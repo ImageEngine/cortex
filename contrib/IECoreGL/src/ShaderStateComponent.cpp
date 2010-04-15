@@ -51,7 +51,8 @@ using namespace std;
 StateComponent::Description<ShaderStateComponent> ShaderStateComponent::g_description;
 
 ShaderStateComponent::ShaderStateComponent()
-	:	m_shaderManager(0), m_textureLoader(0), m_fragmentShader(""), m_vertexShader( "" ), m_parameterMap( 0 ), m_shader( 0 )
+	:	m_shaderManager(0), m_textureLoader(0), m_fragmentShader(""), m_vertexShader( "" ), 
+		m_parameterMap( IECore::CompoundObjectPtr( new IECore::CompoundObject() ) ), m_shader( 0 )
 {
 }
 
@@ -203,6 +204,7 @@ ShaderPtr ShaderStateComponent::shader()
 		{
 			// load the shader
 			m_shader = m_shaderManager->create( m_vertexShader, m_fragmentShader );
+
 			// query default parameters
 			vector<string> allParameters;
 			m_shader->uniformParameterNames( allParameters );
@@ -229,7 +231,12 @@ ShaderPtr ShaderStateComponent::shader()
 				m_parameterMap->members()[ *it ] = paramValue;
 			}
 		}
-		else if ( m_vertexShader.size() || m_fragmentShader.size() )
+		else if ( m_vertexShader.size() == 0 && m_fragmentShader.size() == 0 )
+		{
+			// get the default shader.
+			m_shader = Shader::constant();
+		}
+		else
 		{
 			IECore::msg( IECore::Msg::Warning, "ShaderStateComponent::shader", "No ShaderManager defined while requesting for shader." );
 		}

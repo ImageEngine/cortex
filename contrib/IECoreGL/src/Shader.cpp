@@ -46,6 +46,11 @@
 #include <vector>
 #include <iostream>
 
+#define GL_POINTS_PARAMETER		-10
+#define GL_COLOR_PARAMETER		-11
+#define GL_NORMALS_PARAMETER	-12
+#define GL_TEXCOORDS_PARAMETER	-13
+
 using namespace IECoreGL;
 using namespace std;
 
@@ -111,13 +116,14 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 			d.name = &name[0];
 			GLint location = glGetUniformLocation( m_program, &name[0] );
 
-			// OpenGL native parameters return location -1. We ignore them
+			// OpenGL native parameters return location -1. Ignore them
 			if ( location == -1 )
 				continue;
 
 			// \todo: implement arrays
 			if ( d.size != 1 )
 				continue;
+
 			m_uniformParameters[location] = d;
 		}
 	}
@@ -136,13 +142,14 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 			d.name = &name[0];
 			GLint location = glGetAttribLocation( m_program, &name[0] );
 
-			// OpenGL native parameters return location -1. We ignore them
+			// OpenGL native parameters return location -1. Ignore them.
 			if ( location == -1 )
 				continue;
 
 			// \todo: implement arrays
 			if ( d.size != 1 )
 				continue;
+
 			m_vertexParameters[location] = d;
 		}
 	}
@@ -231,6 +238,10 @@ GLint Shader::uniformParameterIndex( const std::string &parameterName ) const
 			return it->first;
 		}
 	}
+	// accept old-fashined gl_Color
+	if ( parameterName == "Cs" )
+		return GL_COLOR_PARAMETER;
+
 	throw( Exception( boost::str( boost::format( "No uniform parameter named \"%s\"." ) % parameterName ) ) );
 }
 
@@ -243,6 +254,11 @@ bool Shader::hasUniformParameter( const std::string &parameterName ) const
 			return true;
 		}
 	}
+
+	// accept old-fashined gl_Color
+	if ( parameterName == "Cs" )
+		return true;
+
 	return false;
 }
 
@@ -295,7 +311,6 @@ IECore::TypeId Shader::uniformParameterType( GLint parameterIndex ) const
 			default :
 				throw Exception( "Unsupported uniform parameter type." );
 		}
-
 	}
 	else
 	{
@@ -474,6 +489,12 @@ IECore::DataPtr Shader::getUniformParameter( const std::string &parameterName ) 
 
 bool Shader::uniformValueValid( GLint parameterIndex, IECore::TypeId type ) const
 {
+	// accept old-fashioned color parameters.
+	if ( parameterIndex == GL_COLOR_PARAMETER )
+	{
+		return ( type == IECore::V3fDataTypeId || type == IECore::Color3fDataTypeId || type == IECore::Color4fDataTypeId );
+	}
+
 	IECore::TypeId pt = uniformParameterType( parameterIndex );
 
 	if( pt==Texture::staticTypeId() )
@@ -521,6 +542,23 @@ void Shader::setUniformParameter( GLint parameterIndex, IECore::ConstDataPtr val
 
 void Shader::setUniformParameter( GLint parameterIndex, IECore::TypeId type, const void *p )
 {
+	// Special treatment for old-fashined gl_Color parameter.
+	if ( parameterIndex == GL_COLOR_PARAMETER )
+	{
+		switch ( type )
+		{
+			case IECore::V3fDataTypeId:
+			case IECore::Color3fDataTypeId:
+				glColor3fv( static_cast<const float*>(p) );
+				break;
+			case IECore::Color4fDataTypeId:
+				glColor4fv( static_cast<const float*>(p) );
+				break;
+			default :
+				throw Exception( boost::str( boost::format( "Unsupported uniform color parameter type \"%s\"." ) % IECore::RunTimeTyped::typeNameFromTypeId( type ) ) );
+		}
+		return;
+	}
 	switch( type )
 	{
 		case IECore::BoolDataTypeId :
@@ -699,6 +737,17 @@ GLint Shader::vertexParameterIndex( const std::string &parameterName ) const
 			return it->first;
 		}
 	}
+
+	// accept old-fashined gl_Vertex,gl_Normal,gl_Color and gl_MultiTexCoord0
+	if ( parameterName == "P" )
+		return GL_POINTS_PARAMETER;
+	else if ( parameterName == "N" )
+		return GL_NORMALS_PARAMETER;
+	else if ( parameterName == "Cs" )
+		return GL_COLOR_PARAMETER;
+	else if ( parameterName == "st" )
+		return GL_TEXCOORDS_PARAMETER;
+
 	throw( Exception( boost::str( boost::format( "No vertex parameter named \"%s\"." ) % parameterName ) ) );
 }
 
@@ -711,13 +760,31 @@ bool Shader::hasVertexParameter( const std::string &parameterName ) const
 			return true;
 		}
 	}
+
+	// accept old-fashined gl_Vertex,gl_Normal,gl_Color and gl_MultiTexCoord0
+	if ( parameterName == "P" || parameterName == "N" || parameterName == "Cs" || parameterName == "st" )
+		return true;
+
 	return false;
 }
 
 bool Shader::vertexValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const
 {
 	IECore::TypeId t = value->typeId();
-	
+
+	// accept old-fashined OpenGL parameters.
+	switch( parameterIndex )
+	{
+		case GL_POINTS_PARAMETER:
+			return ( t == IECore::V3fVectorDataTypeId );
+		case GL_NORMALS_PARAMETER:
+			return ( t == IECore::V3fVectorDataTypeId );
+		case GL_COLOR_PARAMETER:
+			return ( t == IECore::V3fVectorDataTypeId || t == IECore::Color3fVectorDataTypeId );
+		case GL_TEXCOORDS_PARAMETER:
+			return ( t == IECore::V2fVectorDataTypeId );
+	}
+
 	const ParameterDescription &p = vertexParameterDescription( parameterIndex );
 	if( p.size==1 )
 	{
@@ -782,6 +849,31 @@ void Shader::setVertexParameter( GLint parameterIndex, IECore::ConstDataPtr valu
 	{
 		throw Exception( "Can't set vertex parameter value. Type mismatch." );
 	}
+
+	// accept old-fashined OpenGL parameters.
+	switch( parameterIndex )
+	{
+		case GL_POINTS_PARAMETER:
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer( 3, GL_FLOAT, 0, ((const IECore::V3fVectorData *)value.get())->baseReadable() );
+			return;
+		case GL_NORMALS_PARAMETER:
+			glEnableClientState(GL_NORMAL_ARRAY);
+			glNormalPointer( GL_FLOAT, 0, ((const IECore::V3fVectorData *)value.get())->baseReadable() );
+			return;
+		case GL_COLOR_PARAMETER:
+			glEnableClientState(GL_COLOR_ARRAY);
+			if ( value->typeId() == IECore::V3fVectorDataTypeId )
+				glColorPointer(3, GL_FLOAT, 0, ((const IECore::V3fVectorData *)value.get())->baseReadable() );
+			else
+				glColorPointer(3, GL_FLOAT, 0, ((const IECore::Color3fVectorData *)value.get())->baseReadable() );
+			return;
+		case GL_TEXCOORDS_PARAMETER:
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(2, GL_FLOAT, 0, ((const IECore::V2fVectorData *)value.get())->baseReadable() );
+			return;
+	}
+
 	switch( value->typeId() )
 	{
 		case IECore::FloatVectorDataTypeId :
@@ -860,6 +952,12 @@ void Shader::unsetVertexParameters( )
 	{
 		glDisableVertexAttribArray( it->first );
 	}
+
+	// disables standard (old-fashined) arrays. To be deprecated...
+	glDisableClientState( GL_VERTEX_ARRAY );
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_NORMAL_ARRAY );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 }
 
 const Shader::ParameterDescription &Shader::vertexParameterDescription( GLint parameterIndex ) const

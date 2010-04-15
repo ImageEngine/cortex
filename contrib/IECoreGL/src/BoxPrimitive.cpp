@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,14 @@ BoxPrimitive::BoxPrimitive( const Imath::Box3f &box )
 
 BoxPrimitive::~BoxPrimitive()
 {
+}
+
+void BoxPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+{
+	if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
+	{
+		addUniformAttribute( name, primVar.data );
+	}
 }
 
 void BoxPrimitive::setBox( const Imath::Box3f &box )

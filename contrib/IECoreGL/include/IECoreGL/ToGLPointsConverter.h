@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,29 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLMESHCONVERTER_H
-#define IECOREGL_TOGLMESHCONVERTER_H
+#ifndef IECOREGL_TOGLPOINTSCONVERTER_H
+#define IECOREGL_TOGLPOINTSCONVERTER_H
 
 #include "IECoreGL/ToGLConverter.h"
 
 namespace IECore
 {
-	IE_CORE_FORWARDDECLARE( MeshPrimitive );
+	IE_CORE_FORWARDDECLARE( PointsPrimitive );
 }
 
 namespace IECoreGL
 {
 
-/// Converts IECore::MeshPrimitive objects into IECoreGL::MeshPrimitive objects.
-class ToGLMeshConverter : public ToGLConverter
+/// Converts IECore::PointsPrimitive objects into IECoreGL::PointsPrimitive objects.
+class ToGLPointsConverter : public ToGLConverter
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLPointsConverter, ToGLPointsConverterTypeId, ToGLConverter );
 
-		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = 0 );
-		virtual ~ToGLMeshConverter();
+		ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert = 0 );
+		virtual ~ToGLPointsConverter();
 
 	protected :
 
@@ -62,8 +62,6 @@ class ToGLMeshConverter : public ToGLConverter
 
 };
 
-IE_CORE_DECLAREPTR( ToGLMeshConverter );
-
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLMESHCONVERTER_H
+#endif // IECOREGL_TOGLPOINTSCONVERTER_H

@@ -69,13 +69,25 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySo
 
 IE_CORE_DEFINERUNTIMETYPED( Primitive );
 
-Primitive::Primitive() : m_points( 0 ), m_normals( 0 ), m_colors( 0 ), m_texCoords( 0 )
+Primitive::Primitive()
 {
 	m_shaderSetup = 0;
 }
 
 Primitive::~Primitive()
 {
+}
+
+void Primitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+{
+	if ( primVar.interpolation == IECore::PrimitiveVariable::Constant )
+	{
+		addUniformAttribute( name, primVar.data );
+	}
+	else
+	{
+		addVertexAttribute( name, primVar.data );
+	}
 }
 
 void Primitive::render( ConstStatePtr state ) const
@@ -101,7 +113,6 @@ void Primitive::render( ConstStatePtr state ) const
 		{
 		}
 	}
-
 	// \todo: consider binding at the end the whole original state. Check if that is enough to eliminate these push/pop calls.
 	glPushAttrib( GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
 	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
@@ -207,11 +218,6 @@ void Primitive::render( ConstStatePtr state ) const
 	}
 }
 
-size_t Primitive::vertexAttributeSize() const
-{
-	return 0;
-}
-
 void Primitive::addUniformAttribute( const std::string &name, IECore::ConstDataPtr data )
 {
 	m_uniformAttributes[name] = data->copy();
@@ -219,69 +225,39 @@ void Primitive::addUniformAttribute( const std::string &name, IECore::ConstDataP
 
 void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPtr data )
 {
-	if( !vertexAttributeSize() )
-	{
-		throw Exception( std::string( typeName() ) + " does not support vertex attributes." );
-	}
-
-	size_t s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsTypedData >( IECore::constPointerCast<IECore::Data>( data ) );
-
-	size_t rightSize = vertexAttributeSize();
-	if( s!=rightSize )
-	{
-		throw Exception( boost::str( format( "Vertex attribute \"%s\" has wrong number of elements (%d but expected %d)." ) % name % s % rightSize ) );
-	}
-
-	if ( name == "P" )
-	{
-		m_points = IECore::runTimeCast< const IECore::V3fVectorData >( data );
-	}
-	else if ( name == "Cs" )
-	{
-		m_colors = IECore::runTimeCast< const IECore::Color3fVectorData >( data );
-	}
-	else if ( name == "N" )
-	{
-		m_normals = IECore::runTimeCast< const IECore::V3fVectorData >( data );
-	}
-	else if ( name == "st" )
-	{
-		m_texCoords = IECore::runTimeCast< const IECore::V2fVectorData >( data );
-	}
-
 	m_vertexAttributes[name] = data->copy();
 }
 
-void Primitive::setVertexAttributes( ) const
+void Primitive::setVertexAttributes( unsigned length ) const
 {
-	if( !m_shaderSetup )
+	if( !m_shaderSetup || !length )
 	{
 		return;
 	}
 
-	// \todo: consider getting requiredSize as a parameter or filtering them while creating m_vertexMap.
-	size_t requiredSize = vertexAttributeSize();
-
 	VertexDataMap::const_iterator it;
 	for( it=m_vertexMap.begin(); it!=m_vertexMap.end(); it++ )
 	{
-		if ( boost::get<1>(it->second) == requiredSize )
+		if ( boost::get<1>(it->second) == length )
 		{
 			m_shaderSetup->setVertexParameter( it->first, boost::get<0>(it->second) );
 		}
 	}
 }
 
-void Primitive::setVertexAttributesAsUniforms( unsigned int vertexIndex ) const
+void Primitive::setVertexAttributesAsUniforms( unsigned length, unsigned int vertexIndex ) const
 {
-	if( !m_shaderSetup )
+	if( !m_shaderSetup || !length )
 	{
 		return;
 	}
 	UniformDataMap::const_iterator it;
 	for( it=m_uniformMap.begin(); it!=m_uniformMap.end(); it++ )
 	{
-		m_shaderSetup->setUniformParameterFromVector( it->first, it->second, vertexIndex );
+		if ( boost::get<1>(it->second) == length )
+		{
+			m_shaderSetup->setUniformParameterFromVector( it->first, boost::get<0>(it->second), vertexIndex );
+		}
 	}
 }
 
@@ -304,26 +280,31 @@ void Primitive::setupVertexAttributes( ShaderPtr s ) const
 
 	for( AttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
 	{
-		if ( s->hasVertexParameter( it->first ) )
+		size_t length = 0;
+		IECore::DataPtr data = IECore::constPointerCast<IECore::Data>( it->second );
+		if ( IECore::despatchTraitsTest< IECore::TypeTraits::IsVectorTypedData >( data ) )
 		{
-			// vertex shader variable
-			GLint parameterIndex = s->vertexParameterIndex( it->first );
-			if ( s->vertexValueValid( parameterIndex, it->second ) )
+			length = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsVectorTypedData >( data, size );
+
+			if ( s->hasVertexParameter( it->first ) )
 			{
-				m_vertexMap[ parameterIndex ] = 
-					boost::tuple< IECore::ConstDataPtr, size_t >(
-						it->second,
-						IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsVectorTypedData >( IECore::constPointerCast<IECore::Data>( it->second ), size )
-					);
+				// vertex shader variable
+				GLint parameterIndex = s->vertexParameterIndex( it->first );
+				if ( s->vertexValueValid( parameterIndex, it->second ) )
+				{
+					m_vertexMap[ parameterIndex ] = 
+						boost::tuple< IECore::ConstDataPtr, size_t >( it->second, length );
+				}
 			}
-		}
-		else if ( s->hasUniformParameter( it->first ) )
-		{
-			// uniform shader variable
-			GLint parameterIndex = s->uniformParameterIndex( it->first );
-			if ( s->uniformVectorValueValid( parameterIndex, it->second ) )
+			if ( s->hasUniformParameter( it->first ) )
 			{
-				m_uniformMap[ parameterIndex ] = it->second;
+				// uniform shader variable
+				GLint parameterIndex = s->uniformParameterIndex( it->first );
+				if ( s->uniformVectorValueValid( parameterIndex, it->second ) )
+				{
+					m_uniformMap[ parameterIndex ] = 
+						boost::tuple< IECore::ConstDataPtr, size_t >( it->second, length );
+				}
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,6 +54,7 @@ class BoxPrimitive : public Primitive
 		const Imath::Box3f getBox() const;
 
 		virtual Imath::Box3f bound() const;
+		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
 
 	protected :
 

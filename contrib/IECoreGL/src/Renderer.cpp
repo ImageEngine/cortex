@@ -62,6 +62,7 @@
 #include "IECoreGL/DiskPrimitive.h"
 #include "IECoreGL/ToGLCurvesConverter.h"
 #include "IECoreGL/ToGLTextureConverter.h"
+#include "IECoreGL/ToGLPointsConverter.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -74,6 +75,7 @@
 #include "IECore/SplineData.h"
 #include "IECore/SplineToImage.h"
 #include "IECore/CurvesPrimitive.h"
+#include "IECore/PointsPrimitive.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -89,51 +91,6 @@ IE_CORE_DEFINERUNTIMETYPED( IECoreGL::Renderer );
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // static utility functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-typename T::ConstPtr findPrimVar( const char *name, PrimitiveVariable::Interpolation interpolation, const PrimitiveVariableMap &primVars )
-{
-	PrimitiveVariableMap::const_iterator it = primVars.find( name );
-	if( it==primVars.end() )
-	{
-		return 0;
-	}
-	if( it->second.interpolation!=interpolation )
-	{
-		return 0;
-	}
-	return runTimeCast<T>( it->second.data );
-}
-
-template<typename T>
-typename T::ConstPtr findPrimVar( const char *name, const PrimitiveVariable::Interpolation *interpolation, const PrimitiveVariableMap &primVars )
-{
-	while( *interpolation!=PrimitiveVariable::Invalid )
-	{
-		typename T::ConstPtr d = findPrimVar<T>( name, *interpolation, primVars );
-		if( d )
-		{
-			return d;
-		}
-		interpolation++;
-	}
-	return 0;
-}
-
-template<typename T>
-typename T::ConstPtr findPrimVar( const char **names, const PrimitiveVariable::Interpolation *interpolation, const PrimitiveVariableMap &primVars )
-{
-	while( *names!=0 )
-	{
-		typename T::ConstPtr d = findPrimVar<T>( *names, interpolation, primVars );
-		if( d )
-		{
-			return d;
-		}
-		names++;
-	}
-	return 0;
-}
 
 template<typename T>
 typename T::ConstPtr castWithWarning( ConstDataPtr data, const std::string &name, const std::string &context )
@@ -1139,7 +1096,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:blend:equation"] = blendEquationSetter;
 		(*a)["gl:shade:transparent"] = typedAttributeSetter<TransparentShadingStateComponent>;
 		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsSetter;
-		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitive::GLPointWidth>;
+		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<IECoreGL::PointsPrimitive::GLPointWidth>;
 		(*a)["name"] = nameSetter;
 		(*a)["doubleSided"] = typedAttributeSetter<DoubleSidedStateComponent>;
 		(*a)["rightHandedOrientation"] = typedAttributeSetter<RightHandedOrientationStateComponent>;
@@ -1373,38 +1330,16 @@ static bool checkCulling( RendererImplementation *r, const T *p )
 
 static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::PrimitiveVariableMap &primVars )
 {
-	// add constant primVars as uniform attributes on the gl primitive
+	// add primVars to the gl primitive
 	for( IECore::PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
 	{
-		if( it->second.interpolation==IECore::PrimitiveVariable::Constant )
+		try
 		{
-			try
-			{
-				primitive->addUniformAttribute( it->first, it->second.data );
-			}
-			catch( const std::exception &e )
-			{
-				IECore::msg( IECore::Msg::Error, "Renderer::addPrimitive", boost::format( "Failed to add primitive constant variable %s (%s)." ) % it->first % e.what() );
-			}
+			primitive->addPrimitiveVariable( it->first, it->second );
 		}
-	}
-
-	// add vertex attributes to the primitive if it supports them
-	if( primitive->vertexAttributeSize() )
-	{
-		for( IECore::PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
+		catch( const std::exception &e )
 		{
-			if( it->second.interpolation==IECore::PrimitiveVariable::Vertex || it->second.interpolation==IECore::PrimitiveVariable::Varying )
-			{
-				try
-				{
-					primitive->addVertexAttribute( it->first, it->second.data );
-				}
-				catch( const std::exception &e )
-				{
-					IECore::msg( IECore::Msg::Error, "Renderer::addPrimitive", boost::format( "Failed to add primitive variable %s (%s)." ) % it->first % e.what() );
-				}
-			}
+			IECore::msg( IECore::Msg::Error, "Renderer::addPrimitive", boost::format( "Failed to add primitive variable %s (%s)." ) % it->first % e.what() );
 		}
 	}
 }
@@ -1419,129 +1354,24 @@ static void addCurrentInstanceChild( IECoreGL::Renderer::MemberData *data, IECor
 
 void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
-	// get positions
-	ConstV3fVectorDataPtr points = findPrimVar<V3fVectorData>( "P", PrimitiveVariable::Vertex, primVars );
-	if( !points )
+	try
 	{
-		msg( Msg::Warning, "Renderer::points", "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
+		IECore::PointsPrimitivePtr p = new IECore::PointsPrimitive( numPoints );
+		p->variables = primVars;
+		IECoreGL::PointsPrimitivePtr prim = IECore::staticPointerCast<IECoreGL::PointsPrimitive>( ToGLPointsConverter( p ).convert() );
+		if ( m_data->currentInstance )
+		{
+			addCurrentInstanceChild( m_data, prim );
+		}
+		else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+		{
+			m_data->implementation->addPrimitive( prim );
+		}
+	}
+	catch( const std::exception &e )
+	{
+		msg( Msg::Warning, "Renderer::points", e.what() );
 		return;
-	}
-
-	// get type
-	PointsPrimitive::Type type = PointsPrimitive::Disk;
-	if( ConstStringDataPtr t = findPrimVar<StringData>( "type", PrimitiveVariable::Uniform, primVars ) )
-	{
-		if( t->readable()=="particle" || t->readable()=="disk" || t->readable()=="blobby" )
-		{
-			type = PointsPrimitive::Disk;
-		}
-		else if( t->readable()=="sphere" )
-		{
-			type = PointsPrimitive::Sphere;
-		}
-		else if( t->readable()=="patch" )
-		{
-			type = PointsPrimitive::Quad;
-		}
-		else if( t->readable()=="gl:point" )
-		{
-			type = PointsPrimitive::Point;
-		}
-		else
-		{
-			msg( Msg::Warning, "Renderer::points", boost::format( "Unknown type \"%s\" - reverting to particle type." ) % t->readable() );
-		}
-	}
-
-	// get colors
-	PrimitiveVariable::Interpolation colorInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
-	ConstColor3fVectorDataPtr colors = findPrimVar<Color3fVectorData>( "Cs", colorInterpolations, primVars );
-
-	// get widths
-	ConstFloatDataPtr constantWidth = findPrimVar<FloatData>( "constantwidth", PrimitiveVariable::Constant, primVars );
-	PrimitiveVariable::Interpolation widthInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
-	ConstFloatVectorDataPtr widths = findPrimVar<FloatVectorData>( "width", widthInterpolations, primVars );
-
-	if( constantWidth )
-	{
-		if( widths )
-		{
-			FloatVectorDataPtr newWidths = widths->copy();
-			vector<float> &w = newWidths->writable();
-			float ww = constantWidth->readable();
-			for( vector<float>::iterator it=w.begin(); it!=w.end(); it++ )
-			{
-				*it *= ww;
-			}
-		}
-		else
-		{
-			FloatVectorDataPtr newWidths = new FloatVectorData();
-			newWidths->writable().push_back( constantWidth->readable() );
-			widths = newWidths;
-		}
-	}
-
-	// compute heights
-	ConstFloatDataPtr constantAspectData = findPrimVar<FloatData>( "patchaspectratio", PrimitiveVariable::Constant, primVars );
-	PrimitiveVariable::Interpolation aspectInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
-	ConstFloatVectorDataPtr aspectData = findPrimVar<FloatVectorData>( "patchaspectratio", aspectInterpolations, primVars );
-
-	ConstFloatVectorDataPtr heights = 0;
-	if( !constantAspectData && !aspectData )
-	{
-		heights = widths;
-	}
-	else
-	{
-		if( constantAspectData )
-		{
-			float aspect = constantAspectData->readable();
-			FloatVectorDataPtr h = widths->copy();
-			vector<float> &hV = h->writable();
-			for( unsigned int i=0; i<hV.size(); i++ )
-			{
-				hV[i] /= aspect;
-			}
-			heights = h;
-		}
-		else
-		{
-			// we have varying aspect data
-			FloatVectorDataPtr h = aspectData->copy();
-			vector<float> &hV = h->writable();
-			float defaultWidth = 1;
-			const float *widthsP = &defaultWidth;
-			unsigned int widthStride = 0;
-			if( widths )
-			{
-				widthsP = &widths->readable()[0];
-				widthStride = widths->readable().size() > 1 ? 1 : 0;
-			}
-			for( unsigned int i=0; i<hV.size(); i++ )
-			{
-				hV[i] = *widthsP / hV[i];
-				widthsP += widthStride;
-			}
-			heights = h;
-		}
-	}
-
-	// get rotations
-	PrimitiveVariable::Interpolation rotationInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
-	ConstFloatVectorDataPtr rotations = findPrimVar<FloatVectorData>( "patchrotation", rotationInterpolations, primVars );
-
-	// make the primitive
-	PointsPrimitivePtr prim = new PointsPrimitive( type, points, colors, 0, widths, heights, rotations );
-	addPrimVarsToPrimitive( prim, primVars );
-
-	if ( m_data->currentInstance )
-	{
-		addCurrentInstanceChild( m_data, prim );
-	}
-	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
-	{
-		m_data->implementation->addPrimitive( prim );
 	}
 }
 

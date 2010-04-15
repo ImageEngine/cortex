@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,19 +63,13 @@ class PointsPrimitive : public Primitive
 		/// widths are used by all types.
 		/// heights and rotations are used only by the Quad type.
 		/// Copies of all data are taken.
-		PointsPrimitive( Type type,
-			IECore::ConstV3fVectorDataPtr points,
-			IECore::ConstColor3fVectorDataPtr colors = 0,
-			IECore::ConstFloatVectorDataPtr alphas = 0,
-			IECore::ConstFloatVectorDataPtr widths = 0,
-			IECore::ConstFloatVectorDataPtr heights = 0,
-			IECore::ConstFloatVectorDataPtr rotations = 0 );
+		PointsPrimitive( Type type );
 
 		virtual ~PointsPrimitive();
 
 		virtual Imath::Box3f bound() const;
 
-		virtual size_t vertexAttributeSize() const;
+		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -97,10 +91,9 @@ class PointsPrimitive : public Primitive
 
 	private :
 
-		const Imath::Color3f *setOrReturnColor() const;
-
 		template<typename T>
-		static const T *dataAndStride( typename IECore::TypedData<std::vector<T> >::ConstPtr data, T *defaultValue, unsigned int &stride );
+		static const T *dataAndStride( const IECore::Data *data, T *defaultValue, unsigned int &stride );
+		void updateBounds() const;
 
 		void renderPoints( ConstStatePtr state, IECore::TypeId style ) const;
 		void renderDisks( ConstStatePtr state, IECore::TypeId style ) const;
@@ -108,18 +101,17 @@ class PointsPrimitive : public Primitive
 		void renderSpheres( ConstStatePtr state, IECore::TypeId style ) const;
 
 		IECore::V3fVectorDataPtr m_points;
-		IECore::Color3fVectorDataPtr m_colors;
-		IECore::FloatVectorDataPtr m_alphas;
 
 		Type m_type;
 		static float g_defaultWidth;
-		IECore::FloatVectorDataPtr m_widths;
+		IECore::DataPtr m_widths;
 		static float g_defaultHeight;
-		IECore::FloatVectorDataPtr m_heights;
+		IECore::DataPtr m_heights;
 		static float g_defaultRotation;
-		IECore::FloatVectorDataPtr m_rotations;
+		IECore::DataPtr m_rotations;
 
-		Imath::Box3f m_bound;
+		mutable Imath::Box3f m_bound;
+		mutable bool m_recomputeBound;
 
 		void depthSort() const;
 		mutable bool m_renderSorted;

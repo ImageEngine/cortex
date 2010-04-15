@@ -67,20 +67,21 @@ float PointsPrimitive::g_defaultWidth = 1;
 float PointsPrimitive::g_defaultHeight = 1;
 float PointsPrimitive::g_defaultRotation = 0;
 
-PointsPrimitive::PointsPrimitive( Type type,
-	IECore::ConstV3fVectorDataPtr p,
-	IECore::ConstColor3fVectorDataPtr colors,
-	IECore::ConstFloatVectorDataPtr alphas,
-	IECore::ConstFloatVectorDataPtr widths,
-	IECore::ConstFloatVectorDataPtr heights,
-	IECore::ConstFloatVectorDataPtr rotations )
-	:	m_points( p->copy() ), m_type( type )
+PointsPrimitive::PointsPrimitive( Type type )
+	:	m_type( type ), m_recomputeBound( true )
 {
-	m_colors = colors ? colors->copy() : 0;
-	m_alphas = alphas ? alphas->copy() : 0;
-	m_widths = widths ? widths->copy() : 0;
-	m_heights = heights ? heights->copy() : 0;
-	m_rotations = rotations ? rotations->copy() : 0;
+}
+
+PointsPrimitive::~PointsPrimitive()
+{
+}
+
+void PointsPrimitive::updateBounds() const
+{
+	if ( !m_recomputeBound )
+		return;
+
+	m_recomputeBound = false;
 
 	unsigned int wStep = 0;
 	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
@@ -90,6 +91,7 @@ PointsPrimitive::PointsPrimitive( Type type,
 	{
 		h = 0;
 	}
+	m_bound.makeEmpty();
 	const vector<V3f> &pd = m_points->readable();
 	for( unsigned int i=0; i<pd.size(); i++ )
 	{
@@ -102,8 +104,28 @@ PointsPrimitive::PointsPrimitive( Type type,
 	}
 }
 
-PointsPrimitive::~PointsPrimitive()
+void PointsPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
 {
+	if ( name == "P" )
+	{
+		m_recomputeBound = true;
+		m_points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data );
+	}
+	else if ( name == "width" )
+	{
+		m_recomputeBound = true;
+		m_widths = primVar.data;
+	}
+	else if ( name == "height" )
+	{
+		m_recomputeBound = true;
+		m_heights = primVar.data;
+	}
+	else if ( name == "patchrotation" )
+	{
+		m_rotations = primVar.data;
+	}
+	Primitive::addPrimitiveVariable( name, primVar );
 }
 
 void PointsPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
@@ -152,34 +174,12 @@ void PointsPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 
 Imath::Box3f PointsPrimitive::bound() const
 {
+	updateBounds();
 	return m_bound;
 }
 
-size_t PointsPrimitive::vertexAttributeSize() const
-{
-	return m_points->readable().size();
-}
-
-const Imath::Color3f *PointsPrimitive::setOrReturnColor() const
-{
-	if( m_colors )
-	{
-		if( m_colors->readable().size()==1 )
-		{
-			// constant - set the color once
-			const Color3f &cc = m_colors->readable()[0];
-			glColor3f( cc[0], cc[1], cc[2] );
-		}
-		else
-		{
-			return &m_colors->readable()[0];
-		}
-	}
-	return 0;
-}
-
 template<typename T>
-const T *PointsPrimitive::dataAndStride( typename IECore::TypedData<std::vector<T> >::ConstPtr data, T *defaultValue, unsigned int &stride )
+const T *PointsPrimitive::dataAndStride( const IECore::Data *data, T *defaultValue, unsigned int &stride )
 {
 	stride = 0;
 	if( !data )
@@ -187,11 +187,17 @@ const T *PointsPrimitive::dataAndStride( typename IECore::TypedData<std::vector<
 		stride = 0;
 		return defaultValue;
 	}
-	if( data->readable().size()>1 )
+	IECore::TypeId t = data->typeId();
+	if ( t == IECore::TypedData< T >::staticTypeId() )
+	{
+		return &(static_cast< const IECore::TypedData< T > * >( data )->readable());
+	}
+	if ( t == IECore::TypedData< std::vector< T > >::staticTypeId() )
 	{
 		stride = 1;
+		return &(static_cast< const IECore::TypedData< std::vector<T> > * >( data )->readable()[0]);
 	}
-	return &data->readable()[0];
+	return defaultValue;
 }
 
 void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) const
@@ -200,24 +206,11 @@ void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) 
 
 	glPointSize( state->get<GLPointWidth>()->value() );
 
-	const Color3f *c = setOrReturnColor();
 	if( style==Primitive::DrawSolid::staticTypeId() )
 	{
-		setVertexAttributes( );
+		setVertexAttributes( p.size() );
 	}
-
-	glEnableClientState( GL_VERTEX_ARRAY );
-	glVertexPointer( 3, GL_FLOAT, 0, &p[0] );
-	if( c )
-	{
-		glEnableClientState( GL_COLOR_ARRAY );
-		glColorPointer( 3, GL_FLOAT, 0, c );
-	}
-
 	glDrawArrays( GL_POINTS, 0, p.size() );
-
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisableClientState( GL_VERTEX_ARRAY );
 }
 
 void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) const
@@ -230,8 +223,6 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 	bool perspective = Camera::perspectiveProjection();
 	
 	const std::vector<V3f> &p = m_points->readable();
-
-	const Color3f *c = setOrReturnColor();
 
 	unsigned int wStep = 0;
 	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
@@ -247,11 +238,7 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 
 		if( style==Primitive::DrawSolid::staticTypeId() )
 		{
-			setVertexAttributesAsUniforms( i );
-			if( c )
-			{
-				glColor3f( c[i][0], c[i][1], c[i][2] );
-			}
+			setVertexAttributesAsUniforms( p.size(), i );
 		}
 
 		M44f aim = alignZAxisWithTargetDir( perspective ? cameraCentre - p[i] : cameraView, cameraUp );
@@ -265,7 +252,6 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 			disk->render( state, style );
 		glPopMatrix();
 	}
-
 }
 
 void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) const
@@ -278,8 +264,6 @@ void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) c
 	bool perspective = Camera::perspectiveProjection();
 
 	const std::vector<V3f> &p = m_points->readable();
-
-	const Color3f *c = setOrReturnColor();
 
 	unsigned int wStep = 0;
 	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
@@ -299,18 +283,13 @@ void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) c
 
 	unsigned int rStep = 0;
 	const float *r = dataAndStride( m_rotations, &g_defaultRotation, rStep );
-
 	for( unsigned int j=0; j<p.size(); j++ )
 	{
 		unsigned int i = m_renderSorted ? m_depthOrder[j] : j;
 
 		if( style==Primitive::DrawSolid::staticTypeId() )
 		{
-			setVertexAttributesAsUniforms( i );
-			if( c )
-			{
-				glColor3f( c[i][0], c[i][1], c[i][2] );
-			}
+			setVertexAttributesAsUniforms( p.size(), i );
 		}
 
 		M44f aim = alignZAxisWithTargetDir( perspective ? cameraCentre - p[i] : cameraView, cameraUp );
@@ -338,8 +317,6 @@ void PointsPrimitive::renderSpheres( ConstStatePtr state, IECore::TypeId style )
 	SpherePrimitivePtr sphere = new SpherePrimitive();
 	const std::vector<V3f> &p = m_points->readable();
 
-	const Color3f *c = setOrReturnColor();
-
 	unsigned int wStep = 0;
 	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
 	if( !wStep )
@@ -354,11 +331,7 @@ void PointsPrimitive::renderSpheres( ConstStatePtr state, IECore::TypeId style )
 
 		if( style==Primitive::DrawSolid::staticTypeId() )
 		{
-			setVertexAttributesAsUniforms( i );
-			if( c )
-			{
-				glColor3f( c[i][0], c[i][1], c[i][2] );
-			}
+			setVertexAttributesAsUniforms( p.size(), i );
 		}
 
 		glPushMatrix();

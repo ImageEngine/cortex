@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -97,6 +97,14 @@ void SpherePrimitive::setThetaMax( float thetaMax )
 float SpherePrimitive::getThetaMax() const
 {
 	return m_thetaMax;
+}
+
+void SpherePrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+{
+	if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
+	{
+		addUniformAttribute( name, primVar.data );
+	}
 }
 
 void SpherePrimitive::render( ConstStatePtr state, IECore::TypeId style ) const

@@ -74,18 +74,13 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 		width = widthData->readable();
 	}
 
-	IECore::Color3fVectorData::ConstPtr colorData = curves->variableData<IECore::Color3fVectorData>( "Cs", IECore::PrimitiveVariable::Uniform );
-
-	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->periodic(), curves->verticesPerCurve(), points, width, colorData );
+	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->periodic(), curves->verticesPerCurve(), width );
 
 	for ( IECore::PrimitiveVariableMap::const_iterator pIt = curves->variables.begin(); pIt != curves->variables.end(); ++pIt )
 	{
 		if ( pIt->second.data )
 		{
-			if ( pIt->second.interpolation==IECore::PrimitiveVariable::Constant )
-			{
-				result->addUniformAttribute( pIt->first, pIt->second.data );
-			}
+			result->addPrimitiveVariable( pIt->first, pIt->second );
 		}
 		else
 		{

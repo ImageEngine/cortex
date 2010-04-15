@@ -50,9 +50,7 @@ namespace IECoreGL
 void bindPrimitive()
 {
 	scope s = IECorePython::RunTimeTypedClass<Primitive>()
-		.def( "vertexAttributeSize", &Primitive::vertexAttributeSize )
-		.def( "addVertexAttribute", &Primitive::addVertexAttribute )
-		.def( "addUniformAttribute", &Primitive::addUniformAttribute )
+		.def( "addPrimitiveVariable", &Primitive::addPrimitiveVariable )
 	;
 	bindTypedStateComponent< Primitive::DrawBound >( "DrawBound" );
 	bindTypedStateComponent< Primitive::DrawWireframe >( "DrawWireframe" );

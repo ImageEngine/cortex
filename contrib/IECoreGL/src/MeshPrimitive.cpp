@@ -34,6 +34,8 @@
 
 #include <cassert>
 
+#include "IECore/DespatchTypedData.h"
+
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/State.h"
@@ -46,24 +48,13 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( MeshPrimitive );
 
-MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points )
+MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds )
 	:	m_vertIds( vertIds->copy() )
 {
-	assert( points );
-
-	m_points = points->copy();
-	assert( m_points );
-
-	const vector<V3f> &p = m_points->readable();
-	for( unsigned int i=0; i<p.size(); i++ )
-	{
-		m_bound.extendBy( p[i] );
-	}
 }
 
 MeshPrimitive::~MeshPrimitive()
 {
-
 }
 
 IECore::ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
@@ -71,62 +62,82 @@ IECore::ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
 	return m_vertIds;
 }
 
-size_t MeshPrimitive::vertexAttributeSize() const
+/// \todo This should be in a standalone Op, and should cope with more than just Vertex interpolated input.
+class MeshPrimitive::ToFaceVaryingConverter
 {
-	return m_vertIds->readable().size();
+	public:
+
+		typedef IECore::DataPtr ReturnType;
+
+		ToFaceVaryingConverter( IECore::ConstIntVectorDataPtr vertIds ) : m_vertIds( vertIds )
+		{
+			assert( m_vertIds );
+		}
+
+		template<typename T>
+		IECore::DataPtr operator()( typename T::Ptr inData )
+		{
+			assert( inData );
+
+			const typename T::Ptr outData = new T();
+			outData->writable().resize( m_vertIds->readable().size() );
+
+			typename T::ValueType::iterator outIt = outData->writable().begin();
+
+			for ( typename T::ValueType::size_type i = 0; i <  m_vertIds->readable().size(); i++ )
+			{
+				*outIt++ = inData->readable()[ m_vertIds->readable()[ i ] ];
+			}
+
+			return outData;
+		}
+
+		IECore::ConstIntVectorDataPtr m_vertIds;
+};
+
+void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+{
+	if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || primVar.interpolation==IECore::PrimitiveVariable::Varying )
+	{
+		if ( name == "P" )
+		{
+			// update the bounding box.
+			m_bound.makeEmpty();
+			IECore::ConstV3fVectorDataPtr points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data );
+			if ( points )
+			{
+				const std::vector<Imath::V3f> &p = points->readable();
+				for( unsigned int i=0; i<p.size(); i++ )
+				{
+					m_bound.extendBy( p[i] );
+				}
+			}
+		}
+
+		ToFaceVaryingConverter primVarConverter( m_vertIds );
+		// convert to facevarying
+		IECore::DataPtr newData = IECore::despatchTypedData< ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( primVar.data, primVarConverter );
+		addVertexAttribute( name, newData );
+	}
+	else if ( primVar.interpolation==IECore::PrimitiveVariable::FaceVarying )
+	{
+		addVertexAttribute( name, primVar.data );
+	}
+	else if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
+	{
+		addUniformAttribute( name, primVar.data );
+	}
 }
 
 void MeshPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
-	assert( m_points );
-
+	unsigned vertexCount = m_vertIds->readable().size();
 	if( style==Primitive::DrawSolid::staticTypeId() )
 	{
-		setVertexAttributes();
+		setVertexAttributes( vertexCount );
 	}
 
-	const vector<V3f> &points = m_points->readable();
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer( 3, GL_FLOAT, 0, &points[0] );
-
-	if ( m_normals )
-	{
-		const vector<V3f> &normals = m_normals->readable();
-		glEnableClientState(GL_NORMAL_ARRAY);
-		glNormalPointer( GL_FLOAT, 0, &normals[0] );
-	}
-
-	if ( m_texCoords )
-	{
-		const vector<V2f> &texCoords = m_texCoords->readable();
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, &texCoords[0] );
-	}
-
-	if ( m_colors )
-	{
-		const vector<Color3f> &colors = m_colors->readable();
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(3, GL_FLOAT, 0, &colors[0] );
-	}
-
-	glDrawArrays( GL_TRIANGLES, 0, vertexAttributeSize() );
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	if ( m_normals )
-	{
-		glDisableClientState(GL_NORMAL_ARRAY);
-	}
-
-	if ( m_texCoords )
-	{
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-
-	if ( m_colors )
-	{
-		glDisableClientState(GL_COLOR_ARRAY);
-	}
+	glDrawArrays( GL_TRIANGLES, 0, vertexCount );
 }
 
 Imath::Box3f MeshPrimitive::bound() const

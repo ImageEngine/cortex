@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,12 +49,11 @@ class CurvesPrimitive : public Primitive
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
 
-		CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve,
-			IECore::ConstV3fVectorDataPtr points, float width=1.0f, IECore::Color3fVectorData::ConstPtr colors=0 );
+		CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, float width=1.0f );
 		virtual ~CurvesPrimitive();
 
 		virtual Imath::Box3f bound() const;
-		virtual size_t vertexAttributeSize() const;
+		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -89,9 +88,8 @@ class CurvesPrimitive : public Primitive
 		IECore::CubicBasisf m_basis;
 		bool m_periodic;
 		IECore::IntVectorDataPtr m_vertsPerCurve;
-		IECore::V3fVectorDataPtr m_points;
-		IECore::Color3fVectorData::Ptr m_colors;
 		float m_width;
+		IECore::V3fVectorData::ConstPtr m_points;
 
 };
 

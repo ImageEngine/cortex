@@ -49,39 +49,6 @@ using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( ToGLMeshConverter );
 
-/// \todo This should be in a standalone Op, and should cope with more than just Vertex interpolated input.
-class ToGLMeshConverter::ToFaceVaryingConverter
-{
-	public:
-
-		typedef IECore::DataPtr ReturnType;
-
-		ToFaceVaryingConverter( IECore::ConstIntVectorDataPtr vertIds ) : m_vertIds( vertIds )
-		{
-			assert( m_vertIds );
-		}
-
-		template<typename T>
-		IECore::DataPtr operator()( typename T::Ptr inData )
-		{
-			assert( inData );
-
-			const typename T::Ptr outData = new T();
-			outData->writable().resize( m_vertIds->readable().size() );
-
-			typename T::ValueType::iterator outIt = outData->writable().begin();
-
-			for ( typename T::ValueType::size_type i = 0; i <  m_vertIds->readable().size(); i++ )
-			{
-				*outIt++ = inData->readable()[ m_vertIds->readable()[ i ] ];
-			}
-
-			return outData;
-		}
-
-		IECore::ConstIntVectorDataPtr m_vertIds;
-};
-
 ToGLMeshConverter::ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert )
 	:	ToGLConverter( "Converts IECore::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECore::MeshPrimitiveTypeId )
 {
@@ -144,39 +111,13 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	}
 	assert( n );
 
-	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->vertexIds(), p );
-	if( !p->readable().size() )
-	{
-		// if there are no points in the mesh then any calls to addVertexAttribute will fail
-		// with an exception being thrown, so we early out before that happens. see associated
-		// todo in Primitive::vertexAttributeSize() - we should be able to add attributes provided
-		// they have 0 length too.
-		return glMesh;
-	}
-
-	ToFaceVaryingConverter primVarConverter( mesh->vertexIds() );
+	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->vertexIds() );
 
 	for ( IECore::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{
 		if ( pIt->second.data )
 		{
-			if ( pIt->second.interpolation==IECore::PrimitiveVariable::Vertex || pIt->second.interpolation==IECore::PrimitiveVariable::Varying )
-			{
-				// convert to facevarying
-				IECore::DataPtr newData = IECore::despatchTypedData< ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( pIt->second.data, primVarConverter );
-				glMesh->addVertexAttribute( pIt->first, newData );
-				// modify the primvar we converted in case it is "s" or "t", then we don't have to do another conversion below.
-				pIt->second.interpolation = IECore::PrimitiveVariable::FaceVarying;
-				pIt->second.data = newData;
-			}
-			else if ( pIt->second.interpolation==IECore::PrimitiveVariable::FaceVarying )
-			{
-				glMesh->addVertexAttribute( pIt->first, pIt->second.data );
-			}
-			else if ( pIt->second.interpolation==IECore::PrimitiveVariable::Constant )
-			{
-				glMesh->addUniformAttribute( pIt->first, pIt->second.data );
-			}
+			glMesh->addPrimitiveVariable( pIt->first, pIt->second );
 		}
 		else
 		{
@@ -188,8 +129,9 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( "t" );
 	if ( sIt != mesh->variables.end() && tIt != mesh->variables.end() )
 	{
-		if ( sIt->second.interpolation == IECore::PrimitiveVariable::FaceVarying
-			&&  tIt->second.interpolation == IECore::PrimitiveVariable::FaceVarying )
+		if ( sIt->second.interpolation != IECore::PrimitiveVariable::Constant  
+			&&  tIt->second.interpolation != IECore::PrimitiveVariable::Constant
+			&& sIt->second.interpolation == tIt->second.interpolation )
 		{
 			IECore::ConstFloatVectorDataPtr s = IECore::runTimeCast< const IECore::FloatVectorData >( sIt->second.data );
 			IECore::ConstFloatVectorDataPtr t = IECore::runTimeCast< const IECore::FloatVectorData >( tIt->second.data );
@@ -206,8 +148,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 				{
 					stData->writable()[i] = Imath::V2f( s->readable()[i], t->readable()[i] );
 				}
-
-				glMesh->addVertexAttribute( "st", stData );
+				glMesh->addPrimitiveVariable( "st", IECore::PrimitiveVariable( sIt->second.interpolation, stData ) );
 			}
 			else
 			{
@@ -216,7 +157,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "If specified, primitive variables \"s\" and \"t\" must be of type FloatVectorData and interpolation type FaceVarying." );
+			IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "If specified, primitive variables \"s\" and \"t\" must be of type FloatVectorData and non-Constant interpolation type." );
 		}
 	}
 	else if ( sIt != mesh->variables.end() || tIt != mesh->variables.end() )

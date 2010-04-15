@@ -138,9 +138,9 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 					self.assertEqual( a[i], 0 )
 		
 		if diffImage :
-					
+
 			expectedImage = IECore.Reader.create( diffImage ).read()
-		
+
 			self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = i, maxError = 0.05 ).value, False )
 		
 
@@ -596,6 +596,41 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
 			],
 			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/linearLinesWithUniformColor.tif",
+			shader = self.showColorShader(),
+		)
+
+	def testLinearLinesWithConstantColor( self ) :
+
+		c = IECore.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 4, 4 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[
+					IECore.V3f( 1, 0, 0 ),
+					IECore.V3f( 0, 0, 0 ),
+					IECore.V3f( 0, 0.5, 0 ),
+					IECore.V3f( 0.5, 0.5, 0 ),
+
+					IECore.V3f( 0.5, 0.5, 0 ),
+					IECore.V3f( 1, 0.5, 0 ),
+					IECore.V3f( 1, 1, 0 ),
+					IECore.V3f( 0, 1, 0 ),
+				]
+			)
+
+		)
+		c["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
+
+		self.performTest(
+
+			c,
+			[
+				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
+				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
+			],
+			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/linearLinesWithConstantColor.tif",
 			shader = self.showColorShader(),
 		)
 		

@@ -80,23 +80,14 @@ class Primitive : public Renderable
 		/// present in state.
 		virtual void render( ConstStatePtr state ) const;
 
+		/// Adds a primitive variable on this primitive.
+		/// Derived classes should implement any customized filtering and/or convertions or call the base class implementation.
+		/// Default implementation sets Constant variables as uniform shader parameters and all the
+		/// others as vertex shader parameters.
+		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) = 0;
+
 		virtual Imath::Box3f bound() const = 0;
 
-		/// Returns the number of expected data values for
-		/// vertex attributes. Returns 0 if vertex attributes
-		/// are not supported. The default implementation
-		/// returns 0.
-		/// \todo What if an object does support vertex attributes
-		/// but has no vertices? Like a MeshPrimitive with no faces? If
-		/// it returns 0 then addVertexAttribute() will throw Exceptions,
-		/// meaning other code has to make special case workarounds.
-		virtual size_t vertexAttributeSize() const;
-		/// Takes a copy of data. Throws an Exception if this primitive doesn't support
-		/// vertex attributes, or if the data supplied is not suitable.
-		void addVertexAttribute( const std::string &name, IECore::ConstDataPtr data );
-
-		/// Takes a copy of data. Throws an Exception if the data supplied is not suitable.
-		void addUniformAttribute( const std::string &name, IECore::ConstDataPtr data );
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -134,42 +125,46 @@ class Primitive : public Renderable
 		/// wireframe rendering).
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const = 0;
 
+		/// Called by derived classes to register a vertex attribute. There are no type or length checks on this call.
+		void addVertexAttribute( const std::string &name, IECore::ConstDataPtr data );
+
+		/// Called by derived classes to register a uniform attribute. There are no type or length checks on this call.
+		void addUniformAttribute( const std::string &name, IECore::ConstDataPtr data );
+
+		template<typename T>
+		typename IECore::TypedData<T>::ConstPtr getUniformAttribute( const std::string &name );
+
+		template<typename T>
+		typename IECore::TypedData< std::vector<T> >::ConstPtr getVertexAttribute( const std::string &name );
+
 		/// Can be called from a derived class' render() method to set
 		/// vertex parameters of the current shader based on the
-		/// data from vertex attributes. This must /not/ be called unless the style
+		/// data from vertex attributes. Only vertex parameter that matches the given
+		/// length will be considered. This must /not/ be called unless the style
 		/// parameter passed to render is PrimitiveSolid - in all other cases no shader
 		/// is bound and an Exception will result.
-		void setVertexAttributes( ) const;
+		void setVertexAttributes( unsigned length ) const;
 		/// Can be called from a derived class' render() method to
 		/// set uniform parameters of the current shader based on a single element of
-		/// data from the vertex attributes. This must /not/ be called unless the
+		/// data from the vertex attributes. Only vertex parameter that matches the given
+		/// length will be considered. This must /not/ be called unless the
 		/// style parameter passed to render is PrimitiveSolid - in all other cases
 		/// no shader is bound and an Exception will result.
-		void setVertexAttributesAsUniforms( unsigned int vertexIndex ) const;
+		void setVertexAttributesAsUniforms( unsigned length, unsigned int vertexIndex ) const;
 		/// Convenience function for use in render() implementations. Returns
 		/// true if TransparentShadingStateComponent is true and
 		/// PrimitiveTransparencySortStateComponent is true.
 		bool depthSortRequested( ConstStatePtr state ) const;
 
-		/// Standard OpenGL vertex arrays
-		/// \todo I'm not a fan of these guys. They're only used by the MeshPrimitive,
-		/// and are irrelevant to many of the other Primitive derived classes. PointsPrimitive
-		/// also duplicates them which can't be a good thing either. The ToGLMeshPrimitiveConverter
-		/// has to do special case things with most of them anyway, so perhaps it could just pass 'em
-		/// into the MeshPrimitive constructor? In any case I think the whole attribute thing needs
-		/// a bit of a rejig, and in the process we need to allow uniform data for curves
-		/// and suchlike too.
-		IECore::ConstV3fVectorDataPtr m_points;
-		IECore::ConstV3fVectorDataPtr m_normals;
-		IECore::ConstColor3fVectorDataPtr m_colors;
-		IECore::ConstV2fVectorDataPtr m_texCoords;
+		/// This method is called by Primitive::render() function but it can also be called
+		/// by derived classes when they use other primitives and call render(state,style)
+		/// directly, like TextPrimitive does.
+		void setupVertexAttributes( ShaderPtr s ) const;
 
 	private :
 
-		typedef std::map<GLint, IECore::ConstDataPtr> UniformDataMap;
+		typedef std::map<GLint, boost::tuple< IECore::ConstDataPtr, size_t > > UniformDataMap;
 		typedef std::map<GLint, boost::tuple< IECore::ConstDataPtr, size_t > > VertexDataMap;
-
-		void setupVertexAttributes( ShaderPtr s ) const;
 
 		mutable ShaderPtr m_shaderSetup;
 		mutable UniformDataMap m_uniformMap;	// holds the uniform shader attributes that match non-const prim vars.
@@ -184,5 +179,7 @@ class Primitive : public Renderable
 IE_CORE_DECLAREPTR( Primitive );
 
 } // namespace IECoreGL
+
+#include "IECoreGL/Primitive.inl"
 
 #endif // IECOREGL_PRIMITIVE_H

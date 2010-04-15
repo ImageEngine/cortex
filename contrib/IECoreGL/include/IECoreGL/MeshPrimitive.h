@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,14 +51,14 @@ class MeshPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
 		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
+		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds );
 		virtual ~MeshPrimitive();
 
 		IECore::ConstIntVectorDataPtr vertexIds() const;
 
 		virtual Imath::Box3f bound() const;
 
-		virtual size_t vertexAttributeSize() const;
+		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
 
 	protected :
 
@@ -66,8 +66,9 @@ class MeshPrimitive : public Primitive
 
 	private :
 
-		IECore::ConstIntVectorDataPtr m_vertIds;
+		class ToFaceVaryingConverter;
 
+		IECore::ConstIntVectorDataPtr m_vertIds;
 		Imath::Box3f m_bound;
 
 		/// So TextPrimitive can use the render( state, style ) method.

@@ -57,14 +57,9 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CurvesPrimitive::GLLineWi
 
 IE_CORE_DEFINERUNTIMETYPED( CurvesPrimitive );
 
-CurvesPrimitive::CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, IECore::ConstV3fVectorDataPtr points, float width, IECore::Color3fVectorData::ConstPtr colors )
-	:	m_basis( basis ), m_periodic( periodic ), m_vertsPerCurve( vertsPerCurve->copy() ), m_points( points->copy() ), m_width( width ), m_colors( colors ? colors->copy() : 0 )
+CurvesPrimitive::CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, float width )
+	:	m_basis( basis ), m_periodic( periodic ), m_vertsPerCurve( vertsPerCurve->copy() ), m_width( width ), m_points(0)
 {
-	const vector<V3f> &pd = m_points->readable();
-	for( vector<V3f>::const_iterator it=pd.begin(); it!=pd.end(); it++ )
-	{
-		m_bound.extendBy( *it );
-	}
 }
 
 CurvesPrimitive::~CurvesPrimitive()
@@ -76,9 +71,21 @@ Imath::Box3f CurvesPrimitive::bound() const
 	return m_bound;
 }
 
-size_t CurvesPrimitive::vertexAttributeSize() const
+void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
 {
-	return m_points->readable().size();
+	if ( name == "P" )
+	{
+		m_points = IECore::runTimeCast< const IECore::V3fVectorData >( primVar.data );
+		if ( m_points )
+		{
+			const vector<V3f> &pd = m_points->readable();
+			for( vector<V3f>::const_iterator it=pd.begin(); it!=pd.end(); it++ )
+			{
+				m_bound.extendBy( *it );
+			}
+		}
+	}
+	Primitive::addPrimitiveVariable( name, primVar );
 }
 
 void CurvesPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
@@ -98,17 +105,7 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 	const V3f *p = &(m_points->readable()[0]);
 	const std::vector<int> &v = m_vertsPerCurve->readable();
 
-	bool colorPerVertex = false;
-	const Color3f *c = 0;
-	if( m_colors )
-	{
-		c = &(m_colors->readable()[0]);
-
-		if ( m_colors->readable().size() == vertexAttributeSize() )
-		{
-			colorPerVertex = true;
-		}
-	}
+	unsigned vertexCount = m_points->readable().size();
 
 	glLineWidth( state->get<GLLineWidth>()->value() );
 
@@ -117,45 +114,35 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 
 		if ( style == Primitive::DrawSolid::staticTypeId() );
 		{
-			setVertexAttributes();
+			setVertexAttributes( vertexCount );
 		}
 
-		glEnableClientState( GL_VERTEX_ARRAY );
-		glVertexPointer( 3, GL_FLOAT, 0, p );
-
-		if( colorPerVertex )
-		{
-			glEnableClientState( GL_COLOR_ARRAY );
-			glColorPointer( 3, GL_FLOAT, 0, c );
-		}
-
+		int c = 0;
 		int offset = 0;
-		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
+		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++, c++ )
 		{
-			if( c && !colorPerVertex )
+			if( style==Primitive::DrawSolid::staticTypeId() )
 			{
-				glColor3f( c->x, c->y, c->z );
-				c++;
+				setVertexAttributesAsUniforms( v.size(), c );
 			}
 
 			glDrawArrays( m_periodic ? GL_LINE_LOOP : GL_LINE_STRIP, offset, *vIt );
 			offset += *vIt;
 		}
 
-		if( colorPerVertex )
-		{
-			glDisableClientState( GL_COLOR_ARRAY );
-		}
-
-		glDisableClientState( GL_VERTEX_ARRAY );
-
 	}
 	else
 	{
 
 		unsigned baseIndex = 0;
-		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
+		int c = 0;
+		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++, c++ )
 		{
+
+			if( style==Primitive::DrawSolid::staticTypeId() )
+			{
+				setVertexAttributesAsUniforms( v.size(), c );
+			}
 
 			unsigned numPoints = *vIt;
 			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
@@ -218,9 +205,16 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 		// linear. implemented separately because for this we don't have to worry about
 		// subdividing etc.
 
+		int c = 0;
 		unsigned basePointIndex = 0;
-		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++ )
+		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++, c++ )
 		{
+
+			if( style==Primitive::DrawSolid::staticTypeId() )
+			{
+				setVertexAttributesAsUniforms( vertsPerCurve.size(), c );
+			}
+
 			unsigned numPoints = *vIt;
 			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
 
@@ -270,10 +264,15 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 	}
 	else
 	{
-
+		int c = 0;
 		unsigned basePointIndex = 0;
-		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++ )
+		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++, c++ )
 		{
+
+			if( style==Primitive::DrawSolid::staticTypeId() )
+			{
+				setVertexAttributesAsUniforms( vertsPerCurve.size(), c );
+			}
 
 			unsigned numPoints = *vIt;
 			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );

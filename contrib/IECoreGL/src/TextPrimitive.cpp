@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,9 @@
 #include "IECoreGL/Font.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TextureUnits.h"
+
+#include "IECoreGL/Shader.h"
+#include "IECoreGL/ShaderStateComponent.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -88,6 +91,11 @@ Imath::Box3f TextPrimitive::bound() const
 	return m_bound;
 }
 
+void TextPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+{
+	// \todo: add primitive variables here. Not sure what the interpolation means here. Varying = per character?
+}
+
 void TextPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
 	if( !m_text.size() )
@@ -120,10 +128,12 @@ void TextPrimitive::renderMeshes( ConstStatePtr state, IECore::TypeId style ) co
 		}
 	}
 
+	Shader *shader = state->get<ShaderStateComponent>()->shader();
 	glPushMatrix();
 
 		for( unsigned i=0; i<m_meshes.size(); i++ )
 		{
+			m_meshes[i]->setupVertexAttributes( shader );
 			m_meshes[i]->render( state, style );
 			if( i<m_advances.size() )
 			{
