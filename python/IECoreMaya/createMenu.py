@@ -98,7 +98,7 @@ def createMenu( definition, parent, label="", insertAfter=None, radialPosition=N
 		# assume parent is a control which can accept a popup menu
 		menu = maya.cmds.popupMenu( parent=parent, button=button )
 
-	maya.cmds.menu( menu, edit=True, postMenuCommand = lambda : __postMenu( menu, definition ) )
+	maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( __postMenu, menu, definition ) )
 	return menu
 
 # We don't know what the extra argument maya wants to pass to callbacks is, so
@@ -115,7 +115,7 @@ def __wrapCallback( cb ) :
 		# presumably a command in string form
 		return cb
 
-def __postMenu( parent, definition ) :
+def __postMenu( parent, definition, *args ) :
 
 	if callable( definition ) :
 		definition = definition()
