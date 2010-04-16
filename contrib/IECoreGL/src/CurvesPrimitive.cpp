@@ -106,13 +106,12 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 	const std::vector<int> &v = m_vertsPerCurve->readable();
 
 	unsigned vertexCount = m_points->readable().size();
-
 	glLineWidth( state->get<GLLineWidth>()->value() );
 
 	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
 	{
 
-		if ( style == Primitive::DrawSolid::staticTypeId() );
+		if ( style == Primitive::DrawSolid::staticTypeId() )
 		{
 			setVertexAttributes( vertexCount );
 		}
