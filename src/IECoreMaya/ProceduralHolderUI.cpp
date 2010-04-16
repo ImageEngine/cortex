@@ -247,6 +247,9 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 
 	view.beginGL();
 
+	GLint prevProgram;
+	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
+
 		// maya can sometimes leave an error from it's own code,
 		// and we don't want that to confuse us in our drawing code.
 		while( glGetError()!=GL_NO_ERROR )
@@ -272,22 +275,6 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 				IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
 				if( scene )
 				{
-					bool popTexture = false;
-					if( request.displayStyle()==M3dView::kGouraudShaded || request.displayStyle()==M3dView::kFlatShaded )
-					{
-						glPushAttrib( GL_TEXTURE_BIT );
-						popTexture = true;
-						// set up the material. we probably need to do some work to prevent the base state passed to
-						// the scene render from overriding aspects of this
-						MMaterial material = request.material();
-						material.setMaterial( request.multiPath(), request.isTransparent() );
-						if( material.materialIsTextured() )
-						{
-							glEnable( GL_TEXTURE_2D );
-							material.applyTexture( view, drawData );
-						}
-					}
-
 					IECoreGL::ConstStatePtr displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
 
 					if ( request.component() != MObject::kNullObj )
@@ -315,12 +302,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 							);
 						}
 					}
-
 					scene->render( displayState );
-					if( popTexture )
-					{
-						glPopAttrib();
-					}
 				}
 			}
 		}
@@ -329,6 +311,8 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 			// much better to catch and report this than to let the application die
 			IECore::msg( IECore::Msg::Error, "ProceduralHolderUI::draw", boost::format( "IECoreGL Exception : %s" ) % e.what() );
 		}
+
+	glUseProgram( prevProgram );
 
 	view.endGL();
 }
@@ -353,7 +337,10 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 		view.beginSelect( &selectBuffer[0], selectBufferSize );
 		glInitNames();
 		glPushName( 0 );
+		GLint prevProgram;
+		glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
 		scene->render( m_displayStyle.baseState( selectInfo.displayStyle() ) );
+		glUseProgram( prevProgram );
 	}
 	else
 	{
