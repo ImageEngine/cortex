@@ -131,6 +131,19 @@ class Shader : public Bindable
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case.
 		void setUniformParameter( GLint parameterIndex, IECore::ConstDataPtr value );
+		/// Sets the specified parameter to the value provided. value must be
+		/// of an appropriate simple type or a Imath type.
+		template< typename T >
+		typename boost::disable_if_c< boost::is_convertible< T, IECore::Data * >::value >::type 
+		setUniformParameter( GLint parameterIndex, const T &value )
+		{
+			IECore::TypeId t = IECore::TypedData< T >::staticTypeId();
+			if ( !uniformValueValid( parameterIndex, t ) )
+			{
+				throw IECore::Exception( "Can't set uniform parameter value. Type mismatch." );
+			}
+			setUniformParameter( parameterIndex, t, &value );
+		}
 		/// Sets the specified parameter to the value specified. value must
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case. This call may be slower than the overload based

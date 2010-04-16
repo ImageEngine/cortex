@@ -133,11 +133,19 @@ void Primitive::render( ConstStatePtr state ) const
 		glActiveTexture( textureUnits()[0] );
 		glDisable( GL_TEXTURE_2D );
 
-		// turn off shader for other render modes.
-		if( GLEW_VERSION_2_0 )
+		if( state->get<Primitive::DrawOutline>()->value() || state->get<Primitive::DrawWireframe>()->value() ||
+			state->get<Primitive::DrawPoints>()->value() || state->get<Primitive::DrawBound>()->value() )
 		{
-			glUseProgram( 0 );
-		}
+			// turn off current shader and use constant shader.
+			Shader *constantShader = Shader::constant();
+			constantShader->bind();
+			GLint CsIndex = constantShader->uniformParameterIndex( "Cs" );
+
+			AttributeMap::const_iterator itP = m_vertexAttributes.find( "P" );
+			if ( itP != m_vertexAttributes.end() )
+			{
+				constantShader->setVertexParameter( "P", itP->second );
+			}
 
 			if( state->get<Primitive::DrawOutline>()->value() )
 			{
@@ -146,8 +154,7 @@ void Primitive::render( ConstStatePtr state ) const
 				float width = 2 * state->get<Primitive::OutlineWidth>()->value();
 				glPolygonOffset( 2 * width, 1 );
 				glLineWidth( width );
-				Color4f c = state->get<OutlineColorStateComponent>()->value();
-				glColor4f( c[0], c[1], c[2], c[3] );
+				constantShader->setUniformParameter( CsIndex, state->get<OutlineColorStateComponent>()->value() );
 				render( state, Primitive::DrawOutline::staticTypeId() );
 			}
 
@@ -157,8 +164,7 @@ void Primitive::render( ConstStatePtr state ) const
 				float width = state->get<Primitive::WireframeWidth>()->value();
 				glEnable( GL_POLYGON_OFFSET_LINE );
 				glPolygonOffset( -1 * width, -1 );
-				Color4f c = state->get<WireframeColorStateComponent>()->value();
-				glColor4f( c[0], c[1], c[2], c[3] );
+				constantShader->setUniformParameter( CsIndex, state->get<WireframeColorStateComponent>()->value() );
 				glLineWidth( width );
 				render( state, Primitive::DrawWireframe::staticTypeId() );
 			}
@@ -170,16 +176,14 @@ void Primitive::render( ConstStatePtr state ) const
 				glEnable( GL_POLYGON_OFFSET_POINT );
 				glPolygonOffset( -2 * width, -1 );
 				glPointSize( width );
-				Color4f c = state->get<PointColorStateComponent>()->value();
-				glColor4f( c[0], c[1], c[2], c[3] );
+				constantShader->setUniformParameter( CsIndex, state->get<PointColorStateComponent>()->value() );
 				render( state, Primitive::DrawPoints::staticTypeId() );
 			}
 
 			if( state->get<Primitive::DrawBound>()->value() )
 			{
 				Box3f b = bound();
-				Color4f c = state->get<BoundColorStateComponent>()->value();
-				glColor4f( c[0], c[1], c[2], c[3] );
+				constantShader->setUniformParameter( CsIndex, state->get<BoundColorStateComponent>()->value() );
 				glLineWidth( 1 );
 				glBegin( GL_LINE_LOOP );
 					glVertex3f( b.min.x, b.min.y, b.min.z );
@@ -204,6 +208,8 @@ void Primitive::render( ConstStatePtr state ) const
 					glVertex3f( b.min.x, b.max.y, b.max.z );
 				glEnd();
 			}
+
+		}
 
 	glPopClientAttrib();
 	glPopAttrib();
