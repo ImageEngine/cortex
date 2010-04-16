@@ -33,14 +33,14 @@
 ##########################################################################
 
 import random
-import IECore
-import IECoreMaya
-import unittest
-import MayaUnitTest
-import maya.cmds
 import os
 
-class SplineParameterHandlerTest( unittest.TestCase ) :
+import maya.cmds
+
+import IECore
+import IECoreMaya
+
+class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 
 	class TestClassFloat( IECore.Parameterised ) :
 
@@ -301,4 +301,4 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 			os.remove( path )
 		
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

@@ -66,22 +66,14 @@ if IECore.withFreeType() :
 
 	from TextTest import *
 
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
-
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-		
-	def flush( self ) :
-	
-		sys.stderr.flush()
-		self.__f.flush()
-		
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+unittest.TestProgram(
+	testRunner = unittest.TextTestRunner(
+		stream = IECore.CompoundStream(
+			[
+				sys.stderr,
+				open( "test/IECoreRI/resultsPython.txt", "w" )
+			]
+		),
+		verbosity = 2
+	)
+)

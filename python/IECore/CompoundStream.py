@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,25 +32,21 @@
 #
 ##########################################################################
 
-import maya.cmds
+## A class which acts like a python file object but outputs to several
+# underlying files. This is useful for test output as it allows results to
+# be output to the terminal as well as a file.
+class CompoundStream :
 
-import IECore
-import IECoreMaya
+	def __init__( self, streams=() ) :
 
-class ToMayaPlugConverterTest( IECoreMaya.TestCase ) :
+		self.__streams = tuple( streams )
 
-	def testConversion( self ) :
+	def write( self, l ) :
 
-		locator = maya.cmds.spaceLocator()[0]
+		for s in self.__streams :
+			s.write( l )
 
-		converter = IECoreMaya.ToMayaPlugConverter.create( IECore.FloatData( 10 ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaPlugConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
+	def flush( self ) :
 
-		converter.convert( locator + ".translateX" )
-
-		self.assertEqual( maya.cmds.getAttr( locator + ".translateX" ), 10 )
-
-if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+		for s in self.__streams :
+			s.flush()

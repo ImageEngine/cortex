@@ -41,15 +41,14 @@ sys.path.append( "test/IECoreNuke" )
 from KnobAccessorsTest import *
 from FnAxisTest import *
 
-class SplitStream :
-
-	def __init__( self ) :
-
-		self.__f = open( "test/IECoreNuke/resultsPython.txt", 'w' )
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+unittest.TestProgram(
+	testRunner = unittest.TextTestRunner(
+		stream = IECore.CompoundStream(
+			[
+				sys.stderr,
+				open( "test/IECoreNuke/resultsPython.txt", "w" )
+			]
+		),
+		verbosity = 2
+	)
+)

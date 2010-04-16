@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,15 +32,15 @@
 #
 ##########################################################################
 
-import IECore
-import IECoreMaya
-import unittest
-import MayaUnitTest
-import maya.cmds
-import maya.OpenMaya
 import weakref
 
-class CallbackIdTest( unittest.TestCase ) :
+import maya.cmds
+import maya.OpenMaya
+
+import IECore
+import IECoreMaya
+
+class CallbackIdTest( IECoreMaya.TestCase ) :
 
 	def test( self ) :
 
@@ -76,4 +76,4 @@ class CallbackIdTest( unittest.TestCase ) :
 		self.assertEqual( w(), None )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

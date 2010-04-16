@@ -32,15 +32,15 @@
 #
 ##########################################################################
 
+import os.path
+
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-import unittest, MayaUnitTest
-import os.path
+
 import IECore
 import IECoreMaya
 
-
-class TestParameterisedHolder( unittest.TestCase ) :
+class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 	def __checkAllParameterPlugs( self, fnOH, parameter ) :
 	
@@ -1076,4 +1076,4 @@ class TestParameterisedHolder( unittest.TestCase ) :
 				os.remove( f )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

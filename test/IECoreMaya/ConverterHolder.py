@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,24 +32,24 @@
 #
 ##########################################################################
 
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-import unittest, MayaUnitTest
 import os.path
-from IECore import *
-from IECoreMaya import *
 
-class TestConverterHolder( unittest.TestCase ) :
+import maya.cmds
+
+import IECore
+import IECoreMaya
+
+class TestConverterHolder( IECoreMaya.TestCase ) :
 
 	def test( self ) :
 
 		""" Test ConverterHolder """
-		n = cmds.createNode( "ieConverterHolder" )
-		c = FnConverterHolder( str(n) )
+		n = maya.cmds.createNode( "ieConverterHolder" )
+		c = IECoreMaya.FnConverterHolder( str(n) )
 		self.assert_( c )
 
 		# \todo Add a FromMayaMeshConverter, pass in a mesh shape, and assert that we get a MeshPrimitive out
 
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

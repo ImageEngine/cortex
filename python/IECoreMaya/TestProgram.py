@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,74 +32,17 @@
 #
 ##########################################################################
 
-import os
-import sys
 import unittest
 
-# \todo Move the MayaUnitTest functionality into IECoreMaya proper, that way
-# it can be accessed from other modules
-
-class SplitStream :
-
-	def __init__( self ) :
-
-		self.__f = open( "test/IECoreMaya/resultsPython.txt", 'w' )
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-	def flush( self ) :
-
-		sys.stderr.flush()
-		self.__f.flush()
-
-
-class TestSuite( unittest.TestSuite ) :
-
-	""" A test suite which brings in a fresh Maya scene before each test run """
-
-	def __init__( self, tests=() ):
-
-		unittest.TestSuite.__init__( self, tests )
-
-	def run(self, result):
-
-		import maya.cmds as cmds
-
-		for test in self._tests:
-
-			cmds.file( new = True, force = True )
-			cmds.flushUndo()
-
-			if result.shouldStop:
-				break
-
-			test(result)
-		return result
-
-
-def createMayaTestLoader() :
-	""" Returns an instance of unittest.TestLoader() which gathers test cases into one of our TestSuites """
-
-	loader = unittest.TestLoader()
-	loader.suiteClass = TestSuite
-
-	return loader
-
-
-defaultMayaTestLoader = createMayaTestLoader()
-
+## A test program which initializes Maya standalone before running the test suite
 class TestProgram( unittest.TestProgram ) :
 
-	""" A test program which initializes Maya standalone before running the test suite """
-
-	def __init__(self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=defaultMayaTestLoader ) :
+	def __init__(self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=unittest.defaultTestLoader ) :
 
 		unittest.TestProgram.__init__( self, module, defaultTest, argv, testRunner, testLoader )
 
 	def runTests( self ) :
+	
 		try:
 			import maya.standalone
 			maya.standalone.initialize( name='IECoreMayaTest' )
@@ -110,8 +53,8 @@ class TestProgram( unittest.TestProgram ) :
 		import maya.cmds
 		maya.cmds.loadPlugin( "ieCore" )
 
-		if not self.testRunner:
-			self.testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 )
+		if not self.testRunner :
+			self.testRunner = unittest.TextTestRunner( verbosity = 2 )
 
 		result = self.testRunner.run( self.test )
 

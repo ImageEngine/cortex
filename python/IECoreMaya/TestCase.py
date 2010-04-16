@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,25 +32,18 @@
 #
 ##########################################################################
 
+import unittest
+
 import maya.cmds
 
-import IECore
-import IECoreMaya
+## A class to help implement unit tests for maya functionality. It
+# implements setUp() to create a new maya scene to perform the test in.
+class TestCase( unittest.TestCase ) :
 
-class ToMayaPlugConverterTest( IECoreMaya.TestCase ) :
+	## Derived classes may override this, but they should call the
+	# base class implementation too.
+	def setUp( self ) :
+	
+		maya.cmds.file( new = True, force = True )
+		maya.cmds.flushUndo()
 
-	def testConversion( self ) :
-
-		locator = maya.cmds.spaceLocator()[0]
-
-		converter = IECoreMaya.ToMayaPlugConverter.create( IECore.FloatData( 10 ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaPlugConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
-
-		converter.convert( locator + ".translateX" )
-
-		self.assertEqual( maya.cmds.getAttr( locator + ".translateX" ), 10 )
-
-if __name__ == "__main__":
-	IECoreMaya.TestProgram()

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-import IECore
-import IECoreMaya
-import unittest
-import MayaUnitTest
 import maya.cmds
 
-class FromMayaPlugConverterTest( unittest.TestCase ) :
+import IECore
+import IECoreMaya
+
+class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
 
@@ -71,4 +70,4 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

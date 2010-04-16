@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-import IECore
-import IECoreMaya
-import unittest
-import MayaUnitTest
 import maya.cmds
 
-class FromMayaParticleConverterTest( unittest.TestCase ) :
+import IECore
+import IECoreMaya
+
+class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 	def testSimple( self ) :
 
@@ -101,4 +100,4 @@ class FromMayaParticleConverterTest( unittest.TestCase ) :
 		self.failIf( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.MeshPrimitive.staticTypeId() ) )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

@@ -32,7 +32,11 @@
 #
 ##########################################################################
 
+import sys
 import unittest
+
+import IECore
+import IECoreMaya
 
 from ConverterHolder import *
 from PlaybackFrameList import *
@@ -58,7 +62,16 @@ from TemporaryAttributeValuesTest import *
 from SplineParameterHandlerTest import *
 from DAGPathParametersTest import *
 
-import MayaUnitTest
+IECoreMaya.TestProgram(
 
-if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	testRunner = unittest.TextTestRunner(
+		stream = IECore.CompoundStream(
+			[
+				sys.stderr,
+				open( "test/IECoreMaya/resultsPython.txt", "w" )
+			]
+		),
+		verbosity = 2
+	)
+
+)

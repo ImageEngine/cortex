@@ -34,12 +34,11 @@
 
 from __future__ import with_statement
 
-import IECore
-import IECoreMaya
-import MayaUnitTest
-import unittest
 import maya.cmds
 import maya.OpenMaya
+
+import IECore
+import IECoreMaya
 
 class TestOp( IECore.Op ) :
 
@@ -67,7 +66,7 @@ class TestOp( IECore.Op ) :
 
 		return IECore.IntData( 10 )
 
-class FnParameterisedHolderTest( unittest.TestCase ) :
+class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 
 	def test( self ) :
 
@@ -501,4 +500,4 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 		self.assertEqual( maya.cmds.attributeQuery( plug + "Max", listDefault=True, node=node ), [ 1.0, 1.0, 1.0 ] )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

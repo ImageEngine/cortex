@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,24 +32,22 @@
 #
 ##########################################################################
 
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-import unittest, MayaUnitTest
-import os.path
-from IECore import *
-from IECoreMaya import *
+import maya.cmds
 
-class TestPlaybackFrameList( unittest.TestCase ) :
+import IECore
+import IECoreMaya
+
+class TestPlaybackFrameList( IECoreMaya.TestCase ) :
 
 	def test( self ):
 		""" Test PlaybackFrameList """
 
-		r = PlaybackFrameList( PlaybackFrameList.Range.Animation )
+		r = IECoreMaya.PlaybackFrameList( IECoreMaya.PlaybackFrameList.Range.Animation )
 
 		l = r.asList()
 
-		self.assertEqual( l, range( int( cmds.playbackOptions( query=True, animationStartTime=True ) ),
-		                            int( cmds.playbackOptions( query=True, animationEndTime=True ) + 1 ) ) )
+		self.assertEqual( l, range( int( maya.cmds.playbackOptions( query=True, animationStartTime=True ) ),
+		                            int( maya.cmds.playbackOptions( query=True, animationEndTime=True ) + 1 ) ) )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

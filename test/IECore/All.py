@@ -229,20 +229,14 @@ if IECore.withJPEG() :
 if IECore.withFreeType() :
 	from FontTest import *
 
-class SplitStream :
-
-	def __init__( self ) :
-
-		self.__f = open( "test/IECore/resultsPython.txt", 'w' )
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-		
-	def flush( self ) :
-	
-		sys.stderr.flush()
-		self.__f.flush()
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+unittest.TestProgram(
+	testRunner = unittest.TextTestRunner(
+		stream = IECore.CompoundStream(
+			[
+				sys.stderr,
+				open( "test/IECore/resultsPython.txt", "w" )
+			]
+		),
+		verbosity = 2
+	)
+)

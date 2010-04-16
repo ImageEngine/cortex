@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,14 +32,13 @@
 #
 ##########################################################################
 
+import os.path
+import maya.cmds
+
 import IECore
 import IECoreMaya
-import unittest
-import MayaUnitTest
-import maya.cmds
-import os.path
 
-class FromMayaMeshConverterTest( unittest.TestCase ) :
+class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
 
@@ -255,4 +254,4 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		
 		
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()

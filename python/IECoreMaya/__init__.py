@@ -80,3 +80,5 @@ from PresetManagerUI import PresetManagerUI
 from CompoundParameterUI import CompoundParameterUI
 from ClassParameterUI import ClassParameterUI
 from PresetsOnlyParameterUI import PresetsOnlyParameterUI
+from TestCase import TestCase
+from TestProgram import TestProgram

@@ -32,41 +32,39 @@
 #
 ##########################################################################
 
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-import unittest, MayaUnitTest
-import os.path
-from IECore import *
-from IECoreMaya import *
+import maya.cmds
 
-class TestPluginLoadUnload( unittest.TestCase ) :
+import IECore
+import IECoreMaya
+
+class TestPluginLoadUnload( IECoreMaya.TestCase ) :
 
 	def test( self ):
 		""" Test loading/unloading of plugin """
 
 		# Plugin should be loaded by MayaUnitTest.TestProgram when we get here
-		self.assert_( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		self.assert_( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 		for i in range( 0, 20 ) :
 
-			self.failIf( cmds.pluginInfo( "ieCore", query = True, serviceDescriptions = True ) )
+			self.failIf( maya.cmds.pluginInfo( "ieCore", query = True, serviceDescriptions = True ) )
 
-			cmds.unloadPlugin( "ieCore" )
-			self.failIf( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+			maya.cmds.unloadPlugin( "ieCore" )
+			self.failIf( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
-			cmds.loadPlugin( "ieCore" )
-			self.assert_( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+			maya.cmds.loadPlugin( "ieCore" )
+			self.assert_( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 
-		self.assert_( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		self.assert_( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 	def tearDown( self ):
 
-		if not cmds.pluginInfo( "ieCore", query = True, loaded = True ) :
-			cmds.loadPlugin( "ieCore" )
+		if not maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) :
+			maya.cmds.loadPlugin( "ieCore" )
 
 		# Make sure plugin is definitely loaded when we exit tests
-		assert( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		assert( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	IECoreMaya.TestProgram()
