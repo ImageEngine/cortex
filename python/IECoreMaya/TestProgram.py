@@ -32,13 +32,17 @@
 #
 ##########################################################################
 
+import sys
 import unittest
 
-## A test program which initializes Maya standalone before running the test suite
+## A test program which initializes Maya standalone before running the test suite.
+# The list of named plugins is also loaded.
 class TestProgram( unittest.TestProgram ) :
 
-	def __init__(self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=unittest.defaultTestLoader ) :
+	def __init__( self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=unittest.defaultTestLoader, plugins = [] ) :
 
+		self.__plugins = plugins
+		
 		unittest.TestProgram.__init__( self, module, defaultTest, argv, testRunner, testLoader )
 
 	def runTests( self ) :
@@ -47,11 +51,12 @@ class TestProgram( unittest.TestProgram ) :
 			import maya.standalone
 			maya.standalone.initialize( name='IECoreMayaTest' )
 		except:
-			sys.stderr.write( "Failed to initialize Maya %s in standalone application" % ( os.environ["MAYA_VERSION"] ) )
+			sys.stderr.write( "Failed to initialize Maya standalone application" )
 			raise
 
 		import maya.cmds
-		maya.cmds.loadPlugin( "ieCore" )
+		for plugin in self.__plugins :
+			maya.cmds.loadPlugin( plugin )
 
 		if not self.testRunner :
 			self.testRunner = unittest.TextTestRunner( verbosity = 2 )

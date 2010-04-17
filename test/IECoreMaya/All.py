@@ -72,6 +72,8 @@ IECoreMaya.TestProgram(
 			]
 		),
 		verbosity = 2
-	)
+	),
+	
+	plugins = [ "ieCore" ],
 
 )
