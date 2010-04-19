@@ -36,7 +36,11 @@ import maya.cmds
 import maya.mel
 
 ## A base class to help in creating custom attribute editor controls
-# in a nice object oriented manner.
+# in a nice object oriented manner. After deriving from this class you
+# can instantiate a control from an attribute editor template using mel
+# of the following form :
+#
+# ieAttributeEditorControl( "DerivedClassName", "attributeName" )
 class AttributeEditorControl :
 
 	## Derived classes should first call the base class __init__, before
