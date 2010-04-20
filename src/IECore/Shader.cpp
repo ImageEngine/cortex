@@ -122,7 +122,7 @@ void Shader::copyFrom( const Object *other, CopyContext *context )
 	const Shader *s = static_cast<const Shader *>( other );
 	m_name = s->m_name;
 	m_type = s->m_type;
-	m_parameters = context->copy<CompoundData>( m_parameters );
+	m_parameters = context->copy<CompoundData>( s->m_parameters );
 }
 
 void Shader::save( SaveContext *context ) const

@@ -64,5 +64,12 @@ class TestShader( unittest.TestCase ) :
 		self.assertEqual( s.parameters.typeName(), CompoundData.staticTypeName() )
 		self.assertEqual( s.parameters["a"], StringData( "a" ) )
 		
+	def testCopy( self ) :
+	
+		s = Shader( "test", "surface", CompoundData( { "a" : StringData( "a" ) } ) )
+		ss = s.copy()
+				
+		self.assertEqual( s, ss )
+	
 if __name__ == "__main__":
     unittest.main()
