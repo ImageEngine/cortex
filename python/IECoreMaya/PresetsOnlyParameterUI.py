@@ -82,6 +82,10 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 			maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.node(), self.__attributeChanged )
 		)
 	
+	def _topLevelUIDeleted( self ) :
+	
+		self.__attributeChangedCallbackId = None
+	
 	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
 		
 		if plug == self.plug() :			
