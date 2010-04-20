@@ -75,6 +75,8 @@
 #include "RefCountedThreadingTest.h"
 #include "CurvesPrimitiveEvaluatorThreadingTest.h"
 #include "LRUCacheThreadingTest.h"
+#include "CompoundDataTest.h"
+#include "CompoundObjectTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -117,6 +119,8 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addRefCountedThreadingTest(test);
 		addCurvesPrimitiveEvaluatorThreadingTest(test);
 		addLRUCacheThreadingTest(test);
+		addCompoundDataTest(test);
+		addCompoundObjectTest(test);
 	}
 	catch (std::exception &ex)
 	{
