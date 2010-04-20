@@ -78,3 +78,7 @@ class SubstitutedDict :
 				return self.__dict[key]
 		except KeyError :
 			return defaultValue
+
+	def substitutions( self ) :
+	
+		return self.__substitutions
