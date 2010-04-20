@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,31 +35,97 @@
 #ifndef IE_CORE_COMPOUNDOBJECT_INL
 #define IE_CORE_COMPOUNDOBJECT_INL
 
+#include "boost/format.hpp"
+
 #include "IECore/Exception.h"
 
 namespace IECore
 {
 
 template<typename T>
-typename T::Ptr CompoundObject::member( const std::string &name )
+T *CompoundObject::member( const InternedString &name, bool throwExceptions )
 {
-	ObjectMap::iterator it = members().find( name );
+	return member<T>( name, throwExceptions, false );
+}
+
+template<typename T>
+const T *CompoundObject::member( const InternedString &name, bool throwExceptions ) const
+{
+	ObjectMap::const_iterator it = members().find( name );
 	if( it!=members().end() )
 	{
-		return runTimeCast<T>( it->second );
+		const T *result = runTimeCast<const T>( it->second );
+		if( result )
+		{
+			return result;
+		}
+		else
+		{
+			if( throwExceptions )
+			{
+				throw Exception( boost::str( boost::format( "CompoundObject child \"%s\" is not of type \"%s\"." ) % T::staticTypeName() ) );
+			}
+			else
+			{
+				return 0;
+			}	
+		}
+	}
+	else
+	{
+		if( throwExceptions )
+		{
+			throw Exception( boost::str( boost::format( "CompoundObject has no child named \"%s\"." ) % name.value() ) );
+		}
+		else
+		{
+			return 0;
+		}
 	}
 	return 0;
 }
 
 template<typename T>
-typename T::ConstPtr CompoundObject::member( const std::string &name ) const
+T *CompoundObject::member( const InternedString &name, bool throwExceptions, bool createIfMissing )
 {
-	ObjectMap::const_iterator it = members().find( name );
+	ObjectMap::iterator it = members().find( name );
 	if( it!=members().end() )
 	{
-		return runTimeCast<const T>( it->second );
+		T *result = runTimeCast<T>( it->second.get() );
+		if( result )
+		{
+			return result;
+		}
+		else
+		{
+			if( throwExceptions )
+			{
+				throw Exception( boost::str( boost::format( "CompoundObject child \"%s\" is not of type \"%s\"." ) % T::staticTypeName() ) );
+			}
+			else
+			{
+				return 0;
+			}
+		}
 	}
-	return 0;
+	else
+	{
+		if( createIfMissing )
+		{
+			typename T::Ptr member = staticPointerCast<T>( Object::create( T::staticTypeId() ) );
+			members()[name] = member;
+			return member;
+		}
+		else if( throwExceptions )
+		{
+			throw Exception( boost::str( boost::format( "CompoundObject has no child named \"%s\"." ) % name.value() ) );
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	return 0; // shouldn't get here anyway
 }
 
 }; // namespace IECore

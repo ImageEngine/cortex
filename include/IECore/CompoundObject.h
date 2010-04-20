@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,13 +60,22 @@ class CompoundObject : public Object
 		/// direct manipulation.
 		ObjectMap &members();
 
-		/// Convenience function to find an object in members(). Returns 0 if
-		/// the parameter doesn't exist, or does not match the type specified
-		/// as the template argument.
+		/// Convenience function to find an object in members(). If the named object doesn't exist
+		/// or doesn't match the type specified as the template argument, behavior
+		/// is defined by the throwExceptions parameter. When this parameter is true a descriptive
+		/// Exception is thrown, and when false 0 is returned.
 		template<typename T>
-		typename T::Ptr member( const std::string &name );
+		T *member( const InternedString &name, bool throwExceptions = false );
 		template<typename T>
-		typename T::ConstPtr member( const std::string &name ) const;
+		const T *member( const InternedString &name, bool throwExceptions = false ) const;
+		
+		/// A Convenience function to find an object in members().
+		/// If the named object doesn't exist, if createIfMissing is true, an object will be added
+		/// with the type's object factory create method. If false, or the named entry does not match the 
+		/// type specified as the template argument, behavior is defined by the throwExceptions parameter.
+		/// When this parameter is true a descriptive Exception is thrown, and when false 0 is returned.
+		template<typename T>
+		T *member( const InternedString &name, bool throwExceptions, bool createIfMissing );
 
 	protected:
 
