@@ -51,15 +51,22 @@ class CompoundData : public CompoundDataBase
 
 		IE_CORE_DECLAREOBJECT( CompoundData, CompoundDataBase );
 		
-		/// Convenience functions to find a child Data object. In the case of
-		/// the child not existing or not matching the specified type, behaviour
-		/// is defined by the throwExceptions parameter. When true a descriptive
+		/// Convenience functions to find a child Data object. If the named child doesn't exist
+		/// or doesn't match the type specified as the template argument, behavior
+		/// is defined by the throwExceptions parameter. When this parameter is true a descriptive
 		/// Exception is thrown, and when false 0 is returned.
 		template<typename T>
-		T *member( const InternedString &name, bool throwExceptions=false );
+		T *member( const InternedString &name, bool throwExceptions = false );
 		template<typename T>
-		const T *member( const InternedString &name, bool throwExceptions=false ) const;
+		const T *member( const InternedString &name, bool throwExceptions = false ) const;
 		
+		/// A Convenience function to find a child Data object.
+		/// If the named child doesn't exist, if createIfMissing is true, a child will be added
+		/// with the type's object factory create method. If false, or the named child does not match the 
+		/// type specified as the template argument, behavior is defined by the throwExceptions parameter.
+		/// When this parameter is true a descriptive Exception is thrown, and when false 0 is returned.
+		template<typename T>
+		T *member( const InternedString &name, bool throwExceptions, bool createIfMissing );
 };
 
 IE_CORE_DECLAREPTR( CompoundData );

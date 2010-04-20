@@ -45,10 +45,17 @@ namespace IECore
 template<typename T>
 T *CompoundData::member( const InternedString &name, bool throwExceptions )
 {
+	return member<T>( name, throwExceptions, false );
+}
+
+
+template<typename T>
+const T *CompoundData::member( const InternedString &name, bool throwExceptions ) const
+{
 	CompoundDataMap::const_iterator it = readable().find( name );
 	if( it!=readable().end() )
 	{
-		T *result = runTimeCast<T>( it->second.get() );
+		const T *result = runTimeCast<const T>( it->second.get() );
 		if( result )
 		{
 			return result;
@@ -80,12 +87,12 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions )
 }
 
 template<typename T>
-const T *CompoundData::member( const InternedString &name, bool throwExceptions ) const
+T *CompoundData::member( const InternedString &name, bool throwExceptions, bool createIfMissing )
 {
 	CompoundDataMap::const_iterator it = readable().find( name );
 	if( it!=readable().end() )
 	{
-		const T *result = runTimeCast<T>( it->second.get() );
+		T *result = runTimeCast<T>( it->second.get() );
 		if( result )
 		{
 			return result;
@@ -104,7 +111,13 @@ const T *CompoundData::member( const InternedString &name, bool throwExceptions 
 	}
 	else
 	{
-		if( throwExceptions )
+		if( createIfMissing )
+		{
+			typename T::Ptr member = staticPointerCast<T>( Object::create( T::staticTypeId() ) );
+			writable()[name] = member;
+			return member;
+		}
+		else if( throwExceptions )
 		{
 			throw Exception( boost::str( boost::format( "CompoundData has no child named \"%s\"." ) % name.value() ) );
 		}
@@ -115,6 +128,8 @@ const T *CompoundData::member( const InternedString &name, bool throwExceptions 
 	}
 	return 0; // shouldn't get here anyway
 }
+
+
 
 }; // namespace IECore
 
