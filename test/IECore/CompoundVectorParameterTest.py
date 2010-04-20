@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -66,3 +66,11 @@ class TestCompoundVectorParameter( unittest.TestCase ) :
 		c.addParameter( IntVectorParameter( 'c', '', IntVectorData( [ 1, 2,3 ] ) ) )
 
 		self.assertRaises( Exception, c.validate )
+		try :
+			c.validate()
+		except Exception, e :
+			self.failUnless( 'Parameter "c" has wrong size ( expected 2 but found 3 )' in str( e ) )
+
+if __name__ == "__main__":
+	unittest.main()
+

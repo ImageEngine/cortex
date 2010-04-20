@@ -68,13 +68,16 @@ class CompoundVectorParameter ( CompoundParameter ):
 			return res
 
 		size = None
-		for data in value.values():
+		keys = value.keys()
+		values = value.values()
+		for i in range( 0, len( keys ) ) :
 
+			thisSize = len( values[i] )
 			if size is None:
-				size = len(data)
+				size = thisSize
 
-			elif size != len(data):
-				return ( False, ("Size mismatch on the vectors of parameter %s: " % name) )
+			if size != thisSize :
+				return ( False, ( "Parameter \"%s\" has wrong size ( expected %d but found %d )" % ( keys[i], size, thisSize ) ) )
 
 		return ( True, "" )
 
