@@ -153,6 +153,12 @@ class TestPointsPrimitive( unittest.TestCase ) :
 	def testOrthographicAimedPatches( self ) :
 	
 		self.performAimTest( "orthographic", "aimedOrthographicPatches.tif", "patch" )		
+	
+	def tearDown( self ) :
 		
+		if os.path.exists( self.outputFileName ) :
+			
+			os.remove( self.outputFileName )
+
 if __name__ == "__main__":
     unittest.main()

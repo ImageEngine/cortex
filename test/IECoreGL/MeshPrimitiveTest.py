@@ -101,5 +101,11 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		
 		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
+	def tearDown( self ) :
+		
+		if os.path.exists( self.outputFileName ) :
+			
+			os.remove( self.outputFileName )
+	
 if __name__ == "__main__":
     unittest.main()
