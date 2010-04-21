@@ -149,6 +149,11 @@ class ParameterParser :
 
 	def __serialiseWalk(self, parameter, rootName):
 
+		# Allow parameters to request not to be serialised.
+		if "parser" in parameter.userData() and "serialise" in parameter.userData()["parser"]:
+			if not parameter.userData()["parser"]["serialise"]:
+				return []
+
 		parmType = parameter.typeId()
 		if not parmType in self.__typesToSerialisers and not isinstance( parameter, IECore.CompoundParameter ) :
 			# bail if no serialiser available, unless it's a CompoundParameter in which case we'll content
