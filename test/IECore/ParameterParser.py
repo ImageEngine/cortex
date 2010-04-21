@@ -269,10 +269,9 @@ class testParameterParser( unittest.TestCase ) :
 
 		s = IECore.ParameterParser().serialise( parameters )
 		
-		assert( "-a" in s )
-		assert( "-b" in s )
-		assert( "-c" not in s )
-
+		self.failIf( "-a" not in s )
+		self.failIf( "-b" not in s )
+		self.failIf( "-c" in s )
 
 	def testEvalParsing( self ) :
 
