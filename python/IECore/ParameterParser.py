@@ -151,7 +151,7 @@ class ParameterParser :
 
 		# Allow parameters to request not to be serialised.
 		if "parser" in parameter.userData() and "serialise" in parameter.userData()["parser"]:
-			if not parameter.userData()["parser"]["serialise"]:
+			if not parameter.userData()["parser"]["serialise"].value:
 				return []
 
 		parmType = parameter.typeId()
