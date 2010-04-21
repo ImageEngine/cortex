@@ -240,6 +240,40 @@ class testParameterParser( unittest.TestCase ) :
 			parameters,
 		)
 
+	def testOptionalSerialisation( self ) :
+	
+		parameters = IECore.CompoundParameter(
+
+			members = [
+
+				IECore.IntParameter(
+					name = "a",
+					description = "",
+					defaultValue = 1
+				),
+				IECore.StringParameter(
+					name = "b",
+					description = "",
+					defaultValue = "2",
+					userData = { "parser" : { "serialise" : IECore.BoolData( True ) } }
+				),
+				IECore.IntParameter(
+					name = "c",
+					description = "",
+					defaultValue = 3,
+					userData = { "parser" : { "serialise" : IECore.BoolData( False ) } }
+				),
+
+			]
+		)
+
+		s = IECore.ParameterParser().serialise( parameters )
+		
+		assert( "-a" in s )
+		assert( "-b" in s )
+		assert( "-c" not in s )
+
+
 	def testEvalParsing( self ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
