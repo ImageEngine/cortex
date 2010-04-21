@@ -260,6 +260,7 @@
 #include "IECorePython/ImageThinnerBinding.h"
 #include "IECorePython/CurveLineariserBinding.h"
 #include "IECorePython/ImageConvolveOpBinding.h"
+#include "IECorePython/CurveTangentsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -516,6 +517,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurveTracer();
 	bindImageThinner();
 	bindCurveLineariser();
+	bindCurveTangentsOp();
 	
 #ifdef IECORE_WITH_BOOSTFACTORIAL	
 

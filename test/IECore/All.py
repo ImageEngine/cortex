@@ -214,6 +214,7 @@ from ImageConvolveOpTest import *
 from StringUtilTest import *
 from ClassParameterTest import ClassParameterTest
 from ClassVectorParameterTest import ClassVectorParameterTest
+from CurveTangentsOpTest import CurveTangentsOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

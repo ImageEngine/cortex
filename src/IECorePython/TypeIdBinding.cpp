@@ -358,6 +358,7 @@ void bindTypeId()
 		.value( "ImageConvolveOp", ImageConvolveOpTypeId )
 		.value( "ClassParameter", ClassParameterTypeId )
 		.value( "ClassVectorParameter", ClassVectorParameterTypeId )
+		.value( "CurveTangentsOp", CurveTangentsOpTypeId )
 	;
 }
 
