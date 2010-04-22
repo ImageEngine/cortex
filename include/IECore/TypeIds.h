@@ -356,6 +356,7 @@ enum TypeId
 	ClassParameterTypeId = 313,
 	ClassVectorParameterTypeId = 314,
 	CurveTangentsOpTypeId = 315,
+	MarschnerParameterTypeId = 316,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

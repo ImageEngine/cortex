@@ -359,6 +359,7 @@ void bindTypeId()
 		.value( "ClassParameter", ClassParameterTypeId )
 		.value( "ClassVectorParameter", ClassVectorParameterTypeId )
 		.value( "CurveTangentsOp", CurveTangentsOpTypeId )
+		.value( "MarschnerParameter", MarschnerParameterTypeId )
 	;
 }
 
