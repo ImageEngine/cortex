@@ -187,3 +187,55 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		cls.__setParameterisedCallbacks.remove( callback )
 
 	__setParameterisedCallbacks = set()
+
+	## Adds a callback which will be invoked whenever FnParameterisedHolder.setClassVectorParameterClasses
+	# is called. The expected function signature is callback( FnParameterisedHolder, parameter )
+	@classmethod
+	def addSetClassVectorParameterClassesCallback( cls, callback ) :
+	
+		cls.__setClassVectorParameterClassesCallbacks.add( callback )
+	
+	## Removes a callback added previously with addSetClassVectorParameterClassesCallback()
+	@classmethod
+	def removeSetClassVectorParameterClassesCallback( cls, callback ) :
+	
+		cls.__setClassVectorParameterClassesCallbacks.remove( callback )
+		
+	__setClassVectorParameterClassesCallbacks = set()
+	
+	# Invoked by the ieParameterisedHolderSetClassParameter MPxCommand. It must be invoked from there
+	# rather than the methods above so that callbacks get correctly despatched during undo and redo.
+	@classmethod
+	def _despatchSetClassVectorParameterClassesCallbacks( cls, plugPath ) :
+		
+		fnPH = FnParameterisedHolder( StringUtil.nodeFromAttributePath( plugPath ) )
+		parameter = fnPH.plugParameter( plugPath )
+		for c in cls.__setClassVectorParameterClassesCallbacks :
+			c( fnPH, parameter )
+	
+	## Adds a callback which will be invoked whenever FnParameterisedHolder.setClassParameterClass
+	# is called. The expected function signature is callback( FnParameterisedHolder, parameter )
+	@classmethod
+	def addSetClassParameterClassCallback( cls, callback ) :
+	
+		cls.__setClassParameterClassCallbacks.add( callback )
+	
+	## Removes a callback added previously with addSetClassParameterClassCallback()
+	@classmethod
+	def removeSetClassParameterClassCallback( cls, callback ) :
+	
+		cls.__setClassParameterClassCallbacks.remove( callback )
+		
+	__setClassParameterClassCallbacks = set()
+	
+	# Invoked by the ieParameterisedHolderSetClassParameter MPxCommand. It must be invoked from there
+	# rather than the methods above so that callbacks get correctly despatched during undo and redo.
+	@classmethod
+	def _despatchSetClassParameterClassCallbacks( cls, plugPath ) :
+		
+		fnPH = FnParameterisedHolder( StringUtil.nodeFromAttributePath( plugPath ) )
+		parameter = fnPH.plugParameter( plugPath )
+		for c in cls.__setClassParameterClassCallbacks :
+			c( fnPH, parameter )
+				
+			

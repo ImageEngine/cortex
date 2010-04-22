@@ -40,6 +40,8 @@
 #include "maya/MStringArray.h"
 #include "maya/MFnStringArrayData.h"
 #include "maya/MFnIntArrayData.h"
+#include "maya/MFnDagNode.h"
+#include "maya/MGlobal.h"
 
 #include "IECore/Object.h"
 #include "IECore/Parameter.h"
@@ -199,7 +201,15 @@ MStatus ParameterisedHolderSetClassParameterCmd::redoIt()
 		return s;
 	}
 	
-	return m_parameterisedHolder->updateParameterised();
+	s = m_parameterisedHolder->updateParameterised();
+	if( !s )
+	{
+		return s;
+	}
+	
+	despatchCallbacks();
+	
+	return s;
 }
 
 MStatus ParameterisedHolderSetClassParameterCmd::undoIt()
@@ -233,11 +243,41 @@ MStatus ParameterisedHolderSetClassParameterCmd::undoIt()
 	m_parameter->setValue( m_originalValues );
 	
 	s = m_parameterisedHolder->updateParameterised();
-		
 	if( !s )
 	{
 		return s;
 	}
 	
-	return m_parameterisedHolder->setNodeValues();
+	s = m_parameterisedHolder->setNodeValues();
+	if( !s )
+	{
+		return s;
+	}
+	
+	despatchCallbacks();	
+	
+	return s;
+}
+
+void ParameterisedHolderSetClassParameterCmd::despatchCallbacks()
+{
+	MPlug plug = m_parameterisedHolder->parameterPlug( m_parameter );
+	MObject node = plug.node();
+	MFnDependencyNode fnNode( node );
+	MString nodeName = fnNode.name();
+	MFnDagNode fnDN( node );
+	if( fnDN.hasObj( node ) )
+	{
+		nodeName = fnDN.fullPathName();
+	}
+	MString plugName = nodeName + "." + plug.partialName();
+		
+	if( m_parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
+	{
+		MGlobal::executePythonCommandOnIdle( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetClassVectorParameterClassesCallbacks( \"" + plugName + "\" )" );
+	}
+	else
+	{
+		MGlobal::executePythonCommandOnIdle( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetClassParameterClassCallbacks( \"" + plugName + "\" )" );
+	}
 }

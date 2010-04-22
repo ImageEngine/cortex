@@ -66,6 +66,8 @@ class ParameterisedHolderSetClassParameterCmd : public MPxCommand
 
 	private :
 
+		void despatchCallbacks();
+
 		ParameterisedHolderInterface *m_parameterisedHolder;
 		IECore::ParameterPtr m_parameter;
 		

@@ -115,5 +115,14 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
 		
 		fnPH.setClassParameterClass( self.parameter, className, classVersion, searchPathEnvVar )
+
+	@staticmethod	
+	def _classSetCallback( fnPH, parameter ) :
+			
+		for instance in IECoreMaya.UIElement.instances( ClassParameterUI ) :
+			if instance.parameter.isSame( parameter ) :
+				instance.replace( instance.node(), instance.parameter )
+
+IECoreMaya.FnParameterisedHolder.addSetClassParameterClassCallback( ClassParameterUI._classSetCallback )
 		
 IECoreMaya.ParameterUI.registerUI( IECore.ClassParameter.staticTypeId(), ClassParameterUI )
