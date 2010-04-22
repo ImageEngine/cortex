@@ -215,6 +215,7 @@ from StringUtilTest import *
 from ClassParameterTest import ClassParameterTest
 from ClassVectorParameterTest import ClassVectorParameterTest
 from CurveTangentsOpTest import CurveTangentsOpTest
+from MarschnerLookupTableOpTest import MarschnerLookupTableOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

@@ -360,6 +360,7 @@ void bindTypeId()
 		.value( "ClassVectorParameter", ClassVectorParameterTypeId )
 		.value( "CurveTangentsOp", CurveTangentsOpTypeId )
 		.value( "MarschnerParameter", MarschnerParameterTypeId )
+		.value( "MarschnerLookupTableOp", MarschnerLookupTableOpTypeId )
 	;
 }
 
