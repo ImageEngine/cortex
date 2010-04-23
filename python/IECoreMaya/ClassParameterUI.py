@@ -91,10 +91,16 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 	
 		result = IECore.MenuDefinition()
 		
+		classNameFilter = "*"
+		try :
+			classNameFilter = self.parameter.userData()["UI"]["classNameFilter"].value
+		except :
+			pass
+
 		classInfo = self.parameter.getClass( True )
 		
 		loader = IECore.ClassLoader.defaultLoader( classInfo[3] )
-		for className in loader.classNames() :
+		for className in loader.classNames( classNameFilter ) :
 			for classVersion in loader.versions( className ) :
 				
 				result.append(
