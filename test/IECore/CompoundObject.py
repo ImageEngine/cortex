@@ -119,7 +119,22 @@ class testCompoundObject( unittest.TestCase ) :
 		v = IECore.CompoundObject( { "a" : IECore.IntData( 1 ) } )
 
 		self.assertRaises( AttributeError, getattr, v, "a" )
-
+		
+	def testKeyErrors( self ) :
+	
+		def get( c ) :
+		
+			c["iDontExist"]
+			
+		def delete( c ) :
+		
+			del c["iDontExist"]	
+	
+		c = IECore.CompoundObject()
+		
+		self.assertRaises( KeyError, get, c )
+		self.assertRaises( KeyError, delete, c )
+		
 if __name__ == "__main__":
         unittest.main()
 

@@ -104,27 +104,29 @@ static ObjectPtr getItem( const CompoundObject &o, const char *n )
 	CompoundObject::ObjectMap::const_iterator it = o.members().find( n );
 	if( it==o.members().end() )
 	{
-		throw std::out_of_range( "Bad index" );
+		PyErr_SetString( PyExc_KeyError, n );
+		throw_error_already_set();
 	}
 	return it->second;
 }
 
-static void setItem( CompoundObject &o, const std::string &n, Object &v )
+static void setItem( CompoundObject &o, const char *n, Object &v )
 {
 	o.members()[n] = &v;
 }
 
-static void delItem( CompoundObject &o, const std::string &n )
+static void delItem( CompoundObject &o, const char *n )
 {
 	CompoundObject::ObjectMap::iterator it = o.members().find( n );
 	if( it==o.members().end() )
 	{
-		throw std::out_of_range( "Bad index" );
+		PyErr_SetString( PyExc_KeyError, n );
+		throw_error_already_set();
 	}
 	o.members().erase( it );
 }
 
-static bool contains( const CompoundObject &o, const std::string &n )
+static bool contains( const CompoundObject &o, const char *n )
 {
 	CompoundObject::ObjectMap::const_iterator it = o.members().find( n );
 	if( it==o.members().end() )
@@ -134,7 +136,7 @@ static bool contains( const CompoundObject &o, const std::string &n )
 	return true;
 }
 
-static bool has_key( const CompoundObject &o, const std::string n)
+static bool has_key( const CompoundObject &o, const char *n )
 {
 	CompoundObject::ObjectMap::const_iterator it = o.members().find( n );
 	return ( it != o.members().end() );
@@ -211,7 +213,7 @@ class CompoundObjectFromPythonDict
 			{
 				object key(keys[i]);
 				object value(values[i]);
-				extract< const std::string > keyElem(key);
+				extract<const char *> keyElem(key);
 				if (!keyElem.check())
 				{
 					PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
@@ -250,7 +252,7 @@ static void update( CompoundObject &x, ConstCompoundObjectPtr y )
 
 	for (; it != y->members().end(); it++)
 	{
-		setItem( x, it->first, *it->second );
+		setItem( x, it->first.value().c_str(), *it->second );
 	}
 }
 
@@ -264,7 +266,7 @@ static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other )
 }
 
 /// binding for get method
-static ObjectPtr get( const CompoundObject &o, const std::string key, ObjectPtr defaultValue )
+static ObjectPtr get( const CompoundObject &o, const char *key, ObjectPtr defaultValue )
 {
 	CompoundObject::ObjectMap::const_iterator it = o.members().find( key );
 	if ( it == o.members().end() )
