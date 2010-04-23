@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/ColorAlgo.h"
-
 // Angles used for Marschner reflectance
 varying float sinThetaO;
 varying float sinThetaI;
