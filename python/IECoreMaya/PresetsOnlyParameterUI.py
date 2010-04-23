@@ -87,8 +87,18 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 		self.__attributeChangedCallbackId = None
 	
 	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
+				
+		if not ( changeType & maya.OpenMaya.MNodeMessage.kAttributeSet ) :
+			return
 		
-		if plug == self.plug() :			
+		try :
+			myPlug = self.plug()
+		except :
+			# this situation can occur when our parameter has been removed but the
+			# ui we represent is not quite yet dead
+			return
+		
+		if plug == myPlug :
 			self.__updateLabel()
 		
 	def __updateLabel( self ) :
