@@ -399,6 +399,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_GLSL_SHADER_DIR",
+	"The directory in which to install GLSL shaders.",
+	"$INSTALL_PREFIX/glsl",
+)
+
+o.Add(
 	"INSTALL_RMANPROCEDURAL_NAME",
 	"The name under which to install the renderman procedurals.",
 	"$INSTALL_PREFIX/rmanProcedurals/$IECORE_NAME",
@@ -1253,7 +1259,13 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.AddPostAction( "$INSTALL_GLSL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_GLSL_HEADER_DIR"] ) )
 		glEnv.Alias( "install", glslHeaderInstall )
 		glEnv.Alias( "installGL", glslHeaderInstall )
-		
+				
+		glslShaderFiles = glob.glob( "glsl/*.frag" ) + glob.glob( "glsl/*.vert" )		
+		glslShaderInstall = glEnv.Install( "$INSTALL_GLSL_SHADER_DIR", glslShaderFiles )
+		glEnv.AddPostAction( "$INSTALL_GLSL_SHADER_DIR", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_GLSL_SHADER_DIR"] ) )
+		glEnv.Alias( "install", glslShaderInstall )
+		glEnv.Alias( "installGL", glslShaderInstall )		
+
 		glPythonSources = glob.glob( "src/IECoreGL/bindings/*.cpp" )
 		glPythonModuleEnv = pythonModuleEnv.Copy( **glEnvSets )
 		glPythonModuleEnv.Append( **glEnvAppends )
