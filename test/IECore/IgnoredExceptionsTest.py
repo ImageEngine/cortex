@@ -54,6 +54,10 @@ class IgnoredExceptionsTest( unittest.TestCase ) :
 		f( KeyError, ( KeyError, IndexError ) )
 		f( IndexError, ( KeyError, IndexError ) )
 		
+		c = IECore.CompoundObject()
+		with IECore.IgnoredExceptions( KeyError ) :
+			c["d"]
+		
 if __name__ == "__main__":
 	unittest.main()
 

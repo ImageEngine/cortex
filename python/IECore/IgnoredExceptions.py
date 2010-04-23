@@ -61,3 +61,7 @@ class IgnoredExceptions :
 
 		if isinstance( value, self.__toIgnore ) :
 			return True
+		
+		for t in self.__toIgnore :
+			if type is t :
+				return True
