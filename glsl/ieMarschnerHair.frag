@@ -76,5 +76,5 @@ void main()
 	vec3 marschner = vec3( comps1.x * comps2.a * scaleR ) + ( comps1.y * comps2.xyz * scaleTT ) + ( comps1.z * comps3.xyz * scaleTRT );
 	vec3 diffuse = gl_Color.xyz * mix( 1.0, cosThetaI, diffuseFalloff ) * mix( 1.0, cosHalfPhi, diffuseAzimuthFalloff ); 
 
-	gl_FragColor = vec4( marschner * gl_LightSource[0].specular + ( diffuse * scaleDiffuse * gl_LightSource[0].diffuse ), 1.0 );	
+	gl_FragColor = vec4( marschner * gl_LightSource[0].specular.rgb + ( diffuse * scaleDiffuse * gl_LightSource[0].diffuse.rgb ), 1.0 );	
 }
