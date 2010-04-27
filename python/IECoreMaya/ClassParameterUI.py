@@ -52,7 +52,12 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 				
 		maya.cmds.rowLayout( numberOfColumns = 2, parent = columnLayout )
 		
-		maya.cmds.text( label = "Class", align = "right", annotation = self.description() )
+		maya.cmds.text(
+			label = "Class",
+			font = "smallPlainLabelFont",
+			align = "right",
+			annotation = self.description()
+		)
 		
 		self.__menuParent = maya.cmds.iconTextStaticLabel(
 			image = "arrowDown.xpm",
@@ -113,6 +118,24 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 					)
 					
 				)
+	
+		result.append(
+			"/RemoveDivider",
+			IECore.MenuItemDefinition(
+				divider = True
+			)
+		)
+		
+		result.append(
+		
+			"/Remove", 
+					
+			IECore.MenuItemDefinition(
+				command = IECore.curry( self.__setClass, "", 0, classInfo[3] ),
+				active = classInfo[0] is not None
+			)
+			
+		)
 	
 		return result
 	
