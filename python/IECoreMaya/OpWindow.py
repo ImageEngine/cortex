@@ -51,7 +51,7 @@ class OpWindow( IECoreMaya.UIElement ) :
 		form = maya.cmds.formLayout()
 
 		infoRow = maya.cmds.rowLayout()
-		maya.cmds.text( label = op.name, annotation = op.description, font = "boldLabelFont" )
+		maya.cmds.text( label = op.typeName(), annotation = op.description, font = "boldLabelFont" )
 
 		maya.cmds.setParent( form )
 
