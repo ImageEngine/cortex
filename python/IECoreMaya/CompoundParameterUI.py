@@ -70,33 +70,22 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			**kw
 			
 		)	
-
-		if 'hierarchyDepth' in kw :
-			kw['hierarchyDepth'] += 1 
-		else :
-			kw['hierarchyDepth'] = 0	
 		
 		self.__childUIs = {}
 		self.__headerCreated = False
 		self.__kw = kw.copy()
 		
+		self.__kw["hierarchyDepth"] = self.__kw.get( "hierarchyDepth", -1 ) + 1
+		
 		# \todo Retrieve the "collapsed" state
 		collapsed = collapsable
-
-		font = "boldLabelFont"			
-		if self.__kw['hierarchyDepth'] == 2 :
-			font = "smallBoldLabelFont"
-		elif self.__kw['hierarchyDepth'] >= 3 :
-			font = "tinyBoldLabelFont"
-
-		labelIndent = 5 + ( 8 * max( 0, self.__kw['hierarchyDepth']-1 ) )
 		
 		maya.cmds.frameLayout(
 			self._topLevelUI(),
 			edit = True,
 			label = self.label(),
-			font = font,
-			labelIndent = labelIndent,
+			font = self._labelFont( self.__kw["hierarchyDepth"] ),
+			labelIndent = self._labelIndent( self.__kw["hierarchyDepth"] ),
 			labelVisible = collapsable,
 			borderVisible = False,
 			preExpandCommand = self.__preExpand,
@@ -150,6 +139,21 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			self.__preExpand()
 			
 		maya.cmds.frameLayout( self.layout(), edit=True, collapse=collapsed )
+	
+	@staticmethod
+	def _labelFont( hierarchyDepth ) :
+	
+		if hierarchyDepth == 2 :
+			return "smallBoldLabelFont"
+		elif hierarchyDepth >= 3 :
+			return "tinyBoldLabelFont"
+		else :
+			return "boldLabelFont"			
+	
+	@staticmethod
+	def _labelIndent( hierarchyDepth ) :
+	
+		return 5 + ( 8 * max( 0, hierarchyDepth-1 ) )
 				
 	## May be implemented by derived classes to present some custom ui at the
 	# top of the list of child parameters. Implementations should first call the
