@@ -54,6 +54,10 @@ class ParameterisedWrap : public Parameterised, public Wrapper<Parameterised>
 };
 IE_CORE_DECLAREPTR( ParameterisedWrap );
 
+/// \todo We should consider deprecating this accessor and forcing all parameter access to go through
+/// object.parameters()["name"]. Although it is convenient, it's also confusing that it only supports
+/// a tiny subset of what can be done with parameters(), and it adds another way of doing the same thing
+/// which can also cause confusion.
 static ParameterPtr parameterisedGetItem( Parameterised &o, const std::string &n )
 {
 	ParameterPtr p = o.parameters()->parameter<Parameter>( n );
