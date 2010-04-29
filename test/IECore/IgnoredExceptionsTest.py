@@ -60,6 +60,15 @@ class IgnoredExceptionsTest( unittest.TestCase ) :
 	
 		with IECore.IgnoredExceptions( Exception ) :
 			c["d"]
+			
+		p = IECore.Parameterised( "" )
+		with IECore.IgnoredExceptions( Exception ) :
+			p["d"]
+			
+	def testNoExceptions( self ) :
+	
+		with IECore.IgnoredExceptions( Exception ) :
+			pass
 					
 if __name__ == "__main__":
 	unittest.main()

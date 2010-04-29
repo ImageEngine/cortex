@@ -61,6 +61,6 @@ class IgnoredExceptions :
 
 		if isinstance( value, self.__toIgnore ) :
 			return True
-		
-		if issubclass( type, self.__toIgnore ) :
+				
+		if type is not None and issubclass( type, self.__toIgnore ) :
 			return True
