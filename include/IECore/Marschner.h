@@ -35,7 +35,6 @@
 #ifndef IECORE_MARSCHNERBCSDF_H
 #define IECORE_MARSCHNERBCSDF_H
 
-#include "boost/math/distributions/normal.hpp"
 #include "IECore/Exception.h"
 #include "IECore/EuclideanToSphericalTransform.h"
 #include "IECore/CompoundData.h"
