@@ -82,3 +82,4 @@ from ClassParameterUI import ClassParameterUI
 from PresetsOnlyParameterUI import PresetsOnlyParameterUI
 from TestCase import TestCase
 from TestProgram import TestProgram
+from ClassVectorParameterUI import ClassVectorParameterUI
