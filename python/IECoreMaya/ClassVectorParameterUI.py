@@ -262,7 +262,13 @@ class ChildUI( IECoreMaya.UIElement ) :
 
 		# layer icon
 
-		layerIcon = maya.cmds.picture( image="out_displayLayer.xpm" )
+		layerIcon = maya.cmds.picture(
+			image = "out_displayLayer.xpm",
+			annotation = IECore.StringUtil.wrap(
+				self.__class()[0].description + "\n\n" + "Click to reorder or remove.",
+				48,
+			)
+		)
 		IECoreMaya.createMenu( self.__layerMenu, layerIcon )
 		IECoreMaya.createMenu( self.__layerMenu, layerIcon, button=1 )
 		
