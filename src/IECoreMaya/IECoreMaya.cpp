@@ -69,6 +69,7 @@
 #include "IECoreMaya/ParameterisedHolderSetClassParameterCmd.h"
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/CurveCombiner.h"
+#include "IECoreMaya/ParameterisedHolderManipContextCommand.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 // see ObjectParameterHandler::doUpdate() for an explanation of the necessity for dummy data
@@ -170,7 +171,9 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
 
 		s = plugin.registerCommand( "ieParameterisedHolderSetClassParameter", ParameterisedHolderSetClassParameterCmd::creator );
-
+			
+		s = plugin.registerContextCommand("ieParameterisedHolderManipContext", &ParameterisedHolderManipContextCommand::creator );
+		
 #ifdef IECOREMAYA_WITH_RI
 		s = plugin.registerCommand( "ieDelightProceduralCache", DelightProceduralCacheCommand::creator, DelightProceduralCacheCommand::newSyntax );
 #endif
@@ -232,6 +235,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		PythonCmd::uninitialize();
 
 		s = plugin.deregisterCommand( "ieParameterisedHolderSetValue" );
+		s = plugin.deregisterContextCommand("ieParameterisedHolderManipContext");
 
 #ifdef IECOREMAYA_WITH_RI
 		s = plugin.deregisterCommand( "ieDelightProceduralCache" );
