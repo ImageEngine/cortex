@@ -54,11 +54,10 @@ namespace IECoreMaya
 /// minimum corner valued be greater than its maximum corner values.
 /// Otherwise, the box corners are constrained to valid ranges.
 ///
-/// Behavior can be further customised by adding a "box3ManipulatorWorldSpace" 
-/// StringData member to the "UI" CompoundObject in there Parameters userData().
-/// If this member exists, and its value is True, then the coordinates 
-/// will be treated as being in World space. Otherwise, local space
-/// is assumed, and on-screen controls are transformed along with the node.
+/// Behavior can be further customised by adding the StringData member
+/// "box3ManipSpace" to the "UI" CompoundObject in there Parameters userData().
+/// If this member exists, valid values are "world" and "object". When using
+/// object space, on-screen controls are transformed along with the node.
 ///
 /// This manipulator also supports the "manipLabel" member in userData()["UI"],
 /// and draws this label underneath the constraint switch.

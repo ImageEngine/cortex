@@ -16,6 +16,7 @@
 #include <maya/MTransformationMatrix.h>
 #include <maya/MArgList.h>
 #include <maya/MFnNumericAttribute.h>
+#include <maya/MGlobal.h>
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -465,11 +466,23 @@ void Box3Manipulator::readParameterOptions( MFnDagNode &nodeFn )
 	if( CompoundObjectPtr uiData = userData->member<CompoundObject>( "UI" ) )
 	{
 		// World space parameter values
-		if( BoolDataPtr wsData = uiData->member<BoolData>( "box3ManipulatorWorldSpace" ) )
+		if( StringDataPtr wsData = uiData->member<StringData>( "box3ManipSpace" ) )
 		{
-			if( wsData->readable() == true )
+			if( wsData->readable() == "world" )
 			{
 				m_worldSpace = true;
+			}
+			else if( wsData->readable() == "object" )
+			{
+				m_worldSpace = false;			
+			}
+			else
+			{
+				MGlobal::displayWarning( "Box3Manipulator: Ignoring invalid box3ManipSpace '"
+										 + MString( wsData->readable().c_str() )
+										 + "' for parameter '" 
+										 + MString( parameter->name().c_str() )
+										 + "', using 'object'." );
 			}
 		}				
 	}
