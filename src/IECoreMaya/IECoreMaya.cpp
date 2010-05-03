@@ -69,6 +69,7 @@
 #include "IECoreMaya/ParameterisedHolderSetClassParameterCmd.h"
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/CurveCombiner.h"
+#include "IECoreMaya/Box3Manipulator.h"
 #include "IECoreMaya/ParameterisedHolderManipContextCommand.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
@@ -161,6 +162,10 @@ MStatus initialize(MFnPlugin &plugin)
 		
 		s = plugin.registerNode( CurveCombiner::typeName, CurveCombiner::id,
 			CurveCombiner::creator, CurveCombiner::initialize, MPxNode::kDependNode );
+		assert( s );
+		
+		s = plugin.registerNode( "ieBox3fParameterManipulator", Box3Manipulator::id,
+			Box3Manipulator::creator, Box3Manipulator::initialize, MPxNode::kManipContainer );
 		assert( s );
 
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );

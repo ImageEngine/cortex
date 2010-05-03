@@ -102,6 +102,7 @@ enum TypeId
 	FromMayaCompoundNumericPlugConverterV3dC3fTypeId = 109058,
 	FromMayaTransformationMatrixfConverterTypeId = 109059,
 	FromMayaTransformationMatrixdConverterTypeId = 109060,
+	Box3ManipulatorTypeId = 109061,
 
 	LastTypeId = 109999
 
