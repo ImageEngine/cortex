@@ -55,6 +55,7 @@
 #include "maya/MFnPluginData.h"
 #include "maya/MFnMesh.h"
 #include "maya/MFnGenericAttribute.h"
+#include "maya/MPxManipContainer.h"
 
 #include "IECoreMaya/ParameterisedHolder.h"
 #include "IECoreMaya/ParameterHandler.h"
@@ -239,6 +240,8 @@ MStatus ParameterisedHolder<B>::initialize()
 
 	s = B::addAttribute( aParameterisedSearchPathEnvVar );
 	assert(s);
+	
+	MPxManipContainer::addToManipConnectTable( id );
 
 	return MS::kSuccess;
 }

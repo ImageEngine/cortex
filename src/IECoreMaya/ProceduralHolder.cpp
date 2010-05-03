@@ -64,7 +64,6 @@
 #include "maya/MAttributeSpecArray.h"
 #include "maya/MDagPath.h"
 #include "maya/MFnStringData.h"
-#include "maya/MPxManipContainer.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -157,9 +156,7 @@ MStatus ProceduralHolder::initialize()
 
 	s = addAttribute( aProceduralComponents );
 	assert( s );
-
-	MPxManipContainer::addToManipConnectTable( id );
-
+	
 	return MS::kSuccess;
 }
 
