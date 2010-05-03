@@ -45,9 +45,9 @@ namespace IECoreMaya
 /// This class should be used as a base class for any custom
 /// manipulators designed to operate on IECore::Parameters. 
 /// When used in conjunction with the ParameterisedHolderManipContext,
-/// It ensures that the manipulator knows which MPlug is is meant
+/// It ensures that the manipulator knows which MPlug it is meant
 /// to target, and any Parameter defined labeling is also 
-/// transfered.
+/// transferred.
 class ParameterManipContainer : public MPxManipContainer
 {
 	public:
