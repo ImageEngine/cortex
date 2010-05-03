@@ -1236,6 +1236,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 			}
 			catch ( Exception &e )
 			{
+				e.prepend( "Opening file \"" + filename + "\" : " );
 				throw;
 			}
 			catch (...)
@@ -1267,6 +1268,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		}
 		catch ( Exception &e )
 		{
+			e.prepend( "Opening file \"" + filename + "\" : " );
 			throw;
 		}
 		catch (...)
