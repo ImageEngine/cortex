@@ -57,7 +57,12 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	def __init__( self, node, parameter, **kw  ) :
 
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
-		collapsable = kw.get( "withCompoundFrame", False ) or not parameter.isSame( fnPH.getParameterised()[0].parameters() )		
+		
+		collapsable = not parameter.isSame( fnPH.getParameterised()[0].parameters() )
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsable = parameter.userData()["UI"]["collapsable"].value
+			
+		collapsable = kw.get( "withCompoundFrame", False ) or collapsable
 				
 		IECoreMaya.ParameterUI.__init__( self,
 			
