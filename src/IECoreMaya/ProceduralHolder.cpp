@@ -256,8 +256,12 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 
 			if( rendererToReuse )
 			{
+				rendererToReuse->command( "editBegin", CompoundDataMap() );
+
 				p->render( rendererToReuse.get() );
 				m_scene = rendererToReuse->scene();
+				
+				rendererToReuse->command( "editEnd", CompoundDataMap() );
 			}
 			else
 			{
