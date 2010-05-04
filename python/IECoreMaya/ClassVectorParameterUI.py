@@ -95,18 +95,24 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			classNameFilter = self.parameter.userData()["UI"]["classNameFilter"].value
 		except :
 			pass
+		menuPathStart = max( 0, classNameFilter.find( "*" ) )
 			
 		loader = IECore.ClassLoader.defaultLoader( self.parameter.searchPathEnvVar() )
 		for className in loader.classNames( classNameFilter ) :
-			for classVersion in loader.versions( className ) :
+			classVersions = loader.versions( className )
+			for classVersion in classVersions :
 				
 				active = True
 				if parameterName :
 					active = self.parameter.getClass( parameterName, True )[1:] != ( className, classVersion )
 				
+				menuPath = "/" + className[menuPathStart:]
+				if len( classVersions ) > 1 :
+					menuPath += "/v" + str( classVersion )
+
 				result.append(
 					
-					"/%s/v%d" % ( className, classVersion ), 
+					menuPath, 
 					
 					IECore.MenuItemDefinition(
 						command = IECore.curry( self._setClass, parameterName, className, classVersion ),

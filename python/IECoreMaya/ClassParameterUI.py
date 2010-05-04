@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import os.path
+
 import maya.cmds
 
 import IECore
@@ -101,16 +103,22 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 			classNameFilter = self.parameter.userData()["UI"]["classNameFilter"].value
 		except :
 			pass
+		menuPathStart = max( 0, classNameFilter.find( "*" ) )
 
 		classInfo = self.parameter.getClass( True )
 		
 		loader = IECore.ClassLoader.defaultLoader( classInfo[3] )
 		for className in loader.classNames( classNameFilter ) :
-			for classVersion in loader.versions( className ) :
+			classVersions = loader.versions( className )
+			for classVersion in classVersions :
 				
+				menuPath = "/" + className[menuPathStart:]
+				if len( classVersions ) > 1 :
+					menuPath += "/v" + str( classVersion )
+												
 				result.append(
 					
-					"/%s/v%d" % ( className, classVersion ), 
+					menuPath, 
 					
 					IECore.MenuItemDefinition(
 						command = IECore.curry( self.__setClass, className, classVersion, classInfo[3] ),
