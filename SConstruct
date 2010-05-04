@@ -1280,7 +1280,7 @@ if env["WITH_GL"] and doConfigure :
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "python/IECoreGL/_IECoreGL", glPythonSources )
 		glPythonModuleEnv.Depends( glPythonModule, glLibrary )
 
-		glPythonScripts = glob.glob( "python/IECoreGL/IECoreGL/*.py" )
+		glPythonScripts = glob.glob( "python/IECoreGL/*.py" )
 		glPythonModuleInstall = glPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )		
 		glPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonModuleEnv, glPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		glPythonModuleEnv.Alias( "install", glPythonModuleInstall )
