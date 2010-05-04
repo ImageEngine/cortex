@@ -176,7 +176,10 @@ void ParameterisedHolderManipContext::processNode( MObject &node )
 	else
 	{
 		ParameterisedInterface *parameterisedInterface = pHolder->getParameterisedInterface();
-		createManipulatorWalk( parameterisedInterface->parameters(), nodeFn );
+		if( parameterisedInterface )
+		{
+			createManipulatorWalk( parameterisedInterface->parameters(), nodeFn );
+		}
 	}
 }
 
