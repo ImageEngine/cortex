@@ -390,6 +390,12 @@ class Renderer : public IECore::Renderer
 		/// "removeObject"<br>
 		/// Expects a StringData parameter named "name", which specifies the name of an object to remove from the scene.
 		/// This only has any effect in deferred mode.
+		/// "editBegin"<br>
+		/// This parameter-less command marks the start of an edit to an existing scene, and should be called before
+		/// any other changes are made when re-using an existing renderer, that has already reached worldEnd.
+		/// "editEnd"<br>
+		/// This parameter-less command marks the end of an edit to an existing scene, and should be called after
+		/// other changes have been made when re-using an existing renderer.
 		/// \todo Consider generalising an interface for scene edits and making it a standard part of the documentation
 		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );

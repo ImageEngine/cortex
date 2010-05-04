@@ -168,6 +168,8 @@ class TestRenderer( unittest.TestCase ) :
 				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "sprite" ) )
 
 			r.worldEnd()
+		
+			
 
 	def testOtherRendererAttributes( self ) :
 
@@ -435,6 +437,36 @@ class TestRenderer( unittest.TestCase ) :
 			count += self.__countChildrenRecursive( c )
 		return count
 		
+	def testEdits( self ):
+	
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		
+		r.worldBegin()
+		r.worldEnd()
+		
+		handler = CapturingMessageHandler()
+		Msg.pushHandler( handler )
+		
+		r.attributeBegin()
+		r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+		r.attributeEnd()
+		
+		Msg.popHandler()
+		self.assertEqual( len( handler.messages ), 3 )
+		
+		handler = CapturingMessageHandler()
+		Msg.pushHandler( handler )
+		
+		r.command( "editBegin", {} )
+		r.attributeBegin()
+		r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+		r.attributeEnd()
+		r.command( "editEnd", {} )
+		
+		Msg.popHandler()
+		self.assertEqual( len( handler.messages ), 0 )
+			
 	def testRemoveObject( self ) :
 	
 		r = Renderer()

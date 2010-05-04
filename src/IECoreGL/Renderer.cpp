@@ -1751,12 +1751,40 @@ IECore::DataPtr removeObjectCommand( const std::string &name, const IECore::Comp
 	return new IECore::BoolData( result );
 }
 
+IECore::DataPtr editBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters, IECoreGL::Renderer::MemberData *memberData )
+{
+	DeferredRendererImplementationPtr r = runTimeCast<DeferredRendererImplementation>( memberData->implementation );
+	if( !r )
+	{
+		msg( Msg::Warning, "Renderer::command", "editBeginCommand command operates only in deferred mode" );
+		return 0;
+	}
+		
+	memberData->inWorld = true;
+	return new IECore::BoolData( true );
+}
+
+IECore::DataPtr editEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters, IECoreGL::Renderer::MemberData *memberData )
+{
+	DeferredRendererImplementationPtr r = runTimeCast<DeferredRendererImplementation>( memberData->implementation );
+	if( !r )
+	{
+		msg( Msg::Warning, "Renderer::command", "editEndCommand command operates only in deferred mode" );
+		return 0;
+	}
+	
+	memberData->inWorld = false;
+	return new IECore::BoolData( true );
+}
+
 static const CommandMap &commands()
 {
 	static CommandMap c;
 	if( !c.size() )
 	{
 		c["removeObject"] = removeObjectCommand;
+		c["editBegin"] = editBeginCommand;
+		c["editEnd"] = editEndCommand;
 	}
 	return c;
 }
