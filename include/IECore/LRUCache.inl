@@ -234,11 +234,14 @@ bool LRUCache<Key, Ptr>::erase( const Key &key )
 		return false;
 	}
 
-	m_currentCost -= it->second.cost;
-	m_list.erase( it->second.listIterator );
-	it->second.data = 0;
-	it->second.status = Erased;
+	if( it->second.status==Cached ) 
+	{
+		m_currentCost -= it->second.cost;
+		m_list.erase( it->second.listIterator );
+		it->second.data = 0;
+	}
 	
+	it->second.status = Erased;
 	return true;
 }
 

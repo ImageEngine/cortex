@@ -100,6 +100,10 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() )
 		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( o, o2 )
+		
+		# test clear after failed load
+		self.assertRaises( RuntimeError, r.read, "/i/dont/exist" )
+		r.clear( "/i/dont/exist" )
 
 	def testRepeatedFailures( self ) :
 	
