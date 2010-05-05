@@ -38,23 +38,35 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
-		
+
+## A ParameterUI for ClassVectorParameters. Supports the following Parameter userData entries :
+#
+# BoolData ["UI"]["collapsable"]
+# Specifies if the UI may be collapsed or not - defaults to True. 		
 class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-					
+		
+		# we have to get the collapse state right at the point we create the frameLayout
+		# otherwise maya doesn't get the frame sizing right. we can then specify the rest
+		# of the frame state after calling the base class constructor.			
+		collapsable = True
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsable = parameter.userData()["UI"]["collapsable"].value
+
 		IECoreMaya.ParameterUI.__init__(
 			
 			self,
 			node,
 			parameter,
-			maya.cmds.frameLayout(),
+			maya.cmds.frameLayout( collapsable=collapsable, manage=False ),
 			**kw
 			
 		)
-		
+				
 		self.__kw = kw.copy()
-		self.__kw["hierarchyDepth"] = self.__kw.get( "hierarchyDepth", -1 ) + 1
+		if collapsable :
+			self.__kw["hierarchyDepth"] = self.__kw.get( "hierarchyDepth", -1 ) + 1
 		
 		maya.cmds.frameLayout(
 		
@@ -62,10 +74,12 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			edit = True,
 			label = self.label(),
 			labelIndent = IECoreMaya.CompoundParameterUI._labelIndent( self.__kw["hierarchyDepth"] ),
+			labelVisible = collapsable,
 			font = IECoreMaya.CompoundParameterUI._labelFont( self.__kw["hierarchyDepth"] ),
 			borderVisible = False,
-			collapsable = True,
-			collapse = True
+			collapsable = collapsable,
+			collapse = collapsable,
+			manage = True,
 				
 		)
 					
