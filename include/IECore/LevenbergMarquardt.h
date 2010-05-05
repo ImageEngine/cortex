@@ -79,6 +79,10 @@ struct DefaultLevenbergMarquardtTraits;
 ///    static T tolerance(); /// user defined tolerance
 /// };
 ///
+/// \todo Use max iterations instead of maxCalls on the error function.
+/// \todo No need for TypedData. Template on vector iterators instead.
+/// \todo Consider to pass the parameter changed when building the Jacobian. Most of the problems would not affect all the
+///       outputs when just one parameter changes. Some space for considerable optimization there.
 template<typename T, typename ErrorFn, template<typename> class Traits = DefaultLevenbergMarquardtTraits >
 class LevenbergMarquardt : public boost::noncopyable
 {
