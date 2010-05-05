@@ -37,6 +37,7 @@
 #include "tbb/tbb.h"
 
 #include "IECore/LRUCache.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "LRUCacheThreadingTest.h"
 
@@ -49,14 +50,12 @@ namespace IECore
 
 struct LRUCacheThreadingTest
 {
-	
-	typedef 
-	
+		
 	struct GetFromCache
 	{
 		public :
 		
-			GetFromCache( LRUCache<int, int> &cache )
+			GetFromCache( LRUCache<int, IntDataPtr> &cache )
 				:	m_cache( cache )
 			{
 			}
@@ -65,25 +64,27 @@ struct LRUCacheThreadingTest
 			{
 				for( size_t i=r.begin(); i!=r.end(); ++i )
 				{
-					m_cache.get( i );
+					IntDataPtr k = m_cache.get( i );
+					// can't use boost unit test assertions from threads
+					assert( k->readable() == (int)i );
 				}
 			}
 			
 		private :
 		
-			LRUCache<int, int> &m_cache;
+			LRUCache<int, IntDataPtr> &m_cache;
 			
 	};
 
-	static int get( int key, size_t &cost )
+	static IntDataPtr get( int key, size_t &cost )
 	{
 		cost = 10;
-		return key;
+		return new IntData( key );
 	}
 
 	void test()
 	{
-		LRUCache<int, int> cache( get, 1000 );
+		LRUCache<int, IntDataPtr> cache( get, 1000 );
 		
 		parallel_for( blocked_range<size_t>( 0, 10000 ), GetFromCache( cache ) );
 	}
