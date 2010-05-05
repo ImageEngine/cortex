@@ -86,11 +86,19 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 
 		self.__currentClassInfo = newClassInfo
 
+	def __classNameFilter( self ) :
+	
+		with IECore.IgnoredExceptions( KeyError ) :
+			return self.parameter.userData()["UI"]["classNameFilter"].value
+		
+		return "*"
+
 	def __menuParentLabel( self ) :
 	
 		classInfo = self.parameter.getClass( True )
 		if classInfo[1] :
-			return "%s v%d" % ( classInfo[1], classInfo[2] )
+			labelPathStart = max( 0, self.__classNameFilter().find( "*" ) )
+			return "%s v%d" % ( classInfo[1][labelPathStart:], classInfo[2] )
 		else :
 			return "Choose..."
 
@@ -98,17 +106,12 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 	
 		result = IECore.MenuDefinition()
 		
-		classNameFilter = "*"
-		try :
-			classNameFilter = self.parameter.userData()["UI"]["classNameFilter"].value
-		except :
-			pass
-		menuPathStart = max( 0, classNameFilter.find( "*" ) )
+		menuPathStart = max( 0, self.__classNameFilter().find( "*" ) )
 
 		classInfo = self.parameter.getClass( True )
 		
 		loader = IECore.ClassLoader.defaultLoader( classInfo[3] )
-		for className in loader.classNames( classNameFilter ) :
+		for className in loader.classNames( self.__classNameFilter() ) :
 			classVersions = loader.versions( className )
 			for classVersion in classVersions :
 				
