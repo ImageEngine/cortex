@@ -266,7 +266,7 @@ class ClassLoader :
 		self.__classes = {}
 		for path in self.__searchPaths.paths :
 
-			for root, dirs, files in os.walk( path, followlinks = True ) :
+			for root, dirs, files in os.walk( path ) :
 
 				if path.endswith( '/' ) :
 					nameBase = root[len(path):]
