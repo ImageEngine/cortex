@@ -97,22 +97,28 @@ void Primitive::render( const State * state ) const
 		throw Exception( "Primitive::render called with incomplete state object." );
 	}
 
-	Shader *shader = state->get<ShaderStateComponent>()->shader();
+	Shader *shader = 0;
 
-	// get ready in case the derived class calls setVertexAttributesAsUniforms or setVertexAttributes.
-	setupVertexAttributes( shader );
-
-	// set constant primVars on the uniform shader parameters
-	for ( AttributeMap::const_iterator it = m_uniformAttributes.begin(); it != m_uniformAttributes.end(); it++ )
+	if( state->get<Primitive::DrawSolid>()->value() )
 	{
-		try
+		shader = state->get<ShaderStateComponent>()->shader();
+
+		// get ready in case the derived class calls setVertexAttributesAsUniforms or setVertexAttributes.
+		setupVertexAttributes( shader );
+
+		// set constant primVars on the uniform shader parameters
+		for ( AttributeMap::const_iterator it = m_uniformAttributes.begin(); it != m_uniformAttributes.end(); it++ )
 		{
-			shader->setUniformParameter( it->first, it->second );
-		}
-		catch( ... )
-		{
+			try
+			{
+				shader->setUniformParameter( it->first, it->second );
+			}
+			catch( ... )
+			{
+			}
 		}
 	}
+
 	// \todo: consider binding at the end the whole original state. Check if that is enough to eliminate these push/pop calls.
 	glPushAttrib( GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
 	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
