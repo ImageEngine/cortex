@@ -37,6 +37,8 @@
 
 #include <vector>
 
+#include "tbb/mutex.h"
+
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/BoundedKDTree.h"
@@ -168,6 +170,9 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		/// this function may return 0 in the case of the mesh not having suitable uvs.
 		const UVBoundTree *uvBoundTree() const;
 		//@}
+		
+		typedef tbb::mutex NormalsMutex;
+		NormalsMutex &normalsMutex() const;
 		
 	protected:
 

@@ -45,11 +45,14 @@
 #include "IECore/TriangleAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Deleter.h"
+#include "IECore/ClassData.h"
 
 using namespace IECore;
 using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( MeshPrimitiveEvaluator );
+
+static IECore::ClassData< MeshPrimitiveEvaluator, MeshPrimitiveEvaluator::NormalsMutex > g_classData;
 
 static PrimitiveEvaluator::Description< MeshPrimitiveEvaluator > g_registraar = PrimitiveEvaluator::Description< MeshPrimitiveEvaluator >();
 
@@ -306,6 +309,8 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 	{
 		m_uvTree = 0;
 	}
+	
+	 g_classData.create( this );
 }
 
 PrimitiveEvaluatorPtr MeshPrimitiveEvaluator::create( ConstPrimitivePtr primitive )
@@ -467,10 +472,27 @@ void MeshPrimitiveEvaluator::calculateMassProperties() const
 	m_haveMassProperties = true;
 }
 
+MeshPrimitiveEvaluator::NormalsMutex &MeshPrimitiveEvaluator::normalsMutex() const
+{
+	return g_classData[ this ];
+}
+
 void MeshPrimitiveEvaluator::calculateAverageNormals() const
 {
 	assert( m_mesh );
-
+	
+	if( m_haveAverageNormals )
+	{
+		return;
+	}
+	
+	NormalsMutex::scoped_lock lock( normalsMutex() );
+	if( m_haveAverageNormals )
+	{
+		// another thread may have calculated the normals while we waited for the mutex
+		return;
+	}
+	
 	ConstIntVectorDataPtr verticesPerFace = m_mesh->verticesPerFace();
 
 #ifndef NDEBUG
