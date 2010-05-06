@@ -325,6 +325,10 @@ class ChildUI( IECoreMaya.UIElement ) :
 		
 		# class specific fields
 		
+		self.__attributeChangedCallbackId = None
+		self.__presetParameters = []
+		self.__presetUIs = []
+
 		self.__buildOptionalHeaderUI( headerFormLayout, attachForm, attachControl, self.__classVersion )
 		
 		maya.cmds.formLayout( 
@@ -346,6 +350,10 @@ class ChildUI( IECoreMaya.UIElement ) :
 			collapsable = True,
 			labelVisible = False,
 		)
+				
+	def _topLevelUIDeleted( self ) :
+	
+		self.__attributeChangedCallbackId = None
 		
 	def __class( self ) :
 	
@@ -521,7 +529,28 @@ class ChildUI( IECoreMaya.UIElement ) :
 				control = None
 				parameterPlugPath = fnPH.parameterPlugPath( parameter )
 				annotation = IECore.StringUtil.wrap( "%s\n\n%s" % ( parameterPlugPath.split( "." )[1], parameter.description ), 48 )
-				if isinstance( parameter, IECore.BoolParameter ) :
+				if parameter.presetsOnly :
+					
+					control = maya.cmds.iconTextStaticLabel(
+						image = "arrowDown.xpm",
+						font = "smallBoldLabelFont",
+						style = "iconAndTextHorizontal",
+						height = 23,
+						width = 80,
+						annotation = annotation,
+					)
+					IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control )
+					IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control, button=1 )
+					self.__presetParameters.append( parameter )
+					self.__presetUIs.append( control )
+					if self.__attributeChangedCallbackId is None :
+						self.__attributeChangedCallbackId = IECoreMaya.CallbackId(
+							maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.parent().node(), self.__attributeChanged )
+						)
+						
+					self.__updatePresetLabel( len( self.__presetUIs ) - 1 )
+					
+				elif isinstance( parameter, IECore.BoolParameter ) :
 					
 					control = maya.cmds.checkBox( label="", annotation=annotation )
 					maya.cmds.connectControl( control, parameterPlugPath )
@@ -591,7 +620,46 @@ class ChildUI( IECoreMaya.UIElement ) :
 				edit = True,
 				label = newLabel
 			)
-					
+	
+	def __presetsMenu( self, parameter ) :
+	
+		result = IECore.MenuDefinition()
+		for p in parameter.presetNames() :
+			result.append( "/" + p, { "command" : IECore.curry( self.__setPreset, parameter, p ) } )
+			
+		return result
+		
+	def __setPreset( self, parameter, name ) :
+	
+		parameter.setValue( name )
+		IECoreMaya.FnParameterisedHolder( self.parent().node() ).setNodeValue( parameter )
+
+	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
+				
+		if not ( changeType & maya.OpenMaya.MNodeMessage.kAttributeSet ) :
+			return
+		
+		fnPH = IECoreMaya.FnParameterisedHolder( self.parent().node() )
+		for index, parameter in enumerate( self.__presetParameters ) :
+			
+			try :
+				myPlug = fnPH.parameterPlug( parameter )
+			except :
+				# this situation can occur when our parameter has been removed but the
+				# ui we represent is not quite yet dead
+				continue
+		
+			if plug == myPlug :
+				self.__updatePresetLabel( index )
+				
+	def __updatePresetLabel( self, index ) :
+	
+		maya.cmds.iconTextStaticLabel( 
+			self.__presetUIs[index],
+			edit = True,
+			label = self.__presetParameters[index].getCurrentPresetName()
+		)
+									
 IECoreMaya.FnParameterisedHolder.addSetClassVectorParameterClassesCallback( ClassVectorParameterUI._classesSetCallback )
 					
 IECoreMaya.ParameterUI.registerUI( IECore.ClassVectorParameter.staticTypeId(), ClassVectorParameterUI )
