@@ -128,7 +128,7 @@ void PointsPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	Primitive::addPrimitiveVariable( name, primVar );
 }
 
-void PointsPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void PointsPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	if( depthSortRequested( state ) )
 	{
@@ -200,7 +200,7 @@ const T *PointsPrimitive::dataAndStride( const IECore::Data *data, T *defaultVal
 	return defaultValue;
 }
 
-void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) const
+void PointsPrimitive::renderPoints( const State * state, IECore::TypeId style ) const
 {
 	const std::vector<V3f> &p = m_points->readable();
 
@@ -213,7 +213,7 @@ void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) 
 	glDrawArrays( GL_POINTS, 0, p.size() );
 }
 
-void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) const
+void PointsPrimitive::renderDisks( const State * state, IECore::TypeId style ) const
 {
 	DiskPrimitivePtr disk = new DiskPrimitive();
 
@@ -254,7 +254,7 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 	}
 }
 
-void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) const
+void PointsPrimitive::renderQuads( const State * state, IECore::TypeId style ) const
 {
 	QuadPrimitivePtr quad = new QuadPrimitive();
 	
@@ -312,7 +312,7 @@ void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) c
 
 }
 
-void PointsPrimitive::renderSpheres( ConstStatePtr state, IECore::TypeId style ) const
+void PointsPrimitive::renderSpheres( const State * state, IECore::TypeId style ) const
 {
 	SpherePrimitivePtr sphere = new SpherePrimitive();
 	const std::vector<V3f> &p = m_points->readable();

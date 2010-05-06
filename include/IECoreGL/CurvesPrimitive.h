@@ -77,12 +77,12 @@ class CurvesPrimitive : public Primitive
 
 	protected :
 
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
+		virtual void render( const State *state, IECore::TypeId style ) const;
 
 	private :
 
-		void renderLines( ConstStatePtr state, IECore::TypeId style ) const;
-		void renderRibbons( ConstStatePtr state, IECore::TypeId style ) const;
+		void renderLines( const State * state, IECore::TypeId style ) const;
+		void renderRibbons( const State * state, IECore::TypeId style ) const;
 
 		Imath::Box3f m_bound;
 		IECore::CubicBasisf m_basis;

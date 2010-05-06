@@ -50,7 +50,7 @@ OrthographicCamera::OrthographicCamera(
 
 }
 
-void OrthographicCamera::render( ConstStatePtr state ) const
+void OrthographicCamera::render( const State * state ) const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();

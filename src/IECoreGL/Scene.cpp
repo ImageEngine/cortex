@@ -58,7 +58,7 @@ Scene::~Scene()
 {
 }
 
-void Scene::render( ConstStatePtr state ) const
+void Scene::render( const State * state ) const
 {
 	if( m_camera )
 	{

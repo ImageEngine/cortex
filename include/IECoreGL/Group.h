@@ -74,7 +74,7 @@ class Group : public Renderable
 		void setState( StatePtr state );
 
 		// render method ( assumes there's no threads modifying the group ).
-		virtual void render( ConstStatePtr state ) const;
+		virtual void render( const State *state ) const;
 		virtual Imath::Box3f bound() const;
 
 		void addChild( RenderablePtr child );

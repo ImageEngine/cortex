@@ -58,7 +58,7 @@ class Scene : public Renderable
 		/// Renders the scene, using the passed state as
 		/// the root state - as with all Renderable calls
 		/// this state must already have been bound.
-		virtual void render( ConstStatePtr state ) const;
+		virtual void render( const State *state ) const;
 		/// Convenience function to bind a default state
 		/// and then call render() with it.
 		void render() const;

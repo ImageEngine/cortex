@@ -88,7 +88,7 @@ void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	Primitive::addPrimitiveVariable( name, primVar );
 }
 
-void CurvesPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void CurvesPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	if( state->get<UseGLLines>()->value() )
 	{
@@ -100,7 +100,7 @@ void CurvesPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 	}
 }
 
-void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) const
+void CurvesPrimitive::renderLines( const State * state, IECore::TypeId style ) const
 {
 	const V3f *p = &(m_points->readable()[0]);
 	const std::vector<int> &v = m_vertsPerCurve->readable();
@@ -188,7 +188,7 @@ static inline V3f uTangentAndNormal( const V3f &p, const V3d &cameraCentre, cons
 	return uTangent;
 }
 
-void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style ) const
+void CurvesPrimitive::renderRibbons( const State * state, IECore::TypeId style ) const
 {
 	float halfWidth = m_width/2.0f;
 	const V3f *points = &(m_points->readable()[0]);

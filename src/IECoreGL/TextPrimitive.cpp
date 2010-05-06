@@ -96,7 +96,7 @@ void TextPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 	// \todo: add primitive variables here. Not sure what the interpolation means here. Varying = per character?
 }
 
-void TextPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void TextPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	if( !m_text.size() )
 	{
@@ -117,7 +117,7 @@ void TextPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 	}
 }
 
-void TextPrimitive::renderMeshes( ConstStatePtr state, IECore::TypeId style ) const
+void TextPrimitive::renderMeshes( const State * state, IECore::TypeId style ) const
 {
 	if( !m_meshes.size() )
 	{
@@ -144,7 +144,7 @@ void TextPrimitive::renderMeshes( ConstStatePtr state, IECore::TypeId style ) co
 	glPopMatrix();
 }
 
-void TextPrimitive::renderSprites( ConstStatePtr state, IECore::TypeId style ) const
+void TextPrimitive::renderSprites( const State * state, IECore::TypeId style ) const
 {
 	Box2f charBound = m_font->coreFont()->bound();
 	glPushAttrib( GL_TEXTURE_BIT | GL_ENABLE_BIT );

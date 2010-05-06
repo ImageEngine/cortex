@@ -61,7 +61,7 @@ class QuadPrimitive : public Primitive
 
 	protected :
 
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
+		virtual void render( const State *state, IECore::TypeId style ) const;
 
 	private :
 

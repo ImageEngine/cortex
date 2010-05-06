@@ -90,7 +90,7 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 	}
 }
 
-void Primitive::render( ConstStatePtr state ) const
+void Primitive::render( const State * state ) const
 {
 	if( !state->isComplete() )
 	{
@@ -244,9 +244,9 @@ void Primitive::setVertexAttributes( unsigned length ) const
 	VertexDataMap::const_iterator it;
 	for( it=m_vertexMap.begin(); it!=m_vertexMap.end(); it++ )
 	{
-		if ( boost::get<1>(it->second) == length )
+		if ( boost::get<2>(*it) == length )
 		{
-			m_shaderSetup->setVertexParameter( it->first, boost::get<0>(it->second) );
+			m_shaderSetup->setVertexParameter( boost::get<0>(*it), boost::get<1>(*it) );
 		}
 	}
 }
@@ -260,14 +260,14 @@ void Primitive::setVertexAttributesAsUniforms( unsigned length, unsigned int ver
 	UniformDataMap::const_iterator it;
 	for( it=m_uniformMap.begin(); it!=m_uniformMap.end(); it++ )
 	{
-		if ( boost::get<1>(it->second) == length )
+		if ( boost::get<1>(*it) == length )
 		{
-			m_shaderSetup->setUniformParameterFromVector( it->first, boost::get<0>(it->second), vertexIndex );
+			boost::get<0>(*it)(vertexIndex);
 		}
 	}
 }
 
-void Primitive::setupVertexAttributes( ShaderPtr s ) const
+void Primitive::setupVertexAttributes( Shader *s ) const
 {
 	if( !s )
 	{
@@ -298,8 +298,7 @@ void Primitive::setupVertexAttributes( ShaderPtr s ) const
 				GLint parameterIndex = s->vertexParameterIndex( it->first );
 				if ( s->vertexValueValid( parameterIndex, it->second ) )
 				{
-					m_vertexMap[ parameterIndex ] = 
-						boost::tuple< IECore::ConstDataPtr, size_t >( it->second, length );
+					m_vertexMap.push_back( boost::tuple< GLint, IECore::ConstDataPtr, size_t >( parameterIndex, it->second, length ) );
 				}
 			}
 			if ( s->hasUniformParameter( it->first ) )
@@ -308,8 +307,16 @@ void Primitive::setupVertexAttributes( ShaderPtr s ) const
 				GLint parameterIndex = s->uniformParameterIndex( it->first );
 				if ( s->uniformVectorValueValid( parameterIndex, it->second ) )
 				{
-					m_uniformMap[ parameterIndex ] = 
-						boost::tuple< IECore::ConstDataPtr, size_t >( it->second, length );
+					boost::tuple< Shader::VertexToUniform, size_t > u;
+					try
+					{
+						u = boost::tuple< Shader::VertexToUniform, size_t >( s->uniformParameterFromVectorSetup( parameterIndex, it->second ), length );
+					}
+					catch(...)
+					{
+						continue;
+					}
+					m_uniformMap.push_back( u );
 				}
 			}
 		}
@@ -317,7 +324,7 @@ void Primitive::setupVertexAttributes( ShaderPtr s ) const
 	m_shaderSetup = s;
 }
 
-bool Primitive::depthSortRequested( ConstStatePtr state ) const
+bool Primitive::depthSortRequested( const State * state ) const
 {
 	return state->get<Primitive::TransparencySort>()->value() &&
 		state->get<TransparentShadingStateComponent>()->value();

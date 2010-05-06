@@ -129,7 +129,7 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 	}
 }
 
-void MeshPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void MeshPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	unsigned vertexCount = m_vertIds->readable().size();
 	if( style==Primitive::DrawSolid::staticTypeId() )

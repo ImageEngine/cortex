@@ -107,7 +107,7 @@ void SpherePrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	}
 }
 
-void SpherePrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void SpherePrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	float oMin = Math<float>::asin( m_zMin );
 	float oMax = Math<float>::asin( m_zMax );

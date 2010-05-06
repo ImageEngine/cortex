@@ -86,7 +86,7 @@ void DiskPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 {
 }
 
-void DiskPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void DiskPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	glBegin( GL_TRIANGLE_FAN );
 

@@ -87,7 +87,7 @@ class PointsPrimitive : public Primitive
 
 	protected :
 
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
+		virtual void render( const State *state, IECore::TypeId style ) const;
 
 	private :
 
@@ -95,10 +95,10 @@ class PointsPrimitive : public Primitive
 		static const T *dataAndStride( const IECore::Data *data, T *defaultValue, unsigned int &stride );
 		void updateBounds() const;
 
-		void renderPoints( ConstStatePtr state, IECore::TypeId style ) const;
-		void renderDisks( ConstStatePtr state, IECore::TypeId style ) const;
-		void renderQuads( ConstStatePtr state, IECore::TypeId style ) const;
-		void renderSpheres( ConstStatePtr state, IECore::TypeId style ) const;
+		void renderPoints( const State *state, IECore::TypeId style ) const;
+		void renderDisks( const State *state, IECore::TypeId style ) const;
+		void renderQuads( const State *state, IECore::TypeId style ) const;
+		void renderSpheres( const State *state, IECore::TypeId style ) const;
 
 		IECore::V3fVectorDataPtr m_points;
 

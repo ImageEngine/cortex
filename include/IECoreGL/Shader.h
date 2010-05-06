@@ -124,13 +124,13 @@ class Shader : public Bindable
 		bool uniformValueValid( GLint parameterIndex, IECore::TypeId type ) const;
 		/// Returns true if the specified value is valid for setting the
 		/// specified uniform parameter, and false if not.
-		bool uniformValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
+		bool uniformValueValid( GLint parameterIndex, const IECore::Data *value ) const;
 		/// As above, but specifying the uniform parameter by name.
-		bool uniformValueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const;
+		bool uniformValueValid( const std::string &parameterName, const IECore::Data *value ) const;
 		/// Sets the specified uniform parameter to the value specified. value must
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case.
-		void setUniformParameter( GLint parameterIndex, IECore::ConstDataPtr value );
+		void setUniformParameter( GLint parameterIndex, const IECore::Data *value );
 		/// Sets the specified parameter to the value provided. value must be
 		/// of an appropriate simple type or a Imath type.
 		template< typename T >
@@ -148,7 +148,7 @@ class Shader : public Bindable
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case. This call may be slower than the overload based
 		/// on parameter indexes.
-		void setUniformParameter( const std::string &parameterName, IECore::ConstDataPtr value );
+		void setUniformParameter( const std::string &parameterName, const IECore::Data *value );
 		/// Sets the specified sampler parameter to use the texture unit indicated.
 		void setUniformParameter( GLint parameterIndex, unsigned int textureUnit );
 		/// Sets the specified sampler parameter to use the texture unit indicated.
@@ -159,13 +159,29 @@ class Shader : public Bindable
 		void setUniformParameter( const std::string &parameterName, int value );
 		/// Returns true if the specified vector data is valid for setting one of it's items to the
 		/// specified uniform parameter, and false if not.
-		bool uniformVectorValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
+		bool uniformVectorValueValid( GLint parameterIndex, const IECore::Data *value ) const;
 		/// As above, but specifying the uniform parameter by name.
-		bool uniformVectorValueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const;
+		bool uniformVectorValueValid( const std::string &parameterName, const IECore::Data *value ) const;
 		/// Sets the specified uniform parameter to a single item from a vector Data type.
 		/// Raises an exception if the type is not compatible.
-		void setUniformParameterFromVector( GLint parameterIndex, IECore::ConstDataPtr vector, unsigned int item );
-		void setUniformParameterFromVector( const std::string &parameterName, IECore::ConstDataPtr vector, unsigned int item );
+		void setUniformParameterFromVector( GLint parameterIndex, const IECore::Data *vector, unsigned int item );
+		void setUniformParameterFromVector( const std::string &parameterName, const IECore::Data *vector, unsigned int item );
+
+		struct VertexToUniform 
+		{
+			public:
+				VertexToUniform();
+				VertexToUniform( GLint p, unsigned char d, bool i, const void *a );
+				void operator() ( int index ) const;
+
+			private:
+				GLint m_paramId;
+				unsigned char m_dimensions;
+				bool m_isInteger;
+				const void *m_array;
+		};
+		/// Returns a callable object that sets a uniform shader parameter with a single item value from a given vector.
+		VertexToUniform uniformParameterFromVectorSetup( GLint parameterIndex, const IECore::Data *vector ) const;
 		//@}
 
 		/////////////////////////////////////////////////////////////
@@ -184,17 +200,17 @@ class Shader : public Bindable
 		bool hasVertexParameter( const std::string &parameterName ) const;
 		/// Returns true if the specified vertex data object is valid for setting the
 		/// specified vertex parameter, and false if not.
-		bool vertexValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
+		bool vertexValueValid( GLint parameterIndex, const IECore::Data *value ) const;
 		/// As above, but specifying the vertex parameter by name.
-		bool vertexValueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const;
+		bool vertexValueValid( const std::string &parameterName, const IECore::Data *value ) const;
 		/// Sets the specified vertex parameter to the value specified. value must
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case.
 		/// Derived classes can set normalize to true when they know a integer typed
 		/// vector should be normalized to [-1,1] or [0,1] when passed to the shader.
-		void setVertexParameter( GLint parameterIndex, IECore::ConstDataPtr value, bool normalize = false );
+		void setVertexParameter( GLint parameterIndex, const IECore::Data *value, bool normalize = false );
 		/// As above, but specifying the vertex parameter by name.
-		void setVertexParameter( const std::string &parameterName, IECore::ConstDataPtr value, bool normalize = false );
+		void setVertexParameter( const std::string &parameterName, const IECore::Data *value, bool normalize = false );
 		/// Unsets all vertex parameters from the shader.
 		void unsetVertexParameters();
 
@@ -214,6 +230,7 @@ class Shader : public Bindable
 
 		struct VectorValueValid;
 		struct VectorSetValue;
+		struct VectorSetup;
 
 		void compile( const std::string &source, GLenum type, GLuint &shader );
 		void release();

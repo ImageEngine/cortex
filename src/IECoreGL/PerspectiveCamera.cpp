@@ -61,7 +61,7 @@ float PerspectiveCamera::getFOV() const
 	return m_fov;
 }
 
-void PerspectiveCamera::render( ConstStatePtr state ) const
+void PerspectiveCamera::render( const State * state ) const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();

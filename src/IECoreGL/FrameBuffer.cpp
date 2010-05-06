@@ -151,11 +151,6 @@ void FrameBuffer::bind() const
 	/// \todo do the drawbuffers thing.
 }
 
-GLbitfield FrameBuffer::mask() const
-{
-	return 0;
-}
-
 void FrameBuffer::saveAndBind() const
 {
 	glGetIntegerv( GL_FRAMEBUFFER_BINDING_EXT, &m_savedFrameBuffer );

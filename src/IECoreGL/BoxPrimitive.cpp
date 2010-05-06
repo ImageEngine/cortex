@@ -66,7 +66,7 @@ const Imath::Box3f BoxPrimitive::getBox() const
 	return m_box;
 }
 
-void BoxPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void BoxPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	glBegin( GL_QUADS );
 

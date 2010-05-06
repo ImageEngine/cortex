@@ -82,7 +82,7 @@ void QuadPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 	}
 }
 
-void QuadPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+void QuadPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 
 	glBegin( GL_QUADS );

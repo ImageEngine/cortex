@@ -83,7 +83,7 @@ void Group::setState( StatePtr state )
 	m_state = state;
 }
 
-void Group::render( ConstStatePtr state ) const
+void Group::render( const State * state ) const
 {
 	glPushMatrix();
 	glMultMatrixf( m_transform.getValue() );

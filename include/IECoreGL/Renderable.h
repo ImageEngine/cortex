@@ -64,7 +64,7 @@ class Renderable : public IECore::RunTimeTyped
 		/// bound into the current context, and state->isComplete()
 		/// must be true. Upon leaving render() the OpenGL state is
 		/// unchanged.
-		virtual void render( ConstStatePtr state ) const = 0;
+		virtual void render( const State *state ) const = 0;
 		/// Returns the bounding box for the Renderable.
 		virtual Imath::Box3f bound() const = 0;
 };

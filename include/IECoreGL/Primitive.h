@@ -40,6 +40,7 @@
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/Shader.h"
 
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
@@ -50,7 +51,6 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( State );
-IE_CORE_FORWARDDECLARE( Shader );
 
 /// The Primitive class represents geometric objects that can
 /// be rendered in OpenGL. Primitives may be rendered in a variety
@@ -78,7 +78,7 @@ class Primitive : public Renderable
 		/// the protected render() method several times
 		/// in different OpenGL states, once for each style
 		/// present in state.
-		virtual void render( ConstStatePtr state ) const;
+		virtual void render( const State *state ) const;
 
 		/// Adds a primitive variable on this primitive.
 		/// Derived classes should implement any customized filtering and/or convertions or call the base class implementation.
@@ -123,7 +123,7 @@ class Primitive : public Renderable
 		/// representing that style is passed so that the drawing can be optimised
 		/// for the particular style (e.g. PrimitiveWireframeTypeId is passed for
 		/// wireframe rendering).
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const = 0;
+		virtual void render( const State *state, IECore::TypeId style ) const = 0;
 
 		/// Called by derived classes to register a vertex attribute. There are no type or length checks on this call.
 		void addVertexAttribute( const std::string &name, IECore::ConstDataPtr data );
@@ -154,19 +154,19 @@ class Primitive : public Renderable
 		/// Convenience function for use in render() implementations. Returns
 		/// true if TransparentShadingStateComponent is true and
 		/// PrimitiveTransparencySortStateComponent is true.
-		bool depthSortRequested( ConstStatePtr state ) const;
+		bool depthSortRequested( const State *state ) const;
 
 		/// This method is called by Primitive::render() function but it can also be called
 		/// by derived classes when they use other primitives and call render(state,style)
 		/// directly, like TextPrimitive does.
-		void setupVertexAttributes( ShaderPtr s ) const;
+		void setupVertexAttributes( Shader *s ) const;
 
 	private :
 
-		typedef std::map<GLint, boost::tuple< IECore::ConstDataPtr, size_t > > UniformDataMap;
-		typedef std::map<GLint, boost::tuple< IECore::ConstDataPtr, size_t > > VertexDataMap;
+		typedef std::vector< boost::tuple< Shader::VertexToUniform, size_t > > UniformDataMap;
+		typedef std::vector< boost::tuple< GLint, IECore::ConstDataPtr, size_t > > VertexDataMap;
 
-		mutable ShaderPtr m_shaderSetup;
+		mutable Shader* m_shaderSetup;
 		mutable UniformDataMap m_uniformMap;	// holds the uniform shader attributes that match non-const prim vars.
 		mutable VertexDataMap m_vertexMap;	// holds the vertex shader attributes that match non-const prim vars.
 

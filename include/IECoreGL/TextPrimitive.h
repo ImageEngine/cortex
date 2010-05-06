@@ -75,7 +75,7 @@ class TextPrimitive : public Primitive
 
 	protected :
 
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
+		virtual void render( const State *state, IECore::TypeId style ) const;
 
 	private :
 
@@ -86,12 +86,12 @@ class TextPrimitive : public Primitive
 		AdvanceVector m_advances;
 
 		/// Mesh rendering bits
-		void renderMeshes( ConstStatePtr state, IECore::TypeId style ) const;
+		void renderMeshes( const State *state, IECore::TypeId style ) const;
 		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
 		mutable MeshVector m_meshes;
 
 		/// Sprite rendering bits
-		void renderSprites( ConstStatePtr state, IECore::TypeId style ) const;
+		void renderSprites( const State *state, IECore::TypeId style ) const;
 
 };
 
