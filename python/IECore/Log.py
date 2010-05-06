@@ -40,18 +40,14 @@
 
 import os, sys, traceback
 import inspect, string
+import warnings
 from IECore import *
 
-## Creates and activates a LevelFilteredMessageHandler to filter log messages.
-# Parameters:
-# level: string with the log level. Valid values are: "Debug", "Info", "Warning" and "Error".
-#        If the given level parameter is None, then it will try to get from the env. variable $IECORE_LOG_LEVEL.
-#
-# This function is called on IECore initialization.
-#
-# \todo This should take an enum type as the argument not a string
+## \todo: remove me for major version 6!
 def initializeLog(level = None):
-
+	
+	warnings.warn( "Do not use initializeLog.", DeprecationWarning, 2 )
+	
 	if level is None:
 		level = LevelFilteredMessageHandler.defaultLevel()
 	else:

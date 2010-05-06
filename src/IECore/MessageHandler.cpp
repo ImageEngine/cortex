@@ -34,6 +34,7 @@
 
 #include "IECore/MessageHandler.h"
 #include "IECore/OStreamMessageHandler.h"
+#include "IECore/LevelFilteredMessageHandler.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
 
@@ -83,7 +84,7 @@ std::stack<MessageHandlerPtr> *MessageHandler::handlerStack()
 	static std::stack<MessageHandlerPtr> *s = new std::stack<MessageHandlerPtr>;
 	if( !s->size() )
 	{
-		s->push( OStreamMessageHandler::cErrHandler() );
+		s->push( new LevelFilteredMessageHandler( OStreamMessageHandler::cErrHandler(), LevelFilteredMessageHandler::defaultLevel() ) );
 	}
 	return s;
 }

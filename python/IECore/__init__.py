@@ -110,7 +110,4 @@ from OpOverwriting import *
 from ParameterOverwriting import *
 from ParameterisedOverwriting import *
 
-# calling log initialization function.
-initializeLog()
-
 from ConfigLoader import loadConfig
