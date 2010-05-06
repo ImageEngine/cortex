@@ -127,6 +127,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 		/// Computes the signed distance between the given point and the primitive. By default this is
 		/// just the signed distance between the point, and the plane specified by the closest point and normal,
 		/// but derived class are free to override it as they see fit. Returns true on success.
+		/// \todo: pass a result to this method in major version 6
 		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
 
 		/// Computes the surface area of the primitive
@@ -140,13 +141,16 @@ class PrimitiveEvaluator : public RunTimeTyped
 
 		/// Find the closest point on the primitive to the given query point. Returns true on success.
 		/// \todo Extend this to pass a maximum distance past which results are no longer interesting.
+		/// \todo: use a raw pointer rather than a reference to a smart pointer
 		virtual bool closestPoint( const Imath::V3f &p, const ResultPtr &result ) const =0;
 
 		/// Find the point on the primitive at the given query UV. Returns true on success
+		/// \todo: use a raw pointer rather than a reference to a smart pointer
 		virtual bool pointAtUV( const Imath::V2f &uv, const ResultPtr &result ) const =0;
 
 		/// Finds the closest intersection point for the given ray. Optionally specify a maximum distance of interest.
 		/// Returns true if an intersection was found.
+		/// \todo: use a raw pointer rather than a reference to a smart pointer
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 			const ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const =0;
 
@@ -158,6 +162,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 		//@}
 
 		/// Throws an exception if the passed result type is not compatible with the current evaluator
+		/// \todo: use a raw pointer rather than a reference to a smart pointer
 		virtual void validateResult( const ResultPtr &result ) const =0;
 
 		/// A class to allow registration of primitive evaluators with the system. Simply declare an instance
