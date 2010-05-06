@@ -134,7 +134,9 @@ void ShaderStateComponent::bind() const
 					m_shader->setUniformParameter( paramIndex, data );
 				}
 				else
+				{
 					throw Exception( boost::str( boost::format( "Non-Data type assigned to parameter %s!" ) % it->first.value()) );
+				}
 			}
 		}
 
