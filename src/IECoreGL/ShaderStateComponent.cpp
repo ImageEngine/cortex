@@ -118,7 +118,15 @@ void ShaderStateComponent::bind() const
 					}
 					else if ( it->second->typeId() == IECore::StringData::staticTypeId() )
 					{
-						m_textureParameters[ it->first ] = m_textureLoader->load( IECore::staticPointerCast<IECore::StringData>(it->second)->readable() );
+						const std::string &fileName = IECore::staticPointerCast<IECore::StringData>(it->second)->readable();
+						if( fileName!="" )
+						{
+							TexturePtr texture = m_textureLoader->load( fileName );
+							if( texture )
+							{
+								m_textureParameters[ it->first ] = texture;
+							}
+						}
 					}
 					else
 					{

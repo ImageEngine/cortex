@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,22 +35,87 @@
 import unittest
 import os.path
 
-from IECore import *
+import IECore
+import IECoreGL
 
-from IECoreGL import *
-init( False )
+IECoreGL.init( False )
 
 class TestTexture( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
-		t = ColorTexture( i )
+		t = IECoreGL.ColorTexture( i )
 
 		ii = t.imagePrimitive()
 
-		EXRImageWriter( ii, "/tmp/t.exr" ).write()
+		IECore.EXRImageWriter( ii, "/tmp/t.exr" ).write()
+
+	def performShaderParameterTest( self, shaderParameter ) :
+
+		outputFileName = os.path.dirname( __file__ ) + "/output/testTexture.tif"
+
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+
+		r.camera( "main", {
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 45 ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			}
+		)
+		r.display( outputFileName, "tif", "rgba", {} )
+
+		vs = """
+		void main()
+		{
+			gl_Position = ftransform();
+			gl_TexCoord[0] = gl_MultiTexCoord0;
+		}
+		"""
+	
+		fs = """
+		uniform sampler2D testSampler;
+		void main()
+		{
+			gl_FragColor = vec4( texture2D( testSampler, gl_TexCoord[0].xy ).rgb, 1.0 );
+		}
+		"""
+
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			
+			r.shader( "surface", "color",
+				{
+					"gl:vertexSource" : vs,
+					"gl:fragmentSource" : fs,
+					"testSampler" : shaderParameter,
+				}
+			)
+			
+			r.geometry( "sphere", {}, {} )
+
+	def testEmptyStringShaderParameter( self ) :
+	
+		self.performShaderParameterTest( IECore.StringData( "" ) )
+
+	def testMissingStringShaderParameter( self ) :
+	
+		self.performShaderParameterTest( IECore.StringData( "thisFileDoesntExist" ) )
+
+	def tearDown( self ) :
+
+		files = [
+			os.path.dirname( __file__ ) + "/output/testTexture.tif"
+		]
+
+		for f in files :
+			if os.path.exists( f ) :
+				os.remove( f )
 
 if __name__ == "__main__":
     unittest.main()
