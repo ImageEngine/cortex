@@ -240,10 +240,6 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			
 				it->second.procedural->render( renderer.get(), false, true, false, false );
 
-				// tell 3delight we can't run multiple python procedurals concurrently
-				int zero = 0;
-				RiAttribute( "procedural", "integer reentrant", &zero, 0 );
-
 				const char **data = (const char **)malloc( sizeof( char * ) * 2 );
 				data[0] = STRINGIFY( IECORERI_RMANPROCEDURAL_NAME );
 				data[1] = pythonString.c_str();
