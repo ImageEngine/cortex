@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -74,23 +74,19 @@ def setLogLevelByName( levelName ):
 # This function sets the $IECORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
 # If the current message handler is also a LevelFilteredMessageHandler, this function pushes
 # it from the stack and register the new one.
-#
-# \todo This function completely unbalances the pushing and popping of handlers by popping
-# an arbitrary number of handlers. I think it should push a single new handler onto the
-# stack and be done with it, otherwise there's no way of popping back to previous states.
 def setLogLevel( level ):
 
-	assert( level!=MessageHandler.Level.Invalid )
+	assert( isinstance( level, MessageHandler.Level ) and level!=MessageHandler.Level.Invalid )
 
 	os.environ["IECORE_LOG_LEVEL"] = MessageHandler.levelAsString( level )
 
-	current = MessageHandler.popHandler()
-	# remove previous Level filters
-	while isinstance(current, LevelFilteredMessageHandler):
-		current = MessageHandler.popHandler()
+	current = MessageHandler.currentHandler()
+	if not isinstance( current, LevelFilteredMessageHandler ) :
+		msg( Msg.Level.Warning, "IECore.setLogLevel", "Failed to set log level - current handler is not a LevelFilteredMessageHandler" )
+		return
 
-	newFilter = LevelFilteredMessageHandler( current, level )
-	MessageHandler.pushHandler( newFilter )
+	current.setLevel( level )
+	
 	debug("setLogLevel(", level, ")")
 
 def __getCallContext(frame = None, withLineNumber = False):

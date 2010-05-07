@@ -35,6 +35,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/OStreamMessageHandler.h"
 #include "IECore/LevelFilteredMessageHandler.h"
+#include "IECore/Exception.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
 
@@ -69,6 +70,10 @@ void MessageHandler::pushHandler( MessageHandlerPtr handler )
 
 MessageHandlerPtr MessageHandler::popHandler()
 {
+	if( handlerStack()->size() <= 1 )
+	{
+		throw Exception( "Can not pop the last MessageHandler." );
+	}
 	MessageHandlerPtr h = currentHandler();
 	handlerStack()->pop();
 	return h;
@@ -81,10 +86,12 @@ MessageHandler *MessageHandler::currentHandler()
 
 std::stack<MessageHandlerPtr> *MessageHandler::handlerStack()
 {
+	static bool initialized = false;
 	static std::stack<MessageHandlerPtr> *s = new std::stack<MessageHandlerPtr>;
-	if( !s->size() )
+	if( !initialized )
 	{
 		s->push( new LevelFilteredMessageHandler( OStreamMessageHandler::cErrHandler(), LevelFilteredMessageHandler::defaultLevel() ) );
+		initialized = true;
 	}
 	return s;
 }

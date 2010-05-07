@@ -100,6 +100,8 @@ class MessageHandler : public RefCounted
 		/// handler will now be the one that was current prior to the
 		/// last pushHandler() call.
 		static MessageHandlerPtr popHandler();
+		/// Returns the current handler.
+		static MessageHandler *currentHandler();
 		//@}
 
 		//! @name Conversions between Level and string
@@ -116,8 +118,6 @@ class MessageHandler : public RefCounted
 
 	private :
 
-		/// Returns the current handler.
-		static MessageHandler *currentHandler();
 		/// Returns the stack of message handlers.
 		static std::stack<MessageHandlerPtr> *handlerStack();
 

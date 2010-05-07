@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,6 +57,9 @@ class LevelFilteredMessageHandler : public FilteredMessageHandler
 		virtual ~LevelFilteredMessageHandler();
 
 		virtual void handle( Level level, const std::string &context, const std::string &message );
+
+		MessageHandler::Level getLevel() const;
+		void setLevel( MessageHandler::Level level );
 
 		/// Returns a message level based on the value of the IECORE_LOG_LEVEL
 		/// environment variable, defaulting to Warning level if it isn't set.

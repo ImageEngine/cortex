@@ -82,6 +82,11 @@ static LevelFilteredMessageHandlerPtr levelFilteredMessageHandlerConstructor(Mes
 	return new LevelFilteredMessageHandler( handle, level );
 }
 
+static MessageHandlerPtr currentHandler()
+{
+	return MessageHandler::currentHandler();
+}
+
 void bindMessageHandler()
 {
 
@@ -92,6 +97,8 @@ void bindMessageHandler()
 		.def( "handle", pure_virtual( &MessageHandler::handle ) )
 		.def( "pushHandler", &MessageHandler::pushHandler )
 		.staticmethod( "pushHandler" )
+		.def( "currentHandler", &currentHandler )
+		.staticmethod( "currentHandler" )
 		.def( "popHandler", &MessageHandler::popHandler )
 		.staticmethod( "popHandler" )
 		.def( "output", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&MessageHandler::output )
@@ -124,6 +131,8 @@ void bindMessageHandler()
 
 	RefCountedClass<LevelFilteredMessageHandler, FilteredMessageHandler>( "LevelFilteredMessageHandler" )
 		.def( "__init__", make_constructor( &levelFilteredMessageHandlerConstructor ) )
+		.def( "setLevel", &LevelFilteredMessageHandler::setLevel )
+		.def( "getLevel", &LevelFilteredMessageHandler::getLevel )
 		.def( "defaultLevel", &LevelFilteredMessageHandler::defaultLevel ).staticmethod( "defaultLevel" )
 	;
 
