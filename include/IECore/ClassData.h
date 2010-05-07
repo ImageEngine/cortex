@@ -71,6 +71,11 @@ namespace IECore
 ///    g_classData.create( this, 4 );
 /// }
 ///
+/// A::~A()
+/// {
+///    g_classData.erase( this );
+/// }
+///
 /// int &A::extraMember()
 /// {
 ///    return g_classData[ this ];

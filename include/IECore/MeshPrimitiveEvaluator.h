@@ -172,7 +172,6 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		//@}
 		
 		typedef tbb::mutex NormalsMutex;
-		NormalsMutex &normalsMutex() const;
 		
 	protected:
 
@@ -206,6 +205,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		mutable bool m_haveSurfaceArea;
 		mutable float m_surfaceArea;
 
+		NormalsMutex &normalsMutex() const;
 		mutable bool m_haveAverageNormals;
 		typedef int VertexIndex;
 		typedef int TriangleIndex;

@@ -330,6 +330,8 @@ MeshPrimitiveEvaluator::~MeshPrimitiveEvaluator()
 
 	delete m_uvTree;
 	m_uvTree = 0;
+	
+	g_classData.erase( this );
 }
 
 ConstPrimitivePtr MeshPrimitiveEvaluator::primitive() const
