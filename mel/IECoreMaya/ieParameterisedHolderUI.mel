@@ -35,6 +35,7 @@
 global string $ieCurrentAEParameterisedHolderClass;
 global int $ieCurrentAEParameterisedHolderVersion;
 
+/// \todo: rewrite all of this in python using ieAttributeEditorControl
 global proc AEieParameterisedHolderTemplate( string $nodeName )
 {
 	editorTemplate -beginScrollLayout;
@@ -144,8 +145,10 @@ global proc ieParameterisedHolderUIClassControlNewAndReplace( string $attrName )
 	
 	rowLayout -nc 2 $controlName;
 		text -align right -label $class -ann $description;
-		text -align left -font boldLabelFont -label ("v"+$currentVersion);
-		popupMenu;
+		if ( size($versions) )
+		{
+			text -align left -font boldLabelFont -label ("v"+$currentVersion);
+			popupMenu;
 			/// Put most recent (and presumably most relevant) versions first
 			int $latestVersionIdx = size( $versions ) - 1 ;			
 			for( $i = $latestVersionIdx; $i >= 0; $i = $i - 1 )
@@ -158,6 +161,9 @@ global proc ieParameterisedHolderUIClassControlNewAndReplace( string $attrName )
 				}
  				menuItem -label ("v"+$versions[$i]) -command ("ieParameterisedHolderUIClassControlVersionCallback " + $node + " " + $versions[$i]);
 			}
+		} else {
+			text -align left -font boldLabelFont -label "Not Versioned";
+		}
 		setParent ..;
 	setParent ..;
 }
@@ -183,13 +189,19 @@ global proc ieParameterisedHolderUIParameterPresetsControlNewAndReplace( string 
 {
 	string $node = ieAttrNode( $attrName );
 	
-	string $pyStub = "import IECoreMaya; IECoreMaya.PresetManagerUI( '" + $node + "' )";
-	
 	string $controlName = "ieParameterisedHolderUIAEParameterPresetsControl";
 	if( `control -exists $controlName` )
 	{
 		deleteUI $controlName;
 	}
+	
+	string $searchPath = ieParameterisedHolderClassSearchPathEnvVar( $node );
+	if ( $searchPath == "" )
+	{
+		return;
+	}
+	
+	string $pyStub = "import IECoreMaya; IECoreMaya.PresetManagerUI( '" + $node + "' )";
 	
 	columnLayout -adj 1 $controlName;
 	

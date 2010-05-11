@@ -43,7 +43,13 @@
 /// \todo Handle case where getParameterised() returns None
 global proc string ieParameterisedHolderClassName( string $nodeName )
 {
-	return `iePython -eval ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).getParameterised()[1]")`;
+	$className = `iePython -eval ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).getParameterised()[1]")`;
+	if ( $className == "" )
+	{
+		$className = `iePython -eval ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).getParameterised()[0].typeName()")`;
+	}
+	
+	return $className;
 }
 
 /// Returns the version of the class being held.
@@ -71,13 +77,17 @@ global proc string ieParameterisedHolderClassDescription( string $nodeName )
 /// currently being held by $nodeName.
 global proc int[] ieParameterisedHolderClassVersions( string $nodeName )
 {
+	int $result[];
 	string $class = ieParameterisedHolderClassName( $nodeName );
 	string $searchPathEnvVar = ieParameterisedHolderClassSearchPathEnvVar( $nodeName );
+	if ( $searchPathEnvVar == "" )
+	{
+		return $result;
+	}
 	iePython -command "import os.path";
 	string $versions = `iePython -eval ("IECore.ClassLoader.defaultLoader( '" + $searchPathEnvVar + "' ).versions( '" + $class + "' )" )`;
 	string $tokens[];
 	tokenize $versions "[], " $tokens;
-	int $result[];
 	for( $i=0; $i<size($tokens); $i++ )
 	{
 		$result[$i] = $tokens[$i];
