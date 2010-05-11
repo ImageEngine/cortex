@@ -205,7 +205,8 @@ __dataTypesConversionDict = {
 	IECore.TimeDurationData: ( datetime.timedelta, True ),
 	IECore.TimePeriodData: ( IECore.TimePeriod, True ),
 
-
+	IECore.SmoothSkinningData: None,
+	
 }
 
 ## Function that returns a list of Data derived classes.
