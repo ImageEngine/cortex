@@ -335,8 +335,8 @@ enum TypeId
 	ColorSpaceTransformOpTypeId = 292,
 	TGAImageReaderTypeId = 293,
 	TGAImageWriterTypeId = 294,
-	BINParticleReaderTypeId = 295,		
-	BINParticleWriterTypeId = 296,		
+	BINParticleReaderTypeId = 295,
+	BINParticleWriterTypeId = 296,
 	BINMeshReaderTypeId = 297,
 	BGEOParticleReaderTypeId = 298,
 	NParticleReaderTypeId = 299,
@@ -358,6 +358,7 @@ enum TypeId
 	CurveTangentsOpTypeId = 315,
 	MarschnerParameterTypeId = 316,
 	MarschnerLookupTableOpTypeId = 317,
+	SmoothSkinningDataTypeId = 318,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

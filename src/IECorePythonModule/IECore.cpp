@@ -263,6 +263,7 @@
 #include "IECorePython/CurveTangentsOpBinding.h"
 #include "IECorePython/MarschnerParameterBinding.h"
 #include "IECorePython/MarschnerLookupTableOpBinding.h"
+#include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -392,7 +393,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSphereImplicitSurfaceFunction();
 	bindPlaneImplicitSurfaceFunction();
 	bindBlobbyImplicitSurfaceFunction();
-	bindZhuBridsonImplicitSurfaceFunction();	
+	bindZhuBridsonImplicitSurfaceFunction();
 	bindParticleMeshOp();
 	bindTypedPrimitiveOp();
 	bindPrimitiveEvaluator();
@@ -452,7 +453,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCoordinateSystem();
 
 #ifdef IECORE_WITH_ASIO
-	
+
 	bindDisplayDriver();
 	bindImageDisplayDriver();
 	bindClientDisplayDriver();
@@ -461,7 +462,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindOBJReader();
 
 #endif
-	
+
 	bindSplineToImage();
 	bindDisplay();
 	bindMeshTangentsOp();
@@ -522,7 +523,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurveTangentsOp();
 	bindMarschnerParameter();
 	bindMarschnerLookupTableOp();
-#ifdef IECORE_WITH_BOOSTFACTORIAL	
+	bindSmoothSkinningData();
+#ifdef IECORE_WITH_BOOSTFACTORIAL
 
 	bindImageConvolveOp();
 
