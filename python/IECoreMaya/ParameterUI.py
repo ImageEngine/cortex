@@ -418,7 +418,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 		if not parameter.isInstanceOf( IECore.Parameter.staticTypeId() ) :
 			raise TypeError( "Parameter argument must derive from IECore.Parameter." )
 
-		if parameter.presetsOnly :
+		if parameter.presetsOnly and len( parameter.presets() ) :
 			return IECoreMaya.PresetsOnlyParameterUI( parameterisedHolderNode, parameter, **kw )
 
 		uiTypeHint = None
