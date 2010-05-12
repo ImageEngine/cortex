@@ -75,7 +75,7 @@ void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 {
 	if ( name == "P" )
 	{
-		m_points = IECore::runTimeCast< const IECore::V3fVectorData >( primVar.data );
+		m_points = IECore::runTimeCast< const IECore::V3fVectorData >( primVar.data->copy() );
 		if ( m_points )
 		{
 			const vector<V3f> &pd = m_points->readable();

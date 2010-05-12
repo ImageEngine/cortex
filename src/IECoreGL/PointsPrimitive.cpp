@@ -109,21 +109,21 @@ void PointsPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	if ( name == "P" )
 	{
 		m_recomputeBound = true;
-		m_points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data );
+		m_points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data->copy() );
 	}
 	else if ( name == "width" )
 	{
 		m_recomputeBound = true;
-		m_widths = primVar.data;
+		m_widths = primVar.data->copy();
 	}
 	else if ( name == "height" )
 	{
 		m_recomputeBound = true;
-		m_heights = primVar.data;
+		m_heights = primVar.data->copy();
 	}
 	else if ( name == "patchrotation" )
 	{
-		m_rotations = primVar.data;
+		m_rotations = primVar.data->copy();
 	}
 	Primitive::addPrimitiveVariable( name, primVar );
 }
