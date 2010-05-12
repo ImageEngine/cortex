@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,7 +63,8 @@ enum MayaTypeId
 	ImagePlaneHolderId = 0x00110DCE,
 	CurveCombinerId = 0x00110DCF,
 	DummyDataId = 0x00110DD0,
-
+	DrawableHolderId = 0x00110DD1,
+	
 	/// Don't forget to update MayaTypeIdsBinding.cpp
 
 	LastId = 0x00110E3F,

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,24 +32,53 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// \defgroup melgroup MEL
-///
-/// The core maya library comes with associated MEL files providing useful utility
-/// functions and additional API related to the C++ nodes.
+#ifndef IECOREMAYA_DRAWABLEHOLDER_H
+#define IECOREMAYA_DRAWABLEHOLDER_H
 
-source "IECoreMaya/ieParameterisedHolder.mel";
-source "IECoreMaya/ieProceduralHolder.mel";
-source "IECoreMaya/ieNode.mel";
-source "IECoreMaya/ieAttr.mel";
+#include "maya/MPxLocatorNode.h"
 
-source "IECoreMaya/ieParameterisedHolderUI.mel";
-source "IECoreMaya/ieProceduralHolderUI.mel";
-source "IECoreMaya/ieOpHolderUI.mel";
-source "IECoreMaya/ieConverterHolderUI.mel";
-source "IECoreMaya/ieParameterPanel.mel";
-source "IECoreMaya/ieAttributeEditorControl.mel";
-source "IECoreMaya/iePanel.mel";
-source "IECoreMaya/ieImagePlaneHolderUI.mel";
-source "IECoreMaya/ieParameterisedHolderSetUI.mel";
-source "IECoreMaya/ieDLUserGeoTypes.mel";
-source "IECoreMaya/ieDrawableHolderUI.mel";
+#include "IECoreGL/IECoreGL.h"
+
+#include "IECoreMaya/ParameterisedHolder.h"
+#include "IECoreMaya/DisplayStyle.h"
+#include "IECoreMaya/MayaTypeIds.h"
+
+namespace IECoreGL
+{
+IE_CORE_FORWARDDECLARE( Scene );
+}
+
+namespace IECoreMaya
+{
+
+class DrawableHolder : public ParameterisedHolder<MPxLocatorNode>
+{
+
+	public :
+
+		DrawableHolder();
+		virtual ~DrawableHolder();
+
+		static void *creator();
+		static MStatus initialize();
+		static const MTypeId id;
+		static const MString typeName;
+		
+		virtual bool isBounded() const;
+		virtual MBoundingBox boundingBox() const;
+		virtual void draw( M3dView &view, const MDagPath &path, M3dView::DisplayStyle style, M3dView::DisplayStatus displayStatus );
+		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
+
+		/// Returns an up to date scene created by calling draw() on the held class.
+		IECoreGL::ConstScenePtr scene();
+
+	private :
+
+		IECoreGL::ScenePtr m_scene;
+		DisplayStyle m_displayStyle;
+
+};
+
+} // namespace IECoreMaya
+
+#endif // IECOREMAYA_DRAWABLEHOLDER_H

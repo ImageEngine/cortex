@@ -72,6 +72,7 @@
 #include "IECoreMaya/Box3Manipulator.h"
 #include "IECoreMaya/ParameterisedHolderManipContextCommand.h"
 #include "IECoreMaya/MayaTypeIds.h"
+#include "IECoreMaya/DrawableHolder.h"
 
 // see ObjectParameterHandler::doUpdate() for an explanation of the necessity for dummy data
 static void *dummyDataCreator()
@@ -114,6 +115,10 @@ MStatus initialize(MFnPlugin &plugin)
 
 		s = plugin.registerNode( ParameterisedHolderLocator::typeName, ParameterisedHolderLocator::id,
 			ParameterisedHolderLocator::creator, ParameterisedHolderLocator::initialize, MPxNode::kLocatorNode );
+		assert( s );
+		
+		s = plugin.registerNode( DrawableHolder::typeName, DrawableHolder::id,
+			DrawableHolder::creator, DrawableHolder::initialize, MPxNode::kLocatorNode );
 		assert( s );
 
 		s = plugin.registerNode( ParameterisedHolderDeformer::typeName, ParameterisedHolderDeformer::id,
@@ -221,6 +226,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 
 		s = plugin.deregisterNode( CacheSet::id );
 		s = plugin.deregisterNode( ParameterisedHolderNode::id );
+		s = plugin.deregisterNode( DrawableHolder::id );
 		s = plugin.deregisterNode( ParameterisedHolderLocator::id );
 		s = plugin.deregisterNode( ParameterisedHolderDeformer::id );
 		s = plugin.deregisterNode( ParameterisedHolderField::id );
