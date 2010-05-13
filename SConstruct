@@ -147,6 +147,18 @@ o.Add(
 )
 
 o.Add(
+	"ILMBASE_INCLUDE_PATH",
+	"The path to the IlmBase include directory.",
+	"$OPENEXR_INCLUDE_PATH",
+)
+
+o.Add(
+	"ILMBASE_LIB_PATH",
+	"The path to the IlmBase lib directory.",
+	"$OPENEXR_LIB_PATH",
+)
+
+o.Add(
 	"OPENEXR_LIB_SUFFIX",
 	"The suffix appended to the names of the OpenEXR libraries. You can modify this "
 	"to link against libraries installed with non-default names",
@@ -286,6 +298,18 @@ o.Add(
 	"GLEW_LIB_PATH",
 	"The path to the directory with libGLEW in it.",
 	"/usr/local/lib",
+)
+
+o.Add(
+	"GLUT_INCLUDE_PATH",
+	"The path to the directory with glut.h in it.",
+	"$GLEW_INCLUDE_PATH",
+)
+
+o.Add(
+	"GLUT_LIB_PATH",
+	"The path to the directory with libGLUT in it.",
+	"$GLEW_LIB_PATH",
 )
 
 # Maya options
@@ -597,8 +621,10 @@ env.Prepend(
 		"include",
 		"$TBB_INCLUDE_PATH",
 		"$OPENEXR_INCLUDE_PATH",
+		"$ILMBASE_INCLUDE_PATH",
 		# we use "OpenEXR/x.h" and they use "x.h"
 		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
+		os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
 		"$BOOST_INCLUDE_PATH",
 		"$JPEG_INCLUDE_PATH",
 		"$TIFF_INCLUDE_PATH",
@@ -608,6 +634,7 @@ env.Prepend(
 		"$TBB_LIB_PATH",
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
+		"$ILMBASE_LIB_PATH",
 		"$JPEG_LIB_PATH",
 		"$TIFF_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
@@ -1193,9 +1220,11 @@ if env["WITH_GL"] and doConfigure :
 		
 		"CPPPATH" : [
 			"$GLEW_INCLUDE_PATH",
+			"$GLUT_INCLUDE_PATH",
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
+			"$GLUT_LIB_PATH",
 		],
 	}
 	

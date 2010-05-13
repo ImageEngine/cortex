@@ -32,7 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/filesystem.hpp"
+#include <boost/version.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include "IECoreGL/IECoreGL.h"
 #include "IECoreGL/GL.h"
@@ -59,9 +61,13 @@ void IECoreGL::init( bool glAlreadyInitialised )
 				int argc = 1;
 				const char *argv[] = { "IECoreGL" };
 				glutInit( &argc, const_cast<char**>( argv ) );
-			
-			boost::filesystem::current_path( currentPath );
-			
+
+#if BOOST_VERSION >= 103500
+				boost::filesystem::current_path( currentPath );
+#else
+				chdir( currentPath.string().c_str() );
+#endif
+
 			/// \todo We're making a window here to make glut initialise a gl context,
 			/// so that glewInit() works. But we should figure out how to initialise
 			/// GL ourselves and avoid the annoying window popping up at the beginning.

@@ -35,6 +35,8 @@
 #ifndef IECOREGL_SHADER_H
 #define IECOREGL_SHADER_H
 
+#include <boost/utility.hpp>
+
 #include "IECoreGL/GL.h"
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/TypeIds.h"
