@@ -369,7 +369,7 @@ void MeshTangentsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundO
 	}
 
 	FloatVectorDataPtr vData = mesh->variableData<FloatVectorData>( vPrimVarName, PrimitiveVariable::FaceVarying );
-	if( !uData )
+	if( !vData )
 	{
 		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive has no FaceVarying FloatVectorData primitive variable named \"%s\"."  ) % ( vPrimVarName ) ).str() );
 	}
