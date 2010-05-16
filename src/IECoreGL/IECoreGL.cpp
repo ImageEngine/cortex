@@ -2,6 +2,9 @@
 //
 //  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
+//  its affiliates and/or its licensors.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -65,7 +68,9 @@ void IECoreGL::init( bool glAlreadyInitialised )
 #if BOOST_VERSION >= 103500
 				boost::filesystem::current_path( currentPath );
 #else
-				chdir( currentPath.string().c_str() );
+				std::string cwd = currentPath.string();
+				const char *cwd_cptr = cwd.c_str();
+				chdir( cwd_cptr );
 #endif
 
 			/// \todo We're making a window here to make glut initialise a gl context,
