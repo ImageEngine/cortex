@@ -102,3 +102,5 @@ IECoreMaya.ParameterUI.registerUI( IECore.TypeId.V2fParameter, VectorParameterUI
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.V2dParameter, VectorParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.V3fParameter, VectorParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.V3dParameter, VectorParameterUI )
+
+IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Color3fParameter, VectorParameterUI, "numeric" )
