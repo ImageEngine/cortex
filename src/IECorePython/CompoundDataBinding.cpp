@@ -55,6 +55,86 @@ using namespace IECore;
 namespace IECorePython
 {
 
+class CompoundDataFromPythonDict
+{
+	public :
+
+		CompoundDataFromPythonDict()
+		{
+			converter::registry::push_back(
+				&convertible,
+				&construct,
+				type_id<CompoundDataPtr> ()
+			);
+		}
+
+	private :
+
+		static void *convertible( PyObject *obj_ptr )
+		{
+			if ( !PyDict_Check( obj_ptr ) )
+			{
+				return 0;
+			}
+			return obj_ptr;
+		}
+
+		static void construct(
+	        	PyObject *obj_ptr,
+	        	converter::rvalue_from_python_stage1_data *data )
+		{
+			assert( obj_ptr );
+			assert( PyDict_Check( obj_ptr ) );
+
+			handle<> h( obj_ptr );
+			dict d( h );
+
+			void *storage = (( converter::rvalue_from_python_storage<CompoundDataPtr>* ) data )->storage.bytes;
+			new( storage ) CompoundDataPtr( compoundDataFromDict( d ) );
+			data->convertible = storage;
+		}
+
+		static CompoundDataPtr compoundDataFromDict( const dict &v )
+		{
+			CompoundDataPtr x = new CompoundData();
+			list values = v.values();
+			list keys = v.keys();
+
+			for (int i = 0; i < keys.attr("__len__")(); i++)
+			{
+				object key( keys[i] );
+				object value( values[i] );
+				extract<const char *> keyElem( key );
+				if( !keyElem.check() )
+				{
+					PyErr_SetString( PyExc_TypeError, "Incompatible key type. Only strings accepted." );
+					throw_error_already_set();
+				}
+
+				extract<DataPtr> valueElem( value );
+				if( valueElem.check() )
+				{
+					x->writable()[keyElem()] = valueElem();
+					continue;
+				}
+				extract<dict> dictValueE( value );
+				if( dictValueE.check() )
+				{
+					CompoundDataPtr sub = compoundDataFromDict( dictValueE() );
+					x->writable()[keyElem()] = sub;
+					continue;
+				}
+				else
+				{
+					PyErr_SetString( PyExc_TypeError, "Incompatible value type - must be Data or dict." );
+					throw_error_already_set();
+				}
+			}
+
+			return x;
+		}
+};
+
 class CompoundDataFunctions
 {
 	public:
@@ -67,42 +147,10 @@ class CompoundDataFunctions
 		typedef CompoundDataMap::const_iterator const_iterator;
 
 		/// constructor that receives a python map object
-		/// \todo Create a rvalue-from-python converter to replace this
 		static CompoundDataPtr dataMapConstructor( dict v )
 		{
-			CompoundDataPtr mapPtr = new CompoundData();
-
-			list values = v.values();
-			list keys = v.keys();
-
-			CompoundDataMap &newMap = mapPtr->writable();
-
-			for ( int i = 0; i < keys.attr( "__len__" )(); i++ )
-			{
-				object key( keys[i] );
-				object value( values[i] );
-				extract<key_type> keyElem( key );
-				extract<data_type> valueElem( value );
-				if ( keyElem.check() )
-				{
-					//  try if elem is an exact data_type type
-					if ( valueElem.check() )
-					{
-						newMap[keyElem()] = valueElem();
-					}
-					else
-					{
-						PyErr_SetString( PyExc_TypeError, "Incompatible data type." );
-						throw_error_already_set();
-					}
-				}
-				else
-				{
-					PyErr_SetString( PyExc_TypeError, "Incompatible key type. Only strings accepted." );
-					throw_error_already_set();
-				}
-			}
-			return mapPtr;
+			CompoundDataPtr d = extract<CompoundDataPtr>( v );
+			return d;
 		}
 
 		/// binding for __getitem__ function
@@ -213,52 +261,15 @@ class CompoundDataFunctions
 
 		/// binding for update method
 		static void
-		update1( CompoundData &x, CompoundData &y )
+		update( CompoundData &x, ConstCompoundDataPtr y )
 		{
 			CompoundDataMap &xData = x.writable();
-			const CompoundDataMap &yData = y.readable();
+			const CompoundDataMap &yData = y->readable();
 			CompoundDataMap::const_iterator iterY = yData.begin();
 
 			for ( ; iterY != yData.end(); iterY++ )
 			{
 				xData[iterY->first] = iterY->second;
-			}
-		}
-
-		/// binding for update method
-		/// \todo This can be removed once we have a dict->CompoundData from-python converter
-		static void
-		update2( CompoundData &x, dict v )
-		{
-			list values = v.values();
-			list keys = v.keys();
-
-			CompoundDataMap &xData = x.writable();
-
-			for ( int i = 0; i < keys.attr( "__len__" )(); i++ )
-			{
-				object key( keys[i] );
-				object value( values[i] );
-				extract<key_type> keyElem( key );
-				extract<data_type> valueElem( value );
-				if ( keyElem.check() )
-				{
-					//  try if elem is an exact data_type type
-					if ( valueElem.check() )
-					{
-						xData[keyElem()] = valueElem();
-					}
-					else
-					{
-						PyErr_SetString( PyExc_TypeError, "Incompatible data type." );
-						throw_error_already_set();
-					}
-				}
-				else
-				{
-					PyErr_SetString( PyExc_TypeError, "Incompatible key type. Only strings accepted." );
-					throw_error_already_set();
-				}
 			}
 		}
 
@@ -499,8 +510,7 @@ void bindCompoundData()
 		.def( "has_key", &CompoundDataFunctions::has_key, "m.has_key(k)\nReturns True if m has key k; otherwise, returns False." )
 		.def( "items", &CompoundDataFunctions::items, "m.items()\nReturns a list of (key, value) pairs." )
 		.def( "keys", &CompoundDataFunctions::keys, "m.keys()\nReturns a list of key values." )
-		.def( "update", &CompoundDataFunctions::update1, "m.update(b)\nAdds all objects from b to m. b can be a CompoundData or a python dict." )
-		.def( "update", &CompoundDataFunctions::update2 )
+		.def( "update", &CompoundDataFunctions::update, "m.update(b)\nAdds all objects from b to m. b can be a CompoundData or a python dict." )
 		.def( "values", &CompoundDataFunctions::values, "m.values()\nReturns a list of all values in m." )
 		.def( "get", &CompoundDataFunctions::get, "m.get(k [, v])\nReturns m[k] if found; otherwise, returns v.",
 			(
@@ -515,6 +525,8 @@ void bindCompoundData()
 		.def( "pop", &CompoundDataFunctions::pop2 )
 		.def( "popitem", &CompoundDataFunctions::popitem, "m.popitem()\nRemvoes a random (key,value) pair from m and returns it as a tuple." )
 	;
+
+	CompoundDataFromPythonDict();
 
 }
 

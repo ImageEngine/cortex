@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -250,6 +250,55 @@ class CompoundDataTest(unittest.TestCase):
 		v1["A"] = IECore.Color4fVectorData()
 
 		self.assertEqual( eval(repr(v1)), v1 )
+
+	def testConstructionFromNestedDict( self ) :
+	
+		c = IECore.CompoundData( {
+			"a" : 10,
+			"b" : IECore.BoolData( True ),
+			"c" : {
+				"cc" : IECore.IntData( 20 ),
+			},
+			"d" : IECore.CompoundData( {
+				"dd" : IECore.IntData( 5 ),
+			} )
+		} )
+		
+		self.assertEqual( len( c ), 4 )
+		self.assertEqual( c["a"], IECore.IntData( 10 ) )
+		self.assertEqual( c["b"], IECore.BoolData( True ) )
+		self.assertEqual( len( c["c"] ), 1 )
+		self.assertEqual( c["c"]["cc"], IECore.IntData( 20 ) )
+		self.assertEqual( len( c["d"] ), 1 )
+		self.assertEqual( c["d"]["dd"], IECore.IntData( 5 ) )
+
+	def testUpdateFromNestedDict( self ) :
+	
+		c = IECore.CompoundData( {
+			"a" : IECore.IntData( 30 )
+			}
+		)
+		
+		d = {
+			"a" : 10,
+			"b" : IECore.BoolData( True ),
+			"c" : {
+				"cc" : IECore.IntData( 20 ),
+			},
+			"d" : IECore.CompoundData( {
+				"dd" : IECore.IntData( 5 ),
+			} )
+		}
+		
+		c.update( d )
+		
+		self.assertEqual( len( c ), 4 )
+		self.assertEqual( c["a"], IECore.IntData( 10 ) )
+		self.assertEqual( c["b"], IECore.BoolData( True ) )
+		self.assertEqual( len( c["c"] ), 1 )
+		self.assertEqual( c["c"]["cc"], IECore.IntData( 20 ) )
+		self.assertEqual( len( c["d"] ), 1 )
+		self.assertEqual( c["d"]["dd"], IECore.IntData( 5 ) )
 
 	def tearDown(self):
 
