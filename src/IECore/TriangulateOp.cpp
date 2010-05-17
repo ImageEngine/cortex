@@ -104,20 +104,23 @@ struct TriangleDataRemap
 	size_t operator() ( T * data )
 	{
 		assert( data );
+		typename T::ValueType &dataWritable = data->writable();
+		
 		const T * otherData = runTimeCast<const T, const Data>( m_other );
 		assert( otherData );
+		const typename T::ValueType &otherDataReadable = otherData->readable();
 
-		data->writable().clear();
-		data->writable().reserve( m_indices.size() );
+		dataWritable.clear();
+		dataWritable.reserve( m_indices.size() );
 
 		for ( std::vector<int>::const_iterator it = m_indices.begin(); it != m_indices.end(); ++it )
 		{
-			data->writable().push_back( otherData->readable()[ *it ] );
+			dataWritable.push_back( otherDataReadable[ *it ] );
 		}
 
-		assert( data->readable().size() == m_indices.size() );
+		assert( dataWritable.size() == m_indices.size() );
 
-		return data->readable().size();
+		return dataWritable.size();
 	}
 };
 
@@ -141,22 +144,28 @@ struct TriangulateOp::TriangulateFn
 	{
 		typedef typename T::ValueType::value_type Vec;
 
+		const typename T::ValueType &pReadable = p->readable();
+
 		MeshPrimitivePtr meshCopy = m_mesh->copy();
 
 		ConstIntVectorDataPtr verticesPerFace = m_mesh->verticesPerFace();
+		const std::vector<int> &verticesPerFaceReadable = verticesPerFace->readable();
 		ConstIntVectorDataPtr vertexIds = m_mesh->vertexIds();
+		const std::vector<int> &vertexIdsReadable = vertexIds->readable();
 
 		IntVectorDataPtr newVertexIds = new IntVectorData();
-		newVertexIds->writable().reserve( vertexIds->readable().size() );
+		std::vector<int> &newVertexIdsWritable = newVertexIds->writable();
+		newVertexIdsWritable.reserve( vertexIdsReadable.size() );
 
 		IntVectorDataPtr newVerticesPerFace = new IntVectorData();
-		newVerticesPerFace->writable().reserve( verticesPerFace->readable().size() );
+		std::vector<int> &newVerticesPerFaceWritable = newVerticesPerFace->writable();
+		newVerticesPerFaceWritable.reserve( verticesPerFaceReadable.size() );
 
 		std::vector<int> faceVaryingIndices;
 		std::vector<int> uniformIndices;
 		int faceVertexIdStart = 0;
 		int faceIdx = 0;
-		for ( IntVectorData::ValueType::const_iterator it = verticesPerFace->readable().begin(); it != verticesPerFace->readable().end(); ++it, ++faceIdx )
+		for ( IntVectorData::ValueType::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); ++it, ++faceIdx )
 		{
 			int numFaceVerts = *it;
 
@@ -165,14 +174,14 @@ struct TriangulateOp::TriangulateFn
 				/// For the time being, just do a simple triangle fan.
 
 				const int i0 = faceVertexIdStart + 0;
-				const int v0 = vertexIds->readable()[ i0 ];
+				const int v0 = vertexIdsReadable[ i0 ];
 
 				int i1 = faceVertexIdStart + 1;
 				int i2 = faceVertexIdStart + 2;
-				int v1 = vertexIds->readable()[ i1 ];
-				int v2 = vertexIds->readable()[ i2 ];
+				int v1 = vertexIdsReadable[ i1 ];
+				int v2 = vertexIdsReadable[ i2 ];
 
-				const Vec firstTriangleNormal = triangleNormal( p->readable()[ v0 ], p->readable()[ v1 ], p->readable()[ v2 ] );
+				const Vec firstTriangleNormal = triangleNormal( pReadable[ v0 ], pReadable[ v1 ], pReadable[ v2 ] );
 
 				if (m_throwExceptions)
 				{
@@ -180,12 +189,12 @@ struct TriangulateOp::TriangulateFn
 					for (int i = 0; i < numFaceVerts - 1; i++)
 					{
 						const int edgeStartIndex = faceVertexIdStart + i + 0;
-						const int edgeStart = vertexIds->readable()[ edgeStartIndex ];
+						const int edgeStart = vertexIdsReadable[ edgeStartIndex ];
 
 						const int edgeEndIndex = faceVertexIdStart + i + 1;
-						const int edgeEnd = vertexIds->readable()[ edgeEndIndex ];
+						const int edgeEnd = vertexIdsReadable[ edgeEndIndex ];
 
-						const Vec edge = p->readable()[ edgeEnd ] -  p->readable()[ edgeStart ];
+						const Vec edge = pReadable[ edgeEnd ] - pReadable[ edgeStart ];
 						const float edgeLength = edge.length();
 
 						if (edgeLength > m_tolerance)
@@ -194,18 +203,18 @@ struct TriangulateOp::TriangulateFn
 
 							/// Construct a plane whose normal is perpendicular to both the edge and the polygon's normal
 							const Vec planeNormal = edgeDirection.cross( firstTriangleNormal );
-							const float planeConstant = planeNormal.dot( p->readable()[ edgeStart ] );
+							const float planeConstant = planeNormal.dot( pReadable[ edgeStart ] );
 
 							int sign = 0;
 							bool first = true;
 							for (int j = 0; j < numFaceVerts; j++)
 							{
 								const int testVertexIndex = faceVertexIdStart + j;
-								const int testVertex = vertexIds->readable()[ testVertexIndex ];
+								const int testVertex = vertexIdsReadable[ testVertexIndex ];
 
 								if ( testVertex != edgeStart && testVertex != edgeEnd )
 								{
-									float signedDistance = planeNormal.dot( p->readable()[ testVertex ] ) - planeConstant;
+									float signedDistance = planeNormal.dot( pReadable[ testVertex ] ) - planeConstant;
 
 									if ( fabs(signedDistance) > m_tolerance)
 									{
@@ -235,21 +244,21 @@ struct TriangulateOp::TriangulateFn
 				{
 					i1 = faceVertexIdStart + ( (i + 0) % numFaceVerts );
 					i2 = faceVertexIdStart + ( (i + 1) % numFaceVerts );
-					v1 = vertexIds->readable()[ i1 ];
-					v2 = vertexIds->readable()[ i2 ];
+					v1 = vertexIdsReadable[ i1 ];
+					v2 = vertexIdsReadable[ i2 ];
 
-					if ( m_throwExceptions && fabs( triangleNormal( p->readable()[ v0 ], p->readable()[ v1 ], p->readable()[ v2 ] ).dot( firstTriangleNormal ) - 1.0 ) > m_tolerance )
+					if ( m_throwExceptions && fabs( triangleNormal( pReadable[ v0 ], pReadable[ v1 ], pReadable[ v2 ] ).dot( firstTriangleNormal ) - 1.0 ) > m_tolerance )
 					{
 						throw InvalidArgumentException("TriangulateOp cannot deal with non-planar polygons");
 					}
 
 					/// Create a new triangle
-					newVerticesPerFace->writable().push_back( 3 );
+					newVerticesPerFaceWritable.push_back( 3 );
 
 					/// Triangulate the vertices
-					newVertexIds->writable().push_back( v0 );
-					newVertexIds->writable().push_back( v1 );
-					newVertexIds->writable().push_back( v2 );
+					newVertexIdsWritable.push_back( v0 );
+					newVertexIdsWritable.push_back( v1 );
+					newVertexIdsWritable.push_back( v2 );
 
 					/// Store the indices required to rebuild the facevarying primvars
 					faceVaryingIndices.push_back( i0 );
@@ -267,12 +276,12 @@ struct TriangulateOp::TriangulateFn
 				int i1 = faceVertexIdStart + 1;
 				int i2 = faceVertexIdStart + 2;
 
-				newVerticesPerFace->writable().push_back( 3 );
+				newVerticesPerFaceWritable.push_back( 3 );
 
 				/// Copy across the vertexId data
-				newVertexIds->writable().push_back( vertexIds->readable()[ i0 ] );
-				newVertexIds->writable().push_back( vertexIds->readable()[ i1 ] );
-				newVertexIds->writable().push_back( vertexIds->readable()[ i2 ] );
+				newVertexIdsWritable.push_back( vertexIdsReadable[ i0 ] );
+				newVertexIdsWritable.push_back( vertexIdsReadable[ i1 ] );
+				newVertexIdsWritable.push_back( vertexIdsReadable[ i2 ] );
 
 				/// Store the indices required to rebuild the facevarying primvars
 				faceVaryingIndices.push_back( i0 );
