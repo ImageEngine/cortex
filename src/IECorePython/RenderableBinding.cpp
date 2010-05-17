@@ -40,6 +40,7 @@
 #include "IECore/Renderer.h"
 #include "IECorePython/RenderableBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -47,10 +48,16 @@ using namespace IECore;
 namespace IECorePython
 {
 
+static void render( const Renderable &renderable, Renderer *renderer )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	renderable.render( renderer );
+}
+
 void bindRenderable()
 {
 	RunTimeTypedClass<Renderable>( "An abstract class to define objects which are renderable" )
-		.def("render", &Renderable::render)
+		.def( "render", &render )
 	;
 }
 
