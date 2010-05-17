@@ -47,6 +47,7 @@ namespace IECorePython
 	{
 		RunTimeTypedClass<AttributeState>( "AttributeState" )
 			.def( init<>() )
+			.def( init<CompoundDataPtr>() )
 			.add_property( "attributes", &AttributeState::attributesData )
 		;
 	}

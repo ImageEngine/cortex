@@ -41,6 +41,11 @@ using namespace boost;
 const unsigned int AttributeState::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( AttributeState );
 
+AttributeState::AttributeState( CompoundDataPtr attributes )
+	:	m_attributes( attributes ? attributes : CompoundDataPtr( new CompoundData() ) )
+{
+}
+
 AttributeState::AttributeState( const CompoundDataMap &attributes )
 	: m_attributes( new CompoundData( attributes ) )
 {

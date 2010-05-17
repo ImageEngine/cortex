@@ -47,6 +47,8 @@ class AttributeState : public StateRenderable
 {
 	public:
 
+		/// Attributes is referenced directly rather than copied.
+		AttributeState( CompoundDataPtr attributes );
 		AttributeState( const CompoundDataMap &attributes = CompoundDataMap() );
 		virtual ~AttributeState();
 

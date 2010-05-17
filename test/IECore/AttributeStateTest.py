@@ -45,6 +45,17 @@ class AttributeStateTest( unittest.TestCase ) :
 
 		aa = a.copy()
 		self.assertEqual( a, aa )
+		
+	def testConstructFromDict( self ) :
+	
+		a = IECore.AttributeState( {
+			"a" : IECore.StringData( "a" ),
+			"b" : IECore.IntData( 10 ),
+		} )
+
+		self.assertEqual( len( a.attributes ), 2 )
+		self.assertEqual( a.attributes["a"], IECore.StringData( "a" ) )
+		self.assertEqual( a.attributes["b"], IECore.IntData( 10 ) )
 
 if __name__ == "__main__":
 	unittest.main()
