@@ -39,11 +39,11 @@
 
 // ieSBrownian
 
-float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
+float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain; uniform float filterScale )
 {
 	float sum = 0;
 	point xx = x;
-	float fw = ieFilterWidth( x );
+	float fw = ieFilterWidth( x ) * filterScale;
 	float a = 1;
 	uniform float i;
 	uniform float aSum = 0;
@@ -59,11 +59,11 @@ float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uni
 	return sum / aSum; // try to stop different gains giving wildly different ranges of output.
 }
 
-color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
+color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain; uniform float filterScale )
 {
 	color sum = 0;
 	point xx = x;
-	float fw = ieFilterWidth( x );
+	float fw = ieFilterWidth( x ) * filterScale;
 	float a = 1;
 	uniform float i;
 	uniform float aSum = 0;
@@ -77,6 +77,16 @@ color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uni
 	}
 
 	return sum / aSum; // try to stop different gains giving wildly different ranges of output.
+}
+
+float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
+{
+	return ieSBrownian( x, octaves, lacunarity, gain, 1.0 );
+}
+
+color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
+{
+	return color ieSBrownian( x, octaves, lacunarity, gain, 1.0 );
 }
 
 // ieBrownian
