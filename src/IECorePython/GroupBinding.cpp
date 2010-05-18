@@ -37,8 +37,11 @@
 #include "boost/python.hpp"
 
 #include "IECore/Group.h"
+#include "IECore/Renderer.h"
+
 #include "IECorePython/GroupBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -68,6 +71,30 @@ static list state( Group &g )
 	return result;
 }
 
+static void render( const Group &group, Renderer *renderer )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	group.render( renderer );
+}
+
+static void render2( const Group &group, Renderer *renderer, bool inAttributeBlock )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	group.render( renderer, inAttributeBlock );
+}
+
+static void renderState( const Group &group, Renderer *renderer )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	group.renderState( renderer );
+}
+
+static void renderChildren( const Group &group, Renderer *renderer )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	group.renderChildren( renderer );
+}
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS( transformMatrixOverloads, transformMatrix, 0, 1 );
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS( globalTransformMatrixOverloads, globalTransformMatrix, 0, 1 );
 
@@ -88,6 +115,10 @@ void bindGroup()
 		.def( "transformMatrix", &Group::transformMatrix, transformMatrixOverloads() )
 		.def( "globalTransformMatrix", &Group::globalTransformMatrix, globalTransformMatrixOverloads() )
 		.def( "parent", (GroupPtr (Group::*)())&Group::parent )
+		.def( "render", &render )
+		.def( "render", &render2 )
+		.def( "renderState", &renderState )
+		.def( "renderChildren", &renderChildren )
 	;
 }
 
