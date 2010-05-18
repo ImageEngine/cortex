@@ -400,40 +400,49 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 
 void DeferredRendererImplementation::addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
 {
-	bool mainProcedural = ( m_threadContextPool.size() == 0 );
+	bool withThreads = static_cast<ProceduralThreadingStateComponent *>( getState( ProceduralThreadingStateComponent::staticTypeId() ) )->value();
+	
+	if( withThreads )
+	{
+		bool mainProcedural = ( m_threadContextPool.size() == 0 );
 
-	if ( mainProcedural )
-	{
-		// create root task.
-		ProceduralTask& a = *new( ProceduralTask::allocate_root()) ProceduralTask( *this, proc, renderer );
-		tbb::task::spawn_root_and_wait(a);
-		// check if all contexts were cleared
-		for ( ThreadRenderContext::const_iterator it = m_threadContextPool.begin(); it != m_threadContextPool.end(); it++ )
+		if ( mainProcedural )
 		{
-			if ( (*it).size() )
+			// create root task.
+			ProceduralTask& a = *new( ProceduralTask::allocate_root()) ProceduralTask( *this, proc, renderer );
+			tbb::task::spawn_root_and_wait(a);
+			// check if all contexts were cleared
+			for ( ThreadRenderContext::const_iterator it = m_threadContextPool.begin(); it != m_threadContextPool.end(); it++ )
 			{
-				IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::procedural", "Non empty thread render context detected!" );
+				if ( (*it).size() )
+				{
+					IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::procedural", "Non empty thread render context detected!" );
+				}
 			}
-		}
-		m_threadContextPool.clear();
-	}
-	else
-	{
-		ProceduralTask *parentTask = dynamic_cast< ProceduralTask *>(&ProceduralTask::self());
-		if ( parentTask )
-		{
-			// add a child task to the current task
-			ProceduralTask& a = *new(parentTask->allocate_child()) ProceduralTask( *this, proc, renderer );
-			// register this class on the parent task
-			parentTask->addSubtask( a );
+			m_threadContextPool.clear();
 		}
 		else
 		{
-			// Somehow the parent task is not ProceduralTask...
-			IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::procedural", "Incompatible parent task type!" );
+			ProceduralTask *parentTask = dynamic_cast< ProceduralTask *>(&ProceduralTask::self());
+			if ( parentTask )
+			{
+				// add a child task to the current task
+				ProceduralTask& a = *new(parentTask->allocate_child()) ProceduralTask( *this, proc, renderer );
+				// register this class on the parent task
+				parentTask->addSubtask( a );
+			}
+			else
+			{
+				// Somehow the parent task is not ProceduralTask...
+				IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::procedural", "Incompatible parent task type!" );
+			}
 		}
 	}
-
+	else
+	{
+		// threading not wanted - just execute immediately
+		proc->render( renderer );
+	}
 }
 
 ScenePtr DeferredRendererImplementation::scene()

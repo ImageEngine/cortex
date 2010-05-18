@@ -192,5 +192,6 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( OutlineColorStateComponen
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointColorStateComponent, PointColorStateComponentTypeId, Color4f, Color4f( 0.85, 0.45, 0, 1 ) );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingSpaceStateComponent, CullingSpaceStateComponentTypeId, RendererSpace, ObjectSpace );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingBoxStateComponent, CullingBoxStateComponentTypeId, Imath::Box3f, Imath::Box3f() );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( ProceduralThreadingStateComponent, ProceduralThreadingStateComponentTypeId, bool, true );
 
 } // namespace IECoreGL

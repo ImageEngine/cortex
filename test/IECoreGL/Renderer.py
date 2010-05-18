@@ -109,6 +109,7 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:procedural:reentrant" ), BoolData( True ) )
 			if withFreeType() :
 				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "mesh" ) )
 
@@ -162,6 +163,9 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), BoolData( True ) )
 			r.setAttribute( "gl:smoothing:polygons", BoolData( True ) )
 			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( True ) )
+
+			r.setAttribute( "gl:procedural:reentrant", BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:procedural:reentrant" ), BoolData( False ) )
 
 			if withFreeType() :
 				r.setAttribute( "gl:textPrimitive:type", StringData( "sprite" ) )
@@ -683,6 +687,19 @@ class TestRenderer( unittest.TestCase ) :
 	def testParallelMultithreadedProcedurals( self ):
 		self.__testParallelMultithreadedProcedurals( self.RecursiveParameterisedProcedural )
 
+	def testDisableProceduralThreading( self ):
+
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		with WorldBlock( r ) :
+			r.setAttribute( "gl:procedural:reentrant", BoolData( False ) )
+			p = self.RecursiveParameterisedProcedural()
+			p.render( r )
+
+		self.assertEqual( len( self.RecursiveParameterisedProcedural.threadsUsed ), 1 )
+		
 	def testObjectSpaceCulling( self ):
 
 		p = self.RecursiveProcedural()

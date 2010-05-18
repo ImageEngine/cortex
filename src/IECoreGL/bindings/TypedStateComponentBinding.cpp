@@ -62,6 +62,7 @@ void bindTypedStateComponents()
 	bindTypedStateComponent< RightHandedOrientationStateComponent >( "RightHandedOrientationStateComponent" );
 	bindTypedStateComponent< CullingSpaceStateComponent >( "CullingSpaceStateComponent" );
 	bindTypedStateComponent< CullingBoxStateComponent >( "CullingBoxStateComponent" );
+	bindTypedStateComponent< ProceduralThreadingStateComponent >( "ProceduralThreadingStateComponent" );
 }
 
 } // namespace IECoreGL

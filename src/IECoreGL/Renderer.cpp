@@ -1109,6 +1109,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:textPrimitive:type"] = textPrimitiveTypeSetter;
 		(*a)["gl:cullingSpace"] = rendererSpaceSetter<CullingSpaceStateComponent>;
 		(*a)["gl:cullingBox"] = typedAttributeSetter<CullingBoxStateComponent>;
+		(*a)["gl:procedural:reentrant"] = typedAttributeSetter<ProceduralThreadingStateComponent>;
 	}
 	return a;
 }
@@ -1153,6 +1154,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:textPrimitive:type"] = textPrimitiveTypeGetter;
 		(*a)["gl:cullingSpace"] = rendererSpaceGetter<CullingSpaceStateComponent>;
 		(*a)["gl:cullingBox"] = typedAttributeGetter<CullingBoxStateComponent>;
+		(*a)["gl:procedural:reentrant"] = typedAttributeGetter<ProceduralThreadingStateComponent>;
 	}
 	return a;
 }
@@ -1562,7 +1564,8 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 			}
 		}
 
-		MeshPrimitivePtr prim = IECore::staticPointerCast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
+		ToGLMeshConverterPtr meshConverter = new ToGLMeshConverter( m );
+		MeshPrimitivePtr prim = IECore::staticPointerCast<MeshPrimitive>( meshConverter->convert() );
 		if ( m_data->currentInstance )
 		{
 			addCurrentInstanceChild( m_data, prim );

@@ -292,6 +292,14 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"gl:smoothing:polygons" BoolData false</b><br>
 		/// These attributes enable GL_POINT_SMOOTH, GL_LINE_SMOOTH and
 		/// GL_POLYGON_SMOOTH respectively.
+		///
+		/// \par Implementation specific procedural attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"gl:procedural:reentrant" BoolData true</b><br>
+		/// When true, procedurals may be evaluated in multiple parallel threads.
+		/// When false they will be evaluated from the same thread they were specified
+		/// from.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		/// Supports only shader type "surface" or "gl:surface", looking for "name.vert" and  "name.frag" GLSL source files

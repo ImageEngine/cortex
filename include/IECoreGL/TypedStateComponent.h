@@ -198,6 +198,9 @@ typedef TypedStateComponent<RendererSpace, CullingSpaceStateComponentTypeId> Cul
 // Defines the bounding box for culling. The space it is defined on is given by CullingSpaceStateComponent.
 typedef TypedStateComponent<Imath::Box3f, CullingBoxStateComponentTypeId> CullingBoxStateComponent;
 
+/// Defines whether or not procedurals will be executed in parallel threads.
+typedef TypedStateComponent<bool, ProceduralThreadingStateComponentTypeId> ProceduralThreadingStateComponent;
+
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( BlendColorStateComponent );
 IE_CORE_DECLAREPTR( BlendFuncStateComponent );
@@ -211,6 +214,7 @@ IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
 IE_CORE_DECLAREPTR( PointSmoothingStateComponent );
 IE_CORE_DECLAREPTR( CullingSpaceStateComponent );
 IE_CORE_DECLAREPTR( CullingBoxStateComponent );
+IE_CORE_DECLAREPTR( ProceduralThreadingStateComponent );
 
 } // namespace IECoreGL
 

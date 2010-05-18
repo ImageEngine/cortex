@@ -110,6 +110,7 @@ enum TypeId
 	CullingSpaceStateComponentTypeId = 105067,
 	CullingBoxStateComponentTypeId = 105068,
 	ToGLPointsConverterTypeId = 105069,
+	ProceduralThreadingStateComponentTypeId = 105070,	
 	LastCoreGLTypeId = 105999,
 };
 
