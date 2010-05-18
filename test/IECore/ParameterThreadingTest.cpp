@@ -46,6 +46,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Shader.h"
+#include "IECore/MeshNormalsOp.h"
 
 #include "ParameterThreadingTest.h"
 
@@ -175,6 +176,23 @@ struct ParameterThreadingTest
 		
 		parallel_for( blocked_range<size_t>( 0, permutationSize ), ReadParameters( parameterPermutation ) );
 	}
+	
+	struct CreateAndDestroyOp
+	{
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			for( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				MeshNormalsOpPtr o = new MeshNormalsOp();
+			}
+		}
+	};
+	
+	void testOpCreationAndDestruction()
+	{
+		parallel_for( blocked_range<size_t>( 0, 100000 ), CreateAndDestroyOp() );
+	}
+	
 };
 
 
@@ -187,6 +205,7 @@ struct ParameterThreadingTestSuite : public boost::unit_test::test_suite
 
 		add( BOOST_CLASS_TEST_CASE( &ParameterThreadingTest::testReading, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ParameterThreadingTest::testReadingCompoundChildren, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &ParameterThreadingTest::testOpCreationAndDestruction, instance ) );
 	}
 };
 
