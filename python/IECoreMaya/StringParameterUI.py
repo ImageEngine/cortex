@@ -43,7 +43,7 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 	
 		IECoreMaya.ParameterUI.__init__( self, node, parameter, maya.cmds.rowLayout( numberOfColumns = 2 ), **kw )
 
-		maya.cmds.text(
+		self.__label = maya.cmds.text(
 			label = self.label(),
 			font = "smallPlainLabelFont",
 			align = "right",
@@ -60,7 +60,11 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
 
-		self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
 		maya.cmds.connectControl( self.__textField, self.plugName() )
+		self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
+		
+		# The popup on the text field itself seems not to be working, so also add it to the
+		# label in the mean time.
+		self._addPopupMenu( parentUI=self.__label, attributeName = self.plugName(), button1 = True )
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.StringParameter, StringParameterUI )
