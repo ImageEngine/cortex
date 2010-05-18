@@ -61,6 +61,7 @@ from SXRendererTest import SXRendererTest
 from ProceduralThreadingTest import ProceduralThreadingTest
 from StringArrayParameterTest import StringArrayParameterTest
 from CoshaderTest import CoshaderTest
+from GroupTest import GroupTest
 
 if IECore.withFreeType() :
 

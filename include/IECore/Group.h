@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -112,8 +112,19 @@ class Group : public VisibleRenderable
 		/// parent exists.
 		GroupPtr parent();
 		ConstGroupPtr parent() const;
-
+		
+		/// Renders all the children in an attribute block along
+		/// with the transform and state.
 		virtual void render( Renderer *renderer ) const;
+		/// As above, but can optionally omit the
+		/// attribute block scoping.
+		void render( Renderer *renderer, bool inAttributeBlock ) const;
+		/// Renders all the held state, without any attributeBegin/End.
+		/// Doesn't render the transform.
+		void renderState( Renderer *renderer ) const;
+		/// Renders all the held children, without any attributeBegin/End.
+		void renderChildren( Renderer *renderer ) const;
+		
 		/// Returns the union of the bounds of the children, transformed
 		/// by transformMatrix().
 		virtual Imath::Box3f bound() const;

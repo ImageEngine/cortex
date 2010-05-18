@@ -34,6 +34,7 @@
 
 #include "IECore/Group.h"
 #include "IECore/Renderer.h"
+#include "IECore/AttributeBlock.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -337,22 +338,37 @@ void Group::memoryUsage( Object::MemoryAccumulator &a ) const
 
 void Group::render( Renderer *renderer ) const
 {
-	renderer->attributeBegin();
-		if( m_transform )
-		{
-			m_transform->render( renderer );
-		}
-		for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
-		{
-			(*it)->render( renderer );
-		}
-		for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
-		{
-			(*it)->render( renderer );
-		}
-	renderer->attributeEnd();
+	render( renderer, true );
 }
 
+void Group::render( Renderer *renderer, bool inAttributeBlock ) const
+{
+	AttributeBlock attributeBlock( renderer, inAttributeBlock );
+
+	if( m_transform )
+	{
+		m_transform->render( renderer );
+	}
+	renderState( renderer );
+	renderChildren( renderer );
+}
+
+void Group::renderState( Renderer *renderer ) const
+{
+	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
+	{
+		(*it)->render( renderer );
+	}
+}
+
+void Group::renderChildren( Renderer *renderer ) const
+{
+	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
+	{
+		(*it)->render( renderer );
+	}
+}
+	
 Imath::Box3f Group::bound() const
 {
 	Box3f result;
