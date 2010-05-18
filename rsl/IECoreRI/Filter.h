@@ -49,4 +49,16 @@ float ieFilterWidth( point x )
 	return max( sqrt( area( x ) ), IECORERI_FILTER_MIN_WIDTH );
 }
 
+float ieFilteredAbs( float x, fw )
+{
+	float integral( float t, dx )
+	{
+		return sign(t) * 0.5 * t*t ;
+	}
+	
+	float x0 = x - 0.5*fw;
+	float x1 = x0 + fw;
+	return ( integral( x0 ) - integral( x1 ) ) / fw;
+}
+
 #endif // IECORERI_FILTER_H
