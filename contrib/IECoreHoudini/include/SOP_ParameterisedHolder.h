@@ -1,0 +1,113 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+//  its affiliates and/or its licensors.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#ifndef SOP_PARAMETERISEDHOLDER_H_
+#define SOP_PARAMETERISEDHOLDER_H_
+
+// Houdini
+#include <SOP/SOP_Node.h>
+
+// Boost
+#include <boost/python.hpp>
+
+// Cortex
+#include <IECore/Parameterised.h>
+#include <IECore/ClassData.h>
+#include <IECore/Parameter.h>
+#include <IECore/ParameterisedProcedural.h>
+#include <IECore/CompoundParameter.h>
+
+namespace IECoreHoudini
+{
+	/// Class representing a SOP node acting as a holder for the
+	/// abstract Parameterised class. SOP_ProceduralHolder inherits
+	/// directly from this.
+	class SOP_ParameterisedHolder : public SOP_Node
+	{
+		public:
+			/// Ctor
+			SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op );
+			/// Dtor
+			virtual ~SOP_ParameterisedHolder();
+
+			/// Sets a parameterised on this holder
+			void setParameterised( IECore::RunTimeTypedPtr p );
+
+			/// Gets the parameterised held by this holder
+			IECore::RunTimeTypedPtr getParameterised();
+
+			/// Returns whether or not this holder have a valid parameterised?
+			bool hasParameterised();
+
+			/// Updates all parameters on the parameterised from the Houdini
+			/// SOP's parameter values.
+			template <class T>
+			bool updateParameters( T parameterised, float now )
+			{
+				const IECore::CompoundParameter::ParameterMap &parms = parameterised->parameters()->parameters();
+				for( IECore::CompoundParameter::ParameterMap::const_iterator it=parms.begin(); it!=parms.end(); ++it )
+					updateParameter( it->second, now );
+				bool doesRequireUpdate = m_requiresUpdate;
+				m_requiresUpdate = false; // return doesRequireUpdate so clear this flag for next time
+				return doesRequireUpdate;
+			}
+
+			/// Update a specific Cortex parameter using values from the
+			/// corresponding Houdini SOP Parameter.
+			void updateParameter( IECore::ParameterPtr parm, float now );
+
+			/// Checks for changes in parameter values and
+			/// flags a gui update if required.
+			template <class T, class U>
+			void checkForUpdate( bool do_update, T val, IECore::ParameterPtr parm )
+			{
+					if ( do_update )
+					{
+						IECore::IntrusivePtr<U> data = IECore::runTimeCast<U>( parm->getValue() );
+						if ( val!=data->readable() )
+							m_requiresUpdate = true;
+					}
+			}
+
+		protected:
+			bool m_requiresUpdate;
+
+		private:
+			IECore::RunTimeTypedPtr m_parameterised;
+	};
+
+} // namespace IECoreHoudini
+
+#endif /* SOP_PARAMETERISEDHOLDER_H_ */

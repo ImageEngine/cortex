@@ -1,0 +1,433 @@
+##########################################################################
+#
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#
+#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+#  its affiliates and/or its licensors.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+#     * Neither the name of Image Engine Design nor the names of any
+#       other contributors to this software may be used to endorse or
+#       promote products derived from this software without specific prior
+#       written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+#  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+#  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+#  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+##########################################################################
+
+import SCons
+import glob
+import sys
+import os
+import glob
+import re
+
+EnsureSConsVersion( 0, 97 )
+SConsignFile()
+
+optionsFile = None
+
+if "CORTEX_OPTIONS_FILE" in os.environ :
+	optionsFile = os.environ["CORTEX_OPTIONS_FILE"]
+
+if "OPTIONS" in ARGUMENTS :
+	optionsFile = ARGUMENTS["OPTIONS"]
+
+o = Options( optionsFile, ARGUMENTS )
+
+o.Add(
+	"CXX",
+	"The C++ compiler.",
+	"g++",
+)
+
+o.Add(
+	"CXXFLAGS",
+	"The extra flags to pass to the C++ compiler during compilation.",
+	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
+)
+
+o.Add(
+	"TESTCXXFLAGS",
+	"The extra flags to pass to the C++ compiler during compilation of unit tests.",
+	[ "-pipe", "-Wall", "-O0" ]
+)
+
+o.Add(
+	"PYTHONCXXFLAGS",
+	"The extra flags to pass to the C++ compiler during compilation of Python bindings.",
+	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
+)
+
+o.Add(
+	"LINKFLAGS",
+	"The extra flags to pass to the linker.",
+	[]
+)
+
+# Cortex
+
+o.Add(
+	"CORTEX_ROOT",
+	"The path to the Cortex install.",
+	"",
+)
+
+o.Add(
+	"CORTEX_INCLUDE_PATH",
+	"The path to the Cortex include directory.",
+	"$CORTEX_ROOT/include",
+)
+
+o.Add(
+	"CORTEX_LIB_PATH",
+	"The path to the Cortex libraries.",
+	"$CORTEX_ROOT/lib",
+)
+
+o.Add(
+	"CORTEX_LIB_NAME",
+	"The name of the Cortex library.",
+	"IECore",
+)
+
+o.Add(
+	"CORTEX_GL_LIB_NAME",
+	"The name of the OpenGL Cortex library.",
+	"IECoreGL",
+)
+
+o.Add(
+	"CORTEX_PYTHON_LIB_NAME",
+	"The name of the Python Cortex library.",
+	"IECorePython",
+)
+
+# TBB options
+
+o.Add(
+	"TBB_INCLUDE_PATH",
+	"The path to the tbb include directory.",
+	"/usr/local/include/tbb",
+)
+
+o.Add(
+	"TBB_LIB_PATH",
+	"The path to the tbb library directory.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"TBB_LIB_SUFFIX",
+	"The suffix appended to the names of the tbb libraries. You can modify this "
+	"to link against libraries installed with non-defalt names.",
+	"",
+)
+
+# Boost options
+
+o.Add(
+	"BOOST_INCLUDE_PATH",
+	"The path to the boost include directory.",
+	"/usr/local/include/boost-1_34_1",
+)
+
+o.Add(
+	"BOOST_LIB_PATH",
+	"The path to the boost library directory.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"BOOST_LIB_SUFFIX",
+	"The suffix appended to the names of the boost libraries. You can modify this "
+	"to link against the debug versions of the libraries, or to link against "
+	"unversioned libraries.",
+	"-${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}_${BOOST_PATCH_VERSION}",
+)
+
+# OpenEXR options
+
+o.Add(
+	"OPENEXR_INCLUDE_PATH",
+	"The path to the OpenEXR include directory.",
+	"/usr/local/include/OpenEXR",
+)
+
+o.Add(
+	"OPENEXR_LIB_PATH",
+	"The path to the OpenEXR lib directory.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"ILMBASE_INCLUDE_PATH",
+	"The path to the IlmBase include directory.",
+	"$OPENEXR_INCLUDE_PATH",
+)
+
+o.Add(
+	"ILMBASE_LIB_PATH",
+	"The path to the IlmBase lib directory.",
+	"$OPENEXR_LIB_PATH",
+)
+
+o.Add(
+	"OPENEXR_LIB_SUFFIX",
+	"The suffix appended to the names of the OpenEXR libraries. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
+)
+
+# Houdini options
+
+o.Add(
+	"HFS",
+	"The path to the Houdini install.",
+	"",
+)
+
+o.Add(
+	"HOUDINI_INCLUDE_PATH",
+	"The path to the Houdini include directory.",
+	"$HFS/toolkit/include",
+)
+
+o.Add(
+	"HOUDINI_LIB_PATH",
+	"The path to the OpenEXR lib directory.",
+	"$HFS/dsolib",
+)
+
+o.Add(
+	"HOUDINI_CXX_FLAGS",
+	"C++ Flags to pass to the Houdini compilation.",
+	"",
+)
+
+# Python options
+
+o.Add(
+	"PYTHON_CONFIG",
+	"The path to the python-config program for the Python installation you wish to "
+	"build against. This is used to automatically obtain the appropriate compilation and linking "
+	"flags, unless you override them with the other PYTHON_ flags. "
+	"The default is to look for python-config on the path.",
+	"python-config",""
+)
+
+o.Add(
+	"PYTHON",
+	"The path to the python executable. If unspecified this will be discovered automatically using PYTHON_CONFIG.",
+	""
+)
+
+o.Add(
+	"PYTHON_INCLUDE_PATH",
+	"The path to the python headers. If unspecified this will be discovered automatically using PYTHON_CONFIG.",
+	"",
+)
+
+o.Add(
+	"PYTHON_LINK_FLAGS",
+	"Flags to use when linking python modules. If unspecified this will be discovered automatically using PYTHON_CONFIG.",
+	""
+)
+
+# OpenGL options
+
+o.Add(
+	BoolOption( "WITH_GL", "Set this to build the IECoreGL library.", False ),
+)
+
+o.Add(
+	"GLEW_INCLUDE_PATH",
+	"The path to the directory with glew.h in it.",
+	"/usr/local/include/GL",
+)
+
+o.Add(
+	"GLEW_LIB_PATH",
+	"The path to the directory with libGLEW in it.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"GLUT_INCLUDE_PATH",
+	"The path to the directory with glut.h in it.",
+	"$GLEW_INCLUDE_PATH",
+)
+
+o.Add(
+	"GLUT_LIB_PATH",
+	"The path to the directory with libGLUT in it.",
+	"$GLEW_LIB_PATH",
+)
+
+# Installation options
+
+o.Add(
+	"INSTALL_PREFIX",
+	"The prefix under which to install things.",
+	"/usr/local",
+)
+
+o.Add(
+	"INSTALL_HOUDINI_DIR",
+	"The name under which to install the maya libraries. This "
+	"can be used to build and install the library for multiple "
+	"Maya versions.",
+	"$INSTALL_PREFIX/houdini/dso",
+)
+
+o.Add(
+	"INSTALL_PYTHON_DIR",
+	"The directory in which to install python modules.",
+	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
+)
+
+def getPythonConfig( env, flags ) :
+	f = os.popen( env["PYTHON_CONFIG"] + " " + flags )
+	r = f.read().strip()
+	if f.close() :
+		sys.stderr.write( "ERROR : Error running \"%s\".\n" % env["PYTHON_CONFIG"] )
+		Exit( 1 )
+	return r
+
+env = Environment(
+	options = o
+)
+
+# try to run it to determine version
+pythonExecutable = env["PYTHON"]
+try :
+	env["PYTHON_VERSION"] = os.popen( pythonExecutable + " -c 'import sys; print \"%s.%s\" % sys.version_info[:2]'" ).read().strip()
+except :
+	sys.stderr.write( "ERROR : Unable to determine python version from \"%s\".\n" % pythonExecutable )
+	Exit( 1 )
+
+# get the include path for python if we haven't been told it explicitly
+if env["PYTHON_INCLUDE_PATH"]=="" :
+	env["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( env, "--includes" ).split()
+else :
+	env["PYTHON_INCLUDE_FLAGS"] = "-I$PYTHON_INCLUDE_PATH"
+env.Append( CPPFLAGS="$PYTHON_INCLUDE_FLAGS" )
+
+# get the python link flags
+if env["PYTHON_LINK_FLAGS"]=="" :
+	env["PYTHON_LINK_FLAGS"] = getPythonConfig( env, "--ldflags" )
+env.Append( SHLINKFLAGS = env["PYTHON_LINK_FLAGS"].split() )
+env.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
+env.Append( LIBS = [
+		"boost_python" + env["BOOST_LIB_SUFFIX"],
+	]
+)
+env.Prepend( LIBPATH = [ "./lib" ] )
+env["SHLIBSUFFIX"] = ".so"
+
+# update the include and lib paths
+env.Prepend(
+	CPPPATH = [
+		"include",
+		"include/bindings",
+		"$PYTHON_INCLUDE_PATH",
+		"$BOOST_INCLUDE_PATH",
+		"$HOUDINI_INCLUDE_PATH",
+		"$CORTEX_INCLUDE_PATH",
+		"$TBB_INCLUDE_PATH",
+		"$OPENEXR_INCLUDE_PATH",
+		"$ILMBASE_INCLUDE_PATH",
+		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
+		os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
+		"$GLEW_INCLUDE_PATH",
+	],
+	LIBPATH = [
+		"$BOOST_LIB_PATH",
+		"$PYTHON_LIB_PATH",
+		"$HOUDINI_LIB_PATH",
+		"$CORTEX_LIB_PATH",
+	],
+	LIBS = [
+		"pthread",
+		"boost_python" + env["BOOST_LIB_SUFFIX"],
+		"HoudiniUI",
+  		"HoudiniOPZ",
+  		"HoudiniOP3",
+  		"HoudiniOP2",
+  		"HoudiniOP1",
+  		"HoudiniSIM",
+  		"HoudiniGEO",
+  		"HoudiniPRM",
+  		"HoudiniUT",
+  		"$CORTEX_LIB_NAME",
+  		"$CORTEX_GL_LIB_NAME",
+  		"$CORTEX_PYTHON_LIB_NAME",
+	]
+)
+env.Append(
+	CXXFLAGS = [ "$HOUDINI_CXX_FLAGS" ]
+	)
+env["SHLIBPREFIX"] = ""
+
+#=====
+# build library
+#=====
+libSources = [ "src/CoreHoudini.cpp",
+				"src/FnProceduralHolder.cpp",
+				"src/FnParameterisedHolder.cpp",
+				"src/FromHoudiniSopConverter.cpp",
+				"src/SOP_ParameterisedHolder.cpp",
+				"src/SOP_ProceduralHolder.cpp",
+				"src/GU_ProceduralDetail.cpp",
+				"src/GR_Procedural.cpp"  ]
+lib = env.SharedLibrary( "build/lib/libIECoreHoudini", libSources )
+
+#=====
+# build houdini plugin
+#=====
+plugin_env = env.Copy()
+plugin_env.Append( LIBS=["libIECoreHoudini"] )
+plugin_env.Append( LIBPATH=["build/lib"] )
+pluginSources = [ "src/plugin.cpp"]
+plugin = plugin_env.SharedLibrary( "build/houdini/dso/ieCoreHoudini", pluginSources )
+
+#=====
+# build python module
+#=====
+module_env = env.Copy()
+module_env.Append( LIBS=["libIECoreHoudini"] )
+module_env.Append( LIBPATH=["build/lib", "build/houdini/dso"] )
+bindingSources = [ "src/bindings/IECoreHoudiniModule.cpp",
+					"src/bindings/FnProceduralHolderBinding.cpp",
+					"src/bindings/FromHoudiniSopConverterBinding.cpp"]
+module = module_env.SharedLibrary( "build/lib/python$PYTHON_VERSION/site-packages/IECoreHoudini/_IECoreHoudini", bindingSources )
+
+# copy python files
+pyfiles = glob.glob("python/IECoreHoudini/*.py")
+for pyfile in pyfiles:
+	module_env.AddPostAction( module, Copy( "build/lib/python$PYTHON_VERSION/site-packages/IECoreHoudini/", pyfile ) )
+
+#=====
+# build otls
+#=====
+env.Command( "build/houdini/otls/ieCoreHoudini.otl", "src/hda/cortex_otl", "$HFS/bin/hotl -c src/hda/cortex_otl $TARGET" )
