@@ -54,9 +54,7 @@
 namespace IECoreMaya
 {
 
-/// \todo Add a parameter to echo the command?
-/// \todo Put the M*Array->IECore::*VectorData conversion
-/// somewhere useful.
+/// \deprecated There is no point in having this now that it can be done any number of ways using built-in Maya functionality
 IECore::DataPtr executeMel( const std::string &cmd )
 {
 	MCommandResult result;
