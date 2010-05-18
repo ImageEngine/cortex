@@ -51,7 +51,7 @@ float ieFilterWidth( point x )
 
 float ieFilteredAbs( float x, fw )
 {
-	float integral( float t, dx )
+	float integral( float t )
 	{
 		return sign(t) * 0.5 * t*t ;
 	}
