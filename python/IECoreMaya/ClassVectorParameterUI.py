@@ -42,7 +42,11 @@ import IECoreMaya
 ## A ParameterUI for ClassVectorParameters. Supports the following Parameter userData entries :
 #
 # BoolData ["UI"]["collapsable"]
-# Specifies if the UI may be collapsed or not - defaults to True. 		
+# Specifies if the UI may be collapsed or not - defaults to True. 
+#
+# The icon used for a child UI can be overridden by setting the icon name, minus extension in either
+# the child classes blindData, or its top level compound parameters userData() as follows:
+#   StringData <class.blindData()|class.parameters().userData()>["UI"]["icon"]
 class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
@@ -283,7 +287,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 		# layer icon
 
 		layerIcon = maya.cmds.picture(
-			image = "out_displayLayer.xpm",
+			image = "%s.xpm" % self.__classIconName(),
 			annotation = IECore.StringUtil.wrap(
 				self.__class()[0].description + "\n\n" + "Click to reorder or remove.",
 				48,
@@ -375,6 +379,29 @@ class ChildUI( IECoreMaya.UIElement ) :
 		c = self.__class()
 			
 		return "%s v%d" % ( c[2], c[3] ) + "\n\nClick to change version"
+
+	def __classIconName( self ) :
+		
+		c = self.__class()[0]
+		
+		iconName = "out_displayLayer"
+
+		sources = []
+		
+		if hasattr( c, "blindData" ):
+			sources.append( c.blindData() )
+		
+		if hasattr( c, "parameters" ):
+			sources.append( c.parameters().userData() )
+		
+		for data in sources:	
+			if "UI" in data and "icon" in data["UI"] :
+				icon = data["UI"]["icon"].value
+				if icon :
+					return icon
+	
+		return iconName
+	
 	
 	def __versionMenuDefinition( self ) :
 	
