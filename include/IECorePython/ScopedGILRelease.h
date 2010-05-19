@@ -40,10 +40,11 @@
 namespace IECorePython
 {
 
-/// This class releases the GIL upon construction and reaquires it
+/// This class releases the GIL upon construction and reacquires it
 /// upon destruction. It should be used in bindings to C++ functions
 /// which may take a while to return - for instance heavy computations
-/// or IO.
+/// or IO. Please note that it is only safe to use this class from
+/// a thread which currently holds the GIL.
 class ScopedGILRelease : boost::noncopyable
 {
 	
