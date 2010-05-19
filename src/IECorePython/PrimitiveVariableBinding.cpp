@@ -58,6 +58,8 @@ void bindPrimitiveVariable()
 
 	scope varScope = class_<PrimitiveVariable>( "PrimitiveVariable", no_init )
 		.def( init<PrimitiveVariable::Interpolation, DataPtr>() )
+		.def( init<const PrimitiveVariable &>() )
+		.def( init<const PrimitiveVariable &, bool>() )
 		.def_readwrite( "interpolation", &PrimitiveVariable::interpolation )
 		.add_property( "data", &dataGetter, &dataSetter )
 	;

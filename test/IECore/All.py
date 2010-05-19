@@ -218,6 +218,7 @@ from CurveTangentsOpTest import CurveTangentsOpTest
 from MarschnerLookupTableOpTest import MarschnerLookupTableOpTest
 from SmoothSkinningDataTest import *
 from IgnoredExceptionsTest import IgnoredExceptionsTest
+from PrimitiveVariableTest import PrimitiveVariableTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

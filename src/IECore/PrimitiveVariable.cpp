@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,6 +50,19 @@ PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other )
 {
 	interpolation = other.interpolation;
 	data = other.data;
+}
+
+PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other, bool deepCopy )
+{
+	interpolation = other.interpolation;
+	if( deepCopy )
+	{
+		data = other.data ? other.data->copy() : 0;
+	}
+	else
+	{
+		data = other.data;
+	}
 }
 
 bool PrimitiveVariable::operator==( const PrimitiveVariable &other ) const
