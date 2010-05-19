@@ -37,12 +37,12 @@
 
 #include "IECoreRI/Noise.h"
 
-float ieTurbulence( point x; uniform float octaves; uniform float lacunarity; uniform float gain; uniform float filterScale )
+float ieTurbulence( point x; uniform float octaves; uniform float lacunarity; uniform float gain; varying float filterWidth )
 {
 	float sum = 0;
 	point xx = x;
-	float fw = ieFilterWidth( x ) * filterScale;
 	float a = 1;
+	float fw = filterWidth;
 	uniform float i;
 	uniform float aSum = 0;
 	for( i=0; i<octaves; i+=1 )
@@ -57,12 +57,12 @@ float ieTurbulence( point x; uniform float octaves; uniform float lacunarity; un
 	return sum / aSum;
 }
 
-color ieTurbulence( point x; uniform float octaves; uniform float lacunarity; uniform float gain; uniform float filterScale )
+color ieTurbulence( point x; uniform float octaves; uniform float lacunarity; uniform float gain; varying float filterWidth )
 {
 	color sum = 0;
 	point xx = x;
-	float fw = ieFilterWidth( x ) * filterScale;
 	float a = 1;
+	float fw = filterWidth;
 	uniform float i;
 	uniform float aSum = 0;
 	color n;
@@ -84,12 +84,12 @@ color ieTurbulence( point x; uniform float octaves; uniform float lacunarity; un
 
 float ieTurbulence( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
 {
-	return ieTurbulence( x, octaves, lacunarity, gain, 1.0 );
+	return ieTurbulence( x, octaves, lacunarity, gain, ieFilterWidth(x) );
 }
 
 color ieTurbulence( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
 {
-	return ieTurbulence( x, octaves, lacunarity, gain, 1.0 );
+	return ieTurbulence( x, octaves, lacunarity, gain, ieFilterWidth(x) );
 }
 
 

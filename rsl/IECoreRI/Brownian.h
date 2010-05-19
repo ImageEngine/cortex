@@ -39,12 +39,12 @@
 
 // ieSBrownian
 
-float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain; uniform float filterScale )
+float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain; varying float filterWidth )
 {
 	float sum = 0;
 	point xx = x;
-	float fw = ieFilterWidth( x ) * filterScale;
 	float a = 1;
+	float fw = filterWidth;
 	uniform float i;
 	uniform float aSum = 0;
 	for( i=0; i<octaves; i+=1 )
@@ -59,12 +59,12 @@ float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uni
 	return sum / aSum; // try to stop different gains giving wildly different ranges of output.
 }
 
-color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain; uniform float filterScale )
+color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain; varying float filterWidth )
 {
 	color sum = 0;
 	point xx = x;
-	float fw = ieFilterWidth( x ) * filterScale;
 	float a = 1;
+	float fw = filterWidth;
 	uniform float i;
 	uniform float aSum = 0;
 	for( i=0; i<octaves; i+=1 )
@@ -81,12 +81,12 @@ color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uni
 
 float ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
 {
-	return ieSBrownian( x, octaves, lacunarity, gain, 1.0 );
+	return ieSBrownian( x, octaves, lacunarity, gain, ieFilterWidth(x) );
 }
 
 color ieSBrownian( point x; uniform float octaves; uniform float lacunarity; uniform float gain )
 {
-	return color ieSBrownian( x, octaves, lacunarity, gain, 1.0 );
+	return color ieSBrownian( x, octaves, lacunarity, gain, ieFilterWidth(x) );
 }
 
 // ieBrownian
