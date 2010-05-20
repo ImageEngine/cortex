@@ -55,6 +55,14 @@ import IECoreMaya
 # 
 #   BoolData ["UI"]["classVectorParameterPreHeader"]
 #   BoolData ["UI"]["classVectorParameterHeader"]
+#
+# \TODO See if there is a better way to deal with problematic UI elements (eg: spline) that crash
+# when a redraw is called and constituent plugs no longer exist. This can happen when removing
+# classes, or changing parameter types, as an AE redraw may happen before the related UI
+# has been deleted. It seems for some parameter types, maya doesn't check to see if all 
+# the required plugs are there during a redraw, and consequently falls over.
+# This behavior is currently compensated for by pre-updating the UI before removing a class
+# or changing its version.
 class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
@@ -155,11 +163,20 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		
 		classes = [ c[1:] for c in self.parameter.getClasses( True ) if c[1] != parameterName ]
 		
+		# We have to do a pre-update here, to make sure we delete the UI for any classes we
+		# are going to remove, before we remove them in C++. See the notes at the top.
+		self.__updateChildUIs( classes )
+		
 		fnPH.setClassVectorParameterClasses( self.parameter, classes )
 	
 	def _setClass( self, parameterName, className, classVersion ) :
 	
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+		
+		# We have to remove this class from the UI first, or, if the parameter list changes,
+		# maya can crash as it tries to redraw the AE. See the notes at the top.
+		classesWithoutThis = [ c[1:] for c in self.parameter.getClasses( True ) if c[1] != parameterName ]
+		self.__updateChildUIs( classesWithoutThis )
 		
 		classes = [ c[1:] for c in self.parameter.getClasses( True ) ]
 		if parameterName :
@@ -183,13 +200,18 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		
 		fnPH.setClassVectorParameterClasses( self.parameter, classes )
 	
-	def __updateChildUIs( self ) :
-				
-		classes = self.parameter.getClasses( True )
+	# \param classes A sequence type based on the list comprehension:
+	#     [ c[1:] for c in self.parameter.getClasses(True) ]
+	# This is for compatability with fnPH.setClassVectorParameterClasses()
+	# which doesn't take the first item of each entry.
+	def __updateChildUIs( self, classes=None ) :
+		
+		if classes == None:	
+			classes = [ c[1:] for c in self.parameter.getClasses( True ) ]
 		
 		# delete any uis for parameters which have disappeared
 		
-		parameterNamesSet = set( [ c[1] for c in classes ] )
+		parameterNamesSet = set( [ c[0] for c in classes ] )
 		for parameterName in self.__childUIs.keys() :
 			if parameterName not in parameterNamesSet :
 				maya.cmds.deleteUI( self.__childUIs[parameterName]._topLevelUI() )
@@ -206,12 +228,12 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		prevChildUI = None
 		for i in range( 0, len( classes ) ) :
 		
-			parameterName = classes[i][1]
+			parameterName = classes[i][0]
 			
 			childUI = self.__childUIs.get( parameterName, None )
 			if childUI :
 				# delete it if it's not the right sort any more
-				if childUI.__className!=classes[i][2] or childUI.__classVersion!=classes[i][3] :
+				if childUI.__className!=classes[i][1] or childUI.__classVersion!=classes[i][2] :
 					maya.cmds.deleteUI( childUI._topLevelUI() )
 					childUI = None
 			
@@ -219,8 +241,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 				with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
 					maya.cmds.setParent( self.__formLayout )
 					childUI = ChildUI( self.parameter[parameterName], **self.__kw )
-					childUI.__className = classes[i][2]
-					childUI.__classVersion = classes[i][3]
+					childUI.__className = classes[i][1]
+					childUI.__classVersion = classes[i][2]
 					self.__childUIs[parameterName] = childUI
 						
 			attachForm += [ 
@@ -475,10 +497,12 @@ class ChildUI( IECoreMaya.UIElement ) :
 			)
 		)
 		
+		# This has to be deferred as we update the UI from within the _removeClass method.
+		# Unles it is, maya will crash as its still preoccupied with the popup menu.
 		result.append(
 			"/Remove",
 			IECore.MenuItemDefinition(
-				command = IECore.curry( self.parent()._removeClass, self.__parameter.name )
+				command = IECore.curry( maya.cmds.evalDeferred, IECore.curry( self.parent()._removeClass, self.__parameter.name ) )
 			)
 		)
 		
