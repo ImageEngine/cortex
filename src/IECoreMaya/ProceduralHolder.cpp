@@ -50,6 +50,9 @@
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
+#include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/ScopedGILRelease.h"
+
 #include "IECore/VectorOps.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -188,6 +191,7 @@ MBoundingBox ProceduralHolder::boundingBox() const
 		}
 		catch( boost::python::error_already_set )
 		{
+			IECorePython::ScopedGILLock gilLock;
 			PyErr_Print();
 		}
 		catch( std::exception &e )
@@ -241,16 +245,19 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		try
 		{
 			IECoreGL::RendererPtr rendererToReuse = 0;
-			boost::python::object pythonProcedural( p );
-			if( m_lastRenderer && PyObject_HasAttrString( pythonProcedural.ptr(), "willRerender" ) )
 			{
-				/// \todo Consider how we might modify the ParameterisedProcedural (and possibly Renderer::Procedural?) interface
-				/// to properly support rerendering. Do this in conjunction with the todo in IECoreGL::Renderer::command() (about formalising a
-				/// proper interface for specifying scene edits to a Renderer).
-				bool rerender = boost::python::extract<bool>( pythonProcedural.attr( "willRerender" )( m_lastRenderer, IECore::ObjectPtr( p->parameters()->getValue() ) ) );
-				if( rerender )
+				IECorePython::ScopedGILLock gilLock;
+				boost::python::object pythonProcedural( p );
+				if( m_lastRenderer && PyObject_HasAttrString( pythonProcedural.ptr(), "willRerender" ) )
 				{
-					rendererToReuse = m_lastRenderer;
+					/// \todo Consider how we might modify the ParameterisedProcedural (and possibly Renderer::Procedural?) interface
+					/// to properly support rerendering. Do this in conjunction with the todo in IECoreGL::Renderer::command() (about formalising a
+					/// proper interface for specifying scene edits to a Renderer).
+					bool rerender = boost::python::extract<bool>( pythonProcedural.attr( "willRerender" )( m_lastRenderer, IECore::ObjectPtr( p->parameters()->getValue() ) ) );
+					if( rerender )
+					{
+						rendererToReuse = m_lastRenderer;
+					}
 				}
 			}
 
@@ -269,7 +276,21 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 				renderer->setOption( "gl:mode", new StringData( "deferred" ) );
 				renderer->worldBegin();
 
-					p->render( renderer.get() );
+					// using the form with many arguments so that we can customise
+					// rendering. in particular it's very important that the geometry
+					// is rendered immediately and not deferred in a procedural. if it
+					// were deferred then that procedural might end up being called on
+					// another thread, and then try to get the GIL - this results in deadlock
+					// as sometimes (but not always) maya holds the GIL on the thread calling
+					// scene(). it's ok if the procedural spawns more procedurals because at
+					// that point we release the GIL ourselves in the bindings.
+					p->render(
+						renderer.get(),
+						false, // we don't need an attribute block
+						true, // we do want doRenderState() called
+						true, // we do want geometry (doRender)
+						true  // we want geometry rendered immediately (not deferred in a procedural call)
+					);
 
 				renderer->worldEnd();
 
@@ -283,6 +304,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		}
 		catch( boost::python::error_already_set )
 		{
+			IECorePython::ScopedGILLock gilLock;
 			PyErr_Print();
 		}
 		catch( const std::exception &e )
