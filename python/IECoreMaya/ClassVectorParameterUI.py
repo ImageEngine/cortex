@@ -115,10 +115,12 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		self.replace( node, parameter )
 			
 	def replace( self, node, parameter ) :
+		
+		nodeChanged = self.node() != node
 				
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
 
-		self.__updateChildUIs()
+		self.__updateChildUIs( startFromScratch=nodeChanged )
 
 	def __classMenuDefinition( self, parameterName ) :
 	
@@ -204,7 +206,12 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 	#     [ c[1:] for c in self.parameter.getClasses(True) ]
 	# This is for compatability with fnPH.setClassVectorParameterClasses()
 	# which doesn't take the first item of each entry.
-	def __updateChildUIs( self, classes=None ) :
+	#
+	# \param startFromScratch If this is true, then all child uis are
+	# removed and rebuilt.
+	## \todo If we could reuse child uis (because they had a replace() method)
+	# then we wouldn't need the startFromScratch argument.
+	def __updateChildUIs( self, classes=None, startFromScratch=False ) :
 		
 		if classes == None:	
 			classes = [ c[1:] for c in self.parameter.getClasses( True ) ]
@@ -213,7 +220,7 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		
 		parameterNamesSet = set( [ c[0] for c in classes ] )
 		for parameterName in self.__childUIs.keys() :
-			if parameterName not in parameterNamesSet :
+			if parameterName not in parameterNamesSet or startFromScratch :
 				maya.cmds.deleteUI( self.__childUIs[parameterName]._topLevelUI() )
 				del self.__childUIs[parameterName]
 		
