@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,8 @@
 #include "maya/MSyntax.h"
 #include "maya/MArgDatabase.h"
 
+#include "IECorePython/ScopedGILLock.h"
+
 #include "IECoreMaya/PythonCmd.h"
 
 static const char *kCommandFlag     = "-cmd";
@@ -77,6 +79,7 @@ namespace
 
 void PythonCmd::import( const std::string &moduleName )
 {
+	IECorePython::ScopedGILLock lock;
 
 	try
 	{
@@ -110,19 +113,7 @@ void PythonCmd::initialize()
 
 		assert( Py_IsInitialized() );
 
-		/// We need a valid current state to be able to execute Python. It seems
-		/// that Maya 8.5 can leave us without one set, in which case we have
-		/// to go and find one.
-		PyThreadState *currentState = PyThreadState_GET();
-		if (!currentState)
-		{
-			PyInterpreterState *interp = PyInterpreterState_Head();
-			currentState = PyInterpreterState_ThreadHead( interp );
-		}
-		assert( currentState );
-
-		/// Bring the current state into effect
-		PyThreadState_Swap(currentState);
+		IECorePython::ScopedGILLock lock;
 
 		/// Initialize the __main__ module if not already present
 		PyObject* sysModules = PyImport_GetModuleDict();
@@ -138,26 +129,6 @@ void PythonCmd::initialize()
 		/// Retrieve the global context from the __main__ module
 		g_globalContext = mainModule.attr("__dict__");
 		assert( g_globalContext );
-
-		// Suppress warnings about mismatched API versions. We build IE modules
-		// against python2.5 for use elsewhere, but then use them in maya with python 2.4.
-		// Testing suggests that there are no ill effects of the mismatch. To be on the safe side
-		// we only suppress for IE prefixed modules and only for the specific API versions with
-		// which we've tested.
-		// \todo It would be a jolly good idea to stop doing this.
-		try
-		{
-			handle<> ignored( PyRun_String(
-				"import warnings\n"
-				"warnings.filterwarnings( 'ignore', 'Python C API version mismatch for module _IE.*: This Python has API version 1012, module _IE.* has version 1013.', RuntimeWarning, '.*', 0 )",
-				Py_file_input, g_globalContext.ptr(),
-				g_globalContext.ptr() )
-			);
-		}
-		catch( error_already_set & )
-		{
-			PyErr_Print();
-		}
 
 		import( "IECore" );
 		import( "IECoreMaya" );
@@ -237,6 +208,8 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 		return MS::kFailure;
 	}
 
+	IECorePython::ScopedGILLock gilLock;
+	
 	list argv;
 
 	PySys_SetObject("argv", argv.ptr());
