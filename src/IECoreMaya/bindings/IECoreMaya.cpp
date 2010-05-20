@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,6 +77,7 @@
 #include "IECoreMaya/bindings/FromMayaCompoundNumericPlugConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaTransformationMatrixConverterBinding.h"
 #include "IECoreMaya/bindings/MessageHandlerBinding.h"
+#include "IECoreMaya/bindings/FnProceduralHolderBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -130,4 +131,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaCompoundNumericPlugConverter();
 	bindFromMayaTransformationMatrixConverter();
 	bindMessageHandler();
+	bindFnProceduralHolder();
 }

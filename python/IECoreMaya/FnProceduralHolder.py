@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 
 import maya.OpenMaya
 import maya.cmds
+
+import _IECoreMaya
 from FnParameterisedHolder import FnParameterisedHolder
 
 ## A function set for operating on the IECoreMaya::ProceduralHolder type.
@@ -120,5 +122,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		for s in toSelect :
 			maya.cmds.select( s, add=True )
 
+	## Returns the IECoreGL.Scene displayed by this node.
+	def scene( self ) :
 
-
+		return _IECoreMaya._proceduralHolderScene( self )

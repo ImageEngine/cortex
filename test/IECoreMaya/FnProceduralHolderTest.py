@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,49 +32,59 @@
 #
 ##########################################################################
 
-import sys
-import unittest
+import maya.cmds
+import maya.OpenMaya
 
 import IECore
+import IECoreGL
 import IECoreMaya
 
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-from MayaTypeIdTest import *
-from FromMayaTransformConverterTest import *
-from CallbackIdTest import *
-from TemporaryAttributeValuesTest import *
-from SplineParameterHandlerTest import *
-from DAGPathParametersTest import *
-from FnProceduralHolderTest import FnProceduralHolderTest
+class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 
-IECoreMaya.TestProgram(
-
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreMaya/resultsPython.txt", "w" )
-			]
-		),
-		verbosity = 2
-	),
+	class SphereProcedural( IECore.ParameterisedProcedural ) :
 	
-	plugins = [ "ieCore" ],
+		def __init__( self ) :
+		
+			IECore.ParameterisedProcedural.__init__( self, "" )
+			
+			self.parameters().addParameters(
+				
+				[
+					IECore.FloatParameter(
+						"radius",
+						"",
+						1.0,
+					),
+				]
+			
+			)
+			
+		def doBound( self, args ) :
+		
+			result = IECore.Box3f( IECore.V3f( -args["radius"].value ), IECore.V3f( args["radius"].value ) )
+			return result
+			
+		def doRender( self, renderer, args ) :
+			
+			renderer.sphere( args["radius"].value, -1, 1, 360, {} )
 
-)
+	def testScene( self ) :
+
+		node = maya.cmds.createNode( "ieProceduralHolder" )
+
+		fnPH = IECoreMaya.FnProceduralHolder( node )
+		fnPH.setParameterised( self.SphereProcedural() )
+		
+		radiusAttr = fnPH.parameterPlugPath( fnPH.getProcedural()["radius"] )
+		
+		prevScene = None
+		for i in range( 0, 10000 ) :
+		
+			maya.cmds.setAttr( radiusAttr, i )
+			scene = fnPH.scene()
+			self.failUnless( isinstance( scene, IECoreGL.Scene ) )
+			self.failIf( prevScene is not None and scene.isSame( prevScene ) )
+			prevScene = scene
+			
+if __name__ == "__main__":
+	IECoreMaya.TestProgram()

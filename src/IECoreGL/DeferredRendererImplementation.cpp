@@ -44,6 +44,7 @@
 #include "boost/noncopyable.hpp"
 
 #include "tbb/task.h"
+#include "tbb/task_scheduler_init.h"
 #include "tbb/atomic.h"
 
 #include <cassert>
@@ -408,6 +409,11 @@ void DeferredRendererImplementation::addProcedural( IECore::Renderer::Procedural
 
 		if ( mainProcedural )
 		{
+			// the init is necessary for tbb < 2.2, whereas it is automatically
+			// created for us in tbb >= 2.2. tbb documentation indicates that it is
+			// fine to create multiple instances though so we create one just in case.
+			tbb::task_scheduler_init init;
+		
 			// create root task.
 			ProceduralTask& a = *new( ProceduralTask::allocate_root()) ProceduralTask( *this, proc, renderer );
 			tbb::task::spawn_root_and_wait(a);
