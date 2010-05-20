@@ -546,7 +546,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 			
 			lastControl = self.__label
 			
-			return self.__drawHeaderParameterControls( formLayout, attachForm, attachControl, lastControl, "classVectorParameterHeader" )
+		return self.__drawHeaderParameterControls( formLayout, attachForm, attachControl, lastControl, "classVectorParameterHeader" )
 		
 		
 	def __drawHeaderParameterControls( self, formLayout, attachForm, attachControl, lastControl, uiKey ) :
