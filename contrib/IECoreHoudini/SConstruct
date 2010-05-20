@@ -287,23 +287,17 @@ o.Add(
 # Installation options
 
 o.Add(
-	"INSTALL_PREFIX",
-	"The prefix under which to install things.",
-	"/usr/local",
-)
-
-o.Add(
 	"INSTALL_HOUDINI_DIR",
 	"The name under which to install the maya libraries. This "
 	"can be used to build and install the library for multiple "
 	"Maya versions.",
-	"$INSTALL_PREFIX/houdini/dso",
+	"$CORTEX_ROOT/houdini",
 )
 
 o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
-	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
+	"$CORTEX_ROOT/lib/python$PYTHON_VERSION/site-packages",
 )
 
 def getPythonConfig( env, flags ) :
@@ -392,6 +386,7 @@ env["SHLIBPREFIX"] = ""
 #=====
 # build library
 #=====
+lib_env = env.Copy()
 libSources = [ "src/CoreHoudini.cpp",
 				"src/FnProceduralHolder.cpp",
 				"src/FnParameterisedHolder.cpp",
@@ -400,7 +395,8 @@ libSources = [ "src/CoreHoudini.cpp",
 				"src/SOP_ProceduralHolder.cpp",
 				"src/GU_ProceduralDetail.cpp",
 				"src/GR_Procedural.cpp"  ]
-lib = env.SharedLibrary( "build/lib/libIECoreHoudini", libSources )
+lib = lib_env.SharedLibrary( "build/lib/libIECoreHoudini", libSources )
+lib_install = lib_env.Install( "$CORTEX_ROOT/lib", source=[lib] )
 
 #=====
 # build houdini plugin
@@ -410,6 +406,7 @@ plugin_env.Append( LIBS=["libIECoreHoudini"] )
 plugin_env.Append( LIBPATH=["build/lib"] )
 pluginSources = [ "src/plugin.cpp"]
 plugin = plugin_env.SharedLibrary( "build/houdini/dso/ieCoreHoudini", pluginSources )
+plugin_install = plugin_env.Install( "$INSTALL_HOUDINI_DIR/dso", plugin )
 
 #=====
 # build python module
@@ -426,8 +423,15 @@ module = module_env.SharedLibrary( "build/lib/python$PYTHON_VERSION/site-package
 pyfiles = glob.glob("python/IECoreHoudini/*.py")
 for pyfile in pyfiles:
 	module_env.AddPostAction( module, Copy( "build/lib/python$PYTHON_VERSION/site-packages/IECoreHoudini/", pyfile ) )
+module_install = module_env.Install( "$INSTALL_PYTHON_DIR", source=["build/lib/python$PYTHON_VERSION/site-packages/IECoreHoudini"] )
 
 #=====
 # build otls
 #=====
 env.Command( "build/houdini/otls/ieCoreHoudini.otl", "src/hda/cortex_otl", "$HFS/bin/hotl -c src/hda/cortex_otl $TARGET" )
+otl_install = env.Install( "$CORTEX_ROOT/houdini/otls", source=["build/houdini/otls/ieCoreHoudini.otl"] )
+
+#=====
+# install
+#=====
+env.Alias( "install", [ lib_install, plugin_install, module_install, otl_install ] )
