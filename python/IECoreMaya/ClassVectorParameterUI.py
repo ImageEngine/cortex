@@ -41,12 +41,20 @@ import IECoreMaya
 
 ## A ParameterUI for ClassVectorParameters. Supports the following Parameter userData entries :
 #
-# BoolData ["UI"]["collapsable"]
-# Specifies if the UI may be collapsed or not - defaults to True. 
+#   BoolData ["UI"]["collapsable"]
+#     Specifies if the UI may be collapsed or not - defaults to True. 
 #
 # The icon used for a child UI can be overridden by setting the icon name, minus extension in either
 # the child classes blindData, or its top level compound parameters userData() as follows:
+# 
 #   StringData <class.blindData()|class.parameters().userData()>["UI"]["icon"]
+# 
+# If a parameter of a class has one of the following userData elements set to True, a minimal version
+# of the control for that parameter will be placed in the header row for the class entry,
+# either before, or after the icon/name.
+# 
+#   BoolData ["UI"]["classVectorParameterPreHeader"]
+#   BoolData ["UI"]["classVectorParameterHeader"]
 class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
@@ -283,10 +291,13 @@ class ChildUI( IECoreMaya.UIElement ) :
 			( self.__parameterVisibilityIcon, "top", 0 ),
 			( self.__parameterVisibilityIcon, "bottom", 0 ),
 		]
+		
+		lastControl = self.__buildOptionalPreHeaderUI( headerFormLayout, attachForm, attachControl, self.__parameterVisibilityIcon )
 
 		# layer icon
 
 		layerIcon = maya.cmds.picture(
+			width = 20,
 			image = "%s.xpm" % self.__classIconName(),
 			annotation = IECore.StringUtil.wrap(
 				self.__class()[0].description + "\n\n" + "Click to reorder or remove.",
@@ -297,43 +308,21 @@ class ChildUI( IECoreMaya.UIElement ) :
 		IECoreMaya.createMenu( self.__layerMenu, layerIcon, button=1 )
 		
 		attachControl += [
-			( layerIcon, "left", 0, self.__parameterVisibilityIcon ),
+			( layerIcon, "left", 0, lastControl ),
 		]
 		
 		attachForm += [
 			( layerIcon, "top", 0 ),
 			( layerIcon, "bottom", 0 ),
 		]
-		
-		# class version 
 				
-		self.__classVersion = maya.cmds.text(
-			font = IECoreMaya.CompoundParameterUI._labelFont( self.__kw["hierarchyDepth"] ),
-			align = "left",
-			label = self.__classVersionLabel(),
-			annotation = self.__classVersionAnnotation(),
-			width = 30,
-		)
-		
-		IECoreMaya.createMenu( self.__versionMenuDefinition, self.__classVersion )
-		IECoreMaya.createMenu( self.__versionMenuDefinition, self.__classVersion, button=1 )
-		
-		attachControl += [
-			( self.__classVersion, "left", 2, layerIcon ),
-		]
-		
-		attachForm += [
-			( self.__classVersion, "top", 0 ),
-			( self.__classVersion, "bottom", 0 ),
-		]
-		
 		# class specific fields
 		
 		self.__attributeChangedCallbackId = None
 		self.__presetParameters = []
 		self.__presetUIs = []
 
-		self.__buildOptionalHeaderUI( headerFormLayout, attachForm, attachControl, self.__classVersion )
+		self.__buildOptionalHeaderUI( headerFormLayout, attachForm, attachControl, layerIcon )
 		
 		maya.cmds.formLayout( 
 			headerFormLayout,
@@ -372,7 +361,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 	
 		c = self.__class()
 		
-		return "v%d" % c[3]
+		return "version%d" % c[3]
 				
 	def __classVersionAnnotation( self ) :
 	
@@ -493,6 +482,20 @@ class ChildUI( IECoreMaya.UIElement ) :
 			)
 		)
 		
+		result.append(
+			"/VersionSeparator",
+			IECore.MenuItemDefinition(
+				divider = True,
+			)
+		)
+		
+		result.append( 
+			"/%s" % self.__classVersionLabel(),
+			IECore.MenuItemDefinition(
+				subMenu = self.__versionMenuDefinition
+			)
+		)
+		
 		return result
 		
 	def __moveLayer( self, oldIndex, newIndex ) :
@@ -505,6 +508,11 @@ class ChildUI( IECoreMaya.UIElement ) :
 		fnPH = IECoreMaya.FnParameterisedHolder( self.parent().node() )
 		fnPH.setClassVectorParameterClasses( self.parent().parameter, classes )
 
+
+	def __buildOptionalPreHeaderUI( self, formLayout, attachForm, attachControl, lastControl ) :
+		
+		return self.__drawHeaderParameterControls( formLayout, attachForm, attachControl, lastControl, "classVectorParameterPreHeader" )
+
 	def __buildOptionalHeaderUI( self, formLayout, attachForm, attachControl, lastControl ) :
 			
 		labelPlugPath = self.__labelPlugPath()
@@ -516,7 +524,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 				label = maya.cmds.getAttr( labelPlugPath ),
 				font = IECoreMaya.CompoundParameterUI._labelFont( self.__kw["hierarchyDepth"] ),
 				annotation = IECore.StringUtil.wrap( self.__parameter["label"].description, 48 ),
-				width = 70,
+				width = 190 - IECoreMaya.CompoundParameterUI._labelIndent( self.__kw["hierarchyDepth"] ),
 				recomputeSize = False,
 			)
 			
@@ -533,78 +541,27 @@ class ChildUI( IECoreMaya.UIElement ) :
 				( self.__label, "bottom", 0 ),
 			]
 			attachControl += [
-				( self.__label, "left", 0, lastControl ),
+				( self.__label, "left", 4, lastControl ),
 			]
 			
 			lastControl = self.__label
+			
+			return self.__drawHeaderParameterControls( formLayout, attachForm, attachControl, lastControl, "classVectorParameterHeader" )
 		
+		
+	def __drawHeaderParameterControls( self, formLayout, attachForm, attachControl, lastControl, uiKey ) :
+	
 		fnPH = IECoreMaya.FnParameterisedHolder( self.parent().node() )
 		for parameter in self.__parameter.values() :
 			
 			forHeader = False
 			with IECore.IgnoredExceptions( KeyError ) :
-				forHeader = parameter.userData()["UI"]["classVectorParameterHeader"].value
+				forHeader = parameter.userData()["UI"][ uiKey ].value
 				
 			if forHeader :
 				
-				## \todo This would be so much easier if we could just use ParameterUI
-				# instances for each of the controls. We can't because they all do their
-				# own labelling and are layed out for an attribute editor. if we do the
-				# todo in ParameterUI to remove the labels and stuff then we can do the
-				# todo here.
-				
-				control = None
-				parameterPlugPath = fnPH.parameterPlugPath( parameter )
-				annotation = IECore.StringUtil.wrap( "%s\n\n%s" % ( parameterPlugPath.split( "." )[1], parameter.description ), 48 )
-				if parameter.presetsOnly :
-					
-					control = maya.cmds.iconTextStaticLabel(
-						image = "arrowDown.xpm",
-						font = "smallBoldLabelFont",
-						style = "iconAndTextHorizontal",
-						height = 23,
-						width = 80,
-						annotation = annotation,
-					)
-					IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control )
-					IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control, button=1 )
-					self.__presetParameters.append( parameter )
-					self.__presetUIs.append( control )
-					if self.__attributeChangedCallbackId is None :
-						self.__attributeChangedCallbackId = IECoreMaya.CallbackId(
-							maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.parent().node(), self.__attributeChanged )
-						)
+				control = self.__drawHeaderParameterControl( parameter, fnPH )
 						
-					self.__updatePresetLabel( len( self.__presetUIs ) - 1 )
-					
-				elif isinstance( parameter, IECore.BoolParameter ) :
-					
-					control = maya.cmds.checkBox( label="", annotation=annotation )
-					maya.cmds.connectControl( control, parameterPlugPath )
-					
-				elif isinstance( parameter, IECore.FloatParameter ) :
-				
-					control = maya.cmds.floatField(
-						annotation = annotation,
-						minValue = parameter.minValue,
-						maxValue = parameter.maxValue,
-					)
-					maya.cmds.connectControl( control, parameterPlugPath )
-				
-				elif isinstance( parameter, IECore.Color3fParameter ) :
-				
-					control = maya.cmds.attrColorSliderGrp(
-						label = "",
-						columnWidth = ( ( 1, 1 ), ( 2, 1000 ) ),
-						columnAttach = ( ( 1, "both", 0 ), ( 2, "left", 0  ) ),
-						attribute = parameterPlugPath,
-						annotation = annotation,
-					)
-				
-				else :
-				
-					IECore.msg( IECore.Msg.Level.Warning, "ClassVectorParameterUI", "Parameter \"%s\" has unsupported type for inclusion in header ( %s )." % ( parameter.name, parameter.typeName() ) )
-		
 				if control :
 				
 					attachForm +=  [
@@ -617,7 +574,76 @@ class ChildUI( IECoreMaya.UIElement ) :
 
 					lastControl = control
 		
-			
+		return lastControl
+					
+
+	def __drawHeaderParameterControl( self, parameter, fnPH ) :
+		
+		## \todo This would be so much easier if we could just use ParameterUI
+		# instances for each of the controls. We can't because they all do their
+		# own labelling and are layed out for an attribute editor. if we do the
+		# todo in ParameterUI to remove the labels and stuff then we can do the
+		# todo here.
+		
+		control = None 
+		
+		parameterPlugPath = fnPH.parameterPlugPath( parameter )
+		annotation = IECore.StringUtil.wrap( "%s\n\n%s" % ( parameterPlugPath.split( "." )[1], parameter.description ), 48 )
+		if parameter.presetsOnly :
+
+			control = maya.cmds.iconTextStaticLabel(
+				image = "arrowDown.xpm",
+				font = "smallBoldLabelFont",
+				style = "iconAndTextHorizontal",
+				height = 23,
+				width = 80,
+				annotation = annotation,
+			)
+			IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control )
+			IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control, button=1 )
+			self.__presetParameters.append( parameter )
+			self.__presetUIs.append( control )
+			if self.__attributeChangedCallbackId is None :
+				self.__attributeChangedCallbackId = IECoreMaya.CallbackId(
+					maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.parent().node(), self.__attributeChanged )
+				)
+
+			self.__updatePresetLabel( len( self.__presetUIs ) - 1 )
+
+		elif isinstance( parameter, IECore.BoolParameter ) :
+
+			control = maya.cmds.checkBox( label="", annotation=annotation )
+			maya.cmds.connectControl( control, parameterPlugPath )
+
+		elif isinstance( parameter, IECore.FloatParameter ) :
+
+			control = maya.cmds.floatField(
+				annotation = annotation,
+				minValue = parameter.minValue,
+				maxValue = parameter.maxValue,
+				width = 45,
+				pre = 2
+			)
+			maya.cmds.connectControl( control, parameterPlugPath )
+
+		elif isinstance( parameter, IECore.Color3fParameter ) :
+
+			control = maya.cmds.attrColorSliderGrp(
+				label = "",
+				columnWidth = ( ( 1, 1 ), ( 2, 50 ) ),
+				columnAttach = ( ( 1, "both", 0 ), ( 2, "left", 0  ) ),
+				attribute = parameterPlugPath,
+				annotation = annotation,
+				width = 50,
+				showButton = False
+			)
+
+		else :
+
+			IECore.msg( IECore.Msg.Level.Warning, "ClassVectorParameterUI", "Parameter \"%s\" has unsupported type for inclusion in header ( %s )." % ( parameter.name, parameter.typeName() ) )
+		
+		return control
+
 	def __labelPlugPath( self ) :
 	
 		if "label" in self.__parameter :
