@@ -53,8 +53,9 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/TypedParameter.h"
-
 #include "IECore/Parameterised.h"
+
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -134,6 +135,7 @@ MStatus OpHolder<B>::compute( const MPlug &plug, MDataBlock &block )
 		}
 		catch( boost::python::error_already_set & )
 		{
+			IECorePython::ScopedGILLock lock;
 			PyErr_Print();
 			return MS::kFailure;
 		}

@@ -38,6 +38,8 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
 
+#include "IECorePython/ScopedGILLock.h"
+
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Camera.h"
@@ -168,9 +170,12 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 			renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
 			renderer->worldBegin();
 			
-				boost::python::object pythonDrawable( drawable );
-				pythonDrawable.attr( "draw" )( renderer );
-			
+				{
+					IECorePython::ScopedGILLock gilLock;
+					boost::python::object pythonDrawable( drawable );
+					pythonDrawable.attr( "draw" )( renderer );
+				}
+				
 			renderer->worldEnd();
 			
 			m_scene = renderer->scene();
@@ -179,6 +184,7 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 		}
 		catch( boost::python::error_already_set )
 		{
+			IECorePython::ScopedGILLock gilLock;
 			PyErr_Print();
 		}
 		catch( IECore::Exception &e )

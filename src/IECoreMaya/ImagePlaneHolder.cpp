@@ -51,6 +51,8 @@
 #include "IECore/Object.h"
 #include "IECore/TypedParameter.h"
 
+#include "IECorePython/ScopedGILLock.h"
+
 #include "IECore/Parameterised.h"
 
 using namespace IECore;
@@ -137,6 +139,7 @@ MStatus ImagePlaneHolder::loadImageMap ( const MString &fileName, int frame, MIm
 		}
 		catch( boost::python::error_already_set & )
 		{
+			IECorePython::ScopedGILLock gilLock;
 			PyErr_Print();
 			return MS::kFailure;
 		}

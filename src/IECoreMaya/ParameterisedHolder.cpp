@@ -63,6 +63,8 @@
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/ObjectData.h"
 
+#include "IECorePython/ScopedGILLock.h"
+
 #include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
@@ -599,6 +601,8 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::loadClass( const MString &classN
 			"IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n"
 		) % searchPathEnvVar.asChar() % className.asChar() % classVersion
 	);
+
+	IECorePython::ScopedGILLock gilLock;
 
 	try
 	{

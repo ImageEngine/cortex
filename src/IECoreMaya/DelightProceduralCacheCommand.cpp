@@ -44,6 +44,8 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/AttributeBlock.h"
 
+#include "IECorePython/ScopedGILLock.h"
+
 #include "IECoreRI/Renderer.h"
 #include "IECoreRI/Convert.h"
 
@@ -204,6 +206,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			std::string pythonString;
 			try 
 			{
+				IECorePython::ScopedGILLock gilLock;
 				// we first get an object referencing the serialise result and then make an extractor for it.
 				// making the extractor directly from the return of the serialise call seems to result
 				// in the python object dying before we properly extract the value, which results in corrupted
@@ -248,6 +251,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 		}
 		catch( error_already_set )
 		{
+			IECorePython::ScopedGILLock gilLock;
 			PyErr_Print();
 			displayError( "DelightProceduralCacheCommand::doIt : failed to output procedural for \"" + objectNames[0] + "\"." );
 			return MStatus::kFailure;
