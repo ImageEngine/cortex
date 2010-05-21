@@ -86,6 +86,8 @@ class Renderer : public IECore::Renderer
 		/// "camera:shutter"
 		///	"shutter"	V2fData()
 		/// "user:*"
+		/// "ri:*" Queries of this form use the Rx API and therefore only work
+		/// for options supported by that API.
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
 
 		/// \par Standard parameters supported :

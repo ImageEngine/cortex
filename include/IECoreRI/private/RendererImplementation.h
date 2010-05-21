@@ -136,6 +136,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getFontSearchPathOption( const std::string &name ) const;
 		IECore::ConstDataPtr getShutterOption( const std::string &name ) const;
 		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
+		IECore::ConstDataPtr getRxOption( const char *name ) const;
 
 		IECore::CameraPtr m_camera;
 		void outputCamera( IECore::CameraPtr camera );

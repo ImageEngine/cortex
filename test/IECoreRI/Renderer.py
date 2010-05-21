@@ -163,12 +163,15 @@ class RendererTest( unittest.TestCase ) :
 
 		r.camera( "main", { "resolution" : V2iData( V2i( 1024, 768 ) ) } )
 
+		r.setOption( "ri:shutter:offset", FloatData( 10 ) )
+
 		r.worldBegin()
 
 		s = r.getOption( "shutter" )
 		self.assertEqual( s, V2fData( V2f( 0 ) ) )
 
 		self.assertEqual( r.getOption( "camera:resolution" ), V2iData( V2i( 1024, 768 ) ) )
+		self.assertEqual( r.getOption( "ri:shutter:offset" ), FloatData( 10 ) )
 
 		r.worldEnd()
 
@@ -306,11 +309,15 @@ class RendererTest( unittest.TestCase ) :
 
 		# this should be silently ignored
 		r.setAttribute( "someOtherRenderer:someOtherAttribute", IntData( 10 ) )
-
+		# as should this
+		self.assertEqual( r.getAttribute( "someOtherRenderer:someOtherAttribute" ), None )
+		# and this
+		self.assertEqual( r.getOption( "someOtherRenderer:someOtherOption" ), None )
+		
 		r.worldEnd()
 
 		self.assertEqual( len( m.messages ), 0 )
-
+		
 	def testMissingShaders( self ) :
 
 		"""Check that missing shaders don't throw an exception but print a message instead."""

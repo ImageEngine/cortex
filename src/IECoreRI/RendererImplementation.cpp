@@ -232,15 +232,16 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getOption( const std::str
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		string s( name, 5 );
-		char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
-		memset( result, 0, 16 * sizeof( RtFloat ) ); // 3delight has a bug where it'll try to free some random part of memory if this is not null (v 7.0.54)
-		RxInfoType_t resultType;
-		int resultCount;
-		if( 0==RxOption( (char *)name.c_str(), result, 16 * sizeof( RtFloat ), &resultType, &resultCount ) )
-		{
-			return convert( result, resultType, resultCount );
-		}
+		return getRxOption( name.c_str() );
+	}
+	else if( name.compare( 0, 3, "ri:" )==0 )
+	{
+		return getRxOption( name.c_str() + 3 );
+	}
+	else if( name.find_first_of( ":" )!=string::npos )
+	{
+		// silently ignore options prefixed for some other RendererImplementation
+		return 0;
 	}
 	else
 	{
@@ -320,6 +321,19 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getResolutionOption( cons
 		{
 			return new V2iData( V2i( (int)format[0], (int)format[1] ) );
 		}
+	}
+	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getRxOption( const char *name ) const
+{
+	char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
+	memset( result, 0, 16 * sizeof( RtFloat ) ); // 3delight has a bug where it'll try to free some random part of memory if this is not null (v 7.0.54)
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxOption( (char *)name, result, 16 * sizeof( RtFloat ), &resultType, &resultCount ) )
+	{
+		return convert( result, resultType, resultCount );
 	}
 	return 0;
 }
@@ -811,6 +825,11 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 		{
 			return convert( result, resultType, resultCount );
 		}
+	}
+	else if( name.find_first_of( ":" )!=string::npos )
+	{
+		// silently ignore attributes prefixed for some other RendererImplementation
+		return 0;
 	}
 	else
 	{
