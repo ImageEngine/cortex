@@ -154,6 +154,59 @@ class TestPointsPrimitive( unittest.TestCase ) :
 	
 		self.performAimTest( "orthographic", "aimedOrthographicPatches.tif", "patch" )		
 	
+	def testGLPoints( self ) :
+	
+		fragmentSource = """
+		void main()
+		{
+			gl_FragColor = vec4( 1, 1, 1, 1 );
+		}
+		"""
+		
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"projection:fov" : IECore.FloatData( 20 ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			
+			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
+		
+			with IECore.AttributeBlock( r ) :
+			
+				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 20 ) )
+			
+				r.points( 1, { 
+						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+					}
+				)
+				
+			with IECore.AttributeBlock( r ) :
+			
+				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 10 ) )
+			
+				r.points( 1, { 
+						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] ) ),
+						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+					}
+				)	
+
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/glPoints.tif" ).read()
+		actualImage = IECore.Reader.create( self.outputFileName ).read()
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+	
 	def tearDown( self ) :
 		
 		if os.path.exists( self.outputFileName ) :
