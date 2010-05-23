@@ -39,13 +39,14 @@ import IECoreHoudini
 import unittest
 import os
 import glob
+import shutil
 
 class TestCortexRmanInject( unittest.TestCase ):
 
 	# test we can create and assign an rman inject SHOP
 	# note the procedural has an expression-driven parameter to
 	# check it's being evaluated correctly
-	def test_createRmanInject(self):
+	def testCreateRmanInject(self):
 		procedural = IECoreHoudini.FnProceduralHolder.create( "cortex_sphere", "sphereProcedural", 1 )
 		procedural.parm("parm_radius").setExpression("$F")
 		assert( procedural )
@@ -59,12 +60,10 @@ class TestCortexRmanInject( unittest.TestCase ):
 
 	# test we can render our rmaninject correctly and that the parameters
 	# serialise as expected
-	def test_renderRmanInject(self):
-		if not os.path.exists( "test/test_data" ):
-			os.mkdir( "test/test_data" )
-		rib_file = "test/test_data/testrman.$F4.rib"
+	def testRenderRmanInject(self):
+		rib_file = "test/cortexRmanInject_testData/testrman.$F4.rib"
 		hou.hipFile.clear(suppress_save_prompt=True)
-		self.test_createRmanInject()
+		self.testCreateRmanInject()
 		# create a camera
 		camera = hou.node("/obj").createNode( "cam", node_name="cam1" )
 		assert( camera )
@@ -81,7 +80,7 @@ class TestCortexRmanInject( unittest.TestCase ):
 		except:
 			assert(False)
 		# check ribs made it
-		ribs = glob.glob("test/test_data/testrman.????.rib")
+		ribs = glob.glob("test/cortexRmanInject_testData/testrman.????.rib")
 		assert( len(ribs)==10 )
 		# make sure the procedurals got in there
 		procs = []
@@ -96,3 +95,14 @@ class TestCortexRmanInject( unittest.TestCase ):
  		assert( "['-radius', '3', '-theta', '360']" in procs[2] )
  		assert( "[-1 1 -1 1 -1 1]" in procs[0])
 
+	def setUp( self ) :
+                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+                if not os.path.exists( "test/cortexRmanInject_testData" ):
+			os.mkdir( "test/cortexRmanInject_testData" )
+
+	def tearDown( self ) :
+                if os.path.exists( "test/cortexRmanInject_testData" ):
+			shutil.rmtree( "test/cortexRmanInject_testData" )
+
+if __name__ == "__main__":
+    unittest.main()

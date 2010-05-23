@@ -39,11 +39,12 @@ import IECoreHoudini
 import unittest
 import os
 import glob
+import shutil
 
 class TestCortexWriter( unittest.TestCase ):
 
 	# test we can create a cortex_writer
-	def test_createWriter(self):
+	def testCreateWriter(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		torus = geo.createNode( "torus" )
@@ -70,11 +71,9 @@ class TestCortexWriter( unittest.TestCase ):
 			assert(False)
 
 	# test the cortex_writer works writing a serialised object (COB)
-	def test_renderWriterCOB(self):
-		if not os.path.exists( "test/test_data" ):
-			os.mkdir( "test/test_data" )
-		cache_file = "test/test_data/test.$F4.cob"
-		writer = self.test_createWriter()
+	def testRenderWriterCOB(self):
+		cache_file = "test/cortexWriter_testData/test.$F4.cob"
+		writer = self.testCreateWriter()
 		# set to cob
 		writer.parm("export_format").set(1)
 		# set path
@@ -82,12 +81,12 @@ class TestCortexWriter( unittest.TestCase ):
 		# render
 		self.render(writer, (1,100) )
 		# check files
-		files = glob.glob( "test/test_data/test.????.cob" )
+		files = glob.glob( "test/cortexWriter_testData/test.????.cob" )
 		assert( len(files)==100 )
 		# load cob
-		geo_1 = IECore.Reader.create( "test/test_data/test.0001.cob" ).read()
-		geo_2 = IECore.Reader.create( "test/test_data/test.0051.cob" ).read()
-		geo_3 = IECore.Reader.create( "test/test_data/test.0100.cob" ).read()
+		geo_1 = IECore.Reader.create( "test/cortexWriter_testData/test.0001.cob" ).read()
+		geo_2 = IECore.Reader.create( "test/cortexWriter_testData/test.0051.cob" ).read()
+		geo_3 = IECore.Reader.create( "test/cortexWriter_testData/test.0100.cob" ).read()
 		# compare with a converter
 		hou.setFrame(1)
 		converter = IECoreHoudini.FromHoudiniSopConverter( writer.inputs()[0] )
@@ -99,11 +98,9 @@ class TestCortexWriter( unittest.TestCase ):
 		assert( geo_3==converter.convert() )
 
 	# test the cortex_writer works writing an attribute cache (FIO)
-	def test_renderWriterFIO(self):
-		if not os.path.exists( "test/test_data" ):
-			os.mkdir( "test/test_data" )
-		cache_file = "test/test_data/test.$F4.fio"
-		writer = self.test_createWriter()
+	def testRenderWriterFIO(self):
+		cache_file = "test/cortexWriter_testData/test.$F4.fio"
+		writer = self.testCreateWriter()
 		# set to fio
 		writer.parm("export_format").set(0)
 		# set path
@@ -111,10 +108,10 @@ class TestCortexWriter( unittest.TestCase ):
 		# render
 		self.render(writer, (1,100) )
 		# load fio
-		files = glob.glob( "test/test_data/test.????.fio" )
+		files = glob.glob( "test/cortexWriter_testData/test.????.fio" )
 		assert( len(files)==100 )
 		# check objects
-		ac = IECore.AttributeCache( "test/test_data/test.0001.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test.0001.fio", IECore.IndexedIOOpenMode.Read )
 		assert( "scatter1" in ac.objects() )
 		p_1 = ac.read( "scatter1", "P" )
 		n_1 = ac.read( "scatter1", "N" )
@@ -123,7 +120,7 @@ class TestCortexWriter( unittest.TestCase ):
 		n_1 = ac.read( "scatter1", "N" )
 		assert( n_1 )
 		assert( n_1.size()==5000 )
-		ac = IECore.AttributeCache( "test/test_data/test.0100.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test.0100.fio", IECore.IndexedIOOpenMode.Read )
 		assert( "scatter1" in ac.objects() )
 		p_2 = ac.read( "scatter1", "P" )
 		n_2 = ac.read( "scatter1", "N" )
@@ -138,11 +135,9 @@ class TestCortexWriter( unittest.TestCase ):
 
 	# test the cortex_writer works specifying an alternate object name
 	# when writing an attribute cache (FIO)
-	def test_renderWriterFIOAlternateName(self):
-		if not os.path.exists( "test/test_data" ):
-			os.mkdir( "test/test_data" )
-		cache_file = "test/test_data/test2.$F4.fio"
-		writer = self.test_createWriter()
+	def testRenderWriterFIOAlternateName(self):
+		cache_file = "test/cortexWriter_testData/test2.$F4.fio"
+		writer = self.testCreateWriter()
 		# set to fio
 		writer.parm("export_format").set(0)
 		# set path
@@ -153,10 +148,10 @@ class TestCortexWriter( unittest.TestCase ):
 		# render
 		self.render(writer, (1,100) )
 		# load fio
-		files = glob.glob( "test/test_data/test2.????.fio" )
+		files = glob.glob( "test/cortexWriter_testData/test2.????.fio" )
 		assert( len(files)==100 )
 		# check objects
-		ac = IECore.AttributeCache( "test/test_data/test2.0001.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test2.0001.fio", IECore.IndexedIOOpenMode.Read )
 		assert( "scatter1" not in ac.objects() )
 		assert( "bob" in ac.objects() )
 		p_1 = ac.read( "bob", "P" )
@@ -165,7 +160,7 @@ class TestCortexWriter( unittest.TestCase ):
 		n_1 = ac.read( "bob", "N" )
 		assert( n_1 )
 		assert( n_1.size()==5000 )
-		ac = IECore.AttributeCache( "test/test_data/test2.0100.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test2.0100.fio", IECore.IndexedIOOpenMode.Read )
 		assert( "scatter1" not in ac.objects() )
 		assert( "bob" in ac.objects() )
 		p_2 = ac.read( "bob", "P" )
@@ -176,3 +171,15 @@ class TestCortexWriter( unittest.TestCase ):
 		assert( n_2 )
 		assert( n_2.size()==5000 )
 		assert( n_1!=n_2 )
+
+	def setUp( self ) :
+                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+                if not os.path.exists( "test/cortexWriter_testData" ):
+			os.mkdir( "test/cortexWriter_testData" )
+
+	def tearDown( self ) :
+                if os.path.exists( "test/cortexWriter_testData" ):
+                        shutil.rmtree( "test/cortexWriter_testData" )
+
+if __name__ == "__main__":
+    unittest.main()

@@ -38,10 +38,11 @@ import IECore
 import IECoreHoudini
 import unittest
 import os
+import shutil
 
 class TestProceduralHolder( unittest.TestCase ):
 
-	def test_proceduralHolder(self):
+	def testProceduralHolder(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		proc = geo.createNode( "ieProceduralHolder" )
@@ -50,15 +51,15 @@ class TestProceduralHolder( unittest.TestCase ):
 		assert( fn )
 		return fn
 
-	def test_loadProcedural(self):
-		fn = self.test_proceduralHolder()
+	def testLoadProcedural(self):
+		fn = self.testProceduralHolder()
 		cl = IECore.ClassLoader.defaultProceduralLoader().load( "sphereProcedural", 0 )()
 		fn.setParameterised( cl )
 		assert( fn.getParameterised()!=None )
 		assert( fn.getParameterised()==cl )
 		return fn
 
-	def test_proceduralParameters(self):
+	def testProceduralParameters(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		proc = geo.createNode( "ieProceduralHolder" )
@@ -95,17 +96,15 @@ class TestProceduralHolder( unittest.TestCase ):
 		box = cl.bound()
 		assert( box==IECore.Box3f( IECore.V3f(0,0,0), IECore.V3f(1,1,1) ) )
 
-	def test_lotsQuickly(self):
+	def testLotsQuickly(self):
 		n = []
 		for i in range(1000):
 			n.append( IECoreHoudini.FnProceduralHolder.create( "cortex_sphere", "sphereProcedural", 1 ) )
 		for _n in n:
 			_n.destroy()
 
-	def test_saveAndLoad(self):
-		if not os.path.exists( "test/test_data" ):
-			os.mkdir( "test/test_data" )
-		save_file = "test/test_data/proceduralSave_test.hip"
+	def testSaveAndLoad(self):
+		save_file = "test/proceduralHolder_testData/proceduralSave_test.hip"
 
 		# create a few procedurals
 		n = []
@@ -145,7 +144,7 @@ class TestProceduralHolder( unittest.TestCase ):
 		assert( proc.evalParm("parm_radius")==5 )
 		assert( proc.evalParm("parm_theta")==45 )
 
-	def test_objectWasDeleted(self):
+	def testObjectWasDeleted(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		proc = geo.createNode( "ieProceduralHolder" )
@@ -154,3 +153,15 @@ class TestProceduralHolder( unittest.TestCase ):
 		proc.destroy()
 		assert( fn.hasParameterised() == False )
 		fn.setParameterised(cl)
+
+	def setUp( self ) :                
+                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+                if not os.path.exists( "test/proceduralHolder_testData" ):
+			os.mkdir( "test/proceduralHolder_testData" )
+
+	def tearDown( self ) :
+                if os.path.exists( "test/proceduralHolder_testData" ):
+			shutil.rmtree( "test/proceduralHolder_testData" )
+
+if __name__ == "__main__":
+    unittest.main()

@@ -37,6 +37,7 @@ import hou
 import IECore
 import IECoreHoudini
 import unittest
+import os
 
 class TestFromHoudiniSopConverter( unittest.TestCase ):
 
@@ -58,21 +59,21 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		return points
 
 	# creates a converter
-	def test_createConverter(self):
+	def testCreateConverter(self):
 		box = self.createBox()
 		converter = IECoreHoudini.FromHoudiniSopConverter( box )
 		assert( converter )
 		return converter
 
 	# performs geometry conversion
-	def test_doConversion(self):
-		converter = self.test_createConverter()
+	def testDoConversion(self):
+		converter = self.testCreateConverter()
 		result = converter.convert()
 		assert( result != None )
 
 	# convert a mesh
-	def test_convertMesh(self):
-		converter = self.test_createConverter()
+	def testConvertMesh(self):
+		converter = self.testCreateConverter()
 		result = converter.convert()
 		# TODO: don't support meshes right now
 		#assert( result.typeId() == IECore.MeshPrimitive.staticTypeId() )
@@ -81,7 +82,7 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		assert( bbox == target )
 
 	# convert some points
-	def test_convertPoints(self):
+	def testConvertPoints(self):
 		points = self.createPoints()
 		converter = IECoreHoudini.FromHoudiniSopConverter( points )
 		result = converter.convert()
@@ -91,7 +92,7 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		assert( "N" in result.keys() )
 
 	# simple attribute conversion
-	def test_setupAttributes(self):
+	def testSetupAttributes(self):
 		points = self.createPoints()
 		geo = points.parent()
 		attr = geo.createNode( "attribcreate" )
@@ -108,8 +109,8 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		return attr
 
 	# testing point attributes and types
-	def test_pointAttributes(self):
-		attr = self.test_setupAttributes()
+	def testPointAttributes(self):
+		attr = self.testSetupAttributes()
 		converter = IECoreHoudini.FromHoudiniSopConverter( attr )
 		result = converter.convert()
 		attr.parm("value1").set(123.456)
@@ -153,8 +154,8 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		assert( result["test_attribute"].interpolation == IECore.PrimitiveVariable.Interpolation.Vertex )
 
 	# testing detail attributes and types
-	def test_detailAttributes(self):
-		attr = self.test_setupAttributes()
+	def testDetailAttributes(self):
+		attr = self.testSetupAttributes()
 		attr.parm("class").set(0) # detail attribute
 		converter = IECoreHoudini.FromHoudiniSopConverter( attr )
 		result = converter.convert()
@@ -199,8 +200,8 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		assert( result["test_attribute"].interpolation == IECore.PrimitiveVariable.Interpolation.Constant )
 
 	# testing that float[4] doesn't work!
-	def test_float4attr(self): # we can't deal with float 4's right now
-		attr = self.test_setupAttributes()
+	def testFloat4attr(self): # we can't deal with float 4's right now
+		attr = self.testSetupAttributes()
 		attr.parm("name").set( "test_attribute" )
 		attr.parm("size").set(4) # 4 elements per point-attribute
 		converter = IECoreHoudini.FromHoudiniSopConverter( attr )
@@ -208,7 +209,7 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		assert( "test_attribute" not in result.keys() ) # invalid due to being float[4]
 
 	# testing conversion of animating geometry
-	def test_animatingGeometry(self):
+	def testAnimatingGeometry(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		torus = geo.createNode( "torus" )
@@ -228,7 +229,7 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		assert( points_1["P"].data != points_2["P"].data )
 
 	# testing we can handle an object being deleted
-	def test_objectWasDeleted(self):
+	def testObjectWasDeleted(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		torus = geo.createNode( "torus" )
@@ -237,3 +238,12 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		torus.destroy()
 		g2 = converter.convert()
 		assert( g2==None )
+
+	def setUp( self ) :                
+                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+
+	def tearDown( self ) :
+                pass
+
+if __name__ == "__main__":
+    unittest.main()

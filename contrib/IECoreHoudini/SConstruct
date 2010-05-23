@@ -78,7 +78,6 @@ o.Add(
 	"The extra flags to pass to the C++ compiler during compilation of Python bindings.",
 	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 )
-
 o.Add(
 	"LINKFLAGS",
 	"The extra flags to pass to the linker.",
@@ -404,9 +403,13 @@ lib_install = lib_env.Install( "$CORTEX_ROOT/lib", source=[lib] )
 plugin_env = env.Copy()
 plugin_env.Append( LIBS=["libIECoreHoudini"] )
 plugin_env.Append( LIBPATH=["build/lib"] )
-pluginSources = [ "src/plugin.cpp"]
+pluginSources = [ "src/plugin/Plugin.cpp"]
 plugin = plugin_env.SharedLibrary( "build/houdini/dso/ieCoreHoudini", pluginSources )
 plugin_install = plugin_env.Install( "$INSTALL_HOUDINI_DIR/dso", plugin )
+icons = glob.glob("icons/*.svg")
+for icon in icons:
+	plugin_env.AddPostAction( plugin, [Mkdir("build/houdini/icons"), Copy( "build/houdini/icons", icon )] )
+icon_install = plugin_env.Install( "$INSTALL_HOUDINI_DIR", source=["build/houdini/icons"] )
 
 #=====
 # build python module
@@ -428,10 +431,10 @@ module_install = module_env.Install( "$INSTALL_PYTHON_DIR", source=["build/lib/p
 #=====
 # build otls
 #=====
-env.Command( "build/houdini/otls/ieCoreHoudini.otl", "src/hda/cortex_otl", "$HFS/bin/hotl -c src/hda/cortex_otl $TARGET" )
+env.Command( "build/houdini/otls/ieCoreHoudini.otl", "otls/ieCoreHoudini", "$HFS/bin/hotl -c otls/ieCoreHoudini $TARGET" )
 otl_install = env.Install( "$CORTEX_ROOT/houdini/otls", source=["build/houdini/otls/ieCoreHoudini.otl"] )
 
 #=====
 # install
 #=====
-env.Alias( "install", [ lib_install, plugin_install, module_install, otl_install ] )
+env.Alias( "install", [ lib_install, plugin_install, module_install, otl_install, icon_install ] )
