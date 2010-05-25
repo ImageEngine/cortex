@@ -343,6 +343,32 @@ o.Add(
 	),
 )
 
+# Houdini options
+
+o.Add(
+	"HOUDINI_ROOT",
+	"The path to the Houdini install.",
+	os.environ.get( "HFS", "" ),
+)
+
+o.Add(
+	"HOUDINI_INCLUDE_PATH",
+	"The path to the Houdini include directory.",
+	"$HOUDINI_ROOT/toolkit/include",
+)
+
+o.Add(
+	"HOUDINI_LIB_PATH",
+	"The path to the houdini lib directory.",
+	"$HOUDINI_ROOT/dsolib",
+)
+
+o.Add(
+	"HOUDINI_CXX_FLAGS",
+	"C++ Flags to pass to the Houdini compilation.",
+	"",
+)
+
 # Build options
 
 o.Add(
@@ -408,6 +434,14 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_HOUDINILIB_NAME",
+	"The name under which to install the houdini libraries. This "
+	"can be used to build and install the library for multiple "
+	"Houdini versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
 	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
@@ -450,9 +484,27 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_HOUDINIOTL_DIR",
+	"The directory in which to install houdini otls.",
+	"$INSTALL_PREFIX/houdini/otls/",
+)
+
+o.Add(
+	"INSTALL_HOUDINIICON_DIR",
+	"The name under which to install houdini icons.",
+	"$INSTALL_PREFIX/houdini/icons",
+)
+
+o.Add(
 	"INSTALL_MAYAPLUGIN_NAME",
 	"The name under which to install maya plugins.",
 	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_HOUDINIPLUGIN_NAME",
+	"The name under which to install houdini plugins.",
+	"$INSTALL_PREFIX/houdini/dso/$IECORE_NAME",
 )
 
 o.Add(
@@ -1672,6 +1724,161 @@ if doConfigure :
 				NoCache( nukeTest )
 				nukeTestEnv.Depends( nukeTest, glob.glob( "test/IECoreNuke/*.py" ) )
 				nukeTestEnv.Alias( "testNuke", nukeTest )			
+
+###########################################################################################
+# Build, install and test the coreHoudini library and bindings
+###########################################################################################
+
+houdiniEnvSets = {
+	"IECORE_NAME" : "IECoreHoudini",
+}
+
+houdiniEnvAppends = {
+	"CPPPATH" : [
+		"contrib/IECoreHoudini/include",
+		"contrib/IECoreHoudini/include/bindings",
+		"$GLEW_INCLUDE_PATH",
+		"$HOUDINI_INCLUDE_PATH",
+	],
+	"CPPFLAGS" : [
+		"-DLINUX",
+		pythonEnv["PYTHON_INCLUDE_FLAGS"],
+	],
+	"CXXFLAGS" : [
+		"$HOUDINI_CXX_FLAGS",
+	],
+	"LIBPATH" : [
+		"$HOUDINI_LIB_PATH",
+	],
+	"LIBS" : [
+		"HoudiniUI",
+  		"HoudiniOPZ",
+  		"HoudiniOP3",
+  		"HoudiniOP2",
+  		"HoudiniOP1",
+  		"HoudiniSIM",
+  		"HoudiniGEO",
+  		"HoudiniPRM",
+  		"HoudiniUT",
+		"boost_python" + env["BOOST_LIB_SUFFIX"],
+	]
+}
+
+houdiniEnv = env.Copy( **houdiniEnvSets )
+houdiniEnv.Append( **houdiniEnvAppends )
+
+houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+
+houdiniPythonModuleEnv = pythonModuleEnv.Copy( **houdiniEnvSets )
+houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
+
+houdiniPluginEnv = houdiniEnv.Copy( IECORE_NAME="ieCoreHoudini" )
+
+if doConfigure :
+	
+	c = Configure( houdiniEnv )
+	
+	if not c.CheckHeader( "SOP/SOP_API.h" ) :
+		
+		sys.stderr.write( "WARNING : no houdini devkit found, not building IECoreHoudini - check HOUDINI_ROOT.\n" )
+		c.Finish()
+	
+	else :
+		
+		c.Finish()
+		
+		#=====
+		# glob the files
+		#=====
+		houdiniSources = glob.glob( "contrib/IECoreHoudini/src/*.cpp" )
+		houdiniHeaders = glob.glob( "contrib/IECoreHoudini/include/*.h" ) + glob.glob( "contrib/IECoreHoudini/include/*.inl" )
+		houdiniBindingHeaders = glob.glob( "contrib/IECoreHoudini/include/bindings/*.h" ) + glob.glob( "contrib/IECoreHoudini/include/bindings/*.inl" )
+		houdiniPythonSources = glob.glob( "contrib/IECoreHoudini/src/bindings/*.cpp" )
+		houdiniPythonScripts = glob.glob( "contrib/IECoreHoudini/python/IECoreHoudini/*.py" )
+		houdiniPluginSources = [ "contrib/IECoreHoudini/src/plugin/Plugin.cpp" ]
+		
+		# we can't append this before configuring, as then it gets built as
+		# part of the configure process
+		houdiniEnv.Prepend( LIBPATH = [ "./lib" ] )
+		houdiniEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
+		
+		#=====
+		# build library
+		#=====
+		houdiniLib = houdiniEnv.SharedLibrary( "lib/" + os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniSources )
+		houdiniLibInstall = houdiniEnv.Install( os.path.dirname( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniLib )
+		houdiniEnv.NoCache( houdiniLibInstall )
+		houdiniEnv.AddPostAction( houdiniLibInstall, lambda target, source, env : makeLibSymLinks( houdiniEnv, "INSTALL_HOUDINILIB_NAME" ) )
+		houdiniEnv.Alias( "install", houdiniLibInstall )
+		houdiniEnv.Alias( "installHoudini", houdiniLibInstall )
+		houdiniEnv.Alias( "installLib", [ houdiniLibInstall ] )
+		
+ 		#=====
+		# install headers
+		#=====
+		houdiniHeaderInstall = houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini", houdiniHeaders )
+		houdiniHeaderInstall += houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini/bindings", houdiniBindingHeaders )		
+		houdiniEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniEnv, houdiniEnv["INSTALL_HEADER_DIR"] ) )
+		houdiniEnv.Alias( "install", houdiniHeaderInstall )
+		houdiniEnv.Alias( "installHoudini", houdiniHeaderInstall )
+		
+		#=====
+		# build houdini plugin
+		#=====
+		houdiniPluginEnv.Append(
+			LIBPATH = [ "./lib" ],
+			LIBS=[
+				os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ),
+			],
+		)
+		houdiniPluginTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$INSTALL_HOUDINIPLUGIN_NAME" ) )
+		houdiniPlugin = houdiniPluginEnv.SharedLibrary( houdiniPluginTarget, houdiniPluginSources, SHLIBPREFIX="" )
+		houdiniPluginInstall = houdiniPluginEnv.Install( os.path.dirname( houdiniPluginEnv.subst( "$INSTALL_HOUDINIPLUGIN_NAME" ) ), houdiniPlugin )
+		houdiniPluginEnv.Depends( houdiniPlugin, corePythonModule )
+		houdiniPluginEnv.AddPostAction( houdiniPluginInstall, lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIPLUGIN_NAME"] ) )
+		houdiniPluginEnv.Alias( "install", houdiniPluginInstall )
+		houdiniPluginEnv.Alias( "installHoudini", houdiniPluginInstall )
+		
+		#=====
+		# build python module
+		#=====
+		houdiniPythonModuleEnv.Append(
+			LIBPATH = [ "./lib" ],
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+			]
+		)
+		houdiniPythonModule = houdiniPythonModuleEnv.SharedLibrary( "contrib/IECoreHoudini/python/IECoreHoudini/_IECoreHoudini", houdiniPythonSources )
+		houdiniPythonModuleEnv.Depends( houdiniPythonModule, houdiniLib )
+		houdiniPythonModuleInstall = houdiniPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreHoudini", houdiniPythonScripts + houdiniPythonModule )
+		houdiniPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniPythonModuleEnv, houdiniPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall )
+		houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall )
+		
+		#=====
+		# build otls
+		#=====
+		otlPath = "contrib/IECoreHoudini/otls/ieCoreHoudini"
+		otlTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$IECORE_NAME" ) ) + ".otl"
+		otlCommand = houdiniPluginEnv.Command( otlTarget, otlPath, "$HOUDINI_ROOT/bin/hotl -c %s $TARGET" % otlPath )
+		otlInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIOTL_DIR", source=[ otlTarget ] )
+		houdiniPluginEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIOTL_DIR"] ) )
+		houdiniPluginEnv.Alias( "install", otlInstall )
+		houdiniPluginEnv.Alias( "installHoudini", otlInstall )
+		
+		#=====
+		# install icons
+		#=====
+		houdiniIcons = glob.glob( "contrib/IECoreHoudini/icons/*.svg" )
+		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
+		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
+		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )
+		
+		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
 
 ###########################################################################################
 # Build and install the coreTruelight library and headers

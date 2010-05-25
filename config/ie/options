@@ -269,9 +269,16 @@ if targetApp=="houdini" :
 	BOOST_INCLUDE_PATH = "/software/tools/include/boost/" + boostVersion
 	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + boostVersion.replace( ".", "_" )
 	
-	## \todo: debug boost 1.33.1 backward compatibility issues within IECoreGL
-	WITH_GL=0
-
+	if "-Werror" in CXXFLAGS :
+		CXXFLAGS.remove( "-Werror" )
+	
+	HOUDINI_ROOT = houdiniReg['location']
+	HOUDINI_CXX_FLAGS = '-DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -c  -DGCC4 -DGCC3 -Wno-deprecated -Wall -W -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wno-uninitialized -Wunused -Wno-unused-parameter -O2 -DMAKING_DSO'
+	INSTALL_HOUDINILIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_HOUDINIPLUGIN_NAME = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
+	INSTALL_HOUDINIOTL_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/otls/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/"
+	INSTALL_HOUDINIICON_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/icons/"
+	
 # find truelight, unless we're on osx, where we haven't got it to link yet
 if not IEEnv.platformOS().startswith("osx") :
 	try :
