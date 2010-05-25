@@ -858,9 +858,9 @@ class TestRenderer( unittest.TestCase ) :
 			def render( self, renderer ):
 				myMesh.render( renderer )
 				if self.__level < 2 :
-					for i in xrange( 0, 200 ) :
-						proc = MyProc( self.__level + 1 )
-						renderer.procedural( proc )
+					childCount = 50
+					for i in xrange( 0, childCount ) :
+						renderer.procedural( MyProc( self.__level + 1 ) )
 
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
