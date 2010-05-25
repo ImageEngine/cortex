@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// \todo Simple types should handle True/False tests based on their content. Ex.: IntData(0) should be False, IntData(3) should be True. Types like IntVectorData already handle such tests that way (IntVectorData([]) is False and other values are True).
-
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TypedData.inl"
 
