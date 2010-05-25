@@ -857,8 +857,8 @@ class TestRenderer( unittest.TestCase ) :
 				return Box3f( V3f( -1 ), V3f( 1 ) )
 			def render( self, renderer ):
 				myMesh.render( renderer )
-				if self.__level < 3 :
-					for i in xrange( 0, 60 ) :
+				if self.__level < 2 :
+					for i in xrange( 0, 200 ) :
 						proc = MyProc( self.__level + 1 )
 						renderer.procedural( proc )
 
