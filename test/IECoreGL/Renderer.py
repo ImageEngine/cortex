@@ -845,6 +845,32 @@ class TestRenderer( unittest.TestCase ) :
 		self.assert_( g.bound().min.equalWithAbsError( V3f( -1, 4, 9 ), 0.001 ) )
 		self.assert_( g.bound().max.equalWithAbsError( V3f( 4, 11, 31 ), 0.001 ) )
 	
+	def testCuriousCrashOnThreadedProceduralsAndGarbageCollection( self ):
+
+		myMesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+
+		class MyProc( Renderer.Procedural ):
+			def __init__( self, level = 0 ):
+				Renderer.Procedural.__init__( self )
+				self.__level = level
+			def bound( self ) :
+				return Box3f( V3f( -1 ), V3f( 1 ) )
+			def render( self, renderer ):
+				myMesh.render( renderer )
+				if self.__level < 3 :
+					for i in xrange( 0, 60 ) :
+						proc = MyProc( self.__level + 1 )
+						renderer.procedural( proc )
+
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		r.worldBegin()
+		p = MyProc()
+		r.procedural( p )
+		r.worldEnd()
+
 	def tearDown( self ) :
 
 		files = [
