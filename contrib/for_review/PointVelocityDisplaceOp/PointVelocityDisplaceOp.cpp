@@ -2,7 +2,7 @@
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -55,34 +55,69 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( PointVelocityDisplaceOp );
 
-//static TypeId pointAndVelocityTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
-
 PointVelocityDisplaceOp::PointVelocityDisplaceOp()
 	:	ModifyOp(
-		"Displaces points using their velocity (v) attribute.",
-		new PointsPrimitiveParameter(
+		"Displaces points using a velocity attribute.",
+		new PrimitiveParameter(
 			"result",
-			"The updated positions for points.",
+			"The updated Primitive with displace points.",
 			new PointsPrimitive()
 			),
-		new PointsPrimitiveParameter(
+		new PrimitiveParameter(
 			"input",
-			"The input points to displace.",
+			"The input Primitive with points to displace.",
 			new PointsPrimitive()
 			)
 		)
 {
+	m_positionVarParameter = new StringParameter(
+		"positionVar",
+		"The variable name to use as per-point position.",
+		"P" );
+
+	m_velocityVarParameter = new StringParameter(
+		"velocityVar",
+		"The variable name to use as per-point velocity.",
+		"v" );
 
 	m_sampleLengthParameter = new FloatParameter(
-		"samplelength",
+		"sampleLength",
 		"The sample time across which to displace P.",
 		1.0 );
 
+	m_sampleLengthVarParameter = new StringParameter(
+		"sampleLengthVar",
+		"The variable name to use as per-point sample length.",
+		"" );
+
+	parameters()->addParameter( m_positionVarParameter );
+	parameters()->addParameter( m_velocityVarParameter );
 	parameters()->addParameter( m_sampleLengthParameter );
+	parameters()->addParameter( m_sampleLengthVarParameter );
 }
 
 PointVelocityDisplaceOp::~PointVelocityDisplaceOp()
 {
+}
+
+StringParameter * PointVelocityDisplaceOp::positionVarParameter()
+{
+	return m_positionVarParameter;
+}
+
+const StringParameter * PointVelocityDisplaceOp::positionVarParameter() const
+{
+	return m_positionVarParameter;
+}
+
+StringParameter * PointVelocityDisplaceOp::velocityVarParameter()
+{
+	return m_velocityVarParameter;
+}
+
+const StringParameter * PointVelocityDisplaceOp::velocityVarParameter() const
+{
+	return m_velocityVarParameter;
 }
 
 FloatParameter * PointVelocityDisplaceOp::sampleLengthParameter()
@@ -95,36 +130,94 @@ const FloatParameter * PointVelocityDisplaceOp::sampleLengthParameter() const
 	return m_sampleLengthParameter;
 }
 
+StringParameter * PointVelocityDisplaceOp::sampleLengthVarParameter()
+{
+	return m_sampleLengthVarParameter;
+}
+
+const StringParameter * PointVelocityDisplaceOp::sampleLengthVarParameter() const
+{
+	return m_sampleLengthVarParameter;
+}
+
 void PointVelocityDisplaceOp::modify( Object *input, const CompoundObject *operands )
 {
-	PointsPrimitive *pt = runTimeCast<PointsPrimitive>( input );
-	float sample_length = m_sampleLengthParameter->getNumericValue();
-	if ( !pt )
-		return;
+	// get input and parameters
+	Primitive *pt = static_cast<Primitive *>( input );
+	std::string position_var = operands->member<StringData>( "positionVar" )->readable();
+	std::string velocity_var = operands->member<StringData>( "velocityVar" )->readable();
+	float sample_length = operands->member<FloatData>( "sampleLength" )->readable();
+	std::string sample_length_var = operands->member<StringData>( "sampleLengthVar" )->readable();
 
-	// check for P and V
-	if ( pt->variables.count("P")==0 || pt->variables.count("v")==0 )
-		return;
+	// should we look for pp sample length?
+	bool use_pp_sample_length = ( sample_length_var!="" );
+
+	// check for variables
+	if ( pt->variables.count(position_var)==0 )
+	{
+		throw Exception( "Could not find position variable on primitive!" );
+	}
+	if ( pt->variables.count(velocity_var)==0 )
+	{
+		throw Exception( "Could not find velocity variable on primitive!" );
+	}
 
 	// access our P & V information
-	V3fVectorDataPtr p = runTimeCast<V3fVectorData>(pt->variables["P"].data);
-	V3fVectorDataPtr v = runTimeCast<V3fVectorData>(pt->variables["v"].data);
+	V3fVectorData *p = pt->variableData<V3fVectorData>(position_var);
+	V3fVectorData *v = pt->variableData<V3fVectorData>(velocity_var);
 	if ( !p || !v )
-		return;
+	{
+		throw Exception("Could not get position and velocity data from primitive!");
+	}
 
 	// check P and V are the same length
-	if ( p->readable().size()!=v->readable().size() )
-		return;
-	
-	// modify P by ( V * samplelen )
 	std::vector<V3f> &p_data = p->writable();
-	std::vector<V3f>::iterator p_it = p_data.begin();
 	const std::vector<V3f> &v_data = v->readable();
-	std::vector<V3f>::const_iterator v_it = v_data.begin();
-
-	for ( p_it=p_data.begin(), v_it=v_data.begin();
-		  p_it!=p_data.end(); ++p_it, ++v_it )
+	if ( p_data.size()!=v_data.size() )
 	{
-		(*p_it) += (*v_it) * sample_length;
+		throw Exception("Position and velocity variables must be the same length!");
+	}
+
+	// update p using v
+	if ( !use_pp_sample_length )
+	{
+		std::vector<V3f>::iterator p_it = p_data.begin();
+		std::vector<V3f>::const_iterator v_it = v_data.begin();
+		for ( p_it=p_data.begin(), v_it=v_data.begin();
+				p_it!=p_data.end(); ++p_it, ++v_it )
+		{
+			(*p_it) += (*v_it) * sample_length;
+		}
+	}
+	else
+	{
+		// check for pp sample length variable
+		if( pt->variables.count(sample_length_var)==0 )
+		{
+			throw Exception( "Could not find sample length variable on primitive!" );
+		}
+
+		// get data from parameter
+		FloatVectorData *s = pt->variableData<FloatVectorData>(sample_length_var);
+		if ( !s )
+		{
+			throw Exception("Could not get scale length data from primitive!");
+		}
+
+		// check size against p_data
+		const std::vector<float> &s_data = s->readable();
+		if ( s_data.size()!=p_data.size() )
+		{
+			throw Exception("Position and scale length variables must be the same length!");
+		}
+
+		std::vector<V3f>::iterator p_it = p_data.begin();
+		std::vector<V3f>::const_iterator v_it = v_data.begin();
+		std::vector<float>::const_iterator s_it = s_data.begin();
+		for ( p_it=p_data.begin(), v_it=v_data.begin(), s_it=s_data.begin();
+				p_it!=p_data.end(); ++p_it, ++v_it, ++s_it )
+		{
+			(*p_it) += (*v_it) * (*s_it) * sample_length;
+		}
 	}
 }

@@ -2,7 +2,7 @@
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,18 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( ObjectParameter )
 
 /// The PointVelocityDisplaceOp displaces points by their velocity (v).
-/// The input PointsPrimitive must have "P" and "v" data and the must
-/// be the same length.
+/// the input Primitive should have two V3fVectorData primitive variables
+/// specified by the positionVar and velocityVar parameters (default to 'P'
+/// and 'v' respectively). These variables must have the same number of
+/// entries.
+///
+/// A uniform velocity scale can be applied using the sampleLength parameter.
+/// In addition this scale can be modulated on a per-point basis be specifying
+/// an addition variable via the sampleLengthVar parameter (defaults to an empty
+/// string).
+///
+/// Pnew = P + ( v * sampleLength )
+
 class PointVelocityDisplaceOp : public ModifyOp
 {
 	public :
@@ -57,14 +67,23 @@ class PointVelocityDisplaceOp : public ModifyOp
 		PointVelocityDisplaceOp();
 		virtual ~PointVelocityDisplaceOp();
 
+		StringParameter * positionVarParameter();
+		const StringParameter * positionVarParameter() const;
+		StringParameter * velocityVarParameter();
+		const StringParameter * velocityVarParameter() const;
 		FloatParameter * sampleLengthParameter();
 		const FloatParameter * sampleLengthParameter() const;
+		StringParameter * sampleLengthVarParameter();
+		const StringParameter * sampleLengthVarParameter() const;
 
 	protected :
 		virtual void modify( Object *object, const CompoundObject * operands );
 
 	private :
+		StringParameterPtr m_positionVarParameter;
+		StringParameterPtr m_velocityVarParameter;
 		FloatParameterPtr m_sampleLengthParameter;
+		StringParameterPtr m_sampleLengthVarParameter;
 };
 
 IE_CORE_DECLAREPTR( PointVelocityDisplaceOp );

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
+#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -45,19 +45,12 @@ class TestPointVelocityDisplaceOp( unittest.TestCase ) :
 
 		# check calling with no arguments
 		o = PointVelocityDisplaceOp()
-		p = o()
-		self.assert_( p.isInstanceOf( PointsPrimitive.staticTypeId() ) )
-		self.assertEqual( len(p), 0 )
+		self.assertRaises( RuntimeError, o )
 
 		# check not passing v is a passthru
 		o = PointVelocityDisplaceOp()
 		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f(0) ] ) )
-		p = o( input=pts, copyInput=True )
-		self.assertEqual( p, pts )
-		p = o( input=pts )		
-		self.assertEqual( p, pts )
-		self.assertTrue( p.isInstanceOf( PointsPrimitive.staticTypeId() ) )
-		self.assertEqual( len(p), 1 )
+		self.assertRaises( RuntimeError, o, input=pts, copyInput=True )
 
 		# check it works
 		o = PointVelocityDisplaceOp()
@@ -81,16 +74,55 @@ class TestPointVelocityDisplaceOp( unittest.TestCase ) :
 		o = PointVelocityDisplaceOp()
 		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1,2,3 ), V3f( 4,5,6 ) ] ) )
 		pts["v"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1 ), V3f( 2, 1, 3 ) ] ) )
-		p = o(input=pts, samplelength=0.5)
+		p = o(input=pts, sampleLength=0.5)
 		self.assertEqual( p["P"].data, V3fVectorData([ V3f(1.5,2.5,3.5), V3f(5,5.5,7.5) ] ) )
 
-		# check that len(p)!=len(v) is a passthru
+		# check that len(p)!=len(v) raises exception
 		o = PointVelocityDisplaceOp()
 		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f(0), V3f(1), V3f(2) ] ) )
 		pts["v"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1 ) ] ) )
-		p = o(input=pts)
-		self.assertEqual( p["P"].data, V3fVectorData( [ V3f(0), V3f(1), V3f(2) ] ) )
+		self.assertRaises( RuntimeError, o, input=pts )
 
+		# check that it works with other primitives
+		o = PointVelocityDisplaceOp()
+		c = MeshPrimitive.createBox( Box3f( V3f(0), V3f(1) ) )
+		self.assertEqual( len(c['P'].data), 8 )
+		v = V3fVectorData( [] )
+		v.resize( 8, V3f(1) )
+		c['v'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, v )
+		c2 = o(input=c)
+		for i in range(8):
+			self.assertEqual( c2['P'].data[i], c['P'].data[i] + c['v'].data[i] )
+
+		# check that it works with pervertex samplelength
+		o = PointVelocityDisplaceOp()
+		s = FloatVectorData( [] )
+		for i in range(8):
+			s.append( 0.1 * i )
+		c['s'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, s )
+		c2 = o(input=c, sampleLengthVar="s")
+		for i in range(8):
+			self.assertEqual( c2['P'].data[i], c['P'].data[i] + (c['v'].data[i] * c['s'].data[i]) )
+
+		# check that samplelength array length check raises
+		o = PointVelocityDisplaceOp()
+		s = FloatVectorData( [] )
+		for i in range(4):
+			s.append( 0.1 * i )
+		c['s'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, s )
+		self.assertRaises( RuntimeError, o, input=pts, sampleLengthVar="s" )
+
+		# check that it works with different var names
+		o = PointVelocityDisplaceOp()
+		c = MeshPrimitive.createBox( Box3f( V3f(0), V3f(1) ) )
+		MeshNormalsOp()( input=c, copyInput=False )
+		self.assertTrue( "N" in c )
+		c['bob'] = c['P']
+		del c['P']
+		self.assertEqual( len(c.keys()), 2 )
+		c2 = o(input=c, positionVar="bob", velocityVar="N")
+		for i in range(8):
+			self.assertEqual( c2['bob'].data[i], c['bob'].data[i] + c['N'].data[i] )
 
 if __name__ == "__main__":
 	unittest.main()
