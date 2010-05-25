@@ -491,7 +491,7 @@ o.Add(
 
 o.Add(
 	"INSTALL_HOUDINIICON_DIR",
-	"The name under which to install houdini icons.",
+	"The directory under which to install houdini icons.",
 	"$INSTALL_PREFIX/houdini/icons",
 )
 
