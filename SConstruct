@@ -1731,6 +1731,9 @@ if doConfigure :
 
 houdiniEnvSets = {
 	"IECORE_NAME" : "IECoreHoudini",
+	"CXXFLAGS" : [
+		"$HOUDINI_CXX_FLAGS",
+	],
 }
 
 houdiniEnvAppends = {
@@ -1743,9 +1746,6 @@ houdiniEnvAppends = {
 	"CPPFLAGS" : [
 		"-DLINUX",
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-	"CXXFLAGS" : [
-		"$HOUDINI_CXX_FLAGS",
 	],
 	"LIBPATH" : [
 		"$HOUDINI_LIB_PATH",
