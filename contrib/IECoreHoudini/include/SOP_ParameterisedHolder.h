@@ -101,6 +101,10 @@ namespace IECoreHoudini
 					}
 			}
 
+			/// Method for loading a ParameterisedProcedural from disk
+			IECore::RunTimeTypedPtr loadParameterised( const std::string &type,
+					int version, const std::string &search_path );
+
 		protected:
 			bool m_requiresUpdate;
 

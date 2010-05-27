@@ -95,6 +95,8 @@ class FnProceduralHolder():
 		self.removeParameters()
 
 		# add parameters
+		if not procedural:
+			return
 		parm_names = []
 		parm_update_gui = []
 		for p in procedural.parameters().values():

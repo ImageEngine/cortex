@@ -46,7 +46,9 @@
 
 // IECoreHoudini
 #include "SOP_ParameterisedHolder.h"
-#include "GU_ProceduralDetail.h"
+
+// IECoreGL
+#include "IECoreGL/Scene.h"
 
 namespace IECoreHoudini
 {
@@ -68,21 +70,39 @@ namespace IECoreHoudini
 			static PRM_Name opTypeParm;
 			static PRM_Name opVersionParm;
 			static PRM_Name opParmEval;
+			static PRM_Name opReloadBtn;
 			static PRM_Name switcherName;
 			static PRM_Default switcherDefaults[];
+			static PRM_ChoiceList typeMenu;
+			static PRM_ChoiceList versionMenu;
 
-			/// Cook the sop! This method does all the work
-			//virtual unsigned needToCook( OP_Context &context,
-			//		bool queryOnly=false );
+			/// build dynamic procedural menu
+			static void buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
+					const PRM_SpareData *, PRM_Parm * );
+			static void buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
+					const PRM_SpareData *, PRM_Parm * );
+
+			/// callback for when the type/version parameter changes
+			static int reloadClassCallback( void *data, int index, float time,
+					const PRM_Template *tplate);
+
+			/// callback for when we click the reload button
+			static int reloadButtonCallback( void *data, int index, float time,
+					const PRM_Template *tplate);
 
 			/// handle loading our SOP from disk (i.e. when a hip is loaded)
 			virtual bool load( UT_IStream &is, const char *ext,
 					const char *path );
 
-			/// Utility method to load a ParameterisedProcedural from disk
-			IECore::RunTimeTypedPtr loadParameterised( const std::string &type,
-					int version,
-					const std::string &search_path="IECORE_PROCEDURAL_PATHS" );
+			/// creates and sets a particular type/version of class on this sop
+			void setClassAndVersion( const std::string &type, int version, bool update_gui=true );
+
+            /// returns a GL scene, rendering it if necessary
+            IECoreGL::ConstScenePtr scene();
+
+            /// mark this procedural's scene as dirty
+            void dirty(){ m_renderDirty = true; }
+            bool isDirty(){ return m_renderDirty; }
 
 		protected:
 			SOP_ProceduralHolder( OP_Network *net,
@@ -92,9 +112,32 @@ namespace IECoreHoudini
 			virtual OP_ERROR cookMySop( OP_Context &context );
 
 		private:
-			/// The GU_Detail that carries all the important information
-			/// across to our GR_Procedural render hook
-			GU_ProceduralDetail *mp_detail;
+			// our cache GL scene
+			IECoreGL::ScenePtr m_scene;
+    		bool m_renderDirty;
+
+    		// class type/version
+			std::string m_className;
+			int m_classVersion;
+
+			// cache the procedural names
+			std::vector<std::string> m_cachedProceduralNames;
+	};
+
+	/// Lightweight class used to pass a pointer to our SOP
+	/// to the Render hook via a GB_ATTRIB_MIXED detail attribute.
+	class SOP_ProceduralPassStruct
+	{
+		public:
+			SOP_ProceduralPassStruct( SOP_ProceduralHolder *ptr ) :
+				m_ptr(ptr)
+				{}
+			~SOP_ProceduralPassStruct()
+				{}
+			SOP_ProceduralHolder *ptr(){ return m_ptr; }
+
+		private:
+			SOP_ProceduralHolder *m_ptr;
 	};
 
 } // namespace IECoreHoudini

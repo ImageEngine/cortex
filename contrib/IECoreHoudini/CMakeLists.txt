@@ -101,7 +101,6 @@ add_library( houdini_plugin
  	SHARED
   	${CMAKE_SOURCE_DIR}/src/plugin/Plugin.cpp
   	${CMAKE_SOURCE_DIR}/src/GR_Procedural.cpp
- 	${CMAKE_SOURCE_DIR}/src/GU_ProceduralDetail.cpp
  	)
 
 set_target_properties( houdini_plugin

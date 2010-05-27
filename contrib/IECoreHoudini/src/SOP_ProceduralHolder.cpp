@@ -61,8 +61,17 @@
 #include <IECore/SimpleTypedData.h>
 #include <IECorePython/ScopedGILLock.h>
 
+// IECoreGL
+#include "IECoreGL/IECoreGL.h"
+#include "IECoreGL/GL.h"
+#include "IECoreGL/Renderer.h"
+#include "IECoreGL/Scene.h"
+
 // OpenEXR
 #include <OpenEXR/ImathBox.h>
+
+// C++
+#include <sstream>
 
 // Boost
 #include "boost/python.hpp"
@@ -78,22 +87,29 @@ using namespace boost;
 using namespace IECoreHoudini;
 
 /// Parameter names for non-dynamic SOP parameters
-PRM_Name SOP_ProceduralHolder::opTypeParm( "__opType", "Op Type:" );
-PRM_Name SOP_ProceduralHolder::opVersionParm( "__opVersion", "Op Version:" );
+PRM_Name SOP_ProceduralHolder::opTypeParm( "__opType", "Procedural:" );
+PRM_Name SOP_ProceduralHolder::opVersionParm( "__opVersion", "  Version:" );
 PRM_Name SOP_ProceduralHolder::opParmEval( "__opParmEval", "ParameterEval" );
+PRM_Name SOP_ProceduralHolder::opReloadBtn( "__opReloadBtn", "Reload" );
 PRM_Name SOP_ProceduralHolder::switcherName( "__switcher", "Switcher" );
+
+PRM_ChoiceList SOP_ProceduralHolder::typeMenu( PRM_CHOICELIST_SINGLE,
+		&SOP_ProceduralHolder::buildTypeMenu );
+PRM_ChoiceList SOP_ProceduralHolder::versionMenu( PRM_CHOICELIST_SINGLE,
+		&SOP_ProceduralHolder::buildVersionMenu );
 
 /// Detail for our switcher
 PRM_Default SOP_ProceduralHolder::switcherDefaults[] = {
-		PRM_Default(3, "Class"),
+		PRM_Default(4, "Class"),
 		PRM_Default(0, "Parameters"),
 };
 
 /// Add parameters to SOP
 PRM_Template SOP_ProceduralHolder::myParameters[] = {
 		PRM_Template(PRM_SWITCHER, 2, &switcherName, switcherDefaults ),
-		PRM_Template(PRM_STRING, 1, &opTypeParm),
-		PRM_Template(PRM_STRING, 1, &opVersionParm),
+		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
+		PRM_Template(PRM_STRING, 1, &opVersionParm, 0, &versionMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
+		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_ProceduralHolder::reloadButtonCallback ),
 		PRM_Template(PRM_INT, 1, &opParmEval),
         PRM_Template()
 };
@@ -116,19 +132,16 @@ SOP_ProceduralHolder::SOP_ProceduralHolder(OP_Network *net,
 		const char *name,
 		OP_Operator *op ) :
 	SOP_ParameterisedHolder(net, name, op),
-	mp_detail( new GU_ProceduralDetail )
+	m_className(""),
+	m_classVersion(-1),
+    m_scene(0),
+    m_renderDirty(true)
 {
-	setString( "", CH_STRING_LITERAL, "__opType", 0, 0 );
-	setString( "", CH_STRING_LITERAL, "__opVersion", 0, 0 );
-	getParm("__opType").setLockedFlag( 0, 1 );
-	getParm("__opVersion").setLockedFlag( 0, 1 );
 	getParm("__opParmEval").getTemplatePtr()->setInvisible(true);
 	getParm("__opParmEval").setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
 	getParm("__opParmEval").setLockedFlag( 0, 1 );
 
-	// set our new detail on our gdphandle
-	if ( myGdpHandle.deleteGdp() )
-		myGdpHandle.allocateAndSet( mp_detail, false );
+	m_cachedProceduralNames = CoreHoudini::proceduralNames();
 }
 
 /// Dtor
@@ -136,11 +149,212 @@ SOP_ProceduralHolder::~SOP_ProceduralHolder()
 {
 }
 
-///
-//unsigned SOP_ProceduralHolder::needToCook( OP_Context &context, bool queryOnly )
-//{
-//	return true;
-//}
+/// Build type menu
+void SOP_ProceduralHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
+		const PRM_SpareData *, PRM_Parm * )
+{
+	SOP_ProceduralHolder *me = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	if ( !me )
+		return;
+
+	menu[0].setToken( "" );
+	menu[0].setLabel( "< No Procedural >" );
+	unsigned int pos=1;
+
+	std::vector<std::string> &class_names = me->m_cachedProceduralNames;
+	std::vector<std::string>::iterator it;
+	for ( it=class_names.begin(); it!=class_names.end(); ++it )
+	{
+		menu[pos].setToken( (*it).c_str() );
+		menu[pos].setLabel( (*it).c_str() );
+		++pos;
+	}
+
+	// mark the end of our menu
+	menu[pos].setToken(0);
+}
+
+/// Build version menu
+void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
+		const PRM_SpareData *, PRM_Parm *)
+{
+	SOP_ProceduralHolder *me = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	if ( !me )
+		return;
+
+	unsigned int pos=0;
+	if ( me->m_className!="" )
+	{
+		std::vector<int> class_versions = CoreHoudini::proceduralVersions( me->m_className );
+		std::vector<int>::iterator it;
+		for ( it=class_versions.begin(); it!=class_versions.end(); ++it )
+		{
+	        std::stringstream ss;
+	        ss << (*it);
+			menu[pos].setToken( ss.str().c_str() );
+			menu[pos].setLabel( ss.str().c_str() );
+			++pos;
+		}
+	}
+
+	if ( pos==0 )
+	{
+		menu[0].setToken( "" );
+		menu[0].setLabel( "< No Version >" );
+		++pos;
+	}
+
+	// mark the end of our menu
+	menu[pos].setToken(0);
+}
+
+void SOP_ProceduralHolder::setClassAndVersion( const std::string &type, int version, bool update_gui )
+{
+	// load & set the procedural
+	IECore::RunTimeTypedPtr proc;
+	if ( type!="" && version!=-1 )
+	{
+		proc = loadParameterised( type, version, "IECORE_PROCEDURAL_PATHS" );
+	}
+
+	// check our procedural
+	if ( proc )
+	{
+		FnProceduralHolder fn;
+		fn.setParameterisedDirectly( proc, type, version, this );
+	}
+	else
+	{
+		UT_String msg( "Procedural Holder has no parameterised class to operate on!" );
+    	addError( SOP_MESSAGE, msg );
+	}
+
+	// if required, update the parameter interface on the SOP
+	if ( update_gui )
+	{
+		// update the parameter interface using the FnProceduralHolder.addRemoveParameters()
+		// python method from the IECoreHoudini module.
+		UT_String my_path;
+		getFullPath( my_path );
+		std::string cmd = "IECoreHoudini.FnProceduralHolder( hou.node( \"";
+		cmd += my_path.buffer();
+		cmd += "\") )";
+		{
+			IECorePython::ScopedGILLock lock;
+			try
+			{
+				handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
+					CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
+				object fn( resultHandle );
+				fn.attr("addRemoveParameters")( proc );
+			}
+			catch( ... )
+			{
+				PyErr_Print();
+			}
+		}
+	}
+}
+
+/// Callback executed whenever the type/version menus change
+int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time,
+		const PRM_Template *tplate)
+{
+	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	if ( !sop )
+		return 0;
+
+	bool reload_refresh = false;
+	UT_String type_str, ver_str;
+	sop->evalString( type_str, "__opType", 0, 0 );
+	std::string type( type_str.buffer() );
+	sop->evalString( ver_str, "__opVersion", 0, 0 );
+	int version = -1;
+	if ( ver_str!="" )
+		version = boost::lexical_cast<int>( ver_str.buffer() );
+
+	// has our type changed?
+	if ( type!=sop->m_className )
+	{
+		sop->m_className = type;
+		version = -1;
+		reload_refresh = true;
+	}
+
+	// has the version changed?
+	if ( version!=sop->m_classVersion )
+	{
+		sop->m_classVersion = version;
+		reload_refresh = true;
+	}
+
+	// if necessary reload and update the interface
+	if ( reload_refresh )
+	{
+		sop->m_renderDirty = true; // dirty the scene
+		sop->setParameterised( 0 ); // clear the procedural
+		if ( sop->m_className!="" )
+		{
+			if ( sop->m_classVersion==-1 )
+			{
+				sop->m_classVersion = CoreHoudini::defaultProceduralVersion( sop->m_className );
+				sop->setInt( "__opVersion", 0, 0, sop->m_classVersion );
+			}
+
+			sop->setClassAndVersion( sop->m_className, sop->m_classVersion );
+		}
+	}
+	return static_cast<int>(reload_refresh);
+}
+
+/// Callback executed whenever the reload button is clicked
+int SOP_ProceduralHolder::reloadButtonCallback( void *data, int index, float time,
+		const PRM_Template *tplate)
+{
+	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	if ( !sop )
+		return 0;
+
+	CoreHoudini::evalPython( "IECore.ClassLoader.defaultProceduralLoader().refresh()" );
+	sop->setClassAndVersion( sop->m_className, sop->m_classVersion, false );
+}
+
+/// Redraws the OpenGL Scene if the procedural is marked as having changed
+/// (aka dirty).
+IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
+{
+	IECore::ParameterisedProceduralPtr procedural =
+			IECore::runTimeCast<IECore::ParameterisedProcedural>(
+					getParameterised() );
+
+	if ( !procedural )
+		return 0;
+
+	if ( m_renderDirty || !m_scene )
+	{
+		IECorePython::ScopedGILLock gilLock;
+		try
+		{
+			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
+			renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
+			renderer->worldBegin();
+			procedural->render( renderer );
+			renderer->worldEnd();
+			m_scene = renderer->scene();
+		}
+		catch( const std::exception &e )
+		{
+			std::cerr << e.what() << std::endl;
+		}
+		catch( ... )
+		{
+			std::cerr << "Unknown!" << std::endl;
+		}
+
+		m_renderDirty = false;
+	}
+	return m_scene;
+}
 
 /// Cook the SOP! This method does all the work
 OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
@@ -158,55 +372,33 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
     // force eval of our nodes parameters with our hidden parameter expression
     int parm_eval_result = evalInt( "__opParmEval", 0, now );
 
-    // check for a valid parameterised on this SOP
-    if ( !hasParameterised() )
+	// update parameters on procedural from our Houdini parameters
+	IECore::ParameterisedProceduralPtr procedural =
+			IECore::runTimeCast<IECore::ParameterisedProcedural>(
+					getParameterised() );
+
+	// check for a valid parameterised on this SOP
+    if ( !procedural )
     {
     	UT_String msg( "Procedural Holder has no parameterised class to operate on!" );
     	addError( SOP_MESSAGE, msg );
     	return error();
     }
 
-    // ensure we have a valid GU_ProceduralDetail on this SOP
-	GU_ProceduralDetail *proc_gdp = dynamic_cast<GU_ProceduralDetail *>(gdp);
-	if ( !proc_gdp )
-	{
-		myGdpHandle.unlock( gdp );
-		proc_gdp = mp_detail;
-		GU_Detail *old_handle = myGdpHandle.setGdp( proc_gdp );
-		if ( old_handle == proc_gdp )
-        {
-        	UT_String msg( "SERIOUS ERROR! Could not set "
-        			"IECoreHoudini::ProceduralDetail on this SOP!" );
-        	addError( SOP_MESSAGE, msg );
-        	return error();
-        }
-		myGdpHandle.writeLock();
-	}
-
-	// Here we create a new ProceduralPrimitive and attach it to our detail.
-	IECore::ParameterisedProceduralPtr procedural =
-			IECore::runTimeCast<IECore::ParameterisedProcedural>(
-					getParameterised() );
-	proc_gdp->m_procedural = procedural;
-
-	// check we got a parameterised procedural
-	if ( !procedural )
-	{
-		UT_String msg( "IECore::ParameterisedPtr is not a valid "
-				"ParameterisedProcedural!\n" );
-		addError( SOP_MESSAGE, msg );
-		return error();
-	}
-
 	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building OpHolder Geometry...");
-	proc_gdp->clearAndDestroy();
+	gdp->clearAndDestroy();
 
-	// update parameters on procedural from our Houdini parameters
+	// do we need to redraw?
 	bool do_update = updateParameters( procedural, now);
 	if ( do_update )
-		proc_gdp->dirty();
+		dirty();
+
+	// pass this sop instance to the GR render hook via a detail attribute
+	SOP_ProceduralPassStruct sop_pass( this );
+	gdp->addAttrib( "IECoreHoudini::SOP_ProceduralHolder",
+			sizeof(SOP_ProceduralPassStruct), GB_ATTRIB_MIXED, &sop_pass );
 
 	// calculate our bounding box
 	IECorePython::ScopedGILLock gilLock;
@@ -230,7 +422,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 	}
 
 	// put a box in our gdp to represent our bounds
-	proc_gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y,
+	gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y,
 			bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
 
 	// tidy up & go home!
@@ -248,54 +440,21 @@ bool SOP_ProceduralHolder::load( UT_IStream &is,
 {
 	OP_Node::load( is, ext, path );
 
-	// if type && version != ""
-	//    create new procedural from type/version
-	//    set parameterised with new procedural
-	UT_String opType, opVersion;
-	evalString( opType, "__opType", 0, 0 );
-	evalString( opVersion, "__opVersion", 0, 0 );
-	if ( opType!="" && opVersion!="" )
+	// look at type/version parameters
+	UT_String type_str, ver_str;
+	evalString( type_str, "__opType", 0, 0 );
+	std::string type( type_str.buffer() );
+	evalString( ver_str, "__opVersion", 0, 0 );
+	m_className = type_str.buffer();
+	m_classVersion = -1;
+	if ( ver_str!="" )
 	{
-		std::string type( opType.buffer() );
-		int version = boost::lexical_cast<int>(std::string(opVersion.buffer()));
-
-		IECore::RunTimeTypedPtr proc = loadParameterised( type, version );
-		if ( proc )
-		{
-			FnProceduralHolder fn;
-			fn.setParameterisedDirectly( proc, type, version, this );
-		}
+		m_classVersion = boost::lexical_cast<int>(ver_str.buffer());
 	}
-}
 
-/// Utility class which loads a ParameterisedProcedural from Disk
-/// TODO - This should probably be moved to FnParameterisedHolder?
-IECore::RunTimeTypedPtr SOP_ProceduralHolder::loadParameterised(
-		const std::string &type,
-		int version,
-		const std::string &search_path )
-{
-	IECore::RunTimeTypedPtr new_procedural;
-	IECorePython::ScopedGILLock gilLock;
-
-	string python_cmd = boost::str( format(
-			"IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n"
-		) % search_path % type % version );
-
-	try
+	// if we can, set our class & version
+	if ( m_className!="" && m_classVersion!=-1 )
 	{
-		boost::python::handle<> resultHandle( PyRun_String(
-			python_cmd.c_str(),
-			Py_eval_input, CoreHoudini::globalContext().ptr(),
-			CoreHoudini::globalContext().ptr() )
-		);
-		boost::python::object result( resultHandle );
-		new_procedural =
-				boost::python::extract<IECore::RunTimeTypedPtr>(result)();
+		setClassAndVersion( m_className, m_classVersion, false );
 	}
-	catch( ... )
-	{
-		PyErr_Print();
-	}
-	return new_procedural;
 }

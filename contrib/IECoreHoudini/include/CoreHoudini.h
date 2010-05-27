@@ -38,6 +38,7 @@
 
 #include <boost/python.hpp>
 #include <string>
+#include <vector>
 
 namespace IECoreHoudini
 {
@@ -59,6 +60,14 @@ namespace IECoreHoudini
 
 			/// Utility method for getting the current global time
 			static float currTime();
+
+			/// Run misc python command
+			static void evalPython( const std::string &cmd );
+
+			/// get the procedurals we could load
+			static std::vector<std::string> proceduralNames();
+			static std::vector<int> proceduralVersions( const std::string &type );
+			static int defaultProceduralVersion( const std::string &type );
 
 		private:
 			/// our global context

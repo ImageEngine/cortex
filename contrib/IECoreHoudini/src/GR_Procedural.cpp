@@ -54,7 +54,7 @@
 
 // IECoreHoudini
 #include "GR_Procedural.h"
-#include "GU_ProceduralDetail.h"
+#include "SOP_ProceduralHolder.h"
 using namespace IECoreHoudini;
 
 // ctor
@@ -73,10 +73,9 @@ int GR_Procedural::getWireMask( GU_Detail *gdp,
 		const GR_DisplayOption *dopt
 		) const
 {
-    GU_ProceduralDetail *detail = dynamic_cast<GU_ProceduralDetail*>(gdp);
-    if ( detail )
-        return 0;
-    else
+	if ( gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
+		return 0;
+	else
     	return GEOPRIMALL;
 }
 
@@ -86,8 +85,7 @@ int GR_Procedural::getShadedMask( GU_Detail *gdp,
 		const GR_DisplayOption *dopt
 		) const
 {
-    GU_ProceduralDetail *detail = dynamic_cast<GU_ProceduralDetail*>(gdp);
-    if ( detail )
+	if ( gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
         return 0;
     else
     	return GEOPRIMALL;
@@ -125,15 +123,19 @@ void GR_Procedural::renderWire( GU_Detail *gdp,
     const GU_PrimGroupClosure *hidden_geometry
     )
 {
-    GU_ProceduralDetail *detail = dynamic_cast<GU_ProceduralDetail*>(gdp);
-    if ( !detail )
-        return;
+	if ( !gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
+		return;
+
+	int attr_offset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
+	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>(attr_offset);
+	if ( !sop )
+		return;
 
     // our render state
     IECoreGL::ConstStatePtr displayState = getDisplayState( dopt, true );
 
 	// our render scene
-	IECoreGL::ConstScenePtr scene = detail->scene();
+	IECoreGL::ConstScenePtr scene = sop->ptr()->scene();
     if ( !scene )
     	return;
 
@@ -153,15 +155,19 @@ void GR_Procedural::renderShaded( GU_Detail *gdp,
 		const GU_PrimGroupClosure *hidden_geometry
 		)
 {
-	GU_ProceduralDetail *detail = dynamic_cast<GU_ProceduralDetail*>(gdp);
-    if ( !detail )
-        return;
+	if ( !gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
+		return;
+
+	int attr_offset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
+	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>(attr_offset);
+	if ( !sop )
+		return;
 
     // our render state
     IECoreGL::ConstStatePtr displayState = getDisplayState( dopt, false );
 
 	// our render scene
-    IECoreGL::ConstScenePtr scene = detail->scene();
+	IECoreGL::ConstScenePtr scene = sop->ptr()->scene();
     if ( !scene )
     	return;
 

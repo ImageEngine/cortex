@@ -37,6 +37,7 @@
 
 // Houdini
 #include <OP/OP_Director.h>
+#include <GEO/GEO_Vertex.h>
 
 // Boost
 #include <boost/python.hpp>
@@ -111,10 +112,16 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 	// do some conversion!
 	ObjectPtr return_obj = 0;
 	const GEO_PointList &points = m_geo->points();
-	const GEO_PrimList &prims = m_geo->primitives();
+	const GEO_PrimList &prims = m_geo->primitives() ;
 	int npoints = points.entries();
-	int nprims = 0; // TODO: support meshes!
-	int nverts = 0; // TODO: support meshes!
+	int nprims = prims.entries();
+	int nverts = 0;
+	for ( unsigned int i=0; i<nprims; ++i )
+	{
+		if (!(prims(i)->getPrimitiveId() & GEOPRIMPOLY))
+		    continue;
+		nverts += prims(i)->getVertexCount();
+	}
 
 	// get the bbox
 	UT_BoundingBox bbox;
@@ -122,14 +129,83 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 	Imath::Box3f box( Imath::V3f(bbox.xmin(), bbox.ymin(), bbox.zmin()),
 			Imath::V3f(bbox.xmax(), bbox.ymax(), bbox.zmax()) );
 
+	// get attribute names
+	const GEO_PointAttribDict &point_attribs = m_geo->pointAttribs();
+	const GEO_PrimAttribDict &primitive_attribs = m_geo->primitiveAttribs();
+	const GEO_VertexAttribDict &vertex_attribs = m_geo->vertexAttribs();
+	const GB_AttributeTable &detail_attribs = m_geo->attribs();
+
+	// process our geometry
 	if ( nprims>0 )
 	{
-		// TODO: support meshes!
 		// looks like a mesh
 		return_obj = new MeshPrimitive();
-		// getAttribInfo( m_geo, primitive_attribs, PRIMITIVE, attr_names, attr_data, attr_interp, nprims );
-		// getAttribInfo( m_geo, primitive_attribs, VERTEX, attr_names, attr_data, attr_interp, nvertes );
-		// extractPrimVertexAttribs( m_geo, prims, names, data, attr_entries, attr_types, attr_offset );
+		MeshPrimitivePtr result = runTimeCast<MeshPrimitive>( return_obj );
+
+		// loop over primitives getting data
+		std::vector<int> verts_per_face;
+		std::vector<int> vert_ids;
+		for ( unsigned int i=0; i<nprims; ++i )
+		{
+			const GEO_Primitive *prim = prims(i);
+			int nprimverts = prim->getVertexCount();
+			verts_per_face.push_back( nprimverts );
+			std::vector<int> ids( nprimverts );
+			for ( unsigned int j=0; j<nprimverts; j++ )
+			{
+				const GEO_Vertex &vert = prim->getVertex(nprimverts-1-j);
+				vert_ids.push_back( vert.getPt()->getNum() );
+			}
+		}
+
+		// set our topology
+		result->setTopology( new IntVectorData(verts_per_face),
+				new IntVectorData(vert_ids) );
+
+		// add position
+		std::vector<Imath::V3f> p_data(npoints);
+		int index = 0;
+		for ( const GEO_Point *curr = points.head(); curr!=0;
+				curr=points.next(curr) )
+		{
+			const UT_Vector4 &pos = curr->getPos();
+			p_data[index++] = Imath::V3f( pos[0], pos[1], pos[2] );
+		}
+		result->variables["P"] = PrimitiveVariable(
+				PrimitiveVariable::Vertex,
+				new V3fVectorData( p_data ) );
+
+		// storage for our names, data and interpolation scheme
+		std::vector<AttributeInfo> info;
+
+		// get point attribute info
+		getAttribInfo( m_geo, &point_attribs, PrimitiveVariable::Varying,
+				info, npoints );
+
+		// get primitive attribute info
+		getAttribInfo( m_geo, &primitive_attribs, PrimitiveVariable::Uniform,
+				info, nprims );
+
+		// get vertex attribute info
+		getAttribInfo( m_geo, &vertex_attribs, PrimitiveVariable::FaceVarying,
+				info, nverts );
+
+		// get detail attribute info
+		getAttribInfo( m_geo, &detail_attribs, PrimitiveVariable::Constant,
+				info, 1 );
+
+		// extract data from SOP attributes
+		extractPointAttribs( m_geo, points, info );
+		extractDetailAttribs( m_geo, info );
+		extractPrimVertAttribs( m_geo, prims, info );
+
+		// add the attributes to our MeshPrimitive
+		for ( unsigned int attr_index=0; attr_index<info.size();
+				++attr_index )
+		{
+			result->variables[info[attr_index].name] = PrimitiveVariable(
+					info[attr_index].interp, info[attr_index].data );
+		}
 	}
 	else
 	{
@@ -150,17 +226,11 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 				PrimitiveVariable::Vertex,
 				new V3fVectorData( p_data ) );
 
-		// get other point attribute names
-		const GEO_PointAttribDict &point_attribs = m_geo->pointAttribs();
-		const GEO_PrimAttribDict &primitive_attribs = m_geo->primitiveAttribs();
-		const GEO_VertexAttribDict &vertex_attribs = m_geo->vertexAttribs();
-		const GB_AttributeTable &detail_attribs = m_geo->attribs();
-
 		// our names, data and interpolation scheme
 		std::vector<AttributeInfo> info;
 
 		// point attributes
-		getAttribInfo( m_geo, &point_attribs, PrimitiveVariable::Vertex, info,
+		getAttribInfo( m_geo, &point_attribs, PrimitiveVariable::Varying, info,
 				npoints );
 
 		// detail attributes
@@ -189,9 +259,6 @@ void FromHoudiniSopConverter::getAttribInfo( const GU_Detail *geo,
 		std::vector<AttributeInfo> &info,
 		int num_entries ) const
 {
-	// temp storage for attributes of this class
-	bool valid = true;
-
 	// extract all the attributes of the desired class
 	for( UT_LinkNode *curr=attribs->head(); curr!=0;
 			curr=attribs->next(curr) )
@@ -200,6 +267,7 @@ void FromHoudiniSopConverter::getAttribInfo( const GU_Detail *geo,
 		if ( !attr )
 			continue;
 
+		bool valid = true;
 		DataPtr d_ptr = 0;
 		int len = 0;
 		switch( attr->getType() )
@@ -295,6 +363,7 @@ void FromHoudiniSopConverter::getAttribInfo( const GU_Detail *geo,
 		{
 			AttributeInfo inf;
 			inf.name = std::string( attr->getName() );
+
 			inf.data = d_ptr;
 			inf.interp = interp_type;
 			inf.entries = len;
@@ -302,10 +371,17 @@ void FromHoudiniSopConverter::getAttribInfo( const GU_Detail *geo,
 			switch( interp_type )
 			{
 				case PrimitiveVariable::Vertex:
+				case PrimitiveVariable::Varying:
 					inf.offset = geo->findPointAttrib( attr );
 					break;
 				case PrimitiveVariable::Constant:
 					inf.offset = geo->findAttrib( attr );
+					break;
+				case PrimitiveVariable::Uniform:
+					inf.offset = geo->findPrimAttrib( attr );
+					break;
+				case PrimitiveVariable::FaceVarying:
+					inf.offset = geo->findVertexAttrib( attr );
 					break;
 				default:
 					inf.offset = -1;
@@ -322,7 +398,7 @@ void FromHoudiniSopConverter::extractPointAttribs( const GU_Detail *geo,
 		std::vector<AttributeInfo> &info
 		) const
 {
-	// loop over points getting P and other data
+	// loop over points getting attribute info
 	unsigned int index = 0;
 	for ( const GEO_Point *curr = points.head(); curr!=0;
 			curr=points.next(curr) )
@@ -330,10 +406,16 @@ void FromHoudiniSopConverter::extractPointAttribs( const GU_Detail *geo,
 		for ( unsigned int attr_index=0; attr_index<info.size();
 				++attr_index )
 		{
-			if ( info[attr_index].interp!=PrimitiveVariable::Vertex ||
-					info[attr_index].offset==-1 )
+			// we can only handle vertex/varying attributes
+			if ( info[attr_index].interp!=PrimitiveVariable::Vertex &&
+					info[attr_index].interp!=PrimitiveVariable::Varying )
 				continue;
 
+			// invalid attribute offset
+			if ( info[attr_index].offset==-1 )
+				continue;
+
+			// extract our point attributes
 			int len = info[attr_index].entries;
 			switch( info[attr_index].type )
 			{
@@ -400,6 +482,7 @@ void FromHoudiniSopConverter::extractDetailAttribs( const GU_Detail *geo,
 		if ( info[attr_index].interp!=PrimitiveVariable::Constant ||
 				info[attr_index].offset==-1 )
 			continue;
+
 		int len = info[attr_index].entries;
 		const GB_AttributeTable &attrs = geo->attribs();
 
@@ -453,4 +536,156 @@ void FromHoudiniSopConverter::extractDetailAttribs( const GU_Detail *geo,
 				break;
 		}
 	}
+}
+
+// extracts detail attributes from the sop into the pre-allocated storage
+void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo,
+		const GEO_PrimList &prims,
+		std::vector<AttributeInfo> &info
+		) const
+{
+	// loop over points getting attribute info
+	unsigned int p_index=0, v_index=0;
+	for ( const GEO_Primitive *curr = prims.head(); curr!=0;
+			curr=prims.next(curr), ++p_index )
+	{
+		//=====
+		// handle primitive attributes
+		for ( unsigned int attr_index=0; attr_index<info.size();
+				++attr_index )
+		{
+			// we can only handle uniform attributes
+			if ( info[attr_index].interp!=PrimitiveVariable::Uniform )
+				continue;
+
+			// invalid attribute offset
+			if ( info[attr_index].offset==-1 )
+				continue;
+
+			// extract our primitive attributes
+			int len = info[attr_index].entries;
+			switch( info[attr_index].type )
+			{
+				case GB_ATTRIB_FLOAT:
+				{
+					const float *ptr = curr->castAttribData<float>(info[attr_index].offset);
+					switch( len )
+					{
+						case 1:
+							runTimeCast<FloatVectorData>(info[attr_index].data)->writable()[p_index] = ptr[0];
+							break;
+						case 2:
+							runTimeCast<V2fVectorData>(info[attr_index].data)->writable()[p_index] = Imath::V2f( ptr[0], ptr[1] );
+							break;
+						case 3:
+							runTimeCast<V3fVectorData>(info[attr_index].data)->writable()[p_index] = Imath::V3f( ptr[0], ptr[1], ptr[2] );
+							break;
+						default:
+							break;
+					}
+					break;
+				}
+				case GB_ATTRIB_INT:
+				{
+					const int *ptr = curr->castAttribData<int>(info[attr_index].offset);
+					switch( len )
+					{
+						case 1:
+							runTimeCast<IntVectorData>(info[attr_index].data)->writable()[p_index] = ptr[0];
+							break;
+						case 2:
+							runTimeCast<V2iVectorData>(info[attr_index].data)->writable()[p_index] = Imath::V2i( ptr[0], ptr[1] );
+							break;
+						case 3:
+							runTimeCast<V3iVectorData>(info[attr_index].data)->writable()[p_index] = Imath::V3i( ptr[0], ptr[1], ptr[2] );
+							break;
+						default:
+							break;
+					}
+					break;
+				}
+				case GB_ATTRIB_VECTOR:
+				{
+					const float *ptr = curr->castAttribData<float>(info[attr_index].offset);
+					runTimeCast<V3fVectorData>(info[attr_index].data)->writable()[p_index] = Imath::V3f( ptr[0], ptr[1], ptr[2] );
+					break;
+				}
+				default:
+					break;
+			}
+		}
+
+		// loop over this prim's vertices
+		for ( unsigned int i=0; i<curr->getVertexCount(); ++i, ++v_index )
+		{
+			const GEO_Vertex &vert = curr->getVertex(i);
+
+			// handle vertex attributes
+			for ( unsigned int attr_index=0; attr_index<info.size();
+					++attr_index )
+			{
+				// we can only handle uniform attributes
+				if ( info[attr_index].interp!=PrimitiveVariable::FaceVarying )
+					continue;
+
+				// invalid attribute offset
+				if ( info[attr_index].offset==-1 )
+					continue;
+
+				// extract our primitive attributes
+				int len = info[attr_index].entries;
+				switch( info[attr_index].type )
+				{
+					case GB_ATTRIB_FLOAT:
+					{
+						const float *ptr = vert.castAttribData<float>(info[attr_index].offset);
+						switch( len )
+						{
+							case 1:
+								runTimeCast<FloatVectorData>(info[attr_index].data)->writable()[v_index] = ptr[0];
+								break;
+							case 2:
+								runTimeCast<V2fVectorData>(info[attr_index].data)->writable()[v_index] = Imath::V2f( ptr[0], ptr[1] );
+								break;
+							case 3:
+								runTimeCast<V3fVectorData>(info[attr_index].data)->writable()[v_index] = Imath::V3f( ptr[0], ptr[1], ptr[2] );
+								break;
+							default:
+								break;
+						}
+						break;
+					}
+					case GB_ATTRIB_INT:
+					{
+						const int *ptr = vert.castAttribData<int>(info[attr_index].offset);
+						switch( len )
+						{
+							case 1:
+								runTimeCast<IntVectorData>(info[attr_index].data)->writable()[v_index] = ptr[0];
+								break;
+							case 2:
+								runTimeCast<V2iVectorData>(info[attr_index].data)->writable()[v_index] = Imath::V2i( ptr[0], ptr[1] );
+								break;
+							case 3:
+								runTimeCast<V3iVectorData>(info[attr_index].data)->writable()[v_index] = Imath::V3i( ptr[0], ptr[1], ptr[2] );
+								break;
+							default:
+								break;
+						}
+						break;
+					}
+					case GB_ATTRIB_VECTOR:
+					{
+						const float *ptr = vert.castAttribData<float>(info[attr_index].offset);
+						runTimeCast<V3fVectorData>(info[attr_index].data)->writable()[v_index] = Imath::V3f( ptr[0], ptr[1], ptr[2] );
+						break;
+					}
+					default:
+						break;
+				}
+			}
+		} // end of prim-vertex loop
+
+	}// end of prim loop
+
 }

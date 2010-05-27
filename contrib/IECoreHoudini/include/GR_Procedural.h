@@ -49,7 +49,7 @@
 namespace IECoreHoudini
 {
 	/// forward declare our detail
-	class GU_ProceduralDetail;
+	//class GU_ProceduralDetail;
 
 	/// Custom GL render hook for Houdini.
 	/// This class is responsible for rendering in OpenGL our

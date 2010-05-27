@@ -36,8 +36,14 @@
 #include <IECore/SimpleTypedData.h>
 #include <IECore/MessageHandler.h>
 
+#include <boost/python.hpp>
 #include <boost/format.hpp>
+using namespace boost::python;
+using namespace boost;
 
+#include "IECorePython/ScopedGILLock.h"
+
+#include "CoreHoudini.h"
 #include "SOP_ParameterisedHolder.h"
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -47,6 +53,7 @@ SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *n
 	m_parameterised(0),
 	m_requiresUpdate(true)
 {
+	CoreHoudini::initPython();
 }
 
 SOP_ParameterisedHolder::~SOP_ParameterisedHolder()
@@ -274,4 +281,38 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 	{
 		IECore::msg( IECore::Msg::Error, "SOP_ParameterisedHolder::updateParameter", "Caught unknown exception" );
 	}
+}
+
+/// Utility class which loads a ParameterisedProcedural from Disk
+IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised(
+		const std::string &type,
+		int version,
+		const std::string &search_path )
+{
+	IECore::RunTimeTypedPtr new_procedural;
+	IECorePython::ScopedGILLock gilLock;
+
+	string python_cmd = boost::str( format(
+			"IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n"
+		) % search_path % type % version );
+
+	try
+	{
+		boost::python::handle<> resultHandle( PyRun_String(
+			python_cmd.c_str(),
+			Py_eval_input, CoreHoudini::globalContext().ptr(),
+			CoreHoudini::globalContext().ptr() )
+		);
+		boost::python::object result( resultHandle );
+		new_procedural = boost::python::extract<IECore::RunTimeTypedPtr>(result)();
+		if ( IECore::runTimeCast<IECore::ParameterisedProcedural>(new_procedural)==0 )
+		{
+			new_procedural = 0;
+		}
+	}
+	catch( ... )
+	{
+		PyErr_Print();
+	}
+	return new_procedural;
 }

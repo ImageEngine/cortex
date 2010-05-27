@@ -128,12 +128,19 @@ void FnProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std:
 		IECore::CompoundParameterPtr params = op->parameters();
 
 		// set the name  & version on the sop
-		holder->getParm("__opType").setLockedFlag( 0, 0 );
-		holder->getParm("__opVersion").setLockedFlag( 0, 0 );
+		bool type_lock = holder->getParm("__opType").getLockedFlag(0);
+		bool ver_lock = holder->getParm("__opVersion").getLockedFlag(0);
+
+		if ( type_lock )
+			holder->getParm("__opType").setLockedFlag( 0, 0 );
+		if ( ver_lock )
+			holder->getParm("__opVersion").setLockedFlag( 0, 0 );
 		holder->setString( type.c_str(), CH_STRING_LITERAL, "__opType", 0, 0 );
-		holder->setString( boost::lexical_cast<std::string>(version).c_str(), CH_STRING_LITERAL, "__opVersion", 0, 0 );
-		holder->getParm("__opType").setLockedFlag( 0, 1 );
-		holder->getParm("__opVersion").setLockedFlag( 0, 1 );
+		holder->setInt( "__opVersion", 0, 0, version );
+		if ( type_lock )
+			holder->getParm("__opType").setLockedFlag( 0, 1 );
+		if ( ver_lock )
+			holder->getParm("__opVersion").setLockedFlag( 0, 1 );
 	}
 }
 
@@ -151,12 +158,18 @@ void FnProceduralHolder::setParameterisedDirectly( IECore::RunTimeTypedPtr p, co
 	IECore::CompoundParameterPtr params = op->parameters();
 
 	// set the name  & version on the sop
-	holder->getParm("__opType").setLockedFlag( 0, 0 );
-	holder->getParm("__opVersion").setLockedFlag( 0, 0 );
+	bool type_lock = holder->getParm("__opType").getLockedFlag(0);
+	bool ver_lock = holder->getParm("__opVersion").getLockedFlag(0);
+	if ( type_lock )
+		holder->getParm("__opType").setLockedFlag( 0, 0 );
+	if ( ver_lock )
+		holder->getParm("__opVersion").setLockedFlag( 0, 0 );
 	holder->setString( type.c_str(), CH_STRING_LITERAL, "__opType", 0, 0 );
-	holder->setString( boost::lexical_cast<std::string>(version).c_str(), CH_STRING_LITERAL, "__opVersion", 0, 0 );
-	holder->getParm("__opType").setLockedFlag( 0, 1 );
-	holder->getParm("__opVersion").setLockedFlag( 0, 1 );
+	holder->setInt( "__opVersion", 0, 0, version );
+	if ( type_lock )
+		holder->getParm("__opType").setLockedFlag( 0, 1 );
+	if ( ver_lock )
+		holder->getParm("__opVersion").setLockedFlag( 0, 1 );
 }
 
 IECore::RunTimeTypedPtr FnProceduralHolder::getParameterised()

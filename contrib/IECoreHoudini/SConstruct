@@ -392,7 +392,6 @@ libSources = [ "src/CoreHoudini.cpp",
 				"src/FromHoudiniSopConverter.cpp",
 				"src/SOP_ParameterisedHolder.cpp",
 				"src/SOP_ProceduralHolder.cpp",
-				"src/GU_ProceduralDetail.cpp",
 				"src/GR_Procedural.cpp"  ]
 lib = lib_env.SharedLibrary( "build/lib/libIECoreHoudini", libSources )
 lib_install = lib_env.Install( "$CORTEX_ROOT/lib", source=[lib] )

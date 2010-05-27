@@ -38,6 +38,78 @@ import hou, IECore, IECoreHoudini
 def proc(type, ver):
 	return IECore.ClassLoader.defaultLoader("IECORE_PROCEDURAL_PATHS").load(type,ver)()
 
+def setHoudiniParm( node, p ):
+	value = p.getValue().value
+
+	if p.typeId()==IECore.TypeId.IntParameter:
+		node.parmTuple( "parm_%s" % p.name() ).set( [value] )
+	if p.typeId()==IECore.TypeId.V2iParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.V3iParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
+	# float, V2f, V3f
+	if p.typeId()==IECore.TypeId.FloatParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+	if p.typeId()==IECore.TypeId.V2fParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.V3fParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
+	# double
+	if p.typeId()==IECore.TypeId.DoubleParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+	if p.typeId()==IECore.TypeId.V2dParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.V3dParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
+	# bool
+	if p.typeId()==IECore.TypeId.BoolParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+
+	# string
+	if p.typeId()==IECore.TypeId.StringParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+
+	# path, dirname, filename, filesequence
+	if p.typeId()==IECore.TypeId.PathParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+
+	if p.typeId()==IECore.TypeId.DirNameParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+
+	if p.typeId()==IECore.TypeId.FileNameParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+
+	if p.typeId()==IECore.TypeId.FileSequenceParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( [value] )
+
+	# color3f
+	if p.typeId()==IECore.TypeId.Color3fParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
+	# color4f
+	if p.typeId()==IECore.TypeId.Color4fParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
+	# M44f, M44d
+	if p.typeId()==IECore.TypeId.M44fParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.M44dParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
+
+def syncSopParametersWithProcedural(n):
+	# get our parameters from our procedural
+	fn = IECoreHoudini.FnProceduralHolder( n )
+	parms = fn.getParameterised().parameters().values()
+
+	# set our houdini parameters based on our saved parms
+	for p in parms:
+		if p.parm("parm_%s"%p.name):
+			setHoudiniParm( n, p )
+
 def reloadProcedural():
 	n = hou.node(".")
 	type = n.evalParm("__opType")

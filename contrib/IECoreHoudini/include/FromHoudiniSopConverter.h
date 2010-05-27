@@ -101,6 +101,11 @@ namespace IECoreHoudini
 			void extractDetailAttribs( const GU_Detail *geo,
 					std::vector<AttributeInfo> &info ) const;
 
+			/// extracts primitive/vertex attributes
+			void extractPrimVertAttribs( const GU_Detail *geo,
+					const GEO_PrimList &pprim,
+					std::vector<AttributeInfo> &info ) const;
+
 			/// pointer to the SOP we're converting
 			HOM_SopNode *m_sop;
 	};
