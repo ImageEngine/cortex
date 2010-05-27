@@ -40,10 +40,56 @@
 namespace IECore
 {
 
-//  Templated class following same interface defined by boost::IntrusivePtr with 
-//  one major change: implicit conversion to raw pointers.
-//  It uses the same reference increment and decrement functions used by boost:
-//  intrusive_ptr_add_ref and intrusive_ptr_release.
+/// Templated class following the same interface defined by boost::intrusive_ptr with 
+/// one major change: implicit conversion to raw pointers.
+/// It uses the same reference increment and decrement functions used by boost:
+/// intrusive_ptr_add_ref and intrusive_ptr_release.
+///
+/// IntrusivePtr should be used anywhere in Cortex where it is necessary to maintain
+/// ownership of an instance derived from RefCounted, or to share ownership between
+/// several interested parties. The construction of an IntrusivePtr pointer
+/// increments the reference count and the destruction of an IntrusivePtr decrements
+/// the reference count - when the count drops to 0 the RefCounted object will self
+/// destruct. All RefCounted derived types define both a Type::Ptr and TypePtr typedef
+/// for an IntrusivePtr pointing to that type.
+///
+/// There is some limited overhead involved in the reference counting associated with
+/// IntrusivePtr, and for this reason, and in an attempt to strengthen the semantics of
+/// pointer usage in Cortex, we try to use the following conventions when defining
+/// programming interfaces :
+///
+/// When receiving a pointer as a function argument :
+///
+/// Pass a raw (Type *) pointer if the called function has no need
+/// to increment the reference count. For instance Renderable::render( Renderer *renderer )
+/// takes a raw pointer as the Renderable should not need to hold a reference to the Renderer
+/// following the call.
+///
+/// Pass an IntrusivePtr (TypePtr) if the reference count will be changed following the function
+/// call. For instance Group::addChild( VisibleRenderablePtr child ) takes an IntrusivePtr as the
+/// group will maintain a reference to the child following the call.
+///
+/// When returning a pointer from a method :
+///
+/// Return a raw (Type *) pointer if the called object will continue to maintain a reference 
+/// to the returned object following the method call. For instance CompoundObject::member() returns
+/// a raw pointer, because the CompoundObject will continue to hold a reference to the returned object
+/// following the call. The caller can assign the raw pointer to an IntrusivePtr if it wishes to own
+/// its own reference to the result, but if it merely wants to use the result temporarily it can
+/// rely on the owner to maintain a reference until the owner dies.
+///
+/// Return an IntrusivePtr (TypePtr) if the method or function is returning an object for which no
+/// other references are currently held. For instance Object::create() returns an ObjectPtr so that
+/// a reference to the new object exists, and to encourage the caller to maintain ownership of the new
+/// object.
+///
+/// When calling operator new :
+///
+/// Always assign the result of operator new for a RefCounted class to an IntrusivePtr immediately, to
+/// assume ownership of the new object.
+///
+/// \note Not all of Cortex has been updated to match these conventions. Please add todo items for any
+/// nonconforming APIs.
 template<class T> 
 class IntrusivePtr
 {
