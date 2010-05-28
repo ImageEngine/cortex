@@ -32,63 +32,102 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CachedReader.h"
-#include "IECore/Object.h"
+#include "tbb/mutex.h"
 
 #include "boost/lexical_cast.hpp"
+
+#include "IECore/CachedReader.h"
+#include "IECore/Reader.h"
+#include "IECore/Object.h"
+#include "IECore/ModifyOp.h"
 
 using namespace IECore;
 using namespace boost::filesystem;
 using namespace std;
 
-CachedReader::Getter::Getter( const SearchPath &paths )
-	:	m_paths( paths )
-{
-}
+//////////////////////////////////////////////////////////////////////////
+// Getter
+//////////////////////////////////////////////////////////////////////////
 
-ConstObjectPtr CachedReader::Getter::operator()( const std::string &file, size_t &cost )
+struct CachedReader::Getter
 {
-	cost = 0;
-
-	path resolvedPath = m_paths.find( file );
-	if( resolvedPath.empty() )
+	Getter( const SearchPath &paths, ConstModifyOpPtr postProcessor=0 )
+	:	m_paths( paths ), m_postProcessor( postProcessor )
 	{
-		string pathList;
-		for( list<path>::const_iterator it = m_paths.paths.begin(); it!=m_paths.paths.end(); it++ )
+	}
+
+	const SearchPath &m_paths; // references CachedReader::m_paths
+	ConstModifyOpPtr m_postProcessor;
+	tbb::mutex m_postProcessorMutex;
+
+	ConstObjectPtr operator()( const std::string &file, size_t &cost )
+	{
+		cost = 0;
+
+		path resolvedPath = m_paths.find( file );
+		if( resolvedPath.empty() )
 		{
-			if ( pathList.size() > 0 )
+			string pathList;
+			for( list<path>::const_iterator it = m_paths.paths.begin(); it!=m_paths.paths.end(); it++ )
 			{
-				pathList += ":" + it->string();
+				if ( pathList.size() > 0 )
+				{
+					pathList += ":" + it->string();
+				}
+				else
+				{
+					pathList = it->string();
+				}
 			}
-			else
-			{
-				pathList = it->string();
-			}
+			throw Exception( "Could not find file '" + file + "' at the following paths: " + pathList );
 		}
-		throw Exception( "Could not find file '" + file + "' at the following paths: " + pathList );
+
+		ReaderPtr r = Reader::create( resolvedPath.string() );
+		if( !r )
+		{
+			throw Exception( "Could not create reader for '" + resolvedPath.string() + "'" );
+		}
+
+		ObjectPtr result = r->read();
+		/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
+		/// we were unable to read the file?
+		if( !result )
+		{
+			throw Exception( "Reader for '" + resolvedPath.string() + "' returned no data" );
+		}
+
+		if( m_postProcessor )
+		{
+			/// \todo We need to allow arguments to be passed to Op::operate() directly
+			/// so that the same Op can be used from multiple threads with different arguments.
+			/// This means adding an overloaded operate() method but more importantly making sure
+			/// that all Ops only use their operands to access arguments and not go getting them
+			/// from the Parameters directly.
+			tbb::mutex::scoped_lock l( m_postProcessorMutex );
+			ModifyOpPtr postProcessor = constPointerCast<ModifyOp>( m_postProcessor );
+			postProcessor->inputParameter()->setValue( result );
+			postProcessor->copyParameter()->setTypedValue( false );
+			postProcessor->operate();
+		}
+
+		cost = result->memoryUsage();
+
+		return result;
 	}
 
-	ReaderPtr r = Reader::create( resolvedPath.string() );
-	if( !r )
-	{
-		throw Exception( "Could not create reader for '" + resolvedPath.string() + "'" );
-	}
+};
 
-	ObjectPtr result = r->read();
-	/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
-	/// we were unable to read the file?
-	if( !result )
-	{
-		throw Exception( "Reader for '" + resolvedPath.string() + "' returned no data" );
-	}
-
-	cost = result->memoryUsage();
-
-	return result;
-}
+//////////////////////////////////////////////////////////////////////////
+// CachedReader
+//////////////////////////////////////////////////////////////////////////
 
 CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory )
 	:	m_paths( paths ), m_cache( Getter( m_paths ), maxMemory )
+{
+}
+
+CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory, ConstModifyOpPtr postProcessor )
+	:	m_paths( paths ), m_cache( Getter( m_paths, postProcessor ), maxMemory )
 {
 }
 

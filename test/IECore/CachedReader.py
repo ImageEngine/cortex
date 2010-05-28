@@ -167,6 +167,17 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assert_( r.isSame( r2 ) )
 		self.assertEqual( r.maxMemory, 1024 * 1024 * 200 )
 		self.assertEqual( r.searchPath, SearchPath( "a:test:path", ":" ) )
+		
+	def testPostProcessing( self ) :
+	
+		r = CachedReader( SearchPath( "./test/IECore/data/cobFiles", ":" ), 100 * 1024 * 1024 )
+		m = r.read( "polySphereQuads.cob" )
+		self.failUnless( 4 in m.verticesPerFace )
 
+		r = CachedReader( SearchPath( "./test/IECore/data/cobFiles", ":" ), 100 * 1024 * 1024, TriangulateOp() )
+		m = r.read( "polySphereQuads.cob" )
+		for v in m.verticesPerFace :
+			self.assertEqual( v, 3 )
+		
 if __name__ == "__main__":
     unittest.main()

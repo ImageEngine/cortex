@@ -38,6 +38,7 @@
 
 #include "IECore/CachedReader.h"
 #include "IECore/Object.h"
+#include "IECore/ModifyOp.h"
 #include "IECorePython/CachedReaderBinding.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
@@ -66,6 +67,7 @@ void bindCachedReader()
 {
 	RefCountedClass<CachedReader, RefCounted>( "CachedReader" )
 		.def( init<const SearchPath &, size_t>() )
+		.def( init<const SearchPath &, size_t, ConstModifyOpPtr>() )
 		.def( "read", &read )
 		.def( "memoryUsage", &CachedReader::memoryUsage )
 		.def( "clear", (void (CachedReader::*)( const std::string &) )&CachedReader::clear )

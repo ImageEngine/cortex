@@ -35,7 +35,6 @@
 #ifndef IE_CORE_CACHEDREADER_H
 #define IE_CORE_CACHEDREADER_H
 
-#include "IECore/Reader.h"
 #include "IECore/SearchPath.h"
 #include "IECore/LRUCache.h"
 
@@ -45,6 +44,8 @@ namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( CachedReader );
+IE_CORE_FORWARDDECLARE( ModifyOp );
+IE_CORE_FORWARDDECLARE( Object );
 
 /// The CachedReader class provides a means of loading files
 /// using the Reader subclasses, but caching them in memory to
@@ -66,6 +67,9 @@ class CachedReader : public RefCounted
 		/// given paths and load them. Up to maxMemory bytes of
 		/// memory will be used to cache loading.
 		CachedReader( const SearchPath &paths, size_t maxMemory );
+		/// As above, but also takes an Op which will be applied to
+		/// objects following loading.
+		CachedReader( const SearchPath &paths, size_t maxMemory, ConstModifyOpPtr postProcessor );
 
 		/// Searches for the given file and loads it if found.
 		/// Throws an exception in case it cannot be found or no suitable Reader
@@ -115,14 +119,7 @@ class CachedReader : public RefCounted
 
 	private :
 
-		struct Getter
-		{
-			Getter( const SearchPath &paths );
-			
-			const SearchPath &m_paths; // references CachedReader::m_paths
-			
-			ConstObjectPtr operator()( const std::string &key, size_t &cost );
-		};
+		struct Getter;
 
 		typedef LRUCache<std::string, ConstObjectPtr> Cache;
 		SearchPath m_paths;
