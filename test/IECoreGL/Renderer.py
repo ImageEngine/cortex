@@ -41,6 +41,7 @@ import threading
 import math
 
 from IECore import *
+import IECore
 
 from IECoreGL import *
 init( False )
@@ -845,7 +846,7 @@ class TestRenderer( unittest.TestCase ) :
 		self.assert_( g.bound().min.equalWithAbsError( V3f( -1, 4, 9 ), 0.001 ) )
 		self.assert_( g.bound().max.equalWithAbsError( V3f( 4, 11, 31 ), 0.001 ) )
 	
-	def testCuriousCrashOnThreadedProceduralsAndGarbageCollection( self ):
+	def testCuriousCrashOnThreadedProceduralsAndAttribute( self ):
 
 		myMesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
 
@@ -856,16 +857,17 @@ class TestRenderer( unittest.TestCase ) :
 			def bound( self ) :
 				return Box3f( V3f( -1 ), V3f( 1 ) )
 			def render( self, renderer ):
-				myMesh.render( renderer )
 				if self.__level < 2 :
-					childCount = 50
-					for i in xrange( 0, childCount ) :
+					for i in xrange( 0, 50 ) :
 						renderer.procedural( MyProc( self.__level + 1 ) )
+				else:
+					g = IECore.Group()
+					g.addChild( myMesh )
+					g.addState( IECore.AttributeState( { "name" : StringData( str(self.__level) ) } ) )
+					g.render( renderer )
 
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 		r.worldBegin()
 		p = MyProc()
 		r.procedural( p )
