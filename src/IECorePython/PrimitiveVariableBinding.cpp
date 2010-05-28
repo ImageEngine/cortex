@@ -62,6 +62,8 @@ void bindPrimitiveVariable()
 		.def( init<const PrimitiveVariable &, bool>() )
 		.def_readwrite( "interpolation", &PrimitiveVariable::interpolation )
 		.add_property( "data", &dataGetter, &dataSetter )
+		.def( self == self )
+		.def( self != self )		
 	;
 	enum_<PrimitiveVariable::Interpolation>( "Interpolation" )
 		.value( "Invalid", PrimitiveVariable::Invalid )

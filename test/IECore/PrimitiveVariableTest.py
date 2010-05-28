@@ -63,6 +63,28 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p.data, IECore.IntData( 20 ) )
 		self.assertEqual( p2.data, IECore.IntData( 20 ) )
 		
+	def testEquality( self ) :
+	
+		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
+		p2 = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
+		self.assertEqual( p, p2 )
+		self.failIf( p != p2 )
+		
+		p.interpolation = IECore.PrimitiveVariable.Interpolation.Varying
+		self.assertNotEqual( p, p2 )
+		self.failIf( p == p2 )
+		
+		p2.interpolation = IECore.PrimitiveVariable.Interpolation.Varying
+		self.assertEqual( p, p2 )
+		self.failIf( p != p2 )
+		
+		p.data = IECore.IntData( 2 )
+		self.assertNotEqual( p, p2 )
+		self.failIf( p == p2 )
+		
+		p2.data = IECore.IntData( 2 )
+		self.assertEqual( p, p2 )
+		self.failIf( p != p2 )
 		
 if __name__ == "__main__":
     unittest.main()

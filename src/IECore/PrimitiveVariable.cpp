@@ -70,3 +70,8 @@ bool PrimitiveVariable::operator==( const PrimitiveVariable &other ) const
 	return interpolation==other.interpolation && data->isEqualTo( other.data );
 }
 
+bool PrimitiveVariable::operator!=( const PrimitiveVariable &other ) const
+{
+	return !(*this == other);
+}
+

@@ -72,6 +72,7 @@ struct PrimitiveVariable {
 	/// to be taken.
 	PrimitiveVariable( const PrimitiveVariable &other, bool deepCopy );
 	bool operator==( const PrimitiveVariable &other ) const;
+	bool operator!=( const PrimitiveVariable &other ) const;
 	/// The interpolation type for this PrimitiveVariable.
 	Interpolation interpolation;
 	/// The Data for this PrimitiveVariable. Unless Interpolation is Constant,
