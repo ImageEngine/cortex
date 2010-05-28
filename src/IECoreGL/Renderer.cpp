@@ -1307,13 +1307,14 @@ void IECoreGL::Renderer::motionEnd()
 template< typename T >
 static bool checkCulling( RendererImplementation *r, const T *p )
 {
-	Imath::Box3f b = p->bound();
 	const Imath::Box3f &cullBox = r->getState<CullingBoxStateComponent>()->value();
 	if ( cullBox.isEmpty() )
 	{
 		// culling is disabled... p should be rendered.
 		return true;
 	}
+
+	Imath::Box3f b = p->bound();
 	switch( r->getState<CullingSpaceStateComponent>()->value() )
 	{
 		case ObjectSpace :
