@@ -362,6 +362,7 @@ void bindTypeId()
 		.value( "MarschnerParameter", MarschnerParameterTypeId )
 		.value( "MarschnerLookupTableOp", MarschnerLookupTableOpTypeId )
 		.value( "SmoothSkinningData", SmoothSkinningDataTypeId )
+		.value( "FaceVaryingPromotionOp", FaceVaryingPromotionOpTypeId )
 	;
 }
 

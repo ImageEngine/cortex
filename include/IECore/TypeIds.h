@@ -359,6 +359,7 @@ enum TypeId
 	MarschnerParameterTypeId = 316,
 	MarschnerLookupTableOpTypeId = 317,
 	SmoothSkinningDataTypeId = 318,
+	FaceVaryingPromotionOpTypeId = 319,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

@@ -62,7 +62,8 @@ IECore::ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
 	return m_vertIds;
 }
 
-/// \todo This should be in a standalone Op, and should cope with more than just Vertex interpolated input.
+/// \todo This could be removed and the ToGLMeshConverter could use FaceVaryingPromotionOp
+/// to convert everything to FaceVarying before being added.
 class MeshPrimitive::ToFaceVaryingConverter
 {
 	public:

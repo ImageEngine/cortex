@@ -219,6 +219,7 @@ from MarschnerLookupTableOpTest import MarschnerLookupTableOpTest
 from SmoothSkinningDataTest import *
 from IgnoredExceptionsTest import IgnoredExceptionsTest
 from PrimitiveVariableTest import PrimitiveVariableTest
+from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
