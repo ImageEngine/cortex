@@ -154,6 +154,11 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 	
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
 		
+		# To stop maya crashing, we need to delete the UI for the existing class
+		# before we change it in C++, otherwise, an AE update gets triggered after
+		# we have removed the parameters, but before we have removed the UI.
+		self._deleteChildParameterUIs()
+		
 		fnPH.setClassParameterClass( self.parameter, className, classVersion, searchPathEnvVar )
 
 	@staticmethod	
