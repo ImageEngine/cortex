@@ -93,6 +93,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			labelIndent = self._labelIndent( self.__kw["hierarchyDepth"] ),
 			labelVisible = collapsable,
 			borderVisible = False,
+			expandCommand = self.__expand,
 			preExpandCommand = self.__preExpand,
 			collapseCommand = self.__collapse,
 			collapsable = collapsable,
@@ -136,7 +137,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		return maya.cmds.frameLayout( self.layout(), query=True, collapse=True )
 		
 	## Sets the collapsed state for the frame holding the child parameter uis.
-	def setCollapsed( self, collapsed ) :
+	def setCollapsed( self, collapsed, propagateToChildren=False ) :
 	
 		if not collapsed :
 			# maya only calls preexpand when the ui is expanded by user action,
@@ -144,6 +145,9 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			self.__preExpand()
 			
 		maya.cmds.frameLayout( self.layout(), edit=True, collapse=collapsed )
+		
+		if propagateToChildren :
+			self.__propagateCollapsed( collapsed )
 	
 	@staticmethod
 	def _labelFont( hierarchyDepth ) :
@@ -208,10 +212,19 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			
 		maya.cmds.control( self.__columnLayout, edit=True, manage=True )
 
+	def __expand( self ) :
+	
+		if maya.cmds.getModifiers() & 1 :
+			# shift is held
+			self.__propagateCollapsed( False )
+			
 	def __collapse(self):
-		# \todo Store collapse state
-		pass
 
+		# \todo Store collapse state
+		if maya.cmds.getModifiers() & 1 :
+			# shift is held
+			self.__propagateCollapsed( True )
+			
 	def __preExpand( self ) :
 			
 		# this is the most common entry point into the ui
@@ -229,6 +242,12 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		except :
 
 			IECore.msg( IECore.Msg.Level.Error, "IECoreMaya.ParameterUI", traceback.format_exc() )
+
+	def __propagateCollapsed( self, collapsed ) :
+	
+		for ui in self.__childUIs.values() :
+			if hasattr( ui, "setCollapsed" ) :
+				ui.setCollapsed( collapsed, propagateToChildren=True )
 
 	def __createChildUIs( self ) :
 						
@@ -268,5 +287,5 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 				if ui:
 					self.__childUIs[pName] = ui
-
+	
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.CompoundParameter, CompoundParameterUI )

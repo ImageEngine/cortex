@@ -97,6 +97,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			labelVisible = collapsable,
 			font = IECoreMaya.CompoundParameterUI._labelFont( self.__kw["hierarchyDepth"] ),
 			borderVisible = False,
+			expandCommand = self.__expand,
+			collapseCommand = self.__collapse,
 			collapsable = collapsable,
 			collapse = collapsable,
 			manage = True,
@@ -122,6 +124,22 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 		self.__updateChildUIs( startFromScratch=nodeChanged )
 
+	## Gets the collapsed state for the frame holding the child parameter uis.
+	def getCollapsed( self ) :
+	
+		return maya.cmds.frameLayout( self.layout(), query=True, collapse=True )
+		
+	## Sets the collapsed state for the frame holding the child parameter uis.
+	# In the case that this ui itself is not collapsable, it will still propagate
+	# state to children if asked.
+	def setCollapsed( self, collapsed, propagateToChildren=False ) :
+	
+		if maya.cmds.frameLayout( self.layout(), query=True, collapsable=True ) :
+			maya.cmds.frameLayout( self.layout(), edit=True, collapse = collapsed )
+			
+		if propagateToChildren :
+			self.__propagateCollapsed( collapsed )
+		
 	def __classMenuDefinition( self, parameterName ) :
 	
 		result = IECore.MenuDefinition()
@@ -278,7 +296,25 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			attachControl = attachControl,
 			attachNone = attachNone
 		)
+
+	def __expand( self ) :
 	
+		if maya.cmds.getModifiers() & 1 :
+			# shift is held
+			self.__propagateCollapsed( False )
+			
+	def __collapse(self):
+
+		# \todo Store collapse state
+		if maya.cmds.getModifiers() & 1 :
+			# shift is held
+			self.__propagateCollapsed( True )
+	
+	def __propagateCollapsed( self, collapsed ) :
+	
+		for ui in self.__childUIs.values() :
+			ui.setCollapsed( collapsed, propagateToChildren=True )
+				
 	@staticmethod
 	def _classesSetCallback( fnPH, parameter ) :
 			
@@ -372,6 +408,14 @@ class ChildUI( IECoreMaya.UIElement ) :
 			collapsable = True,
 			labelVisible = False,
 		)
+	
+	def getCollapsed( self ) :
+		
+		return self.__compoundParameterUI.getCollapsed()
+		
+	def setCollapsed( self, collapsed, propagateToChildren=False ) :
+	
+		self.__compoundParameterUI.setCollapsed( collapsed, propagateToChildren=propagateToChildren )
 				
 	def _topLevelUIDeleted( self ) :
 	
@@ -447,7 +491,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 	def __toggleParameterVisibility( self ) :
 			
 		collapsed = not self.__compoundParameterUI.getCollapsed()
-		self.__compoundParameterUI.setCollapsed( collapsed )
+		self.__compoundParameterUI.setCollapsed( collapsed, propagateToChildren=maya.cmds.getModifiers() & 1 )
 		
 		image = "arrowRight.xpm" if collapsed else "arrowDown.xpm"
 		annotation = "Show parameters" if collapsed else "Hide parameters" 
