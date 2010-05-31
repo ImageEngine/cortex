@@ -416,6 +416,15 @@ class ChildUI( IECoreMaya.UIElement ) :
 	def setCollapsed( self, collapsed, propagateToChildren=False ) :
 	
 		self.__compoundParameterUI.setCollapsed( collapsed, propagateToChildren=propagateToChildren )
+		
+		image = "arrowRight.xpm" if collapsed else "arrowDown.xpm"
+		annotation = "Show parameters" if collapsed else "Hide parameters" 
+		maya.cmds.iconTextButton(
+			self.__parameterVisibilityIcon,
+			edit = True,
+			image = image,
+			annotation = annotation,
+		)
 				
 	def _topLevelUIDeleted( self ) :
 	
@@ -490,17 +499,8 @@ class ChildUI( IECoreMaya.UIElement ) :
 
 	def __toggleParameterVisibility( self ) :
 			
-		collapsed = not self.__compoundParameterUI.getCollapsed()
-		self.__compoundParameterUI.setCollapsed( collapsed, propagateToChildren=maya.cmds.getModifiers() & 1 )
-		
-		image = "arrowRight.xpm" if collapsed else "arrowDown.xpm"
-		annotation = "Show parameters" if collapsed else "Hide parameters" 
-		maya.cmds.iconTextButton(
-			self.__parameterVisibilityIcon,
-			edit = True,
-			image = image,
-			annotation = annotation,
-		)
+		collapsed = not self.getCollapsed()
+		self.setCollapsed( collapsed, propagateToChildren=maya.cmds.getModifiers() & 1 )
 	
 	def __layerMenu( self ) :
 	
@@ -582,7 +582,6 @@ class ChildUI( IECoreMaya.UIElement ) :
 				
 		fnPH = IECoreMaya.FnParameterisedHolder( self.parent().node() )
 		fnPH.setClassVectorParameterClasses( self.parent().parameter, classes )
-
 
 	def __buildOptionalPreHeaderUI( self, formLayout, attachForm, attachControl, lastControl ) :
 		
