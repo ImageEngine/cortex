@@ -265,6 +265,7 @@
 #include "IECorePython/MarschnerLookupTableOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
+#include "IECorePython/MeshDistortionsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -532,6 +533,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageConvolveOp();
 
 #endif
+	bindMeshDistortionsOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
