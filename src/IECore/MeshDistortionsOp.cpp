@@ -225,26 +225,26 @@ struct MeshDistortionsOp::CalculateDistortions
 				m_uvDistortions.resize( numUniqueTangents );
 			}
 
-			size_t fvi = 0;
+			size_t fvi0 = 0;
 
 			for( size_t faceIndex = 0; faceIndex < m_vertsPerFace.size() ; faceIndex++ )
 			{
-				size_t firstFvi = fvi;
-				unsigned vertex0 = m_vertIds[ fvi ];
+				size_t firstFvi = fvi0;
+				unsigned vertex0 = m_vertIds[ fvi0 ];
 				Imath::V2f uv0(0);
 				if ( computeUV )
 				{
-					uv0 = Imath::V2f( (*m_u)[ fvi ], (*m_v)[ fvi ] );
+					uv0 = Imath::V2f( (*m_u)[ fvi0 ], (*m_v)[ fvi0 ] );
 				}
-				fvi++;
-				for ( int v = 1; v <= m_vertsPerFace[faceIndex]; v++, fvi++ )
+				for ( int v = 1; v <= m_vertsPerFace[faceIndex]; v++, fvi0++ )
 				{
+					size_t fvi1 = fvi0 + 1;
 					if ( v == m_vertsPerFace[faceIndex] )
 					{
 						// final edge must also be computed...
-						fvi = firstFvi;
+						fvi1 = firstFvi;
 					}
-					unsigned vertex1 = m_vertIds[ fvi ];
+					unsigned vertex1 = m_vertIds[ fvi1 ];
 					// compute distortion along the edge					
 					const Vec &p0 = points[ vertex0 ];
 					const Vec &refP0 = refPoints[ vertex0 ];
@@ -272,14 +272,15 @@ struct MeshDistortionsOp::CalculateDistortions
 					if ( computeUV )
 					{
 						// compute uv vector
-						const Imath::V2f uv1( (*m_u)[ fvi ], (*m_v)[ fvi ] );
+						const Imath::V2f uv1( (*m_u)[ fvi1 ], (*m_v)[ fvi1 ] );
 						const Imath::V2f uvDir = (uv1 - uv0).normalized();
 						// accumulate uv distortion
-						m_uvDistortions[ m_uvIds[fvi-1] ].accumulateDistortion( distortion, uvDir );
+						m_uvDistortions[ m_uvIds[fvi0] ].accumulateDistortion( distortion, uvDir );
+						m_uvDistortions[ m_uvIds[fvi1] ].accumulateDistortion( distortion, uvDir );
 						uv0 = uv1;
 					}
 				}
-				fvi = firstFvi + m_vertsPerFace[faceIndex];
+				fvi0 = firstFvi + m_vertsPerFace[faceIndex];
 			}
 
 			// normalize distortions and build output vectors
