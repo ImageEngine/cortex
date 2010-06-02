@@ -220,7 +220,8 @@ from SmoothSkinningDataTest import *
 from IgnoredExceptionsTest import IgnoredExceptionsTest
 from PrimitiveVariableTest import PrimitiveVariableTest
 from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
-from MeshDistortionsOpTest import MeshDistortionsOpTest
+from MeshDistortionsOpTest import TestMeshDistortionsOp
+from PointVelocityDisplaceOp import *
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

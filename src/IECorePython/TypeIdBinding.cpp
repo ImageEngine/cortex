@@ -363,6 +363,8 @@ void bindTypeId()
 		.value( "MarschnerLookupTableOp", MarschnerLookupTableOpTypeId )
 		.value( "SmoothSkinningData", SmoothSkinningDataTypeId )
 		.value( "FaceVaryingPromotionOp", FaceVaryingPromotionOpTypeId )
+		.value( "MeshDistortionsOp", MeshDistortionsOpTypeId )
+		.value( "PointVelocityDisplaceOp", PointVelocityDisplaceOpTypeId )
 	;
 }
 

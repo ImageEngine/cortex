@@ -1041,7 +1041,7 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const std
 	IECore::CompoundDataMap parametersCopy = parameters;
 	parametersCopy["__handleid"] = new StringData( handle );
 	ParameterList pl( parametersCopy );
-	RiLightSourceV( name.c_str(), pl.n(), pl.tokens(), pl.values() );
+	RiLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
 }
 
 void IECoreRI::RendererImplementation::illuminate( const std::string &lightHandle, bool on )

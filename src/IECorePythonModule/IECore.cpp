@@ -266,6 +266,7 @@
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
 #include "IECorePython/MeshDistortionsOpBinding.h"
+#include "IECorePython/PointVelocityDisplaceOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -534,6 +535,7 @@ BOOST_PYTHON_MODULE(_IECore)
 
 #endif
 	bindMeshDistortionsOp();
+	bindPointVelocityDisplaceOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

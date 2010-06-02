@@ -585,7 +585,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		def render( self, renderer ):
 			# registers this thread id
-			self.threadsUsed.add( threading.current_thread().ident )
+			self.threadsUsed.add( threading.currentThread().getName() )
 			renderer.attributeBegin()
 			renderer.setAttribute( "color", Color3fData( Color3f( float(self.__level)/self.maxLevel, 0, 1 - float(self.__level)/self.maxLevel ) ) )
 			renderer.transformBegin()
@@ -626,7 +626,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		def doRender( self, renderer, args ):
 			# registers this thread id
-			self.threadsUsed.add( threading.current_thread().ident )
+			self.threadsUsed.add( threading.currentThread().getName() )
 			# end of recursion
 			if self.__level < self.maxLevel :
 				for i in xrange( 0, 2 ) :

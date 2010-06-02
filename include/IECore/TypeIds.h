@@ -361,6 +361,7 @@ enum TypeId
 	SmoothSkinningDataTypeId = 318,
 	FaceVaryingPromotionOpTypeId = 319,
 	MeshDistortionsOpTypeId = 320,
+	PointVelocityDisplaceOpTypeId = 321,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.
