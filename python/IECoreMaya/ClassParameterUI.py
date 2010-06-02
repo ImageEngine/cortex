@@ -42,11 +42,14 @@ import IECoreMaya
 class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-			
-		IECoreMaya.CompoundParameterUI.__init__( self, node, parameter, **kw )
-	
+
 		self.__menuParent = None
 		self.__currentClassInfo = parameter.getClass( True )[1:]
+		
+		# We have to do this after initialising self.__menuParent as 
+		# CompoundParameterUI.__init__ will call _createHeader in this
+		# class, which populates self.__menuParent. 
+		IECoreMaya.CompoundParameterUI.__init__( self, node, parameter, **kw )
 	
 	def _createHeader( self, columnLayout, **kw ) :
 			
@@ -54,9 +57,16 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 				
 		maya.cmds.rowLayout( numberOfColumns = 2, parent = columnLayout )
 		
+		collapsable = True
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsable = self.parameter.userData()["UI"]["collapsable"].value
+		
+		lable = "Class" if collapsable else self.label()
+		font = "smallPlainLabelFont" if collapsable else "tinyBoldLabelFont"
+		
 		maya.cmds.text(
-			label = "Class",
-			font = "smallPlainLabelFont",
+			label = lable,
+			font = font,
 			align = "right",
 			annotation = self.description()
 		)
