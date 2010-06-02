@@ -62,6 +62,7 @@ from TemporaryAttributeValuesTest import *
 from SplineParameterHandlerTest import *
 from DAGPathParametersTest import *
 from FnProceduralHolderTest import FnProceduralHolderTest
+from GeometryCombinerTest import GeometryCombinerTest
 
 IECoreMaya.TestProgram(
 

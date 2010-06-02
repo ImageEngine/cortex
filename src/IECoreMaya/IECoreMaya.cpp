@@ -73,6 +73,7 @@
 #include "IECoreMaya/ParameterisedHolderManipContextCommand.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/DrawableHolder.h"
+#include "IECoreMaya/GeometryCombiner.h"
 
 // see ObjectParameterHandler::doUpdate() for an explanation of the necessity for dummy data
 static void *dummyDataCreator()
@@ -169,6 +170,10 @@ MStatus initialize(MFnPlugin &plugin)
 			CurveCombiner::creator, CurveCombiner::initialize, MPxNode::kDependNode );
 		assert( s );
 		
+		s = plugin.registerNode( GeometryCombiner::typeName, GeometryCombiner::id,
+			GeometryCombiner::creator, GeometryCombiner::initialize, MPxNode::kDependNode );
+		assert( s );	
+		
 		s = plugin.registerNode( "ieBox3fParameterManipulator", Box3Manipulator::id,
 			Box3Manipulator::creator, Box3Manipulator::initialize, MPxNode::kManipContainer );
 		assert( s );
@@ -239,6 +244,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
 		s = plugin.deregisterNode( ParameterisedHolderImagePlane::id );
 		s = plugin.deregisterNode( ImagePlaneHolder::id );
+		s = plugin.deregisterNode( GeometryCombiner::id );
 		s = plugin.deregisterNode( CurveCombiner::id );
 
 		s = plugin.deregisterCommand( "iePython" );
