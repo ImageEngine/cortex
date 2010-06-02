@@ -61,8 +61,14 @@ class MeshDistortionsOp : public MeshPrimitiveOp
 		StringParameter * vPrimVarNameParameter();
 		const StringParameter * vPrimVarNameParameter() const;
 
-		StringParameter * uvIndicesPrimVarNameParameter();
-		const StringParameter * uvIndicesPrimVarNameParameter() const;
+		StringParameter * distortionPrimVarNameParameter();
+		const StringParameter * distortionPrimVarNameParameter() const;
+
+		StringParameter * uDistortionPrimVarNameParameter();
+		const StringParameter * uDistortionPrimVarNameParameter() const;
+
+		StringParameter * vDistortionPrimVarNameParameter();
+		const StringParameter * vDistortionPrimVarNameParameter() const;
 		
 		IE_CORE_DECLARERUNTIMETYPED( MeshDistortionsOp, MeshPrimitiveOp );
 
@@ -76,7 +82,9 @@ class MeshDistortionsOp : public MeshPrimitiveOp
 		StringParameterPtr m_pRefPrimVarNameParameter;
 		StringParameterPtr m_uPrimVarNameParameter;
 		StringParameterPtr m_vPrimVarNameParameter;
-		StringParameterPtr m_uvIndicesPrimVarNameParameter;
+		StringParameterPtr m_distortionPrimVarNameParameter;
+		StringParameterPtr m_uDistortionPrimVarNameParameter;
+		StringParameterPtr m_vDistortionPrimVarNameParameter;
 
 		struct CalculateDistortions;
 		struct HandleErrors;

@@ -47,7 +47,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( MeshDistortionsOp );
 
-MeshDistortionsOp::MeshDistortionsOp() : MeshPrimitiveOp( "Computes distortions( expansions and contractions ) on the mesh edges by comparing P and Pref prim vars. Adds vertex primVar 'distortion', and if the s and t primitive variables are specified then it also computes face-varying primVars 'uDistortion' and 'vDistortion'. The distortion values are computed as the ratio from the averaged edge lengths and the averaged reference lengths. The values range from (-INF,0) for contraction and (0,INF) for expansion." )
+MeshDistortionsOp::MeshDistortionsOp() : MeshPrimitiveOp( "Computes distortions( expansions and contractions ) on the mesh edges by comparing P and Pref prim vars. Adds vertex primVar with undirectional distortion, and if the s and t primitive variables are specified then it also computes face-varying primVars for UV mapped distortions. The distortion values are computed as the ratio from the averaged edge lengths and the averaged reference lengths. The values range from (-INF,0) for contraction and (0,INF) for expansion." )
 {
 	m_pPrimVarNameParameter = new StringParameter(
 		"pPrimVarName",	
@@ -73,7 +73,7 @@ MeshDistortionsOp::MeshDistortionsOp() : MeshPrimitiveOp( "Computes distortions(
 		"t"
 	);
 	
-	m_uvIndicesPrimVarNameParameter = new StringParameter(
+	StringParameterPtr uvIndicesPrimVarNameParameter = new StringParameter(
 		"uvIndicesPrimVarName",
 		"This primitive variable must be FaceVarying IntVectorData, and store indices for the uvs referenced "
 		"in the u and v primvars. See IECoreMaya::FromMayaMeshConverter for an example of getting such indices. "
@@ -82,11 +82,33 @@ MeshDistortionsOp::MeshDistortionsOp() : MeshPrimitiveOp( "Computes distortions(
 		"stIndices"
 	);
 
+	m_distortionPrimVarNameParameter = new StringParameter(
+		"distortionPrimVarName",
+		"Defines the name of the primvar to receive the undirectional distortion information.",
+		"distortion"
+	);
+
+	m_uDistortionPrimVarNameParameter = new StringParameter(
+		"uDistortionPrimVarName",
+		"Defines the name of the primvar to receive the U distortion information.",
+		"uDistortion"
+	);
+
+	m_vDistortionPrimVarNameParameter = new StringParameter(
+		"vDistortionPrimVarName",
+		"Defines the name of the primvar to receive the V distortion information.",
+		"vDistortion"
+	);
+
 	parameters()->addParameter( m_pPrimVarNameParameter );
 	parameters()->addParameter( m_pRefPrimVarNameParameter );
 	parameters()->addParameter( m_uPrimVarNameParameter );
 	parameters()->addParameter( m_vPrimVarNameParameter );
-	parameters()->addParameter( m_uvIndicesPrimVarNameParameter );
+	parameters()->addParameter( uvIndicesPrimVarNameParameter );
+	parameters()->addParameter( m_distortionPrimVarNameParameter );
+	parameters()->addParameter( m_uDistortionPrimVarNameParameter );
+	parameters()->addParameter( m_vDistortionPrimVarNameParameter );
+	
 }
 
 MeshDistortionsOp::~MeshDistortionsOp()
@@ -133,14 +155,34 @@ const StringParameter * MeshDistortionsOp::vPrimVarNameParameter() const
 	return m_vPrimVarNameParameter;
 }
 
-StringParameter * MeshDistortionsOp::uvIndicesPrimVarNameParameter()
+StringParameter * MeshDistortionsOp::distortionPrimVarNameParameter()
 {
-	return m_uvIndicesPrimVarNameParameter;
+	return m_distortionPrimVarNameParameter;
 }
 
-const StringParameter * MeshDistortionsOp::uvIndicesPrimVarNameParameter() const
+const StringParameter * MeshDistortionsOp::distortionPrimVarNameParameter() const
 {
-	return m_uvIndicesPrimVarNameParameter;
+	return m_distortionPrimVarNameParameter;
+}
+
+StringParameter * MeshDistortionsOp::uDistortionPrimVarNameParameter()
+{
+	return m_uDistortionPrimVarNameParameter;
+}
+
+const StringParameter * MeshDistortionsOp::uDistortionPrimVarNameParameter() const
+{
+	return m_uDistortionPrimVarNameParameter;
+}
+
+StringParameter * MeshDistortionsOp::vDistortionPrimVarNameParameter()
+{
+	return m_vDistortionPrimVarNameParameter;
+}
+
+const StringParameter * MeshDistortionsOp::vDistortionPrimVarNameParameter() const
+{
+	return m_vDistortionPrimVarNameParameter;
 }
 
 
@@ -367,7 +409,7 @@ void MeshDistortionsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const Compou
 		throw InvalidArgumentException( e );
 	}
 
-	const std::string &uvIndicesPrimVarName = uvIndicesPrimVarNameParameter()->getTypedValue();
+	const std::string &uvIndicesPrimVarName = parameters()->parameter<StringParameter>( "uvIndicesPrimVarName" )->getTypedValue();
 	ConstIntVectorDataPtr uvIndicesData = 0;
 	if( uvIndicesPrimVarName=="" )
 	{
@@ -406,6 +448,10 @@ void MeshDistortionsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const Compou
 		}
 	}
 
+	const std::string &distortionPrimVarName = distortionPrimVarNameParameter()->getTypedValue();
+	const std::string &uDistortionPrimVarName = uDistortionPrimVarNameParameter()->getTypedValue();
+	const std::string &vDistortionPrimVarName = vDistortionPrimVarNameParameter()->getTypedValue();
+
 	size_t faceVaryingSize = mesh->variableSize( PrimitiveVariable::FaceVarying );
 
 	CalculateDistortions f( vertsPerFace->readable(), mesh->vertexIds()->readable(), faceVaryingSize, (uData ? &uData->readable() : 0 ), 
@@ -413,11 +459,11 @@ void MeshDistortionsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const Compou
 
 	despatchTypedData<CalculateDistortions, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pData, f );
 
-	mesh->variables[ "distortion" ] = PrimitiveVariable( PrimitiveVariable::Vertex, f.vvDistortionsData );
+	mesh->variables[ distortionPrimVarName ] = PrimitiveVariable( PrimitiveVariable::Vertex, f.vvDistortionsData );
 	if ( f.fvUDistortionsData )
 	{
-		mesh->variables[ "uDistortion" ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvUDistortionsData );
-		mesh->variables[ "vDistortion" ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvVDistortionsData );
+		mesh->variables[ uDistortionPrimVarName ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvUDistortionsData );
+		mesh->variables[ vDistortionPrimVarName ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvVDistortionsData );
 	}
 
 	assert( mesh->arePrimitiveVariablesValid() );
