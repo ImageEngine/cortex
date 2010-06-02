@@ -45,7 +45,7 @@ global proc AEieGeometryCombinerTemplate( string $nodeName )
 		
 		editorTemplate -addControl "inputGeometry";
 
-		editorTemplate -beginLayout "Node Behavioud";
+		editorTemplate -beginLayout "Node Behaviour";
 
 			editorTemplate -addControl "caching";
 			editorTemplate -addControl "nodeState";
