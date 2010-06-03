@@ -1165,7 +1165,7 @@ if doConfigure :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
 		
-		if c.CheckCXXHeader( "sx.h" ) :
+		if c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxCreateShaderInfo" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
