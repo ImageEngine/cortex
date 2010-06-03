@@ -96,6 +96,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 			
 			text = maya.cmds.text( align="left", label="Not connected", font="tinyBoldLabelFont" )
 			self._addPopupMenu( parentUI=text, attributeName = self.plugName() )
+			self._addPopupMenu( parentUI=text, attributeName = self.plugName(), button1=True )
 			
 			maya.cmds.iconTextButton(
 				annotation = "Clicking this takes you the connection editor for this connection.",
@@ -131,6 +132,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 							   width=fieldWidth, height = 20, ann=plugName )
 							   
 		self._addPopupMenu( parentUI=name, attributeName = self.plugName() )
+		self._addPopupMenu( parentUI=name, attributeName = self.plugName(), button1=True )
 	
 		maya.cmds.iconTextButton(
 			annotation = "Clicking this takes you the connection editor for this connection.",
