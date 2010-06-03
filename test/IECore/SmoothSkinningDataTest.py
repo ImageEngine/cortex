@@ -48,7 +48,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         # test the object
         s = SmoothSkinningData()
         self.assertEqual( s.influenceNames(), StringVectorData() )
-        self.assertEqual( s.influencePoses(), M44fVectorData() )
+        self.assertEqual( s.influencePose(), M44fVectorData() )
         self.assertEqual( s.pointIndexOffsets(), IntVectorData() )
         self.assertEqual( s.pointInfluenceCounts(), IntVectorData() )
         self.assertEqual( s.pointInfluenceIndices(), IntVectorData() )
@@ -85,7 +85,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         s = SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
 
         self.assertEqual( s.influenceNames() , ok_jn )
-        self.assertEqual( s.influencePoses() , ok_ip )
+        self.assertEqual( s.influencePose() , ok_ip )
         self.assertEqual( s.pointIndexOffsets() , ok_pio )
         self.assertEqual( s.pointInfluenceCounts() , ok_pic )
         self.assertEqual( s.pointInfluenceIndices() , ok_pii )
@@ -133,7 +133,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         # test all is ok
         self.assertRaises( Exception, not SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
 
-        # test wrong nr of influenceNames, influencePoses
+        # test wrong nr of influenceNames, influencePose
         self.assertRaises( Exception, SmoothSkinningData(iv_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
         self.assertRaises( Exception, SmoothSkinningData(ok_jn, iv_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
 

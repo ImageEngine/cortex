@@ -56,8 +56,8 @@ class SmoothSkinningData : public Data
 		const StringVectorData *influenceNames() const;
 		StringVectorData *influenceNames() ;
 
-		const M44fVectorData *influencePoses() const;
-		M44fVectorData *influencePoses() ;
+		const M44fVectorData *influencePose() const;
+		M44fVectorData *influencePose() ;
 
 		const IntVectorData *pointIndexOffsets() const;
 		IntVectorData *pointIndexOffsets() ;
@@ -73,7 +73,7 @@ class SmoothSkinningData : public Data
 
 		/// Assign-All Constructor
 		SmoothSkinningData( ConstStringVectorDataPtr influenceNames,
-							ConstM44fVectorDataPtr influencePoses,
+							ConstM44fVectorDataPtr influencePose,
 							ConstIntVectorDataPtr pointIndexOffsets,
 							ConstIntVectorDataPtr pointInfluenceCounts,
 							ConstIntVectorDataPtr pointInfluenceIndices,
@@ -92,7 +92,7 @@ class SmoothSkinningData : public Data
 		static const unsigned int m_ioVersion;
 
 		StringVectorDataPtr m_influenceNames;
-		M44fVectorDataPtr m_influencePoses;
+		M44fVectorDataPtr m_influencePose;
 		IntVectorDataPtr m_pointIndexOffsets;
 		IntVectorDataPtr m_pointInfluenceCounts;
 		IntVectorDataPtr m_pointInfluenceIndices;

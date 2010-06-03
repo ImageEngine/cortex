@@ -43,13 +43,13 @@ using namespace IECore;
 using namespace std;
 using namespace boost;
 
-const unsigned int SmoothSkinningData::m_ioVersion = 0;
+const unsigned int SmoothSkinningData::m_ioVersion = 1;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(SmoothSkinningData);
 
 SmoothSkinningData::SmoothSkinningData() :
 	m_influenceNames( new StringVectorData ),
-	m_influencePoses( new M44fVectorData ),
+	m_influencePose( new M44fVectorData ),
 	m_pointIndexOffsets( new IntVectorData ),
 	m_pointInfluenceCounts( new IntVectorData ),
 	m_pointInfluenceIndices( new IntVectorData ),
@@ -58,21 +58,21 @@ SmoothSkinningData::SmoothSkinningData() :
 }
 
 SmoothSkinningData::SmoothSkinningData( ConstStringVectorDataPtr influenceNames,
-										ConstM44fVectorDataPtr influencePoses,
+										ConstM44fVectorDataPtr influencePose,
 										ConstIntVectorDataPtr pointIndexOffsets,
 										ConstIntVectorDataPtr pointInfluenceCounts,
 										ConstIntVectorDataPtr pointInfluenceIndices,
 										ConstFloatVectorDataPtr pointInfluenceWeights)
 {
 	assert( influenceNames );
-	assert( influencePoses );
+	assert( influencePose );
 	assert( pointIndexOffsets );
 	assert( pointInfluenceCounts );
 	assert( pointInfluenceIndices );
 	assert( pointInfluenceWeights );
 
 	m_influenceNames = influenceNames->copy();
-	m_influencePoses = influencePoses->copy();
+	m_influencePose = influencePose->copy();
 	m_pointIndexOffsets = pointIndexOffsets->copy();
 	m_pointInfluenceCounts = pointInfluenceCounts->copy();
 	m_pointInfluenceIndices = pointInfluenceIndices->copy();
@@ -93,14 +93,14 @@ StringVectorData *SmoothSkinningData::influenceNames()
 	return m_influenceNames;
 }
 
-const M44fVectorData *SmoothSkinningData::influencePoses() const
+const M44fVectorData *SmoothSkinningData::influencePose() const
 {
-	return m_influencePoses;
+	return m_influencePose;
 }
 
-M44fVectorData *SmoothSkinningData::influencePoses()
+M44fVectorData *SmoothSkinningData::influencePose()
 {
-	return m_influencePoses;
+	return m_influencePose;
 }
 
 const IntVectorData *SmoothSkinningData::pointIndexOffsets() const
@@ -146,12 +146,12 @@ FloatVectorData *SmoothSkinningData::pointInfluenceWeights()
 void SmoothSkinningData::validateSizes() const
 {
 	int cin = m_influenceNames->readable().size();
-	int cip = m_influencePoses->readable().size();
+	int cip = m_influencePose->readable().size();
 
 	// check vector sizes
 	if (cin != cip)
 	{
-		string error = str( format( "SmoothSkinningData: Number of influenceNames '%e' does not match number of influencePoses '%e'!" ) % cin % cip);
+		string error = str( format( "SmoothSkinningData: Number of influenceNames '%e' does not match number of influencePose '%e'!" ) % cin % cip);
 		throw Exception( error );
 	}
 
@@ -262,7 +262,7 @@ void SmoothSkinningData::copyFrom( const IECore::Object *other, IECore::Object::
 	Data::copyFrom( other, context );
 	const SmoothSkinningData *tOther = static_cast<const SmoothSkinningData *>( other );
 	m_influenceNames = tOther->m_influenceNames->copy();
-	m_influencePoses = tOther->m_influencePoses->copy();
+	m_influencePose = tOther->m_influencePose->copy();
 	m_pointIndexOffsets = tOther->m_pointIndexOffsets->copy();
 	m_pointInfluenceCounts = tOther->m_pointInfluenceCounts->copy();
 	m_pointInfluenceIndices = tOther->m_pointInfluenceIndices->copy();
@@ -274,7 +274,7 @@ void SmoothSkinningData::save( IECore::Object::SaveContext *context ) const
 	Data::save(context);
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
 	context->save( m_influenceNames, container, "influenceNames" );
-	context->save( m_influencePoses, container, "influencePoses" );
+	context->save( m_influencePose, container, "influencePose" );
 	context->save( m_pointIndexOffsets, container, "pointIndexOffsets" );
 	context->save( m_pointInfluenceCounts, container, "pointInfluenceCounts" );
 	context->save( m_pointInfluenceIndices, container, "pointInfluenceIndices" );
@@ -289,7 +289,7 @@ void SmoothSkinningData::load( IECore::Object::LoadContextPtr context )
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 
 	m_influenceNames = context->load<StringVectorData>( container, "influenceNames" );
-	m_influencePoses = context->load<M44fVectorData>( container, "influencePoses" );
+	m_influencePose = context->load<M44fVectorData>( container, "influencePose" );
 	m_pointIndexOffsets = context->load<IntVectorData>( container, "pointIndexOffsets" );
 	m_pointInfluenceCounts = context->load<IntVectorData>( container, "pointInfluenceCounts" );
 	m_pointInfluenceIndices = context->load<IntVectorData>( container, "pointInfluenceIndices" );
@@ -312,12 +312,12 @@ bool SmoothSkinningData::isEqualTo(  const IECore::Object *other ) const
 		return false;
 	}
 
-	if(	!m_influencePoses->isEqualTo( tOther->m_influencePoses ) )
+	if(	!m_influencePose->isEqualTo( tOther->m_influencePose ) )
 	{
 		return false;
 	}
 
-	if(	!m_influencePoses->isEqualTo( tOther->m_influencePoses ) )
+	if(	!m_influencePose->isEqualTo( tOther->m_influencePose ) )
 	{
 		return false;
 	}
@@ -344,7 +344,7 @@ void SmoothSkinningData::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Data::memoryUsage( a );
 	a.accumulate( m_influenceNames );
-	a.accumulate( m_influencePoses );
+	a.accumulate( m_influencePose );
 	a.accumulate( m_pointIndexOffsets );
 	a.accumulate( m_pointInfluenceCounts );
 	a.accumulate( m_pointInfluenceIndices );

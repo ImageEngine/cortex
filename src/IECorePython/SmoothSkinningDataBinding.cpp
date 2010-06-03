@@ -47,34 +47,34 @@ using namespace IECore;
 namespace IECorePython
 {
 
-	static StringVectorDataPtr influenceNames( const SmoothSkinningData &p )
+	static StringVectorDataPtr influenceNames(  SmoothSkinningData &p )
 	{
-		return p.influenceNames()->copy();
+		return p.influenceNames();
 	}
 
-	static M44fVectorDataPtr influencePoses( const SmoothSkinningData &p )
+	static M44fVectorDataPtr influencePose(  SmoothSkinningData &p )
 	{
-		return p.influencePoses()->copy();
+		return p.influencePose();
 	}
 
-	static IntVectorDataPtr pointIndexOffsets( const SmoothSkinningData &p )
+	static IntVectorDataPtr pointIndexOffsets(  SmoothSkinningData &p )
 	{
-		return p.pointIndexOffsets()->copy();
+		return p.pointIndexOffsets();
 	}
 
-	static IntVectorDataPtr pointInfluenceCounts( const SmoothSkinningData &p )
+	static IntVectorDataPtr pointInfluenceCounts(  SmoothSkinningData &p )
 	{
-		return p.pointInfluenceCounts()->copy();
+		return p.pointInfluenceCounts();
 	}
 
-	static IntVectorDataPtr pointInfluenceIndices( const SmoothSkinningData &p )
+	static IntVectorDataPtr pointInfluenceIndices(  SmoothSkinningData &p )
 	{
-		return p.pointInfluenceIndices()->copy();
+		return p.pointInfluenceIndices();
 	}
 
-	static FloatVectorDataPtr pointInfluenceWeights( const SmoothSkinningData &p )
+	static FloatVectorDataPtr pointInfluenceWeights(  SmoothSkinningData &p )
 	{
-		return p.pointInfluenceWeights()->copy();
+		return p.pointInfluenceWeights();
 	}
 
 
@@ -84,7 +84,7 @@ namespace IECorePython
 			.def( init<>() )
 			.def( init<StringVectorDataPtr, M44fVectorDataPtr, IntVectorDataPtr, IntVectorDataPtr, IntVectorDataPtr, FloatVectorDataPtr>() )
 			.def( "influenceNames", &influenceNames, "A copy of the list of influence object names" )
-			.def( "influencePoses", &influencePoses , "A copy of the list of influence pose matrices (bindPose)" )
+			.def( "influencePose", &influencePose , "A copy of the list of influence pose matrices (bindPose)" )
 			.def( "pointIndexOffsets", &pointIndexOffsets , "A copy of the list of per point offsets into the influence index and weight data")
 			.def( "pointInfluenceCounts", &pointInfluenceCounts, "A copy of the list of per point number of influence objects" )
 			.def( "pointInfluenceIndices", &pointInfluenceIndices, "A copy of the list of per point per influence indices" )
