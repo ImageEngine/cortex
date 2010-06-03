@@ -223,8 +223,9 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			{
 				// Make sure we don't lose the 'current' values if we except.
 				it->second.procedural->parameters()->setValue( currentValues );			
-				displayError( "DelightProceduralCacheCommand::doIt : could not get parameters from \"" + objectNames[0] + "\"." );
-				return MStatus::kFailure;
+				// rethrow so the error is reported appropriately in the catch
+				// blocks below.
+				throw;
 			}
 			
 			// Put the current values back.
