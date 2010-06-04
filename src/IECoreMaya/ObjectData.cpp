@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,20 +71,16 @@ MStatus ObjectData::readASCII( const MArgList &argList, unsigned int &endOfTheLa
 	if ( argList.length() ==  1 )
 	{
 		MStatus s;
-		std::string str = argList.asString( endOfTheLastParsedElement++, &s ).asChar();
+		MString str = argList.asString( endOfTheLastParsedElement++, &s );
 
 		if ( !s )
 		{
 			return s;
 		}
 		CharVectorDataPtr buf = new CharVectorData();
-
-		for ( unsigned i = 0; i < str.size(); i +=2 )
-		{
-			buf->writable().push_back( hexToDec<char>( std::string( str, i, 2 ) ) );
-		}
-		assert( 2 * buf->readable().size() == str.length() );
-
+		buf->writable().resize( str.length() / 2 );
+		IECore::hexToDec<char>( str.asChar(), str.asChar() + str.length(), buf->writable().begin() );
+				
 		try
 		{
 			MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, "/", IndexedIO::Exclusive | IndexedIO::Read );
@@ -142,12 +138,25 @@ MStatus ObjectData::writeASCII( ostream& out )
 			ConstCharVectorDataPtr buf = io->buffer();
 			const CharVectorData::ValueType &data = buf->readable();
 
-			out << "\"";
-			for ( CharVectorData::ValueType::const_iterator it = data.begin(); it != data.end(); ++it )
+			// for some reason maya's parser is quicker to parse and concatenate a series of shorter strings
+			// than it is to parse a single long string. so we output lots of little string concatenations in order to
+			// speed up the reading.
+			out << "( \n";
+			
+			const size_t chunkSize = 5000;
+			for( size_t i = 0; i < data.size(); i += chunkSize )
 			{
-				out << decToHex( *it );
+				if( i!=0 )
+				{
+					out << " + ";
+				}
+				out << "\"";
+				out << decToHex( data.begin() + i, data.begin() + std::min( data.size(), i + chunkSize ) );
+				out << "\"\n";
 			}
-			out << "\"";
+
+			out << ")\n";
+
 		}
 		catch ( std::exception &e )
 		{

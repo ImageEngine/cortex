@@ -222,6 +222,7 @@ from PrimitiveVariableTest import PrimitiveVariableTest
 from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
 from MeshDistortionsOpTest import TestMeshDistortionsOp
 from PointVelocityDisplaceOp import *
+from HexConversionTest import HexConversionTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

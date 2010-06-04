@@ -267,6 +267,7 @@
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
 #include "IECorePython/MeshDistortionsOpBinding.h"
 #include "IECorePython/PointVelocityDisplaceOpBinding.h"
+#include "IECorePython/HexConversionBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -534,8 +535,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageConvolveOp();
 
 #endif
+
 	bindMeshDistortionsOp();
 	bindPointVelocityDisplaceOp();
+	bindHexConversion();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,37 +47,65 @@
 namespace IECore
 {
 
-/// \todo Can probably use ostringstream with hex formatting to make this better
+template<typename T, typename OutputIterator>
+inline void decToHex( T value, OutputIterator result )
+{
+	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
+	typedef typename std::iterator_traits<OutputIterator>::value_type CharType;
+	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
+	
+	for( int i = sizeof( T ) * 2 - 1; i >= 0 ; --i )
+	{
+		int m = ( value >> (i * 4) ) & 0xF;
+		*result = "0123456789ABCDEF"[m];
+		++result;
+	}
+}
+
+template<typename InputIterator, typename OutputIterator>
+inline void decToHex( InputIterator first, InputIterator last, OutputIterator result )
+{
+	for( ; first!=last; ++first )
+	{
+		decToHex( *first, result );
+		result += 2;
+	}
+}
+
+template<typename RandomAccessIterator>
+inline std::string decToHex( RandomAccessIterator first, RandomAccessIterator last )
+{
+	typedef typename std::iterator_traits<RandomAccessIterator>::value_type ValueType;
+	std::string result; result.resize( sizeof( ValueType ) * 2 * ( last - first ) );
+	decToHex( first, last, result.begin() );
+	return result;
+}
+
 template<typename T>
 inline std::string decToHex( T n )
 {
 	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
 
-	std::string r;
-	for ( unsigned i=0; i < sizeof( T ) * 2; i++ )
-	{
-		r.insert( r.begin(), "0123456789ABCDEF"[ n & 0xF ] );
-		n >>= 4;
-	}
+	std::string r; r.resize( sizeof( T ) * 2 );
+	decToHex( n, r.begin() );
 
-	assert( r.size() == sizeof( T ) * 2 );
 	return r;
 }
 
-/// \todo Can probably use istringstream with hex formatting to make this better
-template<typename T>
-inline T hexToDec( const std::string &s )
+template<typename T, typename InputIterator>
+inline T hexToDec( InputIterator first, InputIterator last )
 {
 	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
-	assert( s.size() <= sizeof( T ) * 2 );
-
+	typedef typename std::iterator_traits<InputIterator>::value_type CharType;
+	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
+    
 	T n = 0;
 
-	for ( std::string::const_iterator it = s.begin(); it != s.end(); ++it )
+	for( ; first != last; ++first )
 	{
 		n <<= 4;
 
-		switch ( *it )
+		switch ( *first )
 		{
 		case '0' :
 			n |= 0;
@@ -137,8 +165,28 @@ inline T hexToDec( const std::string &s )
 			assert( false );
 		}
 	}
-
+	
 	return n;
+}
+
+template<typename T>
+inline T hexToDec( const std::string &s )
+{
+	assert( s.size() <= sizeof( T ) * 2 );
+	return hexToDec<T>( s.begin(), s.end() );
+}
+
+template<typename T, typename InputIterator, typename OutputIterator>
+inline void hexToDec( InputIterator first, InputIterator last, OutputIterator result )
+{
+	typedef typename std::iterator_traits<InputIterator>::value_type CharType;
+	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
+
+	for( ; first != last; first += sizeof( T ) * 2 )
+	{
+		*result = hexToDec<T>( first, first + sizeof( T ) * 2 );
+		++result;
+	}
 }
 
 } // namespace IECore
