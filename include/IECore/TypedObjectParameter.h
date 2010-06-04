@@ -2,6 +2,9 @@
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+//  its affiliates and/or its licensors.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -52,6 +55,7 @@ class MatrixTransform;
 class VisibleRenderable;
 class Group;
 class ObjectVector;
+class SmoothSkinningData;
 
 /// The TypedObjectParameter class implements an ObjectParameter which rigidly only
 /// accepts one type of Object
@@ -94,6 +98,7 @@ typedef TypedObjectParameter<VisibleRenderable> VisibleRenderableParameter;
 typedef TypedObjectParameter<Group> GroupParameter;
 typedef TypedObjectParameter<CompoundObject> CompoundObjectParameter;
 typedef TypedObjectParameter<ObjectVector> ObjectVectorParameter;
+typedef TypedObjectParameter<SmoothSkinningData> SmoothSkinningDataParameter;
 
 IE_CORE_DECLAREPTR( RenderableParameter );
 IE_CORE_DECLAREPTR( StateRenderableParameter );
@@ -106,6 +111,7 @@ IE_CORE_DECLAREPTR( VisibleRenderableParameter );
 IE_CORE_DECLAREPTR( GroupParameter );
 IE_CORE_DECLAREPTR( CompoundObjectParameter );
 IE_CORE_DECLAREPTR( ObjectVectorParameter );
+IE_CORE_DECLAREPTR( SmoothSkinningDataParameter );
 
 } // namespace IECore
 

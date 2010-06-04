@@ -2,6 +2,9 @@
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+//  its affiliates and/or its licensors.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -56,6 +59,7 @@
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 #include "IECore/ObjectVector.h"
+#include "IECore/SmoothSkinningData.h"
 
 using namespace std;
 using namespace boost;
@@ -69,7 +73,7 @@ template<typename T>
 static void bindTypedObjectParameter()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<TypedObjectParameter<T>, typename TypedObjectParameterWrap<T>::Ptr >()
 		.def(
 			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
@@ -106,6 +110,7 @@ void bindTypedObjectParameter()
 	bindTypedObjectParameter<PointsPrimitive>();
 	bindTypedObjectParameter<CompoundObject>();
 	bindTypedObjectParameter<ObjectVector>();
+	bindTypedObjectParameter<SmoothSkinningData>();
 }
 
 } // namespace IECorePython

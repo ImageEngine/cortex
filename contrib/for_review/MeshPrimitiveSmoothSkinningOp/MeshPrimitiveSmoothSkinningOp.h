@@ -88,6 +88,14 @@ class MeshPrimitiveSmoothSkinningOp : public TypedPrimitiveOp<MeshPrimitive>
 		IntParameter * blendParameter();
 		const IntParameter * blendParameter() const;
 
+		/// parameter that controls which PrimVar is used for the deformation
+		StringParameter * pointPrimVarParameter();
+		const StringParameter * pointPrimVarParameter() const;
+
+		StringParameter * normalPrimVarParameter();
+		const StringParameter * normalPrimVarParameter() const;
+
+
 	protected:
 
 		virtual void modifyTypedPrimitive( MeshPrimitive * typedPrimitive, const CompoundObject * operands );
@@ -98,6 +106,8 @@ class MeshPrimitiveSmoothSkinningOp : public TypedPrimitiveOp<MeshPrimitive>
 		IntParameterPtr m_blendParameter;
 		IntParameterPtr m_deformNormalsParameter;
 		M44fVectorParameterPtr m_deformationPoseParameter;
+		StringParameterPtr m_pointPrimVarParameter;
+		StringParameterPtr m_normalPrimVarParameter;
 
 };
 

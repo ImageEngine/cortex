@@ -2,6 +2,9 @@
 //
 //  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+//  its affiliates and/or its licensors.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -46,6 +49,7 @@
 #include "IECore/VisibleRenderable.h"
 #include "IECore/Group.h"
 #include "IECore/ObjectVector.h"
+#include "IECore/SmoothSkinningData.h"
 
 namespace IECore
 {
@@ -60,4 +64,5 @@ IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( VisibleRenderable, VisibleRend
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Group, GroupParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( CompoundObject, CompoundObjectParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ObjectVector, ObjectVectorParameter );
+IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( SmoothSkinningData, SmoothSkinningDataParameter );
 }

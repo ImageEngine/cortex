@@ -2,6 +2,9 @@
 #
 #  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
+#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+#  its affiliates and/or its licensors.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -627,12 +630,12 @@ class TestCompoundParameter( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.presetsOnly, True )
-		
+
 		p = CompoundParameter(
 			name = "c",
 			description = "d",
 		)
-		
+
 		self.assertEqual( p.presetsOnly, False )
 		self.assertEqual( len( p.presets() ), 0 )
 
@@ -731,17 +734,17 @@ class TestCompoundParameter( unittest.TestCase ) :
 			raise Exception, "Should have generated an exception."
 
 	def testDelParameters( self ) :
-	
+
 		a = CompoundParameter( "a", "a desc",
 				members = [
 					StringParameter( "b", "b desc", "test 1 ok!"),
 					StringParameter( "d", "d desc", "test 2 failed!"),
 				]
 			)
-		
+
 		c = a.getValue()
 		r = a.defaultValue
-		
+
 		del a["d"]
 		self.assert_( not "d" in a )
 
@@ -871,12 +874,12 @@ class TestCompoundParameter( unittest.TestCase ) :
 		self.assertEqual( p.parameterPath( p["c"]["j"] ), [ "c", "j" ] )
 		self.assertEqual( p.parameterPath( IntParameter( "i", "d", 10 ) ), [] )
 		self.assertEqual( p["c"].parameterPath( p["c"]["j"] ), [ "j" ] )
-		
+
 	def testParameterPathBug( self ) :
-	
+
 		p = CompoundParameter( name="c", description="" )
 		p.addParameter(
-		
+
 			CompoundParameter(
 				name = "n",
 				description = "",
@@ -885,48 +888,48 @@ class TestCompoundParameter( unittest.TestCase ) :
 					CompoundParameter( name="j", description="", members = [ IntParameter( "k", "", 10 ) ] )
 				]
 			)
-		
+
 		)
-		
+
 		self.assertEqual( p.parameterPath( p["n"]["i"] ), [ "n", "i" ] )
 		self.assertEqual( p.parameterPath( p["n"]["j"]["k"] ), [ "n", "j", "k" ] )
 
 	def testClearParameters( self ) :
-	
+
 		a = CompoundParameter( "a", "a desc",
 			members = [
 				StringParameter( "b", "b desc", "test 1 ok!"),
 				StringParameter( "d", "d desc", "test 2 failed!"),
 			]
 		)
-		
+
 		self.assertEqual( len( a ), 2 )
-		
+
 		a.clearParameters()
 		self.assertEqual( len( a ), 0 )
 		self.assertEqual( a.keys(), [] )
 		self.assertEqual( a.values(), [] )
-				
+
 		self.assertRaises( Exception, a.__getitem__, "b" )
 		self.assertRaises( Exception, a.__getitem__, "d" )
 
 	def testSetValueWithMissingData( self ) :
 
 		c = CompoundParameter()
-		
+
 		c1 = StringParameter( "child1", "child1", "child1" )
 		c.addParameter( c1 )
-		
+
 		preset = c.getValue()
-		
+
 		c2 = StringParameter( "child2", "child2", "child2" )
-		c2value = c2.getValue()		
+		c2value = c2.getValue()
 		c.addParameter( c2 )
-		
+
 		c.setValue( preset )
-			
+
 		self.assertEqual( c2value, c["child2"].getValue() )
-			
+
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :
@@ -1296,6 +1299,16 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
 		self.assertEqual( p.presetValues(), ( PointsPrimitive( 1 ), PointsPrimitive( 2 ), PointsPrimitive( 3 ), PointsPrimitive( 4 ) ) )
 
+	def testSmoothSkinningData( self ) :
+
+		ssd = SmoothSkinningData()
+		p = SmoothSkinningDataParameter( "n", "d", ssd )
+		self.assertEqual( p.name, "n" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.defaultValue, ssd )
+		self.assertEqual( p.getValue(), ssd )
+		self.assertEqual( p.userData(), CompoundObject() )
+
 class TestIntVectorParameter( unittest.TestCase ) :
 
 	def test( self ) :
@@ -1380,11 +1393,11 @@ class TestFileSequenceVectorParameter( unittest.TestCase ) :
 		self.assertEqual( p.userData(), CompoundObject() )
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
-		
+
 class TestMarschnerParameter( unittest.TestCase ) :
-	
+
 	def test( self ) :
-		
+
 		p1 = MarschnerParameter( "m", "", True )
 		self.failIf( "color" not in p1 )
 		self.failIf( "absorption" in p1 )
