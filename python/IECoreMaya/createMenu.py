@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -54,6 +54,11 @@ import maya.mel
 # specifies the mouse button which may be used to raise a popup menu, in the same format as
 # expected by the maya.cmds.popupMenu() command.
 #
+# useInterToUI :
+# determines whether or not the interToUI mel command is used when creating menu labels from the
+# paths in the definition. default to True but may well be defaulted to False in a future version
+# and then deprecated.
+#
 # \bug This leaks the MenuDefinition, because maya leaks the postMenuCommand object. This could
 # be a problem if the menu definition references methods on objects which are significant in terms
 # of memory use - for instance ParameterUI objects (which reference Parameter values). This code
@@ -80,7 +85,9 @@ import maya.mel
 # with keys to some dictionary which stores the MenuDefinitions. Then we can remove the
 # definitions from some uiDeleted scriptjob for the menu. Alternatively Alias could fix the damn
 # thing themselves.
-def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None, button = 3 ) :
+#
+# \todo Change useInterToUI default value to False and deprecate its use.
+def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None, button = 3, useInterToUI = True ) :
 
 	menu = None
 	if maya.cmds.window( parent, query=True, exists=True ) :
@@ -98,7 +105,7 @@ def createMenu( definition, parent, label="", insertAfter=None, radialPosition=N
 		# assume parent is a control which can accept a popup menu
 		menu = maya.cmds.popupMenu( parent=parent, button=button )
 
-	maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( __postMenu, menu, definition ) )
+	maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( __postMenu, menu, definition, useInterToUI=useInterToUI ) )
 	return menu
 
 # We don't know what the extra argument maya wants to pass to callbacks is, so
@@ -115,7 +122,7 @@ def __wrapCallback( cb ) :
 		# presumably a command in string form
 		return cb
 
-def __postMenu( parent, definition, *args ) :
+def __postMenu( parent, definition, useInterToUI=True, *args ) :
 
 	if callable( definition ) :
 		definition = definition()
@@ -127,16 +134,17 @@ def __postMenu( parent, definition, *args ) :
 
 		pathComponents = path.strip( "/" ).split( "/" )
 		name = pathComponents[0]
-		## \todo We shouldn't use interToUI here, as it reduces the freedom you have to name
-		# menu items the way you want. For instance, you might want a menu item to match a filename
-		# or nodename exactly, and the interToUI call ruins that.
-		label = maya.mel.eval( 'interToUI( "%s" )' % name )
+		
+		if useInterToUI :
+			label = maya.mel.eval( 'interToUI( "%s" )' % name )
+		else :
+			label = name
 		if len( pathComponents ) > 1 :
 			# a submenu
 			if not name in done :
 				subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, tearOff=True )
 				subMenuDefinition = definition.reRooted( "/" + name + "/" )
-				maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( __postMenu, subMenu, subMenuDefinition ) )
+				maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( __postMenu, subMenu, subMenuDefinition, useInterToUI=useInterToUI ) )
 				done.add( name )
 		else :
 
@@ -147,7 +155,7 @@ def __postMenu( parent, definition, *args ) :
 			elif item.subMenu :
 
 				subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent )
-				maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( __postMenu, subMenu, item.subMenu ) )
+				maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( __postMenu, subMenu, item.subMenu, useInterToUI=useInterToUI ) )
 
 			else :
 
