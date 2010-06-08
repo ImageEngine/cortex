@@ -2,6 +2,9 @@
 #
 #  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
+#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+#  its affiliates and/or its licensors.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -32,6 +35,8 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import os.path
 
 import maya.cmds
@@ -45,50 +50,50 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 
 		self.__menuParent = None
 		self.__currentClassInfo = parameter.getClass( True )[1:]
-		
-		# We have to do this after initialising self.__menuParent as 
+
+		# We have to do this after initialising self.__menuParent as
 		# CompoundParameterUI.__init__ will call _createHeader in this
-		# class, which populates self.__menuParent. 
+		# class, which populates self.__menuParent.
 		IECoreMaya.CompoundParameterUI.__init__( self, node, parameter, **kw )
-	
+
 	def _createHeader( self, columnLayout, **kw ) :
-			
+
 		IECoreMaya.CompoundParameterUI._createHeader( self, columnLayout, **kw )
-				
+
 		maya.cmds.rowLayout( numberOfColumns = 2, parent = columnLayout )
-		
+
 		collapsable = True
 		with IECore.IgnoredExceptions( KeyError ) :
 			collapsable = self.parameter.userData()["UI"]["collapsable"].value
-		
+
 		lable = "Class" if collapsable else self.label()
 		font = "smallPlainLabelFont" if collapsable else "tinyBoldLabelFont"
-		
+
 		maya.cmds.text(
 			label = lable,
 			font = font,
 			align = "right",
 			annotation = self.description()
 		)
-		
+
 		self.__menuParent = maya.cmds.iconTextStaticLabel(
 			image = "arrowDown.xpm",
 			font = "smallBoldLabelFont",
-			label = self.__menuParentLabel(), 
+			label = self.__menuParentLabel(),
 			style = "iconAndTextHorizontal",
 			height = 23,
 		)
-		
+
 		# popup menu can be activated with either right or left buttons
 		IECoreMaya.createMenu( self.__menuDefinition, self.__menuParent )
 		IECoreMaya.createMenu( self.__menuDefinition, self.__menuParent, button = 1 )
-	
+
 	def replace( self, node, parameter ) :
-		
+
 		newClassInfo = parameter.getClass( True )[1:]
 		if newClassInfo != self.__currentClassInfo :
 			self._deleteChildParameterUIs()
-		
+
 		IECoreMaya.CompoundParameterUI.replace( self, node, parameter )
 
 		if self.__menuParent :
@@ -97,14 +102,14 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 		self.__currentClassInfo = newClassInfo
 
 	def __classNameFilter( self ) :
-	
+
 		with IECore.IgnoredExceptions( KeyError ) :
 			return self.parameter.userData()["UI"]["classNameFilter"].value
-		
+
 		return "*"
 
 	def __menuParentLabel( self ) :
-	
+
 		classInfo = self.parameter.getClass( True )
 		if classInfo[1] :
 			labelPathStart = max( 0, self.__classNameFilter().find( "*" ) )
@@ -113,71 +118,71 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 			return "Choose..."
 
 	def __menuDefinition( self ) :
-	
+
 		result = IECore.MenuDefinition()
-		
+
 		menuPathStart = max( 0, self.__classNameFilter().find( "*" ) )
 
 		classInfo = self.parameter.getClass( True )
-		
+
 		loader = IECore.ClassLoader.defaultLoader( classInfo[3] )
 		for className in loader.classNames( self.__classNameFilter() ) :
 			classVersions = loader.versions( className )
 			for classVersion in classVersions :
-				
+
 				menuPath = "/" + className[menuPathStart:]
 				if len( classVersions ) > 1 :
 					menuPath += "/v" + str( classVersion )
-												
+
 				result.append(
-					
-					menuPath, 
-					
+
+					menuPath,
+
 					IECore.MenuItemDefinition(
 						command = IECore.curry( self.__setClass, className, classVersion, classInfo[3] ),
 						active = className != classInfo[1] or classVersion != classInfo[2]
 					)
-					
+
 				)
-	
+
 		result.append(
 			"/RemoveDivider",
 			IECore.MenuItemDefinition(
 				divider = True
 			)
 		)
-		
+
 		result.append(
-		
-			"/Remove", 
-					
+
+			"/Remove",
+
 			IECore.MenuItemDefinition(
 				command = IECore.curry( self.__setClass, "", 0, classInfo[3] ),
 				active = classInfo[0] is not None
 			)
-			
+
 		)
-	
+
 		return result
-	
+
 	def __setClass( self, className, classVersion, searchPathEnvVar ) :
-	
+
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
-		
+
 		# To stop maya crashing, we need to delete the UI for the existing class
 		# before we change it in C++, otherwise, an AE update gets triggered after
 		# we have removed the parameters, but before we have removed the UI.
 		self._deleteChildParameterUIs()
-		
+
 		fnPH.setClassParameterClass( self.parameter, className, classVersion, searchPathEnvVar )
 
-	@staticmethod	
+	@staticmethod
 	def _classSetCallback( fnPH, parameter ) :
-			
+
 		for instance in IECoreMaya.UIElement.instances( ClassParameterUI ) :
 			if instance.parameter.isSame( parameter ) :
 				instance.replace( instance.node(), instance.parameter )
 
 IECoreMaya.FnParameterisedHolder.addSetClassParameterClassCallback( ClassParameterUI._classSetCallback )
-		
+
 IECoreMaya.ParameterUI.registerUI( IECore.ClassParameter.staticTypeId(), ClassParameterUI )
