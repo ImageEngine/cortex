@@ -163,6 +163,9 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 
 		)
 
+		for cb in self.__classMenuCallbacks :
+			cb( result, self.parameter, self.node() )
+
 		return result
 
 	def __setClass( self, className, classVersion, searchPathEnvVar ) :
@@ -182,6 +185,16 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 		for instance in IECoreMaya.UIElement.instances( ClassParameterUI ) :
 			if instance.parameter.isSame( parameter ) :
 				instance.replace( instance.node(), instance.parameter )
+
+	__classMenuCallbacks = []
+	## Registers a callback which is able to modify the popup menu used to choose
+	# the class held by this parameter. Callbacks should have the following signature :
+	#
+	# callback( menuDefinition, parameter, holderNode ).
+	@classmethod
+	def registerClassMenuCallback( cls, callback ) :
+	
+		cls.__classMenuCallbacks.append( callback )
 
 IECoreMaya.FnParameterisedHolder.addSetClassParameterClassCallback( ClassParameterUI._classSetCallback )
 

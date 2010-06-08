@@ -321,6 +321,18 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		for instance in IECoreMaya.UIElement.instances( ClassVectorParameterUI ) :
 			if instance.parameter.isSame( parameter ) :
 				instance.__updateChildUIs()
+	
+	# only protected so it can be accessed by the ChildUI
+	_classMenuCallbacks = []
+	## Registers a callback which is able to modify the popup menu used to
+	# edit an individual class entry within the vector of classes. Callbacks
+	# should have the following signature :
+	#
+	# callback( menuDefinition, classVectorParameter, childParameter, holderNode )
+	@classmethod
+	def registerClassMenuCallback( cls, callback ) :
+	
+		cls._classMenuCallbacks.append( callback )
 
 class ChildUI( IECoreMaya.UIElement ) :
 
@@ -570,6 +582,9 @@ class ChildUI( IECoreMaya.UIElement ) :
 				subMenu = self.__versionMenuDefinition
 			)
 		)
+		
+		for cb in ClassVectorParameterUI._classMenuCallbacks :
+			cb( result, self.parent().parameter, self.__parameter, self.parent().node() )
 		
 		return result
 		
