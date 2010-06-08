@@ -324,6 +324,37 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( p.parameters()["image"].getValue(), image )
 	
+	def testObjectMFnDataParameterIOProblem( self ) :
+		
+		p = IECore.Parameterised('')
+		p.parameters().addParameter(
+			IECore.M44fParameter(
+				"matrix",
+				"",
+				IECore.M44f(),
+			)
+		)
+		n = cmds.createNode( "ieParameterisedHolderNode" )
+		h = IECoreMaya.FnParameterisedHolder( str(n) )
+		h.setParameterised( p )
+		
+		locator = cmds.spaceLocator()[0]
+				
+		parameterPlugPath = h.parameterPlugPath( p.parameters()['matrix'] )
+		attrPlugPath = '%s.worldMatrix' % ( locator )
+		cmds.connectAttr( attrPlugPath, parameterPlugPath )
+		
+		cmds.file( rename = os.getcwd() + "/test/IECoreMaya/objectMFnDataParameterIO.ma" )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+		
+		connections = cmds.listConnections( parameterPlugPath, plugs=True, connections=True )
+		
+		self.failUnless( attrPlugPath in connections )
+		self.failUnless( parameterPlugPath in connections )
+	
 	def testOpHolder( self ) :
 	
 		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "maths/multiply", 2 )
@@ -1066,6 +1097,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			"test/IECoreMaya/classParameterReference.ma" ,
 			"test/IECoreMaya/classParameterReferencer.ma" ,
 			"test/IECoreMaya/objectParameterIO.ma",
+			"test/IECoreMaya/objectMFnDataParameterIO.ma",
 			"test/IECoreMaya/imageProcedural.ma",
 			"test/IECoreMaya/classParameter.ma",
 			"test/IECoreMaya/classVectorParameter.ma",
