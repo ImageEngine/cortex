@@ -2,6 +2,9 @@
 #
 #  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
+#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+#  its affiliates and/or its licensors.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -63,6 +66,7 @@ from SplineParameterHandlerTest import *
 from DAGPathParametersTest import *
 from FnProceduralHolderTest import FnProceduralHolderTest
 from GeometryCombinerTest import GeometryCombinerTest
+from FromMayaSkinClusterConverterTest import *
 
 IECoreMaya.TestProgram(
 
@@ -75,7 +79,7 @@ IECoreMaya.TestProgram(
 		),
 		verbosity = 2
 	),
-	
+
 	plugins = [ "ieCore" ],
 
 )

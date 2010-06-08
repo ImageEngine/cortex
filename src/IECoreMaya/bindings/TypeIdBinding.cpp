@@ -2,6 +2,9 @@
 //
 //  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+//  its affiliates and/or its licensors.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -99,6 +102,7 @@ void bindTypeId()
 		.value( "FromMayaCompoundNumericPlugConverterV3dC3f", FromMayaCompoundNumericPlugConverterV3dC3fTypeId )
 		.value( "FromMayaTransformationMatrixfConverter", FromMayaTransformationMatrixfConverterTypeId )
 		.value( "FromMayaTransformationMatrixdConverter", FromMayaTransformationMatrixdConverterTypeId )
+		.value( "FromMayaSkinClusterConverter", FromMayaSkinClusterConverterTypeId )
 	;
 }
 

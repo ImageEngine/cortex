@@ -2,6 +2,9 @@
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+//  its affiliates and/or its licensors.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -78,6 +81,7 @@
 #include "IECoreMaya/bindings/FromMayaTransformationMatrixConverterBinding.h"
 #include "IECoreMaya/bindings/MessageHandlerBinding.h"
 #include "IECoreMaya/bindings/FnProceduralHolderBinding.h"
+#include "IECoreMaya/bindings/FromMayaSkinClusterConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -132,4 +136,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaTransformationMatrixConverter();
 	bindMessageHandler();
 	bindFnProceduralHolder();
+	bindFromMayaSkinClusterConverter();
 }
