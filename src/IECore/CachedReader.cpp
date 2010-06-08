@@ -56,6 +56,11 @@ struct CachedReader::Getter
 	{
 	}
 
+	Getter( const Getter &g )
+	: m_paths( g.m_paths ), m_postProcessor( g.m_postProcessor )
+	{
+	}
+
 	const SearchPath &m_paths; // references CachedReader::m_paths
 	ConstModifyOpPtr m_postProcessor;
 	tbb::mutex m_postProcessorMutex;
