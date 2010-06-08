@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds as cmds
+import maya.mel
 import maya.OpenMaya
 
 import IECore
@@ -40,7 +41,6 @@ import IECoreMaya
 
 ## Base class for objects which are able to create an Attribute Editor widget for a single IECore.Parameter
 # held on an IECoreMaya.ParameterisedHolder node.
-# \todo Make member functions protected or private as necessary - do this for the derived classes too.
 # \todo Separate control drawing from labelling and layout, so these classes just create the right
 # hand side of what they're doing at the moment. Then we can use them in different layouts like spreadsheets
 # and wotnot.
@@ -153,13 +153,74 @@ class ParameterUI( IECoreMaya.UIElement ) :
 			for m in existingMenus :
 				maya.cmds.deleteUI( m, menu=True )
 
-		cmds.popupMenu( parent = parentUI, postMenuCommand = IECore.curry( self.__buildPopupMenu, **kw ) )
-
+		IECoreMaya.createMenu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, useInterToUI=False )
+		
 		if "button1" in kw and kw["button1"] :
-			cmds.popupMenu( parent = parentUI, button=1, postMenuCommand = IECore.curry( self.__buildPopupMenu, **kw ) )
+			IECoreMaya.createMenu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, button = 1, useInterToUI=False )
 
+	## Returns an IECore.MenuDefinition used to create a popup menu for the ParameterUI. This may
+	# be overridden by derived classes to add their own menu items. In this case they should first
+	# call the base class implementation before adding their items to the result.
+	def _popupMenuDefinition( self, **kw ) :
 
-	def __buildConnectionsPopupMenu( self, popupMenu, ownerControl, **kw ):
+		definition = IECore.MenuDefinition()
+
+		if cmds.getAttr( kw['attributeName'], lock = True) == 0:
+
+			settable = maya.cmds.getAttr( kw["attributeName"], settable=True )
+			if settable :
+
+				# make menu items for all presets and for the default value
+
+				for k in self.parameter.presetNames() :
+					definition.append( "/" + k, { "command" : IECore.curry( self.__selectValue, selection = k ) } )					
+
+				if len( self.parameter.presetNames() ) > 0 :
+					definition.append( "/PresetDivider", { "divider" : True } )
+
+				definition.append( "/Default", { "command" : IECore.curry( self.__selectValue, selection = self.parameter.defaultValue ) } )
+				
+				definition.append( "/ValueDivider", { "divider" : True } )
+
+			attrType = cmds.getAttr( kw["attributeName"], type=True )
+			if attrType in ( "float", "long" ) :
+
+				if cmds.getAttr( kw['attributeName'], keyable=True) and settable :
+					definition.append( "/Set Key", { "command" : IECore.curry( self.__setKey, **kw ) } )
+					
+				expressions = cmds.listConnections(
+					kw['attributeName'],
+					d = False,
+					s = True,
+					type = "expression"
+				)
+
+				if not expressions :
+
+					hasConnections = self.__appendConnectionMenuDefinitions( definition, **kw )
+					if not hasConnections and settable :
+						definition.append( "/Create New Expression...", { "command" : IECore.curry( self.__expressionEditor, **kw ) } )
+
+				else:
+
+					definition.append( "/Edit Expression...", { "command" : IECore.curry( self.__expressionEditor, **kw ) } )
+					definition.append( "/Delete Expression", { "command" : IECore.curry( self.__deleteNode, nodeName = expressions[0] ) } )
+
+			else :
+
+				self.__appendConnectionMenuDefinitions( definition, **kw )
+
+			definition.append( "/ConnectionDivider", { "divider" : True } )
+
+			definition.append( "/Lock Attribute", { "command" : IECore.curry( self.__lock, **kw ) } )
+
+		else :
+
+			definition.append( "/Unlock Attribute", { "command" : IECore.curry( self.__unlock, **kw ) } )
+
+		return definition
+
+	def __appendConnectionMenuDefinitions( self, definition, **kw ) :
 
 		connections = cmds.listConnections(
 			kw['attributeName'],
@@ -170,162 +231,42 @@ class ParameterUI( IECoreMaya.UIElement ) :
 			skipConversionNodes = True
 		)
 		
-		cmds.menuItem(
-			parent = popupMenu,
-			label = "Connection Editor...",
-			command = IECore.curry( self.connectionEditor )
-		)
+		definition.append( "/Connection Editor...", { "command" : IECore.curry( self.__connectionEditor ) } )
 
 		if connections :
 			
-			cmds.menuItem(
-				parent = popupMenu,
-				divider = True
+			definition.append( "/Open AE...",
+				{ "command" : IECore.curry( self.__showEditor, attributeName = connections[1] ) }
+			)				
+
+			definition.append( "/Break Connection",
+				{ 
+					"command" : IECore.curry(
+						self.__disconnect,
+						source = connections[1],
+						destination = connections[0],
+						refreshAE = self.nodeName()
+					)
+				}
 			)
-
-			for i in xrange( 0, len(connections), 2 ):
-
-				conItem = cmds.menuItem(
-					parent = popupMenu,
-					subMenu = True,
-					label = connections[i+1],
-
-				)
-
-				cmds.menuItem(
-					parent = conItem,
-					label = "Connection Editor...",
-					command = IECore.curry( self.connectionEditor, leftHandNode = connections[i+1] )
-				)
-
-				cmds.menuItem(
-					parent = conItem,
-					label = "Open AE...",
-					command = IECore.curry( self.showEditor, attributeName = connections[i+1] )
-				)
-
-				cmds.menuItem(
-					parent = conItem,
-					label = "Break Connection",
-					command = IECore.curry( self.disconnect, source = connections[i+1],
-											destination = connections[i], refreshAE = self.nodeName() )
-				)
-				
-			cmds.menuItem(
-				parent = popupMenu,
-				divider = True
-			)			
 						
 			return True
 
 		else:
 
 			return False
+	
+	def __popupMenuDefinition( self, **kw ) :
+	
+		# call the protected function which can be overridden by
+		# derived classes. then let the callbacks do what they want.
+		definition = self._popupMenuDefinition( **kw )	
+		for cb in self.__popupMenuCallbacks :
+			cb( definition, self.parameter, self.node() )
 
-	def __buildPopupMenu( self, popupMenu, ownerControl, **kw ):
+		return definition
 
-		cmds.popupMenu(
-			popupMenu,
-			edit = True,
-			deleteAllItems = True
-		)
-
-		if cmds.getAttr( kw['attributeName'], lock = True) == 0:
-
-			settable = maya.cmds.getAttr( kw["attributeName"], settable=True )
-			if settable :
-
-				# make menu items for all presets and for the default value
-
-				for k in self.parameter.presetNames() :
-					cmds.menuItem(
-						parent = popupMenu,
-						label = k,
-						command = IECore.curry( self.__selectValue, selection = k )
-					)
-
-				if len( self.parameter.presetNames() ) > 0:
-					cmds.menuItem(
-						parent = popupMenu,
-						divider = True
-					)
-
-				cmds.menuItem(
-						parent = popupMenu,
-						label = "Default",
-						command = IECore.curry( self.__selectValue, selection = self.parameter.defaultValue )
-				)
-
-				cmds.menuItem(
-					parent = popupMenu,
-					divider = True
-				)
-
-			controlType = cmds.objectTypeUI( ownerControl)
-			if controlType == "floatField" or controlType == "intField":
-
-				if cmds.getAttr( kw['attributeName'], keyable=True) and settable :
-					cmds.menuItem(
-						parent = popupMenu,
-						label = "Set Key",
-						command = IECore.curry( self.__setKey, **kw )
-					)
-
-				expressions = cmds.listConnections(
-					kw['attributeName'],
-					d = False,
-					s = True,
-					type = "expression"
-				)
-
-				if not expressions:
-
-					hasConnections = self.__buildConnectionsPopupMenu( popupMenu, ownerControl, **kw )
-					if not hasConnections and settable :
-
-						cmds.menuItem(
-							parent = popupMenu,
-							label = "Create New Expression...",
-
-							command = IECore.curry( self.expressionEditor, **kw )
-						)
-
-				else:
-
-					cmds.menuItem(
-						parent = popupMenu,
-						label = "Edit Expression...",
-
-						command = IECore.curry( self.expressionEditor, **kw )
-					)
-
-
-					cmds.menuItem(
-						parent = popupMenu,
-						label = "Delete Expression",
-
-						command = IECore.curry( self.__deleteNode, nodeName = expressions[0] )
-					)
-
-			else:
-
-				self.__buildConnectionsPopupMenu( popupMenu, ownerControl, **kw )
-
-			cmds.menuItem(
-					parent = popupMenu,
-					label = "Lock attribute",
-					command = IECore.curry( self.__lock, **kw )
-			)
-
-		else:
-
-			cmds.menuItem(
-					parent = popupMenu,
-					label = "Unlock attribute",
-					command = IECore.curry( self.__unlock, **kw )
-			)
-
-	def showEditor( self, args, attributeName = None ):
+	def __showEditor( self, attributeName ) :
 
 		split = attributeName.split('.', 1 )
 		node = split[0]
@@ -334,11 +275,11 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 		IECoreMaya.mel( melCmd.encode('ascii') )
 
-	def __deleteNode( self, args, nodeName = None ):
+	def __deleteNode( self, nodeName = None ) :
 
 		cmds.delete( nodeName )
 
-	def expressionEditor( self, args, attributeName = None ):
+	def __expressionEditor( self, attributeName = None ) :
 
 		split = attributeName.split('.', 1 )
 		node = split[0]
@@ -348,50 +289,41 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 		IECoreMaya.mel( melCmd.encode('ascii') )
 
-	def connectionEditor( self, args, leftHandNode = None ) :
+	def __connectionEditor( self ) :
 	
-		import maya.mel
 		maya.mel.eval(
 				str("ConnectionEditor;"+
 				"nodeOutliner -e -replace %(right)s connectWindow|tl|cwForm|connectWindowPane|rightSideCW;"+
 				"connectWindowSetRightLabel %(right)s;") % { 'right' : self.nodeName() } )
-		
-		if leftHandNode :
-	
-			maya.mel.eval(
-				str("nodeOutliner -e -replace %(left)s connectWindow|tl|cwForm|connectWindowPane|leftSideCW;"+
-				"connectWindowSetLeftLabel %(left)s;" ) % { 'left' : leftHandNode.split(".")[0] } )
 
-	def disconnect( self, args, source = None, destination = None, refreshAE = None ):
+	def __disconnect( self, source = None, destination = None, refreshAE = None ) :
 
 		cmds.disconnectAttr( source, destination )
 		
 		if refreshAE :
-			import maya.mel
 			maya.mel.eval( 'evalDeferred( "updateAE %s;")' % refreshAE )
 
-
-	def __setKey( self, args, **kw ):
+	def __setKey( self, **kw ):
 
 		cmds.setKeyframe(
 			kw['attributeName']
 		)
 
-	def __lock( self, args, **kw ):
+	def __lock( self, **kw ):
 
 		cmds.setAttr(
 			kw['attributeName'],
 			lock = True
 		)
 
-	def __unlock( self, args, **kw  ):
+	def __unlock( self, **kw  ):
 
 		cmds.setAttr(
 			kw['attributeName'],
 			lock = False
 		)
 
-	def __selectValue( self, args, selection = None):
+	def __selectValue( self, selection = None):
 
 		self.parameter.setValue( selection )
 		IECoreMaya.FnParameterisedHolder( self.__node ).setNodeValue( self.parameter )
@@ -448,3 +380,14 @@ class ParameterUI( IECoreMaya.UIElement ) :
 		parameterUI = handlerType( parameterisedHolderNode, parameter, **kw )
 
 		return parameterUI
+
+	__popupMenuCallbacks = []
+	## Registers a callback which is able to modify the popup menus associated
+	# with ParameterUIs. The callback should have the following signature :
+	#
+	# callback( menuDefinition, parameter, holderNode ).
+	@classmethod
+	def registerPopupMenuCallback( cls, callback ) :
+	
+		cls.__popupMenuCallbacks.append( callback )
+ 		

@@ -32,17 +32,17 @@
 #
 ##########################################################################
 
-import os
-
 import maya.cmds
+import maya.mel
 
 import IECore					   
 import IECoreMaya.ParameterUI
+import IECoreMaya.StringUtil
 
 class GenericParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-	
+		
 		IECoreMaya.ParameterUI.__init__(
 		
 			self,
@@ -103,7 +103,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 				style = "iconOnly",
 				image = "listView.xpm",
 				font = "boldLabelFont",
-				command = IECore.curry( self.connectionEditor, None, leftHandNode = None ),
+				command = IECore.curry( self.__connectionEditor, leftHandNode = None ),
 				height = 20,
 				width = 20
 			)
@@ -139,7 +139,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 			style = "iconOnly",
 			image = "listView.xpm",
 			font = "boldLabelFont",
-			command = IECore.curry( self.connectionEditor, None, leftHandNode = plugName ),
+			command = IECore.curry( self.__connectionEditor, leftHandNode = plugName ),
 			height = 20,
 			width = 20
 		)
@@ -148,11 +148,34 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 			annotation = "Clicking this will take you to the node sourcing this connection.",
 			style = "iconOnly",
 			image = "navButtonConnected.xpm",
-			command = IECore.curry( self.showEditor, None, plugName ),
+			command = IECore.curry( self.__showEditor, plugName ),
 			height = 20,
 		)
 		
 		maya.cmds.setParent( ".." )
+		
+	def __connectionEditor( self, leftHandNode ) :
+
+		maya.mel.eval(
+
+			str( "ConnectionEditor;" +
+			"nodeOutliner -e -replace %(right)s connectWindow|tl|cwForm|connectWindowPane|rightSideCW;"+
+			"connectWindowSetRightLabel %(right)s;") % { 'right' : self.nodeName() }
+		
+		)
+	
+		if leftHandNode :
+		
+			maya.mel.eval(
+
+				str("nodeOutliner -e -replace %(left)s connectWindow|tl|cwForm|connectWindowPane|leftSideCW;"+
+				"connectWindowSetLeftLabel %(left)s;" ) % { 'left' : leftHandNode.split(".")[0] }
+
+			)
+	
+	def __showEditor( self, attributeName ) :
+
+		maya.mel.eval( 'showEditor "' + IECoreMaya.StringUtil.nodeFromAttributePath( attributeName ) + '"' )
 				
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI, 'generic' )
