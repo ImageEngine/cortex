@@ -69,7 +69,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
 
         s = SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
         iface = IndexedIOInterface.create( "test/IECore/ssd.fio", "/", IndexedIOOpenMode.Write )
-        #iface = IndexedIOInterface.create( "/tmp/ssd.fio", "/", IndexedIOOpenMode.Write )
+
         s.save( iface, "test" )
         ss = Object.load( iface, "test" )
         self.assertEqual( s, ss )
@@ -95,7 +95,6 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         self.assertEqual( s, s.copy() )
         self.assertRaises( Exception, s.validate() )
 
-        #iface = IndexedIOInterface.create( "/tmp/ssd.fio", "/", IndexedIOOpenMode.Write )
         iface = IndexedIOInterface.create( "test/IECore/ssd.fio", "/", IndexedIOOpenMode.Write )
         s.save( iface, "test" )
         ss = Object.load( iface, "test" )
@@ -131,7 +130,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         iv_pic3 = IntVectorData( [3, 1, 1] )
 
         # test all is ok
-        self.assertRaises( Exception, not SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
+        SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate()
 
         # test wrong nr of influenceNames, influencePose
         self.assertRaises( Exception, SmoothSkinningData(iv_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
