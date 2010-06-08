@@ -64,6 +64,9 @@ void bindMayaTypeId()
 		.value( "ParameterisedHolderImagePlane", ParameterisedHolderImagePlaneId )
 		.value( "ImagePlaneHolder", ImagePlaneHolderId )
 		.value( "CurveCombiner", CurveCombinerId )
+		.value( "DummyData", DummyDataId )
+		.value( "DrawableHolder", DrawableHolderId )
+		.value( "GeometryCombiner", GeometryCombinerId )
 	;
 }
 
