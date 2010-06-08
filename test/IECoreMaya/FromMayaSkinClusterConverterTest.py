@@ -74,7 +74,6 @@ class FromMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 
 		converter.parameters()["influenceName"].setValue(IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full)
 
-		converter.influenceName = IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full
 		ssd = converter.convert()
 		self.assertEqual( ssd.influenceNames(), IECore.StringVectorData( ['|joint1', '|joint1|joint2', '|joint1|joint2|joint3'] ) )
 
@@ -86,7 +85,7 @@ class FromMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len(ssd.pointInfluenceCounts()), 16)
 		self.assertEqual( len(ssd.pointInfluenceIndices()), 32)
 
-		self.assertRaises( Exception, not ssd.validate )
+		ssd.validate()
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
