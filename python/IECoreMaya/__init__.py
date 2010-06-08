@@ -51,7 +51,7 @@ from NodeParameter import NodeParameter
 from DAGPathParameter import DAGPathParameter
 from DAGPathVectorParameter import DAGPathVectorParameter
 from mayaDo import mayaDo
-from createMenu import createMenu
+from Menu import Menu, createMenu
 from BakeTransform import BakeTransform
 from MeshOpHolderUtil import create
 from MeshOpHolderUtil import createUI
