@@ -48,10 +48,15 @@
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/Convert.h"
 
+#include "maya/MFnNumericAttribute.h"
+#include "maya/MFnNumericData.h"
+
 using namespace IECoreMaya;
 
 const MTypeId DrawableHolder::id = DrawableHolderId;
 const MString DrawableHolder::typeName = "ieDrawable";
+
+MObject DrawableHolder::aDraw;
 
 DrawableHolder::DrawableHolder()
 	:	m_scene( 0 )
@@ -71,6 +76,20 @@ MStatus DrawableHolder::initialize()
 {
 	MStatus s = inheritAttributesFrom( ParameterisedHolderLocator::typeName );
 	assert( s );
+	
+	MFnNumericAttribute nAttr;
+	
+	aDraw = nAttr.create( "draw", "draw", MFnNumericData::kBoolean, 1, &s );
+	assert( s );
+	nAttr.setReadable( true );
+	nAttr.setWritable( true );
+	nAttr.setStorable( true );
+	nAttr.setConnectable( true );
+	nAttr.setHidden( false );
+	
+	s = addAttribute( aDraw );
+	assert( s );
+	
 	return s;
 }
 
@@ -97,7 +116,15 @@ void DrawableHolder::draw( M3dView &view, const MDagPath &path, M3dView::Display
 	{
 		return;
 	}
-		
+	
+	MPlug pDraw( this->thisMObject(), DrawableHolder::aDraw );
+	bool draw = true;
+	pDraw.getValue( draw );
+	if( !draw )
+	{
+		return;
+	}
+	
 	view.beginGL();
 	
 	GLint prevProgram;

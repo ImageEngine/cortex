@@ -71,7 +71,9 @@ class DrawableHolder : public ParameterisedHolder<MPxLocatorNode>
 
 		/// Returns an up to date scene created by calling draw() on the held class.
 		IECoreGL::ConstScenePtr scene();
-
+		
+		static MObject aDraw;
+	
 	private :
 
 		IECoreGL::ScenePtr m_scene;

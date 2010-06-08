@@ -41,13 +41,17 @@ global proc AEieDrawableTemplate( string $nodeName )
 			ieParameterisedHolderUIParameterPresetsControl();
 		editorTemplate -endLayout;
 		
+		editorTemplate -beginLayout "Display";
+			editorTemplate -addControl "draw";
+		editorTemplate -endLayout;
+		
 		editorTemplate -beginLayout "Parameters";
-				ieParameterisedHolderUIParametersControl();		
+			ieParameterisedHolderUIParametersControl();		
 			editorTemplate -endLayout;
 		editorTemplate -endLayout;
 
 		editorTemplate -beginLayout "Extra Attributes";
-				ieParameterisedHolderUIExtraAttributesControl();
+			ieParameterisedHolderUIExtraAttributesControl();
 		editorTemplate -endLayout;
 			
 	editorTemplate -endScrollLayout;	
