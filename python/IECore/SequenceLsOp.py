@@ -209,7 +209,7 @@ class SequenceLsOp( Op ) :
 
 		# recursively find sequences
 		baseDirectory = operands["dir"].value
-		if baseDirectory[-1] == '/' :
+		if baseDirectory != "/" and baseDirectory[-1] == '/' :
 			baseDirectory = baseDirectory[:-1]
 
 		sequences = ls( baseDirectory )
