@@ -103,6 +103,9 @@ class TestRunTimeTyped( unittest.TestCase ) :
 				self.assert_( hasattr(t, "baseTypeId") )
 				self.assert_( hasattr(t, "baseTypeName") )
 
+				if t.staticTypeId() not in IECore.TypeId.values.keys() :
+					print "TypeID: %s  TypeName: %s" % ( t.staticTypeId(), t.staticTypeName() )
+					
 				self.assert_( t.staticTypeId() in IECore.TypeId.values.keys() )
 
 				# Make sure that no 2 IECore classes provide the same typeId or typeName
