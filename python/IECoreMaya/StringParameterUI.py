@@ -2,6 +2,9 @@
 #
 #  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
+#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+#  its affiliates and/or its licensors.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -31,6 +34,7 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+from __future__ import with_statement
 
 import maya.cmds
 
@@ -62,7 +66,7 @@ import IECoreMaya
 class StringParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
-	
+
 		IECoreMaya.ParameterUI.__init__( self, node, parameter, maya.cmds.rowLayout( numberOfColumns = 2 ), **kw )
 
 		self.__label = maya.cmds.text(
@@ -84,52 +88,52 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 
 		maya.cmds.connectControl( self.__textField, self.plugName() )
 		self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
-		
+
 		# The popup on the text field itself seems not to be working, so also add it to the
 		# label in the mean time.
 		self._addPopupMenu( parentUI=self.__label, attributeName = self.plugName(), button1 = True )
 
 	def _popupMenuDefinition( self, **kw ) :
-	
+
 		definition = IECoreMaya.ParameterUI._popupMenuDefinition( self, **kw )
-		
+
 		if not maya.cmds.getAttr( self.plugName(), settable=True ) :
 			return definition
 
 		wantsComponentNames = False
 		with IECore.IgnoredExceptions( KeyError ) :
 			wantsComponentNames = self.parameter.userData()["UI"]["acceptsProceduralObjectNames"].value
-		
+
 		if wantsComponentNames :
-			
+
 			definition.append( "/ComponentDivider", { "divider" : True } )
 			definition.append( "/Components/Set To Selected", { "command" : self.__setToSelectedComponents } )
 			definition.append( "/Components/Add Selected", { "command" : self.__addSelectedComponents } )
 			definition.append( "/Components/Remove Selected", { "command" : self.__removeSelectedComponents } )
 			definition.append( "/Components/Select", { "command" : self.__selectComponents } )
-		
+
 		wantsNodeName = False
 		with IECore.IgnoredExceptions( KeyError ) :
 			wantsNodeName = self.parameter.userData()["UI"]["acceptsNodeName"].value
-			
+
 		wantsNodeNames = False
 		with IECore.IgnoredExceptions( KeyError ) :
 			wantsNodeNames = self.parameter.userData()["UI"]["acceptsNodeNames"].value
-			
+
 		if wantsNodeName or wantsNodeNames :
-		
+
 			lskw = {}
 			with IECore.IgnoredExceptions( KeyError ) :
 				lskw["type"] = list( self.parameter.userData()["UI"]["acceptedNodeTypes"] )
 			with IECore.IgnoredExceptions( KeyError ) :
 				if self.parameter.userData()["UI"]["acceptedNodeNameFormat"].value == "full" :
 					lskw["long"] = True
-			
+
 			nodeNames = maya.cmds.ls( **lskw )
 			if nodeNames :
-			
+
 				definition.append( "/NodesDivider", { "divider" : True } )
-			
+
 				if wantsNodeName :
 
 					currentValue = maya.cmds.getAttr( self.plugName() )
@@ -145,62 +149,62 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 							definition.append( "/Nodes/Remove/%s" % nodeName, { "command" : IECore.curry( self.__removeNodeName, nodeName ) } )
 						else :
 							definition.append( "/Nodes/Add/%s" % nodeName, { "command" : IECore.curry( self.__addNodeName, nodeName ) } )
-			
+
 		return definition
-		
+
 	def __setToSelectedComponents( self ) :
-		
+
 		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
 		components = fnPH.selectedComponentNames()
 		components = list( components )
 		components.sort()
-		
+
 		maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
 
 	def __addSelectedComponents( self ) :
-		
+
 		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
 		components = fnPH.selectedComponentNames()
 		components |= set( maya.cmds.getAttr( self.plugName() ).split() )
 		components = list( components )
 		components.sort()
-		
+
 		maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
-		
+
 	def __removeSelectedComponents( self ) :
-	
+
 		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
 		components = set( maya.cmds.getAttr( self.plugName() ).split() )
 		components -= fnPH.selectedComponentNames()
 		components = list( components )
 		components.sort()
-		
+
 		maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
-		
+
 	def __selectComponents( self ) :
-	
+
 		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
 		fnPH.selectComponentNames( set( maya.cmds.getAttr( self.plugName() ).split() ) )
 
 	def __addNodeName( self, nodeName, clearFirst=False ) :
-	
+
 		names = set()
 		if not clearFirst :
 			names = set( maya.cmds.getAttr( self.plugName() ).split() )
-			
+
 		names.add( nodeName )
 		names = list( names )
 		names.sort()
-		
+
 		maya.cmds.setAttr( self.plugName(), " ".join( names ), type="string" )
-		
+
 	def __removeNodeName( self, nodeName ) :
-	
+
 		names = set( maya.cmds.getAttr( self.plugName() ).split() )
 		names.remove( nodeName )
 		names = list( names )
 		names.sort()
-		
+
 		maya.cmds.setAttr( self.plugName(), " ".join( names ), type="string" )
-		
+
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.StringParameter, StringParameterUI )
