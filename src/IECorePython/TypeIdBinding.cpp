@@ -365,6 +365,7 @@ void bindTypeId()
 		.value( "FaceVaryingPromotionOp", FaceVaryingPromotionOpTypeId )
 		.value( "MeshDistortionsOp", MeshDistortionsOpTypeId )
 		.value( "PointVelocityDisplaceOp", PointVelocityDisplaceOpTypeId )
+		.value( "SmoothSkinningDataParameter", SmoothSkinningDataParameterTypeId )
 	;
 }
 
