@@ -57,8 +57,6 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 
 		IE_CORE_DECLAREMEMBERPTR( FileSequenceParameterWrap );
 
-	protected:
-
 		static FileSequenceParameter::ExtensionList makeExtensions( object extensions )
 		{
 			FileSequenceParameter::ExtensionList result;
@@ -137,29 +135,30 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list(), size_t minSequenceSize = 2 )
 			:	FileSequenceParameter( n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ), minSequenceSize ), Wrapper< FileSequenceParameter >( self, this ) {};
 
-		list getExtensionsWrap()
-		{
-			FileSequenceParameter::ExtensionList extensions = FileSequenceParameter::getExtensions();
-
-			list result;
-			for ( FileSequenceParameter::ExtensionList::const_iterator it = extensions.begin(); it != extensions.end(); ++it )
-			{
-				result.append( *it );
-			}
-
-			return result;
-		}
-
-		void setExtensionsWrap( object ext )
-		{
-			for ( long i = 0; i < IECorePython::len( ext ); i++)
-			{
-				FileSequenceParameter::setExtensions( makeExtensions( ext ) );
-			}
-		}
-
 		IECOREPYTHON_PARAMETERWRAPPERFNS( FileSequenceParameter );
 };
+
+static list getFileSequenceExtensionsWrap( FileSequenceParameter &param )
+{
+	FileSequenceParameter::ExtensionList extensions = param.getExtensions();
+
+	list result;
+	for ( FileSequenceParameter::ExtensionList::const_iterator it = extensions.begin(); it != extensions.end(); ++it )
+	{
+		result.append( *it );
+	}
+
+	return result;
+}
+
+static void setFileSequenceExtensionsWrap( FileSequenceParameter &param, object ext )
+{
+	for ( long i = 0; i < IECorePython::len( ext ); i++)
+	{
+		param.setExtensions( FileSequenceParameterWrap::makeExtensions( ext ) );
+	}
+}
+
 
 void bindFileSequenceParameter()
 {
@@ -186,7 +185,7 @@ void bindFileSequenceParameter()
 		.def( "setFileSequenceValue", &FileSequenceParameter::setFileSequenceValue )
 		.def( "setMinSequenceSize", &FileSequenceParameter::setMinSequenceSize )
 		.def( "getMinSequenceSize", &FileSequenceParameter::getMinSequenceSize )
-		.add_property( "extensions",&FileSequenceParameterWrap::getExtensionsWrap, &FileSequenceParameterWrap::setExtensionsWrap )
+		.add_property( "extensions",&getFileSequenceExtensionsWrap, &setFileSequenceExtensionsWrap )
 		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( FileSequenceParameter )
 	;
 
