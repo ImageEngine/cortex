@@ -398,6 +398,32 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertRaises( SyntaxError, parser.parse, ["-box3f"], p )
 		self.assertRaises( SyntaxError, parser.parse, ["-spline"], p )
 
+	def testDerivedClassParsing( self ) :
+	
+		class DerivedParameter( IECore.StringParameter ) :
+		
+			def __init__( self, name, description, defaultValue ) :
+			
+				IECore.StringParameter.__init__( self, name, description, defaultValue )
+
+		IECore.registerRunTimeTyped( DerivedParameter )
+
+		p = IECore.CompoundParameter(
+			members = [
+				DerivedParameter( "n", "", "" ),
+			],
+		)
+
+		p["n"].setTypedValue( "test" )
+		
+		s = IECore.ParameterParser().serialise( p )
+		
+		p["n"].setTypedValue( "ohDear" )
+		
+		IECore.ParameterParser().parse( s, p )
+		
+		self.assertEqual( p["n"].getTypedValue(), "test" )
+
 if __name__ == "__main__":
         unittest.main()
 

@@ -33,7 +33,6 @@
 ##########################################################################
 
 import IECore
-import shlex
 
 ## This class defines a means of parsing a list of string arguments with respect to a Parameter definition.
 # It's main use is in providing values to be passed to Op instances in the do script. It now also provides
@@ -130,13 +129,19 @@ class ParameterParser :
 					continue
 
 			# we're gonna need a specialised parser
-			parmType = p.typeId()
-			if not parmType in self.__typesToParsers :
+			parser = None
+			typeId = p.typeId()
+			while typeId != IECore.TypeId.Invalid :
+				if typeId in self.__typesToParsers :
+					parser = self.__typesToParsers[typeId]
+					break
+				typeId = IECore.RunTimeTyped.baseTypeId( typeId )
+			
+			if parser is None :
 				raise SyntaxError( "No parser available for parameter \"%s\"." % name )
 
-			f = self.__typesToParsers[parmType]
 			try :
-				f( args, p )
+				parser( args, p )
 			except Exception, e :
 				raise SyntaxError( "Problem parsing parameter \"%s\" : %s " % ( name, e ) )
 
@@ -154,18 +159,32 @@ class ParameterParser :
 			if not parameter.userData()["parser"]["serialise"].value:
 				return []
 
-		parmType = parameter.typeId()
-		if not parmType in self.__typesToSerialisers and not isinstance( parameter, IECore.CompoundParameter ) :
+		# Try to find a serialiser
+		serialiser = None
+		typeId = parameter.typeId()
+		while typeId != IECore.TypeId.Invalid :
+			if typeId in self.__typesToSerialisers :
+				serialiser = self.__typesToSerialisers[typeId]
+				break
+			if typeId != IECore.TypeId.CompoundParameter :
+				# consider serialisers for base classes.
+				typeId = IECore.RunTimeTyped.baseTypeId( typeId )
+			else :
+				# don't consider serialiser for base classes of CompoundParameter
+				# so that it doesn't get an unecessary serialisation in the case
+				# of a serialiser for Parameter being registered.
+				break
+
+		if serialiser is None and not isinstance( parameter, IECore.CompoundParameter ) :
 			# bail if no serialiser available, unless it's a CompoundParameter in which case we'll content
 			# ourselves with serialising the children if no serialiser is available.
 			raise RuntimeError( "No serialiser available for parameter \"%s\"" % parameter.name )
 		
 		result = []
-		if parmType in self.__typesToSerialisers :
+		if serialiser is not None :
 			# we have a registered serialiser - use it
-			f = self.__typesToSerialisers[parmType]
 			try:
-				s = f( parameter )
+				s = serialiser( parameter )
 				if not isinstance( s, list ) :
 					raise RuntimeError( "Serialiser did not return a list." )
 				for ss in s :
@@ -179,7 +198,6 @@ class ParameterParser :
 
 		# recurse to children of CompoundParameters
 		if parameter.isInstanceOf( IECore.CompoundParameter.staticTypeId() ) :
-			# but it's a CompoundParameter so we can just recurse.
 			path = rootName
 			if parameter.name :
 				path = path + parameter.name + '.'
