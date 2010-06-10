@@ -58,7 +58,7 @@ class UIElement :
 		instanceRecord.instance = self
 		instanceRecord.callbacks = []
 		# Saves errors in batch if UI work is still done....
-		if maya.cmds.objExists( topLevelUI ):
+		if not maya.cmds.about( batch=True ):
 			instanceRecord.uiDeletedCallbackId = IECoreMaya.CallbackId( maya.OpenMayaUI.MUiMessage.addUiDeletedCallback( topLevelUI, self.__uiDeleted, topLevelUI ) )
 		UIElement.__instances[topLevelUI] = instanceRecord
 
