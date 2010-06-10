@@ -326,21 +326,12 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 	
 	def testObjectMFnDataParameterIOProblem( self ) :
 		
-		p = IECore.Parameterised('')
-		p.parameters().addParameter(
-			IECore.M44fParameter(
-				"matrix",
-				"",
-				IECore.M44f(),
-			)
-		)
-		n = cmds.createNode( "ieParameterisedHolderNode" )
-		h = IECoreMaya.FnParameterisedHolder( str(n) )
-		h.setParameterised( p )
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "matrixParameter", 1 )
+		op = fnOH.getOp()
 		
 		locator = cmds.spaceLocator()[0]
-				
-		parameterPlugPath = h.parameterPlugPath( p.parameters()['matrix'] )
+		
+		parameterPlugPath = fnOH.parameterPlugPath( op.parameters()['matrix'] )
 		attrPlugPath = '%s.worldMatrix' % ( locator )
 		cmds.connectAttr( attrPlugPath, parameterPlugPath )
 		
@@ -350,7 +341,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		cmds.file( new = True, force = True )
 		cmds.file( scene, open = True )
 		
-		connections = cmds.listConnections( parameterPlugPath, plugs=True, connections=True )
+		connections = cmds.listConnections( parameterPlugPath, plugs=True, connections=True ) or []
 		
 		self.failUnless( attrPlugPath in connections )
 		self.failUnless( parameterPlugPath in connections )
