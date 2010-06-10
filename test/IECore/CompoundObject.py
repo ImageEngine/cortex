@@ -134,6 +134,11 @@ class testCompoundObject( unittest.TestCase ) :
 		
 		self.assertRaises( KeyError, get, c )
 		self.assertRaises( KeyError, delete, c )
+
+	def testItems( self ) :	
+	
+		o = IECore.CompoundObject( { "a": IECore.IntData( 1 ) } )
+		self.assertEqual( o.items(), [ ( "a", IECore.IntData( 1 ) ) ] )
 		
 if __name__ == "__main__":
         unittest.main()

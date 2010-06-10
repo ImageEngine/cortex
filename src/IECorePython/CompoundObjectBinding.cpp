@@ -164,6 +164,17 @@ static boost::python::list values( const CompoundObject &o )
 	return result;
 }
 
+static boost::python::list items( const CompoundObject &o )
+{
+	boost::python::list result;
+	CompoundObject::ObjectMap::const_iterator it;
+	for( it = o.members().begin(); it!=o.members().end(); it++ )
+	{
+		result.append( boost::python::make_tuple( it->first.value(), it->second ) );
+	}
+	return result;
+}
+		
 class CompoundObjectFromPythonDict
 {
 	public :
@@ -292,6 +303,7 @@ void bindCompoundObject()
 		.def( "has_key", &has_key )
 		.def( "keys", &keys )
 		.def( "values", &values )
+		.def( "items", &items )
 		.def( "update", &update )
 		.def( "get", &get, "m.get(k [, v])\nReturns m[k] if found; otherwise, returns v.",
 			(
