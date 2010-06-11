@@ -175,6 +175,9 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 					
 				)
 	
+		for cb in self.__addClassMenuCallbacks :
+			cb( result, self.parameter, self.node() )
+	
 		return result
 			
 	def _removeClass( self, parameterName ) :
@@ -333,6 +336,17 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 	def registerClassMenuCallback( cls, callback ) :
 	
 		cls._classMenuCallbacks.append( callback )
+
+	__addClassMenuCallbacks = []
+	## Registers a callback which is able to modify the popup menu used
+	# to add class entries into the vector of classes. Callbacks should have
+	# the following signature :
+	#
+	# callback( menuDefinition, classVectorParameter, holderNode )
+	@classmethod
+	def registerAddClassMenuCallback( cls, callback ) :
+	
+		cls.__addClassMenuCallbacks.append( callback )
 
 class ChildUI( IECoreMaya.UIElement ) :
 
