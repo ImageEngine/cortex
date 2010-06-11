@@ -265,7 +265,7 @@ global proc ieParameterisedHolderUIExtraAttributesNewAndReplace( string $attrNam
 			}
 			if (match("^parm_", $dynAttr) == "" && $dynAttr != "result" && $attrType != "message" )
 			{
-				attrControlGrp -attribute ($nodeName + "." + $dynAttr);
+				attrControlGrp -attribute $dynAttrName;
 			}
 		}
 	}
