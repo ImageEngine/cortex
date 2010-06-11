@@ -194,6 +194,7 @@ class FileDialog():
 		if lastPath :
 			
 			maya.cmds.menuItem( divider=True, parent=menu )
+			maya.cmds.menuItem( enable=False, label="Recent", parent=menu )
 			maya.cmds.menuItem( label=lastPath, parent=menu, command=IECore.curry( self.setPath, lastPath ) )
 		
 		if maya.cmds.menu( menu, numberOfItems=True, query=True ) == 0:
