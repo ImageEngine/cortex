@@ -33,6 +33,7 @@
 ##########################################################################
 
 import os.path
+import warnings
 
 import maya.cmds
 
@@ -68,7 +69,7 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 		maya.cmds.iconTextButton(
 			label = "",
 			image = "fileOpen.xpm",
-			command = self.openDialog,
+			command = self._fileDialog,
 			height = 23,
 			style = "iconOnly"
 		)
@@ -84,15 +85,12 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 		self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
 		maya.cmds.connectControl( self.__textField, self.plugName() )
 
+	## \deprecated
 	def openDialog( self ) :
 		
-		uiUserData = self.parameter.userData().get( 'UI', {} )
-		dialogPath = uiUserData.get( 'defaultPath', IECore.StringData() ).value
-		obeyDefaultPath = uiUserData.get( 'obeyDefaultPath', IECore.BoolData() ).value
-		currentPath = self.parameter.getTypedValue()
+		warnings.warn( "PathParameterUI.openDialog() is deprecated, please implement _filePicker() instead if you need to customise the dialog/returned path.", DeprecationWarning, 2 )
 		
-		if currentPath and not obeyDefaultPath :
-			dialogPath = os.path.dirname( currentPath )
+		dialogPath = self._initialPath()
 		
 		dialogPath = os.path.expandvars( dialogPath )
 		dialogPath = os.path.join( dialogPath, '*' )
@@ -100,3 +98,65 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 		selection = maya.cmds.fileDialog( directoryMask=dialogPath ).encode('ascii')
 		
 		return selection
+	
+	## This can be implemented in derived classes to show a customised file picker.
+	## Typically, you would call the base class passing additional kw arguments,
+	## which are passed to the FileDialog call. If omitted, "path", "key" and
+	## "callback" will be set to appropriate values depending on the parameter.
+	def _fileDialog( self, **kw ) :
+		
+		if not kw:
+	
+			## \todo Remove at some suitable point, once we're happy no one is relying on
+			## a custom openDialog implementation to achieve their desired functionality.
+			warnings.warn( "PathParameterUI.openDialog() is deprecated, please implement _filePicker() instead if you need to customise the dialog/returned path.", DeprecationWarning, 2 )
+			self.openDialog()
+	
+		else:
+		
+			# Allow a class to enforce a path if the default behaviour for
+			# using existing paths or the default userData path is not desired.
+			if "path" not in kw:
+				kw["path"] = self._initialPath()
+
+			# Allow the parameter userData to override the key from the caller.
+			# This is a little different in concept to the path, but they key is
+			# never dynamic in terms of the parameter, so I think it makes sense.
+			uiUserData = self.parameter.userData().get( 'UI', {} )
+			key = uiUserData.get( 'fileDialogKey', IECore.StringData() ).value
+			if key:
+				kw["key"] = key
+
+			if "callback" not in kw:
+				kw["callback"] = self.__defaultFileDialogCallback
+
+			IECoreMaya.FileDialog( **kw )	
+	
+	# Simply sets the parameter value
+	def __defaultFileDialogCallback( self, selection ) :
+		
+		if selection:
+
+			self.parameter.setValue( IECore.StringData( selection[0] ) )
+			fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+			fnPH.setNodeValue( self.parameter )
+	
+	## Returns the initial path for a FileDialog, implied by the current
+	## parameter value, and the status of the following userData["UI"] entries:
+	##  - defaultPath (IECore.StringData()) A path to use as a default.
+	##  - obeyDefaultPath (IECore.BoolData()) If True, the default path will
+	##     be used, regardless of the curent parameter value. Otherwise, the
+	##     parent directory of the current path is used.
+	def _initialPath( self ) :
+		
+		uiUserData = self.parameter.userData().get( 'UI', {} )
+		dialogPath = uiUserData.get( 'defaultPath', IECore.StringData() ).value
+		obeyDefaultPath = uiUserData.get( 'obeyDefaultPath', IECore.BoolData( False ) ).value
+		currentPath = self.parameter.getTypedValue()
+		
+		if currentPath and not obeyDefaultPath :
+			dialogPath = os.path.dirname( currentPath )
+			
+		return dialogPath
+		
+		

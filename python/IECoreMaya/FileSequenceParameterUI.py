@@ -43,24 +43,75 @@ class FileSequenceParameterUI( IECoreMaya.PathParameterUI ) :
 
 		IECoreMaya.PathParameterUI.__init__( self, node, parameter, **kw )
 
-	def openDialog( self ) :
+	def _fileDialog( self ) :
 
-		selection = IECoreMaya.PathParameterUI.openDialog( self )
+		tools = FileSequenceParameterUI.FileSequenceFilter( self.parameter.extensions )
 
-		if len(selection):
-			d = os.path.dirname(selection)
-			sequences = IECore.ls(d)
+		IECoreMaya.PathParameterUI._fileDialog( self,
+			filter = tools.filter,
+			validate = tools.validate,
+		)
+		
+	class FileSequenceFilter :
 
-			if sequences:
+		def __init__( self, extensions=None ) :
+		
+			if extensions:
+				self.__extensions = IECore.StringVectorData( extensions )
+			else:
+				self.__extensions = IECore.StringVectorData()
 
-				for seq in sequences:
+		def filter( self, path, items ) :
+		
+			fsOp = IECore.SequenceLsOp()
+		
+			oldItems = list( items )
+			del items[:]
+			
+			for i in oldItems:
+				if os.path.isdir( i["path"] ) :
+					items.append( i )
+										
+			sequences = fsOp( 
+				dir=path,
+				type="files", 
+				resultType="stringVector", 
+				format="<PREFIX><#PADDING><SUFFIX> <FRAMES>",
+				extensions=self.__extensions,
+			)
 
-					if os.path.basename(selection) in seq.fileNames():
-
-						self.parameter.setValue( IECore.StringData( os.path.join( d, str( seq ) ) ) )
-						fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
-						fnPH.setNodeValue( self.parameter )
-
-						return
-
+			for s in sequences :
+				
+				firstFrame = IECore.FileSequence( s ).fileNames()[0]
+				stat = os.stat( firstFrame )		
+				
+				seqItem = {
+					"path" : s,
+					"name" : s.replace( "%s/" % path, "" ),
+					"mode" :  stat[0],
+					"uid" :  stat[4],
+					"gid" :  stat[5],
+					"size" :  stat[6],
+					"atime" :  stat[7],
+					"mtime" :  stat[8],
+					"ctime" :  stat[9],
+				}
+			
+				items.append( seqItem )
+	
+		# FileExtensionFilter will get confused by the extra info on
+		# the end of the sequence string.
+		def validate( self, path, items ):
+			
+			if not items:
+				return False
+				
+			for i in items:
+				if os.path.isdir( "%s/%s" % ( path, i["name"] ) ) :
+					return False
+				
+			return True
+				
+		
+			
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.FileSequenceParameter, FileSequenceParameterUI )

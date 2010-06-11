@@ -41,14 +41,13 @@ class FileNameParameterUI( IECoreMaya.PathParameterUI ) :
 
 		IECoreMaya.PathParameterUI.__init__( self, node, parameter, **kw )
 
-	def openDialog( self ) :
+	def _fileDialog( self ) :
+		
+		tools = IECoreMaya.FileBrowser.FileExtensionFilter( self.parameter.extensions )
 
-		selection = IECoreMaya.PathParameterUI.openDialog( self )
-
-		if len(selection):
-
-			self.parameter.setValue( IECore.StringData( selection ) )
-			fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
-			fnPH.setNodeValue( self.parameter )
+		IECoreMaya.PathParameterUI._fileDialog( self, 
+			filter = tools.filter,
+			validate = tools.validate
+		)
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.FileNameParameter, FileNameParameterUI )

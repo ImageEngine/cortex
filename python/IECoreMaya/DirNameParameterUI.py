@@ -43,14 +43,10 @@ class DirNameParameterUI( IECoreMaya.PathParameterUI ) :
 
 		IECoreMaya.PathParameterUI.__init__( self, node, parameter, **kw )
 
-	def openDialog( self ) :
-
-		selection = IECoreMaya.PathParameterUI.openDialog( self )
-
-		if len(selection):
-			d = os.path.dirname(selection)
-			self.parameter.setValue( IECore.StringData( d ) )
-			fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
-			fnPH.setNodeValue( self.parameter )
+	def _fileDialog( self ) :
+		
+		IECoreMaya.PathParameterUI._fileDialog( self,
+			filter = IECoreMaya.FileBrowser.DirectoriesOnlyFilter().filter,
+		)
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.DirNameParameter, DirNameParameterUI )
