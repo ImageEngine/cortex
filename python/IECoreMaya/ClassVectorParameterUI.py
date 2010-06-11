@@ -719,13 +719,18 @@ class ChildUI( IECoreMaya.UIElement ) :
 
 			control = maya.cmds.attrColorSliderGrp(
 				label = "",
-				columnWidth = ( ( 1, 1 ), ( 2, 50 ) ),
-				columnAttach = ( ( 1, "both", 0 ), ( 2, "left", 0  ) ),
+				columnWidth = ( ( 1, 1 ), ( 2, 30 ), ( 3, 1 ) ),
+				columnAttach = ( ( 1, "both", 0 ), ( 2, "both", 0  ), ( 3, "left", 0 ) ),
 				attribute = parameterPlugPath,
 				annotation = annotation,
-				width = 50,
+				width = 40,
 				showButton = False
 			)
+			
+		elif isinstance( parameter, IECore.StringParameter ) :
+		
+			control = maya.cmds.textField( annotation = annotation, width = 150 )
+			maya.cmds.connectControl( control, parameterPlugPath )
 
 		else :
 
