@@ -257,7 +257,13 @@ global proc ieParameterisedHolderUIExtraAttributesNewAndReplace( string $attrNam
 	{
 		if( `attributeQuery -node $nodeName -hidden $dynAttr`==0 )
 		{
-			if (match("^parm_", $dynAttr) == "" && $dynAttr != "result" )
+			string $attrType = "";
+			string $dynAttrName = $nodeName + "." + $dynAttr;
+			if (`objExists $dynAttrName` )
+			{
+				$attrType = `getAttr -type $dynAttrName`;
+			}
+			if (match("^parm_", $dynAttr) == "" && $dynAttr != "result" && $attrType != "message" )
 			{
 				attrControlGrp -attribute ($nodeName + "." + $dynAttr);
 			}
