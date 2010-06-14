@@ -209,7 +209,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	def _despatchSetClassVectorParameterClassesCallbacks( cls, plugPath ) :
 		
 		fnPH = FnParameterisedHolder( StringUtil.nodeFromAttributePath( plugPath ) )
-		parameter = fnPH.plugParameter( plugPath )
+		parameter = fnPH.plugParameter( plugPath ) if maya.cmds.objExists( plugPath ) else None
 		for c in cls.__setClassVectorParameterClassesCallbacks :
 			c( fnPH, parameter )
 	
@@ -234,7 +234,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	def _despatchSetClassParameterClassCallbacks( cls, plugPath ) :
 		
 		fnPH = FnParameterisedHolder( StringUtil.nodeFromAttributePath( plugPath ) )
-		parameter = fnPH.plugParameter( plugPath )
+		parameter = fnPH.plugParameter( plugPath ) if maya.cmds.objExists( plugPath ) else None
 		for c in cls.__setClassParameterClassCallbacks :
 			c( fnPH, parameter )
 				
