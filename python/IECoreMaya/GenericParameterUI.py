@@ -65,21 +65,49 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		
 		self.replace( self.node(), self.parameter )
 
-		
 	def replace( self, node, parameter ) :
 	
-		currentParent = maya.cmds.setParent( query=True )
-		
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
+	
+		self.__updateDisplay()
 		
-		fnPH = IECoreMaya.FnParameterisedHolder( node )
-		plugPath = fnPH.parameterPlugPath( parameter )
+		self.__attributeChangedCallbackId = IECoreMaya.CallbackId(
+			maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.node(), self.__attributeChanged )
+		)
+	
+	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
+				
+		if not (
+			( changeType & maya.OpenMaya.MNodeMessage.kConnectionMade )
+			or ( changeType & maya.OpenMaya.MNodeMessage.kConnectionBroken ) 
+		) :
+			return
+		
+		try :
+			myPlug = self.plug()
+		except :
+			# this situation can occur when our parameter has been removed but the
+			# ui we represent is not quite yet dead
+			return
+		
+		if plug == myPlug :
+			self.__updateDisplay()
+		
+	def __updateDisplay( self ) :
+		
+		if not maya.cmds.layout( self.__connectionsLayout, query=True, exists=True ) :
+			return	
+		
+		currentParent = maya.cmds.setParent( query=True )
+				
+		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+		plugPath = fnPH.parameterPlugPath( self.parameter )
 		
 		connections = maya.cmds.listConnections( plugPath, source=True, plugs=True, skipConversionNodes=True )
 		numConnections = 0
 		if connections :
 			numConnections = len( connections )
-		
+				
 		old = maya.cmds.columnLayout( self.__connectionsLayout, query=True, childArray=True )
 		if old :
 			for child in old :
