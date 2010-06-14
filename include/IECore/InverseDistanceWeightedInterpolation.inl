@@ -71,7 +71,7 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 {
 	assert( m_tree );
 
-	Value result = Value();
+	Value result = Value(0);
 
 	neighbours.clear();
 	unsigned int neighbourCount = m_tree->nearestNNeighbours( p, m_numNeighbours, neighbours );
