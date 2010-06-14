@@ -229,7 +229,7 @@ class Renderer : public IECore::Renderer
 		/// Specifies the line width (in pixels) which is used when
 		/// rendering lightweight line primitives.
 		///
-		/// \li <b>"gl:pointsPrimitive:ignoreBasis" BoolData false</b><br>
+		/// \li <b>"gl:curvesPrimitive:ignoreBasis" BoolData false</b><br>
 		/// When this is true, all curves are rendered as if they were linear.
 		///
 		/// \par Implementation specific text primitive attributes :
