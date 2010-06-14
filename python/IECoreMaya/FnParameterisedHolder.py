@@ -208,8 +208,17 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	@classmethod
 	def _despatchSetClassVectorParameterClassesCallbacks( cls, plugPath ) :
 		
+		# This function gets called deferred (on idle) from ParameterisedHolderSetClassParameterCmd.cpp.
+		# Because of the deferred nature of the call, it's possible that the plug has been destroyed before
+		# we're called - in this case we just don't despatch callbacks.
+		## \todo It might be better to not defer the call to this function, and have any callbacks which
+		# need deferred evaluation (the ui callbacks in ClassVectorParameterUI for instance) arrange for that
+		# themselves.
+		if not maya.cmds.objExists( plugPath ) :
+			return
+		
 		fnPH = FnParameterisedHolder( StringUtil.nodeFromAttributePath( plugPath ) )
-		parameter = fnPH.plugParameter( plugPath ) if maya.cmds.objExists( plugPath ) else None
+		parameter = fnPH.plugParameter( plugPath )
 		for c in cls.__setClassVectorParameterClassesCallbacks :
 			c( fnPH, parameter )
 	
@@ -233,8 +242,12 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	@classmethod
 	def _despatchSetClassParameterClassCallbacks( cls, plugPath ) :
 		
+		# See comment in _despatchSetClassVectorParameterClassesCallbacks
+		if not maya.cmds.objExists( plugPath ) :
+			return
+
 		fnPH = FnParameterisedHolder( StringUtil.nodeFromAttributePath( plugPath ) )
-		parameter = fnPH.plugParameter( plugPath ) if maya.cmds.objExists( plugPath ) else None
+		parameter = fnPH.plugParameter( plugPath )
 		for c in cls.__setClassParameterClassCallbacks :
 			c( fnPH, parameter )
 				
