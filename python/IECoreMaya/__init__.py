@@ -85,4 +85,4 @@ from TestProgram import TestProgram
 from ClassVectorParameterUI import ClassVectorParameterUI
 from FileBrowser import FileBrowser
 from FileDialog import FileDialog
-
+from GeometryCombinerUI import *
