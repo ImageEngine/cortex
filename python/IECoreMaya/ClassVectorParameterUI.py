@@ -108,8 +108,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		self.__formLayout = maya.cmds.formLayout( parent=self._topLevelUI() )
 	
 		self.__addButton = maya.cmds.picture( image="setEdAddCmd.xpm", parent=self.__formLayout )
-		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton )
-		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, button=1 )
+		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, useInterToUI=False )
+		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, useInterToUI=False, button=1 )
 			
 		self.__classInfo = []
 		self.__childUIs = {} # mapping from parameter name to ui name
@@ -166,7 +166,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 				result.append(
 					
-					menuPath, 
+					# applies interToUI to each component of the menu path individually, and then joings them back up again
+					"/".join( [ maya.mel.eval( "interToUI \"" + x + "\"" ) for x in menuPath.split( "/" ) ] ),
 					
 					IECore.MenuItemDefinition(
 						command = IECore.curry( self._setClass, parameterName, className, classVersion ),
