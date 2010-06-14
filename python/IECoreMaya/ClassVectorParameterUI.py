@@ -396,8 +396,8 @@ class ChildUI( IECoreMaya.UIElement ) :
 				48,
 			)
 		)
-		IECoreMaya.createMenu( self.__layerMenu, layerIcon )
-		IECoreMaya.createMenu( self.__layerMenu, layerIcon, button=1 )
+		IECoreMaya.createMenu( self.__layerMenu, layerIcon, useInterToUI=False )
+		IECoreMaya.createMenu( self.__layerMenu, layerIcon, useInterToUI=False, button=1 )
 		
 		attachControl += [
 			( layerIcon, "left", 0, lastControl ),
@@ -465,13 +465,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 				return c
 				
 		raise RunTimeError( "Couldn't find class entry" )
-		
-	def __classVersionLabel( self ) :
-	
-		c = self.__class()
-		
-		return "version%d" % c[3]
-				
+						
 	def __classVersionAnnotation( self ) :
 	
 		c = self.__class()
@@ -592,7 +586,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 		)
 		
 		result.append( 
-			"/%s" % self.__classVersionLabel(),
+			"/Change Version",
 			IECore.MenuItemDefinition(
 				subMenu = self.__versionMenuDefinition
 			)
