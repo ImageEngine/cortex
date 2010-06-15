@@ -75,6 +75,10 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 			maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.node(), self.__attributeChanged )
 		)
 	
+	def _topLevelUIDeleted( self ) :
+	
+		self.__attributeChangedCallbackId = None
+
 	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
 				
 		if not (
@@ -91,7 +95,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 			return
 		
 		if plug == myPlug :
-			self.__updateDisplay()
+			maya.cmds.evalDeferred( self.__updateDisplay )
 		
 	def __updateDisplay( self ) :
 		
