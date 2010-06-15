@@ -135,6 +135,13 @@ TIFFImageWriter::~TIFFImageWriter()
 
 std::string TIFFImageWriter::destinationColorSpace() const
 {
+	int bitDepth = m_bitDepthParameter->getNumericValue();
+	if ( bitDepth == 32 )
+	{
+		// We encode float type channels when bit depth is 32.
+		// Usually the tiffs are in linear colorspace if the channels are float.
+		return "linear";
+	}
 	return "srgb";
 }
 

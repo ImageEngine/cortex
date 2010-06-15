@@ -116,6 +116,9 @@ class TIFFImageReader : public ImageReader
 		/// thrown rather than false being returned.
 		bool readCurrentDirectory( bool throwOnFailure = false );
 
+		/// \todo This function was added so that it can be used from sourceColorSpace() without breaking binary compatibility. Consider eliminating one of them.
+		bool readCurrentDirectory( bool throwOnFailure = false ) const;
+
 		// tiff image pointer
 		tiff *m_tiffImage;
 		std::string m_tiffImageFileName;

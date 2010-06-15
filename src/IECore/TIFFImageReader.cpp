@@ -206,7 +206,12 @@ Imath::Box2i TIFFImageReader::displayWindow()
 
 std::string TIFFImageReader::sourceColorSpace() const
 {
-	/// \todo Consider returning "linear" when the image has floating-point channels. If so, then update the Writer to do the same.
+	readCurrentDirectory( true );
+	if ( m_sampleFormat == SAMPLEFORMAT_IEEEFP )
+	{
+		// Usually the tiffs are in linear colorspace if the channels are float.
+		return "linear";
+	}
 	return "srgb";
 }
 
@@ -540,6 +545,11 @@ bool TIFFImageReader::open( bool throwOnFailure )
 	return m_tiffImage != 0;
 }
 
+bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure ) const
+{
+	return const_cast< TIFFImageReader * >(this)->readCurrentDirectory(throwOnFailure);
+}
+
 bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 {
 	if ( !open( throwOnFailure ) )
@@ -619,7 +629,6 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 		{
 			throw IOException( ( boost::format("TIFFImageReader: Unsupported value (%d) for TIFFTAG_SAMPLEFORMAT") % m_sampleFormat ).str() );
 		}
-
 		m_orientation = tiffFieldDefaulted<uint16>( TIFFTAG_ORIENTATION );
 		if ( m_orientation != ORIENTATION_TOPLEFT )
 		{
