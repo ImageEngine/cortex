@@ -206,6 +206,7 @@ Imath::Box2i TIFFImageReader::displayWindow()
 
 std::string TIFFImageReader::sourceColorSpace() const
 {
+	/// \todo Consider returning "linear" when the image has floating-point channels. If so, then update the Writer to do the same.
 	return "srgb";
 }
 
