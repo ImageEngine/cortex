@@ -119,22 +119,22 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	InfluenceName in = (InfluenceName)m_influenceNameParameter->getNumericValue();
 	switch( in )
 	{
-			case Partial :
+		case Partial :
+		{
+			for (int i=0; i < influencesCount; i++)
 			{
-				for (int i=0; i < influencesCount; i++)
-				{
-					influenceNamesData->writable().push_back( influencePaths[i].partialPathName(&stat).asChar() );
-				}
-				break;
+				influenceNamesData->writable().push_back( influencePaths[i].partialPathName(&stat).asChar() );
 			}
-			case Full :
+			break;
+		}
+		case Full :
+		{
+			for (int i=0; i < influencesCount; i++)
 			{
-				for (int i=0; i < influencesCount; i++)
-				{
-					influenceNamesData->writable().push_back( influencePaths[i].fullPathName(&stat).asChar() );
-				}
-				break;
+				influenceNamesData->writable().push_back( influencePaths[i].fullPathName(&stat).asChar() );
 			}
+			break;
+		}
 	}
 
 	// extract bind pose
@@ -148,19 +148,17 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 								 "array plug does not match the number of influences" );
 	}
 
-
 	for (int i=0; i < influencesCount; i++)
 	{
+		MPlug bindPreMatrixElementPlug = bindPreMatrixArrayPlug.elementByLogicalIndex(
+				skinClusterFn.indexForInfluenceObject( influencePaths[i], NULL ), &stat);
+		MObject matObj;
+		bindPreMatrixElementPlug.getValue( matObj );
+		MFnMatrixData matFn( matObj, &stat );
+		MMatrix mat = matFn.matrix();
+		Imath::M44f cmat = IECore::convert<Imath::M44f>( mat );
 
-        MPlug bindPreMatrixElementPlug = bindPreMatrixArrayPlug.elementByLogicalIndex(
-        		skinClusterFn.indexForInfluenceObject( influencePaths[i], NULL ), &stat);
-        MObject matObj;
-        bindPreMatrixElementPlug.getValue( matObj );
-        MFnMatrixData matFn( matObj, &stat );
-        MMatrix mat = matFn.matrix();
-        Imath::M44f cmat = IECore::convert<Imath::M44f>( mat );
-
-        influencePoseData->writable().push_back( cmat );
+		influencePoseData->writable().push_back( cmat );
 	}
 
 	// extract the skinning information
@@ -175,7 +173,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 		throw IECore::Exception( "FromMayaSkinClusterConverter: skinCluster node does not have any output geometry!" );
 	}
 
-    // get the dag path to the first object
+	// get the dag path to the first object
 	MFnDagNode dagFn( outputGeoObjs[0] );
 	MDagPath geoPath;
 	dagFn.getPath( geoPath );
@@ -186,30 +184,30 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 
 	// loop through all the points of the geometry to extract their bind information
 	for ( ; !geoIt.isDone(); geoIt.next() )
-    {
-        MObject pointObj = geoIt.currentItem( &stat );
-        MDoubleArray weights;
-        unsigned int weightsCount;
+	{
+		MObject pointObj = geoIt.currentItem( &stat );
+		MDoubleArray weights;
+		unsigned int weightsCount;
 
-        skinClusterFn.getWeights( geoPath, pointObj, weights, weightsCount );
-        int pointInfluencesCount = 0;
+		skinClusterFn.getWeights( geoPath, pointObj, weights, weightsCount );
+		int pointInfluencesCount = 0;
 
-        for ( int influenceId = 0; influenceId < int( weightsCount ); influenceId++ )
-        {
-        	// ignore zero weights, we are generating a compressed (non-sparse) representation of the weights
-            if ( weights[influenceId] != 0.0 )
-            {
-            	pointInfluencesCount++;
-            	pointInfluenceWeightsData->writable().push_back( float( weights[influenceId] ) );
-            	pointInfluenceIndicesData->writable().push_back( influenceId );
+		for ( int influenceId = 0; influenceId < int( weightsCount ); influenceId++ )
+		{
+			// ignore zero weights, we are generating a compressed (non-sparse) representation of the weights
+			if ( weights[influenceId] != 0.0 )
+			{
+				pointInfluencesCount++;
+				pointInfluenceWeightsData->writable().push_back( float( weights[influenceId] ) );
+				pointInfluenceIndicesData->writable().push_back( influenceId );
 
-            }
-        }
+			}
+		}
 
-    	pointIndexOffsetsData->writable().push_back( currentOffset );
-    	pointInfluenceCountsData->writable().push_back( pointInfluencesCount );
-    	currentOffset += pointInfluencesCount;
-    }
+		pointIndexOffsetsData->writable().push_back( currentOffset );
+		pointInfluenceCountsData->writable().push_back( pointInfluencesCount );
+		currentOffset += pointInfluencesCount;
+	}
 
 	// put all our results in a smooth skinning data object
 	return new IECore::SmoothSkinningData( influenceNamesData, influencePoseData, pointIndexOffsetsData,
