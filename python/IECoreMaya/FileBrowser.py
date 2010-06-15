@@ -70,6 +70,10 @@ __all__ = [ "FileBrowser" ]
 ## 
 ## \param cancelButtonTitle (string) The label for the cancel button.
 ## 
+## \param rightHanded (bool) The main button defaults to the left, to match Maya's
+## look. If you prefer the other side, to match other environments, this can be set
+## to True.
+##
 ## \param allowMultiSelection (bool) Can the user select more than one item at once.
 ## 
 ## \param saveMode (bool) When enabled, the user is allowed to choose paths to files
@@ -105,7 +109,7 @@ class FileBrowser( IECoreMaya.UIElement ) :
 		self, uiParent=None,
 		options=None, filter=None, validate=None,  showHidden=False,
 		buttonTitle="Select", withCancel=True, cancelButtonTitle="Cancel",
-		allowMultiSelection=False, saveMode=False,
+		allowMultiSelection=False, saveMode=False, rightHanded=False,
 	):
 
 		self.__path = None
@@ -151,10 +155,12 @@ class FileBrowser( IECoreMaya.UIElement ) :
 			width=200, height=30,
 		)
 
+		edge = "right" if rightHanded else "left"
+
 		maya.cmds.formLayout(
 			self.__layout, edit=True,
 			attachForm = ( 
-				( self.__selectButton, "right", 4 ), ( self.__selectButton, "bottom", 4 )
+				( self.__selectButton, edge, 4 ), ( self.__selectButton, "bottom", 4 )
 			),
 			attachControl = ( 
 				( pathUI, "bottom", 0, self.__selectButton ),
@@ -162,6 +168,8 @@ class FileBrowser( IECoreMaya.UIElement ) :
 		)		
 
 		if withCancel:
+		
+			edge = "left" if rightHanded else "right" 
 
 			self.__cancelButton = maya.cmds.button( 
 				label = cancelButtonTitle, 
@@ -173,7 +181,7 @@ class FileBrowser( IECoreMaya.UIElement ) :
 			maya.cmds.formLayout(
 				self.__layout, edit=True,
 				attachForm = ( 
-					( self.__cancelButton, "left", 4 ), ( self.__cancelButton, "bottom", 4 )
+					( self.__cancelButton, edge, 4 ), ( self.__cancelButton, "bottom", 4 )
 				),
 			)		
 
@@ -603,7 +611,7 @@ class _PathField( object, IECoreMaya.UIElement ) :
 		self.__layout = maya.cmds.formLayout( parent = uiParent )
 		IECoreMaya.UIElement.__init__( self, self.__layout )
 
-		self.__upButton = maya.cmds.button( label="up", parent=self.__layout, command=self.up, width=50, height=30 )
+		self.__upButton = maya.cmds.button( label="Up", parent=self.__layout, command=self.up, width=50, height=30 )
 		self.__field = maya.cmds.textField( changeCommand=self.__emitValueChanged, parent=self.__layout, **kw )
 
 		maya.cmds.formLayout(
