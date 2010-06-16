@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -64,10 +64,34 @@ class SubstitutedDict :
 	def __contains__( self, key ) :
 	
 		return self.__dict.__contains__( key )
-		
+	
+	def __eq__( self, other ) :
+	
+		if not isinstance( other, SubstitutedDict ) :
+			return False
+			
+		return (	self.__dict == other.__dict and 
+					self.__substitutions == other.__substitutions and
+					self.__dictClasses == other.__dictClasses 	)
+	
+	def __ne__( self, other ) :
+	
+		return not self.__eq__( other )
+				
 	def keys( self ) :
 	
 		return self.__dict.keys()
+		
+	def values( self, substituted=True ) :
+	
+		if substituted :
+			return [ self.get( k ) for k in self.__dict.keys() ]
+		else :
+			return self.__dict.values()
+
+	def items( self, substituted=True ) :
+	
+		return zip( self.keys(), self.values() )
 
 	def get( self, key, defaultValue=None, substituted=True ) :
 	
