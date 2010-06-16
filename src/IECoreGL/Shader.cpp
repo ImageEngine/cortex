@@ -1090,8 +1090,8 @@ ShaderPtr Shader::facingRatio()
 	""
 	"void main()"
 	"{"
-	"	N = faceforward( N, -I, N );"
-	"	float f = dot( normalize(I), normalize(N) );"
+	"	vec3 Nf = faceforward( N, -I, N );"
+	"	float f = dot( normalize(I), normalize(Nf) );"
 	"	gl_FragColor = vec4( f, f, f, 1 );"
 	"}";
 
