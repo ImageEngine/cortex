@@ -195,6 +195,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 		for ( int influenceId = 0; influenceId < int( weightsCount ); influenceId++ )
 		{
 			// ignore zero weights, we are generating a compressed (non-sparse) representation of the weights
+			/// \todo: use a parameter to specify a threshold value rather than 0.0
 			if ( weights[influenceId] != 0.0 )
 			{
 				pointInfluencesCount++;
