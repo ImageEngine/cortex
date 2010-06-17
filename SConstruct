@@ -1165,7 +1165,7 @@ if doConfigure :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
 		
-		if c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxCreateShaderInfo" ) :
+		if c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxSetParameterListGridTopology" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
@@ -1176,6 +1176,8 @@ if doConfigure :
 			riSources.remove( "src/IECoreRI/SXRendererImplementation.cpp" )
 			riSources.remove( "src/IECoreRI/SXExecutor.cpp" )
 			riPythonSources.remove( "src/IECoreRI/bindings/SXRendererBinding.cpp" )
+
+			sys.stderr.write( "WARNING : Supported Sx API version not found - not building SXRenderer. Use 3delight 9.0.36 or later.\n" )
 		
 		c.Finish()	
 

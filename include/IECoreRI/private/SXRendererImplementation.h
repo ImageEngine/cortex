@@ -127,7 +127,6 @@ class SXRendererImplementation : public IECore::Renderer
 			~State();
 			IECore::CompoundDataPtr attributes;
 			SxShader shader;
-			SxShader shaderInfo;
 		};
 		typedef std::stack<State> StateStack;
 		

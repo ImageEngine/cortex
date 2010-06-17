@@ -243,7 +243,14 @@ class SXRendererTest( unittest.TestCase ) :
 				
 		self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
 		self.assertEqual( r.getAttribute( "opacity" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
-			
+	
+	def testNoShader( self ) :
+	
+		r = IECoreRI.SXRenderer()
+		with IECore.WorldBlock( r ) :
+		
+			self.assertRaises( RuntimeError, r.shade, self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) ) ) )
+		
 	def tearDown( self ) :
 		
 		files = [

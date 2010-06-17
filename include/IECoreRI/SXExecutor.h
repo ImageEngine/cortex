@@ -53,21 +53,24 @@ class SXExecutor : public boost::noncopyable
 	
 		/// Constructs an executor for the specified shader. It is the
 		/// caller's responsibility to ensure that the shader remains alive
-		/// for as long as the executor is in use. shader must be created with
-		/// SxCreateShader and shaderInfo must have been created for the same
-		/// shader using SxCreateShaderInfo - this is due to peculiarities of the Sx api.
-		SXExecutor( SxShader shader, SxShader shaderInfo );
+		/// for as long as the executor is in use.
+		SXExecutor( SxShader shader );
 
-		/// Executes the shader for the specified points.
+		/// Executes the shader for the specified points. The points are considered
+		/// to have no specific connectivity.
 		IECore::CompoundDataPtr execute( const IECore::CompoundData *points );
 
 	private :
 
-		struct OutputVariables;
-		struct InputVariables;
+		IECore::TypeId predefinedParameterType( const char *name );
+		
+		template<typename T>
+		void setVariable( SxParameterList parameterList, const char *name, const IECore::Data *d, size_t expectedSize );
+		
+		template<typename T>
+		IECore::DataPtr getVariable( SxParameterList parameterList, const char *name, size_t numPoints );
 
 		SxShader m_shader;
-		SxShader m_shaderInfo;
 
 };
 
