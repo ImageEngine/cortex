@@ -69,7 +69,7 @@ SXRendererImplementation::State::State()
 
 SXRendererImplementation::State::State( const State &other, bool deepCopy )
 	:	attributes( deepCopy ? other.attributes->copy() : other.attributes ),
-		shader( other.shader )
+		shader( other.shader ), coshaders( other.coshaders )
 {
 }
 
@@ -228,12 +228,8 @@ IECore::ConstDataPtr IECoreRI::SXRendererImplementation::getAttribute( const std
 }
 
 void IECoreRI::SXRendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
-{
-	if( type!="surface"	&& type!="ri:surface" )
-	{
-		msg( Msg::Error, "IECoreRI::SXRendererImplementation::shader", boost::format( "Unsupported shader type \"%s\"" ) % type );
-		return;
-	}
+{	
+	// create a shader which we'll use just for getting information from
 	
 	SxShader shaderInfo = SxCreateShader( m_context, 0, name.c_str(), 0 );
 	if( !shaderInfo )
@@ -241,44 +237,51 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 		// 3delight will have printed a warning already.
 		return;
 	}
+	
+	// convert the parameter list for the shader
 		
 	SxParameterList parameterList = SxCreateParameterList( m_context, 1, "shader" );
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
+		if( it->first=="__handle" )
+		{
+			// skip the special handle parameter intended for use as the coshader handle
+			continue;
+		}
 		switch( it->second->typeId() )
 		{
 			case FloatDataTypeId :
 				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, (void *)&(static_cast<const FloatData *>( it->second.get() )->readable() ) );
 				break;
 			case V3fDataTypeId :
+			{
+				unsigned numParameters = SxGetNumParameters( shaderInfo );
+				SxType type = SxInvalid;
+				for( unsigned i=0; i<numParameters; i++ )
 				{
-					unsigned numParameters = SxGetNumParameters( shaderInfo );
-					SxType type = SxInvalid;
-					for( unsigned i=0; i<numParameters; i++ )
+					bool varying;
+					SxData defaultValue;
+					unsigned arraySize;
+					const char *name = SxGetParameterInfo( shaderInfo, i, &type, &varying, &defaultValue, &arraySize );
+					if( 0==strcmp( name, it->first.value().c_str() ) )
 					{
-						bool varying;
-						SxData defaultValue;
-						unsigned arraySize;
-						const char *name = SxGetParameterInfo( shaderInfo, i, &type, &varying, &defaultValue, &arraySize );
-						if( 0==strcmp( name, it->first.value().c_str() ) )
-						{
-							break;
-						}
-						else
-						{
-							type = SxInvalid;
-						}
-					}
-					if( type==SxPoint || type==SxVector || type==SxNormal )
-					{
-						SxSetParameter( parameterList, it->first.value().c_str(), type, (void *)&(static_cast<const V3fData *>( it->second.get() )->readable() ) );
+						break;
 					}
 					else
 					{
-						msg( Msg::Warning, "IECoreRI::SXRendererImplementation::shader", boost::format( "Parameter \"%s\" is not a point, vector or normal and will be ignored" ) % it->second->typeName() );
+						type = SxInvalid;
 					}
-					break;
 				}
+				if( type==SxPoint || type==SxVector || type==SxNormal )
+				{
+					SxSetParameter( parameterList, it->first.value().c_str(), type, (void *)&(static_cast<const V3fData *>( it->second.get() )->readable() ) );
+				}
+				else
+				{
+					msg( Msg::Warning, "IECoreRI::SXRendererImplementation::shader", boost::format( "Parameter \"%s\" is not a point, vector or normal and will be ignored" ) % it->second->typeName() );
+				}
+				break;
+			}
 			case Color3fDataTypeId :
 				SxSetParameter( parameterList, it->first.value().c_str(), SxColor, (void *)&(static_cast<const Color3fData *>( it->second.get() )->readable() ) );
 				break;
@@ -286,11 +289,22 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 				SxSetParameter( parameterList, it->first.value().c_str(), SxMatrix, (void *)&(static_cast<const M33fData *>( it->second.get() )->readable() ) );
 				break;
 			case StringDataTypeId :
+			{
+				const char *s = static_cast<const StringData *>( it->second.get() )->readable().c_str();
+				SxSetParameter( parameterList, it->first.value().c_str(), SxString, &s );
+				break;
+			}
+			case StringVectorDataTypeId :
+			{
+				const std::vector<std::string> &strings = static_cast<const StringVectorData *>( it->second.get() )->readable();
+				std::vector<const char *> charPtrs; charPtrs.resize( strings.size() );
+				for( unsigned i=0; i<strings.size(); i++ )
 				{
-					const char *s = static_cast<const StringData *>( it->second.get() )->readable().c_str();
-					SxSetParameter( parameterList, it->first.value().c_str(), SxString, &s );
-					break;
+					charPtrs[i] = strings[i].c_str();
 				}
+				SxSetParameter( parameterList, it->first.value().c_str(), SxString, &(charPtrs[0]), false, strings.size() );
+				break;
+			}
 			case SplineffDataTypeId :
 			{
 				const IECore::Splineff &spline = static_cast<const SplineffData *>( it->second.get() )->readable();
@@ -348,8 +362,33 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 		}
 	}
 	
-	m_stateStack.top().shader = SxCreateShader( m_context, parameterList, name.c_str(), 0 );
-	
+	// create the shader using the converted parameters, and store it in the appropriate part of our state
+		
+	if( type=="surface"	|| type=="ri:surface" )
+	{
+		m_stateStack.top().shader = SxCreateShader( m_context, parameterList, name.c_str(), 0 );
+	}
+	else if( type=="shader" || type=="ri:shader" )
+	{
+		const StringData *handleData = 0;
+		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
+		if( it!=parameters.end() )
+		{
+			handleData = runTimeCast<const StringData>( it->second );
+		}
+		if( !handleData )
+		{
+			msg( Msg::Error, "IECoreRI::SXRendererImplementation::shader", "Must specify StringData \"__handle\" parameter for coshaders." );
+		}
+		else
+		{
+			m_stateStack.top().coshaders.push_back( SxCreateShader( m_context, parameterList, name.c_str(), handleData->readable().c_str() ) );
+		}
+	}
+	else
+	{
+		msg( Msg::Error, "IECoreRI::SXRendererImplementation::shader", boost::format( "Unsupported shader type \"%s\"" ) % type );
+	}
 }
 
 void IECoreRI::SXRendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
@@ -474,6 +513,6 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore:
 	{
 		throw Exception( "No shader specified" );
 	}
-	SXExecutor executor( m_stateStack.top().shader );
+	SXExecutor executor( m_stateStack.top().shader, &m_stateStack.top().coshaders );
 	return executor.execute( points );
 }

@@ -250,6 +250,27 @@ class SXRendererTest( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 		
 			self.assertRaises( RuntimeError, r.shade, self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) ) ) )
+	
+	def testCoshaders( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxCoshaderTest.sdl test/IECoreRI/shaders/sxCoshaderTest.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxCoshaderTestMain.sdl test/IECoreRI/shaders/sxCoshaderTestMain.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) )
+		points = self.__rectanglePoints( b )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "shaderColor" : IECore.Color3f( 1, 0, 0 ), "__handle" : "cs1" } )
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "sColor" : IECore.Color3f( 0, 1, 0 ), "__handle" : "cs2" } )
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "tColor" : IECore.Color3f( 0, 0, 1 ), "__handle" : "cs3" } )
+			r.shader( "surface", "test/IECoreRI/shaders/sxCoshaderTestMain", { "coshaders" : IECore.StringVectorData( [ "cs1", "cs2", "cs3" ] ) } )
+		
+			s = r.shade( points )
+					
+		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/coshaders.cob" ).read() )
 		
 	def tearDown( self ) :
 		
@@ -258,6 +279,8 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/splineTest.sdl",
 			"test/IECoreRI/shaders/sxParameterTest.sdl",
 			"test/IECoreRI/shaders/sxStackTest.sdl",
+			"test/IECoreRI/shaders/sxCoshaderTest.sdl",
+			"test/IECoreRI/shaders/sxCoshaderTestMain.sdl",
 		]
 		
 		for f in files :

@@ -41,8 +41,8 @@ using namespace IECore;
 using namespace Imath;
 using namespace std;
 
-SXExecutor::SXExecutor( SxShader shader )
-	:	m_shader( shader )
+SXExecutor::SXExecutor( SxShader shader, const ShaderVector *coshaders, const ShaderVector *lights )
+	:	m_shader( shader ), m_coshaders( coshaders ), m_lights( lights )
 {
 }
 		
@@ -97,7 +97,14 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points 
 		
 	// run shader
 
-	SxCallShader( m_shader, vars, 0, 0, 0, 0 );
+	SxCallShader( 
+		m_shader,
+		vars,
+		m_lights ? (void **)&((*m_lights)[0]) : 0,
+		m_lights ? m_lights->size() : 0,
+		m_coshaders ? (void **)&((*m_coshaders)[0]) : 0,
+		m_coshaders ? m_coshaders->size() : 0
+	);
 	
 	// create and return output data
 			

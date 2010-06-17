@@ -40,6 +40,7 @@
 #include "sx.h"
 
 #include "IECoreRI/SXRenderer.h"
+#include "IECoreRI/SXExecutor.h"
 
 namespace IECoreRI
 {
@@ -127,6 +128,7 @@ class SXRendererImplementation : public IECore::Renderer
 			~State();
 			IECore::CompoundDataPtr attributes;
 			SxShader shader;
+			SXExecutor::ShaderVector coshaders;
 		};
 		typedef std::stack<State> StateStack;
 		

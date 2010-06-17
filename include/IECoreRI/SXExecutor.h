@@ -51,10 +51,12 @@ class SXExecutor : public boost::noncopyable
 
 	public :
 	
-		/// Constructs an executor for the specified shader. It is the
-		/// caller's responsibility to ensure that the shader remains alive
-		/// for as long as the executor is in use.
-		SXExecutor( SxShader shader );
+		typedef std::vector<SxShader> ShaderVector;
+	
+		/// Constructs an executor for the specified shader, coshaders and lights.
+		/// It is the caller's responsibility to ensure that the shader and ShaderVectors
+		/// remain alive for as long as the executor is in use.
+		SXExecutor( SxShader shader, const ShaderVector *coshaders = 0, const ShaderVector *lights = 0 );
 
 		/// Executes the shader for the specified points. The points are considered
 		/// to have no specific connectivity.
@@ -71,6 +73,8 @@ class SXExecutor : public boost::noncopyable
 		IECore::DataPtr getVariable( SxParameterList parameterList, const char *name, size_t numPoints );
 
 		SxShader m_shader;
+		const ShaderVector *m_coshaders;
+		const ShaderVector *m_lights;
 
 };
 
