@@ -82,6 +82,7 @@
 #include "IECoreMaya/bindings/MessageHandlerBinding.h"
 #include "IECoreMaya/bindings/FnProceduralHolderBinding.h"
 #include "IECoreMaya/bindings/FromMayaSkinClusterConverterBinding.h"
+#include "IECoreMaya/bindings/ToMayaSkinClusterConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -137,4 +138,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindMessageHandler();
 	bindFnProceduralHolder();
 	bindFromMayaSkinClusterConverter();
+	bindToMayaSkinClusterConverter();
 }

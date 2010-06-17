@@ -107,6 +107,7 @@ enum TypeId
 	FromMayaTransformationMatrixdConverterTypeId = 109060,
 	Box3ManipulatorTypeId = 109061,
 	FromMayaSkinClusterConverterTypeId = 109062,
+	ToMayaSkinClusterConverterTypeId = 109063,
 	LastTypeId = 109999
 
 };

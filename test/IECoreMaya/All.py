@@ -67,6 +67,7 @@ from DAGPathParametersTest import *
 from FnProceduralHolderTest import FnProceduralHolderTest
 from GeometryCombinerTest import GeometryCombinerTest
 from FromMayaSkinClusterConverterTest import *
+from ToMayaSkinClusterConverterTest import *
 
 IECoreMaya.TestProgram(
 

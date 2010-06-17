@@ -103,6 +103,7 @@ void bindTypeId()
 		.value( "FromMayaTransformationMatrixfConverter", FromMayaTransformationMatrixfConverterTypeId )
 		.value( "FromMayaTransformationMatrixdConverter", FromMayaTransformationMatrixdConverterTypeId )
 		.value( "FromMayaSkinClusterConverter", FromMayaSkinClusterConverterTypeId )
+		.value( "ToMayaSkinClusterConverter", ToMayaSkinClusterConverterTypeId )
 	;
 }
 
