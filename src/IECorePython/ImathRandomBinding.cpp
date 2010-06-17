@@ -199,7 +199,13 @@ void bindRand( const char *className )
 		.def( "cosineHemispherefVector", &Vectoriser<T, V3f, &cosineHemisphereRand<V3f, T> >::vectoriseSeeded )
 		.def( "cosineHemispherefVector", &Vectoriser<T, V3f, &cosineHemisphereRand<V3f, T> >::vectorise )
 		.def( "cosineHemispheredVector", &Vectoriser<T, V3d, &cosineHemisphereRand<V3d, T> >::vectoriseSeeded )
-		.def( "cosineHemispheredfVector", &Vectoriser<T, V3d, &cosineHemisphereRand<V3d, T> >::vectorise )
+		.def( "cosineHemispheredVector", &Vectoriser<T, V3d, &cosineHemisphereRand<V3d, T> >::vectorise )
+		.def( "barycentricf", &barycentricRand<V3f,T> )
+		.def( "barycentricd", &barycentricRand<V3d,T> )
+		.def( "barycentricfVector", &Vectoriser<T, V3f, &barycentricRand<V3f, T> >::vectoriseSeeded )
+		.def( "barycentricfVector", &Vectoriser<T, V3f, &barycentricRand<V3f, T> >::vectorise )
+		.def( "barycentricdVector", &Vectoriser<T, V3d, &barycentricRand<V3d, T> >::vectoriseSeeded )
+		.def( "barycentricdVector", &Vectoriser<T, V3d, &barycentricRand<V3d, T> >::vectorise )
 	;
 
 }

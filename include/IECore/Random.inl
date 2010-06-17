@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,7 +59,7 @@ Vec barycentricRand( Rand &rand )
 template<class Vec, class Rand>
 Vec triangleRand( const Vec &v0, const Vec &v1, const Vec &v2, Rand &rand )
 {
-	Vec b = barycentricRand( rand );
+	Vec b = barycentricRand<Vec,Rand>( rand );
 	return v0 * b[0] + v1 * b[1] + v2 * b[2];
 }
 
