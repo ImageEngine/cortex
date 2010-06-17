@@ -320,7 +320,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 	PointsPrimitive * pointsPrimitive = runTimeCast< PointsPrimitive, Object >( object );
 	assert( pointsPrimitive );
 
-	ImagePrimitive * image = runTimeCast< ImagePrimitive, Object >( m_imageParameter->getValue()->copy() );
+	ImagePrimitivePtr image = runTimeCast<ImagePrimitive>( m_imageParameter->getValue()->copy() );
 	assert( image );
 
 	const std::string &channelName = m_channelNameParameter->getTypedValue();
