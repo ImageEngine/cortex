@@ -86,7 +86,7 @@ class CompoundDataFromPythonDict
 			assert( obj_ptr );
 			assert( PyDict_Check( obj_ptr ) );
 
-			handle<> h( obj_ptr );
+			handle<> h( borrowed(obj_ptr) );
 			dict d( h );
 
 			void *storage = (( converter::rvalue_from_python_storage<CompoundDataPtr>* ) data )->storage.bytes;
