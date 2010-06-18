@@ -2023,7 +2023,7 @@ if doConfigure :
 
 		# \todo This won't reinstall the documentation if the directory already exists
 		installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )
-		docEnv.Alias( "install", installDoc )
+		docEnv.Alias( "installDoc", installDoc )
 		
 	else: 
 	
