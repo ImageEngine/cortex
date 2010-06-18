@@ -93,6 +93,12 @@ IECoreRI::SXRendererImplementation::SXRendererImplementation( IECoreRI::SXRender
 	{
 		SxSetOption( m_context, "searchpath:shader", SxString, (SxData)&shaderSearchPath );
 	}
+	
+	const char *textureSearchPath = getenv( "DL_TEXTURES_PATH" );
+	if( textureSearchPath )
+	{
+		SxSetOption( m_context, "searchpath:texture", SxString, (SxData)&textureSearchPath );
+	}
 }
 
 IECoreRI::SXRendererImplementation::~SXRendererImplementation()
