@@ -223,6 +223,7 @@ from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
 from MeshDistortionsOpTest import TestMeshDistortionsOp
 from PointVelocityDisplaceOp import *
 from HexConversionTest import HexConversionTest
+from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

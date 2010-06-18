@@ -268,6 +268,8 @@
 #include "IECorePython/MeshDistortionsOpBinding.h"
 #include "IECorePython/PointVelocityDisplaceOpBinding.h"
 #include "IECorePython/HexConversionBinding.h"
+#include "IECorePython/CompressSmoothSkinningDataOpBinding.h"
+#include "IECorePython/DecompressSmoothSkinningDataOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -539,7 +541,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshDistortionsOp();
 	bindPointVelocityDisplaceOp();
 	bindHexConversion();
-
+	bindCompressSmoothSkinningDataOp();
+	bindDecompressSmoothSkinningDataOp();
+	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
