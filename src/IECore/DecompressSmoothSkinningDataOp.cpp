@@ -39,10 +39,9 @@
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
 #include "IECore/SmoothSkinningData.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/TypedObjectParameter.h"
 
 using namespace IECore;
 
@@ -51,8 +50,8 @@ IE_CORE_DEFINERUNTIMETYPED( DecompressSmoothSkinningDataOp );
 DecompressSmoothSkinningDataOp::DecompressSmoothSkinningDataOp()
 	: ModifyOp(
 		"The DecompressSmoothSkinningDataOp decompresses SmoothSkinningData by adding 0 value weights for all missing influences",
-		new ObjectParameter( "result", "The result", new NullObject, SmoothSkinningDataTypeId ),
-		new ObjectParameter( "input", "The SmoothSkinningData to modify", new NullObject, SmoothSkinningDataTypeId )
+		new SmoothSkinningDataParameter( "result", "The result", new SmoothSkinningData ),
+		new SmoothSkinningDataParameter( "input", "The SmoothSkinningData to modify", new SmoothSkinningData )
 	)
 {
 }

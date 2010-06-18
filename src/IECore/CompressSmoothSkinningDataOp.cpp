@@ -39,10 +39,9 @@
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
 #include "IECore/SmoothSkinningData.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/TypedObjectParameter.h"
 
 using namespace IECore;
 
@@ -51,8 +50,8 @@ IE_CORE_DEFINERUNTIMETYPED( CompressSmoothSkinningDataOp );
 CompressSmoothSkinningDataOp::CompressSmoothSkinningDataOp()
 	: ModifyOp(
 		"The CompressSmoothSkinningDataOp compresses SmoothSkinningData by removing weights below a threshold value.",
-		new ObjectParameter( "result", "The result", new NullObject, SmoothSkinningDataTypeId ),
-		new ObjectParameter( "input", "The SmoothSkinningData to modify", new NullObject, SmoothSkinningDataTypeId )
+		new SmoothSkinningDataParameter( "result", "The result", new SmoothSkinningData ),
+		new SmoothSkinningDataParameter( "input", "The SmoothSkinningData to modify", new SmoothSkinningData )
 	)
 {
 	m_thresholdParameter = new FloatParameter(

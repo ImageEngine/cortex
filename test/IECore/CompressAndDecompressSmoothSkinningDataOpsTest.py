@@ -86,11 +86,13 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		op = CompressSmoothSkinningDataOp()
 		self.assertEqual( type(op), CompressSmoothSkinningDataOp )
+		self.assertEqual( op.typeId(), TypeId.CompressSmoothSkinningDataOp )
 		op.parameters()['input'].setValue( IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 		
 		op = DecompressSmoothSkinningDataOp()
 		self.assertEqual( type(op), DecompressSmoothSkinningDataOp )
+		self.assertEqual( op.typeId(), TypeId.DecompressSmoothSkinningDataOp )
 		op.parameters()['input'].setValue( IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 	
