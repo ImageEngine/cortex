@@ -368,6 +368,11 @@ void bindTypeId()
 		.value( "SmoothSkinningDataParameter", SmoothSkinningDataParameterTypeId )
 		.value( "CompressSmoothSkinningDataOp", CompressSmoothSkinningDataOpTypeId )
 		.value( "DecompressSmoothSkinningDataOp", DecompressSmoothSkinningDataOpTypeId )
+		.value( "NormalizeSmoothSkinningWeightsOp", NormalizeSmoothSkinningWeightsOpTypeId )
+		.value( "ReorderSmoothSkinningInfluencesOp", ReorderSmoothSkinningInfluencesOpTypeId )
+		.value( "RemoveSmoothSkinningInfluencesOp", RemoveSmoothSkinningInfluencesOpTypeId )
+		.value( "SmoothSmoothSkinningWeightsOp", SmoothSmoothSkinningWeightsOpTypeId )
+		.value( "MixSmoothSkinningWeightsOp", MixSmoothSkinningWeightsOpTypeId )
 	;
 }
 
