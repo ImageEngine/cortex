@@ -45,13 +45,28 @@ SXExecutor::SXExecutor( SxShader shader, const ShaderVector *coshaders, const Sh
 	:	m_shader( shader ), m_coshaders( coshaders ), m_lights( lights )
 {
 }
-		
-IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points )
+
+IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points ) const
 {
-	// decide how many points we're shading
+	V2i gridSize( 0 );
+	return execute( points, gridSize );
+}
+		
+IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const
+{
+	// decide how many points we're shading and validate the grid size
 
 	const V3fVectorData *p = points->member<V3fVectorData>( "P", true /* throw */ );
 	size_t numPoints = p->readable().size();
+	
+	bool haveGrid = gridSize.x > 0 && gridSize.y > 0;
+	if( haveGrid )
+	{
+		if( numPoints != (size_t)(gridSize.x * gridSize.y) )
+		{
+			throw Exception( boost::str( boost::format( "Wrong number of points (%d) for grid (%dx%d)." ) % numPoints % gridSize.x % gridSize.y ) );
+		}
+	}
 	
 	// create parameter list and fill it from input data
 
@@ -60,17 +75,17 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points 
 	SxGetPredefinedParameters( m_shader, &(predefinedParameters[0]), numPredefinedParameters );
 
 	SxParameterList vars = SxCreateParameterList( 0, numPoints, "current" );
+	if( haveGrid )
+	{
+		unsigned nu = gridSize.x; unsigned nv = gridSize.y;
+		SxSetParameterListGridTopology( vars, 1, &nu, &nv );
+	}
 		
 	for( unsigned i=0; i<numPredefinedParameters; i++ )
 	{				
 		IECore::TypeId expectedType = predefinedParameterType( predefinedParameters[i] );
-
+		
 		const Data *d = points->member<Data>( predefinedParameters[i] );
-
-		if( d && !d->isInstanceOf( expectedType ) )
-		{
-			throw Exception( boost::str( boost::format( "Variable \"%s\" has wrong type (\"%s\" but should be \"%s\")." ) % predefinedParameters[i] % d->typeName() % RunTimeTyped::typeNameFromTypeId( expectedType ) ) );
-		}
 
 		switch( expectedType )
 		{
@@ -92,7 +107,6 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points 
 			default :
 				throw Exception( boost::str( boost::format( "Input parameter \"%s\" has unsupported type." ) % predefinedParameters[i] ) );
 		}
-
 	}
 		
 	// run shader
@@ -154,7 +168,7 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points 
 	return result;
 }
 
-IECore::TypeId SXExecutor::predefinedParameterType( const char *name )
+IECore::TypeId SXExecutor::predefinedParameterType( const char *name ) const
 {
 	if(
 		strcmp( name, "P" )==0 ||
@@ -167,7 +181,11 @@ IECore::TypeId SXExecutor::predefinedParameterType( const char *name )
 	}
 	else if(
 		strcmp( name, "s" )==0 ||
-		strcmp( name, "t" )==0
+		strcmp( name, "t" )==0 ||
+		strcmp( name, "u" )==0 ||
+		strcmp( name, "v" )==0 ||
+		strcmp( name, "du" )==0 ||
+		strcmp( name, "dv" )==0
 	)
 	{
 		return FloatVectorDataTypeId;
@@ -186,7 +204,7 @@ IECore::TypeId SXExecutor::predefinedParameterType( const char *name )
 }
 
 template<class T>
-void SXExecutor::setVariable( SxParameterList parameterList, const char *name, const Data *d, size_t expectedSize )
+void SXExecutor::setVariable( SxParameterList parameterList, const char *name, const Data *d, size_t expectedSize ) const
 {
 
 	if( d )
@@ -215,10 +233,15 @@ void SXExecutor::setVariable( SxParameterList parameterList, const char *name, c
 		// crash if they're not specified, but for others (like "Cs") it'll provide
 		// a default value from the attribute state and we don't want to overwrite that.
 		// others still (like "Ci") are for output only as far as i know so we don't
-		// want to set them either.
+		// want to set them either. others still ("u", "du" etc) are provided by 3delight
+		// when there is a grid topology specified. all this should go away in 3delight 9.0.44
+		// where the library itself will be providing default values and the crashes will
+		// be gone.
 		if(
 			0==strcmp( name, "Cs" ) || 0==strcmp( name, "Os" ) ||
-			0==strcmp( name, "Ci" ) || 0==strcmp( name, "Oi" )
+			0==strcmp( name, "Ci" ) || 0==strcmp( name, "Oi" ) ||
+			0==strcmp( name, "u" ) || 0==strcmp( name, "v" ) ||
+			0==strcmp( name, "du" ) || 0==strcmp( name, "dv" )
 		)
 		{
 			return;
@@ -229,7 +252,7 @@ void SXExecutor::setVariable( SxParameterList parameterList, const char *name, c
 }
 		
 template<class T>
-DataPtr SXExecutor::getVariable( SxParameterList parameterList, const char *name, size_t numPoints )
+DataPtr SXExecutor::getVariable( SxParameterList parameterList, const char *name, size_t numPoints ) const
 {
 	typename T::Ptr result = new T;
 	result->writable().resize( numPoints );

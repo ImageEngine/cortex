@@ -113,10 +113,12 @@ class SXRenderer : public IECore::Renderer
 		//! @group Shader Execution
 		/// These functions allow direct execution of shaders,
 		/// and always evaluate the shaders active in the current
-		/// attribute context at the point of calling.
+		/// attribute context at the point of calling. See the SXExecutor
+		/// documentation for details of the parameters.
 		////////////////////////////////////////////////////////
 		//@{
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points ) const;
+		IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const;
 		//@}
 		
 	private :

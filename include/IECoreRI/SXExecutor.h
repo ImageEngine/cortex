@@ -37,6 +37,8 @@
 
 #include "boost/noncopyable.hpp"
 
+#include "OpenEXR/ImathVec.h"
+
 #include "sx.h"
 
 #include "IECore/CompoundData.h"
@@ -59,18 +61,26 @@ class SXExecutor : public boost::noncopyable
 		SXExecutor( SxShader shader, const ShaderVector *coshaders = 0, const ShaderVector *lights = 0 );
 
 		/// Executes the shader for the specified points. The points are considered
-		/// to have no specific connectivity.
-		IECore::CompoundDataPtr execute( const IECore::CompoundData *points );
+		/// to have no specific connectivity, meaning that area and filtering functions
+		/// will be effectively disabled during shader execution.
+		IECore::CompoundDataPtr execute( const IECore::CompoundData *points ) const;
+		/// Executes the shader for the specified points. The points are considered to
+		/// have a grid topology of the specified dimensions in u and v space, and this
+		/// topology will be used to implement proper filtering and area functions. u, v, du and dv
+		/// shading variables will be automatically calculated if not provided but they may also
+		/// be passed explicitly if desired. If gridSize is <=0 in either dimension then this method
+		/// is equivalent to the method above, and no topology is assumed.
+		IECore::CompoundDataPtr execute( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const;
 
 	private :
 
-		IECore::TypeId predefinedParameterType( const char *name );
+		IECore::TypeId predefinedParameterType( const char *name ) const;
+				
+		template<typename T>
+		void setVariable( SxParameterList parameterList, const char *name, const IECore::Data *d, size_t expectedSize ) const;
 		
 		template<typename T>
-		void setVariable( SxParameterList parameterList, const char *name, const IECore::Data *d, size_t expectedSize );
-		
-		template<typename T>
-		IECore::DataPtr getVariable( SxParameterList parameterList, const char *name, size_t numPoints );
+		IECore::DataPtr getVariable( SxParameterList parameterList, const char *name, size_t numPoints ) const;
 
 		SxShader m_shader;
 		const ShaderVector *m_coshaders;

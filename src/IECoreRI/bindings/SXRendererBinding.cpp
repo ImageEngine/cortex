@@ -48,7 +48,8 @@ void bindSXRenderer()
 {
 	RunTimeTypedClass<SXRenderer>()
 		.def( init<>() )
-		.def( "shade", &SXRenderer::shade )
+		.def( "shade", (IECore::CompoundDataPtr (SXRenderer::*)( const IECore::CompoundData *points ) const )&SXRenderer::shade )
+		.def( "shade", (IECore::CompoundDataPtr (SXRenderer::*)( const IECore::CompoundData *points, const Imath::V2i & ) const )&SXRenderer::shade )
 	;
 }
 

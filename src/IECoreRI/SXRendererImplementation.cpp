@@ -515,10 +515,16 @@ IECore::DataPtr IECoreRI::SXRendererImplementation::command( const std::string &
 
 IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore::CompoundData *points ) const
 {
+	Imath::V2i gridSize( 0 );
+	return shade( points, gridSize );
+}
+
+IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const
+{
 	if( !m_stateStack.top().shader )
 	{
 		throw Exception( "No shader specified" );
 	}
 	SXExecutor executor( m_stateStack.top().shader, &m_stateStack.top().coshaders );
-	return executor.execute( points );
+	return executor.execute( points, gridSize );
 }

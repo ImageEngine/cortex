@@ -111,6 +111,7 @@ class SXRendererImplementation : public IECore::Renderer
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 		
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points ) const;
+		IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const;
 
 	private :
 	

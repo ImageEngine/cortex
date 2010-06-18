@@ -242,3 +242,8 @@ IECore::CompoundDataPtr SXRenderer::shade( const IECore::CompoundData *points ) 
 {
 	return m_implementation->shade( points );
 }
+
+IECore::CompoundDataPtr SXRenderer::shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const
+{
+	return m_implementation->shade( points, gridSize );
+}

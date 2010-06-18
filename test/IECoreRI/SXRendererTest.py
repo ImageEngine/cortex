@@ -271,7 +271,54 @@ class SXRendererTest( unittest.TestCase ) :
 			s = r.shade( points )
 					
 		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/coshaders.cob" ).read() )
+	
+	def testGrids( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxGridTest.sdl test/IECoreRI/shaders/sxGridTest.sl" ), 0 )
 		
+		r = IECoreRI.SXRenderer()
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+		points = self.__rectanglePoints( b )
+		
+		with IECore.WorldBlock( r ) :
+				
+			r.shader( "surface", "test/IECoreRI/shaders/sxGridTest", {} )
+		
+			# not providing enough points for the grid should raise
+			self.assertRaises( RuntimeError, r.shade, points, IECore.V2i( 100, 500 ) )	
+			
+			s = r.shade( points )
+			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/noGrid.cob" ).read() )
+		
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/grid.cob" ).read() )
+
+	def testWrongType( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+		
+		r.shader( "surface", "test/IECoreRI/shaders/splineTest.sdl", {} )
+				
+		p = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 10 ) ) )
+		p["t"] = p["P"]
+		
+		self.assertRaises( RuntimeError, r.shade, p )
+
+	def testWrongSize( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+		
+		r.shader( "surface", "test/IECoreRI/shaders/splineTest.sdl", {} )
+				
+		p = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 10 ) ) )
+		del p["t"][-10:]
+		
+		self.assertRaises( RuntimeError, r.shade, p )
+				
 	def tearDown( self ) :
 		
 		files = [
@@ -281,6 +328,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxStackTest.sdl",
 			"test/IECoreRI/shaders/sxCoshaderTest.sdl",
 			"test/IECoreRI/shaders/sxCoshaderTestMain.sdl",
+			"test/IECoreRI/shaders/sxGridTest.sdl",
 		]
 		
 		for f in files :
