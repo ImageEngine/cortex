@@ -34,6 +34,7 @@
 
 import sys
 import IECore
+import IECoreRI
 
 from SLOReader import *
 from Renderer import *
@@ -57,11 +58,13 @@ from ParameterisedProcedural import *
 from MotionTest import MotionTest
 from PythonProceduralTest import PythonProceduralTest
 from DetailTest import DetailTest
-from SXRendererTest import SXRendererTest
 from ProceduralThreadingTest import ProceduralThreadingTest
 from StringArrayParameterTest import StringArrayParameterTest
 from CoshaderTest import CoshaderTest
 from GroupTest import GroupTest
+
+if hasattr( IECoreRI, "SXRenderer" ) :
+	from SXRendererTest import SXRendererTest
 
 if IECore.withFreeType() :
 
