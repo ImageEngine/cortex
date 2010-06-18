@@ -81,12 +81,34 @@ static void setItem( ObjectVector &o, long index, ObjectPtr value )
 
 static void delItem( ObjectVector &o, long index )
 {
-	o.members().erase( o.members().begin() + index );
+	o.members().erase( o.members().begin() + convertIndex( o, index ) );
 }
 
 static void append( ObjectVector &o, ObjectPtr value )
 {
 	o.members().push_back( value );
+}
+
+static void remove( ObjectVector &o, ObjectPtr value )
+{
+	ObjectVector::MemberContainer::iterator it = find( o.members().begin(), o.members().end(), value );
+	if( it==o.members().end() )
+	{
+		PyErr_SetString( PyExc_ValueError, "Value not in ObjectVector" );
+		throw_error_already_set();
+	}
+	o.members().erase( it );	
+}
+
+static size_t index( ObjectVector &o, ObjectPtr value )
+{
+	ObjectVector::MemberContainer::iterator it = find( o.members().begin(), o.members().end(), value );
+	if( it==o.members().end() )
+	{
+		PyErr_SetString( PyExc_ValueError, "Value not in ObjectVector" );
+		throw_error_already_set();
+	}
+	return it - o.members().begin();
 }
 
 void bindObjectVector()
@@ -98,6 +120,8 @@ void bindObjectVector()
 		.def( "__setitem__", &setItem )
 		.def( "__delitem__", &delItem )
 		.def( "append", &append )
+		.def( "remove", &remove )
+		.def( "index", &index )
 	;
 }
 

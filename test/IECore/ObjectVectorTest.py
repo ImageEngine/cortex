@@ -100,6 +100,65 @@ class ObjectVectorTest( unittest.TestCase ) :
 		ooo = IECore.ObjectReader( "test/IECore/objectVector.cob" ).read()
 
 		self.assertEqual( o, ooo )
+		
+	def testRemove( self ) :
+	
+		m1 = IECore.IntData( 1 )
+		m2 = IECore.IntData( 2 )
+		m3 = IECore.IntData( 2 )
+		
+		o = IECore.ObjectVector()
+		o.append( m1 )
+		o.append( m2 )
+		o.append( m3 )
+
+		o.remove( m3 )
+		
+		self.assertEqual( len( o ), 2 )
+		self.failUnless( o[0].isSame( m1 ) )
+		self.failUnless( o[1].isSame( m2 ) )
+
+		self.assertRaises( ValueError, o.remove, m3 )
+
+	def testIndex( self ) :
+	
+		m1 = IECore.IntData( 1 )
+		m2 = IECore.IntData( 2 )
+		m3 = IECore.IntData( 2 )
+		
+		o = IECore.ObjectVector()
+		o.append( m1 )
+		o.append( m2 )
+		o.append( m3 )
+		
+		self.assertEqual( o.index( m1 ), 0 )
+		self.assertEqual( o.index( m2 ), 1 )
+		self.assertEqual( o.index( m3 ), 2 )
+
+		o.remove( m1 )
+		
+		self.assertEqual( o.index( m2 ), 0 )
+		self.assertEqual( o.index( m3 ), 1 )
+		
+		self.assertRaises( ValueError, o.index, m1 )
+
+	def testDelSpecialIndices( self ) :
+	
+		m1 = IECore.IntData( 1 )
+		m2 = IECore.IntData( 2 )
+		m3 = IECore.IntData( 3 )
+		
+		o = IECore.ObjectVector()
+		o.append( m1 )
+		o.append( m2 )
+		o.append( m3 )
+		
+		del o[-1]
+		
+		self.assertEqual( len( o ), 2 )
+		self.failUnless( m1 in o )
+		self.failUnless( m2 in o )
+		self.failIf( m3 in o )
 
 	def tearDown( self ) :
 
