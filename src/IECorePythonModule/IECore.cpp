@@ -270,6 +270,7 @@
 #include "IECorePython/HexConversionBinding.h"
 #include "IECorePython/CompressSmoothSkinningDataOpBinding.h"
 #include "IECorePython/DecompressSmoothSkinningDataOpBinding.h"
+#include "IECorePython/ReorderSmoothSkinningInfluencesOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -543,6 +544,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindHexConversion();
 	bindCompressSmoothSkinningDataOp();
 	bindDecompressSmoothSkinningDataOp();
+	bindReorderSmoothSkinningInfluencesOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
