@@ -47,6 +47,18 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testPoints.tif"
 
+	def testStateComponentsInstantiation( self ):
+
+		IECoreGL.PointsPrimitive.UseGLPoints( IECoreGL.GLPointsUsage.ForPointsOnly )
+		IECoreGL.PointsPrimitive.GLPointWidth( 1.5 )
+
+	def testStateComponentsUsage( self ):
+
+		g = IECoreGL.Group()
+		g.getState().add( IECoreGL.PointsPrimitive.UseGLPoints( IECoreGL.GLPointsUsage.ForPointsAndDisks ) )
+		g.getState().add( IECoreGL.PointsPrimitive.GLPointWidth( 2.3 ) )
+
+
 	def testVertexAttributes( self ) :
 
 		fragmentSource = """

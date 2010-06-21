@@ -63,6 +63,18 @@ void bindTypedStateComponents()
 	bindTypedStateComponent< CullingSpaceStateComponent >( "CullingSpaceStateComponent" );
 	bindTypedStateComponent< CullingBoxStateComponent >( "CullingBoxStateComponent" );
 	bindTypedStateComponent< ProceduralThreadingStateComponent >( "ProceduralThreadingStateComponent" );
+
+	enum_<GLPointsUsage>( "GLPointsUsage" )
+		.value( "ForPointsOnly", ForPointsOnly )
+		.value( "ForPointsAndDisks", ForPointsAndDisks )
+		.value( "ForAll", ForAll )
+	;
+
+	enum_<RendererSpace>( "RendererSpace" )
+		.value( "ObjectSpace", ObjectSpace )
+		.value( "WorldSpace", WorldSpace )
+	;
+
 }
 
 } // namespace IECoreGL

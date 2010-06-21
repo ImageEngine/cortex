@@ -65,6 +65,8 @@
 #include "IECoreGL/bindings/LuminanceTextureBinding.h"
 #include "IECoreGL/bindings/ToGLTextureConverterBinding.h"
 #include "IECoreGL/bindings/PrimitiveBinding.h"
+#include "IECoreGL/bindings/PointsPrimitiveBinding.h"
+
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -100,6 +102,7 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindLuminanceTexture();
 	bindToGLTextureConverter();
 	bindPrimitive();
+	bindPointsPrimitive();
 
 	def( "init", &IECoreGL::init );
 }
