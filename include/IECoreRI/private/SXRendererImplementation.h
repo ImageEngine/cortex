@@ -128,7 +128,10 @@ class SXRendererImplementation : public IECore::Renderer
 			State( const State &other, bool deepCopy );
 			~State();
 			IECore::CompoundDataPtr attributes;
-			SxShader shader;
+			SxShader displacementShader;
+			SxShader surfaceShader;
+			SxShader atmosphereShader;
+			SxShader imagerShader;
 			SXExecutor::ShaderVector coshaders;
 		};
 		typedef std::stack<State> StateStack;

@@ -128,11 +128,13 @@ class SXRendererTest( unittest.TestCase ) :
 		
 		s = r.shade( points )
 		
-		self.assertEqual( len( s ), 4 )
+		self.assertEqual( len( s ), 6 )
 		self.failUnless( "outputFloat" in s )
 		self.failUnless( "outputColor" in s )
 		self.failUnless( "Ci" in s )
 		self.failUnless( "Oi" in s )
+		self.failUnless( "P" in s )
+		self.failUnless( "N" in s )
 		
 		self.assertEqual( s["outputFloat"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowFloat.cob" ).read() )
 		self.assertEqual( s["outputColor"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowColor.cob" ).read() )
@@ -288,9 +290,11 @@ class SXRendererTest( unittest.TestCase ) :
 			self.assertRaises( RuntimeError, r.shade, points, IECore.V2i( 100, 500 ) )	
 			
 			s = r.shade( points )
+			del s["P"] # test data on disk was created before we supported P as an output
 			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/noGrid.cob" ).read() )
-		
+					
 			s = r.shade( points, IECore.V2i( 21, 11 ) )
+			del s["P"] # test data on disk was created before we supported P as an output
 			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/grid.cob" ).read() )
 
 	def testWrongType( self ) :
@@ -318,7 +322,59 @@ class SXRendererTest( unittest.TestCase ) :
 		del p["t"][-10:]
 		
 		self.assertRaises( RuntimeError, r.shade, p )
-				
+	
+	def testDisplacementShader( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxDisplacementTest.sdl test/IECoreRI/shaders/sxDisplacementTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "displacement", "test/IECoreRI/shaders/sxDisplacementTest.sdl", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			## need to use a grid topology if we want calculatenormal() to work
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+			
+			self.assertEqual( len( s ), 2 )
+			self.failUnless( "P" in s )
+			self.failUnless( "N" in s )
+			
+			for i in range( 0, len( points["P"] ) ) :
+				self.failUnless( s["P"][i].equalWithAbsError( points["P"][i] + points["N"][i], 0.001 ) )
+				self.failUnless( s["N"][i].equalWithAbsError( IECore.V3f( 0, 0, 1 ), 0.001 ) )
+
+	def testDisplacementAndSurfaceShaders( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxDisplacementTest.sdl test/IECoreRI/shaders/sxDisplacementTest.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxTest.sdl test/IECoreRI/shaders/sxTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "displacement", "test/IECoreRI/shaders/sxDisplacementTest.sdl", {} )
+			r.shader( "surface", "test/IECoreRI/shaders/sxTest.sdl", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			## need to use a grid topology if we want calculatenormal() to work
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+			
+			self.assertEqual( len( s ), 6 )
+			self.failUnless( "P" in s )
+			self.failUnless( "N" in s )
+			self.failUnless( "Ci" in s )
+			self.failUnless( "Oi" in s )
+			self.failUnless( "outputFloat" in s )
+			self.failUnless( "outputColor" in s )
+			
+			for i in range( 0, len( points["P"] ) ) :
+				self.failUnless( s["P"][i].equalWithAbsError( points["P"][i] + points["N"][i], 0.001 ) )
+				self.failUnless( s["N"][i].equalWithAbsError( IECore.V3f( 0, 0, 1 ), 0.001 ) )
+					
 	def tearDown( self ) :
 		
 		files = [
@@ -329,6 +385,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxCoshaderTest.sdl",
 			"test/IECoreRI/shaders/sxCoshaderTestMain.sdl",
 			"test/IECoreRI/shaders/sxGridTest.sdl",
+			"test/IECoreRI/shaders/sxDisplacementTest.sdl",
 		]
 		
 		for f in files :

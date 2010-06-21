@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/shared_ptr.hpp"
+
 #include "IECore/VectorTypedData.h"
 
 #include "IECoreRI/SXExecutor.h"
@@ -41,8 +43,8 @@ using namespace IECore;
 using namespace Imath;
 using namespace std;
 
-SXExecutor::SXExecutor( SxShader shader, const ShaderVector *coshaders, const ShaderVector *lights )
-	:	m_shader( shader ), m_coshaders( coshaders ), m_lights( lights )
+SXExecutor::SXExecutor( const ShaderVector *shaders, const ShaderVector *coshaders, const ShaderVector *lights )
+	:	m_shaders( shaders ), m_coshaders( coshaders ), m_lights( lights )
 {
 }
 
@@ -68,102 +70,98 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points,
 		}
 	}
 	
-	// create parameter list and fill it from input data
-
-	unsigned numPredefinedParameters = SxGetPredefinedParameters( m_shader, 0, 0 );
-	std::vector<const char *> predefinedParameters( numPredefinedParameters );
-	SxGetPredefinedParameters( m_shader, &(predefinedParameters[0]), numPredefinedParameters );
-
-	SxParameterList vars = SxCreateParameterList( 0, numPoints, "current" );
+	// create parameter list and set topology if we can.
+	// we use a shared_ptr with a custom deleter to ensure that SxDestroyParameterList is called
+	// no matter how we exit this function.
+	
+	boost::shared_ptr<void> vars( SxCreateParameterList( 0, numPoints, "current" ), SxDestroyParameterList );
+	
 	if( haveGrid )
 	{
 		unsigned nu = gridSize.x; unsigned nv = gridSize.y;
-		SxSetParameterListGridTopology( vars, 1, &nu, &nv );
+		SxSetParameterListGridTopology( vars.get(), 1, &nu, &nv );
 	}
-		
-	for( unsigned i=0; i<numPredefinedParameters; i++ )
-	{				
-		IECore::TypeId expectedType = predefinedParameterType( predefinedParameters[i] );
-		
-		const Data *d = points->member<Data>( predefinedParameters[i] );
 
-		switch( expectedType )
+	// set input variables for coshaders
+	if( m_coshaders )
+	{
+		for( unsigned shaderIndex = 0; shaderIndex < m_coshaders->size(); shaderIndex++ )
 		{
-			case FloatVectorDataTypeId :
-			{
-				setVariable<FloatVectorData>( vars, predefinedParameters[i], d, numPoints );
-				break;
-			}
-			case V3fVectorDataTypeId :
-			{
-				setVariable<V3fVectorData>( vars, predefinedParameters[i], d, numPoints );
-				break;
-			}
-			case Color3fVectorDataTypeId :
-			{
-				setVariable<Color3fVectorData>( vars, predefinedParameters[i], d, numPoints );
-				break;
-			}
-			default :
-				throw Exception( boost::str( boost::format( "Input parameter \"%s\" has unsupported type." ) % predefinedParameters[i] ) );
+			setVariables( vars.get(), (*m_coshaders)[shaderIndex], 0, points, numPoints );
 		}
 	}
-		
-	// run shader
 
-	SxCallShader( 
-		m_shader,
-		vars,
-		m_lights ? (void **)&((*m_lights)[0]) : 0,
-		m_lights ? m_lights->size() : 0,
-		m_coshaders ? (void **)&((*m_coshaders)[0]) : 0,
-		m_coshaders ? m_coshaders->size() : 0
-	);
-	
-	// create and return output data
-			
+	// loop over the shaders, running them and extracting results as we go
 	CompoundDataPtr result = new CompoundData();
 	
-	unsigned numParameters = SxGetNumParameters( m_shader );
-	for( unsigned i=0; i<numParameters; i++ )
+	SxShader previousShader = 0;
+	for( unsigned shaderIndex = 0; shaderIndex < m_shaders->size(); shaderIndex++ )
 	{
-		SxType type;
-		bool varying;
-		SxData defaultValue;
-		unsigned arraySize;
-		const char *spaceName;
-		bool output;
-		const char *name = SxGetParameterInfo( m_shader, i, &type, &varying, &defaultValue, &arraySize, &spaceName, &output );
-		if( output )
-		{
-			switch( type )
-			{
-				case SxFloat :
-				{
-					result->writable()[name] = getVariable<FloatVectorData>( vars, name, numPoints );
-					break;	
-				}
-				case SxColor :
-				{
-					result->writable()[name] = getVariable<Color3fVectorData>( vars, name, numPoints );
-					break;	
-				}
-				case SxVector :
-				case SxPoint :
-				case SxNormal :
-				{
-					result->writable()[name] = getVariable<V3fVectorData>( vars, name, numPoints );
-					break;	
-				}
-				default :
-					throw Exception( boost::str( boost::format( "Output parameter \"%s\" has unsupported type." ) % name ) );
+	
+		// set parameters from input data 
+		
+		setVariables( vars.get(), (*m_shaders)[shaderIndex], previousShader, points, numPoints );
+		
+		// run shader
 
+		SxCallShader( 
+			(*m_shaders)[shaderIndex],
+			vars.get(),
+			m_lights ? (void **)&((*m_lights)[0]) : 0,
+			m_lights ? m_lights->size() : 0,
+			m_coshaders ? (void **)&((*m_coshaders)[0]) : 0,
+			m_coshaders ? m_coshaders->size() : 0
+		);
+
+		// extract and store output data
+
+		unsigned numParameters = SxGetNumParameters( (*m_shaders)[shaderIndex] );
+		for( unsigned i=0; i<numParameters; i++ )
+		{
+			SxType type;
+			bool varying;
+			SxData defaultValue;
+			unsigned arraySize;
+			const char *spaceName;
+			bool output;
+			const char *name = SxGetParameterInfo( (*m_shaders)[shaderIndex], i, &type, &varying, &defaultValue, &arraySize, &spaceName, &output );
+
+			if( output )
+			{
+				switch( type )
+				{
+					case SxFloat :
+					{
+						getVariable<FloatVectorData>( (*m_shaders)[shaderIndex], name, result );
+						break;	
+					}
+					case SxColor :
+					{
+						getVariable<Color3fVectorData>( (*m_shaders)[shaderIndex], name, result );
+						break;	
+					}
+					case SxVector :
+					case SxPoint :
+					case SxNormal :
+					{
+						getVariable<V3fVectorData>( (*m_shaders)[shaderIndex], name, result );
+						break;	
+					}
+					default :
+						throw Exception( boost::str( boost::format( "Output parameter \"%s\" has unsupported type." ) % name ) );
+
+				}
 			}
 		}
-	}
 
-	result->writable()["Ci"] = getVariable<Color3fVectorData>( vars, "Ci", numPoints );
-	result->writable()["Oi"] = getVariable<Color3fVectorData>( vars, "Oi", numPoints );
+		getVariable<Color3fVectorData>( (*m_shaders)[shaderIndex], "Ci", result );
+		getVariable<Color3fVectorData>( (*m_shaders)[shaderIndex], "Oi", result );
+		getVariable<V3fVectorData>( (*m_shaders)[shaderIndex], "P", result );
+		getVariable<V3fVectorData>( (*m_shaders)[shaderIndex], "N", result );
+		
+		previousShader = (*m_shaders)[shaderIndex];
+		
+	}
 				
 	return result;
 }
@@ -203,10 +201,56 @@ IECore::TypeId SXExecutor::predefinedParameterType( const char *name ) const
 	throw Exception( boost::str( boost::format( "Unknown predefined parameter \"%s\"" ) % name ) ); 
 }
 
-template<class T>
-void SXExecutor::setVariable( SxParameterList parameterList, const char *name, const Data *d, size_t expectedSize ) const
+void SXExecutor::setVariables( SxParameterList parameterList, SxShader targetShader, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const
 {
+	unsigned numPredefinedParameters = SxGetPredefinedParameters( targetShader, 0, 0 );
+	std::vector<const char *> predefinedParameters( numPredefinedParameters );
+	SxGetPredefinedParameters( targetShader, &(predefinedParameters[0]), numPredefinedParameters );
 
+	for( unsigned i=0; i<numPredefinedParameters; i++ )
+	{				
+		IECore::TypeId expectedType = predefinedParameterType( predefinedParameters[i] );
+
+		switch( expectedType )
+		{
+			case FloatVectorDataTypeId :
+			{
+				setVariable<FloatVectorData>( parameterList, predefinedParameters[i], previousShader, points, expectedSize );
+				break;
+			}
+			case V3fVectorDataTypeId :
+			{
+				setVariable<V3fVectorData>( parameterList, predefinedParameters[i], previousShader, points, expectedSize );
+				break;
+			}
+			case Color3fVectorDataTypeId :
+			{
+				setVariable<Color3fVectorData>( parameterList, predefinedParameters[i], previousShader, points, expectedSize );
+				break;
+			}
+			default :
+				throw Exception( boost::str( boost::format( "Input parameter \"%s\" has unsupported type." ) % predefinedParameters[i] ) );
+		}
+	}
+}
+
+template<class T>
+void SXExecutor::setVariable( SxParameterList parameterList, const char *name, SxShader previousShader, const CompoundData *points, size_t expectedSize ) const
+{
+	// try to set the variable based on the output of the previous shader
+	if( previousShader )
+	{
+		void *d = 0;
+		size_t numPoints = SxGetWritableParameterInfo( previousShader, name, &d );
+		if( d && numPoints==expectedSize )
+		{
+			SxSetPredefinedParameter( parameterList, name, d );
+			return;
+		}
+	}
+
+	// if that failed for any reason then set the variable based on the input data provided by the caller
+	const Data *d = points->member<Data>( name );
 	if( d )
 	{
 		const T *td = IECore::runTimeCast<const T>( d );
@@ -252,14 +296,15 @@ void SXExecutor::setVariable( SxParameterList parameterList, const char *name, c
 }
 		
 template<class T>
-DataPtr SXExecutor::getVariable( SxParameterList parameterList, const char *name, size_t numPoints ) const
+void SXExecutor::getVariable( SxShader shader, const char *name, IECore::CompoundData *container ) const
 {
-	typename T::Ptr result = new T;
-	result->writable().resize( numPoints );
-	
-	void *d;
-	SxGetWritableParameterInfo( m_shader, name, &d );
-	memcpy( &(result->writable()[0]), d, numPoints * sizeof( typename T::ValueType::value_type ) );
-	
-	return result;
+	void *d = 0;
+	int numPoints = SxGetWritableParameterInfo( shader, name, &d );
+	if( d && numPoints )
+	{
+		typename T::Ptr data = new T;
+		data->writable().resize( numPoints );
+		memcpy( &(data->writable()[0]), d, numPoints * sizeof( typename T::ValueType::value_type ) );
+		container->writable()[name] = data;
+	}
 }

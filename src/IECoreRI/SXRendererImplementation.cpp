@@ -63,13 +63,20 @@ using namespace boost;
 ////////////////////////////////////////////////////////////////////////
 
 SXRendererImplementation::State::State()
-	:	attributes( new CompoundData() ), shader( 0 )
+	:	attributes( new CompoundData() ),
+		displacementShader( 0 ), surfaceShader( 0 ),
+		atmosphereShader( 0 ), imagerShader( 0 )
+	
 {
 }
 
 SXRendererImplementation::State::State( const State &other, bool deepCopy )
 	:	attributes( deepCopy ? other.attributes->copy() : other.attributes ),
-		shader( other.shader ), coshaders( other.coshaders )
+		displacementShader( other.displacementShader ),
+		surfaceShader( other.surfaceShader ),
+		atmosphereShader( other.atmosphereShader ),
+		imagerShader( other.imagerShader ),
+		coshaders( other.coshaders )
 {
 }
 
@@ -370,9 +377,21 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 	
 	// create the shader using the converted parameters, and store it in the appropriate part of our state
 		
-	if( type=="surface"	|| type=="ri:surface" )
+	if( type=="displacement" || type=="ri:displacement" )
 	{
-		m_stateStack.top().shader = SxCreateShader( m_context, parameterList, name.c_str(), 0 );
+		m_stateStack.top().displacementShader = SxCreateShader( m_context, parameterList, name.c_str(), 0 );
+	}
+	else if( type=="surface" || type=="ri:surface" )
+	{
+		m_stateStack.top().surfaceShader = SxCreateShader( m_context, parameterList, name.c_str(), 0 );
+	}
+	else if( type=="atmosphere"	|| type=="ri:atmosphere" )
+	{
+		m_stateStack.top().atmosphereShader = SxCreateShader( m_context, parameterList, name.c_str(), 0 );
+	}
+	else if( type=="imager"	|| type=="ri:imager" )
+	{
+		m_stateStack.top().imagerShader = SxCreateShader( m_context, parameterList, name.c_str(), 0 );
 	}
 	else if( type=="shader" || type=="ri:shader" )
 	{
@@ -521,10 +540,29 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore:
 
 IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const
 {
-	if( !m_stateStack.top().shader )
+	SXExecutor::ShaderVector shaders;
+	const State &state = m_stateStack.top();
+	if( state.displacementShader )
 	{
-		throw Exception( "No shader specified" );
+		shaders.push_back( state.displacementShader );
 	}
-	SXExecutor executor( m_stateStack.top().shader, &m_stateStack.top().coshaders );
+	if( state.surfaceShader )
+	{
+		shaders.push_back( state.surfaceShader );
+	}
+	if( state.atmosphereShader )
+	{
+		shaders.push_back( state.atmosphereShader );
+	}
+	if( state.imagerShader )
+	{
+		shaders.push_back( state.imagerShader );
+	}
+	
+	if( !shaders.size() )
+	{
+		throw Exception( "No shaders specified" );
+	}
+	SXExecutor executor( &shaders, &m_stateStack.top().coshaders );
 	return executor.execute( points, gridSize );
 }

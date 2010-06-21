@@ -55,10 +55,11 @@ class SXExecutor : public boost::noncopyable
 	
 		typedef std::vector<SxShader> ShaderVector;
 	
-		/// Constructs an executor for the specified shader, coshaders and lights.
-		/// It is the caller's responsibility to ensure that the shader and ShaderVectors
+		/// Constructs an executor for the specified set of shaders, coshaders and lights.
+		/// The shaders in the shaders parameter will be run in sequence, with the output from
+		/// one forming the input to the next. It is the caller's responsibility to ensure that the ShaderVectors
 		/// remain alive for as long as the executor is in use.
-		SXExecutor( SxShader shader, const ShaderVector *coshaders = 0, const ShaderVector *lights = 0 );
+		SXExecutor( const ShaderVector *shaders, const ShaderVector *coshaders = 0, const ShaderVector *lights = 0 );
 
 		/// Executes the shader for the specified points. The points are considered
 		/// to have no specific connectivity, meaning that area and filtering functions
@@ -75,14 +76,16 @@ class SXExecutor : public boost::noncopyable
 	private :
 
 		IECore::TypeId predefinedParameterType( const char *name ) const;
+		
+		void setVariables( SxParameterList parameterList, SxShader targetShader, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
 				
 		template<typename T>
-		void setVariable( SxParameterList parameterList, const char *name, const IECore::Data *d, size_t expectedSize ) const;
+		void setVariable( SxParameterList parameterList, const char *name, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
 		
 		template<typename T>
-		IECore::DataPtr getVariable( SxParameterList parameterList, const char *name, size_t numPoints ) const;
+		void getVariable( SxShader shader, const char *name, IECore::CompoundData *container ) const;
 
-		SxShader m_shader;
+		const ShaderVector *m_shaders;
 		const ShaderVector *m_coshaders;
 		const ShaderVector *m_lights;
 
