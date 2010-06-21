@@ -57,6 +57,26 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( Shader );
 
+Shader::Shader()
+	:	m_vertexShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
+{
+	// hard-code the usual old OpenGL parameters available when no shader is defined.
+	ParameterDescription d;
+	d.name = "gl_Color";
+	d.type = GL_FLOAT_VEC4;
+	d.size = 1;
+	m_uniformParameters[ GL_COLOR_PARAMETER ] = d;
+	m_vertexParameters[ GL_COLOR_PARAMETER ] = d;
+	d.name = "gl_Points";
+	d.type = GL_FLOAT_VEC3;
+	m_vertexParameters[ GL_POINTS_PARAMETER ] = d;
+	d.name = "gl_Normals";
+	m_vertexParameters[ GL_NORMALS_PARAMETER ] = d;
+	d.name = "gl_TexCoords0";
+	d.type = GL_FLOAT_VEC2;
+	m_vertexParameters[ GL_TEXCOORDS_PARAMETER ] = d;
+}
+
 Shader::Shader( const std::string &vertexSource, const std::string &fragmentSource )
 	:	m_vertexShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
 {
@@ -212,9 +232,12 @@ void Shader::compile( const std::string &source, GLenum type, GLuint &shader )
 
 void Shader::release()
 {
-	glDeleteShader( m_vertexShader );
-	glDeleteShader( m_fragmentShader );
-	glDeleteProgram( m_program );
+	if ( m_program )
+	{
+		glDeleteShader( m_vertexShader );
+		glDeleteShader( m_fragmentShader );
+		glDeleteProgram( m_program );
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1058,15 +1081,7 @@ const Shader::ParameterDescription &Shader::vertexParameterDescription( GLint pa
 
 ShaderPtr Shader::constant()
 {
-	static const char *vertexSource =
-	"void main()"
-	"{"
-	"	gl_Position = ftransform();"
-	"	gl_FrontColor = gl_Color;"
-	"	gl_BackColor = gl_Color;"
-	"}";
-
-	static ShaderPtr s = new Shader( vertexSource, "" );
+	static ShaderPtr s = new Shader();
 	return s;
 }
 

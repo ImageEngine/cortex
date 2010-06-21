@@ -99,7 +99,13 @@ void Primitive::render( const State * state ) const
 
 	Shader *shader = 0;
 
-	if( state->get<Primitive::DrawSolid>()->value() )
+	GLint renderMode = 0;
+	glGetIntegerv(GL_RENDER_MODE, &renderMode);
+	// if GL is in select mode we don't draw the geometry with the 
+	// regular shader. We use the constant shader native from GL for fast drawing.
+	bool selectMode = ( renderMode == GL_SELECT );
+
+	if( !selectMode && state->get<Primitive::DrawSolid>()->value() )
 	{
 		shader = state->get<ShaderStateComponent>()->shader();
 
@@ -127,7 +133,7 @@ void Primitive::render( const State * state ) const
 		{
 			glDepthMask( false );
 		}
-		if( state->get<Primitive::DrawSolid>()->value() )
+		if( !selectMode && state->get<Primitive::DrawSolid>()->value() )
 		{
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 			glEnable( GL_LIGHTING );
@@ -139,7 +145,7 @@ void Primitive::render( const State * state ) const
 		glActiveTexture( textureUnits()[0] );
 		glDisable( GL_TEXTURE_2D );
 
-		if( state->get<Primitive::DrawOutline>()->value() || state->get<Primitive::DrawWireframe>()->value() ||
+		if( selectMode || state->get<Primitive::DrawOutline>()->value() || state->get<Primitive::DrawWireframe>()->value() ||
 			state->get<Primitive::DrawPoints>()->value() || state->get<Primitive::DrawBound>()->value() )
 		{
 			// turn off current shader and use constant shader.
@@ -153,68 +159,76 @@ void Primitive::render( const State * state ) const
 				constantShader->setVertexParameter( "P", itP->second );
 			}
 
-			if( state->get<Primitive::DrawOutline>()->value() )
+			if ( selectMode )
 			{
-				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-				glEnable( GL_POLYGON_OFFSET_LINE );
-				float width = 2 * state->get<Primitive::OutlineWidth>()->value();
-				glPolygonOffset( 2 * width, 1 );
-				glLineWidth( width );
-				constantShader->setUniformParameter( CsIndex, state->get<OutlineColorStateComponent>()->value() );
-				render( state, Primitive::DrawOutline::staticTypeId() );
-			}
-
-			if( state->get<Primitive::DrawWireframe>()->value() )
-			{
-				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-				float width = state->get<Primitive::WireframeWidth>()->value();
-				glEnable( GL_POLYGON_OFFSET_LINE );
-				glPolygonOffset( -1 * width, -1 );
-				constantShader->setUniformParameter( CsIndex, state->get<WireframeColorStateComponent>()->value() );
-				glLineWidth( width );
+				// we use wireframe draw mode because we are not interested on binding
+				// additional vertex buffers from the primitive
 				render( state, Primitive::DrawWireframe::staticTypeId() );
 			}
-
-			if( state->get<Primitive::DrawPoints>()->value() )
+			else
 			{
-				glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-				float width = state->get<Primitive::PointWidth>()->value();
-				glEnable( GL_POLYGON_OFFSET_POINT );
-				glPolygonOffset( -2 * width, -1 );
-				glPointSize( width );
-				constantShader->setUniformParameter( CsIndex, state->get<PointColorStateComponent>()->value() );
-				render( state, Primitive::DrawPoints::staticTypeId() );
+				if( state->get<Primitive::DrawOutline>()->value() )
+				{
+					glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+					glEnable( GL_POLYGON_OFFSET_LINE );
+					float width = 2 * state->get<Primitive::OutlineWidth>()->value();
+					glPolygonOffset( 2 * width, 1 );
+					glLineWidth( width );
+					constantShader->setUniformParameter( CsIndex, state->get<OutlineColorStateComponent>()->value() );
+					render( state, Primitive::DrawOutline::staticTypeId() );
+				}
+	
+				if( state->get<Primitive::DrawWireframe>()->value() )
+				{
+					glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+					float width = state->get<Primitive::WireframeWidth>()->value();
+					glEnable( GL_POLYGON_OFFSET_LINE );
+					glPolygonOffset( -1 * width, -1 );
+					constantShader->setUniformParameter( CsIndex, state->get<WireframeColorStateComponent>()->value() );
+					glLineWidth( width );
+					render( state, Primitive::DrawWireframe::staticTypeId() );
+				}
+	
+				if( state->get<Primitive::DrawPoints>()->value() )
+				{
+					glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
+					float width = state->get<Primitive::PointWidth>()->value();
+					glEnable( GL_POLYGON_OFFSET_POINT );
+					glPolygonOffset( -2 * width, -1 );
+						glPointSize( width );
+					constantShader->setUniformParameter( CsIndex, state->get<PointColorStateComponent>()->value() );
+					render( state, Primitive::DrawPoints::staticTypeId() );
+				}
+	
+				if( state->get<Primitive::DrawBound>()->value() )
+				{
+						Box3f b = bound();
+					constantShader->setUniformParameter( CsIndex, state->get<BoundColorStateComponent>()->value() );
+					glLineWidth( 1 );
+					glBegin( GL_LINE_LOOP );
+						glVertex3f( b.min.x, b.min.y, b.min.z );
+						glVertex3f( b.max.x, b.min.y, b.min.z );
+						glVertex3f( b.max.x, b.max.y, b.min.z );
+						glVertex3f( b.min.x, b.max.y, b.min.z );
+						glEnd();
+					glBegin( GL_LINE_LOOP );
+						glVertex3f( b.min.x, b.min.y, b.max.z );
+						glVertex3f( b.max.x, b.min.y, b.max.z );
+						glVertex3f( b.max.x, b.max.y, b.max.z );
+						glVertex3f( b.min.x, b.max.y, b.max.z );
+					glEnd();
+						glBegin( GL_LINES );
+						glVertex3f( b.min.x, b.min.y, b.min.z );
+						glVertex3f( b.min.x, b.min.y, b.max.z );
+						glVertex3f( b.max.x, b.min.y, b.min.z );
+						glVertex3f( b.max.x, b.min.y, b.max.z );
+						glVertex3f( b.max.x, b.max.y, b.min.z );
+						glVertex3f( b.max.x, b.max.y, b.max.z );
+							glVertex3f( b.min.x, b.max.y, b.min.z );
+						glVertex3f( b.min.x, b.max.y, b.max.z );
+					glEnd();
+				}	
 			}
-
-			if( state->get<Primitive::DrawBound>()->value() )
-			{
-				Box3f b = bound();
-				constantShader->setUniformParameter( CsIndex, state->get<BoundColorStateComponent>()->value() );
-				glLineWidth( 1 );
-				glBegin( GL_LINE_LOOP );
-					glVertex3f( b.min.x, b.min.y, b.min.z );
-					glVertex3f( b.max.x, b.min.y, b.min.z );
-					glVertex3f( b.max.x, b.max.y, b.min.z );
-					glVertex3f( b.min.x, b.max.y, b.min.z );
-				glEnd();
-				glBegin( GL_LINE_LOOP );
-					glVertex3f( b.min.x, b.min.y, b.max.z );
-					glVertex3f( b.max.x, b.min.y, b.max.z );
-					glVertex3f( b.max.x, b.max.y, b.max.z );
-					glVertex3f( b.min.x, b.max.y, b.max.z );
-				glEnd();
-				glBegin( GL_LINES );
-					glVertex3f( b.min.x, b.min.y, b.min.z );
-					glVertex3f( b.min.x, b.min.y, b.max.z );
-					glVertex3f( b.max.x, b.min.y, b.min.z );
-					glVertex3f( b.max.x, b.min.y, b.max.z );
-					glVertex3f( b.max.x, b.max.y, b.min.z );
-					glVertex3f( b.max.x, b.max.y, b.max.z );
-					glVertex3f( b.min.x, b.max.y, b.min.z );
-					glVertex3f( b.min.x, b.max.y, b.max.z );
-				glEnd();
-			}
-
 		}
 
 	glPopClientAttrib();

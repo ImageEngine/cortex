@@ -233,6 +233,10 @@ class Shader : public Bindable
 
 	private :
 
+		/// default constructor creates an empty Shader, which simply disables OpenGL shaders and
+		/// only accepts old gl vertex and uniform parameters.
+		Shader();
+
 		struct VectorValueValid;
 		struct VectorSetValue;
 		struct VectorSetup;
