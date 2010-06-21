@@ -271,6 +271,7 @@
 #include "IECorePython/CompressSmoothSkinningDataOpBinding.h"
 #include "IECorePython/DecompressSmoothSkinningDataOpBinding.h"
 #include "IECorePython/ReorderSmoothSkinningInfluencesOpBinding.h"
+#include "IECorePython/NormalizeSmoothSkinningWeightsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -545,6 +546,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCompressSmoothSkinningDataOp();
 	bindDecompressSmoothSkinningDataOp();
 	bindReorderSmoothSkinningInfluencesOp();
+	bindNormalizeSmoothSkinningWeightsOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

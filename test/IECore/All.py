@@ -225,6 +225,7 @@ from PointVelocityDisplaceOp import *
 from HexConversionTest import HexConversionTest
 from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest
 from ReorderSmoothSkinningInfluencesOpTest import ReorderSmoothSkinningInfluencesOpTest
+from NormalizeSmoothSkinningWeightsOpTest import NormalizeSmoothSkinningWeightsOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
