@@ -374,7 +374,35 @@ class SXRendererTest( unittest.TestCase ) :
 			for i in range( 0, len( points["P"] ) ) :
 				self.failUnless( s["P"][i].equalWithAbsError( points["P"][i] + points["N"][i], 0.001 ) )
 				self.failUnless( s["N"][i].equalWithAbsError( IECore.V3f( 0, 0, 1 ), 0.001 ) )
-					
+	
+	def testLights( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxLightTest.sdl test/IECoreRI/shaders/sxLightTest.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxIlluminanceTest.sdl test/IECoreRI/shaders/sxIlluminanceTest.sl" ), 0 )
+	
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/sxIlluminanceTest", {} )
+			r.light( "test/IECoreRI/shaders/sxLightTest", "light0", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+									
+			for i in range( 0, len( points["P"] ) ) :
+				c = s["Ci"][i]
+				self.assertEqual( points["P"][i], IECore.V3f( c[0], c[1], c[2] ) )
+			
+			r.illuminate( "light0", False )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+									
+			for i in range( 0, len( points["P"] ) ) :
+				self.assertEqual( s["Ci"][i], IECore.Color3f( 0 ) )
+			
 	def tearDown( self ) :
 		
 		files = [
@@ -386,6 +414,8 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxCoshaderTestMain.sdl",
 			"test/IECoreRI/shaders/sxGridTest.sdl",
 			"test/IECoreRI/shaders/sxDisplacementTest.sdl",
+			"test/IECoreRI/shaders/sxIlluminanceTest.sdl",
+			"test/IECoreRI/shaders/sxLightTest.sdl",
 		]
 		
 		for f in files :

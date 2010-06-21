@@ -192,12 +192,13 @@ IECore::TypeId SXExecutor::predefinedParameterType( const char *name ) const
 		strcmp( name, "Cs" )==0 ||
 		strcmp( name, "Os" )==0 ||
 		strcmp( name, "Ci" )==0 ||
-		strcmp( name, "Oi" )==0
+		strcmp( name, "Oi" )==0 ||
+		strcmp( name, "Cl" )==0 
 	)
 	{
 		return Color3fVectorDataTypeId;
 	}
-
+	
 	throw Exception( boost::str( boost::format( "Unknown predefined parameter \"%s\"" ) % name ) ); 
 }
 
