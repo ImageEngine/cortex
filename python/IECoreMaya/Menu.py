@@ -71,7 +71,7 @@ class Menu( UIElement ) :
 		menu = None
 		if maya.cmds.window( parent, query=True, exists=True ) :
 			# parent is a window - we're sticking it in the menubar
-			menu = maya.cmds.menu( label=label, parent=parent, tearOff=True )
+			menu = maya.cmds.menu( label=label, parent=parent, allowOptionBoxes=True, tearOff=True )
 		elif maya.cmds.menu( parent, query=True, exists=True ) :
 			# parent is a menu - we're adding a submenu
 			kw = {}
@@ -79,10 +79,10 @@ class Menu( UIElement ) :
 				kw["insertAfter"] = insertAfter
 			if radialPosition :
 				kw["radialPosition"] = radialPosition
-			menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, **kw )
+			menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, allowOptionBoxes=True, **kw )
 		else :
 			# assume parent is a control which can accept a popup menu
-			menu = maya.cmds.popupMenu( parent=parent, button=button )
+			menu = maya.cmds.popupMenu( parent=parent, button=button, allowOptionBoxes=True )
 
 		maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( self.__postMenu, menu, definition, useInterToUI=useInterToUI ) )
 		
@@ -141,7 +141,7 @@ class Menu( UIElement ) :
 					if item.command :
 						maya.cmds.menuItem( menuItem, edit=True, command=self.__wrapCallback( item.command ) )
 					if item.secondaryCommand :
-						optionBox = maya.cmds.menuItem( optionBox=True, command=self.__wrapCallback( item.secondaryCommand ), parent=parent )
+						optionBox = maya.cmds.menuItem( optionBox=True, enable=active, command=self.__wrapCallback( item.secondaryCommand ), parent=parent )
 
 
 # \deprecated Use IECoreMaya.Menu instead.
