@@ -445,7 +445,7 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 				break;
 			case IntDataTypeId :
 			{
-				float value = static_cast<const IntData *>( it->second.get() )->readable() ? 1.0f : 0.0f;
+				float value = static_cast<const IntData *>( it->second.get() )->readable();
 				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, &value );
 				break;	
 			}
