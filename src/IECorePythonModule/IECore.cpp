@@ -273,6 +273,7 @@
 #include "IECorePython/ReorderSmoothSkinningInfluencesOpBinding.h"
 #include "IECorePython/NormalizeSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/RemoveSmoothSkinningInfluencesOpBinding.h"
+#include "IECorePython/MixSmoothSkinningWeightsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -549,6 +550,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindReorderSmoothSkinningInfluencesOp();
 	bindNormalizeSmoothSkinningWeightsOp();
 	bindRemoveSmoothSkinningInfluencesOp();
+	bindMixSmoothSkinningWeightsOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

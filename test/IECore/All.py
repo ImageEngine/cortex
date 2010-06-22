@@ -227,6 +227,7 @@ from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompress
 from ReorderSmoothSkinningInfluencesOpTest import ReorderSmoothSkinningInfluencesOpTest
 from NormalizeSmoothSkinningWeightsOpTest import NormalizeSmoothSkinningWeightsOpTest
 from RemoveSmoothSkinningInfluencesOpTest import RemoveSmoothSkinningInfluencesOpTest
+from MixSmoothSkinningWeightsOpTest import MixSmoothSkinningWeightsOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
