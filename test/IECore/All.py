@@ -226,6 +226,7 @@ from HexConversionTest import HexConversionTest
 from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest
 from ReorderSmoothSkinningInfluencesOpTest import ReorderSmoothSkinningInfluencesOpTest
 from NormalizeSmoothSkinningWeightsOpTest import NormalizeSmoothSkinningWeightsOpTest
+from RemoveSmoothSkinningInfluencesOpTest import RemoveSmoothSkinningInfluencesOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
