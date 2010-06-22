@@ -443,6 +443,18 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 			case FloatDataTypeId :
 				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, (void *)&(static_cast<const FloatData *>( it->second.get() )->readable() ) );
 				break;
+			case IntDataTypeId :
+			{
+				float value = static_cast<const IntData *>( it->second.get() )->readable() ? 1.0f : 0.0f;
+				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, &value );
+				break;	
+			}
+			case BoolDataTypeId :
+			{
+				float value = static_cast<const BoolData *>( it->second.get() )->readable() ? 1.0f : 0.0f;
+				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, &value );
+				break;		
+			}
 			case V3fDataTypeId :
 			{
 				unsigned numParameters = SxGetNumParameters( shaderInfo );

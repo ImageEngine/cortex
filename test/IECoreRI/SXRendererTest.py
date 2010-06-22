@@ -205,6 +205,48 @@ class SXRendererTest( unittest.TestCase ) :
 		
 		self.assertEqual( s["Ci"][0], IECore.Color3f( 0, 1, 0 ) )
 	
+	def testIntParameterSupport( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxParameterTest.sdl test/IECoreRI/shaders/sxParameterTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+				
+		r.shader( "surface", "test/IECoreRI/shaders/sxParameterTest.sdl", {
+			"mustBeOne" : IECore.IntData( 1 ),
+			"mustBeRed" : IECore.Color3f( 1, 0, 0 ),
+			"mustBeTwo" : IECore.V3f( 2 ),
+			"mustBeThree" : IECore.V3f( 3 ),
+			"mustBeFour" : IECore.V3f( 4 ),
+			"mustBeHelloWorld" : "helloWorld"
+		} )
+				
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
+
+		s = r.shade( self.__rectanglePoints( b ) )
+		
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 0, 1, 0 ) )
+		
+	def testBoolParameterSupport( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxParameterTest.sdl test/IECoreRI/shaders/sxParameterTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+				
+		r.shader( "surface", "test/IECoreRI/shaders/sxParameterTest.sdl", {
+			"mustBeOne" : IECore.BoolData( True ),
+			"mustBeRed" : IECore.Color3f( 1, 0, 0 ),
+			"mustBeTwo" : IECore.V3f( 2 ),
+			"mustBeThree" : IECore.V3f( 3 ),
+			"mustBeFour" : IECore.V3f( 4 ),
+			"mustBeHelloWorld" : "helloWorld"
+		} )
+				
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
+
+		s = r.shade( self.__rectanglePoints( b ) )
+		
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 0, 1, 0 ) )	
+	
 	def testStack( self ) :
 	
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxStackTest.sdl test/IECoreRI/shaders/sxStackTest.sl" ), 0 )
