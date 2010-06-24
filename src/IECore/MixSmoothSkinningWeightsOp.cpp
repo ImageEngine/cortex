@@ -56,20 +56,20 @@ MixSmoothSkinningWeightsOp::MixSmoothSkinningWeightsOp()
 		new SmoothSkinningDataParameter( "input", "The SmoothSkinningData to modify", new SmoothSkinningData )
 	)
 {
-	m_skinningData = new SmoothSkinningDataParameter(
+	m_skinningDataParameter = new SmoothSkinningDataParameter(
 		"skinningDataToMix",
 		"The SmoothSkinningData to mix with the input SmoothSkinningData",
 		new SmoothSkinningData
 	);
 	
-	m_mixingWeights = new FloatVectorParameter(
+	m_mixingWeightsParameter = new FloatVectorParameter(
 		"mixingWeights",
 		"The per-influence weights for mixing input with skinningDataToMix",
 		new FloatVectorData
 	);
 	
-	parameters()->addParameter( m_skinningData );
-	parameters()->addParameter( m_mixingWeights );
+	parameters()->addParameter( m_skinningDataParameter );
+	parameters()->addParameter( m_mixingWeightsParameter );
 }
 
 MixSmoothSkinningWeightsOp::~MixSmoothSkinningWeightsOp()
@@ -82,7 +82,12 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 	assert( skinningData );
 	assert( skinningData->validate() );
 	
-	SmoothSkinningData *origMixingData = static_cast<SmoothSkinningData *>( m_skinningData->getValidatedValue() );
+	SmoothSkinningData *origMixingData = runTimeCast<SmoothSkinningData>( m_skinningDataParameter->getValidatedValue() );
+	if ( !origMixingData )
+	{
+		throw IECore::Exception( "MixSmoothSkinningWeightsOp: skinningDataToMix is not valid" );
+	}
+	
 	assert( origMixingData );
 	assert( origMixingData->validate() );
 	
@@ -92,7 +97,7 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 		throw IECore::Exception( "MixSmoothSkinningWeightsOp: skinningDataToMix and input have different numbers of influences" );
 	}
 	
-	std::vector<float> &mixingWeights = m_mixingWeights->getTypedValue();
+	std::vector<float> &mixingWeights = m_mixingWeightsParameter->getTypedValue();
 	
 	// make sure there is one mixing weight per influence
 	if ( mixingWeights.size() != skinningData->influenceNames()->readable().size() )
@@ -108,7 +113,11 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 	decompressionOp.inputParameter()->setValidatedValue( origMixingData );
 	decompressionOp.copyParameter()->setTypedValue( true );
 	decompressionOp.operate();
-	const SmoothSkinningData *mixingData = static_cast<const SmoothSkinningData *>( decompressionOp.resultParameter()->getValidatedValue() );
+	const SmoothSkinningData *mixingData = runTimeCast<const SmoothSkinningData>( decompressionOp.resultParameter()->getValidatedValue() );
+	if ( !mixingData )
+	{
+		throw IECore::Exception( "MixSmoothSkinningWeightsOp: skinningDataToMix did not decompress correctly" );
+	}
 	
 	// make sure everything matches except the weights
 	if ( *(mixingData->pointIndexOffsets()) != *(skinningData->pointIndexOffsets()) )

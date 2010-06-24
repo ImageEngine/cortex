@@ -60,8 +60,8 @@ class MixSmoothSkinningWeightsOp : public ModifyOp
 
 	private :
 		
-		SmoothSkinningDataParameterPtr m_skinningData;
-		FloatVectorParameterPtr m_mixingWeights;
+		SmoothSkinningDataParameterPtr m_skinningDataParameter;
+		FloatVectorParameterPtr m_mixingWeightsParameter;
 };
 
 IE_CORE_DECLAREPTR( MixSmoothSkinningWeightsOp );
