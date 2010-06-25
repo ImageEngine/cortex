@@ -1607,6 +1607,7 @@ if doConfigure :
 		NoCache( mayaPythonTest )
 		mayaPythonTestEnv.Depends( mayaPythonTest, [ mayaPlugin, mayaPythonModule ] )
 		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "test/IECoreMaya/*.py" ) )
+		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "python/IECoreMaya/*.py" ) )
 		if env["WITH_MAYA_PLUGIN_LOADER"] :
 			mayaPythonTestEnv.Depends( mayaPythonTest, mayaPluginLoader )
 		mayaPythonTestEnv.Alias( "testMaya", mayaPythonTest )			
