@@ -179,6 +179,7 @@ void SmoothSmoothSkinningWeightsOp::modify( Object * object, const CompoundObjec
 	}
 	
 	// add the mesh vertices to the neighbourhood graph
+	/// \todo: consider moving this mesh connectivity graphing to the MeshPrimitive
 	Graph meshGraph;
 	for ( int i=0; i < numMeshVerts; i++ )
 	{
