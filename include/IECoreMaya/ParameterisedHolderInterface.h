@@ -72,6 +72,8 @@ class ParameterisedHolderInterface
 		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 ) = 0;
 		/// Convenience method to return dynamic_cast<IECore::ParameterisedInterface *>( getParameterised().get() )
 		IECore::ParameterisedInterface *getParameterisedInterface();
+		/// \todo Remove version with no arguments and default className to 0 as well.
+		IECore::ParameterisedInterface *getParameterisedInterface( std::string *className, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		/// Sets the attributes of the node to reflect the current values
 		/// of the parameters in the held Parameterised object. Performs validation
 		/// of the parameter values and will return kFailure if any one is not valid.

@@ -51,3 +51,9 @@ IECore::ParameterisedInterface *ParameterisedHolderInterface::getParameterisedIn
 {
 	return dynamic_cast<IECore::ParameterisedInterface *>( getParameterised().get() );
 }
+
+IECore::ParameterisedInterface *ParameterisedHolderInterface::getParameterisedInterface( std::string *className, int *classVersion, std::string *searchPathEnvVar )
+{
+	return dynamic_cast<IECore::ParameterisedInterface *>( getParameterised( className, classVersion, searchPathEnvVar ).get() );
+
+}
