@@ -46,7 +46,8 @@ namespace IECore
 /// The RemoveSmoothSkinningInfluencesOp zeros the weight values of SmoothSkinningData for certain influences.
 /// This op has several modes of operation. It can remove influences below a minimum weight value,
 /// it can impose a maximum number of influences per point, or it can remove specific influences for all points.
-/// There is a parameter to control whether the result should be compressed or left as is.
+/// There is a parameter to control whether the result should be compressed or left as is. Locks can be applied
+/// in WeightLimit and MaxInfluences mode to control which influences are removed.
 class RemoveSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :
@@ -74,7 +75,8 @@ class RemoveSmoothSkinningInfluencesOp : public ModifyOp
 		FloatParameterPtr m_minWeightParameter;
 		IntParameterPtr m_maxInfluencesParameter;
 		FrameListParameterPtr m_influenceIndicesParameter;
-
+		BoolParameterPtr m_useLocksParameter;
+		BoolVectorParameterPtr m_influenceLocksParameter;
 };
 
 IE_CORE_DECLAREPTR( RemoveSmoothSkinningInfluencesOp );

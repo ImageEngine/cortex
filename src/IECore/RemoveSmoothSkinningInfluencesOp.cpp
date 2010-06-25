@@ -96,11 +96,25 @@ RemoveSmoothSkinningInfluencesOp::RemoveSmoothSkinningInfluencesOp()
 		""
 	);
 	
+	m_useLocksParameter = new BoolParameter(
+		"applyLocks",
+		"Whether or not influenceLocks should be applied",
+		true
+	);
+	
+	m_influenceLocksParameter = new BoolVectorParameter(
+		"influenceLocks",
+		"A per-influence list of lock values",
+		new BoolVectorData
+	);
+	
 	parameters()->addParameter( m_modeParameter );
 	parameters()->addParameter( m_compressionParameter );
 	parameters()->addParameter( m_minWeightParameter );
 	parameters()->addParameter( m_maxInfluencesParameter );
 	parameters()->addParameter( m_influenceIndicesParameter );
+	parameters()->addParameter( m_useLocksParameter );
+	parameters()->addParameter( m_influenceLocksParameter );
 }
 
 RemoveSmoothSkinningInfluencesOp::~RemoveSmoothSkinningInfluencesOp()
@@ -119,6 +133,21 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	
 	std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->writable();
 	
+	bool useLocks = m_useLocksParameter->getTypedValue();
+	std::vector<bool> &locks = m_influenceLocksParameter->getTypedValue();
+		
+	// make sure there is one lock per influence
+	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) )
+	{
+		throw IECore::Exception( "SmoothSmoothSkinningWeightsOp: There must be exactly one lock per influence" );
+	}
+	
+	if ( !useLocks )
+	{
+		locks.clear();
+		locks.resize( skinningData->influenceNames()->readable().size(), false );
+	}
+	
 	int mode = m_modeParameter->getNumericValue();
 	
 	// remove influences based on minumum allowable weight
@@ -132,7 +161,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 			{
 				int current = pointIndexOffsets[i] + j;
 				
-				if ( pointInfluenceWeights[current] < minWeight )
+				if ( !locks[ pointInfluenceIndices[current] ] && (pointInfluenceWeights[current] < minWeight) )
 				{
 					pointInfluenceWeights[current] = 0.0f;
 				}
@@ -164,7 +193,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 				{
 					int current = pointIndexOffsets[i] + k;
 					
-					if ( find( influencesToRemove.begin(), influencesToRemove.end(), current ) != influencesToRemove.end() )
+					if ( locks[ pointInfluenceIndices[current] ] || find( influencesToRemove.begin(), influencesToRemove.end(), current ) != influencesToRemove.end() )
 					{
 						continue;
 					}
