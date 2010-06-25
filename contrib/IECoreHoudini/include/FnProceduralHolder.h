@@ -64,7 +64,7 @@ namespace IECoreHoudini
 			virtual IECore::RunTimeTypedPtr getParameterised();
 
 		private:
-			virtual void setParameterisedDirectly( IECore::RunTimeTypedPtr p, const std::string &type, int version, SOP_ParameterisedHolder *sop );
+			//virtual void setParameterisedDirectly( IECore::RunTimeTypedPtr p, const std::string &type, int version, SOP_ParameterisedHolder *sop );
 	};
 }
 

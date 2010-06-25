@@ -68,6 +68,7 @@ class TestProceduralHolder( unittest.TestCase ):
 		fn.setParameterised( cl )
 
 		# set a lot of parameters via houdini
+		proc.parmTuple("parm_a").set( [123] )
 		proc.parmTuple("parm_d").set( ["hello"] )
 		proc.parmTuple("parm_g").set( (2,4) )
 		proc.parmTuple("parm_h").set( (1,4,8) )
@@ -86,6 +87,10 @@ class TestProceduralHolder( unittest.TestCase ):
 		proc.parmTuple("parm_p").set( [os.getcwd()] )
 		proc.parmTuple("parm_q").set( [True] )
 		proc.parmTuple("parm_r").set( ["mySequence.####.tif"] )
+		proc.parmTuple("parm_s").set( [-1, -2, 10, 20] )
+		proc.parmTuple("parm_s_1").set( [-1, -2, 10, 20] )
+		proc.parmTuple("parm_s_2").set( [-1, -2, -3, 10, 20, 30] )
+		proc.parmTuple("parm_t").set( [-1, -2, -3, 10, 20, 30] )
 		proc.parmTuple("parm_u").set( (64, 128) )
 		proc.parmTuple("parm_v").set( (25,26,27) )
 
@@ -95,6 +100,7 @@ class TestProceduralHolder( unittest.TestCase ):
 		# generate our bounds
 		box = cl.bound()
 		assert( box==IECore.Box3f( IECore.V3f(0,0,0), IECore.V3f(1,1,1) ) )
+		return ( proc, cl )
 
 	def testLotsQuickly(self):
 		n = []
@@ -154,7 +160,52 @@ class TestProceduralHolder( unittest.TestCase ):
 		assert( fn.hasParameterised() == False )
 		fn.setParameterised(cl)
 
-	def setUp( self ) :                
+	def testProceduralReloadParameters(self):
+		sphere = IECoreHoudini.FnProceduralHolder.create( "cortex_sphere", "sphereProcedural", 1 )
+
+		# check the reload button doesn't clear expressions
+		sphere.parm("parm_radius").setExpression("sin($FF)")
+		hou.setFrame(0)
+		rad = sphere.evalParm("parm_radius")
+		assert( rad>0 )
+		hou.setFrame(100)
+		rad = sphere.evalParm("parm_radius")
+		assert( rad>0.984 )
+		assert( rad<0.985 )
+		sphere.parm("__opReloadBtn").pressButton()
+		rad = sphere.evalParm("parm_radius")
+		assert( rad>0.984 )
+		assert( rad<0.985 )
+		assert( sphere.parm("parm_radius").expression()=="sin($FF)" )
+		hou.setFrame(0)
+		rad = sphere.evalParm("parm_radius")
+		assert( rad>0 )
+
+		# now change the version to v2 and check things are still ok
+		sphere.parm("__opVersion").set("2")
+		# if we're changing the menu programatically then we need to call pressButton()!!
+		sphere.parm("__opVersion").pressButton()
+		assert( not sphere.evalParm("parm_extra") )
+		sphere.parm("parm_extra").set(True)
+		assert( sphere.evalParm("parm_extra") )
+		rad = sphere.evalParm("parm_radius")
+		assert( rad<0.015 )
+		hou.setFrame(100)
+		rad = sphere.evalParm("parm_radius")
+		assert( rad>0.984 )
+		assert( rad<0.985 )
+
+	def testHiddenParameters( self ):
+		( proc, cl ) = self.testProceduralParameters()
+		# check the hidden userData works
+		assert( proc.parmTuple("parm_a").parmTemplate().isHidden()==True )
+		assert( proc.parmTuple("parm_b").parmTemplate().isHidden()==False )
+		# check setting the parameter still works
+		proc.parmTuple("parm_a").set( [123] )
+		proc.cook(force=True)
+		assert( cl['a'].getValue().value == 123 )
+
+	def setUp( self ) :
                 os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
                 if not os.path.exists( "test/proceduralHolder_testData" ):
 			os.mkdir( "test/proceduralHolder_testData" )

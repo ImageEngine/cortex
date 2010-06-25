@@ -111,7 +111,6 @@ bool FnProceduralHolder::hasParameterised()
 
 void FnProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version )
 {
-	IECorePython::ScopedGILLock gilLock;
 	if ( !p )
 		return;
 
@@ -121,55 +120,9 @@ void FnProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std:
 		if ( !holder )
 			return;
 
-		holder->setParameterised( p );
-
-		// here we can add all the spare parameters we need to represent our inputs
-		IECore::ParameterisedProceduralPtr op = IECore::runTimeCast<IECore::ParameterisedProcedural>( p );
-		IECore::CompoundParameterPtr params = op->parameters();
-
-		// set the name  & version on the sop
-		bool type_lock = holder->getParm("__opType").getLockedFlag(0);
-		bool ver_lock = holder->getParm("__opVersion").getLockedFlag(0);
-
-		if ( type_lock )
-			holder->getParm("__opType").setLockedFlag( 0, 0 );
-		if ( ver_lock )
-			holder->getParm("__opVersion").setLockedFlag( 0, 0 );
-		holder->setString( type.c_str(), CH_STRING_LITERAL, "__opType", 0, 0 );
-		holder->setInt( "__opVersion", 0, 0, version );
-		if ( type_lock )
-			holder->getParm("__opType").setLockedFlag( 0, 1 );
-		if ( ver_lock )
-			holder->getParm("__opVersion").setLockedFlag( 0, 1 );
+		// set parameterised on holder
+		holder->setParameterised( p, type, version );
 	}
-}
-
-void FnProceduralHolder::setParameterisedDirectly( IECore::RunTimeTypedPtr p, const std::string &type, int version, SOP_ParameterisedHolder *holder )
-{
-	IECorePython::ScopedGILLock gilLock;
-	if ( !p )
-		return;
-
-	// set parameterised on holder
-	holder->setParameterised( p );
-
-	// here we can add all the spare parameters we need to represent our inputs
-	IECore::ParameterisedProceduralPtr op = IECore::runTimeCast<IECore::ParameterisedProcedural>( p );
-	IECore::CompoundParameterPtr params = op->parameters();
-
-	// set the name  & version on the sop
-	bool type_lock = holder->getParm("__opType").getLockedFlag(0);
-	bool ver_lock = holder->getParm("__opVersion").getLockedFlag(0);
-	if ( type_lock )
-		holder->getParm("__opType").setLockedFlag( 0, 0 );
-	if ( ver_lock )
-		holder->getParm("__opVersion").setLockedFlag( 0, 0 );
-	holder->setString( type.c_str(), CH_STRING_LITERAL, "__opType", 0, 0 );
-	holder->setInt( "__opVersion", 0, 0, version );
-	if ( type_lock )
-		holder->getParm("__opType").setLockedFlag( 0, 1 );
-	if ( ver_lock )
-		holder->getParm("__opVersion").setLockedFlag( 0, 1 );
 }
 
 IECore::RunTimeTypedPtr FnProceduralHolder::getParameterised()

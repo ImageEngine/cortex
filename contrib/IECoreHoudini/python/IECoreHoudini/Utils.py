@@ -99,6 +99,22 @@ def setHoudiniParm( node, p ):
 	if p.typeId()==IECore.TypeId.M44dParameter:
 		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
 
+	# Box2i, Box2f, Box2d
+	if p.typeId()==IECore.TypeId.Box2iParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.Box2fParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.Box2dParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
+	# Box3i, Box3f, Box3d
+	if p.typeId()==IECore.TypeId.Box3iParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.Box3fParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+	if p.typeId()==IECore.TypeId.Box3dParameter:
+		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
+
 
 def syncSopParametersWithProcedural(n):
 	# get our parameters from our procedural

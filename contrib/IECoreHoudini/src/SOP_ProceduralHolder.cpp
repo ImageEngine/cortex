@@ -100,18 +100,17 @@ PRM_ChoiceList SOP_ProceduralHolder::versionMenu( PRM_CHOICELIST_SINGLE,
 
 /// Detail for our switcher
 PRM_Default SOP_ProceduralHolder::switcherDefaults[] = {
-		PRM_Default(4, "Class"),
 		PRM_Default(0, "Parameters"),
 };
 
 /// Add parameters to SOP
 PRM_Template SOP_ProceduralHolder::myParameters[] = {
-		PRM_Template(PRM_SWITCHER, 2, &switcherName, switcherDefaults ),
 		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
-		PRM_Template(PRM_STRING, 1, &opVersionParm, 0, &versionMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
+		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
 		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_ProceduralHolder::reloadButtonCallback ),
 		PRM_Template(PRM_INT, 1, &opParmEval),
-        PRM_Template()
+		PRM_Template(PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
+		PRM_Template()
 };
 
 /// Don't worry about variables today
@@ -132,8 +131,6 @@ SOP_ProceduralHolder::SOP_ProceduralHolder(OP_Network *net,
 		const char *name,
 		OP_Operator *op ) :
 	SOP_ParameterisedHolder(net, name, op),
-	m_className(""),
-	m_classVersion(-1),
     m_scene(0),
     m_renderDirty(true)
 {
@@ -208,8 +205,100 @@ void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int max
 	menu[pos].setToken(0);
 }
 
-void SOP_ProceduralHolder::setClassAndVersion( const std::string &type, int version, bool update_gui )
+void SOP_ProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version )
 {
+	// disable gui update
+	disableParameterisedUpdate();
+
+	// set type & version
+	m_className = type;
+	setString( type.c_str(), CH_STRING_LITERAL, "__opType", 0, 0 );
+	m_classVersion = version;
+	setString( boost::lexical_cast<std::string>(version).c_str(), CH_STRING_LITERAL, "__opVersion", 0, 0 );
+
+	// set parameterised
+	setParameterisedDirectly( p );
+
+	// enable gui update
+	enableParameterisedUpdate();
+}
+
+/// Callback executed whenever the type/version menus change
+int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time,
+		const PRM_Template *tplate)
+{
+	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	if ( !sop )
+	{
+		return 0;
+	}
+
+	UT_String type_str, ver_str;
+	sop->evalString( type_str, "__opType", 0, 0 );
+	std::string type( type_str.buffer() );
+	sop->evalString( ver_str, "__opVersion", 0, 0 );
+	int version = -1;
+	if ( ver_str!="" )
+		version = boost::lexical_cast<int>( ver_str.buffer() );
+
+	// has our type changed?
+	if ( type!=sop->m_className )
+	{
+		sop->m_className = type;
+		version = -1;
+	}
+
+	// has the version changed?
+	if ( version!=sop->m_classVersion )
+	{
+		sop->m_classVersion = version;
+	}
+
+	// if necessary reload and update the interface
+	if ( sop->doParameterisedUpdate() )
+	{
+		sop->m_renderDirty = true; // dirty the scene
+
+		// should we just clear the procedural?
+		if ( sop->m_className=="" )
+		{
+			sop->m_classVersion = -1;
+			sop->setParameterised(0, "", -1);
+		}
+		else
+		{
+			// if we don't have a version, use the default
+			if ( sop->m_classVersion==-1 )
+			{
+				sop->m_classVersion = CoreHoudini::defaultProceduralVersion( sop->m_className );
+				sop->setString( boost::lexical_cast<std::string>(sop->m_classVersion).c_str(), CH_STRING_LITERAL, "__opVersion", 0, 0 );
+			}
+		}
+
+		// set class/version & refresh gui
+		sop->loadProcedural( sop->m_className, sop->m_classVersion );
+	}
+	return 1;
+}
+
+void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version, bool update_gui )
+{
+	// do we have an existsing procedural?
+	bool check_parameters = false;
+	IECore::ParameterisedProceduralPtr old_procedural;
+
+	// get our current procedural and save it
+	if ( hasParameterised() )
+	{
+		IECore::ParameterisedProceduralPtr procedural =
+				IECore::runTimeCast<IECore::ParameterisedProcedural>(
+						getParameterised() );
+		if ( procedural )
+		{
+			old_procedural = procedural;
+		}
+	}
+
 	// load & set the procedural
 	IECore::RunTimeTypedPtr proc;
 	if ( type!="" && version!=-1 )
@@ -220,8 +309,7 @@ void SOP_ProceduralHolder::setClassAndVersion( const std::string &type, int vers
 	// check our procedural
 	if ( proc )
 	{
-		FnProceduralHolder fn;
-		fn.setParameterisedDirectly( proc, type, version, this );
+		setParameterised( proc, type, version );
 	}
 	else
 	{
@@ -246,7 +334,7 @@ void SOP_ProceduralHolder::setClassAndVersion( const std::string &type, int vers
 				handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
 					CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
 				object fn( resultHandle );
-				fn.attr("addRemoveParameters")( proc );
+				fn.attr("addRemoveParameters")( proc, old_procedural );
 			}
 			catch( ... )
 			{
@@ -256,67 +344,18 @@ void SOP_ProceduralHolder::setClassAndVersion( const std::string &type, int vers
 	}
 }
 
-/// Callback executed whenever the type/version menus change
-int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time,
-		const PRM_Template *tplate)
-{
-	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
-	if ( !sop )
-		return 0;
-
-	bool reload_refresh = false;
-	UT_String type_str, ver_str;
-	sop->evalString( type_str, "__opType", 0, 0 );
-	std::string type( type_str.buffer() );
-	sop->evalString( ver_str, "__opVersion", 0, 0 );
-	int version = -1;
-	if ( ver_str!="" )
-		version = boost::lexical_cast<int>( ver_str.buffer() );
-
-	// has our type changed?
-	if ( type!=sop->m_className )
-	{
-		sop->m_className = type;
-		version = -1;
-		reload_refresh = true;
-	}
-
-	// has the version changed?
-	if ( version!=sop->m_classVersion )
-	{
-		sop->m_classVersion = version;
-		reload_refresh = true;
-	}
-
-	// if necessary reload and update the interface
-	if ( reload_refresh )
-	{
-		sop->m_renderDirty = true; // dirty the scene
-		sop->setParameterised( 0 ); // clear the procedural
-		if ( sop->m_className!="" )
-		{
-			if ( sop->m_classVersion==-1 )
-			{
-				sop->m_classVersion = CoreHoudini::defaultProceduralVersion( sop->m_className );
-				sop->setInt( "__opVersion", 0, 0, sop->m_classVersion );
-			}
-
-			sop->setClassAndVersion( sop->m_className, sop->m_classVersion );
-		}
-	}
-	return static_cast<int>(reload_refresh);
-}
-
 /// Callback executed whenever the reload button is clicked
 int SOP_ProceduralHolder::reloadButtonCallback( void *data, int index, float time,
 		const PRM_Template *tplate)
 {
 	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
 	if ( !sop )
+	{
 		return 0;
+	}
 
 	CoreHoudini::evalPython( "IECore.ClassLoader.defaultProceduralLoader().refresh()" );
-	sop->setClassAndVersion( sop->m_className, sop->m_classVersion, false );
+	sop->loadProcedural( sop->m_className, sop->m_classVersion );
 }
 
 /// Redraws the OpenGL Scene if the procedural is marked as having changed
@@ -328,7 +367,9 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 					getParameterised() );
 
 	if ( !procedural )
+	{
 		return 0;
+	}
 
 	if ( m_renderDirty || !m_scene )
 	{
@@ -363,12 +404,6 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
     Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );
 	float now = context.myTime;
 
-    // lock our inputs - not used currently
-	/*
-    if ( lockInputs(context) >= UT_ERROR_ABORT)
-    	error();
-	*/
-
     // force eval of our nodes parameters with our hidden parameter expression
     int parm_eval_result = evalInt( "__opParmEval", 0, now );
 
@@ -393,7 +428,9 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 	// do we need to redraw?
 	bool do_update = updateParameters( procedural, now);
 	if ( do_update )
+	{
 		dirty();
+	}
 
 	// pass this sop instance to the GR render hook via a detail attribute
 	SOP_ProceduralPassStruct sop_pass( this );
@@ -455,6 +492,6 @@ bool SOP_ProceduralHolder::load( UT_IStream &is,
 	// if we can, set our class & version
 	if ( m_className!="" && m_classVersion!=-1 )
 	{
-		setClassAndVersion( m_className, m_classVersion, false );
+		loadProcedural( m_className, m_classVersion, false );
 	}
 }

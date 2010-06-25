@@ -63,7 +63,9 @@ namespace IECoreHoudini
 			virtual ~SOP_ParameterisedHolder();
 
 			/// Sets a parameterised on this holder
-			void setParameterised( IECore::RunTimeTypedPtr p );
+			void setParameterisedDirectly( IECore::RunTimeTypedPtr p );
+			virtual void setParameterised( IECore::RunTimeTypedPtr p,
+					const std::string &type, int version ) = 0;
 
 			/// Gets the parameterised held by this holder
 			IECore::RunTimeTypedPtr getParameterised();
@@ -105,11 +107,22 @@ namespace IECoreHoudini
 			IECore::RunTimeTypedPtr loadParameterised( const std::string &type,
 					int version, const std::string &search_path );
 
+			/// These control whether or not the gui type/version controls
+			/// update the parameterised object - most of the time they do.
+			void enableParameterisedUpdate(){ m_parameterisedUpdate = true; }
+			void disableParameterisedUpdate(){ m_parameterisedUpdate = false; }
+			bool doParameterisedUpdate(){ return m_parameterisedUpdate; }
+
 		protected:
 			bool m_requiresUpdate;
 
-		private:
+    		// class type/version
+			std::string m_className;
+			int m_classVersion;
 			IECore::RunTimeTypedPtr m_parameterised;
+
+		private:
+			bool m_parameterisedUpdate; // this controls whether the parameterised is loaded if the type/version is changed in the gui
 	};
 
 } // namespace IECoreHoudini

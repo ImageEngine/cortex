@@ -50,19 +50,22 @@ using namespace IECoreHoudini;
 
 SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op ) :
 	SOP_Node( net, name, op ),
+	m_className(""),
+	m_classVersion(-1),
 	m_parameterised(0),
 	m_requiresUpdate(true)
 {
 	CoreHoudini::initPython();
+	enableParameterisedUpdate();
 }
 
 SOP_ParameterisedHolder::~SOP_ParameterisedHolder()
 {
 }
 
-void SOP_ParameterisedHolder::setParameterised( IECore::RunTimeTypedPtr p )
+void SOP_ParameterisedHolder::setParameterisedDirectly( IECore::RunTimeTypedPtr p )
 {
-	m_parameterised=p;
+	m_parameterised = p;
 }
 
 IECore::RunTimeTypedPtr SOP_ParameterisedHolder::getParameterised()
@@ -267,6 +270,79 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 				break;
 			}
 
+			// Box2i
+			case IECore::Box2iParameterTypeId:
+			{
+				int vals[4];
+				for ( unsigned int i=0; i<4; i++ )
+					vals[i] = evalInt( parm_name.c_str(), i, now );
+				Imath::Box2i val( Imath::V2i( vals[0], vals[1] ),
+									Imath::V2i( vals[2], vals[3] ) );
+				checkForUpdate<Imath::Box2i, Box2iData>( do_update, val, parm );
+				parm->setValue( new IECore::Box2iData(val) );
+				break;
+			}
+
+			// Box2f
+			case IECore::Box2fParameterTypeId:
+			{
+				float vals[4];
+				evalFloats( parm_name.c_str(), vals, now );
+				Imath::Box2f val( Imath::V2f( vals[0], vals[1] ),
+									Imath::V2f( vals[2], vals[3] ) );
+				checkForUpdate<Imath::Box2f, Box2fData>( do_update, val, parm );
+				parm->setValue( new IECore::Box2fData(val) );
+				break;
+			}
+
+			// Box2d
+			case IECore::Box2dParameterTypeId:
+			{
+				float vals[4];
+				evalFloats( parm_name.c_str(), vals, now );
+				Imath::Box2d val( Imath::V2d( vals[0], vals[1] ),
+									Imath::V2d( vals[2], vals[3] ) );
+				checkForUpdate<Imath::Box2d, Box2dData>( do_update, val, parm );
+				parm->setValue( new IECore::Box2dData(val) );
+				break;
+			}
+
+			// Box3i
+			case IECore::Box3iParameterTypeId:
+			{
+				int vals[6];
+				for ( unsigned int i=0; i<6; i++ )
+					vals[i] = evalInt( parm_name.c_str(), i, now );
+				Imath::Box3i val( Imath::V3i( vals[0], vals[1], vals[2] ),
+									Imath::V3i( vals[3], vals[4], vals[5] ) );
+				checkForUpdate<Imath::Box3i, Box3iData>( do_update, val, parm );
+				parm->setValue( new IECore::Box3iData(val) );
+				break;
+			}
+
+			// Box3f
+			case IECore::Box3fParameterTypeId:
+			{
+				float vals[6];
+				evalFloats( parm_name.c_str(), vals, now );
+				Imath::Box3f val( Imath::V3f( vals[0], vals[1], vals[2] ),
+									Imath::V3f( vals[3], vals[4], vals[5] ) );
+				checkForUpdate<Imath::Box3f, Box3fData>( do_update, val, parm );
+				parm->setValue( new IECore::Box3fData(val) );
+				break;
+			}
+
+			// Box3d
+			case IECore::Box3dParameterTypeId:
+			{
+				float vals[6];
+				evalFloats( parm_name.c_str(), vals, now );
+				Imath::Box3d val( Imath::V3d( vals[0], vals[1], vals[2] ),
+									Imath::V3d( vals[3], vals[4], vals[5] ) );
+				checkForUpdate<Imath::Box3d, Box3dData>( do_update, val, parm );
+				parm->setValue( new IECore::Box3dData(val) );
+				break;
+			}
 
 			default:
 				std::cerr << "Could not get parameter values from '" << parm_name << "' of type " << parm->typeName() << std::endl;

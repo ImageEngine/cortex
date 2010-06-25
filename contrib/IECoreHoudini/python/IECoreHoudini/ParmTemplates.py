@@ -100,6 +100,27 @@ def createParm( p ):
 	if p.typeId()==IECore.TypeId.M44dParameter:
 		parm = IECoreHoudini.ParmTemplates.matrixParm( p )
 
+	# Box2i, Box2f, Box2d
+	if p.typeId()==IECore.TypeId.Box2iParameter:
+		parm = IECoreHoudini.ParmTemplates.boxParmInt( p, 2 )
+	if p.typeId()==IECore.TypeId.Box2fParameter:
+		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 2 )
+	if p.typeId()==IECore.TypeId.Box2dParameter:
+		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 2 )
+
+	# Box3i, Box3f, Box3d
+	if p.typeId()==IECore.TypeId.Box3iParameter:
+		parm = IECoreHoudini.ParmTemplates.boxParmInt( p, 3 )
+	if p.typeId()==IECore.TypeId.Box3fParameter:
+		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 3 )
+	if p.typeId()==IECore.TypeId.Box3dParameter:
+		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 3 )
+
+	# is this parameter hidden?
+	if "hidden" in p.userData():
+		hidden = bool(p.userData()["label"].value)
+		parm['houdini_tuple'].hide( hidden )
+
 	return parm
 
 # tries to pretty-print a parameter, in case it doesn't have a label
@@ -276,4 +297,59 @@ def matrixParm( p, dim=16 ):
 								 	look=hou.parmLook.Regular,
 								 	naming_scheme=hou.parmNamingScheme.Base1
 								 )
+	return {'houdini_name':name, 'houdini_tuple':parm }
+
+def boxParmInt( p, dim ):
+	name = parmName( p.name, dim )
+	if "label" in p.userData():
+		label = p.userData()["label"].value
+	else:
+		label = labelFormat(p.name)
+
+	default_box = p.defaultValue.value
+	default = []
+	for i in range(dim):
+		default.append( default_box.min[i] )
+	for i in range(dim):
+		default.append( default_box.max[i] )
+
+	min_val = 0
+	max_val = 10
+	min_lock = max_lock = False
+	parm = hou.IntParmTemplate( name, label, dim * 2,
+				default_value=default,
+				min=min_val,
+			 	max=max_val,
+			 	min_is_strict=min_lock,
+			 	max_is_strict=max_lock,
+			 	naming_scheme=hou.parmNamingScheme.Base1
+			 )
+	return {'houdini_name':name, 'houdini_tuple':parm }
+
+def boxParmFloat( p, dim ):
+	name = parmName( p.name, dim )
+	if "label" in p.userData():
+		label = p.userData()["label"].value
+	else:
+		label = labelFormat(p.name)
+
+	default_box = p.defaultValue.value
+	default = []
+	for i in range(dim):
+		default.append( default_box.min[i] )
+	for i in range(dim):
+		default.append( default_box.max[i] )
+
+	min_val = 0.0
+	max_val = 10.0
+	min_lock = max_lock = False
+	parm = hou.FloatParmTemplate( name, label, dim * 2,
+				default_value=default,
+				min=min_val,
+			 	max=max_val,
+			 	min_is_strict=min_lock,
+			 	max_is_strict=max_lock,
+			 	look=hou.parmLook.Regular,
+			 	naming_scheme=hou.parmNamingScheme.Base1
+			 )
 	return {'houdini_name':name, 'houdini_tuple':parm }

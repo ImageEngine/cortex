@@ -56,6 +56,8 @@ class FnProceduralHolder():
 
 	# check this node is still valid
 	def nodeValid(self):
+		if not self.__node:
+			raise "FnProceduralHolder does not have a node to operate on."
 		try:
 			p = self.__node.path()
 			return True
@@ -85,11 +87,43 @@ class FnProceduralHolder():
 						found = True
 						break
 
+	def cacheParameters(self, procedural, old_procedural):
+		# for each parameter in old_procedural that matches name & type of
+		# a parameter in procedural we stash a dictionary of information...
+		# value - the tuple of values that parameter is set to
+		# expression - a list of tuples of expression/language if the parm has them
+		if not procedural or not old_procedural:
+			return {}
+		cached_parameters = {}
+		for p_new in procedural.parameters().values():
+			for p_old in old_procedural.parameters().values():
+				if p_new.name == p_old.name and p_new.typeId() == p_old.typeId():
+					parm_name = IECoreHoudini.ParmTemplates.parmName( p_old.name )
+					parm_tuple = self.__node.parmTuple(parm_name)
+					if parm_tuple:
+						data = {}
+						data['value'] = parm_tuple.eval()
+						expressions = []
+						for i in range(len(parm_tuple)):
+							try:
+								expr = parm_tuple[i].expression()
+								lang = parm_tuple[i].expressionLanguage()
+								expressions.append( ( expr, lang ) )
+							except:
+								expressions.append( ( None, None ) )
+						data['expressions'] = expressions
+						cached_parameters[p_old.name] = data
+		return cached_parameters
+
 	#=====
 	# update the parameters on our node to reflect our Procedural
-	def addRemoveParameters(self, procedural):
+	def addRemoveParameters(self, procedural, old_procedural=None):
 		if not self.nodeValid():
 			return
+
+		# if parameters exist in the new procedural too we try and stash their
+		# values (and expressions too) apply them to the new procedural's parameters
+		cached_parameters = self.cacheParameters( procedural, old_procedural )
 
 		# clear spare parameters from "Parameters"
 		self.removeParameters()
@@ -97,16 +131,30 @@ class FnProceduralHolder():
 		# add parameters
 		if not procedural:
 			return
+
 		parm_names = []
 		parm_update_gui = []
 		for p in procedural.parameters().values():
 			# create our houdini parameter
 			parm = IECoreHoudini.ParmTemplates.createParm( p )
 			if parm:
+
 				# add name of parameter that we can call via our update expression
 				parm_names.append( parm["houdini_name"] )
+
 				# add the tuple as a spare parameter
 				self.__node.addSpareParmTuple(parm["houdini_tuple"], in_folder=['Parameters'], create_missing_folders=True)
+
+				# if we have cached values/expressions we load those back on
+				if p.name in cached_parameters:
+					parm_tuple = self.__node.parmTuple(IECoreHoudini.ParmTemplates.parmName(p.name))
+					if parm_tuple:
+						parm_tuple.set( cached_parameters[p.name]['value'] )
+						for i in range(len(parm_tuple)):
+							if cached_parameters[p.name]['expressions'][i][0]:
+								expr = cached_parameters[p.name]['expressions'][i][0]
+								lang = cached_parameters[p.name]['expressions'][i][1]
+								parm_tuple[i].setExpression( expr, lang )
 
 		# update the nodes parameter evaluation expression
 		# this creates cook dependencies on the parameters
@@ -144,7 +192,7 @@ class FnProceduralHolder():
 		if hasattr(procedural, "version"):
 			version = procedural.version
 
-		# update the procedural on our SOP
+		# update the procedural on our SOP & refresh the gui
 		fn.setParameterised( procedural, type, version )
 
 		# refresh our parameters

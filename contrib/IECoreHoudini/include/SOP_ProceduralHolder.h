@@ -95,7 +95,9 @@ namespace IECoreHoudini
 					const char *path );
 
 			/// creates and sets a particular type/version of class on this sop
-			void setClassAndVersion( const std::string &type, int version, bool update_gui=true );
+			void loadProcedural( const std::string &type, int version, bool update_gui=true );
+
+			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version );
 
             /// returns a GL scene, rendering it if necessary
             IECoreGL::ConstScenePtr scene();
@@ -115,10 +117,6 @@ namespace IECoreHoudini
 			// our cache GL scene
 			IECoreGL::ScenePtr m_scene;
     		bool m_renderDirty;
-
-    		// class type/version
-			std::string m_className;
-			int m_classVersion;
 
 			// cache the procedural names
 			std::vector<std::string> m_cachedProceduralNames;

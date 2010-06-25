@@ -49,7 +49,7 @@ class parameterTypes( ParameterisedProcedural ) :
 					name = "a",
 					description = "An int which has a very long description to help test the help formatting. i wonder if there's anything more interesting i could write here.",
 					defaultValue = 1,
-					userData = { "label":StringData("Int"), "gui_update":BoolData(True) }
+					userData = { "label":StringData("Int"), "gui_update":BoolData(True), "hidden":BoolData(False) }
 				),
 
 				FloatParameter(
@@ -201,6 +201,18 @@ class parameterTypes( ParameterisedProcedural ) :
 					defaultValue = Box2d( V2d( -1 ), V2d( 1 ) )
 				),
 
+				Box2iParameter(
+					name = "s_1",
+					description = "boxboxbox2i",
+					defaultValue = Box2i( V2i( -1 ), V2i( 1 ) )
+				),
+
+				Box3iParameter(
+					name = "s_2",
+					description = "boxboxbox3i",
+					defaultValue = Box3i( V3i( -1 ), V3i( 1 ) )
+				),
+
 				Box3fParameter(
 					name = "t",
 					description = "boxboxbox",
@@ -253,7 +265,7 @@ class parameterTypes( ParameterisedProcedural ) :
 		)
 
 	def doBound(self, args) :
-		assert args["a"].value==1
+		assert args["a"].value==123
 		assert args["b"].value > 1.9999
 		assert args["c"].value==3
 		assert args["d"].value=="hello"
@@ -272,8 +284,10 @@ class parameterTypes( ParameterisedProcedural ) :
 		assert args["p"] == StringData( os.getcwd() )
 		assert args["q"] == BoolData( True )
 		assert args["r"] == StringData( "mySequence.####.tif" )
-		#assert args["s"] == Box2dData( Box2d( V2d( -1, -2 ), V2d( 10, 20 ) ) )
-		#assert args["t"] == Box3fData( Box3f( V3f( -1, -2, -3), V3f( 10, 20, 30) ) )
+		assert args["s"] == Box2dData( Box2d( V2d( -1, -2 ), V2d( 10, 20 ) ) )
+		assert args["s_1"] == Box2iData( Box2i( V2i( -1, -2 ), V2i( 10, 20 ) ) )
+		assert args["s_2"] == Box3iData( Box3i( V3i( -1, -2, -3 ), V3i( 10, 20, 30 ) ) )
+		assert args["t"] == Box3fData( Box3f( V3f( -1, -2, -3), V3f( 10, 20, 30) ) )
 		assert args["u"] == V2iData( V2i( 64, 128 ) )
 		assert args["v"] == V3iData( V3i( 25, 26, 27 ) )
 		#assert self["w"].getFrameListValue().asList() == FrameRange( 0, 500, 250 ).asList()
