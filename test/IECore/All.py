@@ -228,6 +228,7 @@ from ReorderSmoothSkinningInfluencesOpTest import ReorderSmoothSkinningInfluence
 from NormalizeSmoothSkinningWeightsOpTest import NormalizeSmoothSkinningWeightsOpTest
 from RemoveSmoothSkinningInfluencesOpTest import RemoveSmoothSkinningInfluencesOpTest
 from MixSmoothSkinningWeightsOpTest import MixSmoothSkinningWeightsOpTest
+from SmoothSmoothSkinningWeightsOpTest import SmoothSmoothSkinningWeightsOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
