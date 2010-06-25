@@ -189,7 +189,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['smoothingRatio'].setValue( 0.0 )
 		op.parameters()['iterations'].setValue( 1 )
-		op.parameters()['applyLocksPerIteration'].setValue( False )
+		op.parameters()['applyLocks'].setValue( False )
 		
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -209,7 +209,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['smoothingRatio'].setValue( 1.0 )
 		op.parameters()['iterations'].setValue( 1 )
-		op.parameters()['applyLocksPerIteration'].setValue( False )
+		op.parameters()['applyLocks'].setValue( False )
 		
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -240,7 +240,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['smoothingRatio'].setValue( 0.5 )
 		op.parameters()['iterations'].setValue( 1 )
-		op.parameters()['applyLocksPerIteration'].setValue( False )
+		op.parameters()['applyLocks'].setValue( False )
 		
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -271,7 +271,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['smoothingRatio'].setValue( 0.3 )
 		op.parameters()['iterations'].setValue( 3 )
-		op.parameters()['applyLocksPerIteration'].setValue( False )
+		op.parameters()['applyLocks'].setValue( False )
 		
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -302,7 +302,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['smoothingRatio'].setValue( 0.3 )
 		op.parameters()['iterations'].setValue( 3 )
-		op.parameters()['applyLocksPerIteration'].setValue( True )
+		op.parameters()['applyLocks'].setValue( True )
 		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, False ] ) )
 		
 		result = op.operate()
@@ -361,7 +361,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['smoothingRatio'].setValue( 0.5 )
 		op.parameters()['iterations'].setValue( 1 )
-		op.parameters()['applyLocksPerIteration'].setValue( False )
+		op.parameters()['applyLocks'].setValue( False )
 		op.parameters()['vertexIndices'].setFrameListValue( FrameList.parse( "2-4,10-12" ) )
 		
 		result = op.operate()
@@ -418,12 +418,12 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 				
 		# wrong number of locks
 		op.parameters()['mesh'].setValue( self.mesh() )
-		op.parameters()['applyLocksPerIteration'].setValue( True )
+		op.parameters()['applyLocks'].setValue( True )
 		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, True, False ] ) )
 		self.assertRaises( RuntimeError, op.operate )
 		
 		# invalid vertex ids
-		op.parameters()['applyLocksPerIteration'].setValue( False )
+		op.parameters()['applyLocks'].setValue( False )
 		op.parameters()['vertexIndices'].setFrameListValue( FrameList.parse( "10-18" ) )
 		self.assertRaises( RuntimeError, op.operate )
 

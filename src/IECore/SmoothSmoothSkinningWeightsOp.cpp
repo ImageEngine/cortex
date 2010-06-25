@@ -42,6 +42,7 @@
 #include "IECore/CompressSmoothSkinningDataOp.h"
 #include "IECore/DecompressSmoothSkinningDataOp.h"
 #include "IECore/Interpolator.h"
+#include "IECore/NormalizeSmoothSkinningWeightsOp.h"
 #include "IECore/SmoothSkinningData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TypedObjectParameter.h"
@@ -85,8 +86,8 @@ SmoothSmoothSkinningWeightsOp::SmoothSmoothSkinningWeightsOp()
 	);
 	
 	m_useLocksParameter = new BoolParameter(
-		"applyLocksPerIteration",
-		"Whether or not influenceLocks should be applied per iteration",
+		"applyLocks",
+		"Whether or not influenceLocks should be applied",
 		true
 	);
 	
@@ -148,6 +149,12 @@ void SmoothSmoothSkinningWeightsOp::modify( Object * object, const CompoundObjec
 	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) )
 	{
 		throw IECore::Exception( "SmoothSmoothSkinningWeightsOp: There must be exactly one lock per influence" );
+	}
+	
+	if ( !useLocks )
+	{
+		locks.clear();
+		locks.resize( skinningData->influenceNames()->readable().size(), false );
 	}
 	
 	std::vector<long int> vertexIds;
@@ -217,6 +224,11 @@ void SmoothSmoothSkinningWeightsOp::modify( Object * object, const CompoundObjec
 	float smoothingRatio = m_smoothingRatioParameter->getNumericValue();
 	int numIterations = m_iterationsParameter->getNumericValue();
 	
+	NormalizeSmoothSkinningWeightsOp normalizeOp;
+	normalizeOp.copyParameter()->setTypedValue( false );
+	normalizeOp.parameters()->setParameterValue( "applyLocks", m_useLocksParameter->getValue() );
+	normalizeOp.parameters()->setParameterValue( "influenceLocks", m_influenceLocksParameter->getValue() );
+	
 	// iterate
 	for ( int iteration=0; iteration < numIterations; iteration++ )
 	{
@@ -246,66 +258,25 @@ void SmoothSmoothSkinningWeightsOp::modify( Object * object, const CompoundObjec
 			}
 		}
 		
-		if ( useLocks )
+		// apply the per-influence locks
+		for ( unsigned i=0; i < vertexIds.size(); i++ )
 		{
-			// apply the per-influence locks
-			std::vector<int> unlockedIndices;
-			for ( unsigned i=0; i < vertexIds.size(); i++ )
-			{
-				int currentVertId = vertexIds[i];
-				
-				unlockedIndices.clear();
-				float totalLockedWeights = 0.0f;
-				float totalUnlockedWeights = 0.0f;
-				
-				for ( int j=0; j < pointInfluenceCounts[currentVertId]; j++ )
-				{
-					int current = pointIndexOffsets[currentVertId] + j;
-					
-					if ( locks[ pointInfluenceIndices[current] ] )
-					{
-						totalLockedWeights += pointInfluenceWeights[current];
-					}
-					else
-					{
-						totalUnlockedWeights += smoothInfluenceWeights[current];
-						unlockedIndices.push_back( current );
-					}
-				}
-				
-				int numUnlocked = unlockedIndices.size();
-				float remainingWeight = 1.0f - totalLockedWeights;
-				
-				if ( (remainingWeight == 0.0f) || (totalUnlockedWeights == 0.0f) )
-				{
-					for ( int j=0; j < numUnlocked; j++ )
-					{
-						pointInfluenceWeights[ unlockedIndices[j] ] = 0.0f;
-					}
-				}
-				else
-				{
-					for ( int j=0; j < numUnlocked; j++ )
-					{
-						pointInfluenceWeights[ unlockedIndices[j] ] = (smoothInfluenceWeights[ unlockedIndices[j] ] * remainingWeight) / totalUnlockedWeights;
-					}
-				}
-			}
-		}
-		else
-		{
-			for ( unsigned i=0; i < vertexIds.size(); i++ )
-			{
-				int currentVertId = vertexIds[i];
+			int currentVertId = vertexIds[i];
 
-				for ( int j=0; j < pointInfluenceCounts[currentVertId]; j++ )
+			for ( int j=0; j < pointInfluenceCounts[currentVertId]; j++ )
+			{
+				int current = pointIndexOffsets[currentVertId] + j;
+
+				if ( !locks[ pointInfluenceIndices[current] ] )
 				{
-					int current = pointIndexOffsets[currentVertId] + j;
-					
 					pointInfluenceWeights[current] = smoothInfluenceWeights[current];
 				}
 			}
 		}
+		
+		// normalize
+		normalizeOp.inputParameter()->setValidatedValue( skinningData );
+		normalizeOp.operate();
 	}
 	
 	// re-compress

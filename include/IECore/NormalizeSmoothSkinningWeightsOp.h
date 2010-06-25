@@ -36,11 +36,14 @@
 #define IECORE_NORMALIZESMOOTHSKINNINGWEIGHTSOP_H
 
 #include "IECore/ModifyOp.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECore
 {
 
 /// The NormalizeSmoothSkinningWeightsOp normalizes SmoothSkinningData weights between the existing influences for each point
+/// Locks can be applied to the influences and the unlocked weights will be normalized accordingly.
 class NormalizeSmoothSkinningWeightsOp : public ModifyOp
 {
 	public :
@@ -53,7 +56,11 @@ class NormalizeSmoothSkinningWeightsOp : public ModifyOp
 	protected :
 
 		virtual void modify( Object *object, const CompoundObject *operands );
-
+	
+	private :
+		
+		BoolParameterPtr m_useLocksParameter;
+		BoolVectorParameterPtr m_influenceLocksParameter;
 };
 
 IE_CORE_DECLAREPTR( NormalizeSmoothSkinningWeightsOp );

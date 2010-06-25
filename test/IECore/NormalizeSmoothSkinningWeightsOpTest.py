@@ -64,6 +64,12 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		return self.createSSD( weights )
 	
+	def normalizedWithLocks( self ) :
+		
+		weights = FloatVectorData( [0.7, 0.3, 0.2, 0.8, 0.0, 1.0, 0.6, 0.4] )
+
+		return self.createSSD( weights )
+	
 	def testTypes( self ) :
 		""" Test NormalizeSmoothSkinningWeightsOp types"""
 		
@@ -117,6 +123,47 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), normalized.pointInfluenceIndices() )
 		self.assertEqual( result.pointInfluenceWeights(), normalized.pointInfluenceWeights() )
 		self.assertEqual( result, normalized )
+	
+	def testLocks( self ) :
+		""" Test NormalizeSmoothSkinningWeightsOp locking mechanism"""
+		
+		ssd = self.original()
+		
+		op = NormalizeSmoothSkinningWeightsOp()
+		op.parameters()['input'].setValue( ssd )
+		op.parameters()['applyLocks'].setValue( True )
+		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, False ] ) )
+		result = op.operate()
+		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
+		self.assertEqual( result.influencePose(), ssd.influencePose() )
+		self.assertEqual( result.pointIndexOffsets(), ssd.pointIndexOffsets() )
+		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
+		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
+		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
+		self.assertNotEqual( result, ssd )
+		
+		normalized = self.normalizedWithLocks()
+		
+		self.assertEqual( result.influenceNames(), normalized.influenceNames() )
+		self.assertEqual( result.influencePose(), normalized.influencePose() )
+		self.assertEqual( result.pointIndexOffsets(), normalized.pointIndexOffsets() )
+		self.assertEqual( result.pointInfluenceCounts(), normalized.pointInfluenceCounts() )
+		self.assertEqual( result.pointInfluenceIndices(), normalized.pointInfluenceIndices() )
+		self.assertEqual( result.pointInfluenceWeights(), normalized.pointInfluenceWeights() )
+		self.assertEqual( result, normalized )
+				
+		# make sure locked weights did not change
+		dop = DecompressSmoothSkinningDataOp()
+		dop.parameters()['input'].setValue( result )
+		decompressedResult = dop.operate()
+		dop.parameters()['input'].setValue( ssd )
+		decompressedOrig = dop.operate()
+		resultIndices = decompressedResult.pointInfluenceIndices()
+		resultWeights = decompressedResult.pointInfluenceWeights()
+		origWeights = decompressedOrig.pointInfluenceWeights()
+		for i in range( 0, resultWeights.size() ) :
+			if resultIndices[i] == 0 :
+				self.assertEqual( resultWeights[i], origWeights[i] )
 
 if __name__ == "__main__":
 	unittest.main()
