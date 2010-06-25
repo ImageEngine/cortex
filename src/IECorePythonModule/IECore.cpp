@@ -2,6 +2,9 @@
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
+//  its affiliates and/or its licensors.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -275,6 +278,7 @@
 #include "IECorePython/RemoveSmoothSkinningInfluencesOpBinding.h"
 #include "IECorePython/MixSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/SmoothSmoothSkinningWeightsOpBinding.h"
+#include "IECorePython/PointSmoothSkinningOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -553,7 +557,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindRemoveSmoothSkinningInfluencesOp();
 	bindMixSmoothSkinningWeightsOp();
 	bindSmoothSmoothSkinningWeightsOp();
-	
+	bindPointSmoothSkinningOp();
+
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
