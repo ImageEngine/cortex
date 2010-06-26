@@ -245,7 +245,7 @@ class IDXReader( IECore.Reader ) :
 		
 			lines = data.split( "\n" )
 			for l in lines:	
-				match = re.search( '([\w.]+)[\s]+"{0,1}?([:\\/\-,.\w.]+)"{0,1}?', l.strip( " \t\r;\"\'" ), re.MULTILINE | re.DOTALL )
+				match = re.search( '([\w.]+)[\s]+"{0,1}?([:\\/\-,.\w. ]+)"{0,1}?', l.strip( " \t\r;\"\'" ), re.MULTILINE | re.DOTALL )
 				if match:
 					fields[match.group(1)] = match.group(2)
 
