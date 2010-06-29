@@ -339,6 +339,19 @@ class SXRendererTest( unittest.TestCase ) :
 			del s["P"] # test data on disk was created before we supported P as an output
 			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/grid.cob" ).read() )
 
+	def testPlaneShade( self ) :
+		
+		r = IECoreRI.SXRenderer()
+		
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxStTest.sdl test/IECoreRI/shaders/sxStTest.sl" ), 0 )
+		r.shader( "surface", "test/IECoreRI/shaders/sxStTest.sdl", {} )
+		
+		data = r.shadePlane( IECore.V2i( 64, 64 ) )
+		self.assertEqual( data, IECore.Reader.create( "test/IECoreRI/data/sxOutput/shadePlaneCompoundData.cob" ).read() )
+		
+		image = r.shadePlaneToImage( IECore.V2i( 64, 64 ) )
+		self.assertEqual( image, IECore.Reader.create( "test/IECoreRI/data/sxOutput/shadePlaneImage.exr" ).read() )
+	
 	def testWrongType( self ) :
 	
 		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
@@ -458,6 +471,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxDisplacementTest.sdl",
 			"test/IECoreRI/shaders/sxIlluminanceTest.sdl",
 			"test/IECoreRI/shaders/sxLightTest.sdl",
+			"test/IECoreRI/shaders/sxStTest.sdl",
 		]
 		
 		for f in files :
