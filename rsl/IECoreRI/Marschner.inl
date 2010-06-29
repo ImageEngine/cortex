@@ -156,7 +156,7 @@ color ieMarschnerA( varying color absorption; varying vector light; uniform floa
 	float cosTheta = cos(thetaT);
 	float l;
 	// equation 20 in [2]
-	l = 2*cos(gammaT)/cosTheta;
+	l = 2*cos(gammaT)/max(1e-5,cosTheta);
 	color segmentAbsorption = color( exp( -absorption[0]*l*p ), exp( -absorption[1]*l*p ), exp( -absorption[2]*l*p ) );
 
 	float fresnel;
