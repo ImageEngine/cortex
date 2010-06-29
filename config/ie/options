@@ -243,8 +243,7 @@ else :
 	mayaMajorVersion = "0" # it needs a value just for the install setup below to execute			
 
 # find nuke, unless we're on intel macs where the library doesn't link right now
-if targetApp=="nuke" :
-	WITH_GL = 0
+if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and targetApp=="nuke" :
 	try :
 		nukeVersion = targetAppVersion
 		nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
@@ -255,16 +254,8 @@ if targetApp=="nuke" :
 			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 			boostVersion = "1.38.0"
 			boostVersionSuffix = "-mt-1_38"
-			if platform.startswith("osx"):
-				BOOST_INCLUDE_PATH = "/software/tools/include/boost/" + boostVersion
-				BOOST_LIB_SUFFIX = "-xgcc"  + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
-			else:
-				BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-				BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
-			print "Suffix: " + BOOST_LIB_SUFFIX
-#			if platform.startswith("osx"):
-#				os.environ['BOOST_LIB_PATH'] = "/software/tools/lib/" + platform + "/applegcc/4.0.1"
-#				print os.environ['BOOST_LIB_PATH']
+			BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
+			BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
 	except :
 		pass
 
