@@ -112,7 +112,9 @@ class SXRendererImplementation : public IECore::Renderer
 		
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points ) const;
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const;
-
+		IECore::CompoundDataPtr shadePlane( const Imath::V2i &resolution ) const;
+		IECore::ImagePrimitivePtr shadePlaneToImage( const Imath::V2i &resolution ) const;
+	
 	private :
 	
 		SxShader createShader( const char *name, const char *handle, const IECore::CompoundDataMap &parameters ) const;

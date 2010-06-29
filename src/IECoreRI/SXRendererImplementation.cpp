@@ -611,3 +611,103 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore:
 	SXExecutor executor( &shaders, &m_stateStack.top().coshaders, &lights );
 	return executor.execute( points, gridSize );
 }
+
+IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shadePlane( const V2i &resolution ) const
+{
+	IECore::CompoundDataPtr points = new IECore::CompoundData();
+	
+	V3fVectorDataPtr pData = new IECore::V3fVectorData();
+	V3fVectorDataPtr nData = new IECore::V3fVectorData();
+	FloatVectorDataPtr sData = new IECore::FloatVectorData();
+	FloatVectorDataPtr tData = new IECore::FloatVectorData();
+
+	std::vector<V3f> &p = pData->writable();
+	std::vector<V3f> &n = nData->writable();
+	std::vector<float> &s = sData->writable();
+	std::vector<float> &t = tData->writable();
+	
+	unsigned numPoints = resolution[0] * resolution[1];
+	
+	p.resize( numPoints );
+	n.resize( numPoints );
+	s.resize( numPoints );
+	t.resize( numPoints );
+	
+	unsigned xResMinus1 = resolution[0] - 1;
+	unsigned yResMinus1 = resolution[1] - 1;
+	
+	unsigned i = 0;
+	for( int y = 0; y < resolution[1]; y++ )
+	{
+		for( int x = 0; x < resolution[0]; x++ )
+		{
+			p[i] = V3f( float(x) / xResMinus1 , float(y) / yResMinus1, 0.0 );	
+			s[i] = p[i][0];
+			t[i] = p[i][1];
+			n[i] = V3f( 0.0f, 0.0f, 1.0f );
+			i++;
+		}
+	}	
+	
+	points->writable()[ "P" ] = pData;
+	points->writable()[ "n" ] = nData;
+	points->writable()[ "s" ] = sData;
+	points->writable()[ "t" ] = tData;
+	
+	return shade( points, resolution );
+}
+
+IECore::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToImage( const V2i &resolution ) const
+{
+	IECore::CompoundDataPtr result = shadePlane( resolution );
+	
+	Box2i window =  Box2i( V2i( 0, 0 ), V2i( resolution[0] - 1, resolution[1] - 1 ) );
+	
+	IECore::ImagePrimitivePtr img = new IECore::ImagePrimitive( window, window );
+	IECore::FloatVectorDataPtr rData = img->createChannel<float>( "R" );
+	IECore::FloatVectorDataPtr gData = img->createChannel<float>( "G" );
+	IECore::FloatVectorDataPtr bData = img->createChannel<float>( "B" );
+	IECore::FloatVectorDataPtr aData = img->createChannel<float>( "A" );
+
+	std::vector<float> &r = rData->writable();
+	std::vector<float> &g = gData->writable();
+	std::vector<float> &b = bData->writable();
+	std::vector<float> &a = aData->writable();
+
+	unsigned numPoints = resolution[0] * resolution[1];
+
+	r.resize( numPoints );
+	g.resize( numPoints );
+	b.resize( numPoints );
+	a.resize( numPoints );
+	
+	IECore::Color3fVectorDataPtr cData = result->member<Color3fVectorData>( "Ci", false );
+	IECore::Color3fVectorDataPtr oData = result->member<Color3fVectorData>( "Oi", false );
+	if( !cData || !oData )
+	{
+		throw( Exception( "The renderer didn't return Ci/Oi when shading the points." ) );
+	}
+	
+	const std::vector<Color3f> &c = cData->readable();
+	const std::vector<Color3f> &o = oData->readable();
+
+	if( c.size() != numPoints )
+	{
+		throw( Exception( boost::str( 
+			boost::format( "The renderer didn't return the right number of shaded points. (%d but should be %d)." )
+		 	% c.size() % numPoints
+		) ) );
+	}
+
+	for( std::vector<V3f>::size_type i=0; i<c.size(); i++ )
+	{
+		r[i] = c[i][0];
+		g[i] = c[i][1];
+		b[i] = c[i][2];
+		a[i] = ( o[i][0] + o[i][1] + o[i][2] ) / 3.0f;
+	}
+	
+	return img;
+}
+
+

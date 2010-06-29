@@ -50,6 +50,8 @@ void bindSXRenderer()
 		.def( init<>() )
 		.def( "shade", (IECore::CompoundDataPtr (SXRenderer::*)( const IECore::CompoundData *points ) const )&SXRenderer::shade )
 		.def( "shade", (IECore::CompoundDataPtr (SXRenderer::*)( const IECore::CompoundData *points, const Imath::V2i & ) const )&SXRenderer::shade )
+		.def( "shadePlane", &SXRenderer::shadePlane )
+		.def( "shadePlaneToImage", &SXRenderer::shadePlaneToImage )
 	;
 }
 

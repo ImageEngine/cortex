@@ -247,3 +247,13 @@ IECore::CompoundDataPtr SXRenderer::shade( const IECore::CompoundData *points, c
 {
 	return m_implementation->shade( points, gridSize );
 }
+
+IECore::CompoundDataPtr SXRenderer::shadePlane( const V2i &resolution ) const
+{
+	return m_implementation->shadePlane( resolution );
+}
+
+IECore::ImagePrimitivePtr SXRenderer::shadePlaneToImage( const V2i &resolution ) const
+{
+	return m_implementation->shadePlaneToImage( resolution );
+}

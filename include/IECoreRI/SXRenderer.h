@@ -39,6 +39,8 @@
 
 #include "IECore/Renderer.h"
 
+#include "IECore/ImagePrimitive.h"
+
 namespace IECoreRI
 {
 
@@ -119,6 +121,11 @@ class SXRenderer : public IECore::Renderer
 		//@{
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points ) const;
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const;
+		/// This method shades a plane, of the specified resolution and returns the shaded points as a
+		/// CompoundData object pointer filled as above.
+		IECore::CompoundDataPtr shadePlane( const Imath::V2i &resolution ) const;
+		/// This method shades a plane, of the specified resolution and returns an RGBA float ImagePrimitive.
+		IECore::ImagePrimitivePtr shadePlaneToImage( const Imath::V2i &resolution ) const;
 		//@}
 		
 	private :
