@@ -89,6 +89,28 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 			self.failUnless( isinstance( scene, IECoreGL.Scene ) )
 			self.failIf( prevScene is not None and scene.isSame( prevScene ) )
 			prevScene = scene
-			
+		
+	def testCreationName( self ) :
+	
+		fnPH = IECoreMaya.FnProceduralHolder.create( "bob", "read", 1 )
+		self.assertEqual( fnPH.fullPathName(), u"|bob|bobShape" )
+
+		fnPH = IECoreMaya.FnProceduralHolder.create( "bob1", "read", 1 )
+		self.assertEqual( fnPH.fullPathName(), u"|bob1|bobShape1" )
+
+		fnPH = IECoreMaya.FnProceduralHolder.create( "bob", "read", 1 )
+		self.assertEqual( fnPH.fullPathName(), u"|bob2|bobShape2" )
+	
+	def testCreationWithoutVersion( self ) :
+	
+		fnPH = IECoreMaya.FnProceduralHolder.create( "bob", "read" )
+		self.assertEqual( fnPH.getParameterised()[2], 1 )
+		
+		fnPH = IECoreMaya.FnProceduralHolder.create( "bob", "read", None )
+		self.assertEqual( fnPH.getParameterised()[2], 1 )
+		
+		fnPH = IECoreMaya.FnProceduralHolder.create( "bob", "read", -1 )
+		self.assertEqual( fnPH.getParameterised()[2], 1 )
+							
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

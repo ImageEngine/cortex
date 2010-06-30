@@ -62,6 +62,8 @@
 #include "IECoreMaya/PythonCmd.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/ObjectData.h"
+#include "IECoreMaya/ClassParameterHandler.h"
+#include "IECoreMaya/ClassVectorParameterHandler.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
@@ -326,7 +328,7 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *c
 				// this avoids the situation where the loading fails due to some
 				// correctable error, but we've just deleted all the attributes with
 				// all the settings and connections important to the user.
-				if( createAndRemoveAttributes() )
+				if( createAndRemoveAttributes( true ) )
 				{
 					m_failedToLoad = false;
 				}
@@ -634,7 +636,7 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::loadClass( const MString &classN
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::createAndRemoveAttributes()
+MStatus ParameterisedHolder<B>::createAndRemoveAttributes( bool callRestore )
 {
 	m_attributeNamesToParameters.clear();
 	m_parametersToAttributeNames.clear();
@@ -643,7 +645,7 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes()
 	if( m_parameterised )
 	{
 		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
-		s = createAttributesWalk( parameterisedInterface->parameters(), "parm" );
+		s = createAttributesWalk( parameterisedInterface->parameters(), "parm", callRestore );
 		if( !s )
 		{
 			msg( Msg::Error, "ParameterisedHolder::createAndRemoveAttributes", boost::format( "Unable to create attributes to represent class." ) );
@@ -662,7 +664,7 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes()
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName )
+MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName, bool callRestore )
 {
 
 	const CompoundParameter::ParameterVector &children = parameter->orderedParameters();
@@ -675,7 +677,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 		m_parametersToAttributeNames[children[i]] = mAttributeName;
 		m_dirtyParameters.insert( children[i] );
 
-		MStatus s = createOrUpdateAttribute( children[i], mAttributeName );
+		MStatus s = createOrUpdateAttribute( children[i], mAttributeName, callRestore );
 		if( !s )
 		{
 			return s;
@@ -685,7 +687,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 		CompoundParameterPtr compoundChild = runTimeCast<CompoundParameter>( children[i] );
 		if( compoundChild )
 		{
-			MStatus s = createAttributesWalk( compoundChild, rootName + "_" + compoundChild->name() );
+			MStatus s = createAttributesWalk( compoundChild, rootName + "_" + compoundChild->name(), callRestore );
 			if( !s )
 			{
 				return s;
@@ -696,9 +698,14 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 	return MS::kSuccess;
 }
 
-
 template<typename B>
 MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName )
+{
+	return createOrUpdateAttribute( parameter, attributeName, false );
+}
+
+template<typename B>
+MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName, bool callRestore )
 {
 	MObject node =  B::thisMObject();
 	MFnDependencyNode fnDN( node );
@@ -709,13 +716,32 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 	MPlug plug = fnDN.findPlug( attributeName, false /* no networked plugs please */ );
 	if( !plug.isNull() )
 	{
-		MStatus s = IECoreMaya::ParameterHandler::update( parameter, plug );
+		MStatus s = MS::kSuccess;
+		if( callRestore )
+		{
+			/// \todo Make restore() a proper part of ParameterHandler so we don't have to do
+			/// this manual downcasting. Do this for major version 6 to avoid breaking
+			/// compatibility now.
+			if( parameter->isInstanceOf( "ClassParameter" ) )
+			{
+				s = ClassParameterHandler::doRestore( plug, parameter );
+			}
+			else if( parameter->isInstanceOf( "ClassVectorParameter" ) )
+			{
+				s = ClassVectorParameterHandler::doRestore( plug, parameter );
+			}
+		}
+	
 		if( s )
 		{
-			return MS::kSuccess;
+			s = IECoreMaya::ParameterHandler::update( parameter, plug );
+			if( s )
+			{
+				return MS::kSuccess;
+			}
 		}
 		
-		// failed to update (parameter type probably changed).
+		// failed to restore and/or update (parameter type probably changed).
 		// remove the current attribute and fall through to the create
 		// code
 

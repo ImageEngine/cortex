@@ -37,6 +37,7 @@ import maya.cmds
 
 import _IECoreMaya
 from FnParameterisedHolder import FnParameterisedHolder
+from FnDagNode import FnDagNode
 
 ## A function set for operating on the IECoreMaya::ProceduralHolder type.
 class FnProceduralHolder( FnParameterisedHolder ) :
@@ -47,19 +48,23 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 
 		FnParameterisedHolder.__init__( self, object )
 
-	## Creates a new node with the specified name and holding the specified procedural
-	# class type. Returns a function set instance operating on this new node.
+	## Creates a new node under a transform of the specified name and holding
+	# the specified procedural class type. Returns a function set instance operating on this new node.
 	@staticmethod
-	def create( nodeName, className, classVersion=-1 ) :
+	def create( parentName, className, classVersion=-1 ) :
 
-		holder = maya.mel.eval( "ieProceduralHolderCreate( \"%s\", \"%s\", %d )" % ( nodeName, className, classVersion ) )
-		return FnProceduralHolder( holder )
+		fnDN = FnDagNode.createShapeWithParent( parentName, "ieProceduralHolder" )
+		fnPH = FnProceduralHolder( fnDN.object() )
+		maya.cmds.sets( fnPH.fullPathName(), add="initialShadingGroup" )
+		fnPH.setProcedural( className, classVersion, undoable=False ) # undo for the node creation is all we need
+		
+		return fnPH
 
 	## Convenience method to call setParameterised with the environment variable
 	# for the searchpaths set to "IECORE_PROCEDURAL_PATHS".
-	def setProcedural( self, className, classVersion ) :
+	def setProcedural( self, className, classVersion=None, undoable=True ) :
 
-		self.setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" )
+		self.setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS", undoable )
 
 	## Convenience method to return the ParameterisedProcedural class held inside this
 	# node.

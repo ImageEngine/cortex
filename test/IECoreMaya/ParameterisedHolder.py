@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import os.path
 
 import maya.cmds as cmds
@@ -42,11 +44,14 @@ import IECoreMaya
 
 class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
-	def __checkAllParameterPlugs( self, fnOH, parameter ) :
+	def __checkAllParameterPlugs( self, fnOH, parameter=None ) :
 	
-		plug = fnOH.parameterPlug( parameter )
-		self.failIf( plug.isNull() )
-				
+		if parameter is not None :
+			plug = fnOH.parameterPlug( parameter )
+			self.failIf( plug.isNull() )
+		else :
+			parameter = fnOH.getParameterised()[0].parameters()
+		
 		if parameter.isInstanceOf( IECore.CompoundParameter.staticTypeId() ) :
 			for p in parameter.values() :
 				self.__checkAllParameterPlugs( fnOH, p )
@@ -502,7 +507,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = TestOp()
 		fnOH.setParameterised( op )
 		
-		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
 		
 		aPlugPath = fnOH.parameterPlugPath( op["cp"]["a"] )
 		bPlugPath = fnOH.parameterPlugPath( op["cp"]["b"] )
@@ -510,7 +516,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
 		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
 		
-		fnOH.setClassParameterClass( op["cp"], "stringParsing", 1, "IECORE_OP_PATHS" )
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "stringParsing", 1, "IECORE_OP_PATHS" )
 		
 		self.failIf( cmds.objExists( aPlugPath ) )
 		self.failIf( cmds.objExists( bPlugPath ) )
@@ -526,7 +533,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
 
 		op = fnOH.getOp()
-		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
 		
 		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
 		self.assertEqual( heldClass.typeName(), "multiply" )
@@ -604,7 +612,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		# set the class and verify it worked
 		####################################################################
 		
-		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
 				
 		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
 		self.assertEqual( heldClass.typeName(), "multiply" )
@@ -650,9 +659,10 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 	
 		# set the class and check it worked
 		####################################################################
-		
-		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
 				
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
+						
 		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
 		self.assertEqual( heldClass.typeName(), "multiply" )
 		self.assertEqual( className, "maths/multiply" )
@@ -681,8 +691,9 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		# change the class to something else and check it worked
 		####################################################################
-		
-		fnOH.setClassParameterClass( op["cp"], "stringParsing", 1, "IECORE_OP_PATHS" )
+				
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "stringParsing", 1, "IECORE_OP_PATHS" )
 				
 		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
 		self.assertEqual( heldClass.typeName(), "stringParsing" )
@@ -703,7 +714,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		# undo and check the previous class reappears, along with the
 		# previous attribute values
 		#####################################################################
-					
+								
 		cmds.undo()
 
 		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
@@ -751,7 +762,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
 		op = fnOH.getOp()
 				
-		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
 				
 		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
 		self.assertEqual( heldClass.typeName(), "multiply" )
@@ -827,16 +839,16 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( len( c.getClasses() ), 0 )
 				
-		fnOH.setClassVectorParameterClasses(
+		with fnOH.classParameterModificationContext() :
 		
-			c,
+			c.setClasses(
 			
-			[
-				( "mult", "maths/multiply", 1 ),
-				( "coIO", "compoundObjectInOut", 1 ),
-			]
+				[
+					( "mult", "maths/multiply", 1 ),
+					( "coIO", "compoundObjectInOut", 1 ),
+				]
 			
-		)
+			)
 		
 		cl = c.getClasses()
 		self.failUnless( isinstance( cl, list ) )
@@ -877,16 +889,16 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( len( c.getClasses() ), 0 )
 				
-		fnOH.setClassVectorParameterClasses(
+		with fnOH.classParameterModificationContext() :
 		
-			c,
+			c.setClasses(
 			
-			[
-				( "mult", "maths/multiply", 1 ),
-				( "coIO", "compoundObjectInOut", 1 ),
-			]
-			
-		)
+				[
+					( "mult", "maths/multiply", 1 ),
+					( "coIO", "compoundObjectInOut", 1 ),
+				]
+
+			)
 		
 		cl = c.getClasses()
 		self.failUnless( isinstance( cl, list ) )
@@ -944,16 +956,16 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 				
 		self.assert_( cmds.undoInfo( query=True, state=True ) )
 
-		fnOH.setClassVectorParameterClasses(
+		with fnOH.classParameterModificationContext() :
 		
-			c,
+			c.setClasses(
 			
-			[
-				( "mult", "maths/multiply", 1 ),
-				( "str", "stringParsing", 1 ),
-			]
-			
-		)
+				[
+					( "mult", "maths/multiply", 1 ),
+					( "str", "stringParsing", 1 ),
+				]
+
+			)
 		
 		cl = c.getClasses()
 		self.failUnless( isinstance( cl, list ) )
@@ -1001,15 +1013,15 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( len( c.getClasses() ), 0 )
 				
-		fnOH.setClassVectorParameterClasses(
+		with fnOH.classParameterModificationContext() :
 		
-			c,
+			c.setClasses(
 			
-			[
-				( "mult", "maths/multiply", 1 ),
-			]
-			
-		)
+				[
+					( "mult", "maths/multiply", 1 ),
+				]
+
+			)
 		
 		cl = c.getClasses( True )
 		self.failUnless( isinstance( cl, list ) )
@@ -1034,16 +1046,16 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		# and check that it worked
 		#####################################################################
 
-		fnOH.setClassVectorParameterClasses(
-		
-			c,
+		with fnOH.classParameterModificationContext() :
 			
-			[
-				( "str", "stringParsing", 1 ),
-				( "spl", "splineInput", 1 ),
-			]
+			c.setClasses(
 			
-		)
+				[
+					( "str", "stringParsing", 1 ),
+					( "spl", "splineInput", 1 ),
+				]
+
+			)
 		
 		cl = c.getClasses( True )
 		self.failUnless( isinstance( cl, list ) )
@@ -1076,6 +1088,261 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
 		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+	
+	def testSetParameterisedUndo( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "stringParsing", 1 )
+		op = fnOH.getOp()
+		
+		self.assertEqual( op.typeName(), "stringParsing" )
+				
+		self.__checkAllParameterPlugs( fnOH )
+
+		self.assert_( cmds.undoInfo( query=True, state=True ) )
+
+		fnOH.setOp( "maths/multiply", 1 )
+		
+		op = fnOH.getOp()
+		self.assertEqual( op.typeName(), "multiply" )
+		self.__checkAllParameterPlugs( fnOH )
+
+		cmds.undo()
+		
+		op = fnOH.getOp()
+		self.assertEqual( op.typeName(), "stringParsing" )
+		self.__checkAllParameterPlugs( fnOH )
+		
+		cmds.redo()
+		
+		op = fnOH.getOp()
+		self.assertEqual( op.typeName(), "multiply" )
+		self.__checkAllParameterPlugs( fnOH )
+	
+	def testCreateOpHolderUndo( self ) :
+	
+		self.assert_( cmds.undoInfo( query=True, state=True ) )
+
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "stringParsing", 1 )
+		
+		self.failUnless( cmds.objExists( "opHolder" ) )
+		
+		cmds.undo()
+		
+		self.failIf( cmds.objExists( "opHolder" ) )
+		
+	def testSetParameterisedCallbacks( self ) :
+	
+		self.__numCallbacks = 0
+		def c( fnPH ) :
+		
+			self.assertEqual( fnPH.fullPathName(), "opHolder" )
+			self.__numCallbacks += 1
+	
+		IECoreMaya.FnParameterisedHolder.addSetParameterisedCallback( c )
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "stringParsing", 1 )
+		self.assertEqual( self.__numCallbacks, 1 )
+		
+		fnOH.setOp( "maths/multiply", 1 )
+		self.assertEqual( self.__numCallbacks, 2 )
+
+		cmds.undo()
+		self.assertEqual( self.__numCallbacks, 3 )
+		
+		cmds.redo()
+		self.assertEqual( self.__numCallbacks, 4 )
+
+		IECoreMaya.FnParameterisedHolder.removeSetParameterisedCallback( c )
+		
+	def testEditClassParameters( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "classParameterTest", 1 )
+		
+		op = fnOH.getOp()
+		
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "classParameterTest", 1 )
+			op["cp"]["cp"].setClass( "maths/multiply", 1 )
+								
+		self.__checkAllParameterPlugs( fnOH )
+		
+		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
+		self.failUnless( cmds.objExists( aPlugPath ) )
+		
+		cmds.undo()
+		
+		self.__checkAllParameterPlugs( fnOH )
+		self.assertEqual( op["cp"].getClass(), None )		
+		self.failIf( cmds.objExists( aPlugPath ) )
+				
+		cmds.redo()
+		
+		self.__checkAllParameterPlugs( fnOH )
+				
+		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
+		self.failUnless( cmds.objExists( aPlugPath ) )
+
+	def testChangeClassAndRevertToClassWithClassParameters( self ) :
+	
+		## create a holder and put an op using ClassParameter in there
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "classParameterTest", 1 )
+	
+		op = fnOH.getOp()
+		
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "classParameterTest", 1 )
+			op["cp"]["cp"].setClass( "maths/multiply", 1 )
+						
+		self.__checkAllParameterPlugs( fnOH )
+		
+		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
+		self.failUnless( cmds.objExists( aPlugPath ) )
+
+		## change the values being held
+		
+		cmds.setAttr( aPlugPath, 123 )
+
+		## change the op to be something simple
+		
+		fnOH.setOp( "maths/multiply", 1 )
+		
+		self.failIf( cmds.objExists( aPlugPath ) )
+		
+		## undo, and check we get all the original held classes and values back
+		
+		cmds.undo()
+		
+		op = fnOH.getOp()
+		
+		self.assertEqual( op["cp"]["cp"].getClass( True )[1:3], ( "maths/multiply", 1 ) )
+		
+		self.assertEqual( op["cp"]["cp"]["a"].getNumericValue(), 123 )
+		
+		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
+		self.assertEqual( cmds.getAttr( aPlugPath ), 123 )
+	
+	def testUpgradeClassWithClassVectorParameter( self ) :
+	
+		# create a holder with a ClassVectorParameter with some classes
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "classVectorParameterTest", 1 )
+		
+		op = fnOH.getOp()
+		
+		with fnOH.classParameterModificationContext() :
+		
+			op["cv"].setClasses( [
+				( "m", "maths/multiply", 1 ),
+				( "n", "maths/multiply", 1 ),
+			] )
+		
+		c = op["cv"].getClasses( True )
+		self.assertEqual( len( c ), 2 )
+		self.assertEqual( c[0][1:], ( "m", "maths/multiply", 1 ) )
+		self.assertEqual( c[1][1:], ( "n", "maths/multiply", 1 ) )
+		
+		aPlugPath = fnOH.parameterPlugPath( op["cv"]["m"]["a"] )
+				
+		# upgrade the parameterised class
+		
+		fnOH.setOp( "classVectorParameterTest", 2 )
+		
+		self.assertEqual( fnOH.getParameterised()[1:-1], ( "classVectorParameterTest", 2 ) )
+
+		# and check the classes are still intact
+		
+		op = fnOH.getOp()
+		
+		c = op["cv"].getClasses( True )
+		self.assertEqual( len( c ), 2 )
+		self.assertEqual( c[0][1:], ( "m", "maths/multiply", 1 ) )
+		self.assertEqual( c[1][1:], ( "n", "maths/multiply", 1 ) )
+		
+		# undo the upgrade
+		
+		cmds.undo()
+		
+		self.assertEqual( fnOH.getParameterised()[1:-1], ( "classVectorParameterTest", 1 ) )
+		
+		# and check the classes are still intact again
+		
+		op = fnOH.getOp()
+		
+		c = op["cv"].getClasses( True )
+		self.assertEqual( len( c ), 2 )
+		self.assertEqual( c[0][1:], ( "m", "maths/multiply", 1 ) )
+		self.assertEqual( c[1][1:], ( "n", "maths/multiply", 1 ) )
+	
+	def testClassParameterCallbacks( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "classParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		self.__numCallbacks = 0
+		def c( fnPH, parameter ) :
+		
+			self.assertEqual( fnPH.fullPathName(), "opHolder" )
+			self.assertEqual( parameter.name, "cp" )
+			self.__numCallbacks += 1
+	
+		IECoreMaya.FnParameterisedHolder.addSetClassParameterClassCallback( c )
+		
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1 )
+		self.assertEqual( self.__numCallbacks, 1 )
+		
+		cmds.undo()
+		self.assertEqual( self.__numCallbacks, 2 )
+		
+		cmds.redo()
+		self.assertEqual( self.__numCallbacks, 3 )
+		
+		# setting the class to the same thing it already is should have
+		# no effect.
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1 )
+		self.assertEqual( self.__numCallbacks, 3 )
+		
+		IECoreMaya.FnParameterisedHolder.removeSetClassParameterClassCallback( c )
+		
+	def testClassVectorParameterCallbacks( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "classVectorParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		self.__numCallbacks = 0
+		def c( fnPH, parameter ) :
+		
+			self.assertEqual( fnPH.fullPathName(), "opHolder" )
+			self.assertEqual( parameter.name, "cv" )
+			self.__numCallbacks += 1
+	
+		IECoreMaya.FnParameterisedHolder.addSetClassVectorParameterClassesCallback( c )
+		
+		with fnOH.classParameterModificationContext() :
+			op["cv"].setClasses( [
+				( "m", "maths/multiply", 1 ),
+				( "n", "maths/multiply", 1 ),
+			] )
+		self.assertEqual( self.__numCallbacks, 1 )
+		
+		cmds.undo()
+		self.assertEqual( self.__numCallbacks, 2 )
+		
+		cmds.redo()
+		self.assertEqual( self.__numCallbacks, 3 )
+
+		# setting the class to the same thing it already is should have
+		# no effect.
+		with fnOH.classParameterModificationContext() :
+			op["cv"].setClasses( [
+				( "m", "maths/multiply", 1 ),
+				( "n", "maths/multiply", 1 ),
+			] )
+		self.assertEqual( self.__numCallbacks, 3 )
+				
+		IECoreMaya.FnParameterisedHolder.removeSetClassVectorParameterClassesCallback( c )	
 		
 	def tearDown( self ) :
 

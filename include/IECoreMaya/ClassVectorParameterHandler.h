@@ -47,12 +47,22 @@ class ClassVectorParameterHandler : public ParameterHandler
 
 	public :
 	
-		/// This is the only way to set the classes held by a ClassVectorParameter and have the maya state
-		/// updated correctly. Typically this shouldn't be called directly, instead the
-		/// ieParameterisedHolderSetClassParameter command should be used, as this allows the operation
-		/// to be undone as well.
-		static MStatus setClasses( IECore::ParameterPtr parameter, MPlug &plug,
-			const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions );
+		
+		/// Convenience function for setting the class held by parameter. This makes no changes to the maya representation
+		/// of the parameter whatsoever.
+		static MStatus setClasses( IECore::ParameterPtr parameter, const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions );
+		/// Convenience function for getting the classes held by parameter. This has nothing to do with the maya
+		/// representation of the classes whatsoever - see below for that.
+		static MStatus getClasses( IECore::ConstParameterPtr parameter, MStringArray &parameterNames, MStringArray &classNames, MIntArray &classVersions );
+		/// Can be used to query the details of the classes currently being held by the parameter represented
+		/// by the specified plug. Note that this returns the classes currently being represented in maya,
+		/// which may not be the same as the classes on the parameter if the two have not been synchronised.
+		/// Again, this function typically shouldn't be called directly, as a combination of direct access
+		/// to parameters and IECoreMaya.FnParameterisedHolder should be enough to achieve most things.
+		static void currentClasses( const MPlug &plug, MStringArray &parameterNames, MStringArray &classNames, MIntArray &classVersions );
+
+		/// \todo See ClassParameterHandler.
+		static MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter );
 	
 	protected:
 
@@ -62,8 +72,9 @@ class ClassVectorParameterHandler : public ParameterHandler
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 		
 	private :
-	
-		static MStatus setClasses( IECore::ParameterPtr parameter, const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions );
+		
+		static MStatus storeClasses( IECore::ConstParameterPtr parameter, MPlug &plug );
+
 				
 };
 

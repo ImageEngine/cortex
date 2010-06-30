@@ -32,8 +32,12 @@
 #
 ##########################################################################
 
-import IECore
+import re
+
 import maya.OpenMaya
+import maya.cmds
+
+import IECore
 import StringUtil
 
 ## This class extends Maya's MFnDagNode to add assorted helper functions.
@@ -52,6 +56,27 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 			obj = obj.object()		
 
 		maya.OpenMaya.MFnDagNode.__init__( self, obj )
+
+	## Creates a shape node of the requested type under a transform with the
+	# requested name. If necessary a numeric suffix will be appended to the
+	# parent name to keep it unique. Returns a function set attached to the
+	# shape.
+	@staticmethod
+	def createShapeWithParent( parentName, shapeNodeType ) :
+	
+		parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True )
+		parentShort = parentNode.rpartition( "|" )[-1]
+		
+		numbersMatch = re.search( "[0-9]+$", parentShort )
+		if numbersMatch is not None :
+			numbers = numbersMatch.group()
+			shapeName = parentShort[:-len(numbers)] + "Shape" + numbers
+		else :
+			shapeName = parentShort + "Shape"
+			
+		shapeNode = maya.cmds.createNode( shapeNodeType, name=shapeName, parent=parentNode, skipSelect=True )
+		
+		return FnDagNode( shapeNode )	
 
 	## Determines whether the DAG node is actually hidden in Maya.
 	# This includes the effect of any parents visibility.

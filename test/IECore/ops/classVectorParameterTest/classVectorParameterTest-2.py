@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,38 +32,32 @@
 #
 ##########################################################################
 
-from FnParameterisedHolder import FnParameterisedHolder
+import IECore
 
-import maya.cmds
+class classVectorParameterTest( IECore.Op ) :
 
-class FnOpHolder( FnParameterisedHolder ) :
+	def __init__( self ) :
 
-	def __init__( self, objectOrObjectName ) :
+		IECore.Op.__init__( self,
+			".",
+			IECore.IntParameter(
+				name = "result",
+				description = "",
+				defaultValue = 0,
+			)
+		)
 
-		FnParameterisedHolder.__init__( self, objectOrObjectName )
+		self.parameters().addParameter(
 
-	## Creates a new node holding a new instance of the op of the specified
-	# type and version. Returns an FnOpHolder instance attached to this node.
-	@staticmethod
-	def create( nodeName, opType, opVersion ) :
+			IECore.ClassVectorParameter(
+				name = "cv",
+				description = "",
+				searchPathEnvVar = "IECORE_OP_PATHS",
+			)
+		)
 
-		holder = maya.cmds.createNode( "ieOpHolderNode", name=nodeName, skipSelect=True )
+	def doOperation( self, operands ) :
 
-		fnOH = FnOpHolder( holder )
-		# not asking for undo, as this way we end up with a single undo action which will
-		# delete the node. otherwise we get two undo actions, one to revert the setParameterised()
-		# one to revert the createNode().
-		fnOH.setOp( opType, opVersion, undoable=False )
+		return IECore.IntData( 1 )
 
-		return fnOH
-
-	## Convenience function which calls setParameterised( opType, opVersion, "IECORE_OP_PATHS" )
-	def setOp( self, opType, opVersion=None, undoable=True ) :
-
-		self.setParameterised( opType, opVersion, "IECORE_OP_PATHS", undoable )
-
-	## Convenience function which returns getParameterised()[0]
-	def getOp( self ) :
-
-		return self.getParameterised()[0]
-
+IECore.registerRunTimeTyped( classVectorParameterTest )

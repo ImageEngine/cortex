@@ -66,7 +66,7 @@
 #include "IECoreMaya/ImageFile.h"
 #include "IECoreMaya/ImagePlaneHolder.h"
 #include "IECoreMaya/ParameterisedHolderSetValueCmd.h"
-#include "IECoreMaya/ParameterisedHolderSetClassParameterCmd.h"
+#include "IECoreMaya/ParameterisedHolderClassModificationCmd.h"
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/CurveCombiner.h"
 #include "IECoreMaya/Box3Manipulator.h"
@@ -185,7 +185,7 @@ MStatus initialize(MFnPlugin &plugin)
 
 		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
 
-		s = plugin.registerCommand( "ieParameterisedHolderSetClassParameter", ParameterisedHolderSetClassParameterCmd::creator );
+		s = plugin.registerCommand( "ieParameterisedHolderClassModification", ParameterisedHolderClassModificationCmd::creator );
 			
 		s = plugin.registerContextCommand("ieParameterisedHolderManipContext", &ParameterisedHolderManipContextCommand::creator );
 		
@@ -251,6 +251,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterCommand( "ieSystemExit" );
 		PythonCmd::uninitialize();
 
+		s = plugin.deregisterCommand( "ieParameterisedHolderClassModification" );
 		s = plugin.deregisterCommand( "ieParameterisedHolderSetValue" );
 		s = plugin.deregisterContextCommand("ieParameterisedHolderManipContext");
 

@@ -50,26 +50,6 @@ using namespace boost::python;
 
 static ParameterHandler::Description<ClassVectorParameterHandler> registrar( IECore::ClassVectorParameterTypeId );
 
-MStatus ClassVectorParameterHandler::setClasses( IECore::ParameterPtr parameter, MPlug &plug, const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions )
-{
-	MStatus s = setClasses( parameter, parameterNames, classNames, classVersions );
-	if( !s )
-	{
-		return s;
-	}
-	
-	MFnStringArrayData fnSAD;
-	MObject parameterNamesObject = fnSAD.create( parameterNames );
-	plug.child( 0 ).setValue( parameterNamesObject );
-	MObject classNamesObject = fnSAD.create( classNames );
-	plug.child( 1 ).setValue( classNamesObject );
-	
-	MFnIntArrayData fnIAD;
-	MObject classVersionsObject = fnIAD.create( classVersions );
-	plug.child( 2 ).setValue( classVersionsObject );
-
-	return MStatus::kSuccess;
-}
 
 MStatus ClassVectorParameterHandler::setClasses( IECore::ParameterPtr parameter, const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions )
 {
@@ -100,6 +80,51 @@ MStatus ClassVectorParameterHandler::setClasses( IECore::ParameterPtr parameter,
 		return MS::kFailure;
 	}
 	return MS::kSuccess;
+}
+
+MStatus ClassVectorParameterHandler::getClasses( IECore::ConstParameterPtr parameter, MStringArray &parameterNames, MStringArray &classNames, MIntArray &classVersions )
+{
+	IECorePython::ScopedGILLock gilLock;
+	try
+	{
+		boost::python::object pythonParameter( IECore::constPointerCast<IECore::Parameter>( parameter ) );
+		boost::python::list classesInfo = extract<list>( pythonParameter.attr( "getClasses" )( true ) );
+		
+		int l = boost::python::len( classesInfo );
+		for( int i=0; i<l; i++ )
+		{
+			tuple c = extract<tuple>( classesInfo[i] );
+			parameterNames.append( MString( extract<const char *>( c[1] ) ) );
+			classNames.append( MString( extract<const char *>( c[2] ) ) );
+			classVersions.append( extract<int>( c[3] ) );
+		}
+				
+		return MS::kSuccess;
+	}
+	catch( boost::python::error_already_set )
+	{
+		PyErr_Print();
+	}
+	catch( const std::exception &e )
+	{
+		MGlobal::displayError( MString( "ClassVectorParameterHandler::getClasses : " ) + e.what() );
+	}
+	return MS::kFailure;
+}
+
+void ClassVectorParameterHandler::currentClasses( const MPlug &plug, MStringArray &parameterNames, MStringArray &classNames, MIntArray &classVersions )
+{
+	MObject parameterNamesObject = plug.child( 0 ).asMObject();
+	MFnStringArrayData fnSAD( parameterNamesObject );
+	fnSAD.copyTo( parameterNames );
+	
+	MObject classNamesObject = plug.child( 1 ).asMObject();
+	fnSAD.setObject( classNamesObject );
+	fnSAD.copyTo( classNames );
+	
+	MObject classVersionsObject = plug.child( 2 ).asMObject();
+	MFnIntArrayData fnIAD( classVersionsObject );
+	fnIAD.copyTo( classVersions );
 }
 				
 MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
@@ -178,7 +203,16 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 	MFnIntArrayData fnIAD( classVersionsObject );
 	MIntArray classVersions = fnIAD.array();
 
-	return setClasses( IECore::constPointerCast<IECore::Parameter>( parameter ), parameterNames, classNames, classVersions );
+	return storeClasses( parameter, plug );
+}
+
+MStatus ClassVectorParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPtr parameter )
+{
+	MStringArray parameterNames;
+	MStringArray classNames;
+	MIntArray classVersions;
+	currentClasses( plug, parameterNames, classNames, classVersions );
+	return setClasses( parameter, parameterNames, classNames, classVersions );
 }
 
 MPlug ClassVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
@@ -203,6 +237,35 @@ MPlug ClassVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter
 	
 	MPlug result = finishCreating( parameter, attribute, node );
 	
+	if( storeClasses( parameter, result ) )
+	{
+		return result;
+	}
+	
+	return MPlug(); // failure
+}
+
+MStatus ClassVectorParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+{
+	if( !parameter || !parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
+	{
+		return MS::kFailure;
+	}
+	return MS::kSuccess;
+}
+
+MStatus ClassVectorParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+{
+	if( !parameter || !parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
+	{
+		return MS::kFailure;
+	}
+	
+	return MS::kSuccess;
+}
+
+MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr parameter, MPlug &plug )
+{
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
@@ -228,41 +291,22 @@ MPlug ClassVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter
 		MFnIntArrayData fnIAD;
 	
 		MObject parameterNamesObject = fnSAD.create( parameterNames );
-		result.child( 0 ).setValue( parameterNamesObject );
+		plug.child( 0 ).setValue( parameterNamesObject );
 		
 		MObject classNamesObject = fnSAD.create( classNames );
-		result.child( 1 ).setValue( classNamesObject );
+		plug.child( 1 ).setValue( classNamesObject );
 		
 		MObject classVersionsObject = fnIAD.create( classVersions );
-		result.child( 2 ).setValue( classVersionsObject );
+		plug.child( 2 ).setValue( classVersionsObject );
 	}
 	catch( boost::python::error_already_set )
 	{
 		PyErr_Print();
-		return MPlug();
+		return MS::kFailure;
 	}
 	catch( const std::exception &e )
 	{
 		MGlobal::displayError( MString( "ClassVectorParameterHandler::setClass : " ) + e.what() );
-		return MPlug();
-	}
-	
-	return result;
-}
-
-MStatus ClassVectorParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
-{
-	if( !parameter || !parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
-	{
-		return MS::kFailure;
-	}
-	return MS::kSuccess;
-}
-
-MStatus ClassVectorParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
-{
-	if( !parameter || !parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
-	{
 		return MS::kFailure;
 	}
 	

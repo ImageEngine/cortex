@@ -48,23 +48,8 @@ using namespace boost::python;
 
 static ParameterHandler::Description<ClassParameterHandler> registrar( IECore::ClassParameterTypeId );
 
-MStatus ClassParameterHandler::setClass( IECore::ParameterPtr parameter, MPlug &plug, const MString &className, int classVersion, const MString &searchPathEnvVar )
-{
-	MStatus s = setClass( parameter, className, classVersion, searchPathEnvVar );
-	if( !s )
-	{
-		return s;
-	}
-		
-	plug.child( 0 ).setString( className );
-	plug.child( 1 ).setInt( classVersion );
-	plug.child( 2 ).setString( searchPathEnvVar );
-
-	return MStatus::kSuccess;
-}
-
 MStatus ClassParameterHandler::setClass( IECore::ParameterPtr parameter, const MString &className, int classVersion, const MString &searchPathEnvVar )
-{
+{	
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
@@ -82,6 +67,47 @@ MStatus ClassParameterHandler::setClass( IECore::ParameterPtr parameter, const M
 		return MS::kFailure;
 	}
 	return MS::kSuccess;
+}
+
+MStatus ClassParameterHandler::getClass( IECore::ConstParameterPtr parameter, MString &className, int &classVersion, MString &searchPathEnvVar )
+{
+	IECorePython::ScopedGILLock gilLock;
+	try
+	{
+		boost::python::object pythonParameter( IECore::constPointerCast<IECore::Parameter>( parameter ) );
+		boost::python::tuple classInfo = extract<tuple>( pythonParameter.attr( "getClass" )( true ) );
+		
+		className = extract<const char *>( classInfo[1] );
+		classVersion = extract<int>( classInfo[2] );
+		searchPathEnvVar = extract<const char *>( classInfo[3] );
+		
+		return MS::kSuccess;
+	}
+	catch( boost::python::error_already_set )
+	{
+		PyErr_Print();
+	}
+	catch( const std::exception &e )
+	{
+		MGlobal::displayError( MString( "ClassParameterHandler::getClass : " ) + e.what() );
+	}
+	return MS::kFailure;
+}
+
+void ClassParameterHandler::currentClass( const MPlug &plug, MString &className, int &classVersion, MString &searchPathEnvVar )
+{
+	className = plug.child( 0 ).asString();
+	classVersion = plug.child( 1 ).asInt();
+	searchPathEnvVar = plug.child( 2 ).asString();
+}
+
+MStatus ClassParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPtr parameter )
+{
+	MString className;
+	int classVersion;
+	MString searchPathEnvVar;
+	currentClass( plug, className, classVersion, searchPathEnvVar );
+	return setClass( parameter, className, classVersion, searchPathEnvVar );
 }
 				
 MStatus ClassParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
@@ -148,11 +174,7 @@ MStatus ClassParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MP
 		return MS::kFailure;
 	}
 
-	MString className = plug.child( 0 ).asString();
-	int classVersion = plug.child( 1 ).asInt();
-	MString searchPaths = plug.child( 2 ).asString();
-
-	return setClass( IECore::constPointerCast<IECore::Parameter>( parameter ), className, classVersion, searchPaths );
+	return storeClass( parameter, plug );
 }
 
 MPlug ClassParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
@@ -178,32 +200,12 @@ MPlug ClassParameterHandler::doCreate( IECore::ConstParameterPtr parameter, cons
 	
 	MPlug result = finishCreating( parameter, attribute, node );
 	
-	IECorePython::ScopedGILLock gilLock;
-	try
+	if( storeClass( parameter, result ) )
 	{
-		boost::python::object pythonParameter( IECore::constPointerCast<IECore::Parameter>( parameter ) );
-		boost::python::object classInfo = pythonParameter.attr( "getClass" )( true );
-	
-		std::string className = boost::python::extract<std::string>( classInfo[1] );
-		int classVersion = boost::python::extract<int>( classInfo[2] );
-		std::string searchPathEnvVar = boost::python::extract<std::string>( classInfo[3] );
-	
-		result.child( 0 ).setString( className.c_str() );
-		result.child( 1 ).setInt( classVersion );
-		result.child( 2 ).setString( searchPathEnvVar.c_str() );
-	}
-	catch( boost::python::error_already_set )
-	{
-		PyErr_Print();
-		return MPlug();
-	}
-	catch( const std::exception &e )
-	{
-		MGlobal::displayError( MString( "ClassParameterHandler::setClass : " ) + e.what() );
-		return MPlug();
+		return result;
 	}
 	
-	return result;
+	return MPlug(); // failure
 }
 
 MStatus ClassParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
@@ -219,6 +221,36 @@ MStatus ClassParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterP
 {
 	if( !parameter || !parameter->isInstanceOf( IECore::ClassParameterTypeId ) )
 	{
+		return MS::kFailure;
+	}
+	
+	return MS::kSuccess;
+}
+
+MStatus ClassParameterHandler::storeClass( IECore::ConstParameterPtr parameter, MPlug &plug )
+{
+	IECorePython::ScopedGILLock gilLock;
+	try
+	{
+		boost::python::object pythonParameter( IECore::constPointerCast<IECore::Parameter>( parameter ) );
+		boost::python::object classInfo = pythonParameter.attr( "getClass" )( true );
+	
+		std::string className = boost::python::extract<std::string>( classInfo[1] );
+		int classVersion = boost::python::extract<int>( classInfo[2] );
+		std::string searchPathEnvVar = boost::python::extract<std::string>( classInfo[3] );
+	
+		plug.child( 0 ).setString( className.c_str() );
+		plug.child( 1 ).setInt( classVersion );
+		plug.child( 2 ).setString( searchPathEnvVar.c_str() );
+	}
+	catch( boost::python::error_already_set )
+	{
+		PyErr_Print();
+		return MS::kFailure;
+	}
+	catch( const std::exception &e )
+	{
+		MGlobal::displayError( MString( "ClassParameterHandler::setClass : " ) + e.what() );
 		return MS::kFailure;
 	}
 	

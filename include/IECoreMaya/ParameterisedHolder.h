@@ -119,6 +119,8 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		MStatus setParameterisedValues( bool lazy );
 		/// Creates an attribute to represent the specified parameter, or updates an existing attribute.
 		MStatus createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName );
+		/// \todo Remove call above and default callRestore to false for major version 6.
+		MStatus createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName, bool callRestore );
 
 	private:
 
@@ -126,11 +128,11 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 	
 		/// Creates (or updates existing) attributes for each parameter. Removes any old attributes no longer
 		/// needed.
-		MStatus createAndRemoveAttributes();
+		MStatus createAndRemoveAttributes( bool callRestore = false );
 		// Makes (or updates existing) attributes for each parameter. Also fills in the two maps below.
 		// This method is called by getParameterised(), so you should call that before expecting the maps
 		// to be up to date.
-		MStatus createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName );
+		MStatus createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName, bool callRestore );
 		typedef std::map<IECore::ParameterPtr, MString> ParameterToAttributeNameMap;
 		ParameterToAttributeNameMap m_parametersToAttributeNames;
 		typedef std::map<MString, IECore::ParameterPtr> AttributeNameToParameterMap;

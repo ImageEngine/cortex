@@ -32,7 +32,15 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
+import warnings
+
 import maya.OpenMaya
+import maya.cmds
+
+import IECore
+
 import _IECoreMaya
 import StringUtil
 
@@ -57,54 +65,59 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	# Directly sets the held object to the Parameterised instance p. Note that this
 	# form doesn't provide enough information for the node to be reinstantiated
 	# after saving and reloading of the maya scene - see the form below for that.
+	# Also note that this form is not undoable, and that the undoable parameter will therefore
+	# be ignored.
 	#
-	# setParameterised( string className, int classVersion, string searchPathEnvVar )
+	# setParameterised( string className, int classVersion, string searchPathEnvVar, bool undoable )
 	# Sets the held object by specifying a class that will be loaded using the IECore.ClassLoader.
 	# searchPathEnvVar specifies an environment variable which holds a colon separated search path for the
-	# ClassLoader. This form allows the held class to be reinstantiated across scene save/load.
-	def setParameterised( self, classNameOrParameterised, classVersion=None, envVarName=None ) :
+	# ClassLoader. This form allows the held class to be reinstantiated across scene save/load, and is
+	# also undoable if requested using the undoable parameter. If classVersion is omitted, None, or negative,
+	# then the highest available version will be used.
+	def setParameterised( self, classNameOrParameterised, classVersion=None, envVarName=None, undoable=True ) :
 
 		if isinstance( classNameOrParameterised, str ) :
-			result = _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised, classVersion, envVarName )
+			if classVersion is None or classVersion < 0 :
+				classVersions = IECore.ClassLoader.defaultLoader( envVarName ).versions( classNameOrParameterised )
+				classVersion = classVersions[-1] if classVersions else 0 
+			if undoable :
+				maya.cmds.ieParameterisedHolderClassModification( self.fullPathName(), classNameOrParameterised, classVersion, envVarName )
+				# no need to despatch callbacks as that is done by the command, so that the callbacks happen on undo and redo too.
+			else :
+				_IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised, classVersion, envVarName )
+				self._despatchSetParameterisedCallbacks( self.fullPathName() )
 		else :
 			result = _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised )
-
-		for c in self.__setParameterisedCallbacks :
-			c( self )
-
-		return result
+			self._despatchSetParameterisedCallbacks( self.fullPathName() )
 
 	## Returns a tuple of the form (parameterised, className, classVersion, searchPathEnvVar).
 	def getParameterised( self ) :
 
 		return _IECoreMaya._parameterisedHolderGetParameterised( self )
 
-	## Calls parameter.setClass() for a ClassParameter. This method should always be used
-	# in preference to calling parameter.setClass() directly, as it correctly updates the
-	# maya state and also implements undo.
+	## Returns a context manager for use with the with statement, to edit the contents
+	# of ClassParameters and ClassVectorParameters in an undoable fashion.
+	def classParameterModificationContext( self ) :
+	
+		return _ClassParameterModificationContext( self )
+
+	## \deprecated
+	## \todo Remove for major version 6
 	def setClassParameterClass( self, parameter, className, classVersion, searchPathEnvVar ) :
 		
-		maya.cmds.ieParameterisedHolderSetClassParameter(
-			self.parameterPlugPath( parameter ),
-			className,
-			classVersion,
-			searchPathEnvVar
-		)
+		warnings.warn( "Use classParameterModificationContext() and manipulate the parameter yourself.", DeprecationWarning, 2 )
 		
-	## Calls parameter.setClasses() for a ClassVectorParameter. This method should always be used
-	# in preference to calling parameter.setClasses() directly, as it correctly updates the
-	# maya state and also implements undo.
+		with self.classParameterModificationContext() :
+			parameter.setClass( className, classVersion, searchPathEnvVar )
+		
+	## \deprecated
+	## \todo Remove for major version 6
 	def setClassVectorParameterClasses( self, parameter, classes ) :
 		
-		args = []
-		for c in classes :
-			args.extend( c )
+		warnings.warn( "Use classParameterModificationContext() and manipulate the parameter yourself.", DeprecationWarning, 2 )
 		
-		maya.cmds.ieParameterisedHolderSetClassParameter(
-			self.parameterPlugPath( parameter ),
-			len( classes ),
-			*args
-		)
+		with self.classParameterModificationContext() :
+			parameter.setClasses( classes )
 		
 	## Sets the values of the plugs representing the parameterised object,
 	# using the current values of the parameters. If the undoable parameter is True
@@ -187,6 +200,12 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		cls.__setParameterisedCallbacks.remove( callback )
 
 	__setParameterisedCallbacks = set()
+	@classmethod
+	def _despatchSetParameterisedCallbacks( cls, nodeName ) :
+	
+		fnPH = FnParameterisedHolder( nodeName )
+		for c in cls.__setParameterisedCallbacks :
+			c( fnPH )
 
 	## Adds a callback which will be invoked whenever FnParameterisedHolder.setClassVectorParameterClasses
 	# is called. The expected function signature is callback( FnParameterisedHolder, parameter )
@@ -203,7 +222,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		
 	__setClassVectorParameterClassesCallbacks = set()
 	
-	# Invoked by the ieParameterisedHolderSetClassParameter MPxCommand. It must be invoked from there
+	# Invoked by the ieParameterisedHolderClassModification MPxCommand. It must be invoked from there
 	# rather than the methods above so that callbacks get correctly despatched during undo and redo.
 	@classmethod
 	def _despatchSetClassVectorParameterClassesCallbacks( cls, plugPath ) :
@@ -237,7 +256,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		
 	__setClassParameterClassCallbacks = set()
 	
-	# Invoked by the ieParameterisedHolderSetClassParameter MPxCommand. It must be invoked from there
+	# Invoked by the ieParameterisedHolderClassModification MPxCommand. It must be invoked from there
 	# rather than the methods above so that callbacks get correctly despatched during undo and redo.
 	@classmethod
 	def _despatchSetClassParameterClassCallbacks( cls, plugPath ) :
@@ -252,3 +271,18 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			c( fnPH, parameter )
 				
 			
+class _ClassParameterModificationContext :
+
+	def __init__( self, fnPH ) :
+	
+		self.__fnPH = fnPH
+
+	def __enter__( self ) :
+	
+		self.__fnPH.setParameterisedValues()
+		self.__originalValues = self.__fnPH.getParameterised()[0].parameters().getValue().copy()
+		
+	def __exit__( self, type, value, traceBack ) :
+	
+		_IECoreMaya._parameterisedHolderAssignUndoValue( self.__originalValues )
+		maya.cmds.ieParameterisedHolderClassModification( self.__fnPH.fullPathName() )

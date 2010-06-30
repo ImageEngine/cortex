@@ -47,12 +47,27 @@ class ClassParameterHandler : public ParameterHandler
 
 	public :
 	
-		/// This is the only way to set the class held by a ClassParameter and have the maya state
-		/// updated correctly. Typically this shouldn't be called directly, instead the
-		/// ieParameterisedHolderSetClassParameter command should be used, as this allows the operation
-		/// to be undone as well.
-		static MStatus setClass( IECore::ParameterPtr parameter, MPlug &plug,
-			const MString &className, int classVersion, const MString &searchPathEnvVar );
+		/// Convenience function for setting the class held by parameter. This makes no changes to the maya representation
+		/// of the parameter whatsoever.
+		static MStatus setClass( IECore::ParameterPtr parameter, const MString &className, int classVersion, const MString &searchPathEnvVar );
+		/// Convenience function for getting the class held by parameter. This has nothing to do with the maya
+		/// representation of the class whatsoever - see below for that.
+		static MStatus getClass( IECore::ConstParameterPtr parameter, MString &className, int &classVersion, MString &searchPathEnvVar );
+		
+		/// Can be used to query the details of the class currently being held by the parameter represented
+		/// by the specified plug. Note that this returns the class currently being represented in maya,
+		/// which may not be the same as the class on the parameter if the two have not been synchronised by a call
+		/// to ParameterisedHolderInterface::updateParameterised.
+		/// This function typically shouldn't be called directly, as a combination of direct access
+		/// to parameters and IECoreMaya.FnParameterisedHolder should be enough to achieve most things.
+		static void currentClass( const MPlug &plug, MString &className, int &classVersion, MString &searchPathEnvVar );
+
+		/// Called to restore a parameter's properties when a file is loaded or the version of a held class
+		/// has been updated.
+		/// \todo Make this a properly documented virtual function in ParameterHandler, and protect it along
+		/// with the others. Then tidy up the code in ParameterisedHolder where this is called. Do this for
+		/// major version 6 to avoid breaking compatibility now.
+		static MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter );
 	
 	protected:
 
@@ -63,7 +78,8 @@ class ClassParameterHandler : public ParameterHandler
 		
 	private :
 	
-		static MStatus setClass( IECore::ParameterPtr parameter, const MString &className, int classVersion, const MString &searchPathEnvVar );
+		static MStatus storeClass( IECore::ConstParameterPtr parameter, MPlug &plug );
+	
 		
 };
 
