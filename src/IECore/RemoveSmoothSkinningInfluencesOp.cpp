@@ -135,9 +135,11 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	
 	bool useLocks = m_useLocksParameter->getTypedValue();
 	std::vector<bool> &locks = m_influenceLocksParameter->getTypedValue();
+	
+	int mode = m_modeParameter->getNumericValue();
 		
 	// make sure there is one lock per influence
-	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) )
+	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) && ( mode != RemoveSmoothSkinningInfluencesOp::Indexed ) )
 	{
 		throw IECore::Exception( "SmoothSmoothSkinningWeightsOp: There must be exactly one lock per influence" );
 	}
@@ -147,8 +149,6 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 		locks.clear();
 		locks.resize( skinningData->influenceNames()->readable().size(), false );
 	}
-	
-	int mode = m_modeParameter->getNumericValue();
 	
 	// remove influences based on minumum allowable weight
 	if ( mode == RemoveSmoothSkinningInfluencesOp::WeightLimit )
