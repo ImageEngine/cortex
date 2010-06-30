@@ -100,12 +100,12 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	{
 		MString influenceName( influenceNames[i].c_str() );
 		influenceList.add( influenceName );
-		influenceList.getDependNode( i, mObj );
-		MFnDagNode fnInfluence( mObj, &s );
+		s = influenceList.getDependNode( i, mObj );
 		if ( s != MS::kSuccess )
 		{
 			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: Influence \"%s\" does not exist" ) % influenceName ).str() );
 		}
+		MFnDagNode fnInfluence( mObj, &s );
 		fnInfluence.getPath( path );
 		influencePaths.append( path );
 	}

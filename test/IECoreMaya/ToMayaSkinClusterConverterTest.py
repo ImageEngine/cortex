@@ -72,7 +72,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 			maya.cmds.skinPercent( sc2, '%s.vtx[%d]' % ( geo2, i ), transformValue=[(j4, val[0]), (j5, val[1]), (j6, val[2]) ])
 		
 		return ( sc, sc2 )
-
+	
 	def testSimple( self ) :
 		# test factory
 		ssd = IECore.SmoothSkinningData()
@@ -128,6 +128,21 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd.pointInfluenceIndices(), ssd2.pointInfluenceIndices() )
 		self.assertEqual( ssd.pointInfluenceWeights(), ssd2.pointInfluenceWeights() )
 		self.assertEqual( ssd, ssd2 )
+	
+	def testErrorStates( self ) :
+		
+		# test converting non-skinCluster node
+		( sc, sc2 ) = self.buildTestSetup()
+		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
+		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
+		ssd = fromConverter.convert()
+		geo = maya.cmds.ls( "myGeo" )[0]
+		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
+		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, geo ) )
+		
+		# test non-existant influences
+		maya.cmds.delete( ['joint2', 'joint3'] )
+		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
