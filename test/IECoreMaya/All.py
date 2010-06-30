@@ -37,9 +37,12 @@
 
 import sys
 import unittest
+import warnings
 
 import IECore
 import IECoreMaya
+
+warnings.simplefilter( "error", DeprecationWarning )
 
 from ConverterHolder import *
 from PlaybackFrameList import *

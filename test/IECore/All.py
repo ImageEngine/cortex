@@ -33,8 +33,12 @@
 ##########################################################################
 
 import unittest
-import IECore
+import warnings
 import sys
+
+import IECore
+
+warnings.simplefilter( "error", DeprecationWarning )
 
 from ClassLoader import *
 from AttributeCache import *
