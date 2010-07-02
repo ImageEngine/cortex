@@ -107,10 +107,16 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 					
 		self.__formLayout = maya.cmds.formLayout( parent=self._topLevelUI() )
 	
-		self.__addButton = maya.cmds.picture( image="setEdAddCmd.xpm", parent=self.__formLayout )
+		self.__buttonRow = maya.cmds.rowLayout( nc=3, adj=3, cw3=( 25, 25, 40 ), parent=self.__formLayout )
+	
+		self.__addButton = maya.cmds.picture( image="ie_addIcon_grey.xpm", parent=self.__buttonRow, width=21 )
 		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, useInterToUI=False )
 		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, useInterToUI=False, button=1 )
-			
+		
+		self.__toolsButton = maya.cmds.picture( image="ie_actionIcon_grey.xpm", parent=self.__buttonRow, width=21 )
+		IECoreMaya.createMenu( IECore.curry( self.__toolsMenuDefinition, None ), self.__toolsButton, useInterToUI=False )
+		IECoreMaya.createMenu( IECore.curry( self.__toolsMenuDefinition, None ), self.__toolsButton, useInterToUI=False, button=1 )
+
 		self.__classInfo = []
 		self.__childUIs = {} # mapping from parameter name to ui name
 		
@@ -177,6 +183,18 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 				)
 	
 		for cb in self.__addClassMenuCallbacks :
+			cb( result, self.parameter, self.node() )
+	
+		return result	
+		
+	def __toolsMenuDefinition( self, parameterName ) :
+	
+		result = IECore.MenuDefinition()
+	
+		if not len( self.__toolsMenuCallbacks ) :
+			result.append( "/No tools available", { "active" : False } )
+	
+		for cb in self.__toolsMenuCallbacks :
 			cb( result, self.parameter, self.node() )
 	
 		return result
@@ -249,8 +267,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		# and create or reorder uis for remaining parameters
 	
 		attachForm = [
-			( self.__addButton, "left", 20 + IECoreMaya.CompoundParameterUI._labelIndent( self.__kw["hierarchyDepth"] + 1 ) ),
-			( self.__addButton, "bottom", 5 ),
+			( self.__buttonRow, "left", IECoreMaya.CompoundParameterUI._labelIndent( self.__kw["hierarchyDepth"] + 1 ) ),
+			( self.__buttonRow, "bottom", 5 ),
 		]
 		attachControl = []
 		attachNone = []
@@ -289,9 +307,9 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			prevChildUI = childUI
 
 		if prevChildUI :
-			attachControl.append( ( self.__addButton, "top", 5, prevChildUI._topLevelUI() ) )
+			attachControl.append( ( self.__buttonRow, "top", 5, prevChildUI._topLevelUI() ) )
 		else :
-			attachForm.append( ( self.__addButton, "top", 5 ) )
+			attachForm.append( ( self.__buttonRow, "top", 5 ) )
 			
 		maya.cmds.formLayout(
 			self.__formLayout,
@@ -348,6 +366,16 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 	def registerAddClassMenuCallback( cls, callback ) :
 	
 		cls.__addClassMenuCallbacks.append( callback )
+		
+	__toolsMenuCallbacks = []
+	## Registers a callback which is able to modify the tools popup menu
+	# Callbacks should have the following signature :
+	#
+	# callback( menuDefinition, classVectorParameter, holderNode )
+	@classmethod
+	def registerToolsMenuCallback( cls, callback ) :
+	
+		cls.__toolsMenuCallbacks.append( callback )
 
 class ChildUI( IECoreMaya.UIElement ) :
 
