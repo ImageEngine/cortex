@@ -114,6 +114,17 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 				keys = self.keys()
 				self.insertParameter( parameter, self[keys[i]] )
 
+	## Returns True or False, f the ClassVector holds a class
+	# with the given name.
+	def hasClass( self, parameterOrParameterName ):
+		
+		if isinstance( parameterOrParameterName, basestring ) :
+			parameterName = parameterOrParameterName
+		else :
+			parameterName = parameterOrParameterName.name
+		
+		return parameterName in self.__namesToInstances
+
 	## Returns the class instance that the named parameter represents,
 	# or if withClassLoaderArgs is True, then returns a tuple of the
 	# form ( classInstance, className, classVersion ).
