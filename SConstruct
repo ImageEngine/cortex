@@ -496,6 +496,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_MAYAICON_DIR",
+	"The directory under which to install maya icons.",
+	"$INSTALL_PREFIX/maya/icons",
+)
+
+o.Add(
 	"INSTALL_MAYAPLUGIN_NAME",
 	"The name under which to install maya plugins.",
 	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
@@ -1500,6 +1506,12 @@ if doConfigure :
 		mayaEnv.AddPostAction( "$INSTALL_MEL_DIR", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
 		mayaEnv.Alias( "install", mayaMelInstall )
 		mayaEnv.Alias( "installMaya", mayaMelInstall )
+		
+		# maya icons
+		mayaIcons = glob.glob( "icons/IECoreMaya/*.xpm" )
+		mayaIconInstall = mayaEnv.Install( "$INSTALL_MAYAICON_DIR", source=mayaIcons )
+		mayaEnv.Alias( "install", mayaIconInstall )
+		mayaEnv.Alias( "installMaya", mayaIconInstall )
 		
 		# maya plugin
 		mayaPluginEnv.Append(
