@@ -76,13 +76,13 @@ from FnParameterisedHolderSet import FnParameterisedHolderSet
 from TemporaryAttributeValues import TemporaryAttributeValues
 from GenericParameterUI import GenericParameterUI
 from FnDagNode import FnDagNode  
-from PresetManagerUI import PresetManagerUI
 from CompoundParameterUI import CompoundParameterUI
 from ClassParameterUI import ClassParameterUI
+from ClassVectorParameterUI import ClassVectorParameterUI
 from PresetsOnlyParameterUI import PresetsOnlyParameterUI
 from TestCase import TestCase
 from TestProgram import TestProgram
-from ClassVectorParameterUI import ClassVectorParameterUI
 from FileBrowser import FileBrowser
 from FileDialog import FileDialog
 from GeometryCombinerUI import *
+from PresetManagerUI import *

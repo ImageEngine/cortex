@@ -211,7 +211,6 @@ from HitMissTransformTest import HitMissTransformTest
 from CurveTracerTest import CurveTracerTest
 from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
-from PresetManagerTest import PresetManagerTest
 from IDXReaderTest import IDXReaderTest
 from ThreadingTest import ThreadingTest
 from ImageConvolveOpTest import *
@@ -228,6 +227,7 @@ from MeshDistortionsOpTest import TestMeshDistortionsOp
 from PointVelocityDisplaceOp import *
 from HexConversionTest import HexConversionTest
 from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest
+from BasicPreset import TestBasicPreset
 from ReorderSmoothSkinningInfluencesOpTest import ReorderSmoothSkinningInfluencesOpTest
 from NormalizeSmoothSkinningWeightsOpTest import NormalizeSmoothSkinningWeightsOpTest
 from RemoveSmoothSkinningInfluencesOpTest import RemoveSmoothSkinningInfluencesOpTest

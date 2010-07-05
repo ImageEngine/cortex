@@ -32,7 +32,7 @@
 #
 ##########################################################################
 
-import os
+import os, warnings
 from IECore import warning, msg, Msg, error, Writer, CompoundParameter, ClassLoader, SearchPath
 
 ## This class manages loading and saving named preset values for Parameterised objects.
@@ -44,6 +44,9 @@ class PresetManager :
 	# \param useClassPath If true, then it uses the 'path' member added to the Parameterised objects 
 	# when loaded by ClassLoader. Otherwise it will only use the name of the Parameterised object.
 	def __init__( self, searchPaths, useClassPath = True ) :
+	
+		warnings.warn( "The PresetManager class is depreciated, please use the Preset classes instead.", DeprecationWarning, 2 )
+	
 		self.__useClassPath = useClassPath
 		self.__searchPaths = searchPaths
 		self.__classLoader = ClassLoader( searchPaths )

@@ -111,3 +111,5 @@ from ParameterOverwriting import *
 from ParameterisedOverwriting import *
 
 from ConfigLoader import loadConfig
+from Preset import Preset
+from BasicPreset import BasicPreset
