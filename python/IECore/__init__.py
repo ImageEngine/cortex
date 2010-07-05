@@ -97,7 +97,6 @@ from DateTimeParameterParser import *
 from MotionBlock import MotionBlock
 from SubstitutedDict import SubstitutedDict
 from VisualiserProcedural import VisualiserProcedural
-from PresetManager import PresetManager
 from IDXReader import IDXReader
 from ClassParameter import ClassParameter
 from ClassVectorParameter import ClassVectorParameter

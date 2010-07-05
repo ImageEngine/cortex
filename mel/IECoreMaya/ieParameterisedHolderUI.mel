@@ -201,7 +201,7 @@ global proc ieParameterisedHolderUIParameterPresetsControlNewAndReplace( string 
 		return;
 	}
 	
-	string $pyStub = "import IECoreMaya; IECoreMaya.PresetManagerUI( '" + $node + "' )";
+	string $pyStub = "import IECoreMaya; IECoreMaya.PresetsUI( '" + $node + "' )";
 	
 	columnLayout -adj 1 $controlName;
 	

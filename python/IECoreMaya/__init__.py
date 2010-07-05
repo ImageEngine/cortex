@@ -85,5 +85,5 @@ from TestProgram import TestProgram
 from FileBrowser import FileBrowser
 from FileDialog import FileDialog
 from GeometryCombinerUI import *
-from PresetManagerUI import *
+from PresetsUI import *
 from ParameterClipboardUI import *

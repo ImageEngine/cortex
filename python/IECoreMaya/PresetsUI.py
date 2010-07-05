@@ -43,7 +43,7 @@ from ClassParameterUI import ClassParameterUI
 from ClassVectorParameterUI import ClassVectorParameterUI
 from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
 
-__all__ = [ 'PresetManagerUI', 'SavePresetUI', 'LoadPresetUI' ]
+__all__ = [ 'PresetsUI', 'SavePresetUI', 'LoadPresetUI' ]
 
 def __savePresetMenuModifierVectorClass( menuDefinition, parent, parameter, node ) :
 	__savePresetMenuModifier( menuDefinition, parameter, node )
@@ -64,7 +64,7 @@ ClassVectorParameterUI.registerClassMenuCallback( __savePresetMenuModifierVector
 ClassVectorParameterUI.registerToolsMenuCallback( __savePresetMenuModifier )
 
 ### \group Wrapper classes
-### These wrappers take only string arguments, to allow the PresetManagerUI
+### These wrappers take only string arguments, to allow the PresetsUI
 ### To be invoked from a evalDeferred call. This is needed to make sure that
 ### all the tasks performed internally by the UI undo in one step.
 ### {
@@ -73,14 +73,14 @@ def SavePresetUI( nodeName, attribute ) :
 	fnPh = FnParameterisedHolder( nodeName )
 	rootParam = fnPh.plugParameter( attribute )
 	
-	PresetManagerUI( nodeName, rootParam ).save()
+	PresetsUI( nodeName, rootParam ).save()
 	
 def LoadPresetUI( nodeName, attribute ) :
 
 	fnPh = FnParameterisedHolder( nodeName )
 	rootParam = fnPh.plugParameter( attribute )
 		
-	PresetManagerUI( nodeName, rootParam ).load()
+	PresetsUI( nodeName, rootParam ).load()
 ### }
 
 ### This class provides a UI for loading and saving presets for nodes
@@ -92,14 +92,14 @@ def LoadPresetUI( nodeName, attribute ) :
 ### \todo Currently, the LoadUI, has to instantiate every preset in the 
 ### search path, and call 'applicableTo'. This is potentially a huge
 ### bottle neck, so, well see what happens when we use it in earnest...
-class PresetManagerUI() :
+class PresetsUI() :
 	
 	def __init__( self, node, rootParameter=None ) :
 	
 		try :
 			fn = FnParameterisedHolder( node )
 		except:
-			raise ValueError, 'PresetManagerUI: "%s" is not a valid Parameterised object.' % node
+			raise ValueError, 'PresetsUI: "%s" is not a valid Parameterised object.' % node
 	
 		self.__node = node
 		self.__rootParameter = rootParameter

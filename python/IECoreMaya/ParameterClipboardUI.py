@@ -147,7 +147,7 @@ def copy( plugPath, showUI=False ) :
 
 	if showUI :
 
-		IECoreMaya.PresetManagerUI( parts[0], parameter ).copy( copyCallback )
+		IECoreMaya.PresetsUI( parts[0], parameter ).copy( copyCallback )
 	
 	else :
 	
