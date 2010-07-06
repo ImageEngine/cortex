@@ -479,7 +479,7 @@ class SXRendererTest( unittest.TestCase ) :
 				c = points["colorPrimVar"][i]
 				c[0] = points["s"][i]
 				self.assertEqual( s["Ci"][i], c )
-			
+
 	def tearDown( self ) :
 		
 		files = [
@@ -494,6 +494,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxIlluminanceTest.sdl",
 			"test/IECoreRI/shaders/sxLightTest.sdl",
 			"test/IECoreRI/shaders/sxStTest.sdl",
+			"test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sdl",
 		]
 		
 		for f in files :
