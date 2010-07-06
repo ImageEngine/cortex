@@ -101,11 +101,17 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
-
+		
+		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
+		self.assertEqual( v[0], 1.0 - coreMesh[ "t" ].data[0] )
+		
 		fnMesh.getUVs( u, v, "testUVSet" )
 
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
+	
+		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
+		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
 
 
 if __name__ == "__main__":

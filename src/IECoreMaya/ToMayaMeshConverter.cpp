@@ -119,16 +119,13 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		vArray.setLength( numUVs );
 
 
-		/// \todo The FromMayaMeshConverter inverts the UVs - shouldn't we do the same here?
-		/// Whatever we do we need to ensure that cortex treats UV orientation consistently everywhere.
-		/// This means in the ImagePrimitive, the Renderer classes and the ImagePrimitiveEvaluator to name
-		/// just a few.
 		MIntArray uvIds;
 		uvIds.setLength( numUVs );
 		for ( int i = 0; i < numUVs; i++)
 		{
 			uArray[i] = u->readable()[i];
-			vArray[i] = v->readable()[i];
+			// FromMayaMeshConverter does the opposite of this
+			vArray[i] = 1 - v->readable()[i];
 			uvIds[i] = i;
 		}
 
