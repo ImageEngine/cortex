@@ -271,29 +271,6 @@ void SXExecutor::setVariable( SxParameterList parameterList, const char *name, S
 			SxSetPredefinedParameter( parameterList, name, (void *)&(td->readable()[0]) );
 		}
 	}
-	else
-	{
-		// no data available, fall back to default values if we don't think they'll
-		// be provided by attributes. for some things (like "t") the Sx library will
-		// crash if they're not specified, but for others (like "Cs") it'll provide
-		// a default value from the attribute state and we don't want to overwrite that.
-		// others still (like "Ci") are for output only as far as i know so we don't
-		// want to set them either. others still ("u", "du" etc) are provided by 3delight
-		// when there is a grid topology specified. all this should go away in 3delight 9.0.44
-		// where the library itself will be providing default values and the crashes will
-		// be gone.
-		if(
-			0==strcmp( name, "Cs" ) || 0==strcmp( name, "Os" ) ||
-			0==strcmp( name, "Ci" ) || 0==strcmp( name, "Oi" ) ||
-			0==strcmp( name, "u" ) || 0==strcmp( name, "v" ) ||
-			0==strcmp( name, "du" ) || 0==strcmp( name, "dv" )
-		)
-		{
-			return;
-		}
-		typename T::ValueType defaultValue; defaultValue.resize( expectedSize, typename T::ValueType::value_type( 0 ) );
-		SxSetPredefinedParameter( parameterList, name, &(defaultValue[0]) );
-	}
 }
 		
 template<class T>
