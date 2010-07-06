@@ -47,7 +47,8 @@ MarschnerParameter::MarschnerParameter( const std::string &name, const std::stri
 		"",
 		1.55f, 1.0f, 3.0f
 	);
-		
+	
+	/// \todo color -> colour, otherwise it's a reserved word in rsl. Not to be done before v6.0.0
 	m_absorption = new Color3fParameter(
 		absorptionAsColor ? "color" : "absorption",
 		"",
