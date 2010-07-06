@@ -139,3 +139,8 @@ void CompoundObject::memoryUsage( Object::MemoryAccumulator &a ) const
 	}
 }
 
+CompoundObject *CompoundObject::defaultInstance()
+{
+	static CompoundObjectPtr o = new CompoundObject();
+	return o.get();
+}

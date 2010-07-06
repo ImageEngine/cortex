@@ -140,6 +140,18 @@ class testCompoundObject( unittest.TestCase ) :
 		o = IECore.CompoundObject( { "a": IECore.IntData( 1 ) } )
 		self.assertEqual( o.items(), [ ( "a", IECore.IntData( 1 ) ) ] )
 		
+	def testDefaultInstance( self ) :
+	
+		o = IECore.CompoundObject.defaultInstance()
+		
+		o["a"] = IECore.IntData( 10 )
+		
+		self.failUnless( o["a"].isSame( IECore.CompoundObject.defaultInstance()["a"] ) )
+		
+		del o["a"]
+		
+		self.failUnless( "a" not in IECore.CompoundObject.defaultInstance() )
+		
 if __name__ == "__main__":
         unittest.main()
 

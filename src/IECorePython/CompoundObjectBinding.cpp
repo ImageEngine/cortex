@@ -288,6 +288,11 @@ static ObjectPtr get( const CompoundObject &o, const char *key, ObjectPtr defaul
 	return it->second;
 }
 
+static CompoundObjectPtr defaultInstance()
+{
+	return CompoundObject::defaultInstance();
+}
+
 void bindCompoundObject()
 {
 
@@ -312,6 +317,7 @@ void bindCompoundObject()
 				boost::python::arg( "defaultValue" ) = object()
 			)
 		)
+		.def( "defaultInstance", &defaultInstance ).staticmethod( "defaultInstance" )
 	;
 
 	CompoundObjectFromPythonDict();

@@ -77,6 +77,10 @@ class CompoundObject : public Object
 		template<typename T>
 		T *member( const InternedString &name, bool throwExceptions, bool createIfMissing );
 
+		/// Returns an instance of CompoundObject which can be shared by everyone - for instance a procedural
+		/// might like to populate it with objects to be used subsequently by a shadeop.
+		static CompoundObject *defaultInstance();
+
 	protected:
 
 		ObjectMap m_members;
