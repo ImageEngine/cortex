@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_REMOVESMOOTHSKINNINGINFLUENCESOP_H
-#define IECORE_REMOVESMOOTHSKINNINGINFLUENCESOP_H
+#ifndef IECORE_LIMITSMOOTHSKINNINGINFLUENCESOP_H
+#define IECORE_LIMITSMOOTHSKINNINGINFLUENCESOP_H
 
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
@@ -43,19 +43,19 @@
 namespace IECore
 {
 
-/// The RemoveSmoothSkinningInfluencesOp zeros the weight values of SmoothSkinningData for certain influences.
-/// This op has several modes of operation. It can remove influences below a minimum weight value,
-/// it can impose a maximum number of influences per point, or it can remove specific influences for all points.
+/// The LimitSmoothSkinningInfluencesOp zeros the weight values of SmoothSkinningData for certain influences.
+/// This op has several modes of operation. It can zero influences below a minimum weight value,
+/// it can impose a maximum number of influences per point, or it can zero specific influences for all points.
 /// There is a parameter to control whether the result should be compressed or left as is. Locks can be applied
-/// in WeightLimit and MaxInfluences mode to control which influences are removed.
-class RemoveSmoothSkinningInfluencesOp : public ModifyOp
+/// in WeightLimit and MaxInfluences mode to control which influences are affected.
+class LimitSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPED( RemoveSmoothSkinningInfluencesOp, ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPED( LimitSmoothSkinningInfluencesOp, ModifyOp );
 
-		RemoveSmoothSkinningInfluencesOp();
-		virtual ~RemoveSmoothSkinningInfluencesOp();
+		LimitSmoothSkinningInfluencesOp();
+		virtual ~LimitSmoothSkinningInfluencesOp();
 		
 		enum Mode
 		{
@@ -79,8 +79,8 @@ class RemoveSmoothSkinningInfluencesOp : public ModifyOp
 		BoolVectorParameterPtr m_influenceLocksParameter;
 };
 
-IE_CORE_DECLAREPTR( RemoveSmoothSkinningInfluencesOp );
+IE_CORE_DECLAREPTR( LimitSmoothSkinningInfluencesOp );
 
 } // namespace IECore
 
-#endif // IECORE_REMOVESMOOTHSKINNINGINFLUENCESOP_H
+#endif // IECORE_LIMITSMOOTHSKINNINGINFLUENCESOP_H

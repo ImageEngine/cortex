@@ -275,7 +275,7 @@
 #include "IECorePython/DecompressSmoothSkinningDataOpBinding.h"
 #include "IECorePython/ReorderSmoothSkinningInfluencesOpBinding.h"
 #include "IECorePython/NormalizeSmoothSkinningWeightsOpBinding.h"
-#include "IECorePython/RemoveSmoothSkinningInfluencesOpBinding.h"
+#include "IECorePython/LimitSmoothSkinningInfluencesOpBinding.h"
 #include "IECorePython/MixSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/SmoothSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/PointSmoothSkinningOpBinding.h"
@@ -554,7 +554,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDecompressSmoothSkinningDataOp();
 	bindReorderSmoothSkinningInfluencesOp();
 	bindNormalizeSmoothSkinningWeightsOp();
-	bindRemoveSmoothSkinningInfluencesOp();
+	bindLimitSmoothSkinningInfluencesOp();
 	bindMixSmoothSkinningWeightsOp();
 	bindSmoothSmoothSkinningWeightsOp();
 	bindPointSmoothSkinningOp();

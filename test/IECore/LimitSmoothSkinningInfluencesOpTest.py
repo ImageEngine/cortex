@@ -38,7 +38,7 @@ import random
 from IECore import *
 
 
-class RemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
+class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	
 	def createSSD( self, weights ) :
 		
@@ -100,25 +100,25 @@ class RemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		return SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 	
 	def testTypes( self ) :
-		""" Test RemoveSmoothSkinningInfluencesOp types"""
+		""" Test LimitSmoothSkinningInfluencesOp types"""
 		
 		ssd = self.original()
 
-		op = RemoveSmoothSkinningInfluencesOp()
-		self.assertEqual( type(op), RemoveSmoothSkinningInfluencesOp )
-		self.assertEqual( op.typeId(), TypeId.RemoveSmoothSkinningInfluencesOp )
+		op = LimitSmoothSkinningInfluencesOp()
+		self.assertEqual( type(op), LimitSmoothSkinningInfluencesOp )
+		self.assertEqual( op.typeId(), TypeId.LimitSmoothSkinningInfluencesOp )
 		op.parameters()['input'].setValue( IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 	def testWeightLimitMode( self ) :
-		""" Test RemoveSmoothSkinningInfluencesOp in weight limit mode"""
+		""" Test LimitSmoothSkinningInfluencesOp in weight limit mode"""
 		
 		ssd = self.original()
 		weightLimited = self.weightLimited()
 		
-		op = RemoveSmoothSkinningInfluencesOp()
+		op = LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.WeightLimit )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
 		op.parameters()['minWeight'].setValue( 0.401 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( False )
@@ -141,14 +141,14 @@ class RemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result, weightLimited )
 
 	def testWeightLimitModeWithLocks( self ) :
-		""" Test RemoveSmoothSkinningInfluencesOp locking mechanism in weight limit mode"""
+		""" Test LimitSmoothSkinningInfluencesOp locking mechanism in weight limit mode"""
 		
 		ssd = self.original()
 		weightLimited = self.weightLimitedWithLocks()
 		
-		op = RemoveSmoothSkinningInfluencesOp()
+		op = LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.WeightLimit )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
 		op.parameters()['minWeight'].setValue( 0.401 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( True )
@@ -185,14 +185,14 @@ class RemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 				self.assertAlmostEqual( resultWeights[i], origWeights[i], 6 )
 
 	def testMaxInfluencesMode( self ) :
-		""" Test RemoveSmoothSkinningInfluencesOp in max influences mode"""
+		""" Test LimitSmoothSkinningInfluencesOp in max influences mode"""
 		
 		ssd = self.original()
 		maxInfluenced = self.maxInfluenced()
 		
-		op = RemoveSmoothSkinningInfluencesOp()
+		op = LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.MaxInfluences )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
 		op.parameters()['maxInfluences'].setValue( 2 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( False )
@@ -215,14 +215,14 @@ class RemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result, maxInfluenced )
 		
 	def testMaxInfluencesModeWithLocks( self ) :
-		""" Test RemoveSmoothSkinningInfluencesOp locking mechanism in max influences mode"""
+		""" Test LimitSmoothSkinningInfluencesOp locking mechanism in max influences mode"""
 		
 		ssd = self.original()
 		maxInfluenced = self.maxInfluencedWithLocks()
 		
-		op = RemoveSmoothSkinningInfluencesOp()
+		op = LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.MaxInfluences )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
 		op.parameters()['maxInfluences'].setValue( 1 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( True )
@@ -259,14 +259,14 @@ class RemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 				self.assertAlmostEqual( resultWeights[i], origWeights[i], 6 )
 	
 	def testIndexedMode( self ) :
-		""" Test RemoveSmoothSkinningInfluencesOp in indexed mode"""
+		""" Test LimitSmoothSkinningInfluencesOp in indexed mode"""
 		
 		ssd = self.original()
 		indexed = self.indexed()
 		
-		op = RemoveSmoothSkinningInfluencesOp()
+		op = LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Indexed )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.Indexed )
 		op.parameters()['influenceIndices'].setFrameListValue( FrameList.parse( "0-2x2" ) )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( False )
@@ -289,14 +289,14 @@ class RemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result, indexed )
 
 	def testCompressionParameter( self ) :
-		""" Test RemoveSmoothSkinningInfluencesOp in indexed mode with compression on"""
+		""" Test LimitSmoothSkinningInfluencesOp in indexed mode with compression on"""
 		
 		ssd = self.original()
 		compressedAfterIndexed = self.compressedAfterIndexed()
 		
-		op = RemoveSmoothSkinningInfluencesOp()
+		op = LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Indexed )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.Indexed )
 		op.parameters()['influenceIndices'].setFrameListValue( FrameList.parse( "1" ) )
 		op.parameters()['compressResult'].setTypedValue( True )
 		op.parameters()['applyLocks'].setValue( False )

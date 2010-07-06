@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/RemoveSmoothSkinningInfluencesOp.h"
+#include "IECore/LimitSmoothSkinningInfluencesOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -43,18 +43,18 @@ using namespace IECore;
 namespace IECorePython
 {
 
-void bindRemoveSmoothSkinningInfluencesOp()
+void bindLimitSmoothSkinningInfluencesOp()
 {
-	object o = RunTimeTypedClass<RemoveSmoothSkinningInfluencesOp>()
+	object o = RunTimeTypedClass<LimitSmoothSkinningInfluencesOp>()
 		.def( init<>() )
 	;
 	
 	scope s( o );
 	
-	enum_< RemoveSmoothSkinningInfluencesOp::Mode >( "Mode" )
-		.value( "WeightLimit", RemoveSmoothSkinningInfluencesOp::WeightLimit )
-		.value( "MaxInfluences", RemoveSmoothSkinningInfluencesOp::MaxInfluences )
-		.value( "Indexed", RemoveSmoothSkinningInfluencesOp::Indexed )
+	enum_< LimitSmoothSkinningInfluencesOp::Mode >( "Mode" )
+		.value( "WeightLimit", LimitSmoothSkinningInfluencesOp::WeightLimit )
+		.value( "MaxInfluences", LimitSmoothSkinningInfluencesOp::MaxInfluences )
+		.value( "Indexed", LimitSmoothSkinningInfluencesOp::Indexed )
 	;
 }
 

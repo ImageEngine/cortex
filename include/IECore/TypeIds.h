@@ -374,6 +374,8 @@ enum TypeId
 	SmoothSmoothSkinningWeightsOpTypeId = 328,
 	MixSmoothSkinningWeightsOpTypeId = 329,
 	PointSmoothSkinningOpTypeId = 330,
+	AddSmoothSkinningInfluencesOpTypeId = 331,
+	LimitSmoothSkinningInfluencesOpTypeId = 332,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

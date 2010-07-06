@@ -377,6 +377,8 @@ void bindTypeId()
 		.value( "SmoothSmoothSkinningWeightsOp", SmoothSmoothSkinningWeightsOpTypeId )
 		.value( "MixSmoothSkinningWeightsOp", MixSmoothSkinningWeightsOpTypeId )
 		.value( "PointSmoothSkinningOp", PointSmoothSkinningOpTypeId )
+		.value( "AddSmoothSkinningInfluencesOp", AddSmoothSkinningInfluencesOpTypeId )
+		.value( "LimitSmoothSkinningInfluencesOp", LimitSmoothSkinningInfluencesOpTypeId )
 	;
 }
 

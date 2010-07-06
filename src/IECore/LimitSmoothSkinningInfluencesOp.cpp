@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include "IECore/RemoveSmoothSkinningInfluencesOp.h"
+#include "IECore/LimitSmoothSkinningInfluencesOp.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
@@ -46,26 +46,26 @@
 
 using namespace IECore;
 
-IE_CORE_DEFINERUNTIMETYPED( RemoveSmoothSkinningInfluencesOp );
+IE_CORE_DEFINERUNTIMETYPED( LimitSmoothSkinningInfluencesOp );
 
-RemoveSmoothSkinningInfluencesOp::RemoveSmoothSkinningInfluencesOp()
+LimitSmoothSkinningInfluencesOp::LimitSmoothSkinningInfluencesOp()
 	: ModifyOp(
-		"The RemoveSmoothSkinningInfluencesOp zeros the weight values of SmoothSkinningData for certain influences.",
+		"The LimitSmoothSkinningInfluencesOp zeros the weight values of SmoothSkinningData for certain influences.",
 		new SmoothSkinningDataParameter( "result", "The result", new SmoothSkinningData ),
 		new SmoothSkinningDataParameter( "input", "The SmoothSkinningData to modify", new SmoothSkinningData )
 	)
 {
 	IntParameter::PresetsContainer modePresets;
-	modePresets.push_back( IntParameter::Preset( "WeightLimit", RemoveSmoothSkinningInfluencesOp::WeightLimit ) );
-	modePresets.push_back( IntParameter::Preset( "MaxInfluences", RemoveSmoothSkinningInfluencesOp::MaxInfluences ) );
-	modePresets.push_back( IntParameter::Preset( "Indexed", RemoveSmoothSkinningInfluencesOp::Indexed ) );
+	modePresets.push_back( IntParameter::Preset( "WeightLimit", LimitSmoothSkinningInfluencesOp::WeightLimit ) );
+	modePresets.push_back( IntParameter::Preset( "MaxInfluences", LimitSmoothSkinningInfluencesOp::MaxInfluences ) );
+	modePresets.push_back( IntParameter::Preset( "Indexed", LimitSmoothSkinningInfluencesOp::Indexed ) );
 	
 	m_modeParameter = new IntParameter(
 		"mode",
-		"The mode of removal. Options are to impose a minimum weight, a maximum number of influences per point, or to remove specific influences from all points",
-		RemoveSmoothSkinningInfluencesOp::WeightLimit,
-		RemoveSmoothSkinningInfluencesOp::WeightLimit,
-		RemoveSmoothSkinningInfluencesOp::Indexed,
+		"The mode of influence limiting. Options are to impose a minimum weight, a maximum number of influences per point, or to zero specific influences for all points",
+		LimitSmoothSkinningInfluencesOp::WeightLimit,
+		LimitSmoothSkinningInfluencesOp::WeightLimit,
+		LimitSmoothSkinningInfluencesOp::Indexed,
 		modePresets,
 		true
 	);
@@ -92,7 +92,7 @@ RemoveSmoothSkinningInfluencesOp::RemoveSmoothSkinningInfluencesOp()
 	
 	m_influenceIndicesParameter = new FrameListParameter(
 		"influenceIndices",
-		"The indices of influences to remove corresponding to the names in input.influenceNames(). This parameter is only used in Indexed mode",
+		"The indices of influences to zero corresponding to the names in input.influenceNames(). This parameter is only used in Indexed mode",
 		""
 	);
 	
@@ -117,11 +117,11 @@ RemoveSmoothSkinningInfluencesOp::RemoveSmoothSkinningInfluencesOp()
 	parameters()->addParameter( m_influenceLocksParameter );
 }
 
-RemoveSmoothSkinningInfluencesOp::~RemoveSmoothSkinningInfluencesOp()
+LimitSmoothSkinningInfluencesOp::~LimitSmoothSkinningInfluencesOp()
 {
 }
 
-void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObject * operands )
+void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObject * operands )
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
@@ -139,7 +139,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	int mode = m_modeParameter->getNumericValue();
 		
 	// make sure there is one lock per influence
-	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) && ( mode != RemoveSmoothSkinningInfluencesOp::Indexed ) )
+	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) && ( mode != LimitSmoothSkinningInfluencesOp::Indexed ) )
 	{
 		throw IECore::Exception( "SmoothSmoothSkinningWeightsOp: There must be exactly one lock per influence" );
 	}
@@ -150,8 +150,8 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 		locks.resize( skinningData->influenceNames()->readable().size(), false );
 	}
 	
-	// remove influences based on minumum allowable weight
-	if ( mode == RemoveSmoothSkinningInfluencesOp::WeightLimit )
+	// Limit influences based on minumum allowable weight
+	if ( mode == LimitSmoothSkinningInfluencesOp::WeightLimit )
 	{
 		float minWeight = m_minWeightParameter->getNumericValue();
 		
@@ -168,23 +168,23 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 			}
 		}
 	}
-	// remove influences by limiting the number of influences per point
-	else if ( mode == RemoveSmoothSkinningInfluencesOp::MaxInfluences )
+	// Limit the number of influences per point
+	else if ( mode == LimitSmoothSkinningInfluencesOp::MaxInfluences )
 	{
 		int maxInfluences = m_maxInfluencesParameter->getNumericValue();
-		std::vector<int> influencesToRemove;
+		std::vector<int> influencesToLimit;
 		
 		for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 		{
-			int numToRemove = pointInfluenceCounts[i] - maxInfluences;
-			if ( numToRemove <= 0 )
+			int numToLimit = pointInfluenceCounts[i] - maxInfluences;
+			if ( numToLimit <= 0 )
 			{
 				continue;
 			}
 			
-			influencesToRemove.clear();
+			influencesToLimit.clear();
 			
-			for ( int j=0; j < numToRemove; j++ )
+			for ( int j=0; j < numToLimit; j++ )
 			{				
 				int indexOfMin;
 				float minWeight = Imath::limits<float>::max();
@@ -193,7 +193,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 				{
 					int current = pointIndexOffsets[i] + k;
 					
-					if ( locks[ pointInfluenceIndices[current] ] || find( influencesToRemove.begin(), influencesToRemove.end(), current ) != influencesToRemove.end() )
+					if ( locks[ pointInfluenceIndices[current] ] || find( influencesToLimit.begin(), influencesToLimit.end(), current ) != influencesToLimit.end() )
 					{
 						continue;
 					}
@@ -207,24 +207,24 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 					}
 				}
 				
-				influencesToRemove.push_back( indexOfMin );
+				influencesToLimit.push_back( indexOfMin );
 			}
 			
-			for ( unsigned j=0; j < influencesToRemove.size(); j++ )
+			for ( unsigned j=0; j < influencesToLimit.size(); j++ )
 			{
-				pointInfluenceWeights[ influencesToRemove[j] ] = 0.0f;
+				pointInfluenceWeights[ influencesToLimit[j] ] = 0.0f;
 			}
 		}
 	}
-	// remove specific influences from all points
-	else if ( mode == RemoveSmoothSkinningInfluencesOp::Indexed )
+	// Zero specific influences for all points
+	else if ( mode == LimitSmoothSkinningInfluencesOp::Indexed )
 	{
-		std::vector<long int> indicesToRemove;
-		m_influenceIndicesParameter->getFrameListValue()->asList( indicesToRemove );
-		std::vector<bool> removeIndex( skinningData->influenceNames()->readable().size(), false );
-		for ( unsigned i=0; i < indicesToRemove.size(); i++ )
+		std::vector<long int> indicesToLimit;
+		m_influenceIndicesParameter->getFrameListValue()->asList( indicesToLimit );
+		std::vector<bool> limitIndex( skinningData->influenceNames()->readable().size(), false );
+		for ( unsigned i=0; i < indicesToLimit.size(); i++ )
 		{
-			removeIndex[ indicesToRemove[i] ] = true;
+			limitIndex[ indicesToLimit[i] ] = true;
 		}
 		
 		for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
@@ -233,7 +233,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 			{
 				int current = pointIndexOffsets[i] + j;
 				
-				if ( removeIndex[ pointInfluenceIndices[current] ] )
+				if ( limitIndex[ pointInfluenceIndices[current] ] )
 				{
 					pointInfluenceWeights[current] = 0.0f;
 				}
@@ -242,7 +242,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	}
 	else
 	{
-		throw IECore::Exception( ( boost::format( "RemoveSmoothSkinningInfluencesOp: \"%d\" is not a recognized mode" ) % mode ).str() );
+		throw IECore::Exception( ( boost::format( "LimitSmoothSkinningInfluencesOp: \"%d\" is not a recognized mode" ) % mode ).str() );
 	}
 	
 	if ( m_compressionParameter->getTypedValue() )
