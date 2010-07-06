@@ -45,6 +45,7 @@ IE_CORE_DEFINERUNTIMETYPED( MarschnerLookupTableOp );
 
 static TypeId objectTypes[] = { ImagePrimitiveTypeId, InvalidTypeId };
 
+
 MarschnerLookupTableOp::MarschnerLookupTableOp()
 	:	Op(
 		"Calculates a 2D lookup table as a multi-channel image, for the supplied Marscher shading model parameters.",
@@ -56,9 +57,29 @@ MarschnerLookupTableOp::MarschnerLookupTableOp()
 		)
 	)
 {
+	createParameters( true );
+}
+
+MarschnerLookupTableOp::MarschnerLookupTableOp( const bool absorptionAsColor )
+	:	Op(
+		"Calculates a 2D lookup table as a multi-channel image, for the supplied Marscher shading model parameters.",
+		new ObjectParameter(
+			"result",
+			"A mult-channel ImagePrimitive",
+			new ImagePrimitive(),
+			objectTypes
+		)
+	)
+{
+	createParameters( absorptionAsColor );
+}
+
+void MarschnerLookupTableOp::createParameters( const bool asColor )
+{
 	m_modelParameter = new MarschnerParameter(
 		"model",
-		"The parameters for the shading model"
+		"The parameters for the shading model",
+		asColor
 	);
 	
 	m_resolutionParameter = new IntParameter(
@@ -71,6 +92,7 @@ MarschnerLookupTableOp::MarschnerLookupTableOp()
 	parameters()->addParameter( m_modelParameter );
 	parameters()->addParameter( m_resolutionParameter );
 }
+
 
 MarschnerLookupTableOp::~MarschnerLookupTableOp()
 {

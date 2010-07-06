@@ -63,7 +63,16 @@ class MarschnerLookupTableOpTest( unittest.TestCase ) :
 		diffOp = IECore.ImageDiffOp()
 		diff = diffOp( imageA = result, imageB = expectedResult ).value
 		
-		self.failIf( diff )					
+		self.failIf( diff )
+		
+	def testInit( self ) :
+		
+		op = IECore.MarschnerLookupTableOp()
+		self.failUnless( "color" in op.parameters()["model"] )
+		
+		op = IECore.MarschnerLookupTableOp( False )
+		self.failUnless( "absorption" in op.parameters()["model"] )
+		
 		
 if __name__ == "__main__":
 	unittest.main()

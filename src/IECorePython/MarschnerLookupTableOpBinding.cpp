@@ -49,6 +49,7 @@ void bindMarschnerLookupTableOp()
 {
 	RunTimeTypedClass<MarschnerLookupTableOp>()
 		.def( init<>() )
+		.def( init<const bool>() )
 	;
 }
 

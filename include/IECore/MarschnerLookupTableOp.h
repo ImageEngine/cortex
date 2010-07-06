@@ -84,6 +84,10 @@ class MarschnerLookupTableOp : public Op
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MarschnerLookupTableOp, MarschnerLookupTableOpTypeId, Op );
 
 		MarschnerLookupTableOp();
+		/// \param absorptionAsColor Switches the behaviour of the MarschnerParameter
+		/// \see MarschnerParameter
+		MarschnerLookupTableOp( const bool absorptionAsColor );
+		
 		virtual ~MarschnerLookupTableOp();
 
 		/// The parameters for Marschner model to be evaluated.
@@ -99,6 +103,8 @@ class MarschnerLookupTableOp : public Op
 		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
+	
+		void createParameters( const bool asColor );
 
 		MarschnerParameterPtr m_modelParameter;
 		IntParameterPtr m_resolutionParameter;
