@@ -75,12 +75,13 @@ class SXExecutor : public boost::noncopyable
 
 	private :
 
-		IECore::TypeId predefinedParameterType( const char *name ) const;
+		SxType predefinedParameterType( const char *name ) const;
 		
 		void setVariables( SxParameterList parameterList, SxShader targetShader, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
-				
-		template<typename T>
-		void setVariable( SxParameterList parameterList, const char *name, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
+		
+		void setVariable( SxParameterList parameterList, const char *name, SxType type, bool predefined, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
+		template<SxType>
+		void setVariable2( SxParameterList parameterList, const char *name, bool predefined, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
 		
 		template<typename T>
 		void getVariable( SxShader shader, const char *name, IECore::CompoundData *container ) const;

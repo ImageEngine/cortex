@@ -457,6 +457,28 @@ class SXRendererTest( unittest.TestCase ) :
 									
 			for i in range( 0, len( points["P"] ) ) :
 				self.assertEqual( s["Ci"][i], IECore.Color3f( 0 ) )
+	
+	def testNonPredefinedPrimitiveVariables( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sdl test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			points["colorPrimVar"] = IECore.Color3fVectorData( [ IECore.Color3f( v[0], v[1], v[2] ) for v in points["P"] ] )
+			points["floatPrimVar"] = points["s"]
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+									
+			for i in range( 0, len( points["P"] ) ) :
+				c = points["colorPrimVar"][i]
+				c[0] = points["s"][i]
+				self.assertEqual( s["Ci"][i], c )
 			
 	def tearDown( self ) :
 		
