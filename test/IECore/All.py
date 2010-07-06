@@ -234,6 +234,7 @@ from LimitSmoothSkinningInfluencesOpTest import LimitSmoothSkinningInfluencesOpT
 from MixSmoothSkinningWeightsOpTest import MixSmoothSkinningWeightsOpTest
 from SmoothSmoothSkinningWeightsOpTest import SmoothSmoothSkinningWeightsOpTest
 from PointSmoothSkinningOpTest import PointSmoothSkinningOpTest
+from AddAndRemoveSmoothSkinningInfluencesOpTest import AddAndRemoveSmoothSkinningInfluencesOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
