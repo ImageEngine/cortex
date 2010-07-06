@@ -72,8 +72,8 @@ void main()
 	vec4 comps2 = texture2D( lookupN, lookupcoord2 );
 	vec4 comps3 = texture2D( lookupNTRT, lookupcoord2 );
 	
-	//                       MR         NR                     MTT         NTT                       MTRT        NTRT
-	vec3 marschner = vec3( comps1.x * comps2.a * scaleR ) + ( comps1.y * comps2.xyz * scaleTT ) + ( comps1.z * comps3.xyz * scaleTRT );
+	//                       MR         NR                                     MTT         NTT                                      MTRT        NTRT
+	vec3 marschner = vec3( comps1.x * comps2.a * scaleR ) + ( gl_Color.xyz * comps1.y * comps2.xyz * scaleTT ) + ( gl_Color.xyz * comps1.z * comps3.xyz * scaleTRT );
 	vec3 diffuse = gl_Color.xyz * mix( 1.0, cosThetaI, diffuseFalloff ) * mix( 1.0, cosHalfPhi, diffuseAzimuthFalloff ); 
 
 	gl_FragColor = vec4( marschner * gl_LightSource[0].specular.rgb + ( diffuse * scaleDiffuse * gl_LightSource[0].diffuse.rgb ), 1.0 );	
