@@ -94,11 +94,15 @@ struct CompoundObjectTest
 		try
 		{
 			IntData *i = c->member<IntData>( "floatElement", true );
-			BOOST_CHECK( "" == "Exception not thrown during invalid member retrieval." );		
+			BOOST_CHECK( "" == "Exception not thrown during invalid member retrieval." );
 			BOOST_CHECK( !i );
+		}
+		catch ( const Exception &e ) 
+		{
 		}
 		catch ( std::exception &e ) 
 		{
+			BOOST_CHECK( "" == "Exception should be of type IECore::Exception." );		
 		}
 		try
 		{
@@ -106,8 +110,12 @@ struct CompoundObjectTest
 			BOOST_CHECK( "" == "Exception not thrown during missing member retrieval." );
 			BOOST_CHECK( !s );		
 		}
+		catch ( const Exception &e ) 
+		{
+		}
 		catch ( std::exception &e ) 
 		{
+			BOOST_CHECK( "" == "Exception should be of type IECore::Exception." );		
 		}
 		
 		try
