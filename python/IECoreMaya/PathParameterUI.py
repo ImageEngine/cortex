@@ -147,12 +147,15 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 	##  - obeyDefaultPath (IECore.BoolData()) If True, the default path will
 	##     be used, regardless of the curent parameter value. Otherwise, the
 	##     parent directory of the current path is used.
-	def _initialPath( self ) :
+	def _initialPath( self, parameter=None ) :
 		
-		uiUserData = self.parameter.userData().get( 'UI', {} )
+		if not parameter:
+			parameter = self.parameter
+		
+		uiUserData = parameter.userData().get( 'UI', {} )
 		dialogPath = uiUserData.get( 'defaultPath', IECore.StringData() ).value
 		obeyDefaultPath = uiUserData.get( 'obeyDefaultPath', IECore.BoolData( False ) ).value
-		currentPath = self.parameter.getTypedValue()
+		currentPath = parameter.getTypedValue()
 		
 		if currentPath and not obeyDefaultPath :
 			dialogPath = os.path.dirname( currentPath )
