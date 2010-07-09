@@ -46,6 +46,7 @@
 #include "maya/MDGModifier.h"
 #include "maya/MGlobal.h"
 #include "maya/MItGeometry.h"
+#include "maya/MFnNumericAttribute.h"
 #include "maya/MObjectArray.h"
 #include "maya/MPlug.h"
 #include "maya/MPlugArray.h"
@@ -162,9 +163,17 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		influenceList.getDependNode( i, mObj );
 		MFnDependencyNode fnInfluence( mObj );
 		MPlug influenceMatrixPlug = fnInfluence.findPlug( "worldMatrix", true, &s ).elementByLogicalIndex( 0, &s );
-		MPlug influenceLockPlug = fnInfluence.findPlug( "lockInfluenceWeights", true, &s );
 		MPlug influenceMessagePlug = fnInfluence.findPlug( "message", true, &s );
 		MPlug influenceBindPosePlug = fnInfluence.findPlug( "bindPose", true, &s );
+		MPlug influenceLockPlug = fnInfluence.findPlug( "lockInfluenceWeights", true, &s );
+		if ( !s )
+		{
+			// add the lockInfluenceWeights attribute if it doesn't exist
+			MFnNumericAttribute nAttr;
+			MObject attribute = nAttr.create( "lockInfluenceWeights", "liw", MFnNumericData::kBoolean, false );
+			fnInfluence.addAttribute( attribute );
+			influenceLockPlug = fnInfluence.findPlug( "lockInfluenceWeights", true, &s );
+		}
 		
 		// connect influence to the skinCluster
 		MPlug matrixPlug = matrixArrayPlug.elementByLogicalIndex( i );
