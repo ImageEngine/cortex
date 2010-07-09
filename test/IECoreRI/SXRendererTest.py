@@ -37,6 +37,7 @@ from __future__ import with_statement
 import unittest
 import os
 import sys
+import threading
 
 import IECore
 import IECoreRI
@@ -123,7 +124,7 @@ class SXRendererTest( unittest.TestCase ) :
 		} )
 				
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxTest.sdl test/IECoreRI/shaders/sxTest.sl" ), 0 )
-		
+				
 		r.shader( "surface", "test/IECoreRI/shaders/sxTest.sdl", { "noiseFrequency" : 1.0, "tint" : IECore.Color3f( 1 ) } )
 		
 		s = r.shade( points )
@@ -168,9 +169,8 @@ class SXRendererTest( unittest.TestCase ) :
 		
 		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/spline.cob" ).read() )
 			
-	# the sx library seems to crash if we don't provide every single predefined variable
-	# it wants. but we want to allow users to not specify everything if they don't want to,
-	# so we try to provide defaults to prevent the crash.
+	# make sure that users don't have to provide values for every varying shader parameter if
+	# they don't want to. this used to crash.
 	def testMissingPredefinedVariables( self ) :
 	
 		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
@@ -333,10 +333,12 @@ class SXRendererTest( unittest.TestCase ) :
 			
 			s = r.shade( points )
 			del s["P"] # test data on disk was created before we supported P as an output
+			del s["N"] # test data on disk was created before we supported N as an output
 			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/noGrid.cob" ).read() )
 					
 			s = r.shade( points, IECore.V2i( 21, 11 ) )
 			del s["P"] # test data on disk was created before we supported P as an output
+			del s["N"] # test data on disk was created before we supported N as an output
 			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/grid.cob" ).read() )
 
 	def testPlaneShade( self ) :
@@ -347,6 +349,8 @@ class SXRendererTest( unittest.TestCase ) :
 		r.shader( "surface", "test/IECoreRI/shaders/sxStTest.sdl", {} )
 		
 		data = r.shadePlane( IECore.V2i( 64, 64 ) )
+		del data["P"]
+		del data["N"]
 		self.assertEqual( data, IECore.Reader.create( "test/IECoreRI/data/sxOutput/shadePlaneCompoundData.cob" ).read() )
 		
 		image = r.shadePlaneToImage( IECore.V2i( 64, 64 ) )
@@ -450,13 +454,6 @@ class SXRendererTest( unittest.TestCase ) :
 			for i in range( 0, len( points["P"] ) ) :
 				c = s["Ci"][i]
 				self.assertEqual( points["P"][i], IECore.V3f( c[0], c[1], c[2] ) )
-			
-			r.illuminate( "light0", False )
-			
-			s = r.shade( points, IECore.V2i( 21, 11 ) )
-									
-			for i in range( 0, len( points["P"] ) ) :
-				self.assertEqual( s["Ci"][i], IECore.Color3f( 0 ) )
 	
 	def testNonPredefinedPrimitiveVariables( self ) :
 	
@@ -480,6 +477,180 @@ class SXRendererTest( unittest.TestCase ) :
 				c[0] = points["s"][i]
 				self.assertEqual( s["Ci"][i], c )
 
+	def testNonPredefinedPrimitiveVariablesForCoshaders( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxCoshaderTestMain.sdl test/IECoreRI/shaders/sxCoshaderTestMain.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxCoshaderTest.sdl test/IECoreRI/shaders/sxCoshaderTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+					
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			points["colorPrimVar"] = IECore.Color3fVectorData( [ IECore.Color3f( v[0], v[1], v[2] ) for v in points["P"] ] )
+			
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "__handle" : "cs1" } )
+			r.shader( "surface", "test/IECoreRI/shaders/sxCoshaderTestMain", { "coshaders" : IECore.StringVectorData( [ "cs1" ] ) } )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+
+			self.assertEqual( s["Ci"], points["colorPrimVar"] )
+
+	def testThreading( self ) :
+	
+		# set up a renderer with a shader in it
+		
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxTest.sdl test/IECoreRI/shaders/sxTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		r.shader( "surface", "test/IECoreRI/shaders/sxTest.sdl", { "noiseFrequency" : 1.0, "tint" : IECore.Color3f( 1 ) } )
+
+		# and get some points to shade
+		
+		points = IECore.CompoundData( {
+		
+			"N" : self.__loadImage( "test/IECoreRI/data/sxInput/cowN.exr" ),
+			"Ng" : self.__loadImage( "test/IECoreRI/data/sxInput/cowN.exr" ),
+			"P" : self.__loadImage( "test/IECoreRI/data/sxInput/cowP.exr" ),
+			"I" : self.__loadImage( "test/IECoreRI/data/sxInput/cowI.exr" ),
+	
+		} )
+
+		# shade in lots of different threads at the same time
+		
+		def s( i ) :
+		
+			results[i] = r.shade( points )
+		
+		threads = []
+		results = []
+		for i in range( 0, 300 ) :
+			threads.append( threading.Thread( target = IECore.curry( s, i ) ) )
+			results.append( None )
+		
+		for t in threads :
+			t.start()
+			
+		for t in threads :
+			t.join()
+				
+		# and check that it all worked
+		
+		cowFloat = IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowFloat.cob" ).read()
+		cowColor = IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowColor.cob" ).read()	
+		cowCI =	IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowCI.cob" ).read()
+		cowOI = IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowOI.cob" ).read()
+		
+		for s in results :
+		
+			self.assertEqual( len( s ), 6 )
+			self.failUnless( "outputFloat" in s )
+			self.failUnless( "outputColor" in s )
+			self.failUnless( "Ci" in s )
+			self.failUnless( "Oi" in s )
+			self.failUnless( "P" in s )
+			self.failUnless( "N" in s )
+
+			self.assertEqual( s["outputFloat"], cowFloat )
+			self.assertEqual( s["outputColor"], cowColor )
+			self.assertEqual( s["Ci"], cowCI )
+			self.assertEqual( s["Oi"], cowOI )
+
+	def testGetVar( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxGetVarTest.sdl test/IECoreRI/shaders/sxGetVarTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+					
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			points["floatValue1"] = points["s"]
+			points["floatValue2"] = points["t"]
+			
+			r.shader( "surface", "test/IECoreRI/shaders/sxGetVarTest", { } )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+
+			for i in range( 0, len( s["Ci"] ) ) :
+				self.assertEqual( s["Ci"][i], IECore.Color3f( 0, points["floatValue1"][i], points["floatValue2"][i] ) )
+
+	def testGetShaderInConstruct( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxGetShaderTest.sdl test/IECoreRI/shaders/sxGetShaderTest.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxCoshaderTest.sdl test/IECoreRI/shaders/sxCoshaderTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+					
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "__handle" : "cs1", "sColor" : IECore.Color3f( 0, 1, 0 ), } )
+			r.shader( "surface", "test/IECoreRI/shaders/sxGetShaderTest", { "coshader" : IECore.StringData( "cs1" ) } )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+
+			for i in range( 0, len( points["P"] ) ) :
+				self.assertEqual( s["Ci"][i], IECore.Color3f( 0, points["s"][i], 0 ) )
+
+	def testCoshadersStack( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxCoshaderTest.sdl test/IECoreRI/shaders/sxCoshaderTest.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxCoshaderTestMain.sdl test/IECoreRI/shaders/sxCoshaderTestMain.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) )
+		points = self.__rectanglePoints( b )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "shaderColor" : IECore.Color3f( 1, 0, 0 ), "__handle" : "cs1" } )
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "sColor" : IECore.Color3f( 0, 1, 0 ), "__handle" : "cs2" } )
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "tColor" : IECore.Color3f( 0, 0, 1 ), "__handle" : "cs3" } )
+			
+			with IECore.AttributeBlock( r ) :
+			
+				# these guys should be popped and therefore not affect the result
+				r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "shaderColor" : IECore.Color3f( 1, 1, 1 ), "__handle" : "cs1" } )
+				r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "sColor" : IECore.Color3f( 1, 1, 0 ), "__handle" : "cs2" } )
+				r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "tColor" : IECore.Color3f( 0.5, 0, 0.25 ), "__handle" : "cs3" } )
+			
+			r.shader( "surface", "test/IECoreRI/shaders/sxCoshaderTestMain", { "coshaders" : IECore.StringVectorData( [ "cs1", "cs2", "cs3" ] ) } )
+		
+			s = r.shade( points )
+					
+		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/coshaders.cob" ).read() )
+
+	def testLightsStack( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxLightTest.sdl test/IECoreRI/shaders/sxLightTest.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxIlluminanceTest.sdl test/IECoreRI/shaders/sxIlluminanceTest.sl" ), 0 )
+	
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/sxIlluminanceTest", {} )
+			r.light( "test/IECoreRI/shaders/sxLightTest", "light0", {} )
+			
+			with IECore.AttributeBlock( r ) :
+				# this guy should be popped and therefore not affect the result
+				r.light( "test/IECoreRI/shaders/sxLightTest", "light1", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+									
+			for i in range( 0, len( points["P"] ) ) :
+				c = s["Ci"][i]
+				self.assertEqual( points["P"][i], IECore.V3f( c[0], c[1], c[2] ) )
+				
 	def tearDown( self ) :
 		
 		files = [
@@ -495,6 +666,8 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxLightTest.sdl",
 			"test/IECoreRI/shaders/sxStTest.sdl",
 			"test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sdl",
+			"test/IECoreRI/shaders/sxGetVarTest.sdl",
+			"test/IECoreRI/shaders/sxGetShaderTest.sdl",
 		]
 		
 		for f in files :

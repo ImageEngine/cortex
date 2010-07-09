@@ -64,6 +64,7 @@ using namespace boost;
 
 SXRendererImplementation::State::State()
 	:	attributes( new CompoundData() ),
+		context( SxContextPtr( SxCreateContext(), SxDestroyContext ) ),
 		displacementShader( 0 ), surfaceShader( 0 ),
 		atmosphereShader( 0 ), imagerShader( 0 )
 	
@@ -72,6 +73,7 @@ SXRendererImplementation::State::State()
 
 SXRendererImplementation::State::State( const State &other, bool deepCopy )
 	:	attributes( deepCopy ? other.attributes->copy() : other.attributes ),
+		context( deepCopy ? SxContextPtr( SxCreateContext( other.context.get() ), SxDestroyContext ) : other.context ),
 		displacementShader( other.displacementShader ),
 		surfaceShader( other.surfaceShader ),
 		atmosphereShader( other.atmosphereShader ),
@@ -90,7 +92,7 @@ SXRendererImplementation::State::~State()
 ////////////////////////////////////////////////////////////////////////
 
 IECoreRI::SXRendererImplementation::SXRendererImplementation( IECoreRI::SXRenderer *parent )
-	:	m_parent( parent ), m_context( SxCreateContext() ), m_inWorld( false )
+	:	m_parent( parent ), m_inWorld( false )
 {
 	m_stateStack.push( State() );
 	setAttribute( "color", new IECore::Color3fData( Color3f( 1 ) ) );
@@ -99,19 +101,18 @@ IECoreRI::SXRendererImplementation::SXRendererImplementation( IECoreRI::SXRender
 	const char *shaderSearchPath = getenv( "DL_SHADERS_PATH" );
 	if( shaderSearchPath )
 	{
-		SxSetOption( m_context, "searchpath:shader", SxString, (SxData)&shaderSearchPath );
+		SxSetOption( m_stateStack.top().context.get(), "searchpath:shader", SxString, (SxData)&shaderSearchPath );
 	}
 	
 	const char *textureSearchPath = getenv( "DL_TEXTURES_PATH" );
 	if( textureSearchPath )
 	{
-		SxSetOption( m_context, "searchpath:texture", SxString, (SxData)&textureSearchPath );
+		SxSetOption( m_stateStack.top().context.get(), "searchpath:texture", SxString, (SxData)&textureSearchPath );
 	}
 }
 
 IECoreRI::SXRendererImplementation::~SXRendererImplementation()
 {
-	SxDestroyContext( m_context );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -290,25 +291,12 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 void IECoreRI::SXRendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
 	SxShader s = createShader( name.c_str(), 0, parameters );
-	if( s )
-	{
-		Light &l = m_stateStack.top().lights[handle];
-		l.shader = s;
-		l.active = true;
-	}
+	m_stateStack.top().lights.push_back( s );
 }
 
 void IECoreRI::SXRendererImplementation::illuminate( const std::string &lightHandle, bool on )
 {
-	LightMap::iterator it = m_stateStack.top().lights.find( lightHandle );
-	if( it!=m_stateStack.top().lights.end() )
-	{
-		it->second.active = on;
-	}
-	else
-	{
-		msg( Msg::Error, "IECoreRI::SXRendererImplementation::illuminate", boost::format( "Invalid light handle \"%s\"" ) % lightHandle );
-	}
+	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::illuminate", "Not implemented" );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -419,9 +407,13 @@ IECore::DataPtr IECoreRI::SXRendererImplementation::command( const std::string &
 
 SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, const char *handle, const IECore::CompoundDataMap &parameters ) const
 {
-	// create a shader which we'll use just for getting information from
+	// create a shader which we'll use just for getting information from. we have to do this
+	// in a temporary context created just for the purpose, so that we don't end up making two shaders
+	// in the context we actually care about.
 	
-	SxShader shaderInfo = SxCreateShader( m_context, 0, name, 0 );
+	boost::shared_ptr<void> tmpContext( SxCreateContext( m_stateStack.top().context.get() ), SxDestroyContext );
+	
+	SxShader shaderInfo = SxCreateShader( tmpContext.get(), 0, name, 0 );
 	if( !shaderInfo )
 	{
 		// 3delight will have printed a warning already.
@@ -430,7 +422,7 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 	
 	// convert the parameter list for the shader
 		
-	SxParameterList parameterList = SxCreateParameterList( m_context, 1, "shader" );
+	SxParameterList parameterList = SxCreateParameterList( m_stateStack.top().context.get(), 1, "shader" );
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
 		if( it->first=="__handle" )
@@ -563,8 +555,8 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::createShader", boost::format( "Unsupported parameter type \"%s\"" ) % it->second->typeName() );
 		}
 	}
-	
-	return SxCreateShader( m_context, parameterList, name, handle );
+		
+	return SxCreateShader( m_stateStack.top().context.get(), parameterList, name, handle );
 }
 
 IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore::CompoundData *points ) const
@@ -599,16 +591,7 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore:
 		throw Exception( "No shaders specified" );
 	}
 	
-	SXExecutor::ShaderVector lights;
-	for( LightMap::const_iterator it=state.lights.begin(); it!=state.lights.end(); it++ )
-	{
-		if( it->second.active )
-		{
-			lights.push_back( it->second.shader );
-		}
-	}
-	
-	SXExecutor executor( &shaders, &m_stateStack.top().coshaders, &lights );
+	SXExecutor executor( shaders, m_stateStack.top().context.get(), m_stateStack.top().coshaders, m_stateStack.top().lights );
 	return executor.execute( points, gridSize );
 }
 
@@ -650,7 +633,7 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shadePlane( const V2
 	}	
 	
 	points->writable()[ "P" ] = pData;
-	points->writable()[ "n" ] = nData;
+	points->writable()[ "N" ] = nData;
 	points->writable()[ "s" ] = sData;
 	points->writable()[ "t" ] = tData;
 	

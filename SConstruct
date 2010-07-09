@@ -1171,7 +1171,7 @@ if doConfigure :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
 		
-		if c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxSetParameterListGridTopology" ) :
+		if c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )

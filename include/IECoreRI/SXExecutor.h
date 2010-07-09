@@ -55,17 +55,17 @@ class SXExecutor : public boost::noncopyable
 	
 		typedef std::vector<SxShader> ShaderVector;
 	
-		/// Constructs an executor for the specified set of shaders, coshaders and lights.
-		/// The shaders in the shaders parameter will be run in sequence, with the output from
-		/// one forming the input to the next. It is the caller's responsibility to ensure that the ShaderVectors
-		/// remain alive for as long as the executor is in use.
-		SXExecutor( const ShaderVector *shaders, const ShaderVector *coshaders = 0, const ShaderVector *lights = 0 );
+		/// Constructs an executor for the specified set of shaders - the shaders in the shaders parameter will be
+		/// run in sequence, with the output from one forming the input to the next. Due to quirks of the Sx API,
+		/// you must also pass the context the shaders were created in, and the coshaders and lights from that context.
+		/// It is the caller's responsibility to ensure that the context and ShaderVectors remain alive for as long as the executor is in use.
+		SXExecutor( const ShaderVector &shaders, SxContext context, const ShaderVector &coshaders, const ShaderVector &lights );
 
-		/// Executes the shader for the specified points. The points are considered
+		/// Executes the shaders for the specified points. The points are considered
 		/// to have no specific connectivity, meaning that area and filtering functions
 		/// will be effectively disabled during shader execution.
 		IECore::CompoundDataPtr execute( const IECore::CompoundData *points ) const;
-		/// Executes the shader for the specified points. The points are considered to
+		/// Executes the shaders for the specified points. The points are considered to
 		/// have a grid topology of the specified dimensions in u and v space, and this
 		/// topology will be used to implement proper filtering and area functions. u, v, du and dv
 		/// shading variables will be automatically calculated if not provided but they may also
@@ -76,19 +76,26 @@ class SXExecutor : public boost::noncopyable
 	private :
 
 		SxType predefinedParameterType( const char *name ) const;
-		
-		void setVariables( SxParameterList parameterList, SxShader targetShader, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
-		
-		void setVariable( SxParameterList parameterList, const char *name, SxType type, bool predefined, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
+		SxType assumedParameterType( IECore::TypeId type ) const;
+				
+		void setVariables( SxParameterList parameterList, const IECore::CompoundData *points, size_t expectedSize ) const;		
+		void setVariable( SxParameterList parameterList, const char *name, SxType type, bool predefined, const IECore::Data *data, size_t expectedSize ) const;
 		template<SxType>
-		void setVariable2( SxParameterList parameterList, const char *name, bool predefined, SxShader previousShader, const IECore::CompoundData *points, size_t expectedSize ) const;
+		void setVariable2( SxParameterList parameterList, const char *name, bool predefined, const IECore::Data *data, size_t expectedSize ) const;
 		
-		template<typename T>
-		void getVariable( SxShader shader, const char *name, IECore::CompoundData *container ) const;
+		IECore::CompoundDataPtr getVariables( SxParameterList parameterList ) const;
+		template<SxType>
+		void getVariable( SxParameterList parameterList, const char *name, IECore::CompoundData *result ) const;
 
-		const ShaderVector *m_shaders;
-		const ShaderVector *m_coshaders;
-		const ShaderVector *m_lights;
+		SxContext m_context;
+		const ShaderVector &m_shaders;
+		const ShaderVector &m_coshaders;
+		const ShaderVector &m_lights;
+		
+		void storeParameterTypes( SxShader shader );
+		typedef std::map<IECore::InternedString, SxType> TypeMap;
+		TypeMap m_inputParameterTypes;
+		TypeMap m_outputParameterTypes;
 
 };
 

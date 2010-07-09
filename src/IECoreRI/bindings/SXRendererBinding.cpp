@@ -34,9 +34,11 @@
 
 #include <boost/python.hpp>
 
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
+
 #include "IECoreRI/SXRenderer.h"
 #include "IECoreRI/bindings/SXRendererBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;
@@ -44,14 +46,38 @@ using namespace IECorePython;
 namespace IECoreRI
 {
 
+static IECore::CompoundDataPtr shade( SXRendererPtr r, const IECore::CompoundDataPtr points )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return r->shade( points );
+}
+
+static IECore::CompoundDataPtr shade2( SXRendererPtr r, const IECore::CompoundDataPtr points, const Imath::V2i &gridSize )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return r->shade( points, gridSize );
+}
+
+static IECore::CompoundDataPtr shadePlane( SXRendererPtr r, const Imath::V2i &resolution )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return r->shadePlane( resolution );
+}
+
+static IECore::ImagePrimitivePtr shadePlaneToImage( SXRendererPtr r, const Imath::V2i &resolution )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return r->shadePlaneToImage( resolution );
+}
+
 void bindSXRenderer()
 {
 	RunTimeTypedClass<SXRenderer>()
 		.def( init<>() )
-		.def( "shade", (IECore::CompoundDataPtr (SXRenderer::*)( const IECore::CompoundData *points ) const )&SXRenderer::shade )
-		.def( "shade", (IECore::CompoundDataPtr (SXRenderer::*)( const IECore::CompoundData *points, const Imath::V2i & ) const )&SXRenderer::shade )
-		.def( "shadePlane", &SXRenderer::shadePlane )
-		.def( "shadePlaneToImage", &SXRenderer::shadePlaneToImage )
+		.def( "shade", &shade )
+		.def( "shade", &shade2 )
+		.def( "shadePlane", &shadePlane )
+		.def( "shadePlaneToImage", &shadePlaneToImage )
 	;
 }
 

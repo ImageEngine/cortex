@@ -120,18 +120,8 @@ class SXRendererImplementation : public IECore::Renderer
 		SxShader createShader( const char *name, const char *handle, const IECore::CompoundDataMap &parameters ) const;
 		
 		SXRenderer *m_parent;
-		// in an ideal world we'd have one context for each State, but as it stands the Sx library
-		// doesn't appear to properly support the parenting of contexts even though it implies it
-		// should in the documentation. furthermore i can't get SxSetAttribute to have any effect at
-		// all so there's not much point anyway right now.
-		SxContext m_context;
 		
-		struct Light
-		{
-			SxShader shader;
-			bool active;
-		};
-		typedef std::map<std::string, Light> LightMap;
+		typedef boost::shared_ptr<void> SxContextPtr;
 		
 		struct State
 		{
@@ -139,12 +129,13 @@ class SXRendererImplementation : public IECore::Renderer
 			State( const State &other, bool deepCopy );
 			~State();
 			IECore::CompoundDataPtr attributes;
+			SxContextPtr context;
 			SxShader displacementShader;
 			SxShader surfaceShader;
 			SxShader atmosphereShader;
 			SxShader imagerShader;
 			SXExecutor::ShaderVector coshaders;
-			LightMap lights;
+			SXExecutor::ShaderVector lights;
 		};
 		typedef std::stack<State> StateStack;
 		
