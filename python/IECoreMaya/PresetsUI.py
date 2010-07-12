@@ -136,9 +136,9 @@ class ParamSelectUI( UIElement ) :
 		self._envVar = parameterised[3].replace( "_PATHS", "_PRESET_PATHS" )
 
 		if self._envVar not in os.environ :
-			maya.cmds.confirmDialog( message="Environment variable not set:\n\n$%s\n\nPlease set "+\
+			maya.cmds.confirmDialog( message="Environment variable not set:\n\n$%s\n\nPlease set "%self._envVar+\
 			"this variable to point to one or more paths.\nPresets can then be saved to these "+\
-			"locations." % self._envVar, button="OK" )
+			"locations.", button="OK" )
 			return
 
 		self._window = maya.cmds.window(
