@@ -287,6 +287,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 
 	}
 
+	Slo_EndShader();
 	return result;
 }
 
