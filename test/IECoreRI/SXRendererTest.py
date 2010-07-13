@@ -325,14 +325,15 @@ class SXRendererTest( unittest.TestCase ) :
 		
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 4 ) )
 		points = self.__rectanglePoints( b )
+		points["forGetVar"] = IECore.Color3fVectorData( [ IECore.Color3f( x[0], x[1], x[2] ) for x in points["P"] ] )
 		
 		with IECore.WorldBlock( r ) :
 		
-			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "primVarName" : "N", "__handle" : "cs1" } )
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "primVarName" : "forGetVar", "__handle" : "cs1" } )
 			r.shader( "surface", "test/IECoreRI/shaders/sxCoshaderTestMain", { "coshaders" : IECore.StringVectorData( [ "cs1" ] ) } )
 			s = r.shade( points )
 					
-		self.assertEqual( s["Ci"], points['N'] )
+		self.assertEqual( s["Ci"], points["forGetVar"] )
 	
 	def testGrids( self ) :
 	
