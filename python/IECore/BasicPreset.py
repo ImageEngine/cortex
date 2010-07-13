@@ -369,7 +369,7 @@ class %s( IECore.BasicPreset ):
 		
 		try:
 			parameter.setValue( data["_value_"] )
-		except Exception as e:
+		except Exception, e:
 			print e
 		
 	def __applyClassParameter_v1( self, parameterised, parameter, data ) :
