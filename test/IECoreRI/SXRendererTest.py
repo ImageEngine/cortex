@@ -315,6 +315,24 @@ class SXRendererTest( unittest.TestCase ) :
 			s = r.shade( points )
 					
 		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/coshaders.cob" ).read() )
+
+	def testCoshadersWithGetVar( self ) :
+
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxCoshaderTest.sdl test/IECoreRI/shaders/sxCoshaderTest.sl" ), 0 )
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxCoshaderTestMain.sdl test/IECoreRI/shaders/sxCoshaderTestMain.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 4 ) )
+		points = self.__rectanglePoints( b )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "primVarName" : "N", "__handle" : "cs1" } )
+			r.shader( "surface", "test/IECoreRI/shaders/sxCoshaderTestMain", { "coshaders" : IECore.StringVectorData( [ "cs1" ] ) } )
+			s = r.shade( points )
+					
+		self.assertEqual( s["Ci"], points['N'] )
 	
 	def testGrids( self ) :
 	
