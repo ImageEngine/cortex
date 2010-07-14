@@ -669,6 +669,20 @@ class SXRendererTest( unittest.TestCase ) :
 			for i in range( 0, len( points["P"] ) ) :
 				c = s["Ci"][i]
 				self.assertEqual( points["P"][i], IECore.V3f( c[0], c[1], c[2] ) )
+
+	def testZeroLength( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+		
+		r.shader( "surface", "test/IECoreRI/shaders/splineTest.sdl", {} )
+				
+		p = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 10 ) ) )
+		for k, v in p.items() :
+			del v[:]
+		
+		self.assertRaises( RuntimeError, r.shade, p )
 				
 	def tearDown( self ) :
 		

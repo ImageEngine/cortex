@@ -75,6 +75,10 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points,
 
 	const V3fVectorData *p = points->member<V3fVectorData>( "P", true /* throw */ );
 	size_t numPoints = p->readable().size();
+	if( !numPoints )
+	{
+		throw Exception( "\"P\" has zero length." );
+	}
 	
 	bool haveGrid = gridSize.x > 0 && gridSize.y > 0;
 	if( haveGrid )
