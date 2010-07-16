@@ -60,11 +60,17 @@ class EXRImageReader : public ImageReader
 
 		static bool canRead( const std::string &filename );
 
+		virtual CompoundObjectPtr readHeader();
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
 		virtual std::string sourceColorSpace() const ;
+
+	protected:
+
+		// overwrites base implementation by adding blind data values from header information.
+		virtual ObjectPtr doOperation( const CompoundObject *operands );
 
 	private:
 

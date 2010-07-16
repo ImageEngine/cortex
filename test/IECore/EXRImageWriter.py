@@ -217,6 +217,57 @@ class TestEXRWriter(unittest.TestCase):
 
 		self.__verifyImageRGB( imgNew, imgExpected )
 
+	def testBlindDataToHeader( self ) :
+
+		displayWindow = Box2i(
+			V2i( 0, 0 ),
+			V2i( 9, 9 )
+		)
+		dataWindow = displayWindow
+
+		headerValues = {
+				"one": IntData( 1 ),
+				"two": FloatData( 2 ),
+				"three": DoubleData( 3 ),
+				"four" : {
+					"five": V2fData( V2f(5) ),
+					"six": V2iData( V2i(6) ),
+					"seven": V3fData( V3f(7) ),
+					"eight": V3iData( V3i(8) ),
+					"nine": {
+						"ten": Box2iData( Box2i( V2i(0), V2i(10) ) ),
+						"eleven": Box2fData( Box2f( V2f(0), V2f(11) ) ),
+						"twelve": M33fData( M33f(12) ),
+						"thirteen": M44fData( M44f(13) ),
+					},
+					"fourteen": StringData( "fourteen" ),
+				}
+			}
+
+		imgOrig = self.__makeFloatImage( dataWindow, dataWindow )
+		imgOrig.blindData().update( headerValues.copy() )
+		# now add some unsupported types
+		imgOrig.blindData()['notSupported1'] = FloatVectorData( [ 1,2,3] )
+		imgOrig.blindData()['four']['notSupported2'] = DoubleVectorData( [1,2,3] )
+
+		w = Writer.create( imgOrig, "test/IECore/data/exrFiles/output.exr" )
+		self.assertEqual( type(w), EXRImageWriter )
+		w.write()
+
+		self.assert_( os.path.exists( "test/IECore/data/exrFiles/output.exr" ) )
+
+		r = Reader.create( "test/IECore/data/exrFiles/output.exr" )
+		imgNew = r.read()
+		imgBlindData = imgNew.blindData()
+		# eliminate default header info that comes on EXR..
+		del imgBlindData['screenWindowCenter']
+		del imgBlindData['displayWindow']
+		del imgBlindData['dataWindow']
+		del imgBlindData['pixelAspectRatio']
+		del imgBlindData['screenWindowWidth']
+
+		self.assertEqual( imgBlindData, CompoundData( headerValues ) )
+
 	def setUp( self ) :
 
 		if os.path.isfile( "test/IECore/data/exrFiles/output.exr") :

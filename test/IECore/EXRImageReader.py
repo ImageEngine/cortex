@@ -318,6 +318,23 @@ class TestEXRReader(unittest.TestCase):
 		self.assertEqual( m.messages[1].level, Msg.Level.Warning )
 		self.assertEqual( m.messages[2].level, Msg.Level.Warning )
 
+	def testHeaderToBlindData( self ) :
+
+		dictHeader = {
+			'screenWindowCenter': V2fData( V2f(0,0) ),
+			'displayWindow': Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ),
+			'dataWindow': Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ),
+			'pixelAspectRatio': FloatData( 1 ),
+			'screenWindowWidth': FloatData( 1 ),
+		}
+
+		r = Reader.create( "test/IECore/data/exrFiles/uvMap.512x256.exr" )
+		header = r.readHeader()
+		del header['channelNames']
+		self.assertEqual( header, CompoundObject(dictHeader) )
+
+		img = r.read()
+		self.assertEqual( img.blindData(), CompoundData(dictHeader) )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -117,6 +117,9 @@ class TestImageCropOp(unittest.TestCase):
 
 			expectedImg = IECore.Reader.create( testCase['checkFile'] ).read()
 
+			expectedImg.blindData().clear()
+			croppedImg.blindData().clear()
+
 			if croppedImg == expectedImg :
 
 				continue

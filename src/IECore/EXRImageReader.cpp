@@ -50,6 +50,13 @@
 #include "OpenEXR/ImfChannelList.h"
 #include "OpenEXR/Iex.h"
 #include "OpenEXR/ImfTestFile.h"
+#include "OpenEXR/ImfFloatAttribute.h"
+#include "OpenEXR/ImfDoubleAttribute.h"
+#include "OpenEXR/ImfIntAttribute.h"
+#include "OpenEXR/ImfBoxAttribute.h"
+#include "OpenEXR/ImfVecAttribute.h"
+#include "OpenEXR/ImfMatrixAttribute.h"
+#include "OpenEXR/ImfStringAttribute.h"
 
 #include <algorithm>
 #include <fstream>
@@ -307,4 +314,142 @@ bool EXRImageReader::open( bool throwOnFailure )
 	}
 
 	return true;
+}
+
+static DataPtr attributeToData( const Imf::Attribute &attr )
+{
+	if ( !strcmp( "float", attr.typeName() ) )
+	{
+		return new FloatData( static_cast< const Imf::FloatAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "double", attr.typeName() ) )
+	{
+		return new DoubleData( static_cast< const Imf::DoubleAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "int", attr.typeName() ) )
+	{
+		return new IntData( static_cast< const Imf::IntAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "box2i", attr.typeName() ) )
+	{
+		return new Box2iData( static_cast< const Imf::Box2iAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "box2f", attr.typeName() ) )
+	{
+		return new Box2fData( static_cast< const Imf::Box2fAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "m33f", attr.typeName() ) )
+	{
+		return new M33fData( static_cast< const Imf::M33fAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "m44f", attr.typeName() ) )
+	{
+		return new M44fData( static_cast< const Imf::M44fAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "string", attr.typeName() ) )
+	{
+		return new StringData( static_cast< const Imf::StringAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "v2i", attr.typeName() ) )
+	{
+		return new V2iData( static_cast< const Imf::V2iAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "v2f", attr.typeName() ) )
+	{
+		return new V2fData( static_cast< const Imf::V2fAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "v3i", attr.typeName() ) )
+	{
+		return new V3iData( static_cast< const Imf::V3iAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "v3f", attr.typeName() ) )
+	{
+		return new V3fData( static_cast< const Imf::V3fAttribute & >( attr ).value() );
+	}
+	return 0;
+}
+
+static void addHeaderAttribute( const std::string &name, Data *data, CompoundData *blindData )
+{
+	// search for '.'
+	string::size_type pos = name.find_first_of( "." );
+
+	if ( string::npos != pos )
+	{
+		std::string thisName = name.substr(0, pos);
+		std::string newName = name.substr( pos+1, name.size() );
+		CompoundDataMap::iterator cIt = blindData->writable().find( thisName );
+
+		// create compound data
+		CompoundDataPtr newBlindData = 0;
+		if ( cIt != blindData->writable().end() )
+		{
+			if ( cIt->second->typeId() == CompoundDataTypeId )
+			{
+				newBlindData = staticPointerCast< CompoundData >( cIt->second );
+			}
+		}
+		if ( !newBlindData )
+		{
+			// create compound data
+			newBlindData = new CompoundData();
+			// add to current blind data
+			blindData->writable()[ thisName ] = newBlindData;
+		}
+		// call recursivelly
+		addHeaderAttribute( newName, data, newBlindData );
+		return;
+	}
+	// add blind data key
+	blindData->writable()[ name ] = data;
+}
+
+static void headerToCompoundData( const Imf::Header &header, CompoundData *blindData )
+{
+	for ( Imf::Header::ConstIterator attrIt = header.begin(); attrIt != header.end(); attrIt++ )
+	{
+		std::string name = attrIt.name();
+		DataPtr data = attributeToData( attrIt.attribute() );
+		if ( data )
+		{
+			addHeaderAttribute( name, data, blindData );
+		}
+	}
+}
+
+// \todo This function may be useful on other situations. Add as Converter?
+static void compoundDataToCompoundObject( const CompoundData *data, CompoundObject *object )
+{
+	for ( CompoundDataMap::const_iterator it = data->readable().begin(); it != data->readable().end(); it++ )
+	{
+		if ( it->second->typeId() == CompoundDataTypeId )
+		{
+			CompoundObjectPtr newObject = new CompoundObject();
+			object->members()[ it->first ] = newObject;
+			compoundDataToCompoundObject( staticPointerCast< CompoundData >( it->second ), newObject );
+		}
+		else
+		{
+			object->members()[ it->first ] = staticPointerCast< Data >( it->second );
+		}
+	}
+}
+
+CompoundObjectPtr EXRImageReader::readHeader()
+{
+	CompoundObjectPtr header = ImageReader::readHeader();
+	CompoundDataPtr tmp = new CompoundData();
+	headerToCompoundData( m_inputFile->header(), tmp );
+	compoundDataToCompoundObject( tmp, header );
+	return header;
+}
+
+ObjectPtr EXRImageReader::doOperation( const CompoundObject *operands )
+{
+	ImagePrimitivePtr image = staticPointerCast< ImagePrimitive >( ImageReader::doOperation( operands ) );
+	if ( image )
+	{
+		headerToCompoundData( m_inputFile->header(), image->blindData() );
+	}
+	return image;
 }
