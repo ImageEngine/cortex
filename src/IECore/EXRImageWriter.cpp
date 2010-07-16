@@ -41,6 +41,14 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/BoxOps.h"
 
+#include "OpenEXR/ImfFloatAttribute.h"
+#include "OpenEXR/ImfDoubleAttribute.h"
+#include "OpenEXR/ImfIntAttribute.h"
+#include "OpenEXR/ImfBoxAttribute.h"
+#include "OpenEXR/ImfVecAttribute.h"
+#include "OpenEXR/ImfMatrixAttribute.h"
+#include "OpenEXR/ImfStringAttribute.h"
+
 #include "boost/format.hpp"
 
 #include <fstream>
@@ -111,6 +119,87 @@ const IntParameter * EXRImageWriter::compressionParameter() const
 	return parameters()->parameter< IntParameter >( "compression" );
 }
 
+static void blindDataToHeader( const CompoundData *blindData, Imf::Header &header, std::string prefix = "" )
+{
+	const CompoundDataMap &map = blindData->readable();
+	for ( CompoundDataMap::const_iterator it = map.begin(); it != map.end(); it++ )
+	{
+		std::string thisName = (prefix.size() ? prefix + "." : std::string("") ) + it->first.value();
+
+		switch ( it->second->typeId() )
+		{
+			case CompoundDataTypeId:
+
+				blindDataToHeader( staticPointerCast< const CompoundData >( it->second ), header, thisName );
+				break;
+			
+			case IntDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::IntAttribute( staticPointerCast< const IntData >( it->second )->readable() ) );
+				break;
+
+			case FloatDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::FloatAttribute( staticPointerCast< FloatData >( it->second )->readable() ) );
+				break;
+
+			case DoubleDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::DoubleAttribute( staticPointerCast< DoubleData >( it->second )->readable() ) );
+				break;
+
+			case V2iDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::V2iAttribute( staticPointerCast< V2iData >( it->second )->readable() ) );
+				break;
+
+			case V2fDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::V2fAttribute( staticPointerCast< V2fData >( it->second )->readable() ) );
+				break;
+
+			case V3iDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::V3iAttribute( staticPointerCast< V3iData >( it->second )->readable() ) );
+				break;
+
+			case V3fDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::V3fAttribute( staticPointerCast< V3fData >( it->second )->readable() ) );
+				break;
+
+			case Box2iDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::Box2iAttribute( staticPointerCast< Box2iData >( it->second )->readable() ) );
+				break;
+
+			case Box2fDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::Box2fAttribute( staticPointerCast< Box2fData >( it->second )->readable() ) );
+				break;
+
+			case M33fDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::M33fAttribute( staticPointerCast< M33fData >( it->second )->readable() ) );
+				break;
+
+			case M44fDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::M44fAttribute( staticPointerCast< M44fData >( it->second )->readable() ) );
+				break;
+
+			case StringDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::StringAttribute( staticPointerCast< StringData >( it->second )->readable() ) );
+				break;
+
+			default:
+				// ignore all the other data types.
+				break;
+		}
+	}
+}
+
 void EXRImageWriter::writeImage( const vector<string> &names, const ImagePrimitive * image, const Box2i &dataWindow) const
 {
 	assert( image );
@@ -123,6 +212,7 @@ void EXRImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 	{
 		Header header(width, height, 1, Imath::V2f(0.0, 0.0), 1, INCREASING_Y, 
 			static_cast<Compression>(compressionParameter()->getNumericValue()) );
+		blindDataToHeader( image->blindData(), header );
 		header.dataWindow() = dataWindow;
 		header.displayWindow() = image->getDisplayWindow();
 
