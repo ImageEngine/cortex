@@ -43,6 +43,10 @@ import IECoreMaya
 
 ## A UI for StringParameters. Supports the following parameter user data :
 #
+# BoolData ["UI"]["acceptsProceduralObjectName"] False
+# When true, menu items will be created to set the parameter value to the name
+# of an object in a procedural.
+#
 # BoolData ["UI"]["acceptsProceduralObjectNames"] False
 # When true, menu items will be created to add and remove selected procedural
 # components names.
@@ -100,17 +104,23 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 		if not maya.cmds.getAttr( self.plugName(), settable=True ) :
 			return definition
 
+		wantsComponentName = False
+		with IECore.IgnoredExceptions( KeyError ) :
+			wantsComponentName = self.parameter.userData()["UI"]["acceptsProceduralObjectName"].value
+			
 		wantsComponentNames = False
 		with IECore.IgnoredExceptions( KeyError ) :
 			wantsComponentNames = self.parameter.userData()["UI"]["acceptsProceduralObjectNames"].value
 
-		if wantsComponentNames :
+		if wantsComponentName or wantsComponentNames  :
 
-			definition.append( "/ComponentDivider", { "divider" : True } )
-			definition.append( "/Components/Set To Selected", { "command" : self.__setToSelectedComponents } )
-			definition.append( "/Components/Add Selected", { "command" : self.__addSelectedComponents } )
-			definition.append( "/Components/Remove Selected", { "command" : self.__removeSelectedComponents } )
-			definition.append( "/Components/Select", { "command" : self.__selectComponents } )
+			definition.append( "/ObjectsDivider", { "divider" : True } )
+			definition.append( "/Objects/Set To Selected", { "command" : IECore.curry( self.__setToSelectedComponents, not wantsComponentNames ) } )
+			if wantsComponentNames :
+				definition.append( "/Objects/Add Selected", { "command" : self.__addSelectedComponents } )
+				definition.append( "/Objects/Remove Selected", { "command" : self.__removeSelectedComponents } )
+			
+			definition.append( "/Objects/Select", { "command" : self.__selectComponents } )
 
 		wantsNodeName = False
 		with IECore.IgnoredExceptions( KeyError ) :
@@ -152,14 +162,17 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 
 		return definition
 
-	def __setToSelectedComponents( self ) :
+	def __setToSelectedComponents( self, oneOnly ) :
 
 		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
 		components = fnPH.selectedComponentNames()
 		components = list( components )
 		components.sort()
 
-		maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
+		if oneOnly :
+			maya.cmds.setAttr( self.plugName(), components[0] if components else "", type="string" )
+		else :
+			maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
 
 	def __addSelectedComponents( self ) :
 
