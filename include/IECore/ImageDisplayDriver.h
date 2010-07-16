@@ -54,6 +54,7 @@ class ImageDisplayDriver : public DisplayDriver
 		IE_CORE_DECLARERUNTIMETYPED( ImageDisplayDriver, DisplayDriver );
 
 		// initializes the internal image primitive object.
+		// The image's blindData will keep the values given on the parameters CompoundData.
 		ImageDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
 		virtual ~ImageDisplayDriver();
 

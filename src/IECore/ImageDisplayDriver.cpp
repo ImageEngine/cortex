@@ -49,6 +49,16 @@ ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i 
 	{
 		m_image->createChannel<float>( *it );
 	}
+	if ( parameters )
+	{
+		CompoundDataMap &xData = m_image->blindData()->writable();
+		const CompoundDataMap &yData = parameters->readable();
+		CompoundDataMap::const_iterator iterY = yData.begin();
+		for ( ; iterY != yData.end(); iterY++ )
+		{
+			xData[iterY->first] = iterY->second->copy();
+		}
+	}
 }
 
 ImageDisplayDriver::~ImageDisplayDriver()

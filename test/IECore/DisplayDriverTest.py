@@ -129,7 +129,12 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
 		idd.imageClose()
-		self.assertEqual( self.clientDisplayDriver.image(), img )
+		newImg = self.clientDisplayDriver.image()
+		self.assertEqual( newImg.blindData(), params )
+		# remove blindData for comparison
+		newImg.blindData().clear()
+		img.blindData().clear()
+		self.assertEqual( newImg, img )
 
 	def tearDown( self ):
 		self.assertEqual( DisplayDriver.unregisterFactory( self.creator ), True )
