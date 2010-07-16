@@ -66,6 +66,7 @@ from TypedDataAsObject import *
 from VectorData import *
 from FileSequence import *
 from EXRImageReader import *
+from EXRImageWriter import *
 from PointsPrimitive import *
 from ImagePrimitive import *
 from PerlinNoise import *
