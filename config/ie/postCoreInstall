@@ -85,6 +85,15 @@ coreOps = [
 	[ "UVDistortOp", "uvDistort", "common/2d/image" ],
 	[ "ImageCompositeOp", "imageComposite", "common/2d/image" ],
 	[ "ImageConvolveOp", "imageConvolve", "common/2d/image" ],
+	[ 'AddSmoothSkinningInfluencesOp', 'addInfluences', 'rigging/smoothSkinning' ],
+	[ 'RemoveSmoothSkinningInfluencesOp', 'removeInfluences', 'rigging/smoothSkinning' ],
+	[ 'CompressSmoothSkinningDataOp', 'compress', 'rigging/smoothSkinning' ],
+	[ 'DecompressSmoothSkinningDataOp', 'decompress', 'rigging/smoothSkinning' ],
+	[ 'NormalizeSmoothSkinningWeightsOp', 'normalizeWeights', 'rigging/smoothSkinning' ],
+	[ 'ReorderSmoothSkinningInfluencesOp', 'reorderInfluences', 'rigging/smoothSkinning' ],
+	[ 'MixSmoothSkinningWeightsOp', 'mixWeights', 'rigging/smoothSkinning' ],
+	[ 'SmoothSmoothSkinningWeightsOp', 'smoothWeights', 'rigging/smoothSkinning' ],
+	[ 'LimitSmoothSkinningInfluencesOp', 'limitInfluences', 'rigging/smoothSkinning' ],
 ]
 
 for op in coreOps : 
