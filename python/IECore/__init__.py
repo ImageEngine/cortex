@@ -102,6 +102,7 @@ from ClassParameter import ClassParameter
 from ClassVectorParameter import ClassVectorParameter
 from CompoundStream import CompoundStream
 from IgnoredExceptions import IgnoredExceptions
+import ParameterAlgo
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
