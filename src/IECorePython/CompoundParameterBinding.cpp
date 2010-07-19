@@ -120,6 +120,17 @@ static boost::python::list compoundParameterValues( const CompoundParameter &o )
 	return result;
 }
 
+static boost::python::list compoundParameterItems( const CompoundParameter &o )
+{
+	boost::python::list result;
+	CompoundParameter::ParameterVector::const_iterator it;
+	for( it = o.orderedParameters().begin(); it!=o.orderedParameters().end(); it++ )
+	{
+		result.append( boost::python::make_tuple( (*it)->name(), *it ) );
+	}
+	return result;
+}
+
 static void compoundParameterAddParameters( CompoundParameter &o, const boost::python::list &p )
 {
 	std::vector<ParameterPtr> pp;
@@ -166,6 +177,7 @@ void bindCompoundParameter()
 		.def( "__contains__", &compoundParameterContains )
 		.def( "keys", &compoundParameterKeys )
 		.def( "values", &compoundParameterValues )
+		.def( "items", &compoundParameterItems )
 		.def( "has_key", &compoundParameterContains )
 		.def( "addParameter", &CompoundParameter::addParameter )
 		.def( "addParameters", &compoundParameterAddParameters )

@@ -930,6 +930,24 @@ class TestCompoundParameter( unittest.TestCase ) :
 
 		self.assertEqual( c2value, c["child2"].getValue() )
 
+	def testItems( self ) :
+	
+		a = CompoundParameter( "a", "a desc",
+			members = [
+				StringParameter( "b", "b desc", "test 1 ok!"),
+				StringParameter( "d", "d desc", "test 2 failed!"),
+			]
+		)
+		
+		items = a.items()
+		self.assertEqual( len( items ), 2 )
+		self.assertEqual( len( items[0] ), 2 )
+		self.assertEqual( len( items[1] ), 2 )
+		self.assertEqual( items[0][0], "b" )
+		self.assertEqual( items[1][0], "d" )
+		self.failUnless( items[0][1].isSame( a["b"] ) )
+		self.failUnless( items[1][1].isSame( a["d"] ) )
+		
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :
