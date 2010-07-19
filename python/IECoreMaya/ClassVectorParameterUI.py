@@ -641,27 +641,52 @@ class ChildUI( IECoreMaya.UIElement ) :
 		return self.__drawHeaderParameterControls( formLayout, attachForm, attachControl, lastControl, "classVectorParameterPreHeader" )
 
 	def __buildOptionalHeaderUI( self, formLayout, attachForm, attachControl, lastControl ) :
+		
+		defaultLabel = ""
+		try :
+			parentUIUserData = self.parent().parameter.userData()["UI"]
+			defaultLabelStyle = parentUIUserData["defaultChildLabel"].value
 			
+			if 'classname' in defaultLabelStyle.lower() :
+				defaultLabel = self.__class()[2]
+			
+			if defaultLabelStyle.startswith( 'abbreviated' ) :
+				if "classNameFilter" in parentUIUserData :
+					classNameFilter = parentUIUserData["classNameFilter"].value
+					defaultLabel = defaultLabel.replace( classNameFilter.strip( '*' ), '' )
+			
+			if defaultLabelStyle.endswith( 'ToUI' ) :
+				defaultLabel = maya.mel.eval( 'interToUI( "%s" )' % defaultLabel )
+			
+			defaultDescription = self.__class()[0].description
+		except :
+			defaultLabel = ""
+			defaultDescription = ""
+		
 		labelPlugPath = self.__labelPlugPath()
-		if labelPlugPath :
+		if labelPlugPath or defaultLabel :
+			
+			label = maya.cmds.getAttr( labelPlugPath ) if labelPlugPath else defaultLabel
+			description = self.__parameter["label"].description if labelPlugPath else defaultDescription
 			
 			self.__label = maya.cmds.text(
 				parent = formLayout,
 				align = "left",
-				label = maya.cmds.getAttr( labelPlugPath ),
+				label = label,
 				font = IECoreMaya.CompoundParameterUI._labelFont( self.__kw["hierarchyDepth"] ),
-				annotation = IECore.StringUtil.wrap( self.__parameter["label"].description, 48 ),
+				annotation = IECore.StringUtil.wrap( description, 48 ),
 				width = 190 - IECoreMaya.CompoundParameterUI._labelIndent( self.__kw["hierarchyDepth"] ),
 				recomputeSize = False,
 			)
 			
-			renameMenu = IECore.MenuDefinition(
-				[
-					( "Change label...", { "command" : self.__changeLabel } ),
-				]
-			)
-			IECoreMaya.createMenu( renameMenu, self.__label )
-			IECoreMaya.createMenu( renameMenu, self.__label, button = 1 )
+			if labelPlugPath :
+				renameMenu = IECore.MenuDefinition(
+					[
+						( "Change label...", { "command" : self.__changeLabel } ),
+					]
+				)
+				IECoreMaya.createMenu( renameMenu, self.__label )
+				IECoreMaya.createMenu( renameMenu, self.__label, button = 1 )
 			
 			attachForm += [
 				( self.__label, "top", 0 ),
