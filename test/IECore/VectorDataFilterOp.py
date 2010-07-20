@@ -33,6 +33,8 @@
 ##########################################################################
 
 import unittest
+import random
+
 from IECore import *
 
 class TestVectorDataFilterOp( unittest.TestCase ) :
@@ -53,6 +55,37 @@ class TestVectorDataFilterOp( unittest.TestCase ) :
 
 		ii = VectorDataFilterOp()( input = i, filter = f, invert = True, clip = False )
 		self.assertEqual( ii, IntVectorData( [ 1, 3, 5, 6 ] ) )
+
+	def testOperateInPlace( self ) :
+	
+		f = BoolVectorData( [ 0, 1, 0, 1 ] )
+		
+		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = False, clip = True )
+		self.assertEqual( i, IntVectorData( [ 2, 4 ] ) )
+
+		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = True, clip = True )
+		self.assertEqual( i, IntVectorData( [ 1, 3 ] ) )
+
+		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = False, clip = False )
+		self.assertEqual( i, IntVectorData( [ 2, 4, 5, 6 ] ) )
+
+		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = True, clip = False )
+		self.assertEqual( i, IntVectorData( [ 1, 3, 5, 6 ] ) )
+
+		for i in range( 0, 1000 ) :
+			m = BoolVectorData()
+			v = V3fVectorData()
+			n = 0
+			for j in range( 0, random.randint( 0, 1000 ) ) :
+				m.append( random.randint( 0,1 ) )
+				n += m[-1]
+				v.append( V3f( 0 ) )
+			VectorDataFilterOp()( input = v, copyInput = False, filter = m )
+			self.assertEqual( len( v ), n )
 
 if __name__ == "__main__":
 	unittest.main()
