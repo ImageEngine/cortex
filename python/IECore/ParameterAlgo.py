@@ -99,3 +99,21 @@ def __findClassesWalk( parameter, parameterPath, uiPath, classTypeFilter, classN
 			newParameterPath = parameterPath[:] + [ n ]
 			newUIPath = parameterPath[:] + [ n ]
 			__findClassesWalk( p, newParameterPath, newUIPath, classTypeFilter, classNameFilter, result )
+
+## Recurses down from srcParameter and dstParameter simultaneously, syncing the dstParameter tree to 
+# srcParameter by making sure the ClassParameters and ClassVectorParameters there hold instances of the same classes
+# that are held on the srcParameter side.
+def copyClasses( srcParameter, dstParameter ) :
+
+	if isinstance( srcParameter, IECore.ClassParameter ) and isinstance( dstParameter, IECore.ClassParameter ) :
+		c = srcParameter.getClass( True )
+		dstParameter.setClass( *c[1:] )
+		
+	if isinstance( srcParameter, IECore.ClassVectorParameter ) and isinstance( dstParameter, IECore.ClassVectorParameter ) :
+		c = srcParameter.getClasses( True )
+		dstParameter.setClasses( [ cc[1:] for cc in c ] )
+
+	if isinstance( srcParameter, IECore.CompoundParameter ) and isinstance( dstParameter, IECore.CompoundParameter ) :
+		for n, p in srcParameter.items() :
+			if dstParameter.has_key( n ) :
+				copyClasses( p, dstParameter[n] )

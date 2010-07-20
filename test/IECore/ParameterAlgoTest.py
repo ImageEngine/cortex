@@ -38,7 +38,7 @@ import IECore
 
 class ParameterAlgoTest( unittest.TestCase ) :
 
-	def test( self ) :
+	def testFindClasses( self ) :
 
 		p = IECore.CompoundParameter(
 			
@@ -146,5 +146,87 @@ class ParameterAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( filteredExpected, c )
 
+	def testCopyClasses( self ) :
+
+		p = IECore.CompoundParameter(
+		
+			name = "q",
+			description = "",
+			members = [
+
+				IECore.ClassVectorParameter(
+
+					"cv",
+					"d",
+					"IECORE_OP_PATHS",
+					[
+						( "mult", "maths/multiply", 2 ),
+						( "coIO", "compoundObjectInOut", 2 ),
+					]
+
+				),
+
+				IECore.ClassParameter(
+
+					"c",
+					"d",
+					"IECORE_OP_PATHS",
+					"classParameterTest", 1
+
+				)
+
+			]
+
+		)
+		
+		p["c"]["cp"].setClass( "classVectorParameterTest", 1 )
+		
+		p["c"]["cp"]["cv"].setClasses( [
+			( "mult", "maths/multiply", 2 ),
+			( "coIO", "compoundObjectInOut", 2 )
+		] )
+		
+		p2 = IECore.CompoundParameter(
+		
+			name = "q",
+			description = "",
+			members = [
+
+				IECore.ClassVectorParameter(
+
+					"cv",
+					"d",
+					"IECORE_OP_PATHS",
+
+				),
+
+				IECore.ClassParameter(
+
+					"c",
+					"d",
+					"IECORE_OP_PATHS",
+
+				)
+
+			]
+		
+		)
+		
+		IECore.ParameterAlgo.copyClasses( p, p2 )
+		
+		cl = [ c[1:] for c in p2["cv"].getClasses( True ) ]
+		self.assertEqual( cl, [
+				( "mult", "maths/multiply", 2 ),
+				( "coIO", "compoundObjectInOut", 2 )
+			]
+		)
+		
+		cl = [ c[1:] for c in p2["c"]["cp"]["cv"].getClasses( True ) ]
+		self.assertEqual( cl, [
+				( "mult", "maths/multiply", 2 ),
+				( "coIO", "compoundObjectInOut", 2 )
+			]
+		)
+		
 if __name__ == "__main__":
 	unittest.main()
