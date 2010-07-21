@@ -680,6 +680,10 @@ struct Shader::VectorValueValid
 	template<typename T>
 	ReturnType operator() ( typename T::Ptr data )
 	{
+		if ( !data->readable().size() )
+		{
+			return false;
+		}
 		return m_shader->uniformValueValid( m_paramIndex, IECore::TypedData< typename T::ValueType::value_type >::staticTypeId() );
 	}
 };
