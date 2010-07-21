@@ -106,6 +106,33 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		
 		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
+	def testEmptyPointsPrimitive( self ):
+
+		fragmentSource = """
+		uniform int greyTo255;
+
+		void main()
+		{
+			float g = float( greyTo255 ) / 255.0;
+			gl_FragColor = vec4( g, g, g, 1 );
+		}
+		"""
+		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
+		g = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData() )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+		with IECore.WorldBlock( r ) :
+			r.shader( "surface", "grey", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
+			r.points( 0, { "P" : p, "greyTo255" : g } )		# it should not crash rendering 0 points.
+
 	def performAimTest( self, projection, expectedImage, particleType ) :
 	
 		fragmentSource = """
