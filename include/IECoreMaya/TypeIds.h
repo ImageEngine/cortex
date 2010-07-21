@@ -108,6 +108,7 @@ enum TypeId
 	Box3ManipulatorTypeId = 109061,
 	FromMayaSkinClusterConverterTypeId = 109062,
 	ToMayaSkinClusterConverterTypeId = 109063,
+	FromMayaArrayDataConverteribTypeId = 109064,
 	LastTypeId = 109999
 
 };

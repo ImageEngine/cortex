@@ -499,5 +499,47 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.attributeQuery( plug + "Min", listDefault=True, node=node ), [ -1.0, -1.0, -1.0 ] )
 		self.assertEqual( maya.cmds.attributeQuery( plug + "Max", listDefault=True, node=node ), [ 1.0, 1.0, 1.0 ] )
 
+	def testArrayPlugCreation( self ) :
+
+		op = IECore.Op( 'test op', IECore.IntParameter( 'result', '', 0 ) )
+		op.parameters().addParameters( [
+			IECore.V3fVectorParameter( 'v3fVector', '', IECore.V3fVectorData() ),
+			IECore.V3dVectorParameter( 'v3dVector', '', IECore.V3dVectorData() ),
+			IECore.StringVectorParameter( 'stringVector', '', IECore.StringVectorData() ),
+			IECore.DoubleVectorParameter( 'doubleVector', '', IECore.DoubleVectorData() ),
+			IECore.FloatVectorParameter( 'floatVector', '', IECore.FloatVectorData() ),
+			IECore.IntVectorParameter( 'intVector', '', IECore.IntVectorData() ),
+			IECore.BoolVectorParameter( 'boolVector', '', IECore.BoolVectorData() ),
+		] )
+		
+		node = maya.cmds.createNode( 'ieOpHolderNode' )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		
+		self.assert_( not maya.cmds.objExists( node+'.parm_v3fVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_v3dVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_stringVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_doubleVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_floatVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_intVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_boolVector' ) )
+		
+		fnPH.setParameterised( op )
+		
+		self.assert_( maya.cmds.objExists( node+'.parm_v3fVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_v3dVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_stringVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_doubleVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_floatVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_intVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_boolVector' ) )
+				
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3fVector', type=True ), 'vectorArray' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3dVector', type=True ), 'vectorArray' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_stringVector', type=True ), 'stringArray' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_doubleVector', type=True ), 'doubleArray' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_floatVector', type=True ), 'doubleArray' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_intVector', type=True ), 'Int32Array' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_boolVector', type=True ), 'Int32Array' )		
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

@@ -75,6 +75,7 @@ IECore::ObjectPtr FromMayaArrayDataConverter<F,T>::doConversion( const MObject &
 }
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterii, FromMayaArrayDataConverteriiTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterib, FromMayaArrayDataConverteribTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterdd, FromMayaArrayDataConverterddTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterdf, FromMayaArrayDataConverterdfTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterss, FromMayaArrayDataConverterssTypeId )
@@ -84,6 +85,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVC3f
 
 /// Explicit instantiations.
 template class FromMayaArrayDataConverter<MIntArray, IntVectorData>;
+template class FromMayaArrayDataConverter<MIntArray, BoolVectorData>;
 template class FromMayaArrayDataConverter<MDoubleArray, DoubleVectorData>;
 template class FromMayaArrayDataConverter<MDoubleArray, FloatVectorData>;
 template class FromMayaArrayDataConverter<MStringArray, StringVectorData>;

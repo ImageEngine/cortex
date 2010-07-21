@@ -68,6 +68,7 @@ class FromMayaArrayDataConverter : public FromMayaObjectConverter
 };
 
 typedef FromMayaArrayDataConverter<MIntArray, IECore::IntVectorData> FromMayaArrayDataConverterii;
+typedef FromMayaArrayDataConverter<MIntArray, IECore::BoolVectorData> FromMayaArrayDataConverterib;
 typedef FromMayaArrayDataConverter<MDoubleArray, IECore::DoubleVectorData> FromMayaArrayDataConverterdd;
 typedef FromMayaArrayDataConverter<MDoubleArray, IECore::FloatVectorData> FromMayaArrayDataConverterdf;
 typedef FromMayaArrayDataConverter<MStringArray, IECore::StringVectorData> FromMayaArrayDataConverterss;

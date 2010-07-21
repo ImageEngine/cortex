@@ -61,6 +61,7 @@ ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::M44dParame
 ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::FloatVectorParameter,  MFnData::kDoubleArray > > floatVectorRegistrar( IECore::FloatVectorParameter::staticTypeId(), IECore::FloatVectorData::staticTypeId() );
 ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::DoubleVectorParameter, MFnData::kDoubleArray > > doubleVectorRegistrar( IECore::DoubleVectorParameter::staticTypeId(), IECore::DoubleVectorData::staticTypeId() );
 ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::IntVectorParameter,    MFnData::kIntArray > >    intVectorRegistrar( IECore::IntVectorParameter::staticTypeId(), IECore::IntVectorData::staticTypeId() );
+ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::BoolVectorParameter,   MFnData::kIntArray > >    boolVectorRegistrar( IECore::BoolVectorParameter::staticTypeId(), IECore::BoolVectorData::staticTypeId() );
 
 template<typename T, MFnData::Type D>
 MStatus ObjectMFnDataParameterHandler<T, D>::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
