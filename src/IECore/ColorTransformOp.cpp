@@ -215,7 +215,7 @@ void ColorTransformOp::transformSeparate( Primitive * primitive, const CompoundO
 		for( size_t i=0; i<n; i++ )
 		{
 			Color3f c( *rw, *gw, *bw );
-			if( alpha && alpha > 0 )
+			if( alpha && *alpha > 0 )
 			{
 				c /= *alpha;
 			}
@@ -224,6 +224,7 @@ void ColorTransformOp::transformSeparate( Primitive * primitive, const CompoundO
 			{
 				c *= *alpha++;
 			}
+			
 			*rw++ = c[0];
 			*gw++ = c[1];
 			*bw++ = c[2];

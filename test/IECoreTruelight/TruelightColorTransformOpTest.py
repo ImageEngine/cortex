@@ -99,6 +99,27 @@ class TruelightColorTransformOpTest( unittest.TestCase ) :
 		outColSRGB = IECore.Color3f( outSRGB["R"].data[0], outSRGB["G"].data[0], outSRGB["B"].data[0] )
 		self.assert_( outColSRGB.equalWithAbsError( outCol1, 0.01 ) )
 
+	def testAlphaChannelTransform( self ):
+		# alpha channels with 0 values were causing segmentation faults in truelight transforms
+		
+		# truelight converter creator
+		def creator( inputColorSpace, outputColorSpace ):
+			converter = TruelightColorTransformOp()
+			converter['profile'] = IECore.StringData( "KodakWithDisplayLab" )
+			converter['display'] = ""
+			return converter
+		
+		IECore.ColorSpaceTransformOp.registerConversion( 
+			"linear", "truelight", creator
+		)
+		op = IECore.ColorSpaceTransformOp()
+		result = op(
+			inputColorSpace = "linear",
+			outputColorSpace = "truelight",
+
+			input = IECore.Reader.create( 'test/IECoreTruelight/data/alphachannelFAIL.tiff' ).read()
+		)
+
 if __name__ == "__main__":
 	unittest.main()
 
