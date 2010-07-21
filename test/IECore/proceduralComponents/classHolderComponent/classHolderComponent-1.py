@@ -1,9 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
-#
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,57 +31,30 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-
-import sys
-import unittest
-import warnings
-
 import IECore
-import IECoreMaya
 
-warnings.simplefilter( "error", DeprecationWarning )
+class ClassHolderComponent( IECore.Parameterised ) :
 
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-from MayaTypeIdTest import *
-from FromMayaTransformConverterTest import *
-from CallbackIdTest import *
-from TemporaryAttributeValuesTest import *
-from SplineParameterHandlerTest import *
-from DAGPathParametersTest import *
-from FnProceduralHolderTest import FnProceduralHolderTest
-from GeometryCombinerTest import GeometryCombinerTest
-from FromMayaSkinClusterConverterTest import *
-from ToMayaSkinClusterConverterTest import *
-from ReferenceEdits import *
+	def __init__( self ) :
+	
+		IECore.Parameterised.__init__( self, "Test class" )
 
-IECoreMaya.TestProgram(
+		self.parameters().addParameters(
+		
+			[				
+				IECore.ClassParameter(
+					name = "class",
+					description = "A filter which can be used to control what this modifier applies to.",
+					searchPathEnvVar = "IECORE_PROCEDURAL_COMPONENT_PATHS",
+				),
+			
+				IECore.FloatParameter(
+					name = "value",
+					description = "A value parameter",
+					defaultValue = -1,
+				),
+			],
+		)
+		
 
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreMaya/resultsPython.txt", "w" )
-			]
-		),
-		verbosity = 2
-	),
-
-	plugins = [ "ieCore" ],
-
-)
+classHolderComponent = ClassHolderComponent

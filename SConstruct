@@ -861,6 +861,7 @@ if testEnv["TEST_LIBPATH"] != "" :
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
 testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "test/IECore/procedurals"
+testEnv["ENV"]["IECORE_PROCEDURAL_COMPONENT_PATHS"] = "test/IECore/proceduralComponents"
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
 if env["PLATFORM"]=="darwin" :	
