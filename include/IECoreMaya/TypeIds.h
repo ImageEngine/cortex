@@ -109,8 +109,10 @@ enum TypeId
 	FromMayaSkinClusterConverterTypeId = 109062,
 	ToMayaSkinClusterConverterTypeId = 109063,
 	FromMayaArrayDataConverteribTypeId = 109064,
+	FromMayaMatrixVectorDataConverterTypeId = 109065,
+	ToMayaMatrixVectorDataConverterTypeId = 109066,
+	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
-
 };
 
 } // namespace IECoreMaya

@@ -510,6 +510,8 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 			IECore.FloatVectorParameter( 'floatVector', '', IECore.FloatVectorData() ),
 			IECore.IntVectorParameter( 'intVector', '', IECore.IntVectorData() ),
 			IECore.BoolVectorParameter( 'boolVector', '', IECore.BoolVectorData() ),
+			IECore.M44fVectorParameter( 'm44fVector', '', IECore.M44fVectorData() ),
+			IECore.M44dVectorParameter( 'm44dVector', '', IECore.M44dVectorData() ),
 		] )
 		
 		node = maya.cmds.createNode( 'ieOpHolderNode' )
@@ -522,6 +524,8 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assert_( not maya.cmds.objExists( node+'.parm_floatVector' ) )
 		self.assert_( not maya.cmds.objExists( node+'.parm_intVector' ) )
 		self.assert_( not maya.cmds.objExists( node+'.parm_boolVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_m44fVector' ) )
+		self.assert_( not maya.cmds.objExists( node+'.parm_m44dVector' ) )
 		
 		fnPH.setParameterised( op )
 		
@@ -532,6 +536,8 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assert_( maya.cmds.objExists( node+'.parm_floatVector' ) )
 		self.assert_( maya.cmds.objExists( node+'.parm_intVector' ) )
 		self.assert_( maya.cmds.objExists( node+'.parm_boolVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_m44fVector' ) )
+		self.assert_( maya.cmds.objExists( node+'.parm_m44dVector' ) )
 				
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3fVector', type=True ), 'vectorArray' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3dVector', type=True ), 'vectorArray' )
@@ -539,7 +545,59 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_doubleVector', type=True ), 'doubleArray' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_floatVector', type=True ), 'doubleArray' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_intVector', type=True ), 'Int32Array' )
-		self.assertEqual( maya.cmds.getAttr( node+'.parm_boolVector', type=True ), 'Int32Array' )		
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_boolVector', type=True ), 'Int32Array' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_m44fVector', type=True ), 'doubleArray' )
+		self.assertEqual( maya.cmds.getAttr( node+'.parm_m44dVector', type=True ), 'doubleArray' )
+	
+	def testMatrixVectorPlugs( self ) :
+
+		m44fVector = IECore.M44fVectorData( [ IECore.M44f( 1 ), IECore.M44f( 2 ), IECore.M44f( 3 ) ] )
+		m44dVector = IECore.M44dVectorData( [ IECore.M44d( 1 ), IECore.M44d( 2 ), IECore.M44d( 3 ) ] )
+		reverseM44fVector = IECore.M44fVectorData( [ IECore.M44f( 3 ), IECore.M44f( 2 ), IECore.M44f( 1 ) ] )
+		reverseM44dVector = IECore.M44dVectorData( [ IECore.M44d( 3 ), IECore.M44d( 2 ), IECore.M44d( 1 ) ] )
+		
+		mayaArray = []
+		for i in range( 0, 3 ) :
+			for j in range( 0, 16 ) :
+				mayaArray.append( i+1 )
+		
+		reverseMayaArray = list(mayaArray)
+		reverseMayaArray.reverse()
+		
+		op = IECore.Op( 'test op', IECore.IntParameter( 'result', '', 0 ) )
+		op.parameters().addParameters( [
+			IECore.M44fVectorParameter( 'm44fVector', '', IECore.M44fVectorData() ),
+			IECore.M44dVectorParameter( 'm44dVector', '', IECore.M44dVectorData() ),
+		] )
+		
+		node = maya.cmds.createNode( 'ieOpHolderNode' )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		fnPH.setParameterised( op )
+		
+		# set from cortex to maya
+		self.assertNotEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44fVector' ) )
+		self.assertNotEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44dVector' ) )
+		fnPH.getParameterised()[0].parameters()['m44fVector'].setValue( m44fVector )
+		fnPH.getParameterised()[0].parameters()['m44dVector'].setValue( m44dVector )
+		fnPH.setNodeValues()
+		self.assertEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44fVector' ) )
+		self.assertEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44dVector' ) )
+		
+		# set from maya to cortex
+		self.assertNotEqual( reverseM44fVector, fnPH.getParameterised()[0].parameters()['m44fVector'].getValue() )
+		self.assertNotEqual( reverseM44dVector, fnPH.getParameterised()[0].parameters()['m44dVector'].getValue() )
+		maya.cmds.setAttr( node+'.parm_m44fVector', reverseMayaArray, type="doubleArray" )
+		maya.cmds.setAttr( node+'.parm_m44dVector', reverseMayaArray, type="doubleArray" )
+		fnPH.setParameterisedValues()		
+		self.assertEqual( reverseM44fVector, fnPH.getParameterised()[0].parameters()['m44fVector'].getValue() )
+		self.assertEqual( reverseM44dVector, fnPH.getParameterised()[0].parameters()['m44dVector'].getValue() )
+		
+		# set to incorrect length from maya
+		maya.cmds.setAttr( node+'.parm_m44fVector', [0,1,2], type="doubleArray" )
+		maya.cmds.setAttr( node+'.parm_m44dVector', [0,1,2], type="doubleArray" )
+		fnPH.setParameterisedValues()
+		self.assertEqual( None, fnPH.getParameterised()[0].parameters()['m44fVector'].getValue() )
+		self.assertEqual( None, fnPH.getParameterised()[0].parameters()['m44dVector'].getValue() )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

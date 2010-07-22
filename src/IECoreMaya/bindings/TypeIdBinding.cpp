@@ -80,6 +80,7 @@ void bindTypeId()
 		.value( "FromMayaNumericPlugConverterdf", FromMayaNumericPlugConverterdfTypeId )
 		.value( "FromMayaNumericPlugConverterdd", FromMayaNumericPlugConverterddTypeId )
 		.value( "FromMayaArrayDataConverterii", FromMayaArrayDataConverteriiTypeId )
+		.value( "FromMayaArrayDataConverterib", FromMayaArrayDataConverteribTypeId )
 		.value( "FromMayaArrayDataConverterdd", FromMayaArrayDataConverterddTypeId )
 		.value( "FromMayaArrayDataConverterdf", FromMayaArrayDataConverterdfTypeId )
 		.value( "FromMayaArrayDataConverterss", FromMayaArrayDataConverterssTypeId )
@@ -104,6 +105,8 @@ void bindTypeId()
 		.value( "FromMayaTransformationMatrixdConverter", FromMayaTransformationMatrixdConverterTypeId )
 		.value( "FromMayaSkinClusterConverter", FromMayaSkinClusterConverterTypeId )
 		.value( "ToMayaSkinClusterConverter", ToMayaSkinClusterConverterTypeId )
+		.value( "FromMayaMatrixVectorDataConverter", FromMayaMatrixVectorDataConverterTypeId )
+		.value( "ToMayaMatrixVectorDataConverter", ToMayaMatrixVectorDataConverterTypeId )
 	;
 }
 
