@@ -803,6 +803,74 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
 		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+		
+	def testClassParameterReferenceEditsWithFloatParameters( self ) :
+	
+		# make a file with a class parameter with no held class
+		#######################################################################
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
+		op = fnOH.getOp()
+
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass, None )
+		self.assertEqual( className, "" )
+		self.assertEqual( classVersion, 0 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "classParameterReference.ma" ) )
+		referenceScene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		# make a new scene referencing that file
+		#######################################################################
+	
+		cmds.file( new = True, force = True )
+		cmds.file( referenceScene, reference = True, namespace = "ns1" )
+
+		# set the held class and change some attribute values
+		#######################################################################
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
+		op = fnOH.getOp()
+				
+		with fnOH.classParameterModificationContext() :
+			op["cp"].setClass( "floatParameter", 1, "IECORE_OP_PATHS" )
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "floatParameter" )
+		self.assertEqual( className, "floatParameter" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		fPlugPath = fnOH.parameterPlugPath( heldClass["f"] )
+		
+		cmds.setAttr( fPlugPath, -1 )
+		self.assertEqual( cmds.getAttr( fPlugPath ), -1 )
+		
+		# save the scene
+		#######################################################################
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "classParameterReferencer.ma" ) )
+		referencerScene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		# reload it and check all is well
+		#######################################################################
+
+		cmds.file( new = True, force = True )
+		cmds.file( referencerScene, force = True, open = True )
+	
+		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
+		op = fnOH.getOp()
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "floatParameter" )
+		self.assertEqual( className, "floatParameter" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		fPlugPath = fnOH.parameterPlugPath( heldClass["f"] )
+		
+		self.assertEqual( cmds.getAttr( fPlugPath ), -1 )
 	
 	def testOpHolderImport( self ) :
 	
@@ -1366,4 +1434,4 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 				os.remove( f )
 
 if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

@@ -31,30 +31,33 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-import IECore
 
-class ClassHolderComponent( IECore.Parameterised ) :
+from IECore import *
+
+class floatParameter( Op ) :
 
 	def __init__( self ) :
-	
-		IECore.Parameterised.__init__( self, "Test class" )
 
-		self.parameters().addParameters(
-		
-			[				
-				IECore.ClassParameter(
-					name = "class",
-					description = "A filter which can be used to control what this modifier applies to.",
-					searchPathEnvVar = "IECORE_PROCEDURAL_COMPONENT_PATHS",
-				),
-			
-				IECore.FloatParameter(
-					name = "value",
-					description = "A value parameter",
-					defaultValue = -1,
-				),
-			],
+		Op.__init__( self,
+			"",
+			FloatParameter(
+				name = "result",
+				description = "",
+				defaultValue = 0,
+			)
 		)
-		
 
-classHolderComponent = ClassHolderComponent
+		self.parameters().addParameter(
+
+			FloatParameter(
+				name = "f",
+				description = "",
+				defaultValue = 1,
+			)
+		)
+
+	def doOperation( self, args ) :
+
+		return args["f"].copy()
+
+registerRunTimeTyped( floatParameter )
