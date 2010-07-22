@@ -1479,6 +1479,52 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minimum=True, node=opNode )[0], -10 )
 		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), True )
 		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maximum=True, node=opNode )[0], 10 )
+	
+	def testRemoveLockedAttributes( self ) :
+	
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0
+			)
+		)
+		
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		fnOH.setParameterised( op )
+		
+		iPlugPath = fnOH.parameterPlugPath( op["i"] )
+		cmds.setAttr( iPlugPath, lock=True )
+		
+		del op.parameters()["i"]
+		fnOH.setParameterised( op )
+		
+		self.failIf( cmds.objExists( iPlugPath ) )
+	
+	def testRemoveLockedChildAttributes( self ) :
+	
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.V3fParameter(
+				"v",
+				"d",
+				IECore.V3f( 0 ),
+			)
+		)
+		
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		fnOH.setParameterised( op )
+		
+		vPlugPath = fnOH.parameterPlugPath( op["v"] )
+		cmds.setAttr( vPlugPath + "X", lock=True )
+		
+		del op.parameters()["v"]
+		fnOH.setParameterised( op )
+		
+		self.failIf( cmds.objExists( vPlugPath ) )
 		
 	def tearDown( self ) :
 

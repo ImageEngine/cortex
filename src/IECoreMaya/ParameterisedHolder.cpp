@@ -796,6 +796,8 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes()
 		{
 			if( m_attributeNamesToParameters.find( fnAttr.name() )==m_attributeNamesToParameters.end() )
 			{
+				MPlug plug( B::thisMObject(), attr );
+				plug.setLocked( false ); // we can't remove things if they're locked
 				if( fnAttr.parent().isNull() )
 				{
 					toRemove.append( attr );
