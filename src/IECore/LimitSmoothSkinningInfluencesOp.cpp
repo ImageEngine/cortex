@@ -141,7 +141,7 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 	// make sure there is one lock per influence
 	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) && ( mode != LimitSmoothSkinningInfluencesOp::Indexed ) )
 	{
-		throw IECore::Exception( "SmoothSmoothSkinningWeightsOp: There must be exactly one lock per influence" );
+		throw IECore::Exception( "LimitSmoothSkinningInfluencesOp: There must be exactly one lock per influence" );
 	}
 	
 	if ( !useLocks )
