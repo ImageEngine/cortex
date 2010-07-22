@@ -69,8 +69,15 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 	}
 
 	fnNAttr.setDefault( p->numericDefaultValue() );
-	fnNAttr.setMin( p->minValue() );
-	fnNAttr.setMax( p->maxValue() );
+	
+	if( p->minValue()!=Imath::limits<T>::min() )
+	{
+		fnNAttr.setMin( p->minValue() );
+	}
+	if( p->maxValue()!=Imath::limits<T>::max() )
+	{
+		fnNAttr.setMax( p->maxValue() );
+	}
 
 	bool keyable = true;
 	bool channelBox = true;

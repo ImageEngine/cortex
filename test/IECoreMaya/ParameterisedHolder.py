@@ -1411,6 +1411,74 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( self.__numCallbacks, 3 )
 				
 		IECoreMaya.FnParameterisedHolder.removeSetClassVectorParameterClassesCallback( c )	
+
+	def testNumericParameterMinMax( self ) :
+	
+		# test no range
+	
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0
+			)
+		)
+	
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		fnOH.setParameterised( op )
+		
+		iPlugPath = fnOH.parameterPlugPath( op["i"] )
+		
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minExists=True, node=opNode ), False )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), False )
+		
+		# test min only
+		
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0,
+				minValue = -10
+			)
+		)
+	
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		fnOH.setParameterised( op )
+		
+		iPlugPath = fnOH.parameterPlugPath( op["i"] )
+		
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minExists=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minimum=True, node=opNode )[0], -10 )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), False )
+		
+		# test min and max
+		
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0,
+				minValue = -10,
+				maxValue = 10
+			)
+		)
+	
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		fnOH.setParameterised( op )
+		
+		iPlugPath = fnOH.parameterPlugPath( op["i"] )
+		
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minExists=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minimum=True, node=opNode )[0], -10 )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maximum=True, node=opNode )[0], 10 )
 		
 	def tearDown( self ) :
 
