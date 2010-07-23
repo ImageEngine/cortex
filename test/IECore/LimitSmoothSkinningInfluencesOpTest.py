@@ -184,6 +184,29 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 			if resultIndices[i] == 0 :
 				self.assertAlmostEqual( resultWeights[i], origWeights[i], 6 )
 
+	def testMaxInfluencesModeAllLocked( self ) :
+		""" Test LimitSmoothSkinningInfluencesOp locking mechanism in weight limit mode with all influences locked"""
+		
+		ssd = self.original()
+		maxInfluenced = self.maxInfluencedWithLocks()
+		
+		op = LimitSmoothSkinningInfluencesOp()
+		op.parameters()['input'].setValue( ssd )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
+		op.parameters()['minWeight'].setValue( 0.401 )
+		op.parameters()['compressResult'].setTypedValue( False )
+		op.parameters()['applyLocks'].setValue( True )
+		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, True, True ] ) )
+		result = op.operate()
+		
+		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
+		self.assertEqual( result.influencePose(), ssd.influencePose() )
+		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
+		self.assertEqual( result.pointIndexOffsets(), ssd.pointIndexOffsets() )
+		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
+		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
+		self.assertEqual( result, ssd )
+	
 	def testMaxInfluencesMode( self ) :
 		""" Test LimitSmoothSkinningInfluencesOp in max influences mode"""
 		
@@ -257,6 +280,29 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		for i in range( 0, resultWeights.size() ) :
 			if resultIndices[i] == 0 :
 				self.assertAlmostEqual( resultWeights[i], origWeights[i], 6 )
+	
+	def testMaxInfluencesModeAllLocked( self ) :
+		""" Test LimitSmoothSkinningInfluencesOp locking mechanism in max influences mode with all influences locked"""
+		
+		ssd = self.original()
+		maxInfluenced = self.maxInfluencedWithLocks()
+		
+		op = LimitSmoothSkinningInfluencesOp()
+		op.parameters()['input'].setValue( ssd )
+		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
+		op.parameters()['maxInfluences'].setValue( 1 )
+		op.parameters()['compressResult'].setTypedValue( False )
+		op.parameters()['applyLocks'].setValue( True )
+		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, True, True ] ) )
+		result = op.operate()
+		
+		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
+		self.assertEqual( result.influencePose(), ssd.influencePose() )
+		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
+		self.assertEqual( result.pointIndexOffsets(), ssd.pointIndexOffsets() )
+		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
+		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
+		self.assertEqual( result, ssd )
 	
 	def testIndexedMode( self ) :
 		""" Test LimitSmoothSkinningInfluencesOp in indexed mode"""

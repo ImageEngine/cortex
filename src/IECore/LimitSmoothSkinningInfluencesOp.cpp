@@ -126,7 +126,7 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
 	assert( skinningData->validate() );
-		
+
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
@@ -137,7 +137,7 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 	std::vector<bool> &locks = m_influenceLocksParameter->getTypedValue();
 	
 	int mode = m_modeParameter->getNumericValue();
-		
+	
 	// make sure there is one lock per influence
 	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) && ( mode != LimitSmoothSkinningInfluencesOp::Indexed ) )
 	{
@@ -186,7 +186,7 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 			
 			for ( int j=0; j < numToLimit; j++ )
 			{				
-				int indexOfMin;
+				int indexOfMin = -1;
 				float minWeight = Imath::limits<float>::max();
 				
 				for ( int k=0; k < pointInfluenceCounts[i]; k++ )
@@ -205,6 +205,11 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 						minWeight = weight;
 						indexOfMin = current;
 					}
+				}
+				
+				if ( indexOfMin == -1 )
+				{
+					break;
 				}
 				
 				influencesToLimit.push_back( indexOfMin );
