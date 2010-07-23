@@ -62,7 +62,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 		IECoreMaya.UIElement.__init__( self, topLevelUI )
 
-		self.__node = parameterisedHolderNode
+		self.__node = maya.OpenMaya.MObjectHandle( parameterisedHolderNode )
 		self.parameter = parameter #IECore.Parameter
 
 		self.__labelWithNodeName = kw.get( "labelWithNodeName", False )
@@ -73,13 +73,16 @@ class ParameterUI( IECoreMaya.UIElement ) :
 	# for the __init__ function.
 	def replace( self, node, parameter ) :
 
-		self.__node = node
+		self.__node = maya.OpenMaya.MObjectHandle( node )
 		self.parameter = parameter
 
 	## Returns the Maya node associated with this UI in the form of an OpenMaya.MObject
 	def node( self ) :
-
-		return self.__node
+		
+		if not self.__node.isValid() :
+			raise RuntimeError, "IECoreMaya.ParameterUI.node(): The requested node is not valid"
+		
+		return self.__node.object()
 
 	## Returns an umambiguous full path for the Maya node associated with this UI.
 	def nodeName( self ) :
@@ -326,7 +329,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 	def __selectValue( self, selection = None):
 
 		self.parameter.setValue( selection )
-		IECoreMaya.FnParameterisedHolder( self.__node ).setNodeValue( self.parameter )
+		IECoreMaya.FnParameterisedHolder( self.node() ).setNodeValue( self.parameter )
 
 	@staticmethod
 	def registerUI( parameterTypeId, handlerType, uiTypeHint = None ):
