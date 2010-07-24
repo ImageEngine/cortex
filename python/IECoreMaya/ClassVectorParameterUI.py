@@ -505,7 +505,9 @@ class ChildUI( IECoreMaya.UIElement ) :
 		c = self.__class()[0]
 		
 		iconName = "out_displayLayer"
-
+		with IECore.IgnoredExceptions( KeyError ) :
+			iconName = self.parent().parameter.userData()["UI"]["defaultChildIcon"].value
+		
 		sources = []
 		
 		if hasattr( c, "blindData" ):
@@ -514,12 +516,12 @@ class ChildUI( IECoreMaya.UIElement ) :
 		if hasattr( c, "parameters" ):
 			sources.append( c.parameters().userData() )
 		
-		for data in sources:	
-			if "UI" in data and "icon" in data["UI"] :
+		for data in sources:
+			with IECore.IgnoredExceptions( KeyError ) :
 				icon = data["UI"]["icon"].value
 				if icon :
 					return icon
-	
+		
 		return iconName
 	
 	
