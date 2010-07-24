@@ -352,6 +352,44 @@ class TestShader( unittest.TestCase ) :
 		r.worldEnd()
 
 		#w.start()
+		
+	def testVertexValueValid( self ) :
+	
+		## Shader.vertexValueValid should not throw exceptions, it should just return True or False
+		
+		vertexSource = """
+		attribute float floatParm;
+		attribute vec2 vec2Parm;
+		attribute vec3 vec3Parm;
+		attribute vec4 vec4Parm;
+
+		varying vec4 myColor;
+
+		void main()
+		{
+			myColor = vec4( floatParm + vec2Parm.x, vec3Parm.y, vec4Parm.r, 1 );
+			gl_Position = ftransform();
+		}
+		"""
+
+		fragmentSource = """
+
+		varying vec4 myColor;
+
+		void main()
+		{
+			gl_FragColor = myColor;
+		}
+		"""
+
+		s = Shader( vertexSource, fragmentSource )
+		
+		self.failUnless( s.vertexValueValid( "floatParm", FloatVectorData() ) )
+		self.failIf( s.vertexValueValid( "floatParm", V3fVectorData() ) )
+		
+		self.failUnless( s.vertexValueValid( "vec3Parm", V3fVectorData() ) )
+		self.failIf( s.vertexValueValid( "vec3Parm", FloatVectorData() ) )
+		
 
 if __name__ == "__main__":
     unittest.main()

@@ -878,7 +878,7 @@ bool Shader::hasVertexParameter( const std::string &parameterName ) const
 }
 
 bool Shader::vertexValueValid( GLint parameterIndex, const IECore::Data *value ) const
-{
+{	
 	IECore::TypeId t = value->typeId();
 
 	// accept old-fashined OpenGL parameters.
@@ -911,6 +911,8 @@ bool Shader::vertexValueValid( GLint parameterIndex, const IECore::Data *value )
 				if ( (t == IECore::ShortVectorDataTypeId || t == IECore::UShortVectorDataTypeId) && sizeof(short) == sizeof(GLshort) )
 					return true;
 
+				return false;
+
 			case GL_FLOAT_VEC2 :
 
 				if ( t == IECore::V2fVectorDataTypeId || t == IECore::V2dVectorDataTypeId )
@@ -918,6 +920,8 @@ bool Shader::vertexValueValid( GLint parameterIndex, const IECore::Data *value )
 
 				if ( t == IECore::V2iVectorDataTypeId && sizeof(int) == sizeof(GLint) )
 					return true;
+					
+				return false;
 
 			case GL_FLOAT_VEC3 :
 
@@ -929,21 +933,26 @@ bool Shader::vertexValueValid( GLint parameterIndex, const IECore::Data *value )
 
 				// \todo: apparently shader mat3 attributes are returned as vec3. So we should accept M33f here too...
 
+				return false;
+
 			case GL_FLOAT_VEC4 :
 
 				if ( t == IECore::Color4fVectorDataTypeId || t == IECore::Color4dVectorDataTypeId )
 					return true;
 
 				// \todo: apparently shader mat4 attributes are returned as vec4. So we should accept M44f here too...
+				
+				return false;
 
 			default :
 				// \todo: implement	other types like GL_FLOAT_MAT3 and GL_FLOAT_MAT4. Although I'm not sure they would be returned. Apparently mat3 and mat4 returns vec3 and vec4...
-				throw Exception( "Unsupported vertex parameter type." );
+
+				return false;
 		}
 	}
 	else
 	{
-		throw Exception( "Array parameters not supported yet." );
+		return false;
 	}
 }
 
