@@ -46,9 +46,9 @@ from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNod
 __all__ = [ 'PresetsUI', 'SavePresetUI', 'LoadPresetUI' ]
 
 def __savePresetMenuModifierVectorClass( menuDefinition, parent, parameter, node ) :
-	__savePresetMenuModifier( menuDefinition, parameter, node )
+	__savePresetMenuModifier( menuDefinition, parameter, node, parent=parent )
 
-def __savePresetMenuModifier( menuDefinition, parameter, node ) :
+def __savePresetMenuModifier( menuDefinition, parameter, node, parent=None ) :
 		
 	fnPh = FnParameterisedHolder( node )
 	plugPath = fnPh.parameterPlugPath( parameter )
@@ -56,8 +56,21 @@ def __savePresetMenuModifier( menuDefinition, parameter, node ) :
 	if len( menuDefinition.items() ):
 		menuDefinition.append( "/PresetsDivider", { "divider" : True } )
 	
-	menuDefinition.append( "/Presets/Save Preset...", { "command" : IECore.curry( maya.cmds.evalDeferred, 'import IECoreMaya; IECoreMaya.SavePresetUI( "%s", "%s" )' % ( fnPh.fullPathName(), plugPath ) ) } )
-	menuDefinition.append( "/Presets/Load Preset...", { "command" : IECore.curry( maya.cmds.evalDeferred, 'import IECoreMaya; IECoreMaya.LoadPresetUI( "%s", "%s" )' % ( fnPh.fullPathName(), plugPath ) ) } )
+	saveItemName = "/Presets/Save Preset..."
+	loadItemName = "/Presets/Load Preset..."
+	
+	# If we are actually a class in a vector, use slightly different names
+	# so that its more obvious whats going on
+	## \todo Add an item to save the class as a preset, rather than its values.
+	if parent is not None and (
+		 isinstance( parent, IECore.ClassVectorParameter )
+		 or isinstance( parent, IECore.ClassParameter )
+	):
+		saveItemName = "/Presets/Save Parameter Values Preset..."
+		loadItemName = "/Presets/Load Parameter Values Preset..."
+	
+	menuDefinition.append( saveItemName, { "command" : IECore.curry( maya.cmds.evalDeferred, 'import IECoreMaya; IECoreMaya.SavePresetUI( "%s", "%s" )' % ( fnPh.fullPathName(), plugPath ) ) } )
+	menuDefinition.append( loadItemName, { "command" : IECore.curry( maya.cmds.evalDeferred, 'import IECoreMaya; IECoreMaya.LoadPresetUI( "%s", "%s" )' % ( fnPh.fullPathName(), plugPath ) ) } )
 
 ClassParameterUI.registerClassMenuCallback( __savePresetMenuModifier )
 ClassVectorParameterUI.registerClassMenuCallback( __savePresetMenuModifierVectorClass )
