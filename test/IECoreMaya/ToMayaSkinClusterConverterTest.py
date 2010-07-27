@@ -143,6 +143,10 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		# test non-existant influences
 		maya.cmds.delete( ['joint2', 'joint3'] )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
+		
+		# test influences that aren't joints
+		ssd.influenceNames()[1] = geo
+		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

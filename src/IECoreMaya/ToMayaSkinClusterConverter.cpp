@@ -37,6 +37,7 @@
 #include "boost/format.hpp"
 
 #include "maya/MFnSkinCluster.h"
+#include "maya/MFnIkJoint.h"
 #include "maya/MFnDagNode.h"
 #include "maya/MFnDependencyNode.h"
 #include "maya/MFnMatrixData.h"
@@ -104,9 +105,13 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		s = influenceList.getDependNode( i, mObj );
 		if ( s != MS::kSuccess )
 		{
-			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: Influence \"%s\" does not exist" ) % influenceName ).str() );
+			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid influence" ) % influenceName ).str() );
 		}
-		MFnDagNode fnInfluence( mObj, &s );
+		MFnIkJoint fnInfluence( mObj, &s );
+		if ( s != MS::kSuccess )
+		{
+			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid influence" ) % influenceName ).str() );
+		}
 		fnInfluence.getPath( path );
 		influencePaths.append( path );
 	}
