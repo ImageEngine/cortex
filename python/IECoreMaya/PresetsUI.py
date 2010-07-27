@@ -133,14 +133,6 @@ class ParamSelectUI( UIElement ) :
 		parameterised = self._fnP.getParameterised()		
 		self._rootParameter = rootParameter if rootParameter else parameterised[0].parameters()
 
-		self._envVar = parameterised[3].replace( "_PATHS", "_PRESET_PATHS" )
-
-		if self._envVar not in os.environ :
-			maya.cmds.confirmDialog( message="Environment variable not set:\n\n$%s\n\nPlease set "%self._envVar+\
-			"this variable to point to one or more paths.\nPresets can then be saved to these "+\
-			"locations.", button="OK" )
-			return
-
 		self._window = maya.cmds.window(
 			title="%s: %s" % ( buttonTitle, node ),
 			width=500,
@@ -167,13 +159,24 @@ class SaveUI( ParamSelectUI ) :
 
 	def __init__( self, node, rootParameter=None, autoCollapseDepth=2 ) :
 	
+		fnP = FnParameterisedHolder( node )
+		parameterised = fnP.getParameterised()	
+	
+		self.__envVar = parameterised[3].replace( "_PATHS", "_PRESET_PATHS" )
+
+		if self.__envVar not in os.environ :
+			maya.cmds.confirmDialog( message="Environment variable not set:\n\n$%s\n\nPlease set "%self.__envVar+\
+			"this variable to point to one or more paths.\nPresets can then be saved to these "+\
+			"locations.", button="OK" )
+			return
+	
 		ParamSelectUI.__init__( self, self.__doSave, node, rootParameter, autoCollapseDepth=autoCollapseDepth )
 
 		self.__location = SearchPathMenu(
-			os.getenv( self._envVar ),
+			os.getenv( self.__envVar ),
 			self._form,
 			label = "Save to:",
-			ann = self._envVar,
+			ann = self.__envVar,
 			cw = ( 1, 65 )
 		)
 	
@@ -324,7 +327,9 @@ class LoadUI( UIElement ) :
 		self.__envVar = parameterised[3].replace( "_PATHS", "_PRESET_PATHS" )
 
 		if self.__envVar not in os.environ :
-			maya.cmds.confirmDialog( message="Environment variable not set:\n\n$%s\n\nPlease set this variable to point to one or more paths.\nPresets can then be loaded from these locations." % self.__envVar, button="OK" )
+			maya.cmds.confirmDialog( message="Environment variable not set:\n\n$%s\n\nPlease set "%self.__envVar+\
+			"this variable to point to one or more paths.\nPresets can then be loaded from these "+\
+			"locations.", button="OK" )		
 			return
 			
 		paths = os.environ[self.__envVar]
