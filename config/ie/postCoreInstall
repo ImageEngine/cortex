@@ -91,7 +91,6 @@ coreOps = [
 	[ 'DecompressSmoothSkinningDataOp', 'decompress', 'rigging/smoothSkinning' ],
 	[ 'NormalizeSmoothSkinningWeightsOp', 'normalizeWeights', 'rigging/smoothSkinning' ],
 	[ 'ReorderSmoothSkinningInfluencesOp', 'reorderInfluences', 'rigging/smoothSkinning' ],
-	[ 'MixSmoothSkinningWeightsOp', 'mixWeights', 'rigging/smoothSkinning' ],
 	[ 'SmoothSmoothSkinningWeightsOp', 'smoothWeights', 'rigging/smoothSkinning' ],
 	[ 'LimitSmoothSkinningInfluencesOp', 'limitInfluences', 'rigging/smoothSkinning' ],
 ]
