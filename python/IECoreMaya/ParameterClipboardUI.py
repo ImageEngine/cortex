@@ -192,9 +192,22 @@ def paste( plugPath ) :
 
 def __getClassParameters( parameter, paramList=[] ) :
 
-	if isinstance( parameter, IECore.CompoundParameter ) :
+	if parameter.staticTypeId() == IECore.TypeId.CompoundParameter :
 		for p in parameter.values():
-			__getClassParameters( p, paramList )	
+			__getClassParameters( p, paramList )
+	elif isinstance( parameter, IECore.ClassParameter ) :
+		
+		c = parameter.getClass( False )
+		if c:
+			__getClassParameters( c.parameters(), paramList )
+		
+	elif isinstance( parameter, IECore.ClassVectorParameter ) :
+		
+		cl = parameter.getClasses( False )
+		if cl :
+			for c in cl :
+				__getClassParameters( c.parameters(), paramList )
+	
 	else :
 		paramList.append( parameter )
 	
