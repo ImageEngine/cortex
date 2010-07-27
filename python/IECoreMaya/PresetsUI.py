@@ -246,7 +246,7 @@ class SaveUI( ParamSelectUI ) :
 		parameters = self._selector.getActiveParameters()
 
 		if not parameters :
-			maya.cmds.confirmDialog( message="Saelect at least one paremeter to save.", button="OK" )
+			maya.cmds.confirmDialog( message="Select at least one parameter to save.", button="OK" )
 			return
 
 		path = self.__location.getValue()
