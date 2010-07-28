@@ -77,6 +77,9 @@ class StringVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
 		
+		# disabling copy/paste from the ParameterClipboardUI as the results will be misleading to users
+		parameter.userData().update( StringVectorParameterUI.__disableCopyPaste )
+		
 		vector = maya.cmds.getAttr( self.plugName() ) or []
 		
 		# delete un-needed fields
@@ -190,5 +193,11 @@ class StringVectorParameterUI( IECoreMaya.ParameterUI ) :
 		for val in value :
 			cmd += ' "%s"' % val
 		maya.mel.eval( cmd )
+	
+	__disableCopyPaste = IECore.CompoundObject( {
+		"UI" : IECore.CompoundObject( {
+			"copyPaste" : IECore.BoolData( False ),
+		} ),
+	} )
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.StringVectorParameter, StringVectorParameterUI )

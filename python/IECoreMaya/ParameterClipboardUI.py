@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import IECore
 import IECoreMaya
 
@@ -46,7 +48,11 @@ import maya.cmds
 __all__ = [ 'copy', 'copyClass', 'paste', '_ieCoreParameterClipboardUIBuffer' ]
 
 def __copyPasteMenuModifier( menuDefinition, parameter, node, parent=None ) :
-		
+	
+	with IECore.IgnoredExceptions( KeyError ) :
+		if not parameter.userData()['UI']['copyPaste'].value :
+			return
+	
 	global _ieCoreParameterClipboardUIBuffer
 	
 	fnPh = IECoreMaya.FnParameterisedHolder( node )

@@ -75,6 +75,9 @@ class NumericVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
 		
+		# disabling copy/paste from the ParameterClipboardUI as the results will be misleading to users
+		parameter.userData().update( NumericVectorParameterUI.__disableCopyPaste )
+		
 		vector = maya.cmds.getAttr( self.plugName() ) or []
 		
 		# delete un-needed fields
@@ -201,6 +204,12 @@ class NumericVectorParameterUI( IECoreMaya.ParameterUI ) :
 			return maya.cmds.intField
 		else:
 			raise RuntimeError("Invalid parameter type for NumericParameterUI")
+	
+	__disableCopyPaste = IECore.CompoundObject( {
+		"UI" : IECore.CompoundObject( {
+			"copyPaste" : IECore.BoolData( False ),
+		} ),
+	} )
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.FloatVectorParameter, NumericVectorParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.DoubleVectorParameter, NumericVectorParameterUI )
