@@ -87,3 +87,5 @@ from FileDialog import FileDialog
 from GeometryCombinerUI import *
 from PresetsUI import *
 from ParameterClipboardUI import *
+from NumericVectorParameterUI import NumericVectorParameterUI
+from StringVectorParameterUI import StringVectorParameterUI
