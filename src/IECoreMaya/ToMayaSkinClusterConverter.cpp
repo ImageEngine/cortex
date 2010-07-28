@@ -203,11 +203,29 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	for ( unsigned i=0; i < influencePoseData.size(); i++ )
 	{
 		MPlug preMatrixPlug = bindPreMatrixArrayPlug.elementByLogicalIndex( i, &s );
-		preMatrixPlug.getValue( mObj );
-		MFnMatrixData matFn( mObj, &s );
-		matFn.set( IECore::convert<MMatrix>( influencePoseData[i] ) );
-		mObj = matFn.object();
+		s = preMatrixPlug.getValue( mObj );
+		if ( s )
+		{
+			MFnMatrixData matFn( mObj );
+			matFn.set( IECore::convert<MMatrix>( influencePoseData[i] ) );
+			mObj = matFn.object();	
+		}
+		else
+		{
+			MFnMatrixData matFn;
+			mObj = matFn.create( IECore::convert<MMatrix>( influencePoseData[i] ) );
+		}
+		
 		preMatrixPlug.setValue( mObj );
+	}
+	
+	// remove unneeded bindPreMatrix children
+	unsigned existingElements = bindPreMatrixArrayPlug.numElements();
+	for ( unsigned i=influencePoseData.size(); i < existingElements; i++ )
+	{
+		MPlug preMatrixPlug = bindPreMatrixArrayPlug.elementByLogicalIndex( i, &s );
+		/// \todo: surely there is a way to accomplish this in c++...
+		MGlobal::executeCommand( ( boost::format( "removeMultiInstance %s" ) % preMatrixPlug.name() ).str().c_str() );
 	}
 	
 	// get the geometry
