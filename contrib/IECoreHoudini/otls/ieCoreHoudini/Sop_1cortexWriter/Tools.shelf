@@ -5,7 +5,7 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="$HDA_TABLE_$HDA_NAME" label="$HDA_LABEL" icon="SOP_subnet">
+  <tool name="$HDA_TABLE_$HDA_NAME" label="$HDA_LABEL" icon="opdef:/Sop/cortexWriter?media-floppy.svg">
     <toolMenuContext name="viewer">
       <contextNetType>SOP</contextNetType>
     </toolMenuContext>
@@ -15,7 +15,7 @@
     <toolMenuContext name="network">
       <contextOpType>$HDA_TABLE/$HDA_NAME</contextOpType>
     </toolMenuContext>
-    <toolSubmenu>Digital Assets</toolSubmenu>
+    <toolSubmenu>Cortex</toolSubmenu>
     <script scriptType="python"><![CDATA[import soptoolutils
 
 soptoolutils.genericTool(kwargs, '$HDA_NAME')]]></script>

@@ -5,7 +5,7 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="$HDA_TABLE_$HDA_NAME" label="$HDA_LABEL" icon="SHOP_material">
+  <tool name="$HDA_TABLE_$HDA_NAME" label="$HDA_LABEL" icon="opdef:/Shop/cortexRmanInject?applications-graphics.svg">
     <toolMenuContext name="viewer">
       <contextNetType>SHOP</contextNetType>
     </toolMenuContext>
@@ -15,7 +15,7 @@
     <toolMenuContext name="network">
       <contextOpType>$HDA_TABLE/$HDA_NAME</contextOpType>
     </toolMenuContext>
-    <toolSubmenu>Digital Assets</toolSubmenu>
+    <toolSubmenu>Cortex</toolSubmenu>
     <toolSubmenu>Generic Shaders</toolSubmenu>
     <script scriptType="python"><![CDATA[import shoptoolutils
 
