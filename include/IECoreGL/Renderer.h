@@ -170,8 +170,8 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"gl:primitive:boundColor" Color4fData </b><br>
 		/// The color of the bounding boxes drawn.
 		///
-		/// \li <b>"gl:primitive:filled" BoolData true</b><br>
-		/// Draw each primitive filled.
+		/// \li <b>"gl:primitive:solid" BoolData true</b><br>
+		/// Draw each primitive solid.
 		///
 		/// \li <b>"gl:primitive:outline" BoolData false</b><br>
 		/// Draw an outline for each primitive. Note that the results
