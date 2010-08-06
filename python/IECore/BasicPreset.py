@@ -71,9 +71,9 @@ class BasicPreset( IECore.Preset ) :
 	##				parameters state at the time of application.
 	def __init__( self, pathOrDataOrParameterised, rootParameter=None, parameters=(), referenceData=False ) :
 		
-		self.__header = None
-		self.__data = None
-		self.__cob = None
+		self._header = None
+		self._data = None
+		self._cob = None
 		
 		IECore.Preset.__init__( self )
 				
@@ -94,11 +94,11 @@ class BasicPreset( IECore.Preset ) :
 		
 		if isinstance( pathOrDataOrParameterised, str ) or isinstance( pathOrDataOrParameterised, unicode ) :
 			
-			self.__cob = pathOrDataOrParameterised
+			self._cob = pathOrDataOrParameterised
 		
 		elif isinstance( pathOrDataOrParameterised, IECore.CompoundObject ) :
 		
-			self.__data = pathOrDataOrParameterised	
+			self._data = pathOrDataOrParameterised	
 		
 		elif hasattr( pathOrDataOrParameterised, "parameters" ):
 			
@@ -107,15 +107,15 @@ class BasicPreset( IECore.Preset ) :
 			if rootParameter is None:
 				rootParameter = pathOrDataOrParameterised.parameters()
 			
-			BasicPreset.__grabHierarchy_v1( data, rootParameter, parameters )
+			BasicPreset._grabHierarchy( data, rootParameter, parameters )
 			# Remove any branches without leaf values. There should be 
 			# a better way of dealing with this.
-			BasicPreset.__pruneHierarchy_v1( data )
+			BasicPreset._pruneHierarchy( data )
 			
 			if referenceData:
-				self.__data = data
+				self._data = data
 			else:
-				self.__data = data.copy()
+				self._data = data.copy()
 								
 		else :		
 			
@@ -132,9 +132,9 @@ class BasicPreset( IECore.Preset ) :
 	##                  the preset is considered part of.
 	def metadata( self ) :
 		
-		self.__ensureHeader()
+		self._ensureHeader()
 		
-		h = self.__header
+		h = self._header
 		return {
 			"title" : h["title"].value if "title" in h else self.__class__,
 			"description" : h["description"].value if "description" in h else "",
@@ -144,18 +144,18 @@ class BasicPreset( IECore.Preset ) :
 	## \see IECore.Preset.applicableTo	
 	def applicableTo( self, parameterised, rootParameter ) :
 		
-		self.__ensureData()	
-		return self.__applicableTo_v1( parameterised, rootParameter, self.__data )
+		self._ensureData()	
+		return self._applicableTo( parameterised, rootParameter, self._data )
 
 	## \see IECore.Preset.__call__
 	def __call__( self, parameterised, rootParameter ) :
 			
-		self.__ensureData()
+		self._ensureData()
 		
 		if not self.applicableTo( parameterised, rootParameter ) :
 			raise RuntimeError, "IECore.BasicPreset: Sorry, this preset is not applicable to that parameter."
 		
-		self.__applyHierarchy_v1( parameterised, rootParameter, self.__data )
+		self._applyHierarchy( parameterised, rootParameter, self._data )
 											
 	## This method will save the specified parameters to disk in such a was
 	## as can be loaded by the IECore.ClassLoader
@@ -170,7 +170,7 @@ class BasicPreset( IECore.Preset ) :
 	## \param versino, int, the version of the preset, this will default to 1.
 	def save( self, path, name, title="", description="", categories=(), version=1 ) :
 	
-		if not self.__data:
+		if not self._data:
 			raise RuntimeError, "IECore.BasicPreset.save: Unable to save, preset has no data."
 		
 		baseDir = "%s/%s" % ( path, name )
@@ -185,7 +185,7 @@ class BasicPreset( IECore.Preset ) :
 		cobName = "%s-%i.cob" % ( name, version )
 		cobFile = "%s/%s" % ( baseDir, cobName )		
 		
-		w = IECore.Writer.create( self.__data, cobFile )
+		w = IECore.Writer.create( self._data, cobFile )
 
 		w["header"].getValue()["title"] = IECore.StringData( title if title else name )
 		w["header"].getValue()["description"] = IECore.StringData( description )
@@ -194,33 +194,33 @@ class BasicPreset( IECore.Preset ) :
 
 		w.write()
 		
-		BasicPreset.__writePy( pyFile, cobName, name )
+		BasicPreset._writePy( pyFile, cobName, name )		
+	
+	def _ensureData( self ) :
 		
-	def __ensureData( self ) :
-		
-		if self.__data != None:
+		if self._data != None:
 			return			
 
-		if self.__cob is not None:
+		if self._cob is not None:
 
-			data = IECore.Reader.create( self.__cob ).read()
+			data = IECore.Reader.create( self._cob ).read()
 			if not isinstance( data, IECore.CompoundObject ) :
-				raise RuntimeError, "IECore.BasicPreset: Unable to retrieve data from '%s'." % self.__cob 
-			self.__data = data
+				raise RuntimeError, "IECore.BasicPreset: Unable to retrieve data from '%s'." % self._cob 
+			self._data = data
 		
-		if not self.__data:
+		if not self._data:
 		
 			raise RuntimeError, "IECore.BasicPreset: No data in preset." 
 
-	def __ensureHeader( self ) :
+	def _ensureHeader( self ) :
 		
-		if self.__cob != None:
-			self.__header = IECore.Reader.create( self.__cob ).readHeader()
+		if self._cob != None:
+			self._header = IECore.Reader.create( self._cob ).readHeader()
 		else:
-			self.__header = {}
+			self._header = {}
 				
 	@staticmethod
-	def __writePy( fileName, cob, className  ) :
+	def _writePy( fileName, cob, className  ) :
 				
 		f = open( fileName, "w" )
 		f.write(
@@ -239,7 +239,7 @@ class %s( IECore.BasicPreset ):
 		)
 		
 	@staticmethod
-	def __grabHierarchy_v1( data, parameter, parameterList=() ) :
+	def _grabHierarchy( data, parameter, parameterList=() ) :
 				
 		if parameter.staticTypeId() == IECore.TypeId.CompoundParameter :
 
@@ -247,7 +247,7 @@ class %s( IECore.BasicPreset ):
 			
 				data[p] = IECore.CompoundObject()
 
-				BasicPreset.__grabHierarchy_v1(
+				BasicPreset._grabHierarchy(
 					data[p],
 					parameter[p],
 					parameterList, 
@@ -257,11 +257,11 @@ class %s( IECore.BasicPreset ):
 			
 			if isinstance( parameter, IECore.ClassParameter ) :
 				
-				BasicPreset.__grabClassParameter_v1( parameter, data, parameterList )
+				BasicPreset._grabClassParameter( parameter, data, parameterList )
 			
 			elif isinstance( parameter, IECore.ClassVectorParameter ) :
 				
-				BasicPreset.__grabClassVectorParameter_v1( parameter, data, parameterList )
+				BasicPreset._grabClassVectorParameter( parameter, data, parameterList )
 			
 			else :	
 						
@@ -270,18 +270,18 @@ class %s( IECore.BasicPreset ):
 				if parameterList:
 					for p in parameterList:
 						if parameter.isSame( p ) :		
-							BasicPreset.__grabParameter_v1( parameter, data )
+							BasicPreset._grabParameter( parameter, data )
 							break
 				else :
-					BasicPreset.__grabParameter_v1( parameter, data )
+					BasicPreset._grabParameter( parameter, data )
 	
 	@staticmethod	
-	def __grabParameter_v1( parameter, data ) :
+	def _grabParameter( parameter, data ) :
 		
 		data["_value_"] = parameter.getValue()
 	
 	@staticmethod	
-	def __grabClassParameter_v1( parameter, data, parameterList ) :
+	def _grabClassParameter( parameter, data, parameterList ) :
 		
 		c = parameter.getClass( True )
 		
@@ -300,14 +300,14 @@ class %s( IECore.BasicPreset ):
 
 		if c[0] :
 
-			BasicPreset.__grabHierarchy_v1(
+			BasicPreset._grabHierarchy(
 				data["_classValue_"],
 				c[0].parameters(),
 				parameterList, 
 			)
 	
 	@staticmethod		
-	def __grabClassVectorParameter_v1( parameter, data, parameterList ) :
+	def _grabClassVectorParameter( parameter, data, parameterList ) :
 		
 		classes = parameter.getClasses( True )
 				
@@ -334,7 +334,7 @@ class %s( IECore.BasicPreset ):
 
 			v = IECore.CompoundObject()
 
-			BasicPreset.__grabHierarchy_v1(
+			BasicPreset._grabHierarchy(
 				v,
 				c[0].parameters(),
 				parameterList, 
@@ -342,19 +342,19 @@ class %s( IECore.BasicPreset ):
 
 			data["_values_"][c[1]] = v 		
 		
-	def __applyHierarchy_v1( self, parameterised, parameter, data ) :
+	def _applyHierarchy( self, parameterised, parameter, data ) :
 		
 		if "_className_" in data :
 							
-			self.__applyClassParameter_v1( parameterised, parameter, data )
+			self._applyClassParameter( parameterised, parameter, data )
 			
 		elif "_classNames_" in data :
 		
-			self.__applyClassVector_v1( parameterised, parameter, data )
+			self._applyClassVector( parameterised, parameter, data )
 		
 		elif "_value_" in data :
 				
-			self.__applyParameter_v1( parameterised, parameter, data )
+			self._applyParameter( parameterised, parameter, data )
 			
 		else : # CompoundParameter
 					
@@ -363,16 +363,16 @@ class %s( IECore.BasicPreset ):
 				if p not in parameter :
 					print "'%s' is missing from '%s' (%s)" % ( p, parameter.name, parameter )
 				
-				self.__applyHierarchy_v1( parameterised, parameter[p], data[p] )
+				self._applyHierarchy( parameterised, parameter[p], data[p] )
 			
-	def __applyParameter_v1( self, parameterised, parameter, data ) :
+	def _applyParameter( self, parameterised, parameter, data ) :
 		
 		try:
 			parameter.setValue( data["_value_"] )
 		except Exception, e:
 			print e
 		
-	def __applyClassParameter_v1( self, parameterised, parameter, data ) :
+	def _applyClassParameter( self, parameterised, parameter, data ) :
 		
 		if not isinstance( parameter, IECore.ClassParameter ) :
 			print "Unable to restore to '%s' (%s) as it isnt a ClassParameter" \
@@ -390,9 +390,9 @@ class %s( IECore.BasicPreset ):
 			
 		c = parameter.getClass( False )
 		if c:	
-			self.__applyHierarchy_v1( parameterised, c.parameters(), data["_classValue_"] )		
+			self._applyHierarchy( parameterised, c.parameters(), data["_classValue_"] )		
 		
-	def __applyClassVector_v1( self, parameterised, parameter, data ) :
+	def _applyClassVector( self, parameterised, parameter, data ) :
 		
 		if not isinstance( parameter, IECore.ClassVectorParameter ) :
 			print "Unable to restore to '%s' (%s) as it isnt a ClassVectorParameter" \
@@ -426,7 +426,7 @@ class %s( IECore.BasicPreset ):
 			
 			else:
 
-				c = self.__addClassToVector_v1(
+				c = self._addClassToVector(
 					parameter, 
 					paramNames[i],
 					names[i],
@@ -434,13 +434,13 @@ class %s( IECore.BasicPreset ):
 				)
 				
 				
-			self.__applyHierarchy_v1(
+			self._applyHierarchy(
 				parameterised,
 				c[0].parameters(),
 				data["_values_"][ paramNames[i] ],
 			)
 		
-	def __addClassToVector_v1( self, parameter, parameterName, className, classVersion ) :
+	def _addClassToVector( self, parameter, parameterName, className, classVersion ) :
 				
 		classes = parameter.getClasses( True )
 		parameterNames = [ c[1] for c in classes ]
@@ -456,7 +456,7 @@ class %s( IECore.BasicPreset ):
 		parameter.setClass( parameterName, className, classVersion )
 		return parameter.getClass( parameterName, True )
 
-	def __applicableTo_v1( self, parameterised, parameter, data ) :
+	def _applicableTo( self, parameterised, parameter, data ) :
 				
 		if parameter.staticTypeId() == IECore.TypeId.CompoundParameter :
 			
@@ -509,7 +509,7 @@ class %s( IECore.BasicPreset ):
 		return True
 		
 	@staticmethod
-	def __pruneHierarchy_v1( data ) :
+	def _pruneHierarchy( data ) :
 	
 		returnVal = True
 	
@@ -521,7 +521,7 @@ class %s( IECore.BasicPreset ):
 				
 			elif isinstance( data[k], IECore.CompoundObject ):
 			
-				if BasicPreset.__pruneHierarchy_v1( data[k] ) :
+				if BasicPreset._pruneHierarchy( data[k] ) :
 					del data[k]
 				else :
 					returnVal = False			
