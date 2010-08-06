@@ -82,6 +82,10 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( r.getOption( "shutter" ), V2fData( V2f( 0 ) ) )
 		r.setOption( "shutter", V2fData( V2f( 1, 2 ) ) )
 		self.assertEqual( r.getOption( "shutter" ), V2fData( V2f( 1, 2 ) ) )
+		
+		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), BoolData( False ) )
+		r.setOption( "gl:drawCoordinateSystems", BoolData( True ) )
+		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), BoolData( True ) )
 
 	def testAttributes( self ) :
 

@@ -77,6 +77,7 @@ MTypeId ProceduralHolder::id = ProceduralHolderId;
 MObject ProceduralHolder::aGLPreview;
 MObject ProceduralHolder::aTransparent;
 MObject ProceduralHolder::aDrawBound;
+MObject ProceduralHolder::aDrawCoordinateSystems;
 MObject ProceduralHolder::aProceduralComponents;
 
 ProceduralHolder::ProceduralHolder()
@@ -138,6 +139,17 @@ MStatus ProceduralHolder::initialize()
 	nAttr.setHidden( false );
 
 	s = addAttribute( aDrawBound );
+	assert( s );
+	
+	aDrawCoordinateSystems = nAttr.create( "drawCoordinateSystems", "dcs", MFnNumericData::kBoolean, 1, &s );
+	assert( s );
+	nAttr.setReadable( true );
+	nAttr.setWritable( true );
+	nAttr.setStorable( true );
+	nAttr.setConnectable( true );
+	nAttr.setHidden( false );
+
+	s = addAttribute( aDrawCoordinateSystems );
 	assert( s );
 
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
@@ -210,7 +222,10 @@ MBoundingBox ProceduralHolder::boundingBox() const
 
 MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
-	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == g_attributeNamePrefix )
+	if(
+		std::string( plug.partialName().substring( 0, 4 ).asChar() ) == g_attributeNamePrefix ||
+		plug == aDrawCoordinateSystems
+	)
 	{
 		// it's an input to the procedural
 		m_boundDirty = m_sceneDirty = true;
@@ -274,6 +289,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 			{
 				IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 				renderer->setOption( "gl:mode", new StringData( "deferred" ) );
+				renderer->setOption( "gl:drawCoordinateSystems", new BoolData( MPlug( thisMObject(), aDrawCoordinateSystems ).asBool() ) );
 				renderer->worldBegin();
 
 					// using the form with many arguments so that we can customise

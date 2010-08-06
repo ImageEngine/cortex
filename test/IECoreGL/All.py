@@ -57,6 +57,7 @@ from DeferredRenderer import *
 from DiskPrimitiveTest import DiskPrimitiveTest
 from ToGLTextureConverter import TestToGLTexureConverter
 from PrimitiveTest import *
+from CoordinateSystemTest import CoordinateSystemTest
 
 if IECore.withFreeType() :
 

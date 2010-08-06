@@ -86,6 +86,10 @@ class Renderer : public IECore::Renderer
 		/// for which an IECore::Reader is available is suitable for use as a texture.
 		///
 		/// "shutter" V2fData
+		///
+		/// "gl:drawCoordinateSystems" BoolData false
+		/// When this is true, coordinate systems created with the coordinateSystem() method
+		/// will be visualised.
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
 		/// \par Standard parameters supported :

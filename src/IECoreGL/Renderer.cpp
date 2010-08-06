@@ -144,6 +144,7 @@ struct IECoreGL::Renderer::MemberData
 		string textureSearchPathDefault;
 		vector<CameraPtr> cameras;
 		vector<DisplayPtr> displays;
+		bool drawCoordinateSystems;
 	} options;
 
 	/// This is used only before worldBegin, so we can correctly get the transforms for cameras.
@@ -185,7 +186,8 @@ IECoreGL::Renderer::Renderer()
 	m_data->options.shaderIncludePath = m_data->options.shaderIncludePathDefault = shaderIncludePath ? shaderIncludePath : "";
 	const char *texturePath = getenv( "IECOREGL_TEXTURE_PATHS" );
 	m_data->options.textureSearchPath = m_data->options.textureSearchPathDefault = texturePath ? texturePath : "";
-
+	m_data->options.drawCoordinateSystems = false;
+	
 	m_data->transformStack.push( M44f() );
 
 	m_data->inWorld = false;
@@ -305,6 +307,19 @@ static IECore::DataPtr textureSearchPathOptionGetter( const std::string &name, I
 	return new StringData( memberData->options.textureSearchPath );
 }
 
+static void drawCoordinateSystemsOptionSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
+{
+	if( ConstBoolDataPtr b = castWithWarning<BoolData>( value, name, "Renderer::setOption" ) )
+	{
+		memberData->options.drawCoordinateSystems = b->readable();
+	}
+}
+
+static IECore::DataPtr drawCoordinateSystemsOptionGetter( const std::string &name, IECoreGL::Renderer::MemberData *memberData )
+{
+	return new BoolData( memberData->options.drawCoordinateSystems );
+}
+
 static const OptionSetterMap *optionSetters()
 {
 	static OptionSetterMap *o = new OptionSetterMap;
@@ -319,6 +334,7 @@ static const OptionSetterMap *optionSetters()
 		(*o)["searchPath:shaderInclude"] = shaderIncludePathOptionSetter;
 		(*o)["gl:searchPath:texture"] = textureSearchPathOptionSetter;
 		(*o)["searchPath:texture"] = textureSearchPathOptionSetter;
+		(*o)["gl:drawCoordinateSystems"] = drawCoordinateSystemsOptionSetter;
 	}
 	return o;
 }
@@ -337,6 +353,7 @@ static const OptionGetterMap *optionGetters()
 		(*o)["searchPath:shaderInclude"] = shaderIncludePathOptionGetter;
 		(*o)["gl:searchPath:texture"] = textureSearchPathOptionGetter;
 		(*o)["searchPath:texture"] = textureSearchPathOptionGetter;
+		(*o)["gl:drawCoordinateSystems"] = drawCoordinateSystemsOptionGetter;
 	}
 	return o;
 }
@@ -646,7 +663,32 @@ void IECoreGL::Renderer::concatTransform( const Imath::M44f &m )
 
 void IECoreGL::Renderer::coordinateSystem( const std::string &name )
 {
-	msg( Msg::Warning, "Renderer::coordinateSystem", "Not implemented" );
+	if( m_data->options.drawCoordinateSystems )
+	{
+		IntVectorDataPtr numVerticesData = new IntVectorData;
+		std::vector<int> &numVertices = numVerticesData->writable();
+		numVertices.push_back( 2 );
+		numVertices.push_back( 2 );
+		numVertices.push_back( 2 );
+		
+		V3fVectorDataPtr pointsData = new V3fVectorData();
+		std::vector<V3f> &points = pointsData->writable();
+		points.push_back( V3f( 0 ) );
+		points.push_back( V3f( 1, 0, 0 ) );
+		points.push_back( V3f( 0 ) );
+		points.push_back( V3f( 0, 1, 0 ) );
+		points.push_back( V3f( 0 ) );
+		points.push_back( V3f( 0, 0, 1 ) );
+		
+		PrimitiveVariableMap primVars;
+		primVars["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pointsData );
+		
+		attributeBegin();
+			setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
+			setAttribute( "gl:curvesPrimitive:glLineWidth", new FloatData( 2 ) );
+			curves( CubicBasisf::linear(), false, numVerticesData, primVars );
+		attributeEnd();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
