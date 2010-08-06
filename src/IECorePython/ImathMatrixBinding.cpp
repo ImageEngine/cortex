@@ -168,6 +168,27 @@ M *constructFromList( list l )
 	return r ;
 }
 
+template<typename M, typename T>
+M *constructFromMatrix33( const T &m )
+{
+	return new M(
+		m[0][0], m[0][1], m[0][2],
+		m[1][0], m[1][1], m[1][2],
+		m[2][0], m[2][1], m[2][2]
+	);
+}
+
+template<typename M, typename T>
+M *constructFromMatrix44( const T &m )
+{
+	return new M(
+		m[0][0], m[0][1], m[0][2], m[0][3],
+		m[1][0], m[1][1], m[1][2], m[1][3],
+		m[2][0], m[2][1], m[2][2], m[2][3],
+		m[3][0], m[3][1], m[3][2], m[3][3]
+	);
+}
+
 template<typename T>
 struct MatrixWrapper
 {
@@ -415,9 +436,8 @@ void bindMatrix33()
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T, T, T, T, T, T, T, T>())
-
-		.def(init<const Matrix33<T> &>())
-
+		.def("__init__", make_constructor( &constructFromMatrix33< Matrix33<T>, Matrix33<float> > ) )
+		.def("__init__", make_constructor( &constructFromMatrix33< Matrix33<T>, Matrix33<double> > ) )
 		.def("__init__", make_constructor( &constructFromList< Matrix33<T> > ) )
 
 		.def("dimensions", &MatrixDimensions<Matrix33<T> >::get)
@@ -535,8 +555,8 @@ void bindMatrix44()
 		.def(init<T>())
 		.def(init<T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T>())
 		.def(init<Matrix33<T>, Vec3<T> >())
-		.def(init<const Matrix44<T> &>())
-
+		.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<float> > ) )
+		.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<double> > ) )
 		.def("__init__", make_constructor( &constructFromList< Matrix44<T> > ) )
 
 		//.def(self = T())

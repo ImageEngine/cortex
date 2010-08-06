@@ -828,6 +828,17 @@ class ImathM33f(unittest.TestCase):
 
 			mt = m.transposed()
 			self.assertAlmostEqual( d, mt.determinant(), 3 )
+			
+	def testConstructFromOtherType( self ) :
+	
+		md = M33d( 1, 2, 3, 4, 5, 6, 7, 8, 9 )
+		mf = M33f( 1, 2, 3, 4, 5, 6, 7, 8, 9 )
+		
+		mf2 = M33f( md )
+		self.assertEqual( mf2, mf )
+		
+		md2 = M33d( mf )
+		self.assertEqual( md2, md )		
 
 class ImathM44f(unittest.TestCase):
 	def testConstructors(self):
@@ -997,7 +1008,18 @@ class ImathM44f(unittest.TestCase):
 			m = M44f()
 			m.translate( V3f( r(), r(), r() ) )
 			self.assertAlmostEqual( m.determinant(), 1, 10 )
-
+			
+	def testConstructFromOtherType( self ) :
+	
+		md = M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 )
+		mf = M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 )
+		
+		mf2 = M44f( md )
+		self.assertEqual( mf2, mf )
+		
+		md2 = M44d( mf )
+		self.assertEqual( md2, md )
+		
 class ImathColor3Test( unittest.TestCase ) :
 
 	def test( self ) :
