@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@ import sys
 import IECore
 import socket
 
-class TestPDCWriter( unittest.TestCase ) :
+class TestObjectWriter( unittest.TestCase ) :
 
 	def testBasics( self ) :
 
@@ -57,16 +57,16 @@ class TestPDCWriter( unittest.TestCase ) :
 		o = IECore.IntData()
 
 		w = IECore.Writer.create( o, "test/intData.cob" )
-		w.header.getValue()["testHeaderData"] = IECore.StringData( "i am part of a header" )
-		w.header.getValue()["testHeaderData2"] = IECore.IntData( 100 )
+		w["header"].getValue()["testHeaderData"] = IECore.StringData( "i am part of a header" )
+		w["header"].getValue()["testHeaderData2"] = IECore.IntData( 100 )
 		w.write()
 
 		h = IECore.Reader.create( "test/intData.cob" ).readHeader()
 
-		for k in w.header.getValue().keys() :
-			self.assertEqual( w.header.getValue()[k], h[k] )
+		for k in w["header"].getValue().keys() :
+			self.assertEqual( w["header"].getValue()[k], h[k] )
 
-		self.assertEqual( h["host"].value, socket.gethostname() )
+		self.assertEqual( h["host"]["nodeName"].value, socket.gethostname() )
 		self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
 		self.assertEqual( h["typeName"].value, "IntData" )
 
