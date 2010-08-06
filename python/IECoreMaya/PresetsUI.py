@@ -98,7 +98,7 @@ def LoadPresetUI( nodeName, attribute ) :
 
 ### This class provides a UI for loading and saving presets for nodes
 ### derived from the ParameterisedHolder class. Currently, it creates
-### BasicPresets in one of the locations set in the relevent search
+### BasicPresets in one of the locations set in the relevant search
 ### paths for the Parameterised objects. Categories, and titles aren't 
 ### yet implemented.
 ###
@@ -132,14 +132,28 @@ class PresetsUI() :
 	def load( self ) :
 		LoadUI( self.__node, self.__rootParameter )
 
+	### Call to select parameters within the current rootParameter
+	## \param callback, f( node, rootParameter, parameters ), A Callable, that will be
+	## called with the node, and chosed parameters after the user has
+	## made their selection. This can be usefull for a variety of cases where
+	## it's needed for the user to select parameters within a hierarchy.
+	def selectParameters( self, callback ) :
+		SelectUI( self.__node, self.__rootParameter, callback )
+		
 
 # Private implementation classes
 
 # This is a base class for all the UIs which need to display a list of available parameters
-# and obtain a subset which the user is interested in. 
+# and obtain a subset which the user is interested in. Thi takes care of drawing a list in 
+# a form layout. Derived classes can then edit/add to this layout to add additional controls.
+#   self._fnP will contain a parameterised holder around the node passed to the constructor.
+#   self._rootParamter will contain the rootParameter passed to the constructor.
+#   self._form is the main form layout
+#   self._scroll is the main scroll layout
+#   self._selector is the actual parameter list
 class ParamSelectUI( UIElement ) :
 
-	def __init__( self, callback, node, rootParameter=None, buttonTitle="Select", autoCollapseDepth=2 ) :
+	def __init__( self, node, rootParameter=None, buttonTitle="Select", autoCollapseDepth=2 ) :
 
 		self._fnP = FnParameterisedHolder( node )
 
@@ -168,6 +182,70 @@ class ParamSelectUI( UIElement ) :
 							( self._scroll, 			"bottom",	0  ), ],
 		)
 
+# The SelectUI allows parameter selection, then calls the supplied callback with
+# the node, rootParameter, and a list of chosen parameters. The button title can
+# be customised with the label argument to the constructor. This may be useful
+# outside this file, and can be accessed by the PresetUI.selectParameters() method
+# which takes a callback.
+class SelectUI( ParamSelectUI ) :
+
+	def __init__( self, node, rootParameter=None, callback=None, label="Select" ) :
+	
+		self.__callback = callback
+		self.__node = node
+	
+		ParamSelectUI.__init__( self, node, rootParameter )
+
+		self.__button = maya.cmds.button(
+			l=label,
+			parent=self._form,
+			height=30,
+			c=self._createCallback( self.__doAction )
+		)	
+	
+		maya.cmds.formLayout( self._form, edit=True,
+
+			attachForm=[	( self._scroll, 			"top",  	0  ),
+							( self._scroll, 			"left", 	0  ),
+							( self._scroll, 			"right",	0  ), 
+							( self.__button, 			"bottom",	0  ),
+							( self.__button, 			"left", 	0  ),
+							( self.__button, 			"right",	0  ) ],
+							
+			attachControl=[	( self._scroll, 	"bottom", 	0, 	self.__button ),  ],
+		)
+
+		maya.cmds.showWindow( self._window )
+		
+	def __doAction( self ) :
+
+		parameters = self._selector.getActiveParameters()
+
+		if not parameters :
+			maya.cmds.confirmDialog( message="Please select at least one paremeter.", button="OK" )
+			return
+	
+		maya.cmds.deleteUI( self._window )
+		
+		if self.__callback:	
+			self.__callback( self.__node, self._rootParameter, parameters )
+
+# The CopyUI extends the selector to create a preset from the users selection, and call a callback
+# passing that preset.	
+class CopyUI( SelectUI ) :
+
+	def __init__( self, node, rootParameter=None, callback=None ) :
+	
+		self.__callback = callback	
+		SelectUI.__init__( self, node, rootParameter, callback=self.__copyCallback, label="copy" )
+	
+	# The copy callback simply creates a preset, then forwards this to whatever other callback was registered
+	def __copyCallback( self, node, rootParameter, parameters ) :
+	
+		preset = IECore.BasicPreset( self._fnP.getParameterised()[0], rootParameter, parameters=parameters )
+		self.__callback( preset )
+
+# The SaveUI extends the selector to add path selection, as well as description and name fields.
 class SaveUI( ParamSelectUI ) :
 
 	def __init__( self, node, rootParameter=None, autoCollapseDepth=2 ) :
@@ -183,7 +261,7 @@ class SaveUI( ParamSelectUI ) :
 			"locations.", button="OK" )
 			return
 	
-		ParamSelectUI.__init__( self, self.__doSave, node, rootParameter, autoCollapseDepth=autoCollapseDepth )
+		ParamSelectUI.__init__( self, node, rootParameter, autoCollapseDepth=autoCollapseDepth )
 
 		self.__location = SearchPathMenu(
 			os.getenv( self.__envVar ),
@@ -256,6 +334,9 @@ class SaveUI( ParamSelectUI ) :
 		# Sanitise the name a little
 		name = name.replace( " ", "_" )
 		name = re.sub( '[^a-zA-Z0-9_]*', "", name )
+		# We have to also make sure that the name doesnt begin with a number,
+		# as it wouldn't be a legal class name in the resulting py stub.
+		name = re.sub( '^[0-9]+', "", name )
 		
 		description = maya.cmds.scrollField( self.__description, query=True, text=True )
 
@@ -266,7 +347,9 @@ class SaveUI( ParamSelectUI ) :
 			return
 
 		path = self.__location.getValue()
-	
+		
+		self._fnP.setParameterisedValues()
+		
 		preset = IECore.BasicPreset(
 			self._fnP.getParameterised()[0],
 			self._rootParameter,
@@ -281,48 +364,6 @@ class SaveUI( ParamSelectUI ) :
 			
 		maya.cmds.deleteUI( self._window )
 
-class CopyUI( ParamSelectUI ) :
-
-	def __init__( self, node, rootParameter=None, callback=None ) :
-	
-		self.__callback = callback
-	
-		ParamSelectUI.__init__( self, self.__doCopy, node, rootParameter )
-
-		self.__copyButton = maya.cmds.button(
-			l="Copy",
-			parent=self._form,
-			height=30,
-			c=self._createCallback( self.__doCopy )
-		)	
-	
-		maya.cmds.formLayout( self._form, edit=True,
-
-			attachForm=[	( self._scroll, 			"top",  	0  ),
-							( self._scroll, 			"left", 	0  ),
-							( self._scroll, 			"right",	0  ), 
-							( self.__copyButton, 		"bottom",	0  ),
-							( self.__copyButton, 		"left", 	0  ),
-							( self.__copyButton, 		"right",	0  ) ],
-							
-			attachControl=[	( self._scroll, 	"bottom", 	0, 	self.__copyButton ),  ],
-		)
-
-		maya.cmds.showWindow( self._window )
-		
-	def __doCopy( self ) :
-
-		parameters = self._selector.getActiveParameters()
-
-		if not parameters :
-			maya.cmds.confirmDialog( message="Select at least one paremeter to copy.", button="OK" )
-			return
-	
-		maya.cmds.deleteUI( self._window )
-		
-		if self.__callback:	
-			self.__callback( IECore.BasicPreset( self._fnP.getParameterised()[0], self._rootParameter, parameters=parameters ) )
-		
 
 class LoadUI( UIElement ) :
 
@@ -410,6 +451,9 @@ class LoadUI( UIElement ) :
 		# Make sure the any parameter changes get set back into
 		# the parameterised objects for each preset.
 		self.__infoColumn.commitParameters()
+	
+		# We need to make sure we have the right values in the first place.
+		self.__fnP.setParameterisedValues()
 	
 		with self.__fnP.classParameterModificationContext() : 
 	
@@ -501,7 +545,7 @@ class PresetInfo() :
 			if len( p.parameters().keys() ) :
 				self.__parameterHolders[ name ] = FnTransientParameterisedHolderNode.create( self.__layout, p )		
 	
-	# This must be called before querying the paramters of any presets passed to this UI
+	# This must be called before querying the parameters of any presets passed to this UI
 	# section, in order to update the Parameterised object with any changed made in the UI
 	def commitParameters( self ) :
 	
@@ -582,7 +626,7 @@ class PresetSelector( UIElement ) :
 
 # Provides a maya.cmds.columnLayout containing a hierarchical selection
 # interface for the supplied parameter. Each parameter is presented with
-# A checkbox to allow selelection. 
+# A checkbox to allow selection. 
 class ParameterSelector( UIElement ) :
 
 	def __init__( self, parameter, parent=None, autoCollapseDepth=2 ) :
@@ -633,7 +677,7 @@ class ParameterSelector( UIElement ) :
 			return self.__parameter
 
 		# \return Either an empty list, or a list with the parameter, depending
-		# on its state. The list syntax is used for interchangability with the
+		# on its state. The list syntax is used for interchangeability with the
 		# ParameterGroup class.
 		def getActiveParameters( self ) :
 			if self.getState():
@@ -709,7 +753,7 @@ class ParameterSelector( UIElement ) :
 			self.syncState( state )
 
 		# \return (Bool) The checked state of the group itself. Note, this does not 
-		# take into account wether or not any children are checked.
+		# take into account whether or not any children are checked.
 		def getState( self ) :
 
 			state = maya.cmds.checkBox( self.__checkbox, query=True, value=True )
