@@ -195,9 +195,18 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 				info, 1 );
 
 		// extract data from SOP attributes
-		extractPointAttribs( m_geo, points, info );
-		extractDetailAttribs( m_geo, info );
-		extractPrimVertAttribs( m_geo, prims, info );
+		if ( point_attribs.length() )
+		{
+			extractPointAttribs( m_geo, points, info );
+		}
+		if ( detail_attribs.length() )
+		{
+			extractDetailAttribs( m_geo, info );
+		}
+		if ( primitive_attribs.length() || vertex_attribs.length() )
+		{
+			extractPrimVertAttribs( m_geo, prims, info );
+		}
 
 		// add the attributes to our MeshPrimitive
 		for ( unsigned int attr_index=0; attr_index<info.size();
@@ -238,8 +247,14 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 				info, 1 );
 
 		// extract data from SOP attributes
-		extractPointAttribs( m_geo, points, info );
-		extractDetailAttribs( m_geo, info );
+		if ( point_attribs.length() )
+		{
+			extractPointAttribs( m_geo, points, info );
+		}
+		if ( detail_attribs.length() )
+		{
+			extractDetailAttribs( m_geo, info );
+		}
 
 		// add the attributes to our PointsPrimitive
 		for ( unsigned int attr_index=0; attr_index<info.size();
