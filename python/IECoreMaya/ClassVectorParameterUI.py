@@ -124,8 +124,12 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			
 	def replace( self, node, parameter ) :
 		
-		nodeChanged = self.node() != node
-				
+		## This is to catch the fact that self.node() will raise
+		# if the old node no longer exists.
+		nodeChanged = True
+		with IECore.IgnoredExceptions( RuntimeError ) :
+			nodeChanged = self.node() != node
+
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
 
 		self.__updateChildUIs( startFromScratch=nodeChanged )
