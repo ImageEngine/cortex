@@ -332,7 +332,7 @@ def _clearReferences( *args, **kwargs ) :
 	_ieCoreParameterClipboardUILastRoot = None
 
 _ieCoreParameterClipboardCallbacks = []
-if not maya.cmds.about( batch=True ):
+if hasattr( maya.cmds, "about" ) and not maya.cmds.about( batch=True ):
 	_ieCoreParameterClipboardCallbacks.append( IECoreMaya.CallbackId( maya.OpenMaya.MSceneMessage.addCallback( maya.OpenMaya.MSceneMessage.kBeforeNew, _clearReferences ) ) )
 	_ieCoreParameterClipboardCallbacks.append( IECoreMaya.CallbackId( maya.OpenMaya.MSceneMessage.addCallback( maya.OpenMaya.MSceneMessage.kBeforeOpen, _clearReferences ) ) )
 
