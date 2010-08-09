@@ -140,16 +140,22 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		return maya.cmds.frameLayout( self.layout(), query=True, collapse=True )
 		
 	## Sets the collapsed state for the frame holding the child parameter uis.
-	# In the case that this ui itself is not collapsable, it will still propagate
-	# state to children if asked.
-	def setCollapsed( self, collapsed, propagateToChildren=False ) :
-	
+	# In the case that this ui itself is not collapsible, it will still propagate
+	# \param propogateToChildren How many levels of hierarchy to propogate 
+	# the new state to. If a Bool is passed, rather than an int, then
+	# 'all' or 'none' is assumed, for backwards compatibility		
+	def setCollapsed( self, collapsed, propagateToChildren=0 ) :
+		
+		if type(propagateToChildren) == bool :	
+			propagateToChildren = 999 if propagateToChildren else 0
+			
 		if maya.cmds.frameLayout( self.layout(), query=True, collapsable=True ) :
 			maya.cmds.frameLayout( self.layout(), edit=True, collapse = collapsed )
 			
-		if propagateToChildren :
-			self.__propagateCollapsed( collapsed )
-		
+		if propagateToChildren > 0 :
+			propagateToChildren = propagateToChildren - 1
+			self.__propagateCollapsed( collapsed, propagateToChildren )
+			
 	def __classMenuDefinition( self, parameterName ) :
 	
 		result = IECore.MenuDefinition()
@@ -336,10 +342,11 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			# shift is held
 			self.__propagateCollapsed( True )
 	
-	def __propagateCollapsed( self, collapsed ) :
+	def __propagateCollapsed( self, collapsed, propogateDepth=999 ) :
 	
 		for ui in self.__childUIs.values() :
-			ui.setCollapsed( collapsed, propagateToChildren=True )
+			if hasattr( ui, "setCollapsed" ) :
+				ui.setCollapsed( collapsed, propogateDepth )
 				
 	@staticmethod
 	def _classesSetCallback( fnPH, parameter ) :

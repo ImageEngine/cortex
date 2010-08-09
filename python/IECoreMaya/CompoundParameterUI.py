@@ -137,8 +137,14 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		return maya.cmds.frameLayout( self.layout(), query=True, collapse=True )
 		
 	## Sets the collapsed state for the frame holding the child parameter uis.
-	def setCollapsed( self, collapsed, propagateToChildren=False ) :
+	# \param propogateToChildren How many levels of hierarchy to propogate 
+	# the new state to. If a Bool is passed, rather than an int, then
+	# 'all' or 'none' is assumed, for backwards compatibility.
+	def setCollapsed( self, collapsed, propagateToChildren=0 ) :
 	
+		if type(propagateToChildren) == bool :	
+			propagateToChildren = 999 if propagateToChildren else 0
+		
 		if not collapsed :
 			# maya only calls preexpand when the ui is expanded by user action,
 			# not by a script - how annoying.
@@ -146,8 +152,9 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			
 		maya.cmds.frameLayout( self.layout(), edit=True, collapse=collapsed )
 		
-		if propagateToChildren :
-			self.__propagateCollapsed( collapsed )
+		if propagateToChildren > 0 :
+			propagateToChildren = propagateToChildren - 1
+			self.__propagateCollapsed( collapsed, propagateToChildren )
 	
 	@staticmethod
 	def _labelFont( hierarchyDepth ) :
@@ -243,11 +250,11 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 			IECore.msg( IECore.Msg.Level.Error, "IECoreMaya.ParameterUI", traceback.format_exc() )
 
-	def __propagateCollapsed( self, collapsed ) :
+	def __propagateCollapsed( self, collapsed, propogateDepth=999 ) :
 	
 		for ui in self.__childUIs.values() :
 			if hasattr( ui, "setCollapsed" ) :
-				ui.setCollapsed( collapsed, propagateToChildren=True )
+				ui.setCollapsed( collapsed, propogateDepth )
 
 	def __createChildUIs( self ) :
 						
