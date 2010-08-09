@@ -38,6 +38,7 @@
 #include "IECore/ByteOrder.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/PointsPrimitive.h"
+#include "IECore/DataCastOp.h"
 
 #include "boost/format.hpp"
 
@@ -142,7 +143,8 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 		DataPtr attr = pv.find( *it )->second.data;
 		TypeId t = attr->typeId();
 		if( t==DoubleVectorDataTypeId || t==IntVectorDataTypeId || t==V3dVectorDataTypeId ||
-			t==DoubleDataTypeId || t==IntDataTypeId || t==V3dDataTypeId )
+			t==DoubleDataTypeId || t==IntDataTypeId || t==V3dDataTypeId ||
+			t==FloatVectorDataTypeId || t==V3fVectorDataTypeId || t==FloatDataTypeId || t==V3fDataTypeId )
 		{
 			checkedAttrNames.push_back( *it );
 		}
@@ -153,6 +155,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 	}
 
 	// write out the attributes
+	DataCastOp castOp;
 	int numAttrs = checkedAttrNames.size();
 	int numAttrsReversed = asBigEndian( numAttrs );
 	oStream.write( (const char *)&numAttrsReversed, sizeof( numAttrsReversed ) );
@@ -174,6 +177,12 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeAttr<IntVectorData, int, 1>( oStream, d );
 				}
 				break;
+			case FloatVectorDataTypeId :
+				{
+					castOp.objectParameter()->setValue( attr );
+					castOp.targetTypeParameter()->setNumericValue( DoubleVectorDataTypeId );
+					attr = staticPointerCast<DoubleVectorData>( castOp.operate() );
+				}
 			case DoubleVectorDataTypeId :
 				{
 					int type = 3; type = asBigEndian( type );
@@ -182,7 +191,12 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeAttr<DoubleVectorData, double, 1>( oStream, d );
 				}
 				break;
-
+			case V3fVectorDataTypeId :
+				{
+					castOp.objectParameter()->setValue( attr );
+					castOp.targetTypeParameter()->setNumericValue( V3dVectorDataTypeId );
+					attr = staticPointerCast<V3dVectorData>( castOp.operate() );
+				}
 			case V3dVectorDataTypeId :
 				{
 					int type = 5; type = asBigEndian( type );
@@ -199,6 +213,12 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeSimpleAttr<IntData, int, 1>( oStream, d );
 				}
 				break;
+			case FloatDataTypeId :
+				{
+					castOp.objectParameter()->setValue( attr );
+					castOp.targetTypeParameter()->setNumericValue( DoubleDataTypeId );
+					attr = staticPointerCast<DoubleData>( castOp.operate() );
+				}
 			case DoubleDataTypeId :
 				{
 					int type = 2; type = asBigEndian( type );
@@ -207,6 +227,12 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeSimpleAttr<DoubleData, double, 1>( oStream, d );
 				}
 				break;
+			case V3fDataTypeId :
+				{
+					castOp.objectParameter()->setValue( attr );
+					castOp.targetTypeParameter()->setNumericValue( V3dDataTypeId );
+					attr = staticPointerCast<V3dData>( castOp.operate() );
+				}
 			case V3dDataTypeId :
 				{
 					int type = 4; type = asBigEndian( type );

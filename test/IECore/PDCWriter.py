@@ -90,6 +90,26 @@ class TestPDCWriter( unittest.TestCase ) :
 
 		self.assertEqual( p, p2 )
 
+	def testWriteFloatData( self ) :
+
+		p = IECore.PointsPrimitive( 3 )
+		p["f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) )
+		p["v3f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		p["fVector"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ) )
+		p["v3fVector"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ), IECore.V3f( 7, 8, 9 ) ] ) )
+
+		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
+		w.write()
+
+		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		p2 = r.read()
+
+		self.assertEqual( p.keys(), p2.keys() )
+		self.assertEqual( p2["f"].data, IECore.DoubleData( 1 ) )
+		self.assertEqual( p2["v3f"].data, IECore.V3dData( IECore.V3d( 1, 2, 3 ) ) )
+		self.assertEqual( p2["fVector"].data, IECore.DoubleVectorData( [ 1, 2, 3 ] ) )
+		self.assertEqual( p2["v3fVector"].data, IECore.V3dVectorData( [ IECore.V3d( 1, 2, 3 ), IECore.V3d( 4, 5, 6 ), IECore.V3d( 7, 8, 9 ) ] ) )
+	
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/particleShape1.250.pdc" ) :
