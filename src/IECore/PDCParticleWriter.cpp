@@ -177,6 +177,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeAttr<IntVectorData, int, 1>( oStream, d );
 				}
 				break;
+			// casting FloatVectorData to DoubleVectorData since PDCs don't handle floats
 			case FloatVectorDataTypeId :
 				{
 					castOp.objectParameter()->setValue( attr );
@@ -191,6 +192,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeAttr<DoubleVectorData, double, 1>( oStream, d );
 				}
 				break;
+			// casting V3fVectorData to V3dVectorData since PDCs don't handle floats
 			case V3fVectorDataTypeId :
 				{
 					castOp.objectParameter()->setValue( attr );
@@ -213,6 +215,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeSimpleAttr<IntData, int, 1>( oStream, d );
 				}
 				break;
+			// casting FloatData to DoubleData since PDCs don't handle floats
 			case FloatDataTypeId :
 				{
 					castOp.objectParameter()->setValue( attr );
@@ -227,6 +230,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeSimpleAttr<DoubleData, double, 1>( oStream, d );
 				}
 				break;
+			// casting V3fData to V3dData since PDCs don't handle floats
 			case V3fDataTypeId :
 				{
 					castOp.objectParameter()->setValue( attr );
