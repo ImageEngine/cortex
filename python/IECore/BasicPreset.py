@@ -167,23 +167,32 @@ class BasicPreset( IECore.Preset ) :
 	## \param title, string, The title of the preset, no character restrictions.
 	## \param description, string, A description of the preset, no character restrictions.
 	## \param categories, ( string, ... ) A list of categories the preset should be tagged with
-	## \param versino, int, the version of the preset, this will default to 1.
-	def save( self, path, name, title="", description="", categories=(), version=1 ) :
+	## \param version, int, the version of the preset, this will default to 1, used when saving
+	## for the ClassLoader.
+	## \param classLoadable, bool, if True (default) then the preset will be saved in a way that
+	## can be loaded by the ClassLoader, otherwise, just a cob file is written containing the
+	## presets data.
+	def save( self, path, name, title="", description="", categories=(), version=1, classLoadable=True ) :
 	
 		if not self._data:
 			raise RuntimeError, "IECore.BasicPreset.save: Unable to save, preset has no data."
+	
+		baseDir = path
+		cobName = "%s.cob" % ( name, )
+		pyFile = None
+			
+		if classLoadable :
+			baseDir = "%s/%s" % ( path, name )
+			cobName = "%s-%i.cob" % ( name, version )
+			pyFile = "%s/%s-%i.py" % ( baseDir, name, version )
 		
-		baseDir = "%s/%s" % ( path, name )
-		
+		cobFile = "%s/%s" % ( baseDir, cobName )	
+			
 		if not os.path.isdir( baseDir ) :
 			os.makedirs( baseDir )
 		
 		if not os.path.isdir( baseDir ) :
 			raise RuntimeError, "IECore.BasicPreset.save: Unable to create the directory '%s'" % baseDir
-		
-		pyFile = "%s/%s-%i.py" % ( baseDir, name, version )
-		cobName = "%s-%i.cob" % ( name, version )
-		cobFile = "%s/%s" % ( baseDir, cobName )		
 		
 		w = IECore.Writer.create( self._data, cobFile )
 
@@ -194,7 +203,8 @@ class BasicPreset( IECore.Preset ) :
 
 		w.write()
 		
-		BasicPreset._writePy( pyFile, cobName, name )		
+		if pyFile :	
+			BasicPreset._writePy( pyFile, cobName, name )		
 	
 	def _ensureData( self ) :
 		

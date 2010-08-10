@@ -113,7 +113,7 @@ class TestBasicPreset( unittest.TestCase ) :
 		
 		self.assertEqual( testObj.parameters()["a"].getTypedValue(), True )
 		self.assertEqual( testObj.parameters()["b"].getTypedValue(), 1.0 )
-
+		
 	def testSave( self ) :
 	
 		testObj = IECore.Parameterised( "testParameterised1" )
@@ -135,9 +135,18 @@ class TestBasicPreset( unittest.TestCase ) :
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
 		
 		preset = IECore.BasicPreset( testObj, testObj.parameters() )
+		
+		# Save for the classLoader and check its there, we test the 'loadability' later...
 		preset.save( savePath, "basicPresetTest" )
+		self.failUnless( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.cob" % savePath ) )
+		self.failUnless( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.py" % savePath ) )
+
+		# save without the classLoader and check its there
+		preset.save( savePath, "basicPresetTest", classLoadable=False )
+		self.failUnless( os.path.isfile( "%s/basicPresetTest.cob" % savePath ) )
+		
 		# reload
-		p = IECore.BasicPreset( "%s/%s" % ( savePath, "basicPresetTest/basicPresetTest-1.cob" ) )
+		p = IECore.BasicPreset( "%s/basicPresetTest.cob" % savePath )
 		
 		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
 		self.failIf( p.applicableTo( testObj2, testObj2.parameters() ) )
@@ -151,9 +160,10 @@ class TestBasicPreset( unittest.TestCase ) :
 		self.assertEqual( testObj.parameters()["b"].getTypedValue(), 1.0 )
 
 		preset2 = IECore.BasicPreset( testObj, testObj.parameters(), parameters=( testObj.parameters()["a"], ) )
-		preset2.save( savePath, "basicPresetTest2" )
+		preset2.save( savePath, "basicPresetTest2", classLoadable=False )
+		
 		#reload
-		p2 = IECore.BasicPreset( "%s/%s" % ( savePath, "basicPresetTest2/basicPresetTest2-1.cob" ) )
+		p2 = IECore.BasicPreset( "%s/basicPresetTest2.cob" % savePath )
 		
 		self.failUnless( p2.applicableTo( testObj, testObj.parameters() ) )
 		self.failUnless( p2.applicableTo( testObj2, testObj.parameters() ) )
@@ -162,7 +172,7 @@ class TestBasicPreset( unittest.TestCase ) :
 		
 		self.assertEqual( testObj2.parameters()["a"].getTypedValue(), True )
 		self.assertEqual( testObj2.parameters()["c"].getTypedValue(), 0.0 )
-	
+
 	def testClassLoader( self ) :
 	
 		testObj = IECore.Parameterised( "testParameterised1" )
@@ -175,10 +185,10 @@ class TestBasicPreset( unittest.TestCase ) :
 		
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
 		preset = IECore.BasicPreset( testObj, testObj.parameters() )
-		preset.save( savePath, "basicPresetTest3" )
+		preset.save( savePath, "basicPresetTestClassLoader" )
 		
-		loader = IECore.ClassLoader( IECore.SearchPath(  savePath, ":" ) )
-		p = loader.load( "basicPresetTest3" )()
+		loader = IECore.ClassLoader( IECore.SearchPath( savePath, ":" ) )
+		p = loader.load( "basicPresetTestClassLoader" )()
 		
 		self.failUnless( isinstance( p, IECore.BasicPreset ) )
 		
@@ -265,13 +275,16 @@ class TestBasicPreset( unittest.TestCase ) :
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
 		paths = (
 			savePath+"/basicPresetTest",
-			savePath+"/basicPresetTest2",
-			savePath+"/basicPresetTest3",
+			savePath+"/basicPresetTest.cob",
+			savePath+"/basicPresetTest2.cob",
+			savePath+"/basicPresetTestClassLoader",
 		)
 
 		for p in paths :		
 			if os.path.isdir( p ) :
-				shutil.rmtree( p )	
+				shutil.rmtree( p )
+			elif os.path.isfile( p ) :
+				os.remove( p )
 				
 if __name__ == "__main__":
 	unittest.main()
