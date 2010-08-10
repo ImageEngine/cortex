@@ -72,6 +72,19 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 
 		return self.getParameterised()[0]
 
+	## Returns a set of the names of the components within the procedural. These names
+	# are specified by the procedural by setting the "name" attribute in the
+	# renderer
+	def componentNames( self ) :
+		
+		attributeName = "%s.proceduralComponents" % self.fullPathName()
+	
+		result = set()
+		for i in range( maya.cmds.getAttr( attributeName, size=True ) ) :
+			result.add( maya.cmds.getAttr( "%s[%i]" % ( attributeName, i ) ) )
+		
+		return result
+		
 	## Returns a set of the names of any currently selected components. These names
 	# are specified by the procedural by setting the "name" attribute in the
 	# renderer.

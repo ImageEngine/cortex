@@ -31,7 +31,7 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-
+import os
 import maya.cmds
 import maya.OpenMaya
 
@@ -111,6 +111,22 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 		
 		fnPH = IECoreMaya.FnProceduralHolder.create( "bob", "read", -1 )
 		self.assertEqual( fnPH.getParameterised()[2], 1 )
+	
+	def testComponentNames( self ) :
+	
+		fnPH = IECoreMaya.FnProceduralHolder.create( "ernie", "read" )
+		
+		self.assertEqual( fnPH.componentNames(), set() )
+		
+		cobPath = os.getcwd() + "/test/IECore/data/cobFiles/pSphereShape1.cob"
+		
+		fnPH.getParameterised()[0].parameters()["files"]["name"].setTypedValue( cobPath )
+		fnPH.setNodeValues()
+		
+		# If we don't call scene, then the names never get updated.
+		fnPH.scene()
+		
+		self.assertEqual( fnPH.componentNames(), set( [ u'unnamed' ] ) )	
 							
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
