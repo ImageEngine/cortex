@@ -183,7 +183,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( DoubleVectorDataTypeId );
 					attr = staticPointerCast<DoubleVectorData>( castOp.operate() );
-				}
+				} // intentionally falling through
 			case DoubleVectorDataTypeId :
 				{
 					int type = 3; type = asBigEndian( type );
@@ -198,7 +198,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( V3dVectorDataTypeId );
 					attr = staticPointerCast<V3dVectorData>( castOp.operate() );
-				}
+				} // intentionally falling through
 			case V3dVectorDataTypeId :
 				{
 					int type = 5; type = asBigEndian( type );
@@ -221,7 +221,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( DoubleDataTypeId );
 					attr = staticPointerCast<DoubleData>( castOp.operate() );
-				}
+				} // intentionally falling through
 			case DoubleDataTypeId :
 				{
 					int type = 2; type = asBigEndian( type );
@@ -236,7 +236,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( V3dDataTypeId );
 					attr = staticPointerCast<V3dData>( castOp.operate() );
-				}
+				} // intentionally falling through
 			case V3dDataTypeId :
 				{
 					int type = 4; type = asBigEndian( type );
