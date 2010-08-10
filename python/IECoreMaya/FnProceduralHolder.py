@@ -76,6 +76,11 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 	# are specified by the procedural by setting the "name" attribute in the
 	# renderer
 	def componentNames( self ) :
+	
+		# Makes sure that the scene has been built at least once with the
+		# current node values, so there will be something in the plug
+		# for us to read.
+		self.scene()
 		
 		attributeName = "%s.proceduralComponents" % self.fullPathName()
 	

@@ -115,17 +115,10 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 	def testComponentNames( self ) :
 	
 		fnPH = IECoreMaya.FnProceduralHolder.create( "ernie", "read" )
-		
-		self.assertEqual( fnPH.componentNames(), set() )
-		
 		cobPath = os.getcwd() + "/test/IECore/data/cobFiles/pSphereShape1.cob"
-		
 		fnPH.getParameterised()[0].parameters()["files"]["name"].setTypedValue( cobPath )
 		fnPH.setNodeValues()
-		
-		# If we don't call scene, then the names never get updated.
-		fnPH.scene()
-		
+	
 		self.assertEqual( fnPH.componentNames(), set( [ u'unnamed' ] ) )	
 							
 if __name__ == "__main__":
