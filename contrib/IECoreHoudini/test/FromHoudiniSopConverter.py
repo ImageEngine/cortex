@@ -410,7 +410,52 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		torus.destroy()
 		g2 = converter.convert()
 		assert( g2==None )
-
+	
+	# testing converting a Houdini particle primitive with detail and point attribs
+	def testParticlePrimitive( self ) :
+		obj = hou.node("/obj")
+		geo = obj.createNode( "geo", run_init_scripts=False )
+		popnet = geo.createNode( "popnet" )
+		location = popnet.createNode( "location" )
+		detailAttr = popnet.createOutputNode( "attribcreate" )
+		detailAttr.parm("name").set( "float3detail" )
+		detailAttr.parm("class").set( 0 ) # detail
+		detailAttr.parm("type").set( 0 ) # float
+		detailAttr.parm("size").set( 3 ) # 3 elements
+		detailAttr.parm("value1").set( 1 )
+		detailAttr.parm("value2").set( 2 )
+		detailAttr.parm("value3").set( 3 )
+		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr.parm("name").set( "float3point" )
+		pointAttr.parm("class").set( 2 ) # point
+		pointAttr.parm("type").set( 0 ) # float
+		pointAttr.parm("size").set( 3 ) # 3 elements
+		pointAttr.parm("value1").set( 1 )
+		pointAttr.parm("value2").set( 2 )
+		pointAttr.parm("value3").set( 3 )
+		
+		hou.setFrame( 5 )
+		converter = IECoreHoudini.FromHoudiniSopConverter( pointAttr )
+		points = converter.convert()
+		
+		self.assertEqual( type(points), IECore.PointsPrimitive )
+		self.assertEqual( points.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 21 )
+		self.assertEqual( points["float3detail"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( type(points["float3detail"].data), IECore.V3fData )
+		self.assert_( points["float3detail"].data.equalWithRelError( IECore.V3f( 1, 2, 3 ), 1e-10 ) )
+		self.assertEqual( type(points["float3point"].data), IECore.V3fVectorData )
+		self.assertEqual( points["float3point"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		for p in points["float3point"].data :
+			self.assert_( p.equalWithRelError( IECore.V3f( 1, 2, 3 ), 1e-10 ) )
+		
+		add = pointAttr.createOutputNode( "add" )
+		add.parm( "keep" ).set( 1 ) # deletes primitive and leaves points
+		
+		converter = IECoreHoudini.FromHoudiniSopConverter( add )
+		points2 = converter.convert()
+		
+		self.assertEqual( points2, points )
+	
 	def setUp( self ) :
                 os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
 
