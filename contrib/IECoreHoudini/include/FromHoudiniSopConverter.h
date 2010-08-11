@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -67,44 +69,35 @@ namespace IECoreHoudini
 			int offset;
 	};
 
-	/// Converter which converts from Houdini SOP geometry to
-	/// Cortex Mesh/Points primitive
+	/// Converter which converts from Houdini SOP geometry to Cortex Mesh/Points primitive
 	class FromHoudiniSopConverter : public IECore::ToCoreConverter
 	{
 		public :
-			IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniSopConverter,
-					FromHoudiniSopConverterTypeId, IECore::ToCoreConverter );
+			
+			IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniSopConverter, FromHoudiniSopConverterTypeId, IECore::ToCoreConverter );
+			
 			FromHoudiniSopConverter( HOM_SopNode *hou_sop );
+			
 			virtual ~FromHoudiniSopConverter();
 
 			/// performs our conversion to a Cortex primitive
-			virtual IECore::ObjectPtr doConversion(
-					IECore::ConstCompoundObjectPtr operands ) const;
+			virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 
 			/// converts our HOM_SopNode ptr to a SOP_Node ptr
 			SOP_Node *getSop() const;
 
 		private:
 			/// gathers attribute information and allocates storage
-			void getAttribInfo( const GU_Detail *geo,
-					const UT_LinkList *attribs,
-					IECore::PrimitiveVariable::Interpolation interp_type,
-					std::vector<AttributeInfo> &info,
-					int num_entries ) const;
+			void getAttribInfo( const GU_Detail *geo, const UT_LinkList *attribs, IECore::PrimitiveVariable::Interpolation interp_type, std::vector<AttributeInfo> &info, int num_entries ) const;
 
 			/// extracts point attributes
-			void extractPointAttribs( const GU_Detail *geo,
-					const GEO_PointList &points,
-					std::vector<AttributeInfo> &info ) const;
+			void extractPointAttribs( const GU_Detail *geo, const GEO_PointList &points, std::vector<AttributeInfo> &info ) const;
 
 			/// extracts detail attributes
-			void extractDetailAttribs( const GU_Detail *geo,
-					std::vector<AttributeInfo> &info ) const;
+			void extractDetailAttribs( const GU_Detail *geo, std::vector<AttributeInfo> &info ) const;
 
 			/// extracts primitive/vertex attributes
-			void extractPrimVertAttribs( const GU_Detail *geo,
-					const GEO_PrimList &pprim,
-					std::vector<AttributeInfo> &info ) const;
+			void extractPrimVertAttribs( const GU_Detail *geo, const GEO_PrimList &pprim, std::vector<AttributeInfo> &info ) const;
 
 			/// pointer to the SOP we're converting
 			HOM_SopNode *m_sop;

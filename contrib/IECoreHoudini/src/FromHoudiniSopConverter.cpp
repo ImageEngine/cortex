@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -33,8 +35,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "FromHoudiniSopConverter.h"
-
 // Houdini
 #include <OP/OP_Director.h>
 #include <GEO/GEO_Vertex.h>
@@ -52,12 +52,12 @@ using namespace IECore;
 // CoreHoudini
 #include "CoreHoudini.h"
 #include "SOP_ParameterisedHolder.h"
+#include "FromHoudiniSopConverter.h"
 using namespace IECoreHoudini;
 
 // ctor
 FromHoudiniSopConverter::FromHoudiniSopConverter( HOM_SopNode *hou_sop ) :
-	ToCoreConverter( "Converts Houdini SOP geometry to IECore::MeshPrimitive "
-			"or IECore::PointsPrimitive objects." ),
+	ToCoreConverter( "Converts Houdini SOP geometry to IECore::MeshPrimitive or IECore::PointsPrimitive objects." ),
 	m_sop(hou_sop)
 {
 }
@@ -71,8 +71,11 @@ FromHoudiniSopConverter::~FromHoudiniSopConverter()
 SOP_Node *FromHoudiniSopConverter::getSop() const
 {
 	SOP_Node *sop = 0;
+	
 	if ( !m_sop )
+	{
 		return sop;
+	}
 
 	// get the hom path and use opdirector to get a regular OP_Node* to our node
 	try
@@ -80,17 +83,19 @@ SOP_Node *FromHoudiniSopConverter::getSop() const
 		std::string node_path = m_sop->path();
 		OP_Node *op = OPgetDirector()->findNode( node_path.c_str() );
 		if ( op )
+		{
 			sop = op->castToSOPNode();
+		}
 	}
 	catch( HOM_ObjectWasDeleted )
 	{
 	}
+	
 	return sop;
 }
 
 // Convert our geometry to cortex
-ObjectPtr FromHoudiniSopConverter::doConversion(
-		ConstCompoundObjectPtr operands ) const
+ObjectPtr FromHoudiniSopConverter::doConversion( ConstCompoundObjectPtr operands ) const
 {
 	// find global time
 	float time = CoreHoudini::currTime();
@@ -102,13 +107,17 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 	// get our sop
 	SOP_Node *sop = getSop();
 	if( !sop )
+	{
 		return 0;
-
+	}
+	
 	// get our geometry
 	const GU_Detail *m_geo = sop->getCookedGeo( context );
 	if ( !m_geo )
+	{
 		return 0;
-
+	}
+	
 	// do some conversion!
 	ObjectPtr return_obj = 0;
 	const GEO_PointList &points = m_geo->points();
@@ -119,15 +128,17 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 	for ( unsigned int i=0; i<nprims; ++i )
 	{
 		if (!(prims(i)->getPrimitiveId() & GEOPRIMPOLY))
-		    continue;
+		{
+			continue;
+		}
+		
 		nverts += prims(i)->getVertexCount();
 	}
 
 	// get the bbox
 	UT_BoundingBox bbox;
 	m_geo->getBBox( &bbox );
-	Imath::Box3f box( Imath::V3f(bbox.xmin(), bbox.ymin(), bbox.zmin()),
-			Imath::V3f(bbox.xmax(), bbox.ymax(), bbox.zmax()) );
+	Imath::Box3f box( Imath::V3f(bbox.xmin(), bbox.ymin(), bbox.zmin()), Imath::V3f(bbox.xmax(), bbox.ymax(), bbox.zmax()) );
 
 	// get attribute names
 	const GEO_PointAttribDict &point_attribs = m_geo->pointAttribs();
@@ -136,7 +147,7 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 	const GB_AttributeTable &detail_attribs = m_geo->attribs();
 
 	// process our geometry
-	if ( nprims>0 )
+	if ( nprims > 0 )
 	{
 		// looks like a mesh
 		return_obj = new MeshPrimitive();
@@ -153,46 +164,33 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 			std::vector<int> ids( nprimverts );
 			for ( unsigned int j=0; j<nprimverts; j++ )
 			{
-				const GEO_Vertex &vert = prim->getVertex(nprimverts-1-j);
+				const GEO_Vertex &vert = prim->getVertex( nprimverts-1-j );
 				vert_ids.push_back( vert.getPt()->getNum() );
 			}
 		}
 
 		// set our topology
-		result->setTopology( new IntVectorData(verts_per_face),
-				new IntVectorData(vert_ids) );
+		result->setTopology( new IntVectorData(verts_per_face),	new IntVectorData(vert_ids) );
 
 		// add position
 		std::vector<Imath::V3f> p_data(npoints);
 		int index = 0;
-		for ( const GEO_Point *curr = points.head(); curr!=0;
-				curr=points.next(curr) )
+		for ( const GEO_Point *curr = points.head(); curr!=0; curr=points.next(curr) )
 		{
 			const UT_Vector4 &pos = curr->getPos();
 			p_data[index++] = Imath::V3f( pos[0], pos[1], pos[2] );
 		}
-		result->variables["P"] = PrimitiveVariable(
-				PrimitiveVariable::Vertex,
-				new V3fVectorData( p_data ) );
+		
+		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( p_data ) );
 
 		// storage for our names, data and interpolation scheme
 		std::vector<AttributeInfo> info;
 
-		// get point attribute info
-		getAttribInfo( m_geo, &point_attribs, PrimitiveVariable::Varying,
-				info, npoints );
-
-		// get primitive attribute info
-		getAttribInfo( m_geo, &primitive_attribs, PrimitiveVariable::Uniform,
-				info, nprims );
-
-		// get vertex attribute info
-		getAttribInfo( m_geo, &vertex_attribs, PrimitiveVariable::FaceVarying,
-				info, nverts );
-
-		// get detail attribute info
-		getAttribInfo( m_geo, &detail_attribs, PrimitiveVariable::Constant,
-				info, 1 );
+		// get attribute info
+		getAttribInfo( m_geo, &point_attribs, PrimitiveVariable::Varying, info, npoints );
+		getAttribInfo( m_geo, &primitive_attribs, PrimitiveVariable::Uniform, info, nprims );
+		getAttribInfo( m_geo, &vertex_attribs, PrimitiveVariable::FaceVarying, info, nverts );
+		getAttribInfo( m_geo, &detail_attribs, PrimitiveVariable::Constant, info, 1 );
 
 		// extract data from SOP attributes
 		if ( point_attribs.length() )
@@ -209,42 +207,34 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 		}
 
 		// add the attributes to our MeshPrimitive
-		for ( unsigned int attr_index=0; attr_index<info.size();
-				++attr_index )
+		for ( unsigned int attr_index=0; attr_index<info.size(); ++attr_index )
 		{
-			result->variables[info[attr_index].name] = PrimitiveVariable(
-					info[attr_index].interp, info[attr_index].data );
+			result->variables[info[attr_index].name] = PrimitiveVariable( info[attr_index].interp, info[attr_index].data );
 		}
 	}
 	else
 	{
 		// just points
 		return_obj = new PointsPrimitive(npoints);
-		PointsPrimitivePtr result =	runTimeCast<PointsPrimitive>( return_obj );
+		PointsPrimitivePtr result = runTimeCast<PointsPrimitive>( return_obj );
 
 		// add position
 		std::vector<Imath::V3f> p_data(npoints);
 		int index = 0;
-		for ( const GEO_Point *curr = points.head(); curr!=0;
-				curr=points.next(curr) )
+		for ( const GEO_Point *curr = points.head(); curr!=0; curr=points.next(curr) )
 		{
 			const UT_Vector4 &pos = curr->getPos();
 			p_data[index++] = Imath::V3f( pos[0], pos[1], pos[2] );
 		}
-		result->variables["P"] = PrimitiveVariable(
-				PrimitiveVariable::Vertex,
-				new V3fVectorData( p_data ) );
+		
+		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( p_data ) );
 
 		// our names, data and interpolation scheme
 		std::vector<AttributeInfo> info;
 
-		// point attributes
-		getAttribInfo( m_geo, &point_attribs, PrimitiveVariable::Varying, info,
-				npoints );
-
-		// detail attributes
-		getAttribInfo( m_geo, &detail_attribs, PrimitiveVariable::Constant,
-				info, 1 );
+		// get attribute info
+		getAttribInfo( m_geo, &point_attribs, PrimitiveVariable::Varying, info,	npoints );
+		getAttribInfo( m_geo, &detail_attribs, PrimitiveVariable::Constant, info, 1 );
 
 		// extract data from SOP attributes
 		if ( point_attribs.length() )
@@ -257,30 +247,32 @@ ObjectPtr FromHoudiniSopConverter::doConversion(
 		}
 
 		// add the attributes to our PointsPrimitive
-		for ( unsigned int attr_index=0; attr_index<info.size();
-				++attr_index )
+		for ( unsigned int attr_index=0; attr_index<info.size(); ++attr_index )
 		{
-			result->variables[info[attr_index].name] = PrimitiveVariable(
-					info[attr_index].interp, info[attr_index].data );
+			result->variables[info[attr_index].name] = PrimitiveVariable( info[attr_index].interp, info[attr_index].data );
 		}
 	}
+	
 	return return_obj;
 }
 
 // gathers information and allocates memory for storage of attributes
-void FromHoudiniSopConverter::getAttribInfo( const GU_Detail *geo,
-		const UT_LinkList *attribs,
-		PrimitiveVariable::Interpolation interp_type,
-		std::vector<AttributeInfo> &info,
-		int num_entries ) const
+void FromHoudiniSopConverter::getAttribInfo(
+	const GU_Detail *geo,
+	const UT_LinkList *attribs,
+	PrimitiveVariable::Interpolation interp_type,
+	std::vector<AttributeInfo> &info,
+	int num_entries
+) const
 {
 	// extract all the attributes of the desired class
-	for( UT_LinkNode *curr=attribs->head(); curr!=0;
-			curr=attribs->next(curr) )
+	for( UT_LinkNode *curr=attribs->head(); curr!=0; curr=attribs->next(curr) )
 	{
 		GB_Attribute *attr = dynamic_cast<GB_Attribute*>(curr);
 		if ( !attr )
+		{
 			continue;
+		}
 
 		bool valid = true;
 		DataPtr d_ptr = 0;
@@ -408,27 +400,25 @@ void FromHoudiniSopConverter::getAttribInfo( const GU_Detail *geo,
 }
 
 // extracts point attributes from the sop into the pre-allocated storage
-void FromHoudiniSopConverter::extractPointAttribs( const GU_Detail *geo,
-		const GEO_PointList &points,
-		std::vector<AttributeInfo> &info
-		) const
+void FromHoudiniSopConverter::extractPointAttribs( const GU_Detail *geo, const GEO_PointList &points, std::vector<AttributeInfo> &info ) const
 {
 	// loop over points getting attribute info
 	unsigned int index = 0;
-	for ( const GEO_Point *curr = points.head(); curr!=0;
-			curr=points.next(curr) )
+	for ( const GEO_Point *curr = points.head(); curr!=0; curr=points.next(curr), ++index )
 	{
-		for ( unsigned int attr_index=0; attr_index<info.size();
-				++attr_index )
+		for ( unsigned int attr_index=0; attr_index<info.size(); ++attr_index )
 		{
 			// we can only handle vertex/varying attributes
-			if ( info[attr_index].interp!=PrimitiveVariable::Vertex &&
-					info[attr_index].interp!=PrimitiveVariable::Varying )
+			if ( info[attr_index].interp!=PrimitiveVariable::Vertex && info[attr_index].interp!=PrimitiveVariable::Varying )
+			{
 				continue;
+			}
 
 			// invalid attribute offset
 			if ( info[attr_index].offset==-1 )
+			{
 				continue;
+			}
 
 			// extract our point attributes
 			int len = info[attr_index].entries;
@@ -479,24 +469,23 @@ void FromHoudiniSopConverter::extractPointAttribs( const GU_Detail *geo,
 					break;
 				}
 				default:
+				{
 					break;
+				}
 			}
 		}
-		++index;
 	}
 }
 
 // extracts detail attributes from the sop into the pre-allocated storage
-void FromHoudiniSopConverter::extractDetailAttribs( const GU_Detail *geo,
-		std::vector<AttributeInfo> &info
-		) const
+void FromHoudiniSopConverter::extractDetailAttribs( const GU_Detail *geo, std::vector<AttributeInfo> &info ) const
 {
-	for ( unsigned int attr_index=0; attr_index<info.size();
-			++attr_index )
+	for ( unsigned int attr_index=0; attr_index<info.size(); ++attr_index )
 	{
-		if ( info[attr_index].interp!=PrimitiveVariable::Constant ||
-				info[attr_index].offset==-1 )
+		if ( info[attr_index].interp!=PrimitiveVariable::Constant || info[attr_index].offset==-1 )
+		{
 			continue;
+		}
 
 		int len = info[attr_index].entries;
 		const GB_AttributeTable &attrs = geo->attribs();
@@ -548,34 +537,34 @@ void FromHoudiniSopConverter::extractDetailAttribs( const GU_Detail *geo,
 				break;
 			}
 			default:
+			{
 				break;
+			}
 		}
 	}
 }
 
 // extracts detail attributes from the sop into the pre-allocated storage
-void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo,
-		const GEO_PrimList &prims,
-		std::vector<AttributeInfo> &info
-		) const
+void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo, const GEO_PrimList &prims, std::vector<AttributeInfo> &info ) const
 {
 	// loop over points getting attribute info
 	unsigned int p_index=0, v_index=0;
-	for ( const GEO_Primitive *curr = prims.head(); curr!=0;
-			curr=prims.next(curr), ++p_index )
+	for ( const GEO_Primitive *curr = prims.head(); curr!=0; curr=prims.next(curr), ++p_index )
 	{
-		//=====
 		// handle primitive attributes
-		for ( unsigned int attr_index=0; attr_index<info.size();
-				++attr_index )
+		for ( unsigned int attr_index=0; attr_index<info.size(); ++attr_index )
 		{
 			// we can only handle uniform attributes
 			if ( info[attr_index].interp!=PrimitiveVariable::Uniform )
+			{
 				continue;
+			}
 
 			// invalid attribute offset
 			if ( info[attr_index].offset==-1 )
+			{
 				continue;
+			}
 
 			// extract our primitive attributes
 			int len = info[attr_index].entries;
@@ -626,7 +615,9 @@ void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo,
 					break;
 				}
 				default:
+				{
 					break;
+				}
 			}
 		}
 
@@ -636,16 +627,19 @@ void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo,
 			const GEO_Vertex &vert = curr->getVertex(i);
 
 			// handle vertex attributes
-			for ( unsigned int attr_index=0; attr_index<info.size();
-					++attr_index )
+			for ( unsigned int attr_index=0; attr_index<info.size(); ++attr_index )
 			{
 				// we can only handle uniform attributes
 				if ( info[attr_index].interp!=PrimitiveVariable::FaceVarying )
+				{
 					continue;
+				}
 
 				// invalid attribute offset
 				if ( info[attr_index].offset==-1 )
+				{
 					continue;
+				}
 
 				// extract our primitive attributes
 				int len = info[attr_index].entries;
@@ -696,7 +690,9 @@ void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo,
 						break;
 					}
 					default:
+					{
 						break;
+					}
 				}
 			}
 		} // end of prim-vertex loop
