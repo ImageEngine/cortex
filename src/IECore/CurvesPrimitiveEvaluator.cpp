@@ -46,6 +46,8 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( CurvesPrimitiveEvaluator );
 
+PrimitiveEvaluator::Description<CurvesPrimitiveEvaluator> CurvesPrimitiveEvaluator::g_evaluatorDescription;
+
 //////////////////////////////////////////////////////////////////////////
 // Implementation of Result
 //////////////////////////////////////////////////////////////////////////
@@ -349,6 +351,13 @@ CurvesPrimitiveEvaluator::CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curv
 
 CurvesPrimitiveEvaluator::~CurvesPrimitiveEvaluator()
 {
+}
+
+PrimitiveEvaluatorPtr CurvesPrimitiveEvaluator::create( ConstPrimitivePtr primitive )
+{
+	ConstCurvesPrimitivePtr points = runTimeCast<const CurvesPrimitive>( primitive );
+	assert( points );
+	return new CurvesPrimitiveEvaluator( points );
 }
 
 ConstPrimitivePtr CurvesPrimitiveEvaluator::primitive() const

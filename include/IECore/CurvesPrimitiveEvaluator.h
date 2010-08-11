@@ -158,6 +158,14 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		const std::vector<int> &varyingDataOffsets() const;
 		//@}
 
+	protected :
+		
+		/// \todo It would be much better if PrimitiveEvaluator::Description didn't require these create()
+		/// functions and instead just called the constructors that have to exist anyway.
+		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
+		friend class PrimitiveEvaluator::Description<CurvesPrimitiveEvaluator>;
+		static PrimitiveEvaluator::Description<CurvesPrimitiveEvaluator> g_evaluatorDescription;
+		
 	private :
 
 		friend class Result;

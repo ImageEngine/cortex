@@ -1142,10 +1142,16 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 	
 		c = IECore.CurvesPrimitive( IECore.IntVectorData( [ 6, 6 ] ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * 12 ) )
 		e = IECore.CurvesPrimitiveEvaluator( c )
-		
 		self.assertEqual( e.verticesPerCurve(), IECore.IntVectorData( [ 6, 6 ] ) )
 		self.assertEqual( e.vertexDataOffsets(), IECore.IntVectorData( [ 0, 6 ] ) )
 		self.assertEqual( e.varyingDataOffsets(), IECore.IntVectorData( [ 0, 6 ] ) )
+		
+	def testCreate( self ) :
+	
+		c = IECore.CurvesPrimitive( IECore.IntVectorData( [ 6, 6 ] ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * 12 ) )
+		e = IECore.PrimitiveEvaluator.create( c )
+		
+		self.failUnless( isinstance( e, IECore.CurvesPrimitiveEvaluator ) )
 			
 if __name__ == "__main__":
 	unittest.main()
