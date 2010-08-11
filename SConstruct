@@ -364,8 +364,20 @@ o.Add(
 )
 
 o.Add(
+	"HOUDINI_BIN_PATH",
+	"The path to the houdini lib directory.",
+	"$HOUDINI_ROOT/bin",
+)
+
+o.Add(
 	"HOUDINI_CXX_FLAGS",
 	"C++ Flags to pass to the Houdini compilation.",
+	"",
+)
+
+o.Add(
+	"HOUDINI_LINK_FLAGS",
+	"Flags to pass to the Houdini linker.",
 	"",
 )
 
@@ -649,6 +661,9 @@ o.Add(
 env = Environment(
 	options = o
 )
+
+if env["PLATFORM"]=="darwin" :
+	env["ENV"]["MACOSX_DEPLOYMENT_TARGET"] = "10.4"
 
 env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
@@ -1759,11 +1774,11 @@ houdiniEnvAppends = {
 		"$HOUDINI_INCLUDE_PATH",
 	],
 	"CPPFLAGS" : [
-		"-DLINUX",
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
 	"LIBPATH" : [
 		"$HOUDINI_LIB_PATH",
+		"$GLEW_LIB_PATH",
 	],
 	"LIBS" : [
 		"HoudiniUI",
@@ -1776,13 +1791,22 @@ houdiniEnvAppends = {
   		"HoudiniPRM",
   		"HoudiniUT",
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
+		"GLEW"
 	]
 }
+
+if env["PLATFORM"]=="posix" :
+	houdiniEnvAppends["CPPFLAGS"] += ["-DLINUX"]
+elif env["PLATFORM"]=="darwin" :
+	houdiniEnvAppends["CPPFLAGS"] += ["-D__APPLE__"]
+	houdiniEnvAppends["FRAMEWORKS"] = ["OpenGL"]
+	houdiniEnvAppends["LIBS"] += [ "GR"]
 
 houdiniEnv = env.Copy( **houdiniEnvSets )
 houdiniEnv.Append( **houdiniEnvAppends )
 
 houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+houdiniEnv.Append( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
 
 houdiniPythonModuleEnv = pythonModuleEnv.Copy( **houdiniEnvSets )
 houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
@@ -1879,7 +1903,7 @@ if doConfigure :
 		#=====
 		otlPath = "contrib/IECoreHoudini/otls/ieCoreHoudini"
 		otlTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$IECORE_NAME" ) ) + ".otl"
-		otlCommand = houdiniPluginEnv.Command( otlTarget, otlPath, "$HOUDINI_ROOT/bin/hotl -c %s $TARGET" % otlPath )
+		otlCommand = houdiniPluginEnv.Command( otlTarget, otlPath, "$HOUDINI_BIN_PATH/hotl -c %s $TARGET" % otlPath )
 		otlInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIOTL_DIR", source=[ otlTarget ] )
 		houdiniPluginEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIOTL_DIR"] ) )
 		houdiniPluginEnv.Alias( "install", otlInstall )
