@@ -238,6 +238,7 @@ from PointSmoothSkinningOpTest import PointSmoothSkinningOpTest
 from AddAndRemoveSmoothSkinningInfluencesOpTest import AddAndRemoveSmoothSkinningInfluencesOpTest
 from LookupTest import LookupTest
 from ParameterAlgoTest import ParameterAlgoTest
+from PointsPrimitiveEvaluatorTest import PointsPrimitiveEvaluatorTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

@@ -379,6 +379,7 @@ void bindTypeId()
 		.value( "PointSmoothSkinningOp", PointSmoothSkinningOpTypeId )
 		.value( "AddSmoothSkinningInfluencesOp", AddSmoothSkinningInfluencesOpTypeId )
 		.value( "LimitSmoothSkinningInfluencesOp", LimitSmoothSkinningInfluencesOpTypeId )
+		.value( "PointsPrimitiveEvaluator", PointsPrimitiveEvaluatorTypeId )
 	;
 }
 

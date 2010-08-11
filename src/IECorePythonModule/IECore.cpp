@@ -282,6 +282,7 @@
 #include "IECorePython/AddSmoothSkinningInfluencesOpBinding.h"
 #include "IECorePython/RemoveSmoothSkinningInfluencesOpBinding.h"
 #include "IECorePython/LookupBinding.h"
+#include "IECorePython/PointsPrimitiveEvaluatorBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -564,6 +565,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindAddSmoothSkinningInfluencesOp();
 	bindRemoveSmoothSkinningInfluencesOp();
 	bindLookup();
+	bindPointsPrimitiveEvaluator();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
