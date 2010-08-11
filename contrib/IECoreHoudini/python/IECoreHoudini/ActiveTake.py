@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,22 +32,36 @@
 #
 ##########################################################################
 
-# require HOM
 import hou
 
-# require IECore
-import IECore
+## A context object intended for use with python's "with" syntax. It ensures
+# that all operations in the with block are performed in the given take,
+# and that the previous take is restored if it still exists when the block exits.
+class ActiveTake :
+	
+	def __init__( self, take ) :
 
-# our c++ module components
-import _IECoreHoudini
+		self.__take = take
+		self.__prevTake = ActiveTake.name()
 
-from _IECoreHoudini import FromHoudiniSopConverter
+	def __enter__( self ) :
 
-# function sets
-from FnProceduralHolder import FnProceduralHolder
+		if self.__take in ActiveTake.ls() :
+			hou.hscript( "takeset %s" % self.__take )
 
-# misc utility methods
-import ParmTemplates
-import Utils
-
-from ActiveTake import ActiveTake
+	def __exit__( self, type, value, traceBack ) :
+		
+		if self.__prevTake in ActiveTake.ls() :
+			hou.hscript( "takeset %s" % self.__prevTake )
+	
+	## \todo: remove this method when the hscript take commands are available in python
+	@staticmethod
+	def name() :
+		
+		return hou.hscript( "takeset" )[0].strip()
+	
+	## \todo: remove this method when the hscript take commands are available in python
+	@staticmethod
+	def ls() :
+		
+		return [ x.strip() for x in hou.hscript( "takels" )[0].strip().split( "\n" ) ]

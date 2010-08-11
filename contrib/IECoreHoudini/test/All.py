@@ -42,6 +42,7 @@ from ProceduralHolder import *
 from FromHoudiniSopConverter import *
 from CortexWriter import *
 from CortexRmanInject import *
+from ActiveTake import *
 
 if __name__ == "__main__":
     unittest.main()
