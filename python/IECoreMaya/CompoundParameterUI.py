@@ -137,7 +137,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		return maya.cmds.frameLayout( self.layout(), query=True, collapse=True )
 		
 	## Sets the collapsed state for the frame holding the child parameter uis.
-	# \param propogateToChildren How many levels of hierarchy to propogate 
+	# \param propagateToChildren How many levels of hierarchy to propagate 
 	# the new state to. If a Bool is passed, rather than an int, then
 	# 'all' or 'none' is assumed, for backwards compatibility.
 	def setCollapsed( self, collapsed, propagateToChildren=0, **kw ) :
