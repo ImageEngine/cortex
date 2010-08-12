@@ -43,6 +43,7 @@
 #include <SOP/SOP_Node.h>
 #include <HOM/HOM_SopNode.h>
 #include <HOM/HOM_NodeType.h>
+#include <UT/UT_Version.h>
 
 // Cortex
 #include <IECore/MeshPrimitive.h>
@@ -66,7 +67,11 @@ namespace IECoreHoudini
 			IECore::PrimitiveVariable::Interpolation interp;
 			int entries;
 			GB_AttribType type;
+#if UT_MAJOR_VERSION_INT >= 11
+			GB_AttributeRef offset;
+#else
 			int offset;
+#endif
 	};
 
 	/// Converter which converts from Houdini SOP geometry to Cortex Mesh/Points primitive

@@ -1762,7 +1762,7 @@ if doConfigure :
 houdiniEnvSets = {
 	"IECORE_NAME" : "IECoreHoudini",
 	"CXXFLAGS" : [
-		"$HOUDINI_CXX_FLAGS",
+		"$HOUDINI_CXX_FLAGS", "-DMAKING_DSO", "-DNEED_SPECIALIZATION_STORAGE"
 	],
 }
 

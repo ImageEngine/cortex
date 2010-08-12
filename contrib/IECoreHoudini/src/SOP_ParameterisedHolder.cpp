@@ -38,13 +38,15 @@
 
 #include <boost/python.hpp>
 #include <boost/format.hpp>
-using namespace boost::python;
-using namespace boost;
 
 #include "IECorePython/ScopedGILLock.h"
 
 #include "CoreHoudini.h"
 #include "SOP_ParameterisedHolder.h"
+
+using namespace boost::python;
+using namespace boost;
+
 using namespace IECore;
 using namespace IECoreHoudini;
 

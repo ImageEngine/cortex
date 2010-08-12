@@ -35,6 +35,7 @@
 
 // Houdini
 #include <UT/UT_DSOVersion.h>
+#include <UT/UT_Version.h>
 #include <OP/OP_OperatorTable.h>
 #include <GR/GR_RenderTable.h>
 
@@ -73,5 +74,9 @@ void newSopOperator(OP_OperatorTable *table)
 void newRenderHook( GR_RenderTable *table )
 {
     GR_Procedural *hook = new GR_Procedural;
+#if UT_MAJOR_VERSION_INT >= 11
+    table->addHook(hook,GR_RENDER_HOOK_VERSION);
+#else
     table->addHook(hook);
+#endif
 }

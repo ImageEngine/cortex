@@ -391,7 +391,11 @@ void FromHoudiniSopConverter::getAttribInfo(
 					inf.offset = geo->findVertexAttrib( attr );
 					break;
 				default:
+#if UT_MAJOR_VERSION_INT >= 11
+					inf.offset.clear();
+#else
 					inf.offset = -1;
+#endif
 					break;
 			}
 			info.push_back( inf );
@@ -415,10 +419,17 @@ void FromHoudiniSopConverter::extractPointAttribs( const GU_Detail *geo, const G
 			}
 
 			// invalid attribute offset
+#if UT_MAJOR_VERSION_INT >= 11
+			if ( info[attr_index].offset.isValid() == false )
+			{
+				continue;
+			}
+#else
 			if ( info[attr_index].offset==-1 )
 			{
 				continue;
 			}
+#endif
 
 			// extract our point attributes
 			int len = info[attr_index].entries;
@@ -482,10 +493,19 @@ void FromHoudiniSopConverter::extractDetailAttribs( const GU_Detail *geo, std::v
 {
 	for ( unsigned int attr_index=0; attr_index<info.size(); ++attr_index )
 	{
-		if ( info[attr_index].interp!=PrimitiveVariable::Constant || info[attr_index].offset==-1 )
+#if UT_MAJOR_VERSION_INT >= 11
+		if ( info[attr_index].interp!=PrimitiveVariable::Constant ||
+				info[attr_index].offset.isValid() == false )
 		{
 			continue;
 		}
+#else
+		if ( info[attr_index].interp!=PrimitiveVariable::Constant ||
+				info[attr_index].offset==-1 )
+		{
+			continue;
+		}
+#endif
 
 		int len = info[attr_index].entries;
 		const GB_AttributeTable &attrs = geo->attribs();
@@ -561,10 +581,17 @@ void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo, cons
 			}
 
 			// invalid attribute offset
+#if UT_MAJOR_VERSION_INT >= 11
+			if ( info[attr_index].offset.isValid() == false)
+			{
+				continue;
+			}
+#else
 			if ( info[attr_index].offset==-1 )
 			{
 				continue;
 			}
+#endif
 
 			// extract our primitive attributes
 			int len = info[attr_index].entries;
@@ -636,10 +663,17 @@ void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo, cons
 				}
 
 				// invalid attribute offset
+#if UT_MAJOR_VERSION_INT >= 11
+				if ( info[attr_index].offset.isValid() == false)
+				{
+					continue;
+				}
+#else
 				if ( info[attr_index].offset==-1 )
 				{
 					continue;
 				}
+#endif
 
 				// extract our primitive attributes
 				int len = info[attr_index].entries;
