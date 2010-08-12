@@ -331,19 +331,33 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __expand( self ) :
 	
-		if maya.cmds.getModifiers() & 1 :
+		modifiers = maya.cmds.getModifiers()
+		if modifiers & 1 :
 			# shift is held
 			self.__propagateCollapsed( False )
+		elif modifiers & 8 :
+			# ctrl is held
+			depth = 1;
+			with IECore.IgnoredExceptions( KeyError ) :
+				depth = self.parameter.userData()["UI"]["autoExpandDepth"].value
+			self.__propagateCollapsed( False, depth )
 			
 	def __collapse(self):
 
 		# \todo Store collapse state
-		if maya.cmds.getModifiers() & 1 :
+		modifiers = maya.cmds.getModifiers()
+		if modifiers & 1 :
 			# shift is held
 			self.__propagateCollapsed( True )
-	
+		elif modifiers & 8 :
+			# ctrl is held
+			depth = 1;
+			with IECore.IgnoredExceptions( KeyError ) :
+				depth = self.parameter.userData()["UI"]["autoExpandDepth"].value
+			self.__propagateCollapsed( True, depth )
+		
 	def __propagateCollapsed( self, collapsed, propogateDepth=999 ) :
-	
+		
 		for ui in self.__childUIs.values() :
 			if hasattr( ui, "setCollapsed" ) :
 				ui.setCollapsed( collapsed, propogateDepth )
@@ -562,7 +576,21 @@ class ChildUI( IECoreMaya.UIElement ) :
 	def __toggleParameterVisibility( self ) :
 			
 		collapsed = not self.getCollapsed()
-		self.setCollapsed( collapsed, propagateToChildren=maya.cmds.getModifiers() & 1 )
+		depth = 0
+		
+		modifiers = maya.cmds.getModifiers()
+		if modifiers & 1 :
+			# shift is held
+			depth = 999
+		elif modifiers & 8 :
+			# alt is held
+			depth = 1;
+			c = self.__class()[0]	
+			if c and hasattr( c, "parameters" ):
+				with IECore.IgnoredExceptions( KeyError ) :
+					depth = c.parameters().userData()["UI"]["autoExpandDepth"].value
+		
+		self.setCollapsed( collapsed, propagateToChildren=depth )
 	
 	def __layerMenu( self ) :
 	

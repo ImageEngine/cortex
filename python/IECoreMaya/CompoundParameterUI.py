@@ -221,17 +221,33 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __expand( self ) :
 	
-		if maya.cmds.getModifiers() & 1 :
+		modifiers = maya.cmds.getModifiers()
+				
+		if modifiers & 1 :
 			# shift is held
 			self.__propagateCollapsed( False )
+		elif modifiers & 8 :
+			# alt is held
+			depth = 1;
+			with IECore.IgnoredExceptions( KeyError ) :
+				depth = self.parameter.userData()["UI"]["autoExpandDepth"].value
+			self.__propagateCollapsed( False, depth )
 			
 	def __collapse(self):
-
+		
 		# \todo Store collapse state
-		if maya.cmds.getModifiers() & 1 :
-			# shift is held
+		modifiers = maya.cmds.getModifiers()
+		
+		if modifiers & 1 :
+			# shift is held			
 			self.__propagateCollapsed( True )
-			
+		elif modifiers & 8 :
+			# alt is held
+			depth = 1;
+			with IECore.IgnoredExceptions( KeyError ) :
+				depth = self.parameter.userData()["UI"]["autoExpandDepth"].value
+			self.__propagateCollapsed( True, depth )
+		
 	def __preExpand( self ) :
 			
 		# this is the most common entry point into the ui
@@ -251,7 +267,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			IECore.msg( IECore.Msg.Level.Error, "IECoreMaya.ParameterUI", traceback.format_exc() )
 
 	def __propagateCollapsed( self, collapsed, propogateDepth=999 ) :
-	
+		
 		for ui in self.__childUIs.values() :
 			if hasattr( ui, "setCollapsed" ) :
 				ui.setCollapsed( collapsed, propogateDepth )
