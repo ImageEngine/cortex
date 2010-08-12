@@ -148,14 +148,27 @@ class BasicPreset( IECore.Preset ) :
 		return self._applicableTo( parameterised, rootParameter, self._data )
 
 	## \see IECore.Preset.__call__
-	def __call__( self, parameterised, rootParameter ) :
+	# \param parameterList A list of Parameter pointers that the preset should apply to. 
+	# \param parameterListExcludes A bool, which when True, will treat the parameterList as a
+	# 'skip' list, rather than an 'application' list.
+	# NOTE: When parameterListExcludes is False, all parent parameters of a desired leaf parameter 
+	# must be in this list. Otherwise the preset will not consider the parent so will never
+	# reach the child.
+	def __call__( self, parameterised, rootParameter, parameterList=[], parameterListExcludes=False ) :
 			
 		self._ensureData()
 		
 		if not self.applicableTo( parameterised, rootParameter ) :
 			raise RuntimeError, "IECore.BasicPreset: Sorry, this preset is not applicable to that parameter."
 		
-		self._applyHierarchy( parameterised, rootParameter, self._data )
+		if parameterList and not parameterListExcludes :
+			# Not much point getting out of bed if the root isn't in there...
+			if rootParameter not in parameterList:
+				# Copy the list so we don't modify the one we were given.
+				parameterList = parameterList[:]
+				parameterList.append( rootParameter )
+						
+		self._applyHierarchy( parameterised, rootParameter, self._data, parameterList, parameterListExcludes )
 											
 	## This method will save the specified parameters to disk in such a was
 	## as can be loaded by the IECore.ClassLoader
@@ -352,15 +365,23 @@ class %s( IECore.BasicPreset ):
 
 			data["_values_"][c[1]] = v 		
 		
-	def _applyHierarchy( self, parameterised, parameter, data ) :
+	def _applyHierarchy( self, parameterised, parameter, data, parameterList=[], invertList=False ) :
+				
+		if parameterList :
+			if invertList : # its a 'skipList'
+				if parameter in parameterList :
+					return
+			else :
+				if parameter not in parameterList :
+					return
 		
 		if "_className_" in data :
 							
-			self._applyClassParameter( parameterised, parameter, data )
+			self._applyClassParameter( parameterised, parameter, data, parameterList, invertList )
 			
 		elif "_classNames_" in data :
 		
-			self._applyClassVector( parameterised, parameter, data )
+			self._applyClassVector( parameterised, parameter, data, parameterList, invertList )
 		
 		elif "_value_" in data :
 				
@@ -373,7 +394,7 @@ class %s( IECore.BasicPreset ):
 				if p not in parameter :
 					print "'%s' is missing from '%s' (%s)" % ( p, parameter.name, parameter )
 				
-				self._applyHierarchy( parameterised, parameter[p], data[p] )
+				self._applyHierarchy( parameterised, parameter[p], data[p], parameterList, invertList )
 			
 	def _applyParameter( self, parameterised, parameter, data ) :
 		
@@ -382,7 +403,7 @@ class %s( IECore.BasicPreset ):
 		except Exception, e:
 			print e
 		
-	def _applyClassParameter( self, parameterised, parameter, data ) :
+	def _applyClassParameter( self, parameterised, parameter, data, parameterList=[], invertList=False ) :
 		
 		if not isinstance( parameter, IECore.ClassParameter ) :
 			print "Unable to restore to '%s' (%s) as it isnt a ClassParameter" \
@@ -400,9 +421,9 @@ class %s( IECore.BasicPreset ):
 			
 		c = parameter.getClass( False )
 		if c:	
-			self._applyHierarchy( parameterised, c.parameters(), data["_classValue_"] )		
+			self._applyHierarchy( parameterised, c.parameters(), data["_classValue_"], parameterList, invertList )		
 		
-	def _applyClassVector( self, parameterised, parameter, data ) :
+	def _applyClassVector( self, parameterised, parameter, data, parameterList=[], invertList=False ) :
 		
 		if not isinstance( parameter, IECore.ClassVectorParameter ) :
 			print "Unable to restore to '%s' (%s) as it isnt a ClassVectorParameter" \
@@ -448,6 +469,8 @@ class %s( IECore.BasicPreset ):
 				parameterised,
 				c[0].parameters(),
 				data["_values_"][ paramNames[i] ],
+				parameterList,
+				invertList
 			)
 		
 	def _addClassToVector( self, parameter, parameterName, className, classVersion ) :
