@@ -53,7 +53,7 @@ class MPxImagePlane;
 namespace IECoreMaya
 {
 
-/// A base class from which nodes to hold IECore::Parametised objects
+/// A base class from which nodes to hold IECore::Parameterised objects
 /// should derive (for example, Maya RI procedurals). It's templated
 /// to allow inheritance from any Maya proxy.
 ///
