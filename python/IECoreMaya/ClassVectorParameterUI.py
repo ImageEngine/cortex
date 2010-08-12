@@ -144,7 +144,7 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 	# \param propogateToChildren How many levels of hierarchy to propogate 
 	# the new state to. If a Bool is passed, rather than an int, then
 	# 'all' or 'none' is assumed, for backwards compatibility		
-	def setCollapsed( self, collapsed, propagateToChildren=0 ) :
+	def setCollapsed( self, collapsed, propagateToChildren=0, **kw ) :
 		
 		if type(propagateToChildren) == bool :	
 			propagateToChildren = 999 if propagateToChildren else 0
@@ -154,7 +154,7 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			
 		if propagateToChildren > 0 :
 			propagateToChildren = propagateToChildren - 1
-			self.__propagateCollapsed( collapsed, propagateToChildren )
+			self.__propagateCollapsed( collapsed, propagateToChildren, **kw )
 			
 	def __classMenuDefinition( self, parameterName ) :
 	
@@ -334,13 +334,13 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		modifiers = maya.cmds.getModifiers()
 		if modifiers & 1 :
 			# shift is held
-			self.__propagateCollapsed( False )
+			self.__propagateCollapsed( False, 999, lazy=True )
 		elif modifiers & 8 :
 			# ctrl is held
 			depth = 1;
 			with IECore.IgnoredExceptions( KeyError ) :
 				depth = self.parameter.userData()["UI"]["autoExpandDepth"].value
-			self.__propagateCollapsed( False, depth )
+			self.__propagateCollapsed( False, depth, lazy=True )
 			
 	def __collapse(self):
 
@@ -348,7 +348,7 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		modifiers = maya.cmds.getModifiers()
 		if modifiers & 1 :
 			# shift is held
-			self.__propagateCollapsed( True )
+			self.__propagateCollapsed( True, 999 )
 		elif modifiers & 8 :
 			# ctrl is held
 			depth = 1;
@@ -356,11 +356,11 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 				depth = self.parameter.userData()["UI"]["autoExpandDepth"].value
 			self.__propagateCollapsed( True, depth )
 		
-	def __propagateCollapsed( self, collapsed, propogateDepth=999 ) :
+	def __propagateCollapsed( self, collapsed, propagateDepth=999, **kw ) :
 		
 		for ui in self.__childUIs.values() :
 			if hasattr( ui, "setCollapsed" ) :
-				ui.setCollapsed( collapsed, propogateDepth )
+				ui.setCollapsed( collapsed, propagateDepth, **kw )
 				
 	@staticmethod
 	def _classesSetCallback( fnPH, parameter ) :
@@ -493,9 +493,9 @@ class ChildUI( IECoreMaya.UIElement ) :
 		
 		return self.__compoundParameterUI.getCollapsed()
 		
-	def setCollapsed( self, collapsed, propagateToChildren=False ) :
+	def setCollapsed( self, collapsed, propagateToChildren=False, **kw ) :
 	
-		self.__compoundParameterUI.setCollapsed( collapsed, propagateToChildren=propagateToChildren )
+		self.__compoundParameterUI.setCollapsed( collapsed, propagateToChildren=propagateToChildren, **kw )
 		
 		image = "arrowRight.xpm" if collapsed else "arrowDown.xpm"
 		annotation = "Show parameters" if collapsed else "Hide parameters" 
@@ -590,7 +590,10 @@ class ChildUI( IECoreMaya.UIElement ) :
 				with IECore.IgnoredExceptions( KeyError ) :
 					depth = c.parameters().userData()["UI"]["autoExpandDepth"].value
 		
-		self.setCollapsed( collapsed, propagateToChildren=depth )
+		if depth :
+			self.setCollapsed( collapsed, propagateToChildren=depth, lazy=True )
+		else :
+			self.setCollapsed( collapsed, propogateToChildren=False )
 	
 	def __layerMenu( self ) :
 	

@@ -140,7 +140,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	# \param propogateToChildren How many levels of hierarchy to propogate 
 	# the new state to. If a Bool is passed, rather than an int, then
 	# 'all' or 'none' is assumed, for backwards compatibility.
-	def setCollapsed( self, collapsed, propagateToChildren=0 ) :
+	def setCollapsed( self, collapsed, propagateToChildren=0, **kw ) :
 	
 		if type(propagateToChildren) == bool :	
 			propagateToChildren = 999 if propagateToChildren else 0
@@ -154,7 +154,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		
 		if propagateToChildren > 0 :
 			propagateToChildren = propagateToChildren - 1
-			self.__propagateCollapsed( collapsed, propagateToChildren )
+			self.__propagateCollapsed( collapsed, propagateToChildren, **kw )
 	
 	@staticmethod
 	def _labelFont( hierarchyDepth ) :
@@ -225,13 +225,13 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 				
 		if modifiers & 1 :
 			# shift is held
-			self.__propagateCollapsed( False )
+			self.__propagateCollapsed( False, 999, lazy=True )
 		elif modifiers & 8 :
 			# alt is held
 			depth = 1;
 			with IECore.IgnoredExceptions( KeyError ) :
 				depth = self.parameter.userData()["UI"]["autoExpandDepth"].value
-			self.__propagateCollapsed( False, depth )
+			self.__propagateCollapsed( False, depth, lazy=True )
 			
 	def __collapse(self):
 		
@@ -240,7 +240,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		
 		if modifiers & 1 :
 			# shift is held			
-			self.__propagateCollapsed( True )
+			self.__propagateCollapsed( True, 999 )
 		elif modifiers & 8 :
 			# alt is held
 			depth = 1;
@@ -266,11 +266,11 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 			IECore.msg( IECore.Msg.Level.Error, "IECoreMaya.ParameterUI", traceback.format_exc() )
 
-	def __propagateCollapsed( self, collapsed, propogateDepth=999 ) :
+	def __propagateCollapsed( self, collapsed, propagateDepth=999, **kw ) :
 		
 		for ui in self.__childUIs.values() :
 			if hasattr( ui, "setCollapsed" ) :
-				ui.setCollapsed( collapsed, propogateDepth )
+				ui.setCollapsed( collapsed, propagateDepth, **kw )
 
 	def __createChildUIs( self ) :
 						
