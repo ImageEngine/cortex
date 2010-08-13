@@ -1,8 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
-//
 //  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -35,37 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <UT/UT_Math.h>
-#include <UT/UT_Interrupt.h>
-#include <PRM/PRM_Include.h>
-#include <PRM/PRM_Parm.h>
-#include <OP/OP_Operator.h>
-#include <OP/OP_OperatorTable.h>
+#ifndef IE_COREHOUDINI_NODEHANDLE_H
+#define IE_COREHOUDINI_NODEHANDLE_H
 
-#include "IECore/CompoundParameter.h"
+#include "OP/OP_Node.h"
+#include "HOM/HOM_Node.h"
 
-#include <iostream>
-
-#include "SOP_ProceduralHolder.h"
-#include "FnParameterisedHolder.h"
-
-using namespace IECoreHoudini;
-
-FnParameterisedHolder::FnParameterisedHolder() :
-	m_handle()
+namespace IECoreHoudini
 {
-}
 
-FnParameterisedHolder::~FnParameterisedHolder()
+/// The NodeHandle is a class that may be used to verify the existence of an OP_Node.
+/// Use a NodeHandle if you want a raw pointer to an OP_Node, but are concerned about
+/// the lifespan of that OP_Node.
+class NodeHandle
 {
-}
 
-void FnParameterisedHolder::setHolder( SOP_Node *sop )
-{
-	m_handle = sop;
-}
+	public :
+		
+		NodeHandle();
+		NodeHandle( const OP_Node *node );
 
-bool FnParameterisedHolder::hasHolder()
-{
-	return m_handle.alive();
-}
+		virtual ~NodeHandle();
+		
+		/// Returns True if the OP_Node represented by this handle is still alive
+		bool alive() const;
+		
+		/// Returns a pointer to the OP_Node represented by this handle, or 0 if alive is false.
+		OP_Node *node() const;
+
+	private :
+		
+		// we are using a HOM_Node because it lets us know if the OP_Node has been deleted
+		boost::shared_ptr<HOM_Node> m_homNode;
+
+};
+
+} // namespace IECoreHoudini
+
+#endif // IE_COREHOUDINI_NODEHANDLE_H

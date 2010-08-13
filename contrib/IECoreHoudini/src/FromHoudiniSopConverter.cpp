@@ -56,9 +56,9 @@ using namespace IECore;
 using namespace IECoreHoudini;
 
 // ctor
-FromHoudiniSopConverter::FromHoudiniSopConverter( HOM_SopNode *hou_sop ) :
+FromHoudiniSopConverter::FromHoudiniSopConverter( SOP_Node *sop ) :
 	ToCoreConverter( "Converts Houdini SOP geometry to IECore::MeshPrimitive or IECore::PointsPrimitive objects." ),
-	m_sop(hou_sop)
+	m_handle( sop )
 {
 }
 
@@ -67,31 +67,9 @@ FromHoudiniSopConverter::~FromHoudiniSopConverter()
 {
 }
 
-// convert a hou sop to a regular sop
-SOP_Node *FromHoudiniSopConverter::getSop() const
+SOP_Node *FromHoudiniSopConverter::sop() const
 {
-	SOP_Node *sop = 0;
-	
-	if ( !m_sop )
-	{
-		return sop;
-	}
-
-	// get the hom path and use opdirector to get a regular OP_Node* to our node
-	try
-	{
-		std::string node_path = m_sop->path();
-		OP_Node *op = OPgetDirector()->findNode( node_path.c_str() );
-		if ( op )
-		{
-			sop = op->castToSOPNode();
-		}
-	}
-	catch( HOM_ObjectWasDeleted )
-	{
-	}
-	
-	return sop;
+	return CAST_SOPNODE( m_handle.node() );
 }
 
 // Convert our geometry to cortex
@@ -105,7 +83,7 @@ ObjectPtr FromHoudiniSopConverter::doConversion( ConstCompoundObjectPtr operands
 	context.setTime( time );
 
 	// get our sop
-	SOP_Node *sop = getSop();
+	SOP_Node *sop = this->sop();
 	if( !sop )
 	{
 		return 0;

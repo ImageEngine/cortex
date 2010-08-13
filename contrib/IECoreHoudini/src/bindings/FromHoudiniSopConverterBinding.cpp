@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -36,7 +38,6 @@
 #include "boost/python.hpp"
 
 #include <SOP/SOP_Node.h>
-#include <HOM/HOM_SopNode.h>
 
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "FromHoudiniSopConverterBinding.h"
@@ -48,6 +49,6 @@ using namespace IECoreHoudini;
 void IECoreHoudini::bindFromHoudiniSopConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniSopConverter >()
-		.def(init<HOM_SopNode*>())
+		.def(init<SOP_Node*>())
 	;
 }

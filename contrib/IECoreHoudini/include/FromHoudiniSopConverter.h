@@ -41,8 +41,6 @@
 // Houdini
 #include <GU/GU_Detail.h>
 #include <SOP/SOP_Node.h>
-#include <HOM/HOM_SopNode.h>
-#include <HOM/HOM_NodeType.h>
 #include <UT/UT_Version.h>
 
 // Cortex
@@ -52,6 +50,7 @@
 
 // IECoreHoudini
 #include "TypeIds.h"
+#include "NodeHandle.h"
 
 namespace IECoreHoudini
 {
@@ -81,15 +80,15 @@ namespace IECoreHoudini
 			
 			IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniSopConverter, FromHoudiniSopConverterTypeId, IECore::ToCoreConverter );
 			
-			FromHoudiniSopConverter( HOM_SopNode *hou_sop );
+			FromHoudiniSopConverter( SOP_Node *sop );
 			
 			virtual ~FromHoudiniSopConverter();
 
 			/// performs our conversion to a Cortex primitive
 			virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 
-			/// converts our HOM_SopNode ptr to a SOP_Node ptr
-			SOP_Node *getSop() const;
+			/// retrieves the SOP_Node held by the converter
+			SOP_Node *sop() const;
 
 		private:
 			/// gathers attribute information and allocates storage
@@ -104,8 +103,8 @@ namespace IECoreHoudini
 			/// extracts primitive/vertex attributes
 			void extractPrimVertAttribs( const GU_Detail *geo, const GEO_PrimList &pprim, std::vector<AttributeInfo> &info ) const;
 
-			/// pointer to the SOP we're converting
-			HOM_SopNode *m_sop;
+			/// the handle to the SOP_Node
+			NodeHandle m_handle;
 	};
 
 /// register our converter

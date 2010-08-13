@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -33,15 +35,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <HOM/HOM_Module.h>
-#include <HOM/HOM_Node.h>
-#include <HOM/HOM_SopNode.h>
-#include <HOM/HOM_FloatParmTemplate.h>
 #include <PRM/PRM_Parm.h>
 #include <OP/OP_Director.h>
 #include <OP/OP_Node.h>
-#include <HOM/HOM_SopNode.h>
-#include <HOM/HOM_NodeType.h>
 #include <SOP/SOP_Node.h>
 
 #include "FnProceduralHolder.h"
@@ -55,70 +51,69 @@
 
 using namespace IECoreHoudini;
 
-FnProceduralHolder::FnProceduralHolder( HOM_SopNode *node ) :
-	FnParameterisedHolder()
+FnProceduralHolder::FnProceduralHolder( SOP_Node *sop ) : FnParameterisedHolder()
 {
-	if ( !node )
+	if ( !sop )
+	{
 		return;
+	}
 
-	if ( getProceduralHolder(node) )
-		setHolder( node );
+	if ( getProceduralHolder( sop ) )
+	{
+		setHolder( sop );
+	}
 	else
-		std::cerr << node->name() << " was not a valid ieProceduralHolder!" << std::endl;
+	{
+		UT_String path;
+		sop->getFullPath( path );
+		std::cerr << path << " was not a valid ieProceduralHolder!" << std::endl;
+	}
 }
 
 FnProceduralHolder::~FnProceduralHolder()
 {
 }
 
-SOP_ProceduralHolder *FnProceduralHolder::getProceduralHolder( HOM_SopNode *node )
+SOP_ProceduralHolder *FnProceduralHolder::getProceduralHolder( SOP_Node *sop )
 {
-	SOP_Node *sop = 0;
 	SOP_ProceduralHolder *procedural = 0;
 
-	// can we get a SOP_Node from our HOM_SopNode?
-	try
+	if ( sop )
 	{
-		std::string node_path = node->path();
-		OP_Node *op = OPgetDirector()->findNode( node_path.c_str() );
-		if ( !op )
-			return 0;
-		sop = op->castToSOPNode();
-		if ( sop )
-			procedural = dynamic_cast<SOP_ProceduralHolder*>(sop);
-	}
-	catch( HOM_ObjectWasDeleted )
-	{
-		// object has been deleted!
-		std::cerr << "Attempting to operate on SOP that has been deleted!" << std::endl;
+		procedural = dynamic_cast<SOP_ProceduralHolder*>( sop );
 	}
 
-	// can we get a procedural from our sop node?
 	return procedural;
 }
 
 bool FnProceduralHolder::hasParameterised()
 {
-	bool result = false;
 	if ( hasHolder() )
 	{
-		SOP_ProceduralHolder *holder = getProceduralHolder( m_holder );
+		SOP_ProceduralHolder *holder = getProceduralHolder( static_cast<SOP_Node*>( m_handle.node() ) );
 		if ( holder )
-			result = holder->hasParameterised();
+		{
+			return holder->hasParameterised();
+		}
 	}
-	return result;
+	
+	return false;
 }
 
 void FnProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version )
 {
 	if ( !p )
+	{
 		return;
+	}
 
 	if ( hasHolder() )
 	{
-		SOP_ProceduralHolder *holder = getProceduralHolder( m_holder );
+		SOP_ProceduralHolder *holder = getProceduralHolder( static_cast<SOP_Node*>( m_handle.node() ) );
 		if ( !holder )
+		{
 			return;
+		}
 
 		// set parameterised on holder
 		holder->setParameterised( p, type, version );
@@ -127,12 +122,14 @@ void FnProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std:
 
 IECore::RunTimeTypedPtr FnProceduralHolder::getParameterised()
 {
-	IECore::RunTimeTypedPtr result = 0;
 	if ( hasHolder() )
 	{
-		SOP_ProceduralHolder *holder = getProceduralHolder( m_holder );
+		SOP_ProceduralHolder *holder = getProceduralHolder( static_cast<SOP_Node*>( m_handle.node() ) );
 		if ( holder )
-			result = holder->getParameterised();
+		{
+			return holder->getParameterised();
+		}
 	}
-	return result;
+	
+	return 0;
 }

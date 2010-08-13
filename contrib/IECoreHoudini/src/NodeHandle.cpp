@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////////
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
-//
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,37 +35,51 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <UT/UT_Math.h>
-#include <UT/UT_Interrupt.h>
-#include <PRM/PRM_Include.h>
-#include <PRM/PRM_Parm.h>
-#include <OP/OP_Operator.h>
-#include <OP/OP_OperatorTable.h>
+#include "OP/OP_Director.h"
 
-#include "IECore/CompoundParameter.h"
-
-#include <iostream>
-
-#include "SOP_ProceduralHolder.h"
-#include "FnParameterisedHolder.h"
+#include "NodeHandle.h"
 
 using namespace IECoreHoudini;
 
-FnParameterisedHolder::FnParameterisedHolder() :
-	m_handle()
+NodeHandle::NodeHandle()
 {
 }
 
-FnParameterisedHolder::~FnParameterisedHolder()
+NodeHandle::NodeHandle( const OP_Node *node )
+{
+	UT_String path = "";
+	node->getFullPath( path );
+	m_homNode = boost::shared_ptr<HOM_Node>( dynamic_cast<HOM_Node*>( HOM().node( path ) ) );
+}
+
+NodeHandle::~NodeHandle()
 {
 }
 
-void FnParameterisedHolder::setHolder( SOP_Node *sop )
+bool NodeHandle::alive() const
 {
-	m_handle = sop;
+	return (bool)node();
 }
 
-bool FnParameterisedHolder::hasHolder()
+OP_Node *NodeHandle::node() const
 {
-	return m_handle.alive();
+	if ( !m_homNode )
+	{
+		return 0;
+	}
+
+	// get the hom path and use opdirector to get a regular OP_Node* to our node
+	try
+	{
+		OP_Node *node = OPgetDirector()->findNode( m_homNode->path().c_str() );
+		if ( node )
+		{
+			return node;
+		}
+	}
+	catch( HOM_ObjectWasDeleted )
+	{
+	}
+	
+	return 0;
 }

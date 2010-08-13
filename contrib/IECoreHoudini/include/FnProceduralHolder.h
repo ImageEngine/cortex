@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -38,14 +40,15 @@
 
 // Houdini
 #include <SOP/SOP_Node.h>
-#include <HOM/HOM_SopNode.h>
 
 // Cortex
 #include <IECore/Op.h>
 #include <IECore/CompoundParameter.h>
 
 // IECoreHoudini
+#include "NodeHandle.h"
 #include "FnParameterisedHolder.h"
+
 
 namespace IECoreHoudini
 {
@@ -54,10 +57,10 @@ namespace IECoreHoudini
 	{
 		friend class SOP_ProceduralHolder;
 		public:
-			FnProceduralHolder( HOM_SopNode *node=0 );
+			FnProceduralHolder( SOP_Node *sop=0 );
 			virtual ~FnProceduralHolder();
 
-			SOP_ProceduralHolder *getProceduralHolder( HOM_SopNode *node );
+			SOP_ProceduralHolder *getProceduralHolder( SOP_Node *sop );
 
 			virtual bool hasParameterised();
 			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version );

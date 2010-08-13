@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -37,12 +39,13 @@
 #define FNPARAMETERISEDHOLDER_H_
 
 // Houdini
-#include <HOM/HOM_SopNode.h>
+#include <SOP/SOP_Node.h>
 
 // Cortex
 #include <IECore/Op.h>
 
 // IECoreHoudini
+#include "NodeHandle.h"
 #include "SOP_ParameterisedHolder.h"
 
 namespace IECoreHoudini
@@ -55,7 +58,7 @@ namespace IECoreHoudini
 			virtual ~FnParameterisedHolder();
 
 			// do we have valid data?
-			bool hasHolder(){ return (bool)(m_holder!=0); }
+			bool hasHolder();
 			virtual bool hasParameterised()=0;
 
 		protected:
@@ -65,10 +68,9 @@ namespace IECoreHoudini
 
 		private:
 			// associate a sop with this fn
-			void setHolder( HOM_SopNode *node ){ m_holder = node; }
+			void setHolder( SOP_Node *sop );
 
-			// our holder Sop
-			HOM_SopNode *m_holder;
+			NodeHandle m_handle;
 	};
 }
 

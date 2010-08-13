@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,17 +32,68 @@
 #
 ##########################################################################
 
-import sys
 import unittest
+import weakref
+import gc
+
+import hou
+
 import IECore
 import IECoreHoudini
 
-from ProceduralHolder import *
-from FromHoudiniSopConverter import *
-from CortexWriter import *
-from CortexRmanInject import *
-from ActiveTake import *
-from NodeHandle import *
+class TestNodeHandle( unittest.TestCase ) :
+	
+	def createBox(self):
+		obj = hou.node("/obj")
+		geo = obj.createNode("geo", run_init_scripts=False)
+		box = geo.createNode( "box" )
+		return box
+	
+	# testing a class that uses NodeHandle internally can be created
+	def testCreation( self ) :
+		
+		box = self.createBox()
+		converter = IECoreHoudini.FromHoudiniSopConverter( box )
+		self.assert_( isinstance( converter, IECoreHoudini.FromHoudiniSopConverter ) )
+
+	# testing deletion of HOM node is irrelevant
+	def testDeleteHOMNode( self ) :
+		
+		box = self.createBox()
+		w = weakref.ref( box )
+		converter = IECoreHoudini.FromHoudiniSopConverter( box )
+		
+		del box
+		gc.collect()
+		
+		self.assertEqual( w(), None )
+		self.assert_( converter.convert().isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+
+	# testing deletion of node causes converter to return None
+	def testDeleteNode( self ) :
+		
+		box = self.createBox()
+		w = weakref.ref( box )
+		converter = IECoreHoudini.FromHoudiniSopConverter( box )
+		
+		box.destroy()
+		gc.collect()
+		
+		self.assertRaises( Exception, w() )
+		self.assertEqual( converter.convert(), None )
+
+	# testing new scene causes converter to return None
+	def testNewScene( self ) :
+		
+		box = self.createBox()
+		w = weakref.ref( box )
+		converter = IECoreHoudini.FromHoudiniSopConverter( box )
+		
+		hou.hipFile.clear( False )
+		
+		self.assertRaises( Exception, w() )
+		self.assertEqual( converter.convert(), None )
 
 if __name__ == "__main__":
     unittest.main()
+
