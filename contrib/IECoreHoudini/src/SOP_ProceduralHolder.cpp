@@ -285,7 +285,6 @@ int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time
 void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version, bool update_gui )
 {
 	// do we have an existsing procedural?
-	bool check_parameters = false;
 	IECore::ParameterisedProceduralPtr old_procedural;
 
 	// get our current procedural and save it
@@ -357,6 +356,8 @@ int SOP_ProceduralHolder::reloadButtonCallback( void *data, int index, float tim
 
 	CoreHoudini::evalPython( "IECore.ClassLoader.defaultProceduralLoader().refresh()" );
 	sop->loadProcedural( sop->m_className, sop->m_classVersion );
+	
+	return 1;
 }
 
 /// Redraws the OpenGL Scene if the procedural is marked as having changed
@@ -405,8 +406,8 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
     Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );
 	float now = context.myTime;
 
-    // force eval of our nodes parameters with our hidden parameter expression
-    int parm_eval_result = evalInt( "__opParmEval", 0, now );
+	// force eval of our nodes parameters with our hidden parameter expression
+	evalInt( "__opParmEval", 0, now );
 
 	// update parameters on procedural from our Houdini parameters
 	IECore::ParameterisedProceduralPtr procedural =
@@ -472,11 +473,12 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 /// This gets called when this SOP is loaded from Disk
 /// It checks for type/version values on the node and attempts to reload
 /// the procedural from disk
+/// \todo: not entirely certain this is returning the correct thing...
 bool SOP_ProceduralHolder::load( UT_IStream &is,
 		const char *ext,
 		const char *path )
 {
-	OP_Node::load( is, ext, path );
+	bool loaded = OP_Node::load( is, ext, path );
 
 	// look at type/version parameters
 	UT_String type_str, ver_str;
@@ -495,4 +497,6 @@ bool SOP_ProceduralHolder::load( UT_IStream &is,
 	{
 		loadProcedural( m_className, m_classVersion, false );
 	}
+	
+	return loaded;
 }
