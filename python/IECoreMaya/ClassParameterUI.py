@@ -189,7 +189,7 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 		# we have removed the parameters, but before we have removed the UI.
 		self._deleteChildParameterUIs()
 
-		with fnPH.classParameterModificationContext() :
+		with fnPH.parameterModificationContext() :
 			self.parameter.setClass( className, classVersion, searchPathEnvVar )
 
 	@staticmethod

@@ -247,11 +247,9 @@ def paste( plugPath ) :
 	
 	fnPh.setParameterisedValues()
 	
-	with fnPh.classParameterModificationContext() : 
+	with fnPh.parameterModificationContext() : 
 		_ieCoreParameterClipboardUIBuffer( fnPh.getParameterised()[0], parameter )
 	
-	fnPh.setNodeValues()
-
 def pasteLinked( plugPath ) :
 	
 	global _ieCoreParameterClipboardUIBuffer
@@ -272,11 +270,9 @@ def pasteLinked( plugPath ) :
 	# Apply the preset to make sure that the children are there
 	fnPh.setParameterisedValues()
 	
-	with fnPh.classParameterModificationContext() : 
+	with fnPh.parameterModificationContext() : 
 		_ieCoreParameterClipboardUIBuffer( fnPh.getParameterised()[0], parameter )
-	
-	fnPh.setNodeValues()
-	
+		
 	# Connect up
 	if not maya.cmds.objExists( _ieCoreParameterClipboardUILastNode ) :
 		raise RuntimeError, "The source node '%s' no longer exists." % _ieCoreParameterClipboardUILastNode

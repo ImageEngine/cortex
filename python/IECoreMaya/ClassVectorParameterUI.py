@@ -219,7 +219,7 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		# are going to remove, before we remove them in C++. See the notes at the top.
 		self.__updateChildUIs( classes )
 		
-		with fnPH.classParameterModificationContext() :
+		with fnPH.parameterModificationContext() :
 			self.parameter.setClasses( classes )
 	
 	def _setClass( self, parameterName, className, classVersion ) :
@@ -251,7 +251,7 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		
 			classes.append( ( parameterName, className, classVersion ) )
 		
-		with fnPH.classParameterModificationContext() :
+		with fnPH.parameterModificationContext() :
 			self.parameter.setClasses( classes )
 	
 	# \param classes A sequence type based on the list comprehension:
@@ -677,7 +677,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 		classes[newIndex:newIndex] = [ cl ]
 				
 		fnPH = IECoreMaya.FnParameterisedHolder( self.parent().node() )
-		with fnPH.classParameterModificationContext() :
+		with fnPH.parameterModificationContext() :
 			self.parent().parameter.setClasses( classes )
 
 	def __buildOptionalPreHeaderUI( self, formLayout, attachForm, attachControl, lastControl ) :

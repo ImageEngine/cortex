@@ -455,15 +455,12 @@ class LoadUI( UIElement ) :
 		# We need to make sure we have the right values in the first place.
 		self.__fnP.setParameterisedValues()
 	
-		with self.__fnP.classParameterModificationContext() : 
+		with self.__fnP.parameterModificationContext() : 
 	
 			for s in selected:
 				# These should have been loaded by the selectCommand callback
 				self.__loadedPresets[s]( self.__parameterised, self.__rootParameter )
-		
-		# IMPORTANT
-		self.__fnP.setNodeValues()
-
+	
 		maya.cmds.deleteUI( self.__window )	
 		self.__loadedPrestes = {}
 
