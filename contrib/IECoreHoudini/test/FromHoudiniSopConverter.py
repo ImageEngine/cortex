@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -70,6 +72,18 @@ class TestFromHoudiniSopConverter( unittest.TestCase ):
 		converter = IECoreHoudini.FromHoudiniSopConverter( box )
 		assert( converter )
 		return converter
+
+	# creates a converter
+	def testFactory( self ) :
+		box = self.createBox()
+		converter = IECoreHoudini.FromHoudiniSopConverter.create( box )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniSopConverter ) ) )
+		converter = IECoreHoudini.FromHoudiniNodeConverter.create( box )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniSopConverter ) ) )
+		converter = IECoreHoudini.FromHoudiniNodeConverter.create( box, IECore.TypeId.Primitive )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniSopConverter ) ) )
+		converter = IECoreHoudini.FromHoudiniNodeConverter.create( box, IECore.TypeId.Group )
+		self.assertEqual( converter, None )
 
 	# performs geometry conversion
 	def testDoConversion(self):

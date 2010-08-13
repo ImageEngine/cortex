@@ -46,14 +46,14 @@
 // Cortex
 #include <IECore/MeshPrimitive.h>
 #include <IECore/PointsPrimitive.h>
-#include <IECore/ToCoreConverter.h>
 
 // IECoreHoudini
 #include "TypeIds.h"
-#include "NodeHandle.h"
+#include "FromHoudiniNodeConverter.h"
 
 namespace IECoreHoudini
 {
+	
 	/// Utility class for storing attribute information
 	struct AttributeInfo
 	{
@@ -74,13 +74,15 @@ namespace IECoreHoudini
 	};
 
 	/// Converter which converts from Houdini SOP geometry to Cortex Mesh/Points primitive
-	class FromHoudiniSopConverter : public IECore::ToCoreConverter
+	class FromHoudiniSopConverter : public IECoreHoudini::FromHoudiniNodeConverter
 	{
 		public :
 			
 			IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniSopConverter, FromHoudiniSopConverterTypeId, IECore::ToCoreConverter );
 			
-			FromHoudiniSopConverter( SOP_Node *sop );
+			typedef SOP_Node FromType;
+			
+			FromHoudiniSopConverter( const SOP_Node *sop );
 			
 			virtual ~FromHoudiniSopConverter();
 
@@ -90,7 +92,8 @@ namespace IECoreHoudini
 			/// retrieves the SOP_Node held by the converter
 			SOP_Node *sop() const;
 
-		private:
+		private :
+			
 			/// gathers attribute information and allocates storage
 			void getAttribInfo( const GU_Detail *geo, const UT_LinkList *attribs, IECore::PrimitiveVariable::Interpolation interp_type, std::vector<AttributeInfo> &info, int num_entries ) const;
 
@@ -103,11 +106,10 @@ namespace IECoreHoudini
 			/// extracts primitive/vertex attributes
 			void extractPrimVertAttribs( const GU_Detail *geo, const GEO_PrimList &pprim, std::vector<AttributeInfo> &info ) const;
 
-			/// the handle to the SOP_Node
-			NodeHandle m_handle;
+			static FromHoudiniNodeConverter::Description<FromHoudiniSopConverter> m_description;
 	};
 
-/// register our converter
+// register our converter
 IE_CORE_DECLAREPTR( FromHoudiniSopConverter );
 
 }

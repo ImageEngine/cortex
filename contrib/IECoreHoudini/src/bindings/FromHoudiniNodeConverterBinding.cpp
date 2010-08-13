@@ -1,8 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
-//
 //  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -35,61 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include <OP/OP_Director.h>
-#include <OP/OP_Node.h>
-#include <SOP/SOP_Node.h>
-#include <HOM/HOM_Node.h>
+#include "FromHoudiniNodeConverter.h"
+#include "FromHoudiniSopConverter.h"
+#include "bindings/FromHoudiniNodeConverterBinding.h"
 
-#include <IECore/Object.h>
-#include <IECore/Parameterised.h>
-#include <IECorePython/PointerFromSWIG.h>
-
-#include "CoreHoudini.h"
-#include "TypeIdBinding.h"
-#include "NodeHandle.h"
-#include "FnOpHolderBinding.h"
-#include "FnProceduralHolderBinding.h"
-#include "FromHoudiniConverterBinding.h"
-#include "FromHoudiniNodeConverterBinding.h"
-#include "FromHoudiniSopConverterBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
 
-// returns a OP_Node from a hou node instance
-static void *extractNodeFromHOM( PyObject *o )
+static IECoreHoudini::FromHoudiniNodeConverterPtr create( const OP_Node *node, IECore::TypeId resultType )
 {
-	if( !PyObject_HasAttrString( o, "this" ) )
+	if ( node->getOpTypeID() == SOP_OPTYPE_ID )
 	{
-		return 0;
-	}
-
-	PyObject *thisAttr = PyObject_GetAttrString( o, "this" );
-	if( !thisAttr )
-	{
-		return 0;
+		FromHoudiniNodeConverterPtr c = FromHoudiniSopConverter::create( node, resultType );
+		if ( c )
+		{
+			return c;
+		}
 	}
 	
-	/// \todo: here we 'assume' we have a HOM_Node object, when it really could be anything...
-	HOM_Node *homNode = static_cast<HOM_Node*>(((IECorePython::Detail::PySwigObject*)thisAttr)->ptr);
-	
-	return OPgetDirector()->findNode( homNode->path().c_str() );
+	return 0;
 }
 
-BOOST_PYTHON_MODULE(_IECoreHoudini)
+void IECoreHoudini::bindFromHoudiniNodeConverter()
 {
-	// setup our global python context
-	CoreHoudini::initPython();
-
-	bindTypeId();
-	bindFnProceduralHolder();
-	bindFromHoudiniConverter();
-	bindFromHoudiniNodeConverter();
-	bindFromHoudiniSopConverter();
-
-	// register our node converter functions
-	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );
-	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<SOP_Node>() );
+	IECorePython::RunTimeTypedClass<FromHoudiniNodeConverter>()
+		.def( "create", &create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+	;
 }

@@ -1,8 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
-//
 //  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -35,61 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "FromHoudiniConverter.h"
 
-#include <OP/OP_Director.h>
-#include <OP/OP_Node.h>
-#include <SOP/SOP_Node.h>
-#include <HOM/HOM_Node.h>
-
-#include <IECore/Object.h>
-#include <IECore/Parameterised.h>
-#include <IECorePython/PointerFromSWIG.h>
-
-#include "CoreHoudini.h"
-#include "TypeIdBinding.h"
-#include "NodeHandle.h"
-#include "FnOpHolderBinding.h"
-#include "FnProceduralHolderBinding.h"
-#include "FromHoudiniConverterBinding.h"
-#include "FromHoudiniNodeConverterBinding.h"
-#include "FromHoudiniSopConverterBinding.h"
+#include "IECore/CompoundParameter.h"
 
 using namespace IECoreHoudini;
-using namespace boost::python;
+using namespace IECore;
 
-// returns a OP_Node from a hou node instance
-static void *extractNodeFromHOM( PyObject *o )
+IE_CORE_DEFINERUNTIMETYPED( FromHoudiniConverter );
+
+FromHoudiniConverter::FromHoudiniConverter( const std::string &description )
+	:	ToCoreConverter( description )
 {
-	if( !PyObject_HasAttrString( o, "this" ) )
-	{
-		return 0;
-	}
-
-	PyObject *thisAttr = PyObject_GetAttrString( o, "this" );
-	if( !thisAttr )
-	{
-		return 0;
-	}
-	
-	/// \todo: here we 'assume' we have a HOM_Node object, when it really could be anything...
-	HOM_Node *homNode = static_cast<HOM_Node*>(((IECorePython::Detail::PySwigObject*)thisAttr)->ptr);
-	
-	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
 
-BOOST_PYTHON_MODULE(_IECoreHoudini)
+FromHoudiniConverter::~FromHoudiniConverter()
 {
-	// setup our global python context
-	CoreHoudini::initPython();
-
-	bindTypeId();
-	bindFnProceduralHolder();
-	bindFromHoudiniConverter();
-	bindFromHoudiniNodeConverter();
-	bindFromHoudiniSopConverter();
-
-	// register our node converter functions
-	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );
-	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<SOP_Node>() );
 }

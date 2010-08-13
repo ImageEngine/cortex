@@ -55,10 +55,13 @@ using namespace IECore;
 #include "FromHoudiniSopConverter.h"
 using namespace IECoreHoudini;
 
+IE_CORE_DEFINERUNTIMETYPED( FromHoudiniSopConverter );
+
+FromHoudiniNodeConverter::Description<FromHoudiniSopConverter> FromHoudiniSopConverter::m_description( SOP_OPTYPE_ID, PrimitiveTypeId );
+
 // ctor
-FromHoudiniSopConverter::FromHoudiniSopConverter( SOP_Node *sop ) :
-	ToCoreConverter( "Converts Houdini SOP geometry to IECore::MeshPrimitive or IECore::PointsPrimitive objects." ),
-	m_handle( sop )
+FromHoudiniSopConverter::FromHoudiniSopConverter( const SOP_Node *sop ) :
+	FromHoudiniNodeConverter( sop, "Converts Houdini SOP geometry to IECore::MeshPrimitive or IECore::PointsPrimitive objects." )
 {
 }
 
@@ -69,7 +72,7 @@ FromHoudiniSopConverter::~FromHoudiniSopConverter()
 
 SOP_Node *FromHoudiniSopConverter::sop() const
 {
-	return CAST_SOPNODE( m_handle.node() );
+	return CAST_SOPNODE( node() );
 }
 
 // Convert our geometry to cortex
@@ -712,3 +715,4 @@ void FromHoudiniSopConverter::extractPrimVertAttribs( const GU_Detail *geo, cons
 	}// end of prim loop
 
 }
+

@@ -50,5 +50,6 @@ void IECoreHoudini::bindFromHoudiniSopConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniSopConverter >()
 		.def(init<SOP_Node*>())
+		.def( "create", &FromHoudiniSopConverter::create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 }
