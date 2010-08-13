@@ -44,40 +44,40 @@
 #include "IECore/Object.h"
 #include "IECore/CompoundParameter.h"
 
-#include "IECoreMaya/ParameterisedHolderClassModificationCmd.h"
+#include "IECoreMaya/ParameterisedHolderModificationCmd.h"
 #include "IECoreMaya/ClassParameterHandler.h"
 #include "IECoreMaya/ClassVectorParameterHandler.h"
 
 using namespace IECoreMaya;
 using namespace IECore;
 
-IECore::ObjectPtr ParameterisedHolderClassModificationCmd::g_undoValue = 0;
+IECore::ObjectPtr ParameterisedHolderModificationCmd::g_undoValue = 0;
 
-ParameterisedHolderClassModificationCmd::ParameterisedHolderClassModificationCmd()
+ParameterisedHolderModificationCmd::ParameterisedHolderModificationCmd()
 	:	m_parameterisedHolder( 0 ), m_originalValues( 0 ), m_newValues( 0 ), m_changingClass( false )
 {
 }
 
-ParameterisedHolderClassModificationCmd::~ParameterisedHolderClassModificationCmd()
+ParameterisedHolderModificationCmd::~ParameterisedHolderModificationCmd()
 {
 }
 
-void *ParameterisedHolderClassModificationCmd::creator()
+void *ParameterisedHolderModificationCmd::creator()
 {
-	return new ParameterisedHolderClassModificationCmd;
+	return new ParameterisedHolderModificationCmd;
 }
 
-bool ParameterisedHolderClassModificationCmd::isUndoable() const
+bool ParameterisedHolderModificationCmd::isUndoable() const
 {
 	return true;
 }
 
-bool ParameterisedHolderClassModificationCmd::hasSyntax() const
+bool ParameterisedHolderModificationCmd::hasSyntax() const
 {
 	return false;
 }
 
-MStatus ParameterisedHolderClassModificationCmd::doIt( const MArgList &argList )
+MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
 {	
 	// get the node we're operating on
 	
@@ -164,7 +164,7 @@ MStatus ParameterisedHolderClassModificationCmd::doIt( const MArgList &argList )
 	return MS::kSuccess;
 }
 
-MStatus ParameterisedHolderClassModificationCmd::undoIt()
+MStatus ParameterisedHolderModificationCmd::undoIt()
 {
 	if( !m_parameterisedHolder )
 	{
@@ -206,7 +206,7 @@ MStatus ParameterisedHolderClassModificationCmd::undoIt()
 	return s;
 }
 
-MStatus ParameterisedHolderClassModificationCmd::redoIt()
+MStatus ParameterisedHolderModificationCmd::redoIt()
 {	
 	if( !m_parameterisedHolder )
 	{
@@ -230,7 +230,7 @@ MStatus ParameterisedHolderClassModificationCmd::redoIt()
 	return MS::kSuccess;
 }
 
-void ParameterisedHolderClassModificationCmd::storeClassParameterStates( ClassInfo &classInfo, const IECore::Parameter *parameter, const std::string &parentParameterPath, bool changedOnly )
+void ParameterisedHolderModificationCmd::storeClassParameterStates( ClassInfo &classInfo, const IECore::Parameter *parameter, const std::string &parentParameterPath, bool changedOnly )
 {
 	std::string parameterPath = parentParameterPath;
 	if( parentParameterPath.size() )
@@ -281,7 +281,7 @@ void ParameterisedHolderClassModificationCmd::storeClassParameterStates( ClassIn
 	}
 }
 
-void ParameterisedHolderClassModificationCmd::restoreClassParameterStates( const ClassInfo &classInfo, IECore::Parameter *parameter, const std::string &parentParameterPath )
+void ParameterisedHolderModificationCmd::restoreClassParameterStates( const ClassInfo &classInfo, IECore::Parameter *parameter, const std::string &parentParameterPath )
 {
 	std::string parameterPath = parentParameterPath;
 	if( parentParameterPath.size() )
@@ -318,7 +318,7 @@ void ParameterisedHolderClassModificationCmd::restoreClassParameterStates( const
 	}
 }
 
-void ParameterisedHolderClassModificationCmd::storeParametersWithNewValues( const IECore::Object *originalValue, const IECore::Object *newValue, const std::string &parameterPath )
+void ParameterisedHolderModificationCmd::storeParametersWithNewValues( const IECore::Object *originalValue, const IECore::Object *newValue, const std::string &parameterPath )
 {
 	if( !(originalValue && newValue) )
 	{
@@ -382,7 +382,7 @@ void ParameterisedHolderClassModificationCmd::storeParametersWithNewValues( cons
 	}
 }
 
-void ParameterisedHolderClassModificationCmd::setNodeValuesForParametersWithNewValues() const
+void ParameterisedHolderModificationCmd::setNodeValuesForParametersWithNewValues() const
 {
 	ParameterisedInterface *parameterised = m_parameterisedHolder->getParameterisedInterface();
 	for( std::set<std::string>::const_iterator it=m_parametersWithNewValues.begin(); it!=m_parametersWithNewValues.end(); it++ )
@@ -395,7 +395,7 @@ void ParameterisedHolderClassModificationCmd::setNodeValuesForParametersWithNewV
 	}
 }
 
-void ParameterisedHolderClassModificationCmd::setNodeValue( IECore::Parameter *parameter ) const
+void ParameterisedHolderModificationCmd::setNodeValue( IECore::Parameter *parameter ) const
 {
 	m_parameterisedHolder->setNodeValue( parameter );
 	
@@ -413,7 +413,7 @@ void ParameterisedHolderClassModificationCmd::setNodeValue( IECore::Parameter *p
 	}
 }
 
-void ParameterisedHolderClassModificationCmd::despatchSetParameterisedCallbacks() const
+void ParameterisedHolderModificationCmd::despatchSetParameterisedCallbacks() const
 {
 	MFnDependencyNode fnNode( m_node );
 	MString nodeName = fnNode.name();
@@ -426,7 +426,7 @@ void ParameterisedHolderClassModificationCmd::despatchSetParameterisedCallbacks(
 	MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetParameterisedCallbacks( \"" + nodeName + "\" )" );
 }
 
-void ParameterisedHolderClassModificationCmd::despatchClassSetCallbacks() const
+void ParameterisedHolderModificationCmd::despatchClassSetCallbacks() const
 {
 	MFnDependencyNode fnNode( m_node );
 	MString nodeName = fnNode.name();
@@ -457,7 +457,7 @@ void ParameterisedHolderClassModificationCmd::despatchClassSetCallbacks() const
 	}
 }
 
-IECore::Parameter *ParameterisedHolderClassModificationCmd::parameterFromPath( ParameterisedInterface *parameterised, const std::string &path ) const
+IECore::Parameter *ParameterisedHolderModificationCmd::parameterFromPath( ParameterisedInterface *parameterised, const std::string &path ) const
 {
 	std::vector<std::string> names;
 	boost::split( names, path, boost::is_any_of( "." ) );

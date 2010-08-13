@@ -45,7 +45,7 @@
 #include "IECoreMaya/bindings/FnParameterisedHolderBinding.h"
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/ParameterisedHolder.h"
-#include "IECoreMaya/ParameterisedHolderClassModificationCmd.h"
+#include "IECoreMaya/ParameterisedHolderModificationCmd.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -140,7 +140,7 @@ static ParameterPtr plugParameter( MFnDependencyNode *fnDN, MPlug *plug )
 
 void IECoreMaya::parameterisedHolderAssignUndoValue( IECore::ObjectPtr value )
 {
-	ParameterisedHolderClassModificationCmd::g_undoValue = value;
+	ParameterisedHolderModificationCmd::g_undoValue = value;
 }
 
 void IECoreMaya::bindFnParameterisedHolder()

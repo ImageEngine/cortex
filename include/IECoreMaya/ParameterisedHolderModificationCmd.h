@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_PARAMETERISEDHOLDERCLASSMODIFICATIONCMD_H
-#define IECOREMAYA_PARAMETERISEDHOLDERCLASSMODIFICATIONCMD_H
+#ifndef IECOREMAYA_PARAMETERISEDHOLDERMODIFICATIONCMD_H
+#define IECOREMAYA_PARAMETERISEDHOLDERMODIFICATIONCMD_H
 
 #include <algorithm>
 
@@ -60,13 +60,13 @@ namespace IECoreMaya
 // Under no circumstances should this class or the command it creates be
 // used directly - it should be considered to be a private implementation
 // detail of FnParameterisedHolder.
-class ParameterisedHolderClassModificationCmd : public MPxCommand
+class ParameterisedHolderModificationCmd : public MPxCommand
 {
 
 	public :
 
-		ParameterisedHolderClassModificationCmd();
-		virtual ~ParameterisedHolderClassModificationCmd();
+		ParameterisedHolderModificationCmd();
+		virtual ~ParameterisedHolderModificationCmd();
 
 		static void *creator();
 
@@ -172,4 +172,4 @@ class ParameterisedHolderClassModificationCmd : public MPxCommand
 
 }
 
-#endif // IECOREMAYA_PARAMETERISEDHOLDERCLASSMODIFICATIONCMD_H
+#endif // IECOREMAYA_PARAMETERISEDHOLDERMODIFICATIONCMD_H
