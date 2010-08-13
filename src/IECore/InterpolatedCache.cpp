@@ -50,7 +50,10 @@ using namespace boost;
 InterpolatedCache::InterpolatedCache( const std::string &pathTemplate, float frame, Interpolation interpolation, const OversamplesCalculator &o )
 		: m_fileSequence( 0 ), m_oversamplesCalculator( o )
 {
-	setPathTemplate( pathTemplate );
+	if( pathTemplate.size() )
+	{
+		setPathTemplate( pathTemplate );
+	}
 	setFrame( frame );
 	setInterpolation( interpolation );
 
@@ -74,7 +77,12 @@ void InterpolatedCache::setPathTemplate( const std::string &pathTemplate )
 
 const std::string &InterpolatedCache::getPathTemplate() const
 {
-	assert( m_fileSequence );
+	if( !m_fileSequence )
+	{
+		// i'd prefer to return "" but that would mean returning a reference
+		// to a temporary or having some weird static string instance.
+		throw Exception( "Path template has not been set" );
+	}
 	return m_fileSequence->getFileName();
 }
 
@@ -297,6 +305,11 @@ void InterpolatedCache::updateCacheFiles() const
 	if ( !m_parametersChanged )
 	{
 		return;
+	}
+
+	if( !m_fileSequence )
+	{
+		throw Exception( "Path template has not been set" );
 	}
 
 	int lowTick, highTick;

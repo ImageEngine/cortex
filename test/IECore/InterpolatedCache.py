@@ -193,6 +193,19 @@ class TestInterpolatedCache(unittest.TestCase):
 		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
 		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd(0.283422, 0, 0)).length(), 0, 2 )
 
+	def testDefaultConstructor( self ) :
+	
+		self.__createCache()
+
+		# If we provide a default constructor then it really oughn't to throw an exception
+		cache = InterpolatedCache()
+		# But if we try to do something with it before setting the template then it should complain
+		self.assertRaises( RuntimeError, cache.readHeader )
+		# And it should work as usual if we subsequently set the template
+		cache.setPathTemplate( self.pathTemplate )
+		cache.readHeader()
+		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0 ) )
+
 	def tearDown(self):
 
 		# cleanup
