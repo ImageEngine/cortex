@@ -47,6 +47,7 @@
 #include <IECorePython/PointerFromSWIG.h>
 
 #include "CoreHoudini.h"
+#include "TypeIdBinding.h"
 #include "NodeHandle.h"
 #include "FnOpHolderBinding.h"
 #include "FnProceduralHolderBinding.h"
@@ -80,7 +81,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	// setup our global python context
 	CoreHoudini::initPython();
 
-	//bindFnOpHolder();
+	bindTypeId();
 	bindFnProceduralHolder();
 	bindFromHoudiniSopConverter();
 

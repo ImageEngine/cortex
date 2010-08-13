@@ -1,8 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
-//
 //  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -35,25 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TYPEIDS_H
-#define IECOREHOUDINI_TYPEIDS_H
+#ifndef IECOREHOUDINI_TYPEIDBINDING_H
+#define IECOREHOUDINI_TYPEIDBINDING_H
 
 namespace IECoreHoudini
 {
+void bindTypeId();
+}
 
-	/// Define Cortex Type Ids for our converter class.
-	enum TypeId
-	{
-		FromHoudiniSopConverterTypeId = 111000,
-		FromHoudiniConverterTypeId = 111001,
-		FromHoudiniNodeConverterTypeId = 111002,
-		FromHoudiniPointsConverterTypeId = 111003,
-		FromHoudiniParticlesConverterTypeId = 111004,
-		FromHoudiniPolygonsConverterTypeId = 111005,
-		// remember to update TypeIdBinding.cpp
-		LastTypeId = 111999,
-	};
-
-} // namespace IECoreHoudini
-
-#endif /* IECOREHOUDINI_TYPEIDS_H */
+#endif // IECOREHOUDINI_TYPEIDBINDING_H
