@@ -52,9 +52,10 @@ namespace IECoreMaya
 // 1) It is used by FnParameterisedHolder.setParameterised() to implement
 // changing of the held class in an undoable way.
 // 
-// 2) It is used by FnParameterisedHolder.classParameterModificationContext()
-// to implement undo for the changing of the classes held by ClassParameter
-// and ClassVectorParameter in an undoable way.
+// 2) It is used by FnParameterisedHolder.parameterModificationContext()
+// for the changing of the classes held by ClassParameter and ClassVectorParameter,
+// and the setting of Parameter values. It must be implemented here as a command
+// so that we can support undo for these operations.
 //
 // Under no circumstances should this class or the command it creates be
 // used directly - it should be considered to be a private implementation
@@ -135,6 +136,9 @@ class ParameterisedHolderClassModificationCmd : public MPxCommand
 		
 		void storeClassParameterStates( ClassInfo &classInfo, const IECore::Parameter *parameter, const std::string &parentParameterPath, bool changedOnly );
 		void restoreClassParameterStates( const ClassInfo &classInfo, IECore::Parameter *parameter, const std::string &parentParameterPath );
+		void storeParametersWithNewValues( const IECore::Object *originalValue, const IECore::Object *newValue,  const std::string &parameterPath );
+		void setNodeValuesForParametersWithNewValues() const;
+		void setNodeValue( IECore::Parameter *parameter ) const;
 		void despatchSetParameterisedCallbacks() const;
 		void despatchClassSetCallbacks() const;
 		IECore::Parameter *parameterFromPath( IECore::ParameterisedInterface *parameterised, const std::string &path ) const;
@@ -146,6 +150,8 @@ class ParameterisedHolderClassModificationCmd : public MPxCommand
 		ClassInfo m_newClassInfo;
 		
 		IECore::ObjectPtr m_originalValues;
+		IECore::ObjectPtr m_newValues;
+		std::set<std::string> m_parametersWithNewValues;
 		
 		bool m_changingClass;
 		MString m_originalClassName;

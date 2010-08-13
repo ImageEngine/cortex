@@ -54,7 +54,7 @@ using namespace IECore;
 IECore::ObjectPtr ParameterisedHolderClassModificationCmd::g_undoValue = 0;
 
 ParameterisedHolderClassModificationCmd::ParameterisedHolderClassModificationCmd()
-	:	m_parameterisedHolder( 0 ), m_originalValues( 0 ), m_changingClass( false )
+	:	m_parameterisedHolder( 0 ), m_originalValues( 0 ), m_newValues( 0 ), m_changingClass( false )
 {
 }
 
@@ -121,7 +121,7 @@ MStatus ParameterisedHolderClassModificationCmd::doIt( const MArgList &argList )
 		return MS::kFailure;
 	}	
 		
-	// store the current (maya side) values of everything
+	// store the original (maya side) values of everything.
 	
 	ParameterisedInterface *parameterised = m_parameterisedHolder->getParameterisedInterface();
 	if( parameterised )
@@ -141,17 +141,23 @@ MStatus ParameterisedHolderClassModificationCmd::doIt( const MArgList &argList )
 		}
 	}
 	
-	// change the class or monkey with the class parameters as requested
+	// change the maya side class or monkey with the maya side class parameters as requested. then remember the new values
+	// of everything and which parameters are changing so we can push them in and out during undo and redo.
 	
 	if( m_changingClass )
 	{
 		m_parameterisedHolder->setParameterised( m_newClassName.asChar(), m_newClassVersion, m_newSearchPathEnvVar.asChar() );
+		m_newValues = m_parameterisedHolder->getParameterisedInterface()->parameters()->getValue()->copy();
+		storeParametersWithNewValues( m_originalValues, m_newValues, "" );
 		despatchSetParameterisedCallbacks();
 	}
 	else
 	{
+		m_newValues = parameterised->parameters()->getValue()->copy();
+		storeParametersWithNewValues( m_originalValues, m_newValues, "" );	
 		m_parameterisedHolder->updateParameterised();
 		storeClassParameterStates( m_newClassInfo, m_parameterisedHolder->getParameterisedInterface()->parameters(), "", false );
+		setNodeValuesForParametersWithNewValues();
 		despatchClassSetCallbacks();
 	}
 		
@@ -184,7 +190,7 @@ MStatus ParameterisedHolderClassModificationCmd::undoIt()
 	if( m_originalValues )
 	{
 		m_parameterisedHolder->getParameterisedInterface()->parameters()->setValue( m_originalValues->copy() );
-		m_parameterisedHolder->setNodeValues();
+		setNodeValuesForParametersWithNewValues();
 	}
 
 	// despatch callbacks only when the dust has settled
@@ -215,7 +221,9 @@ MStatus ParameterisedHolderClassModificationCmd::redoIt()
 	else
 	{
 		restoreClassParameterStates( m_newClassInfo, m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
+		m_parameterisedHolder->getParameterisedInterface()->parameters()->setValue( m_newValues->copy() );
 		m_parameterisedHolder->updateParameterised();
+		setNodeValuesForParametersWithNewValues();
 		despatchClassSetCallbacks();
 	}
 	
@@ -306,6 +314,101 @@ void ParameterisedHolderClassModificationCmd::restoreClassParameterStates( const
 		for( CompoundParameter::ParameterVector::const_iterator it = childParameters.begin(); it!=childParameters.end(); it++ )
 		{
 			restoreClassParameterStates( classInfo, constPointerCast<Parameter>( *it ), parameterPath );
+		}
+	}
+}
+
+void ParameterisedHolderClassModificationCmd::storeParametersWithNewValues( const IECore::Object *originalValue, const IECore::Object *newValue, const std::string &parameterPath )
+{
+	if( !(originalValue && newValue) )
+	{
+		// if either of the values isn't present then a parameter is appearing and disappearing due to
+		// Class*Parameter edits. we treat it as a parameter with a new value so that it'll get it's value
+		// transferred into maya appropriately.
+		m_parametersWithNewValues.insert( parameterPath );
+	}
+	else if( originalValue->typeId() != newValue->typeId() )
+	{
+		// types are different so there's clearly a new value involved
+		m_parametersWithNewValues.insert( parameterPath );
+	}
+	else if( originalValue->isInstanceOf( CompoundObject::staticTypeId() ) )
+	{
+		// compound value, representing several child parameters - attempt to recurse.
+		// we need to consider children of both the original and new parameters in case a parameter
+		// exists only on one side.
+		const CompoundObject *originalCompound = static_cast<const CompoundObject *>( originalValue );
+		const CompoundObject *newCompound = static_cast<const CompoundObject *>( newValue );
+		const CompoundObject::ObjectMap &originalChildren = originalCompound->members();
+		for( CompoundObject::ObjectMap::const_iterator it = originalChildren.begin(); it!=originalChildren.end(); it++ )
+		{
+			std::string childParameterPath;
+			if( parameterPath.size() )
+			{
+				childParameterPath = parameterPath + "." + it->first.value();
+			}
+			else
+			{
+				childParameterPath = it->first;
+			}
+			storeParametersWithNewValues( it->second, newCompound->member<Object>( it->first ), childParameterPath );
+		}
+		
+		const CompoundObject::ObjectMap &newChildren = static_cast<const CompoundObject *>( newValue )->members();
+		for( CompoundObject::ObjectMap::const_iterator it = newChildren.begin(); it!=newChildren.end(); it++ )
+		{
+			if( originalChildren.find( it->first )==originalChildren.end() )
+			{
+				// this is a child we didn't encounter in the first iteration.
+				std::string childParameterPath;
+				if( parameterPath.size() )
+				{
+					childParameterPath = parameterPath + "." + it->first.value();
+				}
+				else
+				{
+					childParameterPath = it->first;
+				}
+				storeParametersWithNewValues( 0, it->second, childParameterPath );
+			}
+		}
+	}
+	else
+	{
+		if( !originalValue->isEqualTo( newValue ) )
+		{
+			m_parametersWithNewValues.insert( parameterPath );
+		}
+	}
+}
+
+void ParameterisedHolderClassModificationCmd::setNodeValuesForParametersWithNewValues() const
+{
+	ParameterisedInterface *parameterised = m_parameterisedHolder->getParameterisedInterface();
+	for( std::set<std::string>::const_iterator it=m_parametersWithNewValues.begin(); it!=m_parametersWithNewValues.end(); it++ )
+	{
+		Parameter *p = parameterFromPath( parameterised, *it );
+		if( p )
+		{
+			setNodeValue( p );
+		}
+	}
+}
+
+void ParameterisedHolderClassModificationCmd::setNodeValue( IECore::Parameter *parameter ) const
+{
+	m_parameterisedHolder->setNodeValue( parameter );
+	
+	if( parameter->isInstanceOf( CompoundParameter::staticTypeId() ) )
+	{
+		// recurse to the children - this is the only reason this function
+		// is necessary as ParameterisedHolder::setNodeValue() doesn't recurse.
+		CompoundParameter *compoundParameter = static_cast<CompoundParameter *>( parameter );
+		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
+		for( CompoundParameter::ParameterVector::const_iterator it = childParameters.begin(); it!=childParameters.end(); it++ )
+		{
+			ParameterPtr childParameter = *it;
+			setNodeValue( childParameter );
 		}
 	}
 }

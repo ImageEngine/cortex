@@ -95,11 +95,21 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 
 		return _IECoreMaya._parameterisedHolderGetParameterised( self )
 
-	## Returns a context manager for use with the with statement, to edit the contents
-	# of ClassParameters and ClassVectorParameters in an undoable fashion.
+	## Returns a context manager for use with the with statement. This can be used to
+	# scope edits to Parameter values (including the classes held by ClassParameters and
+	# ClassVectorParameters) in such a way that they are automatically transferred onto
+	# the maya attributes and furthermore in an undoable fashion.
+	def parameterModificationContext( self ) :
+	
+		return _ParameterModificationContext( self )
+
+	## \deprecated
+	## \todo Remove for major version 6
 	def classParameterModificationContext( self ) :
 	
-		return _ClassParameterModificationContext( self )
+		warnings.warn( "Use parameterModificationContext() instead.", DeprecationWarning, 2 )
+
+		return self.parameterModificationContext()
 
 	## \deprecated
 	## \todo Remove for major version 6
@@ -122,6 +132,11 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	## Sets the values of the plugs representing the parameterised object,
 	# using the current values of the parameters. If the undoable parameter is True
 	# then this method is undoable using the standard maya undo mechanism.
+	# \note If this is applied to a node in a reference, then reference edits will
+	# be produced for every parameter plug, even if the values are not changing.
+	# You may prefer to set parameter values within a parameterModificationContext()
+	# instead as this automatically transfers the values to maya, while also avoiding
+	# the reference edit problem.
 	def setNodeValues( self, undoable=True ) :
 
 		if undoable :
@@ -271,7 +286,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			c( fnPH, parameter )
 				
 			
-class _ClassParameterModificationContext :
+class _ParameterModificationContext :
 
 	def __init__( self, fnPH ) :
 	
