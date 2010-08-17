@@ -392,7 +392,11 @@ class %s( IECore.BasicPreset ):
 			for p in data.keys() :
 			
 				if p not in parameter :
-					print "'%s' is missing from '%s' (%s)" % ( p, parameter.name, parameter )
+					IECore.msg( 
+						IECore.Msg.Level.Warning, 
+						"IECore.BasicPreset", 
+						"'%s' is missing from '%s' (%s)" % ( p, parameter.name, parameter ) 
+					)
 					continue
 				
 				self._applyHierarchy( parameterised, parameter[p], data[p], parameterList, invertList )
@@ -402,13 +406,17 @@ class %s( IECore.BasicPreset ):
 		try:
 			parameter.setValue( data["_value_"] )
 		except Exception, e:
-			print e
+			IECore.msg( IECore.Msg.Level.Warning, "IECore.BasicPreset", e )
 		
 	def _applyClassParameter( self, parameterised, parameter, data, parameterList=[], invertList=False ) :
 		
 		if not isinstance( parameter, IECore.ClassParameter ) :
-			print "Unable to restore to '%s' (%s) as it isnt a ClassParameter" \
-						% ( parameter.name, parameter )
+			IECore.msg(
+				IECore.Msg.Level.Warning, 
+				"IECore.BasicPreset", 
+				"Unable to restore to '%s' (%s) as it isnt a ClassParameter"
+					% ( parameter.name, parameter )
+			)
 			return
 		
 		c = parameter.getClass( True )
@@ -427,8 +435,12 @@ class %s( IECore.BasicPreset ):
 	def _applyClassVector( self, parameterised, parameter, data, parameterList=[], invertList=False ) :
 		
 		if not isinstance( parameter, IECore.ClassVectorParameter ) :
-			print "Unable to restore to '%s' (%s) as it isnt a ClassVectorParameter" \
+			IECore.msg(
+				IECore.Msg.Level.Warning, 
+				"IECore.BasicPreset",
+				"Unable to restore to '%s' (%s) as it isnt a ClassVectorParameter"
 					% ( parameter.name, parameter )
+			)
 			return
 		
 		overwrite = self.parameters()["overwriteMatchingComponents"].getTypedValue()
