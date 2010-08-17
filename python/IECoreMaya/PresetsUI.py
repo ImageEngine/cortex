@@ -268,7 +268,8 @@ class SaveUI( ParamSelectUI ) :
 			self._form,
 			label = "Save to:",
 			ann = self.__envVar,
-			cw = ( 1, 65 )
+			cw = ( 1, 65 ),
+			adj = 2,
 		)
 	
 		self.__name = maya.cmds.textFieldGrp(
@@ -494,7 +495,7 @@ class PresetInfo() :
 		maya.cmds.setParent( parent )
 	
 		self.__parent = parent	
-		self.__layout = maya.cmds.columnLayout( co=( "both", 5 ) )
+		self.__layout = maya.cmds.columnLayout( co=( "both", 5 ), adj=True )
 		
 		maya.cmds.setParent( oldParent )
 
@@ -520,7 +521,7 @@ class PresetInfo() :
 				parent = self.__layout,
 				label = name,
 				font = "boldLabelFont",
-				width = 160,
+				recomputeSize = True,
 				align = "left"
 			)
 		
@@ -530,7 +531,7 @@ class PresetInfo() :
 				descripWrap = IECore.StringUtil.wrap( meta["description"], wrapWidth )
 				lines = descripWrap.split( "\n" )
 				for l in lines:
-					maya.cmds.text( parent = self.__layout, label = l, font = "smallPlainLabelFont" )
+					maya.cmds.text( parent=self.__layout, label=l, font="smallPlainLabelFont", align="left" )
 			
 			maya.cmds.separator(
 				parent = self.__layout,
