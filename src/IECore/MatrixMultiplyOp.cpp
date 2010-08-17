@@ -245,5 +245,5 @@ void MatrixMultiplyOp::modify( Object * toModify, const CompoundObject * operand
 {
 	Data *data = static_cast< Data * >( toModify );
 	MultiplyFunctor func = { data, m_matrixParameter->getValue(), (Mode)m_modeParameter->getNumericValue() };
-	despatchTypedData< MultiplyFunctor, TypeTraits::IsVec3VectorTypedData >( data, func );
+	despatchTypedData< MultiplyFunctor, TypeTraits::IsFloatVec3VectorTypedData >( data, func );
 }

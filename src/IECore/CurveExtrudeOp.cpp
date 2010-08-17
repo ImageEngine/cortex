@@ -393,7 +393,7 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 
 			patchMesh->variables[ it->first ] = PrimitiveVariable(
 				it->second.interpolation,
-				despatchTypedData<VaryingFn, TypeTraits::IsInterpolableVectorTypedData>( it->second.data, varyingFn )
+				despatchTypedData<VaryingFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data, varyingFn )
 			);
 
 		}
@@ -404,7 +404,7 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 
 			patchMesh->variables[ it->first ] = PrimitiveVariable(
 				it->second.interpolation,
-				despatchTypedData<VertexFn, TypeTraits::IsInterpolableVectorTypedData>( it->second.data, vertexFn )
+				despatchTypedData<VertexFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data, vertexFn )
 			);
 
 		}

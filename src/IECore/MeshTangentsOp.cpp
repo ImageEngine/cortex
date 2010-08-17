@@ -395,7 +395,7 @@ void MeshTangentsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundO
 
 	CalculateTangents f( vertsPerFace->readable(), mesh->vertexIds()->readable(), uData->readable(), vData->readable(), uvIndicesData->readable(), orthoTangents );
 
-	despatchTypedData<CalculateTangents, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pData, f );
+	despatchTypedData<CalculateTangents, TypeTraits::IsFloatVec3VectorTypedData, HandleErrors>( pData, f );
 
 	mesh->variables[ uTangentPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvUTangentsData );
 	mesh->variables[ vTangentPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvVTangentsData );

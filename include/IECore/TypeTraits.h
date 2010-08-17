@@ -136,10 +136,22 @@ template<typename T> struct IsVec3 : public boost::false_type {};
 template<typename T> struct IsVec3< Imath::Vec3<T> > : public boost::true_type {};
 template<typename T> struct IsVec3< const T > : public IsVec3< T > {};
 
+/// IsFloatVec3
+template<typename T> struct IsFloatVec3 : public boost::false_type {};
+template<> struct IsFloatVec3< Imath::Vec3<float> > : public boost::true_type {};
+template<> struct IsFloatVec3< Imath::Vec3<double> > : public boost::true_type {};
+template<typename T> struct IsFloatVec3< const T > : public IsFloatVec3< T > {};
+
 /// IsVec2
 template<typename T> struct IsVec2 : public boost::false_type {};
 template<typename T> struct IsVec2< Imath::Vec2<T> > : public boost::true_type {};
 template<typename T> struct IsVec2< const T > : public IsVec2< T > {};
+
+/// IsFloatVec2
+template<typename T> struct IsFloatVec2 : public boost::false_type {};
+template<> struct IsFloatVec2< Imath::Vec2<float> > : public boost::true_type {};
+template<> struct IsFloatVec2< Imath::Vec2<double> > : public boost::true_type {};
+template<typename T> struct IsFloatVec2< const T > : public IsFloatVec2< T > {};
 
 /// IsVec
 template<typename T> struct IsVec : boost::mpl::or_< IsVec3<T>, IsVec2<T> > {};
@@ -181,11 +193,17 @@ template< typename T > struct IsVec2TypedData : boost::mpl::and_< IsTypedData<T>
 /// IsVec2VectorTypedData
 template< typename T > struct IsVec2VectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsVec2< typename VectorValueType<T>::type > > {};
 
+/// IsFloatVec2VectorTypedData
+template< typename T > struct IsFloatVec2VectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsFloatVec2< typename VectorValueType<T>::type > > {};
+
 /// IsVec3TypedData
 template< typename T > struct IsVec3TypedData : boost::mpl::and_< IsTypedData<T>, IsVec3< typename ValueType<T>::type > > {};
 
 /// IsVec3VectorTypedData
 template< typename T > struct IsVec3VectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsVec3< typename VectorValueType<T>::type > > {};
+
+/// IsFloatVec3VectorTypedData
+template< typename T > struct IsFloatVec3VectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsFloatVec3< typename VectorValueType<T>::type > > {};
 
 /// IsVecTypedData
 template< typename T > struct IsVecTypedData : boost::mpl::or_< IsVec2TypedData<T>, IsVec3TypedData<T> > {};
@@ -232,11 +250,20 @@ template< typename T > struct IsStrictlyInterpolable : Detail::IsInterpolableHel
 /// IsInterpolableTypedData
 template< typename T > struct IsInterpolableTypedData : boost::mpl::and_< IsTypedData<T>, IsInterpolable< typename ValueType<T>::type > > {};
 
+/// IsStrictlyInterpolableTypedData
+template< typename T > struct IsStrictlyInterpolableTypedData : boost::mpl::and_< IsTypedData<T>, IsStrictlyInterpolable< typename ValueType<T>::type > > {};
+
 /// IsInterpolableVectorTypedData
 template< typename T > struct IsInterpolableVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsInterpolable< typename VectorValueType<T>::type > > {};
 
+/// IsStrictlyInterpolableVectorTypedData
+template< typename T > struct IsStrictlyInterpolableVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsStrictlyInterpolable< typename VectorValueType<T>::type > > {};
+
 /// IsInterpolableSimpleTypedData
 template< typename T > struct IsInterpolableSimpleTypedData : boost::mpl::and_< IsSimpleTypedData<T>, IsInterpolable< typename ValueType<T>::type > > {};
+
+/// IsStrictlyInterpolableSimpleTypedData
+template< typename T > struct IsStrictlyInterpolableSimpleTypedData : boost::mpl::and_< IsSimpleTypedData<T>, IsStrictlyInterpolable< typename ValueType<T>::type > > {};
 
 /// IsSpline
 template<typename T, typename U = void > struct IsSpline : public boost::false_type {};

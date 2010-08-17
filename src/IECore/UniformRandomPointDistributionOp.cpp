@@ -386,5 +386,5 @@ ObjectPtr UniformRandomPointDistributionOp::doOperation( const CompoundObject * 
 	}
 
 	DistributeFn fn( this, mesh, m_numPointsParameter->getNumericValue(), m_seedParameter->getNumericValue(), sData, tData, addST );
-	return despatchTypedData< DistributeFn, TypeTraits::IsVec3VectorTypedData, DistributeFn::ErrorHandler >( mesh->variables["P"].data, fn );
+	return despatchTypedData< DistributeFn, TypeTraits::IsFloatVec3VectorTypedData, DistributeFn::ErrorHandler >( mesh->variables["P"].data, fn );
 }
