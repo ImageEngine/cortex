@@ -393,6 +393,7 @@ class %s( IECore.BasicPreset ):
 			
 				if p not in parameter :
 					print "'%s' is missing from '%s' (%s)" % ( p, parameter.name, parameter )
+					continue
 				
 				self._applyHierarchy( parameterised, parameter[p], data[p], parameterList, invertList )
 			
