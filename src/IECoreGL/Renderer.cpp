@@ -684,6 +684,7 @@ void IECoreGL::Renderer::coordinateSystem( const std::string &name )
 		primVars["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pointsData );
 		
 		attributeBegin();
+			setAttribute( "name", new StringData( "coordinateSystem:" + name ) );
 			setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
 			setAttribute( "gl:curvesPrimitive:glLineWidth", new FloatData( 2 ) );
 			curves( CubicBasisf::linear(), false, numVerticesData, primVars );
