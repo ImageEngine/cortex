@@ -406,7 +406,7 @@ class %s( IECore.BasicPreset ):
 		try:
 			parameter.setValue( data["_value_"] )
 		except Exception, e:
-			IECore.msg( IECore.Msg.Level.Warning, "IECore.BasicPreset", e )
+			IECore.msg( IECore.Msg.Level.Warning, "IECore.BasicPreset", str(e) )
 		
 	def _applyClassParameter( self, parameterised, parameter, data, parameterList=[], invertList=False ) :
 		
