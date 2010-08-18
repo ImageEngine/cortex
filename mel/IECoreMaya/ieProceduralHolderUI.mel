@@ -55,7 +55,6 @@ if( $ieProceduralHolderUIFixedLightLinking==0 )
 	$ieProceduralHolderUIFixedLightLinking = 1;
 }
 
-
 global proc AEieProceduralHolderTemplate( string $nodeName )
 {
 	editorTemplate -beginScrollLayout;
@@ -108,42 +107,8 @@ global proc AEieProceduralHolderTemplate( string $nodeName )
 	editorTemplate -endScrollLayout;	
 }
 
-/// Allows other plugins to append to the right-click menu
-global proc ieProceduralHolderRegisterDagMenuProc( string $procName )
-{
-	global string $ieProceduralHolderDagMenuProcs[];
-	
-	if ( !stringArrayContains( $procName, $ieProceduralHolderDagMenuProcs ) )
-	{	
-		$ieProceduralHolderDagMenuProcs[size($ieProceduralHolderDagMenuProcs)] = $procName;
-	}
-}
-
-global proc ieProceduralHolderDeregisterDagMenuProc( string $procName )
-{
-	global string $ieProceduralHolderDagMenuProcs[];
-	
-	$ieProceduralHolderDagMenuProcs = stringArrayRemove( { $procName }, $ieProceduralHolderDagMenuProcs );	
-}
-
 global proc ieProceduralHolderDagMenuProc( string $parent, string $child ) 
 {
-	global string $ieProceduralHolderDagMenuProcs[];
- 
-	setParent -m $parent; 
-	menuItem -l "Component" -rp "N" -c ("doMenuComponentSelection(\"" + $child + "\", \"facet\");");
-	menuItem -l "Object" -rp "W" -c ( 
-		"hilite -unHilite " + $child 
-		+ "; string $selection[] = `ls -sl`;" 
-		+ "changeSelectMode -object; select -r $selection;" );
-	
-	string $cmd;
-	for ( $cmd in $ieProceduralHolderDagMenuProcs )
-	{
-		$cmd += "(\"" + $parent + "\", \"" + $child + "\")";
-		setParent -m $parent; 		
-		catch(`eval($cmd)`);
-		setParent -m $parent; 
-	}
+	python( "import IECoreMaya; IECoreMaya.ProceduralHolderUI._dagMenu( '" + $parent + "', '" + $child + "' )" );
 }
 
