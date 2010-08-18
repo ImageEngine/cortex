@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -184,6 +184,30 @@ class LayeredDictTest( unittest.TestCase ) :
 		self.assertEqual( d.get( "i", None ), IECore.IntData( 1 ) )
 		self.assertEqual( d.get( "e", None ), 40 )
 		self.assertEqual( d.get( "x", 11 ), 11 )
+		
+	def testLayerEditing( self ) :
+	
+		dict1 = {
+			"a" : 10,
+			"e" : 40,
+		}
+
+		dict2 = IECore.CompoundObject(
+			{
+				"a" : IECore.StringData( "hello" ),
+				"b" : IECore.FloatData( 10 ),
+				"i" : IECore.IntData( 1 )
+			}
+		)
+		
+		layers = [ dict1, dict2 ]
+		d = IECore.LayeredDict( layers )
+
+		self.failUnless( d.layers is layers )
+		
+		self.assertEqual( d["a"], 10 )
+		layers.insert( 0, { "a" : 100 } )
+		self.assertEqual( d["a"], 100 )
 
 if __name__ == "__main__":
     unittest.main()

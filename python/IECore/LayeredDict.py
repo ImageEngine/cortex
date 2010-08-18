@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,8 +41,10 @@ class LayeredDict :
 
 	## Constructs a new layered dictionary :
 	#
-	# dict : a list of dictionaries to layer. dicts[0] has
-	# highest precedence and dicts[-1] lowest.
+	# dicts : a list of dictionaries to layer. dicts[0] has
+	# highest precedence and dicts[-1] lowest. after construction
+	# this list can be accessed as LayeredDict.layers, and may be
+	# modified in place to change the layering.
 	#
 	# dictClasses : a set of classes to consider as dictionary types.
 	# this comes into play when layeredDict["key"] yields an object of
@@ -55,18 +57,18 @@ class LayeredDict :
 		for d in dicts :
 			assert( d.__class__ in dictClasses )
 
-		self.__dicts = dicts
+		self.layers = dicts
 
 		assert( isinstance( dictClasses, set ) )
 		self.__dictClasses = dictClasses
 
 	def __getitem__( self, key ) :
 
-		for i in range( 0, len( self.__dicts ) ) :
+		for i in range( 0, len( self.layers ) ) :
 
-			if key in self.__dicts[i] :
+			if key in self.layers[i] :
 
-				value = self.__dicts[i][key]
+				value = self.layers[i][key]
 				if not value.__class__ in self.__dictClasses :
 
 					return value
@@ -75,9 +77,9 @@ class LayeredDict :
 
 					# need to return a LayeredDict
 					dicts = [ value ]
-					for j in range( i + 1, len( self.__dicts ) ) :
-						if key in self.__dicts[j] :
-							dicts.append( self.__dicts[j][key] )
+					for j in range( i + 1, len( self.layers ) ) :
+						if key in self.layers[j] :
+							dicts.append( self.layers[j][key] )
 
 					return LayeredDict( dicts )
 
@@ -85,9 +87,9 @@ class LayeredDict :
 
 	def __contains__( self, key ) :
 
-		for i in range( 0, len( self.__dicts ) ) :
+		for i in range( 0, len( self.layers ) ) :
 
-			if key in self.__dicts[i] :
+			if key in self.layers[i] :
 				return True
 
 		return False
@@ -95,7 +97,7 @@ class LayeredDict :
 	def keys( self ) :
 
 		allKeys = set()
-		for d in self.__dicts :
+		for d in self.layers :
 
 			allKeys.update( d.keys() )
 
