@@ -54,6 +54,16 @@ struct VectorTraits
 	static void set( T &v, unsigned int i, BaseType x ) { v[i] = x; };
 };
 
+/// Specialisation for int type to allow its use as a 1d vector
+template<>
+struct VectorTraits<int>
+{
+	typedef int BaseType;
+	static unsigned int dimensions() { return 1; };
+	static int get( const int &v, unsigned int i ) { return v; };
+	static void set( int &v, unsigned int i, int x ) { v = x; };
+};
+
 /// Specialisation for float type to allow its use as a 1d vector
 template<>
 struct VectorTraits<float>
