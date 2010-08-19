@@ -1904,6 +1904,7 @@ if doConfigure :
 		otlPath = "contrib/IECoreHoudini/otls/ieCoreHoudini"
 		otlTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$IECORE_NAME" ) ) + ".otl"
 		otlCommand = houdiniPluginEnv.Command( otlTarget, otlPath, "$HOUDINI_BIN_PATH/hotl -c %s $TARGET" % otlPath )
+		houdiniPluginEnv.Depends( otlTarget, glob.glob( otlPath + "/*" ) + glob.glob( otlPath + "/*/*" ) )
 		otlInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIOTL_DIR", source=[ otlTarget ] )
 		houdiniPluginEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIOTL_DIR"] ) )
 		houdiniPluginEnv.Alias( "install", otlInstall )
