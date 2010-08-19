@@ -113,13 +113,20 @@ IFFHairReader::~IFFHairReader()
 
 bool IFFHairReader::canRead( const std::string &fileName )
 {
-	IFFFile iffFile( fileName );
-	IFFFile::Chunk::ChunkIterator itBegin = iffFile.root()->childrenBegin();
-	
-	if ( itBegin->isGroup() && itBegin->groupName().id() == IFFFile::Tag( "CACH" ).id() )
+	try
 	{
-		return true;
+		IFFFile iffFile( fileName );
+		IFFFile::Chunk::ChunkIterator itBegin = iffFile.root()->childrenBegin();
+	
+		if ( itBegin->isGroup() && itBegin->groupName().id() == IFFFile::Tag( "CACH" ).id() )
+		{
+			return true;
+		}
 	}
+	catch( ... )
+	{
+	}
+	
 	return false;
 }
 

@@ -120,6 +120,8 @@ class Reader : public Op
 		/// const instance of one of these in your class, it will call registerReader() for you when
 		/// it is constructed. It assumes your Reader class has a constructor taking a fileName as
 		/// const std::string and also has a static canRead function matching the CanReadFn type.
+		/// Please note that it is essential that the canRead function simply returns true or false
+		/// and does not throw exceptions under any circumstances.
 		template<class T>
 		class ReaderDescription
 		{

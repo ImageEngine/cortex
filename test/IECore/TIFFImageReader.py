@@ -36,6 +36,9 @@ import unittest
 import glob
 import sys
 import random
+import shutil
+import os
+
 from IECore import *
 
 class TestTIFFReader(unittest.TestCase):
@@ -399,7 +402,26 @@ class TestTIFFReader(unittest.TestCase):
 		)
 
 		self.failIf( res.value )
-
+		
+	def testReadWithIncorrectExtension( self ) :
+	
+		shutil.copyfile( "test/IECore/data/tiff/uvMap.512x256.8bit.tif", "test/IECore/data/tiff/uvMap.512x256.8bit.dpx" )
+		
+		# should be able to infer a correct reader even though the extension is incorrect
+		r = Reader.create( "test/IECore/data/tiff/uvMap.512x256.8bit.dpx" )
+		self.failUnless( isinstance( r, TIFFImageReader ) )
+		
+		i = r.read()
+		self.failUnless( isinstance( i, ImagePrimitive ) )
+			
+	def tearDown( self ) :
+	
+		for f in [
+			 "test/IECore/data/tiff/uvMap.512x256.8bit.dpx",
+		] :
+			if os.path.exists( f ) :
+				os.remove( f )
+		
 if __name__ == "__main__":
 	unittest.main()
 
