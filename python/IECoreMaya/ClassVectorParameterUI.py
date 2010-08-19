@@ -821,6 +821,21 @@ class ChildUI( IECoreMaya.UIElement ) :
 				pre = 2
 			)
 			maya.cmds.connectControl( control, parameterPlugPath )
+			
+		elif isinstance( parameter, IECore.IntParameter ) :
+
+			kw = {}
+			if parameter.hasMinValue() :
+				kw["minValue"] = parameter.minValue
+			if parameter.hasMaxValue() :
+				kw["maxValue"] = parameter.maxValue
+
+			control = maya.cmds.intField(
+				annotation = annotation,
+				width = 45,
+				**kw
+			)
+			maya.cmds.connectControl( control, parameterPlugPath )	
 
 		elif isinstance( parameter, IECore.Color3fParameter ) :
 
