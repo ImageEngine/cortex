@@ -162,6 +162,18 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 	
 		self.removeParameter( parameterName )
 		del self.__namesToInstances[parameterName]
+	
+	## Returns a good name for a new parameter. It's not compulsory to use this
+	# function (any unique name is fine) but it can be useful to keep a consistent
+	# naming convention, and it removes the need to come up with unique names some other
+	# way.
+	def newParameterName( self, prefix="p" ) :
+	
+		existingNames = set( self.keys() )
+		for i in range( 0, len( existingNames ) + 1 ) :
+			parameterName = "%s%d" % ( prefix, i )
+			if parameterName not in existingNames :
+				return parameterName
 
 	@staticmethod
 	def _serialise( parameter ) :
