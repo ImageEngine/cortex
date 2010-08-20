@@ -35,6 +35,7 @@
 #include "maya/MFnExpression.h"
 #include "maya/MFnDagNode.h"
 #include "maya/MDGModifier.h"
+#include "maya/MFnAttribute.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/SimpleTypedData.h"
@@ -183,6 +184,7 @@ MPlug ParameterHandler::finishCreating( IECore::ConstParameterPtr parameter, MPl
 		}
 	}
 	
+	
 	return plug;
 }
 
@@ -192,4 +194,30 @@ MPlug ParameterHandler::finishCreating( IECore::ConstParameterPtr parameter, MOb
 	fnNode.addAttribute( attribute );
 	MPlug plug( node, attribute );
 	return finishCreating( parameter, plug );
+}
+
+MStatus ParameterHandler::finishUpdating( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+{
+	MStatus status = MS::kSuccess;
+	
+	IECore::ConstCompoundObjectPtr mayaUserData = parameter->userData()->member<IECore::CompoundObject>( "maya" );
+	if( mayaUserData )
+	{
+		IECore::ConstBoolDataPtr storable = mayaUserData->member<IECore::BoolData>( "storable" );
+		if( storable )
+		{
+			MFnAttribute fnA = MFnAttribute( plug.attribute() );
+			status = fnA.setStorable( storable->readable() );
+		}
+	}
+	
+	return status;
+}
+
+MStatus ParameterHandler::finishUpdating( IECore::ConstParameterPtr parameter, MObject &attribute, MObject &node ) const
+{
+	MFnDependencyNode fnNode( node );
+	fnNode.addAttribute( attribute );
+	MPlug plug( node, attribute );
+	return finishUpdating( parameter, plug );
 }

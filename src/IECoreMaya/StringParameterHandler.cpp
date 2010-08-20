@@ -87,7 +87,6 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 		if (valueProvider && valueProvider->readable() == "connectedNodeName")
 		{
 			/// Nothing to do.
-			return MS::kSuccess;
 		}
 	}
 
@@ -98,7 +97,7 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 	// will be saved correctly (if we set the default to "X" and the value was "X", maya won't save the
 	// default or the value at all, and we end up with a value of "" on scene reload).
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 MPlug StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const

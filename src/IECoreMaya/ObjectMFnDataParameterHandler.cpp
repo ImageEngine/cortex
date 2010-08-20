@@ -87,7 +87,7 @@ MStatus ObjectMFnDataParameterHandler<T, D>::doUpdate( IECore::ConstParameterPtr
 	// when saved and loaded.
 	fnGAttr.addAccept( DummyDataId );
 	
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 template<typename T, MFnData::Type D>

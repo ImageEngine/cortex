@@ -174,7 +174,12 @@ MStatus ClassParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MP
 		return MS::kFailure;
 	}
 
-	return storeClass( parameter, plug );
+	if( !storeClass( parameter, plug ) )
+	{
+		return MS::kFailure;
+	}
+	
+	return finishUpdating( parameter, plug );
 }
 
 MPlug ClassParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const

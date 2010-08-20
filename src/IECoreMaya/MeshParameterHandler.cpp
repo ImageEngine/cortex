@@ -66,7 +66,7 @@ MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPl
 
 	fnGAttr.addAccept( MFnData::kMesh );
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 MPlug MeshParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const

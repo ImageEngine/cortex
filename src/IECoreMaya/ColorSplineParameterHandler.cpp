@@ -86,7 +86,7 @@ MStatus ColorSplineParameterHandler<S>::doUpdate( IECore::ConstParameterPtr para
 		return MS::kFailure;
 	}
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 template<typename S>

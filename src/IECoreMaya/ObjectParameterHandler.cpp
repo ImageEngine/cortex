@@ -86,7 +86,7 @@ MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 		}
 	}
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 MPlug ObjectParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const

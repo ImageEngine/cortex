@@ -57,7 +57,7 @@ MStatus CompoundParameterHandler::doUpdate( IECore::ConstParameterPtr parameter,
 		return MS::kFailure;
 	}
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 MPlug CompoundParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const

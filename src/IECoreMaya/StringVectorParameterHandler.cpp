@@ -81,7 +81,7 @@ MStatus StringVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parame
 
 	fnTAttr.setDefault( MFnStringArrayData().create( defaultValue ) );
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 MPlug StringVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const

@@ -1523,7 +1523,47 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fnOH.setParameterised( op )
 		
 		self.failIf( cmds.objExists( vPlugPath ) )
+	
+	def testStorable( self ) :
 		
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameters( [
+			
+			IECore.BoolParameter(
+				name = "a",
+				description = "",
+				defaultValue = True,
+			),
+			IECore.IntParameter(
+				name = "b",
+				description = "",
+				defaultValue = 1,
+				userData = IECore.CompoundObject( { "maya" : { "storable" : IECore.BoolData( False ) } } )
+			),
+			IECore.StringParameter(
+				name = "c",
+				description = "",
+				defaultValue = "",
+				userData = IECore.CompoundObject( { "maya" : { "storable" : IECore.BoolData( True ) } } )
+			),
+		
+		] )
+		
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		fnOH.setParameterised( op )
+		
+		self.assertEqual( cmds.attributeQuery( fnOH.parameterPlugPath( op["a"] ).split( "." )[-1], storable=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( fnOH.parameterPlugPath( op["b"] ).split( "." )[-1], storable=True, node=opNode ), False )
+		self.assertEqual( cmds.attributeQuery( fnOH.parameterPlugPath( op["c"] ).split( "." )[-1], storable=True, node=opNode ), True )
+	
+		with fnOH.parameterModificationContext() :
+			op["a"].userData()["maya"] = IECore.CompoundObject( { "storable" : IECore.BoolData( False ) } )
+			op["b"].userData()["maya"]["storable"]  = IECore.BoolData( True )
+		
+		self.assertEqual( cmds.attributeQuery( fnOH.parameterPlugPath( op["a"] ).split( "." )[-1], storable=True, node=opNode ), False )
+		self.assertEqual( cmds.attributeQuery( fnOH.parameterPlugPath( op["b"] ).split( "." )[-1], storable=True, node=opNode ), True )		
+				
 	def tearDown( self ) :
 
 		for f in [

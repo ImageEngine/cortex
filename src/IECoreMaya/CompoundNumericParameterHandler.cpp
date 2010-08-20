@@ -165,7 +165,7 @@ MStatus CompoundNumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr 
 		fnNAttr.setChannelBox( channelBox );
 	}
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 template<typename T>

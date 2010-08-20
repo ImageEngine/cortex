@@ -109,7 +109,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 		fnNAttr.setChannelBox( channelBox );
 	}
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 template<typename T>

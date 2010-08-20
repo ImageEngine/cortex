@@ -203,7 +203,12 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 	MFnIntArrayData fnIAD( classVersionsObject );
 	MIntArray classVersions = fnIAD.array();
 
-	return storeClasses( parameter, plug );
+	if( !storeClasses( parameter, plug ) )
+	{
+		return MS::kFailure;
+	}
+	
+	return finishUpdating( parameter, plug );
 }
 
 MStatus ClassVectorParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPtr parameter )

@@ -97,7 +97,7 @@ MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPl
 		fnNAttr.setChannelBox( channelBox );
 	}
 	
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 MPlug BoolParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const

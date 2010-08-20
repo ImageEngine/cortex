@@ -131,7 +131,7 @@ MStatus BoxParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, M
 		
 	}
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 template<typename T>

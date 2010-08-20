@@ -79,7 +79,7 @@ MStatus ObjectVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parame
 		return MS::kFailure;
 	}
 
-	return MS::kSuccess;
+	return finishUpdating( parameter, plug );
 }
 
 MStatus ObjectVectorParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
