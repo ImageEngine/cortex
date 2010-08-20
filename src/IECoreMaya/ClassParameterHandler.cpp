@@ -249,9 +249,28 @@ MStatus ClassParameterHandler::storeClass( IECore::ConstParameterPtr parameter, 
 		int classVersion = boost::python::extract<int>( classInfo[2] );
 		std::string searchPathEnvVar = boost::python::extract<std::string>( classInfo[3] );
 	
-		plug.child( 0 ).setString( className.c_str() );
-		plug.child( 1 ).setInt( classVersion );
-		plug.child( 2 ).setString( searchPathEnvVar.c_str() );
+		// only set the plug values if the new value is genuinely different, as otherwise
+		// we end up generating unwanted reference edits.
+		MPlug classNamePlug = plug.child( 0 );
+		MString storedClassName = classNamePlug.asString();
+		if( storedClassName != className.c_str() )
+		{
+			classNamePlug.setString( className.c_str() );
+		}
+		
+		MPlug classVersionPlug = plug.child( 1 );
+		int storedClassVersion = classVersionPlug.asInt();
+		if( storedClassVersion != classVersion )
+		{
+			classVersionPlug.setInt( classVersion );
+		}
+		
+		MPlug searchPathEnvVarPlug = plug.child( 2 );
+		MString storedSearchPathEnvVar = searchPathEnvVarPlug.asString();
+		if( storedSearchPathEnvVar != searchPathEnvVar.c_str() )
+		{
+			searchPathEnvVarPlug.setString( searchPathEnvVar.c_str() );
+		}
 	}
 	catch( boost::python::error_already_set )
 	{

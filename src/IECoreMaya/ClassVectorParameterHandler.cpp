@@ -282,32 +282,71 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 		boost::python::object pythonParameter( IECore::constPointerCast<IECore::Parameter>( parameter ) );
 		boost::python::object classes = pythonParameter.attr( "getClasses" )( true );
 	
+		MStringArray storedParameterNames;
+		MStringArray storedClassNames;
+		MIntArray storedClassVersions;
+		currentClasses( plug, storedParameterNames, storedClassNames, storedClassVersions );
+		unsigned storedParameterNamesLength = storedParameterNames.length();
+		unsigned storedClassNamesLength = storedClassNames.length();
+		unsigned storedClassVersionsLength = storedClassVersions.length();
+		
 		MStringArray parameterNames;
 		MStringArray classNames;
 		MIntArray classVersions;
 	
 		size_t l = IECorePython::len( classes );
+		bool parameterNamesChanged = l != storedParameterNamesLength;
+		bool classNamesChanged = l != storedClassNamesLength;
+		bool classVersionsChanged = l != storedClassVersionsLength;
 		for( size_t i=0; i<l; i++ )
 		{
 			object cl = classes[i];
+			
 			MString parameterName = boost::python::extract<const char *>( cl[1] )();
 			parameterNames.append( parameterName );
+			if( i < storedParameterNamesLength && parameterName != storedParameterNames[i] )
+			{
+				parameterNamesChanged = true;
+			}
+			
 			MString className = boost::python::extract<const char *>( cl[2] )();
 			classNames.append( className );
-			classVersions.append( boost::python::extract<int>( cl[3] ) );
+			if( i < storedClassNamesLength && className != storedClassNames[i] )
+			{
+				classNamesChanged = true;
+			}
+			
+			int classVersion = boost::python::extract<int>( cl[3] );
+			classVersions.append( classVersion );
+			if( i < storedClassVersionsLength && classVersion != storedClassVersions[i] )
+			{
+				classVersionsChanged = true;
+			}
 		}
 	
 		MFnStringArrayData fnSAD;
 		MFnIntArrayData fnIAD;
 	
-		MObject parameterNamesObject = fnSAD.create( parameterNames );
-		plug.child( 0 ).setValue( parameterNamesObject );
+		// only set the plug values if the new value is genuinely different, as otherwise
+		// we end up generating unwanted reference edits.
+		if( parameterNamesChanged )
+		{
+			MObject parameterNamesObject = fnSAD.create( parameterNames );
+			plug.child( 0 ).setValue( parameterNamesObject );
+		}
 		
-		MObject classNamesObject = fnSAD.create( classNames );
-		plug.child( 1 ).setValue( classNamesObject );
+		if( classNamesChanged )
+		{
+			MObject classNamesObject = fnSAD.create( classNames );
+			plug.child( 1 ).setValue( classNamesObject );
+		}
 		
-		MObject classVersionsObject = fnIAD.create( classVersions );
-		plug.child( 2 ).setValue( classVersionsObject );
+		if( classVersionsChanged )
+		{
+			MObject classVersionsObject = fnIAD.create( classVersions );
+			plug.child( 2 ).setValue( classVersionsObject );
+		}
+		
 	}
 	catch( boost::python::error_already_set )
 	{

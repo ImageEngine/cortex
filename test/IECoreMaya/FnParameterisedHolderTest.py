@@ -541,6 +541,98 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 1 )
 		
+	def testExcessClassParameterReferenceEdits( self ) :
+	
+		# Save a scene with a ClassParameter in it
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		with fnOH.parameterModificationContext() :
+			
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
+			
+		self.assertEqual( op["cp"].getClass( True )[1:], ( "maths/multiply", 1, "IECORE_OP_PATHS" ) )
+		
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "referenceEditCounts.ma" ) )
+		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		# And reference it back in to a new scene
+		
+		maya.cmds.file( new = True, force = True )
+		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
+		
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
+
+		# Make a modification which does nothing and check that there are no reference edits
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
+		with fnOH.parameterModificationContext() :
+			pass
+			
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
+		
+		# Make a modification which happens to set things to the values they're already at and
+		# check that there are no reference edits
+		
+		op = fnOH.getOp()
+		with fnOH.parameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
+			
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
+		
+	def testExcessClassVectorParameterReferenceEdits( self ) :
+	
+		# Save a scene with a ClassParameter in it
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		with fnOH.parameterModificationContext() :
+			
+			op["cv"].setClasses(
+			
+				[
+					( "mult", "maths/multiply", 1 ),
+					( "coIO", "compoundObjectInOut", 1 ),
+				]
+				
+			)
+					
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "referenceEditCounts.ma" ) )
+		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		# And reference it back in to a new scene
+		
+		maya.cmds.file( new = True, force = True )
+		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
+		
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
+
+		# Make a modification which does nothing and check that there are no reference edits
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
+		with fnOH.parameterModificationContext() :
+			pass
+			
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )	
+		
+		# Make a modification which happens to set things to the values they're already at and
+		# check that there are no reference edits
+		
+		with fnOH.parameterModificationContext() :
+			
+			op["cv"].setClasses(
+			
+				[
+					( "mult", "maths/multiply", 1 ),
+					( "coIO", "compoundObjectInOut", 1 ),
+				]
+				
+			)
+			
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )			
+		
 	def testSetParameterValuesUsingContext( self ) :
 	
 		fnOH = IECoreMaya.FnOpHolder.create( "testOp", "maths/multiply", 2 )
