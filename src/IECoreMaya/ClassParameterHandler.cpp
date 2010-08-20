@@ -205,12 +205,17 @@ MPlug ClassParameterHandler::doCreate( IECore::ConstParameterPtr parameter, cons
 	
 	MPlug result = finishCreating( parameter, attribute, node );
 	
-	if( storeClass( parameter, result ) )
+	if( !storeClass( parameter, result ) )
 	{
-		return result;
+		return MPlug(); // failure
 	}
 	
-	return MPlug(); // failure
+	if( !finishUpdating( parameter, result ) )
+	{
+		return MPlug(); // failure
+	}
+	
+	return result;
 }
 
 MStatus ClassParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const

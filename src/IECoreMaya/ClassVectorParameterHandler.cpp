@@ -242,12 +242,17 @@ MPlug ClassVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter
 	
 	MPlug result = finishCreating( parameter, attribute, node );
 	
-	if( storeClasses( parameter, result ) )
+	if( !storeClasses( parameter, result ) )
 	{
-		return result;
+		return MPlug(); // failure
 	}
 	
-	return MPlug(); // failure
+	if( !finishUpdating( parameter, result ) )
+	{
+		return MPlug(); // failure
+	}
+		
+	return result; 
 }
 
 MStatus ClassVectorParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const

@@ -70,7 +70,15 @@ MPlug CompoundParameterHandler::doCreate( IECore::ConstParameterPtr parameter, c
 
 	MFnMessageAttribute fnMAttr;
 	MObject attribute = fnMAttr.create( plugName, plugName );
-	return finishCreating( parameter, attribute, node );
+	
+	MPlug result = finishCreating( parameter, attribute, node );
+	
+	if( !finishUpdating( parameter, result ) )
+	{
+		return MPlug();
+	}	
+	
+	return result;
 }
 
 MStatus CompoundParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const

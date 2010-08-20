@@ -100,7 +100,14 @@ MPlug FloatSplineParameterHandler<S>::doCreate( IECore::ConstParameterPtr parame
 	MRampAttribute fnRAttr;
 	MObject attribute = fnRAttr.createCurveRamp( plugName, plugName );
 
-	return finishCreating( parameter, attribute, node );
+	MPlug result = finishCreating( parameter, attribute, node );
+	
+	if( !finishUpdating( parameter, result ) )
+	{
+		return MPlug();
+	}	
+	
+	return result;
 }
 
 template<typename S>

@@ -128,7 +128,14 @@ MPlug StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, con
 	MFnTypedAttribute fnTAttr;
 	MObject attribute = fnTAttr.create( plugName, plugName, MFnData::kString /* see comments in stringUpdate for why we don't specify a default here */ );
 	
-	return finishCreating( parameter, attribute, node );
+	MPlug result = finishCreating( parameter, attribute, node );
+	
+	if( !finishUpdating( parameter, result ) )
+	{
+		return MPlug();
+	}	
+	
+	return result;
 }
 
 MStatus StringParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const

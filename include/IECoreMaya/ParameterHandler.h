@@ -106,7 +106,8 @@ class ParameterHandler : public IECore::RefCounted
 		/// Performs common actions which all handlers should apply to updated plugs, including
 		/// the setting of any Attribute properties as requested in the parameter userData. 
 		/// Currently, only 'storable' is supported.
-		/// This function should be called at the end of all doUpdate() implementations.
+		/// This function should be called at the end of all doUpdate() implementations, and doCreate()
+		/// if doUpdate() isn't called as part of doCreate()
 		MStatus finishUpdating( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		/// An overload for the above function which accepts an attribute for which a plug needs to be made.
 		MStatus finishUpdating( IECore::ConstParameterPtr parameter, MObject &attribute, MObject &node ) const;
