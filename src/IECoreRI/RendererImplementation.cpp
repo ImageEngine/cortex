@@ -1194,11 +1194,49 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 
 	if( interpolation=="catmullClark" )
 	{
-		char *tags[] = { "interpolateboundary" };
-		int nargs[] = { 0, 0 };
+		int numNames = 1;
+		const char *names[] = { "interpolateboundary", 0, 0, 0, 0, 0 };
+		int defaultNArgs[] = { 0, 0 };
+		const int *nArgs = defaultNArgs;
+		const float *floats = 0;
+		const int *integers = 0;
+		
+		IECore::PrimitiveVariableMap::const_iterator tagIt = primVars.find( "tags" );
+		if( tagIt != primVars.end() )
+		{
+			const CompoundData *tagsData = runTimeCast<const CompoundData>( tagIt->second.data.get() );
+			if( tagsData )
+			{
+				const StringVectorData *namesData = tagsData->member<const StringVectorData>( "names" );
+				const IntVectorData *nArgsData = tagsData->member<const IntVectorData>( "nArgs" );
+				const FloatVectorData *floatsData = tagsData->member<const FloatVectorData>( "floats" );
+				const IntVectorData *integersData = tagsData->member<const IntVectorData>( "integers" );
+				if( namesData && nArgsData && floatsData && integersData )
+				{
+					// we only have room for 6 names in the array above as we're trying to avoid having to dynamically allocate
+					// any memory here - should be ok as there are only 5 tag types currently specified by 3delight.
+					numNames = std::min( (int)namesData->readable().size(), 6 );
+					for( int i=0; i<numNames; i++ )
+					{
+						names[i] = namesData->readable()[i].c_str();
+					}
+					nArgs = &(nArgsData->readable()[0]);
+					floats = &(floatsData->readable()[0]);
+					integers = &(integersData->readable()[0]);
+				}
+				else
+				{
+					msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Primitive variable \"tags\" does not contain the required members - ignoring." );
+				}
+			}
+			else
+			{
+				msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Primitive variable \"tags\" is not of type CompoundData - ignoring." );
+			}
+		}
 
 		RiSubdivisionMeshV( "catmull-clark", vertsPerFace->readable().size(), (int *)&vertsPerFace->readable()[0], (int *)&vertIds->readable()[0],
-			1, tags, nargs, 0, 0,
+			numNames, names, (int *)nArgs, (int *)integers, (float *)floats,
 			pv.n(), pv.tokens(), pv.values() );
 
 		return;

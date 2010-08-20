@@ -171,7 +171,15 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 		case StringDataTypeId :
 			return "string";
 		default :
-			msg( Msg::Warning, "PrimitiveVariableList::type", format( "Variable \"%s\" has unsupported datatype \"%s\"." ) % name % d->typeName() );
+			if( !( name=="tags" && t==CompoundDataTypeId) )
+			{
+				msg( Msg::Warning, "PrimitiveVariableList::type", format( "Variable \"%s\" has unsupported datatype \"%s\"." ) % name % d->typeName() );
+			}
+			else
+			{
+				// not complaining for "tags" of type CompoundData as this currently has
+				// special meaning to the Renderer::mesh() method.
+			}
 			return 0;
 	}
 }

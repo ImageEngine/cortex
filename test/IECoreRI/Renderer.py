@@ -211,6 +211,40 @@ class RendererTest( unittest.TestCase ) :
 		self.failUnless( 'vertex point P' in l )
 		self.failUnless( 'facevarying float s' in l )
 		self.failUnless( 'facevarying float t' in l )
+		
+	def testSubDivTags( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/subdiv.rib" )
+
+		r.display( "test", "idisplay", "rgba", {} )
+
+		r.worldBegin()
+
+		t = M44f()
+		t.translate( V3f( 0, 0, 10 ) )
+		r.concatTransform( t )
+		m = ObjectReader( "test/IECoreRI/data/openSubDivCube.cob" ).read()
+		m["tags"] = PrimitiveVariable(
+			PrimitiveVariable.Interpolation.Constant,
+			CompoundData( {
+				"names" : StringVectorData( [ "interpolateboundary", "facevaryinginterpolateboundary" ] ),
+				"nArgs" : IntVectorData( [ 1, 0, 1, 0 ] ),
+				"floats" : FloatVectorData( [] ),
+				"integers" : IntVectorData( [ 1, 0 ] ),
+			} )
+		)
+		
+		m.render( r )
+
+		r.worldEnd()
+
+		l = "".join( file( "test/IECoreRI/output/subdiv.rib" ).readlines() ).replace( "\n", "" )
+		
+		self.failUnless( 'SubdivisionMesh "catmull-clark" [ 4 4 4 4 4 ]' in l )
+		self.failUnless( '[ "interpolateboundary" "facevaryinginterpolateboundary" ] [ 1 0 1 0 ] [ 1 0 ] [ ]' in l )
+		self.failUnless( 'vertex point P' in l )
+		self.failUnless( 'facevarying float s' in l )
+		self.failUnless( 'facevarying float t' in l )
 
 	def testCommands( self ) :
 

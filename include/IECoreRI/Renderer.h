@@ -238,6 +238,15 @@ class Renderer : public IECore::Renderer
 
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );
 		/// Renders interpolation types of "linear" as RiPointsGeneralPolygons and "catmullClark" as RiSubdivisionMesh.
+		/// Supports an optional "tags" primitive variable of type CompoundData and interpolation Constant, which is used to specify tags
+		/// for the RiSubdivisionMesh call. This should contain the following children :
+		/// 
+		///		StringVectorData "names"
+		///		IntVectorData "nArgs"
+		///		FloatVectorData "floats"
+		///		IntVectorData "integers"
+		///
+		/// \todo Consider how we might standardise a means of storing tags explicitly on the mesh rather than as primitive variables.
 		virtual void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars );
