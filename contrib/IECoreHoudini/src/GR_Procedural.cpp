@@ -40,6 +40,7 @@
 #include <UT/UT_Version.h>
 #include <RE/RE_Render.h>
 #include <UT/UT_Interrupt.h>
+#include "GB/GB_AttributeRef.h"
 
 // Cortex
 #include <IECoreGL/Scene.h>
@@ -127,13 +128,9 @@ void GR_Procedural::renderWire( GU_Detail *gdp,
 	if ( !gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
 		return;
 
-#if UT_MAJOR_VERSION_INT >= 11
-	GB_AttributeRef attr_offset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
-	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>(attr_offset);
-#else
-	int attr_offset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
-	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>(attr_offset);
-#endif
+	GB_AttributeRef attrOffset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
+	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>( attrOffset );
+	
 	if ( !sop )
 		return;
 
@@ -164,13 +161,9 @@ void GR_Procedural::renderShaded( GU_Detail *gdp,
 	if ( !gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
 		return;
 
-#if UT_MAJOR_VERSION_INT >= 11
-	GB_AttributeRef attr_offset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
-	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>(attr_offset);
-#else
-	int attr_offset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
-	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>(attr_offset);
-#endif
+	GB_AttributeRef attrOffset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
+	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>( attrOffset );
+
 	if ( !sop )
 		return;
 
