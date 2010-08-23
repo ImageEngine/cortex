@@ -1,0 +1,39 @@
+ArchiveBegin "aShader"  # {
+  
+ArchiveEnd  # }
+
+ArchiveBegin "aProcedural"  # {
+ArchiveEnd
+
+Option "searchpath" "string shader" [ "@" ] "string texture" [ "@" ] "string procedural" [ "@" ] 
+Option "searchpath" "string procedural" [ "&:$DELIGHT/lib" ] 
+
+FrameBegin 1  # {
+
+  Display "iAmNotADependency.tif" "tiff" "rgba" 
+    "float[4] quantize" [ 0 0 0 0 ] 
+    "float dither" [ 0.5 ] 
+    "string filter" [ "gaussian" ] 
+    "float[2] filterwidth" [ 3 3 ] 
+    "string cameraname" [ "SGA_WA001_004_RENDER_CAMShape" ] 
+    "uniform string compression" [ "piz" ] 
+
+  Format 1280 720 0.9999975 
+  
+  Projection "perspective" 
+    "fov" [ 79.374404 ] 
+  ScreenWindow -1 1 -0.5625 0.5625 
+  CropWindow 0 1 0 1 
+
+  WorldBegin  # {
+
+	AttributeBegin  # {
+
+		Surface "aShader" "uniform string aTexture" [ "/a/texture/file.0001.tdl" ] "uniform string anotherTexture" [ "hello.tdl" ]
+		Procedural "DynamicLoad" [ "aPythonProcedural" "print 10" ] [ -88.29631 86.10258 2.039762 239.51103 -110.4293 100.94006 ]
+
+	AttributeEnd  # }
+
+  WorldEnd  # }
+
+FrameEnd  # }

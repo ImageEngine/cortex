@@ -1,0 +1,129 @@
+#! /software/apps/nuke/4.8v2b1/rhel4.i686/Nuke4.8 -nx
+version 4.8200
+define_window_layout -1 {  {4 0 0.0953125 0.331667 1.07448 1.09 0 1 {-1083 -525 1 0.623762 0}}  {2 0 0.11875 0.481667 0.355208 0.711667 0 1 {1}}  {2 1 0.177604 0.3 0.414062 0.53 0 1 {1}} }
+restore_window_layout_from_script -1
+Root {
+ inputs 0
+ name /home/john/opendev/cortex/trunk/test/IECore/data/nukeScripts/dependencies.nk
+ last_frame 101
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+}
+Read {
+ inputs 0
+ file /tmp/test.%04d.tif
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy /tmp/testProxy.%04d.tif
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ first 3
+ last 10
+ name Read1
+ xpos -402
+ ypos -275
+}
+Bezier {
+ center {1024 778}
+ p1 {100 400}
+ p0 {100 100}
+ name Bezier1
+ xpos -402
+ ypos -206
+}
+ScannedGrain {
+ fullGrain /film/grain/scans/AreDependenciesToo.%04d.tif
+ fullGrain.first_frame 2
+ fullGrain.last_frame 75
+ amount {0.3 0.4 0.5}
+ name ScannedGrain1
+ xpos -402
+ ypos -180
+}
+Add {
+ name Add1
+ xpos -402
+ ypos -154
+}
+Group {
+ inputs 0
+ name Group1
+ xpos -154
+ ypos -272
+}
+ Read {
+  inputs 0
+  file /tmp/filesInAGroupMustBeDetected.%d.exr
+  format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+  name Read2
+  selected true
+  xpos -210
+  ypos -213
+ }
+ Output {
+  name Output1
+  xpos -210
+  ypos -113
+ }
+end_group
+Merge2 {
+ inputs 2
+ name Merge1
+ xpos -357
+ ypos -71
+}
+Read {
+ inputs 0
+ file /tmp/testNoPadding.%d.tif
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ first -100
+ last 1000
+ name Read2
+ xpos -564
+ ypos -267
+}
+Merge2 {
+ inputs 2
+ name Merge2
+ xpos -357
+ ypos -9
+}
+Read {
+ inputs 0
+ file /tmp/testNoFrameNumber.tif
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ name Read3
+ xpos -570
+ ypos -82
+}
+Merge2 {
+ inputs 2
+ name Merge3
+ xpos -357
+ ypos 30
+}
+Write {
+ file /tmp/writesShouldNotBeConsideredADependency.tif
+ file_type tiff
+ name Write1
+ xpos -357
+ ypos 66
+}
+push 0
+ReadGeo {
+ file /tmp/test/geoNoAnimation.obj
+ name ReadGeo2
+ xpos 204
+ ypos -242
+}
+push 0
+ReadGeo {
+ file /tmp/animatedGeo.%04d.obj
+ name ReadGeo1
+ xpos 39
+ ypos -239
+}
+Scene {
+ inputs 2
+ name Scene1
+ xpos 136
+ ypos -115
+}
