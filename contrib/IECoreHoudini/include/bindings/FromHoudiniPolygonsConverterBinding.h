@@ -32,19 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTERBINDING_H
+#define IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTERBINDING_H
 
-#include "FromHoudiniNodeConverter.h"
-#include "bindings/FromHoudiniNodeConverterBinding.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace IECoreHoudini;
-using namespace boost::python;
-
-void IECoreHoudini::bindFromHoudiniNodeConverter()
+namespace IECoreHoudini
 {
-	IECorePython::RunTimeTypedClass<FromHoudiniNodeConverter>()
-		.def( "create", FromHoudiniNodeConverter::create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+
+void bindFromHoudiniPolygonsConverter();
+
 }
+
+#endif // IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTERBINDING_H

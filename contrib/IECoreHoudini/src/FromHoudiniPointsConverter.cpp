@@ -34,17 +34,31 @@
 
 #include "boost/python.hpp"
 
-#include "FromHoudiniNodeConverter.h"
-#include "bindings/FromHoudiniNodeConverterBinding.h"
+#include "FromHoudiniPointsConverter.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
-
+using namespace IECore;
 using namespace IECoreHoudini;
-using namespace boost::python;
 
-void IECoreHoudini::bindFromHoudiniNodeConverter()
+IE_CORE_DEFINERUNTIMETYPED( FromHoudiniPointsConverter );
+
+FromHoudiniNodeConverter::Description<FromHoudiniPointsConverter> FromHoudiniPointsConverter::m_description( SOP_OPTYPE_ID, PointsPrimitiveTypeId, true );
+
+FromHoudiniPointsConverter::FromHoudiniPointsConverter( const SOP_Node *sop ) :
+	FromHoudiniSopConverter( sop, "Converts Houdini SOP geometry to an IECore::PointsPrimitive." )
 {
-	IECorePython::RunTimeTypedClass<FromHoudiniNodeConverter>()
-		.def( "create", FromHoudiniNodeConverter::create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+}
+
+FromHoudiniPointsConverter::~FromHoudiniPointsConverter()
+{
+}
+
+PrimitivePtr FromHoudiniPointsConverter::doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const
+{
+	const GEO_PointList &points = geo->points();
+	
+	PointsPrimitivePtr result = new PointsPrimitive( points.entries() );
+	
+	transferAttribs( geo, result, PrimitiveVariable::Vertex );
+	
+	return result;
 }

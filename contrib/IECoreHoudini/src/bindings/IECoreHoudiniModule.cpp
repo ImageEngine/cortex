@@ -54,6 +54,8 @@
 #include "FromHoudiniConverterBinding.h"
 #include "FromHoudiniNodeConverterBinding.h"
 #include "FromHoudiniSopConverterBinding.h"
+#include "FromHoudiniPointsConverterBinding.h"
+#include "FromHoudiniPolygonsConverterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -88,6 +90,8 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindFromHoudiniConverter();
 	bindFromHoudiniNodeConverter();
 	bindFromHoudiniSopConverter();
+	bindFromHoudiniPointsConverter();
+	bindFromHoudiniPolygonsConverter();
 
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );

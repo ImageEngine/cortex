@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -39,11 +41,12 @@ import IECore
 import IECoreHoudini
 
 from ProceduralHolder import *
-from FromHoudiniSopConverter import *
 from CortexWriter import *
 from CortexRmanInject import *
 from ActiveTake import *
 from NodeHandle import *
+from FromHoudiniPointsConverter import *
+from FromHoudiniPolygonsConverter import *
 
 if __name__ == "__main__":
     unittest.main()

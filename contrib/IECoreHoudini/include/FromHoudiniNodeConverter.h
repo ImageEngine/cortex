@@ -75,7 +75,7 @@ class FromHoudiniNodeConverter : public FromHoudiniConverter
 
 		typedef FromHoudiniNodeConverterPtr (*CreatorFn)( const OP_Node *node );
 
-		static void registerConverter( const OP_OpTypeId fromType, IECore::TypeId resultType, CreatorFn creator );
+		static void registerConverter( const OP_OpTypeId fromType, IECore::TypeId resultType, bool isDefault, CreatorFn creator );
 
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.
@@ -85,7 +85,7 @@ class FromHoudiniNodeConverter : public FromHoudiniConverter
 		class Description
 		{
 			public :
-				Description( OP_OpTypeId fromType, IECore::TypeId resultType );
+				Description( OP_OpTypeId fromType, IECore::TypeId resultType, bool isDefault = false );
 			private :
 				static FromHoudiniNodeConverterPtr creator( const OP_Node *node );
 		};

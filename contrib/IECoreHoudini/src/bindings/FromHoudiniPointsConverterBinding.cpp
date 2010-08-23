@@ -34,17 +34,18 @@
 
 #include "boost/python.hpp"
 
-#include "FromHoudiniNodeConverter.h"
-#include "bindings/FromHoudiniNodeConverterBinding.h"
+#include <SOP/SOP_Node.h>
 
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "FromHoudiniPointsConverterBinding.h"
+#include "FromHoudiniPointsConverter.h"
 
-using namespace IECoreHoudini;
 using namespace boost::python;
+using namespace IECoreHoudini;
 
-void IECoreHoudini::bindFromHoudiniNodeConverter()
+void IECoreHoudini::bindFromHoudiniPointsConverter()
 {
-	IECorePython::RunTimeTypedClass<FromHoudiniNodeConverter>()
-		.def( "create", FromHoudiniNodeConverter::create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+	IECorePython::RunTimeTypedClass<FromHoudiniPointsConverter>()
+		.def(init<SOP_Node*>())
 	;
 }

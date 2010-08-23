@@ -1,4 +1,4 @@
-# Dialog script for cortexWriter automatically generated 08/03/10 13:13:53
+# Dialog script for cortexWriter automatically generated 08/19/10 12:54:44
 
 {
     name	cortexWriter
@@ -76,6 +76,18 @@
 	menu	{
 	    "fio"	"Fio (Attribute Cache)"
 	    "cob"	"Cob (Cortex Object)"
+	}
+	range	{ 0 1 }
+	export	none
+    }
+    parm {
+	name	"conversionType"
+	label	"Conversion Type"
+	type	ordinal
+	default	{ "0" }
+	menu	{
+	    "IECore.PointsPrimitive"	"IECore.PointsPrimitive"
+	    "IECore.MeshPrimitive"	"IECore.MeshPrimitive"
 	}
 	range	{ 0 1 }
 	export	none

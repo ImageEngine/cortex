@@ -38,42 +38,20 @@
 #ifndef IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_H
 #define IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_H
 
-// Houdini
-#include <GU/GU_Detail.h>
-#include <SOP/SOP_Node.h>
-#include <UT/UT_Version.h>
+#include "GB/GB_AttributeRef.h"
+#include "GU/GU_Detail.h"
+#include "SOP/SOP_Node.h"
 
-// Cortex
-#include <IECore/MeshPrimitive.h>
-#include <IECore/PointsPrimitive.h>
+#include "IECore/Primitive.h"
 
-// IECoreHoudini
 #include "TypeIds.h"
 #include "FromHoudiniNodeConverter.h"
 
 namespace IECoreHoudini
 {
 	
-/// Utility class for storing attribute information
-struct AttributeInfo
-{
-	public:
-		friend class FromHoudiniSopConverter;
-
-	private:
-		std::string name;
-		IECore::DataPtr data;
-		IECore::PrimitiveVariable::Interpolation interp;
-		int entries;
-		GB_AttribType type;
-#if UT_MAJOR_VERSION_INT >= 11
-		GB_AttributeRef offset;
-#else
-		int offset;
-#endif
-};
-
-/// Converter which converts from Houdini SOP geometry to Cortex Mesh/Points primitive
+/// The FromHoudiniSopConverter class forms a base class for all classes able to perform
+/// some kind of conversion from a Houdini SOP_Node to an IECore::Primitive.
 class FromHoudiniSopConverter : public IECoreHoudini::FromHoudiniNodeConverter
 {
 	public :
@@ -81,30 +59,55 @@ class FromHoudiniSopConverter : public IECoreHoudini::FromHoudiniNodeConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniSopConverter, FromHoudiniSopConverterTypeId, IECore::ToCoreConverter );
 
 		typedef SOP_Node FromType;
+		
+	protected :
 
-		FromHoudiniSopConverter( const SOP_Node *sop );
+		FromHoudiniSopConverter( const SOP_Node *sop, const std::string &description );
 
 		virtual ~FromHoudiniSopConverter();
 
-		/// performs our conversion to a Cortex primitive
+		/// Implemented to call doPrimitiveConversion() Derived classes need not reimplement this function,
+		/// but should instead implement doPrimitiveConversion().
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
-
-		/// retrieves the SOP_Node held by the converter
+		/// Must be implemented by derived classes to return a Primitive created to represent the specified GU_Detail.
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const = 0;
+		
+		/// Retrieves the SOP_Node held by the converter
 		SOP_Node *sop() const;
+		
+		/// Extracts position and attribs from Houdini and stores them as primitive variables on the IECore::Primitive provided.
+		/// In most cases, this is the only transfer function that derived classes will need to use
+		void transferAttribs(
+			const GU_Detail *geo, IECore::Primitive *result,
+			IECore::PrimitiveVariable::Interpolation vertexInterpolation = IECore::PrimitiveVariable::FaceVarying,
+			IECore::PrimitiveVariable::Interpolation primitiveInterpolation = IECore::PrimitiveVariable::Uniform,
+			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,
+			IECore::PrimitiveVariable::Interpolation detailInterpolation = IECore::PrimitiveVariable::Constant
+		) const;
+		
+		typedef UT_PtrArray<const GEO_Vertex*> VertexList;
+		
+		/// Utility functions for transfering each attrib type from Houdini onto the IECore::Primitive provided
+		void transferDetailAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation ) const;
+		void transferPointAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points ) const;
+		void transferPrimitiveAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives ) const;
+		void transferVertexAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const VertexList &vertices ) const;
+		
+		template <typename Container>
+		void transferAttribData(
+			const Container &container, IECore::Primitive *result,
+			IECore::PrimitiveVariable::Interpolation interpolation,
+			const GB_Attribute *attr, const GB_AttributeRef &attrRef
+		) const;
+		
+		/// Utility functions for extracting attrib data from Houdini and storing it as a DataPtr of type T
+		template <typename T, typename Container>
+		IECore::DataPtr extractData( const Container &container, const GB_AttributeRef &attrRef ) const;
+		
+		template <typename T>
+		IECore::DataPtr extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const;
 
 	private :
-
-		/// gathers attribute information and allocates storage
-		void getAttribInfo( const GU_Detail *geo, const UT_LinkList *attribs, IECore::PrimitiveVariable::Interpolation interp_type, std::vector<AttributeInfo> &info, int num_entries ) const;
-
-		/// extracts point attributes
-		void extractPointAttribs( const GU_Detail *geo, const GEO_PointList &points, std::vector<AttributeInfo> &info ) const;
-
-		/// extracts detail attributes
-		void extractDetailAttribs( const GU_Detail *geo, std::vector<AttributeInfo> &info ) const;
-
-		/// extracts primitive/vertex attributes
-		void extractPrimVertAttribs( const GU_Detail *geo, const GEO_PrimList &pprim, std::vector<AttributeInfo> &info ) const;
 
 		static FromHoudiniNodeConverter::Description<FromHoudiniSopConverter> m_description;
 };
@@ -113,5 +116,7 @@ class FromHoudiniSopConverter : public IECoreHoudini::FromHoudiniNodeConverter
 IE_CORE_DECLAREPTR( FromHoudiniSopConverter );
 
 }
+
+#include "FromHoudiniSopConverter.inl"
 
 #endif // IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_H

@@ -89,7 +89,7 @@ class TestCortexWriter( unittest.TestCase ):
 		geo_3 = IECore.Reader.create( "test/cortexWriter_testData/test.0100.cob" ).read()
 		# compare with a converter
 		hou.setFrame(1)
-		converter = IECoreHoudini.FromHoudiniSopConverter( writer.inputs()[0] )
+		converter = IECoreHoudini.FromHoudiniNodeConverter.create( writer.inputs()[0] )
 		assert( geo_1==converter.convert() )
 		assert( geo_2!=converter.convert() )
 		hou.setFrame(51)

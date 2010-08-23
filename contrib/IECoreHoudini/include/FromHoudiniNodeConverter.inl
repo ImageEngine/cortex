@@ -41,9 +41,9 @@ namespace IECoreHoudini
 {
 
 template<class T>
-FromHoudiniNodeConverter::Description<T>::Description( OP_OpTypeId fromType, IECore::TypeId resultType )
+FromHoudiniNodeConverter::Description<T>::Description( OP_OpTypeId fromType, IECore::TypeId resultType, bool isDefault )
 {
-	FromHoudiniNodeConverter::registerConverter( fromType, resultType, creator );
+	FromHoudiniNodeConverter::registerConverter( fromType, resultType, isDefault, creator );
 }
 
 template<class T>

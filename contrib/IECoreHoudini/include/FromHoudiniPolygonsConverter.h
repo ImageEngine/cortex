@@ -32,19 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTER_H
+#define IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTER_H
 
-#include "FromHoudiniNodeConverter.h"
-#include "bindings/FromHoudiniNodeConverterBinding.h"
+#include "IECore/MeshPrimitive.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "TypeIds.h"
+#include "FromHoudiniSopConverter.h"
 
-using namespace IECoreHoudini;
-using namespace boost::python;
-
-void IECoreHoudini::bindFromHoudiniNodeConverter()
+namespace IECoreHoudini
 {
-	IECorePython::RunTimeTypedClass<FromHoudiniNodeConverter>()
-		.def( "create", FromHoudiniNodeConverter::create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+
+/// Converter which converts from Houdini SOP geometry to IECore::MeshPrimitive
+class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniSopConverter
+{
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniPolygonsConverter, FromHoudiniPolygonsConverterTypeId, IECore::ToCoreConverter );
+
+		FromHoudiniPolygonsConverter( const SOP_Node *sop );
+
+		virtual ~FromHoudiniPolygonsConverter();
+	
+	protected :
+		
+		/// performs conversion to a IECore::MeshPrimitive
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
+
+		static FromHoudiniNodeConverter::Description<FromHoudiniPolygonsConverter> m_description;
+};
+
+// register our converter
+IE_CORE_DECLAREPTR( FromHoudiniPolygonsConverter );
+
 }
+
+#endif // IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTER_H

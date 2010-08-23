@@ -70,11 +70,15 @@ FromHoudiniNodeConverterPtr FromHoudiniNodeConverter::create( const OP_Node *nod
 	return 0;
 }
 
-void FromHoudiniNodeConverter::registerConverter( const OP_OpTypeId fromType, IECore::TypeId resultType, CreatorFn creator )
+void FromHoudiniNodeConverter::registerConverter( const OP_OpTypeId fromType, IECore::TypeId resultType, bool isDefault, CreatorFn creator )
 {
 	TypesToFnsMap *m = typesToFns();
 	m->insert( TypesToFnsMap::value_type( Types( fromType, resultType ), creator ) );
-	m->insert( TypesToFnsMap::value_type( Types( fromType, IECore::InvalidTypeId ), creator ) ); // for the create function which doesn't care about resultType
+	
+	if ( isDefault )
+	{
+		m->insert( TypesToFnsMap::value_type( Types( fromType, IECore::InvalidTypeId ), creator ) );
+	}
 }
 
 FromHoudiniNodeConverter::TypesToFnsMap *FromHoudiniNodeConverter::typesToFns()

@@ -53,15 +53,15 @@ class TestNodeHandle( unittest.TestCase ) :
 	def testCreation( self ) :
 		
 		box = self.createBox()
-		converter = IECoreHoudini.FromHoudiniSopConverter( box )
-		self.assert_( isinstance( converter, IECoreHoudini.FromHoudiniSopConverter ) )
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
+		self.assert_( isinstance( converter, IECoreHoudini.FromHoudiniPolygonsConverter ) )
 
 	# testing deletion of HOM node is irrelevant
 	def testDeleteHOMNode( self ) :
 		
 		box = self.createBox()
 		w = weakref.ref( box )
-		converter = IECoreHoudini.FromHoudiniSopConverter( box )
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
 		
 		del box
 		gc.collect()
@@ -74,7 +74,7 @@ class TestNodeHandle( unittest.TestCase ) :
 		
 		box = self.createBox()
 		w = weakref.ref( box )
-		converter = IECoreHoudini.FromHoudiniSopConverter( box )
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
 		
 		box.destroy()
 		gc.collect()
@@ -87,7 +87,7 @@ class TestNodeHandle( unittest.TestCase ) :
 		
 		box = self.createBox()
 		w = weakref.ref( box )
-		converter = IECoreHoudini.FromHoudiniSopConverter( box )
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
 		
 		hou.hipFile.clear( False )
 		

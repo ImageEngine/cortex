@@ -37,8 +37,6 @@
 
 #include "boost/python.hpp"
 
-#include <SOP/SOP_Node.h>
-
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "FromHoudiniSopConverterBinding.h"
 #include "FromHoudiniSopConverter.h"
@@ -48,8 +46,5 @@ using namespace IECoreHoudini;
 
 void IECoreHoudini::bindFromHoudiniSopConverter()
 {
-	IECorePython::RunTimeTypedClass< FromHoudiniSopConverter >()
-		.def(init<SOP_Node*>())
-		.def( "create", &FromHoudiniSopConverter::create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+	IECorePython::RunTimeTypedClass< FromHoudiniSopConverter >();
 }
