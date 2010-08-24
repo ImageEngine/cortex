@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-import sys
+import os, sys
 import IECore
 import socket
 
@@ -69,7 +69,12 @@ class TestObjectWriter( unittest.TestCase ) :
 		self.assertEqual( h["host"]["nodeName"].value, socket.gethostname() )
 		self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
 		self.assertEqual( h["typeName"].value, "IntData" )
+	
+	def tearDown( self ) :
+		
+		for f in ( "test/compoundData.cob", "test/intData.cob" ) :
+			if os.path.isfile( f ) :
+				os.remove( f )
 
 if __name__ == "__main__":
 	unittest.main()
-
