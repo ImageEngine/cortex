@@ -146,7 +146,11 @@ MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
 	
 	if( m_changingClass )
 	{
-		m_parameterisedHolder->setParameterised( m_newClassName.asChar(), m_newClassVersion, m_newSearchPathEnvVar.asChar() );
+		MStatus s = m_parameterisedHolder->setParameterised( m_newClassName.asChar(), m_newClassVersion, m_newSearchPathEnvVar.asChar() );
+		if ( !s )
+		{
+			return s;
+		}
 		m_newValues = m_parameterisedHolder->getParameterisedInterface()->parameters()->getValue()->copy();
 		storeParametersWithNewValues( m_originalValues, m_newValues, "" );
 		despatchSetParameterisedCallbacks();
@@ -215,7 +219,11 @@ MStatus ParameterisedHolderModificationCmd::redoIt()
 
 	if( m_changingClass )
 	{
-		m_parameterisedHolder->setParameterised( m_newClassName.asChar(), m_newClassVersion, m_newSearchPathEnvVar.asChar() );
+		MStatus s = m_parameterisedHolder->setParameterised( m_newClassName.asChar(), m_newClassVersion, m_newSearchPathEnvVar.asChar() );
+		if ( !s )
+		{
+			return s;
+		}
 		despatchSetParameterisedCallbacks();
 	}
 	else

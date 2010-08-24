@@ -1564,6 +1564,12 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( cmds.attributeQuery( fnOH.parameterPlugPath( op["a"] ).split( "." )[-1], storable=True, node=opNode ), False )
 		self.assertEqual( cmds.attributeQuery( fnOH.parameterPlugPath( op["b"] ).split( "." )[-1], storable=True, node=opNode ), True )		
 				
+	def testBadArgsDoNotSegFault( self ) :
+		
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		self.assertRaises( RuntimeError, IECore.curry( fnOH.setOp, "fake", -1 ) )
+				
 	def tearDown( self ) :
 
 		for f in [
