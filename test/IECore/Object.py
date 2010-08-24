@@ -151,6 +151,42 @@ class TestObject( unittest.TestCase ) :
 				o = Object.create( tId )
 				oo = o.copy()
 				self.assertEqual( o, oo )
+	
+	def testCopyFrom( self ) :
+
+		i = IntData( 1 )
+		ii = IntData( 2 )
+		self.assertNotEqual( i, ii )
+		ii.copyFrom( i )
+		self.assertEqual( i, ii )
+		
+		f = FloatData( 1 )
+		self.assertNotEqual( i, f )
+		self.assertRaises( RuntimeError, curry( ii.copyFrom, f ) )
+		
+		vertsPerFace = IntVectorData( [ 3, 3 ] )
+		vertexIds = IntVectorData( [ 0, 1, 2, 1, 2, 3 ] )
+		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
+		mm = MeshPrimitive()
+		self.assertNotEqual( m, mm )
+		mm.copyFrom( m )
+		self.assertEqual( m, mm )
+		
+		p = PointsPrimitive( 3 )
+		self.assertRaises( RuntimeError, curry( p.copyFrom, m ) )
+		
+		b = BlindDataHolder()
+		b.blindData()["floatData"] = FloatData( 1.0 )
+		b.blindData()["intData"] = IntData( -5 )
+		bb = BlindDataHolder()
+		self.assertNotEqual( b, bb )
+		bb.copyFrom( b )
+		self.assertEqual( b, bb )
+		
+		m.blindData()["floatData"] = FloatData( 3.0 )
+		b.copyFrom( m )
+		self.assertNotEqual( b, bb )
+		self.assertEqual( b.blindData(), m.blindData() )
 
 if __name__ == "__main__":
     unittest.main()

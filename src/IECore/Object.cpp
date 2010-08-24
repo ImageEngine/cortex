@@ -300,6 +300,17 @@ void Object::save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &
 	context->save( this, i, name );
 }
 
+void Object::copyFrom( const Object *toCopy )
+{
+	if ( !toCopy->isInstanceOf( typeId() ) )
+	{
+		throw InvalidArgumentException( ( boost::format( "\"%s\" is not an instance of \"%s\"" ) % toCopy->typeName() % typeName() ).str() );
+	}
+	
+	CopyContext context;
+	copyFrom( toCopy, &context );
+}
+
 void Object::copyFrom( const Object *toCopy, CopyContext *context )
 {
 }

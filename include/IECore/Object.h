@@ -118,6 +118,9 @@ class Object : public RunTimeTyped
 		/// identical function is provided which returns a pointer
 		/// to the subclass rather than to this base class.
 		ObjectPtr copy() const;
+		/// Copies from another object. Throws an IECore::InvalidArgumentException if
+		/// other is not an instance of this object.
+		void copyFrom( const Object *other );
 		/// Saves the object in the current directory of ioInterface, in
 		/// a subdirectory with the specified name.
 		void save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name ) const;
@@ -223,8 +226,6 @@ class Object : public RunTimeTyped
 		/// the base class to do the same. When making copies of held member
 		/// data derived from Object, you /must/ use the context object provided,
 		/// rather than calling copy() or copyFrom() yourself.
-		/// \todo Think about adding public access to copyFrom() by providing a small
-		/// method which creates a new CopyContext, similar to how copy, load, and save work.
 		virtual void copyFrom( const Object *other, CopyContext *context ) = 0;
 
 		/// The class provided to the save() method implemented by subclasses.
