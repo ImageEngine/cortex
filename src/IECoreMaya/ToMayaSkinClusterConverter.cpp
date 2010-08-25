@@ -116,11 +116,22 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		influencePaths.append( path );
 	}
 	
+	MPlugArray connectedPlugs;
+	MPlug bindPlug = fnSkinClusterNode.findPlug( "bindPose", true, &s );
+	if ( !bindPlug.connectedTo( connectedPlugs, true, false ) )
+	{
+		throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" does not have a valid bindPose" ) % fnSkinClusterNode.name() ).str() );
+	}
+	MFnDependencyNode fnBindPose( connectedPlugs[0].node() );
+	if ( fnBindPose.typeName() != "dagPose" )
+	{
+		throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid bindPose" ) % fnBindPose.name() ).str() );
+	}
+	
 	/// \todo: optional parameter to reset the skinCluster's geomMatrix plug
 	
 	// break existing influence connections to the skinCluster
 	MDGModifier dgModifier;
-	MPlugArray connectedPlugs;
 	MPlug matrixArrayPlug = fnSkinClusterNode.findPlug( "matrix", true, &s );
 	for ( unsigned i=0; i < matrixArrayPlug.numConnectedElements(); i++ )
 	{
@@ -143,9 +154,6 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	}
 	
 	// break existing influence connections to the bind pose
-	MPlug bindPlug = fnSkinClusterNode.findPlug( "bindPose", true, &s );
-	bindPlug.connectedTo( connectedPlugs, true, false );
-	MFnDependencyNode fnBindPose( connectedPlugs[0].node() );
 	MPlug bindPoseMatrixArrayPlug = fnBindPose.findPlug( "worldMatrix", true, &s );
 	for ( unsigned i=0; i < bindPoseMatrixArrayPlug.numConnectedElements(); i++ )
 	{

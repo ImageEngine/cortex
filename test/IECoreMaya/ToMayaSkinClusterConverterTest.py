@@ -140,6 +140,13 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, geo ) )
 		
+		# test invalid bindPose
+		bindPose = maya.cmds.listConnections( sc2+'.bindPose' )[0]
+		maya.cmds.delete( bindPose )
+		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
+		maya.cmds.connectAttr( geo+'.message', sc2+'.bindPose' )
+		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
+		
 		# test non-existant influences
 		maya.cmds.delete( ['joint2', 'joint3'] )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
