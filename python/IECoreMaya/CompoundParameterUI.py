@@ -43,6 +43,8 @@ import IECoreMaya
 
 class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
+	_collapsedUserDataKey = "aeCollapsed"
+
 	## Supports the following keyword arguments :
 	#
 	# bool "withCompoundFrame"
@@ -82,9 +84,8 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		
 		self.__kw["hierarchyDepth"] = self.__kw.get( "hierarchyDepth", -1 ) + 1
 		
-		# \todo Retrieve the "collapsed" state
-		collapsed = collapsable
-		
+		collapsed = self._retrieveCollapsedState( collapsable )
+							
 		maya.cmds.frameLayout(
 			self._topLevelUI(),
 			edit = True,
@@ -113,9 +114,21 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		maya.cmds.setParent("..")
 
 	def replace( self, node, parameter ) :
-
+		
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
-
+		
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		
+		collapsable = not parameter.isSame( fnPH.getParameterised()[0].parameters() )
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsable = parameter.userData()["UI"]["collapsable"].value
+		
+		if collapsable :
+			collapsed = self._retrieveCollapsedState( self.getCollapsed() )
+			self.setCollapsed( collapsed, **self.__kw )	
+		
+		maya.cmds.frameLayout( self._topLevelUI(), edit=True, collapsable=collapsable )
+		
 		if len( self.__childUIs ) :
 		
 			for pName in self.__childUIs.keys() :
@@ -151,11 +164,32 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			self.__preExpand()
 			
 		maya.cmds.frameLayout( self.layout(), edit=True, collapse=collapsed )
+		self._storeCollapsedState( collapsed )
 		
 		if propagateToChildren > 0 :
 			propagateToChildren = propagateToChildren - 1
 			self.__propagateCollapsed( collapsed, propagateToChildren, **kw )
 	
+	# This will retrieve the collapsedState from the parameters userData. It uses the
+	# default key if 'collapsedUserDataKey' was not provided in the UI constructor's **kw.
+	def _retrieveCollapsedState( self, default=True ) :
+		
+		key = self.__kw.get( "collapsedUserDataKey", CompoundParameterUI._collapsedUserDataKey )
+		if "UI" in self.parameter.userData() and key in self.parameter.userData()["UI"] :		
+			return self.parameter.userData()["UI"][ key ].value
+		else :
+			return default
+	
+	# This will store \param state in the parameters userData, under the default key,
+	# unless 'collapsedUserDataKey' was provided in the UI constructor's **kw.
+	def _storeCollapsedState( self, state ) :
+
+		if "UI" not in self.parameter.userData() :
+			self.parameter.userData()["UI"] = IECore.CompoundObject()
+		
+		key = self.__kw.get( "collapsedUserDataKey", CompoundParameterUI._collapsedUserDataKey )
+		self.parameter.userData()["UI"][key] = IECore.BoolData( state )
+		
 	@staticmethod
 	def _labelFont( hierarchyDepth ) :
 	
@@ -221,6 +255,8 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __expand( self ) :
 	
+		self._storeCollapsedState( False )
+		
 		modifiers = maya.cmds.getModifiers()
 				
 		if modifiers & 1 :
@@ -234,6 +270,8 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			self.__propagateCollapsed( False, depth, lazy=True )
 			
 	def __collapse(self):
+		
+		self._storeCollapsedState( True )
 		
 		# \todo Store collapse state
 		modifiers = maya.cmds.getModifiers()
@@ -249,7 +287,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			self.__propagateCollapsed( True, depth )
 		
 	def __preExpand( self ) :
-			
+		
 		# this is the most common entry point into the ui
 		# creation code, and unfortunately it's called from
 		# a maya ui callback. maya appears to suppress all

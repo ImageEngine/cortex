@@ -88,6 +88,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		if collapsable :
 			self.__kw["hierarchyDepth"] = self.__kw.get( "hierarchyDepth", -1 ) + 1
 		
+		collapsed = self._retrieveCollapsedState( collapsable )
+		
 		maya.cmds.frameLayout(
 		
 			self._topLevelUI(),
@@ -100,7 +102,7 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			expandCommand = self.__expand,
 			collapseCommand = self.__collapse,
 			collapsable = collapsable,
-			collapse = collapsable,
+			collapse = collapsed,
 			manage = True,
 				
 		)
@@ -131,9 +133,19 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			nodeChanged = self.node() != node
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
-
+		
+		collapsable = True
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsable = parameter.userData()["UI"]["collapsable"].value
+		
+		if collapsable :
+			collapsed = self._retrieveCollapsedState( self.getCollapsed() )
+			self.setCollapsed( collapsed, **self.__kw )
+			
+		maya.cmds.frameLayout( self._topLevelUI(), edit=True, collapsable=collapsable )
+			
 		self.__updateChildUIs( startFromScratch=nodeChanged )
-
+			
 	## Gets the collapsed state for the frame holding the child parameter uis.
 	def getCollapsed( self ) :
 	
@@ -151,11 +163,32 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			
 		if maya.cmds.frameLayout( self.layout(), query=True, collapsable=True ) :
 			maya.cmds.frameLayout( self.layout(), edit=True, collapse = collapsed )
-			
+			self._storeCollapsedState( collapsed )
+
 		if propagateToChildren > 0 :
 			propagateToChildren = propagateToChildren - 1
 			self.__propagateCollapsed( collapsed, propagateToChildren, **kw )
-			
+	
+	# This will retrieve the collapsedState from the parameters userData. It uses the
+	# default key if 'collapsedUserDataKey' was not provided in the UI constructor's **kw.
+	def _retrieveCollapsedState( self, default=True ) :
+		
+		key = self.__kw.get( "collapsedUserDataKey", IECoreMaya.CompoundParameterUI._collapsedUserDataKey )
+		if "UI" in self.parameter.userData() and key in self.parameter.userData()["UI"] :		
+			return self.parameter.userData()["UI"][ key ].value
+		else :
+			return default
+	
+	# This will store \param state in the parameters userData, under the default key,
+	# unless 'collapsedUserDataKey' was provided in the UI constructor's **kw.		
+	def _storeCollapsedState( self, state ) :
+
+		if "UI" not in self.parameter.userData() :
+			self.parameter.userData()["UI"] = IECore.CompoundObject()
+	
+		key = self.__kw.get( "collapsedUserDataKey", IECoreMaya.CompoundParameterUI._collapsedUserDataKey )
+		self.parameter.userData()["UI"][key] = IECore.BoolData( state )
+		
 	def __classMenuDefinition( self, parameterName ) :
 	
 		result = IECore.MenuDefinition()
@@ -286,6 +319,27 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		for i in range( 0, len( classes ) ) :
 		
 			parameterName = classes[i][0]
+
+			longParameterName = self.__kw['longParameterName']
+			if longParameterName :
+				# If we have a path already, we need a separator, otherwise, not
+				longParameterName += "."
+			longParameterName += parameterName
+			
+			visible = True
+			if 'visibleOnly' in self.__kw :
+
+				visible = longParameterName in self.__kw['visibleOnly']
+
+				if not visible :
+					for i in self.__kw['visibleOnly'] :
+						if i.startswith( longParameterName + "." ) :
+							visible = True
+							break
+
+			if not visible:
+				continue
+			
 			
 			childUI = self.__childUIs.get( parameterName, None )
 			if childUI :
@@ -297,7 +351,17 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			if not childUI :
 				with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
 					maya.cmds.setParent( self.__formLayout )
-					childUI = ChildUI( self.parameter[parameterName], **self.__kw )
+									
+					if "longParameterName" in self.__kw :
+						# We have to append our 'name' (as worked out above), otherwise,
+						# the parameter path misseses it out as the parameter were passing down
+						# has '' as a name.
+						kw = self.__kw.copy()
+						kw["longParameterName"] = longParameterName
+						childUI = ChildUI( self.parameter[parameterName], **kw )
+					else:
+						childUI = ChildUI( self.parameter[parameterName], **self.__kw )
+					
 					childUI.__className = classes[i][1]
 					childUI.__classVersion = classes[i][2]
 					self.__childUIs[parameterName] = childUI
@@ -331,6 +395,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __expand( self ) :
 	
+		self._storeCollapsedState( False )
+	
 		modifiers = maya.cmds.getModifiers()
 		if modifiers & 1 :
 			# shift is held
@@ -343,6 +409,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			self.__propagateCollapsed( False, depth, lazy=True )
 			
 	def __collapse(self):
+
+		self._storeCollapsedState( True )
 
 		# \todo Store collapse state
 		modifiers = maya.cmds.getModifiers()
@@ -479,7 +547,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 		# CompoundParameterUI to hold child parameters
 		
 		maya.cmds.setParent( self._topLevelUI() )
-		
+			
 		self.__compoundParameterUI = IECoreMaya.CompoundParameterUI( self.parent().node(), parameter, **kw )
 		
 		maya.cmds.frameLayout(
@@ -488,7 +556,9 @@ class ChildUI( IECoreMaya.UIElement ) :
 			collapsable = True,
 			labelVisible = False,
 		)
-	
+		
+		self.setCollapsed( self.getCollapsed(), False )
+		
 	def getCollapsed( self ) :
 		
 		return self.__compoundParameterUI.getCollapsed()
