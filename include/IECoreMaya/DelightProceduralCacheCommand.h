@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,7 @@
 #include "maya/MPxCommand.h"
 
 #include "IECore/ParameterisedProcedural.h"
+#include "IECore/ObjectVector.h"
 
 namespace IECoreMaya
 {
@@ -62,6 +63,8 @@ class DelightProceduralCacheCommand : public MPxCommand
 		
 	private :
 		
+		typedef std::map<IECore::ParameterPtr, IECore::ObjectVectorPtr> MotionValueMap;
+		
 		struct CachedProcedural
 		{
 			std::string className;
@@ -69,10 +72,14 @@ class DelightProceduralCacheCommand : public MPxCommand
 			Imath::Box3f bound; // the union of the procedural bound across all sample times
 			IECore::ParameterisedProceduralPtr procedural;
 			IECore::ObjectPtr values;
+			std::map<IECore::ParameterPtr, IECore::ObjectVectorPtr> motionValues; // for parameters who want to be given one value per motion sample
 		};		
 		typedef std::map<std::string, CachedProcedural> ProceduralMap;
 		static ProceduralMap g_procedurals;
 		
+		void findMotionParameters( IECore::Parameter *parameter, MotionValueMap &values );
+		void addMotionSample( MotionValueMap &values );
+
 };
 
 } // namespace IECoreMaya

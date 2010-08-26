@@ -43,6 +43,7 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/AttributeBlock.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
@@ -142,6 +143,8 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 		{
 			// we already got the procedural on the first sample, but we should expand the bounding box for this sample
 			pIt->second.bound.extendBy( IECore::convert<Imath::Box3f>( fnDagNode.boundingBox() ) );
+			// we also need to add value samples for any parameter flagged as wanting them.
+			addMotionSample( pIt->second.motionValues );
 			return MStatus::kSuccess;
 		}
 		else
@@ -162,7 +165,11 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 				displayError( "DelightProceduralCacheCommand::doIt : failed to get parameter values from \"" + objectNames[0] + "\"." );
 				return MStatus::kFailure;
 			}
-			cachedProcedural.values = values->copy();				
+			cachedProcedural.values = values->copy();
+			
+			findMotionParameters( cachedProcedural.procedural->parameters(), cachedProcedural.motionValues );
+			addMotionSample( cachedProcedural.motionValues );
+			
 			g_procedurals[objectNames[0].asChar()] = cachedProcedural;
 		}
 
@@ -201,8 +208,15 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 		try
 		{
 			IECore::ObjectPtr currentValues = it->second.procedural->parameters()->getValue();			
-			it->second.procedural->parameters()->setValue( it->second.values );			
-			
+			it->second.procedural->parameters()->setValue( it->second.values );
+			for( MotionValueMap::const_iterator aIt=it->second.motionValues.begin(); aIt!=it->second.motionValues.end(); aIt++ )
+			{
+				if( aIt->second->members().size() > 1 ) // only override if we cached more than one sample
+				{
+					aIt->first->setValue( aIt->second );
+				}
+			}
+						
 			std::string pythonString;
 			try 
 			{
@@ -285,4 +299,32 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 	
 	displayError( "DelightProceduralCacheCommand::doIt : No suitable flag specified." );
 	return MS::kFailure;
+}
+
+void DelightProceduralCacheCommand::findMotionParameters( IECore::Parameter *parameter, MotionValueMap &values )
+{
+	if( parameter->isInstanceOf( IECore::CompoundParameter::staticTypeId() ) )
+	{
+		IECore::CompoundParameter *c = static_cast<IECore::CompoundParameter *>( parameter );
+		for( IECore::CompoundParameter::ParameterVector::const_iterator it = c->orderedParameters().begin(); it!=c->orderedParameters().end(); it++ )
+		{
+			findMotionParameters( it->get(), values );
+		}
+	}
+	else
+	{
+		const IECore::BoolData *bd = parameter->userData()->member<const IECore::BoolData>( "acceptsMotionSamples" );
+		if( bd && bd->readable() )
+		{
+			values.insert( MotionValueMap::value_type( parameter, new IECore::ObjectVector() ) );
+		}
+	}
+}
+
+void DelightProceduralCacheCommand::addMotionSample( MotionValueMap &values )
+{
+	for( MotionValueMap::const_iterator it=values.begin(); it!=values.end(); it++ )
+	{
+		it->second->members().push_back( it->first->getValue()->copy() );
+	}
 }
