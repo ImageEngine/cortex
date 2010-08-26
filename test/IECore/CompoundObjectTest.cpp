@@ -132,6 +132,9 @@ struct CompoundObjectTest
 		{
 			BOOST_CHECK( "" == "Exception thrown during creation of member." );
 		}
+		
+		const StringData *s = c->member<const StringData>( "stringElement" );
+		BOOST_CHECK( s );
 	}
 };
 

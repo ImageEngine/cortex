@@ -45,7 +45,38 @@ namespace IECore
 template<typename T>
 T *CompoundObject::member( const InternedString &name, bool throwExceptions )
 {
-	return member<T>( name, throwExceptions, false );
+	ObjectMap::const_iterator it = members().find( name );
+	if( it!=members().end() )
+	{
+		T *result = runTimeCast<T>( it->second );
+		if( result )
+		{
+			return result;
+		}
+		else
+		{
+			if( throwExceptions )
+			{
+				throw Exception( boost::str( boost::format( "CompoundObject child \"%s\" is not of type \"%s\"." ) % name.value() % T::staticTypeName() ) );
+			}
+			else
+			{
+				return 0;
+			}	
+		}
+	}
+	else
+	{
+		if( throwExceptions )
+		{
+			throw Exception( boost::str( boost::format( "CompoundObject has no child named \"%s\"." ) % name.value() ) );
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	return 0;
 }
 
 template<typename T>
