@@ -103,6 +103,17 @@ static boost::python::list values( MotionPrimitive &p )
 	return result;
 }
 
+static boost::python::list items( MotionPrimitive &p )
+{
+	boost::python::list result;
+	const MotionPrimitive::SnapshotMap &s = p.snapshots();
+	MotionPrimitive::SnapshotMap::const_iterator it;
+	for( it = s.begin(); it!=s.end(); it++ )
+	{
+		result.append( make_tuple( it->first, it->second ) );
+	}
+	return result;
+}
 
 void bindMotionPrimitive()
 {
@@ -115,6 +126,7 @@ void bindMotionPrimitive()
 		.def( "__contains__", &contains )
 		.def( "keys", &keys )
 		.def( "values", &values )
+		.def( "items", &items )
 	;
 }
 

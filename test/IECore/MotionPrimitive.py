@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -79,6 +79,13 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
+		
+	def testItems( self ) :
+	
+		m = MotionPrimitive()
+		m[0] = PointsPrimitive( 1 )
+		m[1] = PointsPrimitive( 2 )
+		self.assertEqual( m.items(), [ ( 0, PointsPrimitive( 1 ) ), ( 1, PointsPrimitive( 2 ) ) ] )
 
 	def tearDown( self ) :
 
