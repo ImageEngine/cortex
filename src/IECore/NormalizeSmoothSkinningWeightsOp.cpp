@@ -78,7 +78,6 @@ void NormalizeSmoothSkinningWeightsOp::modify( Object * object, const CompoundOb
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();

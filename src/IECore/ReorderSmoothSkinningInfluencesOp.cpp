@@ -71,7 +71,6 @@ void ReorderSmoothSkinningInfluencesOp::modify( Object * object, const CompoundO
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 	
 	const std::vector<std::string> &newOrder = m_reorderedInfluencesParameter->getTypedValue();
 	const std::vector<std::string> &originalOrder = skinningData->influenceNames()->readable();

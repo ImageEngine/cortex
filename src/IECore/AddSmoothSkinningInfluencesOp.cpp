@@ -86,7 +86,6 @@ void AddSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObjec
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 	
 	const std::vector<std::string> &newNames = m_influenceNamesParameter->getTypedValue();
 	const std::vector<Imath::M44f> &newPoseData = m_influencePoseParameter->getTypedValue();

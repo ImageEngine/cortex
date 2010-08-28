@@ -71,7 +71,6 @@ void CompressSmoothSkinningDataOp::modify( Object * object, const CompoundObject
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 	
 	const float threshold = m_thresholdParameter->getNumericValue();
 	

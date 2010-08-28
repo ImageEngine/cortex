@@ -64,7 +64,6 @@ void DecompressSmoothSkinningDataOp::modify( Object * object, const CompoundObje
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 
 	const std::vector<std::string> &influenceNames = skinningData->influenceNames()->readable();
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();

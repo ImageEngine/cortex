@@ -93,7 +93,6 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 	
 	const std::vector<std::string> &influenceNames = skinningData->influenceNames()->readable();
 	const std::vector<Imath::M44f> &influencePoseData = skinningData->influencePose()->readable();

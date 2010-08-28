@@ -80,7 +80,6 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 	
 	SmoothSkinningData *origMixingData = runTimeCast<SmoothSkinningData>( m_skinningDataParameter->getValidatedValue() );
 	if ( !origMixingData )
@@ -89,7 +88,6 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 	}
 	
 	assert( origMixingData );
-	assert( origMixingData->validate() );
 	
 	// make sure the number of influences matches
 	if ( origMixingData->influenceNames()->readable().size() != skinningData->influenceNames()->readable().size() )

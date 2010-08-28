@@ -113,7 +113,6 @@ void SmoothSmoothSkinningWeightsOp::modify( Object * object, const CompoundObjec
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	assert( skinningData->validate() );
 	
 	// decompress
 	DecompressSmoothSkinningDataOp decompressionOp;
