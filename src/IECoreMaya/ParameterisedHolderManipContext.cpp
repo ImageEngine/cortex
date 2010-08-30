@@ -212,7 +212,7 @@ MPxManipContainer *ParameterisedHolderManipContext::createAndConnectManip( Param
 		return 0;
 	}
 	
-	// The 'name' of the manipulator to create is: ie<manipulatorTypeHint><parameterTypeName>ParameterManipulator
+	// The 'name' of the manipulator to create is: ie<manipulatorTypeHint><parameterTypeName>Manipulator
 	MString manipLabel( "" );
 	MString manipName( "ie" );
 	

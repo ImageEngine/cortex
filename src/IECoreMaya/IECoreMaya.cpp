@@ -174,8 +174,15 @@ MStatus initialize(MFnPlugin &plugin)
 			GeometryCombiner::creator, GeometryCombiner::initialize, MPxNode::kDependNode );
 		assert( s );	
 		
+		// This should be used to set the classification of any manipulators that are
+		// compatible with the ieParameterisedHolderManipContext to permit the UI code
+		// to identify if a Parameter is manipulatable.
+		const MString manipClassification( "ieParameterManipulator" );
+		// Convention for parameter manipulator names:
+		//    ie<manipulatorTypeHint><parameterTypeName>Manipulator
+		
 		s = plugin.registerNode( "ieBox3fParameterManipulator", Box3Manipulator::id,
-			Box3Manipulator::creator, Box3Manipulator::initialize, MPxNode::kManipContainer );
+			Box3Manipulator::creator, Box3Manipulator::initialize, MPxNode::kManipContainer, &manipClassification );
 		assert( s );
 
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
