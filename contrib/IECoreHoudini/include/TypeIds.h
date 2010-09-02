@@ -50,6 +50,7 @@ namespace IECoreHoudini
 		FromHoudiniPointsConverterTypeId = 111003,
 		FromHoudiniParticlesConverterTypeId = 111004,
 		FromHoudiniPolygonsConverterTypeId = 111005,
+		ToHoudiniConverterTypeId = 111006,
 		// remember to update TypeIdBinding.cpp
 		LastTypeId = 111999,
 	};

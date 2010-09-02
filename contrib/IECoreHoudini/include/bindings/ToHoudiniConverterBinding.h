@@ -32,27 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "TypeIds.h"
-#include "bindings/TypeIdBinding.h"
-
-using namespace boost::python;
+#ifndef IECOREHOUDINI_TOHOUDINICONVERTERBINDING_H
+#define IECOREHOUDINI_TOHOUDINICONVERTERBINDING_H
 
 namespace IECoreHoudini
 {
 
-void bindTypeId()
-{
-	enum_<TypeId>( "TypeId" )
-		.value( "FromHoudiniConverter", FromHoudiniConverterTypeId )
-		.value( "FromHoudiniNodeConverter", FromHoudiniNodeConverterTypeId )
-		.value( "FromHoudiniSopConverter", FromHoudiniSopConverterTypeId )
-		.value( "FromHoudiniPointsConverter", FromHoudiniPointsConverterTypeId )
-		.value( "FromHoudiniParticlesConverter", FromHoudiniParticlesConverterTypeId )
-		.value( "FromHoudiniPolygonsConverter", FromHoudiniPolygonsConverterTypeId )
-		.value( "ToHoudiniConverter", ToHoudiniConverterTypeId )
-	;
-}
+void bindToHoudiniConverter();
 
 }
+
+#endif //  IECOREHOUDINI_TOHOUDINICONVERTERBINDING_H

@@ -32,27 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREHOUDINI_TOHOUDINICONVERTER_H
+#define IECOREHOUDINI_TOHOUDINICONVERTER_H
 
 #include "TypeIds.h"
-#include "bindings/TypeIdBinding.h"
 
-using namespace boost::python;
+#include "IECore/FromCoreConverter.h"
 
 namespace IECoreHoudini
 {
 
-void bindTypeId()
+/// A base class for all classes which convert from an IECore datatype
+/// to a Houdini datatype.
+class ToHoudiniConverter : public IECore::FromCoreConverter
 {
-	enum_<TypeId>( "TypeId" )
-		.value( "FromHoudiniConverter", FromHoudiniConverterTypeId )
-		.value( "FromHoudiniNodeConverter", FromHoudiniNodeConverterTypeId )
-		.value( "FromHoudiniSopConverter", FromHoudiniSopConverterTypeId )
-		.value( "FromHoudiniPointsConverter", FromHoudiniPointsConverterTypeId )
-		.value( "FromHoudiniParticlesConverter", FromHoudiniParticlesConverterTypeId )
-		.value( "FromHoudiniPolygonsConverter", FromHoudiniPolygonsConverterTypeId )
-		.value( "ToHoudiniConverter", ToHoudiniConverterTypeId )
-	;
-}
 
-}
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniConverter, ToHoudiniConverterTypeId, IECore::FromCoreConverter );
+
+	protected:
+
+		ToHoudiniConverter( const std::string &description, IECore::TypeId supportedType );
+
+		virtual ~ToHoudiniConverter();
+
+};
+
+IE_CORE_DECLAREPTR( ToHoudiniConverter );
+
+} // namespace IECoreHoudini
+
+#endif // IECOREHOUDINI_TOHOUDINICONVERTER_H
