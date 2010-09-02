@@ -106,9 +106,6 @@ class Box3Manipulator : public ParameterManipContainer
 		MPoint getPlugValues( MPlug &plug );
 		void getPlugValues( MPlug &plug, double *values );
 		void getPlugValues( MPlug &plug, MFnNumericData &data );
-			
-		void toLocal( MPoint &point );
-		void fromLocal( MPoint &point );
 		
 		MMatrix m_localMatrix; 
 		MMatrix m_localMatrixInv;

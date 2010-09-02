@@ -17,6 +17,8 @@
 #include <maya/MArgList.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MGlobal.h>
+#include <maya/MEulerRotation.h>
+#include <maya/MPxTransformationMatrix.h>
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -66,6 +68,9 @@ MStatus Box3Manipulator::connectToDependNode( const MObject & node )
 	MFnFreePointTriadManip minFn( m_minManip );
 	MFnFreePointTriadManip maxFn( m_maxManip );
 	
+	minFn.connectToPointPlug( m_minPlug );
+	maxFn.connectToPointPlug( m_maxPlug );
+	
 	addManipToPlugConversionCallback( m_minPlug, (manipToPlugConversionCallback)&Box3Manipulator::vectorManipToPlugConversion );
 	addManipToPlugConversionCallback( m_maxPlug, (manipToPlugConversionCallback)&Box3Manipulator::vectorManipToPlugConversion );
 	
@@ -87,26 +92,33 @@ MStatus Box3Manipulator::connectToDependNode( const MObject & node )
 
 	readParameterOptions( dagFn );
 		
-	if( !m_worldSpace )
+	if( m_worldSpace)
 	{
+		m_localMatrix.setToIdentity();
+		m_localMatrixInv.setToIdentity();
+	}
+	else
+	{	
+		// Inhereit any transform to the parent
 		MDagPath transformPath = m_nodePath;
 		transformPath.pop(); 
 		MFnTransform transformFn( transformPath );
-		m_localMatrix = transformFn.transformation().asMatrix();
-		m_localMatrixInv = m_localMatrix.inverse();
-	}
-
-	// We have to set the initial position, otherwise,
-	// it will wipe out the plug values ;) 
-	MPoint min = getPlugValues( m_minPlug );
-	MPoint max = getPlugValues( m_maxPlug );
-	
-	fromLocal( min );
-	fromLocal( max );
-	
-	minFn.setPoint( min );
-	maxFn.setPoint( max );
+		m_localMatrix = transformPath.inclusiveMatrix();
+		m_localMatrixInv = transformPath.inclusiveMatrixInverse();
 		
+		MPxTransformationMatrix m( m_localMatrix );
+		MEulerRotation r = m.eulerRotation();
+		MVector t = m.translation();
+
+		minFn.setRotation( r );
+		maxFn.setRotation( r );
+		validateFn.setRotation( r );	
+		
+		minFn.setTranslation( t, MSpace::kTransform );
+		maxFn.setTranslation( t, MSpace::kTransform );
+		validateFn.setTranslation( t, MSpace::kTransform );
+	}
+	
 	return stat;
 }
 	
@@ -129,21 +141,21 @@ void Box3Manipulator::draw( M3dView & view, const MDagPath & path, M3dView::Disp
 	// the control.
 	short x, y;
 	
-	bool drawLabel = view.worldToView( center, x, y );
+	bool drawLabel = view.worldToView( center * m_localMatrix, x, y );
 	if( drawLabel ) 
 	{
 		y -= 18;
 		view.viewToWorld( x, y, center, notUsed );
 	}
 	
-	bool drawMin = view.worldToView( min, x, y );
+	bool drawMin = view.worldToView( min * m_localMatrix, x, y );
 	if( drawMin ) 
 	{
 		y -= 18;
 		view.viewToWorld( x, y, minOffset, notUsed );
 	}
 	
-	bool drawMax = view.worldToView( max, x, y );
+	bool drawMax = view.worldToView( max * m_localMatrix, x, y );
 	if( drawMax ) 
 	{
 		y -= 18;
@@ -165,9 +177,6 @@ void Box3Manipulator::draw( M3dView & view, const MDagPath & path, M3dView::Disp
 		
 	view.endGL();
 
-	toLocal( min );
-	toLocal( max );
-	
 	MTransformationMatrix m( m_localMatrix );
 	
 	MVector t = m.getTranslation( MSpace::kWorld );
@@ -281,7 +290,6 @@ MManipData Box3Manipulator::vectorPlugToManipConversion( unsigned int manipIndex
 	}
 		
 	MPoint p = getPlugValues( sourcePlug );
-	fromLocal( p );
 	
 	numericData.setData( p.x, p.y, p.z );	
 		
@@ -302,9 +310,6 @@ MManipData Box3Manipulator::vectorManipToPlugConversion( unsigned int plugIndex 
 	MPoint min, max;
 	getConverterManipValue( minFn.pointIndex(), min );
 	getConverterManipValue( maxFn.pointIndex(), max );
-	
-	toLocal( min );
-	toLocal( max );
 	
 	MPoint out;
 	MPlug sourcePlug;
@@ -366,32 +371,11 @@ MManipData Box3Manipulator::updateCenteredManipPosition( unsigned int manipIndex
 	MPoint min = getPlugValues( m_minPlug );
 	MPoint max = getPlugValues( m_maxPlug );
 	
-	fromLocal( min );
-	fromLocal( max );
-	
 	MPoint average = ( ( min + max ) / 2.0 );
 	
 	numericData.setData( average.x, average.y, average.z );
 	
 	return MManipData( returnData );	
-}
-
-void Box3Manipulator::toLocal( MPoint &point )
-{
-	if( m_worldSpace )
-	{
-		return;
-	}
-	point = point * m_localMatrixInv;
-}
-
-void Box3Manipulator::fromLocal( MPoint &point )
-{
-	if( m_worldSpace )
-	{
-		return;
-	}
-	point = point * m_localMatrix;
 }
 
 bool Box3Manipulator::findPlugs( MFnDagNode &dagFn )
