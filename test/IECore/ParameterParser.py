@@ -75,6 +75,9 @@ class testParameterParser( unittest.TestCase ) :
 			"-u", "64", "128",
 			"-v", "25", "26", "27",
 			"-w", "0-500x250",
+			"-x", '0', '0', '0', '1', '1', '1', '0', '0', '0', '0', '0', '0', 'Default', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+			"-y", '0', '0', '0', '1', '1', '1', '0', '0', '0', '0', '0', '0', 'Default', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+
 			], a.parameters() )
 
 		a()
@@ -127,6 +130,8 @@ class testParameterParser( unittest.TestCase ) :
 			"-u", "64", "128",
 			"-v", "25", "26", "27",
 			"-w", "0-500x250",
+			"-x", '0', '0', '0', '1', '1', '1', '0', '0', '0', '0', '0', '0', 'Default', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+			"-y", '0', '0', '0', '1', '1', '1', '0', '0', '0', '0', '0', '0', 'Default', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
 			], a.parameters() )
 
 		a()
@@ -304,6 +309,33 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( s, p )
 
 		self.assertEqual( p["a"].getValue(), v )
+
+	def testTransformationMatrixParsing( self ) :
+
+		p = IECore.CompoundParameter(
+			members = [
+				IECore.TransformationMatrixfParameter(
+					name = "t",
+					description = "d",
+					defaultValue = IECore.TransformationMatrixf(),
+				),
+			]
+		)
+		
+		args = [ "-t", '1', '2', '3', '10', '11', '12', '4', '5', '6', '7', '8', '9', 'ZYX', '1', '21', '22', '23', '26', '27', '28', '36', '37', '38', '46', '47', '48', '56', '57', '58' ]
+		IECore.ParameterParser().parse( args, p )
+		
+		t = p["t"].getTypedValue()
+		self.assertEqual( t.translate,IECore.V3f( 1,2,3 ) )
+		self.assertEqual( t.scale,IECore.V3f( 10,11,12 ) )
+		self.assertEqual( t.shear, IECore.V3f( 4,5,6 ) )
+		self.assertEqual( t.rotate, IECore.V3f( 7,8,9 ) )
+		self.assertEqual( t.rotate.order(),IECore.Eulerf.Order.ZYX )
+		self.assertEqual( t.rotationOrientation, IECore.Quatf( 1,21,22,23 ) )
+		self.assertEqual( t.rotatePivot, IECore.V3f( 26,27,28 ) )
+		self.assertEqual( t.rotatePivotTranslation, IECore.V3f( 36,37,38 ) )
+		self.assertEqual( t.scalePivot, IECore.V3f( 46,47,48 ) )
+		self.assertEqual( t.scalePivotTranslation, IECore.V3f( 56,57,58 ) )
 
 	def testDatetimeParsing( self ) :
 

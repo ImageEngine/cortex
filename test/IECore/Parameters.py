@@ -1348,6 +1348,56 @@ class TestIntVectorParameter( unittest.TestCase ) :
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
 
+class TestTransformationMatixParameter( unittest.TestCase ) :
+
+	def test( self ) :
+
+		tm = TransformationMatrixfData()
+		p = TransformationMatrixfParameter(
+			name = "f",
+			description = "d",
+			defaultValue = tm,
+		)
+		p.validate()		
+		
+		self.assertEqual( p.name, "f" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.valueValid()[0], True )
+
+		self.failUnless( isinstance( p.getTypedValue().translate, V3f ) )
+		self.assertEqual( p.getTypedValue().translate, V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotate, Eulerf( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotationOrientation, Quatf( 1,0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scale, V3f( 1,1,1 ) )
+		self.assertEqual( p.getTypedValue().shear, V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivot, V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivotTranslation, V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivot, V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivotTranslation, V3f( 0,0,0 ) )
+		
+		tm = TransformationMatrixdData()
+		p = TransformationMatrixdParameter(
+			name = "f",
+			description = "d",
+			defaultValue = tm,
+		)
+		p.validate()		
+
+		self.assertEqual( p.name, "f" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.valueValid()[0], True )
+		
+		self.failUnless( isinstance( p.getTypedValue().translate, V3d ) )
+		self.assertEqual( p.getTypedValue().translate, V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotate, Eulerd( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotationOrientation, Quatd( 1,0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scale, V3d( 1,1,1 ) )
+		self.assertEqual( p.getTypedValue().shear, V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivot, V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivotTranslation, V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivot, V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivotTranslation, V3d( 0,0,0 ) )		
+
 class TestPathVectorParameter( unittest.TestCase ) :
 
 	def test( self ) :

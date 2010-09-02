@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,39 +32,39 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IE_COREMAYA_TRANSFORMATIONMATRIXPARAMETERHANDLER_H
+#define IE_COREMAYA_TRANSFORMATIONMATRIXPARAMETERHANDLER_H
 
-#include "IECorePython/TypedParameterBinding.h"
-#include "IECore/SimpleTypedParameter.h"
+#include "IECoreMaya/ParameterHandler.h"
 
-using namespace std;
-using namespace Imath;
+#include "maya/MObject.h"
+#include "maya/MString.h"
+#include "maya/MPlug.h"
 
-namespace IECorePython
+namespace IECoreMaya
 {
 
-void bindSimpleTypedParameter()
+/// A ParameterHandler which deals with IECore::TransformationMatrixes
+/// \todo Expose and add support for other rotation orders supported by Imath::Euler<T>
+template<typename T>
+class TransformationMatrixParameterHandler : public ParameterHandler
 {
-	bindTypedParameter<bool>();
-	bindTypedParameter<V2i>();
-	bindTypedParameter<V3i>();
-	bindTypedParameter<V2f>();
-	bindTypedParameter<V3f>();
-	bindTypedParameter<V2d>();
-	bindTypedParameter<V3d>();
-	bindTypedParameter<Color3f>();
-	bindTypedParameter<Color4f>();
-	bindTypedParameter<Box2i>();
-	bindTypedParameter<Box3i>();
-	bindTypedParameter<Box2f>();
-	bindTypedParameter<Box3f>();
-	bindTypedParameter<Box2d>();
-	bindTypedParameter<Box3d>();
-	bindTypedParameter<M44f>();
-	bindTypedParameter<M44d>();
-	bindTypedParameter<string>();
-	bindTypedParameter<IECore::TransformationMatrixf>();
-	bindTypedParameter<IECore::TransformationMatrixd>();
-}
+	protected:
+		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;
+		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
+	
+	private:
+	
+		static MString g_attributeNames[];
+		
+		MStatus setVecValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;
+		MStatus getVecValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;
+		MStatus setVecDefaultValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;
+		MStatus setUnitVecDefaultValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;	
+};
 
-} // namespace IECorePython
+} // namespace IECoreMaya
+
+#endif // IE_COREMAYA_TRANSFORMATIONMATRIXPARAMETERHANDLER_H

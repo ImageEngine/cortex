@@ -91,3 +91,4 @@ from NumericVectorParameterUI import NumericVectorParameterUI
 from StringVectorParameterUI import StringVectorParameterUI
 import ProceduralHolderUI
 from ManipulatorUI import *
+from TransformationMatrixParameterUI import TransformationMatrixParameterUI

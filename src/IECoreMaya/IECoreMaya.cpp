@@ -74,6 +74,7 @@
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/DrawableHolder.h"
 #include "IECoreMaya/GeometryCombiner.h"
+#include "IECoreMaya/TransformationMatrixManipulator.h"
 
 // see ObjectParameterHandler::doUpdate() for an explanation of the necessity for dummy data
 static void *dummyDataCreator()
@@ -184,7 +185,11 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerNode( "ieBox3fParameterManipulator", Box3Manipulator::id,
 			Box3Manipulator::creator, Box3Manipulator::initialize, MPxNode::kManipContainer, &manipClassification );
 		assert( s );
-
+	
+		s = plugin.registerNode( "ieTransformationMatrixfParameterManipulator", TransformationMatrixManipulator::id,
+			TransformationMatrixManipulator::creator, TransformationMatrixManipulator::initialize, MPxNode::kManipContainer, &manipClassification );
+		assert( s );
+		
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
 

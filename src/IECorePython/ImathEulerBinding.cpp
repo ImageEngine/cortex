@@ -60,7 +60,7 @@ void bindImathEuler()
 	bindEuler<float>("Eulerf");
 	bindEuler<double>("Eulerd");
 }
-
+/// \todo Handle rotation order
 #define DEFINEEULERSTRSPECIALISATION( EULER )\
 \
 template<>\

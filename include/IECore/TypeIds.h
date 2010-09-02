@@ -377,6 +377,8 @@ enum TypeId
 	AddSmoothSkinningInfluencesOpTypeId = 331,
 	LimitSmoothSkinningInfluencesOpTypeId = 332,
 	PointsPrimitiveEvaluatorTypeId = 333,
+	TransformationMatrixfParameterTypeId = 334,
+	TransformationMatrixdParameterTypeId = 335,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

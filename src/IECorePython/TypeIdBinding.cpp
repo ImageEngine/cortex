@@ -380,6 +380,8 @@ void bindTypeId()
 		.value( "AddSmoothSkinningInfluencesOp", AddSmoothSkinningInfluencesOpTypeId )
 		.value( "LimitSmoothSkinningInfluencesOp", LimitSmoothSkinningInfluencesOpTypeId )
 		.value( "PointsPrimitiveEvaluator", PointsPrimitiveEvaluatorTypeId )
+		.value( "TransformationMatrixfParameter", TransformationMatrixfParameterTypeId )
+		.value( "TransformationMatrixdParameter", TransformationMatrixdParameterTypeId )
 	;
 }
 

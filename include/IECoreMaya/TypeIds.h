@@ -111,6 +111,7 @@ enum TypeId
 	FromMayaArrayDataConverteribTypeId = 109064,
 	FromMayaMatrixVectorDataConverterTypeId = 109065,
 	ToMayaMatrixVectorDataConverterTypeId = 109066,
+	TransformationMatrixManipulatorTypeId = 109067,
 	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
 };

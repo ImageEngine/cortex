@@ -46,7 +46,7 @@ class parameterTypes( Op ) :
 				defaultValue = 0,
 			)
 		)
-
+		
 		self.parameters().addParameters(
 
 			[
@@ -211,7 +211,21 @@ class parameterTypes( Op ) :
 					description = "A FrameList",
 					defaultValue = "",
 				),
-
+				
+				TransformationMatrixfParameter(
+					name = "x",
+					description = "",
+					defaultValue = TransformationMatrixf(),
+				),
+				
+				# We'd like to have one with a non-standard rotation order
+				# here, but they're not currently supported in Maya.
+				TransformationMatrixdParameter(
+					name = "y",
+					description = "",
+					defaultValue = TransformationMatrixd(),
+				),
+				
 				ImagePrimitiveParameter(
 					name = "p1",
 					description = "",
@@ -249,6 +263,9 @@ class parameterTypes( Op ) :
 					defaultValue = MeshPrimitive(),
 					types = [ TypeId.MeshPrimitive ]
 				),
+				
+		
+				
 			]
 		)
 
@@ -276,6 +293,8 @@ class parameterTypes( Op ) :
 		assert args["u"] == V2iData( V2i( 64, 128 ) )
 		assert args["v"] == V3iData( V3i( 25, 26, 27 ) )
 		assert self["w"].getFrameListValue().asList() == FrameRange( 0, 500, 250 ).asList()
+		assert args["x"] == TransformationMatrixfData()
+		assert args["y"] == TransformationMatrixdData()
 
 		return IntData( 1 )
 

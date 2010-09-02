@@ -39,6 +39,7 @@
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TypedParameter.h"
+#include "IECore/TransformationMatrix.h"
 
 namespace IECore
 {
@@ -61,6 +62,8 @@ typedef TypedParameter<Imath::Box2d> Box2dParameter;
 typedef TypedParameter<Imath::Box3d> Box3dParameter;
 typedef TypedParameter<Imath::M44f> M44fParameter;
 typedef TypedParameter<Imath::M44d> M44dParameter;
+typedef TypedParameter<TransformationMatrixf> TransformationMatrixfParameter;
+typedef TypedParameter<TransformationMatrixd> TransformationMatrixdParameter;
 
 IE_CORE_DECLAREPTR( BoolParameter );
 IE_CORE_DECLAREPTR( StringParameter );
@@ -80,7 +83,8 @@ IE_CORE_DECLAREPTR( Box2dParameter );
 IE_CORE_DECLAREPTR( Box3dParameter );
 IE_CORE_DECLAREPTR( M44fParameter );
 IE_CORE_DECLAREPTR( M44dParameter );
-
+IE_CORE_DECLAREPTR( TransformationMatrixfParameter );
+IE_CORE_DECLAREPTR( TransformationMatrixdParameter );
 }
 
 #endif // IE_CORE_SIMPLETYPEDPARAMETER_H

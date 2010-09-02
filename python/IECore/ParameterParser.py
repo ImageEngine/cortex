@@ -397,6 +397,52 @@ def __parseNumericArray( dataType, integer, args, parameter ) :
 				done = True
 
 	parameter.setValidatedValue( d )
+	
+def __parseTransformationMatrix( dataType, args, parameter ) :
+
+	if not len(args) :
+		raise SyntaxError( "Expected 29 values." )
+
+	if dataType == IECore.TransformationMatrixfData :
+		vecType = IECore.V3f
+		angleType = IECore.Eulerf
+		orientationType = IECore.Quatf
+	else :
+		vecType = IECore.V3d
+		angleType = IECore.Eulerd
+		orientationType = IECore.Quatd
+
+	t = type(dataType().value)()
+
+	t.translate = vecType( float(args[0]), float(args[1]), float(args[2] ) )
+	del args[0:3]
+	
+	t.scale = vecType( float(args[0]), float(args[1]), float(args[2] ) )
+	del args[0:3]	
+	
+	t.shear = vecType( float(args[0]), float(args[1]), float(args[2] ) )
+	del args[0:3]
+	
+	t.rotate = angleType( float(args[0]), float(args[1]), float(args[2] ) )
+	t.rotate.setOrder( getattr( angleType.Order, args[3] ) )
+	del args[0:4]
+	
+	t.rotationOrientation = orientationType( float(args[0]), float(args[1]), float(args[2] ), float(args[3]) )
+	del args[0:4]
+	
+	t.rotatePivot = vecType( float(args[0]), float(args[1]), float(args[2] ) )
+	del args[0:3]
+	
+	t.rotatePivotTranslation = vecType( float(args[0]), float(args[1]), float(args[2] ) )
+	del args[0:3]
+	
+	t.scalePivot = vecType( float(args[0]), float(args[1]), float(args[2] ) )
+	del args[0:3]
+	
+	t.scalePivotTranslation = vecType( float(args[0]), float(args[1]), float(args[2] ) )
+	del args[0:3]
+	
+	parameter.setValidatedValue( dataType(t) )
 
 def __serialiseString( parameter ) :
 
@@ -417,6 +463,22 @@ def __serialiseUsingSplitStr( parameter ) :
 def _serialiseUsingRepr( parameter ) :
 
 	return [ "python:" + repr( parameter.getValidatedValue() ) ]
+
+def __serialiseTransformationMatrix( parameter ) :
+
+	t = parameter.getValidatedValue().value
+	retList = []
+	retList.extend( str(t.translate).split() )
+	retList.extend( str(t.scale).split() )
+	retList.extend( str(t.shear).split() )
+	retList.extend( str(t.rotate).split() )
+	retList.append( str(t.rotate.order()) )
+	retList.extend( str(t.rotationOrientation).split() )
+	retList.extend( str(t.rotatePivot).split() )
+	retList.extend( str(t.rotatePivotTranslation).split() )
+	retList.extend( str(t.scalePivot).split() )
+	retList.extend( str(t.scalePivotTranslation).split() )
+	return retList
 
 ParameterParser.registerType( IECore.BoolParameter.staticTypeId(), __parseBool, __serialiseUsingStr )
 ParameterParser.registerType( IECore.IntParameter.staticTypeId(), ( lambda args, parameter : __parseNumeric( IECore.IntData, True, args, parameter ) ), __serialiseUsingStr )
@@ -453,5 +515,7 @@ ParameterParser.registerType( IECore.Box2iParameter.staticTypeId(), ( lambda arg
 ParameterParser.registerType( IECore.Box3iParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box3iData, IECore.Box3i, IECore.V3i, True, args, parameter ) ), __serialiseUsingSplitStr )
 ParameterParser.registerType( IECore.SplineffParameter.staticTypeId(), None, _serialiseUsingRepr )
 ParameterParser.registerType( IECore.SplinefColor3fParameter.staticTypeId(), None, _serialiseUsingRepr )
+ParameterParser.registerType( IECore.TransformationMatrixfParameter.staticTypeId(), ( lambda args, parameter : __parseTransformationMatrix( IECore.TransformationMatrixfData, args, parameter ) ), __serialiseTransformationMatrix )
+ParameterParser.registerType( IECore.TransformationMatrixdParameter.staticTypeId(), ( lambda args, parameter : __parseTransformationMatrix( IECore.TransformationMatrixdData, args, parameter ) ), __serialiseTransformationMatrix )
 
 __all__ = [ "ParameterParser" ]

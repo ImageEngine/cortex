@@ -107,6 +107,8 @@ void bindTypeId()
 		.value( "ToMayaSkinClusterConverter", ToMayaSkinClusterConverterTypeId )
 		.value( "FromMayaMatrixVectorDataConverter", FromMayaMatrixVectorDataConverterTypeId )
 		.value( "ToMayaMatrixVectorDataConverter", ToMayaMatrixVectorDataConverterTypeId )
+		.value( "Box3Manipulator", Box3ManipulatorTypeId )
+		.value( "TransformationMatrixManipulator", TransformationMatrixManipulatorTypeId )
 	;
 }
 
