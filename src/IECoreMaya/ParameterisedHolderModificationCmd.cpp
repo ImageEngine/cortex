@@ -43,6 +43,8 @@
 
 #include "IECore/Object.h"
 #include "IECore/CompoundParameter.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
 
 #include "IECoreMaya/ParameterisedHolderModificationCmd.h"
 #include "IECoreMaya/ClassParameterHandler.h"
@@ -51,7 +53,10 @@
 using namespace IECoreMaya;
 using namespace IECore;
 
-IECore::ObjectPtr ParameterisedHolderModificationCmd::g_undoValue = 0;
+IECore::ConstObjectPtr ParameterisedHolderModificationCmd::g_originalValue = 0;
+IECore::ConstCompoundDataPtr ParameterisedHolderModificationCmd::g_originalClasses = 0;
+IECore::ConstObjectPtr ParameterisedHolderModificationCmd::g_newValue = 0;
+IECore::ConstCompoundDataPtr ParameterisedHolderModificationCmd::g_newClasses = 0;
 
 ParameterisedHolderModificationCmd::ParameterisedHolderModificationCmd()
 	:	m_parameterisedHolder( 0 ), m_originalValues( 0 ), m_newValues( 0 ), m_changingClass( false )
@@ -121,25 +126,19 @@ MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
 		return MS::kFailure;
 	}	
 		
-	// store the original (maya side) values of everything.
+	// store the original and new values of everything. these are just passed in from
+	// the FnParameterisedHolder. in the case of changing the held class we won't have
+	// any new values.
 	
-	ParameterisedInterface *parameterised = m_parameterisedHolder->getParameterisedInterface();
-	if( parameterised )
-	{
-		if( m_changingClass )
-		{
-			m_parameterisedHolder->setParameterisedValues();
-			m_originalValues = parameterised->parameters()->getValue()->copy();
-			storeClassParameterStates( m_originalClassInfo, parameterised->parameters(), "", false /* all of em */ );
-		}
-		else
-		{
-			assert( g_undoValue );
-			m_originalValues = g_undoValue;
-			g_undoValue = 0;
-			storeClassParameterStates( m_originalClassInfo, parameterised->parameters(), "", true /* only the ones that have been changed */ );
-		}
-	}
+	m_originalValues = g_originalValue;
+	m_originalClasses = g_originalClasses;
+	m_newValues = g_newValue;
+	m_newClasses = g_newClasses;
+	
+	g_originalValue = 0;
+	g_originalClasses = 0;
+	g_newValue = 0;
+	g_newClasses = 0;
 	
 	// change the maya side class or monkey with the maya side class parameters as requested. then remember the new values
 	// of everything and which parameters are changing so we can push them in and out during undo and redo.
@@ -157,10 +156,8 @@ MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
 	}
 	else
 	{
-		m_newValues = parameterised->parameters()->getValue()->copy();
 		storeParametersWithNewValues( m_originalValues, m_newValues, "" );	
 		m_parameterisedHolder->updateParameterised();
-		storeClassParameterStates( m_newClassInfo, m_parameterisedHolder->getParameterisedInterface()->parameters(), "", false );
 		setNodeValuesForParametersWithNewValues();
 		despatchClassSetCallbacks();
 	}
@@ -185,9 +182,9 @@ MStatus ParameterisedHolderModificationCmd::undoIt()
 		}
 	}
 	
-	if( m_originalClassInfo.classParameters.size() || m_originalClassInfo.classVectorParameters.size() )
+	if( m_originalClasses->readable().size() )
 	{
-		restoreClassParameterStates( m_originalClassInfo, m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
+		restoreClassParameterStates( m_originalClasses, m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
 		m_parameterisedHolder->updateParameterised();
 	}
 	
@@ -228,7 +225,7 @@ MStatus ParameterisedHolderModificationCmd::redoIt()
 	}
 	else
 	{
-		restoreClassParameterStates( m_newClassInfo, m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
+		restoreClassParameterStates( m_newClasses, m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
 		m_parameterisedHolder->getParameterisedInterface()->parameters()->setValue( m_newValues->copy() );
 		m_parameterisedHolder->updateParameterised();
 		setNodeValuesForParametersWithNewValues();
@@ -238,7 +235,7 @@ MStatus ParameterisedHolderModificationCmd::redoIt()
 	return MS::kSuccess;
 }
 
-void ParameterisedHolderModificationCmd::storeClassParameterStates( ClassInfo &classInfo, const IECore::Parameter *parameter, const std::string &parentParameterPath, bool changedOnly )
+void ParameterisedHolderModificationCmd::restoreClassParameterStates( const IECore::CompoundData *classes, IECore::Parameter *parameter, const std::string &parentParameterPath )
 {
 	std::string parameterPath = parentParameterPath;
 	if( parentParameterPath.size() )
@@ -246,72 +243,39 @@ void ParameterisedHolderModificationCmd::storeClassParameterStates( ClassInfo &c
 		parameterPath += ".";
 	}
 	parameterPath += parameter->name();
-	
+		
 	if( parameter->isInstanceOf( "ClassParameter" ) )
-	{
-		MPlug parameterPlug = m_parameterisedHolder->parameterPlug( parameter );
-		if( !parameterPlug.isNull() )
+	{				
+		const CompoundData *c = classes->member<const CompoundData>( parameterPath );
+		if( c )
 		{
-			ClassParameterInfo mayaInfo;
-			ClassParameterHandler::currentClass( parameterPlug, mayaInfo.className, mayaInfo.classVersion, mayaInfo.searchPathEnvVar );
-			ClassParameterInfo realInfo;
-			ClassParameterHandler::getClass( parameter, realInfo.className, realInfo.classVersion, realInfo.searchPathEnvVar );
-			if( !changedOnly || mayaInfo != realInfo )
-			{
-				classInfo.classParameters[parameterPath] = mayaInfo;
-			}
-		}
-	}
-	else if( parameter->isInstanceOf( "ClassVectorParameter" ) )
-	{
-		MPlug parameterPlug = m_parameterisedHolder->parameterPlug( parameter );
-		if( !parameterPlug.isNull() )
-		{
-			ClassVectorParameterInfo mayaInfo;
-			ClassVectorParameterHandler::currentClasses( parameterPlug, mayaInfo.parameterNames, mayaInfo.classNames, mayaInfo.classVersions );
-			ClassVectorParameterInfo realInfo;
-			ClassVectorParameterHandler::getClasses( parameter, realInfo.parameterNames, realInfo.classNames, realInfo.classVersions );
-			if( !changedOnly || mayaInfo != realInfo )
-			{
-				classInfo.classVectorParameters[parameterPath] = mayaInfo;
-			}
-		}
-	}
-	
-	if( parameter->isInstanceOf( IECore::CompoundParameter::staticTypeId() ) )
-	{
-		const CompoundParameter *compoundParameter = static_cast<const CompoundParameter *>( parameter );
-		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
-		for( CompoundParameter::ParameterVector::const_iterator it = childParameters.begin(); it!=childParameters.end(); it++ )
-		{
-			storeClassParameterStates( classInfo, *it, parameterPath, changedOnly );
-		}
-	}
-}
-
-void ParameterisedHolderModificationCmd::restoreClassParameterStates( const ClassInfo &classInfo, IECore::Parameter *parameter, const std::string &parentParameterPath )
-{
-	std::string parameterPath = parentParameterPath;
-	if( parentParameterPath.size() )
-	{
-		parameterPath += ".";
-	}
-	parameterPath += parameter->name();
-	
-	if( parameter->isInstanceOf( "ClassParameter" ) )
-	{		
-		ClassParameterInfoMap::const_iterator it = classInfo.classParameters.find( parameterPath );
-		if( it!=classInfo.classParameters.end() )
-		{
-			ClassParameterHandler::setClass( parameter, it->second.className, it->second.classVersion, it->second.searchPathEnvVar );
+			ClassParameterHandler::setClass(
+				parameter,
+				c->member<const IECore::StringData>( "className" )->readable().c_str(),
+				c->member<const IECore::IntData>( "classVersion" )->readable(),
+				c->member<const IECore::StringData>( "searchPathEnvVar" )->readable().c_str()
+			);
 		}
 	}
 	else if( parameter->isInstanceOf( "ClassVectorParameter" ) )
 	{		
-		ClassVectorParameterInfoMap::const_iterator it = classInfo.classVectorParameters.find( parameterPath );
-		if( it!=classInfo.classVectorParameters.end() )
+		const CompoundData *c = classes->member<const CompoundData>( parameterPath );
+		if( c )
 		{
-			ClassVectorParameterHandler::setClasses( parameter, it->second.parameterNames, it->second.classNames, it->second.classVersions );
+			IECore::ConstStringVectorDataPtr parameterNames = c->member<const IECore::StringVectorData>( "parameterNames" );
+			IECore::ConstStringVectorDataPtr classNames = c->member<const IECore::StringVectorData>( "classNames" );
+			IECore::ConstIntVectorDataPtr classVersions = c->member<const IECore::IntVectorData>( "classVersions" );
+			MStringArray mParameterNames;
+			MStringArray mClassNames;
+			MIntArray mClassVersions;
+			int numClasses = parameterNames->readable().size();
+			for( int i=0; i<numClasses; i++ )
+			{
+				mParameterNames.append( parameterNames->readable()[i].c_str() );
+				mClassNames.append( classNames->readable()[i].c_str() );
+				mClassVersions.append( classVersions->readable()[i] );
+			}
+			ClassVectorParameterHandler::setClasses( parameter, mParameterNames, mClassNames, mClassVersions );
 		}
 	}
 	
@@ -321,7 +285,7 @@ void ParameterisedHolderModificationCmd::restoreClassParameterStates( const Clas
 		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 		for( CompoundParameter::ParameterVector::const_iterator it = childParameters.begin(); it!=childParameters.end(); it++ )
 		{
-			restoreClassParameterStates( classInfo, constPointerCast<Parameter>( *it ), parameterPath );
+			restoreClassParameterStates( classes, constPointerCast<Parameter>( *it ), parameterPath );
 		}
 	}
 }
@@ -446,22 +410,38 @@ void ParameterisedHolderModificationCmd::despatchClassSetCallbacks() const
 	
 	ParameterisedInterface *parameterised = m_parameterisedHolder->getParameterisedInterface();
 
-	ClassParameterInfoMap::const_iterator it;
-	for( it = m_originalClassInfo.classParameters.begin(); it != m_originalClassInfo.classParameters.end(); it++ )
+	std::set<IECore::InternedString> names;
+	for( IECore::CompoundDataMap::const_iterator it=m_originalClasses->readable().begin(); it!=m_originalClasses->readable().end(); it++ )
 	{
-		Parameter *parameter = parameterFromPath( parameterised, it->first );
-		MPlug parameterPlug = m_parameterisedHolder->parameterPlug( parameter );
-		MString plugName = nodeName + "." + parameterPlug.partialName();
-		MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetClassParameterClassCallbacks( \"" + plugName + "\" )" );
+		names.insert( it->first );
 	}
-	
-	ClassVectorParameterInfoMap::const_iterator vit;
-	for( vit = m_originalClassInfo.classVectorParameters.begin(); vit != m_originalClassInfo.classVectorParameters.end(); vit++ )
+	for( IECore::CompoundDataMap::const_iterator it=m_newClasses->readable().begin(); it!=m_newClasses->readable().end(); it++ )
 	{
-		Parameter *parameter = parameterFromPath( parameterised, vit->first );
-		MPlug parameterPlug = m_parameterisedHolder->parameterPlug( parameter );
-		MString plugName = nodeName + "." + parameterPlug.partialName();
-		MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetClassVectorParameterClassesCallbacks( \"" + plugName + "\" )" );
+		names.insert( it->first );
+	}
+
+	for( std::set<IECore::InternedString>::const_iterator it=names.begin(); it!=names.end(); it++ )
+	{
+		Parameter *parameter = parameterFromPath( parameterised, *it );
+		if( parameter )
+		{
+			IECore::CompoundDataMap::const_iterator it1 = m_originalClasses->readable().find( *it );
+			IECore::CompoundDataMap::const_iterator it2 = m_newClasses->readable().find( *it );			
+
+			if( it1==m_originalClasses->readable().end() || it2==m_newClasses->readable().end() || !(it1->second->isEqualTo( it2->second ) ) )
+			{
+				MPlug parameterPlug = m_parameterisedHolder->parameterPlug( parameter );
+				MString plugName = nodeName + "." + parameterPlug.partialName();
+				if( parameter->isInstanceOf( "ClassParameter" ) )
+				{
+					MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetClassParameterClassCallbacks( \"" + plugName + "\" )" );
+				}
+				else
+				{
+					MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetClassVectorParameterClassesCallbacks( \"" + plugName + "\" )" );
+				}
+			}		
+		}
 	}
 }
 
@@ -480,6 +460,10 @@ IECore::Parameter *ParameterisedHolderModificationCmd::parameterFromPath( Parame
 		else
 		{
 			parent = parent->parameter<CompoundParameter>( names[i] );
+			if( !parent )
+			{
+				return 0;
+			}
 		}
 	}
 	

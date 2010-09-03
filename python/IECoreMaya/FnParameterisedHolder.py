@@ -81,6 +81,13 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 				classVersions = IECore.ClassLoader.defaultLoader( envVarName ).versions( classNameOrParameterised )
 				classVersion = classVersions[-1] if classVersions else 0 
 			if undoable :
+				self.setParameterisedValues()
+				_IECoreMaya._parameterisedHolderAssignModificationState(
+					self.getParameterised()[0].parameters().getValue().copy(),
+					self._classParameterStates(),
+					None,
+					None
+				)
 				maya.cmds.ieParameterisedHolderModification( self.fullPathName(), classNameOrParameterised, classVersion, envVarName )
 				# no need to despatch callbacks as that is done by the command, so that the callbacks happen on undo and redo too.
 			else :
@@ -267,7 +274,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	@classmethod
 	def removeSetClassParameterClassCallback( cls, callback ) :
 	
-		cls.__setClassParameterClassCallbacks.remove( callback )
+		cls.__setClassParameterClassCallbacks.remove( callback )  
 		
 	__setClassParameterClassCallbacks = set()
 	
@@ -284,8 +291,51 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		parameter = fnPH.plugParameter( plugPath )
 		for c in cls.__setClassParameterClassCallbacks :
 			c( fnPH, parameter )
-				
 			
+	def _classParameterStates( self, parameter=None, parentParameterPath="", result=None ) :
+	
+		if result is None :
+			result = IECore.CompoundData()
+			
+		if parameter is None :
+			parameter = self.getParameterised()[0].parameters()	
+	
+		parameterPath = parameter.name
+		if parentParameterPath :
+			parameterPath = parentParameterPath + "." + parameterPath
+			
+		if isinstance( parameter, IECore.ClassParameter ) :
+				
+			classInfo = parameter.getClass( True )
+			result[parameterPath] = IECore.CompoundData( {
+				"className" : IECore.StringData( classInfo[1] ),
+				"classVersion" : IECore.IntData( classInfo[2] ),
+				"searchPathEnvVar" : IECore.StringData( classInfo[3] ),	
+			} )
+
+		elif isinstance( parameter, IECore.ClassVectorParameter ) :
+		
+			classInfo = parameter.getClasses( True )
+			if classInfo :
+				classInfo = zip( *classInfo )
+			else :
+				classInfo = [ [], [], [], [] ]
+						
+			result[parameterPath] = IECore.CompoundData({
+				"parameterNames" : IECore.StringVectorData( classInfo[1] ),
+				"classNames" : IECore.StringVectorData( classInfo[2] ),
+				"classVersions" : IECore.IntVectorData( classInfo[3] ),
+			} )
+
+		if isinstance( parameter, IECore.CompoundParameter ) :
+		
+			for c in parameter.values() :
+			
+				self._classParameterStates( c, parameterPath, result )
+
+		return result
+			
+						
 class _ParameterModificationContext :
 
 	def __init__( self, fnPH ) :
@@ -296,8 +346,16 @@ class _ParameterModificationContext :
 	
 		self.__fnPH.setParameterisedValues()
 		self.__originalValues = self.__fnPH.getParameterised()[0].parameters().getValue().copy()
+		self.__originalClasses = self.__fnPH._classParameterStates()
 		
 	def __exit__( self, type, value, traceBack ) :
 	
-		_IECoreMaya._parameterisedHolderAssignUndoValue( self.__originalValues )
+		_IECoreMaya._parameterisedHolderAssignModificationState(
+			self.__originalValues,
+			self.__originalClasses,
+			self.__fnPH.getParameterised()[0].parameters().getValue().copy(),
+			self.__fnPH._classParameterStates(),
+		)
+		
 		maya.cmds.ieParameterisedHolderModification( self.__fnPH.fullPathName() )
+

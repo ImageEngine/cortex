@@ -138,9 +138,12 @@ static ParameterPtr plugParameter( MFnDependencyNode *fnDN, MPlug *plug )
 	return interface( fnDN )->plugParameter( *plug );
 }
 
-void IECoreMaya::parameterisedHolderAssignUndoValue( IECore::ObjectPtr value )
+void IECoreMaya::parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses )
 {
-	ParameterisedHolderModificationCmd::g_undoValue = value;
+	ParameterisedHolderModificationCmd::g_originalValue = originalValue;
+	ParameterisedHolderModificationCmd::g_originalClasses = originalClasses;
+	ParameterisedHolderModificationCmd::g_newValue = newValue;
+	ParameterisedHolderModificationCmd::g_newClasses = newClasses;
 }
 
 void IECoreMaya::bindFnParameterisedHolder()
@@ -155,7 +158,7 @@ void IECoreMaya::bindFnParameterisedHolder()
 	def( "_parameterisedHolderSetParameterisedValue", &setParameterisedValue );
 	def( "_parameterisedHolderParameterPlug", &parameterPlug );
 	def( "_parameterisedHolderPlugParameter", &plugParameter );
-	def( "_parameterisedHolderAssignUndoValue", &parameterisedHolderAssignUndoValue );
+	def( "_parameterisedHolderAssignModificationState", &parameterisedHolderAssignModificationState );
 
 	PointerFromSWIG<MFnDependencyNode>();
 	PointerFromSWIG<MPlug>();

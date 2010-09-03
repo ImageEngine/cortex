@@ -41,6 +41,8 @@
 #include "maya/MSyntax.h"
 #include "maya/MStringArray.h"
 
+#include "IECore/CompoundData.h"
+
 #include "IECoreMaya/ParameterisedHolderInterface.h"
 #include "IECoreMaya/MArrayIter.h"
 
@@ -78,64 +80,8 @@ class ParameterisedHolderModificationCmd : public MPxCommand
 		virtual MStatus redoIt();
 
 	private :
-
-		struct ClassParameterInfo
-		{
-			MString className;
-			int classVersion;
-			MString searchPathEnvVar;
-			bool operator == ( const ClassParameterInfo &other ) const
-			{
-				return className==other.className && classVersion==other.classVersion && searchPathEnvVar==other.searchPathEnvVar;
-			}
-			bool operator != ( const ClassParameterInfo &other ) const
-			{
-				return !(*this == other);
-			}
-		};
-		typedef std::map<std::string, ClassParameterInfo> ClassParameterInfoMap;
 		
-		struct ClassVectorParameterInfo
-		{
-			MStringArray parameterNames;
-			MStringArray classNames;
-			MIntArray classVersions;
-			bool operator == ( const ClassVectorParameterInfo &other ) const
-			{
-				if( parameterNames.length() != other.parameterNames.length() ||
-					classNames.length() != other.classNames.length() ||
-					classVersions.length() != other.classVersions.length() )
-				{
-					return false;
-				}
-				int l = parameterNames.length();
-				for( int i=0; i<l; i++ )
-				{
-					if( parameterNames[i] != other.parameterNames[i] ||
-						classNames[i] != other.classNames[i] ||
-						classVersions[i] != other.classVersions[i]
-					)
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-			bool operator != ( const ClassVectorParameterInfo &other ) const
-			{
-				return !(*this == other);
-			}
-		};
-		typedef std::map<std::string, ClassVectorParameterInfo> ClassVectorParameterInfoMap;
-
-		struct ClassInfo
-		{
-			ClassParameterInfoMap classParameters;
-			ClassVectorParameterInfoMap classVectorParameters;
-		};
-		
-		void storeClassParameterStates( ClassInfo &classInfo, const IECore::Parameter *parameter, const std::string &parentParameterPath, bool changedOnly );
-		void restoreClassParameterStates( const ClassInfo &classInfo, IECore::Parameter *parameter, const std::string &parentParameterPath );
+		void restoreClassParameterStates( const IECore::CompoundData *classes, IECore::Parameter *parameter, const std::string &parentParameterPath );
 		void storeParametersWithNewValues( const IECore::Object *originalValue, const IECore::Object *newValue,  const std::string &parameterPath );
 		void setNodeValuesForParametersWithNewValues() const;
 		void setNodeValue( IECore::Parameter *parameter ) const;
@@ -146,11 +92,11 @@ class ParameterisedHolderModificationCmd : public MPxCommand
 		MObject m_node;
 		ParameterisedHolderInterface *m_parameterisedHolder;
 		
-		ClassInfo m_originalClassInfo;
-		ClassInfo m_newClassInfo;
+		IECore::ConstCompoundDataPtr m_originalClasses;
+		IECore::ConstCompoundDataPtr m_newClasses;
 		
-		IECore::ObjectPtr m_originalValues;
-		IECore::ObjectPtr m_newValues;
+		IECore::ConstObjectPtr m_originalValues;
+		IECore::ConstObjectPtr m_newValues;
 		std::set<std::string> m_parametersWithNewValues;
 		
 		bool m_changingClass;
@@ -163,11 +109,14 @@ class ParameterisedHolderModificationCmd : public MPxCommand
 		MString m_newSearchPathEnvVar;
 		
 		// When using FnParameterisedHolder.classParameterModificationContext(), it is too late
-		// to calculate the parameter value to undo back to in this command, so that value
-		// is passed in from the context manager instead.
-		static IECore::ObjectPtr g_undoValue;
-		friend void parameterisedHolderAssignUndoValue( IECore::ObjectPtr value );
-		
+		// to calculate the state to undo back to in this command, so that state
+		// is passed in from the context manager instead. we also pass in the new values and
+		// classes for simplicity.
+		static IECore::ConstObjectPtr g_originalValue;
+		static IECore::ConstCompoundDataPtr g_originalClasses;
+		static IECore::ConstObjectPtr g_newValue;
+		static IECore::ConstCompoundDataPtr g_newClasses;
+		friend void IECoreMaya::parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses );	
 };
 
 }

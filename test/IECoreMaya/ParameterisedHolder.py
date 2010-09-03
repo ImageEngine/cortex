@@ -732,6 +732,98 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		for p in plugPaths :
 		
 			self.failIf( cmds.objExists( plugPath ) )
+			
+	def testClassParameterRemovalUndoWithChildren( self ) :
+	
+		# make an opholder with a ClassParameter, and check that there is
+		# no class loaded
+		####################################################################
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass, None )
+		self.assertEqual( className, "" )
+		self.assertEqual( classVersion, 0 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+	
+		# set the class and check it worked
+		####################################################################
+				
+		with fnOH.parameterModificationContext() :
+			op["cp"].setClass( "classParameterTest", 1, "IECORE_OP_PATHS" )
+						
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "classParameterTest" )
+		self.assertEqual( className, "classParameterTest" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		# put a class inside the class and check it worked
+		####################################################################
+		
+		with fnOH.parameterModificationContext() :
+			op["cp"]["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )		
+		
+		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
+		bPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["b"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
+		
+		# change some attribute values
+		####################################################################
+		
+		cmds.setAttr( aPlugPath, 10 )
+		cmds.setAttr( bPlugPath, 20 )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+		
+		# check that undo is enabled
+		####################################################################
+		
+		self.assert_( cmds.undoInfo( query=True, state=True ) )
+
+		# remove the top level class
+		####################################################################
+				
+		with fnOH.parameterModificationContext() :
+			op["cp"].setClass( "", -1, "IECORE_OP_PATHS" )
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass, None )
+		self.assertEqual( className, "" )
+		self.assertEqual( classVersion, -1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+				
+		self.failIf( cmds.objExists( aPlugPath ) )
+		self.failIf( cmds.objExists( bPlugPath ) )
+		
+		# undo and check the previous class reappears, along with the child
+		# class and previous attribute values
+		#####################################################################
+										
+		cmds.undo()
+		
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "classParameterTest" )
+		self.assertEqual( className, "classParameterTest" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		childClass, childClassName, childClassVersion, childSearchPath = heldClass["cp"].getClass( True )
+		self.assertEqual( childClass.typeName(), "multiply" )
+		self.assertEqual( childClassName, "maths/multiply" )
+		self.assertEqual( childClassVersion, 1 )
+		self.assertEqual( childSearchPath, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( childClass["a"] )
+		bPlugPath = fnOH.parameterPlugPath( childClass["b"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
 		
 	def testClassParameterReferenceEdits( self ) :
 	
