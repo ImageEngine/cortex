@@ -532,6 +532,58 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_IECORE_OP_PATH",
+	"The directory in which to install the IECore op stubs.",
+	"$INSTALL_PREFIX/ops",
+)
+
+o.Add(
+	"INSTALL_IECORE_OPS",
+	"The IECore C++ ops to install via python stubs.",
+	[
+		( "IECore.SequenceLsOp", "common/fileSystem/seqLs" ), 
+		( "IECore.SequenceCpOp", "common/fileSystem/seqCp" ), 
+		( "IECore.SequenceMvOp", "common/fileSystem/seqMv" ), 
+		( "IECore.SequenceRmOp", "common/fileSystem/Rm" ), 
+		( "IECore.SequenceRenumberOp", "common/fileSystem/seqRenumber" ), 
+		( "IECore.SequenceConvertOp", "common/fileSystem/seqConvert" ),
+		( "IECore.SequenceCatOp", "common/fileSystem/seqCat" ),
+		( "IECore.RemovePrimitiveVariables", "common/primitive/removeVariables" ), 
+		( "IECore.RenamePrimitiveVariables", "common/primitive/renameVariables" ), 
+		( "IECore.PointsExpressionOp", "common/primitive/pointsExpression" ),
+		( "IECore.ClassLsOp", "common/classes/classLs" ), 
+		( "IECore.FileDependenciesOp", "common/fileSystem/depLs" ), 
+		( "IECore.CheckFileDependenciesOp", "common/fileSystem/depCheck" ), 
+		( "IECore.LsHeaderOp", "common/fileSystem/lsHeader" ),
+		( "IECore.SearchReplaceOp", "common/fileSystem/searchReplace" ),
+		( "IECore.CheckImagesOp", "common/fileSystem/checkImages" ),
+		( "IECore.FileSequenceGraphOp", "common/fileSystem/fileSequenceGraph" ),
+		( "IECore.MeshPrimitiveImplicitSurfaceOp", "common/primitive/mesh/implicitSurface" ), 	
+		( "IECore.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
+		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),	 		
+		( "IECore.Grade", "common/colorSpace/grade" ),
+		( "IECore.CubeColorTransformOp", "common/colorSpace/cubeColorTransform" ),
+		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),
+		( "IECore.LinearToCineonOp", "common/colorSpace/linearToCineon" ),
+		( "IECore.SRGBToLinearOp", "common/colorSpace/SRGBToLinear" ),
+		( "IECore.LinearToSRGBOp", "common/colorSpace/linearToSRGB" ),
+		( "IECore.Rec709ToLinearOp", "common/colorSpace/Rec709ToLinear" ),
+		( "IECore.LinearToRec709Op", "common/colorSpace/linearToRec709" ),
+		( "IECore.UVDistortOp", "common/2d/image/uvDistort" ),
+		( "IECore.ImageCompositeOp", "common/2d/image/imageComposite" ),
+		( "IECore.ImageConvolveOp", "common/2d/image/imageConvolve" ),
+		( "IECore.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
+		( "IECore.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
+		( "IECore.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
+		( "IECore.DecompressSmoothSkinningDataOp", "rigging/smoothSkinning/decompress" ),
+		( "IECore.NormalizeSmoothSkinningWeightsOp", "rigging/smoothSkinning/normalizeWeights" ),
+		( "IECore.ReorderSmoothSkinningInfluencesOp", "rigging/smoothSkinning/reorderInfluences" ),
+		( "IECore.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
+		( "IECore.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
+	]
+)
+
+o.Add(
 	"INSTALL_CORE_POST_COMMAND",
 	"A command which is run following a successful installation of "
 	"the core library. This could be used to customise installation "
@@ -965,6 +1017,28 @@ def makeSymLink( target, source ) :
 
 	os.symlink( relativeSource, target )
 	
+# Create an op stub so that a C++ op can be loaded by IECore.ClassLoader
+def createOpStub( op_install_path, full_class_name, stub_path ):
+	module_name = full_class_name.split('.')[0]
+	class_name = '.'.join( full_class_name.split('.')[1:])
+	stub_name = stub_path.split('/')[-1]
+	
+	# make sure our directory exists
+	install_path = "%s/%s" % ( op_install_path, stub_path )
+	if not os.path.exists( install_path ):
+		os.makedirs( install_path )
+		
+	# write our stub file
+	stub_filename = "%s/%s-1.py" % ( install_path, stub_name )
+	stub = open( stub_filename, "w" )
+	stub.write( "from %s import %s as %s\n" % ( module_name, class_name, stub_name ) )
+	stub.close()
+	
+# builder action that creates the C++ op stubs
+def createOpStubs( target, source, env ):
+	for op in env['INSTALL_IECORE_OPS']:
+		createOpStub( env.subst( "$INSTALL_IECORE_OP_PATH" ), op[0], op[1] ) 
+	
 ###########################################################################################
 # Build, install and test the core library and bindings
 ###########################################################################################
@@ -1073,6 +1147,7 @@ corePythonLibrary = corePythonEnv.SharedLibrary( "lib/" + os.path.basename( core
 corePythonLibraryInstall = corePythonEnv.Install( os.path.dirname( corePythonEnv.subst( "$INSTALL_LIB_NAME" ) ), corePythonLibrary )
 corePythonEnv.NoCache( corePythonLibraryInstall )
 corePythonEnv.AddPostAction( corePythonLibraryInstall, lambda target, source, env : makeLibSymLinks( corePythonEnv, libNameVar="INSTALL_PYTHONLIB_NAME" ) )
+corePythonEnv.AddPostAction( corePythonLibraryInstall, createOpStubs )
 corePythonEnv.Alias( "install", [ corePythonLibraryInstall ] )
 corePythonEnv.Alias( "installCore", [ corePythonLibraryInstall ] )
 corePythonEnv.Alias( "installLib", [ corePythonLibraryInstall ] )
