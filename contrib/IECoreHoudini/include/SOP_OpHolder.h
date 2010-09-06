@@ -33,8 +33,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef SOP_PROCEDURALHOLDER_H_
-#define SOP_PROCEDURALHOLDER_H_
+#ifndef SOP_OPHOLDER_H_
+#define SOP_OPHOLDER_H_
 
 // Houdini
 #include <SOP/SOP_Node.h>
@@ -47,17 +47,12 @@
 // IECoreHoudini
 #include "SOP_ParameterisedHolder.h"
 
-// IECoreGL
-#include "IECoreGL/Scene.h"
-
 namespace IECoreHoudini
 {
-	/// SOP class for representing a IECore::ParameterisedProcedural
-	/// in Houdini. Inherits directly from SOP_ParameterisedHolder
-	/// and is visualised by the GR_Cortex render hook.
-	class SOP_ProceduralHolder : public SOP_ParameterisedHolder
+	/// SOP class for representing a IECore::Op
+	/// in Houdini. Inherits directly from SOP_ParameterisedHolder.
+	class SOP_OpHolder : public SOP_ParameterisedHolder
 	{
-		friend class GR_Cortex;
 		public:
 			/// standard houdini ctor and parameter variables
 			static OP_Node *myConstructor( OP_Network *net,
@@ -95,33 +90,39 @@ namespace IECoreHoudini
 					const char *path );
 
 			/// creates and sets a particular type/version of class on this sop
-			void loadProcedural( const std::string &type, int version, bool update_gui=true );
+			void loadOp( const std::string &type, int version, bool update_gui=true );
 
 			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version );
 
-            /// returns a GL scene, rendering it if necessary
-            IECoreGL::ConstScenePtr scene();
+			/// this updates the input connections to match our parameters
+			void refreshInputConnections();
 
             /// mark this procedural's scene as dirty
             void dirty(){ m_renderDirty = true; }
             bool isDirty(){ return m_renderDirty; }
 
 		protected:
-			SOP_ProceduralHolder( OP_Network *net,
+			SOP_OpHolder( OP_Network *net,
 					const char *name,
 					OP_Operator *op );
-			virtual ~SOP_ProceduralHolder();
+			virtual ~SOP_OpHolder();
 			virtual OP_ERROR cookMySop( OP_Context &context );
 
+			virtual const char *inputLabel( unsigned pos ) const;
+			virtual unsigned minInputs() const;
+			virtual unsigned maxInputs() const;
+
 		private:
-			// our cache GL scene
-			IECoreGL::ScenePtr m_scene;
     		bool m_renderDirty;
 
 			// cache the procedural names
-			std::vector<std::string> m_cachedProceduralNames;
+			std::vector<std::string> m_cachedOpNames;
+
+			IECore::ConstCompoundParameterPtr m_parameters; // local const reference to all our op parameters
+			IECore::CompoundParameter::ParameterVector m_inputs; // local cache of node inputs
+			bool m_haveParameterList;
 	};
 
 } // namespace IECoreHoudini
 
-#endif /* SOP_PROCEDURALHOLDER_H_ */
+#endif /* SOP_OPHOLDER_H_ */

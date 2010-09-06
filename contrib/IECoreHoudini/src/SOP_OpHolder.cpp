@@ -49,24 +49,22 @@
 #include <GU/GU_PrimPart.h>
 #include <CH/CH_ExprLanguage.h>
 #include <GEO/GEO_PrimPart.h>
+#include <GB/GB_AttributeRef.h>
+
 
 // Cortex
 #include <IECore/MessageHandler.h>
 #include <IECore/CompoundParameter.h>
 #include <IECore/Object.h>
+#include <IECore/NullObject.h>
 #include <IECore/Op.h>
 #include <IECore/TypedParameter.h>
 #include <IECore/Parameterised.h>
 #include <IECore/CompoundParameter.h>
 #include <IECore/ParameterisedProcedural.h>
 #include <IECore/SimpleTypedData.h>
+#include <IECore/MeshPrimitive.h>
 #include <IECorePython/ScopedGILLock.h>
-
-// IECoreGL
-#include "IECoreGL/IECoreGL.h"
-#include "IECoreGL/GL.h"
-#include "IECoreGL/Renderer.h"
-#include "IECoreGL/Scene.h"
 
 // OpenEXR
 #include <OpenEXR/ImathBox.h>
@@ -83,84 +81,87 @@ using namespace boost;
 
 // IECoreHoudini
 #include "CoreHoudini.h"
-#include "SOP_ProceduralHolder.h"
+#include "SOP_OpHolder.h"
 #include "NodePassData.h"
-#include "FnProceduralHolder.h"
+#include "FnOpHolder.h"
 using namespace IECoreHoudini;
 
 /// Parameter names for non-dynamic SOP parameters
-PRM_Name SOP_ProceduralHolder::opTypeParm( "__opType", "Procedural:" );
-PRM_Name SOP_ProceduralHolder::opVersionParm( "__opVersion", "  Version:" );
-PRM_Name SOP_ProceduralHolder::opParmEval( "__opParmEval", "ParameterEval" );
-PRM_Name SOP_ProceduralHolder::opReloadBtn( "__opReloadBtn", "Reload" );
-PRM_Name SOP_ProceduralHolder::switcherName( "__switcher", "Switcher" );
+PRM_Name SOP_OpHolder::opTypeParm( "__opType", "Op:" );
+PRM_Name SOP_OpHolder::opVersionParm( "__opVersion", "  Version:" );
+PRM_Name SOP_OpHolder::opParmEval( "__opParmEval", "ParameterEval" );
+PRM_Name SOP_OpHolder::opReloadBtn( "__opReloadBtn", "Reload" );
+PRM_Name SOP_OpHolder::switcherName( "__switcher", "Switcher" );
 
-PRM_ChoiceList SOP_ProceduralHolder::typeMenu( PRM_CHOICELIST_SINGLE,
-		&SOP_ProceduralHolder::buildTypeMenu );
-PRM_ChoiceList SOP_ProceduralHolder::versionMenu( PRM_CHOICELIST_SINGLE,
-		&SOP_ProceduralHolder::buildVersionMenu );
+PRM_ChoiceList SOP_OpHolder::typeMenu( PRM_CHOICELIST_SINGLE,
+		&SOP_OpHolder::buildTypeMenu );
+PRM_ChoiceList SOP_OpHolder::versionMenu( PRM_CHOICELIST_SINGLE,
+		&SOP_OpHolder::buildVersionMenu );
 
 /// Detail for our switcher
-PRM_Default SOP_ProceduralHolder::switcherDefaults[] = {
+PRM_Default SOP_OpHolder::switcherDefaults[] = {
 		PRM_Default(0, "Parameters"),
 };
 
 /// Add parameters to SOP
-PRM_Template SOP_ProceduralHolder::myParameters[] = {
-		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
-		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
-		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_ProceduralHolder::reloadButtonCallback ),
+PRM_Template SOP_OpHolder::myParameters[] = {
+		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_OpHolder::reloadClassCallback ),
+		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_OpHolder::reloadClassCallback ),
+		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_OpHolder::reloadButtonCallback ),
 		PRM_Template(PRM_INT, 1, &opParmEval),
 		PRM_Template(PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
 		PRM_Template()
 };
 
 /// Don't worry about variables today
-CH_LocalVariable SOP_ProceduralHolder::myVariables[] = {
+CH_LocalVariable SOP_OpHolder::myVariables[] = {
 		{ 0, 0, 0 },
 };
 
 /// Houdini's static creator method
-OP_Node *SOP_ProceduralHolder::myConstructor( OP_Network *net,
+OP_Node *SOP_OpHolder::myConstructor( OP_Network *net,
 										const char *name,
 										OP_Operator *op )
 {
-    return new SOP_ProceduralHolder(net, name, op);
+    return new SOP_OpHolder(net, name, op);
 }
 
 /// Ctor
-SOP_ProceduralHolder::SOP_ProceduralHolder(OP_Network *net,
+SOP_OpHolder::SOP_OpHolder(OP_Network *net,
 		const char *name,
 		OP_Operator *op ) :
 	SOP_ParameterisedHolder(net, name, op),
-    m_scene(0),
-    m_renderDirty(true)
+    m_renderDirty(true),
+    m_parameters(0),
+    m_haveParameterList(false)
 {
 	getParm("__opParmEval").getTemplatePtr()->setInvisible(true);
 	getParm("__opParmEval").setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
 	getParm("__opParmEval").setLockedFlag( 0, 1 );
 
-	m_cachedProceduralNames = CoreHoudini::proceduralNames();
+	m_cachedOpNames = CoreHoudini::opNames();
+	m_inputs.clear();
 }
 
 /// Dtor
-SOP_ProceduralHolder::~SOP_ProceduralHolder()
+SOP_OpHolder::~SOP_OpHolder()
 {
 }
 
+/// TODO: move this code into parameterised holder
 /// Build type menu
-void SOP_ProceduralHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
+void SOP_OpHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
 		const PRM_SpareData *, PRM_Parm * )
 {
-	SOP_ProceduralHolder *me = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	SOP_OpHolder *me = reinterpret_cast<SOP_OpHolder*>(data);
 	if ( !me )
 		return;
 
 	menu[0].setToken( "" );
-	menu[0].setLabel( "< No Procedural >" );
+	menu[0].setLabel( "< No Op >" );
 	unsigned int pos=1;
 
-	std::vector<std::string> &class_names = me->m_cachedProceduralNames;
+	std::vector<std::string> &class_names = me->m_cachedOpNames;
 	std::vector<std::string>::iterator it;
 	for ( it=class_names.begin(); it!=class_names.end(); ++it )
 	{
@@ -173,18 +174,19 @@ void SOP_ProceduralHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSiz
 	menu[pos].setToken(0);
 }
 
+/// TODO: move this code into parameterised holder
 /// Build version menu
-void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
+void SOP_OpHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
 		const PRM_SpareData *, PRM_Parm *)
 {
-	SOP_ProceduralHolder *me = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	SOP_OpHolder *me = reinterpret_cast<SOP_OpHolder*>(data);
 	if ( !me )
 		return;
 
 	unsigned int pos=0;
 	if ( me->m_className!="" )
 	{
-		std::vector<int> class_versions = CoreHoudini::proceduralVersions( me->m_className );
+		std::vector<int> class_versions = CoreHoudini::opVersions( me->m_className );
 		std::vector<int>::iterator it;
 		for ( it=class_versions.begin(); it!=class_versions.end(); ++it )
 		{
@@ -207,7 +209,8 @@ void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int max
 	menu[pos].setToken(0);
 }
 
-void SOP_ProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version )
+/// TODO: Move this code into parameterised holder
+void SOP_OpHolder::setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version )
 {
 	// disable gui update
 	disableParameterisedUpdate();
@@ -223,13 +226,17 @@ void SOP_ProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const st
 
 	// enable gui update
 	enableParameterisedUpdate();
+
+	// refresh input parameters
+	refreshInputConnections();
 }
 
+/// TODO: move this code into parameterised holder
 /// Callback executed whenever the type/version menus change
-int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time,
+int SOP_OpHolder::reloadClassCallback( void *data, int index, float time,
 		const PRM_Template *tplate)
 {
-	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	SOP_OpHolder *sop = reinterpret_cast<SOP_OpHolder*>(data);
 	if ( !sop )
 	{
 		return 0;
@@ -259,7 +266,7 @@ int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time
 	// if necessary reload and update the interface
 	if ( sop->doParameterisedUpdate() )
 	{
-		sop->m_renderDirty = true; // dirty the scene
+		sop->m_renderDirty = true; // dirty the op
 
 		// should we just clear the procedural?
 		if ( sop->m_className=="" )
@@ -272,31 +279,74 @@ int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time
 			// if we don't have a version, use the default
 			if ( sop->m_classVersion==-1 )
 			{
-				sop->m_classVersion = CoreHoudini::defaultProceduralVersion( sop->m_className );
+				sop->m_classVersion = CoreHoudini::defaultOpVersion( sop->m_className );
 				sop->setString( boost::lexical_cast<std::string>(sop->m_classVersion).c_str(), CH_STRING_LITERAL, "__opVersion", 0, 0 );
 			}
 		}
 
 		// set class/version & refresh gui
-		sop->loadProcedural( sop->m_className, sop->m_classVersion );
+		sop->loadOp( sop->m_className, sop->m_classVersion );
 	}
 	return 1;
 }
 
-void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version, bool update_gui )
+void SOP_OpHolder::refreshInputConnections()
+{
+	// clear our internal cache of input parameters
+	m_parameters = 0;
+	m_inputs.clear();
+
+	IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( getParameterised() );
+	if ( !op )
+		return;
+
+	// work out which parameters need inputs & make them so :)
+	m_parameters = op->parameters();
+	for ( IECore::CompoundParameter::ParameterVector::const_iterator it=m_parameters->orderedParameters().begin();
+			it!=m_parameters->orderedParameters().end(); ++it )
+	{
+		switch( (*it)->typeId() )
+		{
+			case IECore::ObjectParameterTypeId:
+			case IECore::PrimitiveParameterTypeId:
+			case IECore::PointsPrimitiveParameterTypeId:
+			case IECore::MeshPrimitiveParameterTypeId:
+				m_inputs.push_back( (*it) );
+				break;
+			default:
+				break;
+		}
+
+		// \todo: get proper warning in here...
+		if ( m_inputs.size()>4 )
+		{
+			std::cerr << "Cortex Op Holder cannot support more than 4 input parameter connections." << std::endl;
+		}
+	}
+	m_haveParameterList = true;
+
+	//=====
+	// \todo: Geesh, is this really the only we can get the gui to update the input connections?!?
+	setXY( getX()+.0001, getY()+.0001 );
+	setXY( getX()-.0001, getY()-.0001 );
+	//=====
+}
+
+/// TODO: move this code into parameterised holder
+void SOP_OpHolder::loadOp( const std::string &type, int version, bool update_gui )
 {
 	// do we have an existsing procedural?
-	IECore::ParameterisedProceduralPtr old_procedural;
+	IECore::OpPtr old_op;
 
 	// get our current procedural and save it
 	if ( hasParameterised() )
 	{
-		IECore::ParameterisedProceduralPtr procedural =
-				IECore::runTimeCast<IECore::ParameterisedProcedural>(
+		IECore::OpPtr op =
+				IECore::runTimeCast<IECore::Op>(
 						getParameterised() );
-		if ( procedural )
+		if ( op )
 		{
-			old_procedural = procedural;
+			old_op = op;
 		}
 	}
 
@@ -304,17 +354,21 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 	IECore::RunTimeTypedPtr proc;
 	if ( type!="" && version!=-1 )
 	{
-		proc = loadParameterised( type, version, "IECORE_PROCEDURAL_PATHS" );
+		proc = loadParameterised( type, version, "IECORE_OP_PATHS" );
 	}
 
 	// check our procedural
 	if ( proc )
 	{
+		// set out parameterised on our opholder
 		setParameterised( proc, type, version );
 	}
 	else
 	{
-		UT_String msg( "Procedural Holder has no parameterised class to operate on!" );
+		m_parameters = 0;
+		m_inputs.clear();
+		m_haveParameterList = false;
+		UT_String msg( "Op Holder has no parameterised class to operate on!" );
     	addError( SOP_MESSAGE, msg );
 	}
 
@@ -325,7 +379,7 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 		// python method from the IECoreHoudini module.
 		UT_String my_path;
 		getFullPath( my_path );
-		std::string cmd = "IECoreHoudini.FnProceduralHolder( hou.node( \"";
+		std::string cmd = "IECoreHoudini.FnOpHolder( hou.node( \"";
 		cmd += my_path.buffer();
 		cmd += "\") )";
 		{
@@ -335,7 +389,7 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 				handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
 					CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
 				object fn( resultHandle );
-				fn.attr("addRemoveParameters")( proc, old_procedural );
+				fn.attr("addRemoveParameters")( proc, old_op );
 			}
 			catch( ... )
 			{
@@ -345,126 +399,126 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 	}
 }
 
+/// TODO: move this code into parameterised holder
 /// Callback executed whenever the reload button is clicked
-int SOP_ProceduralHolder::reloadButtonCallback( void *data, int index, float time,
+int SOP_OpHolder::reloadButtonCallback( void *data, int index, float time,
 		const PRM_Template *tplate)
 {
-	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	SOP_OpHolder *sop = reinterpret_cast<SOP_OpHolder*>(data);
 	if ( !sop )
 	{
 		return 0;
 	}
 
-	CoreHoudini::evalPython( "IECore.ClassLoader.defaultProceduralLoader().refresh()" );
-	sop->loadProcedural( sop->m_className, sop->m_classVersion );
-	
+	CoreHoudini::evalPython( "IECore.ClassLoader.defaultOpLoader().refresh()" );
+	sop->loadOp( sop->m_className, sop->m_classVersion );
+
 	return 1;
 }
 
-/// Redraws the OpenGL Scene if the procedural is marked as having changed
-/// (aka dirty).
-IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
-{
-	IECore::ParameterisedProceduralPtr procedural =
-			IECore::runTimeCast<IECore::ParameterisedProcedural>(
-					getParameterised() );
-
-	if ( !procedural )
-	{
-		return 0;
-	}
-
-	if ( m_renderDirty || !m_scene )
-	{
-		IECorePython::ScopedGILLock gilLock;
-		try
-		{
-			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
-			renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
-			renderer->worldBegin();
-			procedural->render( renderer );
-			renderer->worldEnd();
-			m_scene = renderer->scene();
-		}
-		catch( const std::exception &e )
-		{
-			std::cerr << e.what() << std::endl;
-		}
-		catch( ... )
-		{
-			std::cerr << "Unknown!" << std::endl;
-		}
-
-		m_renderDirty = false;
-	}
-	return m_scene;
-}
-
 /// Cook the SOP! This method does all the work
-OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
+OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 {
 	// some defaults and useful variables
+    Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );
 	float now = context.myTime;
 
 	// force eval of our nodes parameters with our hidden parameter expression
 	evalInt( "__opParmEval", 0, now );
 
-	// update parameters on procedural from our Houdini parameters
-	IECore::ParameterisedProceduralPtr procedural =
-			IECore::runTimeCast<IECore::ParameterisedProcedural>(
-					getParameterised() );
+	// get our op
+	IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( getParameterised() );
 
 	// check for a valid parameterised on this SOP
-    if ( !procedural )
+    if ( !op )
     {
-    	UT_String msg( "Procedural Holder has no parameterised class to operate on!" );
+    	UT_String msg( "Op Holder has no parameterised class to operate on!" );
     	addError( SOP_MESSAGE, msg );
     	return error();
     }
+
+    if( lockInputs(context)>=UT_ERROR_ABORT )
+    	return error();
 
 	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building OpHolder Geometry...");
 	gdp->clearAndDestroy();
 
-	// do we need to redraw?
-	bool do_update = updateParameters( procedural, now);
-	if ( do_update )
+	// loop through inputs getting the upstream geometry detail & putting it into our Op's parameters
+	for ( unsigned int i=0; i<m_inputs.size(); ++i )
+	{
+		IECore::ParameterPtr input_parameter = m_inputs[i];
+		const GU_Detail *input_gdp = inputGeo( i, context );
+		if ( !input_gdp )
+			continue;
+
+	    if ( input_gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) ) // looks like data passed from another OpHolder
+	    {
+	    	GB_AttributeRef attrOffset = input_gdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
+	    	const NodePassData *pass_data = input_gdp->attribs().castAttribData<NodePassData>( attrOffset );
+	    	if ( pass_data->type()==IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
+	    	{
+	    		SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>(const_cast<OP_Node*>(pass_data->nodePtr()));
+				IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
+				const IECore::Parameter *result_parameter = op->resultParameter();
+				const IECore::ConstObjectPtr result_object(result_parameter->getValue());
+				input_parameter->setValue( IECore::constPointerCast<IECore::Object>( result_object ));
+	    	}
+	    }
+	    else // otherwise looks like a regular Houdini detail
+	    {
+	    	// TODO: here we need to convert a GU_Detail to a Cortex Primitive that we can set on our input parameter
+	    	// cortex_object = FromHoudiniConverter( input_gdp ).convert()
+	    	// input_parameter->setValue( cortex_object )
+	    }
+	}
+
+	// update parameters from our op & flag as dirty if necessary
+	bool req_update = updateParameters( op, now);
+	if ( req_update )
 	{
 		dirty();
 	}
 
-	// calculate our bounding box
-	IECorePython::ScopedGILLock gilLock;
+	// if we have an op, make it do itself
 	try
 	{
-		// put our cortex passdata on our gdp as a detail attribute
-		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER );
+		// make our Cortex op do it's thing...
+		op->operate();
+
+		// pass ourselves onto the GR_Cortex render hook
+		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_OPHOLDER );
 		gdp->addAttrib( "IECoreHoudini::NodePassData",
 				sizeof(IECoreHoudini::NodePassData), GB_ATTRIB_MIXED, &data );
 
-		// calculate our bounding box
-	    Imath::Box3f bbox = procedural->bound();
-		gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y,
-				bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
+		// if our result is a visible renderable then set our bounds on our output gdp
+		const IECore::Object *result = op->resultParameter()->getValue();
+		IECore::ConstVisibleRenderablePtr renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( result );
+		if ( renderable )
+		{
+			Imath::Box3f bbox = renderable->bound();
+			gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y,
+					bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
+		}
 	}
 	catch( boost::python::error_already_set )
 	{
+		IECorePython::ScopedGILLock gilLock;
 		PyErr_Print();
 	}
 	catch( const std::exception &e )
 	{
-		std::cerr << "Procedural::bound() " << e.what() << std::endl;
+		std::cerr << e.what() << std::endl;
 	}
 	catch( ... )
 	{
-		std::cerr << "Procedural::bound() Caught unknown exception!"
-			<< std::endl;
+		std::cerr << "Caught unknown exception!" << std::endl;
 	}
 
 	// tidy up & go home!
 	boss->opEnd();
-
+	unlockInputs();
 	return error();
 }
 
@@ -472,10 +526,11 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 /// It checks for type/version values on the node and attempts to reload
 /// the procedural from disk
 /// \todo: not entirely certain this is returning the correct thing...
-bool SOP_ProceduralHolder::load( UT_IStream &is,
+bool SOP_OpHolder::load( UT_IStream &is,
 		const char *ext,
 		const char *path )
 {
+	m_haveParameterList = false;
 	bool loaded = OP_Node::load( is, ext, path );
 
 	// look at type/version parameters
@@ -493,8 +548,39 @@ bool SOP_ProceduralHolder::load( UT_IStream &is,
 	// if we can, set our class & version
 	if ( m_className!="" && m_classVersion!=-1 )
 	{
-		loadProcedural( m_className, m_classVersion, false );
+		loadOp( m_className, m_classVersion, false );
 	}
-	
+
 	return loaded;
+}
+
+const char *SOP_OpHolder::inputLabel( unsigned pos ) const
+{
+	if ( pos>m_inputs.size()-1 )
+		return "";
+
+	const IECore::CompoundParameter::ParameterVector &params = m_parameters->orderedParameters();
+	if ( pos>params.size()-1 ) // shouldn't happen
+		return "";
+	return params[pos]->name().c_str();
+}
+
+unsigned SOP_OpHolder::minInputs() const
+{
+	// TODO: need to check for 'required' inputs and increase this number accordingly
+	return 0;
+}
+
+unsigned SOP_OpHolder::maxInputs() const
+{
+	// this makes sure when we first load we have 4 inputs
+	// the wires get connected before the Op is loaded onto the Sop
+	// so
+	if ( !m_haveParameterList )
+		return 4;
+
+	if ( m_inputs.size()>4 )
+		return 4;
+	else
+		return m_inputs.size();
 }

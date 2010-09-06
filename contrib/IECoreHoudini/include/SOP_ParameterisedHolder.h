@@ -46,6 +46,7 @@
 #include <IECore/Parameterised.h>
 #include <IECore/ClassData.h>
 #include <IECore/Parameter.h>
+#include <IECore/Op.h>
 #include <IECore/ParameterisedProcedural.h>
 #include <IECore/CompoundParameter.h>
 

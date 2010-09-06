@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -33,54 +35,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef COREHOUDINI_H_
-#define COREHOUDINI_H_
+#include "boost/python.hpp"
 
-#include <boost/python.hpp>
-#include <string>
-#include <vector>
+#include <SOP/SOP_Node.h>
 
-namespace IECoreHoudini
+#include "FnOpHolderBinding.h"
+#include "FnOpHolder.h"
+
+using namespace boost::python;
+using namespace IECoreHoudini;
+
+void IECoreHoudini::bindFnOpHolder()
 {
-	class CoreHoudini
-	{
-		public:
-
-			/// This loads hou into the global context
-			static void initPython();
-
-			/// Utility method to import a python module into the
-			/// global context
-			static void import( const std::string &module );
-
-			/// Utility method for getting the global python context
-			static boost::python::object &globalContext() {
-				return g_globalContext;
-			}
-
-			/// Utility method for getting the current global time
-			static float currTime();
-
-			/// Run misc python command
-			static void evalPython( const std::string &cmd );
-
-			/// get the ops we could load
-			static std::vector<std::string> opNames();
-			static std::vector<int> opVersions( const std::string &type );
-			static int defaultOpVersion( const std::string &type );
-
-			/// get the procedurals we could load
-			static std::vector<std::string> proceduralNames();
-			static std::vector<int> proceduralVersions( const std::string &type );
-			static int defaultProceduralVersion( const std::string &type );
-
-		private:
-			/// our global context
-			static boost::python::object g_globalContext;
-
-			/// initialized
-			static bool g_initialized;
-	};
+	class_< FnOpHolder  >("_FnOpHolder")
+		.def(init<SOP_Node*>())
+		.def("setParameterised", &FnOpHolder::setParameterised)
+		.def("hasParameterised", &FnOpHolder::hasParameterised)
+		.def("getParameterised", &FnOpHolder::getParameterised)
+	;
 }
-
-#endif /* COREHOUDINI_H_ */

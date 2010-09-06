@@ -33,18 +33,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// Boost
+#include <boost/python.hpp>
+
 // Houdini
 #include <UT/UT_DSOVersion.h>
 #include <UT/UT_Version.h>
 #include <OP/OP_OperatorTable.h>
 #include <GR/GR_RenderTable.h>
 
-// Boost
-#include <boost/python.hpp>
-
 // IECoreHoudini
+#include "SOP_OpHolder.h"
 #include "SOP_ProceduralHolder.h"
-#include "GR_Procedural.h"
+#include "GR_Cortex.h"
 using namespace IECoreHoudini;
 
 /// Tell Houdini that this plugin should be loaded with RTLD_GLOBAL
@@ -68,14 +69,23 @@ void newSopOperator(OP_OperatorTable *table)
     				0, // Max # of sources
     				SOP_ProceduralHolder::myVariables, // Local variables
     				OP_FLAG_GENERATOR) ); // Flag it as generator
+	table->addOperator(
+			new OP_Operator("ieOpHolder", // Internal name
+					"Cortex Op", // UI name
+					SOP_OpHolder::myConstructor, // How to build the SOP
+					SOP_OpHolder::myParameters, // My parameters
+    				0, // Min # of sources
+    				4, // Max # of sources
+    				SOP_OpHolder::myVariables, // Local variables
+    				OP_FLAG_GENERATOR) ); // Flag it as generator
 }
 
 /// Declare our new Render Hooks
 void newRenderHook( GR_RenderTable *table )
 {
-    GR_Procedural *hook = new GR_Procedural;
+	GR_Cortex *hook = new GR_Cortex;
 #if UT_MAJOR_VERSION_INT >= 11
-    table->addHook(hook,GR_RENDER_HOOK_VERSION);
+    table->addHook(hook, GR_RENDER_HOOK_VERSION);
 #else
     table->addHook(hook);
 #endif

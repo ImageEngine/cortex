@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -33,54 +35,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef COREHOUDINI_H_
-#define COREHOUDINI_H_
+#ifndef FNOPHOLDER_H
+#define FNOPHOLDER_H
 
-#include <boost/python.hpp>
-#include <string>
-#include <vector>
+// Houdini
+#include <SOP/SOP_Node.h>
+
+// Cortex
+#include <IECore/Op.h>
+#include <IECore/CompoundParameter.h>
+
+// IECoreHoudini
+#include "NodeHandle.h"
+#include "FnParameterisedHolder.h"
 
 namespace IECoreHoudini
 {
-	class CoreHoudini
+	class SOP_OpHolder;
+	class FnOpHolder : public FnParameterisedHolder
 	{
+		friend class SOP_OpHolder;
 		public:
+			FnOpHolder( SOP_Node *sop=0 );
+			virtual ~FnOpHolder();
 
-			/// This loads hou into the global context
-			static void initPython();
+			SOP_OpHolder *getOpHolder( SOP_Node *sop );
 
-			/// Utility method to import a python module into the
-			/// global context
-			static void import( const std::string &module );
+			virtual bool hasParameterised();
+			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version );
+			virtual IECore::RunTimeTypedPtr getParameterised();
 
-			/// Utility method for getting the global python context
-			static boost::python::object &globalContext() {
-				return g_globalContext;
-			}
-
-			/// Utility method for getting the current global time
-			static float currTime();
-
-			/// Run misc python command
-			static void evalPython( const std::string &cmd );
-
-			/// get the ops we could load
-			static std::vector<std::string> opNames();
-			static std::vector<int> opVersions( const std::string &type );
-			static int defaultOpVersion( const std::string &type );
-
-			/// get the procedurals we could load
-			static std::vector<std::string> proceduralNames();
-			static std::vector<int> proceduralVersions( const std::string &type );
-			static int defaultProceduralVersion( const std::string &type );
-
-		private:
-			/// our global context
-			static boost::python::object g_globalContext;
-
-			/// initialized
-			static bool g_initialized;
 	};
 }
 
-#endif /* COREHOUDINI_H_ */
+#endif /* FNOPHOLDER_H */

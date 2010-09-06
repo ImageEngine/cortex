@@ -87,6 +87,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	CoreHoudini::initPython();
 
 	bindTypeId();
+	bindFnOpHolder();
 	bindFnProceduralHolder();
 	bindFromHoudiniConverter();
 	bindFromHoudiniNodeConverter();

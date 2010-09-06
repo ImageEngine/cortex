@@ -40,7 +40,7 @@
 #include <UT/UT_Version.h>
 #include <RE/RE_Render.h>
 #include <UT/UT_Interrupt.h>
-#include "GB/GB_AttributeRef.h"
+#include <GB/GB_AttributeRef.h>
 
 // Cortex
 #include <IECoreGL/Scene.h>
@@ -55,46 +55,84 @@
 #include <IECore/SimpleTypedData.h>
 
 // IECoreHoudini
-#include "GR_Procedural.h"
+#include "GR_Cortex.h"
+#include "SOP_OpHolder.h"
 #include "SOP_ProceduralHolder.h"
+#include "NodePassData.h"
 using namespace IECoreHoudini;
 
 // ctor
-GR_Procedural::GR_Procedural()
+GR_Cortex::GR_Cortex()
 {
 	IECoreGL::init( true );
 }
 // dtor
-GR_Procedural::~GR_Procedural()
+GR_Cortex::~GR_Cortex()
 {
 }
 
 // Tell Houdini to only render GU_ProceduralDetails with this
 // render hook.
-int GR_Procedural::getWireMask( GU_Detail *gdp,
+int GR_Cortex::getWireMask( GU_Detail *gdp,
 		const GR_DisplayOption *dopt
 		) const
 {
-	if ( gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
+	if ( gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) )
+	{
 		return 0;
+	}
 	else
+	{
     	return GEOPRIMALL;
+	}
 }
 
 // Tell Houdini to only render GU_ProceduralDetails with this
 // render hook.
-int GR_Procedural::getShadedMask( GU_Detail *gdp,
+int GR_Cortex::getShadedMask( GU_Detail *gdp,
 		const GR_DisplayOption *dopt
 		) const
 {
-	if ( gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
-        return 0;
-    else
+	if ( gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) )
+	{
+		return 0;
+	}
+	else
+	{
     	return GEOPRIMALL;
+	}
+}
+
+// Render our ParameterisedProcedural in wireframe
+void GR_Cortex::renderWire( GU_Detail *gdp,
+    RE_Render &ren,
+    const GR_AttribOffset &ptinfo,
+    const GR_DisplayOption *dopt,
+    float lod,
+    const GU_PrimGroupClosure *hidden_geometry
+    )
+{
+    // our render state
+    IECoreGL::ConstStatePtr displayState = getDisplayState( dopt, true );
+    render( gdp, displayState );
+}
+
+// Render our ParameterisedProcedural in shaded
+void GR_Cortex::renderShaded( GU_Detail *gdp,
+		RE_Render &ren,
+		const GR_AttribOffset &ptinfo,
+		const GR_DisplayOption *dopt,
+		float lod,
+		const GU_PrimGroupClosure *hidden_geometry
+		)
+{
+    // our render state
+    IECoreGL::ConstStatePtr displayState = getDisplayState( dopt, false );
+    render( gdp, displayState );
 }
 
 // Get a Cortex display state based on the Houdini display options
-IECoreGL::ConstStatePtr GR_Procedural::getDisplayState(
+IECoreGL::ConstStatePtr GR_Cortex::getDisplayState(
 		const GR_DisplayOption *dopt,
 		bool wireframe
 		)
@@ -116,32 +154,9 @@ IECoreGL::ConstStatePtr GR_Procedural::getDisplayState(
 	return state;
 }
 
-// Render our ParameterisedProcedural in wireframe
-void GR_Procedural::renderWire( GU_Detail *gdp,
-    RE_Render &ren,
-    const GR_AttribOffset &ptinfo,
-    const GR_DisplayOption *dopt,
-    float lod,
-    const GU_PrimGroupClosure *hidden_geometry
-    )
+// Renders an OpenGL scene (normally from a parameterisedprocedural)
+void GR_Cortex::renderScene( IECoreGL::ConstScenePtr scene, IECoreGL::ConstStatePtr displayState )
 {
-	if ( !gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
-		return;
-
-	GB_AttributeRef attrOffset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
-	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>( attrOffset );
-	
-	if ( !sop )
-		return;
-
-    // our render state
-    IECoreGL::ConstStatePtr displayState = getDisplayState( dopt, true );
-
-	// our render scene
-	IECoreGL::ConstScenePtr scene = sop->ptr()->scene();
-    if ( !scene )
-    	return;
-
     // render our scene
 	GLint prevProgram;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
@@ -149,35 +164,69 @@ void GR_Procedural::renderWire( GU_Detail *gdp,
 	glUseProgram( prevProgram );
 }
 
-// Render our ParameterisedProcedural in shaded
-void GR_Procedural::renderShaded( GU_Detail *gdp,
-		RE_Render &ren,
-		const GR_AttribOffset &ptinfo,
-		const GR_DisplayOption *dopt,
-		float lod,
-		const GU_PrimGroupClosure *hidden_geometry
-		)
+// Renders an object directly (nbrmally from an opHolder)
+void GR_Cortex::renderObject( const IECore::Object *object, IECoreGL::ConstStatePtr displayState )
 {
-	if ( !gdp->attribs().find("IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED) )
+	// try and cast this to a visible renderable
+	IECore::ConstVisibleRenderablePtr renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object );
+	if ( !renderable )
 		return;
 
-	GB_AttributeRef attrOffset = gdp->attribs().getOffset( "IECoreHoudini::SOP_ProceduralHolder", GB_ATTRIB_MIXED );
-	SOP_ProceduralPassStruct *sop = gdp->attribs().castAttribData<SOP_ProceduralPassStruct>( attrOffset );
+    // render our object into a buffer
+	IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
+	renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
+	renderer->worldBegin();
+	renderable->render( renderer );
+	renderer->worldEnd();
+	IECoreGL::ConstScenePtr scene = renderer->scene();
 
-	if ( !sop )
-		return;
-
-    // our render state
-    IECoreGL::ConstStatePtr displayState = getDisplayState( dopt, false );
-
-	// our render scene
-	IECoreGL::ConstScenePtr scene = sop->ptr()->scene();
-    if ( !scene )
-    	return;
-
-    // render our scene
+	// now render
 	GLint prevProgram;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
 	scene->root()->render( displayState );
 	glUseProgram( prevProgram );
+}
+
+// general cortex render function, takes a gu_detail and uses the NodePassData attribute
+// to call the required render method
+void GR_Cortex::render( GU_Detail *gdp, IECoreGL::ConstStatePtr displayState )
+{
+    // gl scene from a parameterised procedural
+    if ( gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) )
+    {
+    	GB_AttributeRef attrOffset = gdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
+    	NodePassData *pass_data = gdp->attribs().castAttribData<NodePassData>( attrOffset );
+
+    	switch( pass_data->type() )
+    	{
+    		case IECoreHoudini::NodePassData::CORTEX_OPHOLDER:
+    		{
+    			SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>( const_cast<OP_Node*>( pass_data->nodePtr() ) );
+				if ( !sop )
+					return;
+				IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
+				if ( !op )
+					return;
+				const IECore::Parameter *result_parameter = op->resultParameter();
+				const IECore::Object *result_object = result_parameter->getValue();
+				renderObject( result_object, displayState );
+    			break;
+    		}
+
+    		case IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER:
+    		{
+    			SOP_ProceduralHolder *sop = dynamic_cast<SOP_ProceduralHolder*>( const_cast<OP_Node*>( pass_data->nodePtr() ) );
+    			if ( !sop )
+    				return;
+    	    	IECoreGL::ConstScenePtr scene = sop->scene();
+    	    	if ( !scene )
+    	    		return;
+    	    	renderScene( scene, displayState );
+    			break;
+    		}
+
+    		default:
+    			break;
+    	}
+    }
 }

@@ -33,8 +33,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef GR_PROCEDURAL_H_
-#define GR_PROCEDURAL_H_
+#ifndef GR_CORTEX_H_
+#define GR_CORTEX_H_
 
 // Houdini
 #include <GR/GR_Detail.h>
@@ -50,14 +50,14 @@ namespace IECoreHoudini
 {
 	/// Custom GL render hook for Houdini.
 	/// This class is responsible for rendering in OpenGL our
-	/// ParameterisedProcedural.
-	class GR_Procedural : public GR_RenderHook
+	/// Cortex primitives and GL scenes.
+	class GR_Cortex : public GR_RenderHook
     {
         public:
 			/// ctor
-			GR_Procedural();
+			GR_Cortex();
 			/// dtor
-            virtual ~GR_Procedural();
+            virtual ~GR_Cortex();
 
             /// Tell Houdini if a particular detail should be
             /// rendered using this render hook.
@@ -87,10 +87,15 @@ namespace IECoreHoudini
                     float lod,
                     const GU_PrimGroupClosure *hidden_geometry );
 
+            /// Methods to render stuff in openGL
+            void render( GU_Detail *gdp, IECoreGL::ConstStatePtr displayState );
+            void renderObject( const IECore::Object *object, IECoreGL::ConstStatePtr displayState );
+            void renderScene( IECoreGL::ConstScenePtr scene, IECoreGL::ConstStatePtr displayState );
+
             /// Tells Houdini what our render hook is called.
             virtual const char *getName() const
             {
-            	return "IECoreHoudini::GR_Procedural";
+            	return "IECoreHoudini::GR_Cortex";
             }
 
         private:
@@ -103,4 +108,4 @@ namespace IECoreHoudini
 
 } // namespace IECoreHoudini
 
-#endif /* GR_PROCEDURAL_H_ */
+#endif /* GR_CORTEX_H_ */

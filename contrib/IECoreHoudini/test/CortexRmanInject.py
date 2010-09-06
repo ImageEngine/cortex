@@ -41,22 +41,23 @@ import os
 import glob
 import shutil
 
-class TestCortexRmanInject( unittest.TestCase ):
+# todo: need to skip this if hou.isApprentice() returns true
+class TestCortexRmanInject(unittest.TestCase):
 
 	# test we can create and assign an rman inject SHOP
 	# note the procedural has an expression-driven parameter to
 	# check it's being evaluated correctly
 	def testCreateRmanInject(self):
-		procedural = IECoreHoudini.FnProceduralHolder.create( "cortex_sphere", "sphereProcedural", 1 )
+		procedural = IECoreHoudini.FnProceduralHolder.create("cortex_sphere", "sphereProcedural", 1)
 		procedural.parm("parm_radius").setExpression("$F")
-		assert( procedural )
+		assert(procedural)
 		rmaninject = hou.node("/shop").createNode("cortexRmanInject")
-		assert( rmaninject )
+		assert(rmaninject)
 		rmaninject.parm("procedural").set(procedural.path())
 		procedural.parent().parm("shop_materialpath").set(rmaninject.path())
-		assert( procedural.parent().evalParm("shop_materialpath") == rmaninject.path() )
-		assert( hou.node(procedural.parent().evalParm("shop_materialpath")) )
-		assert( hou.node(procedural.parent().evalParm("shop_materialpath")).evalParm("procedural") == procedural.path() )
+		assert(procedural.parent().evalParm("shop_materialpath") == rmaninject.path())
+		assert(hou.node(procedural.parent().evalParm("shop_materialpath")))
+		assert(hou.node(procedural.parent().evalParm("shop_materialpath")).evalParm("procedural") == procedural.path())
 
 	# test we can render our rmaninject correctly and that the parameters
 	# serialise as expected
@@ -65,44 +66,44 @@ class TestCortexRmanInject( unittest.TestCase ):
 		hou.hipFile.clear(suppress_save_prompt=True)
 		self.testCreateRmanInject()
 		# create a camera
-		camera = hou.node("/obj").createNode( "cam", node_name="cam1" )
-		assert( camera )
+		camera = hou.node("/obj").createNode("cam", node_name="cam1")
+		assert(camera)
 		# create a mantra rop
-		rman = hou.node("/out").createNode( "rib", node_name="rman_out" )
-		assert( rman )
+		rman = hou.node("/out").createNode("rib", node_name="rman_out")
+		assert(rman)
 		rman.parm("camera").set(camera.path())
 		# set path
 		rman.parm("rib_outputmode").set(True)
 		rman.parm("soho_diskfile").set(rib_file)
 		# render
 		try:
-			rman.render( frame_range=(1,10) )
+			rman.render(frame_range=(1, 10))
 		except:
 			assert(False)
 		# check ribs made it
 		ribs = glob.glob("test/cortexRmanInject_testData/testrman.????.rib")
-		assert( len(ribs)==10 )
+		assert(len(ribs) == 10)
 		# make sure the procedurals got in there
 		procs = []
 		for rib in ribs:
 			for line in open(rib):
 				if 'Procedural "DynamicLoad"' in line:
 					procs.append(line.strip())
- 		assert( len(procs)==10 )
- 		assert( "iePython" in procs[0] )
- 		assert( "['-radius', '1', '-theta', '360']" in procs[0] )
- 		assert( "['-radius', '2', '-theta', '360']" in procs[1] )
- 		assert( "['-radius', '3', '-theta', '360']" in procs[2] )
- 		assert( "[-1 1 -1 1 -1 1]" in procs[0])
+ 		assert(len(procs) == 10)
+ 		assert("iePython" in procs[0])
+ 		assert("['-radius', '1', '-theta', '360']" in procs[0])
+ 		assert("['-radius', '2', '-theta', '360']" in procs[1])
+ 		assert("['-radius', '3', '-theta', '360']" in procs[2])
+ 		assert("[-1 1 -1 1 -1 1]" in procs[0])
 
-	def setUp( self ) :
-                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
-                if not os.path.exists( "test/cortexRmanInject_testData" ):
-			os.mkdir( "test/cortexRmanInject_testData" )
+	def setUp(self) :
+		os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+		if not os.path.exists("test/cortexRmanInject_testData"):
+			os.mkdir("test/cortexRmanInject_testData")
 
-	def tearDown( self ) :
-                if os.path.exists( "test/cortexRmanInject_testData" ):
-			shutil.rmtree( "test/cortexRmanInject_testData" )
+	def tearDown(self) :
+		if os.path.exists("test/cortexRmanInject_testData"):
+			shutil.rmtree("test/cortexRmanInject_testData")
 
 if __name__ == "__main__":
     unittest.main()

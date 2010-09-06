@@ -361,7 +361,7 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 	}
 }
 
-/// Utility class which loads a ParameterisedProcedural from Disk
+/// Utility class which loads a Procedural from Disk
 IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised(
 		const std::string &type,
 		int version,
@@ -383,7 +383,9 @@ IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised(
 		);
 		boost::python::object result( resultHandle );
 		new_procedural = boost::python::extract<IECore::RunTimeTypedPtr>(result)();
-		if ( IECore::runTimeCast<IECore::ParameterisedProcedural>(new_procedural)==0 )
+
+		if ( IECore::runTimeCast<IECore::ParameterisedProcedural>(new_procedural)==0 &&
+				IECore::runTimeCast<IECore::Op>(new_procedural)==0 )
 		{
 			new_procedural = 0;
 		}

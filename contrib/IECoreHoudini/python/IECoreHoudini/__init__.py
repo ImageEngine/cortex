@@ -45,6 +45,7 @@ import IECore
 from _IECoreHoudini import *
 
 # function sets
+from FnOpHolder import FnOpHolder
 from FnProceduralHolder import FnProceduralHolder
 
 # misc utility methods

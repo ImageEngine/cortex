@@ -46,12 +46,14 @@
 
 // IECoreHoudini
 #include "NodeHandle.h"
+#include "SOP_OpHolder.h"
 #include "SOP_ParameterisedHolder.h"
 
 namespace IECoreHoudini
 {
 	class FnParameterisedHolder
 	{
+		friend class FnOpHolder;
 		friend class FnProceduralHolder;
 		public:
 			FnParameterisedHolder();
