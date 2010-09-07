@@ -41,7 +41,6 @@ import os
 import glob
 import shutil
 
-# todo: need to skip this if hou.isApprentice() returns true
 class TestCortexRmanInject(unittest.TestCase):
 
 	# test we can create and assign an rman inject SHOP
@@ -61,7 +60,11 @@ class TestCortexRmanInject(unittest.TestCase):
 
 	# test we can render our rmaninject correctly and that the parameters
 	# serialise as expected
+	# Note: rendering with 3rd party renderers is not supported under Apprentice
+	# so this test will return a PASS on apprentice regardless
 	def testRenderRmanInject(self):
+		if hou.isApprentice():
+			return
 		rib_file = "test/cortexRmanInject_testData/testrman.$F4.rib"
 		hou.hipFile.clear(suppress_save_prompt=True)
 		self.testCreateRmanInject()
