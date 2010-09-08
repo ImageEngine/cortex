@@ -32,19 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTERBINDING_H
+#define IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTERBINDING_H
 
-#include "FromHoudiniNodeConverter.h"
-#include "bindings/FromHoudiniNodeConverterBinding.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace IECoreHoudini;
-using namespace boost::python;
-
-void IECoreHoudini::bindFromHoudiniNodeConverter()
+namespace IECoreHoudini
 {
-	IECorePython::RunTimeTypedClass<FromHoudiniNodeConverter>()
-		.def( "create", FromHoudiniNodeConverter::create, ( arg_( "node" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+	void bindFromHoudiniGeometryConverter();
 }
+
+#endif // IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTERBINDING_H

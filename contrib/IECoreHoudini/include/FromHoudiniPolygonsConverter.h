@@ -38,18 +38,19 @@
 #include "IECore/MeshPrimitive.h"
 
 #include "TypeIds.h"
-#include "FromHoudiniSopConverter.h"
+#include "FromHoudiniGeometryConverter.h"
 
 namespace IECoreHoudini
 {
 
-/// Converter which converts from Houdini SOP geometry to IECore::MeshPrimitive
-class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniSopConverter
+/// Converter which converts from a Houdini GU_Detail to an IECore::MeshPrimitive
+class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniPolygonsConverter, FromHoudiniPolygonsConverterTypeId, IECore::ToCoreConverter );
 
+		FromHoudiniPolygonsConverter( const GU_DetailHandle &handle );
 		FromHoudiniPolygonsConverter( const SOP_Node *sop );
 
 		virtual ~FromHoudiniPolygonsConverter();
@@ -61,7 +62,7 @@ class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniSopConvert
 
 	private :
 
-		static FromHoudiniNodeConverter::Description<FromHoudiniPolygonsConverter> m_description;
+		static FromHoudiniGeometryConverter::Description<FromHoudiniPolygonsConverter> m_description;
 };
 
 // register our converter

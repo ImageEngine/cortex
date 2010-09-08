@@ -35,47 +35,76 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_H
-#define IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_H
+#ifndef IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_H
+#define IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_H
 
 #include "GB/GB_AttributeRef.h"
 #include "GU/GU_Detail.h"
+#include "GU/GU_DetailHandle.h"
 #include "SOP/SOP_Node.h"
 
 #include "IECore/Primitive.h"
 
 #include "TypeIds.h"
-#include "FromHoudiniNodeConverter.h"
+#include "FromHoudiniConverter.h"
 
 namespace IECoreHoudini
 {
-	
-/// The FromHoudiniSopConverter class forms a base class for all classes able to perform
-/// some kind of conversion from a Houdini SOP_Node to an IECore::Primitive.
-class FromHoudiniSopConverter : public IECoreHoudini::FromHoudiniNodeConverter
+
+IE_CORE_FORWARDDECLARE( FromHoudiniGeometryConverter );
+
+/// The FromHoudiniGeometryConverter class forms a base class for all classes able to perform
+/// some kind of conversion from a Houdini GU_Detail to an IECore::Primitive.
+class FromHoudiniGeometryConverter : public FromHoudiniConverter
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniSopConverter, FromHoudiniSopConverterTypeId, IECore::ToCoreConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniGeometryConverter, FromHoudiniGeometryConverterTypeId, IECore::ToCoreConverter );
 
-		typedef SOP_Node FromType;
+		//! @name Factory
+		//////////////////////////////////////////////////////////////////////////////////////////
+		//@{
+		/// Creates a converter which will convert the given Houdini GU_Detail to an IECore::Primitive.
+		/// If resultType is specified then only converters which create objects of that
+		/// type will be returned - the default value allows any suitable converter to be
+		/// created. If no matching converters exist then returns 0.
+		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, IECore::TypeId resultType=IECore::InvalidTypeId );
+		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, IECore::TypeId resultType=IECore::InvalidTypeId );
+		//@}
 		
 	protected :
 
-		FromHoudiniSopConverter( const SOP_Node *sop, const std::string &description );
+		FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description );
+		FromHoudiniGeometryConverter( const SOP_Node *sop, const std::string &description );
 
-		virtual ~FromHoudiniSopConverter();
+		virtual ~FromHoudiniGeometryConverter();
 
-		/// Implemented to call doPrimitiveConversion() Derived classes need not reimplement this function,
-		/// but should instead implement doPrimitiveConversion().
+		/// Implemented to aquire the read lock on the GU_Detail held by the GU_DetailHandle,
+		/// call doPrimitiveConversion(), and finally unlock the GU_Detail. Derived classes
+		/// need not reimplement this function, but should instead implement doPrimitiveConversion().
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
-		/// Must be implemented by derived classes to return a Primitive created to represent the specified GU_Detail.
+		/// Must be implemented by derived classes to return a IECore::Primitive created to represent the specified GU_Detail.
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const = 0;
 		
-		/// Retrieves the SOP_Node held by the converter
-		SOP_Node *sop() const;
+		typedef FromHoudiniGeometryConverterPtr (*CreatorFn)( const GU_DetailHandle &handle );
+
+		static void registerConverter( IECore::TypeId resultType, bool isDefault, CreatorFn creator );
+
+		/// Creating a static instance of one of these (templated on your Converter type)
+		/// within your class will register your converter with the factory mechanism.
+		template<class T>
+		class Description
+		{
+			public :
+				Description( IECore::TypeId resultType, bool isDefault = false );
+			private :
+				static FromHoudiniGeometryConverterPtr creator( const GU_DetailHandle &handle );
+		};
 		
-		/// Extracts position and attribs from Houdini and stores them as primitive variables on the IECore::Primitive provided.
+		/// extracts the GU_DetailHandle from a SOP_Node
+		static const GU_DetailHandle handle( const SOP_Node *sop );
+		
+		/// Extracts position and attribs from the GU_Detail and stores them as primitive variables on the IECore::Primitive provided.
 		/// In most cases, this is the only transfer function that derived classes will need to use
 		void transferAttribs(
 			const GU_Detail *geo, IECore::Primitive *result,
@@ -108,15 +137,23 @@ class FromHoudiniSopConverter : public IECoreHoudini::FromHoudiniNodeConverter
 		IECore::DataPtr extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const;
 
 	private :
+		
+		// the handle to the GU_Detail
+		GU_DetailHandle m_geoHandle;
+		
+		struct Types
+		{
+			Types( IECore::TypeId result );
+			IECore::TypeId resultType;
+			bool operator < ( const Types &other ) const;
+		};
 
-		static FromHoudiniNodeConverter::Description<FromHoudiniSopConverter> m_description;
+		typedef std::map<Types, CreatorFn> TypesToFnsMap;
+		static TypesToFnsMap *typesToFns();
 };
-
-// register our converter
-IE_CORE_DECLAREPTR( FromHoudiniSopConverter );
 
 }
 
-#include "FromHoudiniSopConverter.inl"
+#include "FromHoudiniGeometryConverter.inl"
 
-#endif // IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_H
+#endif // IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_H

@@ -44,13 +44,14 @@ namespace IECoreHoudini
 	/// Define Cortex Type Ids for our converter class.
 	enum TypeId
 	{
-		FromHoudiniSopConverterTypeId = 111000,
-		FromHoudiniConverterTypeId = 111001,
-		FromHoudiniNodeConverterTypeId = 111002,
-		FromHoudiniPointsConverterTypeId = 111003,
-		FromHoudiniParticlesConverterTypeId = 111004,
-		FromHoudiniPolygonsConverterTypeId = 111005,
-		ToHoudiniConverterTypeId = 111006,
+		FromHoudiniConverterTypeId = 111000,
+		FromHoudiniGeometryConverterTypeId = 111001,
+		FromHoudiniPointsConverterTypeId = 111002,
+		FromHoudiniPolygonsConverterTypeId = 111003,
+		ToHoudiniConverterTypeId = 111004,
+		ToHoudiniGeometryConverterTypeId = 111005,
+		ToHoudiniPointsConverterTypeId = 111006,
+		ToHoudiniPolygonsConverterTypeId = 111007,
 		// remember to update TypeIdBinding.cpp
 		LastTypeId = 111999,
 	};

@@ -46,12 +46,13 @@ void bindTypeId()
 {
 	enum_<TypeId>( "TypeId" )
 		.value( "FromHoudiniConverter", FromHoudiniConverterTypeId )
-		.value( "FromHoudiniNodeConverter", FromHoudiniNodeConverterTypeId )
-		.value( "FromHoudiniSopConverter", FromHoudiniSopConverterTypeId )
+		.value( "FromHoudiniGeometryConverter", FromHoudiniGeometryConverterTypeId )
 		.value( "FromHoudiniPointsConverter", FromHoudiniPointsConverterTypeId )
-		.value( "FromHoudiniParticlesConverter", FromHoudiniParticlesConverterTypeId )
 		.value( "FromHoudiniPolygonsConverter", FromHoudiniPolygonsConverterTypeId )
 		.value( "ToHoudiniConverter", ToHoudiniConverterTypeId )
+		.value( "ToHoudiniGeometryConverter", ToHoudiniGeometryConverterTypeId )
+		.value( "ToHoudiniPointsConverter", ToHoudiniPointsConverterTypeId )
+		.value( "ToHoudiniPolygonsConverter", ToHoudiniPolygonsConverterTypeId )
 	;
 }
 

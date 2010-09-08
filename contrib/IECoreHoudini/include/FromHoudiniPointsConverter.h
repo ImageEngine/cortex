@@ -38,18 +38,19 @@
 #include "IECore/PointsPrimitive.h"
 
 #include "TypeIds.h"
-#include "FromHoudiniSopConverter.h"
+#include "FromHoudiniGeometryConverter.h"
 
 namespace IECoreHoudini
 {
 
-/// Converter which converts from Houdini SOP geometry to IECore::PointsPrimitive
-class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniSopConverter
+/// Converter which converts from a Houdini GU_Detail to an IECore::PointsPrimitive
+class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniPointsConverter, FromHoudiniPointsConverterTypeId, IECore::ToCoreConverter );
 
+		FromHoudiniPointsConverter( const GU_DetailHandle &handle );
 		FromHoudiniPointsConverter( const SOP_Node *sop );
 
 		virtual ~FromHoudiniPointsConverter();
@@ -61,7 +62,7 @@ class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniSopConverter
 
 	private :
 
-		static FromHoudiniNodeConverter::Description<FromHoudiniPointsConverter> m_description;
+		static FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> m_description;
 };
 
 // register our converter

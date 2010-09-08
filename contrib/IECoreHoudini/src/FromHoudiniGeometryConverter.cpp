@@ -38,30 +38,29 @@
 #include "IECore/CompoundObject.h"
 
 #include "CoreHoudini.h"
-#include "FromHoudiniSopConverter.h"
+#include "FromHoudiniGeometryConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
-IE_CORE_DEFINERUNTIMETYPED( FromHoudiniSopConverter );
+IE_CORE_DEFINERUNTIMETYPED( FromHoudiniGeometryConverter );
 
-// ctor
-FromHoudiniSopConverter::FromHoudiniSopConverter( const SOP_Node *sop, const std::string &description ) :
-	FromHoudiniNodeConverter( sop, description )
+FromHoudiniGeometryConverter::FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description )
+	: FromHoudiniConverter( description ), m_geoHandle( handle )
 {
 }
 
-// dtor
-FromHoudiniSopConverter::~FromHoudiniSopConverter()
+FromHoudiniGeometryConverter::FromHoudiniGeometryConverter( const SOP_Node *sop, const std::string &description )
+	: FromHoudiniConverter( description )
+{
+	m_geoHandle = handle( sop );
+}
+
+FromHoudiniGeometryConverter::~FromHoudiniGeometryConverter()
 {
 }
 
-SOP_Node *FromHoudiniSopConverter::sop() const
-{
-	return CAST_SOPNODE( node() );
-}
-
-ObjectPtr FromHoudiniSopConverter::doConversion( ConstCompoundObjectPtr operands ) const
+const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
 {
 	// find global time
 	float time = CoreHoudini::currTime();
@@ -69,16 +68,15 @@ ObjectPtr FromHoudiniSopConverter::doConversion( ConstCompoundObjectPtr operands
 	// create the work context
 	OP_Context context;
 	context.setTime( time );
-
-	// get the sop
-	SOP_Node *sop = this->sop();
-	if( !sop )
-	{
-		return 0;
-	}
 	
-	// get the geometry
-	const GU_Detail *geo = sop->getCookedGeo( context );
+	return ((SOP_Node*)sop)->getCookedGeoHandle( context );
+}
+
+ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr operands ) const
+{
+	GU_DetailHandleAutoReadLock readHandle( m_geoHandle );
+	
+	const GU_Detail *geo = readHandle.getGdp();
 	if ( !geo )
 	{
 		return 0;
@@ -87,7 +85,7 @@ ObjectPtr FromHoudiniSopConverter::doConversion( ConstCompoundObjectPtr operands
 	return doPrimitiveConversion( geo, operands );
 }
 
-void FromHoudiniSopConverter::transferAttribs(
+void FromHoudiniGeometryConverter::transferAttribs(
 	const GU_Detail *geo, IECore::Primitive *result,
 	PrimitiveVariable::Interpolation vertexInterpolation,
 	PrimitiveVariable::Interpolation primitiveInterpolation,
@@ -105,7 +103,7 @@ void FromHoudiniSopConverter::transferAttribs(
 		const UT_Vector4 &pos = point->getPos();
 		pData[i] = Imath::V3f( pos[0], pos[1], pos[2] );
 	}
-
+	
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData ) );
 	
 	// add detail attribs	
@@ -123,6 +121,7 @@ void FromHoudiniSopConverter::transferAttribs(
 	// add primitive attribs
 	const GEO_PrimList &primitives = geo->primitives();
 	size_t numPrims = primitives.entries();
+	
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
 		transferPrimitiveAttribs( geo, result, primitiveInterpolation, primitives );
@@ -130,10 +129,12 @@ void FromHoudiniSopConverter::transferAttribs(
 	
 	// add vertex attribs
 	size_t numVerts = 0;
+	
 	for ( size_t i=0; i < numPrims; i++ )
 	{
 		numVerts += primitives[i]->getVertexCount();
 	}
+	
 	if ( result->variableSize( vertexInterpolation ) == numVerts )
 	{
 		size_t vertCount = 0;
@@ -159,7 +160,7 @@ void FromHoudiniSopConverter::transferAttribs(
 	}
 }
 
-void FromHoudiniSopConverter::transferDetailAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
 	const GB_AttributeTable &attribs = geo->attribs();
 	
@@ -241,7 +242,7 @@ void FromHoudiniSopConverter::transferDetailAttribs( const GU_Detail *geo, Primi
 	}
 }
 
-void FromHoudiniSopConverter::transferPointAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points ) const
+void FromHoudiniGeometryConverter::transferPointAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points ) const
 {
 	const GEO_PointAttribDict &attribs = geo->pointAttribs();
 	
@@ -263,7 +264,7 @@ void FromHoudiniSopConverter::transferPointAttribs( const GU_Detail *geo, Primit
 	}
 }
 
-void FromHoudiniSopConverter::transferPrimitiveAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives ) const
+void FromHoudiniGeometryConverter::transferPrimitiveAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives ) const
 {
 	const GEO_PrimAttribDict &attribs = geo->primitiveAttribs();
 	
@@ -285,7 +286,7 @@ void FromHoudiniSopConverter::transferPrimitiveAttribs( const GU_Detail *geo, Pr
 	}
 }
 
-void FromHoudiniSopConverter::transferVertexAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const VertexList &vertices ) const
+void FromHoudiniGeometryConverter::transferVertexAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const VertexList &vertices ) const
 {
 	const GEO_VertexAttribDict &attribs = geo->vertexAttribs();
 	
@@ -305,4 +306,57 @@ void FromHoudiniSopConverter::transferVertexAttribs( const GU_Detail *geo, Primi
 		
 		transferAttribData<VertexList>( vertices, result, interpolation, attr, attrRef );
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Factory
+/////////////////////////////////////////////////////////////////////////////////
+
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_DetailHandle &handle, IECore::TypeId resultType )
+{
+	const TypesToFnsMap *m = typesToFns();
+
+	TypesToFnsMap::const_iterator it = m->find( Types( resultType ) );
+	if ( it != m->end() )
+	{
+		return it->second( handle );
+	}
+	
+	return 0;
+}
+
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_Node *sop, IECore::TypeId resultType )
+{
+	return create( handle( sop ), resultType );
+}
+
+void FromHoudiniGeometryConverter::registerConverter( IECore::TypeId resultType, bool isDefault, CreatorFn creator )
+{
+	TypesToFnsMap *m = typesToFns();
+	m->insert( TypesToFnsMap::value_type( Types( resultType ), creator ) );
+	
+	if ( isDefault )
+	{
+		m->insert( TypesToFnsMap::value_type( Types( IECore::InvalidTypeId ), creator ) );
+	}
+}
+
+FromHoudiniGeometryConverter::TypesToFnsMap *FromHoudiniGeometryConverter::typesToFns()
+{
+	static TypesToFnsMap *m = new TypesToFnsMap;
+	return m;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Implementation of nested Types class
+/////////////////////////////////////////////////////////////////////////////////
+
+FromHoudiniGeometryConverter::Types::Types( IECore::TypeId result )
+	: resultType( result )
+{
+}
+
+bool FromHoudiniGeometryConverter::Types::operator < ( const Types &other ) const
+{
+	return resultType < other.resultType;
 }

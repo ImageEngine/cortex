@@ -75,12 +75,13 @@ class TestNodeHandle( unittest.TestCase ) :
 		box = self.createBox()
 		w = weakref.ref( box )
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
+		result = converter.convert()
 		
 		box.destroy()
 		gc.collect()
 		
 		self.assertRaises( Exception, w() )
-		self.assertEqual( converter.convert(), None )
+		self.assertEqual( converter.convert(), result )
 
 	# testing new scene causes converter to return None
 	def testNewScene( self ) :
@@ -88,11 +89,12 @@ class TestNodeHandle( unittest.TestCase ) :
 		box = self.createBox()
 		w = weakref.ref( box )
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
+		result = converter.convert()
 		
 		hou.hipFile.clear( False )
 		
 		self.assertRaises( Exception, w() )
-		self.assertEqual( converter.convert(), None )
+		self.assertEqual( converter.convert(), result )
 
 if __name__ == "__main__":
     unittest.main()

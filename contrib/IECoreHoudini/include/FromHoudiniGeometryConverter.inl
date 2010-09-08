@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_INL
-#define IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_INL
+#ifndef IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_INL
+#define IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_INL
 
 #include "GEO/GEO_Vertex.h"
 
@@ -41,13 +41,25 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/VectorTraits.h"
 
-#include "FromHoudiniSopConverter.h"
+#include "FromHoudiniGeometryConverter.h"
 
 namespace IECoreHoudini
 {
 
+template<class T>
+FromHoudiniGeometryConverter::Description<T>::Description( IECore::TypeId resultType, bool isDefault )
+{
+	FromHoudiniGeometryConverter::registerConverter( resultType, isDefault, creator );
+}
+
+template<class T>
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::Description<T>::creator( const GU_DetailHandle &handle )
+{
+	return new T( handle );
+}
+
 template <typename Container>
-void FromHoudiniSopConverter::transferAttribData(
+void FromHoudiniGeometryConverter::transferAttribData(
 	const Container &container, IECore::Primitive *result,
 	IECore::PrimitiveVariable::Interpolation interpolation,
 	const GB_Attribute *attr, const GB_AttributeRef &attrRef
@@ -117,7 +129,7 @@ void FromHoudiniSopConverter::transferAttribData(
 }
 
 template <typename T, typename Container>
-IECore::DataPtr FromHoudiniSopConverter::extractData( const Container &container, const GB_AttributeRef &attrRef ) const
+IECore::DataPtr FromHoudiniGeometryConverter::extractData( const Container &container, const GB_AttributeRef &attrRef ) const
 {
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType::value_type ValueType;
@@ -142,7 +154,7 @@ IECore::DataPtr FromHoudiniSopConverter::extractData( const Container &container
 }
 
 template <typename T>
-IECore::DataPtr FromHoudiniSopConverter::extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const
+IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const
 {
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType ValueType;
@@ -163,4 +175,4 @@ IECore::DataPtr FromHoudiniSopConverter::extractData( const GB_AttributeTable &a
 
 }
 
-#endif // IE_COREHOUDINI_FROMHOUDINISOPCONVERTER_INL
+#endif // IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_INL

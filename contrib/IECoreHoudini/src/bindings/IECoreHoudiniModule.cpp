@@ -52,8 +52,7 @@
 #include "FnOpHolderBinding.h"
 #include "FnProceduralHolderBinding.h"
 #include "FromHoudiniConverterBinding.h"
-#include "FromHoudiniNodeConverterBinding.h"
-#include "FromHoudiniSopConverterBinding.h"
+#include "FromHoudiniGeometryConverterBinding.h"
 #include "FromHoudiniPointsConverterBinding.h"
 #include "FromHoudiniPolygonsConverterBinding.h"
 #include "ToHoudiniConverterBinding.h"
@@ -90,8 +89,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindFnOpHolder();
 	bindFnProceduralHolder();
 	bindFromHoudiniConverter();
-	bindFromHoudiniNodeConverter();
-	bindFromHoudiniSopConverter();
+	bindFromHoudiniGeometryConverter();
 	bindFromHoudiniPointsConverter();
 	bindFromHoudiniPolygonsConverter();
 	bindToHoudiniConverter();

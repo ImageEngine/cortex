@@ -41,10 +41,15 @@ using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniPolygonsConverter );
 
-FromHoudiniNodeConverter::Description<FromHoudiniPolygonsConverter> FromHoudiniPolygonsConverter::m_description( SOP_OPTYPE_ID, MeshPrimitiveTypeId );
+FromHoudiniGeometryConverter::Description<FromHoudiniPolygonsConverter> FromHoudiniPolygonsConverter::m_description( MeshPrimitiveTypeId );
+
+FromHoudiniPolygonsConverter::FromHoudiniPolygonsConverter( const GU_DetailHandle &handle ) :
+	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECore::MeshPrimitive." )
+{
+}
 
 FromHoudiniPolygonsConverter::FromHoudiniPolygonsConverter( const SOP_Node *sop ) :
-	FromHoudiniSopConverter( sop, "Converts Houdini SOP geometry to a IECore::MeshPrimitive." )
+	FromHoudiniGeometryConverter( sop, "Converts a Houdini GU_Detail to an IECore::MeshPrimitive." )
 {
 }
 
@@ -65,7 +70,7 @@ PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detai
 		const GEO_Primitive *prim = primitives( i );
 		if ( !( prim->getPrimitiveId() & GEOPRIMPOLY ) )
 		{
-			throw runtime_error( ( boost::format( "FromHoudiniPolygonsConverter: SOP \"%d\" contains non-polygon primitives" ) % sop()->getName() ).str() );
+			throw runtime_error( "FromHoudiniPolygonsConverter: Geometry contains non-polygon primitives" );
 		}
 		
 		numVerts += prim->getVertexCount();
@@ -73,7 +78,7 @@ PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detai
 	
 	if ( !numVerts )
 	{
-		throw runtime_error( ( boost::format( "FromHoudiniPolygonsConverter: SOP \"%d\" does not contain polygon vertices" ) % sop()->getName() ).str() );
+		throw runtime_error( "FromHoudiniPolygonsConverter: Geometry does not contain polygon vertices" );
 	}
 	
 	// loop over primitives gathering mesh data
