@@ -76,6 +76,11 @@ static ObjectPtr getItem( ObjectVector &o, long index )
 
 static void setItem( ObjectVector &o, long index, ObjectPtr value )
 {
+	if ( !value )
+	{
+		PyErr_SetString( PyExc_ValueError, "Invalid Object pointer!" );
+		throw_error_already_set();
+	}
 	o.members()[convertIndex( o, index )] = value;
 }
 
@@ -86,6 +91,11 @@ static void delItem( ObjectVector &o, long index )
 
 static void append( ObjectVector &o, ObjectPtr value )
 {
+	if ( !value )
+	{
+		PyErr_SetString( PyExc_ValueError, "Invalid Object pointer!" );
+		throw_error_already_set();
+	}
 	o.members().push_back( value );
 }
 

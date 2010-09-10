@@ -44,6 +44,7 @@ class ObjectVectorTest( unittest.TestCase ) :
 		o = IECore.ObjectVector()
 
 		self.assertEqual( len( o ), 0 )
+		self.assertRaises( ValueError, o.append, None )
 
 		m1 = IECore.FloatData()
 		m2 = IECore.FloatData()
@@ -100,7 +101,7 @@ class ObjectVectorTest( unittest.TestCase ) :
 		ooo = IECore.ObjectReader( "test/IECore/objectVector.cob" ).read()
 
 		self.assertEqual( o, ooo )
-		
+
 	def testRemove( self ) :
 	
 		m1 = IECore.IntData( 1 )
