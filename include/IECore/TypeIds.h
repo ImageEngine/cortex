@@ -379,6 +379,7 @@ enum TypeId
 	PointsPrimitiveEvaluatorTypeId = 333,
 	TransformationMatrixfParameterTypeId = 334,
 	TransformationMatrixdParameterTypeId = 335,
+	PointsMotionOpTypeId = 336,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.
