@@ -35,9 +35,20 @@
 
 import hou, IECore, IECoreHoudini
 
-def proc(type, ver):
-	return IECore.ClassLoader.defaultLoader("IECORE_PROCEDURAL_PATHS").load(type,ver)()
+'''
+This contains utility methods for doing useful stuff in the IECoreHoudini
+python module.
+'''
 
+# returns an instance of a procedural loaded using the defaultProceduralLoader
+def proc(type, ver):
+	return IECore.ClassLoader.defaultProceduralLoader().load(type,ver)()
+
+# returns an instance of an op loaded using the defaultOpLoader
+def op(type, ver):
+	return IECore.ClassLoader.defaultOpLoader().load(type,ver)()
+
+# sets a houdini parameter based on the value from it's corresponding cortex parameter
 def setHoudiniParm( node, p ):
 	value = p.getValue().value
 
@@ -115,17 +126,16 @@ def setHoudiniParm( node, p ):
 	if p.typeId()==IECore.TypeId.Box3dParameter:
 		node.parmTuple( "parm_%s" % p.name() ).setTuple( list(value) )
 
-
+# updates all the houdini parameters based on an Op/Procedural's parameter values
 def syncSopParametersWithProcedural(n):
-	# get our parameters from our procedural
 	fn = IECoreHoudini.FnProceduralHolder( n )
 	parms = fn.getParameterised().parameters().values()
-
-	# set our houdini parameters based on our saved parms
 	for p in parms:
 		if p.parm("parm_%s"%p.name):
 			setHoudiniParm( n, p )
 
+# reloads a procedural based on the values of the type/version parameters
+# \todo: this can be combined with the reloadOp code
 def reloadProcedural():
 	n = hou.node(".")
 	type = n.evalParm("__opType")
@@ -135,7 +145,35 @@ def reloadProcedural():
 	ver = int(ver)
 	fn = IECoreHoudini.FnProceduralHolder(n)
 	IECore.ClassLoader.defaultProceduralLoader().refresh()
-	cl = IECore.ClassLoader.defaultProceduralLoader().load(type, ver)()
+	cl = IECoreHoudini.proc( type, ver )
+
+	# cache our existing parameters
+	parms = fn.getParameterised().parameters().values()
+	saved_parms = {}
+	for p in parms:
+		saved_parms[p.name] = p.getValue().value
+
+	# reload parameter interface
+	fn.setParameterised(cl)
+
+	# restore parameter values
+	for p in saved_parms.keys():
+		hparm = n.parm("parm_%s" % p)
+		if hparm:
+			hparm.set( saved_parms[p] )
+
+# reloads an op based on the values of the type/version parameters
+# \todo: this can be combined with the reloadProc code
+def reloadOp():
+	n = hou.node(".")
+	type = n.evalParm("__opType")
+	ver = n.evalParm("__opVersion")
+	if type=="" or ver=="":
+		return
+	ver = int(ver)
+	fn = IECoreHoudini.FnOpHolder(n)
+	IECore.ClassLoader.defaultOpLoader().refresh()
+	cl = IECoreHoudini.op( type, ver )
 
 	# cache our existing parameters
 	parms = fn.getParameterised().parameters().values()

@@ -236,6 +236,175 @@ class TestOpHolder( unittest.TestCase ):
 		assert( result['N'].data == src['N'].data)
 		assert( result['N'].data != deformer['N'].data)
 		
+	# tests compound parameter support
+	def testCompoundParameters(self):
+		(op,fn)=self.testOpHolder()
+		cl = IECore.ClassLoader.defaultOpLoader().load("compoundParameters", 1)()
+		fn.setParameterised( cl )
+		
+		# test we have the parameters & folders
+		num_folders = [ type(p.parmTemplate()).__name__ for p in op.spareParms()].count("FolderSetParmTemplate")
+		assert( num_folders == 4 )
+		p = op.parm( "parm_compound_1_parm_jy" )
+		assert( p )
+		assert( p.containingFolders() == ('Parameters', 'My Compound 1') )
+		p = op.parm( "parm_compound_2_parm_kx" )
+		assert( p )
+		assert( p.containingFolders() == ('Parameters', 'My Compound 2') )
+		p = op.parm( "parm_compound_3_parm_compound_4_parm_some_int" )
+		assert( p )
+		assert( p.containingFolders() == ('Parameters', 'My Compound 3', 'My Compound 4') )
+		
+		# test that houdini values get set on cortex parameters correctly
+		p = op.parmTuple( "parm_compound_3_parm_compound_4_parm_some_int" )
+		p.set( [345] )
+		assert( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value == 123 )
+		op.cook()
+		assert( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value == 345 )
+		
+		p = op.parmTuple( "parm_compound_2_parm_j" )
+		p.set( [123.456, 456.789, 0.0] )
+		assert( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 8,16,32 ) ).length()<0.001 )
+		op.cook()
+		assert( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 123.456, 456.789, 0 ) ).length()<0.001 )
+		
+		# test that caching parameters works
+		op.parm("__opReloadBtn").pressButton()
+		op.cook()
+		assert( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value == 345 )
+		assert( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 123.456, 456.789, 0 ) ).length()<0.001 )
+		
+	def testObjectParameterConversion(self):
+		(op,fn)=self.testOpHolder()
+		cl = IECore.ClassLoader.defaultOpLoader().load("objectDebug", 1)()
+		fn.setParameterised( cl )
+		op.parm("parm_quiet").set( True )
+		torus = op.createInputNode(0, "torus" )
+		op.cook()
+		result = cl.resultParameter().getValue()
+		assert( op.errors()=="" )
+		assert( result.typeId()==IECore.TypeId.MeshPrimitive )
+		torus.parm("type").set(1)
+		op.cook()
+		result = cl.resultParameter().getValue()
+		assert( op.errors()=="" )
+		assert( result.typeId()==IECore.TypeId.PointsPrimitive )
+		op2 = op.createInputNode(0, "ieOpHolder")
+		fn = IECoreHoudini.FnOpHolder( op2 )
+		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
+		fn.setParameterised(cl)
+		op2.parm("parm_filename").set("test/test_data/torus.cob")
+		op.cook()
+		result2 = fn.getParameterised().resultParameter().getValue()
+		assert( op.errors()=="" )
+		assert( result2.typeId()==IECore.TypeId.MeshPrimitive )
+		assert( result2["P"].data == result["P"].data )
+		
+	def testPrimitiveParameterConversion(self):
+		(op,fn)=self.testOpHolder()
+		cl = IECore.ClassLoader.defaultOpLoader().load("primParam", 1)()
+		fn.setParameterised( cl )
+		torus = op.createInputNode(0, "torus" )
+		op.cook()
+		result = cl.resultParameter().getValue()
+		assert( op.errors()=="" )
+		assert( result.typeId()==IECore.TypeId.MeshPrimitive )
+		torus.parm("type").set(1)
+		op.cook()
+		result = cl.resultParameter().getValue()
+		assert( op.errors()=="" )
+		assert( result.typeId()==IECore.TypeId.PointsPrimitive )
+		op2 = op.createInputNode(0, "ieOpHolder")
+		fn = IECoreHoudini.FnOpHolder( op2 )
+		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
+		fn.setParameterised(cl)
+		op2.parm("parm_filename").set("test/test_data/torus.cob")
+		op.cook()
+		result2 = fn.getParameterised().resultParameter().getValue()
+		assert( op.errors()=="" )
+		assert( result2.typeId()==IECore.TypeId.MeshPrimitive )
+		assert( result2["P"].data == result["P"].data )
+		
+	def testPointsParameterConversion(self):
+		(op,fn)=self.testOpHolder()
+		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
+		fn.setParameterised( cl )
+		cob = op.createInputNode(0, "ieOpHolder" )
+		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
+		fn2 = IECoreHoudini.FnOpHolder( cob )
+		fn2.setParameterised( cl )
+		cob.parm("parm_filename").set("test/test_data/torus.cob")
+		cook_failed = False
+		try:
+			op.cook() # This should fail because the parameter validation should fail
+		except hou.OperationFailed:
+			cook_failed = True
+		assert(cook_failed)
+		assert(op.errors()!="")
+		cob = op.createInputNode(0, "torus" )
+		op.cook() # should pass because torus will be converted to points
+		assert( fn.getParameterised()['input'].getValue().typeId() == IECore.TypeId.PointsPrimitive )
+		assert( fn.getParameterised().resultParameter().getValue().typeId() == IECore.TypeId.PointsPrimitive )
+
+	def testPolygonsParameterConversion(self):
+		(op,fn)=self.testOpHolder()
+		cl = IECore.ClassLoader.defaultOpLoader().load("polyParam", 1)()
+		fn.setParameterised( cl )
+		cob = op.createInputNode(0, "ieOpHolder" )
+		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
+		fn2 = IECoreHoudini.FnOpHolder( cob )
+		fn2.setParameterised( cl )
+		cob.parm("parm_filename").set("test/test_data/torus.cob")
+		op.cook() # should pass because we have a mesh primitive
+		torus = op.createInputNode(0, "torus" )
+		op.cook() # should pass because torus will be converted to mesh
+		assert( fn.getParameterised()['input'].getValue().typeId() == IECore.TypeId.MeshPrimitive )
+		assert( fn.getParameterised().resultParameter().getValue().typeId() == IECore.TypeId.MeshPrimitive )
+		op2 = torus.createOutputNode( "ieOpHolder" )
+		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
+		fn = IECoreHoudini.FnOpHolder( op2 )
+		fn.setParameterised( cl )
+		op2.cook()
+		assert( fn.getParameterised().resultParameter().getValue().typeId() == IECore.TypeId.PointsPrimitive )
+		op.setInput( 0, op2 )
+		cook_failed = False
+		try:
+			op.cook() # This should fail because the parameter validation should fail
+		except hou.OperationFailed:
+			cook_failed = True
+		assert(cook_failed)
+		assert(op.errors()!="")
+					
+	def testInvalidValidation(self):
+		(op,fn)=self.testOpHolder()
+		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
+		fn.setParameterised( cl )
+		op.parm("parm_filename").set("test/test_data/torus.cob")
+		op2 = op.createOutputNode( "ieOpHolder" )
+		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
+		fn = IECoreHoudini.FnOpHolder(op2)
+		fn.setParameterised(cl)
+		cook_failed = False
+		try:
+			op2.cook() # This should fail because the parameter validation should fail
+		except hou.OperationFailed:
+			cook_failed = True
+		assert(cook_failed)
+		assert(op2.errors()!="")
+		
+	def testInvalidOp(self):
+		(op,fn)=self.testOpHolder()
+		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
+		fn.setParameterised( cl )
+		op.createInputNode( 0, "torus" )
+		cook_failed = False
+		try:
+			op.cook() # this should error because torus has no normals
+		except hou.OperationFailed:
+			cook_failed = True
+		assert(cook_failed)
+		assert(op.errors()!="")
+		
 	def setUp( self ) :
 		os.environ["IECORE_OP_PATHS"] = "test/ops"
 		if not os.path.exists( "test/opHolder_testData" ):

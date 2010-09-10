@@ -56,7 +56,9 @@ class noiseDeformer( Op ) :
 		prim['P'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( new_p ) )
 		
 		# recalculate normals
-		MeshNormalsOp()( input=prim, copyInput=False )
+		if prim.typeId()==TypeId.MeshPrimitive:
+			MeshNormalsOp()( input=prim, copyInput=False )
+			
 		return prim
 
 registerRunTimeTyped( noiseDeformer )

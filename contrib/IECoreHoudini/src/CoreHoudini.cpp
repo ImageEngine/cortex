@@ -35,6 +35,8 @@
 
 #include "CoreHoudini.h"
 #include <IECorePython/ScopedGILLock.h>
+#include "FromHoudiniPointsConverter.h"
+#include "FromHoudiniPolygonsConverter.h"
 using namespace IECoreHoudini;
 using namespace boost::python;
 
@@ -222,4 +224,32 @@ void CoreHoudini::evalPython( const std::string &cmd )
 	{
 		PyErr_Print();
 	}
+}
+
+IECore::ObjectPtr CoreHoudini::convertFromHoudini( GU_DetailHandle detailHandle )
+{
+	// try polygons
+	try
+	{
+		FromHoudiniPolygonsConverterPtr converter = new FromHoudiniPolygonsConverter( detailHandle );
+		IECore::ObjectPtr converted = converter->convert();
+		return converted;
+	}
+	catch(runtime_error)
+	{
+	}
+
+	// try points
+	try
+	{
+		FromHoudiniPointsConverterPtr converter = new FromHoudiniPointsConverter( detailHandle );
+		IECore::ObjectPtr converted = converter->convert();
+		return converted;
+	}
+	catch(runtime_error)
+	{
+	}
+
+	// if we got here then boo, could not convert our geometry
+	throw runtime_error( "Could not convert this Houdini geometry to a Cortex primitive!" );
 }

@@ -49,7 +49,7 @@ class parameterTypes( ParameterisedProcedural ) :
 					name = "a",
 					description = "An int which has a very long description to help test the help formatting. i wonder if there's anything more interesting i could write here.",
 					defaultValue = 1,
-					userData = { "label":StringData("Int"), "gui_update":BoolData(True), "hidden":BoolData(False) }
+					userData = { "label":StringData("Int"), "gui_update":BoolData(True), "hidden":BoolData(True) }
 				),
 
 				FloatParameter(
@@ -122,6 +122,7 @@ class parameterTypes( ParameterisedProcedural ) :
 
 					name = "compound",
 					description = "a compound parameter",
+					userData = { "label":StringData("My Compound") },
 
 					members = [
 
@@ -132,7 +133,8 @@ class parameterTypes( ParameterisedProcedural ) :
 							presets = (
 								( "one", V3d( 1 ) ),
 								( "two", V3d( 2 ) )
-							)
+							),
+							userData = { "label":StringData("Compound->V3d") }
 						),
 
 						M44fParameter(
@@ -274,8 +276,8 @@ class parameterTypes( ParameterisedProcedural ) :
 		assert args["g"] == V2fData( V2f( 2, 4 ) )
 		assert args["h"] == V3fData( V3f( 1, 4, 8 ) )
 		assert args["i"] == V2dData( V2d( 2, 4 ) )
-		#assert args["compound"]["j"] == V3dData( V3d( 1, 4, 8 ) )
-		#assert args["compound"]["k"] == M44fData( M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
+		assert args["compound"]["j"] == V3dData( V3d( 1, 4, 8 ) )
+		assert args["compound"]["k"] == M44fData( M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
 		assert args["i_3"] == M44fData( M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
 		assert args["i_4"] == M44dData( M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
 		assert args["l"] == Color3fData( Color3f( 1, 0, 0 ) )

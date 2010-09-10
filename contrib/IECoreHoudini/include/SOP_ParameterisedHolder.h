@@ -79,9 +79,7 @@ namespace IECoreHoudini
 			template <class T>
 			bool updateParameters( T parameterised, float now )
 			{
-				const IECore::CompoundParameter::ParameterMap &parms = parameterised->parameters()->parameters();
-				for( IECore::CompoundParameter::ParameterMap::const_iterator it=parms.begin(); it!=parms.end(); ++it )
-					updateParameter( it->second, now );
+				updateParameter( parameterised->parameters(), now, "", true );
 				bool doesRequireUpdate = m_requiresUpdate;
 				m_requiresUpdate = false; // return doesRequireUpdate so clear this flag for next time
 				return doesRequireUpdate;
@@ -89,7 +87,9 @@ namespace IECoreHoudini
 
 			/// Update a specific Cortex parameter using values from the
 			/// corresponding Houdini SOP Parameter.
-			void updateParameter( IECore::ParameterPtr parm, float now );
+			/// \parm prefix A string prefix for the houdini parameter name
+			/// \parm top_level This should be true if you know the parm is the top-level CompoundParameter
+			void updateParameter( IECore::ParameterPtr parm, float now, std::string prefix="", bool top_level=false );
 
 			/// Checks for changes in parameter values and
 			/// flags a gui update if required.

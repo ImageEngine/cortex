@@ -389,7 +389,7 @@ void SOP_OpHolder::loadOp( const std::string &type, int version, bool update_gui
 				handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
 					CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
 				object fn( resultHandle );
-				fn.attr("addRemoveParameters")( proc, old_op );
+				fn.attr("updateParameters")( proc, old_op );
 			}
 			catch( ... )
 			{
@@ -449,29 +449,77 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 	for ( unsigned int i=0; i<m_inputs.size(); ++i )
 	{
 		IECore::ParameterPtr input_parameter = m_inputs[i];
-		const GU_Detail *input_gdp = inputGeo( i, context );
-		if ( !input_gdp )
-			continue;
+		GU_DetailHandle gdp_handle = inputGeoHandle(i);
+		const GU_Detail *input_gdp = gdp_handle.readLock();
 
-	    if ( input_gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) ) // looks like data passed from another OpHolder
-	    {
-	    	GB_AttributeRef attrOffset = input_gdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
-	    	const NodePassData *pass_data = input_gdp->attribs().castAttribData<NodePassData>( attrOffset );
-	    	if ( pass_data->type()==IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
-	    	{
-	    		SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>(const_cast<OP_Node*>(pass_data->nodePtr()));
-				IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
-				const IECore::Parameter *result_parameter = op->resultParameter();
-				const IECore::ConstObjectPtr result_object(result_parameter->getValue());
-				input_parameter->setValue( IECore::constPointerCast<IECore::Object>( result_object ));
-	    	}
-	    }
-	    else // otherwise looks like a regular Houdini detail
-	    {
-	    	// TODO: here we need to convert a GU_Detail to a Cortex Primitive that we can set on our input parameter
-	    	// cortex_object = FromHoudiniConverter( input_gdp ).convert()
-	    	// input_parameter->setValue( cortex_object )
-	    }
+		if ( input_gdp )
+		{
+			if ( input_gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) ) // looks like data passed from another OpHolder
+			{
+				GB_AttributeRef attrOffset = input_gdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
+				const NodePassData *pass_data = input_gdp->attribs().castAttribData<NodePassData>( attrOffset );
+				if ( pass_data->type()==IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
+				{
+					SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>(const_cast<OP_Node*>(pass_data->nodePtr()));
+					IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
+					const IECore::Parameter *result_parameter = op->resultParameter();
+					const IECore::ConstObjectPtr result_object(result_parameter->getValue());
+
+					try
+					{
+						input_parameter->setValidatedValue( IECore::constPointerCast<IECore::Object>( result_object ));
+					}
+					catch (const IECore::Exception &e)
+					{
+				    	addError( SOP_MESSAGE, e.what() );
+					}
+				}
+			}
+			else // otherwise looks like a regular Houdini detail
+			{
+				IECore::ObjectPtr converted;
+				try
+				{
+					switch (input_parameter->typeId())
+					{
+						case IECore::PointsPrimitiveParameterTypeId:
+						{
+							FromHoudiniPointsConverterPtr converter = new FromHoudiniPointsConverter( gdp_handle );
+							converted = converter->convert();
+							break;
+						}
+						case IECore::MeshPrimitiveParameterTypeId:
+						{
+							FromHoudiniPolygonsConverterPtr converter = new FromHoudiniPolygonsConverter( gdp_handle );
+							converted = converter->convert();
+							break;
+						}
+						default: // try a general conversion
+						{
+							converted = CoreHoudini::convertFromHoudini( gdp_handle );
+							break;
+						}
+					}
+				}
+				catch (std::runtime_error)
+				{
+			    	addError( SOP_MESSAGE, "Could not convert input geometry!"  );
+				}
+
+				if ( converted )
+				{
+					try
+					{
+						input_parameter->setValidatedValue( converted );
+					}
+					catch (const IECore::Exception &e)
+					{
+				    	addError( SOP_MESSAGE, e.what() );
+					}
+				}
+			}
+		}
+	    gdp_handle.unlock( input_gdp );
 	}
 
 	// update parameters from our op & flag as dirty if necessary
@@ -504,12 +552,17 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 	}
 	catch( boost::python::error_already_set )
 	{
-		IECorePython::ScopedGILLock gilLock;
+	    addError( SOP_MESSAGE, "Error raised during Python evaluation!" );
+	    IECorePython::ScopedGILLock lock;
 		PyErr_Print();
+	}
+	catch( const IECore::Exception &e )
+	{
+		addError( SOP_MESSAGE, e.what() );
 	}
 	catch( const std::exception &e )
 	{
-		std::cerr << e.what() << std::endl;
+		addError( SOP_MESSAGE, e.what() );
 	}
 	catch( ... )
 	{

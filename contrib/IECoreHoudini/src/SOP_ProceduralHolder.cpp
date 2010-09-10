@@ -335,7 +335,7 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 				handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
 					CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
 				object fn( resultHandle );
-				fn.attr("addRemoveParameters")( proc, old_procedural );
+				fn.attr("updateParameters")( proc, old_procedural );
 			}
 			catch( ... )
 			{

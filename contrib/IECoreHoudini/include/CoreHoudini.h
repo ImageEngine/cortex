@@ -39,6 +39,8 @@
 #include <boost/python.hpp>
 #include <string>
 #include <vector>
+#include "FromHoudiniPointsConverter.h"
+#include "FromHoudiniPolygonsConverter.h"
 
 namespace IECoreHoudini
 {
@@ -73,6 +75,9 @@ namespace IECoreHoudini
 			static std::vector<std::string> proceduralNames();
 			static std::vector<int> proceduralVersions( const std::string &type );
 			static int defaultProceduralVersion( const std::string &type );
+
+			/// create a converter, trying to work out the appropriate type (points/mesh)
+			static IECore::ObjectPtr convertFromHoudini( GU_DetailHandle detailHandle );
 
 		private:
 			/// our global context

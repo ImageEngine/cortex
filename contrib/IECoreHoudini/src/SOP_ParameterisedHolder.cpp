@@ -80,12 +80,38 @@ bool SOP_ParameterisedHolder::hasParameterised()
 	return (bool)(m_parameterised.get()!=0);
 }
 
-/// update a specific parameters on parameterised using SOP param
-void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float now )
+/// update a Cortex parameter on using our SOP parameter value
+void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float now, std::string prefix, bool top_level )
 {
 	try
 	{
-		std::string parm_name = "parm_" + std::string( parm->name() );
+		// find out our parameter name
+		std::string parm_name = prefix + std::string("parm_") + std::string( parm->name() );
+
+		// compoundParameters - recursively calling updateParameter on children
+		if ( parm->typeId()==IECore::CompoundParameterTypeId )
+		{
+			if ( top_level==true )
+			{
+				parm_name = ""; // our top-level compound parameter should not apply a prefix
+			}
+			else
+			{
+				parm_name += "_";
+			}
+
+			IECore::CompoundParameterPtr compound = IECore::runTimeCast<CompoundParameter>(parm);
+			if ( parm )
+			{
+				const IECore::CompoundParameter::ParameterMap &child_parms = compound->parameters();
+				for( IECore::CompoundParameter::ParameterMap::const_iterator it=child_parms.begin();
+						it!=child_parms.end(); ++it )
+				{
+					updateParameter( it->second, now, parm_name );
+				}
+			}
+			return;
+		}
 
 		// check we can find the parameter on our Houdini node
 		if ( !getParmList()->getParmPtr( parm_name.c_str() ) )
@@ -343,6 +369,13 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 									Imath::V3d( vals[3], vals[4], vals[5] ) );
 				checkForUpdate<Imath::Box3d, Box3dData>( do_update, val, parm );
 				parm->setValue( new IECore::Box3dData(val) );
+				break;
+			}
+
+			// Compound
+			case IECore::CompoundParameterTypeId:
+			{
+				std::cerr << "TODO: need to add code to evaluate compoundParameters and it's children." << __FILE__ << ", " << __LINE__ << std::endl;
 				break;
 			}
 
