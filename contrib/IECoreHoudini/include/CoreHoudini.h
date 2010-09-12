@@ -37,10 +37,10 @@
 #define COREHOUDINI_H_
 
 #include <boost/python.hpp>
+#include <IECore/Object.h>
 #include <string>
 #include <vector>
-#include "FromHoudiniPointsConverter.h"
-#include "FromHoudiniPolygonsConverter.h"
+#include <GU/GU_DetailHandle.h>
 
 namespace IECoreHoudini
 {

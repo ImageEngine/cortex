@@ -35,7 +35,11 @@
 #ifndef IE_CORE_POINTSMOTIONOP_H
 #define IE_CORE_POINTSMOTIONOP_H
 
+#if BOOST_VERSION >= 103600
 #include "boost/unordered_map.hpp"
+#else
+#include <map>
+#endif
 
 #include "IECore/Op.h"
 #include "IECore/SimpleTypedParameter.h"
@@ -75,7 +79,11 @@ class PointsMotionOp : public Op
 	private :
 
 		struct IdInfo;
+#if BOOST_VERSION >= 103600
 		typedef boost::unordered_map< unsigned, IdInfo > IdMap;
+#else
+		typedef std::map< unsigned, IdInfo > IdMap;
+#endif
 		struct PrimVarBuilder;
 		
 		FloatVectorParameterPtr m_snapshotTimesParameter;

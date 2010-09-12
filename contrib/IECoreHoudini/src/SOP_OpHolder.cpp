@@ -84,6 +84,7 @@ using namespace boost;
 #include "SOP_OpHolder.h"
 #include "NodePassData.h"
 #include "FnOpHolder.h"
+#include "FromHoudiniGeometryConverter.h"
 using namespace IECoreHoudini;
 
 /// Parameter names for non-dynamic SOP parameters
@@ -480,24 +481,17 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 				IECore::ObjectPtr converted;
 				try
 				{
-					switch (input_parameter->typeId())
+					if ( input_parameter->typeId()==IECore::ObjectParameterTypeId ||
+						input_parameter->typeId()==IECore::PrimitiveParameterTypeId )
 					{
-						case IECore::PointsPrimitiveParameterTypeId:
+						converted = CoreHoudini::convertFromHoudini( gdp_handle );
+					}
+					else // specific parameter type
+					{
+						FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( gdp_handle, input_parameter->getValue()->typeId() );
+						if ( converter )
 						{
-							FromHoudiniPointsConverterPtr converter = new FromHoudiniPointsConverter( gdp_handle );
 							converted = converter->convert();
-							break;
-						}
-						case IECore::MeshPrimitiveParameterTypeId:
-						{
-							FromHoudiniPolygonsConverterPtr converter = new FromHoudiniPolygonsConverter( gdp_handle );
-							converted = converter->convert();
-							break;
-						}
-						default: // try a general conversion
-						{
-							converted = CoreHoudini::convertFromHoudini( gdp_handle );
-							break;
 						}
 					}
 				}
