@@ -64,7 +64,12 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 
 	// get type
 	PointsPrimitive::Type type = PointsPrimitive::Disk;
-	if( IECore::ConstStringDataPtr t = pointsPrim->variableData<IECore::StringData>( "type", IECore::PrimitiveVariable::Uniform ) )
+	IECore::ConstStringDataPtr t = pointsPrim->variableData<IECore::StringData>( "type", IECore::PrimitiveVariable::Constant );
+	if ( !t )
+	{
+		t = pointsPrim->variableData<IECore::StringData>( "type", IECore::PrimitiveVariable::Uniform );
+	}
+	if( t )
 	{
 		if( t->readable()=="particle" || t->readable()=="disk" || t->readable()=="blobby" )
 		{
