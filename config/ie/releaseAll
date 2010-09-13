@@ -51,7 +51,6 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	
 	build( [ "COMPILER_VERSION=3.4.6", "DL_VERSION=9.0.15", "PYTHON_VERSION=2.5" ] ) # for c++ libraries loaded from Nuke.
 	build( [ "APP=nuke", "APP_VERSION=6.0v3", "PYTHON_VERSION=2.5" ] )
-	build( [ "APP=houdini", "APP_VERSION=10.0.528", "PYTHON_VERSION=2.5" ] )
 	build( [ "APP=houdini", "APP_VERSION=11.0.469", "PYTHON_VERSION=2.5" ] )
 	
 	installDocs()
