@@ -119,7 +119,7 @@ struct PointsMotionOp::IdInfo
 	unsigned firstSnapshotIndex;
 	int lastValidSnapshot;
 	unsigned lastSnapshotIndex;
-	IdInfo() : finalIndex(0), firstValidSnapshot(-1), firstSnapshotIndex(-1), lastValidSnapshot(-1), lastSnapshotIndex(-1) {}
+	IdInfo() : finalIndex(0), firstValidSnapshot(-1), firstSnapshotIndex(0), lastValidSnapshot(-1), lastSnapshotIndex(0) {}
 };
 
 struct PointsMotionOp::PrimVarBuilder
