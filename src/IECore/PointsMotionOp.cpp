@@ -129,10 +129,10 @@ struct PointsMotionOp::PrimVarBuilder
 	template< typename T > 
 	struct CompatibleTypedData : boost::mpl::or_< IECore::TypeTraits::IsNumericVectorTypedData<T>, IECore::TypeTraits::IsVecVectorTypedData<T>, IECore::TypeTraits::IsColor< typename IECore::TypeTraits::VectorValueType<T>::type > > {};
 
-	ConstIntVectorDataPtr m_ids;
+	ConstUIntVectorDataPtr m_ids;
 	PointsMotionOp::IdMap &m_map;
 
-	PrimVarBuilder( ConstIntVectorDataPtr ids, PointsMotionOp::IdMap &map ) : m_ids(ids), m_map(map)
+	PrimVarBuilder( ConstUIntVectorDataPtr ids, PointsMotionOp::IdMap &map ) : m_ids(ids), m_map(map)
 	{
 	}
 
@@ -146,7 +146,7 @@ struct PointsMotionOp::PrimVarBuilder
 		newDataVec.resize( m_map.size(), typename T::ValueType::value_type(0) );
 		// For each id from the snapshot:
 		unsigned index = 0;
-		for ( std::vector<int>::const_iterator idIt = m_ids->readable().begin(); idIt != m_ids->readable().end(); idIt++, index++ )
+		for ( std::vector<unsigned int>::const_iterator idIt = m_ids->readable().begin(); idIt != m_ids->readable().end(); idIt++, index++ )
 		{
 			// Get the value at new data index
 			newDataVec[ m_map.find( *idIt )->second.finalIndex ] = dataVec[ index ];
@@ -171,8 +171,8 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 	std::map< std::string, PrimitiveVariable::Interpolation > primVars, tmpVars;
 	bool firstObject = true;
 	int snapshot = 0;
-	IntVectorDataPtr newIdsPtr = new IntVectorData();
-	std::vector<int> &newIds = newIdsPtr->writable();
+	UIntVectorDataPtr newIdsPtr = new UIntVectorData();
+	std::vector< unsigned int > &newIds = newIdsPtr->writable();
 	std::vector< const std::vector< Imath::V3f > * > positions;
 
 	for ( std::vector<ObjectPtr>::const_iterator it = objectVector.begin(); it != objectVector.end(); it++, snapshot++ )
@@ -193,7 +193,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 			throw InvalidArgumentException( "PointsMotionOp : Invalid primvars in given PointsPrimitive object." );
 		}
 	
-		ConstIntVectorDataPtr ids = points->variableData< IntVectorData >( idPrimVarName );
+		ConstUIntVectorDataPtr ids = points->variableData< UIntVectorData >( idPrimVarName );
 		if ( !ids )
 		{
 			throw InvalidArgumentException( "PointsMotionOp : Could not find particle ids on the given PointsPrimitive object." );
@@ -229,7 +229,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 
 		// Collect ids and snapshot valid ranges from all particles.
 		unsigned int index = 0;
-		for ( std::vector<int>::const_iterator idIt = ids->readable().begin(); idIt != ids->readable().end(); idIt++, index++ )
+		for ( std::vector<unsigned int>::const_iterator idIt = ids->readable().begin(); idIt != ids->readable().end(); idIt++, index++ )
 		{
 			IdInfo &idInfo = idMap[ *idIt ];
 
@@ -274,7 +274,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 			}
 			else if ( pIt->first != idPrimVarName )
 			{
-				ConstIntVectorDataPtr ids = points->variableData< IntVectorData >( idPrimVarName );
+				ConstUIntVectorDataPtr ids = points->variableData< UIntVectorData >( idPrimVarName );
 				PrimVarBuilder primVarBuilder( ids, idMap );
 				// \todo: make sure we support all relevant primvar types....
 				primitive->variables[ pIt->first ] = PrimitiveVariable( pIt->second.interpolation, 

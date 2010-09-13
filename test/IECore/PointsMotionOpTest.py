@@ -41,7 +41,7 @@ class PointsMotionOpTest( unittest.TestCase ) :
 	def _buildPoints( self, time ):
 		p = PointsPrimitive( 5 )
 		p[ "P" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f(time*1), V3f(time*2), V3f(time*3), V3f(time*4), V3f(time*5) ] ) )
-		p[ "id" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, IntVectorData( [ 1, 2, 3, 4, 5 ] ) )
+		p[ "id" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, UIntVectorData( [ 1, 2, 3, 4, 5 ] ) )
 		p[ "float" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, FloatVectorData( [ time*1, time*2, time*3, time*4, time*5 ] ) )
 		p[ "vec3" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f(time*2), V3f(time*3), V3f(time*4), V3f(time*5), V3f(time*6) ] ) )
 		p[ "vec2" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V2fVectorData( [ V2f(time*2), V2f(time*3), V2f(time*4), V2f(time*5), V2f(time*6) ] ) )
@@ -177,7 +177,7 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		
 		self.assertEqual( len(result), 5 )
 		# checking ids
-		self.assertEqual( result[1]["id"].data, IntVectorData([ 10,11,3,4,5,1,2,12,13 ]) )
+		self.assertEqual( result[1]["id"].data, UIntVectorData([ 10,11,3,4,5,1,2,12,13 ]) )
 		self.assertEqual( result[1]["id"].data, result[2]["id"].data )
 		self.assertEqual( result[1]["id"].data, result[3]["id"].data )
 		self.assertEqual( result[1]["id"].data, result[4]["id"].data )
