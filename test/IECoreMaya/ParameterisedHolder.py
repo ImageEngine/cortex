@@ -1313,7 +1313,20 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( self.__numCallbacks, 4 )
 
 		IECoreMaya.FnParameterisedHolder.removeSetParameterisedCallback( c )
+	
+	def testSetParameterisedAndUndoOnEmptyHolder( self ) :
+
+		n = cmds.createNode( "ieProceduralHolder" )
 		
+		fnPh = IECoreMaya.FnParameterisedHolder( n )
+		self.assertEqual( fnPh.getParameterised()[0], None )
+		
+		fnPh.setParameterised( "read", "-1", "IECORE_PROCEDURAL_PATHS" )
+		self.assertEqual( fnPh.getParameterised()[1], "read" )
+		
+		cmds.undo()
+		self.assertEqual( fnPh.getParameterised()[0], None )		
+	
 	def testEditClassParameters( self ) :
 	
 		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "classParameterTest", 1 )
