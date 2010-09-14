@@ -112,6 +112,13 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 		fnPH = IECoreMaya.FnProceduralHolder.create( "bob", "read", -1 )
 		self.assertEqual( fnPH.getParameterised()[2], 1 )
 	
+	def testMelCreation( self ) :
+	
+		import maya.mel as mel
+		mel.eval( 'ieProceduralHolderCreate( "read", "read", "1" )' )
+		
+		self.failUnless( maya.cmds.objExists( "readShape" ) )
+	
 	def testComponentNames( self ) :
 	
 		fnPH = IECoreMaya.FnProceduralHolder.create( "ernie", "read" )
