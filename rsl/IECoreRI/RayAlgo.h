@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,7 +34,7 @@
 
 #ifndef IECORERI_RAYALGO_H
 #define IECORERI_RAYALGO_H
-
+	
 /// Intersections between a ray and a sphere centred at the origin.
 float ieRaySphereIntersection(
 	point rayOrigin;
@@ -78,4 +78,26 @@ float ieRaySphereIntersection(
 
 }
 
+/// Intersections between a ray and an XY plane at the origin.
+float ieRayPlaneIntersection(
+	point rayOrigin;
+	vector rayDirection; // normalised
+	float epsilon;
+	output float t0
+)
+{
+	float solutions = 0;
+
+	if( rayDirection[2] == 0.0 )
+	{
+		solutions = 0;
+	}
+	else
+	{
+		t0 = - rayOrigin[2] / rayDirection[2];
+		solutions = t0 > epsilon ? 1 : 0;
+	}
+
+	return solutions;
+}
 #endif // IECORERI_RAYALGO_H
