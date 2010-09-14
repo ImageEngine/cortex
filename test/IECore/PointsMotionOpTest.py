@@ -173,7 +173,7 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		p5["id"].data[4] = 13
 
 		op = PointsMotionOp()
-		result = op( snapshotTimes = FloatVectorData( [ 1, 2, 3, 4, 5 ] ), pointsPrimitives = points )
+		result = op( snapshotTimes = FloatVectorData( [ 1, 2, 3, 4, 5 ] ), pointsPrimitives = points, maskedPrimVars = StringVectorData( [ 'vec3' ] ) )
 		
 		self.assertEqual( len(result), 5 )
 		# checking ids
@@ -182,11 +182,11 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		self.assertEqual( result[1]["id"].data, result[3]["id"].data )
 		self.assertEqual( result[1]["id"].data, result[4]["id"].data )
 		self.assertEqual( result[1]["id"].data, result[5]["id"].data )
-		# checking if P was filled with closest available value
+		# checking if unmasked prim var was filled with closest available value
 		self.assertEqual( result[1]["P"].data, V3fVectorData( [ V3f(1*1), V3f(1*2), V3f(1*3), V3f(1*4), V3f(1*5),   V3f(2*1), V3f(3*2), V3f(4*4), V3f(5*5) ] ) )
 		self.assertEqual( result[3]["P"].data, V3fVectorData( [ V3f(1*1), V3f(2*2), V3f(3*3), V3f(3*4), V3f(3*5),   V3f(3*1), V3f(3*2), V3f(4*4), V3f(5*5) ] ) )
 		self.assertEqual( result[5]["P"].data, V3fVectorData( [ V3f(1*1), V3f(2*2), V3f(5*3), V3f(3*4), V3f(4*5),   V3f(5*1), V3f(5*2), V3f(5*4), V3f(5*5) ] ) )
-		# checkin if other prim vars are filled with zero
+		# checkin if masked prim var was filled with zero
 		self.assertEqual( result[3]["vec3"].data, V3fVectorData( [ V3f(0), V3f(0), V3f(3*4), V3f(3*5), V3f(3*6),   V3f(3*2), V3f(3*3), V3f(0), V3f(0) ] ) )
 		
 if __name__ == "__main__":

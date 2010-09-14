@@ -49,7 +49,7 @@ IE_CORE_DEFINERUNTIMETYPED( PointsMotionOp );
 
 PointsMotionOp::PointsMotionOp()
 	:	Op(
-		"Creates a MotionPrimitive object from a list of PointsPrimitive objects. If a particle does not exist on any given time then it's primVars are set to 0.",
+		"Creates a MotionPrimitive object from a list of PointsPrimitive objects. If a point does not exist on any given snapshot then it's non-masked primvars are copied from the closest available snapshot. Masked primvars are set to zero.",
 		new ObjectParameter(
 			"result",
 			"Resulting motion primitive object.",
@@ -73,9 +73,17 @@ PointsMotionOp::PointsMotionOp()
 		"Primvar name used as unique ID for each particle in the PointsPrimitive objects.",
 		new StringData( "id" )
 	);
+
+	m_maskedPrimVarsParameter = new StringVectorParameter(
+		"maskedPrimVars",
+		"List of primitive variables that should be set to zero when the corresponding point does not exist on the snapshot.",
+		new StringVectorData()
+	);
+
 	parameters()->addParameter( m_snapshotTimesParameter );
 	parameters()->addParameter( m_pointsPrimitiveVectorParameter );
 	parameters()->addParameter( m_idPrimVarNameParameter );
+	parameters()->addParameter( m_maskedPrimVarsParameter );
 }
 
 PointsMotionOp::~PointsMotionOp()
@@ -112,6 +120,16 @@ const StringParameter * PointsMotionOp::idPrimVarNameParameter() const
 	return m_idPrimVarNameParameter;
 }
 
+StringVectorParameter * PointsMotionOp::maskedPrimVarsParameter()
+{
+	return m_maskedPrimVarsParameter;
+}
+
+const StringVectorParameter * PointsMotionOp::maskedPrimVarsParameter() const
+{
+	return m_maskedPrimVarsParameter;
+}
+
 struct PointsMotionOp::IdInfo
 {
 	unsigned int finalIndex;
@@ -129,10 +147,15 @@ struct PointsMotionOp::PrimVarBuilder
 	template< typename T > 
 	struct CompatibleTypedData : boost::mpl::or_< IECore::TypeTraits::IsNumericVectorTypedData<T>, IECore::TypeTraits::IsVecVectorTypedData<T>, IECore::TypeTraits::IsColor< typename IECore::TypeTraits::VectorValueType<T>::type > > {};
 
+	const std::string &m_primVarName;
+	bool m_masked;
+	int m_snapshot;
 	ConstIntVectorDataPtr m_ids;
-	PointsMotionOp::IdMap &m_map;
+	const PointsMotionOp::IdMap &m_map;
+	const std::vector<ObjectPtr> &m_objectVector;
 
-	PrimVarBuilder( ConstIntVectorDataPtr ids, PointsMotionOp::IdMap &map ) : m_ids(ids), m_map(map)
+	PrimVarBuilder( const std::string &primVarName, bool masked, int snapshot, ConstIntVectorDataPtr ids, PointsMotionOp::IdMap &map, const std::vector<ObjectPtr> &objectVector ) : 
+					m_primVarName(primVarName), m_masked(masked), m_snapshot(snapshot), m_ids(ids), m_map(map), m_objectVector(objectVector)
 	{
 	}
 
@@ -151,6 +174,36 @@ struct PointsMotionOp::PrimVarBuilder
 			// Get the value at new data index
 			newDataVec[ m_map.find( *idIt )->second.finalIndex ] = dataVec[ index ];
 		}
+		if ( !m_masked )
+		{
+			// Collect snapshot pointers for the given primvar
+			std::vector< const typename T::ValueType * > snapshots;
+			for ( std::vector<ObjectPtr>::const_iterator it = m_objectVector.begin(); it != m_objectVector.end(); it++ )
+			{
+				ConstPointsPrimitivePtr points = staticPointerCast< const PointsPrimitive >( *it );
+				typename T::ConstPtr primVarData = points->variableData< T >( m_primVarName );
+				assert( primVarData );
+				snapshots.push_back( &primVarData->readable() );
+			}
+			
+			// Now process missing values by setting them to the "closest" known value
+			// For each id on the map:
+			for ( IdMap::const_iterator mapIt = m_map.begin(); mapIt != m_map.end(); mapIt++ )
+			{
+				const IdInfo &info = mapIt->second;
+				// Set all the snapshots that come prior to the first valid one equal to the first one.
+				if ( info.firstValidSnapshot > m_snapshot )
+				{
+					newDataVec[ info.finalIndex ] = (*snapshots[ info.firstValidSnapshot ])[ info.firstSnapshotIndex ];
+				}
+				// Set all the snapshots that come after the last valid one equal to the last one.
+				if ( info.lastValidSnapshot < m_snapshot )
+				{
+					newDataVec[ info.finalIndex ] = (*snapshots[ info.lastValidSnapshot ])[ info.lastSnapshotIndex ];
+				}
+			}
+		}
+
 		return newData;
 	}
 };
@@ -160,6 +213,13 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 	const std::string &idPrimVarName = idPrimVarNameParameter()->getTypedValue();
 	const std::vector<float> &snapshotTimes = m_snapshotTimesParameter->getTypedValue();
 	const std::vector<ObjectPtr> &objectVector = staticPointerCast< ObjectVector, Object >( m_pointsPrimitiveVectorParameter->getValue() )->members();
+	const std::vector<std::string> &maskedPrimvars = m_maskedPrimVarsParameter->getTypedValue();
+	std::set< std::string > maskedPrimvarsSet;
+
+	for ( std::vector<std::string>::const_iterator mit = maskedPrimvars.begin(); mit != maskedPrimvars.end(); mit++ )
+	{
+		maskedPrimvarsSet.insert( *mit );
+	}
 
 	// Check if shutter time vector has same length as the points primitive vector...
 	if ( snapshotTimes.size() != objectVector.size() )
@@ -173,7 +233,6 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 	int snapshot = 0;
 	IntVectorDataPtr newIdsPtr = new IntVectorData();
 	std::vector<int> &newIds = newIdsPtr->writable();
-	std::vector< const std::vector< Imath::V3f > * > positions;
 
 	for ( std::vector<ObjectPtr>::const_iterator it = objectVector.begin(); it != objectVector.end(); it++, snapshot++ )
 	{
@@ -198,13 +257,6 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 		{
 			throw InvalidArgumentException( "PointsMotionOp : Could not find particle ids on the given PointsPrimitive object." );
 		}
-
-		ConstV3fVectorDataPtr pos = points->variableData< V3fVectorData >( "P" );
-		if ( !pos )
-		{
-			throw InvalidArgumentException( "PointsMotionOp : Could not find particle Ps on the given PointsPrimitive object." );
-		}
-		positions.push_back( &pos->readable() );
 
 		// Check if all objects contain the same set of prim vars and with same data type and interpolation.
 		tmpVars.clear();
@@ -275,29 +327,11 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 			else if ( pIt->first != idPrimVarName )
 			{
 				ConstIntVectorDataPtr ids = points->variableData< IntVectorData >( idPrimVarName );
-				PrimVarBuilder primVarBuilder( ids, idMap );
-				// \todo: make sure we support all relevant primvar types....
+				bool masked = ( maskedPrimvarsSet.find( pIt->first ) != maskedPrimvarsSet.end() );
+				PrimVarBuilder primVarBuilder( pIt->first, masked, snapshot, ids, idMap, objectVector );
 				primitive->variables[ pIt->first ] = PrimitiveVariable( pIt->second.interpolation, 
 						IECore::despatchTypedData< PrimVarBuilder, PrimVarBuilder::CompatibleTypedData >( pIt->second.data, primVarBuilder ) 
 				);
-			}
-		}
-
-		// Now process missing P values by setting them to the "closest" valid P
-		std::vector< Imath::V3f > &p = primitive->variableData< V3fVectorData >( "P" )->writable();
-		// For each id on the map:
-		for ( IdMap::const_iterator mapIt = idMap.begin(); mapIt != idMap.end(); mapIt++ )
-		{
-			const IdInfo &info = mapIt->second;
-			// Set all the snapshots that come prior to the first valid one equal to the first one.
-			if ( info.firstValidSnapshot > snapshot )
-			{
-				p[ info.finalIndex ] = (*positions[ info.firstValidSnapshot ])[ info.firstSnapshotIndex ];
-			}
-			// Set all the snapshots that come after the last valid one equal to the last one.
-			if ( info.lastValidSnapshot < snapshot )
-			{
-				p[ info.finalIndex ] = (*positions[ info.lastValidSnapshot ])[ info.lastSnapshotIndex ];
 			}
 		}
 		result->addSnapshot( snapshotTimes[ it - objectVector.begin() ], primitive );

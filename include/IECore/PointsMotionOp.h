@@ -53,7 +53,8 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( ObjectParameter )
 
 /// The PointsMotionOp creates a MotionPrimitive object from a list of PointsPrimitive objects.
-/// If a particle does not exist on any given time then it's primVars are set to 0 and P is set to the closest position found.
+/// If a point does not exist on any given snapshot then it's non-masked primvars are copied from the closest available snapshot. 
+/// Masked primvars are set to zero.
 class PointsMotionOp : public Op
 {
 	public :
@@ -72,6 +73,9 @@ class PointsMotionOp : public Op
 		StringParameter * idPrimVarNameParameter();
 		const StringParameter * idPrimVarNameParameter() const;
 
+		StringVectorParameter * maskedPrimVarsParameter();
+		const StringVectorParameter * maskedPrimVarsParameter() const;
+
 	protected :
 
 		virtual ObjectPtr doOperation( const CompoundObject * operands );
@@ -89,6 +93,7 @@ class PointsMotionOp : public Op
 		FloatVectorParameterPtr m_snapshotTimesParameter;
 		ObjectVectorParameterPtr m_pointsPrimitiveVectorParameter;
 		StringParameterPtr m_idPrimVarNameParameter;
+		StringVectorParameterPtr m_maskedPrimVarsParameter;
 
 };
 
