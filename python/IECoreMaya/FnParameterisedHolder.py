@@ -80,14 +80,17 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			if classVersion is None or classVersion < 0 :
 				classVersions = IECore.ClassLoader.defaultLoader( envVarName ).versions( classNameOrParameterised )
 				classVersion = classVersions[-1] if classVersions else 0 
-			if undoable :
-				self.setParameterisedValues()
-				_IECoreMaya._parameterisedHolderAssignModificationState(
-					self.getParameterised()[0].parameters().getValue().copy(),
-					self._classParameterStates(),
-					None,
-					None
-				)
+			if undoable  :
+				if self.getParameterised()[0] :
+					self.setParameterisedValues()
+					_IECoreMaya._parameterisedHolderAssignModificationState(
+						self.getParameterised()[0].parameters().getValue().copy(),
+						self._classParameterStates(),
+						None,
+						None
+					)
+				else :
+					_IECoreMaya._parameterisedHolderAssignModificationState( None, None, None, None	)
 				maya.cmds.ieParameterisedHolderModification( self.fullPathName(), classNameOrParameterised, classVersion, envVarName )
 				# no need to despatch callbacks as that is done by the command, so that the callbacks happen on undo and redo too.
 			else :
