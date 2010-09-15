@@ -43,6 +43,9 @@ from UIElement import UIElement
 # displayed, so the definition can be edited at any time to change the menu. 
 class Menu( UIElement ) :
 
+	# maya.cmds.about doesn't exist in maya standalone
+	__defaultBoldFont = False if hasattr( maya.cmds, "about" ) and maya.cmds.about( windows=True ) else True
+
 	# Creates a menu defined by the specified definition. parent may be a
 	# window (in which case the menu is added to the menu bar), a menu (in which case a submenu is created)
 	# or a control (in which case a popup menu is created). The optional keyword arguments operate as follows :
@@ -114,8 +117,7 @@ class Menu( UIElement ) :
 			else :
 				label = name
 				
-				
-			boldFont = True
+			boldFont = Menu.__defaultBoldFont
 			if hasattr( item, "bold" ) :
 				boldFont = bool(item.bold)
 			
