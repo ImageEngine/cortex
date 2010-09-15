@@ -51,6 +51,6 @@ class FnParameterisedHolderSet( IECoreMaya.FnParameterisedHolder ) :
 		node = maya.cmds.createNode( "ieParameterisedHolderSet", name=nodeName )
 
 		fnSH = IECoreMaya.FnParameterisedHolderSet( node )
-		fnSH.setParameterised( className, classVersion, searchPathEnvVar )
+		fnSH.setParameterised( className, classVersion, searchPathEnvVar, undoable=False )
 
 		return fnSH

@@ -1289,6 +1289,18 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		cmds.undo()
 		
 		self.failIf( cmds.objExists( "opHolder" ) )
+	
+	def testCreateParameterisedHolderSetUndo( self ) :
+	
+		self.assert_( cmds.undoInfo( query=True, state=True ) )
+
+		fnOH = IECoreMaya.FnParameterisedHolderSet.create( "mySet", "stringParsing", 1, "IECORE_OP_PATHS" )
+		
+		self.failUnless( cmds.objExists( "mySet" ) )
+		
+		cmds.undo()
+		
+		self.failIf( cmds.objExists( "mySet" ) )
 		
 	def testSetParameterisedCallbacks( self ) :
 	
