@@ -113,6 +113,16 @@ class Menu( UIElement ) :
 				label = maya.mel.eval( 'interToUI( "%s" )' % name )
 			else :
 				label = name
+				
+				
+			boldFont = True
+			if hasattr( item, "bold" ) :
+				boldFont = bool(item.bold)
+			
+			italicized = False
+			if hasattr( item, "italic" ) :
+				italicized = bool(item.italic)
+				
 			if len( pathComponents ) > 1 :
 				# a submenu
 				if not name in done :
@@ -128,7 +138,7 @@ class Menu( UIElement ) :
 
 				elif item.subMenu :
 
-					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent )
+					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, boldFont=boldFont, italicized=italicized )
 					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, item.subMenu, useInterToUI=useInterToUI ) )
 
 				else :
@@ -137,7 +147,7 @@ class Menu( UIElement ) :
 					if callable( active ) :
 						active = active()
 
-					menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description )
+					menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description, boldFont=boldFont, italicized=italicized )
 					if item.command :
 						maya.cmds.menuItem( menuItem, edit=True, command=self.__wrapCallback( item.command ) )
 					if item.secondaryCommand :
