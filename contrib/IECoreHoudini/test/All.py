@@ -46,6 +46,8 @@ from ActiveTake import *
 from NodeHandle import *
 from FromHoudiniPointsConverter import *
 from FromHoudiniPolygonsConverter import *
+from ToHoudiniPointsConverter import *
+from ToHoudiniPolygonsConverter import *
 
 if __name__ == "__main__":
     unittest.main()
