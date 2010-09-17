@@ -462,7 +462,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = include/IECore src/IECore python/IECore include/IECoreRI src/IECoreRI python/IECoreRI include/IECoreNuke src/IECoreNuke contrib/IECoreGL/include/IECoreGL contrib/IECoreGL/src contrib/IECoreGL/python/IECoreGL include/IECoreTruelight src/IECoreTruelight python/IECoreTruelight include/IECoreMaya src/IECoreMaya python/IECoreMaya mel/IECoreMaya
+INPUT                  = include/IECore src/IECore python/IECore include/IECoreRI src/IECoreRI python/IECoreRI include/IECoreNuke src/IECoreNuke include/IECoreGL src/IECoreGL python/IECoreGL include/IECoreTruelight src/IECoreTruelight python/IECoreTruelight include/IECoreMaya src/IECoreMaya python/IECoreMaya mel/IECoreMaya contrib/IECoreHoudini/include contrib/IECoreHoudini/src contrib/IECoreHoudini/python/IECoreHoudini
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
