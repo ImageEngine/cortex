@@ -2,6 +2,8 @@
 #
 #  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
+#  Copyright (c) 2010, John Haddon. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -113,3 +115,4 @@ from ParameterisedOverwriting import *
 from ConfigLoader import loadConfig
 from Preset import Preset
 from BasicPreset import BasicPreset
+import CamelCase
