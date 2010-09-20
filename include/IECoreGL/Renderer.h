@@ -408,6 +408,9 @@ class Renderer : public IECore::Renderer
 		/// "editEnd"<br>
 		/// This parameter-less command marks the end of an edit to an existing scene, and should be called after
 		/// other changes have been made when re-using an existing renderer.
+		/// "editQuery"<br>
+		/// This parameter-less command returns BoolData( true ) if an edit is in progress, and BoolData( false )
+		/// otherwise.
 		/// \todo Consider generalising an interface for scene edits and making it a standard part of the documentation
 		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );

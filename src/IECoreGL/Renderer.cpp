@@ -152,6 +152,7 @@ struct IECoreGL::Renderer::MemberData
 	std::stack<Imath::M44f> transformStack;
 
 	bool inWorld;
+	bool inEdit;
 	RendererImplementationPtr implementation;
 	ShaderManagerPtr shaderManager;
 	TextureLoaderPtr textureLoader;
@@ -191,6 +192,7 @@ IECoreGL::Renderer::Renderer()
 	m_data->transformStack.push( M44f() );
 
 	m_data->inWorld = false;
+	m_data->inEdit = false;
 	m_data->currentInstance = 0;
 	m_data->implementation = 0;
 	m_data->shaderManager = 0;
@@ -1803,11 +1805,12 @@ IECore::DataPtr editBeginCommand( const std::string &name, const IECore::Compoun
 	DeferredRendererImplementationPtr r = runTimeCast<DeferredRendererImplementation>( memberData->implementation );
 	if( !r )
 	{
-		msg( Msg::Warning, "Renderer::command", "editBeginCommand command operates only in deferred mode" );
+		msg( Msg::Warning, "Renderer::command", "editBegin command operates only in deferred mode" );
 		return 0;
 	}
 		
 	memberData->inWorld = true;
+	memberData->inEdit = true;
 	return new IECore::BoolData( true );
 }
 
@@ -1816,12 +1819,25 @@ IECore::DataPtr editEndCommand( const std::string &name, const IECore::CompoundD
 	DeferredRendererImplementationPtr r = runTimeCast<DeferredRendererImplementation>( memberData->implementation );
 	if( !r )
 	{
-		msg( Msg::Warning, "Renderer::command", "editEndCommand command operates only in deferred mode" );
+		msg( Msg::Warning, "Renderer::command", "editEnd command operates only in deferred mode" );
 		return 0;
 	}
 	
 	memberData->inWorld = false;
+	memberData->inEdit = false;
 	return new IECore::BoolData( true );
+}
+
+IECore::DataPtr editQueryCommand( const std::string &name, const IECore::CompoundDataMap &parameters, IECoreGL::Renderer::MemberData *memberData )
+{
+	DeferredRendererImplementationPtr r = runTimeCast<DeferredRendererImplementation>( memberData->implementation );
+	if( !r )
+	{
+		msg( Msg::Warning, "Renderer::command", "editQuery command operates only in deferred mode" );
+		return 0;
+	}
+	
+	return new IECore::BoolData( memberData->inEdit );
 }
 
 static const CommandMap &commands()
@@ -1832,6 +1848,7 @@ static const CommandMap &commands()
 		c["removeObject"] = removeObjectCommand;
 		c["editBegin"] = editBeginCommand;
 		c["editEnd"] = editEndCommand;
+		c["editQuery"] = editQueryCommand;
 	}
 	return c;
 }

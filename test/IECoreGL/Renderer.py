@@ -512,7 +512,20 @@ class TestRenderer( unittest.TestCase ) :
 		commandResult = r.command( "removeObject", { "name" : StringData( "sphereTwo" ) } )
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 0 )
-
+		
+	def testEditQuery( self ) :
+	
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		with WorldBlock( r ) :
+			self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
+			
+		self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
+		r.command( "editBegin", {} )
+		self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( True ) )
+		r.command( "editEnd", {} )
+		self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
+		
 	def testRemoveObjectDuringProcedural( self ) :
 	
 		r = Renderer()
