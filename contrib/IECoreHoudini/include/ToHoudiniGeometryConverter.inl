@@ -99,9 +99,12 @@ ToHoudiniGeometryConverter::TransferReturnType ToHoudiniGeometryConverter::Trans
 	size_t entries = m_container ? m_container->entries() : 0;
 	for ( size_t i=0; i < entries; i++ )
 	{
+		/// \todo: castAttribData() is deprecated in Houdini 11. replace this with setValue()
+		/// when we drop support for Houdini 10.
+		BaseType *dest =  (*m_container)[i]->template castAttribData<BaseType>( attrRef );
 		for ( size_t j=0; j < dimensions; j++ )
 		{
-			(*m_container)[i]->template setValue<BaseType>( attrRef, src[ i*dimensions + j ], j );
+			dest[j] = src[ i*dimensions + j ];
 		}
 	}
 }
@@ -138,13 +141,14 @@ ToHoudiniGeometryConverter::TransferReturnType ToHoudiniGeometryConverter::Trans
 		throw IECore::Exception( ( boost::format( "ToHoudiniGeometryConverter::TransferDetailAttrib: Invalid GB_AttributeRef returned for PrimitiveVariable \"%s\"." ) % m_name ).str() );
 	}
 
-	GB_AttributeElem &element = m_geo->attribs().getElement();
-
 	const BaseType *src = data->baseReadable();
 
+	/// \todo: castAttribData() is deprecated in Houdini 11. replace this with setValue()
+	/// when we drop support for Houdini 10.
+	BaseType *dest = m_geo->attribs().castAttribData<BaseType>( attrRef );
 	for ( size_t j=0; j < dimensions; j++ )
 	{
-		element.template setValue<BaseType>( attrRef, src[j], j );
+		dest[j] = src[j];
 	}
 }
 

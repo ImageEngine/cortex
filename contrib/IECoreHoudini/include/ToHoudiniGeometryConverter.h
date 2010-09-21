@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_H
 
 #include "GB/GB_AttributeRef.h"
+#include "GEO/GEO_Vertex.h"
 #include "GU/GU_Detail.h"
 #include "GU/GU_DetailHandle.h"
 

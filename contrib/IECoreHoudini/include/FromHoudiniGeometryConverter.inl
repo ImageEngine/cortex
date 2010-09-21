@@ -143,6 +143,8 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const Container &cont
 	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
 	for ( size_t i=0; i < size; i++ )
 	{
+		/// \todo: castAttribData() is deprecated in Houdini 11. replace this with getValue()
+		/// when we drop support for Houdini 10.
 		const BaseType *src = container[i]->template castAttribData<BaseType>( attrRef );
 		for ( size_t j=0; j < dimensions; j++ )
 		{
@@ -162,6 +164,8 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GB_AttributeTab
 	typename T::Ptr data = new T();
 	BaseType *dest = data->baseWritable();
 
+	/// \todo: castAttribData() is deprecated in Houdini 11. replace this with getValue()
+	/// when we drop support for Houdini 10.
 	const BaseType *src = attribs.castAttribData<BaseType>( attrRef );
 
 	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
