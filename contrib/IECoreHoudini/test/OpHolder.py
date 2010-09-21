@@ -334,12 +334,7 @@ class TestOpHolder( unittest.TestCase ):
 		fn2 = IECoreHoudini.FnOpHolder( cob )
 		fn2.setParameterised( cl )
 		cob.parm("parm_filename").set("test/test_data/torus.cob")
-		cook_failed = False
-		try:
-			op.cook() # This should fail because the parameter validation should fail
-		except hou.OperationFailed:
-			cook_failed = True
-		assert(cook_failed)
+		self.assertRaises( hou.OperationFailed, op.cook )
 		assert(op.errors()!="")
 		cob = op.createInputNode(0, "torus" )
 		op.cook() # should pass because torus will be converted to points
@@ -367,12 +362,7 @@ class TestOpHolder( unittest.TestCase ):
 		op2.cook()
 		assert( fn.getParameterised().resultParameter().getValue().typeId() == IECore.TypeId.PointsPrimitive )
 		op.setInput( 0, op2 )
-		cook_failed = False
-		try:
-			op.cook() # This should fail because the parameter validation should fail
-		except hou.OperationFailed:
-			cook_failed = True
-		assert(cook_failed)
+		self.assertRaises( hou.OperationFailed, op.cook )
 		assert(op.errors()!="")
 					
 	def testInvalidValidation(self):
@@ -384,27 +374,15 @@ class TestOpHolder( unittest.TestCase ):
 		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
 		fn = IECoreHoudini.FnOpHolder(op2)
 		fn.setParameterised(cl)
-		cook_failed = False
-		try:
-			op2.cook() # This should fail because the parameter validation should fail
-		except hou.OperationFailed:
-			cook_failed = True
-		assert(cook_failed)
+		self.assertRaises( hou.OperationFailed, op2.cook )
 		assert(op2.errors()!="")
 		
 	def testInvalidOp(self):
 		(op,fn)=self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
 		fn.setParameterised( cl )
-		op.createInputNode( 0, "torus" )
-		cook_failed = False
-		try:
-			print "\n== Test expecting an exception... =="
-			op.cook() # this should error because torus has no normals
-		except hou.OperationFailed:
-			pass
-		else:
-			assert(False)
+		print "\n== Test expecting Exception(\"Must have primvar 'N' in primitive!\") =="
+		self.assertRaises( hou.OperationFailed, op.cook )
 		assert(op.errors()!="")
 		
 	def testMatchString(self):
