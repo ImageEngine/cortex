@@ -33,6 +33,7 @@
 #
 ##########################################################################
 
+import os
 import hou
 import IECore
 import IECoreHoudini
@@ -203,7 +204,7 @@ class TestAttributeRemap( unittest.TestCase ):
 		assert( len(geo['test'].data)==100 )
 		
 	def setUp( self ) :
-		pass
+		os.environ["IECORE_OP_PATHS"] = "test/ops"
 	
 	def tearDown( self ) :
 		pass

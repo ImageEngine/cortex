@@ -33,6 +33,7 @@
 #
 ##########################################################################
 
+import os
 import hou
 import IECore
 import IECoreHoudini
@@ -97,7 +98,7 @@ class TestToHoudiniCoverterOp( unittest.TestCase ):
 		assert( len(geo.prims())==len(h_geo.prims()) )
 	
 	def setUp( self ) :
-		pass
+		os.environ["IECORE_OP_PATHS"] = "test/ops"
 
 	def tearDown( self ) :
 		pass
