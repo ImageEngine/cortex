@@ -52,5 +52,7 @@ void IECoreHoudini::bindFnProceduralHolder()
 		.def("setParameterised", &FnProceduralHolder::setParameterised)
 		.def("hasParameterised", &FnProceduralHolder::hasParameterised)
 		.def("getParameterised", &FnProceduralHolder::getParameterised)
+		.def("refreshClassNames", &FnProceduralHolder::refreshClassNames)
+		.def("classNames", &FnProceduralHolder::classNames)
 	;
 }

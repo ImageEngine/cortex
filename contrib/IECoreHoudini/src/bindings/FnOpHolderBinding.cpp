@@ -35,7 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include <boost/python.hpp>
 
 #include <SOP/SOP_Node.h>
 
@@ -52,5 +52,7 @@ void IECoreHoudini::bindFnOpHolder()
 		.def("setParameterised", &FnOpHolder::setParameterised)
 		.def("hasParameterised", &FnOpHolder::hasParameterised)
 		.def("getParameterised", &FnOpHolder::getParameterised)
+		.def("refreshClassNames", &FnOpHolder::refreshClassNames)
+		.def("classNames", &FnOpHolder::classNames)
 	;
 }

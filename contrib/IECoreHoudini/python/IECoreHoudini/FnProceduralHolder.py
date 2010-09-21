@@ -87,3 +87,14 @@ class FnProceduralHolder(FnParameterisedHolder):
 			if IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).hasParameterised():
 				return IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).getParameterised()
 		return None
+
+	# forces the list of cached class names to refresh	
+	def refreshClassNames(self):
+		if self.nodeValid():
+			IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).refreshClassNames()
+		
+	# get our list of class names based on matchString
+	def classNames(self):
+		if self.nodeValid():
+			return IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).classNames()
+		return None

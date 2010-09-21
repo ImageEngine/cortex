@@ -64,17 +64,7 @@ namespace IECoreHoudini
 			static float currTime();
 
 			/// Run misc python command
-			static void evalPython( const std::string &cmd );
-
-			/// get the ops we could load
-			static std::vector<std::string> opNames();
-			static std::vector<int> opVersions( const std::string &type );
-			static int defaultOpVersion( const std::string &type );
-
-			/// get the procedurals we could load
-			static std::vector<std::string> proceduralNames();
-			static std::vector<int> proceduralVersions( const std::string &type );
-			static int defaultProceduralVersion( const std::string &type );
+			static boost::python::object evalPython( const std::string &cmd );
 
 			/// create a converter, trying to work out the appropriate type (points/mesh)
 			static IECore::ObjectPtr convertFromHoudini( GU_DetailHandle detailHandle );

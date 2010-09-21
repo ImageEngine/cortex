@@ -48,6 +48,8 @@ from FromHoudiniPointsConverter import *
 from FromHoudiniPolygonsConverter import *
 from ToHoudiniPointsConverter import *
 from ToHoudiniPolygonsConverter import *
+from AttributeRemap import *
+from ToHoudiniConverterOp import *
 
 if __name__ == "__main__":
     unittest.main()

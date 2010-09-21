@@ -91,6 +91,8 @@ using namespace IECoreHoudini;
 PRM_Name SOP_OpHolder::opTypeParm( "__opType", "Op:" );
 PRM_Name SOP_OpHolder::opVersionParm( "__opVersion", "  Version:" );
 PRM_Name SOP_OpHolder::opParmEval( "__opParmEval", "ParameterEval" );
+PRM_Name SOP_OpHolder::opMatchString( "__opMatchString", "MatchString" );
+PRM_Default SOP_OpHolder::opMatchStringDefault( 0.f, "*" );
 PRM_Name SOP_OpHolder::opReloadBtn( "__opReloadBtn", "Reload" );
 PRM_Name SOP_OpHolder::switcherName( "__switcher", "Switcher" );
 
@@ -109,7 +111,8 @@ PRM_Template SOP_OpHolder::myParameters[] = {
 		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_OpHolder::reloadClassCallback ),
 		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_OpHolder::reloadClassCallback ),
 		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_OpHolder::reloadButtonCallback ),
-		PRM_Template(PRM_INT, 1, &opParmEval),
+		PRM_Template(PRM_INT|PRM_TYPE_INVISIBLE, 1, &opParmEval),
+		PRM_Template(PRM_STRING|PRM_TYPE_INVISIBLE, 1, &opMatchString, &opMatchStringDefault ),
 		PRM_Template(PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
 		PRM_Template()
 };
@@ -136,11 +139,11 @@ SOP_OpHolder::SOP_OpHolder(OP_Network *net,
     m_parameters(0),
     m_haveParameterList(false)
 {
-	getParm("__opParmEval").getTemplatePtr()->setInvisible(true);
+	// evaluation expression parameter
 	getParm("__opParmEval").setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
 	getParm("__opParmEval").setLockedFlag( 0, 1 );
 
-	m_cachedOpNames = CoreHoudini::opNames();
+	// clear inputs
 	m_inputs.clear();
 }
 
@@ -162,8 +165,10 @@ void SOP_OpHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
 	menu[0].setLabel( "< No Op >" );
 	unsigned int pos=1;
 
-	std::vector<std::string> &class_names = me->m_cachedOpNames;
-	std::vector<std::string>::iterator it;
+	// refresh class names
+	me->refreshClassNames();
+	const std::vector<std::string> &class_names = me->classNames();
+	std::vector<std::string>::const_iterator it;
 	for ( it=class_names.begin(); it!=class_names.end(); ++it )
 	{
 		menu[pos].setToken( (*it).c_str() );
@@ -187,7 +192,7 @@ void SOP_OpHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
 	unsigned int pos=0;
 	if ( me->m_className!="" )
 	{
-		std::vector<int> class_versions = CoreHoudini::opVersions( me->m_className );
+		std::vector<int> class_versions = classVersions( SOP_ParameterisedHolder::OP_LOADER, me->m_className );
 		std::vector<int>::iterator it;
 		for ( it=class_versions.begin(); it!=class_versions.end(); ++it )
 		{
@@ -230,6 +235,18 @@ void SOP_OpHolder::setParameterised( IECore::RunTimeTypedPtr p, const std::strin
 
 	// refresh input parameters
 	refreshInputConnections();
+}
+
+// This refresh the list of class names
+void SOP_OpHolder::refreshClassNames()
+{
+	UT_String matchString;
+	evalString( matchString, "__opMatchString", 0, 0 );
+	if ( std::string( matchString.buffer() )!=m_matchString )
+	{
+		m_matchString = std::string( matchString.buffer() );
+		m_cachedNames = classNames( SOP_ParameterisedHolder::OP_LOADER, m_matchString );
+	}
 }
 
 /// TODO: move this code into parameterised holder
@@ -280,7 +297,7 @@ int SOP_OpHolder::reloadClassCallback( void *data, int index, float time,
 			// if we don't have a version, use the default
 			if ( sop->m_classVersion==-1 )
 			{
-				sop->m_classVersion = CoreHoudini::defaultOpVersion( sop->m_className );
+				sop->m_classVersion = defaultClassVersion( SOP_ParameterisedHolder::OP_LOADER, sop->m_className );
 				sop->setString( boost::lexical_cast<std::string>(sop->m_classVersion).c_str(), CH_STRING_LITERAL, "__opVersion", 0, 0 );
 			}
 		}
@@ -603,12 +620,15 @@ bool SOP_OpHolder::load( UT_IStream &is,
 
 const char *SOP_OpHolder::inputLabel( unsigned pos ) const
 {
-	if ( pos>m_inputs.size()-1 )
+	if ( !m_parameters || pos>m_inputs.size()-1 )
+	{
 		return "";
-
+	}
 	const IECore::CompoundParameter::ParameterVector &params = m_parameters->orderedParameters();
 	if ( pos>params.size()-1 ) // shouldn't happen
+	{
 		return "";
+	}
 	return params[pos]->name().c_str();
 }
 
@@ -623,11 +643,9 @@ unsigned SOP_OpHolder::maxInputs() const
 	// this makes sure when we first load we have 4 inputs
 	// the wires get connected before the Op is loaded onto the Sop
 	// so
-	if ( !m_haveParameterList )
+	if ( !m_haveParameterList || m_inputs.size()>4 )
+	{
 		return 4;
-
-	if ( m_inputs.size()>4 )
-		return 4;
-	else
-		return m_inputs.size();
+	}
+	return m_inputs.size();
 }

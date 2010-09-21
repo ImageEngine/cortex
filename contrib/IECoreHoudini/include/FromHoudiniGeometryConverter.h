@@ -53,6 +53,19 @@ namespace IECoreHoudini
 
 IE_CORE_FORWARDDECLARE( FromHoudiniGeometryConverter );
 
+/// This simple class is used to describe the destination mapping for point or primitive
+/// attributes that have been remapped using the 'attribute' sop.
+class RemappingInfo
+{
+	public:
+		enum AttrType { Point=0,
+						Primitive };
+		std::string name; // our new name
+		IECore::TypeId type; // our new type
+		IECore::PrimitiveVariable::Interpolation interpolation; // our new interpolation
+		int offset; // our element offset
+};
+
 /// The FromHoudiniGeometryConverter class forms a base class for all classes able to perform
 /// some kind of conversion from a Houdini GU_Detail to an IECore::Primitive.
 class FromHoudiniGeometryConverter : public FromHoudiniConverter
@@ -115,23 +128,30 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		) const;
 		
 		typedef UT_PtrArray<const GEO_Vertex*> VertexList;
-		
+
+		/// Attribute remapping
+		typedef std::map< std::string, std::vector< RemappingInfo > > MappingMap; // each of the attribute types (point, prim) will have it's own map
+		typedef std::map< RemappingInfo::AttrType, MappingMap > AttributeRemapping; // this is all the maps together
+		AttributeRemapping getAttributeRemapping( const GU_Detail *geo ) const;
+
 		/// Utility functions for transfering each attrib type from Houdini onto the IECore::Primitive provided
 		void transferDetailAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation ) const;
-		void transferPointAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points ) const;
-		void transferPrimitiveAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives ) const;
+		void transferPointAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points, AttributeRemapping &attribute_remap ) const;
+		void transferPrimitiveAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives, AttributeRemapping &attribute_remap  ) const;
 		void transferVertexAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const VertexList &vertices ) const;
 		
 		template <typename Container>
 		void transferAttribData(
 			const Container &container, IECore::Primitive *result,
 			IECore::PrimitiveVariable::Interpolation interpolation,
-			const GB_Attribute *attr, const GB_AttributeRef &attrRef
+			const GB_Attribute *attr, const GB_AttributeRef &attrRef,
+			const RemappingInfo *remap_info=0
 		) const;
 		
 		/// Utility functions for extracting attrib data from Houdini and storing it as a DataPtr of type T
+		/// @parm index allows a single component to be extracted from a larger container
 		template <typename T, typename Container>
-		IECore::DataPtr extractData( const Container &container, const GB_AttributeRef &attrRef ) const;
+		IECore::DataPtr extractData( const Container &container, const GB_AttributeRef &attrRef, int index=-1 ) const;
 		
 		template <typename T>
 		IECore::DataPtr extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const;

@@ -65,6 +65,9 @@ namespace IECoreHoudini
 			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version );
 			virtual IECore::RunTimeTypedPtr getParameterised();
 
+			void refreshClassNames();
+			std::vector<std::string> classNames();
+
 	};
 }
 

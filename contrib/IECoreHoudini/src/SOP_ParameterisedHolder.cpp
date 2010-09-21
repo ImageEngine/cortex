@@ -55,7 +55,8 @@ SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *n
 	m_className(""),
 	m_classVersion(-1),
 	m_parameterised(0),
-	m_requiresUpdate(true)
+	m_requiresUpdate(true),
+    m_matchString("")
 {
 	CoreHoudini::initPython();
 	enableParameterisedUpdate();
@@ -428,4 +429,102 @@ IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised(
 		PyErr_Print();
 	}
 	return new_procedural;
+}
+
+const std::vector<std::string> &SOP_ParameterisedHolder::classNames()
+{
+	return m_cachedNames;
+}
+
+
+std::vector<std::string> SOP_ParameterisedHolder::classNames( const LoaderType &type, const std::string &matchString )
+{
+	IECorePython::ScopedGILLock lock;
+	std::vector<std::string> class_names;
+	try
+	{
+		std::string python_cmd;
+		switch( type )
+		{
+			case OP_LOADER:
+			{
+				python_cmd = boost::str( format("IECore.ClassLoader.defaultOpLoader().classNames(\"\%s\")") % matchString );
+				break;
+			}
+			case PROCEDURAL_LOADER:
+			{
+				python_cmd = boost::str( format("IECore.ClassLoader.defaultProceduralLoader().classNames(\"\%s\")") % matchString );
+				break;
+			}
+			default:
+			{
+				return class_names;
+				break;
+			}
+		}
+
+		object result = CoreHoudini::evalPython( python_cmd );
+		boost::python::list names = extract<boost::python::list>(result)();
+		class_names.clear();
+		for ( unsigned int i=0; i<names.attr("__len__")(); ++i )
+		{
+			class_names.push_back( extract<std::string>(names[i]) );
+		}
+	}
+	catch( ... )
+	{
+		PyErr_Print();
+	}
+	return class_names;
+}
+
+std::vector<int> SOP_ParameterisedHolder::classVersions( const LoaderType &loader_type, const std::string &type )
+{
+	IECorePython::ScopedGILLock lock;
+	std::vector<int> class_versions;
+	try
+	{
+		std::string python_cmd;
+		switch( loader_type )
+		{
+			case OP_LOADER:
+			{
+				python_cmd = boost::str( format("IECore.ClassLoader.defaultOpLoader().versions(\"\%s\")") % type );
+				break;
+			}
+			case PROCEDURAL_LOADER:
+			{
+				python_cmd = boost::str( format("IECore.ClassLoader.defaultProceduralLoader().versions(\"\%s\")") % type );
+				break;
+			}
+			default:
+			{
+				return class_versions;
+				break;
+			}
+		}
+
+		object result = CoreHoudini::evalPython( python_cmd );
+		boost::python::list versions = extract<boost::python::list>(result)();
+		class_versions.clear();
+		for ( unsigned int i=0; i<versions.attr("__len__")(); ++i )
+		{
+			class_versions.push_back( extract<int>(versions[i]) );
+		}
+	}
+	catch( ... )
+	{
+		PyErr_Print();
+	}
+	return class_versions;
+}
+
+int SOP_ParameterisedHolder::defaultClassVersion( const LoaderType &loader_type, const std::string &type )
+{
+	// just return the highest version we find on disk
+	std::vector<int> versions = classVersions( loader_type, type );
+	if ( versions.size()==0 )
+		return -1;
+	else
+		return versions[versions.size()-1];
 }

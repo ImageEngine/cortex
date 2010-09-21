@@ -209,6 +209,26 @@ class TestProceduralHolder( unittest.TestCase ):
 		proc.parmTuple("parm_a").set( [123] )
 		proc.cook(force=True)
 		assert( cl['a'].getValue().value == 123 )
+		
+	def testMatchString(self):
+		(op,fn)=self.testProceduralParameters()
+		fn = IECoreHoudini.FnProceduralHolder(op)
+		assert( op.parm("__opMatchString").eval()=="*")
+		op.parm("__opType").set("sphereProcedural")
+		op.parm("__opType").pressButton()
+		cl = fn.getParameterised()
+		assert( cl.typeName()=="sphereProcedural" )
+		op.parm("__opMatchString").set("nestedChild")
+		fn.refreshClassNames()
+		results = fn.classNames()
+		assert(len(fn.classNames())==1)
+		op.parm("__opType").set("sphereProcedural") # this still works, should it be invalid?
+		op.parm("__opType").pressButton()
+		cl = fn.getParameterised()
+		assert( cl.typeName()=="sphereProcedural" )
+		op.parm("__opMatchString").set("*")
+		fn.refreshClassNames()
+		assert(len(fn.classNames())>1)
 
 	def setUp( self ) :
                 os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"

@@ -45,6 +45,7 @@
 // IECoreHoudini
 #include "SOP_OpHolder.h"
 #include "SOP_ProceduralHolder.h"
+#include "SOP_ToHoudiniConverter.h"
 #include "GR_Cortex.h"
 using namespace IECoreHoudini;
 
@@ -77,6 +78,15 @@ void newSopOperator(OP_OperatorTable *table)
     				0, // Min # of sources
     				4, // Max # of sources
     				SOP_OpHolder::myVariables, // Local variables
+    				OP_FLAG_GENERATOR) ); // Flag it as generator
+	table->addOperator(
+			new OP_Operator("ieToHoudiniConverter", // Internal name
+					"Cortex To Houdini", // UI name
+					SOP_ToHoudiniConverter::myConstructor, // How to build the SOP
+					SOP_ToHoudiniConverter::myParameters, // My parameters
+    				1, // Min # of sources
+    				1, // Max # of sources
+    				SOP_ToHoudiniConverter::myVariables, // Local variables
     				OP_FLAG_GENERATOR) ); // Flag it as generator
 }
 

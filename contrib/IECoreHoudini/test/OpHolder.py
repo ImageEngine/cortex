@@ -399,11 +399,32 @@ class TestOpHolder( unittest.TestCase ):
 		op.createInputNode( 0, "torus" )
 		cook_failed = False
 		try:
+			print "\n== Test expecting an exception... =="
 			op.cook() # this should error because torus has no normals
 		except hou.OperationFailed:
-			cook_failed = True
-		assert(cook_failed)
+			pass
+		else:
+			assert(False)
 		assert(op.errors()!="")
+		
+	def testMatchString(self):
+		(op,fn)=self.testOpHolder()
+		assert( op.parm("__opMatchString").eval()=="*")
+		op.parm("__opType").set("cobReader")
+		op.parm("__opType").pressButton()
+		cl = fn.getParameterised()
+		assert( cl.typeName()=="cobReader" )
+		op.parm("__opMatchString").set("object*")
+		fn.refreshClassNames()
+		results = fn.classNames()
+		assert(len(fn.classNames())==1)
+		op.parm("__opType").set("cobReader") # this still works, should it be invalid?
+		op.parm("__opType").pressButton()
+		cl = fn.getParameterised()
+		assert( cl.typeName()=="cobReader" )
+		op.parm("__opMatchString").set("*")
+		fn.refreshClassNames()
+		assert(len(fn.classNames())>1)
 		
 	def setUp( self ) :
 		os.environ["IECORE_OP_PATHS"] = "test/ops"

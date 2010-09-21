@@ -58,6 +58,10 @@ namespace IECoreHoudini
 	class SOP_ParameterisedHolder : public SOP_Node
 	{
 		public:
+
+			enum LoaderType { OP_LOADER=0,
+				PROCEDURAL_LOADER };
+
 			/// Ctor
 			SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op );
 			/// Dtor
@@ -114,6 +118,14 @@ namespace IECoreHoudini
 			void disableParameterisedUpdate(){ m_parameterisedUpdate = false; }
 			bool doParameterisedUpdate(){ return m_parameterisedUpdate; }
 
+			/// get the classes we could load
+			void virtual refreshClassNames()=0;
+			const std::vector<std::string> &classNames();
+
+			static std::vector<std::string> classNames( const LoaderType &loader_type, const std::string &matchString );
+			static std::vector<int> classVersions( const LoaderType &loader_type, const std::string &type );
+			static int defaultClassVersion( const LoaderType &loader_type, const std::string &type );
+
 		protected:
 			bool m_requiresUpdate;
 
@@ -121,9 +133,11 @@ namespace IECoreHoudini
 			std::string m_className;
 			int m_classVersion;
 			IECore::RunTimeTypedPtr m_parameterised;
+			std::vector<std::string> m_cachedNames;
 
 		private:
 			bool m_parameterisedUpdate; // this controls whether the parameterised is loaded if the type/version is changed in the gui
+			std::string m_matchString; // our class loader match string
 	};
 
 } // namespace IECoreHoudini

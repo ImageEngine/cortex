@@ -159,7 +159,7 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 
 # tries to pretty-print a parameter, in case it doesn't have a label
 def labelFormat( str ):
-	return string.capwords( ' '.join( str.split("_") ) )
+	return IECore.CamelCase.toSpaced( str )
 
 # returns a houdini parameter name, give it's cortex name
 def parmName( n, parent=None ) :

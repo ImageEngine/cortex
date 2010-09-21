@@ -62,10 +62,21 @@ template <typename Container>
 void FromHoudiniGeometryConverter::transferAttribData(
 	const Container &container, IECore::Primitive *result,
 	IECore::PrimitiveVariable::Interpolation interpolation,
-	const GB_Attribute *attr, const GB_AttributeRef &attrRef
+	const GB_Attribute *attr, const GB_AttributeRef &attrRef,
+	const RemappingInfo *remap_info
 ) const
 {
 	IECore::DataPtr dataPtr = 0;
+
+	// we use this initial value to indicate we don't have a remapping so just
+	// guess what destination type to use.
+	IECore::TypeId var_type = IECore::InvalidTypeId;
+	int var_offset = -1;
+	if ( remap_info )
+	{
+		var_type = remap_info->type;
+		var_offset = remap_info->offset;
+	}
 
 	switch ( attr->getType() )
 	{
@@ -78,10 +89,41 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					dataPtr = extractData<IECore::FloatVectorData>( container, attrRef );
 					break;
 				case 2:
-					dataPtr = extractData<IECore::V2fVectorData>( container, attrRef );
+					// it can be either a single float (sub-component), or (default) just a V2f
+					switch( var_type )
+					{
+						case IECore::FloatVectorDataTypeId:
+						{
+							dataPtr = extractData<IECore::FloatVectorData>( container, attrRef, var_offset );
+							break;
+						}
+						default:
+						{
+							dataPtr = extractData<IECore::V2fVectorData>( container, attrRef );
+							break;
+						}
+					}
 					break;
 				case 3:
-					dataPtr = extractData<IECore::V3fVectorData>( container, attrRef );
+					// it can be either a single float (sub-component), Color3f or (default) just a V3f
+					switch( var_type )
+					{
+						case IECore::FloatVectorDataTypeId:
+						{
+							dataPtr = extractData<IECore::FloatVectorData>( container, attrRef, var_offset );
+							break;
+						}
+						case IECore::Color3fVectorDataTypeId:
+						{
+							dataPtr = extractData<IECore::Color3fVectorData>( container, attrRef );
+							break;
+						}
+						default:
+						{
+							dataPtr = extractData<IECore::V3fVectorData>( container, attrRef );
+							break;
+						}
+					}
 					break;
 				default:
 					break;
@@ -112,7 +154,25 @@ void FromHoudiniGeometryConverter::transferAttribData(
 			unsigned dimensions = attr->getSize() / (sizeof( float ) * 3);
 			if ( dimensions == 1 ) // only support single element vectors
 			{
-				dataPtr = extractData<IECore::V3fVectorData>( container, attrRef );
+				// a vector can be either a single float, a Color3f or a V3f
+				switch( var_type )
+				{
+					case IECore::FloatVectorDataTypeId:
+					{
+						dataPtr = extractData<IECore::FloatVectorData>( container, attrRef, var_offset );
+						break;
+					}
+					case IECore::Color3fVectorDataTypeId:
+					{
+						dataPtr = extractData<IECore::Color3fVectorData>( container, attrRef );
+						break;
+					}
+					default:
+					{
+						dataPtr = extractData<IECore::V3fVectorData>( container, attrRef );
+						break;
+					}
+				}
 			}
  			break;
  		}
@@ -124,12 +184,23 @@ void FromHoudiniGeometryConverter::transferAttribData(
 
 	if ( dataPtr )
 	{
-		result->variables[ std::string( attr->getName() ) ] = IECore::PrimitiveVariable( interpolation, dataPtr );
+		std::string var_name( attr->getName() );
+		IECore::PrimitiveVariable::Interpolation var_interp = interpolation;
+
+		// remap our name and interpolation
+		if ( remap_info )
+		{
+			var_name = remap_info->name;
+			var_interp = remap_info->interpolation;
+		}
+
+		// add the primitive variable to our result
+		result->variables[ var_name ] = IECore::PrimitiveVariable( var_interp, dataPtr );
 	}
 }
 
 template <typename T, typename Container>
-IECore::DataPtr FromHoudiniGeometryConverter::extractData( const Container &container, const GB_AttributeRef &attrRef ) const
+IECore::DataPtr FromHoudiniGeometryConverter::extractData( const Container &container, const GB_AttributeRef &attrRef, int index ) const
 {
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType::value_type ValueType;
@@ -141,6 +212,12 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const Container &cont
 	BaseType *dest = data->baseWritable();
 	
 	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
+	unsigned int offset = 0;
+	if ( index>=0 )
+	{
+		offset = index;
+	}
+
 	for ( size_t i=0; i < size; i++ )
 	{
 		/// \todo: castAttribData() is deprecated in Houdini 11. replace this with getValue()
@@ -148,7 +225,7 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const Container &cont
 		const BaseType *src = container[i]->template castAttribData<BaseType>( attrRef );
 		for ( size_t j=0; j < dimensions; j++ )
 		{
-			dest[ i*dimensions + j ] = src[j];
+			dest[ ( i * dimensions ) + j ] = src[j+offset];
 		}
 	}
 

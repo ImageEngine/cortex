@@ -70,6 +70,8 @@ namespace IECoreHoudini
 			static PRM_Name opTypeParm;
 			static PRM_Name opVersionParm;
 			static PRM_Name opParmEval;
+			static PRM_Name opMatchString;
+			static PRM_Default opMatchStringDefault;
 			static PRM_Name opReloadBtn;
 			static PRM_Name switcherName;
 			static PRM_Default switcherDefaults[];
@@ -89,6 +91,9 @@ namespace IECoreHoudini
 			/// callback for when we click the reload button
 			static int reloadButtonCallback( void *data, int index, float time,
 					const PRM_Template *tplate);
+
+			/// class names based on match string
+			virtual void refreshClassNames();
 
 			/// handle loading our SOP from disk (i.e. when a hip is loaded)
 			virtual bool load( UT_IStream &is, const char *ext,
@@ -119,6 +124,7 @@ namespace IECoreHoudini
     		bool m_renderDirty;
 
 			// cache the procedural names
+    		std::string m_matchString;
 			std::vector<std::string> m_cachedProceduralNames;
 	};
 

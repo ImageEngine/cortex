@@ -133,3 +133,29 @@ IECore::RunTimeTypedPtr FnOpHolder::getParameterised()
 	
 	return 0;
 }
+
+void FnOpHolder::refreshClassNames()
+{
+	if ( hasHolder() )
+	{
+		SOP_OpHolder *holder = getOpHolder( static_cast<SOP_Node*>( m_handle.node() ) );
+		if ( holder )
+		{
+			holder->refreshClassNames();
+		}
+	}
+}
+
+std::vector<std::string> FnOpHolder::classNames()
+{
+	std::vector<std::string> results;
+	if ( hasHolder() )
+	{
+		SOP_OpHolder *holder = getOpHolder( static_cast<SOP_Node*>( m_handle.node() ) );
+		if ( holder )
+		{
+			results = holder->classNames();
+		}
+	}
+	return results;
+}

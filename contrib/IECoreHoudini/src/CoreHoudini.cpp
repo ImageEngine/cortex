@@ -90,140 +90,21 @@ float CoreHoudini::currTime()
 	return time;
 }
 
-std::vector<std::string> CoreHoudini::opNames()
+object CoreHoudini::evalPython( const std::string &cmd )
 {
 	IECorePython::ScopedGILLock lock;
-	std::vector<std::string> class_names;
-	try
-	{
-		handle<> resultHandle( PyRun_String( "IECore.ClassLoader.defaultOpLoader().classNames()", Py_eval_input,
-				CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
-		object result( resultHandle );
-
-		boost::python::list names = extract<boost::python::list>(result)();
-		class_names.clear();
-		for ( unsigned int i=0; i<names.attr("__len__")(); ++i )
-		{
-			class_names.push_back( extract<std::string>(names[i]) );
-		}
-	}
-	catch( ... )
-	{
-		PyErr_Print();
-	}
-	return class_names;
-}
-
-std::vector<int> CoreHoudini::opVersions( const std::string &type )
-{
-	IECorePython::ScopedGILLock lock;
-	std::vector<int> class_versions;
-	try
-	{
-		std::string cmd = "IECore.ClassLoader.defaultOpLoader().versions('";
-		cmd += type;
-		cmd += "')";
-		handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
-				CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
-		object result( resultHandle );
-
-		boost::python::list versions = extract<boost::python::list>(result)();
-		class_versions.clear();
-		for ( unsigned int i=0; i<versions.attr("__len__")(); ++i )
-		{
-			class_versions.push_back( extract<int>(versions[i]) );
-		}
-	}
-	catch( ... )
-	{
-		PyErr_Print();
-	}
-	return class_versions;
-}
-
-int CoreHoudini::defaultOpVersion( const std::string &type )
-{
-	// just return the highest version we find on disk
-	std::vector<int> versions = opVersions( type );
-	if ( versions.size()==0 )
-		return -1;
-	else
-		return versions[versions.size()-1];
-}
-
-std::vector<std::string> CoreHoudini::proceduralNames()
-{
-	IECorePython::ScopedGILLock lock;
-	std::vector<std::string> class_names;
-	try
-	{
-		handle<> resultHandle( PyRun_String( "IECore.ClassLoader.defaultProceduralLoader().classNames()", Py_eval_input,
-				CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
-		object result( resultHandle );
-
-		boost::python::list names = extract<boost::python::list>(result)();
-		class_names.clear();
-		for ( unsigned int i=0; i<names.attr("__len__")(); ++i )
-		{
-			class_names.push_back( extract<std::string>(names[i]) );
-		}
-	}
-	catch( ... )
-	{
-		PyErr_Print();
-	}
-	return class_names;
-}
-
-std::vector<int> CoreHoudini::proceduralVersions( const std::string &type )
-{
-	IECorePython::ScopedGILLock lock;
-	std::vector<int> class_versions;
-	try
-	{
-		std::string cmd = "IECore.ClassLoader.defaultProceduralLoader().versions('";
-		cmd += type;
-		cmd += "')";
-		handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
-				CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
-		object result( resultHandle );
-
-		boost::python::list versions = extract<boost::python::list>(result)();
-		class_versions.clear();
-		for ( unsigned int i=0; i<versions.attr("__len__")(); ++i )
-		{
-			class_versions.push_back( extract<int>(versions[i]) );
-		}
-	}
-	catch( ... )
-	{
-		PyErr_Print();
-	}
-	return class_versions;
-}
-
-int CoreHoudini::defaultProceduralVersion( const std::string &type )
-{
-	// just return the highest version we find on disk
-	std::vector<int> versions = proceduralVersions( type );
-	if ( versions.size()==0 )
-		return -1;
-	else
-		return versions[versions.size()-1];
-}
-
-void CoreHoudini::evalPython( const std::string &cmd )
-{
-	IECorePython::ScopedGILLock lock;
+	object result;
 	try
 	{
 		handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
 				CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
+		result = object( resultHandle );
 	}
 	catch( ... )
 	{
 		PyErr_Print();
 	}
+	return result;
 }
 
 IECore::ObjectPtr CoreHoudini::convertFromHoudini( GU_DetailHandle detailHandle )

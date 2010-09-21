@@ -3,8 +3,6 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
-//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -35,43 +33,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef FNPROCEDURALHOLDER_H_
-#define FNPROCEDURALHOLDER_H_
+#ifndef SOP_TOHOUDINICONVERTER_H_
+#define SOP_TOHOUDINICONVERTER_H_
 
 // Houdini
 #include <SOP/SOP_Node.h>
-
-// Cortex
-#include <IECore/Op.h>
-#include <IECore/CompoundParameter.h>
+#include <PRM/PRM_Name.h>
 
 // IECoreHoudini
-#include "NodeHandle.h"
-#include "FnParameterisedHolder.h"
-
+#include "SOP_ParameterisedHolder.h"
 
 namespace IECoreHoudini
 {
-	class SOP_ProceduralHolder;
-	class FnProceduralHolder : public FnParameterisedHolder
+	/// SOP class for converting from an IECore::Object into native
+	/// Houdini geometry.
+	class SOP_ToHoudiniConverter : public SOP_Node
 	{
-		friend class SOP_ProceduralHolder;
 		public:
-			FnProceduralHolder( SOP_Node *sop=0 );
-			virtual ~FnProceduralHolder();
+			/// standard houdini ctor and parameter variables
+			static OP_Node *myConstructor( OP_Network *net,
+					const char *name,
+					OP_Operator *op );
+			static PRM_Template myParameters[];
+			static CH_LocalVariable myVariables[];
 
-			SOP_ProceduralHolder *getProceduralHolder( SOP_Node *sop );
-
-			virtual bool hasParameterised();
-			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version );
-			virtual IECore::RunTimeTypedPtr getParameterised();
-
-			void refreshClassNames();
-			std::vector<std::string> classNames();
+		protected:
+			SOP_ToHoudiniConverter( OP_Network *net,
+					const char *name,
+					OP_Operator *op );
+			virtual ~SOP_ToHoudiniConverter();
+			virtual OP_ERROR cookMySop( OP_Context &context );
+			virtual const char *inputLabel( unsigned pos ) const;
 
 		private:
-			//virtual void setParameterisedDirectly( IECore::RunTimeTypedPtr p, const std::string &type, int version, SOP_ParameterisedHolder *sop );
+			// -
 	};
-}
 
-#endif /* FNPROCEDURALHOLDER_H_ */
+} // namespace IECoreHoudini
+
+#endif /* SOP_TOHOUDINICONVERTER_H_ */

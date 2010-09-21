@@ -92,6 +92,8 @@ using namespace IECoreHoudini;
 PRM_Name SOP_ProceduralHolder::opTypeParm( "__opType", "Procedural:" );
 PRM_Name SOP_ProceduralHolder::opVersionParm( "__opVersion", "  Version:" );
 PRM_Name SOP_ProceduralHolder::opParmEval( "__opParmEval", "ParameterEval" );
+PRM_Name SOP_ProceduralHolder::opMatchString( "__opMatchString", "MatchString" );
+PRM_Default SOP_ProceduralHolder::opMatchStringDefault( 0.f, "*" );
 PRM_Name SOP_ProceduralHolder::opReloadBtn( "__opReloadBtn", "Reload" );
 PRM_Name SOP_ProceduralHolder::switcherName( "__switcher", "Switcher" );
 
@@ -110,7 +112,8 @@ PRM_Template SOP_ProceduralHolder::myParameters[] = {
 		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
 		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
 		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_ProceduralHolder::reloadButtonCallback ),
-		PRM_Template(PRM_INT, 1, &opParmEval),
+		PRM_Template(PRM_INT|PRM_TYPE_INVISIBLE, 1, &opParmEval),
+		PRM_Template(PRM_STRING|PRM_TYPE_INVISIBLE, 1, &opMatchString, &opMatchStringDefault ),
 		PRM_Template(PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
 		PRM_Template()
 };
@@ -136,11 +139,8 @@ SOP_ProceduralHolder::SOP_ProceduralHolder(OP_Network *net,
     m_scene(0),
     m_renderDirty(true)
 {
-	getParm("__opParmEval").getTemplatePtr()->setInvisible(true);
 	getParm("__opParmEval").setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
 	getParm("__opParmEval").setLockedFlag( 0, 1 );
-
-	m_cachedProceduralNames = CoreHoudini::proceduralNames();
 }
 
 /// Dtor
@@ -160,8 +160,10 @@ void SOP_ProceduralHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSiz
 	menu[0].setLabel( "< No Procedural >" );
 	unsigned int pos=1;
 
-	std::vector<std::string> &class_names = me->m_cachedProceduralNames;
-	std::vector<std::string>::iterator it;
+	// refresh class list
+	me->refreshClassNames();
+	const std::vector<std::string> &class_names = me->classNames();
+	std::vector<std::string>::const_iterator it;
 	for ( it=class_names.begin(); it!=class_names.end(); ++it )
 	{
 		menu[pos].setToken( (*it).c_str() );
@@ -184,7 +186,7 @@ void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int max
 	unsigned int pos=0;
 	if ( me->m_className!="" )
 	{
-		std::vector<int> class_versions = CoreHoudini::proceduralVersions( me->m_className );
+		std::vector<int> class_versions = classVersions( SOP_ParameterisedHolder::PROCEDURAL_LOADER, me->m_className );
 		std::vector<int>::iterator it;
 		for ( it=class_versions.begin(); it!=class_versions.end(); ++it )
 		{
@@ -205,6 +207,18 @@ void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int max
 
 	// mark the end of our menu
 	menu[pos].setToken(0);
+}
+
+// This refresh the list of class names
+void SOP_ProceduralHolder::refreshClassNames()
+{
+	UT_String matchString;
+	evalString( matchString, "__opMatchString", 0, 0 );
+	if ( std::string( matchString.buffer() )!=m_matchString )
+	{
+		m_matchString = std::string( matchString.buffer() );
+		m_cachedNames = classNames( SOP_ParameterisedHolder::PROCEDURAL_LOADER, m_matchString );
+	}
 }
 
 void SOP_ProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version )
@@ -272,7 +286,7 @@ int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time
 			// if we don't have a version, use the default
 			if ( sop->m_classVersion==-1 )
 			{
-				sop->m_classVersion = CoreHoudini::defaultProceduralVersion( sop->m_className );
+				sop->m_classVersion = defaultClassVersion( SOP_ParameterisedHolder::PROCEDURAL_LOADER, sop->m_className );
 				sop->setString( boost::lexical_cast<std::string>(sop->m_classVersion).c_str(), CH_STRING_LITERAL, "__opVersion", 0, 0 );
 			}
 		}
