@@ -102,26 +102,41 @@ class TestMessageHandler( unittest.TestCase ) :
 
 		MessageHandler.popHandler()
 
+	class Derived( MessageHandler ):
+
+		def __init__( self ):
+			MessageHandler.__init__( self )
+			self.lastMessage = StringData("")
+			self.lastContext = StringData("")
+			self.lastLevel = IntData(0)
+
+		def handle( self, level, context, msg ):
+			self.lastLevel.value = level
+			self.lastContext.value = context
+			self.lastMessage.value = msg
+				
 	def testSubclassing( self ):
 
-		class derived( MessageHandler ):
-
-			def __init__( self ):
-				MessageHandler.__init__( self )
-				self.lastMessage = StringData("")
-				self.lastContext = StringData("")
-				self.lastLevel = IntData(0)
-
-			def handle( self, level, context, msg ):
-				self.lastLevel.value = level
-				self.lastContext.value = context
-				self.lastMessage.value = msg
-
-		myHandler = derived()
+		myHandler = self.Derived()
 		MessageHandler.pushHandler( myHandler )
 		MessageHandler.output( Msg.Level.Info, "context", "message" )
 		MessageHandler.popHandler()
 
+		self.assertEqual( myHandler.lastLevel.value, Msg.Level.Info )
+		self.assertEqual( myHandler.lastContext.value, "context" )
+		self.assertEqual( myHandler.lastMessage.value, "message" )
+
+	def testContextManager( self ) :
+	
+		currentHandler = MessageHandler.currentHandler()
+		
+		myHandler = self.Derived()
+		with myHandler :
+		
+			MessageHandler.output( Msg.Level.Info, "context", "message" )
+			
+		self.failUnless( currentHandler.isSame( MessageHandler.currentHandler() ) )
+		
 		self.assertEqual( myHandler.lastLevel.value, Msg.Level.Info )
 		self.assertEqual( myHandler.lastContext.value, "context" )
 		self.assertEqual( myHandler.lastMessage.value, "message" )
@@ -154,6 +169,6 @@ class TestMessageHandler( unittest.TestCase ) :
 	def testTooManyPops( self ) :
 	
 		self.assertRaises( RuntimeError, MessageHandler.popHandler )
-
+		
 if __name__ == "__main__":
     unittest.main()

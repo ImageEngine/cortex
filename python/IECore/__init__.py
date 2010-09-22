@@ -111,6 +111,7 @@ from ObjectOverwriting import *
 from OpOverwriting import *
 from ParameterOverwriting import *
 from ParameterisedOverwriting import *
+from MessageHandlerOverwriting import *
 
 from ConfigLoader import loadConfig
 from Preset import Preset
