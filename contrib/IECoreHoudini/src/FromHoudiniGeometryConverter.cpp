@@ -257,7 +257,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		numVerts += primitives[i]->getVertexCount();
 	}
 	
-	if ( result->variableSize( vertexInterpolation ) == numVerts )
+	if ( geo->vertexAttribs().length() && result->variableSize( vertexInterpolation ) == numVerts )
 	{
 		size_t vertCount = 0;
 		VertexList vertices( numVerts );
