@@ -67,6 +67,10 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 	{
 		return MS::kFailure;
 	}
+	if( fnNAttr.unitType() != NumericTraits<T>::dataType() )
+	{
+		return MS::kFailure;
+	}
 
 	fnNAttr.setDefault( p->numericDefaultValue() );
 	
@@ -78,7 +82,18 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 	{
 		fnNAttr.setMax( p->maxValue() );
 	}
-
+	
+	T v;
+	MStatus result = plug.getValue( v );
+	if( result )
+	{
+		IECore::ObjectPtr d = new IECore::TypedData<T>( v );
+		if( !parameter->valueValid( d ) )
+		{
+			return MS::kFailure;
+		}
+	}
+	
 	bool keyable = true;
 	bool channelBox = true;
 
