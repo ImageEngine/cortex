@@ -275,30 +275,15 @@ MStatus FloatSplineParameterHandler<S>::doSetValue( const MPlug &plug, IECore::P
 		return MS::kFailure;
 	}
 
-	if ( fnRAttr.getNumEntries( &s ) > 0 )
+	MIntArray indices;
+	(const_cast<MPlug &>( plug )).getExistingArrayAttributeIndices( indices, &s );	
+	
+	for( unsigned i = 0; i < indices.length(); i++ )
 	{
-		assert( s );
-
-		MIntArray indices;
-		MFloatArray positions;
-		MFloatArray values;
-		MIntArray interps;
-		fnRAttr.getEntries( indices, positions, values, interps, &s );
-		assert( s );
-
-		if ( positions.length() != values.length() || positions.length() != interps.length() || positions.length() != indices.length() )
-		{
-			return MS::kFailure;
-		}
-
-		for ( unsigned i = 0; i < positions.length(); i ++)
-		{
-			spline.points.insert(
-				typename S::PointContainer::value_type(
-					static_cast< typename S::XType >( positions[i] ), static_cast< typename S::YType >( values[ i ] )
-				)
-			);
-		}
+		MPlug pointPlug = plug.elementByLogicalIndex( indices[i] );
+		spline.points.insert(
+			typename S::PointContainer::value_type( pointPlug.child( 0 ).asDouble(), pointPlug.child( 1 ).asDouble() )
+		);
 	}
 
 	// maya seems to do an implicit doubling up of the end points to cause interpolation to the ends.

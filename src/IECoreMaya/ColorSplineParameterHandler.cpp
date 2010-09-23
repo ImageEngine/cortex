@@ -37,6 +37,7 @@
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/ColorSplineParameterHandler.h"
+#include "IECoreMaya/MArrayIter.h"
 
 #include "IECore/SplineParameter.h"
 
@@ -49,6 +50,7 @@
 #include "maya/MColor.h"
 #include "maya/MColorArray.h"
 #include "maya/MGlobal.h"
+#include "maya/MFnDagNode.h"
 
 using namespace IECoreMaya;
 using namespace Imath;
@@ -128,88 +130,82 @@ MStatus ColorSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 	const S &spline = p->getTypedValue();
 
 	MStatus s;
-	MColorArray colors;
-	MFloatArray positions;
-	MIntArray interps;
-	MIntArray indices;
-	fnRAttr.getEntries( indices, positions, colors, interps, &s );
+	MIntArray indicesToReuse;
+	plug.getExistingArrayAttributeIndices( indicesToReuse, &s );
 	assert( s );
-	positions.clear();
-	colors.clear();
-	interps.clear();
 
-	assert( indices.length() == fnRAttr.getNumEntries() );
+	int nextNewLogicalIndex = 0;
+	if( indicesToReuse.length() )
+	{
+		nextNewLogicalIndex = 1 + *std::max_element( MArrayIter<MIntArray>::begin( indicesToReuse ), MArrayIter<MIntArray>::end( indicesToReuse ) );
+	}
+	
+	assert( indicesToReuse.length() == fnRAttr.getNumEntries() );
 
 	size_t pointsSizeMinus2 = spline.points.size() - 2;
-	unsigned idx = 0;
-	unsigned expectedPoints = 0;
-	unsigned reusedIndices = 0;
-	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++idx )
+	unsigned pointIndex = 0;
+	unsigned numExpectedPoints = 0;
+	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++pointIndex )
 	{
 		// we commonly double up the endpoints on cortex splines to force interpolation to the end.
 		// maya does this implicitly, so we skip duplicated endpoints when passing the splines into maya.
 		// this avoids users having to be responsible for managing the duplicates, and gives them some consistency
 		// with the splines they edit elsewhere in maya.
-		if( idx==1 && *it == *spline.points.begin() || idx==pointsSizeMinus2 && *it == *spline.points.rbegin()  )
+		if( pointIndex==1 && *it == *spline.points.begin() || pointIndex==pointsSizeMinus2 && *it == *spline.points.rbegin()  )
 		{
 			continue;
 		}
 
-		expectedPoints ++;
-
-		if ( idx < std::min( 2u, indices.length() ) )
+		MPlug pointPlug;
+		if( indicesToReuse.length() )
 		{
-			reusedIndices ++;
-			fnRAttr.setPositionAtIndex( it->first, indices[ idx ], &s );
-			assert( s );
-			MColor c = IECore::convert< MColor >( it->second );
-			fnRAttr.setColorAtIndex( c, indices[ idx ], &s );
-			assert( s );
-			fnRAttr.setInterpolationAtIndex( MRampAttribute::kSpline, indices[ idx ], &s );
-			assert( s );
+			pointPlug = plug.elementByLogicalIndex( indicesToReuse[0] );
+			indicesToReuse.remove( 0 );
 		}
 		else
 		{
-			colors.append( IECore::convert< MColor >( it->second ) );
-			positions.append( it->first );
-			interps.append( MRampAttribute::kSpline );
+			pointPlug = plug.elementByLogicalIndex( nextNewLogicalIndex++ );		
+		}
+		
+		s = pointPlug.child( 0 ).setValue( it->first ); assert( s );
+		MPlug colorPlug = pointPlug.child( 1 );
+		colorPlug.child( 0 ).setValue( it->second[0] );
+		colorPlug.child( 1 ).setValue( it->second[1] );
+		colorPlug.child( 2 ).setValue( it->second[2] );
+		// hardcoding interpolation of 3 (spline) because the MRampAttribute::MInterpolation enum values don't actually
+		// correspond to the necessary plug values at all.
+		s = pointPlug.child( 2 ).setValue( 3 ); assert( s );
+
+		numExpectedPoints++;
+	}
+
+	// delete any of the original indices which we didn't reuse. we can't use MRampAttribute::deleteEntries
+	// here as it's utterly unreliable.
+	if( indicesToReuse.length() )
+	{
+		MString plugName = plug.name();
+		MObject node = plug.node();
+		MFnDagNode fnDAGN( node );
+		if( fnDAGN.hasObj( node ) )
+		{
+			plugName = fnDAGN.fullPathName() + "." + plug.partialName();
+		}
+		for( unsigned i=0; i<indicesToReuse.length(); i++ )
+		{
+			// using mel because there's no equivalant api method as far as i know.
+			MString command = "removeMultiInstance -b true \"" + plugName + "[" + indicesToReuse[i] + "]\"";
+			s = MGlobal::executeCommand( command );
+			assert( s );
+			if( !s )
+			{
+				return s;
+			}
 		}
 	}
 
-	assert( positions.length() == colors.length() );
-	assert( positions.length() == interps.length() );
-	assert( expectedPoints == reusedIndices + positions.length() );
-
-#ifndef NDEBUG
-	unsigned int oldNumEntries = fnRAttr.getNumEntries();
-#endif
-
-	/// \todo We had to stop using this call in FloatSplineParameterHandler due to maya bugs. see
-	/// if the same applies here.
-	fnRAttr.addEntries( positions, colors, interps, &s );
-	assert( s );
-
-	assert( fnRAttr.getNumEntries() == oldNumEntries + positions.length() );
-
-	/// Remove all the indices we just reused
-	for ( unsigned i = 0; i < reusedIndices ; i ++ )
-	{
-		assert( indices.length() > 0 );
-		indices.remove( 0 );
-	}
-
-	/// Delete any ununsed indices
-	if ( indices.length() )
-	{
-		/// \todo We had to stop using this call in FloatSplineParameterHandler due to maya bugs. see
-		/// if the same applies here.
-		fnRAttr.deleteEntries( indices, &s );
-		assert( s );
-	}
-
 #ifndef NDEBUG
 	{
-		assert( fnRAttr.getNumEntries() == expectedPoints );
+		assert( fnRAttr.getNumEntries() == numExpectedPoints );
 
 		MIntArray indices;
 		MFloatArray positions;
@@ -217,10 +213,10 @@ MStatus ColorSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 		MIntArray interps;
 		fnRAttr.getEntries( indices, positions, colors, interps, &s );
 		assert( s );
-		assert( expectedPoints == positions.length() );
-		assert( expectedPoints == colors.length() );
-		assert( expectedPoints == interps.length() );
-		assert( expectedPoints == indices.length() );
+		assert( numExpectedPoints == positions.length() );
+		assert( numExpectedPoints == colors.length() );
+		assert( numExpectedPoints == interps.length() );
+		assert( numExpectedPoints == indices.length() );
 
 		for ( unsigned i = 0; i < positions.length(); i++ )
 		{
@@ -267,30 +263,22 @@ MStatus ColorSplineParameterHandler<S>::doSetValue( const MPlug &plug, IECore::P
 		return MS::kFailure;
 	}
 
-	if ( fnRAttr.getNumEntries( &s ) > 0 )
+	MIntArray indices;
+	(const_cast<MPlug &>( plug )).getExistingArrayAttributeIndices( indices, &s );
+
+	for( unsigned i = 0; i < indices.length(); i++ )
 	{
-		assert( s );
-
-		MIntArray indices;
-		MFloatArray positions;
-		MColorArray colors;
-		MIntArray interps;
-		fnRAttr.getEntries( indices, positions, colors, interps, &s );
-		assert( s );
-
-		if ( positions.length() != colors.length() || positions.length() != interps.length() )
-		{
-			return MS::kFailure;
-		}
-
-		for ( unsigned i = 0; i < positions.length(); i ++)
-		{
-			spline.points.insert(
-				typename S::PointContainer::value_type(
-					static_cast< typename S::XType >( positions[i] ), IECore::convert< typename S::YType >( colors[ i ] )
-				)
-			);
-		}
+		MPlug pointPlug = plug.elementByLogicalIndex( indices[i] );
+		MPlug colorPlug = pointPlug.child( 1 );
+				
+		typename S::YType y( 1 );
+		y[0] = colorPlug.child( 0 ).asDouble();
+		y[1] = colorPlug.child( 1 ).asDouble();
+		y[2] = colorPlug.child( 2 ).asDouble();
+		
+		spline.points.insert(
+			typename S::PointContainer::value_type( pointPlug.child( 0 ).asDouble(), y )
+		);
 	}
 
 	// maya seems to do an implicit doubling up of the end points to cause interpolation to the ends.

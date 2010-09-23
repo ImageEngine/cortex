@@ -291,14 +291,140 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 		fnOH.setParameterisedValue( op["spline"] )
 		splineData2 = op["spline"].getValue()
 		self.assertEqual( splineData, splineData2 )
+		
+	def testAddColorSplineToReferencedNode( self ) :
+	
+		# make a scene with an empty op holder
+		######################################
+		
+		maya.cmds.createNode( "ieOpHolderNode" )
+		
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReference.ma" ) )
+		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
 
+		# reference it in and add an op with a color spline
+		###################################################
+		
+		maya.cmds.file( new = True, force = True )
+		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
+		fnOH.setOp( "colorSplineInput", 1 )
+		
+		fnOH.setParameterisedValues()
+		
+		self.assertEqual(
+			fnOH.getOp()["spline"].getValue().value,
+			IECore.SplinefColor3f(
+				IECore.CubicBasisf.catmullRom(),
+				(
+					( 0, IECore.Color3f( 1 ) ),
+					( 0, IECore.Color3f( 1 ) ),
+					( 1, IECore.Color3f( 0 ) ),
+					( 1, IECore.Color3f( 0 ) ),
+				),
+			)
+		)
+		
+		# save the scene, and reload it. check that we've worked
+		# around another wonderful maya referencing bug
+		########################################################
+		
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReferencer.ma" ) )
+		referencerScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		maya.cmds.file( new = True, force = True )
+		maya.cmds.file( referencerScene, force = True, open = True )
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
+				
+		fnOH.setParameterisedValues()
+				
+		self.assertEqual(
+			fnOH.getOp()["spline"].getValue().value,
+			IECore.SplinefColor3f(
+				IECore.CubicBasisf.catmullRom(),
+				(
+					( 0, IECore.Color3f( 1 ) ),
+					( 0, IECore.Color3f( 1 ) ),
+					( 1, IECore.Color3f( 0 ) ),
+					( 1, IECore.Color3f( 0 ) ),
+				),
+			)
+		)
+
+	def testAddFloatSplineToReferencedNode( self ) :
+	
+		# make a scene with an empty op holder
+		######################################
+		
+		maya.cmds.createNode( "ieOpHolderNode" )
+		
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReference.ma" ) )
+		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+
+		# reference it in and add an op with a color spline
+		###################################################
+		
+		maya.cmds.file( new = True, force = True )
+		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
+		fnOH.setOp( "splineInput", 1 )
+		
+		fnOH.setParameterisedValues()
+		
+		self.assertEqual(
+			fnOH.getOp()["spline"].getValue().value,
+			IECore.Splineff(
+				IECore.CubicBasisf.catmullRom(),
+				(
+					( 0, 1 ),
+					( 0, 1 ),
+					( 1, 0 ),
+					( 1, 0 ),
+				),
+			)
+		)
+		
+		# save the scene, and reload it. check that we've worked
+		# around another wonderful maya referencing bug
+		########################################################
+		
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReferencer.ma" ) )
+		referencerScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		maya.cmds.file( new = True, force = True )
+		maya.cmds.file( referencerScene, force = True, open = True )
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
+				
+		fnOH.setParameterisedValues()
+				
+		self.assertEqual(
+			fnOH.getOp()["spline"].getValue().value,
+			IECore.Splineff(
+				IECore.CubicBasisf.catmullRom(),
+				(
+					( 0, 1 ),
+					( 0, 1 ),
+					( 1, 0 ),
+					( 1, 0 ),
+				),
+			)
+		)
+		
 	def tearDown( self ) :
 	
-		path = os.getcwd() + "/test/IECoreMaya/splineParameterHandlerTest.ma"
-
-		if os.path.exists( path ) :
-
-			os.remove( path )
+		paths = [
+			os.getcwd() + "/test/IECoreMaya/splineParameterHandlerTest.ma",
+			os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReference.ma" ),
+			os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReferencer.ma" ),
+		]
+		
+		for path in paths :
+			if os.path.exists( path ) :
+				os.remove( path )
 		
 if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
