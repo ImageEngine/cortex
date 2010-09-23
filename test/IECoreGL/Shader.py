@@ -230,13 +230,13 @@ class TestShader( unittest.TestCase ) :
 		self.assert_( s.uniformValueValid( "boolParm", BoolData( True ) ) )
 
 		# check uniform parameters defined from vector items
-		self.assert_( s.uniformVectorValueValid( "vec2Parm", V2fVectorData() ) )
-		self.assert_( not s.uniformVectorValueValid( "vec2Parm", FloatVectorData() ) )
-		self.assert_( s.uniformVectorValueValid( "floatParm", FloatVectorData() ) )
-		self.assert_( not s.uniformVectorValueValid( "floatParm", IntVectorData() ) )
-		self.assert_( s.uniformVectorValueValid( "vec3Parm", V3fVectorData() ) )
-		self.assert_( s.uniformVectorValueValid( "vec3Parm", Color3fVectorData() ) )
-		self.assert_( not s.uniformVectorValueValid( "vec3Parm", V2fVectorData() ) )
+		self.assert_( s.uniformVectorValueValid( "vec2Parm", V2fVectorData( [ V2f() ] ) ) )
+		self.assert_( not s.uniformVectorValueValid( "vec2Parm", FloatVectorData( [ 1 ] ) ) )
+		self.assert_( s.uniformVectorValueValid( "floatParm", FloatVectorData( [ 1 ] ) ) )
+		self.assert_( not s.uniformVectorValueValid( "floatParm", IntVectorData( [ 1 ] ) ) )
+		self.assert_( s.uniformVectorValueValid( "vec3Parm", V3fVectorData( [ V3f() ] ) ) )
+		self.assert_( s.uniformVectorValueValid( "vec3Parm", Color3fVectorData( [ Color3f() ] ) ) )
+		self.assert_( not s.uniformVectorValueValid( "vec3Parm", V2fVectorData( [ V2f() ] ) ) )
 
 		v = V2fVectorData( [ V2f(9,9), V2f(1,2), V2f(9,9) ] )
 		s.setUniformParameterFromVector( "vec2Parm", v, 1 )
