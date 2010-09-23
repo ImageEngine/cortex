@@ -52,6 +52,9 @@ class StringParameterHandler : public ParameterHandler
 		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
+		
+	private:
+		MStatus getPlugValue( const MPlug &plug, IECore::ConstStringParameterPtr parameter, MString &value ) const;
 };
 
 } // namespace IECoreMaya

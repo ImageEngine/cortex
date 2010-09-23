@@ -76,6 +76,17 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 	{
 		return MS::kFailure;
 	}
+	
+	MObject attribute = plug.attribute();
+	MFnTypedAttribute fnTAttr( attribute );
+	if( !fnTAttr.hasObj( attribute ) )
+	{
+		return MS::kFailure;
+	}
+	if( fnTAttr.attrType() != MFnData::kString )
+	{
+		return MS::kFailure;
+	}
 
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
@@ -89,7 +100,17 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 			/// Nothing to do.
 		}
 	}
-
+	
+	MString v;
+	if( getPlugValue( plug, p, v ) )
+	{
+		IECore::ObjectPtr d = new IECore::StringData( v.asChar() );
+		if( !parameter->valueValid( d ) )
+		{
+			return MS::kFailure;
+		}
+	}
+	
 	// we'd like to be setting the default value here, but as maya doesn't save the default value
 	// for dynamic string attributes in scene files, it'll be lost when the scene is reloaded. it's
 	// best therefore that we don't set the default at all, so that the default is "", which is what
@@ -164,6 +185,7 @@ MStatus StringParameterHandler::doSetValue( IECore::ConstParameterPtr parameter,
 
 MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
+	
 	IECore::StringParameterPtr p = IECore::runTimeCast<IECore::StringParameter>( parameter );
 	if( !p )
 	{
@@ -171,7 +193,19 @@ MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 	}
 
 	MString v = "";
-	MStatus result;
+	MStatus result = getPlugValue( plug, p, v );
+	if( result )
+	{
+		p->setTypedValue( v.asChar() );
+	}
+	
+	return result;
+}
+
+MStatus StringParameterHandler::getPlugValue( const MPlug &plug, IECore::ConstStringParameterPtr parameter, MString &value ) const
+{
+	MStatus result;	
+
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
 
@@ -182,27 +216,26 @@ MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 
 		if (valueProvider && valueProvider->readable() == "nodeName")
 		{
-			MStatus s;
 			MObject node = plug.node();
 
 			if (node.hasFn( MFn::kDagNode) )
 			{
 				MDagPath path;
-				s = MDagPath::getAPathTo( node, path );
-				if (!s)
+				result = MDagPath::getAPathTo( node, path );
+				if (!result)
 				{
-					return s;
+					return result;
 				}
-				v = path.fullPathName();
+				value = path.fullPathName();
 			}
 			else
 			{
-				MFnDependencyNode fnDN( node, &s );
-				if (!s)
+				MFnDependencyNode fnDN( node, &result );
+				if (!result)
 				{
-					return s;
+					return result;
 				}
-				v = fnDN.name();
+				value = fnDN.name();
 			}
 
 			hasValueProvider = true;
@@ -211,10 +244,8 @@ MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 		{
 			assert( plug.attribute().hasFn( MFn::kMessageAttribute ) );
 
-			MStatus s;
-
 			MPlugArray connections;
-			bool connected = plug.connectedTo( connections, true, false, &s);
+			bool connected = plug.connectedTo( connections, true, false, &result);
 
 			if (connected)
 			{
@@ -223,21 +254,21 @@ MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 				if (node.hasFn( MFn::kDagNode) )
 				{
 					MDagPath path;
-					s = MDagPath::getAPathTo( node, path );
-					if (!s)
+					result = MDagPath::getAPathTo( node, path );
+					if (!result)
 					{
-						return s;
+						return result;
 					}
-					v = path.fullPathName();
+					value = path.fullPathName();
 				}
 				else
 				{
-					MFnDependencyNode fnDN( node, &s );
-					if (!s)
+					MFnDependencyNode fnDN( node, &result );
+					if (!result)
 					{
-						return s;
+						return result;
 					}
-					v = fnDN.name();
+					value = fnDN.name();
 				}
 			}
 
@@ -247,11 +278,9 @@ MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 
 	if (!hasValueProvider)
 	{
-		result = plug.getValue( v );
+		result = plug.getValue( value );
 	}
-	if( result )
-	{
-		p->setTypedValue( v.asChar() );
-	}
+	
 	return result;
 }
+
