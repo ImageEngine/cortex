@@ -99,6 +99,7 @@ class TestPDCReader( unittest.TestCase ) :
 		r.parameters()["attributes"].setValue( IECore.StringVectorData( attributesToLoad ) )
 
 		a = r.readAttribute( "position" )
+
 		# what the acceptable thresholds should be are somewhat debatable,
 		# especially for such a small number of particles
 		self.assert_( len( a ) < 13 )
@@ -109,6 +110,31 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assert_( p.numPoints > 7 )
 		for attr in attributesToLoad :
 			self.assertEqual( p.numPoints, p[attr].data.size() )
+
+		# compare filtering with int ids		
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.intId.250.pdc" )
+
+		attributesToLoad = [ "position", "age" ]
+		r.parameters()["percentage"].setValue( IECore.FloatData( 50 ) )
+		r.parameters()["attributes"].setValue( IECore.StringVectorData( attributesToLoad ) )
+
+		a2 = r.readAttribute( "position" )
+		self.assertEqual( a, a2 )
+
+		# compare filtering with no ids at all
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.noId.250.pdc" )
+
+		attributesToLoad = [ "position", "age" ]
+		r.parameters()["percentage"].setValue( IECore.FloatData( 50 ) )
+		r.parameters()["attributes"].setValue( IECore.StringVectorData( attributesToLoad ) )
+
+		a3 = r.readAttribute( "position" )
+		self.assertNotEqual( a3, a )
+		# what the acceptable thresholds should be are somewhat debatable,
+		# especially for such a small number of particles
+		self.assert_( len( a ) < 15 )
+		self.assert_( len( a ) > 8 )
+
 
 	def testConversion( self ) :
 

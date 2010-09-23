@@ -246,36 +246,46 @@ void PDCParticleReader::readElements( T *buffer, std::streampos pos, unsigned lo
 	assert( m_iStream->good() );
 }
 
-template<typename T, typename F>
-typename T::Ptr PDCParticleReader::filterAttr( const F *attr, float percentage )
+template<typename T, typename F >
+typename T::Ptr PDCParticleReader::filterAttr( const F *attr, float percentage, const Data *idAttr ) const
 {
 	if( percentage < 100.0f )
 	{
-		ConstDoubleVectorDataPtr idAttr = idAttribute();
 		if( idAttr )
 		{
+			if ( idAttr->typeId() == DoubleVectorDataTypeId )
+			{
+				return filterAttr< T, F, double >( attr, percentage, static_cast< const DoubleVectorData * >( idAttr )->readable() );
+			}
+			else if ( idAttr->typeId() == IntVectorDataTypeId )
+			{
+				return filterAttr< T, F, int >( attr, percentage, static_cast< const IntVectorData * >( idAttr )->readable() );
+			}
+			else
+			{
+				msg( Msg::Warning, "PDCParticleReader::filterAttr", format( "Unrecognized id data type in file \"%s\"! Disabling filtering." ) % fileName() );
+			}
+		}
+		else
+		{
+			// apply filtering only based on order
 			// percentage filtering (and type conversion if necessary)
 			typename T::Ptr result( new T );
 			const typename F::ValueType &in = attr->readable();
 			typename T::ValueType &out = result->writable();
-			const vector<double> &ids = idAttr->readable();
-			int seed = particlePercentageSeed();
 			float fraction = percentage / 100.0f;
+			out.reserve( std::min((size_t)1, (size_t)(in.size() * fraction) ) );
+			int seed = particlePercentageSeed();
 			Rand48 r;
+			r.init( seed );
 			for( typename F::ValueType::size_type i=0; i<in.size(); i++ )
 			{
-				r.init( seed + (int)ids[i] );
 				if( r.nextf() <= fraction )
 				{
 					out.push_back( in[i] );
 				}
 			}
 			return result;
-		}
-		else
-		{
-			msg( Msg::Warning, "PDCParticleReader::filterAttr", format( "Percentage filtering requested but file \"%s\" contains no particleId attribute." ) % fileName() );
-			// fall through to allow basic loading to happen anyway.
 		}
 	}
 
@@ -294,6 +304,27 @@ typename T::Ptr PDCParticleReader::filterAttr( const F *attr, float percentage )
 	return typename T::Ptr( (T *)attr );
 }
 
+template<typename T, typename F, typename U >
+typename T::Ptr PDCParticleReader::filterAttr( const F *attr, float percentage, const std::vector< U > &ids ) const
+{
+	// percentage filtering based on id (and type conversion if necessary)
+	typename T::Ptr result( new T );
+	const typename F::ValueType &in = attr->readable();
+	typename T::ValueType &out = result->writable();
+	int seed = particlePercentageSeed();
+	float fraction = percentage / 100.0f;
+	Rand48 r;
+	for( typename F::ValueType::size_type i=0; i<in.size(); i++ )
+	{
+		r.init( seed + (int)ids[i] );
+		if( r.nextf() <= fraction )
+		{
+			out.push_back( in[i] );
+		}
+	}
+	return result;
+}
+
 DataPtr PDCParticleReader::readAttribute( const std::string &name )
 {
 	if( !open() )
@@ -305,6 +336,12 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 	if( it==m_header.attributes.end() )
 	{
 		return 0;
+	}
+
+	const Data *idAttr = idAttribute();
+	if ( !idAttr )
+	{
+		msg( Msg::Warning, "PDCParticleReader::filterAttr", format( "Percentage filtering requested but file \"%s\" contains no particle Id attribute." ) % fileName() );
 	}
 
 	DataPtr result = 0;
@@ -322,7 +359,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				IntVectorDataPtr d( new IntVectorData );
 				d->writable().resize( numParticles() );
 				readElements( &d->writable()[0], it->second.position, numParticles() );
-				result = filterAttr<IntVectorData, IntVectorData>( d, particlePercentage() );
+				result = filterAttr<IntVectorData, IntVectorData>( d, particlePercentage(), idAttr );
 			}
 			break;
 		case Double :
@@ -350,10 +387,10 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				{
 					case Native :
 					case Double :
-						result = filterAttr<DoubleVectorData, DoubleVectorData>( d, particlePercentage() );
+						result = filterAttr<DoubleVectorData, DoubleVectorData>( d, particlePercentage(), idAttr );
 						break;
 					case Float :
-						result = filterAttr<FloatVectorData, DoubleVectorData>( d, particlePercentage() );
+						result = filterAttr<FloatVectorData, DoubleVectorData>( d, particlePercentage(), idAttr );
 						break;
 				}
 			}
@@ -397,10 +434,10 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				{
 					case Native :
 					case Double :
-						result = filterAttr<V3dVectorData, V3dVectorData>( d, particlePercentage() );
+						result = filterAttr<V3dVectorData, V3dVectorData>( d, particlePercentage(), idAttr );
 						break;
 					case Float :
-						result = filterAttr<V3fVectorData, V3dVectorData>( d, particlePercentage() );
+						result = filterAttr<V3fVectorData, V3dVectorData>( d, particlePercentage(), idAttr );
 						break;
 				}
 			}
@@ -412,7 +449,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 	return result;
 }
 
-const DoubleVectorData * PDCParticleReader::idAttribute()
+const Data * PDCParticleReader::idAttribute()
 {
 	if( !open() )
 	{
@@ -430,9 +467,17 @@ const DoubleVectorData * PDCParticleReader::idAttribute()
 		{
 			if( it->second.type==DoubleArray )
 			{
-				m_idAttribute = new DoubleVectorData;
-				m_idAttribute->writable().resize( numParticles() );
-				readElements( &m_idAttribute->writable()[0], it->second.position, numParticles() );
+				DoubleVectorDataPtr doubleVec = new DoubleVectorData;
+				doubleVec->writable().resize( numParticles() );
+				readElements( &doubleVec->writable()[0], it->second.position, numParticles() );
+				m_idAttribute = doubleVec;
+			}
+			if( it->second.type==IntegerArray )
+			{
+				IntVectorDataPtr intVec = new IntVectorData;
+				intVec->writable().resize( numParticles() );
+				readElements( &intVec->writable()[0], it->second.position, numParticles() );
+				m_idAttribute = intVec;
 			}
 		}
 	}
