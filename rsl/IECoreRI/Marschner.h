@@ -47,7 +47,7 @@
 // The returned values are already multiplied by the cosine of the incidence angle on the cross section plane of the hair according to equation 1 in [1].
 // The parameters for this function are the same as in table 1 at [1] but angles are in radians. 'eye' and 'light' vectors are spherical coordinates that should be computed by ieMarschnerLocalVector().
 // Lucio Moser - October 2009
-color ieMarschner( varying vector eye; varying vector light; uniform float refraction; 
+color ieMarschner( varying vector eye; varying vector lightVec; uniform float refraction; 
 						varying color absorption; uniform float eccentricity;
 						uniform float shiftR; uniform float shiftTT; uniform float shiftTRT; 
 						uniform float widthR; uniform float widthTT; uniform float widthTRT; 
@@ -56,19 +56,19 @@ color ieMarschner( varying vector eye; varying vector light; uniform float refra
 						// output factors R, TT and TRT
 						output varying color outR; output varying color outTT; output varying color outTRT )
 {
-	float relativeTheta = abs( eye[1] - light[1] ) / 2.;
+	float relativeTheta = abs( eye[1] - lightVec[1] ) / 2.;
 	// get refraction indices as described in [1] for R and TT
 	float etaPerp = ieBravaisIndex( relativeTheta, refraction );
 	float etaParal = (refraction*refraction)/etaPerp;
 	// get refraction indices modified by the eccentricity to use in TRT
-	float refractionTRT = ieMarschnerEccentricityRefraction( eccentricity, refraction, (eye[0] + light[0]) / 2 );
+	float refractionTRT = ieMarschnerEccentricityRefraction( eccentricity, refraction, (eye[0] + lightVec[0]) / 2 );
 	float etaPerpTRT = ieBravaisIndex( relativeTheta, refractionTRT );
 	float etaParalTRT = (refractionTRT*refractionTRT)/etaPerpTRT;
-	float averageTheta = ( eye[1] + light[1] ) / 2.;
-	float relativeAzimuth = mod( abs( eye[0] - light[0] ), 2*PI );
+	float averageTheta = ( eye[1] + lightVec[1] ) / 2.;
+	float relativeAzimuth = mod( abs( eye[0] - lightVec[0] ), 2*PI );
 	float cosRelativeTheta = cos( relativeTheta );
 	float invSqrCosRelativeTheta = 1/(cosRelativeTheta*cosRelativeTheta);
-	float cosLight = cos(light[1]);
+	float cosLight = cos(lightVec[1]);
 	float finalScale = invSqrCosRelativeTheta*cosLight;
 
 	uniform float rWidth = 5;
@@ -76,13 +76,13 @@ color ieMarschner( varying vector eye; varying vector light; uniform float refra
 	float MTT = ieMarschnerM( shiftTT, widthTT, rWidth/2, averageTheta );
 	float MTRT = ieMarschnerM( shiftTRT, widthTRT, rWidth*2, averageTheta );
 
-	color NR = ieMarschnerNP( absorption, light, 0, refraction, etaPerp, etaParal, ieMarschnerTargetAngle(0,relativeAzimuth) );
+	color NR = ieMarschnerNP( absorption, lightVec, 0, refraction, etaPerp, etaParal, ieMarschnerTargetAngle(0,relativeAzimuth) );
 	outR = MR*NR*finalScale;
 
-	color NTT = ieMarschnerNP( absorption, light, 1, refraction, etaPerp, etaParal, ieMarschnerTargetAngle(1,relativeAzimuth) );
+	color NTT = ieMarschnerNP( absorption, lightVec, 1, refraction, etaPerp, etaParal, ieMarschnerTargetAngle(1,relativeAzimuth) );
 	outTT = MTT*NTT*finalScale;
 
-	color NTRT = ieMarschnerNTRT( absorption, light, refractionTRT, etaPerpTRT, etaParalTRT, ieMarschnerTargetAngle(2,relativeAzimuth), causticLimit, causticWidth, glintScale, causticFade );
+	color NTRT = ieMarschnerNTRT( absorption, lightVec, refractionTRT, etaPerpTRT, etaParalTRT, ieMarschnerTargetAngle(2,relativeAzimuth), causticLimit, causticWidth, glintScale, causticFade );
 	outTRT = MTRT*NTRT*finalScale;
  
 	return outR + outTT + outTRT;

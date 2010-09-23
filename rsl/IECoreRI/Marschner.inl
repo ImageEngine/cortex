@@ -143,16 +143,16 @@ float ieMarschnerDDExitAnglePolynomial( uniform float p; varying float eta; vary
 	return (dGamma*h)/max(1e-5,denom);
 }
 
-color ieMarschnerA( varying color absorption; varying vector light; uniform float p; varying float gammaI; varying float refraction; varying float etaPerp; varying float etaParal )
+color ieMarschnerA( varying color absorption; varying vector lightVec; uniform float p; varying float gammaI; varying float refraction; varying float etaPerp; varying float etaParal )
 {
 	if ( p == 0 )
 	{
-		return ieMarschnerFresnel( gammaI, etaPerp, etaParal, 0 );
+		return color ieMarschnerFresnel( gammaI, etaPerp, etaParal, 0 );
 	}
 
 	float h = sin( gammaI );			// from [1] right before equation 3.
 	float gammaT = asin(h / etaPerp);	// from [1] right before equation 3.
-	float thetaT = acos( (etaPerp/refraction)*cos( light[1] ) );	// definition for equation 20 in [2].
+	float thetaT = acos( (etaPerp/refraction)*cos( lightVec[1] ) );	// definition for equation 20 in [2].
 	float cosTheta = cos(thetaT);
 	float l;
 	// equation 20 in [2]
@@ -198,7 +198,7 @@ float ieMarschnerRoots( uniform float p; varying float eta; varying float target
 	return rootCount;
 }
 
-color ieMarschnerNP( varying color absorption; varying vector light; uniform float p; varying float refraction; varying float etaPerp; varying float etaParal; varying float targetAngle )
+color ieMarschnerNP( varying color absorption; varying vector lightVec; uniform float p; varying float refraction; varying float etaPerp; varying float etaParal; varying float targetAngle )
 {
 	float roots[3] = { 0,0,0 };
 	float rootCount = ieMarschnerRoots( p, etaPerp, targetAngle, roots );
@@ -212,7 +212,7 @@ color ieMarschnerNP( varying color absorption; varying vector light; uniform flo
 		if ( abs(gammaI) <= PI/2 )
 		{
 			float h = sin( gammaI );
-			color finalAbsorption = ieMarschnerA( absorption, light, p, gammaI, refraction, etaPerp, etaParal );
+			color finalAbsorption = ieMarschnerA( absorption, lightVec, p, gammaI, refraction, etaPerp, etaParal );
 			float dexitAngle;
 			dexitAngle = ieMarschnerDExitAnglePolynomial( p, etaPerp, h );
 			float denom = max( denomMin, 2*abs( dexitAngle ) );
@@ -222,7 +222,7 @@ color ieMarschnerNP( varying color absorption; varying vector light; uniform flo
 	return result;
 }
 
-color ieMarschnerNTRT( varying color absorption; varying vector light; varying float refraction; varying float etaPerp; varying float etaParal; varying float targetAngle; uniform float causticLimit; uniform float causticWidth; uniform float glintScale; uniform float causticFade )
+color ieMarschnerNTRT( varying color absorption; varying vector lightVec; varying float refraction; varying float etaPerp; varying float etaParal; varying float targetAngle; uniform float causticLimit; uniform float causticWidth; uniform float glintScale; uniform float causticFade )
 {
 	float dH, t, hc, Oc1, Oc2;
 	if ( etaPerp < 2 )
@@ -252,9 +252,9 @@ color ieMarschnerNTRT( varying color absorption; varying vector light; varying f
 	uniform float causticCenter = ieGaussian( a, b, c, 0 );
 	float causticLeft = ieGaussian( a, b, c, targetAngle - Oc1 );
 	float causticRight = ieGaussian( a, b, c, targetAngle - Oc2 );
-	color glintAbsorption = ieMarschnerA( absorption, light, 2, asin(hc), refraction, etaPerp, etaParal );
+	color glintAbsorption = ieMarschnerA( absorption, lightVec, 2, asin(hc), refraction, etaPerp, etaParal );
 
-	color result = ieMarschnerNP( absorption, light, 2, refraction, etaPerp, etaParal, targetAngle );
+	color result = ieMarschnerNP( absorption, lightVec, 2, refraction, etaPerp, etaParal, targetAngle );
 	result *= 1 - t*causticLeft/causticCenter;
 	result *= 1 - t*causticRight/causticCenter;
 	result += glintAbsorption*t*glintScale*dH*(causticLeft + causticRight);
