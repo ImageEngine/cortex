@@ -503,13 +503,31 @@ class TestRenderer( unittest.TestCase ) :
 		s = r.scene()
 		self.assertEqual( len( s.root().children() ), 3 )
 		
+		# check that trying to remove objects when not in an editBegin/editEnd block
+		# fails and prints a message
+		
+		errorCatcher = CapturingMessageHandler()
+		with errorCatcher :
+			commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+			
+		self.assertEqual( commandResult, None )
+		self.assertEqual( len( errorCatcher.messages ), 1 )
+		
+		# check we can remove one object without affecting the other
+		
+		r.command( "editBegin", {} )
 		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+		r.command( "editEnd", {} )
+		
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 2 )
 		self.assertEqual( self.__countChildrenRecursive( s.root() ), 2 )
 
 		# now we test that either the sphere and the following attribute block ( instantiates as a Group ) are removed
+		r.command( "editBegin", {} )
 		commandResult = r.command( "removeObject", { "name" : StringData( "sphereTwo" ) } )
+		r.command( "editEnd", {} )
+
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 0 )
 		
@@ -555,9 +573,77 @@ class TestRenderer( unittest.TestCase ) :
 				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
 				self.assertEqual( commandResult, BoolData( True ) )
 
+		r.command( "editBegin", {} )
 		r.procedural( RemovalProcedural() )
+		r.command( "editEnd", {} )
+		
 		self.assertEqual( len( s.root().children() ), 1 )
 		self.assertEqual( self.__countChildrenRecursive( r.scene().root() ), 1 )
+		
+	def testRemoveObjectWithResourcesDuringProcedural( self ) :
+	
+		r = Renderer()
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		with WorldBlock( r ) :
+		
+			with AttributeBlock( r ) :
+				
+				r.setAttribute( "name", "sphereOne" )
+		
+				r.shader( "surface", "image", {
+					"texture" : IECore.SplinefColor3fData(
+						IECore.SplinefColor3f(
+							IECore.CubicBasisf.catmullRom(),
+							(
+								( 0, IECore.Color3f( 1 ) ),
+								( 0, IECore.Color3f( 1 ) ),
+								( 1, IECore.Color3f( 0 ) ),
+								( 1, IECore.Color3f( 0 ) ),
+							),
+						),
+					),
+				} )
+		
+				r.sphere( 1, -1, 1, 360, {} )
+			
+		s = r.scene()
+		self.assertEqual( len( s.root().children()[0].children() ), 1 )
+
+		s.render()
+
+		class RemovalProcedural( Renderer.Procedural ):
+
+			def __init__( proc, level=0 ) :
+			
+				Renderer.Procedural.__init__( proc )
+
+			def bound( proc ) :
+			
+				return Box3f( V3f( -1 ), V3f( 1 ) )
+
+			def render( proc, renderer ):
+
+				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+				self.assertEqual( commandResult, BoolData( True ) )
+
+		r.command( "editBegin", {} )
+		
+		# typically you wouldn't call a renderer method on a separate thread like this. we're just
+		# doing it here to force the procedural onto a different thread. if left to its own devices
+		# the renderer will run procedurals on different threads, but it equally well might call
+		# them on the main thread. we force the procedural onto a separate thread so we can reliably
+		# exercise a problem we're trying to address.
+		t = threading.Thread( target=IECore.curry( r.procedural, RemovalProcedural() ) )
+		t.start()
+		t.join()
+		
+		# if an edit session removes objects which use gl resources (shaders, textures etc),
+		# then it's essential that the editEnd call occurs on the thread with the correct gl context.
+		# this is so the gl resources can be deleted in the correct context.
+		r.command( "editEnd", {} )
+		
+		self.assertEqual( len( s.root().children() ), 0 )
 
 	def testParallelRenders( self ):
 

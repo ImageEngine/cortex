@@ -79,6 +79,8 @@
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
+#include "tbb/mutex.h"
+
 #include <stack>
 
 using namespace IECore;
@@ -160,6 +162,15 @@ struct IECoreGL::Renderer::MemberData
 	typedef std::map<std::string, GroupPtr> InstanceMap;
 	InstanceMap instances;
 	Group *currentInstance;
+	
+	// we don't want to just destroy objects in the removeObject command, as we could be in
+	// any thread at the time, and we can only destroy gl resources on the thread which has
+	// the gl context. so we stash them in here until the editEnd command, and then destroy
+	// them. the implication is therefore that editEnd must be called on the main gl thread,
+	// but that procedurals are free to call removeObject regardless of which thread they're
+	// being called from.
+	std::set<RenderablePtr> removedObjects;
+	tbb::mutex removedObjectsMutex;
 
 #ifdef IECORE_WITH_FREETYPE
 	typedef std::map<std::string, FontPtr> FontMap;
@@ -1738,20 +1749,31 @@ void IECoreGL::Renderer::instance( const std::string &name )
 typedef IECore::DataPtr (*Command)( const std::string &name, const IECore::CompoundDataMap &parameters, IECoreGL::Renderer::MemberData *memberData );
 typedef std::map<string, Command> CommandMap;
 
-bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, const std::string &objectName )
+bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, const std::string &objectName, IECoreGL::Renderer::MemberData *memberData )
 {
 	ConstNameStateComponentPtr stateName = child->getState()->get<NameStateComponent>();
 	if( stateName && stateName->name()==objectName )
 	{
 		if( parent )
 		{
-			IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
-			parent->removeChild( child );
+			{
+				IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
+				parent->removeChild( child );
+			}
+			{
+				tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
+				memberData->removedObjects.insert( child );
+			}
 		}
 		else
 		{
 			// no parent, ie we're at the root of the Scene. just remove all the children.
 			IECoreGL::Group::Mutex::scoped_lock lock( child->mutex() );
+			tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
+			for( IECoreGL::Group::ChildContainer::const_iterator it=child->children().begin(); it!=child->children().end(); it++ )
+			{
+				memberData->removedObjects.insert( *it );
+			}
 			child->clearChildren();
 		}
 		return true;
@@ -1766,14 +1788,20 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		it++;
 		if( g )
 		{
-			result = result | removeObjectWalk( child, g, objectName );
+			result = result | removeObjectWalk( child, g, objectName, memberData );
 		}
 	}
 	if ( result && child->children().size() == 0 && parent )
 	{
 		// group after removal became empty, remove it too.
-		IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
-		parent->removeChild( child );
+		{
+			IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
+			parent->removeChild( child );
+		}
+		{
+			tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
+			memberData->removedObjects.insert( child );
+		}
 	}
 	return result;
 }
@@ -1787,6 +1815,12 @@ IECore::DataPtr removeObjectCommand( const std::string &name, const IECore::Comp
 		return 0;
 	}
 	
+	if( !memberData->inEdit )
+	{
+		msg( Msg::Warning, "Renderer::command", "removeObject command operates only within an editBegin/editEnd block" );
+		return 0;
+	}
+	
 	string objectName = parameterValue<string>( "name", parameters, "" );
 	if( objectName=="" )
 	{
@@ -1795,7 +1829,7 @@ IECore::DataPtr removeObjectCommand( const std::string &name, const IECore::Comp
 	}
 	
 	ScenePtr scene = r->scene();
-	bool result = removeObjectWalk( 0, r->scene()->root(), objectName );
+	bool result = removeObjectWalk( 0, r->scene()->root(), objectName, memberData );
 
 	return new IECore::BoolData( result );
 }
@@ -1825,6 +1859,10 @@ IECore::DataPtr editEndCommand( const std::string &name, const IECore::CompoundD
 	
 	memberData->inWorld = false;
 	memberData->inEdit = false;
+	// we defer final destruction of objects till now, so we don't destroy gl resources directly in removeObjectCommand.
+	// we could be on any thread in removeObjectCommand (it can be called from procedurals) but we require that editEnd
+	// is called on the GL thread, so this is therefore the only safe place to do the destruction.
+	memberData->removedObjects.clear();
 	return new IECore::BoolData( true );
 }
 

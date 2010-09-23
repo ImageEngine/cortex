@@ -107,6 +107,12 @@ class Renderer : public IECore::Renderer
 		virtual void worldEnd();
 		/// When in deferred mode (see setOption above), this method will return the Scene that
 		/// was generated.
+		/// \threading The Renderer tries very hard not to need a GL context to operate in when in deferred mode. This allows it to evaluate multiple
+		/// procedurals concurrently in separate threads (GL wants only one threading talking to a context). When the scene is rendered for the first
+		/// time it will instantiate various OpenGL resources (textures and shaders and the like) in the current GL context. It is therefore important that
+		/// the scene is destroyed from the same thread that renders it, so that the resources are released in the correct context. As the resources are
+		/// also shared by caches (TextureLoaders and ShaderManagers) in the Renderer, it is also important that the renderer is destroyed from this same
+		/// thread.
 		ScenePtr scene();
 
 		virtual void transformBegin();
@@ -407,7 +413,9 @@ class Renderer : public IECore::Renderer
 		/// any other changes are made when re-using an existing renderer, that has already reached worldEnd.
 		/// "editEnd"<br>
 		/// This parameter-less command marks the end of an edit to an existing scene, and should be called after
-		/// other changes have been made when re-using an existing renderer.
+		/// other changes have been made when re-using an existing renderer. Note that if a scene has been drawn
+		/// with renderer->scene()->render() prior to this edit, then it is essential that editEnd is called by the
+		/// same thread on which drawing was performed, so that GL resources can be released in the appropriate context.
 		/// "editQuery"<br>
 		/// This parameter-less command returns BoolData( true ) if an edit is in progress, and BoolData( false )
 		/// otherwise.
