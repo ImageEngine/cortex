@@ -1595,6 +1595,55 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), True )
 		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maximum=True, node=opNode )[0], 10 )
 	
+	def testParameterTypeChanges( self ) :
+	
+		"""Test maya attribute type with changing parameters types."""
+
+		n = cmds.createNode( 'ieParameterisedHolderNode' )
+
+		a = IECore.Parameterised( "a" )
+		a.parameters().addParameter( IECore.IntParameter( "theParameter", "", 1  ) )		
+
+		b = IECore.Parameterised( "b" )
+		b.parameters().addParameter( IECore.StringParameter( "theParameter", "", ""  ) )		
+		
+		c = IECore.Parameterised( "c" )
+		c.parameters().addParameter( IECore.FloatParameter( "theParameter", "", 1.0  ) )	
+		
+		fnPH = IECoreMaya.FnParameterisedHolder( n )
+		
+		fnPH.setParameterised( a )
+		fnPH.setNodeValues()
+
+		# Check the Maya attribute holds an int.
+		plugPath = fnPH.parameterPlugPath( a["theParameter"] )
+		cmds.setAttr( plugPath, 2.75 )
+		self.assertEqual( cmds.getAttr(plugPath), 3 )
+
+		fnPH.setParameterised( b )
+		fnPH.setNodeValues()
+		
+		# Should be a string now
+		plugPath = fnPH.parameterPlugPath( b["theParameter"] )
+		cmds.setAttr( plugPath, "test", type="string" )
+		self.assertEqual( cmds.getAttr(plugPath), "test" )
+
+		fnPH.setParameterised( c )
+		fnPH.setNodeValues()
+		
+		# Should be a float now
+		plugPath = fnPH.parameterPlugPath( c["theParameter"] )
+		cmds.setAttr( plugPath, 3.75 )
+		self.assertEqual( cmds.getAttr(plugPath), 3.75 )
+		
+		fnPH.setParameterised( a )
+		fnPH.setNodeValues()	
+		
+		# Should be an int again
+		plugPath = fnPH.parameterPlugPath( a["theParameter"] )
+		cmds.setAttr( plugPath, 4.75 )
+		self.assertEqual( cmds.getAttr(plugPath), 5 )
+	
 	def testRemoveLockedAttributes( self ) :
 	
 		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
