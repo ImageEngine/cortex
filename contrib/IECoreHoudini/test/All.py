@@ -50,6 +50,7 @@ from ToHoudiniPointsConverter import *
 from ToHoudiniPolygonsConverter import *
 from AttributeRemap import *
 from ToHoudiniConverterOp import *
+from FromHoudiniCurvesConverter import *
 
 if __name__ == "__main__":
     unittest.main()

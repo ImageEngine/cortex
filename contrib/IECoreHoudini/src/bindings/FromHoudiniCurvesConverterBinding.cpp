@@ -32,30 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "TypeIds.h"
-#include "bindings/TypeIdBinding.h"
+#include <SOP/SOP_Node.h>
+
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "FromHoudiniCurvesConverterBinding.h"
+#include "FromHoudiniCurvesConverter.h"
 
 using namespace boost::python;
+using namespace IECoreHoudini;
 
-namespace IECoreHoudini
+void IECoreHoudini::bindFromHoudiniCurvesConverter()
 {
-
-void bindTypeId()
-{
-	enum_<TypeId>( "TypeId" )
-		.value( "FromHoudiniConverter", FromHoudiniConverterTypeId )
-		.value( "FromHoudiniGeometryConverter", FromHoudiniGeometryConverterTypeId )
-		.value( "FromHoudiniPointsConverter", FromHoudiniPointsConverterTypeId )
-		.value( "FromHoudiniPolygonsConverter", FromHoudiniPolygonsConverterTypeId )
-		.value( "ToHoudiniConverter", ToHoudiniConverterTypeId )
-		.value( "ToHoudiniGeometryConverter", ToHoudiniGeometryConverterTypeId )
-		.value( "ToHoudiniPointsConverter", ToHoudiniPointsConverterTypeId )
-		.value( "ToHoudiniPolygonsConverter", ToHoudiniPolygonsConverterTypeId )
-		.value( "FromHoudiniCurvesConverter", FromHoudiniCurvesConverterTypeId )
-		.value( "ToHoudiniCurvesConverter", ToHoudiniCurvesConverterTypeId )
+	IECorePython::RunTimeTypedClass<FromHoudiniCurvesConverter>()
+		.def(init<SOP_Node*>())
 	;
-}
-
 }

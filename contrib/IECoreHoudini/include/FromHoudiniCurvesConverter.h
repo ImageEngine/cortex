@@ -32,30 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREHOUDINI_FROMHOUDINICURVESCONVERTER_H
+#define IECOREHOUDINI_FROMHOUDINICURVESCONVERTER_H
+
+#include "IECore/CurvesPrimitive.h"
 
 #include "TypeIds.h"
-#include "bindings/TypeIdBinding.h"
-
-using namespace boost::python;
+#include "FromHoudiniGeometryConverter.h"
 
 namespace IECoreHoudini
 {
 
-void bindTypeId()
+/// Converter which converts from a Houdini GU_Detail to an IECore::CurvesPrimitive.
+class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
-	enum_<TypeId>( "TypeId" )
-		.value( "FromHoudiniConverter", FromHoudiniConverterTypeId )
-		.value( "FromHoudiniGeometryConverter", FromHoudiniGeometryConverterTypeId )
-		.value( "FromHoudiniPointsConverter", FromHoudiniPointsConverterTypeId )
-		.value( "FromHoudiniPolygonsConverter", FromHoudiniPolygonsConverterTypeId )
-		.value( "ToHoudiniConverter", ToHoudiniConverterTypeId )
-		.value( "ToHoudiniGeometryConverter", ToHoudiniGeometryConverterTypeId )
-		.value( "ToHoudiniPointsConverter", ToHoudiniPointsConverterTypeId )
-		.value( "ToHoudiniPolygonsConverter", ToHoudiniPolygonsConverterTypeId )
-		.value( "FromHoudiniCurvesConverter", FromHoudiniCurvesConverterTypeId )
-		.value( "ToHoudiniCurvesConverter", ToHoudiniCurvesConverterTypeId )
-	;
-}
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniCurvesConverter, FromHoudiniCurvesConverterTypeId, IECoreHoudini::FromHoudiniGeometryConverter );
+
+		FromHoudiniCurvesConverter( const GU_DetailHandle &handle );
+		FromHoudiniCurvesConverter( const SOP_Node *sop );
+
+		virtual ~FromHoudiniCurvesConverter();
+	
+	protected :
+		
+		/// performs conversion to an IECore::CurvesPrimitive
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
+
+		static FromHoudiniGeometryConverter::Description<FromHoudiniCurvesConverter> m_description;
+		
+		/// Utility struct for duplicating curve end points using DespatchedTypedData
+		struct DuplicateEnds
+		{
+			typedef void ReturnType;
+			
+			DuplicateEnds( const std::vector<int> &vertsPerCurve );
+			
+			template<typename T>
+			ReturnType operator()( typename T::Ptr data ) const;
+			
+			const std::vector<int> &m_vertsPerCurve;
+		};
+};
+
+// register our converter
+IE_CORE_DECLAREPTR( FromHoudiniCurvesConverter );
 
 }
+
+#endif // IECOREHOUDINI_FROMHOUDINICURVESCONVERTER_H

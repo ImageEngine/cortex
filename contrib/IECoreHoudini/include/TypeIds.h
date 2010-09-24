@@ -52,6 +52,8 @@ namespace IECoreHoudini
 		ToHoudiniGeometryConverterTypeId = 111005,
 		ToHoudiniPointsConverterTypeId = 111006,
 		ToHoudiniPolygonsConverterTypeId = 111007,
+		FromHoudiniCurvesConverterTypeId = 111008,
+		ToHoudiniCurvesConverterTypeId = 111009,
 		// remember to update TypeIdBinding.cpp
 		LastTypeId = 111999,
 	};

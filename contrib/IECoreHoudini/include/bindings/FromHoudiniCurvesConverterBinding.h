@@ -32,30 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "TypeIds.h"
-#include "bindings/TypeIdBinding.h"
-
-using namespace boost::python;
+#ifndef IECOREHOUDINI_FROMHOUDINICURVESCONVERTERBINDING_H
+#define IECOREHOUDINI_FROMHOUDINICURVESCONVERTERBINDING_H
 
 namespace IECoreHoudini
 {
 
-void bindTypeId()
-{
-	enum_<TypeId>( "TypeId" )
-		.value( "FromHoudiniConverter", FromHoudiniConverterTypeId )
-		.value( "FromHoudiniGeometryConverter", FromHoudiniGeometryConverterTypeId )
-		.value( "FromHoudiniPointsConverter", FromHoudiniPointsConverterTypeId )
-		.value( "FromHoudiniPolygonsConverter", FromHoudiniPolygonsConverterTypeId )
-		.value( "ToHoudiniConverter", ToHoudiniConverterTypeId )
-		.value( "ToHoudiniGeometryConverter", ToHoudiniGeometryConverterTypeId )
-		.value( "ToHoudiniPointsConverter", ToHoudiniPointsConverterTypeId )
-		.value( "ToHoudiniPolygonsConverter", ToHoudiniPolygonsConverterTypeId )
-		.value( "FromHoudiniCurvesConverter", FromHoudiniCurvesConverterTypeId )
-		.value( "ToHoudiniCurvesConverter", ToHoudiniCurvesConverterTypeId )
-	;
-}
+void bindFromHoudiniCurvesConverter();
 
 }
+
+#endif // IECOREHOUDINI_FROMHOUDINICURVESCONVERTERBINDING_H
