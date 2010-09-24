@@ -115,6 +115,14 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		self.assertEqual( cubicObjectInterpolation( V2dVectorData( [V2d(1)] ), V2dVectorData( [V2d(2)] ), V2dVectorData( [V2d(3)] ), V2dVectorData( [V2d(4)] ), 0.5 ), V2dVectorData( [V2d(2.5)] ) )
 		self.assertEqual( cubicObjectInterpolation( V3dVectorData( [V3d(1)] ), V3dVectorData( [V3d(2)] ), V3dVectorData( [V3d(3)] ), V3dVectorData( [V3d(4)] ), 0.5 ), V3dVectorData( [V3d(2.5)] ) )
 
+	def testNonSupportedInterpolation( self ):
+
+		obj1 = Camera()
+		obj2 = Camera()
+		obj3 = Camera()
+		obj4 = Camera()
+		self.assertRaises( RuntimeError, linearObjectInterpolation, obj1, obj2, 0.5 )
+		self.assertRaises( RuntimeError, cubicObjectInterpolation, obj1, obj2, obj3, obj4, 0.5 )
 
 if __name__ == "__main__":
     unittest.main()
