@@ -38,7 +38,7 @@ import hou
 import IECoreHoudini
 import unittest
 
-class TestActiveTake( unittest.TestCase ) :
+class TestActiveTake( IECoreHoudini.TestCase ) :
 	
 	# testing a take can be set with the context
 	def testSetTake( self ) :

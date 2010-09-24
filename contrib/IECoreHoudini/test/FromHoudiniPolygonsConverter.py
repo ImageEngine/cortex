@@ -41,7 +41,7 @@ import IECoreHoudini
 import unittest
 import os
 
-class TestFromHoudiniPolygonsConverter( unittest.TestCase ) :
+class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 	def createBox( self ) :
 		obj = hou.node("/obj")
@@ -541,7 +541,8 @@ class TestFromHoudiniPolygonsConverter( unittest.TestCase ) :
 		self.assertEqual( mesh["vertex"].data, IECore.FloatVectorData( [ 3, 2, 1, 0 ] ) )
 	
 	def setUp( self ) :
-                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+		IECoreHoudini.TestCase.setUp( self )
+	        os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
 
 	def tearDown( self ) :
                 pass

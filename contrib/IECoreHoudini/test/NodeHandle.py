@@ -41,7 +41,7 @@ import hou
 import IECore
 import IECoreHoudini
 
-class TestNodeHandle( unittest.TestCase ) :
+class TestNodeHandle( IECoreHoudini.TestCase ) :
 	
 	def createBox(self):
 		obj = hou.node("/obj")

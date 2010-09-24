@@ -41,7 +41,7 @@ import IECoreHoudini
 import unittest
 import os
 
-class TestFromHoudiniPointsConverter( unittest.TestCase ) :
+class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 
 	def createBox( self ) :
 		obj = hou.node("/obj")

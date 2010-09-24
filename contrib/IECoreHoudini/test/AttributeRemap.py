@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -39,7 +41,7 @@ import IECore
 import IECoreHoudini
 import unittest
 
-class TestAttributeRemap( unittest.TestCase ):
+class TestAttributeRemap( IECoreHoudini.TestCase ):
 
 	def testCreateObjects(self):
 		obj = hou.node("/obj")
@@ -204,6 +206,7 @@ class TestAttributeRemap( unittest.TestCase ):
 		assert( len(geo['test'].data)==100 )
 		
 	def setUp( self ) :
+		IECoreHoudini.TestCase.setUp( self )
 		os.environ["IECORE_OP_PATHS"] = "test/ops"
 	
 	def tearDown( self ) :

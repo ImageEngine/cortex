@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -40,7 +42,7 @@ import unittest
 import os
 import shutil
 
-class TestOpHolder( unittest.TestCase ):
+class TestOpHolder( IECoreHoudini.TestCase ):
 
 	def testOpHolder(self):
 		obj = hou.node("/obj")
@@ -405,6 +407,7 @@ class TestOpHolder( unittest.TestCase ):
 		assert(len(fn.classNames())>1)
 		
 	def setUp( self ) :
+		IECoreHoudini.TestCase.setUp( self )
 		os.environ["IECORE_OP_PATHS"] = "test/ops"
 		if not os.path.exists( "test/opHolder_testData" ):
 			os.mkdir( "test/opHolder_testData" )

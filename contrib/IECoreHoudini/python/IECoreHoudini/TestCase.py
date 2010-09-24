@@ -1,8 +1,5 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
-#
 #  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,22 +32,15 @@
 #
 ##########################################################################
 
-# require HOM
 import hou
+import unittest
 
-# require IECore
-import IECore
+## A class to help implement unit tests for Houdini functionality. It
+# implements setUp() to create a new houdini scene to perform the test in.
+class TestCase( unittest.TestCase ) :
 
-# our c++ module components
-from _IECoreHoudini import *
-
-# function sets
-from FnOpHolder import FnOpHolder
-from FnProceduralHolder import FnProceduralHolder
-
-# misc utility methods
-from TestCase import TestCase
-import ParmTemplates
-import Utils
-
-from ActiveTake import ActiveTake
+	## Derived classes may override this, but they should call the
+	# base class implementation too.
+	def setUp( self ) :
+		
+		hou.hipFile.clear( True )

@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -41,7 +43,7 @@ import os
 import glob
 import shutil
 
-class TestCortexWriter( unittest.TestCase ):
+class TestCortexWriter( IECoreHoudini.TestCase ):
 
 	# test we can create a cortex_writer
 	def testCreateWriter(self):
@@ -175,7 +177,8 @@ class TestCortexWriter( unittest.TestCase ):
 		assert( n_1!=n_2 )
 
 	def setUp( self ) :
-                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+                IECoreHoudini.TestCase.setUp( self )
+		os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
                 if not os.path.exists( "test/cortexWriter_testData" ):
 			os.mkdir( "test/cortexWriter_testData" )
 

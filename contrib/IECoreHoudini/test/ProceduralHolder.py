@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -40,7 +42,7 @@ import unittest
 import os
 import shutil
 
-class TestProceduralHolder( unittest.TestCase ):
+class TestProceduralHolder( IECoreHoudini.TestCase ):
 
 	def testProceduralHolder(self):
 		obj = hou.node("/obj")
@@ -231,8 +233,9 @@ class TestProceduralHolder( unittest.TestCase ):
 		assert(len(fn.classNames())>1)
 
 	def setUp( self ) :
-                os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
-                if not os.path.exists( "test/proceduralHolder_testData" ):
+		IECoreHoudini.TestCase.setUp( self )
+		os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
+		if not os.path.exists( "test/proceduralHolder_testData" ):
 			os.mkdir( "test/proceduralHolder_testData" )
 
 	def tearDown( self ) :

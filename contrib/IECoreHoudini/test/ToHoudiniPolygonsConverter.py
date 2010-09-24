@@ -38,7 +38,7 @@ import IECoreHoudini
 import unittest
 import os
 
-class TestToHoudiniPolygonsConverter( unittest.TestCase ) :
+class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	
 	__testScene = "test/converterTest.hip"
 	
