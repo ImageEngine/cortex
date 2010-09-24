@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file MatrixAlgo.h
-/// Defines useful operations on Imath::Matrix types.
+#include "IECore/MatrixAlgo.h"
 
-#ifndef IE_CORE_MATRIXALGO_H
-#define IE_CORE_MATRIXALGO_H
+using namespace Imath;
 
-#include "OpenEXR/ImathMatrix.h"
-#include "IECore/Convert.h"
-
-namespace IECore
+template<>
+M44d IECore::convert( const M44f &in )
 {
+	return M44d( in[0][0],  in[0][1],  in[0][2],  in[0][3],
+				 in[1][0],  in[1][1],  in[1][2],  in[1][3],
+				 in[2][0],  in[2][1],  in[2][2],  in[2][3],
+				 in[3][0],  in[3][1],  in[3][2],  in[3][3] );
+}
 
-/// Returns a matrix specified by the orientation of the unit vectors x,y,z and origin o after transformation
-/// by the matrix.
-template<typename T>
-Imath::Matrix44<T> matrixFromBasis( const Imath::Vec3<T> &x, const Imath::Vec3<T> &y, const Imath::Vec3<T> &z, const Imath::Vec3<T> &o );
-
-template<class T>
-float determinant( const Imath::Matrix33<T> &m );
-
-template<class T>
-float determinant( const Imath::Matrix44<T> &m );
-
-// provide function for convertion between float to double matrix (not available in OpenEXR)
-template<> Imath::M44d convert( const Imath::M44f &in );
-// provide function for convertion between double to float matrix (not available in OpenEXR)
-template<> Imath::M44f convert( const Imath::M44d &in );
-
-} // namespace IECore
-
-#include "IECore/MatrixAlgo.inl"
-
-#endif // IE_CORE_MATRIXALGO_H
+template<>
+M44f IECore::convert( const M44d &in )
+{
+	return M44f( in[0][0],  in[0][1],  in[0][2],  in[0][3],
+				 in[1][0],  in[1][1],  in[1][2],  in[1][3],
+				 in[2][0],  in[2][1],  in[2][2],  in[2][3],
+				 in[3][0],  in[3][1],  in[3][2],  in[3][3] );
+}
