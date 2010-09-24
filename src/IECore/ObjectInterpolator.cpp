@@ -38,7 +38,6 @@
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECore/Exception.h"
 
 using namespace IECore;
 
@@ -139,7 +138,7 @@ void LinearInterpolator< Object >::operator()( const ObjectPtr &y0, const Object
 	}
 	else
 	{
-		throw InvalidArgumentException( (boost::format( "Interpolation not supported for %s objects." ) % result->typeName()).str() );
+		result = 0;
 	}
 }
 
@@ -284,7 +283,7 @@ void CubicInterpolator<Object>::operator()( const ObjectPtr &y0, const ObjectPtr
 	}
 	else
 	{
-		throw InvalidArgumentException( (boost::format( "Interpolation not supported for %s objects." ) % result->typeName()).str() );
+		result = 0;
 	}
 }
 

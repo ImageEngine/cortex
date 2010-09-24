@@ -121,8 +121,8 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		obj2 = Camera()
 		obj3 = Camera()
 		obj4 = Camera()
-		self.assertRaises( RuntimeError, linearObjectInterpolation, obj1, obj2, 0.5 )
-		self.assertRaises( RuntimeError, cubicObjectInterpolation, obj1, obj2, obj3, obj4, 0.5 )
+		self.assertEqual( linearObjectInterpolation( obj1, obj2, 0.5), None )
+		self.assertEqual( cubicObjectInterpolation( obj1, obj2, obj3, obj4, 0.5), None )
 
 if __name__ == "__main__":
     unittest.main()
