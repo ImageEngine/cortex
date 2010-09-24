@@ -47,6 +47,7 @@ namespace IECore
 /// The BGEOParticleReader class implements the ParticleReader
 /// interface for Houdini .bgeo format particle caches.
 /// All points are treated as particles, primitives are ignored
+/// \todo Use id prim var for filtering.
 class BGEOParticleReader : public ParticleReader
 {
 
@@ -120,9 +121,6 @@ class BGEOParticleReader : public ParticleReader
 		
 		template<typename T>
 		void readAttributeData( char **dataBuffer, T *attrBuffer, unsigned long n ) const;
-		
-		template<typename T, typename F>
-		IntrusivePtr<T> filterAttr( IntrusivePtr<F> attr, float percentage );
 		
 		// reads all attributes from m_header.attributes and returns CoumpoundData containing the results
 		IECore::CompoundDataPtr readAttributes( const std::vector<std::string> &names );

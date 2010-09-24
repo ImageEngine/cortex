@@ -122,6 +122,18 @@ class ParticleReader : public Reader
 		RealType realType() const;
 		IntParameterPtr m_realTypeParameter;
 
+		/// Convenience function to filter prim vars at a given percentage.
+		/// The filtering is based on the particle id or based on the 
+		/// particle index if no id is provided.
+		template<typename T, typename F>
+		typename T::Ptr filterAttr( const F * attr, float percentage, const Data *idAttr ) const;
+
+	private :
+
+		template<typename T, typename F, typename U >
+		typename T::Ptr filterAttr( const F * attr, float percentage, const std::vector< U > &ids ) const;
+
+
 };
 
 IE_CORE_DECLAREPTR( ParticleReader );

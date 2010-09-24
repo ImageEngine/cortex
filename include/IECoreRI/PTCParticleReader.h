@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -95,9 +95,6 @@ class PTCParticleReader : public IECore::ParticleReader
 
 		struct PTCParticleIO::PTCHeader m_header;
 		float *m_userDataBuffer;
-
-		template<typename T, typename F>
-		IECore::IntrusivePtr<T> filterAttr( IECore::IntrusivePtr<F> attr, float percentage );
 
 		// reads several attributes in one operation and returns them in a CompoundData.
 		IECore::CompoundDataPtr readAttributes( const std::vector<std::string> &names );

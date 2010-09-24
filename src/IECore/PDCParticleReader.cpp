@@ -39,8 +39,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/Timer.h"
+#include "IECore/ParticleReader.inl"
 
-#include "OpenEXR/ImathRandom.h"
 
 #include <algorithm>
 
@@ -244,85 +244,6 @@ void PDCParticleReader::readElements( T *buffer, std::streampos pos, unsigned lo
 		}
 	}
 	assert( m_iStream->good() );
-}
-
-template<typename T, typename F >
-typename T::Ptr PDCParticleReader::filterAttr( const F *attr, float percentage, const Data *idAttr ) const
-{
-	if( percentage < 100.0f )
-	{
-		if( idAttr )
-		{
-			if ( idAttr->typeId() == DoubleVectorDataTypeId )
-			{
-				return filterAttr< T, F, double >( attr, percentage, static_cast< const DoubleVectorData * >( idAttr )->readable() );
-			}
-			else if ( idAttr->typeId() == IntVectorDataTypeId )
-			{
-				return filterAttr< T, F, int >( attr, percentage, static_cast< const IntVectorData * >( idAttr )->readable() );
-			}
-			else
-			{
-				msg( Msg::Warning, "PDCParticleReader::filterAttr", format( "Unrecognized id data type in file \"%s\"! Disabling filtering." ) % fileName() );
-			}
-		}
-		else
-		{
-			// apply filtering only based on order
-			// percentage filtering (and type conversion if necessary)
-			typename T::Ptr result( new T );
-			const typename F::ValueType &in = attr->readable();
-			typename T::ValueType &out = result->writable();
-			float fraction = percentage / 100.0f;
-			out.reserve( std::min((size_t)1, (size_t)(in.size() * fraction) ) );
-			int seed = particlePercentageSeed();
-			Rand48 r;
-			r.init( seed );
-			for( typename F::ValueType::size_type i=0; i<in.size(); i++ )
-			{
-				if( r.nextf() <= fraction )
-				{
-					out.push_back( in[i] );
-				}
-			}
-			return result;
-		}
-	}
-
-	if( T::staticTypeId()!=F::staticTypeId() )
-	{
-		// type conversion only
-		typename T::Ptr result( new T );
-		const typename F::ValueType &in = attr->readable();
-		typename T::ValueType &out = result->writable();
-		out.resize( in.size() );
-		copy( in.begin(), in.end(), out.begin() );
-		return result;
-	}
-
-	// no filtering of any sort needed
-	return typename T::Ptr( (T *)attr );
-}
-
-template<typename T, typename F, typename U >
-typename T::Ptr PDCParticleReader::filterAttr( const F *attr, float percentage, const std::vector< U > &ids ) const
-{
-	// percentage filtering based on id (and type conversion if necessary)
-	typename T::Ptr result( new T );
-	const typename F::ValueType &in = attr->readable();
-	typename T::ValueType &out = result->writable();
-	int seed = particlePercentageSeed();
-	float fraction = percentage / 100.0f;
-	Rand48 r;
-	for( typename F::ValueType::size_type i=0; i<in.size(); i++ )
-	{
-		r.init( seed + (int)ids[i] );
-		if( r.nextf() <= fraction )
-		{
-			out.push_back( in[i] );
-		}
-	}
-	return result;
 }
 
 DataPtr PDCParticleReader::readAttribute( const std::string &name )

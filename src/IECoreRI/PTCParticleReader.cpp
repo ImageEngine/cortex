@@ -42,8 +42,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/DespatchTypedData.h"
-
-#include "OpenEXR/ImathRandom.h"
+#include "IECore/MatrixAlgo.h"
+#include "IECore/ParticleReader.inl"
 
 #include <algorithm>
 
@@ -335,74 +335,6 @@ ObjectPtr PTCParticleReader::doOperation( const CompoundObject * operands )
 	return result;
 }
 
-template< class T, class F >
-T convertion( const F &in )
-{
-	return T( in );
-}
-
-
-template<>
-M44d convertion( const M44f &in )
-{
-	return M44d( in[0][0],  in[0][1],  in[0][2],  in[0][3],
-				 in[1][0],  in[1][1],  in[1][2],  in[1][3],
-				 in[2][0],  in[2][1],  in[2][2],  in[2][3],
-				 in[3][0],  in[3][1],  in[3][2],  in[3][3] );
-}
-
-static inline std::vector< M44d >::iterator
-copy( std::vector< M44f >::const_iterator inBegin,
-		std::vector< M44f >::const_iterator inEnd,
-		std::vector< M44d >::iterator outBegin )
-{
-	std::vector< M44f >::const_iterator i;
-	for (i = inBegin; i != inEnd; i++, outBegin++)
-	{
-		outBegin->setValue( *i );
-	}
-	return outBegin;
-}
-
-
-template<typename T, typename F>
-IECore::IntrusivePtr<T> PTCParticleReader::filterAttr( IECore::IntrusivePtr<F> attr, float percentage )
-{
-	if( percentage < 100.0f )
-	{
-		// percentage filtering (and type conversion if necessary)
-		IECore::IntrusivePtr<T> result( new T );
-		const typename F::ValueType &in = attr->readable();
-		typename T::ValueType &out = result->writable();
-		int seed = particlePercentageSeed();
-		float fraction = percentage / 100.0f;
-		Rand48 r;
-		r.init( seed );
-		for( typename F::ValueType::size_type i=0; i<in.size(); i++ )
-		{
-			if( r.nextf() <= fraction )
-			{
-				out.push_back( convertion< typename T::ValueType::value_type, typename F::ValueType::value_type >( in[i] ) );
-			}
-		}
-		return result;
-	}
-
-	if( T::staticTypeId()!=F::staticTypeId() )
-	{
-		// type conversion only
-		IECore::IntrusivePtr<T> result( new T );
-		const typename F::ValueType &in = attr->readable();
-		typename T::ValueType &out = result->writable();
-		out.resize( in.size() );
-		copy( in.begin(), in.end(), out.begin() );
-		return result;
-	}
-
-	// no filtering of any sort needed
-	return IECore::IntrusivePtr<T>( (T *)attr.get() );
-}
-
 DataPtr PTCParticleReader::readAttribute( const std::string &name )
 {
 	std::vector< std::string > names;
@@ -571,6 +503,9 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			}
 		}
 	}
+
+	/// \todo do we have ids from ptc files to be used in the filtering?
+	const Data *ids = 0;
 	DataPtr filteredData = 0;
 	// filter and convert each attribute individually.
 	std::map< std::string, struct AttrInfo >::const_iterator attrIt;
@@ -583,10 +518,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<Color3fVectorData, Color3fVectorData>( staticPointerCast<Color3fVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<Color3fVectorData, Color3fVectorData>( staticPointerCast<Color3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<Color3dVectorData, Color3fVectorData>( staticPointerCast<Color3fVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<Color3dVectorData, Color3fVectorData>( staticPointerCast<Color3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 			}
 			break;
@@ -597,10 +532,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<V3fVectorData, V3fVectorData>( staticPointerCast<V3fVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<V3fVectorData, V3fVectorData>( staticPointerCast<V3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<V3dVectorData, V3fVectorData>( staticPointerCast<V3fVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<V3dVectorData, V3fVectorData>( staticPointerCast<V3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 			}
 			break;
@@ -609,10 +544,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<FloatVectorData, FloatVectorData>( staticPointerCast<FloatVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<FloatVectorData, FloatVectorData>( staticPointerCast<FloatVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<DoubleVectorData, FloatVectorData>( staticPointerCast<FloatVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<DoubleVectorData, FloatVectorData>( staticPointerCast<FloatVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 			}
 			break;
@@ -621,10 +556,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<M44fVectorData, M44fVectorData>( staticPointerCast<M44fVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<M44fVectorData, M44fVectorData>( staticPointerCast<M44fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<M44dVectorData, M44fVectorData>( staticPointerCast<M44fVectorData>(attrIt->second.targetData), particlePercentage() );
+					filteredData = filterAttr<M44dVectorData, M44fVectorData>( staticPointerCast<M44fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
 					break;
 			}
 			break;
