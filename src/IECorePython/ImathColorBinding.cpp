@@ -228,6 +228,8 @@ void bindColor3( const char *typeName )
 		.def( init<typename T::BaseType>() )
 		.def( init<typename T::BaseType, typename T::BaseType, typename T::BaseType>() )
 		.def( init<const T&>() )
+		.def( init<const Imath::V3f &> () )
+		.def( init<const Imath::V3d &> () )
 
 		.def( "equalWithAbsError", &equalWithAbsError<T> )
 		.def( "equalWithRelError", &equalWithRelError<T> )

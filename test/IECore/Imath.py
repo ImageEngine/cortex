@@ -1037,6 +1037,16 @@ class ImathColor3Test( unittest.TestCase ) :
 		cc = Color3f( c )
 		self.assertEqual( c, cc )
 
+		c = Color3f( V3f(1,2,3) )
+		self.assertEqual( c.r, 1 )
+		self.assertEqual( c.g, 2 )
+		self.assertEqual( c.b, 3 )
+
+		c = Color3f( V3d(1,2,3) )
+		self.assertEqual( c.r, 1 )
+		self.assertEqual( c.g, 2 )
+		self.assertEqual( c.b, 3 )
+
 		cm = -c * 2
 		self.assertEqual( cm.r, -2 )
 		self.assertEqual( cm.g, -4 )
