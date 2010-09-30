@@ -343,6 +343,8 @@ void Group::render( Renderer *renderer ) const
 
 void Group::render( Renderer *renderer, bool inAttributeBlock ) const
 {
+	/// \todo I wonder if this should just use a transform block if
+	/// the Group doesn't have any state?
 	AttributeBlock attributeBlock( renderer, inAttributeBlock );
 
 	if( m_transform )
