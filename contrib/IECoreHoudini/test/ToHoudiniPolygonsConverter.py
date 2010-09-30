@@ -618,7 +618,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		pointAttr = detailAttr.createOutputNode( "attribcreate" )
 		pointAttr.parm( "name" ).set( "floatPoint" )
-		pointAttr.parm( "class" ).set( 1 ) # point
+		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 1 ) # int
 		pointAttr.parm( "size" ).set( 3 ) # 3 elements
 		pointAttr.parm( "value1" ).set( 10 )
@@ -626,8 +626,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm( "value3" ).set( 12 )
 		
 		primAttr = pointAttr.createOutputNode( "attribcreate" )
-		primAttr.parm( "name" ).set( "floatPoint" )
-		primAttr.parm( "class" ).set( 1 ) # point
+		primAttr.parm( "name" ).set( "floatPrim" )
+		primAttr.parm( "class" ).set( 1 ) # prim
 		primAttr.parm( "type" ).set( 1 ) # int
 		primAttr.parm( "size" ).set( 3 ) # 3 elements
 		primAttr.parm( "value1" ).set( 10 )
@@ -635,8 +635,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		primAttr.parm( "value3" ).set( 12 )
 		
 		vertexAttr = primAttr.createOutputNode( "attribcreate" )
-		vertexAttr.parm( "name" ).set( "floatPoint" )
-		vertexAttr.parm( "class" ).set( 1 ) # point
+		vertexAttr.parm( "name" ).set( "floatVert" )
+		vertexAttr.parm( "class" ).set( 3 ) # vert
 		vertexAttr.parm( "type" ).set( 1 ) # int
 		vertexAttr.parm( "size" ).set( 3 ) # 3 elements
 		vertexAttr.parm( "value1" ).set( 10 )
