@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,21 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#include "IECoreNuke/ToNukeConverter.h"
 
-namespace IECoreNuke
+#include "IECore/Object.h"
+
+using namespace IECoreNuke;
+
+IE_CORE_DEFINERUNTIMETYPED( ToNukeConverter );
+
+ToNukeConverter::ToNukeConverter( const std::string &description, IECore::TypeId supportedType )
+	:	IECore::FromCoreConverter( description, supportedType )
 {
+}
 
-enum TypeId
+ToNukeConverter::~ToNukeConverter()
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	LastCoreNukeTypeId = 107999
-};
-
-} // namespace IECoreNuke
-
-#endif // IECORENUKE_TYPEIDS_H
+}

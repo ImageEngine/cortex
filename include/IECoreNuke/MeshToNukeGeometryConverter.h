@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,21 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#ifndef IECORENUKE_MESHTONUKEGEOMETRYCONVERTER_H
+#define IECORENUKE_MESHTONUKEGEOMETRYCONVERTER_H
+
+#include "IECoreNuke/ToNukeGeometryConverter.h"
+
 
 namespace IECoreNuke
 {
 
-enum TypeId
+/// This class converts IECore.MeshPrimitive objects to geometry in a Nuke GeometryList object.
+class MeshToNukeGeometryConverter : public ToNukeGeometryConverter
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	LastCoreNukeTypeId = 107999
+	public:
+
+		MeshToNukeGeometryConverter( IECore::ConstObjectPtr object );
+
+	protected:
+
+		virtual void doConversion( const IECore::Object *from, DD::Image::GeometryList &to, int objIndex, const IECore::CompoundObject *operands ) const;
+
+		typedef ToNukeGeometryConverterDescription<MeshToNukeGeometryConverter> Description;
+		static Description g_description;
 };
 
-} // namespace IECoreNuke
+}
 
-#endif // IECORENUKE_TYPEIDS_H
+#endif // IECORENUKE_MESHTONUKEGEOMETRYCONVERTER_H

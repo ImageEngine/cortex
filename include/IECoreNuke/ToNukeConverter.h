@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,21 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#ifndef IECORENUKE_TONUKECONVERTER_H
+#define IECORENUKE_TONUKECONVERTER_H
+
+#include "IECoreNuke/TypeIds.h"
+
+#include "IECore/FromCoreConverter.h"
 
 namespace IECoreNuke
 {
 
-enum TypeId
+/// A base class for all classes which convert from an IECore datatype
+/// to a Nuke datatype.
+class ToNukeConverter : public IECore::FromCoreConverter
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	LastCoreNukeTypeId = 107999
+
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToNukeConverter, ToNukeConverterTypeId, IECore::FromCoreConverter );
+
+	protected:
+
+		ToNukeConverter( const std::string &description, IECore::TypeId supportedType );
+
+		virtual ~ToNukeConverter();
+
 };
+
+IE_CORE_DECLAREPTR( ToNukeConverter );
 
 } // namespace IECoreNuke
 
-#endif // IECORENUKE_TYPEIDS_H
+#endif // IECORENUKE_TONUKECONVERTER_H
