@@ -118,6 +118,7 @@ class AttributeCache : public RefCounted
 
 		IndexedIOInterfacePtr m_io;
 
+		static void checkName( const std::string &name );
 };
 
 IE_CORE_DECLAREPTR( AttributeCache );

@@ -71,8 +71,18 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 	}
 }
 
+void AttributeCache::checkName( const std::string &name )
+{
+	if ( name.find( '/' ) != std::string::npos )
+	{
+		throw InvalidArgumentException( name );
+	}
+}
+
 void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr, const Object *data)
 {
+	checkName( obj );
+	checkName( attr );
 	m_io->chdir("/objects");
 	m_io->mkdir(obj);
 	m_io->chdir(obj);
@@ -81,12 +91,14 @@ void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr
 
 void AttributeCache::writeHeader( const HeaderHandle &hdr, const Object *data)
 {
+	checkName( hdr );
 	m_io->chdir("/headers");
 	data->save( m_io, hdr );
 }
 
 ObjectPtr AttributeCache::read( const ObjectHandle &obj, const AttributeHandle &attr )
 {
+	// \todo Use checkName() on next Cortex major version.
 	m_io->chdir("/objects");
 	m_io->chdir(obj);
 	ObjectPtr data = Object::load( m_io, attr );
@@ -95,6 +107,7 @@ ObjectPtr AttributeCache::read( const ObjectHandle &obj, const AttributeHandle &
 
 CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 {
+	// \todo Use checkName() on next Cortex major version.
 	CompoundObjectPtr dict = new CompoundObject();
 
 	m_io->chdir("/objects");
@@ -115,6 +128,7 @@ CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 
 ObjectPtr AttributeCache::readHeader( const HeaderHandle &hdr )
 {
+	// \todo Use checkName() on next Cortex major version.
 	m_io->chdir("/headers");
 	ObjectPtr data = Object::load( m_io, hdr );
 	return data;
@@ -175,6 +189,7 @@ void AttributeCache::objects(std::vector<AttributeCache::ObjectHandle> &objs)
 
 bool AttributeCache::contains( const ObjectHandle &obj )
 {
+	// \todo Use checkName() on next Cortex major version.
 	m_io->chdir("/objects");
 	try
 	{
@@ -189,6 +204,7 @@ bool AttributeCache::contains( const ObjectHandle &obj )
 
 bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &attr )
 {
+	// \todo Use checkName() on next Cortex major version.
 	m_io->chdir("/objects");
 	try
 	{
@@ -204,6 +220,7 @@ bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &a
 
 void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs)
 {
+	// \todo Use checkName() on next Cortex major version.
 	attrs.clear();
 
 	m_io->chdir("/objects");
@@ -222,6 +239,7 @@ void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHa
 
 void AttributeCache::attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs)
 {
+	// \todo Use checkName() on next Cortex major version.
 	attrs.clear();
 
 	m_io->chdir("/objects");
@@ -241,6 +259,7 @@ void AttributeCache::attributes(const ObjectHandle &obj, const std::string regex
 
 void AttributeCache::remove( const ObjectHandle &obj )
 {
+	// \todo Use checkName() on next Cortex major version.
 	m_io->chdir("/objects");
 
 	m_io->rm( obj );
@@ -248,6 +267,7 @@ void AttributeCache::remove( const ObjectHandle &obj )
 
 void AttributeCache::remove( const ObjectHandle &obj, const AttributeHandle &attr )
 {
+	// \todo Use checkName() on next Cortex major version.
 	m_io->chdir("/objects");
 
 	m_io->chdir( obj );
@@ -256,6 +276,7 @@ void AttributeCache::remove( const ObjectHandle &obj, const AttributeHandle &att
 
 void AttributeCache::removeHeader( const HeaderHandle &hdr )
 {
+	// \todo Use checkName() on next Cortex major version.
 	m_io->chdir("/headers");
 
 	m_io->rm( hdr );
