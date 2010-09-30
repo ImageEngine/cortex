@@ -66,6 +66,12 @@ Imath::V3f convert( const DD::Image::Vector3 &from );
 template<>
 Imath::V3d convert( const DD::Image::Vector3 &from );
 
+template<>
+DD::Image::Vector3 convert( const Imath::V3f &from );
+
+template<>
+DD::Image::Vector3 convert( const Imath::V3d &from );
+
 /// Discards from.z and from.w
 template<>
 Imath::V2f convert( const DD::Image::Vector4 &from );

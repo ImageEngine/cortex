@@ -62,6 +62,18 @@ Imath::V3d convert( const DD::Image::Vector3 &from )
 }
 
 template<>
+DD::Image::Vector3 convert( const Imath::V3f &from )
+{
+	return DD::Image::Vector3( from.x, from.y, from.z );
+}
+
+template<>
+DD::Image::Vector3 convert( const Imath::V3d &from )
+{
+	return DD::Image::Vector3( from.x, from.y, from.z );
+}
+
+template<>
 Imath::V2f convert( const DD::Image::Vector4 &from )
 {
 	return Imath::V2f( from.x, from.y );
