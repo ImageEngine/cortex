@@ -284,6 +284,7 @@
 #include "IECorePython/LookupBinding.h"
 #include "IECorePython/PointsPrimitiveEvaluatorBinding.h"
 #include "IECorePython/PointsMotionOpBinding.h"
+#include "IECorePython/CapturingRendererBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -568,6 +569,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLookup();
 	bindPointsPrimitiveEvaluator();
 	bindPointsMotionOp();
+	bindCapturingRenderer();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

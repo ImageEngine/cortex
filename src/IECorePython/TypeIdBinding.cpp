@@ -383,6 +383,7 @@ void bindTypeId()
 		.value( "TransformationMatrixfParameter", TransformationMatrixfParameterTypeId )
 		.value( "TransformationMatrixdParameter", TransformationMatrixdParameterTypeId )
 		.value( "PointsMotionOp", PointsMotionOpTypeId )
+		.value( "CapturingRenderer", CapturingRendererTypeId )
 	;
 }
 

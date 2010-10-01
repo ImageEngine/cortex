@@ -243,6 +243,7 @@ from ParameterAlgoTest import ParameterAlgoTest
 from PointsPrimitiveEvaluatorTest import PointsPrimitiveEvaluatorTest
 from PointsMotionOpTest import PointsMotionOpTest
 from CamelCaseTest import CamelCaseTest
+from CapturingRendererTest import CapturingRendererTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
