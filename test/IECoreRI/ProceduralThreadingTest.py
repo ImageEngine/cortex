@@ -92,10 +92,9 @@ class ProceduralThreadingTest( unittest.TestCase ) :
 	def performRender( self, withMultiThreading, withParameterisedProcedural ) :
 	
 		if withMultiThreading :
-			# create a dummy thread that exits immediately. this is necessary to get the GIL initialised so that
-			# when 3delight starts firing procedural calls into python the necessary mechanisms
-			# are in place to deal with it.
-			thread.start_new_thread( lambda : 10, () )
+			# this is necessary so python will allow threads created by the renderer
+			# to enter into python when those threads execute procedurals.
+			IECore.initThreads()
 
 		r = IECoreRI.Renderer( "" )
 		

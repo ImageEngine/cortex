@@ -577,6 +577,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "withTIFF", &IECore::withTIFF );
 	def( "withJPEG", &IECore::withJPEG );
 	def( "withFreeType", &IECore::withFreeType );
+	def( "initThreads", &PyEval_InitThreads );
 
 }
 
