@@ -215,7 +215,8 @@ class CapturingRenderer::Implementation
 				return 0;
 			}
 			
-			for( Context::StateStack::const_reverse_iterator it = context->stack.rbegin(); it!=context->stack.rend(); it++ )
+			const Context::StateStack &stack = context->stack;
+			for( Context::StateStack::const_reverse_iterator it = stack.rbegin(); it!=stack.rend(); it++ )
 			{
 				CompoundDataMap::const_iterator dIt = it->attributes.find( name );
 				if( dIt != it->attributes.end() )
