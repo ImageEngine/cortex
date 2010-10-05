@@ -122,6 +122,15 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 
 		self.failUnless( mayaMesh in maya.cmds.sets( "initialShadingGroup", query=True ) )
+		
+	def testConstructor( self ) :
+	
+		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		
+		converter = IECoreMaya.ToMayaMeshConverter( coreMesh )
+		transform = maya.cmds.createNode( "transform" )
+		converter.convert( transform )
+		self.assertEqual( maya.cmds.nodeType( maya.cmds.listRelatives( transform, shapes=True )[0] ), "mesh" )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
