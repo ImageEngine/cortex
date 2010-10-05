@@ -41,6 +41,7 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -126,7 +127,10 @@ std::vector< T > listToVector( const boost::python::list &names )
 
 static DisplayDriverPtr displayDriverCreate( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const boost::python::list &channelNames, CompoundDataPtr parameters )
 {
-	return DisplayDriver::create( displayWindow, dataWindow, listToVector<std::string>(channelNames), parameters );
+	std::vector<std::string> names = listToVector<std::string>(channelNames);
+	ScopedGILRelease gilRelease;
+	DisplayDriverPtr res = DisplayDriver::create( displayWindow, dataWindow, names, parameters );
+	return res;
 }
 
 void bindDisplayDriver()

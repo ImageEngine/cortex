@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import gc
 import glob
 import sys
 import time
@@ -85,6 +86,12 @@ class TestImageDisplayDriver(unittest.TestCase):
 		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
 		self.assertEqual( DisplayDriver.unregisterFactory( creator ), True )
 		self.assertEqual( DisplayDriver.unregisterFactory( creator ), False )
+		# test if all symbols are gone after the tests.
+		creator = None
+		idd = None
+		gc.collect()
+		RefCounted.collectGarbage()
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 
 class TestClientServerDisplayDriver(unittest.TestCase):
 
@@ -95,10 +102,22 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			self.myTest = myTest
 
 		def create( self, displayWindow, dataWindow, channelNames, parameters ):
-			self.myTest.clientDisplayDriver = ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
-			return self.myTest.clientDisplayDriver
+			clientDisplayDriver = ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
+			self.myTest.clientDisplayDriver = clientDisplayDriver
+			self.myTest = None	# destroy circular reference
+			return clientDisplayDriver
 
 	def setUp( self ):
+
+		gc.collect()
+		RefCounted.collectGarbage()
+		# make sure we don't have symbols from previous tests
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+
+		# this is necessary so python will allow threads created by the display driver server
+		# to enter into python when those threads execute procedurals.
+		initThreads()
+
 		self.server = DisplayDriverServer( 1559 )
 		self.creator = self.MyDisplayDriverCreator( self )
 		self.assertEqual( DisplayDriver.registerFactory( self.creator ), True )
@@ -140,6 +159,10 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 		self.assertEqual( DisplayDriver.unregisterFactory( self.creator ), True )
 		self.creator = None
 		self.server = None
+		# test if all symbols are gone after the tests.
+		gc.collect()
+		RefCounted.collectGarbage()
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 
 if __name__ == "__main__":
 	unittest.main()

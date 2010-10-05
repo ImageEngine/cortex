@@ -39,6 +39,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -57,7 +58,9 @@ std::vector< T > listToVector( const boost::python::list &names )
 
 static ClientDisplayDriverPtr clientDisplayDriverConstructor( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const list &channelNames, CompoundDataPtr parameters )
 {
-	return new ClientDisplayDriver( displayWindow, dataWindow, listToVector<std::string>( channelNames ), parameters );
+	std::vector<std::string> names = listToVector<std::string>( channelNames );
+	ScopedGILRelease gilRelease;
+	return new ClientDisplayDriver( displayWindow, dataWindow, names, parameters );
 }
 
 void bindClientDisplayDriver()
