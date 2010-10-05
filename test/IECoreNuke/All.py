@@ -41,6 +41,7 @@ sys.path.append( "test/IECoreNuke" )
 from KnobAccessorsTest import *
 from FnAxisTest import *
 from StringUtilTest import *
+from KnobConvertersTest import *
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
