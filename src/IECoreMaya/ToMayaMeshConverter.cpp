@@ -43,6 +43,7 @@
 #include "maya/MFloatVectorArray.h"
 #include "maya/MFloatArray.h"
 #include "maya/MIntArray.h"
+#include "maya/MGlobal.h"
 
 #include "IECore/MeshPrimitive.h"
 #include "IECore/PrimitiveVariable.h"
@@ -59,6 +60,14 @@ ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDescription( IECore:
 ToMayaMeshConverter::ToMayaMeshConverter( IECore::ConstObjectPtr object )
 : ToMayaObjectConverter( "Converts IECore::MeshPrimitive objects to a Maya object.", object)
 {
+}
+
+void ToMayaMeshConverter::assignDefaultShadingGroup( MObject &shape ) const
+{
+	MFnDagNode fnDN( shape );
+	// it would perhaps be preferable to use MFnSet::addMember() instead but at the time of
+	// writing (maya 2010) that seems to print out "Result : initialShadingGroup" totally unnecessarily.
+	MGlobal::executeCommand( "sets -addElement initialShadingGroup " + fnDN.fullPathName() );
 }
 
 void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, MString *uvSetName ) const
@@ -340,6 +349,14 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				uvSets.insert( uvSetNameStr );
 			}
 		}
+	}
+
+	/// If we're making a mesh node (rather than a mesh data) then make sure it belongs
+	/// to the default shading group.
+	MObject oMesh = fnMesh.object();
+	if( oMesh.apiType()==MFn::kMesh )
+	{
+		assignDefaultShadingGroup( oMesh );
 	}
 
 	/// \todo Other primvars, e.g. vertex color ("Cs")

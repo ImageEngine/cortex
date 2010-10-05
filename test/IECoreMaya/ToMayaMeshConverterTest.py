@@ -113,6 +113,15 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
 		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
 
+	def testShadingGroup( self ) :
+	
+		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
+		transform = maya.cmds.createNode( "transform" )
+		converter.convert( transform )
+		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
+
+		self.failUnless( mayaMesh in maya.cmds.sets( "initialShadingGroup", query=True ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
