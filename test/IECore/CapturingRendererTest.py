@@ -35,8 +35,9 @@
 from __future__ import with_statement
 
 import threading
-
 import unittest
+import sys
+
 import IECore
 
 class CapturingRendererTest( unittest.TestCase ) :
@@ -413,7 +414,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 		IECore.ObjectWriter( w, "/tmp/flake.cob" ).write()
 		
 	def testProceduralExceptionHandling( self ) :
-	
+			
 		# this is necessary so python will allow threads created by the renderer
 		# to enter into python when those threads execute procedurals.
 		IECore.initThreads()
@@ -441,6 +442,13 @@ class CapturingRendererTest( unittest.TestCase ) :
 			exceptionCaughtOK = True
 			
 		self.failUnless( exceptionCaughtOK )
+		
+		# remove the record of the exception so that it doesn't interfere
+		# with subsequent tests - the traceback contains a reference to
+		# the NaughtyLittleChap.
+		sys.last_traceback = None
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 		
 if __name__ == "__main__":
 	unittest.main()
