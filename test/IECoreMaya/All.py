@@ -71,6 +71,7 @@ from FnProceduralHolderTest import FnProceduralHolderTest
 from GeometryCombinerTest import GeometryCombinerTest
 from FromMayaSkinClusterConverterTest import *
 from ToMayaSkinClusterConverterTest import *
+from ToMayaGroupConverterTest import ToMayaGroupConverterTest
 
 IECoreMaya.TestProgram(
 
