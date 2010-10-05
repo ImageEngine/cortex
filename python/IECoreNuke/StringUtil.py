@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,24 +32,35 @@
 #
 ##########################################################################
 
-import unittest
-import IECore
-import sys
+import re
 
-sys.path.append( "test/IECoreNuke" )
+def __toFormatString( match ):
+	txt = match.group(0)
+	cc = len(txt)
+	if cc == 1 :
+		result = "%d"
+	else :
+		result = "%%0%dd" % cc
+	return result
 
-from KnobAccessorsTest import *
-from FnAxisTest import *
-from StringUtilTest import *
+def __toNumberSign( match ):
+	txt = match.group(1)
+	cc = 1
+	if len(txt) :
+		cc = int(txt)
+		if txt[0] != '0' and cc > 1 :
+			raise RuntimeError, "Frame numbers padded with space is not supported!"
+	result = ""
+	for c in xrange( cc ) :
+		result = result + "#"
+	return result
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreNuke/resultsPython.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+## Converts IECore standard file sequence path to Nuke's syntax
+def nukeFileSequence( ieCorefs ) :
+
+	return re.sub( "#+", __toFormatString, ieCorefs )
+
+## Converts Nuke standard file sequence path to IECore's syntax
+def ieCoreFileSequence( nukefs ) :
+
+	return re.sub( "%([0-9]*)d", __toNumberSign, nukefs )
