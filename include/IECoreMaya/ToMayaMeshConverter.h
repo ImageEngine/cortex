@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,10 @@
 #ifndef IE_COREMAYA_TOMAYAMESHCONVERTER_H
 #define IE_COREMAYA_TOMAYAMESHCONVERTER_H
 
+#include "maya/MFnMesh.h"
+
+#include "IECore/MeshPrimitive.h"
+
 #include "IECoreMaya/ToMayaObjectConverter.h"
 
 namespace IECoreMaya
@@ -46,6 +50,8 @@ IE_CORE_DECLAREPTR( ToMayaMeshConverter );
 class ToMayaMeshConverter : public ToMayaObjectConverter
 {
 	public:
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaMeshConverter, ToMayaMeshConverterTypeId, ToMayaObjectConverter );
 
 		ToMayaMeshConverter( IECore::ConstObjectPtr object );
 
