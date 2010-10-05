@@ -138,7 +138,10 @@ static ParameterPtr plugParameter( MFnDependencyNode *fnDN, MPlug *plug )
 	return interface( fnDN )->plugParameter( *plug );
 }
 
-void IECoreMaya::parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses )
+namespace IECoreMaya
+{
+
+void parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses )
 {
 	ParameterisedHolderModificationCmd::g_originalValue = originalValue;
 	ParameterisedHolderModificationCmd::g_originalClasses = originalClasses;
@@ -146,7 +149,7 @@ void IECoreMaya::parameterisedHolderAssignModificationState( IECore::ObjectPtr o
 	ParameterisedHolderModificationCmd::g_newClasses = newClasses;
 }
 
-void IECoreMaya::bindFnParameterisedHolder()
+void bindFnParameterisedHolder()
 {
 
 	def( "_parameterisedHolderSetParameterised", &setParameterised );
@@ -164,3 +167,5 @@ void IECoreMaya::bindFnParameterisedHolder()
 	PointerFromSWIG<MPlug>();
 
 }
+
+} // namespace IECoreMaya
