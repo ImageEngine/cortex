@@ -1,9 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
-#
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,57 +32,41 @@
 #
 ##########################################################################
 
-import sys
 import unittest
-import warnings
 
 import IECore
 import IECoreMaya
 
-warnings.simplefilter( "error", DeprecationWarning )
+class RunTimeTypedTest( unittest.TestCase ) :
 
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-from MayaTypeIdTest import *
-from FromMayaTransformConverterTest import *
-from CallbackIdTest import *
-from TemporaryAttributeValuesTest import *
-from SplineParameterHandlerTest import *
-from DAGPathParametersTest import *
-from FnProceduralHolderTest import FnProceduralHolderTest
-from GeometryCombinerTest import GeometryCombinerTest
-from FromMayaSkinClusterConverterTest import *
-from ToMayaSkinClusterConverterTest import *
-from ToMayaGroupConverterTest import ToMayaGroupConverterTest
-from RunTimeTypedTest import RunTimeTypedTest
+	def test( self ) :
+		
+		typeNames = {}
+		typeIds = {}
+		
+		for c in [ getattr( IECoreMaya, x ) for x in dir( IECoreMaya ) ] :
+		
+			try :
+				if not issubclass( c, IECore.RunTimeTyped ) :
+					continue
+			except TypeError :
+				continue # c wasn't a class
+						
+			self.failIf( c.staticTypeId() in typeIds )
+			self.failIf( c.staticTypeName() in typeNames )
 
-IECoreMaya.TestProgram(
+			typeIds[c.staticTypeId()] = c
+			typeNames[c.staticTypeName()] = c
+		
+			self.assertEqual( IECore.RunTimeTyped.typeNameFromTypeId( c.staticTypeId() ), c.staticTypeName() )
+			self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( c.staticTypeName() ), c.staticTypeId() )
+			
+			self.failUnless( c.staticTypeId() in IECoreMaya.TypeId.values or c.staticTypeId() in IECore.TypeId.values )
+			
+			if c.staticTypeId() in IECoreMaya.TypeId.values :
+				self.assertEqual( c.staticTypeId(), getattr( IECoreMaya.TypeId, c.staticTypeName() ) )
+			else :
+				self.assertEqual( c.staticTypeId(), getattr( IECore.TypeId, c.staticTypeName() ) )
 
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreMaya/resultsPython.txt", "w" )
-			]
-		),
-		verbosity = 2
-	),
-
-	plugins = [ "ieCore" ],
-
-)
+if __name__ == "__main__":
+	IECoreMaya.TestProgram()

@@ -48,6 +48,8 @@ FromMayaPlugConverter::Description<T>::Description( MFnNumericData::Type fromTyp
 	{
 		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
 	}
+	/// \todo Derive FromMayaPlugConverter::Description from RunTimeTyped::TypeDescription instead of calling this manually.
+	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }
 
 template<class T>
@@ -58,6 +60,8 @@ FromMayaPlugConverter::Description<T>::Description( MFnData::Type fromType, IECo
 	{
 		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
 	}
+	/// \todo Derive FromMayaPlugConverter::Description from RunTimeTyped::TypeDescription instead of calling this manually.
+	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }
 
 template<class T>
@@ -68,6 +72,8 @@ FromMayaPlugConverter::Description<T>::Description( MFnUnitAttribute::Type fromT
 	{
 		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
 	}
+	/// \todo Derive FromMayaPlugConverter::Description from RunTimeTyped::TypeDescription instead of calling this manually.
+	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }
 
 template<class T>

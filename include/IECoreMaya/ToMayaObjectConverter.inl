@@ -44,6 +44,8 @@ template<class T>
 ToMayaObjectConverter::ToMayaObjectConverterDescription<T>::ToMayaObjectConverterDescription( IECore::TypeId fromType, const MFn::Type resultType )
 {
 	ToMayaObjectConverter::registerConverter( fromType, resultType, creator );
+	/// \todo Derive ToMayaObjectConverterDescription from RunTimeTyped::TypeDescription instead of calling this manually.
+	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }
 
 template<class T>
