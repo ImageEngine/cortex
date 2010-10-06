@@ -282,7 +282,8 @@ if targetApp=="houdini" :
 	INSTALL_HOUDINIPLUGIN_NAME = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 	INSTALL_HOUDINIOTL_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/otls/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/"
 	INSTALL_HOUDINIICON_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/icons/"
-	
+	INSTALL_HOUDINITOOLBAR_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/toolbar/"
+
 # find truelight, unless we're on osx, where we haven't got it to link yet
 if not IEEnv.platformOS().startswith("osx") :
 	try :
