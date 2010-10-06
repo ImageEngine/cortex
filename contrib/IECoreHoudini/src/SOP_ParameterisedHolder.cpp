@@ -120,11 +120,19 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 
 		// does this parameter cause a gui refresh?
 		bool do_update = true;
-		if ( parm->userData()->members().count("gui_update")>0 )
+		if( CompoundObjectPtr uiData = parm->userData()->member<CompoundObject>( "UI" ) )
 		{
-			BoolDataPtr update_data = IECore::runTimeCast<BoolData>( parm->userData()->members()["gui_update"] );
-			if ( update_data )
+			// World space parameter values
+			if( BoolDataPtr update_data = uiData->member<BoolData>( "update" ) )
+			{
 				do_update = update_data->readable();
+			}
+		}
+
+		/// \todo: This gui_update userData flag is deprecated!
+		if ( BoolDataPtr update_data = parm->userData()->member<BoolData>("gui_update") )
+		{
+			do_update = update_data->readable();
 		}
 
 		// handle the different parameter types

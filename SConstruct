@@ -508,6 +508,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_HOUDINITOOLBAR_DIR",
+	"The directory under which to install houdini shelf files.",
+	"$INSTALL_PREFIX/houdini/toolbar",
+)
+
+o.Add(
 	"INSTALL_MAYAICON_DIR",
 	"The directory under which to install maya icons.",
 	"$INSTALL_PREFIX/maya/icons",
@@ -1992,6 +1998,14 @@ if doConfigure :
 		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
 		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )
+		
+		#=====
+		# install toolbar
+		#=====
+		houdiniToolbars = glob.glob( "contrib/IECoreHoudini/toolbar/*.shelf" )
+		houdiniToolbarInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINITOOLBAR_DIR", source=houdiniToolbars )
+		houdiniPluginEnv.Alias( "install", houdiniToolbarInstall )
+		houdiniPluginEnv.Alias( "installHoudini", houdiniToolbarInstall )
 		
 		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
 

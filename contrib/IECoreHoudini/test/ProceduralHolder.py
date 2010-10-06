@@ -207,10 +207,21 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		# check the hidden userData works
 		assert( proc.parmTuple("parm_a").parmTemplate().isHidden()==True )
 		assert( proc.parmTuple("parm_b").parmTemplate().isHidden()==False )
+		print proc.parmTuple("parm_c").parmTemplate().isHidden()
+		assert( proc.parmTuple("parm_c").parmTemplate().isHidden()==True )
+		assert( proc.parmTuple("parm_d").parmTemplate().isHidden()==False )
 		# check setting the parameter still works
 		proc.parmTuple("parm_a").set( [123] )
 		proc.cook(force=True)
 		assert( cl['a'].getValue().value == 123 )
+		
+	def testParameterLabels( self ):
+		( proc, cl ) = self.testProceduralParameters()
+		# check the hidden userData works
+		assert( proc.parmTuple("parm_a").parmTemplate().label()=="Int" )
+		assert( proc.parmTuple("parm_b").parmTemplate().label()=="B" )
+		assert( proc.parmTuple("parm_c").parmTemplate().label()=="Double" )
+		assert( proc.parmTuple("parm_d").parmTemplate().label()=="D" )
 		
 	def testMatchString(self):
 		(op,fn)=self.testProceduralParameters()

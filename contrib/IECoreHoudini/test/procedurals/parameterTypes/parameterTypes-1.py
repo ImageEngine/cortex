@@ -56,21 +56,26 @@ class parameterTypes( ParameterisedProcedural ) :
 					name = "b",
 					description = "A float which has a very long description to help test the help formatting. i wonder if there's anything more interesting i could write here.",
 					defaultValue = 2,
-					userData = { "label":StringData("Float"), "gui_update":BoolData(True) }
+					userData = { "gui_update":BoolData(True) }
 				),
 
 				DoubleParameter(
 					name = "c",
 					description = "A double",
 					defaultValue = 3,
-					userData = { "label":StringData("Double"), "gui_update":BoolData(True) }
+					userData = { 'UI': { 
+									'visible':BoolData(False),
+									'label':StringData("Double"),
+									'update':BoolData(True)
+									} 
+								}
 				),
 
 				StringParameter(
 					name = "d",
 					description = "A string",
 					defaultValue = "ssss",
-					userData = { "label":StringData("String"), "gui_update":BoolData(True) }
+					userData = { "gui_update":BoolData(True) }
 				),
 
 				IntVectorParameter(

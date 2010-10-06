@@ -88,6 +88,10 @@ void newSopOperator(OP_OperatorTable *table)
     				1, // Max # of sources
     				SOP_ToHoudiniConverter::myVariables, // Local variables
     				OP_FLAG_GENERATOR) ); // Flag it as generator
+
+	table->addOpHidden( "ieOpHolder" );
+	table->addOpHidden( "ieProceduralHolder" );
+	table->addOpHidden( "ieToHoudiniConverter" );
 }
 
 /// Declare our new Render Hooks

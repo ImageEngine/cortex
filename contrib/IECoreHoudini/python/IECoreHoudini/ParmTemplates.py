@@ -55,10 +55,7 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 			sub_folder = ['Parameters']
 			name = None
 		else:
-			if 'label' in p.userData():
-				label = p.userData()['label'].value
-			else:
-				label = labelFormat(p.name)
+			label = parmLabel( p )
 			sub_folder = folders + [label]
 			name = parmName(p.name, parent=parent)
 		
@@ -143,9 +140,12 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 
 	if parm:
 		# is this parameter hidden?
-		if 'hidden' in p.userData():
-			hidden = bool(p.userData()['hidden'].value)
-			parm['tuple'].hide( hidden )
+		do_hide = False
+		if 'UI' in p.userData() and 'visible' in p.userData()['UI']:
+			do_hide = not bool(p.userData()['UI']['visible'].value)
+		if 'hidden' in p.userData(): # TODO: this flag is deprecated
+			do_hide = bool(p.userData()['hidden'].value)
+		parm['tuple'].hide( do_hide )
 			
 		# add our list of parent folders
 		parm['folder'] = folders
@@ -153,6 +153,18 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		
 		# add to our list of results
 		results.append(parm)
+		
+	# certain parameter types are ok to ignore
+	ignore_types = [ IECore.TypeId.CompoundParameter,
+					IECore.TypeId.ObjectParameter,
+					IECore.TypeId.PrimitiveParameter,
+					IECore.TypeId.PointsPrimitiveParameter,
+					IECore.TypeId.MeshPrimitiveParameter ]
+	if not parm and not p.typeId() in ignore_types:
+		msg = "IECoreHoudini does not currently support parameters of type " + p.typeName()
+		if ( hou.applicationVersion()[0]>10 ): # H10 doesn't support setStatusMessage
+			hou.ui.setStatusMessage( msg, hou.severityType.Warning )
+		print "Warning: ", msg
 	
 	# our parent folder list
 	return results
@@ -169,15 +181,21 @@ def parmName( n, parent=None ) :
 		prefix = ""
 	return "%sparm_%s" % ( prefix, n )
 
+# returns a parameter label
+def parmLabel( p ):
+        label = labelFormat(p.name)
+        if 'UI' in p.userData() and 'label' in p.userData()['UI']:
+                label = p.userData()['UI']['label'].value
+        if 'label' in p.userData(): # TODO: this userData key is deprecated
+                label = p.userData()['label'].value
+        return label
+
 #=====
 # use the following to find out how to call template()
 # n.parm("intparm").parmTemplate().asCode()
 def intParm( p, dim=1, parent=None ):
 	name = parmName( p.name, parent=parent )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
+        label = parmLabel( p )
 
 	# only simple floats have min/max values
 	if dim==1:
@@ -216,10 +234,7 @@ def intParm( p, dim=1, parent=None ):
 # n.parm("floatparm").parmTemplate().asCode()
 def floatParm( p, dim=1, parent=None ):
 	name = parmName( p.name, parent=parent )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
+	label = parmLabel( p )
 
 	# only simple floats have min/max values
 	if dim==1:
@@ -259,20 +274,14 @@ def floatParm( p, dim=1, parent=None ):
 # n.parm("boolparm").parmTemplate().asCode()
 def boolParm( p, parent=None ):
 	name = parmName( p.name )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
+	label = parmLabel( p )
 	default = p.defaultValue.value
 	parm = hou.ToggleParmTemplate( name, label, default_value=default, disable_when="")
 	return {'name':name, 'tuple':parm }
 
 def stringParm( p, parent=None ):
 	name = parmName( p.name )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
+	label = parmLabel( p )
 	default = ([p.defaultValue.value])
 	parm = hou.StringParmTemplate( name, label, 1,
 									default_value=default,
@@ -282,10 +291,7 @@ def stringParm( p, parent=None ):
 
 def pathParm( p, parent=None ):
 	name = parmName( p.name )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
+	label = parmLabel( p )
 	default = ([p.defaultValue.value])
 	parm = hou.StringParmTemplate( name, label, 1,
 									default_value=default,
@@ -296,10 +302,7 @@ def pathParm( p, parent=None ):
 
 def colParm( p, dim, parent=None ):
 	name = parmName( p.name, parent=parent )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
+	label = parmLabel( p )
 	default = list(p.defaultValue.value)
 	parm = hou.FloatParmTemplate( name, label, dim,
 									default_value=default,
@@ -314,10 +317,7 @@ def colParm( p, dim, parent=None ):
 
 def matrixParm( p, dim=16, parent=None ):
 	name = parmName( p.name, parent=parent )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
+	label = parmLabel( p )
 	default_matrix = p.defaultValue.value
 	default = []
 	dim_sqrt = int(math.sqrt(dim))
@@ -340,11 +340,7 @@ def matrixParm( p, dim=16, parent=None ):
 
 def boxParmInt( p, dim, parent=None ):
 	name = parmName( p.name, parent=parent )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
-
+	label = parmLabel( p )
 	default_box = p.defaultValue.value
 	default = []
 	for i in range(dim):
@@ -367,11 +363,7 @@ def boxParmInt( p, dim, parent=None ):
 
 def boxParmFloat( p, dim, parent=None ):
 	name = parmName( p.name, parent=parent )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
-
+	label = parmLabel( p )
 	default_box = p.defaultValue.value
 	default = []
 	for i in range(dim):
@@ -393,20 +385,3 @@ def boxParmFloat( p, dim, parent=None ):
 			 )
 	return { 'name':name, 'tuple':parm }
 
-# Code for parameter template\n
-# hou_parm_template = hou.FolderSetParmTemplate("folder0", folder_names=(["Folder Name"]), folder_style=hou.folderType.Tabs)
-# hou_parm_template.setTags({"visibletabs": "1"})
-'''
-def compoundParameter( p, children ):
-	name = parmName( p.name )
-	if "label" in p.userData():
-		label = p.userData()["label"].value
-	else:
-		label = labelFormat(p.name)
-	
-	parm = hou.FolderParmTemplate( name, label, 
-								parm_templates = children,
-								folder_type=hou.folderType.Tabs
-									)
-	return { 'name':name, 'tuple':parm }
-'''
