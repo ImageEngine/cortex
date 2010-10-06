@@ -90,6 +90,12 @@ def _dagMenu( menu, proceduralHolder ) :
 			command = IECore.curry( __printSelectedComponents, proceduralHolder )
 		)
 	
+	maya.cmds.menuItem(
+		label = "Convert To Geometry",
+		radialPosition = "S",
+		command = "import IECoreMaya; IECoreMaya.ProceduralHolderUI._convertToGeometry( \"" + proceduralHolder + "\" )",
+	)
+	
 	for c in __dagMenuCallbacks :
 	
 		c( menu, proceduralHolder )
@@ -125,3 +131,17 @@ def __printSelectedComponents( proceduralHolder, *unused ) :
 	selectedNames = list( selectedNames )
 	selectedNames.sort()
 	print " ".join( selectedNames )
+
+def _convertToGeometry( proceduralHolder, *unused ) :
+
+	fnP = IECoreMaya.FnProceduralHolder( proceduralHolder )
+	
+	proceduralParent = maya.cmds.listRelatives( fnP.fullPathName(), parent=True, fullPath=True )[0]
+	geometryParent = maya.cmds.createNode( "transform", name = "convertedProcedural" )
+	
+	proceduralTransform = maya.cmds.xform( proceduralParent, query=True, worldSpace=True, matrix=True )
+	maya.cmds.xform( geometryParent, worldSpace=True, matrix=proceduralTransform )
+	
+	fnP.convertToGeometry( parent=geometryParent )	
+
+	maya.cmds.select( geometryParent, replace=True )

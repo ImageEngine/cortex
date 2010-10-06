@@ -32,9 +32,13 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import maya.OpenMaya
 import maya.cmds
 
+import IECore
+import IECoreMaya
 import _IECoreMaya
 from FnParameterisedHolder import FnParameterisedHolder
 from FnDagNode import FnDagNode
@@ -149,3 +153,28 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 	def scene( self ) :
 
 		return _IECoreMaya._proceduralHolderScene( self )
+
+	## Creates a hierarchy of maya nodes representing the output of the procedural
+	# at the current frame. If parent is specified then the geometry will be parented
+	# under it, otherwise it will share the parent of the procedural. Returns the
+	# path to the top level transform of the new geometry.
+	def convertToGeometry( self, parent=None ) :
+	
+		procedural = self.getProcedural()
+		if not procedural :
+			return None
+			
+		renderer = IECore.CapturingRenderer()
+		with IECore.WorldBlock( renderer ) :
+			procedural.render( renderer )
+		
+		world = renderer.world()
+		
+		if parent is None :
+			parent = maya.cmds.listRelatives( self.fullPathName(), fullPath=True, parent=True )
+			if parent is not None :
+				parent = parent[0]
+			
+		IECoreMaya.ToMayaGroupConverter( world ).convert( parent )
+		
+		return maya.cmds.listRelatives( parent, fullPath=True )[-1]
