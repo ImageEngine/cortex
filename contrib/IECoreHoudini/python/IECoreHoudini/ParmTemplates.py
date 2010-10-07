@@ -162,7 +162,9 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 					IECore.TypeId.MeshPrimitiveParameter ]
 	if not parm and not p.typeId() in ignore_types:
 		msg = "IECoreHoudini does not currently support parameters of type " + p.typeName()
-		if ( hou.applicationVersion()[0]>10 ): # H10 doesn't support setStatusMessage
+		
+		# H10 and hbatch/hython don't support ui.setStatusMessage()
+		if ( hou.applicationVersion()[0]>10 and hou.isUIAvailable() ) :
 			hou.ui.setStatusMessage( msg, hou.severityType.Warning )
 		print "Warning: ", msg
 	
