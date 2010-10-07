@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -46,7 +48,9 @@
 #include "SOP_OpHolder.h"
 #include "SOP_ProceduralHolder.h"
 #include "SOP_ToHoudiniConverter.h"
+#include "GEO_CobIOTranslator.h"
 #include "GR_Cortex.h"
+
 using namespace IECoreHoudini;
 
 /// Tell Houdini that this plugin should be loaded with RTLD_GLOBAL
@@ -103,4 +107,10 @@ void newRenderHook( GR_RenderTable *table )
 #else
     table->addHook(hook);
 #endif
+}
+
+/// Declare our new IO Translators
+void newGeometryIO( void * )
+{
+    GU_Detail::registerIOTranslator( new GEO_CobIOTranslator() );
 }
