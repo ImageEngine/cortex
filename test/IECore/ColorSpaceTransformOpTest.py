@@ -70,7 +70,7 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 		)
 		self.failIf( diffResult.value )
 		
-	def testPanalog( self ):
+	def testLinearToPanalog( self ):
 		op = ColorSpaceTransformOp()
 		result = op(
 			inputColorSpace = "linear",
@@ -87,6 +87,33 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 			maxError = 0.001
 		)
 		self.failIf( diffResult.value )
+		
+	def testPanalog( self ):
+		# testing if I can transform back and forth
+		op = ColorSpaceTransformOp()
+		result = op(
+			inputColorSpace = "linear",
+			outputColorSpace = "panalog",
+
+			input = Reader.create( "test/IECore/data/exrFiles/uvMap.256x256.exr" ).read()
+		)
+		
+		result = op(
+			inputColorSpace = "panalog",
+			outputColorSpace = "linear",
+
+			input = result
+		)
+		
+		# Result verified by eye
+		diff = ImageDiffOp()
+		diffResult = diff(
+			imageA = result,
+			imageB = Reader.create( "test/IECore/data/exrFiles/uvMap.256x256.exr" ).read(),
+			maxError = 0.0001
+		)
+		self.failIf( diffResult.value )
+
 
 if __name__ == "__main__":
 	unittest.main()
