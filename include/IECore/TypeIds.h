@@ -381,6 +381,8 @@ enum TypeId
 	TransformationMatrixdParameterTypeId = 335,
 	PointsMotionOpTypeId = 336,
 	CapturingRendererTypeId = 337,
+	LinearToPanalogOpTypeId = 338,
+	PanalogToLinearOpTypeId = 339,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

@@ -384,6 +384,8 @@ void bindTypeId()
 		.value( "TransformationMatrixdParameter", TransformationMatrixdParameterTypeId )
 		.value( "PointsMotionOp", PointsMotionOpTypeId )
 		.value( "CapturingRenderer", CapturingRendererTypeId )
+		.value( "LinearToPanalogOp", LinearToPanalogOpTypeId )
+		.value( "PanalogToLinearOp", PanalogToLinearOpTypeId )
 	;
 }
 

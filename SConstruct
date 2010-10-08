@@ -575,6 +575,8 @@ o.Add(
 		( "IECore.LinearToSRGBOp", "common/colorSpace/linearToSRGB" ),
 		( "IECore.Rec709ToLinearOp", "common/colorSpace/Rec709ToLinear" ),
 		( "IECore.LinearToRec709Op", "common/colorSpace/linearToRec709" ),
+		( "IECore.PanalogToLinearOp", "common/colorSpace/PanalogToLinear" ),
+		( "IECore.LinearToPanalogOp", "common/colorSpace/linearToPanalog" ),
 		( "IECore.UVDistortOp", "common/2d/image/uvDistort" ),
 		( "IECore.ImageCompositeOp", "common/2d/image/imageComposite" ),
 		( "IECore.ImageConvolveOp", "common/2d/image/imageConvolve" ),

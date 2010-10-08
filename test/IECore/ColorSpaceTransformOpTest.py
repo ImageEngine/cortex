@@ -39,9 +39,9 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		self.assertEqual(  set( ColorSpaceTransformOp.colorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb'] ) )
-		self.assertEqual(  set( ColorSpaceTransformOp.inputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb'] ) )
-		self.assertEqual(  set( ColorSpaceTransformOp.outputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb'] ) )
+		self.assertEqual(  set( ColorSpaceTransformOp.colorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog'] ) )
+		self.assertEqual(  set( ColorSpaceTransformOp.inputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog'] ) )
+		self.assertEqual(  set( ColorSpaceTransformOp.outputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog'] ) )
 
 	def testConversion( self ) :
 
@@ -67,6 +67,24 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 			imageA = result,
 			imageB = Reader.create( "test/IECore/data/expectedResults/colorSpaceTransformOp1.exr" ).read(),
 			maxError = 0.0001
+		)
+		self.failIf( diffResult.value )
+		
+	def testPanalog( self ):
+		op = ColorSpaceTransformOp()
+		result = op(
+			inputColorSpace = "linear",
+			outputColorSpace = "panalog",
+
+			input = Reader.create( "test/IECore/data/exrFiles/uvMap.256x256.exr" ).read()
+		)
+
+		# Result verified by eye
+		diff = ImageDiffOp()
+		diffResult = diff(
+			imageA = result,
+			imageB = Reader.create( "test/IECore/data/expectedResults/colorSpaceTransformOpPanalog.exr" ).read(),
+			maxError = 0.001
 		)
 		self.failIf( diffResult.value )
 
