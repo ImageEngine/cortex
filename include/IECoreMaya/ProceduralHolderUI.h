@@ -38,6 +38,7 @@
 #include <map>
 
 #include "IECore/Object.h"
+#include "OpenEXR/ImathColor.h"
 
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/DisplayStyle.h"
@@ -91,7 +92,16 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 
 		mutable StateMap m_stateMap;
 		mutable DisplayStyle m_displayStyle;
-
+		
+		void cleanupLights( const MDrawRequest &request, M3dView &view ) const;
+		void restoreLights() const;	
+		
+		mutable bool m_restoreLights;
+		mutable unsigned int m_numMayaLights;
+		mutable unsigned int m_numGlLights;
+		mutable std::vector<Imath::Color4f> m_diffuses;
+		mutable std::vector<Imath::Color4f> m_specs;
+		mutable std::vector<Imath::Color4f> m_ambients;
 };
 
 } // namespace IECoreMaya

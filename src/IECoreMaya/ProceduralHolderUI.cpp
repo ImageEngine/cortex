@@ -244,11 +244,14 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 	{
 		resetHilites();
 	}
-
+	
+	cleanupLights( request, view );
+	
 	view.beginGL();
 
 	GLint prevProgram;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
+	
 
 		// maya can sometimes leave an error from it's own code,
 		// and we don't want that to confuse us in our drawing code.
@@ -315,6 +318,8 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 	glUseProgram( prevProgram );
 
 	view.endGL();
+	
+	restoreLights();	
 }
 
 bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const
@@ -542,5 +547,93 @@ void ProceduralHolderUI::resetHilites() const
 	}
 
 	m_stateMap.clear();
+}
+
+// Currently, Maya leaves lights in GL when you reduce the number of active lights in 
+// your scene. It fills the GL light space from 0 with the visible lights, so, we simply 
+// need to reset the potentially 'old' state of lights after the last one we know to be 
+// visible. We'll put it all back as we found it though. For the moment, this assumes 
+// Maya is filling GL consecutively, if they stop doing that, we'll need to get the 
+// actual light indexes from the view. Its just a bit quicker to assume this, whilst we can.
+void ProceduralHolderUI::cleanupLights( const MDrawRequest &request, M3dView &view  ) const
+{
+	m_restoreLights = false;
+	
+	if( !(request.displayStyle()==M3dView::kFlatShaded || request.displayStyle()==M3dView::kGouraudShaded) )
+	{
+		return;
+	}
+	
+	M3dView::LightingMode mode;
+	view.getLightingMode(mode);
+	
+	if (mode == M3dView::kLightDefault)
+	{
+		m_numMayaLights = 1;
+	}
+	else
+	{
+		view.getLightCount( m_numMayaLights );
+	}
+	
+	int sGlMaxLights = 0;
+	glGetIntegerv( GL_MAX_LIGHTS, &sGlMaxLights );
+	m_numGlLights = sGlMaxLights;	
+
+	if( m_numMayaLights >= m_numGlLights || m_numGlLights == 0 )
+	{
+		return;
+	}		
+	
+	unsigned int vectorSize = m_numGlLights - m_numMayaLights;
+	
+	m_diffuses.resize( vectorSize );
+	m_specs.resize( vectorSize );
+	m_ambients.resize( vectorSize );
+
+	static float s_defaultColor[] = { 0.0, 0.0, 0.0, 1.0 };
+	
+	GLenum light;
+	unsigned int j = 0;
+	
+	for( unsigned int i = m_numMayaLights; i < m_numGlLights; i++ )
+	{		
+		light = GL_LIGHT0 + i;
+		
+		glGetLightfv( light, GL_DIFFUSE, m_diffuses[j].getValue() );
+		glLightfv( light, GL_DIFFUSE, s_defaultColor );
+			
+		glGetLightfv( light, GL_SPECULAR, m_specs[j].getValue() );
+		glLightfv( light, GL_SPECULAR, s_defaultColor );
+			
+		glGetLightfv( light, GL_AMBIENT, m_ambients[j].getValue() );
+		glLightfv( light, GL_AMBIENT, s_defaultColor );
+		
+		j++;
+	}
+	
+	m_restoreLights = true;
+}
+
+void ProceduralHolderUI::restoreLights() const
+{
+	if( !m_restoreLights )
+	{
+		return;
+	}
+	
+	GLenum light;
+	unsigned int j = 0;
+	
+	for( unsigned int i = m_numMayaLights; i < m_numGlLights; i++ )
+	{	
+		light = GL_LIGHT0 + i;
+		
+		glLightfv( light, GL_DIFFUSE, m_diffuses[j].getValue() );
+		glLightfv( light, GL_SPECULAR, m_specs[j].getValue() );
+		glLightfv( light, GL_AMBIENT, m_ambients[j].getValue() );
+		
+		j++;
+	}
 }
 
