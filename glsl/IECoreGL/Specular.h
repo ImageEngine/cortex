@@ -37,7 +37,7 @@
 
 vec3 ieSpecular( vec3 P, vec3 N, vec3 V, float roughness, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int nLights )
 {
-	vec3 result;
+	vec3 result = vec3( 0 );
 	for( int i=0 ; i<nLights; i++ )
 	{
 		vec3 H = normalize( normalize( L[i] ) + V );

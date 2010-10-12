@@ -37,7 +37,7 @@
 
 vec3 ieDiffuse( vec3 P, vec3 N, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int nLights )
 {
-	vec3 result;
+	vec3 result = vec3( 0 );
 	for( int i=0 ; i<nLights; i++ )
 	{
 		result += Cl[i] * max( 0.0, dot( N, normalize( L[i] ) ) );
