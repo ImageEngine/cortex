@@ -73,8 +73,8 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 	def testLinearToPanalog( self ):
 		op = ColorSpaceTransformOp()
 		result = op(
-			inputColorSpace = "linear",
-			outputColorSpace = "panalog",
+			inputColorSpace = "panalog",
+			outputColorSpace = "linear",
 
 			input = Reader.create( "test/IECore/data/exrFiles/uvMap.256x256.exr" ).read()
 		)

@@ -67,8 +67,7 @@ LinearToPanalogDataConversion<F, T>::LinearToPanalogDataConversion( float c1, fl
 template<typename F, typename T>
 T LinearToPanalogDataConversion<F, T>::operator()( F f ) const
 {
-	return T(-m_c2 + m_c2 * Imath::Math<float>::exp(m_c3 * (f * m_c4 - m_c1)));
-	
+	return T((m_c1 + Imath::Math<float>::log( (f + m_c2) / m_c2 ) / m_c3 ) / m_c4);
 }
 
 template<typename F, typename T>
