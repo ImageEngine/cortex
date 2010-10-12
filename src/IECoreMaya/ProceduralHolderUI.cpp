@@ -245,9 +245,10 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 		resetHilites();
 	}
 	
-	cleanupLights( request, view );
-	
 	view.beginGL();
+	
+	LightingState lightingState;
+	bool restoreLightState = cleanupLights( request, view, &lightingState );
 
 	GLint prevProgram;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
@@ -261,7 +262,6 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 
 		try
 		{
-
 			// draw the bound if asked
 			if( request.token()==BoundDrawMode )
 			{
@@ -317,9 +317,12 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 
 	glUseProgram( prevProgram );
 
-	view.endGL();
+	if( restoreLightState )
+	{
+		restoreLights( &lightingState );	
+	}
 	
-	restoreLights();	
+	view.endGL();
 }
 
 bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const
@@ -555,13 +558,12 @@ void ProceduralHolderUI::resetHilites() const
 // visible. We'll put it all back as we found it though. For the moment, this assumes 
 // Maya is filling GL consecutively, if they stop doing that, we'll need to get the 
 // actual light indexes from the view. Its just a bit quicker to assume this, whilst we can.
-void ProceduralHolderUI::cleanupLights( const MDrawRequest &request, M3dView &view  ) const
+bool ProceduralHolderUI::cleanupLights( const MDrawRequest &request, M3dView &view, LightingState *s ) const
 {
-	m_restoreLights = false;
-	
+		
 	if( !(request.displayStyle()==M3dView::kFlatShaded || request.displayStyle()==M3dView::kGouraudShaded) )
 	{
-		return;
+		return false;
 	}
 	
 	M3dView::LightingMode mode;
@@ -569,69 +571,64 @@ void ProceduralHolderUI::cleanupLights( const MDrawRequest &request, M3dView &vi
 	
 	if (mode == M3dView::kLightDefault)
 	{
-		m_numMayaLights = 1;
+		s->numMayaLights = 1;
 	}
 	else
 	{
-		view.getLightCount( m_numMayaLights );
+		view.getLightCount( s->numMayaLights );
 	}
 	
 	int sGlMaxLights = 0;
 	glGetIntegerv( GL_MAX_LIGHTS, &sGlMaxLights );
-	m_numGlLights = sGlMaxLights;	
+	s->numGlLights = sGlMaxLights;	
 
-	if( m_numMayaLights >= m_numGlLights || m_numGlLights == 0 )
+	if( s->numMayaLights >= s->numGlLights || s->numGlLights == 0 )
 	{
-		return;
+		return false;
 	}		
 	
-	unsigned int vectorSize = m_numGlLights - m_numMayaLights;
+	unsigned int vectorSize = s->numGlLights - s->numMayaLights;
 	
-	m_diffuses.resize( vectorSize );
-	m_specs.resize( vectorSize );
-	m_ambients.resize( vectorSize );
+	s->diffuses.resize( vectorSize );
+	s->specs.resize( vectorSize );
+	s->ambients.resize( vectorSize );
 
 	static float s_defaultColor[] = { 0.0, 0.0, 0.0, 1.0 };
 	
 	GLenum light;
 	unsigned int j = 0;
 	
-	for( unsigned int i = m_numMayaLights; i < m_numGlLights; i++ )
+	for( unsigned int i = s->numMayaLights; i < s->numGlLights; i++ )
 	{		
 		light = GL_LIGHT0 + i;
 		
-		glGetLightfv( light, GL_DIFFUSE, m_diffuses[j].getValue() );
+		glGetLightfv( light, GL_DIFFUSE, s->diffuses[j].getValue() );
 		glLightfv( light, GL_DIFFUSE, s_defaultColor );
 			
-		glGetLightfv( light, GL_SPECULAR, m_specs[j].getValue() );
+		glGetLightfv( light, GL_SPECULAR, s->specs[j].getValue() );
 		glLightfv( light, GL_SPECULAR, s_defaultColor );
 			
-		glGetLightfv( light, GL_AMBIENT, m_ambients[j].getValue() );
+		glGetLightfv( light, GL_AMBIENT, s->ambients[j].getValue() );
 		glLightfv( light, GL_AMBIENT, s_defaultColor );
 		
 		j++;
 	}
 	
-	m_restoreLights = true;
+	return true;
 }
 
-void ProceduralHolderUI::restoreLights() const
+void ProceduralHolderUI::restoreLights( LightingState *s ) const
 {
-	if( !m_restoreLights )
-	{
-		return;
-	}
-	
 	GLenum light;
 	unsigned int j = 0;
 	
-	for( unsigned int i = m_numMayaLights; i < m_numGlLights; i++ )
+	for( unsigned int i = s->numMayaLights; i < s->numGlLights; i++ )
 	{	
 		light = GL_LIGHT0 + i;
 		
-		glLightfv( light, GL_DIFFUSE, m_diffuses[j].getValue() );
-		glLightfv( light, GL_SPECULAR, m_specs[j].getValue() );
-		glLightfv( light, GL_AMBIENT, m_ambients[j].getValue() );
+		glLightfv( light, GL_DIFFUSE, s->diffuses[j].getValue() );
+		glLightfv( light, GL_SPECULAR, s->specs[j].getValue() );
+		glLightfv( light, GL_AMBIENT, s->ambients[j].getValue() );
 		
 		j++;
 	}
