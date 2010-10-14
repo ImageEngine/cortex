@@ -61,6 +61,7 @@
 #include "maya/MIntArray.h"
 #include "maya/MPointArray.h"
 #include "maya/MDoubleArray.h"
+#include "maya/MFnCamera.h"
 
 using namespace IECoreMaya;
 using namespace std;
@@ -329,159 +330,160 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 {
 	MStatus s;
 
-	M3dView view = selectInfo.view();
+	// early out if we're not selectable. we always allow components to be selected if we're highlighted,
+	// but we don't allow ourselves to be selected as a whole unless meshes are in the selection mask.
+	// it's not ideal that we act like a mesh, but it's at least consistent with the drawing mask we use.
+	if( selectInfo.displayStatus() != M3dView::kHilite )
+	{
+		MSelectionMask meshMask( MSelectionMask::kSelectMeshes );
+		if( !selectInfo.selectable( meshMask ) )
+		{
+			return false;
+		}
+	}
 
+	// early out if we have no scene to draw
 	ProceduralHolder *proceduralHolder = static_cast<ProceduralHolder *>( surfaceShape() );
-	assert( proceduralHolder );
-
-	bool hilited = (selectInfo.displayStatus() == M3dView::kHilite);
-
+	IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
+	if( !scene )
+	{
+		return false;
+	}
+		
+	// draw the scene in select mode, and early out if we have no hits
 	static const GLsizei selectBufferSize = 20000; // enough to select 5000 distinct objects
 	static GLuint selectBuffer[selectBufferSize];
 
-	IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
-	if( scene )
-	{
-		view.beginSelect( &selectBuffer[0], selectBufferSize );
+	M3dView view = selectInfo.view();
+	view.beginSelect( &selectBuffer[0], selectBufferSize );	
 		glInitNames();
 		glPushName( 0 );
 		GLint prevProgram;
-		glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-		scene->render( m_displayStyle.baseState( selectInfo.displayStyle() ) );
+		glGetIntegerv( GL_CURRENT_PROGRAM,  &prevProgram );
+		
+			if( selectInfo.displayStatus() != M3dView::kHilite )
+			{
+				// we're not in component selection mode. we'd like to be able to select the procedural
+				// object using the bounding box so we draw it too.
+				MPlug pDrawBound( proceduralHolder->thisMObject(), ProceduralHolder::aDrawBound );
+				bool drawBound = true;
+				pDrawBound.getValue( drawBound );
+				if( drawBound )
+				{
+					IECoreGL::ConstStatePtr wireframeState = m_displayStyle.baseState( M3dView::kWireFrame );
+					m_boxPrimitive->setBox( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
+					IECore::staticPointerCast<IECoreGL::Renderable>( m_boxPrimitive )->render( wireframeState );
+				}
+			}
+				
+			scene->render( m_displayStyle.baseState( selectInfo.displayStyle() ) );
+		
 		glUseProgram( prevProgram );
-	}
-	else
+	int numHits = view.endSelect();
+
+	if( !numHits )
 	{
 		return false;
 	}
 
-	int numHits = view.endSelect();
-
-	// Get the hits out of the select buffer.
-	typedef std::list<IECoreGL::HitRecord> HitRecordList;
-	HitRecordList hits;
-	GLuint *hitRecord = selectBuffer;
+	// iterate over the hits, converting them into components and also finding
+	// the closest one.
+	MIntArray componentIndices;
+	float depthMin = std::numeric_limits<float>::max();
+	int depthMinIndex = -1;
+	
+	GLuint *hitRecords = selectBuffer;
 	for( int i=0; i<numHits; i++ )
 	{
-		IECoreGL::HitRecord h( hitRecord );
-		hits.push_back( h );
-		hitRecord += h.offsetToNext();
-	}
-
-	/// Process the hits
-	bool selected = false;
-	MFnSingleIndexedComponent fnComponent;
-	MObject component = fnComponent.create( MFn::kMeshPolygonComponent, &s );
-	assert( s );
-	bool foundClosest = false;
-	int closestCompId = -1;
-	float depthMin = std::numeric_limits<float>::max();
-	for ( HitRecordList::const_iterator it = hits.begin(); it != hits.end(); ++it )
-	{
-		const std::string &hitName = it->name.value();
-		selected = true;
-
-		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->m_componentsMap.find( hitName );
-		assert( compIt != proceduralHolder->m_componentsMap.end() );
-
-		int compId = compIt->second.first;
-
-		if ( selectInfo.singleSelection()  )
+		IECoreGL::HitRecord hitRecord( hitRecords );
+		
+		if( hitRecord.depthMin < depthMin )
 		{
-			if ( !foundClosest )
-			{
-				closestCompId = compId;
-				foundClosest = true;
-				depthMin = it->depthMin;
-			}
-			else
-			{
-				if ( it->depthMin < depthMin )
-				{
-					closestCompId = compId;
-					depthMin = it->depthMin;
-				}
-			}
+			depthMin = hitRecord.depthMin;
+			depthMinIndex = componentIndices.length();
+		}
+		
+		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->m_componentsMap.find( hitRecord.name.value() );
+		assert( compIt != proceduralHolder->m_componentsMap.end() );
+		componentIndices.append( compIt->second.first );		
+
+		hitRecords += hitRecord.offsetToNext();
+	}
+	
+	assert( depthMinIndex >= 0 );
+
+	// figure out the world space location of the closest hit
+	
+	MDagPath camera;
+	view.getCamera( camera );
+	MFnCamera fnCamera( camera.node() );
+	float near = fnCamera.nearClippingPlane();
+	float far = fnCamera.farClippingPlane();
+	
+	float z = -1;
+	if( fnCamera.isOrtho() )
+	{
+		z = Imath::lerp( near, far, depthMin );
+	}
+	else
+	{
+		// perspective camera - depth isn't linear so linearise to get z
+		float a = far / ( far - near );
+		float b = far * near / ( near - far );
+		z = b / ( depthMin - a );
+	}	
+	
+	MPoint localRayOrigin;
+	MVector localRayDirection;
+	selectInfo.getLocalRay( localRayOrigin, localRayDirection );
+	MMatrix localToCamera = selectInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();	
+	MPoint cameraRayOrigin = localRayOrigin * localToCamera;
+	MVector cameraRayDirection = localRayDirection * localToCamera;
+	
+	MPoint cameraIntersectionPoint = cameraRayOrigin + cameraRayDirection * ( -( z - near ) / cameraRayDirection.z );
+	MPoint worldIntersectionPoint = cameraIntersectionPoint * camera.inclusiveMatrix();
+	
+	// turn the processed hits into appropriate changes to the current selection
+				
+	if( selectInfo.displayStatus() == M3dView::kHilite )
+	{
+		// selecting components
+		MFnSingleIndexedComponent fnComponent;
+		MObject component = fnComponent.create( MFn::kMeshPolygonComponent, &s ); assert( s );
+	
+		if( selectInfo.singleSelection() )
+		{
+			fnComponent.addElement( componentIndices[depthMinIndex] );
 		}
 		else
 		{
-			assert( proceduralHolder->m_componentToGroupMap.find( compId ) != proceduralHolder->m_componentToGroupMap.end() );
-
-			const ProceduralHolder::ComponentToGroupMap::mapped_type &groups = proceduralHolder->m_componentToGroupMap[compId];
-			for ( ProceduralHolder::ComponentToGroupMap::mapped_type::const_iterator jit = groups.begin(); jit != groups.end(); ++jit )
-			{
-				const IECoreGL::GroupPtr &group = jit->second;
-
-				MPoint pt = IECore::convert< MPoint > ( group->bound().center() );
-				pt *= selectInfo.selectPath().inclusiveMatrix();
-
-				worldSpaceSelectPts.append( pt );
-			}
-
-			fnComponent.addElement( compId );
+			fnComponent.addElements( componentIndices );
 		}
-	}
-
-	if ( !selected )
-	{
-		return false;
-	}
-
-	MPoint selectionPoint( 0, 0, 0, 1 );
-	if ( hilited )
-	{
-		if ( selectInfo.singleSelection() )
-		{
-			assert( foundClosest );
-			assert( closestCompId >= 0 );
-
-			assert( proceduralHolder->m_componentToGroupMap.find( closestCompId ) != proceduralHolder->m_componentToGroupMap.end() );
-
-			const ProceduralHolder::ComponentToGroupMap::mapped_type &groups = proceduralHolder->m_componentToGroupMap[closestCompId];
-			for ( ProceduralHolder::ComponentToGroupMap::mapped_type::const_iterator jit = groups.begin(); jit != groups.end(); ++jit )
-			{
-				const IECoreGL::GroupPtr &group = jit->second;
-
-				MPoint pt = IECore::convert< MPoint > ( group->bound().center() );
-				pt *= selectInfo.selectPath().inclusiveMatrix();
-
-				worldSpaceSelectPts.append( pt );
-			}
-
-			fnComponent.addElement( closestCompId );
-		}
-
-		const MDagPath &path = selectInfo.multiPath();
-
-		MSelectionList item;
-		item.add( path, component );
-
-		MSelectionMask mask( MSelectionMask::kSelectComponentsMask );
+		
+		MSelectionList items;
+		items.add( selectInfo.multiPath(), component );
+		
 		selectInfo.addSelection(
-			item, selectionPoint,
+			items, worldIntersectionPoint,
 			selectionList, worldSpaceSelectPts,
-			MSelectionMask::kSelectObjectsMask,
-			true );
+			MSelectionMask::kSelectMeshFaces,
+			true
+		);		
 	}
 	else
 	{
+		// selecting objects
 		MSelectionList item;
 		item.add( selectInfo.selectPath() );
 
-		if ( selectInfo.singleSelection() )
-		{
-			/// \todo Find a way of creating a PrimitiveEvaluator to fire the selection ray at
-			selectionPoint = proceduralHolder->boundingBox().center();
-			selectionPoint *= selectInfo.selectPath().inclusiveMatrix();
-		}
-
 		selectInfo.addSelection(
-			item, selectionPoint,
+			item, worldIntersectionPoint,
 			selectionList, worldSpaceSelectPts,
-			MSelectionMask::kSelectObjectsMask,
-			false );
+			MSelectionMask::kSelectMeshes,
+			false
+		);
 	}
-
+	
 	return true;
 }
 

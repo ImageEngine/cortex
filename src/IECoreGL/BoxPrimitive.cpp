@@ -68,39 +68,78 @@ const Imath::Box3f BoxPrimitive::getBox() const
 
 void BoxPrimitive::render( const State * state, IECore::TypeId style ) const
 {
-	glBegin( GL_QUADS );
+	if( style==(IECore::TypeId)PrimitiveWireframeTypeId )
+	{	
+		glBegin( GL_LINE_LOOP );
+	
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
+			
+		glEnd();
+		
+		glBegin( GL_LINE_LOOP );
+			
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
+			
+		glEnd();
+		
+		glBegin( GL_LINES );
+				
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
+			
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
 
-		glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
-		glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
-		glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
-		glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
 
-		glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
-		glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
-		glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
-		glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
+		
+		glEnd();
+	}
+	else
+	{
+		glBegin( GL_QUADS );
 
-		glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
-		glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
-		glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
-		glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
 
-		glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
-		glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
-		glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
-		glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
 
-		glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
-		glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
-		glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
-		glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
 
-		glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
-		glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
-		glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
-		glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
 
-	glEnd();
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
+			glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
+			glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
+
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
+			glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
+			glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
+
+		glEnd();
+	}
 }
 
 Imath::Box3f BoxPrimitive::bound() const
