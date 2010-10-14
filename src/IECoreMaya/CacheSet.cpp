@@ -69,7 +69,10 @@ void *CacheSet::creator()
 
 bool CacheSet::isAbstractClass() const
 {
-	return true;
+	// ideally we would return true, but then pymel gets upset, because
+	// it tries to make a node of every single type during startup, and prints
+	// warnings if it fails. i'm not sure why it does this.
+	return false;
 }
 
 MStatus CacheSet::initialize()
