@@ -57,7 +57,10 @@ class GEO_CobIOTranslator : public GEO_IOTranslator
 
 		/// Loads a cob if the content of the cob has a registered ToHoudiniGeometryConverter
 		virtual bool fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );
-
+		
+		/// \todo: Houdini 10 requires that this definition exist, even though it isn't used
+		virtual int fileSave( const GEO_Detail *geo, ostream &os );
+		
 		/// Saves a cob by attempting to find a FromHoudiniGeometryConverter matching the given GEO_Detail
 		virtual int fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName );
 };

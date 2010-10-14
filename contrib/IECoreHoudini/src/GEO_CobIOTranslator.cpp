@@ -102,6 +102,10 @@ bool GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_mag
 	return converter->convert( handle );
 }
 
+int GEO_CobIOTranslator::fileSave( const GEO_Detail *geo, ostream &os )
+{
+}
+
 int GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName )
 {
 	((ofstream&)os).close();
