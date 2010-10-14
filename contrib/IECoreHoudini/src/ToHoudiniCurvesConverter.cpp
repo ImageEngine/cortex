@@ -36,6 +36,7 @@
 
 #include "IECore/DespatchTypedData.h"
 
+#include "ToHoudiniAttribConverter.h"
 #include "ToHoudiniCurvesConverter.h"
 #include "TypeTraits.h"
 
@@ -131,8 +132,13 @@ bool ToHoudiniCurvesConverter::doPrimitiveConversion( const Primitive *primitive
 		}
 		
 		// add point attribs
-		TransferAttrib<GEO_PointList> func( geo, &newPoints, it->first, GEO_POINT_DICT );
-		despatchTypedData<TransferAttrib<GEO_PointList>, TypeTraits::IsVectorGbAttribTypedData, DespatchTypedDataIgnoreError>( it->second, func );
+		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second );
+ 		if ( !converter )
+ 		{
+ 			continue;
+ 		}
+
+ 		converter->convert( it->first, geo, &newPoints );
 	}
 	
 	return true;

@@ -462,7 +462,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		sop = self.emptySop()
 		
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), points )
-		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
+		self.assertRaises( RuntimeError, IECore.curry( IECoreHoudini.ToHoudiniPointsConverter( points ).convert, sop ) )
 		
 		allAttribs = [ x.name() for x in sop.geometry().globalAttribs() ]
 		allAttribs.extend( [ x.name() for x in sop.geometry().pointAttribs() ] )
@@ -473,6 +473,8 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		
 		del points["floatPrim"]
 		del points["floatVert"]
+		
+		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
 		self.comparePrimAndSop( points, sop )
 
 	def tearDown( self ) :

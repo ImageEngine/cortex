@@ -1,8 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
-//
 //  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -35,44 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TYPEIDS_H
-#define IECOREHOUDINI_TYPEIDS_H
+#ifndef IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_INL
+#define IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_INL
+
+#include "IECore/CompoundData.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "ToHoudiniAttribConverter.h"
 
 namespace IECoreHoudini
 {
 
-	/// Define Cortex Type Ids for our converter class.
-	enum TypeId
-	{
-		FromHoudiniConverterTypeId = 111000,
-		FromHoudiniGeometryConverterTypeId = 111001,
-		FromHoudiniPointsConverterTypeId = 111002,
-		FromHoudiniPolygonsConverterTypeId = 111003,
-		ToHoudiniConverterTypeId = 111004,
-		ToHoudiniGeometryConverterTypeId = 111005,
-		ToHoudiniPointsConverterTypeId = 111006,
-		ToHoudiniPolygonsConverterTypeId = 111007,
-		FromHoudiniCurvesConverterTypeId = 111008,
-		ToHoudiniCurvesConverterTypeId = 111009,
-		ToHoudiniAttribConverterTypeId = 111010,
-		ToHoudiniFloatDetailAttribConverterTypeId = 111011,
-		ToHoudiniV2fDetailAttribConverterTypeId = 111012,
-		ToHoudiniV3fDetailAttribConverterTypeId = 111013,
-		ToHoudiniColor3fDetailAttribConverterTypeId = 111014,
-		ToHoudiniIntDetailAttribConverterTypeId = 111015,
-		ToHoudiniV2iDetailAttribConverterTypeId = 111016,
-		ToHoudiniV3iDetailAttribConverterTypeId = 111017,
-		ToHoudiniFloatVectorAttribConverterTypeId = 111018,
-		ToHoudiniV2fVectorAttribConverterTypeId = 111019,
-		ToHoudiniV3fVectorAttribConverterTypeId = 111020,
-		ToHoudiniColor3fVectorAttribConverterTypeId = 111021,
-		ToHoudiniIntVectorAttribConverterTypeId = 111022,
-		ToHoudiniV2iVectorAttribConverterTypeId = 111023,
-		ToHoudiniV3iVectorAttribConverterTypeId = 111024,
-		// remember to update TypeIdBinding.cpp
-		LastTypeId = 111999,
-	};
+template<class T>
+ToHoudiniAttribConverter::Description<T>::Description( IECore::TypeId fromType )
+{
+	ToHoudiniAttribConverter::registerConverter( fromType, creator );
+}
+
+template<class T>
+ToHoudiniAttribConverterPtr ToHoudiniAttribConverter::Description<T>::creator( const IECore::Data *data )
+{
+	return new T( data );
+}
 
 } // namespace IECoreHoudini
 
-#endif /* IECOREHOUDINI_TYPEIDS_H */
+#endif // IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_INL

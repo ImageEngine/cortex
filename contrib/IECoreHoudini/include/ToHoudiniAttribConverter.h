@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_H
-#define IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_H
+#ifndef IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
+#define IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
 
+#include "GB/GB_AttributeRef.h"
 #include "GU/GU_Detail.h"
 #include "GU/GU_DetailHandle.h"
+#include "UT/UT_PtrArray.h"
 
-#include "IECore/Primitive.h"
-#include "IECore/VectorTypedData.h"
+#include "IECore/Data.h"
 
 #include "TypeIds.h"
 #include "ToHoudiniConverter.h"
@@ -47,36 +48,45 @@
 namespace IECoreHoudini
 {
 
-IE_CORE_FORWARDDECLARE( ToHoudiniGeometryConverter );
+IE_CORE_FORWARDDECLARE( ToHoudiniAttribConverter );
 
-/// The ToHoudiniGeometryConverter class forms a base class for all classes able to perform
-/// some kind of conversion from an IECore::Primitive to a Houdini GU_Detail.
-class ToHoudiniGeometryConverter : public ToHoudiniConverter
+/// The ToHoudiniAttribConverter class forms an abstract base class for all classes
+/// able to perform some kind of conversion from IECore::Data to a Houdini GB_Attribute.
+/// The resulting GB_Attribute will be transferred onto the provided GU_Detail.
+class ToHoudiniAttribConverter : public ToHoudiniConverter
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniGeometryConverter, ToHoudiniGeometryConverterTypeId, ToHoudiniConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniAttribConverter, ToHoudiniAttribConverterTypeId, ToHoudiniConverter );
 
-		/// Converts the IECore::Primitive into the given GU_Detail and returns true if successful
-		/// and false otherwise. Implemented to aquire the write lock on the GU_Detail held by the
-		/// GU_DetailHandle, call doPrimitiveConversion(), and finally unlock the GU_Detail.
-		bool convert( GU_DetailHandle handle ) const;
+		typedef UT_PtrArray<GEO_Vertex*> VertexList;
+		
+		/// Converts the IECore::Data into a GB_Attribute on the given GU_Detail and returns the
+		/// associated GB_AttributeRef. It is assumed that the user has aquired the write lock
+		/// for the given GU_Detail.
+		GB_AttributeRef convert( std::string name, GU_Detail *geo ) const;
+		GB_AttributeRef convert( std::string name, GU_Detail *geo, GEO_PointList *points ) const;
+		GB_AttributeRef convert( std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const;
+		GB_AttributeRef convert( std::string name, GU_Detail *geo, VertexList *vertices ) const;
 
-		/// Creates a converter which will convert the given IECore::Primitive to a Houdini GU_Detail.
+		/// Creates a converter which will convert the given IECore::Data to a Houdini GB_Attribute.
 		/// Returns 0 if no such converter can be found.
-		static ToHoudiniGeometryConverterPtr create( const IECore::Primitive *primitive );
+		static ToHoudiniAttribConverterPtr create( const IECore::Data *data );
 
 	protected :
 
-		ToHoudiniGeometryConverter( const IECore::Primitive *primitive, const std::string &description );
+		ToHoudiniAttribConverter( const IECore::Data *data, const std::string &description );
 		
-		virtual ~ToHoudiniGeometryConverter();
+		virtual ~ToHoudiniAttribConverter();
 		
-		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::Primitive
-		virtual bool doPrimitiveConversion( const IECore::Primitive *primitive, GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const = 0;
-
-		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::Primitive *primitive );
+		/// Must be implemented by derived classes to create a GB_Attribute on the given GU_Detail and fill it with the IECore::Data
+		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const = 0;
+		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PointList *points ) const = 0;
+		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const = 0;
+		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, VertexList *vertices ) const = 0;
+		
+		typedef ToHoudiniAttribConverterPtr (*CreatorFn)( const IECore::Data *data );
 
 		static void registerConverter( IECore::TypeId fromType, CreatorFn creator );
 
@@ -88,23 +98,8 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 			public :
 				Description( IECore::TypeId fromType );
 			private :
-				static ToHoudiniGeometryConverterPtr creator( const IECore::Primitive *primitive );
+				static ToHoudiniAttribConverterPtr creator( const IECore::Data *data );
 		};
-		
-		/// Appends points to the GU_Detail from the given V3fVectorData.
-		/// Returns a GEO_PointList containing the newly added points.
-		GEO_PointList appendPoints( GU_Detail *geo, const IECore::V3fVectorData *positions ) const;
-		
-		/// Extracts primitive variables from the IECore::Primitive provided and appends them to the GU_Detail.
-		/// In most cases, this is the only transfer function that derived classes will need to use
-		void transferAttribs(
-			const IECore::Primitive *primitive, GU_Detail *geo,
-			GEO_PointList *newPoints = 0, GEO_PrimList *newPrims = 0,
-			IECore::PrimitiveVariable::Interpolation vertexInterpolation = IECore::PrimitiveVariable::FaceVarying,
-			IECore::PrimitiveVariable::Interpolation primitiveInterpolation = IECore::PrimitiveVariable::Uniform,
-			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,
-			IECore::PrimitiveVariable::Interpolation detailInterpolation = IECore::PrimitiveVariable::Constant
-		) const;
 		
 	private :
 			
@@ -123,6 +118,6 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 
 } // namespace IECoreHoudini
 
-#include "ToHoudiniGeometryConverter.inl"
+#include "ToHoudiniAttribConverter.inl"
 
-#endif // IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_H
+#endif // IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H

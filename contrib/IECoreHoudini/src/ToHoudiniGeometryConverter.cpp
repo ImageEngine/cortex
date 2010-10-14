@@ -34,9 +34,9 @@
 
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/DespatchTypedData.h"
 
 #include "Convert.h"
+#include "ToHoudiniAttribConverter.h"
 #include "ToHoudiniGeometryConverter.h"
 
 using namespace IECore;
@@ -105,7 +105,7 @@ void ToHoudiniGeometryConverter::transferAttribs(
 	}
 	
 	size_t vertCount = 0;
-	VertexList vertices( numVerts );
+	ToHoudiniAttribConverter::VertexList vertices( numVerts );
 	for ( size_t i=0; i < numPrims; i++ )
 	{
 		GEO_Primitive *prim = (*newPrims)[i];
@@ -134,33 +134,48 @@ void ToHoudiniGeometryConverter::transferAttribs(
 		else if ( it->second.interpolation == detailInterpolation )
  		{
 			// add detail attribs
-			TransferDetailAttrib func( geo, it->first );
-			despatchTypedData<TransferDetailAttrib, TypeTraits::IsDetailGbAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
+			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+			if ( !converter )
+			{
+				continue;
+			}
+			
+			converter->convert( it->first, geo );
 	 	}
 		else if ( it->second.interpolation == pointInterpolation )
 		{
 			// add point attribs
-			TransferAttrib<GEO_PointList> func( geo, newPoints, it->first, GEO_POINT_DICT );
-			despatchTypedData<TransferAttrib<GEO_PointList>, TypeTraits::IsVectorGbAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
+ 			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+ 			if ( !converter )
+ 			{
+ 				continue;
+ 			}
+ 			
+ 			converter->convert( it->first, geo, newPoints );
 		}
 		else if ( it->second.interpolation == primitiveInterpolation )
 		{
 			// add primitive attribs
-			TransferAttrib<GEO_PrimList> func( geo, newPrims, it->first, GEO_PRIMITIVE_DICT );
-			despatchTypedData<TransferAttrib<GEO_PrimList>, TypeTraits::IsVectorGbAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
+			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+ 			if ( !converter )
+ 			{
+ 				continue;
+ 			}
+ 			
+ 			converter->convert( it->first, geo, newPrims );
 		}
 		else if ( it->second.interpolation == vertexInterpolation )
 		{
 			// add vertex attribs
-			TransferAttrib<VertexList> func( geo, &vertices, it->first, GEO_VERTEX_DICT );
-			despatchTypedData<TransferAttrib<VertexList>, TypeTraits::IsVectorGbAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
+			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+ 			if ( !converter )
+ 			{
+ 				continue;
+ 			}
+ 			
+ 			converter->convert( it->first, geo, &vertices );
 		}
 	}
-}
-
-ToHoudiniGeometryConverter::TransferDetailAttrib::TransferDetailAttrib( GU_Detail *geo, std::string name )
-	: m_geo( geo ), m_name( name )
-{
 }
 
 /////////////////////////////////////////////////////////////////////////////////
