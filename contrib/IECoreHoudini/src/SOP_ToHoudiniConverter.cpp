@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -34,6 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 // Houdini
+#include "GB/GB_AttributeRef.h"
 #include <OP/OP_OperatorTable.h>
 #include <OP/OP_Operator.h>
 #include <UT/UT_Interrupt.h>
