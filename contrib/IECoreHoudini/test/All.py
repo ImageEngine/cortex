@@ -53,6 +53,7 @@ from ToHoudiniConverterOp import *
 from FromHoudiniCurvesConverter import *
 from ToHoudiniCurvesConverter import *
 from CobIOTranslator import *
+from InterpolatedCacheReader import *
 
 if __name__ == "__main__":
     unittest.main()

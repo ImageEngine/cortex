@@ -31,4 +31,13 @@ soptoolutils.genericTool(kwargs, 'ieProceduralHolder')]]></script>
 soptoolutils.genericTool(kwargs, 'ieToHoudiniConverter')]]></script>
   </tool> 
 
+  <!-- Interpolated Cache Reader -->
+  <tool name="cortex_interpolated_cache_reader" label="Interpolated Cache Reader" icon="SOP_ieInterpolatedCacheReader">
+    <toolMenuContext name="network">
+      <contextNetType>SOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieInterpolatedCacheReader')]]></script>
+  </tool> 
+
 </shelfDocument>

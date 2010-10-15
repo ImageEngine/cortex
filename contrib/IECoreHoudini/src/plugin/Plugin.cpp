@@ -48,6 +48,7 @@
 #include "SOP_OpHolder.h"
 #include "SOP_ProceduralHolder.h"
 #include "SOP_ToHoudiniConverter.h"
+#include "SOP_InterpolatedCacheReader.h"
 #include "GEO_CobIOTranslator.h"
 #include "GR_Cortex.h"
 
@@ -92,10 +93,18 @@ void newSopOperator(OP_OperatorTable *table)
     				1, // Max # of sources
     				SOP_ToHoudiniConverter::myVariables, // Local variables
     				OP_FLAG_GENERATOR) ); // Flag it as generator
+	
+	table->addOperator(
+		new OP_Operator(
+			"ieInterpolatedCacheReader", "Interpolated Cache Reader",
+			SOP_InterpolatedCacheReader::create, SOP_InterpolatedCacheReader::parameters, 1, 1, 0
+		)
+	);
 
 	table->addOpHidden( "ieOpHolder" );
 	table->addOpHidden( "ieProceduralHolder" );
 	table->addOpHidden( "ieToHoudiniConverter" );
+	table->addOpHidden( "ieInterpolatedCacheReader" );
 }
 
 /// Declare our new Render Hooks
