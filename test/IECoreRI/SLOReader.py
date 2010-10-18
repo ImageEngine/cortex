@@ -81,7 +81,10 @@ class TestSLOReader( unittest.TestCase ) :
 		s = r.read()
 		self.assertEqual( s.name, "spotlight" )
 		self.assertEqual( s.type, "light" )
-		self.assertEqual( len( s.parameters ), 12 )
+		if "__category" in s.parameters :
+			self.assertEqual( len( s.parameters ), 13 )
+		else :
+			self.assertEqual( len( s.parameters ), 12 )
 
 		self.assertExpectedParams ( s,
 			[
