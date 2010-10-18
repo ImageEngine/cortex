@@ -86,7 +86,7 @@ class ProceduralThreadingTest( unittest.TestCase ) :
 	#
 	# Or :
 	#
-	# ensure that threading has been enabled in python by creating a dummy thread prior to
+	# ensure that threading has been enabled in python by calling IECore.initThreads prior to
 	# rendering.
 	#
 	def performRender( self, withMultiThreading, withParameterisedProcedural ) :
@@ -107,6 +107,7 @@ class ProceduralThreadingTest( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
+		r.setOption( "ri:pixelSamples", IECore.V2i( 16 ) )
 		
 		with IECore.WorldBlock( r ) :
 			
