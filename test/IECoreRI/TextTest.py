@@ -51,6 +51,7 @@ class TextTest( unittest.TestCase ) :
 		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test" ) )
 		r.setOption( "searchPath:font", IECore.StringData( "test/IECore/data/fonts" ) )
 		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test/IECore/data/fonts" ) )
+		r.setOption( "ri:pixelsamples", IECore.V2i( 16 ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
