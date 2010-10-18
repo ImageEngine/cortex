@@ -109,6 +109,18 @@ class SXRendererTest( unittest.TestCase ) :
 			"s" : s,
 			"t" : t,
 		} )
+	
+	def __assertVectorDataAlmostEqual( self, data1, data2 ) :
+	
+		self.assertEqual( len( data1 ), len( data2 ) )
+		self.assertEqual( data1.typeName(), data2.typeName() )
+		
+		if isinstance( data1, IECore.Color3fVectorData ) :
+			for i in range( 0, len( data1 ) ) :
+				self.failUnless( data1[i].equalWithAbsError( data2[i], 0.000001 ) )
+		else : 
+			for i in range( 0, len( data1 ) ) :
+				self.assertAlmostEqual( data1[i], data2[i], 6 )
 		
 	def test( self ) :
 
@@ -137,10 +149,10 @@ class SXRendererTest( unittest.TestCase ) :
 		self.failUnless( "P" in s )
 		self.failUnless( "N" in s )
 		
-		self.assertEqual( s["outputFloat"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowFloat.cob" ).read() )
-		self.assertEqual( s["outputColor"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowColor.cob" ).read() )
-		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowCI.cob" ).read() )
-		self.assertEqual( s["Oi"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowOI.cob" ).read() )
+		self.__assertVectorDataAlmostEqual( s["outputFloat"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowFloat.cob" ).read() )
+		self.__assertVectorDataAlmostEqual( s["outputColor"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowColor.cob" ).read() )
+		self.__assertVectorDataAlmostEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowCI.cob" ).read() )
+		self.__assertVectorDataAlmostEqual( s["Oi"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowOI.cob" ).read() )
 	
 	def testSplineParameter( self ) :
 	
@@ -563,6 +575,17 @@ class SXRendererTest( unittest.TestCase ) :
 		cowCI =	IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowCI.cob" ).read()
 		cowOI = IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowOI.cob" ).read()
 		
+		# check that the first set of results is close enough to the expected results.
+		# we allow some small variation as 3delight's noise routines seem to yield
+		# veryvery small differences between some versions.
+		self.__assertVectorDataAlmostEqual( results[0]["outputFloat"], cowFloat )
+		self.__assertVectorDataAlmostEqual( results[0]["outputColor"], cowColor )
+		self.__assertVectorDataAlmostEqual( results[0]["Ci"], cowCI )
+		self.__assertVectorDataAlmostEqual( results[0]["Oi"], cowOI )
+		
+		# check that all results are exactly equal to the first set. even if we
+		# accept small variations between different 3delight versions we don't accept
+		# variation within one version.
 		for s in results :
 		
 			self.assertEqual( len( s ), 6 )
@@ -572,12 +595,12 @@ class SXRendererTest( unittest.TestCase ) :
 			self.failUnless( "Oi" in s )
 			self.failUnless( "P" in s )
 			self.failUnless( "N" in s )
-
-			self.assertEqual( s["outputFloat"], cowFloat )
-			self.assertEqual( s["outputColor"], cowColor )
-			self.assertEqual( s["Ci"], cowCI )
-			self.assertEqual( s["Oi"], cowOI )
-
+					
+			self.assertEqual( s["outputFloat"], results[0]["outputFloat"] )
+			self.assertEqual( s["outputColor"], results[0]["outputColor"] )
+			self.assertEqual( s["Ci"], results[0]["Ci"] )
+			self.assertEqual( s["Oi"], results[0]["Oi"] )
+	
 	def testGetVar( self ) :
 	
 		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxGetVarTest.sdl test/IECoreRI/shaders/sxGetVarTest.sl" ), 0 )
