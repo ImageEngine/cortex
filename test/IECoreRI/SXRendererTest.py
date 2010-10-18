@@ -373,7 +373,9 @@ class SXRendererTest( unittest.TestCase ) :
 		self.assertEqual( data, IECore.Reader.create( "test/IECoreRI/data/sxOutput/shadePlaneCompoundData.cob" ).read() )
 		
 		image = r.shadePlaneToImage( IECore.V2i( 64, 64 ) )
-		self.assertEqual( image, IECore.Reader.create( "test/IECoreRI/data/sxOutput/shadePlaneImage.exr" ).read() )
+		expectedImage = IECore.Reader.create( "test/IECoreRI/data/sxOutput/shadePlaneImage.exr" ).read()
+
+		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0 ), IECore.BoolData( False ) )
 	
 	def testWrongType( self ) :
 	
