@@ -46,10 +46,10 @@ if IEEnv.platformOS() == "osx104" or IEEnv.platformOS() == "osx105" :
 elif IEEnv.platform() == "cent5.x86_64" :
 
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.49", "PYTHON_VERSION=2.6" ] )
-	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.62", "PYTHON_VERSION=2.6" ] )
+	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.68", "PYTHON_VERSION=2.6" ] )
 	build( [ "APP=maya", "APP_VERSION=2010", "DL_VERSION=9.0.49", "PYTHON_VERSION=2.6" ] )
 	
-	build( [ "COMPILER_VERSION=3.4.6", "DL_VERSION=9.0.15", "PYTHON_VERSION=2.5" ] ) # for c++ libraries loaded from Nuke.
+	build( [ "COMPILER_VERSION=3.4.6", "DL_VERSION=9.0.49", "PYTHON_VERSION=2.5" ] ) # for c++ libraries loaded from Nuke.
 	build( [ "APP=nuke", "APP_VERSION=6.1v1", "PYTHON_VERSION=2.5" ] )
 	build( [ "APP=houdini", "APP_VERSION=11.0.504", "PYTHON_VERSION=2.5" ] )
 	
