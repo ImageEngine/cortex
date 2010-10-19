@@ -37,6 +37,8 @@
 
 #include <map>
 
+#include "OpenEXR/ImathMatrix.h"
+
 #include "IECoreGL/IECoreGL.h"
 
 #include "IECoreMaya/ParameterisedHolder.h"
@@ -88,7 +90,8 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		virtual bool isBounded() const;
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-
+		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
+		
 		virtual void componentToPlugs( MObject &component, MSelectionList &selectionList ) const;
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
 
@@ -105,6 +108,36 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		static MObject aDrawBound;
 		static MObject aDrawCoordinateSystems;
 		static MObject aProceduralComponents;
+		
+		static MObject aComponentQueries;
+		
+		static MObject aComponentTransform;
+		static MObject aComponentTranslate;
+		static MObject aComponentTranslateX;
+		static MObject aComponentTranslateY;
+		static MObject aComponentTranslateZ;
+		static MObject aComponentRotate;
+		static MObject aComponentRotateX;
+		static MObject aComponentRotateY;
+		static MObject aComponentRotateZ;
+		static MObject aComponentScale;
+		static MObject aComponentScaleX;
+		static MObject aComponentScaleY;
+		static MObject aComponentScaleZ;
+		
+		static MObject aComponentBound;
+		static MObject aComponentBoundMin;
+		static MObject aComponentBoundMinX;
+		static MObject aComponentBoundMinY;
+		static MObject aComponentBoundMinZ;
+		static MObject aComponentBoundMax;
+		static MObject aComponentBoundMaxX;
+		static MObject aComponentBoundMaxY;
+		static MObject aComponentBoundMaxZ;
+		static MObject aComponentBoundCenter;
+		static MObject aComponentBoundCenterX;
+		static MObject aComponentBoundCenterY;
+		static MObject aComponentBoundCenterZ;
 
 	private :
 
@@ -115,11 +148,13 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		IECoreGL::ScenePtr m_scene;
 		IECoreGL::RendererPtr m_lastRenderer;
 		
+		/// \todo Use a boost::multi_index jobby to replace both these and the ClassData. It could store a nice
+		/// struct with named fields instead of the hard to understand std::pairs.		
 		typedef std::map<IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr > > ComponentsMap;
 		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;
 
 		void buildComponents();
-		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group );
+		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, const Imath::M44f &parentTransform );
 
 		ComponentsMap m_componentsMap;
 		ComponentToGroupMap m_componentToGroupMap;

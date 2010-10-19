@@ -178,3 +178,35 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		IECoreMaya.ToMayaGroupConverter( world ).convert( parent )
 		
 		return maya.cmds.listRelatives( parent, fullPath=True )[-1]
+	
+	## Returns a path to a plug which outputs the transform for the specified component. The plug
+	# will have "componentTranslate", "componentRotate" and "componentScale" children with the appropriate values.
+	def componentTransformPlugPath( self, componentName ) :
+	
+		i = self.__componentIndex( componentName )
+		return self.fullPathName() + ".componentTransform[" + str( i ) + "]"
+
+	## Returns a path to a plug which outputs the bounding box of the specified component. The 
+	# plug will have "componentBoundMin", "componentBoundMax" and "componentBoundCenter" children with the
+	# appropriate values.
+	def componentBoundPlugPath( self, componentName ) :
+	
+		i = self.__componentIndex( componentName )
+		return self.fullPathName() + ".componentBound[" + str( i ) + "]"
+
+	def __componentIndex( self, componentName ) :
+	
+		fullPathName = self.fullPathName()
+
+		queryIndices = maya.cmds.getAttr( fullPathName + ".componentQueries", multiIndices=True )
+		if not queryIndices :
+			i = 0
+		else :
+			for i in queryIndices :
+				if maya.cmds.getAttr( fullPathName + ".componentQueries[" + str( i ) + "]" ) == componentName :
+					return i
+			i += 1
+			
+		maya.cmds.setAttr( fullPathName + ".componentQueries[" + str( i ) + "]", componentName, type="string" )
+		return i
+				

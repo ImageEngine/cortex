@@ -89,6 +89,28 @@ def _dagMenu( menu, proceduralHolder ) :
 			radialPosition = "E",
 			command = IECore.curry( __printSelectedComponents, proceduralHolder )
 		)
+		
+	if fnPH.selectedComponentNames() :
+		
+		maya.cmds.menuItem(
+			label = "Create Locator",
+			radialPosition = "SE",
+			subMenu = True,
+		)
+		
+		maya.cmds.menuItem(
+			label = "At Centre",
+			radialPosition = "E",
+			command = IECore.curry( __createLocatorAtCentre, proceduralHolder ),
+		)
+		
+		maya.cmds.menuItem(
+			label = "With Transform",
+			radialPosition = "SE",
+			command = IECore.curry( __createLocatorWithTransform, proceduralHolder ),
+		)
+		
+	maya.cmds.setParent( menu, menu=True )	
 	
 	maya.cmds.menuItem(
 		label = "Convert To Geometry",
@@ -145,3 +167,31 @@ def _convertToGeometry( proceduralHolder, *unused ) :
 	fnP.convertToGeometry( parent=geometryParent )	
 
 	maya.cmds.select( geometryParent, replace=True )
+
+def __createLocatorAtCentre( proceduralHolder, *unused ) :
+	
+	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
+	selectedNames = fnPH.selectedComponentNames()
+	
+	proceduralParent = maya.cmds.listRelatives( fnPH.fullPathName(), parent=True, fullPath=True )[0]
+
+	for name in selectedNames :
+		outputPlug = fnPH.componentBoundPlugPath( name )
+		locator = maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + "Center" )[0]
+		maya.cmds.connectAttr( outputPlug + ".componentBoundCenter", locator + ".translate" )
+		maya.cmds.parent( locator, proceduralParent, relative=True )
+
+def __createLocatorWithTransform( proceduralHolder, *unused ) :
+	
+	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
+	selectedNames = fnPH.selectedComponentNames()
+
+	proceduralParent = maya.cmds.listRelatives( fnPH.fullPathName(), parent=True, fullPath=True )[0]
+	
+	for name in selectedNames :
+		outputPlug = fnPH.componentTransformPlugPath( name )
+		locator = maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + "Transform" )[0]
+		maya.cmds.connectAttr( outputPlug + ".componentTranslate", locator + ".translate" )
+		maya.cmds.connectAttr( outputPlug + ".componentRotate", locator + ".rotate" )
+		maya.cmds.connectAttr( outputPlug + ".componentScale", locator + ".scale" )
+		maya.cmds.parent( locator, proceduralParent, relative=True )

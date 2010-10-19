@@ -31,6 +31,9 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
+from __future__ import with_statement
+
 import os
 import maya.cmds
 import maya.OpenMaya
@@ -55,6 +58,13 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 						"",
 						1.0,
 					),
+					
+					IECore.V3fParameter(
+						"translate",
+						"",
+						IECore.V3f( 0 ),
+					),
+					
 				]
 			
 			)
@@ -66,7 +76,13 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 			
 		def doRender( self, renderer, args ) :
 			
-			renderer.sphere( args["radius"].value, -1, 1, 360, {} )
+			with IECore.AttributeBlock( renderer ) :
+			
+				renderer.concatTransform( IECore.M44f.createTranslated( args["translate"].value ) )
+				
+				renderer.setAttribute( "name", IECore.StringData( "mySphere" ) )
+				
+				renderer.sphere( args["radius"].value, -1, 1, 360, {} )
 			
 		def doRenderState( self, renderer, args ) :
 			
@@ -127,6 +143,40 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 		fnPH.setNodeValues()
 	
 		self.assertEqual( fnPH.componentNames(), set( [ u'unnamed' ] ) )	
+	
+	def testComponentTransforms( self ) :
+	
+		node = maya.cmds.createNode( "ieProceduralHolder" )
+
+		fnPH = IECoreMaya.FnProceduralHolder( node )
+		fnPH.setParameterised( self.SphereProcedural() )
+		
+		transformPlug = fnPH.componentTransformPlugPath( "mySphere" )
+		self.failUnless( maya.cmds.objExists( transformPlug ) )
+		
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentTranslate" ), [ ( 0, 0, 0 ) ] )
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentRotate" ), [ ( 0, 0, 0 ) ] )
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentScale" ), [ ( 1, 1, 1 ) ] )
+		
+		boundPlug = fnPH.componentBoundPlugPath( "mySphere" )
+		self.failUnless( maya.cmds.objExists( boundPlug ) )
+		
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMin" ), [ ( -1, -1, -1 ) ] )
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMax" ), [ ( 1, 1, 1 ) ] )
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundCenter" ), [ ( 0, 0, 0 ) ] )
+		
+		procedural = fnPH.getProcedural()
+		procedural["translate"].setValue( IECore.V3f( 2, 0, 0 ) )
+		procedural["radius"].setNumericValue( 2 )
+		fnPH.setNodeValues()
+		
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentTranslate" ), [ ( 2, 0, 0 ) ] )
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentRotate" ), [ ( 0, 0, 0 ) ] )
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentScale" ), [ ( 1, 1, 1 ) ] )
+		
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMin" ), [ ( 0, -2, -2 ) ] )
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMax" ), [ ( 4, 2, 2 ) ] )
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundCenter" ), [ ( 2, 0, 0 ) ] )
 							
 if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
