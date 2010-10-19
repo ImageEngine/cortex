@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//#include "IECore/SimpleTypedData.h"
-
 #include "ToHoudiniNumericAttribConverter.h"
 
 using namespace IECore;
