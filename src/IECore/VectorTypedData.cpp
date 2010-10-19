@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -87,23 +87,38 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	void TNAME::save( Object::SaveContext *context ) const											\
 	{																								\
 		Data::save( context );																		\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );				\
+		IndexedIOInterfacePtr container = context->rawContainer();									\
 		container->write( "value", &(readable()[0]), readable().size() );							\
 	}																								\
 	template<>																						\
 	void TNAME::load( LoadContextPtr context )														\
 	{																								\
 		Data::load( context );																		\
-		unsigned int v = 0;																			\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );				\
-		IndexedIO::Entry e = container->ls( "value" );												\
-		writable().resize( e.arrayLength() );														\
-		if ( e.arrayLength() ) \
-		{ \
-			TNAME::ValueType::value_type *p = &(writable()[0]); \
-			assert( p ); \
-			container->read( "value", p, e.arrayLength() ); \
-		} \
+		try																							\
+		{																							\
+			IndexedIOInterfacePtr container = context->rawContainer();								\
+			IndexedIO::Entry e = container->ls( "value" );											\
+			writable().resize( e.arrayLength() );													\
+			if ( e.arrayLength() ) 																	\
+			{ 																						\
+				TNAME::ValueType::value_type *p = &(writable()[0]); 								\
+				assert( p ); 																		\
+				container->read( "value", p, e.arrayLength() ); 									\
+			} 																						\
+		}																							\
+		catch( ... )																				\
+		{																							\
+			unsigned int v = 0;																		\
+			IndexedIOInterfacePtr container = context->container( staticTypeName(), v );			\
+			IndexedIO::Entry e = container->ls( "value" );											\
+			writable().resize( e.arrayLength() );													\
+			if ( e.arrayLength() ) 																	\
+			{ 																						\
+				TNAME::ValueType::value_type *p = &(writable()[0]); 								\
+				assert( p ); 																		\
+				container->read( "value", p, e.arrayLength() ); 									\
+			} 																						\
+		}																							\
 	}																								\
 
 #define IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )								\
@@ -111,7 +126,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	void TNAME::save( SaveContext *context ) const													\
 	{																								\
 		Data::save( context );																		\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );				\
+		IndexedIOInterfacePtr container = context->rawContainer();									\
 		assert( ( sizeof( TNAME::ValueType::value_type ) / sizeof( TNAME::BaseType ) ) == N );		\
 		container->write( "value", baseReadable(), baseSize() );									\
 	}																								\
@@ -119,16 +134,31 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	void TNAME::load( LoadContextPtr context )														\
 	{																								\
 		Data::load( context );																		\
-		unsigned int v = 0;																			\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );				\
-		IndexedIO::Entry e = container->ls( "value" );												\
-		writable().resize( e.arrayLength() / N );													\
-		if ( e.arrayLength() ) \
-		{ \
-			TNAME::BaseType *p = baseWritable(); \
-			assert( p ) ; \
-			container->read( "value", p, e.arrayLength() ); \
-		} \
+		try																							\
+		{																							\
+			IndexedIOInterfacePtr container = context->rawContainer();								\
+			IndexedIO::Entry e = container->ls( "value" );											\
+			writable().resize( e.arrayLength() / N );												\
+			if ( e.arrayLength() ) 																	\
+			{ 																						\
+				TNAME::BaseType *p = baseWritable(); 												\
+				assert( p ) ; 																		\
+				container->read( "value", p, e.arrayLength() ); 									\
+			} 																						\
+		}																							\
+		catch( ... )																				\
+		{																							\
+			unsigned int v = 0;																		\
+			IndexedIOInterfacePtr container = context->container( staticTypeName(), v );			\
+			IndexedIO::Entry e = container->ls( "value" );											\
+			writable().resize( e.arrayLength() / N );												\
+			if ( e.arrayLength() ) 																	\
+			{ 																						\
+				TNAME::BaseType *p = baseWritable(); 												\
+				assert( p ) ; 																		\
+				container->read( "value", p, e.arrayLength() ); 									\
+			} 																						\
+		}																							\
 	}
 
 #define IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( TNAME, TID )			\
