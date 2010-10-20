@@ -81,7 +81,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testFactory( self ) :
 		box = self.createBox()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.PointsPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )

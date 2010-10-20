@@ -82,8 +82,18 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// type will be returned - the default value allows any suitable converter to be
 		/// created. If no matching converters exist then returns 0.
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, IECore::TypeId resultType=IECore::InvalidTypeId );
+		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, const std::set<IECore::TypeId> &resultTypes );
 		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
+		
+		enum Convertability
+		{
+			Inapplicable = 0,
+			Ideal,
+			Suitable,
+			Admissible,
+			InvalidValue,
+		};
 		
 	protected :
 
@@ -100,8 +110,9 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const = 0;
 		
 		typedef FromHoudiniGeometryConverterPtr (*CreatorFn)( const GU_DetailHandle &handle );
+		typedef Convertability (*ConvertabilityFn)( const GU_DetailHandle &handle );
 
-		static void registerConverter( IECore::TypeId resultType, bool isDefault, CreatorFn creator );
+		static void registerConverter( IECore::TypeId resultType, CreatorFn creator, ConvertabilityFn canConvert );
 
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.
@@ -109,9 +120,10 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		class Description
 		{
 			public :
-				Description( IECore::TypeId resultType, bool isDefault = false );
+				Description( IECore::TypeId resultType );
 			private :
 				static FromHoudiniGeometryConverterPtr creator( const GU_DetailHandle &handle );
+				static Convertability canConvert( const GU_DetailHandle &handle );
 		};
 		
 		/// extracts the GU_DetailHandle from a SOP_Node
@@ -168,7 +180,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			bool operator < ( const Types &other ) const;
 		};
 
-		typedef std::map<Types, CreatorFn> TypesToFnsMap;
+		typedef std::map<Types, std::pair<CreatorFn, ConvertabilityFn> > TypesToFnsMap;
 		static TypesToFnsMap *typesToFns();
 };
 

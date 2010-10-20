@@ -464,14 +464,48 @@ void FromHoudiniGeometryConverter::transferVertexAttribs( const GU_Detail *geo, 
 
 FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_DetailHandle &handle, IECore::TypeId resultType )
 {
-	const TypesToFnsMap *m = typesToFns();
-
-	TypesToFnsMap::const_iterator it = m->find( Types( resultType ) );
-	if ( it != m->end() )
-	{
-		return it->second( handle );
-	}
+	std::set<IECore::TypeId> types;
+	types.insert( resultType );
 	
+	return create( handle, types );
+}
+
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_DetailHandle &handle, const std::set<IECore::TypeId> &resultTypes )
+{
+	const TypesToFnsMap *m = typesToFns();
+	
+	Convertability best = InvalidValue;
+	TypesToFnsMap::const_iterator bestIt = m->end();
+	
+	for ( std::set<IECore::TypeId>::iterator typeIt=resultTypes.begin(); typeIt != resultTypes.end(); typeIt++ )
+	{
+		const std::set<IECore::TypeId> &derivedTypes = RunTimeTyped::derivedTypeIds( *typeIt );
+
+		// find the best possible converter
+		for ( TypesToFnsMap::const_iterator it=m->begin(); it != m->end(); it ++ )
+		{
+			if ( *typeIt != IECore::InvalidTypeId && *typeIt != it->first.resultType && find( derivedTypes.begin(), derivedTypes.end(), it->first.resultType ) == derivedTypes.end() )
+			{
+				// we want something specific, but this converter won't give it to us, nor something that derives from it
+				continue;
+			}
+
+			Convertability current = it->second.second( handle );
+			if ( current && current < best )
+			{
+				best = current;
+				bestIt = it;
+			}
+		}
+	}
+
+	// return the best converter if it was found
+	if ( bestIt != m->end() )
+	{
+		return bestIt->second.first( handle );
+	}
+
+	// there were no suitable converters
 	return 0;
 }
 
@@ -480,15 +514,10 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_
 	return create( handle( sop ), resultType );
 }
 
-void FromHoudiniGeometryConverter::registerConverter( IECore::TypeId resultType, bool isDefault, CreatorFn creator )
+void FromHoudiniGeometryConverter::registerConverter( IECore::TypeId resultType, CreatorFn creator, ConvertabilityFn canConvert )
 {
 	TypesToFnsMap *m = typesToFns();
-	m->insert( TypesToFnsMap::value_type( Types( resultType ), creator ) );
-	
-	if ( isDefault )
-	{
-		m->insert( TypesToFnsMap::value_type( Types( IECore::InvalidTypeId ), creator ) );
-	}
+	m->insert( TypesToFnsMap::value_type( Types( resultType ), std::pair<CreatorFn, ConvertabilityFn>( creator, canConvert ) ) );
 }
 
 FromHoudiniGeometryConverter::TypesToFnsMap *FromHoudiniGeometryConverter::typesToFns()

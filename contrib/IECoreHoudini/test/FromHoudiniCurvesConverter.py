@@ -118,7 +118,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def testFactory( self ) :
 		curve = self.createCurve()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, IECore.TypeId.CurvesPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )

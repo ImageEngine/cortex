@@ -52,8 +52,11 @@ class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryCo
 
 		FromHoudiniPolygonsConverter( const GU_DetailHandle &handle );
 		FromHoudiniPolygonsConverter( const SOP_Node *sop );
-
+		
 		virtual ~FromHoudiniPolygonsConverter();
+
+		/// Determines if the given GU_Detail can be converted
+		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
 	
 	protected :
 		

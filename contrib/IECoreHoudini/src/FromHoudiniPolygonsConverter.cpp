@@ -57,6 +57,23 @@ FromHoudiniPolygonsConverter::~FromHoudiniPolygonsConverter()
 {
 }
 
+FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canConvert( const GU_Detail *geo )
+{
+	const GEO_PrimList &primitives = geo->primitives();
+	
+	size_t numPrims = primitives.entries();
+	for ( size_t i=0; i < numPrims; i++ )
+	{
+		const GEO_Primitive *prim = primitives( i );
+		if ( !( prim->getPrimitiveId() & GEOPRIMPOLY ) )
+		{
+			return Inapplicable;
+		}
+	}
+	
+	return Ideal;
+}
+
 PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const
 {
 	const GEO_PrimList &primitives = geo->primitives();

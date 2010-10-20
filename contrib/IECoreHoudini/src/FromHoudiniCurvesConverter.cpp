@@ -62,6 +62,43 @@ FromHoudiniCurvesConverter::~FromHoudiniCurvesConverter()
 {
 }
 
+FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConvert( const GU_Detail *geo )
+{
+	const GEO_PrimList &primitives = geo->primitives();
+	
+	size_t numPrims = primitives.entries();
+	if ( !numPrims || !( primitives[0]->getPrimitiveId() & GEOCURVE ) )
+	{
+		return Inapplicable;
+	}
+	
+	const GEO_Curve *firstCurve = (const GEO_Curve*)primitives[0];
+	bool periodic = firstCurve->isClosed();
+	unsigned order = firstCurve->getOrder();
+	
+	for ( size_t i=0; i < numPrims; i++ )
+	{
+		const GEO_Primitive *prim = primitives( i );
+		if ( !( prim->getPrimitiveId() & GEOCURVE ) )
+		{
+			return Inapplicable;
+		}
+		
+		const GEO_Curve *curve = (const GEO_Curve*)prim;
+		if ( curve->getOrder() != order )
+		{
+			return Inapplicable;
+		}
+		
+		if ( curve->isClosed() != periodic )
+		{
+			return Inapplicable;
+		}
+	}
+	
+	return Ideal;
+}
+
 PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const
 {
 	const GEO_PrimList &primitives = geo->primitives();

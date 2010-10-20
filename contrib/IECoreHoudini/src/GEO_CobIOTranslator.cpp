@@ -35,7 +35,6 @@
 #include "IECore/ObjectReader.h"
 #include "IECore/ObjectWriter.h"
 
-#include "CoreHoudini.h"
 #include "GEO_CobIOTranslator.h"
 #include "FromHoudiniGeometryConverter.h"
 #include "ToHoudiniGeometryConverter.h"
@@ -104,6 +103,7 @@ bool GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_mag
 
 int GEO_CobIOTranslator::fileSave( const GEO_Detail *geo, ostream &os )
 {
+	return 0;
 }
 
 int GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName )
@@ -113,7 +113,13 @@ int GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, ostream &os, con
 	GU_DetailHandle handle;
 	handle.allocateAndSet( (GU_Detail*)geo, false );
 	
-	ObjectPtr object = CoreHoudini::convertFromHoudini( handle );
+	FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
+	if ( !converter )
+	{
+		return false;
+	}
+	
+	ObjectPtr object = converter->convert();
 	if ( !object )
 	{
 		return false;

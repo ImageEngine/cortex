@@ -57,6 +57,7 @@
 #include <IECore/CompoundParameter.h>
 #include <IECore/Object.h>
 #include <IECore/NullObject.h>
+#include "IECore/ObjectParameter.h"
 #include <IECore/Op.h>
 #include <IECore/TypedParameter.h>
 #include <IECore/Parameterised.h>
@@ -489,7 +490,7 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 					}
 					catch (const IECore::Exception &e)
 					{
-				    	addError( SOP_MESSAGE, e.what() );
+						addError( SOP_MESSAGE, e.what() );
 					}
 				}
 			}
@@ -498,23 +499,19 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 				IECore::ObjectPtr converted;
 				try
 				{
-					if ( input_parameter->typeId()==IECore::ObjectParameterTypeId ||
-						input_parameter->typeId()==IECore::PrimitiveParameterTypeId )
+					IECore::ObjectParameterPtr objectParameter = IECore::runTimeCast<IECore::ObjectParameter>( input_parameter );
+					if ( objectParameter )
 					{
-						converted = CoreHoudini::convertFromHoudini( gdp_handle );
-					}
-					else // specific parameter type
-					{
-						FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( gdp_handle, input_parameter->getValue()->typeId() );
+						FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( gdp_handle, objectParameter->validTypes() );
 						if ( converter )
 						{
 							converted = converter->convert();
 						}
 					}
 				}
-				catch (std::runtime_error)
+				catch (std::runtime_error &e)
 				{
-			    	addError( SOP_MESSAGE, "Could not convert input geometry!"  );
+					addError( SOP_MESSAGE, e.what() );
 				}
 
 				if ( converted )
@@ -525,12 +522,13 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 					}
 					catch (const IECore::Exception &e)
 					{
-				    	addError( SOP_MESSAGE, e.what() );
+						addError( SOP_MESSAGE, e.what() );
 					}
 				}
 			}
 		}
-	    gdp_handle.unlock( input_gdp );
+		
+		gdp_handle.unlock( input_gdp );
 	}
 
 	// update parameters from our op & flag as dirty if necessary

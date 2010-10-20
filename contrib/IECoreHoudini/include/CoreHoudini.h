@@ -66,9 +66,6 @@ namespace IECoreHoudini
 			/// Run misc python command
 			static boost::python::object evalPython( const std::string &cmd );
 
-			/// create a converter, trying to work out the appropriate type (points/mesh)
-			static IECore::ObjectPtr convertFromHoudini( GU_DetailHandle detailHandle );
-
 		private:
 			/// our global context
 			static boost::python::object g_globalContext;

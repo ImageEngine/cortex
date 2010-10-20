@@ -81,7 +81,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testFactory( self ) :
 		box = self.createBox()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
@@ -318,7 +318,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testPointAttributes( self ) :
 		attr = self.testSetupAttributes()
 		
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		attr.parm("value1").set(123.456)
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.FloatVectorData )
 		self.assert_( result["test_attribute"].data[0] > 123.0 )
@@ -327,7 +327,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set(1) # integer
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.IntVectorData )
 		self.assertEqual( result["test_attribute"].data[0], 123 )
 		self.assertEqual( result["test_attribute"].data.size(), 100 )
@@ -337,7 +337,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		attr.parm("type").set(0) # float
 		attr.parm("size").set(2) # 2 elementS
 		attr.parm("value2").set(456.789)
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2fVectorData )
 		self.assertEqual( result["test_attribute"].data[0], IECore.V2f( 123.456, 456.789 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 100 )
@@ -345,7 +345,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set(1) # int
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2iVectorData )
 		self.assertEqual( result["test_attribute"].data[0], IECore.V2i( 123, 456 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 100 )
@@ -355,7 +355,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		attr.parm("type").set(0) # float
 		attr.parm("size").set(3) # 3 elements
 		attr.parm("value3").set(999.999)
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3fVectorData )
 		self.assertEqual( result["test_attribute"].data[0],IECore.V3f( 123.456, 456.789, 999.999 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 100 )
@@ -363,7 +363,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set(1) # int
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3iVectorData )
 		self.assertEqual( result["test_attribute"].data[0], IECore.V3i( 123, 456, 999 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 100 )
@@ -375,7 +375,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		attr = self.testSetupAttributes()
 		attr.parm("class").set(0) # detail attribute
 		
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		attr.parm("value1").set(123.456)
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.FloatData )
 		self.assert_( result["test_attribute"].data > IECore.FloatData( 123.0 ) )
@@ -383,7 +383,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set(1) # integer
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.IntData )
 		self.assertEqual( result["test_attribute"].data, IECore.IntData( 123 ) )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
@@ -392,14 +392,14 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		attr.parm("type").set(0) # float
 		attr.parm("size").set(2) # 2 elementS
 		attr.parm("value2").set(456.789)
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2fData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V2f( 123.456, 456.789 ) )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set(1) # int
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2iData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V2i( 123, 456 ) )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
@@ -408,14 +408,14 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		attr.parm("type").set(0) # float
 		attr.parm("size").set(3) # 3 elements
 		attr.parm("value3").set(999.999)
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3fData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V3f( 123.456, 456.789, 999.999 ) )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set(1) # int
-		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3iData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V3i( 123, 456, 999 ) )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )

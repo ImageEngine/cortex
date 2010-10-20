@@ -54,6 +54,9 @@ class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConv
 		FromHoudiniCurvesConverter( const SOP_Node *sop );
 
 		virtual ~FromHoudiniCurvesConverter();
+		
+		/// Determines if the given GU_Detail can be converted
+		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
 	
 	protected :
 		

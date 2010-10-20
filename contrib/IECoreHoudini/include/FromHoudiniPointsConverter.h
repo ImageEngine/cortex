@@ -52,8 +52,11 @@ class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConv
 
 		FromHoudiniPointsConverter( const GU_DetailHandle &handle );
 		FromHoudiniPointsConverter( const SOP_Node *sop );
-
+		
 		virtual ~FromHoudiniPointsConverter();
+		
+		/// Determines if the given GU_Detail can be converted
+		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
 	
 	protected :
 		

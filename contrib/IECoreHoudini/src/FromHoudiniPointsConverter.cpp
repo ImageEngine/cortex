@@ -41,7 +41,7 @@ using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniPointsConverter );
 
-FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> FromHoudiniPointsConverter::m_description( PointsPrimitiveTypeId, true );
+FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> FromHoudiniPointsConverter::m_description( PointsPrimitiveTypeId );
 
 FromHoudiniPointsConverter::FromHoudiniPointsConverter( const GU_DetailHandle &handle ) :
 	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECore::PointsPrimitive." )
@@ -55,6 +55,16 @@ FromHoudiniPointsConverter::FromHoudiniPointsConverter( const SOP_Node *sop ) :
 
 FromHoudiniPointsConverter::~FromHoudiniPointsConverter()
 {
+}
+
+FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConvert( const GU_Detail *geo )
+{
+	if ( !geo->primitives().entries() )
+	{
+		return Ideal;
+	}
+	
+	return Admissible;
 }
 
 PrimitivePtr FromHoudiniPointsConverter::doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const

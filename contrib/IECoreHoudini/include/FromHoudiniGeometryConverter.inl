@@ -47,15 +47,29 @@ namespace IECoreHoudini
 {
 
 template<class T>
-FromHoudiniGeometryConverter::Description<T>::Description( IECore::TypeId resultType, bool isDefault )
+FromHoudiniGeometryConverter::Description<T>::Description( IECore::TypeId resultType )
 {
-	FromHoudiniGeometryConverter::registerConverter( resultType, isDefault, creator );
+	FromHoudiniGeometryConverter::registerConverter( resultType, creator, canConvert );
 }
 
 template<class T>
 FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::Description<T>::creator( const GU_DetailHandle &handle )
 {
 	return new T( handle );
+}
+
+template<class T>
+FromHoudiniGeometryConverter::Convertability FromHoudiniGeometryConverter::Description<T>::canConvert( const GU_DetailHandle &handle )
+{
+	GU_DetailHandleAutoReadLock readHandle( handle );
+	
+	const GU_Detail *geo = readHandle.getGdp();
+	if ( !geo )
+	{
+		return Inapplicable;
+	}
+	
+	return T::canConvert( geo );
 }
 
 template <typename Container>
