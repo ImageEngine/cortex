@@ -99,14 +99,32 @@ def _dagMenu( menu, proceduralHolder ) :
 		)
 		
 		maya.cmds.menuItem(
-			label = "At Centre",
-			radialPosition = "E",
-			command = IECore.curry( __createLocatorAtCentre, proceduralHolder ),
+			label = "At Bound Min",
+			radialPosition = "N",
+			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Min" ] ),
 		)
 		
 		maya.cmds.menuItem(
-			label = "With Transform",
+			label = "At Bound Max",
+			radialPosition = "NE",
+			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Max" ] ),
+		)
+		
+		maya.cmds.menuItem(
+			label = "At Bound Min And Max",
+			radialPosition = "E",
+			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Min", "Max" ] ),
+		)
+		
+		maya.cmds.menuItem(
+			label = "At Bound Centre",
 			radialPosition = "SE",
+			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Center" ] ),
+		)
+		
+		maya.cmds.menuItem(
+			label = "At Transform Origin",
+			radialPosition = "S",
 			command = IECore.curry( __createLocatorWithTransform, proceduralHolder ),
 		)
 		
@@ -168,18 +186,22 @@ def _convertToGeometry( proceduralHolder, *unused ) :
 
 	maya.cmds.select( geometryParent, replace=True )
 
-def __createLocatorAtCentre( proceduralHolder, *unused ) :
+def __createLocatorAtPoints( proceduralHolder, childPlugSuffixes, *unused ) :
 	
 	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
 	selectedNames = fnPH.selectedComponentNames()
 	
 	proceduralParent = maya.cmds.listRelatives( fnPH.fullPathName(), parent=True, fullPath=True )[0]
 
+	locators = []
 	for name in selectedNames :
-		outputPlug = fnPH.componentBoundPlugPath( name )
-		locator = maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + "Center" )[0]
-		maya.cmds.connectAttr( outputPlug + ".componentBoundCenter", locator + ".translate" )
-		maya.cmds.parent( locator, proceduralParent, relative=True )
+		for childPlugSuffix in childPlugSuffixes :
+			outputPlug = fnPH.componentBoundPlugPath( name )
+			locator = "|" + maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + childPlugSuffix )[0]
+			maya.cmds.connectAttr( outputPlug + ".componentBound" + childPlugSuffix, locator + ".translate" )
+			locators.extend( maya.cmds.parent( locator, proceduralParent, relative=True ) )
+		
+	maya.cmds.select( locators, replace=True )
 
 def __createLocatorWithTransform( proceduralHolder, *unused ) :
 	
@@ -188,10 +210,13 @@ def __createLocatorWithTransform( proceduralHolder, *unused ) :
 
 	proceduralParent = maya.cmds.listRelatives( fnPH.fullPathName(), parent=True, fullPath=True )[0]
 	
+	locators = []
 	for name in selectedNames :
 		outputPlug = fnPH.componentTransformPlugPath( name )
-		locator = maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + "Transform" )[0]
+		locator = "|" + maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + "Transform" )[0]
 		maya.cmds.connectAttr( outputPlug + ".componentTranslate", locator + ".translate" )
 		maya.cmds.connectAttr( outputPlug + ".componentRotate", locator + ".rotate" )
 		maya.cmds.connectAttr( outputPlug + ".componentScale", locator + ".scale" )
-		maya.cmds.parent( locator, proceduralParent, relative=True )
+		locators.extend( maya.cmds.parent( locator, proceduralParent, relative=True ) )
+
+	maya.cmds.select( locators, replace=True )
