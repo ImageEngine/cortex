@@ -485,7 +485,7 @@ MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
 		}
 	}
 
-	if( topLevelPlug==aComponentBoundCenter || topLevelPlug==aComponentTransform )
+	if( topLevelPlug==aComponentBound || topLevelPlug==aComponentTransform )
 	{
 
 		scene(); // to get the component maps up to date

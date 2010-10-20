@@ -177,6 +177,19 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMin" ), [ ( 0, -2, -2 ) ] )
 		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMax" ), [ ( 4, 2, 2 ) ] )
 		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundCenter" ), [ ( 2, 0, 0 ) ] )
-							
+
+	def testComponentBoundMinMax( self ) :
+	
+		node = maya.cmds.createNode( "ieProceduralHolder" )
+
+		fnPH = IECoreMaya.FnProceduralHolder( node )
+		fnPH.setParameterised( self.SphereProcedural() )
+		
+		boundPlug = fnPH.componentBoundPlugPath( "mySphere" )
+		self.failUnless( maya.cmds.objExists( boundPlug ) )
+		
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMin" ), [ ( -1, -1, -1 ) ] )
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMax" ), [ ( 1, 1, 1 ) ] )
+		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
