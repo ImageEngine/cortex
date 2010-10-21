@@ -467,68 +467,69 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 	// loop through inputs getting the upstream geometry detail & putting it into our Op's parameters
 	for ( unsigned int i=0; i<m_inputs.size(); ++i )
 	{
-		IECore::ParameterPtr input_parameter = m_inputs[i];
-		GU_DetailHandle gdp_handle = inputGeoHandle(i);
-		const GU_Detail *input_gdp = gdp_handle.readLock();
-
-		if ( input_gdp )
+		IECore::ParameterPtr inputParameter = m_inputs[i];
+		GU_DetailHandle inputHandle = inputGeoHandle(i);
+		GU_DetailHandleAutoReadLock readHandle( inputHandle );
+		const GU_Detail *inputGdp = readHandle.getGdp();
+		if ( !inputGdp )
 		{
-			if ( input_gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) ) // looks like data passed from another OpHolder
-			{
-				GB_AttributeRef attrOffset = input_gdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
-				const NodePassData *pass_data = input_gdp->attribs().castAttribData<NodePassData>( attrOffset );
-				if ( pass_data->type()==IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
-				{
-					SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>(const_cast<OP_Node*>(pass_data->nodePtr()));
-					IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
-					const IECore::Parameter *result_parameter = op->resultParameter();
-					const IECore::ConstObjectPtr result_object(result_parameter->getValue());
+			continue;
+		}
 
-					try
-					{
-						input_parameter->setValidatedValue( IECore::constPointerCast<IECore::Object>( result_object ));
-					}
-					catch (const IECore::Exception &e)
-					{
-						addError( SOP_MESSAGE, e.what() );
-					}
-				}
-			}
-			else // otherwise looks like a regular Houdini detail
+		if ( inputGdp->attribs().find( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED ) )
+		{
+			// looks like data passed from another OpHolder
+			GB_AttributeRef attrOffset = inputGdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
+			const NodePassData *passData = inputGdp->attribs().castAttribData<NodePassData>( attrOffset );
+			if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
 			{
-				IECore::ObjectPtr converted;
+				SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>( const_cast<OP_Node*>( passData->nodePtr() ) );
+				IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
+				const IECore::Parameter *resultParameter = op->resultParameter();
+				const IECore::ConstObjectPtr resultObject( resultParameter->getValue() );
+
 				try
 				{
-					IECore::ObjectParameterPtr objectParameter = IECore::runTimeCast<IECore::ObjectParameter>( input_parameter );
-					if ( objectParameter )
-					{
-						FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( gdp_handle, objectParameter->validTypes() );
-						if ( converter )
-						{
-							converted = converter->convert();
-						}
-					}
+					inputParameter->setValidatedValue( IECore::constPointerCast<IECore::Object>( resultObject ));
 				}
-				catch (std::runtime_error &e)
+				catch ( const IECore::Exception &e )
 				{
 					addError( SOP_MESSAGE, e.what() );
 				}
-
-				if ( converted )
-				{
-					try
-					{
-						input_parameter->setValidatedValue( converted );
-					}
-					catch (const IECore::Exception &e)
-					{
-						addError( SOP_MESSAGE, e.what() );
-					}
-				}
 			}
 		}
-		
-		gdp_handle.unlock( input_gdp );
+		else
+		{
+			// looks like a regular Houdini detail
+			IECore::ObjectParameterPtr objectParameter = IECore::runTimeCast<IECore::ObjectParameter>( inputParameter );
+			if ( !objectParameter )
+			{
+				continue;
+			}
+			
+			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( inputHandle, objectParameter->validTypes() );
+			if ( !converter )
+			{
+				continue;
+			}
+			
+			try
+			{
+				IECore::ObjectPtr converted = converter->convert();
+				if ( converted )
+				{
+					inputParameter->setValidatedValue( converted );
+				}
+			}
+			catch ( const IECore::Exception &e )
+			{
+				addError( SOP_MESSAGE, e.what() );
+			}
+			catch ( std::runtime_error &e )
+			{
+				addError( SOP_MESSAGE, e.what() );
+			}
+		}
 	}
 
 	// update parameters from our op & flag as dirty if necessary
