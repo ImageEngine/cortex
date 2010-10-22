@@ -78,6 +78,28 @@ class CapturingRenderer::Implementation
 			m_topLevelProceduralParent->destroy( *m_topLevelProceduralParent );
 		}
 	
+		void setOption( const std::string &name, ConstDataPtr value )
+		{
+			ContextStack &contextStack = m_threadContexts.local();
+			if( contextStack.size() )
+			{
+				msg( Msg::Warning, "CapturingRenderer::Implementation::setOption", "Cannot call setOption() after worldBegin()." );
+				return;
+			}
+			
+			m_options[name] = value->copy();
+		}
+		
+		ConstDataPtr getOption( const std::string &name )
+		{
+			std::map<std::string, ConstDataPtr>::const_iterator it = m_options.find( name );
+			if( it==m_options.end() )
+			{
+				return 0;
+			}
+			return it->second;
+		}
+	
 		void worldBegin()
 		{
 			ContextStack &contextStack = m_threadContexts.local();
@@ -460,6 +482,7 @@ class CapturingRenderer::Implementation
 			}
 		}
 		
+		std::map<std::string, ConstDataPtr> m_options;
 		GroupPtr m_world;
 			
 };
@@ -480,13 +503,12 @@ CapturingRenderer::~CapturingRenderer()
 
 void CapturingRenderer::setOption( const std::string &name, ConstDataPtr value )
 {
-	msg( Msg::Warning, "CapturingRenderer::setOption", "Not implemented" );
+	m_implementation->setOption( name, value );
 }
 
 ConstDataPtr CapturingRenderer::getOption( const std::string &name ) const
 {
-	msg( Msg::Warning, "CapturingRenderer::getOption", "Not implemented" );
-	return 0;
+	return m_implementation->getOption( name );
 }
 
 void CapturingRenderer::camera( const std::string &name, const CompoundDataMap &parameters )

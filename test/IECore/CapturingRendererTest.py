@@ -450,6 +450,75 @@ class CapturingRendererTest( unittest.TestCase ) :
 		IECore.RefCounted.collectGarbage()
 		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 		
+	def testOptions( self ) :
+	
+		r = IECore.CapturingRenderer()
+		
+		r.setOption( "user:something", IECore.IntData( 1 ) )
+		r.setOption( "something", IECore.IntData( 10 ) )
+		
+		self.assertEqual( r.getOption( "user:something" ), IECore.IntData( 1 ) )
+		self.assertEqual( r.getOption( "something" ), IECore.IntData( 10 ) )
+		self.assertEqual( r.getOption( "somethingUndefined" ), None )
+		
+		with IECore.WorldBlock( r ) :
+		
+			self.assertEqual( r.getOption( "user:something" ), IECore.IntData( 1 ) )
+			self.assertEqual( r.getOption( "something" ), IECore.IntData( 10 ) )
+			self.assertEqual( r.getOption( "somethingUndefined" ), None )
+			
+			m = IECore.CapturingMessageHandler()
+			with m :
+				r.setOption( "naughtyNaughty", IECore.IntData( 1 ) )
+			
+			self.assertEqual( len( m.messages ), 1 )
+			self.assertEqual( m.messages[0].level, IECore.Msg.Level.Warning )
+	
+	class GetOptionProcedural( IECore.Renderer.Procedural ) :
+	
+		failure = False
+	
+		def __init__( self, maxLevel = 4, level = 0 ) :
+		
+			IECore.Renderer.Procedural.__init__( self )
+			
+			self.__maxLevel = maxLevel
+			self.__level = level
+			
+		def bound( self ) :
+		
+			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+			
+		def render( self, renderer ) :
+					
+			if self.__level < self.__maxLevel :
+
+				with IECore.AttributeBlock( renderer ) :
+					renderer.procedural( CapturingRendererTest.GetOptionProcedural( self.__maxLevel, self.__level + 1 ) )
+			
+			if renderer.getOption( "iDontExist" ) != None :
+				CapturingRendererTest.GetOptionProcedural.failure = True
+				
+			if renderer.getOption( "user:ten" ) != IECore.IntData( 10 ) :
+				CapturingRendererTest.GetOptionProcedural.failure = True
+				
+	def testGetOptionFromThreadedProcedurals( self ) :
+	
+		# this is necessary so python will allow threads created by the renderer
+		# to enter into python when those threads execute procedurals.
+		IECore.initThreads()
+				
+		r = IECore.CapturingRenderer()
+	
+		r.setOption( "user:ten", IECore.IntData( 10 ) )
+	
+		self.GetOptionProcedural.failure = False
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.GetOptionProcedural( maxLevel = 6 ) )
+		
+		self.assertEqual( self.GetOptionProcedural.failure, False )
+		
 if __name__ == "__main__":
 	unittest.main()
 
