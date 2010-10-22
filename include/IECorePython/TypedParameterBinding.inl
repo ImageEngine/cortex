@@ -96,6 +96,8 @@ void bindTypedParameter()
 				)
 			)
 		)
+		/// \todo This is a property to match the NumericParameter::numericDefaultValue, but I think they would both be better as functions.
+		.add_property( "typedDefaultValue", boost::python::make_function( &IECore::TypedParameter<T>::typedDefaultValue, boost::python::return_value_policy<boost::python::copy_const_reference>() ) )
 		.def( "setTypedValue", &IECore::TypedParameter<T>::setTypedValue )
 		.def( "getTypedValue", (const T &(IECore::TypedParameter<T>::* )() const)&IECore::TypedParameter<T>::getTypedValue, boost::python::return_value_policy<boost::python::copy_const_reference>() )
 		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( IECore::TypedParameter<T> )

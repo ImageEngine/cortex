@@ -334,6 +334,14 @@ class TestNumericParameter( unittest.TestCase ) :
 		self.assert_( p.getValue() == IntData( 3 ) )
 		p.smartSetValue( IntData(4) )
 		self.assert_( p.getValue() == IntData( 4 ) )
+		
+	def testDefaultValue( self ) :
+	
+		p = IntParameter( "p", "description", 1 )
+		
+		self.assertEqual( p.numericDefaultValue, 1 )
+		self.assertRaises( AttributeError, setattr, p, "numericDefaultValue", 2 )
+		
 
 class TestTypedParameter( unittest.TestCase ) :
 
@@ -417,11 +425,17 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertEqual( p.getTypedValue(), "10" )
 		p.setTypedValue( "20" )
 		self.assertEqual( p.getTypedValue(), "20" )
+		
+		self.assertEqual( p.typedDefaultValue, "10" )
+		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", "20" )
 
 		p = V3fParameter( name="n", description="d", defaultValue = V3f( 1, 2, 3 ) )
 		self.assertEqual( p.getTypedValue(), V3f( 1, 2, 3 ) )
 		p.setTypedValue( V3f( 12, 13, 14 ) )
 		self.assertEqual( p.getTypedValue(), V3f( 12, 13, 14 ) )
+
+		self.assertEqual( p.typedDefaultValue, V3f( 1, 2, 3 ) )
+		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", V3f( 4, 5, 6 ) )
 
 	def testSmartSetValue( self ):
 		"""Test python overwriting: smartSetValue()"""
