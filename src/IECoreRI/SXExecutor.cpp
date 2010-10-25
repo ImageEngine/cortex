@@ -105,7 +105,6 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points,
 	
 	// run all the shaders in sequence on the grid
 	
-	CompoundDataPtr result = new CompoundData();
 	for( unsigned shaderIndex = 0; shaderIndex < m_shaders.size(); ++shaderIndex )
 	{
 	
