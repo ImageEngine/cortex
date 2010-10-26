@@ -137,10 +137,12 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 			d.name = &name[0];
 			GLint location = glGetUniformLocation( m_program, &name[0] );
 
-			// OpenGL native parameters return location -1. Ignore them
-			if ( location == -1 )
+			// ignore native parameters
+			if( 0 == d.name.compare( 0, 3, "gl_" ) )
+			{
 				continue;
-
+			}
+			
 			// \todo: implement arrays
 			if ( d.size != 1 )
 				continue;
@@ -163,9 +165,11 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 			d.name = &name[0];
 			GLint location = glGetAttribLocation( m_program, &name[0] );
 
-			// OpenGL native parameters return location -1. Ignore them.
-			if ( location == -1 )
+			// ignore native parameters
+			if( 0 == d.name.compare( 0, 3, "gl_" ) )
+			{
 				continue;
+			}
 
 			// \todo: implement arrays
 			if ( d.size != 1 )
