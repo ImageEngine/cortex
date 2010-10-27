@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -69,6 +69,16 @@ class PointDistribution : public boost::noncopyable
 		/// pointEmitter is called for each point generated and must have the signature void( const Imath::V2f &pos ).
 		template<typename DensityFunction, typename PointFunction>
 		void operator () ( const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const;
+		/// Variation on the function above for times when the density function isn't available to be evaluated on a point
+		/// by point basis - perhaps because it is best evaluated in SIMD (as the IECoreRI::SXRenderer would do).
+		///
+		/// density specifies the number of points generated per unit area.
+		///
+		/// pointEmitter is called for each point generated and must have the signature void( const Imath::V2f &pos, float densityThreshold )
+		/// densityThreshold allows for deferred rejection of the points using a density function evaluated later - if the density evaluated
+		/// is less than densityThreshold then that point should be rejected.
+		template<typename PointFunction>
+		void operator () ( const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
 	
 		/// Returns a reference to a static PointDistribution which can be shared by anyone who needs one. This
 		/// distribution uses the tile set pointed to by the CORTEX_POINTDISTRIBUTION_TILESET environment variable.
@@ -79,10 +89,13 @@ class PointDistribution : public boost::noncopyable
 		struct Tile;
 		
 		template<typename DensityFunction, typename PointFunction>
-		void processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const;
+		struct DensityThresholdedEmitter;
+		
+		template<typename PointFunction>
+		void processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
 
-		template<typename DensityFunction, typename PointFunction>
-		void recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const;
+		template<typename PointFunction>
+		void recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
 	
 		typedef std::vector<Tile> TileVector;
 		TileVector m_tiles;

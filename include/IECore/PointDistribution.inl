@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,7 +54,36 @@ struct PointDistribution::Tile
 };
 
 template<typename DensityFunction, typename PointFunction>
+struct PointDistribution::DensityThresholdedEmitter
+{
+	DensityThresholdedEmitter( DensityFunction &densitySampler, PointFunction &pointEmitter )
+		:	m_densitySampler( densitySampler ), m_pointEmitter( pointEmitter )
+	{
+	}
+	
+	void operator() ( const Imath::V2f &pos, float densityThreshold  )
+	{
+		if( m_densitySampler( pos ) >= densityThreshold )
+		{
+			m_pointEmitter( pos );
+		}
+	}
+
+	private :
+	
+		DensityFunction &m_densitySampler;
+		PointFunction &m_pointEmitter;
+};
+
+template<typename DensityFunction, typename PointFunction>
 void PointDistribution::operator () ( const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const
+{
+	DensityThresholdedEmitter<DensityFunction, PointFunction> thresholdedEmitter( densitySampler, pointEmitter );
+	(*this)( bounds, density, thresholdedEmitter );
+}
+
+template<typename PointFunction>
+void PointDistribution::operator () ( const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
 {
 	Imath::Box2i bi;
 	bi.min.x = fastFloatFloor( bounds.min.x );
@@ -79,7 +108,7 @@ void PointDistribution::operator () ( const Imath::Box2f &bounds, float density,
 				const Tile *tile = &m_tiles[i];
 				if( tile->w==w && tile->n==n && tile->e==e )
 				{
-					processTile( *tile, Imath::V2f( x, y ), bounds, density, densitySampler, pointEmitter );
+					processTile( *tile, Imath::V2f( x, y ), bounds, density, pointEmitter );
 					tileFound = true;
 					break;
 				}
@@ -87,11 +116,10 @@ void PointDistribution::operator () ( const Imath::Box2f &bounds, float density,
 			assert( tileFound );
 		}
 	}
-
 }
-
-template<typename DensityFunction, typename PointFunction>
-void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const
+		
+template<typename PointFunction>
+void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
 {
 	unsigned potentialPoints = std::min( tile.points.size(), (size_t)density );
 	float factor = 1.0f / density;
@@ -103,19 +131,14 @@ void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomL
 			continue;
 		}
 		
-		if( densitySampler( p ) < i * factor )
-		{
-			continue;
-		}
-		
-		pointEmitter( p );
+		pointEmitter( p, i * factor );
 	}
 
-	recurseTile( tile, bottomLeft, 0, bounds, density, densitySampler, pointEmitter );
+	recurseTile( tile, bottomLeft, 0, bounds, density, pointEmitter );
 }
 
-template<typename DensityFunction, typename PointFunction>
-void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const
+template<typename PointFunction>
+void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
 {
 	float tileSize = 1.0f / powf( (float)m_numSubTiles, (float)level );
 	
@@ -139,12 +162,7 @@ void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomL
 			continue;
 		}
 		
-		if( densitySampler( p ) < ( i + tile.points.size() ) * factor )
-		{
-			continue;
-		}
-		
-		pointEmitter( p );
+		pointEmitter( p, ( i + tile.points.size() ) * factor );
 	}
 	
 	if( numPointsInTile - tile.points.size() > tile.subPoints.size() )
@@ -154,7 +172,7 @@ void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomL
 			for( int x=0; x<m_numSubTiles; x++ )
 			{
 				Imath::V2f newBottomLeft = bottomLeft + Imath::V2f( x, y ) * tileSize / m_numSubTiles;
-				recurseTile( *(tile.subTiles[y*m_numSubTiles + x]), newBottomLeft, level + 1, bounds, density, densitySampler, pointEmitter );
+				recurseTile( *(tile.subTiles[y*m_numSubTiles + x]), newBottomLeft, level + 1, bounds, density, pointEmitter );
 			}
 		}
 	}
