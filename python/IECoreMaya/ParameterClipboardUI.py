@@ -175,7 +175,7 @@ def copy( plugPath, showUI=False ) :
 		global _ieCoreParameterClipboardUILastParameterList
 		global _ieCoreParameterClipboardUILastNode
 		global _ieCoreParameterClipboardUILastRoot
-
+		
 		fnPh = IECoreMaya.FnParameterisedHolder( node )
 		preset = IECore.BasicPreset( fnPh.getParameterised()[0], rootParameter, parameters=parameters )
 		
@@ -304,12 +304,14 @@ def __getParameters( parameter, paramList=[] ) :
 		
 		c = parameter.getClass( False )
 		if c:
+			paramList.append( parameter )
 			__getParameters( c.parameters(), paramList )
 		
 	elif isinstance( parameter, IECore.ClassVectorParameter ) :
 		
 		cl = parameter.getClasses( False )
 		if cl :
+			paramList.append( parameter )
 			for c in cl :
 				__getParameters( c.parameters(), paramList )
 	
