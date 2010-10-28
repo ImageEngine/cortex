@@ -51,6 +51,17 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
+	def testConstructor( self ) :
+	
+		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
+		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
+
+		converter = IECoreMaya.FromMayaMeshConverter( sphere )
+		
+		m = converter.convert()
+		
+		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+
 	def testParameters( self ) :
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )

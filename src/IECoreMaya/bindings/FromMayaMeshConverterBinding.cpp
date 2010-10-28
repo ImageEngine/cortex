@@ -45,6 +45,7 @@ using namespace boost::python;
 void IECoreMaya::bindFromMayaMeshConverter()
 {
 	IECorePython::RunTimeTypedClass<FromMayaMeshConverter>()
+		.def( init<const MDagPath &>() )
 		.def( "points", &FromMayaMeshConverter::points )
 		.def( "normals", &FromMayaMeshConverter::normals )
 		.def( "s", &FromMayaMeshConverter::s )
