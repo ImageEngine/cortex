@@ -108,8 +108,9 @@ class BasicPreset( IECore.Preset ) :
 				rootParameter = pathOrDataOrParameterised.parameters()
 			
 			BasicPreset._grabHierarchy( data, rootParameter, parameters )
-			# Remove any branches without leaf values. There should be 
-			# a better way of dealing with this.
+			
+			# We need to prune any class entries without parameters, so that
+			# we don't meddle with classes the user asked us not to copy parameters for.
 			BasicPreset._pruneHierarchy( data )
 			
 			if referenceData:
@@ -322,12 +323,28 @@ class %s( IECore.BasicPreset ):
 		data["_classValue_"] = IECore.CompoundObject()
 
 		if c[0] :
+			
+			# Some classes may have no parameters, if they have been
+			# specifically included in the parameter list, then we
+			# want to save their instance specification anyway.
+			if len( c[0].parameters() ) :
 
-			BasicPreset._grabHierarchy(
-				data["_classValue_"],
-				c[0].parameters(),
-				parameterList, 
-			)
+				BasicPreset._grabHierarchy(
+					data["_classValue_"],
+					c[0].parameters(),
+					parameterList, 
+				)
+			
+			elif parameterList :
+		
+				for p in parameterList:
+					if parameter.isSame( p ) :			
+						data["_noPrune_"] = IECore.BoolData( True )
+				
+			else :
+			
+				data["_noPrune_"] = IECore.BoolData( True )
+			
 	
 	@staticmethod		
 	def _grabClassVectorParameter( parameter, data, parameterList ) :
@@ -429,7 +446,7 @@ class %s( IECore.BasicPreset ):
 			parameter.setClass( className, classVersion, classPaths )
 			
 		c = parameter.getClass( False )
-		if c:	
+		if c and "_classValue_" in data :	
 			self._applyHierarchy( parameterised, c.parameters(), data["_classValue_"], parameterList, invertList )		
 		
 	def _applyClassVector( self, parameterised, parameter, data, parameterList=[], invertList=False ) :
@@ -561,7 +578,7 @@ class %s( IECore.BasicPreset ):
 	
 		for k in data.keys() :
 		
-			if k == "_value_" : 
+			if k == "_value_" or k == "_noPrune_": 
 			
 				returnVal = False
 				
