@@ -1283,6 +1283,18 @@ if doConfigure :
 
 			sys.stderr.write( "WARNING : Supported Sx API version not found - not building SXRenderer. Use 3delight 9.0.36 or later.\n" )
 		
+		if c.CheckCXXHeader( "gx.h" ) and c.CheckFunc( "GxGetGeometry" ) :
+		
+			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_GX" )
+			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_GX" )
+			
+		else :
+		
+			riSources.remove( "src/IECoreRI/GXEvaluator.cpp" )
+			riPythonSources.remove( "src/IECoreRI/bindings/GXEvaluatorBinding.cpp" )
+
+			sys.stderr.write( "WARNING : Gx API not found - not building GXEvaluator. Use 3delight 9.0.39 or later.\n" )
+			
 		c.Finish()	
 
 		# we can't append this before configuring, as then it gets built as

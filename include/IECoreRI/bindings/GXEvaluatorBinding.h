@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECORERI_GXEVALUATORBINDING_H
+#define IECORERI_GXEVALUATORBINDING_H
 
-#include "IECoreRI/bindings/RendererBinding.h"
-#include "IECoreRI/bindings/SLOReaderBinding.h"
-
-#include "IECoreRI/bindings/PTCParticleReaderBinding.h"
-#include "IECoreRI/bindings/PTCParticleWriterBinding.h"
-#include "IECoreRI/bindings/RIBWriterBinding.h"
-#include "IECoreRI/bindings/SXRendererBinding.h"
-#include "IECoreRI/bindings/GXEvaluatorBinding.h"
-
-using namespace IECoreRI;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreRI )
+namespace IECoreRI
 {
-	bindRenderer();
-	bindSLOReader();
-#ifdef IECORERI_WITH_PTC
-	bindPTCParticleReader();
-	bindPTCParticleWriter();
-#endif // IECORERI_WITH_PTC
-	bindRIBWriter();
-#ifdef IECORERI_WITH_SX
-	bindSXRenderer();	
-#endif // IECORERI_WITH_SX
-#ifdef IECORERI_WITH_GX
-	bindGXEvaluator();	
-#endif // IECORERI_WITH_GX
+
+void bindGXEvaluator();
+
 }
+
+#endif // IECORERI_GXEVALUATORBINDING_H

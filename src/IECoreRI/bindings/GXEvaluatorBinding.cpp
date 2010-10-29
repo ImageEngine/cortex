@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECoreRI/bindings/RendererBinding.h"
-#include "IECoreRI/bindings/SLOReaderBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
 
-#include "IECoreRI/bindings/PTCParticleReaderBinding.h"
-#include "IECoreRI/bindings/PTCParticleWriterBinding.h"
-#include "IECoreRI/bindings/RIBWriterBinding.h"
-#include "IECoreRI/bindings/SXRendererBinding.h"
+#include "IECoreRI/GXEvaluator.h"
 #include "IECoreRI/bindings/GXEvaluatorBinding.h"
 
-using namespace IECoreRI;
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreRI )
+namespace IECoreRI
 {
-	bindRenderer();
-	bindSLOReader();
-#ifdef IECORERI_WITH_PTC
-	bindPTCParticleReader();
-	bindPTCParticleWriter();
-#endif // IECORERI_WITH_PTC
-	bindRIBWriter();
-#ifdef IECORERI_WITH_SX
-	bindSXRenderer();	
-#endif // IECORERI_WITH_SX
-#ifdef IECORERI_WITH_GX
-	bindGXEvaluator();	
-#endif // IECORERI_WITH_GX
+
+static IECore::CompoundDataPtr evaluate( GXEvaluator &e, const IECore::IntVectorData *faceIndices, const IECore::FloatVectorData *u, const IECore::FloatVectorData *v, const object &primVarNames  )
+{
+	std::vector<std::string> pvn;
+	container_utils::extend_container( pvn, primVarNames );
+	
+	IECorePython::ScopedGILRelease gilRelease;
+		
+	return e.evaluate( faceIndices, u, v, pvn );
 }
+
+void bindGXEvaluator()
+{
+	class_<GXEvaluator, boost::noncopyable>( "GXEvaluator", no_init )
+		.def( init<const IECore::Primitive *>() )
+		.def( "numFaces", &GXEvaluator::numFaces )
+		.def( "evaluate", &evaluate )
+	;
+}
+
+} // namespace IECoreRI

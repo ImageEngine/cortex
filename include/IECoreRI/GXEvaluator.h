@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECORERI_GXEVALUATOR_H
+#define IECORERI_GXEVALUATOR_H
 
-#include "IECoreRI/bindings/RendererBinding.h"
-#include "IECoreRI/bindings/SLOReaderBinding.h"
+#include "boost/noncopyable.hpp"
 
-#include "IECoreRI/bindings/PTCParticleReaderBinding.h"
-#include "IECoreRI/bindings/PTCParticleWriterBinding.h"
-#include "IECoreRI/bindings/RIBWriterBinding.h"
-#include "IECoreRI/bindings/SXRendererBinding.h"
-#include "IECoreRI/bindings/GXEvaluatorBinding.h"
+#include "gx.h"
 
-using namespace IECoreRI;
-using namespace boost::python;
+#include "IECore/Primitive.h"
+#include "IECore/VectorTypedData.h"
 
-BOOST_PYTHON_MODULE( _IECoreRI )
+namespace IECoreRI
 {
-	bindRenderer();
-	bindSLOReader();
-#ifdef IECORERI_WITH_PTC
-	bindPTCParticleReader();
-	bindPTCParticleWriter();
-#endif // IECORERI_WITH_PTC
-	bindRIBWriter();
-#ifdef IECORERI_WITH_SX
-	bindSXRenderer();	
-#endif // IECORERI_WITH_SX
-#ifdef IECORERI_WITH_GX
-	bindGXEvaluator();	
-#endif // IECORERI_WITH_GX
-}
+
+/// This class simplifies the use of the Gx API by
+/// wrapping it to accept IECore datatypes for input and output.
+class GXEvaluator : public boost::noncopyable
+{
+
+	public :
+	
+		GXEvaluator( const IECore::Primitive *primitive );
+		~GXEvaluator();
+		
+		unsigned numFaces();
+		
+		IECore::CompoundDataPtr evaluate( const IECore::IntVectorData *faceIndices, const IECore::FloatVectorData *u, const IECore::FloatVectorData *v, const std::vector<std::string> &primVarNames ) const;
+		
+	private :
+
+		RtContextHandle m_context;
+		GxGeometryHandle m_geo;
+		typedef std::map<std::string, IECore::TypeId> PrimitiveVariableTypeMap;
+		PrimitiveVariableTypeMap m_primitiveVariableTypes;
+};
+
+} // namespace IECoreRI
+
+#endif // IECORERI_GXEVALUATOR_H
