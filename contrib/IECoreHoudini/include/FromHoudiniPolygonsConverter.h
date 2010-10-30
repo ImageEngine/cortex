@@ -61,7 +61,7 @@ class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryCo
 	protected :
 		
 		/// performs conversion to a IECore::MeshPrimitive
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const;
 
 	private :
 

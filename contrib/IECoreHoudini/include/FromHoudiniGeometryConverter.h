@@ -101,13 +101,13 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		FromHoudiniGeometryConverter( const SOP_Node *sop, const std::string &description );
 
 		virtual ~FromHoudiniGeometryConverter();
-
+		
 		/// Implemented to aquire the read lock on the GU_Detail held by the GU_DetailHandle,
 		/// call doPrimitiveConversion(), and finally unlock the GU_Detail. Derived classes
 		/// need not reimplement this function, but should instead implement doPrimitiveConversion().
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 		/// Must be implemented by derived classes to return a IECore::Primitive created to represent the specified GU_Detail.
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const = 0;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const = 0;
 		
 		typedef FromHoudiniGeometryConverterPtr (*CreatorFn)( const GU_DetailHandle &handle );
 		typedef Convertability (*ConvertabilityFn)( const GU_DetailHandle &handle );
@@ -126,6 +126,8 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 				static Convertability canConvert( const GU_DetailHandle &handle );
 		};
 		
+		/// returns a reference to the GU_DetailHandle
+		const GU_DetailHandle &handle() const;
 		/// extracts the GU_DetailHandle from a SOP_Node
 		static const GU_DetailHandle handle( const SOP_Node *sop );
 		

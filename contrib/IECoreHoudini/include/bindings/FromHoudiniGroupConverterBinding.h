@@ -32,45 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
-#define IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
-
-#include "IECore/PointsPrimitive.h"
-
-#include "TypeIds.h"
-#include "FromHoudiniGeometryConverter.h"
+#ifndef IECOREHOUDINI_FROMHOUDINIGROUPCONVERTERBINDING_H
+#define IECOREHOUDINI_FROMHOUDINIGROUPCONVERTERBINDING_H
 
 namespace IECoreHoudini
 {
 
-/// Converter which converts from a Houdini GU_Detail to an IECore::PointsPrimitive
-class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
-{
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniPointsConverter, FromHoudiniPointsConverterTypeId, IECore::ToCoreConverter );
-
-		FromHoudiniPointsConverter( const GU_DetailHandle &handle );
-		FromHoudiniPointsConverter( const SOP_Node *sop );
-		
-		virtual ~FromHoudiniPointsConverter();
-		
-		/// Determines if the given GU_Detail can be converted
-		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
-	
-	protected :
-		
-		/// performs conversion to a IECore::PointsPrimitive
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const;
-
-	private :
-
-		static FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> m_description;
-};
-
-// register our converter
-IE_CORE_DECLAREPTR( FromHoudiniPointsConverter );
+void bindFromHoudiniGroupConverter();
 
 }
 
-#endif // IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
+#endif // IECOREHOUDINI_FROMHOUDINIGROUPCONVERTERBINDING_H

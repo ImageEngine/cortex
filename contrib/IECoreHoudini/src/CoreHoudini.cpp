@@ -38,9 +38,6 @@
 #include "IECorePython/ScopedGILLock.h"
 
 #include "CoreHoudini.h"
-#include "FromHoudiniPointsConverter.h"
-#include "FromHoudiniPolygonsConverter.h"
-#include "FromHoudiniCurvesConverter.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;

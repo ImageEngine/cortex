@@ -32,45 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
-#define IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
+#include "boost/python.hpp"
 
-#include "IECore/PointsPrimitive.h"
+#include <SOP/SOP_Node.h>
 
-#include "TypeIds.h"
-#include "FromHoudiniGeometryConverter.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "FromHoudiniGroupConverterBinding.h"
+#include "FromHoudiniGroupConverter.h"
 
-namespace IECoreHoudini
+using namespace boost::python;
+using namespace IECoreHoudini;
+
+void IECoreHoudini::bindFromHoudiniGroupConverter()
 {
-
-/// Converter which converts from a Houdini GU_Detail to an IECore::PointsPrimitive
-class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
-{
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniPointsConverter, FromHoudiniPointsConverterTypeId, IECore::ToCoreConverter );
-
-		FromHoudiniPointsConverter( const GU_DetailHandle &handle );
-		FromHoudiniPointsConverter( const SOP_Node *sop );
-		
-		virtual ~FromHoudiniPointsConverter();
-		
-		/// Determines if the given GU_Detail can be converted
-		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
-	
-	protected :
-		
-		/// performs conversion to a IECore::PointsPrimitive
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const;
-
-	private :
-
-		static FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> m_description;
-};
-
-// register our converter
-IE_CORE_DECLAREPTR( FromHoudiniPointsConverter );
-
+	IECorePython::RunTimeTypedClass<FromHoudiniGroupConverter>()
+		.def(init<SOP_Node*>())
+	;
 }
-
-#endif // IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H

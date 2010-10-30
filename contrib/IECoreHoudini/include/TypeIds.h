@@ -69,6 +69,8 @@ namespace IECoreHoudini
 		ToHoudiniIntVectorAttribConverterTypeId = 111022,
 		ToHoudiniV2iVectorAttribConverterTypeId = 111023,
 		ToHoudiniV3iVectorAttribConverterTypeId = 111024,
+		FromHoudiniGroupConverterTypeId = 111025,
+		ToHoudiniGroupConverterTypeId = 111026,
 		// remember to update TypeIdBinding.cpp
 		LastTypeId = 111999,
 	};

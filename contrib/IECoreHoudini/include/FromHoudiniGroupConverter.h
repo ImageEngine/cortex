@@ -32,10 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
-#define IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
-
-#include "IECore/PointsPrimitive.h"
+#ifndef IECOREHOUDINI_FROMHOUDINIGROUPCONVERTER_H
+#define IECOREHOUDINI_FROMHOUDINIGROUPCONVERTER_H
 
 #include "TypeIds.h"
 #include "FromHoudiniGeometryConverter.h"
@@ -43,34 +41,51 @@
 namespace IECoreHoudini
 {
 
-/// Converter which converts from a Houdini GU_Detail to an IECore::PointsPrimitive
-class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
+/// Converter which converts from a Houdini GU_Detail to an IECore::Group containing
+/// any number of IECore::Primitives or IECore::Groups
+class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniPointsConverter, FromHoudiniPointsConverterTypeId, IECore::ToCoreConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromHoudiniGroupConverter, FromHoudiniGroupConverterTypeId, FromHoudiniGeometryConverter );
 
-		FromHoudiniPointsConverter( const GU_DetailHandle &handle );
-		FromHoudiniPointsConverter( const SOP_Node *sop );
+		FromHoudiniGroupConverter( const GU_DetailHandle &handle );
+		FromHoudiniGroupConverter( const SOP_Node *sop );
 		
-		virtual ~FromHoudiniPointsConverter();
-		
+		virtual ~FromHoudiniGroupConverter();
+
 		/// Determines if the given GU_Detail can be converted
 		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
 	
 	protected :
 		
-		/// performs conversion to a IECore::PointsPrimitive
+		/// Re-implemented to perform conversion to an IECore::Group
+		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
+		
+		/// Uses the factory mechanism to find the best converter for the given GU_Detail
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const;
-
+		
 	private :
 
-		static FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> m_description;
+		typedef std::pair<unsigned, GB_PrimitiveGroup*> PrimIdGroupPair;
+		typedef std::map<unsigned, GB_PrimitiveGroup*> PrimIdGroupMap;
+		typedef std::map<unsigned, GB_PrimitiveGroup*>::iterator PrimIdGroupMapIterator;
+
+		/// Converts the contents of the GB_PrimitiveGroup into a VisibleRenderable
+		size_t doGroupConversion( const GU_Detail *geo, GB_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result ) const;
+
+		/// Regroups a single GB_PrimitiveGroup into several groups, based on primitive type ids
+		/// @param geo The GU_Detail containing the orginal group. New groups will be added based on primitive type ids
+		/// @param groupMap A map from primitive type id to the newly created group for that type
+		/// @return The number of newly created groups ( groupMap.size() )
+		size_t regroup( GU_Detail *geo, PrimIdGroupMap &groupMap ) const;
+
+		static FromHoudiniGeometryConverter::Description<FromHoudiniGroupConverter> m_description;
 };
 
 // register our converter
-IE_CORE_DECLAREPTR( FromHoudiniPointsConverter );
+IE_CORE_DECLAREPTR( FromHoudiniGroupConverter );
 
 }
 
-#endif // IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
+#endif // IECOREHOUDINI_FROMHOUDINIGROUPCONVERTER_H

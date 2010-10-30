@@ -96,10 +96,16 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 		}
 	}
 	
-	return Ideal;
+	const GB_GroupList &primGroups = geo->primitiveGroups();
+	if ( !primGroups.length() || primGroups.head()->entries() == numPrims )
+	{
+		return Ideal;
+	}
+	
+	return Suitable;
 }
 
-PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const
+PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail *geo ) const
 {
 	const GEO_PrimList &primitives = geo->primitives();
 	

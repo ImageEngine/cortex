@@ -67,7 +67,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConv
 	return Admissible;
 }
 
-PrimitivePtr FromHoudiniPointsConverter::doPrimitiveConversion( const GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const
+PrimitivePtr FromHoudiniPointsConverter::doPrimitiveConversion( const GU_Detail *geo ) const
 {
 	const GEO_PointList &points = geo->points();
 	

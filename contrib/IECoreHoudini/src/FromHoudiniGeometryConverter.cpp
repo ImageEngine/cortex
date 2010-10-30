@@ -73,17 +73,21 @@ const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop 
 	return ((SOP_Node*)sop)->getCookedGeoHandle( context );
 }
 
+const GU_DetailHandle &FromHoudiniGeometryConverter::handle() const
+{
+	return m_geoHandle;
+}
+
 ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr operands ) const
 {
 	GU_DetailHandleAutoReadLock readHandle( m_geoHandle );
-	
 	const GU_Detail *geo = readHandle.getGdp();
 	if ( !geo )
 	{
 		return 0;
 	}
 	
-	return doPrimitiveConversion( geo, operands );
+	return doPrimitiveConversion( geo );
 }
 
 /// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
