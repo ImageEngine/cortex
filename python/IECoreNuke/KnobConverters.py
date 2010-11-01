@@ -121,6 +121,9 @@ def __createCompoundParameterKnob( knobHolder, parameter, knobName, knobLabel ) 
 	for childName, child in parameter.items() :
 		createKnobsFromParameter( knobHolder, child, knobName + "_" + childName )
 
+	if knobLabel:
+		knobHolder.addKnob( nuke.Tab_Knob( knobName, knobLabel, nuke.TABENDGROUP) )
+
 	return None
 
 def __compoundParameterToKnob( knobHolder, parameter, knobName ) :
