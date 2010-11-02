@@ -42,6 +42,8 @@ namespace IECoreNuke
 {
 
 /// This class converts IECore.MeshPrimitive objects to geometry in a Nuke GeometryList object.
+/// \todo Sort out the naming of this and other converters so they follow the convention used
+/// elsewhere in cortex - particularly IECoreMaya.
 class MeshToNukeGeometryConverter : public ToNukeGeometryConverter
 {
 	public:

@@ -44,6 +44,8 @@ namespace IECoreNuke
 
 /// The MeshFromNuke class converts Nuke GeoInfo objects
 /// into IECore::MeshPrimitive objects.
+/// \todo Sort out the naming of this and other converters so they follow the convention used
+/// elsewhere in cortex - particularly IECoreMaya.
 class MeshFromNuke : public FromNukeConverter
 {
 
