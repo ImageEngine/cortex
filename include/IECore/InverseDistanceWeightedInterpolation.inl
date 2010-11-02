@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include "IECore/VectorOps.h"
 #include "OpenEXR/ImathLimits.h"
 
 namespace IECore
@@ -71,7 +72,8 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 {
 	assert( m_tree );
 
-	Value result = Value(0);
+	Value result;
+	vecSetAll( result, 0 );
 
 	neighbours.clear();
 	unsigned int neighbourCount = m_tree->nearestNNeighbours( p, m_numNeighbours, neighbours );
