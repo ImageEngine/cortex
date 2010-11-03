@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 
 import unittest
 import sys
+import os
+
 import IECore
 
 class TestPDCReader( unittest.TestCase ) :
@@ -243,6 +245,31 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assert_( p.resultParameter().isInstanceOf( "ObjectParameter" ) )
 		self.assertEqual( p.resultParameter().validTypes(), [IECore.TypeId.PointsPrimitive] )
 
+	def testWarnings( self ) :
+		
+		p = IECore.PointsPrimitive( 3 )
+		p["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1, 2, 3 ] ) )
+		IECore.Writer.create( p, "test/particleShape1.250.pdc" ).write()
+
+		r = IECore.PDCParticleReader( "test/particleShape1.250.pdc" )
+
+		c = IECore.CapturingMessageHandler()
+		with c :
+			r.read()
+		self.assertEqual( len( c.messages ), 0 )
+		
+		r["percentage"].setTypedValue( 10 )
+		with c :
+			r.read()	
+
+		self.assertEqual( len( c.messages ), 1 )
+		self.assertEqual( c.messages[0].level, IECore.Msg.Level.Warning )
+		
+	def tearDown( self ) :
+
+		if os.path.isfile( "test/particleShape1.250.pdc" ) :
+			os.remove( "test/particleShape1.250.pdc" )
+			
 if __name__ == "__main__":
 	unittest.main()
 

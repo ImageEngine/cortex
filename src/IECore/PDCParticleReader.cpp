@@ -260,7 +260,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 	}
 
 	const Data *idAttr = idAttribute();
-	if ( !idAttr )
+	if ( !idAttr && particlePercentage() < 100.0f )
 	{
 		msg( Msg::Warning, "PDCParticleReader::filterAttr", format( "Percentage filtering requested but file \"%s\" contains no particle Id attribute." ) % fileName() );
 	}
