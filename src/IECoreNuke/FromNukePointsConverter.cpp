@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,22 +32,47 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#include "IECoreNuke/FromNukePointsConverter.h"
+#include "IECoreNuke/Convert.h"
 
-namespace IECoreNuke
+#include "IECore/PointsPrimitive.h"
+
+using namespace IECoreNuke;
+using namespace IECore;
+
+FromNukePointsConverter::FromNukePointsConverter( const DD::Image::GeoInfo *geo )
+	:	FromNukeConverter( "Converts nuke meshes to IECore meshes." ), m_geo( geo )
 {
+}
 
-enum TypeId
+FromNukePointsConverter::~FromNukePointsConverter()
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	LastCoreNukeTypeId = 107999
-};
+}
 
-} // namespace IECoreNuke
+IECore::ObjectPtr FromNukePointsConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+{
+	
+	// get points
+	V3fVectorDataPtr p = new V3fVectorData();
+	if( const DD::Image::PointList *pl = m_geo->point_list() )
+	{
+		p->writable().resize( pl->size() );
+		std::transform( pl->begin(), pl->end(), p->writable().begin(), IECore::convert<Imath::V3f, DD::Image::Vector3> );
+	}
 
-#endif // IECORENUKE_TYPEIDS_H
+	PointsPrimitivePtr result = new PointsPrimitive( p );
+		
+	// get colour
+	const DD::Image::Attribute *colorAttr = m_geo->get_typed_attribute( "Cf", DD::Image::VECTOR4_ATTRIB );
+	if( colorAttr && colorAttr->size()==result->getNumPoints() )
+	{
+		Color3fVectorDataPtr colorData = new Color3fVectorData();
+		colorData->writable().resize( result->getNumPoints() );
+		std::transform( colorAttr->vector4_list->begin(), colorAttr->vector4_list->end(), colorData->writable().begin(), IECore::convert<Imath::Color3f, DD::Image::Vector4> );		
+		result->variables["Cs"] = PrimitiveVariable( PrimitiveVariable::Vertex, colorData );
+	}
+	
+	/// \todo Other primitive variables
+	
+	return result;
+}

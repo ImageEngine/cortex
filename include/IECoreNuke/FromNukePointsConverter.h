@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,22 +32,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#ifndef IECORENUKE_FROMNUKEPOINTSCONVERTER_H
+#define IECORENUKE_FROMNUKEPOINTSCONVERTER_H
+
+#include "DDImage/GeoInfo.h"
+
+#include "IECoreNuke/FromNukeConverter.h"
 
 namespace IECoreNuke
 {
 
-enum TypeId
+/// The FromNukePointsConverter class converts Nuke GeoInfo objects
+/// into IECore::PointsPrimitive objects.
+/// \todo Might be good to have a FromNukeGeometryConverter as a base
+/// class of this and MeshFromNuke.
+class FromNukePointsConverter : public FromNukeConverter
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	LastCoreNukeTypeId = 107999
+
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromNukePointsConverter, FromNukePointsConverterTypeId, FromNukePointsConverter );
+
+		/// The caller is responsible for ensuring that geo is alive
+		/// for as long as the converter is.
+		FromNukePointsConverter( const DD::Image::GeoInfo *geo );
+		virtual ~FromNukePointsConverter();
+
+	protected :
+
+		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
+
+		const DD::Image::GeoInfo *m_geo;
+
 };
+
+IE_CORE_DECLAREPTR( FromNukePointsConverter );
 
 } // namespace IECoreNuke
 
-#endif // IECORENUKE_TYPEIDS_H
+#endif // IECORENUKE_FROMNUKEPOINTSCONVERTER_H
