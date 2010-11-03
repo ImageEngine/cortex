@@ -62,6 +62,7 @@ class ToMayaPlugConverter : public ToMayaConverter
 		virtual bool convert( MPlug &plug ) const;
 
 		/// \todo Implement this as a genuine factory which creates subclasses.
+		/// \todo Should be ConstPtr not const Ptr.
 		static ToMayaPlugConverterPtr create( const IECore::ObjectPtr src );
 
 	private :
