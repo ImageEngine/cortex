@@ -62,6 +62,12 @@ Imath::V3d convert( const DD::Image::Vector3 &from )
 }
 
 template<>
+Imath::Color3f convert( const DD::Image::Vector3 &from )
+{
+	return Imath::Color3f( from.x, from.y, from.z );
+}
+
+template<>
 DD::Image::Vector3 convert( const Imath::V3f &from )
 {
 	return DD::Image::Vector3( from.x, from.y, from.z );
@@ -95,6 +101,12 @@ template<>
 Imath::V3d convert( const DD::Image::Vector4 &from )
 {
 	return Imath::V3d( from.x, from.y, from.z );
+}
+
+template<>
+Imath::Color3f convert( const DD::Image::Vector4 &from )
+{
+	return Imath::Color3f( from.x, from.y, from.z );
 }
 
 template<>

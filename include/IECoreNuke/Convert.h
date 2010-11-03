@@ -40,6 +40,7 @@
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathColor.h"
 
 #include "DDImage/Matrix4.h"
 #include "DDImage/Vector3.h"
@@ -67,6 +68,9 @@ template<>
 Imath::V3d convert( const DD::Image::Vector3 &from );
 
 template<>
+Imath::Color3f convert( const DD::Image::Vector3 &from );
+
+template<>
 DD::Image::Vector3 convert( const Imath::V3f &from );
 
 template<>
@@ -83,6 +87,10 @@ Imath::V2d convert( const DD::Image::Vector4 &from );
 /// Discards from.w
 template<>
 Imath::V3f convert( const DD::Image::Vector4 &from );
+
+/// Discards from.w
+template<>
+Imath::Color3f convert( const DD::Image::Vector4 &from );
 
 /// Discards from.w
 template<>
