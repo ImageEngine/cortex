@@ -315,6 +315,7 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 			{
 				CASTDATA( Color3f, Color3d )
 				CASTDATA( Color3f, V3f )
+				CASTDATA( Color3f, V3d )
 				CASTVECTORDATA( Color3f, FloatVector )
 				default:	break;
 			}
@@ -651,6 +652,19 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 				default:	break;
 			}
 			break;
+		case Color3fVectorDataTypeId :
+			switch ( targetType )
+			{
+				CASTDATA( Color3fVector, V3f )
+				CASTDATA( Color3fVector, Box3f )
+				CASTVECTORDATA( Color3fVector, FloatVector )
+				CASTVECTORDATA( Color3fVector, V3fVector )
+				CASTVECTORDATA( Color3fVector, V3dVector )
+				CASTVECTORDATA( Color3fVector, Color3dVector )
+				CASTVECTORDATA( Color3fVector, Box3fVector )
+				default:	break;
+			}
+			break;	
 		case Box3fVectorDataTypeId :
 			switch ( targetType )
 			{

@@ -144,7 +144,8 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 		TypeId t = attr->typeId();
 		if( t==DoubleVectorDataTypeId || t==IntVectorDataTypeId || t==V3dVectorDataTypeId ||
 			t==DoubleDataTypeId || t==IntDataTypeId || t==V3dDataTypeId ||
-			t==FloatVectorDataTypeId || t==V3fVectorDataTypeId || t==FloatDataTypeId || t==V3fDataTypeId )
+			t==FloatVectorDataTypeId || t==V3fVectorDataTypeId || t==FloatDataTypeId || t==V3fDataTypeId ||
+			t==Color3fDataTypeId || t==Color3fVectorDataTypeId )
 		{
 			checkedAttrNames.push_back( *it );
 		}
@@ -192,8 +193,9 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeAttr<DoubleVectorData, double, 1>( oStream, d );
 				}
 				break;
-			// casting V3fVectorData to V3dVectorData since PDCs don't handle floats
+			// casting V3fVectorData and Color3fVectorData to V3dVectorData since PDCs don't handle floats
 			case V3fVectorDataTypeId :
+			case Color3fVectorDataTypeId :
 				{
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( V3dVectorDataTypeId );
@@ -230,8 +232,9 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					writeSimpleAttr<DoubleData, double, 1>( oStream, d );
 				}
 				break;
-			// casting V3fData to V3dData since PDCs don't handle floats
+			// casting V3fData and Color3fData to V3dData since PDCs don't handle floats
 			case V3fDataTypeId :
+			case Color3fDataTypeId :
 				{
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( V3dDataTypeId );
