@@ -44,6 +44,8 @@
 #include "SOP/SOP_Node.h"
 
 #include "IECore/Primitive.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
 
 #include "TypeIds.h"
 #include "FromHoudiniConverter.h"
@@ -169,6 +171,10 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		
 		template <typename T>
 		IECore::DataPtr extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const;
+		
+		template <typename Container>
+		IECore::DataPtr extractStringVectorData( const Container &container, const GB_Attribute *attr, const GB_AttributeRef &attrRef, IECore::IntVectorDataPtr &indexData ) const;
+		IECore::DataPtr extractStringData( const GU_Detail *geo, const GB_Attribute *attr ) const;
 
 	private :
 		

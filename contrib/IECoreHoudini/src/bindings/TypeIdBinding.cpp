@@ -72,6 +72,8 @@ void bindTypeId()
 		.value( "ToHoudiniV3iVectorAttribConverter", ToHoudiniV3iVectorAttribConverterTypeId )
 		.value( "FromHoudiniGroupConverter", FromHoudiniGroupConverterTypeId )
 		.value( "ToHoudiniGroupConverter", ToHoudiniGroupConverterTypeId )
+		.value( "ToHoudiniStringDetailAttribConverter", ToHoudiniStringDetailAttribConverterTypeId )
+		.value( "ToHoudiniStringVectorAttribConverter", ToHoudiniStringVectorAttribConverterTypeId )
 	;
 }
 

@@ -35,11 +35,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/tokenizer.hpp"
+
+#include "GEO/GEO_AttributeHandle.h"
+
 #include "IECore/CompoundObject.h"
+
 #include "CoreHoudini.h"
 #include "FromHoudiniGeometryConverter.h"
-
-#include <boost/tokenizer.hpp>
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -355,6 +358,11 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 				}
  				break;
  			}
+			case GB_ATTRIB_INDEX :
+ 			{
+				dataPtr = extractStringData( geo, attr );
+				break;
+			}
 			default :
 			{
 				break;
@@ -460,6 +468,22 @@ void FromHoudiniGeometryConverter::transferVertexAttribs( const GU_Detail *geo, 
 		
 		transferAttribData<VertexList>( vertices, result, interpolation, attr, attrRef );
 	}
+}
+
+DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, const GB_Attribute *attr ) const
+{
+	StringDataPtr data = new StringData();
+
+	GEO_AttributeHandle attribHandle = geo->getAttribute( GEO_DETAIL_DICT, attr->getName() );
+	attribHandle.setElement( geo );
+	
+	UT_String src;
+	if ( attribHandle.getString( src ) )
+	{
+		data->writable() = src;
+	}
+	
+	return data;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

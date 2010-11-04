@@ -38,6 +38,7 @@
 #include "Convert.h"
 #include "ToHoudiniAttribConverter.h"
 #include "ToHoudiniGeometryConverter.h"
+#include "ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -123,57 +124,79 @@ void ToHoudiniGeometryConverter::transferAttribs(
 		}
 	}
 	
- 	// add the primitive variables to the various GEO_AttribDicts based on interpolation type
+	// P should already have been added as points
+	std::vector<std::string> variablesToIgnore;
+	variablesToIgnore.push_back( "P" );
+	
+	// match all the string variables to each associated indices variable
+	/// \todo: replace all this logic with IECore::IndexedData once it exists...
+	PrimitiveVariableMap stringsToIndices;
 	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
 	{
-		// P should already have been added as points
-		if ( it->first == "P" )
+		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+		if ( !converter )
 		{
 			continue;
 		}
-		else if ( it->second.interpolation == detailInterpolation )
+		
+		if ( it->second.data->isInstanceOf( StringVectorDataTypeId ) )
+		{
+			std::string indicesVariableName = it->first + "Indices";
+			PrimitiveVariableMap::const_iterator indices = primitive->variables.find( indicesVariableName );
+			if ( indices != primitive->variables.end() && indices->second.data->isInstanceOf( IntVectorDataTypeId ) )
+			{
+				stringsToIndices[it->first] = indices->second;
+				variablesToIgnore.push_back( indicesVariableName );
+			}
+		}
+	}
+	
+ 	// add the primitive variables to the various GEO_AttribDicts based on interpolation type
+	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
+	{
+		if ( find( variablesToIgnore.begin(), variablesToIgnore.end(), it->first ) != variablesToIgnore.end() )
+		{
+			continue;
+		}
+		
+		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+		if ( !converter )
+		{
+			continue;
+		}
+		
+		PrimitiveVariable::Interpolation interpolation = it->second.interpolation;
+		
+		if ( converter->isInstanceOf( (IECore::TypeId)ToHoudiniStringVectorAttribConverterTypeId ) )
+		{
+			PrimitiveVariableMap::const_iterator indices = stringsToIndices.find( it->first );
+			if ( indices != stringsToIndices.end() )
+			{
+				ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter );
+				stringVectorConverter->indicesParameter()->setValidatedValue( indices->second.data );
+				interpolation = indices->second.interpolation;
+			}
+		}
+		
+		if ( interpolation == detailInterpolation )
  		{
 			// add detail attribs
-			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
-			if ( !converter )
-			{
-				continue;
-			}
-			
 			converter->convert( it->first, geo );
 	 	}
-		else if ( it->second.interpolation == pointInterpolation )
+		else if ( interpolation == pointInterpolation )
 		{
 			// add point attribs
- 			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
- 			if ( !converter )
- 			{
- 				continue;
- 			}
- 			
  			converter->convert( it->first, geo, newPoints );
 		}
-		else if ( it->second.interpolation == primitiveInterpolation )
+		else if ( interpolation == primitiveInterpolation )
 		{
 			// add primitive attribs
-			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
- 			if ( !converter )
- 			{
- 				continue;
- 			}
- 			
- 			converter->convert( it->first, geo, newPrims );
+			converter->convert( it->first, geo, newPrims );
 		}
-		else if ( it->second.interpolation == vertexInterpolation )
+		else if ( interpolation == vertexInterpolation )
 		{
 			// add vertex attribs
-			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
- 			if ( !converter )
- 			{
- 				continue;
- 			}
- 			
- 			converter->convert( it->first, geo, &vertices );
+			converter->convert( it->first, geo, &vertices );
 		}
 	}
 }

@@ -196,6 +196,13 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		vert_v3f.parm("value3").setExpression("$VTX*0.1")
 		vert_v3f.setInput( 0, vert_i3 )
 
+		vertString = geo.createNode( "attribcreate", node_name = "vertString" )
+		vertString.parm("name").set("vertString")
+		vertString.parm("class").set(3)
+		vertString.parm("type").set(3)
+		vertString.parm("string").set("string $VTX!")
+		vertString.setInput( 0, vert_v3f )
+
 		detail_i3 = geo.createNode( "attribcreate", node_name = "detail_i3" )
 		detail_i3.parm("name").set("detail_i3")
 		detail_i3.parm("class").set(0)
@@ -204,7 +211,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		detail_i3.parm("value1").set(123)
 		detail_i3.parm("value2").set(456.789) # can we catch it out with a float?
 		detail_i3.parm("value3").set(789)
-		detail_i3.setInput( 0, vert_v3f )
+		detail_i3.setInput( 0, vertString )
 
 		out = geo.createNode( "null", node_name="OUT" )
 		out.setInput( 0, detail_i3 )
@@ -262,7 +269,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assert_( result["Cd"].data[i][j] <= 1.0 )
 
 		# test vertex attributes
-		attrs = [ "vert_f1", "vert_f2", "vert_f3", "vert_i1", "vert_i2", "vert_i3", "vert_v3f" ]
+		attrs = [ "vert_f1", "vert_f2", "vert_f3", "vert_i1", "vert_i2", "vert_i3", "vert_v3f", "vertStringIndices" ]
 		for a in attrs :
 			self.assert_( a in result )
 			self.assertEqual( result[a].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
@@ -286,6 +293,15 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( result["vert_i3"].data[i][j], 0 )
 		
 		self.assertEqual( result["vert_v3f"].data.typeId(), IECore.V3fVectorData.staticTypeId() )
+		
+		self.assertEqual( result["vertString"].data.typeId(), IECore.TypeId.StringVectorData )
+		self.assertEqual( result["vertString"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["vertString"].data.size(), 4 )
+		self.assertEqual( result["vertStringIndices"].data.typeId(), IECore.TypeId.IntVectorData )
+		
+		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ) ) :
+			index = result["vertStringIndices"].data[ result.vertexIds[i] ]
+			self.assertEqual( result["vertString"].data[ index ], "string %d!" % index )
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
 	
@@ -313,7 +329,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		return attr
-
+	
 	# testing point attributes and types
 	def testPointAttributes( self ) :
 		attr = self.testSetupAttributes()
@@ -369,6 +385,19 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.size(), 100 )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		self.assert_( result.arePrimitiveVariablesValid() )
+		
+		attr.parm("type").set( 3 ) # string
+		attr.parm( "string" ).set( "string $PT!" )
+		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.StringVectorData )
+		self.assertEqual( result["test_attribute"].data[10], "string 10!" )
+		self.assertEqual( result["test_attribute"].data.size(), 100 )
+		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attributeIndices"].data.typeId(), IECore.TypeId.IntVectorData )
+		self.assertEqual( result["test_attributeIndices"].data[10], 10 )
+		self.assertEqual( result["test_attributeIndices"].data.size(), 100 )
+		self.assertEqual( result["test_attributeIndices"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assert_( result.arePrimitiveVariablesValid() )
 
 	# testing detail attributes and types
 	def testDetailAttributes( self ) :
@@ -418,6 +447,14 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3iData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V3i( 123, 456, 999 ) )
+		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assert_( result.arePrimitiveVariablesValid() )
+		
+		attr.parm("type").set( 3 ) # string
+		attr.parm( "string" ).set( "string!" )
+		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
+		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.StringData )
+		self.assertEqual( result["test_attribute"].data.value, "string!" )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
@@ -539,6 +576,26 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		mesh = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertEqual( mesh["vertex"].data, IECore.FloatVectorData( [ 3, 2, 1, 0 ] ) )
+	
+	def testEmptyStringAttr( self ) :
+		torus = self.createTorus()
+		geo = torus.parent()
+		attr = geo.createNode( "attribcreate" )
+		attr.setInput( 0, torus )
+		attr.parm("name").set( "test_attribute" )
+		attr.parm("type").set(3) # string
+		attr.parm("string").set("")
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( attr )
+		result = converter.convert()
+		self.assert_( "test_attribute" in result.keys() )
+		self.assert_( "test_attributeIndices" in result.keys() )
+		self.assertEqual( result["test_attribute"].data.size(), 1 )
+		self.assertEqual( result["test_attributeIndices"].data.size(), 100 )
+		self.assertEqual( result["test_attribute"].data[0], "" )
+		for i in range( 0, 100 ) :
+			self.assertEqual( result["test_attributeIndices"].data[i], 0 )
+		
+		self.assert_( result.arePrimitiveVariablesValid() )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

@@ -37,8 +37,6 @@
 
 #include "GEO/GEO_Vertex.h"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
 #include "IECore/VectorTraits.h"
 
 #include "FromHoudiniGeometryConverter.h"
@@ -190,6 +188,26 @@ void FromHoudiniGeometryConverter::transferAttribData(
 			}
  			break;
  		}
+		case GB_ATTRIB_INDEX :
+ 		{
+			/// \todo: replace this with IECore::IndexedData once it exists...
+			IECore::IntVectorDataPtr indexDataPtr = 0;
+			dataPtr = extractStringVectorData( container, attr, attrRef, indexDataPtr );
+			if ( indexDataPtr )
+			{
+				std::string name( attr->getName() );
+				if ( remap_info )
+				{
+					name = remap_info->name;
+					interpolation = remap_info->interpolation;
+				}
+				
+				name = name + "Indices";
+				result->variables[name] = IECore::PrimitiveVariable( interpolation, indexDataPtr );
+				interpolation = IECore::PrimitiveVariable::Constant;
+			}
+			break;
+		}
 		default :
 		{
 			break;
@@ -207,7 +225,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 			var_name = remap_info->name;
 			var_interp = remap_info->interpolation;
 		}
-
+		
 		// add the primitive variable to our result
 		result->variables[ var_name ] = IECore::PrimitiveVariable( var_interp, dataPtr );
 	}
@@ -265,6 +283,51 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GB_AttributeTab
 		dest[j] = src[j];
 	}
 
+	return data;
+}
+
+template <typename Container>
+IECore::DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const Container &container, const GB_Attribute *attr, const GB_AttributeRef &attrRef, IECore::IntVectorDataPtr &indexData ) const
+{
+	IECore::StringVectorDataPtr data = new IECore::StringVectorData();
+	
+	std::vector<std::string> &dest = data->writable();
+	
+	size_t numStrings = attr->getIndexSize();
+	for ( size_t i=0; i < numStrings; i++ )
+	{
+		dest.push_back( attr->getIndex( i ) );
+	}
+	
+	indexData = new IECore::IntVectorData();
+	std::vector<int> &indexContainer = indexData->writable();
+	size_t entries = container.entries();
+	indexContainer.resize( entries );
+	int *indices = indexData->baseWritable();
+	
+	bool adjustedDefault = false;
+	for ( size_t i=0; i < entries; i++ )
+	{
+		/// \todo: castAttribData() is deprecated in Houdini 11. replace this with getValue()
+		/// when we drop support for Houdini 10.
+		const int *src = container[i]->template castAttribData<int>( attrRef );
+		
+		if ( src[0] < 0 )
+		{
+			if ( !adjustedDefault )
+			{
+				dest.push_back( "" );
+				adjustedDefault = true;
+			}
+			
+			indices[i] = numStrings;
+		}
+		else
+		{
+			indices[i] = src[0];
+		}
+	}
+	
 	return data;
 }
 

@@ -72,6 +72,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		intData = IECore.IntData( 1 )
 		v2iData = IECore.V2iData( IECore.V2i( 1, 2 ) )
 		v3iData = IECore.V3iData( IECore.V3i( 1, 2, 3 ) )
+		stringData = IECore.StringData( "this is a string" )
 		
 		intRange = range( 1, pData.size()+1 )
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
@@ -81,6 +82,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		intVectorData = IECore.IntVectorData( intRange )
 		v2iVectorData = IECore.V2iVectorData( [ IECore.V2i( x, -x ) for x in intRange ] )
 		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
+		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
 		
 		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
 		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
@@ -94,6 +96,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		curves["intDetail"] = IECore.PrimitiveVariable( detailInterpolation, intData )
 		curves["v2iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2iData )
 		curves["v3iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3iData )
+		curves["stringDetail"] = IECore.PrimitiveVariable( detailInterpolation, stringData )
 		
 		# add all valid point attrib types
 		if not periodic and basis == IECore.CubicBasisf.bSpline() :
@@ -106,9 +109,10 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			intPointData = IECore.IntVectorData()
 			v2iPointData = IECore.V2iVectorData()
 			v3iPointData = IECore.V3iVectorData()
+			stringPointData = IECore.StringVectorData()
 			
-			datas = [ modPData, floatPointData, v2fPointData, v3fPointData, color3fPointData, intPointData, v2iPointData, v3iPointData ]
-			rawDatas = [ pData, floatVectorData, v2fVectorData, v3fVectorData, color3fVectorData, intVectorData, v2iVectorData, v3iVectorData ]
+			datas = [ modPData, floatPointData, v2fPointData, v3fPointData, color3fPointData, intPointData, v2iPointData, v3iPointData, stringPointData ]
+			rawDatas = [ pData, floatVectorData, v2fVectorData, v3fVectorData, color3fVectorData, intVectorData, v2iVectorData, v3iVectorData, stringVectorData ]
 			
 			pIndex = 0
 			for i in range( 0, numCurves ) :
@@ -125,7 +129,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			curves["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fPointData )
 			curves["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intPointData )
 			curves["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iPointData )
-			curves["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iPointData )			
+			curves["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iPointData )
 		else :
 			curves["P"] = IECore.PrimitiveVariable( pointInterpolation, pData )
 			curves["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData[:8*numCurves] )
@@ -135,6 +139,8 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			curves["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData[:8*numCurves] )
 			curves["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData[:8*numCurves] )
 			curves["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData[:8*numCurves] )
+			curves["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:8*numCurves] )
+			curves["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 8*numCurves ) ) )
 			
 		# add all valid primitive attrib types
 		curves["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:numCurves] )
@@ -144,6 +150,8 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		curves["intPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, intVectorData[:numCurves] )
 		curves["v2iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:numCurves] )
 		curves["v3iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:numCurves] )
+		curves["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:numCurves] )
+		curves["stringPrimIndices"] = IECore.PrimitiveVariable( primitiveInterpolation, IECore.IntVectorData( range( 0, numCurves ) ) )
 		
 		self.assert_( curves.arePrimitiveVariablesValid() )
 		
@@ -194,7 +202,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	
 	def comparePrimAndSop( self, prim, sop ) :
 		geo = sop.geometry()
-		for key in [ "floatDetail", "intDetail" ] :
+		for key in [ "floatDetail", "intDetail", "stringDetail" ] :
 			self.assertEqual( prim[key].data.value, geo.attribValue( key ) )
 		
 		for key in [ "v2fDetail", "v3fDetail", "color3fDetail", "v2iDetail", "v3iDetail" ] :
@@ -211,6 +219,11 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPoints[i].attribValue( key ) )
 		
+		data = prim["stringPoint"].data
+		dataIndices = prim["stringPointIndices"].data
+		for i in range( 0, data.size() ) :
+			self.assertEqual( data[ dataIndices[i] ], sopPoints[i].attribValue( "stringPoint" ) )
+		
 		sopPrims = geo.prims()
 		self.assertEqual( len(sopPrims), prim.numCurves() )
 		
@@ -223,6 +236,11 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			data = prim[key].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPrims[i].attribValue( key ) )
+		
+		data = prim["stringPrim"].data
+		dataIndices = prim["stringPrimIndices"].data
+		for i in range( 0, data.size() ) :
+			self.assertEqual( data[ dataIndices[i] ], sopPrims[i].attribValue( "stringPrim" ) )
 		
 		sopVerts = []
 		for i in range( 0, len(sopPrims) ) :
@@ -242,7 +260,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 	def compareOpenSplinePrimAndSop( self, prim, sop ) :
 		geo = sop.geometry()
-		for key in [ "floatDetail", "intDetail" ] :
+		for key in [ "floatDetail", "intDetail", "stringDetail" ] :
 			self.assertEqual( prim[key].data.value, geo.attribValue( key ) )
 		
 		for key in [ "v2fDetail", "v3fDetail", "color3fDetail", "v2iDetail", "v3iDetail" ] :
@@ -291,6 +309,11 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPrims[i].attribValue( key ) )
 		
+		data = prim["stringPrim"].data
+		dataIndices = prim["stringPrimIndices"].data
+		for i in range( 0, data.size() ) :
+			self.assertEqual( data[ dataIndices[i] ], sopPrims[i].attribValue( "stringPrim" ) )
+		
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertEqual( result.verticesPerCurve(), prim.verticesPerCurve() )
 		self.assertEqual( result.keys(), prim.keys() )
@@ -300,7 +323,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=False ) :
 		geo = sop.geometry()
-		for key in [ "floatDetail", "intDetail" ] :
+		for key in [ "floatDetail", "intDetail", "stringDetail" ] :
 			self.assertEqual( prim[key].data.value, geo.attribValue( key ) )
 		
 		for key in [ "v2fDetail", "v3fDetail", "color3fDetail", "v2iDetail", "v3iDetail" ] :
@@ -339,6 +362,19 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPoints[ origNumPoints + i ].attribValue( key ) )
 		
+		data = prim["stringPoint"].data
+		dataIndices = prim["stringPointIndices"].data
+		
+		if multipleConversions :
+			defaultIndices = origSopPrim["stringPointIndices"].data
+			for i in range( 0, origNumPoints ) :
+				val = "" if ( defaultIndices[i] >= data.size() ) else data[ defaultIndices[i] ]
+				self.assertEqual( val, sopPoints[ i ].attribValue( "stringPoint" ) )
+		else :
+			defaultValues = [ "" ] * origNumPoints
+			for i in range( 0, origNumPoints ) :
+				self.assertEqual( defaultValues[i], sopPoints[ i ].attribValue( "stringPoint" ) )
+		
 		sopPrims = geo.prims()
 		origNumPrims = origSopPrim.numCurves()
 		self.assertEqual( len(sopPrims), origNumPrims + prim.numCurves() )
@@ -370,6 +406,19 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPrims[ origNumPrims + i ].attribValue( key ) )
+		
+		data = prim["stringPrim"].data
+		dataIndices = prim["stringPrimIndices"].data
+		
+		if multipleConversions :
+			defaultIndices = origSopPrim["stringPrimIndices"].data
+			for i in range( 0, origNumPrims ) :
+				val = "" if ( defaultIndices[i] >= data.size() ) else data[ defaultIndices[i] ]
+				self.assertEqual( val, sopPrims[ i ].attribValue( "stringPrim" ) )
+		else :
+			defaultValues = [ "" ] * origNumPrims
+			for i in range( 0, origNumPrims ) :
+				self.assertEqual( defaultValues[i], sopPrims[ i ].attribValue( "stringPrim" ) )
 		
 		sopVerts = []
 		for i in range( 0, len(sopPrims) ) :
