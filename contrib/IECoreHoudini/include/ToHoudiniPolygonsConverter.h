@@ -50,14 +50,14 @@ class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConver
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPolygonsConverter, ToHoudiniPolygonsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniPolygonsConverter( const IECore::Primitive *primitive );
+		ToHoudiniPolygonsConverter( const IECore::VisibleRenderable *renderable );
 
 		virtual ~ToHoudiniPolygonsConverter();
 	
 	protected :
 		
-		/// performs conversion from the IECore::Primitive into the given GU_Detail
-		virtual bool doPrimitiveConversion( const IECore::Primitive *primitive, GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const;
+		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
+		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
 
 	private :
 

@@ -32,26 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
-#define IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
+#ifndef IECOREHOUDINI_TOHOUDINIGROUPCONVERTER_H
+#define IECOREHOUDINI_TOHOUDINIGROUPCONVERTER_H
 
+#include "IECore/Group.h"
+
+#include "TypeIds.h"
 #include "ToHoudiniGeometryConverter.h"
 
 namespace IECoreHoudini
 {
 
-template<class T>
-ToHoudiniGeometryConverter::Description<T>::Description( IECore::TypeId fromType )
+/// Converter which converts from an IECore::Group to a Houdini GU_Detail
+class ToHoudiniGroupConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
-	ToHoudiniGeometryConverter::registerConverter( fromType, creator );
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniGroupConverter, ToHoudiniGroupConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
+
+		ToHoudiniGroupConverter( const IECore::VisibleRenderable *renderable );
+
+		virtual ~ToHoudiniGroupConverter();
+	
+	protected :
+		
+		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
+		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
+
+	private :
+
+		static ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> m_description;
+};
+
+// register our converter
+IE_CORE_DECLAREPTR( ToHoudiniGroupConverter );
+
 }
 
-template<class T>
-ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::Description<T>::creator( const IECore::VisibleRenderable *renderable )
-{
-	return new T( renderable );
-}
-
-} // namespace IECoreHoudini
-
-#endif // IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
+#endif // IECOREHOUDINI_TOHOUDINIGROUPCONVERTER_H

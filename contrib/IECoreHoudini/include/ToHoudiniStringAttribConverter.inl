@@ -80,13 +80,17 @@ GB_AttributeRef ToHoudiniStringVectorAttribConverter::doVectorConversion( const 
 		return attrRef;
 	}
 	
-	size_t numStrings = definedStrings.entries();
+	std::vector<int> adjustedIndices( indices.size() );
+	for ( size_t i=0; i < indices.size(); i++ )
+	{
+		adjustedIndices[i] = definedStrings.find( stringVector[ indices[i] ].c_str() );
+	}
+	
 	size_t entries = std::min( (size_t)container->entries(), indices.size() );
 	for ( size_t i=0; i < entries; i++ )
 	{
 		attribHandle.setElement( (*container)[i] );
-		int index = indices[i] < numStrings ? indices[i] : numStrings - 1;
-		attribHandle.setString( definedStrings( index ) );
+		attribHandle.setString( definedStrings( adjustedIndices[i] ) );
 	}
 	
 	return attrRef;

@@ -47,8 +47,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniCurvesConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniCurvesConverter> ToHoudiniCurvesConverter::m_description( CurvesPrimitiveTypeId );
 
-ToHoudiniCurvesConverter::ToHoudiniCurvesConverter( const Primitive *primitive ) :
-	ToHoudiniGeometryConverter( primitive, "Converts an IECore::CurvesPrimitive to a Houdini GU_Detail." )
+ToHoudiniCurvesConverter::ToHoudiniCurvesConverter( const VisibleRenderable *renderable ) :
+	ToHoudiniGeometryConverter( renderable, "Converts an IECore::CurvesPrimitive to a Houdini GU_Detail." )
 {
 }
 
@@ -56,9 +56,9 @@ ToHoudiniCurvesConverter::~ToHoudiniCurvesConverter()
 {
 }
 
-bool ToHoudiniCurvesConverter::doPrimitiveConversion( const Primitive *primitive, GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const
+bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
 {
-	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( primitive );
+	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( renderable );
 	if ( !curves )
 	{
 		return false;

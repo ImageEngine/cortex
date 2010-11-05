@@ -50,14 +50,14 @@ class ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPointsConverter, ToHoudiniPointsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniPointsConverter( const IECore::Primitive *primitive );
+		ToHoudiniPointsConverter( const IECore::VisibleRenderable *renderable );
 
 		virtual ~ToHoudiniPointsConverter();
 	
 	protected :
 		
-		/// performs conversion from the IECore::Primitive into the given GU_Detail
-		virtual bool doPrimitiveConversion( const IECore::Primitive *primitive, GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const;
+		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
+		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
 
 	private :
 

@@ -32,26 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
-#define IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
-
-#include "ToHoudiniGeometryConverter.h"
+#ifndef IECOREHOUDINI_TOHOUDINIGROUPCONVERTERBINDING_H
+#define IECOREHOUDINI_TOHOUDINIGROUPCONVERTERBINDING_H
 
 namespace IECoreHoudini
 {
-
-template<class T>
-ToHoudiniGeometryConverter::Description<T>::Description( IECore::TypeId fromType )
-{
-	ToHoudiniGeometryConverter::registerConverter( fromType, creator );
+	void bindToHoudiniGroupConverter();
 }
 
-template<class T>
-ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::Description<T>::creator( const IECore::VisibleRenderable *renderable )
-{
-	return new T( renderable );
-}
-
-} // namespace IECoreHoudini
-
-#endif // IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
+#endif // IECOREHOUDINI_TOHOUDINIGROUPCONVERTERBINDING_H

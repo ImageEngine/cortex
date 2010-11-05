@@ -32,105 +32,76 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ObjectReader.h"
-#include "IECore/ObjectWriter.h"
+#include "IECore/SimpleTypedData.h"
 
-#include "GEO_CobIOTranslator.h"
-#include "FromHoudiniGeometryConverter.h"
-#include "ToHoudiniGeometryConverter.h"
+#include "ToHoudiniGroupConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
-GEO_CobIOTranslator::GEO_CobIOTranslator()
+IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGroupConverter );
+
+ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> ToHoudiniGroupConverter::m_description( GroupTypeId );
+
+ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::VisibleRenderable *renderable ) :
+	ToHoudiniGeometryConverter( renderable, "Converts an IECore::Group to a Houdini GU_Detail." )
 {
 }
 
-GEO_CobIOTranslator::~GEO_CobIOTranslator()
+ToHoudiniGroupConverter::~ToHoudiniGroupConverter()
 {
 }
 
-const char *GEO_CobIOTranslator::formatName() const
+bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
 {
-	return "Cortex Object Format";
-}
-
-int GEO_CobIOTranslator::checkExtension( const char *fileName ) 
-{
-	UT_String sname( fileName );
-
-	if ( sname.fileExtension() && !strcmp( sname.fileExtension(), ".cob" ) )
-	{
-		return true;
-	}
-	
-	return false;
-}
-
-int GEO_CobIOTranslator::checkMagicNumber( unsigned magic )
-{
-	return 0;
-}
-
-bool GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic )
-{
-	((UT_IFStream&)is).close();
-	
-	ObjectReaderPtr reader = new ObjectReader( is.getLabel() );
-	ConstVisibleRenderablePtr renderable = 0;
-	
-	try
-	{
-		renderable = runTimeCast<VisibleRenderable>( reader->read() );
-	}
-	catch ( IECore::IOException e )
+	const Group *group = IECore::runTimeCast<const Group>( renderable );
+	if ( !group )
 	{
 		return false;
 	}
 	
-	if ( !renderable )
+	StringDataPtr groupName = group->blindData()->member<StringData>( "name" );
+	
+	const Group::ChildContainer &children = group->children();
+	for ( Group::ChildContainer::const_iterator it=children.begin(); it != children.end(); it++ )
 	{
-		return false;
+		const VisibleRenderable *child = *it;
+		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child );
+		if ( !converter )
+		{
+			continue;
+		}
+		
+		size_t origNumPrims = geo->primitives().entries();
+		
+		GU_DetailHandle handle;
+		handle.allocateAndSet( geo, false );
+		
+		if ( !converter->convert( handle ) )
+		{
+			continue;
+		}
+		
+		StringDataPtr childName = child->blindData()->member<StringData>( "name" );
+		if ( !childName && !groupName )
+		{
+			continue;
+		}
+		
+		std::string name = childName ? childName->readable() : groupName->readable();		
+		GB_PrimitiveGroup *childGroup = geo->findPrimitiveGroup( name.c_str() );
+		if ( !childGroup )
+		{
+			childGroup = geo->newPrimitiveGroup( name.c_str() );
+		}
+		
+		GEO_PrimList &primitives = geo->primitives();
+		size_t numPrims = primitives.entries();
+		for ( size_t i=origNumPrims; i < numPrims; i++ )
+		{
+			childGroup->add( primitives( i ) );
+		}
 	}
-	
-	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
-	if ( !converter )
-	{
-		return false;
-	}
-	
-	GU_DetailHandle handle;
-	handle.allocateAndSet( (GU_Detail*)geo, false );
-	
-	return converter->convert( handle );
-}
-
-int GEO_CobIOTranslator::fileSave( const GEO_Detail *geo, ostream &os )
-{
-	return 0;
-}
-
-int GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName )
-{
-	((ofstream&)os).close();
-	
-	GU_DetailHandle handle;
-	handle.allocateAndSet( (GU_Detail*)geo, false );
-	
-	FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
-	if ( !converter )
-	{
-		return false;
-	}
-	
-	ObjectPtr object = converter->convert();
-	if ( !object )
-	{
-		return false;
-	}
-	
-	ObjectWriterPtr writer = new ObjectWriter( object, fileName );
-	writer->write();
 	
 	return true;
 }

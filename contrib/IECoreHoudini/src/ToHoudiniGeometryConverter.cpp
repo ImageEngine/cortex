@@ -45,10 +45,10 @@ using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGeometryConverter );
 
-ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const Primitive *primitive, const std::string &description )
-	:	ToHoudiniConverter( description, PrimitiveTypeId )
+ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const VisibleRenderable *renderable, const std::string &description )
+	:	ToHoudiniConverter( description, VisibleRenderableTypeId )
 {
-	srcParameter()->setValue( (Primitive *)primitive );
+	srcParameter()->setValue( (VisibleRenderable *)renderable );
 }
 
 ToHoudiniGeometryConverter::~ToHoudiniGeometryConverter()
@@ -66,7 +66,13 @@ bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
 		return false;
 	}
 	
-	return doPrimitiveConversion( (const Primitive *)srcParameter()->getValidatedValue(), geo, operands );
+	const VisibleRenderable *renderable = IECore::runTimeCast<const VisibleRenderable>( srcParameter()->getValidatedValue() );
+	if ( !renderable )
+	{
+		return false;
+	}
+	
+	return doConversion( renderable, geo );
 }
 
 GEO_PointList ToHoudiniGeometryConverter::appendPoints( GU_Detail *geo, const IECore::V3fVectorData *positions ) const
@@ -205,13 +211,13 @@ void ToHoudiniGeometryConverter::transferAttribs(
 // Factory
 /////////////////////////////////////////////////////////////////////////////////
 
-ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::create( const Primitive *primitive )
+ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::create( const VisibleRenderable *renderable )
 {
 	const TypesToFnsMap *m = typesToFns();
-	TypesToFnsMap::const_iterator it = m->find( Types( primitive->typeId() ) );
+	TypesToFnsMap::const_iterator it = m->find( Types( renderable->typeId() ) );
 	if( it!=m->end() )
 	{
-		return it->second( primitive );
+		return it->second( renderable );
 	}
 	
 	return 0;

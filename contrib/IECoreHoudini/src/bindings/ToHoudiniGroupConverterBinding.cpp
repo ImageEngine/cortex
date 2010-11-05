@@ -32,26 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
-#define IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL
+#include "boost/python.hpp"
 
-#include "ToHoudiniGeometryConverter.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
-namespace IECoreHoudini
+#include "ToHoudiniGroupConverter.h"
+#include "ToHoudiniGroupConverterBinding.h"
+
+using namespace boost::python;
+using namespace IECoreHoudini;
+
+void IECoreHoudini::bindToHoudiniGroupConverter()
 {
-
-template<class T>
-ToHoudiniGeometryConverter::Description<T>::Description( IECore::TypeId fromType )
-{
-	ToHoudiniGeometryConverter::registerConverter( fromType, creator );
+	IECorePython::RunTimeTypedClass<ToHoudiniGroupConverter>()
+		.def(init<IECore::Group*>())
+	;
 }
-
-template<class T>
-ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::Description<T>::creator( const IECore::VisibleRenderable *renderable )
-{
-	return new T( renderable );
-}
-
-} // namespace IECoreHoudini
-
-#endif // IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_INL

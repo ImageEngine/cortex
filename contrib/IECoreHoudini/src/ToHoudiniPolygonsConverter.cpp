@@ -43,8 +43,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniPolygonsConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> ToHoudiniPolygonsConverter::m_description( MeshPrimitiveTypeId );
 
-ToHoudiniPolygonsConverter::ToHoudiniPolygonsConverter( const Primitive *primitive ) :
-	ToHoudiniGeometryConverter( primitive, "Converts an IECore::MeshPrimitive to a Houdini GU_Detail." )
+ToHoudiniPolygonsConverter::ToHoudiniPolygonsConverter( const VisibleRenderable *renderable ) :
+	ToHoudiniGeometryConverter( renderable, "Converts an IECore::MeshPrimitive to a Houdini GU_Detail." )
 {
 }
 
@@ -52,9 +52,9 @@ ToHoudiniPolygonsConverter::~ToHoudiniPolygonsConverter()
 {
 }
 
-bool ToHoudiniPolygonsConverter::doPrimitiveConversion( const Primitive *primitive, GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const
+bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
 {
-	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( primitive );
+	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( renderable );
 	if ( !mesh )
 	{
 		return false;

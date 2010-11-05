@@ -37,6 +37,7 @@
 
 import sys
 import unittest
+import hou
 import IECore
 import IECoreHoudini
 
@@ -55,8 +56,13 @@ from ToHoudiniConverterOp import *
 from FromHoudiniCurvesConverter import *
 from ToHoudiniCurvesConverter import *
 from CobIOTranslator import *
-from InterpolatedCacheReader import *
 from FromHoudiniGroupConverter import *
+
+## these tests use python functions that aren't available before Houdini 11
+## \todo: remove this clause once we drop support for Houdini 10
+if hou.applicationVersion()[0] >= 11 :
+	from InterpolatedCacheReader import *
+	from ToHoudiniGroupConverter import *
 
 if __name__ == "__main__":
     unittest.main()

@@ -63,6 +63,7 @@
 #include "FromHoudiniCurvesConverterBinding.h"
 #include "ToHoudiniCurvesConverterBinding.h"
 #include "FromHoudiniGroupConverterBinding.h"
+#include "ToHoudiniGroupConverterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -97,7 +98,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
     class_<StringVector>("StringVector")
     	.def(boost::python::vector_indexing_suite<StringVector>());
 
-    // bind our IECoreHoudini classes & types
+	// bind our IECoreHoudini classes & types
 	bindTypeId();
 	bindFnOpHolder();
 	bindFnProceduralHolder();
@@ -112,6 +113,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindFromHoudiniCurvesConverter();
 	bindToHoudiniCurvesConverter();
 	bindFromHoudiniGroupConverter();
+	bindToHoudiniGroupConverter();
 	
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );

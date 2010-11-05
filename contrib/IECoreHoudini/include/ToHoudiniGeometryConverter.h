@@ -40,6 +40,7 @@
 
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/VisibleRenderable.h"
 
 #include "TypeIds.h"
 #include "ToHoudiniConverter.h"
@@ -60,23 +61,23 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 
 		/// Converts the IECore::Primitive into the given GU_Detail and returns true if successful
 		/// and false otherwise. Implemented to aquire the write lock on the GU_Detail held by the
-		/// GU_DetailHandle, call doPrimitiveConversion(), and finally unlock the GU_Detail.
+		/// GU_DetailHandle, call doConversion(), and finally unlock the GU_Detail.
 		bool convert( GU_DetailHandle handle ) const;
 
 		/// Creates a converter which will convert the given IECore::Primitive to a Houdini GU_Detail.
 		/// Returns 0 if no such converter can be found.
-		static ToHoudiniGeometryConverterPtr create( const IECore::Primitive *primitive );
+		static ToHoudiniGeometryConverterPtr create( const IECore::VisibleRenderable *renderable );
 
 	protected :
 
-		ToHoudiniGeometryConverter( const IECore::Primitive *primitive, const std::string &description );
+		ToHoudiniGeometryConverter( const IECore::VisibleRenderable *renderable, const std::string &description );
 		
 		virtual ~ToHoudiniGeometryConverter();
 		
-		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::Primitive
-		virtual bool doPrimitiveConversion( const IECore::Primitive *primitive, GU_Detail *geo, IECore::ConstCompoundObjectPtr operands ) const = 0;
+		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::VisibleRenderable
+		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const = 0;
 
-		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::Primitive *primitive );
+		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::VisibleRenderable *renderable );
 
 		static void registerConverter( IECore::TypeId fromType, CreatorFn creator );
 
@@ -88,7 +89,7 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 			public :
 				Description( IECore::TypeId fromType );
 			private :
-				static ToHoudiniGeometryConverterPtr creator( const IECore::Primitive *primitive );
+				static ToHoudiniGeometryConverterPtr creator( const IECore::VisibleRenderable *renderable );
 		};
 		
 		/// Appends points to the GU_Detail from the given V3fVectorData.

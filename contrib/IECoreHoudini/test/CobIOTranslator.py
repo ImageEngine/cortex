@@ -101,7 +101,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
 		
-		converter = IECoreHoudini.FromHoudiniPointsConverter( reader )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
@@ -117,7 +117,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
 		
-		converter = IECoreHoudini.FromHoudiniPolygonsConverter( reader )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.MeshPrimitive ) ) )
@@ -133,10 +133,30 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
 		
-		converter = IECoreHoudini.FromHoudiniCurvesConverter( reader )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.CurvesPrimitive ) ) )
+
+	def testReadWriteGroup( self ) :
+		curves = self.curves()
+		torus = hou.node( "/obj/geo1/torus1" )
+		merge = hou.node( "/obj/geo1" ).createNode( "merge" )
+		merge.setInput( 0, torus )
+		merge.setInput( 1, curves )
+		writer = self.writer( merge )
+		reader = self.reader()
+		
+		self.assert_( not reader.geometry() )
+		self.assert_( reader.errors() )
+		writer.cook()
+		self.assert_( reader.geometry() )
+		self.assert_( not reader.errors() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+		result = converter.convert()
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.Group ) ) )
 
 	def testCantReadBadCob( self ) :
 		writer = self.writer( self.torus() )
