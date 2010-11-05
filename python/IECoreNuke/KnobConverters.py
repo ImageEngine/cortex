@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
 import nuke
 import IECore
 from StringUtil import nukeFileSequence, ieCoreFileSequence
@@ -128,10 +129,21 @@ def __createCompoundParameterKnob( knobHolder, parameter, knobName, knobLabel ) 
 
 def __compoundParameterToKnob( knobHolder, parameter, knobName ) :
 
+	with IECore.IgnoredExceptions( KeyError ):
+		collapsed = parameter.userData()["UI"]["collapsed"]
+		knob = knobHolder.knobs()[ knobName ]
+		knob.setValue( collapsed )
+
 	for childName, child in parameter.items() :
 		setKnobsFromParameter( knobHolder, child, knobName + "_" + childName )
 
 def __compoundParameterFromKnob( knobHolder, parameter, knobName ) :
+
+	knob = knobHolder.knobs()[ knobName ]
+	collapsed = knob.getValue( collapsed )
+	if not "UI" in parameter.userData() :
+		parameter.userData()["UI"] = IECore.CompoundData()
+	parameter.userData()["UI"]["collapsed"] = IECore.BoolData(collapsed)
 
 	for childName, child in parameter.items() :
 		setParameterFromKnobs( knobHolder, child, knobName + "_" + childName )
