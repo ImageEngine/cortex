@@ -117,6 +117,7 @@ void bindTypeId()
 		.value( "Box3Manipulator", Box3ManipulatorTypeId )
 		.value( "TransformationMatrixManipulator", TransformationMatrixManipulatorTypeId )
 		.value( "ToMayaGroupConverter", ToMayaGroupConverterTypeId )
+		.value( "ToMayaParticleConverter", ToMayaParticleConverterTypeId )
 	;
 }
 

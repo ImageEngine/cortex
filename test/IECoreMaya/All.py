@@ -73,6 +73,7 @@ from FromMayaSkinClusterConverterTest import *
 from ToMayaSkinClusterConverterTest import *
 from ToMayaGroupConverterTest import ToMayaGroupConverterTest
 from RunTimeTypedTest import RunTimeTypedTest
+from ToMayaParticleConverterTest import ToMayaParticleConverterTest
 
 IECoreMaya.TestProgram(
 

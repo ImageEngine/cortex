@@ -85,6 +85,7 @@
 #include "IECoreMaya/bindings/ToMayaSkinClusterConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaMeshConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaGroupConverterBinding.h"
+#include "IECoreMaya/bindings/ToMayaParticleConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -143,4 +144,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindToMayaSkinClusterConverter();
 	bindToMayaMeshConverter();
 	bindToMayaGroupConverter();
+	bindToMayaParticleConverter();
 }

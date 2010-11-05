@@ -80,6 +80,7 @@ bool ToMayaArrayDataConverter<F, T>::doConversion( IECore::ConstObjectPtr from, 
 
 template class ToMayaArrayDataConverter< IECore::V3fVectorData, MVectorArray >;
 template class ToMayaArrayDataConverter< IECore::V3dVectorData, MVectorArray >;
+template class ToMayaArrayDataConverter< IECore::Color3fVectorData, MVectorArray >;
 template class ToMayaArrayDataConverter< IECore::V3fVectorData, MPointArray >;
 template class ToMayaArrayDataConverter< IECore::V3dVectorData, MPointArray >;
 template class ToMayaArrayDataConverter< IECore::StringVectorData, MStringArray >;
