@@ -1236,7 +1236,7 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 		}
 
 		RiSubdivisionMeshV( "catmull-clark", vertsPerFace->readable().size(), (int *)&vertsPerFace->readable()[0], (int *)&vertIds->readable()[0],
-			numNames, names, (int *)nArgs, (int *)integers, (float *)floats,
+			numNames, (char **)names, (int *)nArgs, (int *)integers, (float *)floats,
 			pv.n(), pv.tokens(), pv.values() );
 
 		return;
