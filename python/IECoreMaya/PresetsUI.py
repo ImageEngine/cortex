@@ -31,6 +31,9 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
+from __future__ import with_statement
+
 import os, re
 
 import maya.cmds
