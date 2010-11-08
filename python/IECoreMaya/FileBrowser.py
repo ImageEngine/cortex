@@ -36,6 +36,7 @@ import IECoreMaya
 import maya.cmds
 
 import os
+import re, fnmatch
 
 __all__ = [ "FileBrowser" ]
 
@@ -580,7 +581,29 @@ class FileBrowser( IECoreMaya.UIElement ) :
 					return False
 			
 			return True
-	##! }		
+	
+	## A filter that matches a pattern to the filenames
+	class FnMatchFilter() :
+		
+		def __init__( self, pattern ) :
+			
+			self.__reobj = re.compile( fnmatch.translate( pattern ) )
+		
+		def filter( self, path, items ) :
+			
+			items[:] = [ i for i in items if self.__reobj.match( i["path"] ) or os.path.isdir( i["path"] ) ]
+		
+		def validate( self, path, items ) :
+			
+			if not items :
+				return False
+				
+			for i in items:
+				if not self.__reobj.match( i["path"] ) :
+					return False
+			
+			return True
+	##! }
 
 
 # A basic signal mechanism to allow arbitrary connections
