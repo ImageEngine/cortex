@@ -36,56 +36,23 @@
 //////////////////////////////////////////////////////////////////////////
 
 // Houdini
-#include <OP/OP_OperatorTable.h>
-#include <OP/OP_Operator.h>
-#include <UT/UT_Math.h>
-#include <UT/UT_Interrupt.h>
-#include <GU/GU_Detail.h>
-#include <GU/GU_PrimPoly.h>
-#include <CH/CH_LocalVariable.h>
-#include <PRM/PRM_Include.h>
-#include <PRM/PRM_Parm.h>
-#include <OP/OP_Operator.h>
-#include <GU/GU_PrimPart.h>
-#include <CH/CH_ExprLanguage.h>
-#include <GEO/GEO_PrimPart.h>
-#include <GB/GB_AttributeRef.h>
-
+#include "CH/CH_LocalVariable.h"
+#include "UT/UT_Interrupt.h"
+#include "PRM/PRM_Include.h"
+#include "PRM/PRM_Parm.h"
+#include "GB/GB_AttributeRef.h"
 
 // Cortex
-#include <IECore/MessageHandler.h>
-#include <IECore/CompoundParameter.h>
-#include <IECore/Object.h>
-#include <IECore/NullObject.h>
 #include "IECore/ObjectParameter.h"
-#include <IECore/Op.h>
-#include <IECore/TypedParameter.h>
-#include <IECore/Parameterised.h>
-#include <IECore/CompoundParameter.h>
-#include <IECore/ParameterisedProcedural.h>
-#include <IECore/SimpleTypedData.h>
-#include <IECore/MeshPrimitive.h>
-#include <IECorePython/ScopedGILLock.h>
-
-// OpenEXR
-#include <OpenEXR/ImathBox.h>
-
-// C++
-#include <sstream>
-
-// Boost
-#include "boost/python.hpp"
-#include "boost/format.hpp"
-#include "boost/tokenizer.hpp"
-using namespace boost::python;
-using namespace boost;
+#include "IECorePython/ScopedGILLock.h" 
 
 // IECoreHoudini
 #include "CoreHoudini.h"
 #include "SOP_OpHolder.h"
 #include "NodePassData.h"
-#include "FnOpHolder.h"
 #include "FromHoudiniGeometryConverter.h"
+
+using namespace boost::python;
 using namespace IECoreHoudini;
 
 /// Parameter names for non-dynamic SOP parameters
@@ -97,52 +64,43 @@ PRM_Default SOP_OpHolder::opMatchStringDefault( 0.f, "*" );
 PRM_Name SOP_OpHolder::opReloadBtn( "__opReloadBtn", "Reload" );
 PRM_Name SOP_OpHolder::switcherName( "__switcher", "Switcher" );
 
-PRM_ChoiceList SOP_OpHolder::typeMenu( PRM_CHOICELIST_SINGLE,
-		&SOP_OpHolder::buildTypeMenu );
-PRM_ChoiceList SOP_OpHolder::versionMenu( PRM_CHOICELIST_SINGLE,
-		&SOP_OpHolder::buildVersionMenu );
+PRM_ChoiceList SOP_OpHolder::typeMenu( PRM_CHOICELIST_SINGLE, &SOP_OpHolder::buildTypeMenu );
+PRM_ChoiceList SOP_OpHolder::versionMenu( PRM_CHOICELIST_SINGLE, &SOP_OpHolder::buildVersionMenu );
 
 /// Detail for our switcher
 PRM_Default SOP_OpHolder::switcherDefaults[] = {
-		PRM_Default(0, "Parameters"),
+	PRM_Default( 0, "Parameters" ),
 };
 
 /// Add parameters to SOP
 PRM_Template SOP_OpHolder::myParameters[] = {
-		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_OpHolder::reloadClassCallback ),
-		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_OpHolder::reloadClassCallback ),
-		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_OpHolder::reloadButtonCallback ),
-		PRM_Template(PRM_INT|PRM_TYPE_INVISIBLE, 1, &opParmEval),
-		PRM_Template(PRM_STRING|PRM_TYPE_INVISIBLE, 1, &opMatchString, &opMatchStringDefault ),
-		PRM_Template(PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
-		PRM_Template()
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_OpHolder::reloadClassCallback ),
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_OpHolder::reloadClassCallback ),
+	PRM_Template( PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_OpHolder::reloadButtonCallback ),
+	PRM_Template( PRM_INT|PRM_TYPE_INVISIBLE, 1, &opParmEval ),
+	PRM_Template( PRM_STRING|PRM_TYPE_INVISIBLE, 1, &opMatchString, &opMatchStringDefault ),
+	PRM_Template( PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
+	PRM_Template()
 };
 
 /// Don't worry about variables today
 CH_LocalVariable SOP_OpHolder::myVariables[] = {
-		{ 0, 0, 0 },
+	{ 0, 0, 0 },
 };
 
 /// Houdini's static creator method
-OP_Node *SOP_OpHolder::myConstructor( OP_Network *net,
-										const char *name,
-										OP_Operator *op )
+OP_Node *SOP_OpHolder::myConstructor( OP_Network *net, const char *name, OP_Operator *op )
 {
-    return new SOP_OpHolder(net, name, op);
+    return new SOP_OpHolder( net, name, op );
 }
 
 /// Ctor
-SOP_OpHolder::SOP_OpHolder(OP_Network *net,
-		const char *name,
-		OP_Operator *op ) :
-	SOP_ParameterisedHolder(net, name, op),
-    m_renderDirty(true),
-    m_parameters(0),
-    m_haveParameterList(false)
+SOP_OpHolder::SOP_OpHolder(OP_Network *net, const char *name, OP_Operator *op )
+	: SOP_ParameterisedHolder( net, name, op ), m_renderDirty( true ), m_parameters( 0 ), m_haveParameterList( false )
 {
 	// evaluation expression parameter
-	getParm("__opParmEval").setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
-	getParm("__opParmEval").setLockedFlag( 0, 1 );
+	getParm( "__opParmEval" ).setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
+	getParm( "__opParmEval" ).setLockedFlag( 0, 1 );
 
 	// clear inputs
 	m_inputs.clear();
@@ -155,12 +113,13 @@ SOP_OpHolder::~SOP_OpHolder()
 
 /// TODO: move this code into parameterised holder
 /// Build type menu
-void SOP_OpHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
-		const PRM_SpareData *, PRM_Parm * )
+void SOP_OpHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
 {
-	SOP_OpHolder *me = reinterpret_cast<SOP_OpHolder*>(data);
+	SOP_OpHolder *me = reinterpret_cast<SOP_OpHolder*>( data );
 	if ( !me )
+	{
 		return;
+	}
 
 	menu[0].setToken( "" );
 	menu[0].setLabel( "< No Op >" );
@@ -178,17 +137,18 @@ void SOP_OpHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
 	}
 
 	// mark the end of our menu
-	menu[pos].setToken(0);
+	menu[pos].setToken( 0 );
 }
 
 /// TODO: move this code into parameterised holder
 /// Build version menu
-void SOP_OpHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
-		const PRM_SpareData *, PRM_Parm *)
+void SOP_OpHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
 {
-	SOP_OpHolder *me = reinterpret_cast<SOP_OpHolder*>(data);
+	SOP_OpHolder *me = reinterpret_cast<SOP_OpHolder*>( data );
 	if ( !me )
+	{
 		return;
+	}
 
 	unsigned int pos=0;
 	if ( me->m_className!="" )
@@ -197,8 +157,8 @@ void SOP_OpHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
 		std::vector<int>::iterator it;
 		for ( it=class_versions.begin(); it!=class_versions.end(); ++it )
 		{
-	        std::stringstream ss;
-	        ss << (*it);
+			std::stringstream ss;
+			ss << (*it);
 			menu[pos].setToken( ss.str().c_str() );
 			menu[pos].setLabel( ss.str().c_str() );
 			++pos;
@@ -213,7 +173,7 @@ void SOP_OpHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
 	}
 
 	// mark the end of our menu
-	menu[pos].setToken(0);
+	menu[pos].setToken( 0 );
 }
 
 /// TODO: Move this code into parameterised holder
@@ -252,10 +212,9 @@ void SOP_OpHolder::refreshClassNames()
 
 /// TODO: move this code into parameterised holder
 /// Callback executed whenever the type/version menus change
-int SOP_OpHolder::reloadClassCallback( void *data, int index, float time,
-		const PRM_Template *tplate)
+int SOP_OpHolder::reloadClassCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
-	SOP_OpHolder *sop = reinterpret_cast<SOP_OpHolder*>(data);
+	SOP_OpHolder *sop = reinterpret_cast<SOP_OpHolder*>( data );
 	if ( !sop )
 	{
 		return 0;
@@ -267,7 +226,9 @@ int SOP_OpHolder::reloadClassCallback( void *data, int index, float time,
 	sop->evalString( ver_str, "__opVersion", 0, 0 );
 	int version = -1;
 	if ( ver_str!="" )
+	{
 		version = boost::lexical_cast<int>( ver_str.buffer() );
+	}
 
 	// has our type changed?
 	if ( type!=sop->m_className )
@@ -317,12 +278,13 @@ void SOP_OpHolder::refreshInputConnections()
 
 	IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( getParameterised() );
 	if ( !op )
+	{
 		return;
+	}
 
 	// work out which parameters need inputs & make them so :)
 	m_parameters = op->parameters();
-	for ( IECore::CompoundParameter::ParameterVector::const_iterator it=m_parameters->orderedParameters().begin();
-			it!=m_parameters->orderedParameters().end(); ++it )
+	for ( IECore::CompoundParameter::ParameterVector::const_iterator it=m_parameters->orderedParameters().begin(); it!=m_parameters->orderedParameters().end(); ++it )
 	{
 		switch( (*it)->typeId() )
 		{
@@ -360,9 +322,7 @@ void SOP_OpHolder::loadOp( const std::string &type, int version, bool update_gui
 	// get our current procedural and save it
 	if ( hasParameterised() )
 	{
-		IECore::OpPtr op =
-				IECore::runTimeCast<IECore::Op>(
-						getParameterised() );
+		IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( getParameterised() );
 		if ( op )
 		{
 			old_op = op;
@@ -388,7 +348,7 @@ void SOP_OpHolder::loadOp( const std::string &type, int version, bool update_gui
 		m_inputs.clear();
 		m_haveParameterList = false;
 		UT_String msg( "Op Holder has no parameterised class to operate on!" );
-    	addError( SOP_MESSAGE, msg );
+		addError( SOP_MESSAGE, msg );
 	}
 
 	// if required, update the parameter interface on the SOP
@@ -405,8 +365,7 @@ void SOP_OpHolder::loadOp( const std::string &type, int version, bool update_gui
 			IECorePython::ScopedGILLock lock;
 			try
 			{
-				handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input,
-					CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
+				handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input, CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
 				object fn( resultHandle );
 				fn.attr("updateParameters")( proc, old_op );
 			}
@@ -420,10 +379,9 @@ void SOP_OpHolder::loadOp( const std::string &type, int version, bool update_gui
 
 /// TODO: move this code into parameterised holder
 /// Callback executed whenever the reload button is clicked
-int SOP_OpHolder::reloadButtonCallback( void *data, int index, float time,
-		const PRM_Template *tplate)
+int SOP_OpHolder::reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
-	SOP_OpHolder *sop = reinterpret_cast<SOP_OpHolder*>(data);
+	SOP_OpHolder *sop = reinterpret_cast<SOP_OpHolder*>( data );
 	if ( !sop )
 	{
 		return 0;
@@ -436,10 +394,10 @@ int SOP_OpHolder::reloadButtonCallback( void *data, int index, float time,
 }
 
 /// Cook the SOP! This method does all the work
-OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
+OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 {
 	// some defaults and useful variables
-    Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );
+	Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );
 	float now = context.myTime;
 
 	// force eval of our nodes parameters with our hidden parameter expression
@@ -449,15 +407,17 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 	IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( getParameterised() );
 
 	// check for a valid parameterised on this SOP
-    if ( !op )
-    {
-    	UT_String msg( "Op Holder has no parameterised class to operate on!" );
-    	addError( SOP_MESSAGE, msg );
-    	return error();
-    }
+	if ( !op )
+	{
+		UT_String msg( "Op Holder has no parameterised class to operate on!" );
+		addError( SOP_MESSAGE, msg );
+		return error();
+	}
 
-    if( lockInputs(context)>=UT_ERROR_ABORT )
-    	return error();
+	if( lockInputs(context)>=UT_ERROR_ABORT )
+	{
+		return error();
+	}
 
 	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
@@ -533,7 +493,7 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 	}
 
 	// update parameters from our op & flag as dirty if necessary
-	bool req_update = updateParameters( op, now);
+	bool req_update = updateParameters( op, now );
 	if ( req_update )
 	{
 		dirty();
@@ -547,8 +507,7 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 
 		// pass ourselves onto the GR_Cortex render hook
 		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_OPHOLDER );
-		gdp->addAttrib( "IECoreHoudini::NodePassData",
-				sizeof(IECoreHoudini::NodePassData), GB_ATTRIB_MIXED, &data );
+		gdp->addAttrib( "IECoreHoudini::NodePassData", sizeof(IECoreHoudini::NodePassData), GB_ATTRIB_MIXED, &data );
 
 		// if our result is a visible renderable then set our bounds on our output gdp
 		const IECore::Object *result = op->resultParameter()->getValue();
@@ -556,14 +515,13 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 		if ( renderable )
 		{
 			Imath::Box3f bbox = renderable->bound();
-			gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y,
-					bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
+			gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y, bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
 		}
 	}
 	catch( boost::python::error_already_set )
 	{
-	    addError( SOP_MESSAGE, "Error raised during Python evaluation!" );
-	    IECorePython::ScopedGILLock lock;
+		addError( SOP_MESSAGE, "Error raised during Python evaluation!" );
+		IECorePython::ScopedGILLock lock;
 		PyErr_Print();
 	}
 	catch( const IECore::Exception &e )
@@ -589,9 +547,7 @@ OP_ERROR SOP_OpHolder::cookMySop(OP_Context &context)
 /// It checks for type/version values on the node and attempts to reload
 /// the procedural from disk
 /// \todo: not entirely certain this is returning the correct thing...
-bool SOP_OpHolder::load( UT_IStream &is,
-		const char *ext,
-		const char *path )
+bool SOP_OpHolder::load( UT_IStream &is, const char *ext, const char *path )
 {
 	m_haveParameterList = false;
 	bool loaded = OP_Node::load( is, ext, path );
@@ -605,7 +561,7 @@ bool SOP_OpHolder::load( UT_IStream &is,
 	m_classVersion = -1;
 	if ( ver_str!="" )
 	{
-		m_classVersion = boost::lexical_cast<int>(ver_str.buffer());
+		m_classVersion = boost::lexical_cast<int>( ver_str.buffer() );
 	}
 
 	// if we can, set our class & version
