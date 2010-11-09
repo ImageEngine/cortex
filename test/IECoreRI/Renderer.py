@@ -32,8 +32,11 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import unittest
 import os
+
 from IECore import *
 import IECoreRI
 
@@ -142,6 +145,43 @@ class RendererTest( unittest.TestCase ) :
 			l = "".join( file( "test/IECoreRI/output/testAttributes.rib" ).readlines() )
 			l = " ".join( l.split() )
 			self.assert_( t[2] in l )
+
+	def testCompoundDataAttributes( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
+		
+		with WorldBlock( r ) :
+
+			r.setAttribute(
+				"ri:displacementbound",
+				{
+					"sphere" : 10.0,
+					"coordinatesystem" : "shader",
+				},
+			)
+
+		lines = file( "test/IECoreRI/output/testAttributes.rib" ).readlines()
+		found = False
+		for line in lines :
+			if	( "Attribute \"displacementbound\"" in line and
+				"\"string coordinatesystem\" [ \"shader\" ]" in line and
+				"\"float sphere\" [ 10 ]" in line ) :
+					found = True
+				
+		self.failUnless( found )
+		
+		# check that we get appropriate warnings if not providing CompoundData
+		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
+		
+		with WorldBlock( r ) :
+		
+			c = CapturingMessageHandler()
+			with c :
+				r.setAttribute( "ri:displacementbound", FloatData( 10 ) )
+				
+		self.assertEqual( len( c.messages ), 1 )
+		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
 
 	def testProcedural( self ) :
 

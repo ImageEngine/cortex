@@ -167,8 +167,12 @@ class Renderer : public IECore::Renderer
 		/// \par Implementation specific attributes :
 		////////////////////////////////////////////////////////////////////////////
 		///
-		/// \li <b>"ri:*:*"</b><br>
+		/// \li <b>"ri:*:*" Data</b><br>
 		/// Passed to an RiAttribute call.
+		///
+		/// \li <b>"ri:*" CompoundData</b><br>
+		/// Passed to an RiAttribute call. This allows multiple attribute values to be
+		/// specified in one setAttribute() call.
 		///
 		/// \li <b>"ri:shadingRate" FloatData</b><br>
 		/// Passed to RiShadingRate.

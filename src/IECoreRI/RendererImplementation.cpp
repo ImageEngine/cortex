@@ -586,13 +586,24 @@ void IECoreRI::RendererImplementation::setAttribute( const std::string &name, IE
 		size_t i = name.find_first_of( ":", 3 );
 		if( i==string::npos )
 		{
-			msg( Msg::Warning, "IECoreRI::RendererImplementation::setAttribute", format( "Expected attribute name matching \"ri:*:*\" but got \"%s\"." ) % name );
-			return;
+			const CompoundData *compoundValue = runTimeCast<const CompoundData>( value );
+			if( !compoundValue )
+			{
+				msg( Msg::Warning, "IECoreRI::RendererImplementation::setAttribute", format( "Expected CompoundData for name matching \"ri:*\" but got \"%s\"." ) % value->typeName() );
+			}
+			else
+			{
+				ParameterList pl( compoundValue->readable() );
+				RiAttributeV( name.c_str() + 3, pl.n(), pl.tokens(), pl.values() );
+			}
 		}
-		string s1( name, 3, i-3 );
-		string s2( name, i+1 );
-		ParameterList pl( s2, value );
-		RiAttributeV( (char *)s1.c_str(), pl.n(), pl.tokens(), pl.values() );
+		else
+		{
+			string s1( name, 3, i-3 );
+			string s2( name, i+1 );
+			ParameterList pl( s2, value );
+			RiAttributeV( (char *)s1.c_str(), pl.n(), pl.tokens(), pl.values() );
+		}
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
