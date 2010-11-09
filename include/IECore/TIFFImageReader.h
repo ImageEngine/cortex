@@ -90,7 +90,7 @@ class TIFFImageReader : public ImageReader
 
 		//! @name ImageReader interface
 		/// Please note that these methods operate on the current TIFF directory.
-                //@{
+		//@{
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
