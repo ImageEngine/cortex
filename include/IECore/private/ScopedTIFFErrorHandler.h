@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,38 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SCOPEDTIFFERRORHANDLER_H
-#define IE_CORE_SCOPEDTIFFERRORHANDLER_H
+#ifndef IECORE_SCOPEDTIFFERRORHANDLER_H
+#define IECORE_SCOPEDTIFFERRORHANDLER_H
 
-#include <stdarg.h>
-#include <setjmp.h>
-#include <vector>
-#include "tbb/mutex.h"
+#include <stack>
 
 #include "tiffio.h"
 
+#include "tbb/mutex.h"
+#include "tbb/enumerable_thread_specific.h"
+
 namespace IECore
 {
+namespace Detail
+{
 
-/// A class that hides the TIFF error handling mechanism by raising exceptions instead.
-/// The object will catch any TIFF errors until it gets out of scope.
+/// Installs an error handler for the time it is in scope, and captures
+/// any errors coming it's way. These can then be converted to exceptions
+/// by calling the throwIfError() member function.
 class ScopedTIFFErrorHandler
 {
-	public:
-		ScopedTIFFErrorHandler( );
+	public :
+	
+		ScopedTIFFErrorHandler();
 		virtual ~ScopedTIFFErrorHandler();
 
-	protected:
+		/// Returns true if any errors have been captured.
+		bool hasError() const;
+		/// Throws a descriptive IOException if any errors have been captured.
+		void throwIfError() const;
+		/// The error messages captured to far.
+		const std::string &errorMessage() const;
+		/// Clears any errors captured so far.
+		void clear();
+		
+	private :
 
-		jmp_buf m_jmpBuffer;
+		static void handler( const char *module, const char *fmt, va_list ap );
+
 		std::string m_errorMessage;
+		
+		static tbb::mutex g_handlerMutex;
+		static TIFFErrorHandler g_previousHandler;
+		static size_t g_handlerCount;
+		
+		static tbb::enumerable_thread_specific<std::stack<ScopedTIFFErrorHandler *> > g_handlerStack;
 
-		static tbb::mutex m_setupMutex;
-		static void output(const char* module, const char* fmt, va_list ap);
-		static TIFFErrorHandler m_previousHandler;
-		static unsigned int m_handlerCount;
 };
 
+} // namespace Detail
 } // namespace IECore
 
-#endif // IE_CORE_SCOPEDTIFFERRORHANDLER_H
+#endif // IECORE_SCOPEDTIFFERRORHANDLER_H

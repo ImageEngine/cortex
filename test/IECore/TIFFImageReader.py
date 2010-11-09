@@ -346,9 +346,6 @@ class TestTIFFReader(unittest.TestCase):
 
 		fileNames = glob.glob( "test/IECore/data/tiff/*.tif" ) + glob.glob( "test/IECore/data/tiff/*.tiff" )
 
-		# Silence any warnings while the tests run
-		MessageHandler.pushHandler( NullMessageHandler() )
-
 		expectedFailures = [
 			"test/IECore/data/tiff/rgb_black_circle.256x256.4bit.tiff",
 			"test/IECore/data/tiff/rgb_black_circle.256x256.2bit.tiff",
@@ -356,33 +353,23 @@ class TestTIFFReader(unittest.TestCase):
 			"test/IECore/data/tiff/uvMap.512x256.16bit.truncated.tif",
 		]
 
-		try:
+		for f in fileNames:
 
-			for f in fileNames:
+			r = TIFFImageReader( f )
 
-				r = TIFFImageReader( f )
+			if f in expectedFailures :
 
-				if f in expectedFailures :
+				self.assertRaises( RuntimeError, r.read )
 
-					self.assertRaises( RuntimeError, r.read )
+			else :
+				self.assert_( TIFFImageReader.canRead( f ) )
+				self.failIf( JPEGImageReader.canRead( f ) )
+				self.failIf( EXRImageReader.canRead( f ) )
+				self.failIf( CINImageReader.canRead( f ) )
 
-				else :
-					self.assert_( TIFFImageReader.canRead( f ) )
-					self.failIf( JPEGImageReader.canRead( f ) )
-					self.failIf( EXRImageReader.canRead( f ) )
-					self.failIf( CINImageReader.canRead( f ) )
-
-					img = r.read()
-					self.assertEqual( type(img), ImagePrimitive )
-					self.assert_( img.arePrimitiveVariablesValid() )
-
-		except:
-
-			raise
-
-		finally:
-
-			MessageHandler.popHandler()
+				img = r.read()
+				self.assertEqual( type(img), ImagePrimitive )
+				self.assert_( img.arePrimitiveVariablesValid() )
 
 	def testTilesWithLeftovers( self ) :
 
@@ -413,6 +400,37 @@ class TestTIFFReader(unittest.TestCase):
 		
 		i = r.read()
 		self.failUnless( isinstance( i, ImagePrimitive ) )
+	
+	def testProblemTDL( self ) :
+	
+		# 3delight has started using the SMinSampleValue and SMaxSampleValue tags to store
+		# the range of values in a tdl file. this is jolly useful for shader writers but a pain
+		# for anyone using libtiff to read the images. libtiff currently doesn't support the
+		# storage of different values per sample, and therefore complains when given
+		# one of these files. we deal with this by pretending nothing has happened and allowing
+		# all directories except the last one to be read (it's only the last one that has the
+		# problem).
+	
+		r = TIFFImageReader( "test/IECore/data/tiff/problem.tdl" )
+		
+		expectedResolutions = [
+			( 64, 32 ),
+			( 32, 16 ),
+			( 16, 8 ),
+			( 8, 4 ),
+			( 4, 2 ),
+			# there should be a ( 2, 1 ) as well, but the best we can do is
+			# ignore it.
+		]
+		
+		self.assertEqual( r.numDirectories(), len( expectedResolutions ) )
+		
+		for i in range( 0, len( expectedResolutions ) ) :
+			r.setDirectory( i )
+			image = r.read()
+			size = image.dataWindow.size()
+			self.assertEqual( size.x + 1, expectedResolutions[i][0] )
+			self.assertEqual( size.y + 1, expectedResolutions[i][1] )
 			
 	def tearDown( self ) :
 	

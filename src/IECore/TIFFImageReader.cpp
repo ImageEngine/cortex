@@ -46,7 +46,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/ScopedTIFFErrorHandler.h"
+#include "IECore/private/ScopedTIFFErrorHandler.h"
 #include "IECore/BoxOps.h"
 #include "IECore/ScaledDataConversion.h"
 
@@ -55,9 +55,8 @@
 
 #include "tiffio.h"
 
-
-
 using namespace IECore;
+using namespace IECore::Detail;
 using namespace boost;
 using namespace Imath;
 using namespace std;
@@ -182,7 +181,7 @@ bool TIFFImageReader::isComplete()
 
 		readBuffer();
 
-		return true;
+		return !errorHandler.hasError();
 	}
 	catch (...)
 	{
@@ -321,8 +320,6 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 
 DataPtr TIFFImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw )
 {
-	ScopedTIFFErrorHandler errorHandler;
-
 	readCurrentDirectory( true );
 
 	if ( m_buffer.size() == 0 )
@@ -505,44 +502,53 @@ bool TIFFImageReader::open( bool throwOnFailure )
 
 	try
 	{
-		if ( ! m_tiffImage )
-		{
-			m_tiffImage = TIFFOpen( fileName().c_str(), "r" );
-
-			if (! m_tiffImage )
-			{
-				throw IOException( ( boost::format("TIFFImageReader: Could not open %s ") % fileName() ).str() );
-			}
-		}
-
+	
 		ScopedTIFFErrorHandler errorHandler;
+
+		m_tiffImage = TIFFOpen( fileName().c_str(), "r" );
+		errorHandler.throwIfError();
 
 		m_numDirectories = 1;
 		TIFFSetDirectory( m_tiffImage, 0 );
 		while ( !TIFFLastDirectory( m_tiffImage ) )
 		{
-			m_numDirectories ++;
-
 			TIFFReadDirectory( m_tiffImage );
+			if( errorHandler.hasError() )
+			{
+				if( errorHandler.errorMessage().find( "SMinSampleValue" ) != string::npos ||
+					errorHandler.errorMessage().find( "SMaxSampleValue" ) != string::npos
+				)
+				{
+					// 3delight makes tiff files which have SMinSampleValue and SMaxSampleValue
+					// tags where the values differ per sample, and libtiff currently doesn't support that.
+					// fortunately 3delight only puts those tags on the last directory, so we
+					// just ignore the problem and end up with one less directory than we should.
+					errorHandler.clear();
+				}
+			}
+			else
+			{
+				m_numDirectories ++;
+			}
 		}
-
 		TIFFSetDirectory( m_tiffImage, 0 );
 
-		m_tiffImageFileName = fileName();
+		errorHandler.throwIfError();
+		
 	}
-	catch ( ... )
+	catch( ... )
 	{
-		if ( throwOnFailure )
+		if( throwOnFailure )
 		{
 			throw;
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 
-	return m_tiffImage != 0;
+	assert( m_tiffImage );
+	m_tiffImageFileName = fileName();
+	
+	return true;
 }
 
 bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure ) const
@@ -660,6 +666,8 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 		uint32 fullLength = tiffField<uint32>( TIFFTAG_PIXAR_IMAGEFULLLENGTH, height );
 
 		m_displayWindow = Box2i( V2i( 0, 0 ), V2i( fullWidth - 1, fullLength - 1 ) );
+
+		errorHandler.throwIfError();
 
 		m_haveDirectory = true;
 	}

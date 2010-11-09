@@ -49,7 +49,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/Parameter.h"
 #include "IECore/NumericParameter.h"
-#include "IECore/ScopedTIFFErrorHandler.h"
+#include "IECore/private/ScopedTIFFErrorHandler.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/TypeTraits.h"
@@ -59,6 +59,7 @@
 #include "tiffio.h"
 
 using namespace IECore;
+using namespace IECore::Detail;
 using namespace std;
 using namespace Imath;
 using namespace boost;
@@ -431,4 +432,6 @@ void TIFFImageWriter::writeImage( const vector<string> &names, const ImagePrimit
 	}
 
 	TIFFClose( tiffImage );
+	
+	errorHandler.throwIfError();
 }
