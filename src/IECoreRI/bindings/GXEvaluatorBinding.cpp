@@ -45,7 +45,7 @@ using namespace boost::python;
 namespace IECoreRI
 {
 
-static IECore::CompoundDataPtr evaluate( GXEvaluator &e, const IECore::IntVectorData *faceIndices, const IECore::FloatVectorData *u, const IECore::FloatVectorData *v, const object &primVarNames  )
+static IECore::CompoundDataPtr evaluate1( GXEvaluator &e, const IECore::IntVectorData *faceIndices, const IECore::FloatVectorData *u, const IECore::FloatVectorData *v, const object &primVarNames )
 {
 	std::vector<std::string> pvn;
 	container_utils::extend_container( pvn, primVarNames );
@@ -55,12 +55,23 @@ static IECore::CompoundDataPtr evaluate( GXEvaluator &e, const IECore::IntVector
 	return e.evaluate( faceIndices, u, v, pvn );
 }
 
+static IECore::CompoundDataPtr evaluate2( GXEvaluator &e, const IECore::FloatVectorData *s, const IECore::FloatVectorData *t, const object &primVarNames )
+{
+	std::vector<std::string> pvn;
+	container_utils::extend_container( pvn, primVarNames );
+	
+	IECorePython::ScopedGILRelease gilRelease;
+		
+	return e.evaluate( s, t, pvn );
+}
+
 void bindGXEvaluator()
 {
 	class_<GXEvaluator, boost::noncopyable>( "GXEvaluator", no_init )
 		.def( init<const IECore::Primitive *>() )
 		.def( "numFaces", &GXEvaluator::numFaces )
-		.def( "evaluate", &evaluate )
+		.def( "evaluate", &evaluate1 )
+		.def( "evaluate", &evaluate2 )
 	;
 }
 

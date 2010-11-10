@@ -35,12 +35,15 @@
 #ifndef IECORERI_GXEVALUATOR_H
 #define IECORERI_GXEVALUATOR_H
 
+#include "tbb/queuing_rw_mutex.h"
+
 #include "boost/noncopyable.hpp"
 
 #include "gx.h"
 
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/MeshPrimitiveEvaluator.h"
 
 namespace IECoreRI
 {
@@ -55,16 +58,32 @@ class GXEvaluator : public boost::noncopyable
 		GXEvaluator( const IECore::Primitive *primitive );
 		~GXEvaluator();
 		
-		unsigned numFaces();
+		unsigned numFaces() const;
 		
+		/// Evaluates points at the specified u,v positions of the specified faces.
+		/// \threading It is safe to call this from multiple concurrent threads.
 		IECore::CompoundDataPtr evaluate( const IECore::IntVectorData *faceIndices, const IECore::FloatVectorData *u, const IECore::FloatVectorData *v, const std::vector<std::string> &primVarNames ) const;
+		/// Evaluates points at the specified s,t positions. As an individual evaluation can fail if no geometry exists
+		/// at that location, an additional "gxStatus" BoolVectorData is returned, with elements being true only if the corresponding
+		/// results are valid.
+		/// \threading It is safe to call this from multiple concurrent threads.
+		IECore::CompoundDataPtr evaluate( const IECore::FloatVectorData *s, const IECore::FloatVectorData *t, const std::vector<std::string> &primVarNames ) const;
 		
 	private :
 
+		void validatePrimVarNames( const std::vector<std::string> &primVarNames ) const;
+
 		RtContextHandle m_context;
 		GxGeometryHandle m_geo;
+		
 		typedef std::map<std::string, IECore::TypeId> PrimitiveVariableTypeMap;
 		PrimitiveVariableTypeMap m_primitiveVariableTypes;
+		
+		void buildSTEvaluator() const;
+		typedef tbb::queuing_rw_mutex Mutex;
+		mutable Mutex m_stEvaluatorMutex;
+		mutable IECore::MeshPrimitiveEvaluatorPtr m_stEvaluator;
+		
 };
 
 } // namespace IECoreRI

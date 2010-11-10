@@ -37,6 +37,7 @@ from __future__ import with_statement
 import unittest
 import threading
 import random
+import math
 
 import IECore
 import IECoreRI
@@ -184,7 +185,73 @@ class GXEvaluatorTest( unittest.TestCase ) :
 		self.assertEqual( len( points ), len( threads ) )
 		
 		for p in points :
-			self.assertEqual( p, referencePoints )		
+			self.assertEqual( p, referencePoints )
 			
+	def testSTEvaluation( self ) :
+	
+		m = IECore.ObjectReader( "test/IECoreRI/data/gxSubdivCube.cob" ).read()
+		
+		# use the cortex evaluator to get points to evaluate
+		tm = IECore.TriangulateOp()( input=m )
+		tme = IECore.MeshPrimitiveEvaluator( tm )
+		tmer = tme.createResult()
+		r = IECore.Rand32()
+		
+		s = IECore.FloatVectorData()
+		t = IECore.FloatVectorData()
+		for fi in range( 0, tm.numFaces() ) :
+			for i in range( 100 ) :
+				status = tme.barycentricPosition( fi, r.barycentricf(), tmer )
+				self.assertEqual( status, True )
+				s.append( tmer.uv()[0] )
+				t.append( tmer.uv()[1] )
+			
+		# then use the GXEvaluator on those points
+		e = IECoreRI.GXEvaluator( m )
+	
+		points = e.evaluate( s, t, [ "Ng", "P", "s", "t" ] )
+		
+		self.assertEqual( len( points["P"] ), len( s ) )
+		self.assertEqual( len( points["s"] ), len( s ) )
+		self.assertEqual( len( points["t"] ), len( s ) )
+		self.assertEqual( len( points["Ng"] ), len( s ) )
+		
+		# check the points are ok
+		for i in range( 0, len( points["P"] ) ) :
+		
+			self.failUnless( math.fabs( points["P"][i].length() - 0.425 ) < 0.01 )
+			self.failUnless( points["P"][i].normalized().dot( points["Ng"][i].normalized() ) > 0.99 )
+			self.failUnless( points["gxStatus"][i] )
+			
+	def testFailedSTEvaluation( self ) :
+	
+		m = IECore.ObjectReader( "test/IECoreRI/data/gxSubdivCube.cob" ).read()
+		
+		# the cube only covers a portion of 0-1 texture space. generate points in
+		# this whole area, and then use a cortex evaluator to decide which ones
+		# should succeed and which should fail.
+		# use the cortex evaluator to get points to evaluate
+		tm = IECore.TriangulateOp()( input=m )
+		tme = IECore.MeshPrimitiveEvaluator( tm )
+		tmer = tme.createResult()
+		r = IECore.Rand32()
+		
+		s = IECore.FloatVectorData()
+		t = IECore.FloatVectorData()
+		expectedStatuses = IECore.BoolVectorData()
+		for fi in range( 0, 100 ) :
+			s.append( r.nextf( 0, 1 ) )
+			t.append( r.nextf( 0, 1 ) )
+			expectedStatuses.append( tme.pointAtUV( IECore.V2f( s[-1], t[-1] ), tmer ) )
+					
+		# then evaluate those points using the gx library
+		e = IECoreRI.GXEvaluator( m )
+		
+		points = e.evaluate( s, t, [ "P" ] )
+		
+		# check we get the successes and failures we expect
+		
+		self.assertEqual( points["gxStatus"], expectedStatuses )
+		
 if __name__ == "__main__":
     unittest.main()

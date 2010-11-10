@@ -32,6 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/TriangulateOp.h"
+#include "IECore/FileNameParameter.h"
+
 #include "IECoreRI/GXEvaluator.h"
 #include "IECoreRI/Renderer.h"
 #include "IECoreRI/ScopedContext.h"
@@ -90,7 +93,7 @@ GXEvaluator::~GXEvaluator()
 	}
 }
 
-unsigned GXEvaluator::numFaces()
+unsigned GXEvaluator::numFaces() const
 {
 	ScopedContext context( m_context );
 	return GxGetFaceCount( m_geo );
@@ -114,19 +117,9 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::IntVectorData *face
 	{
 		throw InvalidArgumentException( "faceIndices, u and v must all have the same length" );
 	}
-	for( vector<string>::const_iterator it=primVarNames.begin(); it!=primVarNames.end(); it++ )
-	{
-		PrimitiveVariableTypeMap::const_iterator pvIt = m_primitiveVariableTypes.find( *it );
-		if( pvIt == m_primitiveVariableTypes.end() )
-		{
-			throw InvalidArgumentException( boost::str( boost::format( "Primitive variable \"%s\" does not exist" ) % *it ) );
-		}
-		if( pvIt->second==InvalidTypeId )
-		{
-			throw InvalidArgumentException( boost::str( boost::format( "Primitive variable \"%s\" has unsupported type" ) % *it ) );
-		}
-	}
-
+	
+	validatePrimVarNames( primVarNames );
+	
 	// create surface points
 	ScopedContext context( m_context );
 
@@ -177,4 +170,133 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::IntVectorData *face
 	}
 	
 	return result;
+}
+
+IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s, const IECore::FloatVectorData *t, const std::vector<std::string> &primVarNames ) const
+{
+	size_t numPoints = s->readable().size();
+	if( t->readable().size() != numPoints )
+	{
+		throw InvalidArgumentException( "s and t must have the same length" );
+	}
+		
+	buildSTEvaluator();
+	
+	PrimitiveEvaluator::ResultPtr evaluatorResult = m_stEvaluator->createResult();
+	IntVectorDataPtr fData = new IntVectorData;
+	FloatVectorDataPtr uData = new FloatVectorData;
+	FloatVectorDataPtr vData = new FloatVectorData;
+	BoolVectorDataPtr statusData = new BoolVectorData;
+	std::vector<int> &fWritable = fData->writable(); fWritable.resize( numPoints );
+	std::vector<float> &uWritable = uData->writable(); uWritable.resize( numPoints );
+	std::vector<float> &vWritable = vData->writable(); vWritable.resize( numPoints );
+	std::vector<bool> &statusWritable = statusData->writable(); statusWritable.resize( numPoints );
+	
+	const std::vector<float> &sReadable = s->readable();
+	const std::vector<float> &tReadable = t->readable();
+	
+	const PrimitiveVariable &fPrimVar = m_stEvaluator->primitive()->variables.find( "f" )->second;
+	const PrimitiveVariable &uPrimVar = m_stEvaluator->primitive()->variables.find( "u" )->second;
+	const PrimitiveVariable &vPrimVar = m_stEvaluator->primitive()->variables.find( "v" )->second;
+	for( size_t i=0; i<numPoints; i++ )
+	{
+		bool success = m_stEvaluator->pointAtUV( Imath::V2f( sReadable[i], tReadable[i] ), evaluatorResult );
+		fWritable[i] = success ? evaluatorResult->intPrimVar( fPrimVar ) : 0;
+		uWritable[i] = success ? evaluatorResult->floatPrimVar( uPrimVar ) : 0;
+		vWritable[i] = success ? evaluatorResult->floatPrimVar( vPrimVar ) : 0;
+		statusWritable[i] = success;
+	}
+
+	CompoundDataPtr result = evaluate( fData, uData, vData, primVarNames );
+	result->writable()["gxStatus"] = statusData;
+	
+	return result;
+}
+
+void GXEvaluator::validatePrimVarNames( const std::vector<std::string> &primVarNames ) const
+{
+	for( vector<string>::const_iterator it=primVarNames.begin(); it!=primVarNames.end(); it++ )
+	{
+		PrimitiveVariableTypeMap::const_iterator pvIt = m_primitiveVariableTypes.find( *it );
+		if( pvIt == m_primitiveVariableTypes.end() )
+		{
+			throw InvalidArgumentException( boost::str( boost::format( "Primitive variable \"%s\" does not exist" ) % *it ) );
+		}
+		if( pvIt->second==InvalidTypeId )
+		{
+			throw InvalidArgumentException( boost::str( boost::format( "Primitive variable \"%s\" has unsupported type" ) % *it ) );
+		}
+	}
+}
+
+void GXEvaluator::buildSTEvaluator() const
+{
+	Mutex::scoped_lock lock( m_stEvaluatorMutex, false ); // read only lock
+	if( m_stEvaluator )
+	{
+		return;
+	}
+	lock.upgrade_to_writer();
+	if( m_stEvaluator )
+	{
+		return;
+	}
+		
+	size_t nFaces = numFaces();
+	size_t nVertices = nFaces * 4;
+	
+	IntVectorDataPtr faceIndicesData = new IntVectorData;
+	FloatVectorDataPtr uData = new FloatVectorData;
+	FloatVectorDataPtr vData = new FloatVectorData;
+	std::vector<int> &faceIndicesWritable = faceIndicesData->writable(); faceIndicesWritable.resize( nVertices );
+	std::vector<float> &uWritable = uData->writable(); uWritable.resize( nVertices );
+	std::vector<float> &vWritable = vData->writable(); vWritable.resize( nVertices );
+	
+	size_t vi = 0;
+	for( size_t fi=0; fi<nFaces; fi++ )
+	{
+		faceIndicesWritable[vi] = fi;
+		faceIndicesWritable[vi+1] = fi;
+		faceIndicesWritable[vi+2] = fi;
+		faceIndicesWritable[vi+3] = fi;
+		uWritable[vi] = 0;
+		uWritable[vi+1] = 0;
+		uWritable[vi+2] = 1;
+		uWritable[vi+3] = 1;
+		vWritable[vi] = 0;
+		vWritable[vi+1] = 1;
+		vWritable[vi+2] = 1;
+		vWritable[vi+3] = 0;
+		vi += 4;
+	}
+	
+	std::vector<std::string> primVarNames;
+	primVarNames.push_back( "P" );
+	primVarNames.push_back( "s" );
+	primVarNames.push_back( "t" );
+	CompoundDataPtr vertexData = evaluate( faceIndicesData, uData, vData, primVarNames );
+	
+	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
+	IntVectorDataPtr vertexIdsData = new IntVectorData;
+	std::vector<int> &verticesPerFace = verticesPerFaceData->writable(); verticesPerFace.resize( nFaces, 4 );
+	std::vector<int> &vertexIds = vertexIdsData->writable(); vertexIds.resize( nVertices );
+	for( size_t i=0; i<nVertices; i++ )
+	{
+		vertexIds[i] = i;
+	}
+	MeshPrimitivePtr mesh = new MeshPrimitive( verticesPerFaceData, vertexIdsData );
+	mesh->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, vertexData->member<V3fVectorData>( "P" ) );
+	mesh->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, vertexData->member<FloatVectorData>( "s" ) );
+	mesh->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, vertexData->member<FloatVectorData>( "t" ) );
+	mesh->variables["u"] = PrimitiveVariable( PrimitiveVariable::Vertex, uData );
+	mesh->variables["v"] = PrimitiveVariable( PrimitiveVariable::Vertex, vData );
+	mesh->variables["f"] = PrimitiveVariable( PrimitiveVariable::Vertex, faceIndicesData );
+	
+	TriangulateOpPtr op = new TriangulateOp();
+	op->inputParameter()->setValue( mesh );
+	op->copyParameter()->setTypedValue( false );
+	op->throwExceptionsParameter()->setTypedValue( false );
+	op->operate();
+	
+	m_stEvaluator = new MeshPrimitiveEvaluator( mesh );
 }
