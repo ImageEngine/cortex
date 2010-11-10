@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -33,30 +35,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <IECore/SimpleTypedData.h>
-#include <IECore/MessageHandler.h>
+#include "boost/python.hpp"
+#include "boost/format.hpp"
 
-#include <boost/python.hpp>
-#include <boost/format.hpp>
-
+#include "IECore/MessageHandler.h"
+#include "IECore/Op.h"
+#include "IECore/ParameterisedProcedural.h"
+#include "IECore/SimpleTypedData.h"
 #include "IECorePython/ScopedGILLock.h"
 
 #include "CoreHoudini.h"
 #include "SOP_ParameterisedHolder.h"
 
-using namespace boost::python;
 using namespace boost;
+using namespace boost::python;
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
-SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op ) :
-	SOP_Node( net, name, op ),
-	m_className(""),
-	m_classVersion(-1),
-	m_parameterised(0),
-	m_requiresUpdate(true),
-    m_matchString("")
+SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op )
+	: SOP_Node( net, name, op ), m_className( "" ), m_classVersion( -1 ), m_parameterised( 0 ), m_requiresUpdate( true ), m_matchString( "" )
 {
 	CoreHoudini::initPython();
 	enableParameterisedUpdate();
@@ -404,30 +402,20 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 }
 
 /// Utility class which loads a Procedural from Disk
-IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised(
-		const std::string &type,
-		int version,
-		const std::string &search_path )
+IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised( const std::string &type, int version, const std::string &search_path )
 {
 	IECore::RunTimeTypedPtr new_procedural;
 	IECorePython::ScopedGILLock gilLock;
 
-	string python_cmd = boost::str( format(
-			"IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n"
-		) % search_path % type % version );
+	string python_cmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n" ) % search_path % type % version );
 
 	try
 	{
-		boost::python::handle<> resultHandle( PyRun_String(
-			python_cmd.c_str(),
-			Py_eval_input, CoreHoudini::globalContext().ptr(),
-			CoreHoudini::globalContext().ptr() )
-		);
+		boost::python::handle<> resultHandle( PyRun_String( python_cmd.c_str(), Py_eval_input, CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() )	);
 		boost::python::object result( resultHandle );
 		new_procedural = boost::python::extract<IECore::RunTimeTypedPtr>(result)();
 
-		if ( IECore::runTimeCast<IECore::ParameterisedProcedural>(new_procedural)==0 &&
-				IECore::runTimeCast<IECore::Op>(new_procedural)==0 )
+		if ( IECore::runTimeCast<IECore::ParameterisedProcedural>(new_procedural)==0 && IECore::runTimeCast<IECore::Op>(new_procedural)==0 )
 		{
 			new_procedural = 0;
 		}

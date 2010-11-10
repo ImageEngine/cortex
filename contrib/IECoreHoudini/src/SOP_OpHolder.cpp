@@ -43,6 +43,7 @@
 #include "GB/GB_AttributeRef.h"
 
 // Cortex
+#include "IECore/Op.h"
 #include "IECore/ObjectParameter.h"
 #include "IECorePython/ScopedGILLock.h" 
 

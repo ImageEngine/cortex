@@ -43,6 +43,7 @@
 #include <GB/GB_AttributeRef.h>
 
 // Cortex
+#include "IECore/Op.h"
 #include <IECoreGL/Scene.h>
 #include <IECoreGL/State.h>
 #include <IECoreGL/StateComponent.h>

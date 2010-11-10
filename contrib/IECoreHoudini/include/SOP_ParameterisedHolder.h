@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -33,22 +35,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef SOP_PARAMETERISEDHOLDER_H_
-#define SOP_PARAMETERISEDHOLDER_H_
+#ifndef IECOREHOUDINI_SOPPARAMETERISEDHOLDER_H
+#define IECOREHOUDINI_SOPPARAMETERISEDHOLDER_H
 
 // Houdini
-#include <SOP/SOP_Node.h>
-
-// Boost
-#include <boost/python.hpp>
+#include "SOP/SOP_Node.h"
 
 // Cortex
-#include <IECore/Parameterised.h>
-#include <IECore/ClassData.h>
-#include <IECore/Parameter.h>
-#include <IECore/Op.h>
-#include <IECore/ParameterisedProcedural.h>
-#include <IECore/CompoundParameter.h>
+#include "IECore/Parameter.h"
+#include "IECore/CompoundParameter.h"
 
 namespace IECoreHoudini
 {
@@ -57,10 +52,13 @@ namespace IECoreHoudini
 	/// directly from this.
 	class SOP_ParameterisedHolder : public SOP_Node
 	{
-		public:
+		public :
 
-			enum LoaderType { OP_LOADER=0,
-				PROCEDURAL_LOADER };
+			enum LoaderType
+			{
+				OP_LOADER = 0,
+				PROCEDURAL_LOADER
+			};
 
 			/// Ctor
 			SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op );
@@ -69,8 +67,7 @@ namespace IECoreHoudini
 
 			/// Sets a parameterised on this holder
 			void setParameterisedDirectly( IECore::RunTimeTypedPtr p );
-			virtual void setParameterised( IECore::RunTimeTypedPtr p,
-					const std::string &type, int version ) = 0;
+			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version ) = 0;
 
 			/// Gets the parameterised held by this holder
 			IECore::RunTimeTypedPtr getParameterised();
@@ -100,17 +97,18 @@ namespace IECoreHoudini
 			template <class T, class U>
 			void checkForUpdate( bool do_update, T val, IECore::ParameterPtr parm )
 			{
-					if ( do_update )
+				if ( do_update )
+				{
+					IECore::IntrusivePtr<U> data = IECore::runTimeCast<U>( parm->getValue() );
+					if ( val!=data->readable() )
 					{
-						IECore::IntrusivePtr<U> data = IECore::runTimeCast<U>( parm->getValue() );
-						if ( val!=data->readable() )
-							m_requiresUpdate = true;
+						m_requiresUpdate = true;
 					}
+				}
 			}
 
 			/// Method for loading a ParameterisedProcedural from disk
-			IECore::RunTimeTypedPtr loadParameterised( const std::string &type,
-					int version, const std::string &search_path );
+			IECore::RunTimeTypedPtr loadParameterised( const std::string &type, int version, const std::string &search_path );
 
 			/// These control whether or not the gui type/version controls
 			/// update the parameterised object - most of the time they do.
@@ -126,20 +124,22 @@ namespace IECoreHoudini
 			static std::vector<int> classVersions( const LoaderType &loader_type, const std::string &type );
 			static int defaultClassVersion( const LoaderType &loader_type, const std::string &type );
 
-		protected:
+		protected :
+			
 			bool m_requiresUpdate;
 
-    		// class type/version
+			// class type/version
 			std::string m_className;
 			int m_classVersion;
 			IECore::RunTimeTypedPtr m_parameterised;
 			std::vector<std::string> m_cachedNames;
 
-		private:
+		private :
+		
 			bool m_parameterisedUpdate; // this controls whether the parameterised is loaded if the type/version is changed in the gui
 			std::string m_matchString; // our class loader match string
 	};
 
 } // namespace IECoreHoudini
 
-#endif /* SOP_PARAMETERISEDHOLDER_H_ */
+#endif // IECOREHOUDINI_SOPPARAMETERISEDHOLDER_H
