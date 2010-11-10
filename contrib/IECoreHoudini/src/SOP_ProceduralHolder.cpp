@@ -36,56 +36,23 @@
 //////////////////////////////////////////////////////////////////////////
 
 // Houdini
-#include <OP/OP_OperatorTable.h>
-#include <OP/OP_Operator.h>
-#include <UT/UT_Math.h>
-#include <UT/UT_Interrupt.h>
-#include <GU/GU_Detail.h>
-#include <GU/GU_PrimPoly.h>
-#include <CH/CH_LocalVariable.h>
-#include <PRM/PRM_Include.h>
-#include <PRM/PRM_Parm.h>
-#include <OP/OP_Operator.h>
-#include <GU/GU_PrimPart.h>
-#include <CH/CH_ExprLanguage.h>
-#include <GEO/GEO_PrimPart.h>
+#include "UT/UT_Interrupt.h"
+#include "CH/CH_LocalVariable.h"
+#include "PRM/PRM_Include.h"
+#include "PRM/PRM_Parm.h"
 
 // Cortex
-#include <IECore/MessageHandler.h>
-#include <IECore/CompoundParameter.h>
-#include <IECore/Object.h>
-#include <IECore/Op.h>
-#include <IECore/TypedParameter.h>
-#include <IECore/Parameterised.h>
-#include <IECore/CompoundParameter.h>
-#include <IECore/ParameterisedProcedural.h>
-#include <IECore/SimpleTypedData.h>
-#include <IECorePython/ScopedGILLock.h>
-
-// IECoreGL
-#include "IECoreGL/IECoreGL.h"
-#include "IECoreGL/GL.h"
+#include "IECore/ParameterisedProcedural.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECorePython/ScopedGILLock.h"
 #include "IECoreGL/Renderer.h"
-#include "IECoreGL/Scene.h"
-
-// OpenEXR
-#include <OpenEXR/ImathBox.h>
-
-// C++
-#include <sstream>
-
-// Boost
-#include "boost/python.hpp"
-#include "boost/format.hpp"
-#include "boost/tokenizer.hpp"
-using namespace boost::python;
-using namespace boost;
 
 // IECoreHoudini
 #include "CoreHoudini.h"
-#include "SOP_ProceduralHolder.h"
 #include "NodePassData.h"
-#include "FnProceduralHolder.h"
+#include "SOP_ProceduralHolder.h"
+
+using namespace boost::python;
 using namespace IECoreHoudini;
 
 /// Parameter names for non-dynamic SOP parameters
@@ -97,47 +64,39 @@ PRM_Default SOP_ProceduralHolder::opMatchStringDefault( 0.f, "*" );
 PRM_Name SOP_ProceduralHolder::opReloadBtn( "__opReloadBtn", "Reload" );
 PRM_Name SOP_ProceduralHolder::switcherName( "__switcher", "Switcher" );
 
-PRM_ChoiceList SOP_ProceduralHolder::typeMenu( PRM_CHOICELIST_SINGLE,
-		&SOP_ProceduralHolder::buildTypeMenu );
-PRM_ChoiceList SOP_ProceduralHolder::versionMenu( PRM_CHOICELIST_SINGLE,
-		&SOP_ProceduralHolder::buildVersionMenu );
+PRM_ChoiceList SOP_ProceduralHolder::typeMenu( PRM_CHOICELIST_SINGLE, &SOP_ProceduralHolder::buildTypeMenu );
+PRM_ChoiceList SOP_ProceduralHolder::versionMenu( PRM_CHOICELIST_SINGLE, &SOP_ProceduralHolder::buildVersionMenu );
 
 /// Detail for our switcher
 PRM_Default SOP_ProceduralHolder::switcherDefaults[] = {
-		PRM_Default(0, "Parameters"),
+	PRM_Default( 0, "Parameters" ),
 };
 
 /// Add parameters to SOP
 PRM_Template SOP_ProceduralHolder::myParameters[] = {
-		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
-		PRM_Template(PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
-		PRM_Template(PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_ProceduralHolder::reloadButtonCallback ),
-		PRM_Template(PRM_INT|PRM_TYPE_INVISIBLE, 1, &opParmEval),
-		PRM_Template(PRM_STRING|PRM_TYPE_INVISIBLE, 1, &opMatchString, &opMatchStringDefault ),
-		PRM_Template(PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
-		PRM_Template()
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &opTypeParm, 0, &typeMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT , 1, &opVersionParm, 0, &versionMenu, 0, &SOP_ProceduralHolder::reloadClassCallback ),
+	PRM_Template( PRM_CALLBACK, 1, &opReloadBtn, 0, 0, 0, &SOP_ProceduralHolder::reloadButtonCallback ),
+	PRM_Template( PRM_INT|PRM_TYPE_INVISIBLE, 1, &opParmEval ),
+	PRM_Template( PRM_STRING|PRM_TYPE_INVISIBLE, 1, &opMatchString, &opMatchStringDefault ),
+	PRM_Template( PRM_SWITCHER, 1, &switcherName, switcherDefaults ),
+	PRM_Template()
 };
 
 /// Don't worry about variables today
 CH_LocalVariable SOP_ProceduralHolder::myVariables[] = {
-		{ 0, 0, 0 },
+	{ 0, 0, 0 },
 };
 
 /// Houdini's static creator method
-OP_Node *SOP_ProceduralHolder::myConstructor( OP_Network *net,
-										const char *name,
-										OP_Operator *op )
+OP_Node *SOP_ProceduralHolder::myConstructor( OP_Network *net, const char *name, OP_Operator *op )
 {
-    return new SOP_ProceduralHolder(net, name, op);
+	return new SOP_ProceduralHolder( net, name, op );
 }
 
 /// Ctor
-SOP_ProceduralHolder::SOP_ProceduralHolder(OP_Network *net,
-		const char *name,
-		OP_Operator *op ) :
-	SOP_ParameterisedHolder(net, name, op),
-    m_scene(0),
-    m_renderDirty(true)
+SOP_ProceduralHolder::SOP_ProceduralHolder(OP_Network *net, const char *name, OP_Operator *op )
+	: SOP_ParameterisedHolder( net, name, op ), m_scene( 0 ), m_renderDirty( true )
 {
 	getParm("__opParmEval").setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
 	getParm("__opParmEval").setLockedFlag( 0, 1 );
@@ -149,12 +108,13 @@ SOP_ProceduralHolder::~SOP_ProceduralHolder()
 }
 
 /// Build type menu
-void SOP_ProceduralHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize,
-		const PRM_SpareData *, PRM_Parm * )
+void SOP_ProceduralHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
 {
-	SOP_ProceduralHolder *me = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	SOP_ProceduralHolder *me = reinterpret_cast<SOP_ProceduralHolder*>( data );
 	if ( !me )
+	{
 		return;
+	}
 
 	menu[0].setToken( "" );
 	menu[0].setLabel( "< No Procedural >" );
@@ -172,16 +132,17 @@ void SOP_ProceduralHolder::buildTypeMenu( void *data, PRM_Name *menu, int maxSiz
 	}
 
 	// mark the end of our menu
-	menu[pos].setToken(0);
+	menu[pos].setToken( 0 );
 }
 
 /// Build version menu
-void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize,
-		const PRM_SpareData *, PRM_Parm *)
+void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
 {
 	SOP_ProceduralHolder *me = reinterpret_cast<SOP_ProceduralHolder*>(data);
 	if ( !me )
+	{
 		return;
+	}
 
 	unsigned int pos=0;
 	if ( me->m_className!="" )
@@ -206,7 +167,7 @@ void SOP_ProceduralHolder::buildVersionMenu( void *data, PRM_Name *menu, int max
 	}
 
 	// mark the end of our menu
-	menu[pos].setToken(0);
+	menu[pos].setToken( 0 );
 }
 
 // This refresh the list of class names
@@ -240,8 +201,7 @@ void SOP_ProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p, const st
 }
 
 /// Callback executed whenever the type/version menus change
-int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time,
-		const PRM_Template *tplate)
+int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
 	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
 	if ( !sop )
@@ -255,7 +215,9 @@ int SOP_ProceduralHolder::reloadClassCallback( void *data, int index, float time
 	sop->evalString( ver_str, "__opVersion", 0, 0 );
 	int version = -1;
 	if ( ver_str!="" )
+	{
 		version = boost::lexical_cast<int>( ver_str.buffer() );
+	}
 
 	// has our type changed?
 	if ( type!=sop->m_className )
@@ -305,9 +267,7 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 	// get our current procedural and save it
 	if ( hasParameterised() )
 	{
-		IECore::ParameterisedProceduralPtr procedural =
-				IECore::runTimeCast<IECore::ParameterisedProcedural>(
-						getParameterised() );
+		IECore::ParameterisedProceduralPtr procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( getParameterised() );
 		if ( procedural )
 		{
 			old_procedural = procedural;
@@ -329,7 +289,7 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 	else
 	{
 		UT_String msg( "Procedural Holder has no parameterised class to operate on!" );
-    	addError( SOP_MESSAGE, msg );
+		addError( SOP_MESSAGE, msg );
 	}
 
 	// if required, update the parameter interface on the SOP
@@ -360,10 +320,9 @@ void SOP_ProceduralHolder::loadProcedural( const std::string &type, int version,
 }
 
 /// Callback executed whenever the reload button is clicked
-int SOP_ProceduralHolder::reloadButtonCallback( void *data, int index, float time,
-		const PRM_Template *tplate)
+int SOP_ProceduralHolder::reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
-	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>(data);
+	SOP_ProceduralHolder *sop = reinterpret_cast<SOP_ProceduralHolder*>( data );
 	if ( !sop )
 	{
 		return 0;
@@ -379,10 +338,7 @@ int SOP_ProceduralHolder::reloadButtonCallback( void *data, int index, float tim
 /// (aka dirty).
 IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 {
-	IECore::ParameterisedProceduralPtr procedural =
-			IECore::runTimeCast<IECore::ParameterisedProcedural>(
-					getParameterised() );
-
+	IECore::ParameterisedProceduralPtr procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( getParameterised() );
 	if ( !procedural )
 	{
 		return 0;
@@ -415,7 +371,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 }
 
 /// Cook the SOP! This method does all the work
-OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
+OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 {
 	// some defaults and useful variables
 	float now = context.myTime;
@@ -424,17 +380,15 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 	evalInt( "__opParmEval", 0, now );
 
 	// update parameters on procedural from our Houdini parameters
-	IECore::ParameterisedProceduralPtr procedural =
-			IECore::runTimeCast<IECore::ParameterisedProcedural>(
-					getParameterised() );
+	IECore::ParameterisedProceduralPtr procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( getParameterised() );
 
 	// check for a valid parameterised on this SOP
-    if ( !procedural )
-    {
-    	UT_String msg( "Procedural Holder has no parameterised class to operate on!" );
-    	addError( SOP_MESSAGE, msg );
-    	return error();
-    }
+	if ( !procedural )
+	{
+		UT_String msg( "Procedural Holder has no parameterised class to operate on!" );
+		addError( SOP_MESSAGE, msg );
+		return error();
+	}
 
 	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
@@ -442,7 +396,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 	gdp->clearAndDestroy();
 
 	// do we need to redraw?
-	bool do_update = updateParameters( procedural, now);
+	bool do_update = updateParameters( procedural, now );
 	if ( do_update )
 	{
 		dirty();
@@ -454,13 +408,11 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 	{
 		// put our cortex passdata on our gdp as a detail attribute
 		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER );
-		gdp->addAttrib( "IECoreHoudini::NodePassData",
-				sizeof(IECoreHoudini::NodePassData), GB_ATTRIB_MIXED, &data );
+		gdp->addAttrib( "IECoreHoudini::NodePassData", sizeof(IECoreHoudini::NodePassData), GB_ATTRIB_MIXED, &data );
 
 		// calculate our bounding box
-	    Imath::Box3f bbox = procedural->bound();
-		gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y,
-				bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
+		Imath::Box3f bbox = procedural->bound();
+		gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y, bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
 	}
 	catch( boost::python::error_already_set )
 	{
@@ -472,8 +424,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 	}
 	catch( ... )
 	{
-		std::cerr << "Procedural::bound() Caught unknown exception!"
-			<< std::endl;
+		std::cerr << "Procedural::bound() Caught unknown exception!" << std::endl;
 	}
 
 	// tidy up & go home!
@@ -486,9 +437,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop(OP_Context &context)
 /// It checks for type/version values on the node and attempts to reload
 /// the procedural from disk
 /// \todo: not entirely certain this is returning the correct thing...
-bool SOP_ProceduralHolder::load( UT_IStream &is,
-		const char *ext,
-		const char *path )
+bool SOP_ProceduralHolder::load( UT_IStream &is, const char *ext, const char *path )
 {
 	bool loaded = OP_Node::load( is, ext, path );
 
