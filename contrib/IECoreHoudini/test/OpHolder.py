@@ -423,7 +423,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 	def testMatchString(self):
 		(op,fn)=self.testOpHolder()
-		assert( op.parm("__opMatchString").eval()=="*")
+		op.parm( "__opMatchString" ).set( "*" )
 		op.parm("__opType").set("cobReader")
 		op.parm("__opType").pressButton()
 		cl = fn.getParameterised()
