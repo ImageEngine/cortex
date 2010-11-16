@@ -46,6 +46,7 @@
 
 // IECoreHoudini
 #include "SOP_OpHolder.h"
+#include "SOP_ParameterisedHolder.h"
 #include "SOP_ProceduralHolder.h"
 #include "SOP_ToHoudiniConverter.h"
 #include "SOP_InterpolatedCacheReader.h"
@@ -67,33 +68,26 @@ extern "C"
 void newSopOperator(OP_OperatorTable *table)
 {
 	table->addOperator(
-			new OP_Operator("ieProceduralHolder", // Internal name
-					"Cortex Procedural", // UI name
-					SOP_ProceduralHolder::myConstructor, // How to build the SOP
-    				SOP_ProceduralHolder::myParameters, // My parameters
-    				0, // Min # of sources
-    				0, // Max # of sources
-    				SOP_ProceduralHolder::myVariables, // Local variables
-    				OP_FLAG_GENERATOR) ); // Flag it as generator
+		new OP_Operator(
+			"ieProceduralHolder", "Cortex Procedural",
+			SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 0,
+    			SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
+		)
+	);
 	table->addOperator(
-			new OP_Operator("ieOpHolder", // Internal name
-					"Cortex Op", // UI name
-					SOP_OpHolder::myConstructor, // How to build the SOP
-					SOP_OpHolder::myParameters, // My parameters
-    				0, // Min # of sources
-    				4, // Max # of sources
-    				SOP_OpHolder::myVariables, // Local variables
-    				OP_FLAG_GENERATOR) ); // Flag it as generator
+		new OP_Operator(
+			"ieOpHolder", "Cortex Op",
+			SOP_OpHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
+			SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
+		)
+	);
 	table->addOperator(
-			new OP_Operator("ieToHoudiniConverter", // Internal name
-					"Cortex To Houdini", // UI name
-					SOP_ToHoudiniConverter::myConstructor, // How to build the SOP
-					SOP_ToHoudiniConverter::myParameters, // My parameters
-    				1, // Min # of sources
-    				1, // Max # of sources
-    				SOP_ToHoudiniConverter::myVariables, // Local variables
-    				OP_FLAG_GENERATOR) ); // Flag it as generator
-	
+		new OP_Operator(
+			"ieToHoudiniConverter", "Cortex To Houdini",
+			SOP_ToHoudiniConverter::myConstructor, SOP_ToHoudiniConverter::myParameters, 1,	1,
+			SOP_ToHoudiniConverter::myVariables, OP_FLAG_GENERATOR
+		)
+	);
 	table->addOperator(
 		new OP_Operator(
 			"ieInterpolatedCacheReader", "Interpolated Cache Reader",
@@ -112,14 +106,14 @@ void newRenderHook( GR_RenderTable *table )
 {
 	GR_Cortex *hook = new GR_Cortex;
 #if UT_MAJOR_VERSION_INT >= 11
-    table->addHook(hook, GR_RENDER_HOOK_VERSION);
+	table->addHook( hook, GR_RENDER_HOOK_VERSION );
 #else
-    table->addHook(hook);
+	table->addHook( hook );
 #endif
 }
 
 /// Declare our new IO Translators
 void newGeometryIO( void * )
 {
-    GU_Detail::registerIOTranslator( new GEO_CobIOTranslator() );
+	GU_Detail::registerIOTranslator( new GEO_CobIOTranslator() );
 }

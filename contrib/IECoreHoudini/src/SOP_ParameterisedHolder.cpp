@@ -38,9 +38,12 @@
 #include "boost/python.hpp"
 #include "boost/format.hpp"
 
+#include "CH/CH_LocalVariable.h"
+#include "PRM/PRM_Include.h"
+#include "PRM/PRM_Parm.h"
+
 #include "IECore/MessageHandler.h"
-#include "IECore/Op.h"
-#include "IECore/ParameterisedProcedural.h"
+#include "IECore/Parameterised.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECorePython/ScopedGILLock.h"
 
@@ -53,20 +56,285 @@ using namespace boost::python;
 using namespace IECore;
 using namespace IECoreHoudini;
 
-SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op )
-	: SOP_Node( net, name, op ), m_className( "" ), m_classVersion( -1 ), m_parameterised( 0 ), m_requiresUpdate( true ), m_matchString( "" )
+PRM_Name SOP_ParameterisedHolder::pParameterisedClassName( "__className", "ClassName:" );
+PRM_Name SOP_ParameterisedHolder::pParameterisedVersion( "__classVersion", "  Version:" );
+PRM_Name SOP_ParameterisedHolder::pParameterisedSearchPathEnvVar( "__classSearchPathEnvVar", "SearchPathEnvVar:" );
+PRM_Name SOP_ParameterisedHolder::pMatchString( "__classMatchString", "MatchString" );
+PRM_Name SOP_ParameterisedHolder::pReloadButton( "__classReloadButton", "Reload" );
+PRM_Name SOP_ParameterisedHolder::pEvaluateParameters( "__evaluateParameters", "ParameterEval" );
+PRM_Name SOP_ParameterisedHolder::pSwitcher( "__parameterSwitcher", "Switcher" );
+
+PRM_Default SOP_ParameterisedHolder::matchStringDefault( 0, "*" );
+PRM_Default SOP_ParameterisedHolder::switcherDefaults[] = { PRM_Default( 0, "Parameters" ) };
+
+PRM_ChoiceList SOP_ParameterisedHolder::classNameMenu( PRM_CHOICELIST_SINGLE, &SOP_ParameterisedHolder::buildClassNameMenu );
+PRM_ChoiceList SOP_ParameterisedHolder::classVersionMenu( PRM_CHOICELIST_SINGLE, &SOP_ParameterisedHolder::buildVersionMenu );
+
+PRM_Template SOP_ParameterisedHolder::parameters[] = {
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &pParameterisedClassName, 0, &classNameMenu, 0, &SOP_ParameterisedHolder::reloadClassCallback ),
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &pParameterisedVersion, 0, &classVersionMenu, 0, &SOP_ParameterisedHolder::reloadClassCallback ),
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT|PRM_TYPE_INVISIBLE, 1, &pParameterisedSearchPathEnvVar, 0, 0, 0, &SOP_ParameterisedHolder::reloadClassCallback ),
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT|PRM_TYPE_INVISIBLE, 1, &pMatchString, &matchStringDefault ),
+	PRM_Template( PRM_CALLBACK, 1, &pReloadButton, 0, 0, 0, &SOP_ParameterisedHolder::reloadButtonCallback ),
+	PRM_Template( PRM_INT|PRM_TYPE_INVISIBLE, 1, &pEvaluateParameters ),
+	PRM_Template( PRM_SWITCHER, 1, &pSwitcher, switcherDefaults ),
+	PRM_Template()
+};
+
+CH_LocalVariable SOP_ParameterisedHolder::variables[] = {
+	{ 0, 0, 0 },
+};
+
+SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op ) : SOP_Node( net, name, op )
 {
 	CoreHoudini::initPython();
-	enableParameterisedUpdate();
+	
+	getParm( "__evaluateParameters" ).setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
+	getParm( "__evaluateParameters" ).setLockedFlag( 0, 1 );
 }
 
 SOP_ParameterisedHolder::~SOP_ParameterisedHolder()
 {
 }
 
-void SOP_ParameterisedHolder::setParameterisedDirectly( IECore::RunTimeTypedPtr p )
+void SOP_ParameterisedHolder::buildClassNameMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
 {
+	SOP_ParameterisedHolder *holder = reinterpret_cast<SOP_ParameterisedHolder*>( data );
+	if ( !holder )
+	{
+		return;
+	}
+	
+	menu[0].setToken( "" );
+	menu[0].setLabel( "< No Class Loaded >" );
+	unsigned int pos = 1;
+
+	UT_String value;
+	holder->evalString( value, pMatchString.getToken(), 0, 0 );
+	std::string matchString( value.toStdString() );
+	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
+	std::string searchPathEnvVar( value.toStdString() );
+	
+	std::vector<std::string> names;
+	classNames( searchPathEnvVar, matchString, names );
+
+	for ( std::vector<std::string>::const_iterator it=names.begin(); it != names.end(); it++, pos++ )
+	{
+		menu[pos].setToken( (*it).c_str() );
+		menu[pos].setLabel( (*it).c_str() );
+	}
+
+	// mark the end of our menu
+	menu[pos].setToken( 0 );
+}
+
+void SOP_ParameterisedHolder::buildVersionMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
+{
+	SOP_ParameterisedHolder *holder = reinterpret_cast<SOP_ParameterisedHolder*>( data );
+	if ( !holder )
+	{
+		return;
+	}
+
+	unsigned int pos = 0;
+	
+	UT_String value;
+	holder->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
+	std::string className( value.toStdString() );
+	
+	if ( className != "" )
+	{
+		holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
+		std::string searchPathEnvVar( value.toStdString() );
+	
+		std::vector<int> versions;
+		classVersions( className, searchPathEnvVar, versions );
+		for ( std::vector<int>::iterator it=versions.begin(); it != versions.end(); it++, pos++ )
+		{
+			std::stringstream ss;
+			ss << (*it);
+			menu[pos].setToken( ss.str().c_str() );
+			menu[pos].setLabel( ss.str().c_str() );
+		}
+	}
+
+	if ( !pos )
+	{
+		menu[0].setToken( "" );
+		menu[0].setLabel( "< No Version >" );
+		pos++;
+	}
+
+	// mark the end of our menu
+	menu[pos].setToken( 0 );
+}
+
+int SOP_ParameterisedHolder::reloadClassCallback( void *data, int index, float time, const PRM_Template *tplate )
+{
+	SOP_ParameterisedHolder *holder = reinterpret_cast<SOP_ParameterisedHolder*>( data );
+	if ( !holder )
+	{
+		return 0;
+	}
+
+	UT_String value;
+	holder->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
+	std::string className( value.toStdString() );
+	
+	holder->evalString( value, pParameterisedVersion.getToken(), 0, 0 );
+	int version = -1;
+	if ( value != "" )
+	{
+		version = boost::lexical_cast<int>( value.buffer() );
+	}
+	
+	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
+	std::string searchPathEnvVar( value.toStdString() );
+	
+	if ( className != holder->m_loadedClassName )
+	{
+		version = -1;
+	}
+	
+	if ( className == "" )
+	{
+		version = -1;
+		holder->setParameterised( 0 );
+	}
+	else if ( version == -1 )
+	{
+		version = defaultClassVersion( className, searchPathEnvVar );
+		holder->setString( boost::lexical_cast<std::string>( version ).c_str(), CH_STRING_LITERAL, pParameterisedVersion.getToken(), 0, 0 );
+	}
+
+	holder->load( className, version, searchPathEnvVar );
+
+	return 1;
+}
+
+int SOP_ParameterisedHolder::reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
+{
+	SOP_ParameterisedHolder *holder = reinterpret_cast<SOP_ParameterisedHolder*>( data );
+	if ( !holder )
+	{
+		return 0;
+	}
+
+	UT_String value;
+	holder->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
+	std::string className( value.toStdString() );
+	
+	holder->evalString( value, pParameterisedVersion.getToken(), 0, 0 );
+	int version = -1;
+	if ( value != "" )
+	{
+		version = boost::lexical_cast<int>( value.buffer() );
+	}
+	
+	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
+	std::string searchPathEnvVar( value.toStdString() );
+
+	CoreHoudini::evalPython( "IECore.ClassLoader.defaultLoader( \"" + searchPathEnvVar + "\" ).refresh()" );
+	holder->load( className, version, searchPathEnvVar );
+
+	return 1;
+}
+
+const char *SOP_ParameterisedHolder::inputLabel( unsigned pos ) const
+{
+	if ( (int)pos > (int)m_inputParameters.size() - 1 )
+	{
+		return "";
+	}
+	
+	return m_inputParameters[pos]->name().c_str();
+}
+
+unsigned SOP_ParameterisedHolder::minInputs() const
+{
+	/// \todo: need to check for 'required' inputs and increase this number accordingly
+	return 0;
+}
+
+unsigned SOP_ParameterisedHolder::maxInputs() const
+{
+	// this makes sure when we first load we have 4 inputs
+	// the wires get connected before the Op is loaded onto the Sop
+	if ( !m_parameterised || m_inputParameters.size() > 4 )
+	{
+		return 4;
+	}
+	
+	return m_inputParameters.size();
+}
+
+void SOP_ParameterisedHolder::refreshInputConnections()
+{
+	// clear our internal cache of input parameters
+	m_inputParameters.clear();
+
+	ParameterisedPtr parameterised = IECore::runTimeCast<Parameterised>( getParameterised() );
+	if ( !parameterised )
+	{
+		return;
+	}
+
+	// add inputs for the appropriate parameters
+	const CompoundParameter::ParameterVector &parameters = parameterised->parameters()->orderedParameters();
+	for ( CompoundParameter::ParameterVector::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
+	{
+		switch( (*it)->typeId() )
+		{
+			case ObjectParameterTypeId:
+			case PrimitiveParameterTypeId:
+			case PointsPrimitiveParameterTypeId:
+			case MeshPrimitiveParameterTypeId:
+			case CurvesPrimitiveParameterTypeId:
+			case GroupParameterTypeId:
+				m_inputParameters.push_back( (*it) );
+				break;
+			default:
+				break;
+		}
+
+		/// \todo: get proper warning in here...
+		if ( m_inputParameters.size() > 4 )
+		{
+			std::cerr << "ieParameterisedHolder does not support more than 4 input parameter connections." << std::endl;
+		}
+	}
+
+	/// \todo: Is this really the only we can get the gui to update the input connections?
+	setXY( getX()+.0001, getY()+.0001 );
+	setXY( getX()-.0001, getY()-.0001 );
+}
+
+bool SOP_ParameterisedHolder::hasParameterised()
+{
+	return (bool)(m_parameterised.get() != 0);
+}
+
+void SOP_ParameterisedHolder::setParameterised( IECore::RunTimeTypedPtr p )
+{
+	setString( "", CH_STRING_LITERAL, pParameterisedClassName.getToken(), 0, 0 );
+	setString( boost::lexical_cast<std::string>( -1 ).c_str(), CH_STRING_LITERAL, pParameterisedVersion.getToken(), 0, 0 );
+
 	m_parameterised = p;
+	m_loadedClassName = "";
+	
+	refreshInputConnections();
+}
+
+void SOP_ParameterisedHolder::setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar )
+{
+	setString( className.c_str(), CH_STRING_LITERAL, pParameterisedClassName.getToken(), 0, 0 );
+	setString( boost::lexical_cast<std::string>( classVersion ).c_str(), CH_STRING_LITERAL, pParameterisedVersion.getToken(), 0, 0 );
+	setString( searchPathEnvVar.c_str(), CH_STRING_LITERAL, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
+	
+	m_parameterised = loadParameterised( className, classVersion, searchPathEnvVar );
+	m_loadedClassName = m_parameterised ? className : "";
+	
+	refreshInputConnections();
 }
 
 IECore::RunTimeTypedPtr SOP_ParameterisedHolder::getParameterised()
@@ -74,13 +342,98 @@ IECore::RunTimeTypedPtr SOP_ParameterisedHolder::getParameterised()
 	return m_parameterised;
 }
 
-bool SOP_ParameterisedHolder::hasParameterised()
+IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar )
 {
-	return (bool)(m_parameterised.get()!=0);
+	IECorePython::ScopedGILLock gilLock;
+
+	string pythonCmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n" ) % searchPathEnvVar % className % classVersion );
+
+	try
+	{
+		boost::python::handle<> resultHandle( PyRun_String( pythonCmd.c_str(), Py_eval_input, CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() )	);
+		boost::python::object result( resultHandle );
+		return boost::python::extract<IECore::RunTimeTypedPtr>( result )();
+	}
+	catch( ... )
+	{
+		PyErr_Print();
+	}
+
+	return 0;
 }
 
-/// update a Cortex parameter on using our SOP parameter value
-void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float now, std::string prefix, bool top_level )
+void SOP_ParameterisedHolder::load( const std::string &className, int classVersion, const std::string &searchPathEnvVar, bool updateGui )
+{
+	RunTimeTypedPtr parameterised = 0;
+	if ( className != "" && classVersion != -1 && searchPathEnvVar != "" )
+	{
+		setParameterised( className, classVersion, searchPathEnvVar );
+		parameterised = getParameterised();
+		m_loadedClassName = className;
+	}
+
+	if ( !parameterised )
+	{
+		m_loadedClassName = "";
+		m_inputParameters.clear();
+		addError( SOP_MESSAGE, "ParameterisedHolder has no parameterised class to operate on!" );
+	}
+
+	m_dirty = true;
+	
+	if ( !updateGui )
+	{
+		return;
+	}
+	
+	UT_String path;
+	getFullPath( path );
+	std::string cmd = "IECoreHoudini.FnParameterisedHolder( hou.node( \"";
+	cmd += path.buffer();
+	cmd += "\") )";
+	{
+		IECorePython::ScopedGILLock lock;
+		try
+		{
+			handle<> resultHandle( PyRun_String( cmd.c_str(), Py_eval_input, CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() ) );
+			object fn( resultHandle );
+			fn.attr( "updateParameters" )( parameterised );
+		}
+		catch( ... )
+		{
+			PyErr_Print();
+		}
+	}
+}
+
+bool SOP_ParameterisedHolder::load( UT_IStream &is, const char *ext, const char *path )
+{
+	bool loaded = OP_Node::load( is, ext, path );
+
+	UT_String value;
+	evalString( value, pParameterisedClassName.getToken(), 0, 0 );
+	std::string className( value.toStdString() );
+	
+	evalString( value, pParameterisedVersion.getToken(), 0, 0 );
+	int version = -1;
+	if ( value != "" )
+	{
+		version = boost::lexical_cast<int>( value.buffer() );
+	}
+	
+	evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
+	std::string searchPathEnvVar( value.toStdString() );
+	
+	if ( className != "" && version != -1 && searchPathEnvVar != "" )
+	{
+		load( className, version, searchPathEnvVar, false );
+	}
+	
+	/// \todo: not entirely certain this is returning the correct thing
+	return loaded;
+}
+
+void SOP_ParameterisedHolder::updateParameter( ParameterPtr parm, float now, std::string prefix, bool top_level )
 {
 	try
 	{
@@ -102,9 +455,8 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 			IECore::CompoundParameterPtr compound = IECore::runTimeCast<CompoundParameter>(parm);
 			if ( parm )
 			{
-				const IECore::CompoundParameter::ParameterMap &child_parms = compound->parameters();
-				for( IECore::CompoundParameter::ParameterMap::const_iterator it=child_parms.begin();
-						it!=child_parms.end(); ++it )
+				const CompoundParameter::ParameterMap &childParms = compound->parameters();
+				for( CompoundParameter::ParameterMap::const_iterator it=childParms.begin(); it != childParms.end(); it++ )
 				{
 					updateParameter( it->second, now, parm_name );
 				}
@@ -114,7 +466,9 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 
 		// check we can find the parameter on our Houdini node
 		if ( !getParmList()->getParmPtr( parm_name.c_str() ) )
+		{
 			return;
+		}
 
 		// does this parameter cause a gui refresh?
 		bool do_update = true;
@@ -401,126 +755,53 @@ void SOP_ParameterisedHolder::updateParameter( IECore::ParameterPtr parm, float 
 	}
 }
 
-/// Utility class which loads a Procedural from Disk
-IECore::RunTimeTypedPtr SOP_ParameterisedHolder::loadParameterised( const std::string &type, int version, const std::string &search_path )
-{
-	IECore::RunTimeTypedPtr new_procedural;
-	IECorePython::ScopedGILLock gilLock;
-
-	string python_cmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n" ) % search_path % type % version );
-
-	try
-	{
-		boost::python::handle<> resultHandle( PyRun_String( python_cmd.c_str(), Py_eval_input, CoreHoudini::globalContext().ptr(), CoreHoudini::globalContext().ptr() )	);
-		boost::python::object result( resultHandle );
-		new_procedural = boost::python::extract<IECore::RunTimeTypedPtr>(result)();
-
-		if ( IECore::runTimeCast<IECore::ParameterisedProcedural>(new_procedural)==0 && IECore::runTimeCast<IECore::Op>(new_procedural)==0 )
-		{
-			new_procedural = 0;
-		}
-	}
-	catch( ... )
-	{
-		PyErr_Print();
-	}
-	return new_procedural;
-}
-
-const std::vector<std::string> &SOP_ParameterisedHolder::classNames()
-{
-	return m_cachedNames;
-}
-
-
-std::vector<std::string> SOP_ParameterisedHolder::classNames( const LoaderType &type, const std::string &matchString )
+void SOP_ParameterisedHolder::classNames( const std::string searchPathEnvVar, const std::string &matchString, std::vector<std::string> &names )
 {
 	IECorePython::ScopedGILLock lock;
-	std::vector<std::string> class_names;
+	std::vector<std::string> classNames;
 	try
 	{
-		std::string python_cmd;
-		switch( type )
+		std::string pythonCmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).classNames(\"\%s\")" ) % searchPathEnvVar % matchString );
+		object result = CoreHoudini::evalPython( pythonCmd );
+		boost::python::list extractedNames = extract<boost::python::list>( result )();
+		
+		names.clear();
+		for ( unsigned i=0; i < extractedNames.attr( "__len__" )(); i++ )
 		{
-			case OP_LOADER:
-			{
-				python_cmd = boost::str( format("IECore.ClassLoader.defaultOpLoader().classNames(\"\%s\")") % matchString );
-				break;
-			}
-			case PROCEDURAL_LOADER:
-			{
-				python_cmd = boost::str( format("IECore.ClassLoader.defaultProceduralLoader().classNames(\"\%s\")") % matchString );
-				break;
-			}
-			default:
-			{
-				return class_names;
-				break;
-			}
-		}
-
-		object result = CoreHoudini::evalPython( python_cmd );
-		boost::python::list names = extract<boost::python::list>(result)();
-		class_names.clear();
-		for ( unsigned int i=0; i<names.attr("__len__")(); ++i )
-		{
-			class_names.push_back( extract<std::string>(names[i]) );
+			names.push_back( extract<std::string>( extractedNames[i] ) );
 		}
 	}
 	catch( ... )
 	{
 		PyErr_Print();
 	}
-	return class_names;
 }
 
-std::vector<int> SOP_ParameterisedHolder::classVersions( const LoaderType &loader_type, const std::string &type )
+void SOP_ParameterisedHolder::classVersions( const std::string className, const std::string searchPathEnvVar, std::vector<int> &versions )
 {
 	IECorePython::ScopedGILLock lock;
-	std::vector<int> class_versions;
 	try
 	{
-		std::string python_cmd;
-		switch( loader_type )
+		std::string pythonCmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).versions( \"%s\" )" ) % searchPathEnvVar % className );
+		object result = CoreHoudini::evalPython( pythonCmd );
+		boost::python::list extractedVersions = extract<boost::python::list>( result )();
+		
+		versions.clear();
+		for ( unsigned i=0; i < extractedVersions.attr( "__len__" )(); i++ )
 		{
-			case OP_LOADER:
-			{
-				python_cmd = boost::str( format("IECore.ClassLoader.defaultOpLoader().versions(\"\%s\")") % type );
-				break;
-			}
-			case PROCEDURAL_LOADER:
-			{
-				python_cmd = boost::str( format("IECore.ClassLoader.defaultProceduralLoader().versions(\"\%s\")") % type );
-				break;
-			}
-			default:
-			{
-				return class_versions;
-				break;
-			}
-		}
-
-		object result = CoreHoudini::evalPython( python_cmd );
-		boost::python::list versions = extract<boost::python::list>(result)();
-		class_versions.clear();
-		for ( unsigned int i=0; i<versions.attr("__len__")(); ++i )
-		{
-			class_versions.push_back( extract<int>(versions[i]) );
+			versions.push_back( extract<int>( extractedVersions[i] ) );
 		}
 	}
 	catch( ... )
 	{
 		PyErr_Print();
 	}
-	return class_versions;
 }
 
-int SOP_ParameterisedHolder::defaultClassVersion( const LoaderType &loader_type, const std::string &type )
+int SOP_ParameterisedHolder::defaultClassVersion( const std::string className, const std::string searchPathEnvVar )
 {
-	// just return the highest version we find on disk
-	std::vector<int> versions = classVersions( loader_type, type );
-	if ( versions.size()==0 )
-		return -1;
-	else
-		return versions[versions.size()-1];
+	std::vector<int> versions;
+	classVersions( className, searchPathEnvVar, versions );
+	
+	return versions.empty() ? -1 : versions[versions.size()-1];
 }

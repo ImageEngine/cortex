@@ -50,8 +50,7 @@
 #include "CoreHoudini.h"
 #include "TypeIdBinding.h"
 #include "NodeHandle.h"
-#include "FnOpHolderBinding.h"
-#include "FnProceduralHolderBinding.h"
+#include "FnParameterisedHolderBinding.h"
 #include "FromHoudiniConverterBinding.h"
 #include "FromHoudiniGeometryConverterBinding.h"
 #include "FromHoudiniPointsConverterBinding.h"
@@ -100,8 +99,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 
 	// bind our IECoreHoudini classes & types
 	bindTypeId();
-	bindFnOpHolder();
-	bindFnProceduralHolder();
+	bindFnParameterisedHolder();
 	bindFromHoudiniConverter();
 	bindFromHoudiniGeometryConverter();
 	bindFromHoudiniPointsConverter();

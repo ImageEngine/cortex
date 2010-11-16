@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -49,51 +51,15 @@ class FnOpHolder(FnParameterisedHolder):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", node_name=name, run_init_scripts=False)
 		proc = geo.createNode( "ieOpHolder", node_name=name )
-		fn = IECoreHoudini.FnOpHolder( proc )
-		cl = IECore.ClassLoader.defaultLoader( path ).load( type, version )
-		fn.setParameterised( cl() )
+		IECoreHoudini.FnOpHolder( proc ).setParameterised( type, version, path )
 		return proc
-
-	# do we have a valid parameterised instance?
-	def hasParameterised(self):
-		if not self.nodeValid():
-			return False
-		return IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).hasParameterised()
-
-	# this sets a procedural on our node and then updates the parameters
-	def setParameterised(self, procedural, refresh_gui=True ):
-		if not self.nodeValid():
-			return
-		fn = IECoreHoudini._IECoreHoudini._FnOpHolder(self.node())
-
-		# get our procedural type/version which is added by ClassLoader
-		type = procedural.typeName()
-		version = 0
-		if hasattr(procedural, "version"):
-			version = procedural.version
-
-		# update the procedural on our SOP & refresh the gui
-		fn.setParameterised( procedural, type, version )
-
-		# refresh our parameters
-		if refresh_gui:
-			self.updateParameters( procedural )
-			
-	# this returns the procedural our node is working with
-	def getParameterised(self):
-		if self.nodeValid():
-			if IECoreHoudini._IECoreHoudini._FnOpHolder(self.node()).hasParameterised():
-				return IECoreHoudini._IECoreHoudini._FnOpHolder(self.node()).getParameterised()
-		return None
-
-	# forces the list of cached class names to refresh	
-	def refreshClassNames(self):
-		if self.nodeValid():
-			IECoreHoudini._IECoreHoudini._FnOpHolder(self.node()).refreshClassNames()
-		
-	# get our list of class names based on matchString
-	def classNames(self):
-		if self.nodeValid():
-			return IECoreHoudini._IECoreHoudini._FnOpHolder(self.node()).classNames()
-		return None
 	
+	## Convenience method to call setParameterised with the environment variable
+	# for the searchpaths set to "IECORE_OP_PATHS".
+	def setOp( self, className, classVersion=None, updateGui=True ) :
+
+		self.setParameterised( className, classVersion, "IECORE_OP_PATHS", updateGui )
+
+	def getOp( self ) :
+		
+		return self.getParameterised()

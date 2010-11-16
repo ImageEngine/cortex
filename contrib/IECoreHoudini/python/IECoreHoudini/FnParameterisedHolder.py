@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -55,9 +57,47 @@ class FnParameterisedHolder():
 		
 	# return the node we're currently wrapping
 	def node(self):
-		if self.nodeValid():
-			return self.__node
-		return None
+
+		return self.__node if self.nodeValid() else None
+
+	# do we have a valid parameterised instance?
+	def hasParameterised( self ) :
+
+		return IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).hasParameterised() if self.nodeValid() else False
+
+	# this sets a parameterised object on our node and then updates the parameters
+	def setParameterised( self, classNameOrParameterised, classVersion=None, envVarName=None, updateGui=True ) :
+	
+		if not self.nodeValid() :
+			return
+		
+		if isinstance( classNameOrParameterised, str ) :
+			if classVersion is None or classVersion < 0 :
+				classVersions = IECore.ClassLoader.defaultLoader( envVarName ).versions( classNameOrParameterised )
+				classVersion = classVersions[-1] if classVersions else 0 
+			IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).setParameterised( classNameOrParameterised, classVersion, envVarName )
+		else :
+			IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).setParameterised( classNameOrParameterised )
+		
+		parameterised = self.getParameterised()
+
+		if updateGui and parameterised :
+			self.updateParameters( parameterised )
+
+	# this returns the parameterised object our node is working with
+	def getParameterised( self ) :
+		
+		return IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).getParameterised() if self.hasParameterised() else None
+
+	# get our list of class names based on matchString
+	def classNames( self ) :
+		
+		if not self.nodeValid() :
+			return []
+		
+		matchString = self.__node.parm( "__classMatchString" ).eval()
+		searchPathEnvVar = self.__node.parm( "__classSearchPathEnvVar" ).eval()
+		return IECore.ClassLoader.defaultLoader( searchPathEnvVar ).classNames( matchString )
 
 	# takes a snapshot of the parameter values & expressions on our node so 
 	# that if we change the procedural/op we can restore the parameters afterwards.
@@ -127,7 +167,7 @@ class FnParameterisedHolder():
 			num_leftovers = self.countSpareParameters()
 	
 	# add/remove parameters on our node so we correctly reflect our Procedural
-	def updateParameters(self, parameterised, old_parameterised=None):
+	def updateParameters( self, parameterised ) :
 		if not self.nodeValid():
 			return
 
@@ -156,7 +196,7 @@ class FnParameterisedHolder():
 		expr += "return 1"
 		if len(parm_names)==0:
 			expr = "1"
-		eval_parm = self.__node.parm( "__opParmEval" )
+		eval_parm = self.__node.parm( "__evaluateParameters" )
 		eval_parm.lock(False)
 		eval_parm.setExpression( expr, language=hou.exprLanguage.Python, replace_expression=True )
 		eval_parm.lock(True)

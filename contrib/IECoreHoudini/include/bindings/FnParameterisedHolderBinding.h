@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef FNOPHOLDERBINDING_H_
-#define FNOPHOLDERBINDING_H_
+#ifndef IECOREHOUDINI_FNPARAMETERISEDHOLDERBINDING_H
+#define IECOREHOUDINI_FNPARAMETERISEDHOLDERBINDING_H
 
 namespace IECoreHoudini
 {
-	void bindFnOpHolder();
+	void bindFnParameterisedHolder();
 }
 
-#endif /* FNOPHOLDERBINDING_H_ */
+#endif // IECOREHOUDINI_FNPARAMETERISEDHOLDERBINDING_H

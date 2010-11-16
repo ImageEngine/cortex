@@ -155,12 +155,17 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		results.append(parm)
 		
 	# certain parameter types are ok to ignore
-	ignore_types = [ IECore.TypeId.CompoundParameter,
-					IECore.TypeId.ObjectParameter,
-					IECore.TypeId.PrimitiveParameter,
-					IECore.TypeId.PointsPrimitiveParameter,
-					IECore.TypeId.MeshPrimitiveParameter ]
-	if not parm and not p.typeId() in ignore_types:
+	ignoredParameterTypes = [
+		IECore.TypeId.CompoundParameter,
+		IECore.TypeId.ObjectParameter,
+		IECore.TypeId.PrimitiveParameter,
+		IECore.TypeId.PointsPrimitiveParameter,
+		IECore.TypeId.MeshPrimitiveParameter,
+		IECore.TypeId.CurvesPrimitiveParameter,
+		IECore.TypeId.GroupParameter,
+	]
+	
+	if not parm and not p.typeId() in ignoredParameterTypes :
 		msg = "IECoreHoudini does not currently support parameters of type " + p.typeName()
 		
 		# H10 and hbatch/hython don't support ui.setStatusMessage()

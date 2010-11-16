@@ -35,45 +35,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef FNPARAMETERISEDHOLDER_H_
-#define FNPARAMETERISEDHOLDER_H_
+#ifndef IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
+#define IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
 
-// Houdini
-#include <SOP/SOP_Node.h>
+#include "SOP/SOP_Node.h"
 
-// Cortex
-#include <IECore/Op.h>
-
-// IECoreHoudini
 #include "NodeHandle.h"
-#include "SOP_OpHolder.h"
 #include "SOP_ParameterisedHolder.h"
 
 namespace IECoreHoudini
 {
+
 	class FnParameterisedHolder
 	{
-		friend class FnOpHolder;
-		friend class FnProceduralHolder;
-		public:
-			FnParameterisedHolder();
+		public :
+			
+			FnParameterisedHolder( SOP_Node *sop=0 );
 			virtual ~FnParameterisedHolder();
 
-			// do we have valid data?
+			bool hasParameterised();
+			
+			void setParameterised( IECore::RunTimeTypedPtr p );
+			void setParameterised( const std::string &className, int classVerison, const std::string &seachPathEnvVar );
+			
+			IECore::RunTimeTypedPtr getParameterised();
+
+		private :
+			
 			bool hasHolder();
-			virtual bool hasParameterised()=0;
-
-		protected:
-			// set the procedural on the holder
-			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version )=0;
-			virtual IECore::RunTimeTypedPtr getParameterised()=0;
-
-		private:
-			// associate a sop with this fn
 			void setHolder( SOP_Node *sop );
+			SOP_ParameterisedHolder *getHolder( SOP_Node *sop );
 
 			NodeHandle m_handle;
+
 	};
+
 }
 
-#endif /* FNPARAMETERISEDHOLDER_H_ */
+#endif // IECOREHOUDINI_FNPARAMETERISEDHOLDER_H

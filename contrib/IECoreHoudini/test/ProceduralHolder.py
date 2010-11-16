@@ -66,8 +66,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		geo = obj.createNode("geo", run_init_scripts=False)
 		proc = geo.createNode( "ieProceduralHolder" )
 		fn = IECoreHoudini.FnProceduralHolder( proc )
-		cl = IECore.ClassLoader.defaultProceduralLoader().load( "parameterTypes", 1 )()
-		fn.setParameterised( cl )
+		fn.setProcedural( "parameterTypes", 1 )
 
 		# set a lot of parameters via houdini
 		proc.parmTuple("parm_a").set( [123] )
@@ -105,9 +104,11 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc.cook(force=True)
 
 		# generate our bounds
-		box = cl.bound()
-		assert( box==IECore.Box3f( IECore.V3f(0,0,0), IECore.V3f(1,1,1) ) )
-		return ( proc, cl )
+		parameterised = fn.getParameterised()
+		self.failUnless( parameterised.isInstanceOf( IECore.TypeId.RunTimeTyped ) )
+		box = parameterised.bound()
+		self.assertEqual( box, IECore.Box3f( IECore.V3f(0,0,0), IECore.V3f(1,1,1) ) )
+		return ( proc, parameterised )
 
 	def testLotsQuickly(self):
 		n = []
@@ -145,17 +146,17 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 
 		# check parameters
 		proc = hou.node(path1)
-		assert( proc )
-		assert( proc.evalParm("__opType")=="sphereProcedural" )
-		assert( proc.evalParm("__opVersion")=="1" )
-		assert( proc.evalParm("parm_radius")==10 )
-		assert( proc.evalParm("parm_theta")==90 )
+		self.failUnless( proc )
+		self.assertEqual( proc.evalParm( "__className" ), "sphereProcedural" )
+		self.assertEqual( proc.evalParm( "__classVersion" ), "1" )
+		self.assertEqual( proc.evalParm("parm_radius"), 10 )
+		self.assertEqual( proc.evalParm("parm_theta"), 90 )
 		proc = hou.node(path2)
-		assert( proc )
-		assert( proc.evalParm("__opType")=="sphereProcedural" )
-		assert( proc.evalParm("__opVersion")=="1" )
-		assert( proc.evalParm("parm_radius")==5 )
-		assert( proc.evalParm("parm_theta")==45 )
+		self.failUnless( proc )
+		self.assertEqual( proc.evalParm( "__className" ), "sphereProcedural" )
+		self.assertEqual( proc.evalParm( "__classVersion" ), "1" )
+		self.assertEqual( proc.evalParm("parm_radius"), 5 )
+		self.assertEqual( proc.evalParm("parm_theta"), 45 )
 
 	def testObjectWasDeleted(self):
 		obj = hou.node("/obj")
@@ -179,7 +180,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		rad = sphere.evalParm("parm_radius")
 		assert( rad>0.984 )
 		assert( rad<0.985 )
-		sphere.parm("__opReloadBtn").pressButton()
+		sphere.parm( "__classReloadButton" ).pressButton()
 		rad = sphere.evalParm("parm_radius")
 		assert( rad>0.984 )
 		assert( rad<0.985 )
@@ -189,9 +190,9 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		assert( rad>0 )
 
 		# now change the version to v2 and check things are still ok
-		sphere.parm("__opVersion").set("2")
+		sphere.parm( "__classVersion" ).set( "2" )
 		# if we're changing the menu programatically then we need to call pressButton()!!
-		sphere.parm("__opVersion").pressButton()
+		sphere.parm( "__classVersion" ).pressButton()
 		assert( not sphere.evalParm("parm_extra") )
 		sphere.parm("parm_extra").set(True)
 		assert( sphere.evalParm("parm_extra") )
@@ -226,22 +227,20 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 	def testMatchString(self):
 		(op,fn)=self.testProceduralParameters()
 		fn = IECoreHoudini.FnProceduralHolder(op)
-		assert( op.parm("__opMatchString").eval()=="*")
-		op.parm("__opType").set("sphereProcedural")
-		op.parm("__opType").pressButton()
+		self.assertEqual( op.parm( "__classMatchString" ).eval(), "*" )
+		op.parm( "__className" ).set( "sphereProcedural" )
+		op.parm( "__className" ).pressButton()
 		cl = fn.getParameterised()
-		assert( cl.typeName()=="sphereProcedural" )
-		op.parm("__opMatchString").set("nestedChild")
-		fn.refreshClassNames()
+		self.assertEqual( cl.typeName(), "sphereProcedural" )
+		op.parm( "__classMatchString" ).set( "nestedChild" )
 		results = fn.classNames()
-		assert(len(fn.classNames())==1)
-		op.parm("__opType").set("sphereProcedural") # this still works, should it be invalid?
-		op.parm("__opType").pressButton()
+		self.assertEqual( len(fn.classNames()), 1 )
+		op.parm( "__className" ).set( "sphereProcedural" ) # this still works, should it be invalid?
+		op.parm( "__className" ).pressButton()
 		cl = fn.getParameterised()
-		assert( cl.typeName()=="sphereProcedural" )
-		op.parm("__opMatchString").set("*")
-		fn.refreshClassNames()
-		assert(len(fn.classNames())>1)
+		self.assertEqual( cl.typeName(), "sphereProcedural" )
+		op.parm( "__classMatchString" ).set( "*" )
+		self.assert_( len(fn.classNames()) > 1 )
 
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

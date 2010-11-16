@@ -1,8 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
-//
 //  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -35,43 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef FNPROCEDURALHOLDER_H_
-#define FNPROCEDURALHOLDER_H_
+#include "boost/python.hpp"
 
-// Houdini
 #include <SOP/SOP_Node.h>
 
-// Cortex
-#include <IECore/Op.h>
-#include <IECore/CompoundParameter.h>
-
-// IECoreHoudini
-#include "NodeHandle.h"
+#include "FnParameterisedHolderBinding.h"
 #include "FnParameterisedHolder.h"
 
+using namespace boost::python;
+using namespace IECoreHoudini;
 
-namespace IECoreHoudini
+void IECoreHoudini::bindFnParameterisedHolder()
 {
-	class SOP_ProceduralHolder;
-	class FnProceduralHolder : public FnParameterisedHolder
-	{
-		friend class SOP_ProceduralHolder;
-		public:
-			FnProceduralHolder( SOP_Node *sop=0 );
-			virtual ~FnProceduralHolder();
-
-			SOP_ProceduralHolder *getProceduralHolder( SOP_Node *sop );
-
-			virtual bool hasParameterised();
-			virtual void setParameterised( IECore::RunTimeTypedPtr p, const std::string &type, int version );
-			virtual IECore::RunTimeTypedPtr getParameterised();
-
-			void refreshClassNames();
-			std::vector<std::string> classNames();
-
-		private:
-			//virtual void setParameterisedDirectly( IECore::RunTimeTypedPtr p, const std::string &type, int version, SOP_ParameterisedHolder *sop );
-	};
+	class_<FnParameterisedHolder>( "_FnParameterisedHolder" )
+		.def( init<SOP_Node*>() )
+		.def( "hasParameterised", &FnParameterisedHolder::hasParameterised )
+		.def( "setParameterised", (void (FnParameterisedHolder::*)( IECore::RunTimeTypedPtr ))&FnParameterisedHolder::setParameterised )
+		.def( "setParameterised", (void (FnParameterisedHolder::*)( const std::string &, int, const std::string & ))&FnParameterisedHolder::setParameterised )
+		.def( "getParameterised", &FnParameterisedHolder::getParameterised )
+	;
 }
-
-#endif /* FNPROCEDURALHOLDER_H_ */

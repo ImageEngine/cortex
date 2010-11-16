@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -49,52 +51,15 @@ class FnProceduralHolder(FnParameterisedHolder):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", node_name=name, run_init_scripts=False)
 		proc = geo.createNode( "ieProceduralHolder", node_name=name )
-		fn = IECoreHoudini.FnProceduralHolder( proc )
-		cl = IECore.ClassLoader.defaultLoader( path ).load( type, version )
-		fn.setParameterised( cl() )
+		IECoreHoudini.FnProceduralHolder( proc ).setParameterised( type, version, path )
 		return proc
 
-	# do we have a valid parameterised instance?
-	def hasParameterised(self):
-		if not self.nodeValid():
-			return False
-		return IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).hasParameterised()
+	## Convenience method to call setParameterised with the environment variable
+	# for the searchpaths set to "IECORE_PROCEDURAL_PATHS".
+	def setProcedural( self, className, classVersion=None, updateGui=True ) :
 
-	# this sets a procedural on our node and then updates the parameters
-	def setParameterised(self, procedural, refresh_gui=True ):
-		if not self.nodeValid():
-			return
-		fn = IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node())
+		self.setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS", updateGui )
 
-		# get our procedural type/version which is added by ClassLoader
-		type = "Unknown"
-		version = "Unknown"
-		if hasattr(procedural, "path"):
-			type = procedural.path
-		if hasattr(procedural, "version"):
-			version = procedural.version
-
-		# update the procedural on our SOP & refresh the gui
-		fn.setParameterised( procedural, type, version )
-
-		# refresh our parameters
-		if refresh_gui:
-			self.updateParameters( procedural )
-
-	# this returns the procedural our node is working with
-	def getParameterised(self):
-		if self.nodeValid():
-			if IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).hasParameterised():
-				return IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).getParameterised()
-		return None
-
-	# forces the list of cached class names to refresh	
-	def refreshClassNames(self):
-		if self.nodeValid():
-			IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).refreshClassNames()
+	def getProcedural( self ) :
 		
-	# get our list of class names based on matchString
-	def classNames(self):
-		if self.nodeValid():
-			return IECoreHoudini._IECoreHoudini._FnProceduralHolder(self.node()).classNames()
-		return None
+		return self.getParameterised()

@@ -91,27 +91,23 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 		v1_op = geo.createNode( "ieOpHolder", node_name="vector1" )
 		fn = IECoreHoudini.FnOpHolder( v1_op )
-		cl = IECore.ClassLoader.defaultOpLoader().load("V3fVectorCreator", 1)()
-		fn.setParameterised( cl )
+		fn.setOp( "V3fVectorCreator", 1 )
 		v1_op.parm("parm_size").set(3)
 		v1_op.parmTuple("parm_value").set( (1,2,3) )
 		
 		v2_op = geo.createNode( "ieOpHolder", node_name="vector2" )
 		fn = IECoreHoudini.FnOpHolder( v2_op )
-		cl = IECore.ClassLoader.defaultOpLoader().load("V3fVectorCreator", 1)()
-		fn.setParameterised( cl )
+		fn.setOp( "V3fVectorCreator", 1 )
 		v2_op.parm("parm_size").set(3)
 		v2_op.parmTuple("parm_value").set( (4,5,6) )
 		
 		add_op = geo.createNode( "ieOpHolder", node_name="add_vectors" )
 		fn = IECoreHoudini.FnOpHolder( add_op )
-		cl = IECore.ClassLoader.defaultOpLoader().load("V3fVectorAdder", 1)()
-		fn.setParameterised( cl )
+		fn.setOp( "V3fVectorAdder", 1 )
 		
 		print_op = geo.createNode( "ieOpHolder", node_name="print_values" )
 		fn = IECoreHoudini.FnOpHolder( print_op )
-		cl = IECore.ClassLoader.defaultOpLoader().load("objectDebug", 1)()
-		fn.setParameterised( cl )
+		fn.setOp( "objectDebug", 1 )
 		print_op.parm("parm_quiet").set(True)
 		
 		# connect our ops together
@@ -158,11 +154,11 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		n = IECoreHoudini.FnOpHolder.create( "test_node", "V3fVectorCreator", 1)
 		fn = IECoreHoudini.FnOpHolder(n)
 		op = fn.getParameterised()
-		assert( len(n.inputConnectors())==0 )
+		self.assertEqual( len(n.inputConnectors()), 0 )
 		fn.setParameterised( IECore.ClassLoader.defaultOpLoader().load("objectDebug",1)() )
-		assert( len(n.inputConnectors())==1 )
+		self.assertEqual( len(n.inputConnectors()), 1 )
 		fn.setParameterised( IECore.ClassLoader.defaultOpLoader().load("V3fVectorAdder",1)() )
-		assert( len(n.inputConnectors())==2 )
+		self.assertEqual( len(n.inputConnectors()), 2 )
 
 	# tests creation of a lot of opHolders
 	def testLotsQuickly(self):
@@ -271,7 +267,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		assert( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 123.456, 456.789, 0 ) ).length()<0.001 )
 		
 		# test that caching parameters works
-		op.parm("__opReloadBtn").pressButton()
+		op.parm( "__classReloadButton" ).pressButton()
 		op.cook()
 		assert( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value == 345 )
 		assert( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 123.456, 456.789, 0 ) ).length()<0.001 )
@@ -423,21 +419,19 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 	def testMatchString(self):
 		(op,fn)=self.testOpHolder()
-		op.parm( "__opMatchString" ).set( "*" )
-		op.parm("__opType").set("cobReader")
-		op.parm("__opType").pressButton()
+		op.parm( "__classMatchString" ).set( "*" )
+		op.parm( "__className" ).set( "cobReader" )
+		op.parm( "__className" ).pressButton()
 		cl = fn.getParameterised()
 		assert( cl.typeName()=="cobReader" )
-		op.parm("__opMatchString").set("object*")
-		fn.refreshClassNames()
+		op.parm( "__classMatchString" ).set( "object*" )
 		results = fn.classNames()
 		assert(len(fn.classNames())==1)
-		op.parm("__opType").set("cobReader") # this still works, should it be invalid?
-		op.parm("__opType").pressButton()
+		op.parm( "__className" ).set( "cobReader" ) # this still works, should it be invalid?
+		op.parm( "__className" ).pressButton()
 		cl = fn.getParameterised()
 		assert( cl.typeName()=="cobReader" )
-		op.parm("__opMatchString").set("*")
-		fn.refreshClassNames()
+		op.parm( "__classMatchString" ).set("*")
 		assert(len(fn.classNames())>1)
 		
 	def setUp( self ) :
