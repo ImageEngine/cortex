@@ -139,11 +139,12 @@ def __compoundParameterToKnob( knobHolder, parameter, knobName ) :
 
 def __compoundParameterFromKnob( knobHolder, parameter, knobName ) :
 
-	knob = knobHolder.knobs()[ knobName ]
-	collapsed = knob.getValue( collapsed )
-	if not "UI" in parameter.userData() :
-		parameter.userData()["UI"] = IECore.CompoundData()
-	parameter.userData()["UI"]["collapsed"] = IECore.BoolData(collapsed)
+	with IECore.IgnoredExceptions( KeyError ):
+		knob = knobHolder.knobs()[ knobName ]
+		collapsed = bool(knob.getValue())
+		if not "UI" in parameter.userData() :
+			parameter.userData()["UI"] = IECore.CompoundData()
+		parameter.userData()["UI"]["collapsed"] = IECore.BoolData(collapsed)
 
 	for childName, child in parameter.items() :
 		setParameterFromKnobs( knobHolder, child, knobName + "_" + childName )
