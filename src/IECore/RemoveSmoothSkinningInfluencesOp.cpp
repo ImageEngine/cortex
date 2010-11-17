@@ -57,13 +57,14 @@ RemoveSmoothSkinningInfluencesOp::RemoveSmoothSkinningInfluencesOp()
 	IntParameter::PresetsContainer modePresets;
 	modePresets.push_back( IntParameter::Preset( "Named", RemoveSmoothSkinningInfluencesOp::Named ) );
 	modePresets.push_back( IntParameter::Preset( "Indexed", RemoveSmoothSkinningInfluencesOp::Indexed ) );
+	modePresets.push_back( IntParameter::Preset( "Weightless", RemoveSmoothSkinningInfluencesOp::Weightless ) );
 	
 	m_modeParameter = new IntParameter(
 		"mode",
-		"The mode of influence removal. Options are to remove by name or by index",
+		"The mode of influence removal. Options are to remove by name, index, or to remove influences with no weights",
 		RemoveSmoothSkinningInfluencesOp::Named,
 		RemoveSmoothSkinningInfluencesOp::Named,
-		RemoveSmoothSkinningInfluencesOp::Indexed,
+		RemoveSmoothSkinningInfluencesOp::Weightless,
 		modePresets,
 		true
 	);
@@ -103,6 +104,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	
 	// gather the influence indices
 	std::vector<int> indicesToRemove;
+	const unsigned numInfluences = influenceNames.size();
 	const int mode = m_modeParameter->getNumericValue();
 	if ( mode == RemoveSmoothSkinningInfluencesOp::Named )
 	{
@@ -124,9 +126,38 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 		indicesToRemove = m_indicesParameter->getTypedValue();
 		for ( unsigned i=0; i < indicesToRemove.size(); i++ )
 		{
-			if ( indicesToRemove[i] > (int)influenceNames.size() - 1 )
+			if ( indicesToRemove[i] > (int)numInfluences - 1 )
 			{
 				throw IECore::Exception( ( boost::format( "RemoveSmoothSkinningInfluencesOp: \"%d\" is not a valid index" ) % indicesToRemove[i] ).str() );
+			}
+		}
+	}
+	else if ( mode == RemoveSmoothSkinningInfluencesOp::Weightless )
+	{
+		std::set<int> indicesToKeep;
+		for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
+		{
+			for ( int j=0; j < pointInfluenceCounts[i]; j++ )
+			{
+				int current = pointIndexOffsets[i] + j;
+				
+				if ( pointInfluenceWeights[current] > 0.0f )
+				{
+					indicesToKeep.insert( pointInfluenceIndices[current] );
+				}
+			}
+			
+			if ( indicesToKeep.size() == numInfluences )
+			{
+				break;
+			}
+		}
+		
+		for ( unsigned i=0; i < numInfluences; i++ )
+		{
+			if ( indicesToKeep.find( i ) == indicesToKeep.end() )
+			{
+				indicesToRemove.push_back( i );
 			}
 		}
 	}
@@ -144,7 +175,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	std::vector<float> newWeights;
 	
 	// calculate the map between old and new influence indices
-	for ( int i=0; i < (int)influenceNames.size(); i++ )
+	for ( int i=0; i < (int)numInfluences; i++ )
 	{
 		if ( find( indicesToRemove.begin(), indicesToRemove.end(), i ) == indicesToRemove.end() )
 		{

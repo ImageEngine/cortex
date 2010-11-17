@@ -57,6 +57,7 @@ class RemoveSmoothSkinningInfluencesOp : public ModifyOp
 		{
 			Named = 0,
 			Indexed,
+			Weightless
 		};
 
 	protected :

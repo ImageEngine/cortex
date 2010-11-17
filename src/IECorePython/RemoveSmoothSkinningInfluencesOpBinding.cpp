@@ -54,6 +54,7 @@ void bindRemoveSmoothSkinningInfluencesOp()
 	enum_< RemoveSmoothSkinningInfluencesOp::Mode >( "Mode" )
 		.value( "Named", RemoveSmoothSkinningInfluencesOp::Named )
 		.value( "Indexed", RemoveSmoothSkinningInfluencesOp::Indexed )
+		.value( "Weightless", RemoveSmoothSkinningInfluencesOp::Weightless )
 	;
 }
 

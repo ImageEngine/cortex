@@ -215,6 +215,33 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceWeights(), removed.pointInfluenceWeights() )
 		self.assertEqual( result, removed )
 	
+	def testRemovingWeightlessMode( self ) :
+		""" Test RemoveSmoothSkinningInfluencesOp in weightless mode"""
+		
+		ssd = self.added()
+		
+		op = RemoveSmoothSkinningInfluencesOp()
+		op.parameters()['input'].setValue( ssd )
+		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Weightless )
+		result = op.operate()
+		
+		self.assertNotEqual( result.influenceNames(), ssd.influenceNames() )
+		self.assertNotEqual( result.influencePose(), ssd.influencePose() )
+		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
+		self.assertEqual( result.pointIndexOffsets(), ssd.pointIndexOffsets() )
+		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
+		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
+		self.assertNotEqual( result, ssd )
+		
+		removed = self.original()
+		self.assertEqual( result.influenceNames(), removed.influenceNames() )
+		self.assertEqual( result.influencePose(), removed.influencePose() )
+		self.assertEqual( result.pointIndexOffsets(), removed.pointIndexOffsets() )
+		self.assertEqual( result.pointInfluenceCounts(), removed.pointInfluenceCounts() )
+		self.assertEqual( result.pointInfluenceIndices(), removed.pointInfluenceIndices() )
+		self.assertEqual( result.pointInfluenceWeights(), removed.pointInfluenceWeights() )
+		self.assertEqual( result, removed )
+	
 	def testAddOpErrorStates( self ) :
 		""" Test AddSmoothSkinningInfluencesOp with various error states"""
 		
