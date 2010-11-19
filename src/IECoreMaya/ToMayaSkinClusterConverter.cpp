@@ -48,11 +48,13 @@
 #include "maya/MGlobal.h"
 #include "maya/MItGeometry.h"
 #include "maya/MFnNumericAttribute.h"
+#include "maya/MMatrixArray.h"
 #include "maya/MObjectArray.h"
 #include "maya/MPlug.h"
 #include "maya/MPlugArray.h"
 #include "maya/MSelectionList.h"
 
+#include "IECore/CompoundParameter.h"
 #include "IECore/SmoothSkinningData.h"
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/MessageHandler.h"
@@ -67,6 +69,13 @@ ToMayaSkinClusterConverter::Description ToMayaSkinClusterConverter::g_skinCluste
 ToMayaSkinClusterConverter::ToMayaSkinClusterConverter( IECore::ConstObjectPtr object )
 : ToMayaObjectConverter( "Converts IECore::SmoothSkinningData objects to a Maya skinCluster.", object)
 {
+	m_ignoreMissingInfluencesParameter = new IECore::BoolParameter(
+		"ignoreMissingInfluences",
+		"If True, ignores SmoothSkinningData influences that aren't in the Maya scene and prunes the weights of Maya skinCluster influences that aren't in the SmoothSkinningData",
+		false
+	);
+	
+	parameters()->addParameter( m_ignoreMissingInfluencesParameter );
 }
 
 bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
@@ -92,28 +101,52 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid skinCluster" ) % fnSkinClusterNode.name() ).str() );
 	}
 
+	const unsigned origNumInfluences = influenceNames.size();
+	unsigned numInfluences = origNumInfluences;
+	std::vector<bool> ignoreInfluence( origNumInfluences, false );
+	std::vector<int> indexMap( origNumInfluences, -1 );
+	const bool ignoreMissingInfluences = m_ignoreMissingInfluencesParameter->getTypedValue();
+	
 	// gather the influence objects
-	/// \todo: optional parameter to keep existing influences
 	MObject mObj;
 	MDagPath path;
 	MSelectionList influenceList;
 	MDagPathArray influencePaths;
-	for ( unsigned i=0; i < influenceNames.size(); i++ )
+	for ( unsigned i=0, index=0; i < origNumInfluences; i++ )
 	{
 		MString influenceName( influenceNames[i].c_str() );
-		influenceList.add( influenceName );
-		s = influenceList.getDependNode( i, mObj );
-		if ( s != MS::kSuccess )
+		s = influenceList.add( influenceName );
+		if ( !s )
 		{
+			if ( ignoreMissingInfluences )
+			{
+				ignoreInfluence[i] = true;
+				MGlobal::displayWarning( MString( "ToMayaSkinClusterConverter: \"" + influenceName + "\" is not a valid influence" ) );
+				continue;
+			}
+			
 			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid influence" ) % influenceName ).str() );
 		}
+		
+		influenceList.getDependNode( index, mObj );
 		MFnIkJoint fnInfluence( mObj, &s );
-		if ( s != MS::kSuccess )
+		if ( !s )
 		{
+			if ( ignoreMissingInfluences )
+			{
+				ignoreInfluence[i] = true;
+				influenceList.remove( index );
+				MGlobal::displayWarning( MString( "ToMayaSkinClusterConverter: \"" + influenceName + "\" is not a valid influence" ) );
+				continue;
+			}
+			
 			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid influence" ) % influenceName ).str() );
 		}
+		
 		fnInfluence.getPath( path );
 		influencePaths.append( path );
+		indexMap[i] = index;
+		index++;
 	}
 	
 	MPlugArray connectedPlugs;
@@ -132,11 +165,26 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	
 	// break existing influence connections to the skinCluster
 	MDGModifier dgModifier;
+	MMatrixArray ignoredPreMatrices;
 	MPlug matrixArrayPlug = fnSkinClusterNode.findPlug( "matrix", true, &s );
+	MPlug bindPreMatrixArrayPlug = fnSkinClusterNode.findPlug( "bindPreMatrix", true, &s );
 	for ( unsigned i=0; i < matrixArrayPlug.numConnectedElements(); i++ )
 	{
 		MPlug matrixPlug = matrixArrayPlug.connectionByPhysicalIndex( i, &s );
 		matrixPlug.connectedTo( connectedPlugs, true, false );
+		MFnIkJoint fnInfluence( connectedPlugs[0].node() );
+		fnInfluence.getPath( path );
+		if ( ignoreMissingInfluences && !influenceList.hasItem( path ) )
+		{
+			MPlug preMatrixPlug = bindPreMatrixArrayPlug.elementByLogicalIndex( i );
+			preMatrixPlug.getValue( mObj );
+			MFnMatrixData matFn( mObj );
+			ignoredPreMatrices.append( matFn.matrix() );
+			ignoreInfluence.push_back( false );
+			indexMap.push_back( influenceList.length() );
+			influenceList.add( connectedPlugs[0].node() );
+			numInfluences++;
+		}
 		dgModifier.disconnect( connectedPlugs[0], matrixPlug );
 	}
 	MPlug lockArrayPlug = fnSkinClusterNode.findPlug( "lockWeights", true, &s );
@@ -171,10 +219,16 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	dgModifier.doIt();
 	
 	// make connections from influences to skinCluster and bindPose
-	for ( unsigned i=0; i < influenceNames.size(); i++ )
+	for ( unsigned i=0; i < numInfluences; i++ )
 	{
-		influenceList.getDependNode( i, mObj );
-		MFnDependencyNode fnInfluence( mObj );
+		if ( ignoreInfluence[i] )
+		{
+			continue;
+		}
+		
+		int index = indexMap[i];
+		s = influenceList.getDependNode( index, mObj );
+		MFnIkJoint fnInfluence( mObj, &s );
 		MPlug influenceMatrixPlug = fnInfluence.findPlug( "worldMatrix", true, &s ).elementByLogicalIndex( 0, &s );
 		MPlug influenceMessagePlug = fnInfluence.findPlug( "message", true, &s );
 		MPlug influenceBindPosePlug = fnInfluence.findPlug( "bindPose", true, &s );
@@ -189,39 +243,45 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		}
 		
 		// connect influence to the skinCluster
-		MPlug matrixPlug = matrixArrayPlug.elementByLogicalIndex( i );
-		MPlug lockPlug = lockArrayPlug.elementByLogicalIndex( i );
+		MPlug matrixPlug = matrixArrayPlug.elementByLogicalIndex( index );
+		MPlug lockPlug = lockArrayPlug.elementByLogicalIndex( index );
 		dgModifier.connect( influenceMatrixPlug, matrixPlug );
 		dgModifier.connect( influenceLockPlug, lockPlug );
 		
 		// connect influence to the bindPose
-		MPlug bindPoseMatrixPlug = bindPoseMatrixArrayPlug.elementByLogicalIndex( i );
-		MPlug memberPlug = bindPoseMemberArrayPlug.elementByLogicalIndex( i );
+		MPlug bindPoseMatrixPlug = bindPoseMatrixArrayPlug.elementByLogicalIndex( index );
+		MPlug memberPlug = bindPoseMemberArrayPlug.elementByLogicalIndex( index );
 		dgModifier.connect( influenceMessagePlug, bindPoseMatrixPlug );
 		dgModifier.connect( influenceBindPosePlug, memberPlug );
 	}
-	influenceList.getDependNode( 0, mObj );
+	unsigned firstIndex = find( ignoreInfluence.begin(), ignoreInfluence.end(), false ) - ignoreInfluence.begin();
+	influenceList.getDependNode( firstIndex, mObj );
 	MFnDependencyNode fnInfluence( mObj );
 	MPlug influenceMessagePlug = fnInfluence.findPlug( "message", true, &s );
 	dgModifier.connect( influenceMessagePlug, paintPlug );
 	dgModifier.doIt();
 	
 	// use influencePoseData as bindPreMatrix
-	MPlug bindPreMatrixArrayPlug = fnSkinClusterNode.findPlug( "bindPreMatrix", true, &s );
-	for ( unsigned i=0; i < influencePoseData.size(); i++ )
+	for ( unsigned i=0; i < numInfluences; i++ )
 	{
-		MPlug preMatrixPlug = bindPreMatrixArrayPlug.elementByLogicalIndex( i, &s );
+		if ( ignoreInfluence[i] )
+		{
+			continue;
+		}
+		
+		MMatrix preMatrix = ( i < origNumInfluences ) ? IECore::convert<MMatrix>( influencePoseData[i] ) : ignoredPreMatrices[i-origNumInfluences];
+		MPlug preMatrixPlug = bindPreMatrixArrayPlug.elementByLogicalIndex( indexMap[i], &s );
 		s = preMatrixPlug.getValue( mObj );
 		if ( s )
 		{
 			MFnMatrixData matFn( mObj );
-			matFn.set( IECore::convert<MMatrix>( influencePoseData[i] ) );
-			mObj = matFn.object();	
+			matFn.set( preMatrix );
+			mObj = matFn.object();
 		}
 		else
 		{
 			MFnMatrixData matFn;
-			mObj = matFn.create( IECore::convert<MMatrix>( influencePoseData[i] ) );
+			mObj = matFn.create( preMatrix );
 		}
 		
 		preMatrixPlug.setValue( mObj );
@@ -229,7 +289,7 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	
 	// remove unneeded bindPreMatrix children
 	unsigned existingElements = bindPreMatrixArrayPlug.numElements();
-	for ( unsigned i=influencePoseData.size(); i < existingElements; i++ )
+	for ( unsigned i=influenceList.length(); i < existingElements; i++ )
 	{
 		MPlug preMatrixPlug = bindPreMatrixArrayPlug.elementByLogicalIndex( i, &s );
 		/// \todo: surely there is a way to accomplish this in c++...
@@ -245,7 +305,7 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	MFnDagNode dagFn( outputGeoObjs[0] );
 	MDagPath geoPath;
 	dagFn.getPath( geoPath );
-		
+	
 	// loop through all the points of the geometry and set the weights
 	MItGeometry geoIt( outputGeoObjs[0] );
 	MPlug weightListArrayPlug = fnSkinClusterNode.findPlug( "weightList", true, &s );
@@ -266,10 +326,16 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		int firstIndex = pointIndexOffsets[pIndex];
 		for( int i=0; i < pointInfluenceCounts[pIndex]; i++ )
 		{
-			int influenceIndex = fnSkinCluster.indexForInfluenceObject( influencePaths[ pointInfluenceIndices[ firstIndex + i ] ] );
-			MPlug influenceWeightPlug = pointWeightsPlug.elementByLogicalIndex( influenceIndex, &s );
+			int influenceIndex = pointInfluenceIndices[ firstIndex + i ];
+			if ( ignoreInfluence[ influenceIndex ] )
+			{
+				continue;
+			}
+			
+			int skinClusterInfluenceIndex = fnSkinCluster.indexForInfluenceObject( influencePaths[ indexMap[ influenceIndex ] ] );
+			MPlug influenceWeightPlug = pointWeightsPlug.elementByLogicalIndex( skinClusterInfluenceIndex, &s );
 			influenceWeightPlug.setValue( pointInfluenceWeights[ firstIndex + i ] );
-		}				
+		}
 	}
 	
 	return true;

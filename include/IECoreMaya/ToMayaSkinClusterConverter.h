@@ -35,6 +35,7 @@
 #ifndef IECOREMAYA_TOMAYASKINCLUSTERCONVERTER_H
 #define IECOREMAYA_TOMAYASKINCLUSTERCONVERTER_H
 
+#include "IECore/SimpleTypedParameter.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 
 namespace IECoreMaya
@@ -59,6 +60,10 @@ class ToMayaSkinClusterConverter : public ToMayaObjectConverter
 
 		typedef ToMayaObjectConverterDescription<ToMayaSkinClusterConverter> Description;
 		static Description g_skinClusterDescription;
+	
+	private :
+		
+		IECore::BoolParameterPtr m_ignoreMissingInfluencesParameter;
 
 };
 
