@@ -99,7 +99,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 	
 	if( Slo_SetShader( (char *)fileName().c_str() ) )
 	{
-		return 0;
+		throw Exception( boost::str( boost::format( "Unable to set shader to \"%s\"" ) % fileName() ) );
 	}
 
 	string name = Slo_GetName();
