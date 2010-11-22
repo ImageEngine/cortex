@@ -56,24 +56,41 @@ struct PythonInitialiser
 		Py_Initialize();
 		PyEval_InitThreads();
 		
-			mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
-			mainModuleNamespace = mainModule.attr( "__dict__" );
+			try
+			{
+			
+				mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
+				mainModuleNamespace = mainModule.attr( "__dict__" );
 
-			// load the IECoreRI and IECore modules so people don't have to do that in the string
-			// they pass to be executed. this also means people don't have to worry about which
-			// version to load. also set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
-			// cross module rtti errors on linux.
-			string toExecute =	"import sys\n"
-								"import ctypes\n"
-								"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
-								"import IECore\n"
-								"import IECoreRI\n";
+				// load the IECoreRI and IECore modules so people don't have to do that in the string
+				// they pass to be executed. this also means people don't have to worry about which
+				// version to load. also set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
+				// cross module rtti errors on linux.
+				string toExecute =	"import sys\n"
+									"import ctypes\n"
+									"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
+									"import IECore\n"
+									"import IECoreRI\n";
 
-			handle<> ignored( PyRun_String( 
-				toExecute.c_str(),
-				Py_file_input, mainModuleNamespace.ptr(),
-				mainModuleNamespace.ptr() ) );
-
+				handle<> ignored( PyRun_String( 
+					toExecute.c_str(),
+					Py_file_input, mainModuleNamespace.ptr(),
+					mainModuleNamespace.ptr() ) );
+					
+			}
+			catch( const error_already_set &e )
+			{
+				PyErr_Print();
+			}
+			catch( const std::exception &e )
+			{
+				cerr << "ERROR : Python procedural initialiser : " << e.what() << endl;
+			}
+			catch( ... )
+			{
+				cerr << "ERROR : Python procedural initialiser : caught unknown exception" << endl;
+			}
+		
 		PyEval_ReleaseThread( PyThreadState_Get() );
 	}
 	
