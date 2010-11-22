@@ -594,7 +594,7 @@ void IECoreRI::RendererImplementation::setAttribute( const std::string &name, IE
 			else
 			{
 				ParameterList pl( compoundValue->readable() );
-				RiAttributeV( name.c_str() + 3, pl.n(), pl.tokens(), pl.values() );
+				RiAttributeV( (char *)name.c_str() + 3, pl.n(), pl.tokens(), pl.values() );
 			}
 		}
 		else
