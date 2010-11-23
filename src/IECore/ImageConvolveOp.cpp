@@ -152,10 +152,7 @@ void ImageConvolveOp::modifyChannels( const Imath::Box2i &displayWindow, const I
 	IECore::SHProjectorf projector( samples );
 	projector.computeSamples( bands );
 
-	SHf kernel = lambertianKernel<float>( bands );
-	// when convolving the lambertian kernel with the env light and 
-	// reconstructing the image it increased intensity by PI, so we compensate it here.
-	kernel *= 1/M_PI;
+	SHf kernel = lambertianKernel<float>( bands, true );
 
 	ChannelVector::iterator it = channels.begin();
 	while( it != channels.end() )
