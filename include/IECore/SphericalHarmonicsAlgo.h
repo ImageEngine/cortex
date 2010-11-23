@@ -50,7 +50,7 @@ const SphericalHarmonics<S> operator *= ( SphericalHarmonics<S> &sh1, const Sphe
 /// From "On the Relationship between Radiance and Irradiance: Determining the illumination from images of a convex Lambertian object" by
 /// by Ramamoorthi, Ravi and Hanrahan, Pat - 2001.
 template < class T >
-SphericalHarmonics<T> lambertianKernel( unsigned int bands );
+SphericalHarmonics<T> lambertianKernel( unsigned int bands, bool normalized = false );
 
 /// Creates a SphericalHarmonics object by pointing a given SH kernel to a given direction.
 /// The rotation is a lot faster than SHRotation because it takes in consideration the kernel symmetries on the Z axis.
