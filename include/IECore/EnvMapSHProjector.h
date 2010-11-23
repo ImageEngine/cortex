@@ -68,6 +68,7 @@ class EnvMapSHProjector : public Op
 		IntParameterPtr m_bandsParameter;
 		IntParameterPtr m_samplesParameter;
 		BoolParameterPtr m_applyFilterParameter;
+		BoolParameterPtr m_rightHandSystemParameter;
 		ObjectParameterPtr m_envMapParameter;
 };
 

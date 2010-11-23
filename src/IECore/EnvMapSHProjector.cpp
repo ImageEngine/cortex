@@ -67,6 +67,12 @@ EnvMapSHProjector::EnvMapSHProjector(): Op( "Projects a Lat-Long environment map
 		new M44fData()
 	);
 
+	m_rightHandSystemParameter = new BoolParameter(
+		"rightHandSystem",
+		"Defines the handedness of the system when converting spherical to euclidean coordinates.",
+		true
+	);
+
 	m_applyFilterParameter = new BoolParameter(
 		"applyFilter",
 		"Applies a filter on the resulting spherical harmonics. That is necessary if the map has big contrasting regions",
@@ -83,6 +89,7 @@ EnvMapSHProjector::EnvMapSHProjector(): Op( "Projects a Lat-Long environment map
 	parameters()->addParameter( m_bandsParameter );
 	parameters()->addParameter( m_samplesParameter );
 	parameters()->addParameter( m_orientationParameter );
+	parameters()->addParameter( m_rightHandSystemParameter );
 	parameters()->addParameter( m_applyFilterParameter );
 	parameters()->addParameter( m_envMapParameter );
 }
@@ -102,6 +109,7 @@ ObjectPtr EnvMapSHProjector::doOperation( const CompoundObject *operands )
 
 	unsigned bands = m_bandsParameter->getNumericValue();
 	unsigned samples = m_samplesParameter->getNumericValue();
+	bool rightHandSystem = m_rightHandSystemParameter->getTypedValue();
 	bool applyFilter = m_applyFilterParameter->getTypedValue();
 	Imath::M44f orientation = m_orientationParameter->getTypedValue();
 
@@ -137,11 +145,16 @@ ObjectPtr EnvMapSHProjector::doOperation( const CompoundObject *operands )
 	SHColor3f sh( bands );
 	unsigned int i;
 	unsigned actualSamples = projector.euclideanCoordinates().size();
+	Imath::V3f systemConversion(1);
+	if ( !rightHandSystem )
+	{
+		systemConversion[2] = -systemConversion[2];
+	}
 
 	// image to SH
 	for ( i = 0; i < actualSamples; i++, cit++ )
 	{
-		Imath::V2f phiTheta = euc2sph.transform( (*cit) * orientation );
+		Imath::V2f phiTheta = euc2sph.transform( ((*cit) * systemConversion) * orientation );
 		int ix = (int)(phiTheta.x * (float)imgWidth / ( M_PI * 2 ));
 		int iy = (int)(phiTheta.y * (float)imgHeight /  M_PI );
 		if ( ix > imgWidth )
