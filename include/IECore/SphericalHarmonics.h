@@ -37,6 +37,7 @@
 
 #include "IECore/VectorTraits.h"
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathColor.h"
 #include <vector>
 #include <algorithm>
 
@@ -152,6 +153,7 @@ typedef SphericalHarmonics<float> SHf;
 typedef SphericalHarmonics<double> SHd;
 typedef SphericalHarmonics<Imath::V3f> SHV3f;
 typedef SphericalHarmonics<Imath::V3d> SHV3d;
+typedef SphericalHarmonics<Imath::Color3f> SHColor3f;
 
 
 // Define addition of two SphericalHarmonics object.
