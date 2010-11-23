@@ -161,4 +161,30 @@ void ieArrayAdd( output float array[]; float array2[] )
 	}
 }
 
+/// Compute dot product from the two arrays.
+color ieArrayDot( color array[]; color array2[] )
+{
+	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float i = 0;
+	color result = 0;
+	for( i=0; i<l; i+=1 )
+	{
+		result += array[i] * array2[i];
+	}
+	return result;
+}
+
+/// Compute dot product from the two arrays.
+color ieArrayDot( color array[]; float array2[] )
+{
+	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float i = 0;
+	color result = 0;
+	for( i=0; i<l; i+=1 )
+	{
+		result += array[i] * array2[i];
+	}
+	return result;
+}
+
 #endif // IECORERI_ARRAYALGO_H
