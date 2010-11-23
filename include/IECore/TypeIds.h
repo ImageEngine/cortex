@@ -383,6 +383,7 @@ enum TypeId
 	CapturingRendererTypeId = 337,
 	LinearToPanalogOpTypeId = 338,
 	PanalogToLinearOpTypeId = 339,
+	EnvMapSHProjectorTypeId = 340,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

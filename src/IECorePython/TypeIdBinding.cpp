@@ -386,6 +386,7 @@ void bindTypeId()
 		.value( "CapturingRenderer", CapturingRendererTypeId )
 		.value( "LinearToPanalogOp", LinearToPanalogOpTypeId )
 		.value( "PanalogToLinearOp", PanalogToLinearOpTypeId )
+		.value( "EnvMapSHProjector", EnvMapSHProjectorTypeId )
 	;
 }
 
