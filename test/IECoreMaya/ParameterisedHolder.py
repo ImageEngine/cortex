@@ -350,6 +350,31 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		self.failUnless( attrPlugPath in connections )
 		self.failUnless( parameterPlugPath in connections )
+		
+	def testNonStorableObjectParameter( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "unstorable", 1 )
+		op = fnOH.getOp()
+		node = fnOH.fullPathName()
+		
+		testObj = IECore.CompoundObject( { "someData" : IECore.BoolData( False ) } )
+		
+		with fnOH.parameterModificationContext() :
+			op["input"].setValue( testObj )
+		
+		self.assertEqual( op["input"].getValue(), testObj )
+	
+		cmds.file( rename = os.getcwd() + "/test/IECoreMaya/nonStorableObjectParameter.ma" )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		fnPH.setParameterisedValues()
+		
+		op = fnPH.getParameterised()[0]
+		self.assertEqual( op["input"].getValue(), op["input"].defaultValue )
 	
 	def testOpHolder( self ) :
 	
@@ -1751,6 +1776,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			"test/IECoreMaya/imageProcedural.ma",
 			"test/IECoreMaya/classParameter.ma",
 			"test/IECoreMaya/classVectorParameter.ma",
+			"test/IECoreMaya/nonStorableObjectParameter.ma",
 		] :
 
 			if os.path.exists( f ) :

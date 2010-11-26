@@ -171,7 +171,20 @@ MStatus ObjectParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 	s = plug.getValue( plugData );
 	if (!s)
 	{
-		return MS::kFailure;
+		// We might be here as the attribute isn't storable, 
+		// in that case we set the parameter to its default value.
+		// If it is storable, then something has gone awry.
+		MFnAttribute fnA = MFnAttribute( plug.attribute() );
+		bool isStorable = fnA.isStorable( &s );
+		if( s && !isStorable )
+		{	
+			parameter->setValue( parameter->defaultValue()->copy() );
+			return MS::kSuccess;
+		}
+		else
+		{	
+			return MS::kFailure;
+		}
 	}
 
 	MFnPluginData fnData( plugData, &s );
