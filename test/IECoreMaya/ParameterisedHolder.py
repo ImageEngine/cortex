@@ -496,6 +496,62 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		fnOH.setParameterisedValues()
 		self.assertEqual( op["s"].getTypedValue(), "time1" )
+	
+	def testReferencedConnectedNodeNameValueProvider( self ) :
+
+		# Create a scene with a ClassVector parameter containing a StringParameter
+		# that uses the "connectedNodeName" value provider, and hook it up.
+		##########################################################################
+
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 2 )
+		op = fnOH.getOp()
+		c = op["cv"]
+				
+		with fnOH.parameterModificationContext() :
+			c.setClasses(
+				[
+					( "mud", "mayaUserData", 1 ),
+				]			
+			)
+		
+		plugPath = fnOH.parameterPlugPath( c["mud"]["s"] )		
+		
+		camera = cmds.createNode( "camera" )
+		cmds.connectAttr( "%s.message" % camera, plugPath )
+				
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "connectedNodeReference.ma" ) )
+		referenceScene = cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		# Reference this scene into a new one, and add another class.
+		#############################################################
+
+		cmds.file( new = True, force = True )
+		cmds.file( referenceScene, reference = True, namespace = "ns1" )
+
+		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
+		op = fnOH.getOp()
+		c = op["cv"]
+		
+		with fnOH.parameterModificationContext() :
+			c.setClasses(
+				[
+					( "mud", "mayaUserData", 1 ),
+					( "maths", "maths/multiply", 1 )
+				]			
+			)
+		
+		plugPath =  fnOH.parameterPlugPath( c["mud"]["s"] )
+		
+		self.failUnless( cmds.isConnected( "ns1:%s.message" % camera, plugPath ) )
+		
+		# Save, and re-open scene, and make sure that the message connection survived
+		#############################################################################
+	
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "connectedNodeReference2.ma" ) )
+		thisScene = cmds.file( force = True, type = "mayaAscii", save = True )
+		cmds.file( thisScene, open = True, force = True )
+		
+		self.failUnless( cmds.isConnected( "ns1:%s.message" % camera, plugPath ) )
 		
 	def testClassParameter( self ) :
 	
@@ -1777,6 +1833,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			"test/IECoreMaya/classParameter.ma",
 			"test/IECoreMaya/classVectorParameter.ma",
 			"test/IECoreMaya/nonStorableObjectParameter.ma",
+			"test/IECoreMaya/connectedNodeReference.ma",
+			"test/IECoreMaya/connectedNodeReference2.ma",
 		] :
 
 			if os.path.exists( f ) :
