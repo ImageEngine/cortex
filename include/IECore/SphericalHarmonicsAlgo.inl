@@ -120,7 +120,7 @@ SphericalHarmonics<T> rotatedKernel( const SphericalHarmonics<T> &kernel, const 
 	// rotate kernel taking advantage of it's rotation symmetry on Z.
 	int l = 0;
 	int m = 0;
-	Imath::V3f basis = kernel.coefficients()[0] * sqrt( (4*M_PI)/(2*l+1) );
+	T basis = kernel.coefficients()[0] * sqrt( (4*M_PI)/(2*l+1) );
 	SphericalHarmonics<T> sh( kernel.bands() );
 	for ( typename SphericalHarmonics<T>::CoefficientVector::iterator shIt = sh.coefficients().begin(); shIt != sh.coefficients().end(); shIt++, evIt++ )
 	{
