@@ -1740,6 +1740,8 @@ if doConfigure :
 		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "python/IECoreMaya/*.py" ) )
 		if env["WITH_MAYA_PLUGIN_LOADER"] :
 			mayaPythonTestEnv.Depends( mayaPythonTest, mayaPluginLoader )
+		if env["WITH_GL"] :
+			mayaPythonTestEnv.Depends( mayaPythonTest, [ glLibrary, glPythonModule ] )
 		mayaPythonTestEnv.Alias( "testMaya", mayaPythonTest )			
 		mayaPythonTestEnv.Alias( "testMayaPython", mayaPythonTest )			
 
@@ -2066,6 +2068,8 @@ if doConfigure :
 		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniPlugin, houdiniPythonModule ] )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "contrib/IECoreHoudini/test/*.py" ) )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "contrib/IECoreHoudini/python/IECoreHoudini/*.py" ) )
+		if env["WITH_GL"] :
+			houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
 		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
 		houdiniTestEnv.Alias( "testHoudiniPython", houdiniPythonTest )
 
