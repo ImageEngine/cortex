@@ -57,6 +57,7 @@ namespace IECoreHoudini
 			static PRM_Template parameters[];
 			static CH_LocalVariable variables[];
 
+			static PRM_Name pParameterisedClassCategory;
 			static PRM_Name pParameterisedClassName;
 			static PRM_Name pParameterisedVersion;
 			static PRM_Name pParameterisedSearchPathEnvVar;
@@ -68,6 +69,7 @@ namespace IECoreHoudini
 			static PRM_Default matchStringDefault;
 			static PRM_Default switcherDefaults[];
 			
+			static PRM_ChoiceList classCategoryMenu;
 			static PRM_ChoiceList classNameMenu;
 			static PRM_ChoiceList classVersionMenu;
 
@@ -75,6 +77,9 @@ namespace IECoreHoudini
 			/// Dynamic menus, callbacks, and helper functions for the className/version parameters.
 			/////////////////////////////////////////////////////////////////////////////////////////
 			//@{
+			/// \todo: the concept of class category is a hack to make the UI usable. remove this when
+			/// Houdini supports cascading menus for parameters.
+			static void buildClassCategoryMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * );
 			static void buildClassNameMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * );
 			static void buildVersionMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * );
 			static int reloadClassCallback( void *data, int index, float time, const PRM_Template *tplate );

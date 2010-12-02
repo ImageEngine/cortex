@@ -56,7 +56,8 @@ using namespace boost::python;
 using namespace IECore;
 using namespace IECoreHoudini;
 
-PRM_Name SOP_ParameterisedHolder::pParameterisedClassName( "__className", "ClassName:" );
+PRM_Name SOP_ParameterisedHolder::pParameterisedClassCategory( "__classCategory", "Category:" );
+PRM_Name SOP_ParameterisedHolder::pParameterisedClassName( "__className", "Class:" );
 PRM_Name SOP_ParameterisedHolder::pParameterisedVersion( "__classVersion", "  Version:" );
 PRM_Name SOP_ParameterisedHolder::pParameterisedSearchPathEnvVar( "__classSearchPathEnvVar", "SearchPathEnvVar:" );
 PRM_Name SOP_ParameterisedHolder::pMatchString( "__classMatchString", "MatchString" );
@@ -67,14 +68,16 @@ PRM_Name SOP_ParameterisedHolder::pSwitcher( "__parameterSwitcher", "Switcher" )
 PRM_Default SOP_ParameterisedHolder::matchStringDefault( 0, "*" );
 PRM_Default SOP_ParameterisedHolder::switcherDefaults[] = { PRM_Default( 0, "Parameters" ) };
 
+PRM_ChoiceList SOP_ParameterisedHolder::classCategoryMenu( PRM_CHOICELIST_SINGLE, &SOP_ParameterisedHolder::buildClassCategoryMenu );
 PRM_ChoiceList SOP_ParameterisedHolder::classNameMenu( PRM_CHOICELIST_SINGLE, &SOP_ParameterisedHolder::buildClassNameMenu );
 PRM_ChoiceList SOP_ParameterisedHolder::classVersionMenu( PRM_CHOICELIST_SINGLE, &SOP_ParameterisedHolder::buildVersionMenu );
 
 PRM_Template SOP_ParameterisedHolder::parameters[] = {
+	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &pParameterisedClassCategory, 0, &classCategoryMenu, 0, &SOP_ParameterisedHolder::reloadClassCallback ),
 	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &pParameterisedClassName, 0, &classNameMenu, 0, &SOP_ParameterisedHolder::reloadClassCallback ),
 	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT, 1, &pParameterisedVersion, 0, &classVersionMenu, 0, &SOP_ParameterisedHolder::reloadClassCallback ),
 	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT|PRM_TYPE_INVISIBLE, 1, &pParameterisedSearchPathEnvVar, 0, 0, 0, &SOP_ParameterisedHolder::reloadClassCallback ),
-	PRM_Template( PRM_STRING|PRM_TYPE_JOIN_NEXT|PRM_TYPE_INVISIBLE, 1, &pMatchString, &matchStringDefault ),
+	PRM_Template( PRM_STRING|PRM_TYPE_INVISIBLE, 1, &pMatchString, &matchStringDefault ),
 	PRM_Template( PRM_CALLBACK, 1, &pReloadButton, 0, 0, 0, &SOP_ParameterisedHolder::reloadButtonCallback ),
 	PRM_Template( PRM_INT|PRM_TYPE_INVISIBLE, 1, &pEvaluateParameters ),
 	PRM_Template( PRM_SWITCHER, 1, &pSwitcher, switcherDefaults ),
@@ -97,6 +100,49 @@ SOP_ParameterisedHolder::~SOP_ParameterisedHolder()
 {
 }
 
+void SOP_ParameterisedHolder::buildClassCategoryMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
+{
+	SOP_ParameterisedHolder *holder = reinterpret_cast<SOP_ParameterisedHolder*>( data );
+	if ( !holder )
+	{
+		return;
+	}
+	
+	menu[0].setToken( "" );
+	menu[0].setLabel( "< No Category Selected >" );
+	unsigned int pos = 1;
+
+	UT_String value;
+	holder->evalString( value, pMatchString.getToken(), 0, 0 );
+	std::string matchString( value.toStdString() );
+	size_t padding = matchString.length();
+	
+	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
+	std::string searchPathEnvVar( value.toStdString() );
+	
+	std::vector<std::string> names;
+	classNames( searchPathEnvVar, matchString, names );
+	
+	std::set<std::string> categories;
+	for ( std::vector<std::string>::const_iterator it=names.begin(); it != names.end(); it++ )
+	{
+		size_t divider = (*it).rfind( "/" );
+		if ( divider != std::string::npos )
+		{
+			categories.insert( (*it).substr( 0, divider ) );
+		}
+	}
+	
+	for ( std::set<std::string>::const_iterator it=categories.begin(); it != categories.end(); it++, pos++ )
+	{
+		menu[pos].setToken( (*it).c_str() );
+		menu[pos].setLabel( (*it).substr( (*it).find( matchString ) + padding ).c_str() );
+	}
+
+	// mark the end of our menu
+	menu[pos].setToken( 0 );
+}
+
 void SOP_ParameterisedHolder::buildClassNameMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * )
 {
 	SOP_ParameterisedHolder *holder = reinterpret_cast<SOP_ParameterisedHolder*>( data );
@@ -112,6 +158,16 @@ void SOP_ParameterisedHolder::buildClassNameMenu( void *data, PRM_Name *menu, in
 	UT_String value;
 	holder->evalString( value, pMatchString.getToken(), 0, 0 );
 	std::string matchString( value.toStdString() );
+	
+	holder->evalString( value, pParameterisedClassCategory.getToken(), 0, 0 );
+	std::string category( value.toStdString() );
+	if ( category != "" )
+	{
+		matchString = category + "/*";
+	}
+	
+	size_t padding = matchString.length();
+	
 	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 	std::string searchPathEnvVar( value.toStdString() );
 	
@@ -121,7 +177,7 @@ void SOP_ParameterisedHolder::buildClassNameMenu( void *data, PRM_Name *menu, in
 	for ( std::vector<std::string>::const_iterator it=names.begin(); it != names.end(); it++, pos++ )
 	{
 		menu[pos].setToken( (*it).c_str() );
-		menu[pos].setLabel( (*it).c_str() );
+		menu[pos].setLabel( (*it).substr( (*it).find( matchString ) + padding ).c_str() );
 	}
 
 	// mark the end of our menu
@@ -178,6 +234,9 @@ int SOP_ParameterisedHolder::reloadClassCallback( void *data, int index, float t
 	}
 
 	UT_String value;
+	holder->evalString( value, pParameterisedClassCategory.getToken(), 0, 0 );
+	std::string category( value.toStdString() );
+	
 	holder->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
 	std::string className( value.toStdString() );
 	
@@ -190,6 +249,12 @@ int SOP_ParameterisedHolder::reloadClassCallback( void *data, int index, float t
 	
 	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 	std::string searchPathEnvVar( value.toStdString() );
+	
+	size_t divider = holder->m_loadedClassName.rfind( "/" );
+	if ( holder->m_loadedClassName != ""  && divider != std::string::npos && category != holder->m_loadedClassName.substr( 0, divider ) )
+	{
+		className = "";
+	}
 	
 	if ( className != holder->m_loadedClassName )
 	{
@@ -327,6 +392,9 @@ void SOP_ParameterisedHolder::setParameterised( IECore::RunTimeTypedPtr p )
 
 void SOP_ParameterisedHolder::setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar )
 {
+	size_t divider = className.rfind( "/" );
+	std::string category = ( divider == std::string::npos ) ? "" : className.substr( 0, divider );
+	setString( category.c_str(), CH_STRING_LITERAL, pParameterisedClassCategory.getToken(), 0, 0 );
 	setString( className.c_str(), CH_STRING_LITERAL, pParameterisedClassName.getToken(), 0, 0 );
 	setString( boost::lexical_cast<std::string>( classVersion ).c_str(), CH_STRING_LITERAL, pParameterisedVersion.getToken(), 0, 0 );
 	setString( searchPathEnvVar.c_str(), CH_STRING_LITERAL, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );

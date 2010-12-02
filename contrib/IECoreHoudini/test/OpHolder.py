@@ -91,19 +91,19 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 		v1_op = geo.createNode( "ieOpHolder", node_name="vector1" )
 		fn = IECoreHoudini.FnOpHolder( v1_op )
-		fn.setOp( "V3fVectorCreator", 1 )
+		fn.setOp( "vectors/V3fVectorCreator", 1 )
 		v1_op.parm("parm_size").set(3)
 		v1_op.parmTuple("parm_value").set( (1,2,3) )
 		
 		v2_op = geo.createNode( "ieOpHolder", node_name="vector2" )
 		fn = IECoreHoudini.FnOpHolder( v2_op )
-		fn.setOp( "V3fVectorCreator", 1 )
+		fn.setOp( "vectors/V3fVectorCreator", 1 )
 		v2_op.parm("parm_size").set(3)
 		v2_op.parmTuple("parm_value").set( (4,5,6) )
 		
 		add_op = geo.createNode( "ieOpHolder", node_name="add_vectors" )
 		fn = IECoreHoudini.FnOpHolder( add_op )
-		fn.setOp( "V3fVectorAdder", 1 )
+		fn.setOp( "vectors/V3fVectorAdder", 1 )
 		
 		print_op = geo.createNode( "ieOpHolder", node_name="print_values" )
 		fn = IECoreHoudini.FnOpHolder( print_op )
@@ -151,13 +151,13 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 	# TODO: add a test to check that changing an op updates the inputs properly
 	def testChangingOp(self):
-		n = IECoreHoudini.FnOpHolder.create( "test_node", "V3fVectorCreator", 1)
+		n = IECoreHoudini.FnOpHolder.create( "test_node", "vectors/V3fVectorCreator", 1)
 		fn = IECoreHoudini.FnOpHolder(n)
 		op = fn.getParameterised()
 		self.assertEqual( len(n.inputConnectors()), 0 )
 		fn.setParameterised( IECore.ClassLoader.defaultOpLoader().load("objectDebug",1)() )
 		self.assertEqual( len(n.inputConnectors()), 1 )
-		fn.setParameterised( IECore.ClassLoader.defaultOpLoader().load("V3fVectorAdder",1)() )
+		fn.setParameterised( IECore.ClassLoader.defaultOpLoader().load("vectors/V3fVectorAdder",1)() )
 		self.assertEqual( len(n.inputConnectors()), 2 )
 
 	# tests creation of a lot of opHolders
@@ -237,7 +237,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 	# tests compound parameter support
 	def testCompoundParameters(self):
 		(op,fn)=self.testOpHolder()
-		cl = IECore.ClassLoader.defaultOpLoader().load("compoundParameters", 1)()
+		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/compoundParameters", 1)()
 		fn.setParameterised( cl )
 		
 		# test we have the parameters & folders
@@ -322,7 +322,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assert_( not op.errors() )
 		self.assertEqual( result3.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result3["P"].data, result["P"].data )
-		cl = IECore.ClassLoader.defaultOpLoader().load( "V3fVectorAdder", 1 )()
+		cl = IECore.ClassLoader.defaultOpLoader().load( "vectors/V3fVectorAdder", 1 )()
 		fn2.setParameterised( cl )
 		fn2.getParameterised().parameters()['vector1'].setValue( result["P"].data )
 		fn2.getParameterised().parameters()['vector2'].setValue( result["P"].data )
@@ -334,7 +334,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 	def testPrimitiveParameterConversion(self):
 		(op,fn)=self.testOpHolder()
-		cl = IECore.ClassLoader.defaultOpLoader().load("primParam", 1)()
+		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/primitives/primParam", 1)()
 		fn.setParameterised( cl )
 		torus = op.createInputNode(0, "torus" )
 		op.cook()
@@ -359,7 +359,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 	def testPointsParameterConversion(self):
 		(op,fn)=self.testOpHolder()
-		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
+		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/primitives/pointParam", 1)()
 		fn.setParameterised( cl )
 		cob = op.createInputNode(0, "ieOpHolder" )
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
@@ -375,7 +375,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 
 	def testPolygonsParameterConversion(self):
 		(op,fn)=self.testOpHolder()
-		cl = IECore.ClassLoader.defaultOpLoader().load("polyParam", 1)()
+		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/primitives/polyParam", 1)()
 		fn.setParameterised( cl )
 		cob = op.createInputNode(0, "ieOpHolder" )
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
@@ -388,7 +388,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		assert( fn.getParameterised()['input'].getValue().typeId() == IECore.TypeId.MeshPrimitive )
 		assert( fn.getParameterised().resultParameter().getValue().typeId() == IECore.TypeId.MeshPrimitive )
 		op2 = torus.createOutputNode( "ieOpHolder" )
-		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
+		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/primitives/pointParam", 1)()
 		fn = IECoreHoudini.FnOpHolder( op2 )
 		fn.setParameterised( cl )
 		op2.cook()
@@ -403,7 +403,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn.setParameterised( cl )
 		op.parm("parm_filename").set( self.__torusTestFile )
 		op2 = op.createOutputNode( "ieOpHolder" )
-		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
+		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/primitives/pointParam", 1)()
 		fn = IECoreHoudini.FnOpHolder(op2)
 		fn.setParameterised(cl)
 		self.assertRaises( hou.OperationFailed, op2.cook )
@@ -434,6 +434,48 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.parm( "__classMatchString" ).set("*")
 		assert(len(fn.classNames())>1)
 		
+	def testCategories( self ) :
+		( op, fn ) = self.testOpHolder()
+		op.parm( "__classMatchString" ).set( "*" )
+		self.assertEqual( op.parm( "__classCategory" ).eval(), "" )
+		
+		op.parm( "__className" ).set( "cobReader" )
+		self.assertEqual( op.parm( "__classCategory" ).eval(), "" )
+		op.parm( "__className" ).pressButton()
+		self.assertEqual( fn.getParameterised().typeName(), "cobReader" )
+		self.assertEqual( fn.getParameterised().path, "cobReader" )
+		
+		op.parm( "__className" ).set( "vectors/V3fVectorCreator" )
+		op.parm( "__className" ).pressButton()
+		self.assertEqual( op.parm( "__classCategory" ).eval(), "vectors" )
+		self.assertEqual( fn.getParameterised().typeName(), "V3fVectorCreator" )
+		self.assertEqual( fn.getParameterised().path, "vectors/V3fVectorCreator" )
+		
+		op.parm( "__className" ).set( "" )
+		op.parm( "__className" ).pressButton()
+		self.assertEqual( op.parm( "__classCategory" ).eval(), "vectors" )
+		op.parm( "__classCategory" ).set( "" )
+		op.parm( "__classCategory" ).pressButton()
+		self.assertRaises( hou.OperationFailed, op.cook )
+		self.assertEqual( op.parm( "__className" ).eval(), "" )
+		
+		op.parm( "__className" ).set( "parameters/compoundParameters" )
+		op.parm( "__className" ).pressButton()
+		self.assertEqual( op.parm( "__classCategory" ).eval(), "parameters" )
+		self.assertEqual( fn.getParameterised().typeName(), "compoundParameters" )
+		self.assertEqual( fn.getParameterised().path, "parameters/compoundParameters" )
+		op.parm( "__className" ).set( "parameters/primitives/pointParam" )
+		op.parm( "__className" ).pressButton()
+		self.assertEqual( op.parm( "__classCategory" ).eval(), "parameters/primitives" )
+		self.assertEqual( fn.getParameterised().typeName(), "pointParam" )
+		self.assertEqual( fn.getParameterised().path, "parameters/primitives/pointParam" )
+		
+		op.parm( "__classCategory" ).set( "" )
+		op.parm( "__classCategory" ).pressButton()
+		self.failUnless( len(fn.classNames()) > 4 )
+		op.parm( "__classMatchString" ).set( "parameters/*" )
+		self.assertEqual( len(fn.classNames()), 4 )		
+	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
 		self.__torusTestFile = "contrib/IECoreHoudini/test/test_data/torus.cob"
