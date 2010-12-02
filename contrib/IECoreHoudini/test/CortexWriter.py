@@ -178,7 +178,6 @@ class TestCortexWriter( IECoreHoudini.TestCase ):
 
 	def setUp( self ) :
                 IECoreHoudini.TestCase.setUp( self )
-		os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
                 if not os.path.exists( "test/cortexWriter_testData" ):
 			os.mkdir( "test/cortexWriter_testData" )
 

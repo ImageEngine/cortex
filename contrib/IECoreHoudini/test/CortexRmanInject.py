@@ -103,7 +103,6 @@ class TestCortexRmanInject( IECoreHoudini.TestCase ):
 
 	def setUp(self) :
 		IECoreHoudini.TestCase.setUp( self )
-		os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
 		if not os.path.exists("test/cortexRmanInject_testData"):
 			os.mkdir("test/cortexRmanInject_testData")
 

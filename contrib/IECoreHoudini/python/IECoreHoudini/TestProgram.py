@@ -1,8 +1,5 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
-#
 #  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -37,41 +34,19 @@
 
 import sys
 import unittest
-import hou
-import IECore
-import IECoreHoudini
 
-from ProceduralHolder import *
-from OpHolder import *
-from CortexWriter import *
-from CortexRmanInject import *
-from ActiveTake import *
-from NodeHandle import *
-from FromHoudiniPointsConverter import *
-from FromHoudiniPolygonsConverter import *
-from ToHoudiniPointsConverter import *
-from ToHoudiniPolygonsConverter import *
-from AttributeRemap import *
-from ToHoudiniConverterOp import *
-from FromHoudiniCurvesConverter import *
-from ToHoudiniCurvesConverter import *
-from CobIOTranslator import *
-from FromHoudiniGroupConverter import *
+## A test program which initializes Houdini before running the test suite.
+class TestProgram( unittest.TestProgram ) :
 
-## these tests use python functions that aren't available before Houdini 11
-## \todo: remove this clause once we drop support for Houdini 10
-if hou.applicationVersion()[0] >= 11 :
-	from InterpolatedCacheReader import *
-	from ToHoudiniGroupConverter import *
+	def __init__( self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=unittest.defaultTestLoader ) :
 
-IECoreHoudini.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreHoudini/test/resultsPython.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+		unittest.TestProgram.__init__( self, module, defaultTest, argv, testRunner, testLoader )
+
+	def runTests( self ) :
+	
+		if not self.testRunner :
+			self.testRunner = unittest.TextTestRunner( verbosity = 2 )
+
+		result = self.testRunner.run( self.test )
+
+		sys.exit( int( not result.wasSuccessful() ) )

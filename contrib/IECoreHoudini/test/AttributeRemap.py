@@ -208,12 +208,5 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		assert( geo['test'].interpolation == IECore.PrimitiveVariable.Interpolation.Constant )
 		assert( len(geo['test'].data)==100 )
 		
-	def setUp( self ) :
-		IECoreHoudini.TestCase.setUp( self )
-		os.environ["IECORE_OP_PATHS"] = "test/ops"
-	
-	def tearDown( self ) :
-		pass
-	
 if __name__ == "__main__":
 	unittest.main()

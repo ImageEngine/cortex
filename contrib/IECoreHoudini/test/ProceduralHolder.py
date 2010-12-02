@@ -244,7 +244,6 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
-		os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
 		if not os.path.exists( "test/proceduralHolder_testData" ):
 			os.mkdir( "test/proceduralHolder_testData" )
 

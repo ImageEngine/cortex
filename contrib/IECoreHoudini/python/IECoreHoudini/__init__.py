@@ -51,6 +51,7 @@ from FnProceduralHolder import FnProceduralHolder
 
 # misc utility methods
 from TestCase import TestCase
+from TestProgram import TestProgram
 import ParmTemplates
 import Utils
 

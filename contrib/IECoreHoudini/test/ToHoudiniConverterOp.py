@@ -49,7 +49,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		geo = obj.createNode("geo", run_init_scripts=False)
 		op = geo.createNode( "ieOpHolder" )
 		cl = IECore.ClassLoader.defaultOpLoader().load( "cobReader", 1)()
-		cl['filename'] = "test/test_data/torus.cob"
+		cl['filename'] = "contrib/IECoreHoudini/test/test_data/torus.cob"
 		fn = IECoreHoudini.FnOpHolder(op)
 		fn.setParameterised(cl)
 		IECoreHoudini.Utils.syncSopParametersWithOp(op)
@@ -99,12 +99,5 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		assert( len(geo.pointAttribs())==len(h_geo.pointAttribs()) )
 		assert( len(geo.prims())==len(h_geo.prims()) )
 	
-	def setUp( self ) :
-		IECoreHoudini.TestCase.setUp( self )
-		os.environ["IECORE_OP_PATHS"] = "test/ops"
-
-	def tearDown( self ) :
-		pass
-
 if __name__ == "__main__":
 	unittest.main()

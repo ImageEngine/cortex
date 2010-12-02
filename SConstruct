@@ -682,6 +682,14 @@ o.Add(
 )
 
 o.Add(
+	"TEST_HOUDINI_SCRIPT",
+	"The python script to run for the houdini tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"contrib/IECoreHoudini/test/All.py"
+)
+
+o.Add(
 	"TEST_NUKE_SCRIPT",
 	"The python script to run for the nuke tests. The default will run all the tests, "
 	"but it can be useful to override this to run just the test for the functionality "
@@ -2022,6 +2030,44 @@ if doConfigure :
 		houdiniPluginEnv.Alias( "installHoudini", houdiniToolbarInstall )
 		
 		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
+
+		#=====
+		# Houdini tests
+		#=====
+		houdiniTestEnv = testEnv.Copy()
+		
+		houdiniTestLibPaths = houdiniEnv.subst( ":".join( [ "./lib" ] + houdiniPythonModuleEnv["LIBPATH"] ) )
+		if haveRI :
+			houdiniTestLibPaths += ":" + houdiniEnv.subst( "$RMAN_ROOT/lib" )
+		houdiniTestEnv["ENV"][houdiniTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + houdiniTestLibPaths
+		houdiniTestEnv["ENV"][libraryPathEnvVar] += ":" + houdiniTestLibPaths
+		
+		houdiniTestEnv["ENV"]["PATH"] = houdiniEnv.subst( "$HOUDINI_ROOT/bin:" ) + houdiniEnv["ENV"]["PATH"]
+		
+		houdiniTestEnv.Append( **houdiniEnvAppends )
+		houdiniTestEnv.Append( 
+			LIBS = [ 
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), 
+				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ), 				
+			]
+		)
+		
+		houdiniTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreHoudini/python"
+		houdiniTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:&"
+		houdiniTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:&"
+		
+		houdiniTestEnv["ENV"]["IECORE_OP_PATHS"] = "./contrib/IECoreHoudini/test/ops"
+		houdiniTestEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "./contrib/IECoreHoudini/test/procedurals"
+		
+		houdiniPythonExecutable = "hython"
+		
+		houdiniPythonTest = houdiniTestEnv.Command( "contrib/IECoreHoudini/test/resultsPython.txt", houdiniPythonModule, houdiniPythonExecutable + " $TEST_HOUDINI_SCRIPT" )
+		NoCache( houdiniPythonTest )
+		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniPlugin, houdiniPythonModule ] )
+		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "contrib/IECoreHoudini/test/*.py" ) )
+		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "contrib/IECoreHoudini/python/IECoreHoudini/*.py" ) )
+		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
+		houdiniTestEnv.Alias( "testHoudiniPython", houdiniPythonTest )
 
 ###########################################################################################
 # Build and install the coreTruelight library and headers

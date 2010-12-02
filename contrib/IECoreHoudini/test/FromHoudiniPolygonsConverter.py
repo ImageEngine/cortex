@@ -597,12 +597,5 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
 	
-	def setUp( self ) :
-		IECoreHoudini.TestCase.setUp( self )
-	        os.environ["IECORE_PROCEDURAL_PATHS"] = "test/procedurals"
-
-	def tearDown( self ) :
-                pass
-
 if __name__ == "__main__":
     unittest.main()

@@ -41,16 +41,18 @@ import shutil
 
 class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 	
+	__torusTestFile = "contrib/IECoreHoudini/test/test_data/torus.cob"
+	
 	def cacheSop( self ) :
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
 		torus = geo.createNode( "file" )
-		torus.parm( "file" ).set( "test/test_data/torus.cob" )
+		torus.parm( "file" ).set( TestInterpolatedCacheReader.__torusTestFile )
 		group = torus.createOutputNode( "group" )
 		group.parm( "crname" ).set( "torus" )
 		group.parm( "entity" ).set( 1 )
 		cache = group.createOutputNode( "ieInterpolatedCacheReader" )
-		cache.parm( "cacheSequence" ).set( "test/test_data/torusVertCache.####.fio" )
+		cache.parm( "cacheSequence" ).set( "contrib/IECoreHoudini/test/test_data/torusVertCache.####.fio" )
 		cache.setDisplayFlag( True )
 		cache.setRenderFlag( True )
 		return cache
@@ -78,19 +80,19 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache.parm( "frameMultiplier" ).set( 250 )
 		self.assertRaises( hou.OperationFailed, cache.cook )
 		self.failUnless( cache.errors() )
-		shutil.copyfile( "test/test_data/torusVertCache.0001.fio", "test/test_data/torusVertCache.0250.fio" )
+		shutil.copyfile( "contrib/IECoreHoudini/test/test_data/torusVertCache.0001.fio", "contrib/IECoreHoudini/test/test_data/torusVertCache.0250.fio" )
 		self.failUnless( isinstance( cache.geometry(), hou.Geometry ) )
-		os.remove( "test/test_data/torusVertCache.0250.fio" )
+		os.remove( "contrib/IECoreHoudini/test/test_data/torusVertCache.0250.fio" )
 	
 	def testNonExistantFile( self ) :
 		cache = self.cacheSop()
-		cache.parm( "cacheSequence" ).set( "test/test_data/fake.####.fio" )
+		cache.parm( "cacheSequence" ).set( "contrib/IECoreHoudini/test/test_data/fake.####.fio" )
 		self.assertRaises( hou.OperationFailed, cache.cook )
 		self.failUnless( cache.errors() )
 		
 	def testNoFileForFrame( self ) :
 		cache = self.cacheSop()
-		cache.parm( "cacheSequence" ).set( "test/test_data/torusVertCache.####.fio" )
+		cache.parm( "cacheSequence" ).set( "contrib/IECoreHoudini/test/test_data/torusVertCache.####.fio" )
 		hou.setFrame( 4 )
 		self.assertRaises( hou.OperationFailed, cache.cook )
 		self.failUnless( cache.errors() )
@@ -159,7 +161,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		hou.setFrame( 3 )
 		cache = self.cacheSop()
 		torus = cache.parent().createNode( "file" )
-		torus.parm( "file" ).set( "test/test_data/torus.cob" )
+		torus.parm( "file" ).set( TestInterpolatedCacheReader.__torusTestFile )
 		group = torus.createOutputNode( "group" )
 		group.parm( "crname" ).set( "torus2" )
 		group.parm( "entity" ).set( 1 )
@@ -229,7 +231,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		hou.setFrame( 3 )
 		cache = self.cacheSop()
 		torus = cache.parent().createNode( "file" )
-		torus.parm( "file" ).set( "test/test_data/torus.cob" )
+		torus.parm( "file" ).set( TestInterpolatedCacheReader.__torusTestFile )
 		group = torus.createOutputNode( "group" )
 		group.parm( "crname" ).set( "badObject" )
 		group.parm( "entity" ).set( 1 )
@@ -245,7 +247,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		hou.setFrame( 3 )
 		cache = self.cacheSop()
 		torus = cache.parent().createNode( "file" )
-		torus.parm( "file" ).set( "test/test_data/torus.cob" )
+		torus.parm( "file" ).set( TestInterpolatedCacheReader.__torusTestFile )
 		group = torus.createOutputNode( "group" )
 		group.parm( "crname" ).set( "badObject" )
 		group.parm( "entity" ).set( 1 )

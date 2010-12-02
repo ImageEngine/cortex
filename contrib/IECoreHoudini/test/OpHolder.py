@@ -60,11 +60,11 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn.setParameterised( cl )
 		assert( fn.getParameterised()!=None )
 		assert( fn.getParameterised()==cl )
-		op.parm("parm_filename").set("test/test_data/torus.cob")
+		op.parm("parm_filename").set( self.__torusTestFile )
 		op.cook() # cook using Houdini's cook mechanism, NOT operate()
-		assert( fn.getParameterised()["filename"].getValue()==IECore.StringData("test/test_data/torus.cob") )
+		assert( fn.getParameterised()["filename"].getValue()==IECore.StringData( self.__torusTestFile ) )
 		result = fn.getParameterised().resultParameter().getValue()
-		assert( result == IECore.Reader.create("test/test_data/torus.cob").read() )
+		assert( result == IECore.Reader.create( self.__torusTestFile ).read() )
 		
 	# tests the alternative 'all in one' opHolder creator
 	def testAlternateCreator(self):
@@ -173,7 +173,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		(op, fn) = self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
 		fn.setParameterised( cl )
-		op.parm("parm_filename").set("test/test_data/torus_with_normals.cob")
+		op.parm("parm_filename").set( self.__torusNormalsTestFile )
 		deformer = op.createOutputNode( "ieOpHolder" )
 		assert( deformer )
 		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
@@ -183,7 +183,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		deformer.parm("parm_magnitude").set( 2.5 )
 		deformer.parmTuple("parm_frequency").set( (1,2,3) )
 		deformer.cook()
-		torus = IECore.Reader.create( "test/test_data/torus_with_normals.cob" ).read()
+		torus = IECore.Reader.create( self.__torusNormalsTestFile ).read()
 		result = fn.getParameterised().resultParameter().getValue()
 		assert( len(result["P"].data) == len(torus["P"].data) )
 		assert( len(result["N"].data) == len(torus["N"].data) )
@@ -196,7 +196,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		(op,fn) = self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
 		fn.setParameterised( cl )
-		op.parm("parm_filename").set("test/test_data/torus_with_normals.cob")
+		op.parm("parm_filename").set( self.__torusNormalsTestFile )
 		op.cook()
 		geo = op.geometry()
 		assert( geo )
@@ -291,7 +291,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn2 = IECoreHoudini.FnOpHolder( op2 )
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
 		fn2.setParameterised(cl)
-		op2.parm("parm_filename").set("test/test_data/torus.cob")
+		op2.parm("parm_filename").set( self.__torusTestFile )
 		op.cook()
 		result2 = fn.getParameterised().resultParameter().getValue()
 		assert( op.errors()=="" )
@@ -316,7 +316,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn2 = IECoreHoudini.FnOpHolder( op2 )
 		cl = IECore.ClassLoader.defaultOpLoader().load( "cobReader", 1 )()
 		fn2.setParameterised( cl )
-		op2.parm( "parm_filename" ).set( "test/test_data/torus.cob" )
+		op2.parm( "parm_filename" ).set( self.__torusTestFile )
 		op.cook()
 		result3 = fn.getParameterised().resultParameter().getValue()
 		self.assert_( not op.errors() )
@@ -350,7 +350,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder( op2 )
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
 		fn.setParameterised(cl)
-		op2.parm("parm_filename").set("test/test_data/torus.cob")
+		op2.parm("parm_filename").set( self.__torusTestFile )
 		op.cook()
 		result2 = fn.getParameterised().resultParameter().getValue()
 		assert( op.errors()=="" )
@@ -365,7 +365,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
 		fn2 = IECoreHoudini.FnOpHolder( cob )
 		fn2.setParameterised( cl )
-		cob.parm("parm_filename").set("test/test_data/torus.cob")
+		cob.parm("parm_filename").set( self.__torusTestFile )
 		self.assertRaises( hou.OperationFailed, op.cook )
 		assert(op.errors()!="")
 		cob = op.createInputNode(0, "torus" )
@@ -381,7 +381,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
 		fn2 = IECoreHoudini.FnOpHolder( cob )
 		fn2.setParameterised( cl )
-		cob.parm("parm_filename").set("test/test_data/torus.cob")
+		cob.parm("parm_filename").set( self.__torusTestFile )
 		op.cook() # should pass because we have a mesh primitive
 		torus = op.createInputNode(0, "torus" )
 		op.cook() # should pass because torus will be converted to mesh
@@ -401,7 +401,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		(op,fn)=self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
 		fn.setParameterised( cl )
-		op.parm("parm_filename").set("test/test_data/torus.cob")
+		op.parm("parm_filename").set( self.__torusTestFile )
 		op2 = op.createOutputNode( "ieOpHolder" )
 		cl = IECore.ClassLoader.defaultOpLoader().load("pointParam", 1)()
 		fn = IECoreHoudini.FnOpHolder(op2)
@@ -436,7 +436,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
-		os.environ["IECORE_OP_PATHS"] = "test/ops"
+		self.__torusTestFile = "contrib/IECoreHoudini/test/test_data/torus.cob"
+		self.__torusNormalsTestFile = "contrib/IECoreHoudini/test/test_data/torus_with_normals.cob"
 		if not os.path.exists( "test/opHolder_testData" ):
 			os.mkdir( "test/opHolder_testData" )
 	
