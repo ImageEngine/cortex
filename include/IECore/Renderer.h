@@ -299,6 +299,7 @@ class Renderer : public RunTimeTyped
 		/// Renders a sphere of the specified radius. zMin and zMax are measured as a proportion of the radius - so no matter
 		/// what the radius, the default values will always give a full sphere. If the "rightHandedOrientation"
 		/// attribute is true then the normals point outwards, otherwise they point inwards.
+		/// \todo Give this the default values it talks about.
 		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders an image.
 		/// \todo Clarify the intended use of dataWindow and displayWindow.
