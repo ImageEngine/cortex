@@ -251,8 +251,8 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 	LightingState lightingState;
 	bool restoreLightState = cleanupLights( request, view, &lightingState );
 
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
+	GLint prevProgram; /// \todo I think there's a very good case for putting this bit in
+	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram ); // IECoreGL::Scene::render() instead
 	
 
 		// maya can sometimes leave an error from it's own code,
