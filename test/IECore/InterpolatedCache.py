@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,9 +34,10 @@
 
 
 """Unit test for InterpolatedCache binding"""
-import os, glob
+import os, glob, random
 import unittest
 import math
+import threading
 
 from IECore import *
 
@@ -66,7 +67,7 @@ class TestInterpolatedCache(unittest.TestCase):
 		fs = FileSequence( self.pathTemplate, EmptyFrameList() )
 
 		cache = AttributeCache( fs.fileNameForFrame( frame ), IndexedIOOpenMode.Write)
-
+	
 		dataWritten = self.__createV3f( value )
 		cache.write( "obj1", "v3fVec", dataWritten)
 		cache.write( "obj2", "i", IntData( value ) )
@@ -145,7 +146,7 @@ class TestInterpolatedCache(unittest.TestCase):
 
 		self.__createCache()
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
+		cache = InterpolatedCache( self.pathTemplate, frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assertEqual( cache.read( "obj2", "i" ), IntData( 1 ) )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 1.5 ) )
 		self.assertEqual( cache.read( "obj1" ), CompoundObject( { "v3fVec": self.__createV3f( 1.5 ) } ) )
@@ -186,6 +187,7 @@ class TestInterpolatedCache(unittest.TestCase):
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
 
 	def testOldTransformationMatrixData( self ):
+
 		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.old.####.fio", frame = 4, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
 		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd( 0.244525, 0, 0 )).length(), 0, 2 )
@@ -193,6 +195,53 @@ class TestInterpolatedCache(unittest.TestCase):
 		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
 		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd(0.283422, 0, 0)).length(), 0, 2 )
 
+	def testThreading( self ) :
+	
+		def check( cache, frame ) :
+		
+			objects = cache.objects( frame )
+			self.assertEqual( len( objects ), 2 )
+			self.failUnless( "obj1" in objects )
+			self.failUnless( "obj2" in objects )
+			
+			self.assertEqual( cache.attributes( frame, "obj1" ), [ "v3fVec" ] )
+			
+			attributes = cache.attributes( frame, "obj2" )
+			self.assertEqual( len( attributes ), 2 )
+			self.failUnless( "i" in attributes )
+			self.failUnless( "d" in attributes )
+			
+			v = cache.read( frame, "obj1", "v3fVec" )
+			self.failUnless( v[0].equalWithAbsError( V3f( frame ), 0.001 ) )
+			self.failUnless( v[1].equalWithAbsError( V3f( frame ), 0.001 ) )
+			self.failUnless( v[2].equalWithAbsError( V3f( frame ), 0.001 ) )
+			self.assertEqual( cache.read( frame, "obj2", "i" ), IntData( int( frame ) ) )
+			self.assertAlmostEqual( cache.read( frame, "obj2", "d" ).value, frame, 6 )
+	
+			cache.read( frame, "obj1" )
+	
+			self.failUnless( "testCache" in cache.headers( frame ) )
+			
+			h = cache.readHeader( frame, "testCache" )
+			self.assertEqual( cache.readHeader( frame )["testCache"], h )
+			
+			self.failUnless( cache.contains( frame, "obj1" ) )
+			self.failUnless( cache.contains( frame, "obj2" ) )
+			self.failIf( cache.contains( frame, "ofsdfsdbj2" ) )
+
+		self.__createCache()
+		
+		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Linear )
+					
+		threads = []
+		for i in range( 0, 1000 ) :
+			t = threading.Thread( target=check, args = ( cache, random.uniform( 0, 2 ) ) )
+			t.start()
+			threads.append( t )
+
+		for t in threads :
+			t.join()
+	
 	def testDefaultConstructor( self ) :
 	
 		self.__createCache()
@@ -206,6 +255,31 @@ class TestInterpolatedCache(unittest.TestCase):
 		cache.readHeader()
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0 ) )
 
+	def testReadMissing( self ) :
+
+		# check that trying to read missing caches fails
+		
+		cache = InterpolatedCache( "iDontExist.######.fio" )
+		self.assertRaises( RuntimeError, cache.read, "a", "b" )
+	
+		# check that trying to read missing objects or attributes fails
+	
+		self.__createCache()
+	
+		cache = InterpolatedCache( self.pathTemplate )
+		cache.read( "obj2", "d" )
+		
+		self.assertRaises( RuntimeError, cache.read, "iDontExist", "a" )
+		self.assertRaises( RuntimeError, cache.read, "obj2", "iDontExist" )
+
+	def testMaxOpenFiles( self ) :
+
+		cache = InterpolatedCache( self.pathTemplate, maxOpenFiles=20 )
+		self.assertEqual( cache.getMaxOpenFiles(), 20 )
+		
+		cache.setMaxOpenFiles( 10 )
+		self.assertEqual( cache.getMaxOpenFiles(), 10 )
+		
 	def tearDown(self):
 
 		# cleanup

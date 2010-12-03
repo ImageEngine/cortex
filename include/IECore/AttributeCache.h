@@ -46,9 +46,12 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( CompoundObject );
 
-///A simple means of creating and reading caches of data values which are associated with
-///notional "Objects" and "Attributes". Will throw an exception derived from IEException if
-///any errors are encountered.
+/// A simple means of creating and reading caches of data values which are associated with
+/// notional "Objects" and "Attributes". Will throw an exception derived from IECore::Exception if
+/// any errors are encountered.
+/// \threading It is not safe to use an instance of this class from multiple concurrent threads. See
+/// the InterpolatedCache class for a threadsafe means of reading the files with automatic
+/// interpolation.
 class AttributeCache : public RefCounted
 {
 	public:

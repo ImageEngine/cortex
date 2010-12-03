@@ -35,6 +35,7 @@
 import unittest
 import time
 import threading
+import random
 import os
 
 import IECore
@@ -266,12 +267,61 @@ class ThreadingTest( unittest.TestCase ) :
 		runThread = False
 		newThread.join()
 
+	def testInterpolatedCacheGains( self ) :
+	
+		numObjects = 100
+		numAttrs = 2
+	
+		def createCache( fileName ) :
+		
+			data = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 50000 )
+			cache = IECore.AttributeCache( fileName, IECore.IndexedIOOpenMode.Write )
+			for i in range( 0, numObjects ) :
+				for j in range( 0, numAttrs ) :
+					cache.write( "object%d" % i, "attr%d" % j, data )
+
+		
+		createCache( "test/IECore/interpolatedCache.0250.fio" )
+		createCache( "test/IECore/interpolatedCache.0500.fio" )
+		
+		cache = IECore.InterpolatedCache(
+			"test/IECore/interpolatedCache.####.fio",
+			1.5,
+			IECore.InterpolatedCache.Interpolation.Linear,
+		)
+		
+		calls = []
+		for i in range( 0, 200 ) :
+			calls.append(
+				IECore.curry(
+					cache.read,
+					"object%d" % random.uniform( 0, numObjects ),
+					"attr%d" % random.uniform( 0, numAttrs )
+				)
+			)
+					
+		tStart = time.time()
+		self.callSomeThings( calls, threaded=False )
+		nonThreadedTime = time.time() - tStart
+
+		tStart = time.time()
+		self.callSomeThings( calls, threaded=True )
+		threadedTime = time.time() - tStart
+						
+		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
+
 	def tearDown( self ) :
 		
-		for i in range( 0, 4 ) :
-			fileName = "test/IECore/test%d.jpg" % i
-			if os.path.exists( fileName ) :
-				os.remove( fileName )
+		for f in [
+			"test/IECore/test0.jpg",
+			"test/IECore/test1.jpg",
+			"test/IECore/test2.jpg",
+			"test/IECore/test3.jpg",
+			"test/IECore/interpolatedCache.0250.fio",
+			"test/IECore/interpolatedCache.0500.fio",
+		] :
+			if os.path.exists( f ) :
+				os.remove( f )
 				
 if __name__ == "__main__":
 	unittest.main()
