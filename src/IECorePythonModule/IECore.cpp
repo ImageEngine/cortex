@@ -551,6 +551,7 @@ BOOST_PYTHON_MODULE(_IECore)
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 
 	bindImageConvolveOp();
+	bindEnvMapSHProjectorOp();
 
 #endif
 
@@ -571,7 +572,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointsPrimitiveEvaluator();
 	bindPointsMotionOp();
 	bindCapturingRenderer();
-	bindEnvMapSHProjectorOp();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
