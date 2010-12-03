@@ -81,6 +81,10 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.assertRaises( hou.OperationFailed, cache.cook )
 		self.failUnless( cache.errors() )
 		shutil.copyfile( "contrib/IECoreHoudini/test/test_data/torusVertCache.0001.fio", "contrib/IECoreHoudini/test/test_data/torusVertCache.0250.fio" )
+		# need to refresh the LRUCache in order to get passed the original error
+		cache.parm( "frameMultiplier" ).set( 1 )
+		cache.cook()
+		cache.parm( "frameMultiplier" ).set( 250 )
 		self.failUnless( isinstance( cache.geometry(), hou.Geometry ) )
 		os.remove( "contrib/IECoreHoudini/test/test_data/torusVertCache.0250.fio" )
 	
