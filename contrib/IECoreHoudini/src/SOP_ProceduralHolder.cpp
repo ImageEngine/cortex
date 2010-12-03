@@ -42,6 +42,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECorePython/ScopedGILLock.h"
 #include "IECoreGL/Renderer.h"
+#include "IECoreGL/Camera.h"
 
 #include "NodePassData.h"
 #include "SOP_ProceduralHolder.h"
@@ -83,6 +84,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 			procedural->render( renderer );
 			renderer->worldEnd();
 			m_scene = renderer->scene();
+			m_scene->setCamera( 0 ); // houdini will be providing the camera when we draw the scene
 		}
 		catch( const std::exception &e )
 		{

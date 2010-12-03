@@ -161,7 +161,7 @@ void GR_Cortex::renderScene( IECoreGL::ConstScenePtr scene, IECoreGL::ConstState
     // render our scene
 	GLint prevProgram;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-	scene->root()->render( displayState );
+	scene->render( displayState );
 	glUseProgram( prevProgram );
 }
 
@@ -179,12 +179,13 @@ void GR_Cortex::renderObject( const IECore::Object *object, IECoreGL::ConstState
 	renderer->worldBegin();
 	renderable->render( renderer );
 	renderer->worldEnd();
-	IECoreGL::ConstScenePtr scene = renderer->scene();
-
+	IECoreGL::ScenePtr scene = renderer->scene();
+	scene->setCamera( 0 ); // houdini will be providing the camera
+	
 	// now render
 	GLint prevProgram;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-	scene->root()->render( displayState );
+	scene->render( displayState );
 	glUseProgram( prevProgram );
 }
 
