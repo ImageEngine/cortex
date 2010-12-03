@@ -108,6 +108,9 @@ float OversamplesCalculator::tickInterval( float frame, int &tickLow, int &tickH
 	/// 250, 333, 416, 499, 583, 555, 749
 	/// Note that the 499 and 749 should ideally be 500 and 750 respectively.
 	/// Here we deliberately discard some of the precision in an attempt to match this behaviour.
+	/// \todo I don't think we should be deliberately be reproducing a maya bug in cortex code.
+	/// The primary purpose of this class is not dealing with maya particle caches (it's used more
+	/// with the InterpolatedCache). Consider removing this hack for Cortex 6. 
 	step = int( step*100000 )/100000.0;
 	float tickF = frame * m_ticksPerSecond /  m_frameRate ;
 	int tick = ( int )( tickF );
