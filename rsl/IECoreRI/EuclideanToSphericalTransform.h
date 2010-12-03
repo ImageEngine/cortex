@@ -40,7 +40,7 @@
 /// to specify the radius. 
 /// Check documentation for SphericalToEuclideanTransform for 
 /// more details on spherical coordinates.
-vector ieEuclideanToSphericalTransform( varying point euclidean )
+point ieEuclideanToSphericalTransform( varying point euclidean )
 {
 	varying vector e = vector euclidean;
 	varying float length = length(e);
@@ -50,7 +50,7 @@ vector ieEuclideanToSphericalTransform( varying point euclidean )
 	{
 		phi += 2 * PI;
 	}
-	return vector (	phi, acos(e[2]), length );
+	return point (	phi, acos(e[2]), length );
 }
 
 #endif // IECORERI_EUCLIDEANTOSPHERICALTRANSFORM_H

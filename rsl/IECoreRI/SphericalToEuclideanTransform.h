@@ -41,7 +41,7 @@
 /// The phi component ranges from 0 to 2*PI and represents the angle of 
 /// rotation on the XY plane.
 /// The theta ranges from 0 to PI and it represents the angle from Z axis. 
-point ieSphericalToEuclideanTransform( varying vector spherical )
+point ieSphericalToEuclideanTransform( varying point spherical )
 {	
 	varying float sinTheta = sin( spherical[1] );
 	
