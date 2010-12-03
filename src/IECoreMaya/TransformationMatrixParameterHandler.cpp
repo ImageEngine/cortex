@@ -172,6 +172,7 @@ MPlug TransformationMatrixParameterHandler<T>::doCreate( IECore::ConstParameterP
 	// more basic here, and just supply a V3f rotation and pretend that the Quartonean isn't there.
 	///\todo Expose rotation order and rotationOrientation.
 
+	// These use the '0', '1' and '2' child suffixes instead of 'X' 'Y' and 'Z' to match those created by fnNAttr.create() @ L188.
 	MObject p1 = fnUAttr.create( plugName + g_attributeNames[ TRANSLATE_INDEX ] + "0", plugName + g_attributeNames[ TRANSLATE_INDEX ] + "0", MFnUnitAttribute::kDistance );
 	MObject p2 = fnUAttr.create( plugName + g_attributeNames[ TRANSLATE_INDEX ] + "1", plugName + g_attributeNames[ TRANSLATE_INDEX ] + "1", MFnUnitAttribute::kDistance );
 	MObject p3 = fnUAttr.create( plugName + g_attributeNames[ TRANSLATE_INDEX ] + "2", plugName + g_attributeNames[ TRANSLATE_INDEX ] + "2", MFnUnitAttribute::kDistance );
