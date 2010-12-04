@@ -70,6 +70,7 @@
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/CurveCombiner.h"
 #include "IECoreMaya/Box3Manipulator.h"
+#include "IECoreMaya/V3Manipulator.h"
 #include "IECoreMaya/ParameterisedHolderManipContextCommand.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/DrawableHolder.h"
@@ -189,6 +190,10 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerNode( "ieTransformationMatrixfParameterManipulator", TransformationMatrixManipulator::id,
 			TransformationMatrixManipulator::creator, TransformationMatrixManipulator::initialize, MPxNode::kManipContainer, &manipClassification );
 		assert( s );
+
+		s = plugin.registerNode( "ieV3fParameterManipulator", V3Manipulator::id,
+			V3Manipulator::creator, V3Manipulator::initialize, MPxNode::kManipContainer, &manipClassification );
+		assert( s );
 		
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
@@ -258,6 +263,9 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ImagePlaneHolder::id );
 		s = plugin.deregisterNode( GeometryCombiner::id );
 		s = plugin.deregisterNode( CurveCombiner::id );
+		s = plugin.deregisterNode( Box3Manipulator::id );
+		s = plugin.deregisterNode( TransformationMatrixManipulator::id );
+		s = plugin.deregisterNode( V3Manipulator::id );
 
 		s = plugin.deregisterCommand( "iePython" );
 		s = plugin.deregisterCommand( "ieSystemExit" );
