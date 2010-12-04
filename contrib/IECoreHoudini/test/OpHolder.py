@@ -148,17 +148,41 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder(n)
 		result = fn.getParameterised().resultParameter().getValue()
 		assert( result == IECore.V3fVectorData( [IECore.V3f(5,7,9),IECore.V3f(5,7,9),IECore.V3f(5,7,9)] ) )
-		
-	# TODO: add a test to check that changing an op updates the inputs properly
-	def testChangingOp(self):
-		n = IECoreHoudini.FnOpHolder.create( "test_node", "vectors/V3fVectorCreator", 1)
-		fn = IECoreHoudini.FnOpHolder(n)
+	
+	# tests changing op and inputs
+	def testChangingOp( self ) :
+		n = IECoreHoudini.FnOpHolder.create( "test_node", "vectors/V3fVectorCreator", 1 )
+		fn = IECoreHoudini.FnOpHolder( n )
 		op = fn.getParameterised()
 		self.assertEqual( len(n.inputConnectors()), 0 )
-		fn.setParameterised( IECore.ClassLoader.defaultOpLoader().load("objectDebug",1)() )
+		
+		fn.setOp( "objectDebug", 1 )
 		self.assertEqual( len(n.inputConnectors()), 1 )
-		fn.setParameterised( IECore.ClassLoader.defaultOpLoader().load("vectors/V3fVectorAdder",1)() )
+		torus = n.createInputNode( 0, "torus" )
+		self.assertEqual( torus, n.inputConnections()[0].inputNode() )
+		self.assertEqual( 0, n.inputConnections()[0].inputIndex() )
+		
+		fn.setOp( "vectors/V3fVectorAdder", 1 )
 		self.assertEqual( len(n.inputConnectors()), 2 )
+		self.assertEqual( torus, n.inputConnections()[0].inputNode() )
+		self.assertEqual( 0, n.inputConnections()[0].inputIndex() )
+		box = n.createInputNode( 1, "box" )
+		self.assertEqual( box, n.inputConnections()[1].inputNode() )
+		self.assertEqual( 1, n.inputConnections()[1].inputIndex() )
+		
+		n.setInput( 0, None )
+		self.assertEqual( len(n.inputConnectors()), 2 )
+		self.assertEqual( len(n.inputConnections()), 1 )
+		self.assertEqual( box, n.inputConnections()[0].inputNode() )
+		self.assertEqual( 1, n.inputConnections()[0].inputIndex() )
+		fn.setOp( "objectDebug", 1 )
+		self.assertEqual( len(n.inputConnectors()), 1 )
+		self.assertEqual( box, n.inputConnections()[0].inputNode() )
+		self.assertEqual( 0, n.inputConnections()[0].inputIndex() )
+		
+		fn.setOp( "vectors/V3fVectorCreator", 1 )
+		self.assertEqual( len(n.inputConnectors()), 0 )
+		self.assert_( not n.inputConnectors() )
 
 	# tests creation of a lot of opHolders
 	def testLotsQuickly(self):

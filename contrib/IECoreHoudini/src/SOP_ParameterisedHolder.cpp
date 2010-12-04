@@ -335,7 +335,22 @@ unsigned SOP_ParameterisedHolder::maxInputs() const
 
 void SOP_ParameterisedHolder::refreshInputConnections()
 {
-	// clear our internal cache of input parameters
+	// store the existing input nodes
+	unsigned numInputs = nInputs();
+	std::vector<OP_Node*> inputNodes;
+	for ( unsigned i=0; i < numInputs; i++ )
+	{
+		OP_Node *input = getInput( i );
+		if ( !input )
+		{
+			continue;
+		}
+		
+		inputNodes.push_back( input );
+	}
+	
+	// clear the input parameters and break the node connections
+	disconnectAllInputs();
 	m_inputParameters.clear();
 
 	ParameterisedPtr parameterised = IECore::runTimeCast<Parameterised>( getParameterised() );
@@ -369,6 +384,13 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 		}
 	}
 
+	// remake the connections to inputs that still exist
+	numInputs = min( inputNodes.size(), m_inputParameters.size() );
+	for ( unsigned i=0; i < numInputs; i++ )
+	{
+		setInput( i, inputNodes[i] );
+	}
+	
 	/// \todo: Is this really the only we can get the gui to update the input connections?
 	setXY( getX()+.0001, getY()+.0001 );
 	setXY( getX()-.0001, getY()-.0001 );
