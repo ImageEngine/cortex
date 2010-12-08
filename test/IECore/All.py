@@ -244,6 +244,7 @@ from PointsPrimitiveEvaluatorTest import PointsPrimitiveEvaluatorTest
 from PointsMotionOpTest import PointsMotionOpTest
 from CamelCaseTest import CamelCaseTest
 from CapturingRendererTest import CapturingRendererTest
+from LightTest import LightTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

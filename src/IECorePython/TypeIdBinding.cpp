@@ -387,6 +387,7 @@ void bindTypeId()
 		.value( "LinearToPanalogOp", LinearToPanalogOpTypeId )
 		.value( "PanalogToLinearOp", PanalogToLinearOpTypeId )
 		.value( "EnvMapSHProjector", EnvMapSHProjectorTypeId )
+		.value( "Light", LightTypeId )
 	;
 }
 

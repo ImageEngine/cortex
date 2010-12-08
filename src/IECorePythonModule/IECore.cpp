@@ -286,6 +286,7 @@
 #include "IECorePython/PointsMotionOpBinding.h"
 #include "IECorePython/CapturingRendererBinding.h"
 #include "IECorePython/EnvMapSHProjectorBinding.h"
+#include "IECorePython/LightBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -572,6 +573,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointsPrimitiveEvaluator();
 	bindPointsMotionOp();
 	bindCapturingRenderer();
+	bindLight();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
