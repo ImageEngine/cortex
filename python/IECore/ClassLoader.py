@@ -74,6 +74,7 @@ class ClassLoader :
 	def classNames( self, matchString = "*" ) :
 
 		self.__findAllClasses()
+		### \todo Support re, and allow exclusions, etc...
 		n = [ x for x in self.__classes.keys() if fnmatch( x, matchString ) ]
 		n.sort()
 		return n

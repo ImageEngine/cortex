@@ -198,6 +198,8 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 			classNameFilter = self.parameter.userData()["UI"]["classNameFilter"].value
 		except :
 			pass
+		
+		### \todo We can't assume that * is immediately after /
 		menuPathStart = max( 0, classNameFilter.find( "*" ) )
 			
 		loader = IECore.ClassLoader.defaultLoader( self.parameter.searchPathEnvVar() )
