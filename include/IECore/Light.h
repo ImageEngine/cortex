@@ -45,7 +45,7 @@ class Light : public StateRenderable
 {
 	public:
 
-		Light( const std::string &name="defaultlight", const std::string &handle="", const CompoundDataMap &parameters = CompoundDataMap() );
+		Light( const std::string &name="distantlight", const std::string &handle="", const CompoundDataMap &parameters = CompoundDataMap() );
 		virtual ~Light();
 
 		IE_CORE_DECLAREABSTRACTOBJECT( Light, StateRenderable );

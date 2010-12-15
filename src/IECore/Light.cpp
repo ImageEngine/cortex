@@ -34,6 +34,7 @@
 
 #include "IECore/Light.h"
 #include "IECore/Renderer.h"
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace boost;
@@ -44,6 +45,10 @@ Object::TypeDescription<Light> Light::m_description;
 Light::Light(  const std::string &name, const std::string &handle, const CompoundDataMap &parameters )
 	: m_name( name ), m_handle( handle ), m_parameters( new CompoundData( parameters ) )
 {
+	if ( m_handle.empty() )
+	{
+		m_handle = ( boost::format( "%p" ) % this ).str();
+	}
 }
 
 Light::~Light()

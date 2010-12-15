@@ -44,7 +44,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-	static LightPtr construct( const std::string &name="defaultlight", const std::string &handle="", CompoundDataPtr parameters = 0 )
+	static LightPtr construct( const std::string &name="distantlight", const std::string &handle="", CompoundDataPtr parameters = 0 )
 	{
 		return new Light( name, handle, parameters ? parameters->readable() : CompoundDataMap() );
 	}
@@ -54,7 +54,7 @@ namespace IECorePython
 		RunTimeTypedClass<Light>()
 			.def( init<>() )
 			.def( init<optional<const std::string &, const std::string &, const CompoundDataMap &> >() )
-			.def( "__init__", make_constructor( &construct, default_call_policies(), ( boost::python::arg_( "name" )="defaultsurface", boost::python::arg_( "handle" )="", boost::python::arg_( "parameters" )=0 ) ) )
+			.def( "__init__", make_constructor( &construct, default_call_policies(), ( boost::python::arg_( "name" )="distantlight", boost::python::arg_( "handle" )="", boost::python::arg_( "parameters" )=0 ) ) )
 			.add_property( "name", make_function( &Light::getName, return_value_policy<copy_const_reference>() ), &Light::setName )
 			.add_property( "handle", make_function( &Light::getHandle, return_value_policy<copy_const_reference>() ), &Light::setHandle )
 			.add_property( "parameters", &Light::parametersData )

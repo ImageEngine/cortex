@@ -41,10 +41,13 @@ class LightTest( unittest.TestCase ) :
 	def test( self ) :
 
 		s = Light()
-		self.assertEqual( s.name, "defaultlight" )
-		self.assertEqual( s.handle, "" )
+		self.assertEqual( s.name, "distantlight" )
+		self.assert_( len(s.handle) > 0 )
 		self.assertEqual( len( s.parameters ), 0 )
 		self.assertEqual( s.parameters.typeName(), "CompoundData" )
+
+		ss = Light()
+		self.assertNotEqual( s.handle, ss.handle )
 
 		s = Light( "marble", "marble001" )
 		self.assertEqual( s.name, "marble" )
@@ -53,6 +56,14 @@ class LightTest( unittest.TestCase ) :
 		ss = s.copy()
 		self.assertEqual( ss.name, s.name )
 		self.assertEqual( ss.handle, s.handle )
+
+	def testProperties( self ) :
+
+		s = Light()
+		s.handle = "myNewHandle"
+		s.name = "myNewName"
+		self.assertEqual( s.name, "myNewName" )
+		self.assertEqual( s.handle, "myNewHandle" )
 
 	def testConstructWithParameters( self ) :
 	
