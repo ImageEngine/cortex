@@ -55,6 +55,18 @@ Imath::V3f convert( const UT_Vector3 &from )
 }
 
 template<>
+UT_Vector4 convert( const Imath::V3f &from )
+{
+	return UT_Vector4( from.x, from.y, from.z );
+}
+
+template<>
+Imath::V3f convert( const UT_Vector4 &from )
+{
+	return Imath::V3f( from[0], from[1], from[2] );
+}
+
+template<>
 UT_BoundingBox convert( const Imath::Box3f &from )
 {
 	if( from.isEmpty() )

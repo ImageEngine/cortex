@@ -42,6 +42,7 @@
 #include "IECore/CompoundObject.h"
 
 #include "CoreHoudini.h"
+#include "Convert.h"
 #include "FromHoudiniGeometryConverter.h"
 
 using namespace IECore;
@@ -229,8 +230,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	std::vector<Imath::V3f> pData( numPoints );
 	for ( const GEO_Point *point = points.head(); point !=0 ; point = points.next( point ), i++ )
 	{
-		const UT_Vector4 &pos = point->getPos();
-		pData[i] = Imath::V3f( pos[0], pos[1], pos[2] );
+		pData[i] = IECore::convert<Imath::V3f>( point->getPos() );
 	}
 	
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData ) );

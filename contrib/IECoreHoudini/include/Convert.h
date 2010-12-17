@@ -61,6 +61,12 @@ template<>
 Imath::V3f convert( const UT_Vector3 &from );
 
 template<>
+UT_Vector4 convert( const Imath::V3f &from );
+
+template<>
+Imath::V3f convert( const UT_Vector4 &from );
+
+template<>
 UT_BoundingBox convert( const Imath::Box3f &from );
 
 template<>
