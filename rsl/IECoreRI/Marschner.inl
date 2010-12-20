@@ -151,7 +151,7 @@ color ieMarschnerA( varying color absorption; varying vector lightVec; uniform f
 	}
 
 	float h = sin( gammaI );			// from [1] right before equation 3.
-	float gammaT = asin(h / etaPerp);	// from [1] right before equation 3.
+	float gammaT = asin( clamp(h / etaPerp,-1,1) );	// from [1] right before equation 3.
 	float thetaT = acos( (etaPerp/refraction)*cos( lightVec[1] ) );	// definition for equation 20 in [2].
 	float cosTheta = cos(thetaT);
 	float l;
