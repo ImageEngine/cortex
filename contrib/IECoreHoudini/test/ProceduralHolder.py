@@ -48,17 +48,17 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		proc = geo.createNode( "ieProceduralHolder" )
-		assert( proc )
+		self.assert_( proc )
 		fn = IECoreHoudini.FnProceduralHolder( proc )
-		assert( fn )
+		self.assert_( fn )
 		return fn
 
 	def testLoadProcedural(self):
 		fn = self.testProceduralHolder()
 		cl = IECore.ClassLoader.defaultProceduralLoader().load( "sphereProcedural", 0 )()
 		fn.setParameterised( cl )
-		assert( fn.getParameterised()!=None )
-		assert( fn.getParameterised()==cl )
+		self.assertNotEqual( fn.getParameterised(), None )
+		self.assertEqual( fn.getParameterised(), cl )
 		return fn
 
 	def testProceduralParameters(self):
@@ -165,7 +165,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnProceduralHolder( proc )
 		cl = IECore.ClassLoader.defaultProceduralLoader().load( "sphereProcedural", 1 )()
 		proc.destroy()
-		assert( fn.hasParameterised() == False )
+		self.assertEqual( fn.hasParameterised(), False )
 		fn.setParameterised(cl)
 
 	def testProceduralReloadParameters(self):
@@ -175,54 +175,53 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		sphere.parm("parm_radius").setExpression("sin($FF)")
 		hou.setFrame(0)
 		rad = sphere.evalParm("parm_radius")
-		assert( rad>0 )
+		self.assert_( rad > 0 )
 		hou.setFrame(100)
 		rad = sphere.evalParm("parm_radius")
-		assert( rad>0.984 )
-		assert( rad<0.985 )
+		self.assert_( rad > 0.984 )
+		self.assert_( rad < 0.985 )
 		sphere.parm( "__classReloadButton" ).pressButton()
 		rad = sphere.evalParm("parm_radius")
-		assert( rad>0.984 )
-		assert( rad<0.985 )
-		assert( sphere.parm("parm_radius").expression()=="sin($FF)" )
+		self.assert_( rad > 0.984 )
+		self.assert_( rad < 0.985 )
+		self.assertEqual( sphere.parm("parm_radius").expression(), "sin($FF)" )
 		hou.setFrame(0)
 		rad = sphere.evalParm("parm_radius")
-		assert( rad>0 )
+		self.assert_( rad > 0 )
 
 		# now change the version to v2 and check things are still ok
 		sphere.parm( "__classVersion" ).set( "2" )
 		# if we're changing the menu programatically then we need to call pressButton()!!
 		sphere.parm( "__classVersion" ).pressButton()
-		assert( not sphere.evalParm("parm_extra") )
+		self.assert_( not sphere.evalParm("parm_extra") )
 		sphere.parm("parm_extra").set(True)
-		assert( sphere.evalParm("parm_extra") )
+		self.failUnless( sphere.evalParm("parm_extra") )
 		rad = sphere.evalParm("parm_radius")
-		assert( rad<0.015 )
+		self.assert_( rad < 0.015 )
 		hou.setFrame(100)
 		rad = sphere.evalParm("parm_radius")
-		assert( rad>0.984 )
-		assert( rad<0.985 )
+		self.assert_( rad > 0.984 )
+		self.assert_( rad < 0.985 )
 
 	def testHiddenParameters( self ):
 		( proc, cl ) = self.testProceduralParameters()
 		# check the hidden userData works
-		assert( proc.parmTuple("parm_a").parmTemplate().isHidden()==True )
-		assert( proc.parmTuple("parm_b").parmTemplate().isHidden()==False )
-		print proc.parmTuple("parm_c").parmTemplate().isHidden()
-		assert( proc.parmTuple("parm_c").parmTemplate().isHidden()==True )
-		assert( proc.parmTuple("parm_d").parmTemplate().isHidden()==False )
+		self.assertEqual( proc.parmTuple("parm_a").parmTemplate().isHidden(), True )
+		self.assertEqual( proc.parmTuple("parm_b").parmTemplate().isHidden(), False )
+		self.assertEqual( proc.parmTuple("parm_c").parmTemplate().isHidden(), True )
+		self.assertEqual( proc.parmTuple("parm_d").parmTemplate().isHidden(), False )
 		# check setting the parameter still works
 		proc.parmTuple("parm_a").set( [123] )
 		proc.cook(force=True)
-		assert( cl['a'].getValue().value == 123 )
+		self.assertEqual( cl['a'].getValue().value, 123 )
 		
 	def testParameterLabels( self ):
 		( proc, cl ) = self.testProceduralParameters()
 		# check the hidden userData works
-		assert( proc.parmTuple("parm_a").parmTemplate().label()=="Int" )
-		assert( proc.parmTuple("parm_b").parmTemplate().label()=="B" )
-		assert( proc.parmTuple("parm_c").parmTemplate().label()=="Double" )
-		assert( proc.parmTuple("parm_d").parmTemplate().label()=="D" )
+		self.assertEqual( proc.parmTuple("parm_a").parmTemplate().label(), "Int" )
+		self.assertEqual( proc.parmTuple("parm_b").parmTemplate().label(), "B" )
+		self.assertEqual( proc.parmTuple("parm_c").parmTemplate().label(), "Double" )
+		self.assertEqual( proc.parmTuple("parm_d").parmTemplate().label(), "D" )
 		
 	def testMatchString(self):
 		(op,fn)=self.testProceduralParameters()

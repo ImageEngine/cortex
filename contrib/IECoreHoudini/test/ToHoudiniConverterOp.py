@@ -54,7 +54,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		fn.setParameterised(cl)
 		IECoreHoudini.Utils.syncSopParametersWithOp(op)
 		op.cook()
-		assert( cl.resultParameter().getValue().typeId()==IECore.TypeId.MeshPrimitive )
+		self.assertEqual( cl.resultParameter().getValue().typeId(), IECore.TypeId.MeshPrimitive )
 		return (op, fn)
 	
 	# check it works for points
@@ -75,29 +75,29 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		attr_names = []
 		for p in geo.pointAttribs():
 			attr_names.append(p.name())
-		assert( attr_names == ["P", "Pw", "testAttribute"] )
-		assert( len(geo.points())==5000 )
-		assert( len(geo.prims())==0 )
+		self.assertEqual( attr_names, ["P", "Pw", "testAttribute"] )
+		self.assertEqual( len(geo.points()), 5000 )
+		self.assertEqual( len(geo.prims()), 0 )
 	
 	# check it works for polygons
 	def testPolygonConversion(self):
 		(op,fn) = self.testCreateToHoudiniConverter()
 		torus = op.createOutputNode( "ieToHoudiniConverter" )
 		geo = torus.geometry()
-		assert( len(geo.points())==100 )
-		assert( len(geo.prims())==100 )
+		self.assertEqual( len(geo.points()), 100 )
+		self.assertEqual( len(geo.prims()), 100 )
 		attr_names = []
 		for p in geo.pointAttribs():
 			attr_names.append(p.name())
-		assert( attr_names == ["P", "Pw"] )
+		self.assertEqual( attr_names, ["P", "Pw"] )
 		for p in geo.prims():
-			assert( p.numVertices()==4 )
-			assert( p.type()==hou.primType.Polygon )
+			self.assertEqual( p.numVertices(), 4 )
+			self.assertEqual( p.type(), hou.primType.Polygon )
 		n = hou.node("/obj/geo1")
 		h_torus = n.createNode( "torus" )
 		h_geo = h_torus.geometry()
-		assert( len(geo.pointAttribs())==len(h_geo.pointAttribs()) )
-		assert( len(geo.prims())==len(h_geo.prims()) )
+		self.assertEqual( len(geo.pointAttribs()), len(h_geo.pointAttribs()) )
+		self.assertEqual( len(geo.prims()), len(h_geo.prims()) )
 	
 if __name__ == "__main__":
 	unittest.main()
