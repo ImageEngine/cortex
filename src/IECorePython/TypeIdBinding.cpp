@@ -388,6 +388,7 @@ void bindTypeId()
 		.value( "PanalogToLinearOp", PanalogToLinearOpTypeId )
 		.value( "EnvMapSHProjector", EnvMapSHProjectorTypeId )
 		.value( "Light", LightTypeId )
+		.value( "ContrastSmoothSkinningWeightsOp", ContrastSmoothSkinningWeightsOpTypeId )
 	;
 }
 

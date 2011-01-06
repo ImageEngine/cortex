@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -287,6 +287,7 @@
 #include "IECorePython/CapturingRendererBinding.h"
 #include "IECorePython/EnvMapSHProjectorBinding.h"
 #include "IECorePython/LightBinding.h"
+#include "IECorePython/ContrastSmoothSkinningWeightsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -574,6 +575,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointsMotionOp();
 	bindCapturingRenderer();
 	bindLight();
+	bindContrastSmoothSkinningWeightsOp();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
