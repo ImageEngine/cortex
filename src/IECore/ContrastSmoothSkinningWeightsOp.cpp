@@ -134,20 +134,20 @@ class ContrastSmoothSkinningWeightsOp::ContrastSmoothStep
 
 		float operator()( float value )
 		{
-			float result = value;
 			for ( int i = 0; i < m_iterations; i++ )
 			{
-				if ( result >= m_center )
+				float result;
+				if ( value >= m_center )
 				{
-					result = ((smoothstep(0.0,1.0,(result-m_center)*m_secondHalfScale+0.5) - 0.5) * m_firstHalfScale + m_secondHalfScale*0.5) / m_norm;
+					result = ((smoothstep(0.0,1.0,(value-m_center)*m_secondHalfScale+0.5) - 0.5) * m_firstHalfScale + m_secondHalfScale*0.5) / m_norm;
 				}
 				else
 				{
-					result = (smoothstep(0.0,1.0,(result-m_center)*m_firstHalfScale+0.5) * m_secondHalfScale) / m_norm;
+					result = (smoothstep(0.0,1.0,(value-m_center)*m_firstHalfScale+0.5) * m_secondHalfScale) / m_norm;
 				}
-				result = m_ratio*result + (1-m_ratio)*value;
+				value = m_ratio*result + (1-m_ratio)*value;
 			}
-			return result;
+			return value;
 		}
 
 	private :
