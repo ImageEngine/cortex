@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
 #
@@ -245,6 +245,7 @@ from PointsMotionOpTest import PointsMotionOpTest
 from CamelCaseTest import CamelCaseTest
 from CapturingRendererTest import CapturingRendererTest
 from LightTest import LightTest
+from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
