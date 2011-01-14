@@ -84,7 +84,7 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 
 		IECoreGL::BoxPrimitivePtr m_boxPrimitive;
 
-		typedef std::map< IECoreGL::Group*, IECoreGL::StatePtr > StateMap;
+		typedef std::map< IECoreGL::GroupPtr, IECoreGL::StatePtr > StateMap;
 
 		void hiliteGroups( const ProceduralHolder::ComponentToGroupMap::mapped_type &groups, IECoreGL::StateComponentPtr hilite, IECoreGL::StateComponentPtr base ) const;
 		void unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const;
