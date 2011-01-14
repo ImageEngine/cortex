@@ -183,7 +183,8 @@ class FnParameterisedHolder():
 		parm_names = []
 		for p in parms:
 			parm_names.append( p['name'] )
-			self.__node.addSpareParmTuple(p['tuple'], in_folder=p['folder'], create_missing_folders=True)
+			parm = self.__node.addSpareParmTuple( p['tuple'], in_folder=p['folder'], create_missing_folders=True )
+			parm.set( p['initialValue'] )
 		
 		# restore our cached parameters	
 		self.restoreCachedParameters( cached_parameters )

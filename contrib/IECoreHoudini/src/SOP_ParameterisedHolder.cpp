@@ -528,14 +528,15 @@ void SOP_ParameterisedHolder::updateParameter( ParameterPtr parm, float now, std
 	try
 	{
 		// find out our parameter name
-		std::string parm_name = prefix + std::string("parm_") + std::string( parm->name() );
+		std::string parm_name = prefix + std::string( parm->name() );
 
 		// compoundParameters - recursively calling updateParameter on children
-		if ( parm->typeId()==IECore::CompoundParameterTypeId )
+		if ( parm->isInstanceOf( IECore::CompoundParameterTypeId ) )
 		{
 			if ( top_level==true )
 			{
-				parm_name = ""; // our top-level compound parameter should not apply a prefix
+				// only our top-level compound parameter should apply the generic prefix
+				parm_name = "parm_";
 			}
 			else
 			{
@@ -686,6 +687,7 @@ void SOP_ParameterisedHolder::updateParameter( ParameterPtr parm, float now, std
 
 			// string parameter
 			case IECore::StringParameterTypeId:
+			case IECore::ValidatedStringParameterTypeId:
 			case IECore::PathParameterTypeId:
 			case IECore::DirNameParameterTypeId:
 			case IECore::FileNameParameterTypeId:

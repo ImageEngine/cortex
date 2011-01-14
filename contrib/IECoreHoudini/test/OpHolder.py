@@ -267,24 +267,24 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		# test we have the parameters & folders
 		num_folders = [ type(p.parmTemplate()).__name__ for p in op.spareParms()].count("FolderSetParmTemplate")
 		self.assertEqual( num_folders, 4 )
-		p = op.parm( "parm_compound_1_parm_jy" )
+		p = op.parm( "parm_compound_1_jy" )
 		self.assert_( p )
 		self.assertEqual( p.containingFolders(), ('Parameters', 'My Compound 1') )
-		p = op.parm( "parm_compound_2_parm_kx" )
+		p = op.parm( "parm_compound_2_kx" )
 		self.assert_( p )
 		self.assertEqual( p.containingFolders(), ('Parameters', 'My Compound 2') )
-		p = op.parm( "parm_compound_3_parm_compound_4_parm_some_int" )
+		p = op.parm( "parm_compound_3_compound_4_some_int" )
 		self.assert_( p )
 		self.assertEqual( p.containingFolders(), ('Parameters', 'My Compound 3', 'My Compound 4') )
 		
 		# test that houdini values get set on cortex parameters correctly
-		p = op.parmTuple( "parm_compound_3_parm_compound_4_parm_some_int" )
+		p = op.parmTuple( "parm_compound_3_compound_4_some_int" )
 		p.set( [345] )
 		self.assertEqual( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value, 123 )
 		op.cook()
 		self.assertEqual( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value, 345 )
 		
-		p = op.parmTuple( "parm_compound_2_parm_j" )
+		p = op.parmTuple( "parm_compound_2_j" )
 		p.set( [123.456, 456.789, 0.0] )
 		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 8,16,32 ) ).length() < 0.001 )
 		op.cook()
@@ -498,7 +498,22 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.parm( "__classCategory" ).pressButton()
 		self.failUnless( len(fn.classNames()) > 4 )
 		op.parm( "__classMatchString" ).set( "parameters/*" )
-		self.assertEqual( len(fn.classNames()), 4 )		
+		self.assertEqual( len(fn.classNames()), 4 )
+	
+	def testSetOpValues( self ) :
+		( holder, fn ) = self.testOpHolder()
+		op = IECore.ClassLoader.defaultOpLoader().load( "noiseDeformer", 1 )()
+		fn.setOp( op )
+		self.assertEqual( tuple(op.parameters()['frequency'].defaultValue.value), holder.parmTuple( "parm_frequency" ).parmTemplate().defaultValue() )
+		self.assertEqual( tuple(op.parameters()['frequency'].defaultValue.value), holder.parmTuple( "parm_frequency" ).eval() )
+		self.assertEqual( tuple(op.parameters()['frequency'].getTypedValue()), holder.parmTuple( "parm_frequency" ).eval() )
+		
+		( holder2, fn2 ) = self.testOpHolder()
+		op.parameters()['frequency'].setTypedValue( IECore.V3f( 0.2, 0.4, 0.6 ) )
+		fn2.setOp( op )
+		self.assertEqual( tuple(op.parameters()['frequency'].defaultValue.value), holder2.parmTuple( "parm_frequency" ).parmTemplate().defaultValue() )
+		self.assertNotEqual( tuple(op.parameters()['frequency'].defaultValue.value), holder2.parmTuple( "parm_frequency" ).eval() )
+		self.assertEqual( tuple(op.parameters()['frequency'].getTypedValue()), holder2.parmTuple( "parm_frequency" ).eval() )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

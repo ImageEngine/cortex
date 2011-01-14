@@ -50,14 +50,14 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		folders = []
 		
 	# Compound Parameter
-	if p.typeId()==IECore.TypeId.CompoundParameter:
+	if p.isInstanceOf( IECore.TypeId.CompoundParameter ) :
 		if top_level==True: # this is our top-level CompoundParameter
 			sub_folder = ['Parameters']
 			name = None
 		else:
 			label = parmLabel( p )
 			sub_folder = folders + [label]
-			name = parmName(p.name, parent=parent)
+			name = parmName( p.name, prefix=parent )
 		
 		# recurse through children
 		for child in p.values():
@@ -93,6 +93,10 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 
 	# string
 	if p.typeId()==IECore.TypeId.StringParameter:
+		parm = IECoreHoudini.ParmTemplates.stringParm( p, parent=parent )
+
+	# validated string
+	if p.typeId()==IECore.TypeId.ValidatedStringParameter:
 		parm = IECoreHoudini.ParmTemplates.stringParm( p, parent=parent )
 
 	# path, dirname, filename, filesequence
@@ -155,17 +159,14 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		results.append(parm)
 		
 	# certain parameter types are ok to ignore
-	ignoredParameterTypes = [
-		IECore.TypeId.CompoundParameter,
-		IECore.TypeId.ObjectParameter,
-		IECore.TypeId.PrimitiveParameter,
-		IECore.TypeId.PointsPrimitiveParameter,
-		IECore.TypeId.MeshPrimitiveParameter,
-		IECore.TypeId.CurvesPrimitiveParameter,
-		IECore.TypeId.GroupParameter,
-	]
+	ignoredParameterTypes = (
+		IECore.CompoundParameter,
+		IECore.ObjectParameter,
+		IECore.PrimitiveParameter,
+		IECore.GroupParameter,
+	)
 	
-	if not parm and not p.typeId() in ignoredParameterTypes :
+	if not parm and not isinstance( p, ignoredParameterTypes ) :
 		msg = "IECoreHoudini does not currently support parameters of type " + p.typeName()
 		
 		# H10 and hbatch/hython don't support ui.setStatusMessage()
@@ -181,12 +182,11 @@ def labelFormat( str ):
 	return IECore.CamelCase.toSpaced( str )
 
 # returns a houdini parameter name, give it's cortex name
-def parmName( n, parent=None ) :
-	if parent:
-		prefix = "%s_" % parent
-	else:
-		prefix = ""
-	return "%sparm_%s" % ( prefix, n )
+def parmName( name, prefix=None ) :
+	if not prefix :
+		prefix = "parm"
+	
+	return "_".join( [ prefix, name ] )
 
 # returns a parameter label
 def parmLabel( p ):
@@ -201,7 +201,7 @@ def parmLabel( p ):
 # use the following to find out how to call template()
 # n.parm("intparm").parmTemplate().asCode()
 def intParm( p, dim=1, parent=None ):
-	name = parmName( p.name, parent=parent )
+	name = parmName( p.name, prefix=parent )
         label = parmLabel( p )
 
 	# only simple floats have min/max values
@@ -234,13 +234,19 @@ def intParm( p, dim=1, parent=None ):
 								 	max_is_strict=max_lock,
 								 	naming_scheme=naming
 								 )
-	return {'name':name, 'tuple':parm }
+	
+	if dim == 1 :
+		initialValue = [ p.getTypedValue() ]
+	else :
+		initialValue = list(p.getTypedValue())
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 #=====
 # use the following to find out how to call template()
 # n.parm("floatparm").parmTemplate().asCode()
 def floatParm( p, dim=1, parent=None ):
-	name = parmName( p.name, parent=parent )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 
 	# only simple floats have min/max values
@@ -274,30 +280,38 @@ def floatParm( p, dim=1, parent=None ):
 								 	look=hou.parmLook.Regular,
 								 	naming_scheme=naming
 								 )
-	return {'name':name, 'tuple':parm }
+	
+	if dim == 1 :
+		initialValue = [ p.getTypedValue() ]
+	else :
+		initialValue = list(p.getTypedValue())
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 #=====
 # use the following to find out how to call template()
 # n.parm("boolparm").parmTemplate().asCode()
 def boolParm( p, parent=None ):
-	name = parmName( p.name )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = p.defaultValue.value
 	parm = hou.ToggleParmTemplate( name, label, default_value=default, disable_when="")
-	return {'name':name, 'tuple':parm }
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
 def stringParm( p, parent=None ):
-	name = parmName( p.name )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = ([p.defaultValue.value])
 	parm = hou.StringParmTemplate( name, label, 1,
 									default_value=default,
 									naming_scheme=hou.parmNamingScheme.Base1
 									)
-	return {'name':name, 'tuple':parm }
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
 def pathParm( p, parent=None ):
-	name = parmName( p.name )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = ([p.defaultValue.value])
 	parm = hou.StringParmTemplate( name, label, 1,
@@ -305,10 +319,11 @@ def pathParm( p, parent=None ):
 									naming_scheme=hou.parmNamingScheme.Base1,
 									string_type=hou.stringParmType.FileReference
 									)
-	return {'name':name, 'tuple':parm }
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
 def colParm( p, dim, parent=None ):
-	name = parmName( p.name, parent=parent )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = list(p.defaultValue.value)
 	parm = hou.FloatParmTemplate( name, label, dim,
@@ -320,10 +335,11 @@ def colParm( p, dim, parent=None ):
 									look=hou.parmLook.ColorSquare,
 									naming_scheme=hou.parmNamingScheme.RGBA
 									)
-	return {'name':name, 'tuple':parm }
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : list(p.getTypedValue()) }
 
 def matrixParm( p, dim=16, parent=None ):
-	name = parmName( p.name, parent=parent )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default_matrix = p.defaultValue.value
 	default = []
@@ -343,17 +359,22 @@ def matrixParm( p, dim=16, parent=None ):
 								 	look=hou.parmLook.Regular,
 								 	naming_scheme=hou.parmNamingScheme.Base1
 								 )
-	return {'name':name, 'tuple':parm }
+	
+	matrix = p.getTypedValue()
+	initialValue = []
+	for i in range(dim_sqrt):
+		for j in range(dim_sqrt):
+			initialValue.append( matrix[(i,j)] )
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 def boxParmInt( p, dim, parent=None ):
-	name = parmName( p.name, parent=parent )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default_box = p.defaultValue.value
 	default = []
-	for i in range(dim):
-		default.append( default_box.min[i] )
-	for i in range(dim):
-		default.append( default_box.max[i] )
+	default = list(default_box.min)
+	default.extend( list(default_box.max) )
 
 	min_val = 0
 	max_val = 10
@@ -366,17 +387,20 @@ def boxParmInt( p, dim, parent=None ):
 			 	max_is_strict=max_lock,
 			 	naming_scheme=hou.parmNamingScheme.Base1
 			 )
-	return {'name':name, 'tuple':parm }
+	
+	box = p.getTypedValue()
+	initialValue = list(box.min)
+	initialValue.extend( list(box.max) )
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 def boxParmFloat( p, dim, parent=None ):
-	name = parmName( p.name, parent=parent )
+	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default_box = p.defaultValue.value
 	default = []
-	for i in range(dim):
-		default.append( default_box.min[i] )
-	for i in range(dim):
-		default.append( default_box.max[i] )
+	default = list(default_box.min)
+	default.extend( list(default_box.max) )
 
 	min_val = 0.0
 	max_val = 10.0
@@ -390,5 +414,10 @@ def boxParmFloat( p, dim, parent=None ):
 			 	look=hou.parmLook.Regular,
 			 	naming_scheme=hou.parmNamingScheme.Base1
 			 )
-	return { 'name':name, 'tuple':parm }
+	
+	box = p.getTypedValue()
+	initialValue = list(box.min)
+	initialValue.extend( list(box.max) )
+	
+	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 

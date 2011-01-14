@@ -82,8 +82,8 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 										5, 6, 7, 8,
 										9, 10, 11, 12,
 										13, 14, 15, 16 ) )
-		proc.parmTuple("parm_compound_parm_j").set( (1,4,8) )
-		proc.parmTuple("parm_compound_parm_k").set( (1, 2, 3, 4,
+		proc.parmTuple("parm_compound_j").set( (1,4,8) )
+		proc.parmTuple("parm_compound_k").set( (1, 2, 3, 4,
 										5, 6, 7, 8,
 										9, 10, 11, 12,
 										13, 14, 15, 16 ) )
