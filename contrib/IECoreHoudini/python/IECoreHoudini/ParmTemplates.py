@@ -197,6 +197,20 @@ def parmLabel( p ):
                 label = p.userData()['label'].value
         return label
 
+# sets the parmTemplate menu arguments for preset parameters
+def presetsMenuArgs( p ) :
+	menuLabels = p.presetNames()
+	menuItems = tuple( [ x.value for x in p.presetValues() ] )
+	menuType = hou.menuType.Normal
+	if not p.presetsOnly :
+		menuType = hou.menuType.StringReplace
+	
+	return {
+		"menu_items" : menuItems,
+		"menu_labels" : menuLabels,
+		"menu_type" : menuType
+	}
+
 #=====
 # use the following to find out how to call template()
 # n.parm("intparm").parmTemplate().asCode()
@@ -288,7 +302,7 @@ def boolParm( p, parent=None ):
 	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = p.defaultValue.value
-	parm = hou.ToggleParmTemplate( name, label, default_value=default, disable_when="")
+	parm = hou.ToggleParmTemplate( name, label, default_value=default, disable_when="" )
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
@@ -299,7 +313,8 @@ def stringParm( p, parent=None ):
 	
 	parm = hou.StringParmTemplate(
 		name, label, 1,	default_value=default,
-		naming_scheme = hou.parmNamingScheme.Base1
+		naming_scheme = hou.parmNamingScheme.Base1,
+		**presetsMenuArgs( p )
 	)
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
@@ -311,7 +326,8 @@ def pathParm( p, parent=None ):
 	parm = hou.StringParmTemplate(
 		name, label, 1, default_value=default,
 		naming_scheme=hou.parmNamingScheme.Base1,
-		string_type=hou.stringParmType.FileReference
+		string_type=hou.stringParmType.FileReference,
+		**presetsMenuArgs( p )
 	)
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
