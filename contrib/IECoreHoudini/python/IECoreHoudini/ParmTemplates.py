@@ -226,14 +226,11 @@ def intParm( p, dim=1, parent=None ):
 	if dim>1:
 		naming = hou.parmNamingScheme.XYZW
 
-	parm = hou.IntParmTemplate( name, label, dim,
-									default_value=default,
-								 	min=min_val,
-								 	max=max_val,
-								 	min_is_strict=min_lock,
-								 	max_is_strict=max_lock,
-								 	naming_scheme=naming
-								 )
+	parm = hou.IntParmTemplate(
+		name, label, dim, default_value=default,
+	 	min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
+		naming_scheme=naming
+	)
 	
 	if dim == 1 :
 		initialValue = [ p.getTypedValue() ]
@@ -271,15 +268,11 @@ def floatParm( p, dim=1, parent=None ):
 	if dim>1:
 		naming = hou.parmNamingScheme.XYZW
 
-	parm = hou.FloatParmTemplate( name, label, dim,
-									default_value=default,
-								 	min=min_val,
-								 	max=max_val,
-								 	min_is_strict=min_lock,
-								 	max_is_strict=max_lock,
-								 	look=hou.parmLook.Regular,
-								 	naming_scheme=naming
-								 )
+	parm = hou.FloatParmTemplate(
+		name, label, dim, default_value=default,
+		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
+		look=hou.parmLook.Regular, naming_scheme=naming
+	)
 	
 	if dim == 1 :
 		initialValue = [ p.getTypedValue() ]
@@ -303,10 +296,11 @@ def stringParm( p, parent=None ):
 	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = ([p.defaultValue.value])
-	parm = hou.StringParmTemplate( name, label, 1,
-									default_value=default,
-									naming_scheme=hou.parmNamingScheme.Base1
-									)
+	
+	parm = hou.StringParmTemplate(
+		name, label, 1,	default_value=default,
+		naming_scheme = hou.parmNamingScheme.Base1
+	)
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
@@ -314,11 +308,11 @@ def pathParm( p, parent=None ):
 	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = ([p.defaultValue.value])
-	parm = hou.StringParmTemplate( name, label, 1,
-									default_value=default,
-									naming_scheme=hou.parmNamingScheme.Base1,
-									string_type=hou.stringParmType.FileReference
-									)
+	parm = hou.StringParmTemplate(
+		name, label, 1, default_value=default,
+		naming_scheme=hou.parmNamingScheme.Base1,
+		string_type=hou.stringParmType.FileReference
+	)
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
@@ -326,15 +320,12 @@ def colParm( p, dim, parent=None ):
 	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = list(p.defaultValue.value)
-	parm = hou.FloatParmTemplate( name, label, dim,
-									default_value=default,
-									min=0,
-									max=1,
-									min_is_strict=False,
-									max_is_strict=False,
-									look=hou.parmLook.ColorSquare,
-									naming_scheme=hou.parmNamingScheme.RGBA
-									)
+	parm = hou.FloatParmTemplate(
+		name, label, dim, default_value=default,
+		min=0, max=1, min_is_strict=False, max_is_strict=False,
+		look=hou.parmLook.ColorSquare,
+		naming_scheme=hou.parmNamingScheme.RGBA
+	)
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : list(p.getTypedValue()) }
 
@@ -350,15 +341,11 @@ def matrixParm( p, dim=16, parent=None ):
 	min_val = 0.0
 	max_val = 10.0
 	min_lock = max_lock = False
-	parm = hou.FloatParmTemplate( name, label, dim,
-									default_value=default,
-								 	min=min_val,
-								 	max=max_val,
-								 	min_is_strict=min_lock,
-								 	max_is_strict=max_lock,
-								 	look=hou.parmLook.Regular,
-								 	naming_scheme=hou.parmNamingScheme.Base1
-								 )
+	parm = hou.FloatParmTemplate(
+		name, label, dim, default_value=default,
+		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
+		look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1
+	)
 	
 	matrix = p.getTypedValue()
 	initialValue = []
@@ -379,14 +366,11 @@ def boxParmInt( p, dim, parent=None ):
 	min_val = 0
 	max_val = 10
 	min_lock = max_lock = False
-	parm = hou.IntParmTemplate( name, label, dim * 2,
-				default_value=default,
-				min=min_val,
-			 	max=max_val,
-			 	min_is_strict=min_lock,
-			 	max_is_strict=max_lock,
-			 	naming_scheme=hou.parmNamingScheme.Base1
-			 )
+	parm = hou.IntParmTemplate(
+		name, label, dim * 2, default_value=default,
+		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
+		naming_scheme=hou.parmNamingScheme.Base1
+	)
 	
 	box = p.getTypedValue()
 	initialValue = list(box.min)
@@ -405,19 +389,14 @@ def boxParmFloat( p, dim, parent=None ):
 	min_val = 0.0
 	max_val = 10.0
 	min_lock = max_lock = False
-	parm = hou.FloatParmTemplate( name, label, dim * 2,
-				default_value=default,
-				min=min_val,
-			 	max=max_val,
-			 	min_is_strict=min_lock,
-			 	max_is_strict=max_lock,
-			 	look=hou.parmLook.Regular,
-			 	naming_scheme=hou.parmNamingScheme.Base1
-			 )
+	parm = hou.FloatParmTemplate(
+		name, label, dim * 2, default_value=default,
+		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
+		look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1
+	)
 	
 	box = p.getTypedValue()
 	initialValue = list(box.min)
 	initialValue.extend( list(box.max) )
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
-
