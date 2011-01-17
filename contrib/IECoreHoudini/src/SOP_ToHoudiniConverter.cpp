@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,119 +35,98 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// Houdini
-#include "GB/GB_AttributeRef.h"
-#include <OP/OP_OperatorTable.h>
-#include <OP/OP_Operator.h>
-#include <UT/UT_Interrupt.h>
-#include <CH/CH_LocalVariable.h>
+#include "UT/UT_Interrupt.h"
 
-// Cortex
-#include <IECore/Object.h>
-#include <IECore/Op.h>
-#include <IECore/TypedParameter.h>
-#include <IECore/Primitive.h>
+#include "IECore/Op.h"
 
-// OpenEXR
-#include <OpenEXR/ImathBox.h>
-
-// C++
-#include <sstream>
-
-// IECoreHoudini
 #include "CoreHoudini.h"
 #include "SOP_OpHolder.h"
-#include "SOP_ToHoudiniConverter.h"
 #include "NodePassData.h"
 #include "ToHoudiniGeometryConverter.h"
-#include "ToHoudiniPointsConverter.h"
-#include "ToHoudiniPolygonsConverter.h"
+#include "SOP_ToHoudiniConverter.h"
+
 using namespace IECoreHoudini;
 
-/// Add parameters to SOP
-PRM_Template SOP_ToHoudiniConverter::myParameters[] = {
-		PRM_Template()
+PRM_Template SOP_ToHoudiniConverter::parameters[] = {
+	PRM_Template()
 };
 
-/// Don't worry about variables today
-CH_LocalVariable SOP_ToHoudiniConverter::myVariables[] = {
-		{ 0, 0, 0 },
+CH_LocalVariable SOP_ToHoudiniConverter::variables[] = {
+	{ 0, 0, 0 },
 };
 
-/// Houdini's static creator method
-OP_Node *SOP_ToHoudiniConverter::myConstructor( OP_Network *net,
-										const char *name,
-										OP_Operator *op )
+OP_Node *SOP_ToHoudiniConverter::create( OP_Network *net, const char *name, OP_Operator *op )
 {
-    return new SOP_ToHoudiniConverter(net, name, op);
+	return new SOP_ToHoudiniConverter( net, name, op );
 }
 
-/// Ctor
-SOP_ToHoudiniConverter::SOP_ToHoudiniConverter(OP_Network *net,
-		const char *name,
-		OP_Operator *op ) :
-	SOP_Node(net, name, op)
+SOP_ToHoudiniConverter::SOP_ToHoudiniConverter( OP_Network *net, const char *name, OP_Operator *op )
+	: SOP_Node(net, name, op)
 {
 }
 
-/// Dtor
 SOP_ToHoudiniConverter::~SOP_ToHoudiniConverter()
 {
 }
 
-/// Cook the SOP! This method does all the work
-OP_ERROR SOP_ToHoudiniConverter::cookMySop(OP_Context &context)
+OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 {
-    if( lockInputs(context)>=UT_ERROR_ABORT )
-    	return error();
+	if( lockInputs( context ) >= UT_ERROR_ABORT )
+	{
+		return error();
+	}
 
 	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building ToHoudiniConverter Geometry...");
 	gdp->clearAndDestroy();
 
-	GU_DetailHandle gdp_handle = inputGeoHandle(0);
-	const GU_Detail *input_gdp = gdp_handle.readLock();
-
-	const NodePassData *pass_data = 0;
-	if ( input_gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) ) // looks like data passed from another OpHolder
+	GU_DetailHandleAutoReadLock readHandle( inputGeoHandle(0) );
+	const GU_Detail *inputGeo = readHandle.getGdp();
+	if ( !inputGeo )
 	{
-		GB_AttributeRef attrOffset = input_gdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
-		pass_data = input_gdp->attribs().castAttribData<NodePassData>( attrOffset );
+		addError( SOP_MESSAGE, "Input Geo was not readable" );
+	    	boss->opEnd();
+	    	return error();
+	}
+	
+	const NodePassData *passData = 0;
+	if ( inputGeo->attribs().find( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED ) ) // looks like data passed from another OpHolder
+	{
+		GB_AttributeRef attrOffset = inputGeo->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
+		passData = inputGeo->attribs().castAttribData<NodePassData>( attrOffset );
 	};
 
-	if ( !pass_data )
+	if ( !passData )
 	{
-    	addError( SOP_MESSAGE, "Could not find Cortex Object on input geometry!" );
-    	boss->opEnd();
-    	return error();
+		addError( SOP_MESSAGE, "Could not find Cortex Object on input geometry!" );
+		boss->opEnd();
+		return error();
 	}
 
-	if ( pass_data->type()==IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
+	if ( passData->type()==IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
 	{
-		SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>(const_cast<OP_Node*>(pass_data->nodePtr()));
+		SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>( const_cast<OP_Node*>( passData->nodePtr() ) );
 		IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
 		const IECore::Parameter *result_parameter = op->resultParameter();
 		const IECore::Object *result_ptr = result_parameter->getValue();
 		const IECore::Primitive *primitive = IECore::runTimeCast<const IECore::Primitive>( result_ptr );
 		if ( !primitive )
 		{
-	    	addError( SOP_MESSAGE, "Object was not a Cortex Primitive!" );
-	    	boss->opEnd();
-	    	return error();
+			addError( SOP_MESSAGE, "Object was not a Cortex Primitive!" );
+			boss->opEnd();
+			return error();
 		}
 
 		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( primitive );
 		if ( !converter->convert( myGdpHandle ) )
 		{
-	    	addError( SOP_MESSAGE, "Conversion Failed!" );
-	    	boss->opEnd();
-	    	return error();
+			addError( SOP_MESSAGE, "Conversion Failed!" );
+			boss->opEnd();
+			return error();
 		}
 	}
-	gdp_handle.unlock( input_gdp );
 
-	// tidy up & go home!
 	boss->opEnd();
 	unlockInputs();
 	return error();

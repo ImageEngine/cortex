@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -33,42 +35,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef SOP_TOHOUDINICONVERTER_H_
-#define SOP_TOHOUDINICONVERTER_H_
+#ifndef IECOREHOUDINI_SOPTOHOUDINICONVERTER_H
+#define IECOREHOUDINI_SOPTOHOUDINICONVERTER_H
 
-// Houdini
-#include <SOP/SOP_Node.h>
-#include <PRM/PRM_Name.h>
-
-// IECoreHoudini
-#include "SOP_ParameterisedHolder.h"
+#include "SOP/SOP_Node.h"
+#include "PRM/PRM_Name.h"
 
 namespace IECoreHoudini
 {
-	/// SOP class for converting from an IECore::Object into native
-	/// Houdini geometry.
-	class SOP_ToHoudiniConverter : public SOP_Node
-	{
-		public:
-			/// standard houdini ctor and parameter variables
-			static OP_Node *myConstructor( OP_Network *net,
-					const char *name,
-					OP_Operator *op );
-			static PRM_Template myParameters[];
-			static CH_LocalVariable myVariables[];
 
-		protected:
-			SOP_ToHoudiniConverter( OP_Network *net,
-					const char *name,
-					OP_Operator *op );
-			virtual ~SOP_ToHoudiniConverter();
-			virtual OP_ERROR cookMySop( OP_Context &context );
-			virtual const char *inputLabel( unsigned pos ) const;
+/// SOP class for converting from an IECore::VisibleRenderable into native Houdini geometry.
+class SOP_ToHoudiniConverter : public SOP_Node
+{
+	public :
 
-		private:
-			// -
-	};
+		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
+
+		static PRM_Template parameters[];
+		static CH_LocalVariable variables[];
+
+	protected :
+
+		SOP_ToHoudiniConverter( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~SOP_ToHoudiniConverter();
+
+		virtual OP_ERROR cookMySop( OP_Context &context );
+		virtual const char *inputLabel( unsigned pos ) const;
+
+};
 
 } // namespace IECoreHoudini
 
-#endif /* SOP_TOHOUDINICONVERTER_H_ */
+#endif // IECOREHOUDINI_SOPTOHOUDINICONVERTER_H
