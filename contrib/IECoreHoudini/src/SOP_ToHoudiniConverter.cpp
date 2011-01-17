@@ -37,12 +37,16 @@
 
 #include "UT/UT_Interrupt.h"
 
+#include "IECore/CapturingRenderer.h"
+#include "IECore/Group.h"
 #include "IECore/Op.h"
+#include "IECore/ParameterisedProcedural.h"
+#include "IECore/WorldBlock.h"
 
 #include "CoreHoudini.h"
-#include "SOP_OpHolder.h"
 #include "NodePassData.h"
 #include "ToHoudiniGeometryConverter.h"
+#include "SOP_ParameterisedHolder.h"
 #include "SOP_ToHoudiniConverter.h"
 
 using namespace IECoreHoudini;
@@ -76,7 +80,6 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 		return error();
 	}
 
-	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building ToHoudiniConverter Geometry...");
 	gdp->clearAndDestroy();
@@ -91,7 +94,7 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 	}
 	
 	const NodePassData *passData = 0;
-	if ( inputGeo->attribs().find( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED ) ) // looks like data passed from another OpHolder
+	if ( inputGeo->attribs().find( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED ) )
 	{
 		GB_AttributeRef attrOffset = inputGeo->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
 		passData = inputGeo->attribs().castAttribData<NodePassData>( attrOffset );
@@ -104,27 +107,44 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 		return error();
 	}
 
-	if ( passData->type()==IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
+	IECore::ConstVisibleRenderablePtr renderable = 0;
+	SOP_ParameterisedHolder *sop = dynamic_cast<SOP_ParameterisedHolder*>( const_cast<OP_Node*>( passData->nodePtr() ) );
+	
+	if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
 	{
-		SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>( const_cast<OP_Node*>( passData->nodePtr() ) );
-		IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
-		const IECore::Parameter *result_parameter = op->resultParameter();
-		const IECore::Object *result_ptr = result_parameter->getValue();
-		const IECore::Primitive *primitive = IECore::runTimeCast<const IECore::Primitive>( result_ptr );
-		if ( !primitive )
+		IECore::Op *op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
+		renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( op->resultParameter()->getValue() );
+	}
+	else if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER )
+	{
+		IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( sop->getParameterised() );
+		IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
 		{
-			addError( SOP_MESSAGE, "Object was not a Cortex Primitive!" );
-			boss->opEnd();
-			return error();
+			IECore::WorldBlock worldBlock( renderer );
+			procedural->render( renderer );
 		}
+		renderable = renderer->world();
+	}
+	else
+	{
+		addError( SOP_MESSAGE, "Input node is not a recognized Cortex type" );
+		boss->opEnd();
+		return error();
+	}
+	
+	if ( !renderable )
+	{
+		addError( SOP_MESSAGE, "Input Cortex data could not be converted to Houdini Geo" );
+		boss->opEnd();
+		return error();
+	}
 
-		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( primitive );
-		if ( !converter->convert( myGdpHandle ) )
-		{
-			addError( SOP_MESSAGE, "Conversion Failed!" );
-			boss->opEnd();
-			return error();
-		}
+	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	if ( !converter->convert( myGdpHandle ) )
+	{
+		addError( SOP_MESSAGE, "Input Cortex data could not be converted to Houdini Geo" );
+		boss->opEnd();
+		return error();
 	}
 
 	boss->opEnd();

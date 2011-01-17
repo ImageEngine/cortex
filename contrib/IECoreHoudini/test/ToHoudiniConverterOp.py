@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -99,5 +99,25 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		self.assertEqual( len(geo.pointAttribs()), len(h_geo.pointAttribs()) )
 		self.assertEqual( len(geo.prims()), len(h_geo.prims()) )
 	
+	# test converting a procedural
+	def testProceduralConversion( self ) :
+		obj = hou.node( "/obj" )
+		geo = obj.createNode( "geo", run_init_scripts=False )
+		holder = geo.createNode( "ieProceduralHolder" )
+		fn = IECoreHoudini.FnProceduralHolder( holder )
+		fn.setProcedural( "pointRender", 1 )
+		holder.parm( "parm_npoints" ).set( 123 )
+		converter = holder.createOutputNode( "ieToHoudiniConverter" )
+		geo = converter.geometry()
+		self.assertEqual( len(geo.points()), 123 )
+		self.assertEqual( len(geo.prims()), 0 )
+
+		fn.setProcedural( "meshRender", 1 )
+		holder.parm( "parm_path" ).set( "contrib/IECoreHoudini/test/test_data/torus_with_normals.cob" )
+		geo = converter.geometry()
+		self.assertEqual( len(geo.points()), 100 )
+		self.assertEqual( len(geo.prims()), 100 )
+		self.assertEqual( geo.pointAttribs()[-1].name(), "N" )
+
 if __name__ == "__main__":
 	unittest.main()
