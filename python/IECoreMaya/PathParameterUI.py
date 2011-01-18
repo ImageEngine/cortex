@@ -57,7 +57,7 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 		
 		)
 
-		maya.cmds.text(
+		self.__label = maya.cmds.text(
 			label = self.label(),
 			font = "smallPlainLabelFont",
 			align = "right",
@@ -81,8 +81,8 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 	def replace( self, node, parameter ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
-
-		self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
+		# We can't see the menu if its on the field...
+		self._addPopupMenu( parentUI=self.__label, attributeName = self.plugName() )
 		maya.cmds.connectControl( self.__textField, self.plugName() )
 
 	## \deprecated
