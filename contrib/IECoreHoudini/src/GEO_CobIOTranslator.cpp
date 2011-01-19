@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ObjectReader.h"
-#include "IECore/ObjectWriter.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/ParticleReader.h"
+#include "IECore/Reader.h"
+#include "IECore/TypeIds.h"
+#include "IECore/Writer.h"
 
 #include "GEO_CobIOTranslator.h"
 #include "FromHoudiniGeometryConverter.h"
@@ -59,7 +62,7 @@ int GEO_CobIOTranslator::checkExtension( const char *fileName )
 {
 	UT_String sname( fileName );
 
-	if ( sname.fileExtension() && !strcmp( sname.fileExtension(), ".cob" ) )
+	if ( sname.fileExtension() && ( !strcmp( sname.fileExtension(), ".cob" ) || !strcmp( sname.fileExtension(), ".pdc" ) ) )
 	{
 		return true;
 	}
@@ -76,14 +79,18 @@ bool GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_mag
 {
 	((UT_IFStream&)is).close();
 	
-	ObjectReaderPtr reader = new ObjectReader( is.getLabel() );
 	ConstVisibleRenderablePtr renderable = 0;
-	
 	try
 	{
+		ReaderPtr reader = Reader::create( is.getLabel() );
+		if ( reader->isInstanceOf( ParticleReaderTypeId ) )
+		{
+			reader->parameters()->parameter<IntParameter>( "realType" )->setNumericValue( ParticleReader::Float );
+		}
+		
 		renderable = runTimeCast<VisibleRenderable>( reader->read() );
 	}
-	catch ( IECore::IOException e )
+	catch ( IECore::Exception e )
 	{
 		return false;
 	}
@@ -129,7 +136,7 @@ int GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, ostream &os, con
 		return false;
 	}
 	
-	ObjectWriterPtr writer = new ObjectWriter( object, fileName );
+	WriterPtr writer = Writer::create( object, fileName );
 	writer->write();
 	
 	return true;
