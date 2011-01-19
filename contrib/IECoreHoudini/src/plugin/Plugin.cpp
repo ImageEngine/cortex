@@ -70,7 +70,7 @@ void newSopOperator(OP_OperatorTable *table)
 	table->addOperator(
 		new OP_Operator(
 			"ieProceduralHolder", "Cortex Procedural",
-			SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 0,
+			SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
     			SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 		)
 	);

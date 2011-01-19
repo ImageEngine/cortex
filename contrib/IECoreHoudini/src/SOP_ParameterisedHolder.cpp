@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,12 +42,20 @@
 #include "PRM/PRM_Include.h"
 #include "PRM/PRM_Parm.h"
 
+#include "IECore/CapturingRenderer.h"
+#include "IECore/Group.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/Parameterised.h"
+#include "IECore/Op.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/ParameterisedInterface.h"
+#include "IECore/ParameterisedProcedural.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/WorldBlock.h"
 #include "IECorePython/ScopedGILLock.h"
 
 #include "CoreHoudini.h"
+#include "FromHoudiniGeometryConverter.h"
+#include "NodePassData.h"
 #include "SOP_ParameterisedHolder.h"
 
 using namespace boost;
@@ -353,7 +361,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 	disconnectAllInputs();
 	m_inputParameters.clear();
 
-	ParameterisedPtr parameterised = IECore::runTimeCast<Parameterised>( getParameterised() );
+	ParameterisedInterface *parameterised = dynamic_cast<ParameterisedInterface*>( getParameterised().get() );
 	if ( !parameterised )
 	{
 		return;
@@ -394,6 +402,93 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 	/// \todo: Is this really the only we can get the gui to update the input connections?
 	setXY( getX()+.0001, getY()+.0001 );
 	setXY( getX()-.0001, getY()-.0001 );
+}
+
+void SOP_ParameterisedHolder::setInputParameterValues()
+{
+	for ( unsigned int i=0; i < m_inputParameters.size(); i++ )
+	{
+		useInputSource( i, m_dirty, false );
+		
+		IECore::ParameterPtr inputParameter = m_inputParameters[i];
+		GU_DetailHandle inputHandle = inputGeoHandle( i );
+		GU_DetailHandleAutoReadLock readHandle( inputHandle );
+		const GU_Detail *inputGdp = readHandle.getGdp();
+		if ( !inputGdp )
+		{
+			continue;
+		}
+
+		if ( inputGdp->attribs().find( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED ) )
+		{
+			// looks like data passed from another ParameterisedHolder
+			GB_AttributeRef attrOffset = inputGdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
+			const NodePassData *passData = inputGdp->attribs().castAttribData<NodePassData>( attrOffset );
+			SOP_ParameterisedHolder *sop = dynamic_cast<SOP_ParameterisedHolder*>( const_cast<OP_Node*>( passData->nodePtr() ) );
+			
+			IECore::ConstObjectPtr result = 0;
+			if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
+			{
+				IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
+				result = op->resultParameter()->getValue();
+			}
+			else if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER )
+			{
+				IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( sop->getParameterised() );
+				IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
+				{
+					IECore::WorldBlock worldBlock( renderer );
+					procedural->render( renderer );
+				}
+				result = IECore::runTimeCast<const IECore::Object>( renderer->world() );
+			}
+			else
+			{
+				continue;
+			}
+			
+			try
+			{
+				inputParameter->setValidatedValue( IECore::constPointerCast<IECore::Object>( result ) );
+			}
+			catch ( const IECore::Exception &e )
+			{
+				addError( SOP_MESSAGE, e.what() );
+			}
+		}
+		else
+		{
+			// looks like a regular Houdini detail
+			IECore::ObjectParameterPtr objectParameter = IECore::runTimeCast<IECore::ObjectParameter>( inputParameter );
+			if ( !objectParameter )
+			{
+				continue;
+			}
+			
+			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( inputHandle, objectParameter->validTypes() );
+			if ( !converter )
+			{
+				continue;
+			}
+			
+			try
+			{
+				IECore::ObjectPtr converted = converter->convert();
+				if ( converted )
+				{
+					inputParameter->setValidatedValue( converted );
+				}
+			}
+			catch ( const IECore::Exception &e )
+			{
+				addError( SOP_MESSAGE, e.what() );
+			}
+			catch ( std::runtime_error &e )
+			{
+				addError( SOP_MESSAGE, e.what() );
+			}
+		}
+	}
 }
 
 bool SOP_ParameterisedHolder::hasParameterised()

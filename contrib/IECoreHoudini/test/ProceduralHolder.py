@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -240,7 +240,161 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( cl.typeName(), "sphereProcedural" )
 		op.parm( "__classMatchString" ).set( "*" )
 		self.assert_( len(fn.classNames()) > 1 )
+	
+	def createProcedural( self, path="primitiveParameters/multiple", version=1 ) :
+		obj = hou.node( "/obj" )
+		geo = obj.createNode( "geo", run_init_scripts=False )
+		proc = geo.createNode( "ieProceduralHolder" )
+		fn = IECoreHoudini.FnProceduralHolder( proc )
+		fn.setProcedural( path, version )
+		
+		return ( proc, fn )
+	
+	def testObjectParameterConversion( self ) :
+		( proc, fn ) = self.createProcedural()
+		torus = proc.createInputNode( 2, "torus" )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 100 )
+		
+		torus.parm( "type" ).set( 1 )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 100 )
+		
+	def testObjectParameterWithMultipleTypesConversion( self ) :
+		( proc, fn ) = self.createProcedural()
+		torus = proc.createInputNode( 3, "torus" )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 100 )
+		
+		torus.parm( "type" ).set( 1 )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.numPoints, 100 )
 
+	def testPointsParameterConversion( self ) :
+		( proc, fn ) = self.createProcedural()
+		torus = proc.createInputNode( 1, "torus" )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.numPoints, 100 )
+		
+		torus.parm( "type" ).set( 1 )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.numPoints, 100 )
+	
+	def testMeshParameterConversion( self ) :
+		( proc, fn ) = self.createProcedural( "primitiveParameters/meshRender" )
+		torus = proc.createInputNode( 0, "torus" )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 100 )
+		
+		torus.parm( "type" ).set( 1 )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 100 )
+	
+	# test an proceduralHolder with multiple inputs
+	def testMultipleInputs( self ) :
+		( proc, fn ) = self.createProcedural()
+		torus = proc.createInputNode( 0, "torus" )
+		box = proc.createInputNode( 2, "box" )
+		torus2 = proc.createInputNode( 3, "torus" )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 208 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 206 )
+		
+		torus2.parm( "type" ).set( 1 )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		self.assertEqual( len(converterSop.geometry().points()), 208 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 106 )
+		self.assertEqual( result["P"].data.size(), 208 )
+	
+	# test using op holders and procedural holders as inputs
+	def testCortexInputs( self ) :
+		( proc, fn ) = self.createProcedural()
+		torus = proc.parent().createNode( "torus" )
+		op = torus.createOutputNode( "ieOpHolder" )
+		IECoreHoudini.FnOpHolder( op ).setOp( "objectDebug", 1 )
+		op.parm( "parm_quiet" ).set( True )
+		proc.setInput( 0, op )
+		box = proc.createInputNode( 2, "box" )
+		proc2 = proc.createInputNode( 3, "ieProceduralHolder" )
+		fn2 = IECoreHoudini.FnProceduralHolder( proc2 )
+		fn2.setProcedural( "primitiveParameters/meshRender", 1 )
+		torus2 = proc2.createInputNode( 0, "torus" )
+		proc.cook()
+		self.assertEqual( proc.errors(), "" )
+		self.assertEqual( proc2.errors(), "" )
+		self.assertEqual( op.errors(), "" )
+		self.assertEqual( len(proc.geometry().points()), 8 )
+		self.assertEqual( len(proc2.geometry().points()), 8 )
+		self.assertEqual( len(op.geometry().points()), 8 )
+		converterSop = op.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 100 )
+		converterSop = proc2.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 100 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 100 )
+		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		self.assertEqual( len(converterSop.geometry().points()), 208 )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.numFaces(), 206 )
+	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
 		if not os.path.exists( "test/proceduralHolder_testData" ):

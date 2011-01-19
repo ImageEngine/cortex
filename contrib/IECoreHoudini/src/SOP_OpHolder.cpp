@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,12 +40,11 @@
 #include "GB/GB_AttributeRef.h"
 
 #include "IECore/Op.h"
-#include "IECore/ObjectParameter.h"
+#include "IECore/VisibleRenderable.h"
 #include "IECorePython/ScopedGILLock.h" 
 
 #include "SOP_OpHolder.h"
 #include "NodePassData.h"
-#include "FromHoudiniGeometryConverter.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
@@ -95,74 +94,9 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	boss->opStart("Building OpHolder Geometry...");
 	gdp->clearAndDestroy();
 
-	// loop through inputs getting the upstream geometry detail & putting it into our Op's parameters
-	for ( unsigned int i=0; i < m_inputParameters.size(); i++ )
-	{
-		IECore::ParameterPtr inputParameter = m_inputParameters[i];
-		GU_DetailHandle inputHandle = inputGeoHandle(i);
-		GU_DetailHandleAutoReadLock readHandle( inputHandle );
-		const GU_Detail *inputGdp = readHandle.getGdp();
-		if ( !inputGdp )
-		{
-			continue;
-		}
-
-		if ( inputGdp->attribs().find( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED ) )
-		{
-			// looks like data passed from another OpHolder
-			GB_AttributeRef attrOffset = inputGdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
-			const NodePassData *passData = inputGdp->attribs().castAttribData<NodePassData>( attrOffset );
-			if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
-			{
-				SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>( const_cast<OP_Node*>( passData->nodePtr() ) );
-				IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
-				const IECore::Parameter *resultParameter = op->resultParameter();
-				const IECore::ConstObjectPtr resultObject( resultParameter->getValue() );
-
-				try
-				{
-					inputParameter->setValidatedValue( IECore::constPointerCast<IECore::Object>( resultObject ));
-				}
-				catch ( const IECore::Exception &e )
-				{
-					addError( SOP_MESSAGE, e.what() );
-				}
-			}
-		}
-		else
-		{
-			// looks like a regular Houdini detail
-			IECore::ObjectParameterPtr objectParameter = IECore::runTimeCast<IECore::ObjectParameter>( inputParameter );
-			if ( !objectParameter )
-			{
-				continue;
-			}
-			
-			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( inputHandle, objectParameter->validTypes() );
-			if ( !converter )
-			{
-				continue;
-			}
-			
-			try
-			{
-				IECore::ObjectPtr converted = converter->convert();
-				if ( converted )
-				{
-					inputParameter->setValidatedValue( converted );
-				}
-			}
-			catch ( const IECore::Exception &e )
-			{
-				addError( SOP_MESSAGE, e.what() );
-			}
-			catch ( std::runtime_error &e )
-			{
-				addError( SOP_MESSAGE, e.what() );
-			}
-		}
-	}
-
+	// push the input geo into the associated op parameters
+	setInputParameterValues();
+	
 	// update the SOP parameters to match the IECore::Op parameters
 	updateParameter( op->parameters(), now, "", true );
 
@@ -201,7 +135,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	}
 	catch( ... )
 	{
-		std::cerr << "Caught unknown exception!" << std::endl;
+		addError( SOP_MESSAGE, "Caught unknown exception!" );
 	}
 
 	// tidy up & go home!

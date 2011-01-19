@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -121,16 +121,23 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 		return error();
 	}
 
+	if( lockInputs(context) >= UT_ERROR_ABORT )
+	{
+		return error();
+	}
+	
 	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building ProceduralHolder Geometry...");
 	gdp->clearAndDestroy();
 	
+	// push the input geo into the associated procedural parameters
+	setInputParameterValues();
+	
 	// update the SOP parameters to match the procedural parameters
 	updateParameter( procedural->parameters(), now, "", true );
 	
 	// calculate our bounding box
-	IECorePython::ScopedGILLock gilLock;
 	try
 	{
 		// put our cortex passdata on our gdp as a detail attribute
@@ -143,19 +150,21 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	}
 	catch( boost::python::error_already_set )
 	{
+		addError( SOP_MESSAGE, "Error raised during Python evaluation!" );
+		IECorePython::ScopedGILLock lock;
 		PyErr_Print();
 	}
 	catch( const std::exception &e )
 	{
-		std::cerr << "Procedural::bound() " << e.what() << std::endl;
+		addError( SOP_MESSAGE, e.what() );
 	}
 	catch( ... )
 	{
-		std::cerr << "Procedural::bound() Caught unknown exception!" << std::endl;
+		addError( SOP_MESSAGE, "Procedural::bound() Caught unknown exception!" );
 	}
 
 	// tidy up & go home!
 	boss->opEnd();
-
+	unlockInputs();
 	return error();
 }

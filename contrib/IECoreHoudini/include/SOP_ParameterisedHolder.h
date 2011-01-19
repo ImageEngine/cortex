@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -115,7 +115,13 @@ namespace IECoreHoudini
 			/// @param prefix A string prefix for the houdini parameter name
 			/// @param top_level This should be true if you know the parm is the top-level CompoundParameter
 			void updateParameter( IECore::ParameterPtr parm, float now, std::string prefix="", bool top_level=false );
-
+			
+			/// Pushes the geometry data from the incomming connections into the associated Cortex parameters.
+			/// This method will cook the incomming nodes. If the input node derives from SOP_ParameterisedHolder,
+			/// it's Cortex output will be passed through. If it is a native Houdini node, it will be converted
+			/// using the appropriate FromHoudiniGeometryConverter.
+			void setInputParameterValues();
+			
 			/// A vector of IECore::Parameters which are passed through SOP inputs rather than PRM_Templates
 			IECore::CompoundParameter::ParameterVector m_inputParameters;
 			
