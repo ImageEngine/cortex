@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -178,6 +178,41 @@ class CachedReaderTest( unittest.TestCase ) :
 		m = r.read( "polySphereQuads.cob" )
 		for v in m.verticesPerFace :
 			self.assertEqual( v, 3 )
+			
+	def testPostProcessingFailureMode( self ) :
+	
+		class PostProcessor( ModifyOp ) :
+		
+			def __init__( self ) :
+			
+				ModifyOp.__init__( self, "", Parameter( "result", "", NullObject() ), Parameter( "input", "", NullObject() ) )
+				
+			def modify( self, obj, args ) :
+			
+				raise Exception( "I am a very naughty op" )
+				
+		r = CachedReader( SearchPath( "./test/IECore/data/cobFiles", ":" ), 100 * 1024 * 1024, PostProcessor() )
+		
+		firstException = None
+		try :
+			m = r.read( "polySphereQuads.cob" )
+		except Exception, e :
+			firstException = str( e )
+		
+		self.failUnless( firstException is not None )
+				
+		secondException = None
+		try :
+			m = r.read( "polySphereQuads.cob" )
+		except Exception, e :
+			secondException = str( e )
+		
+		self.failUnless( secondException is not None )
+		
+		# we want the second exception to be different, as the CachedReader
+		# shouldn't be wasting time attempting to load files again when
+		# it failed the first time
+		self.assertNotEqual( firstException, secondException )
 		
 if __name__ == "__main__":
     unittest.main()

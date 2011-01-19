@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -144,7 +144,7 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 				data = m_getter( key, cost );
 			lock.acquire( m_mutex );
 		}
-		catch( const std::exception &e )
+		catch( ... )
 		{
 			lock.acquire( m_mutex );
 			CacheEntry &cacheEntry = m_cache[key]; // in case some other thread erased our entry while we had released the lock
