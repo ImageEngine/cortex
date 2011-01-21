@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -444,6 +444,15 @@ def __parseTransformationMatrix( dataType, args, parameter ) :
 	
 	parameter.setValidatedValue( dataType(t) )
 
+def __parseObject( args, parameter ) :
+
+	v = args[0]
+	v = IECore.hexToDecCharVector( v )
+	mio = IECore.MemoryIndexedIO( v, "/", IECore.IndexedIOOpenMode.Read )
+	v = IECore.Object.load( mio, "v" )
+	parameter.setValidatedValue( v )
+	del args[0]
+	
 def __serialiseString( parameter ) :
 
 	return [ parameter.getTypedValue() ]
@@ -480,6 +489,14 @@ def __serialiseTransformationMatrix( parameter ) :
 	retList.extend( str(t.scalePivotTranslation).split() )
 	return retList
 
+def __serialiseObject( parameter ) :
+
+	v = parameter.getValidatedValue()
+	mio = IECore.MemoryIndexedIO( IECore.CharVectorData(), "/", IECore.IndexedIOOpenMode.Write )
+	v.save( mio, "v" )
+	buf = mio.buffer()
+	return [ IECore.decToHexCharVector( buf ) ]
+	
 ParameterParser.registerType( IECore.BoolParameter.staticTypeId(), __parseBool, __serialiseUsingStr )
 ParameterParser.registerType( IECore.IntParameter.staticTypeId(), ( lambda args, parameter : __parseNumeric( IECore.IntData, True, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.FloatParameter.staticTypeId(), ( lambda args, parameter : __parseNumeric( IECore.FloatData, False, args, parameter ) ), __serialiseUsingStr )
@@ -517,5 +534,6 @@ ParameterParser.registerType( IECore.SplineffParameter.staticTypeId(), None, _se
 ParameterParser.registerType( IECore.SplinefColor3fParameter.staticTypeId(), None, _serialiseUsingRepr )
 ParameterParser.registerType( IECore.TransformationMatrixfParameter.staticTypeId(), ( lambda args, parameter : __parseTransformationMatrix( IECore.TransformationMatrixfData, args, parameter ) ), __serialiseTransformationMatrix )
 ParameterParser.registerType( IECore.TransformationMatrixdParameter.staticTypeId(), ( lambda args, parameter : __parseTransformationMatrix( IECore.TransformationMatrixdData, args, parameter ) ), __serialiseTransformationMatrix )
+ParameterParser.registerType( IECore.ObjectParameter.staticTypeId(), __parseObject, __serialiseObject )
 
 __all__ = [ "ParameterParser" ]
