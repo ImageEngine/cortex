@@ -67,9 +67,9 @@ color ieMarschner( varying vector eye; varying vector lightVec; uniform float re
 	float averageTheta = ( eye[1] + lightVec[1] ) / 2.;
 	float relativeAzimuth = mod( abs( eye[0] - lightVec[0] ), 2*PI );
 	float cosRelativeTheta = cos( relativeTheta );
-	float invSqrCosRelativeTheta = 1/(cosRelativeTheta*cosRelativeTheta);
+	float invSqrCosRelativeTheta = 1/max(1e-3,cosRelativeTheta*cosRelativeTheta);
 	float cosLight = cos(lightVec[1]);
-	float finalScale = invSqrCosRelativeTheta*cosLight;
+	float finalScale = max(0,invSqrCosRelativeTheta*cosLight);
 
 	uniform float rWidth = 5;
 	float MR = ieMarschnerM( shiftR, widthR, rWidth, averageTheta );
