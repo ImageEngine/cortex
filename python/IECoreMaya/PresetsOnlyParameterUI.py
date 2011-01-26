@@ -103,7 +103,7 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 		
 	def __updateLabel( self ) :
 	
-		IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValue( self.parameter )
+		IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValues()
 
 		maya.cmds.iconTextStaticLabel(
 			self.__popupControl,
