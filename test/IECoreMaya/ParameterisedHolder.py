@@ -376,62 +376,6 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = fnPH.getParameterised()[0]
 		self.assertEqual( op["input"].getValue(), op["input"].defaultValue )
 	
-	def testObjectParameterUpdateCount( self ) :
-	
-		class Test( IECore.Parameterised ) :
-		
-			def __init__( self ) :
-			
-				IECore.Parameterised.__init__( self, "" )
-				
-				presetA = IECore.IntVectorData( [ 0,1,2,3,4 ] )
-				presetB = IECore.IntVectorData( [ 5,4,3,2,1,0,5 ] )
-				
-				self.parameters().addParameter(
-
-					IECore.ObjectParameter(
-						name = "theObject",
-						description = "",
-						defaultValue = presetA,
-						types = [ IECore.IntVectorData.staticTypeId() ],
-						presetsOnly = True,
-						presets = [
-							( "A", presetA ),
-							( "B", presetB ),
-						]
-					),				
-				)
-			
-		c = Test()
-		n = cmds.createNode( 'ieParameterisedHolderNode' )
-		fnPH = IECoreMaya.FnParameterisedHolder( n )
-		fnPH.setParameterised( c )
-		fnPH.setNodeValues()
-		
-		p = c["theObject"]
-		
-		self.failUnless( p.getValue() == IECore.IntVectorData( [ 0,1,2,3,4 ] ) )
-		
-		lastCount = p.userData()["updateCount"].value
-		
-		p.setValue( "B" )
-		fnPH.setNodeValue( p )
-		
-		self.failUnless( p.getValue() == IECore.IntVectorData( [ 5,4,3,2,1,0,5 ] ) )
-		
-		newCount = p.userData()["updateCount"].value
-		self.failIf(  newCount == lastCount )
-		lastCount = newCount
-		
-		p.setValue( "A" )
-		fnPH.setNodeValue( c )
-	
-		self.failUnless( p.getValue() == IECore.IntVectorData( [ 0,1,2,3,4 ] ) )
-	
-		newCount = p.userData()["updateCount"].value
-		self.failIf( newCount == lastCount )
-		
-	
 	def testOpHolder( self ) :
 	
 		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "maths/multiply", 2 )
