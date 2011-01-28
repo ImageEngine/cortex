@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -795,10 +795,29 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( None, fnPH.getParameterised()[0].parameters()['m44fVector'].getValue() )
 		self.assertEqual( None, fnPH.getParameterised()[0].parameters()['m44dVector'].getValue() )
 	
+	def testResultAttrSaveLoad( self ) :
+		
+		node = maya.cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnOpHolder( node )
+		fnPH.setOp( "floatParameter" )
+
+		self.assertNotEqual( maya.cmds.getAttr( node + ".parm_f" ), 50.5 )
+		self.assertNotEqual( maya.cmds.getAttr( node + ".result" ), 50.5 )
+		maya.cmds.setAttr( node + ".parm_f", 50.5 )
+		self.assertEqual( maya.cmds.getAttr( node + ".parm_f" ), 50.5 )
+		self.assertEqual( maya.cmds.getAttr( node + ".result" ), 50.5 )
+
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "resultAttrLoadTest.ma" ) )
+		testScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+		maya.cmds.file( testScene, f = True, o  = True )
+		self.assertEqual( maya.cmds.getAttr( node + ".parm_f" ), 50.5 )
+		self.assertEqual( maya.cmds.getAttr( node + ".result" ), 50.5 )
+	
 	def tearDown( self ) :
 
 		for f in [
 			"test/IECoreMaya/referenceEditCounts.ma",
+			"test/IECoreMaya/resultAttrLoadTest.ma"
 		] :
 
 			if os.path.exists( f ) :
