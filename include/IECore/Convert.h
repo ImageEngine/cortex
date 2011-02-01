@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@ namespace IECore
 /// between simple types (like vectors) in IECore, Imath and
 /// other libraries. It should be specialised appropriately in
 /// support libraries.
+/// \todo Could this be declared static inline?
 template<typename T, typename F>
 T convert( const F &from )
 {
