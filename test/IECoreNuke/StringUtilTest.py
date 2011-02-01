@@ -38,7 +38,7 @@ import IECoreNuke
 import IECore
 import nuke
 
-class StringUtilTest( unittest.TestCase ) :
+class StringUtilTest( IECoreNuke.TestCase ) :
 
 	def testNukeFileSequence( self ) :
 

@@ -226,6 +226,7 @@ bool CompoundParameter::valueValid( const Object *value, std::string *reason ) c
 		}
 		return false;
 	}
+		
 	CompoundObject::ObjectMap::const_iterator it;
 	for( it=tValue->members().begin(); it!=tValue->members().end(); it++ )
 	{
@@ -240,9 +241,19 @@ bool CompoundParameter::valueValid( const Object *value, std::string *reason ) c
 		}
 		else
 		{
-			/// \todo Prepend the child parameter name to the message to make it more useful.
 			if( !pIt->second->valueValid( it->second.get(), reason ) )
 			{
+				if( reason )
+				{
+					if( !pIt->second->isInstanceOf( staticTypeId() ) )
+					{
+						*reason = pIt->first.value() + " : " + *reason;
+					}
+					else
+					{
+						*reason = pIt->first.value() + "." + *reason;
+					}
+				}
 				return false;
 			}
 		}

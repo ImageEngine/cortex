@@ -65,11 +65,33 @@ static ImagePrimitivePtr image( ImageDisplayDriverPtr dd )
 	return dd->image()->copy();
 }
 
+static ImagePrimitivePtr storedImage( const std::string &handle )
+{
+	ConstImagePrimitivePtr i = ImageDisplayDriver::storedImage( handle );
+	if( i )
+	{
+		return i->copy();
+	}
+	return 0;
+}
+
+static ImagePrimitivePtr removeStoredImage( const std::string &handle )
+{
+	ConstImagePrimitivePtr i = ImageDisplayDriver::removeStoredImage( handle );
+	if( i )
+	{
+		return i->copy();
+	}
+	return 0;
+}
+
 void bindImageDisplayDriver()
 {
 	RunTimeTypedClass<ImageDisplayDriver>()
 		.def( "__init__", make_constructor( &imageDisplayDriverConstructor, default_call_policies(), ( boost::python::arg_( "displayWindow" ), boost::python::arg_( "dataWindow" ), boost::python::arg_( "channelNames" ), boost::python::arg_( "parameters" ) ) ) )
 		.def( "image", &image )
+		.def( "storedImage", &storedImage ).staticmethod( "storedImage" )
+		.def( "removeStoredImage", &removeStoredImage ).staticmethod( "removeStoredImage" )
 	;
 }
 

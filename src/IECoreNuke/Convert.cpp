@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,18 @@
 
 namespace IECore
 {
+
+template<>
+Imath::V2f convert( const DD::Image::Vector2 &from )
+{
+	return Imath::V2f( from.x, from.y );
+}
+
+template<>
+Imath::V2d convert( const DD::Image::Vector2 &from )
+{
+	return Imath::V2d( from.x, from.y );
+}
 
 template<>
 Imath::V2f convert( const DD::Image::Vector3 &from )
@@ -141,6 +153,12 @@ template<>
 Imath::Box2i convert( const DD::Image::Box &from )
 {
 	return Imath::Box2i( Imath::V2i( from.x(), from.y() ), Imath::V2i( from.r(), from.t() ) );
+}
+
+template<>
+DD::Image::Box3 convert( const Imath::Box3f &from )
+{
+	return DD::Image::Box3( convert<DD::Image::Vector3>( from.min ), convert<DD::Image::Vector3>( from.max ) );
 }
 
 } // namespace IECore

@@ -304,8 +304,10 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 		channelNames = staticPointerCast<StringVectorData>( Object::load( io, "channelNames" ) );
 		parameters = staticPointerCast<CompoundData>( Object::load( io, "parameters" ) );
 
+		const StringData *displayType = parameters->member<StringData>( "remoteDisplayType", true /* throw if missing */ );
+
 		// create a displayDriver using the factory function.
-		m_displayDriver = DisplayDriver::create( displayWindow->readable(), dataWindow->readable(), channelNames->readable(), parameters );
+		m_displayDriver = DisplayDriver::create( displayType->readable(), displayWindow->readable(), dataWindow->readable(), channelNames->readable(), parameters );
 
 		scanLineOrder = m_displayDriver->scanLineOrderOnly();
 	}

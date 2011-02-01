@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,7 +41,6 @@
 #include <vector>
 
 #include "boost/function.hpp"
-#include "boost/thread/mutex.hpp"
 
 #include "OpenEXR/ImathBox.h"
 
@@ -59,68 +58,75 @@ IE_CORE_FORWARDDECLARE( DisplayDriver );
 /// Derived classes should implement the virtual methods that are used as callbacks for opening a new pass, updating an image block and closing the image.
 class DisplayDriver : public RunTimeTyped
 {
-	public:
+	public :
 
 		IE_CORE_DECLARERUNTIMETYPED( DisplayDriver, RunTimeTyped );
 
-		// Initializes the display driver for showing a new image according to the given parameters.
+		/// Initializes the display driver for showing a new image according to the given parameters.
 		DisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
 
 		virtual ~DisplayDriver();
 
-		// Defines a sub-region of the image.
-		// Called multiple times depending on how the channels are being computed.
-		// \param box Defines the area on which the given data should be written on the channel.
-		// \param data Points to a block of float values with interleaved channel data. Each pixel will have the same number of floats as the channelNames parameter in the constructor.
-		// \param dataSize Is the number of float values in the data. It must be box.width * box.height * numberOfChannels.
+		/// Defines a sub-region of the image.
+		/// Called multiple times depending on how the channels are being computed.
+		/// \param box Defines the area on which the given data should be written on the channel.
+		/// \param data Points to a block of float values with interleaved channel data. Each pixel will have the same number of floats as the channelNames parameter in the constructor.
+		/// \param dataSize Is the number of float values in the data. It must be box.width * box.height * numberOfChannels.
 		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) = 0;
 
-		// Finalizes the display driver for the current image being constructed.
+		/// Finalizes the display driver for the current image being constructed.
 		virtual void imageClose() = 0;
 
-		// Indicates whether this display driver only accepts data one line each time.
+		/// Indicates whether this display driver only accepts data one line each time.
 		virtual bool scanLineOrderOnly() const = 0;
 
-		// returns display window size.
+		/// Returns display window size.
 		Imath::Box2i displayWindow() const;
 
-		// returns data window size.
+		/// Returns data window size.
 		Imath::Box2i dataWindow() const;
 
-		// returns channelNames.
+		/// Returns channelNames.
 		const std::vector<std::string> &channelNames() const;
 
-		// Factory class for DisplayDrivers
-		class DisplayDriverCreator : public RunTimeTyped
+		//! @name Factory functions
+		/////////////////////////////////////////////////////////////////////
+		//@{
+		/// Factory function for creating display drivers. Returns a new display driver
+		/// of the specified type, constructed using the specified parameters.
+		static DisplayDriverPtr create( const std::string &typeName, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
+		/// Definition of a function which can create a display driver.
+		typedef boost::function<DisplayDriverPtr ( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters )> CreatorFn;
+		/// Registers a new display driver type.
+		static void registerType( const std::string &typeName, CreatorFn creator );
+		//@}
+	
+	protected :
+	
+		/// Create a static const instance of one of these to automatically register a display driver type. Should
+		/// be templated on the type of the DisplayDriver.
+		template<typename T>
+		class DisplayDriverDescription
 		{
-			public:
-
-				IE_CORE_DECLARERUNTIMETYPED( DisplayDriverCreator, RunTimeTyped );
-
-				// Should return a null pointer if it cannot instantiate a DisplayDriver for the given parameters.
-				virtual DisplayDriverPtr create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters ) = 0;
+			public :
+				DisplayDriverDescription();
+			private :			
+				static DisplayDriverPtr creator( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
 		};
-		IE_CORE_DECLAREPTR( DisplayDriverCreator )
 
-		// factory function for display drivers.
-		static DisplayDriverPtr create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
+	private :
 
-		// Registers a factory function for display drivers.
-		static bool registerFactory( DisplayDriverCreatorPtr creator );
-
-		// Unregisters a factory function
-		static bool unregisterFactory( DisplayDriverCreatorPtr creator );
-
-	private:
-
-		static boost::mutex m_factoryMutex;
-		static std::vector< DisplayDriverCreatorPtr > &factoryList();
+		typedef std::map<std::string, CreatorFn > TypeNamesToCreators;
+		static TypeNamesToCreators &typeNamesToCreators();
 
 		Imath::Box2i m_displayWindow;
 		Imath::Box2i m_dataWindow;
 		std::vector<std::string> m_channelNames;
+		
 };
 
 }  // namespace IECore
+
+#include "IECore/DisplayDriver.inl"
 
 #endif // IE_CORE_DISPLAYDRIVER_H

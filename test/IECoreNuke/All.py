@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -42,6 +42,9 @@ from KnobAccessorsTest import *
 from FnAxisTest import *
 from StringUtilTest import *
 from KnobConvertersTest import *
+from ParameterisedHolderTest import ParameterisedHolderTest
+from ObjectKnobTest import ObjectKnobTest
+from OpHolderTest import OpHolderTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

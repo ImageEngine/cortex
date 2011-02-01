@@ -38,7 +38,7 @@ import IECoreNuke
 import IECore
 import nuke
 
-class KnobConvertersTest( unittest.TestCase ) :
+class KnobConvertersTest( IECoreNuke.TestCase ) :
 
 	@staticmethod
 	def __parameters() :

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -113,3 +113,39 @@ def __setColor( knob, value ) :
 	knob.setValue( value[2], 2 )
 
 registerAccessors( nuke.Color_Knob, __getColor, __setColor )
+
+# String Knob
+
+def __getString( knob, resultType=str ) :
+	
+	return resultType( knob.getText() )
+	
+def __setString( knob, value ) :
+
+	knob.setValue( str( value ) )
+	
+registerAccessors( nuke.EvalString_Knob, __getString, __setString )
+
+# Box3 Knob
+
+def __getBox3( knob, resultType=IECore.Box3f ) :
+
+	vectorType = IECore.V3f
+	if resultType == IECore.Box3d :
+		vectorType = IECore.V3d
+		
+	value = knob.getValue()
+	return resultType( vectorType( *value[:3] ), vectorType( *value[3:] ) )
+
+def __setBox3( knob, value ) :
+
+	knob.setX( value.min[0] )
+	knob.setY( value.min[1] )
+	knob.setN( value.min[2] )
+	
+	knob.setR( value.max[0] )
+	knob.setT( value.max[1] )
+	knob.setF( value.max[2] )
+	
+registerAccessors( nuke.Box3_Knob, __getBox3, __setBox3 )
+

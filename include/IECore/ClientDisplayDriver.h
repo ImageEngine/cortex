@@ -76,6 +76,8 @@ class ClientDisplayDriver : public DisplayDriver
 
 	private:
 
+		static const DisplayDriverDescription<ClientDisplayDriver> g_description;
+
 		void sendHeader( DisplayDriverServer::MessageType msg, size_t dataSize );
 		size_t receiveHeader( DisplayDriverServer::MessageType msg );
 

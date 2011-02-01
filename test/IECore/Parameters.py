@@ -962,6 +962,32 @@ class TestCompoundParameter( unittest.TestCase ) :
 		self.failUnless( items[0][1].isSame( a["b"] ) )
 		self.failUnless( items[1][1].isSame( a["d"] ) )
 		
+	def testValueValidReason( self ) :
+	
+		i = IntParameter( "i", "", 1, 0, 10 )
+		c = CompoundParameter(
+			"c",
+			members = [
+				i
+			]
+		)
+		
+		childReason = i.valueValid( IntData( 20 ) )[1]
+		compoundReason = c.valueValid( CompoundObject( { "i" : IntData( 20 ) } ) )[1]
+		
+		self.assertEqual( compoundReason, "i : " + childReason )
+		
+		cc = CompoundParameter(
+			members = [
+				c
+			]
+		)
+		
+		compoundCompoundReason = cc.valueValid( CompoundObject( { "c" : { "i" : IntData( 20 ) } } ) )[1]
+		
+		self.assertEqual( compoundCompoundReason, "c.i : " + childReason )
+		
+		
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :

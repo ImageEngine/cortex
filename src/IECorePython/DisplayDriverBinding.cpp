@@ -50,44 +50,6 @@ using namespace IECore;
 namespace IECorePython
 {
 
-class DisplayDriverCreatorWrap : public DisplayDriver::DisplayDriverCreator, public Wrapper<DisplayDriver::DisplayDriverCreator>
-{
-	public :
-
-		DisplayDriverCreatorWrap( PyObject *self ) : DisplayDriverCreator(), Wrapper<DisplayDriver::DisplayDriverCreator>( self, this )
-		{
-		};
-
-		virtual DisplayDriverPtr create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
-		{
-			ScopedGILLock gilLock;
-			override c = this->get_override( "create" );
-			if( c )
-			{
-				list channelList;
-				std::vector<std::string>::const_iterator iterX = channelNames.begin();
-				while ( iterX != channelNames.end() )
-				{
-					channelList.append( *iterX );
-					iterX++;
-				}
-
-				DisplayDriverPtr r = c( displayWindow, dataWindow, channelList,
-					constPointerCast<CompoundData>( parameters ) );
-				if( !r )
-				{
-					throw Exception( "create() python method didn't return a DisplayDriver." );
-				}
-				return r;
-			}
-			else
-			{
-				throw Exception( "create() python method not defined" );
-			}
-		};
-};
-IE_CORE_DECLAREPTR( DisplayDriverCreatorWrap );
-
 static boost::python::list channelNames( DisplayDriverPtr dd )
 {
 	boost::python::list newList;
@@ -117,25 +79,18 @@ static bool displayDriverScanLineOrderOnly( DisplayDriverPtr dd )
 	return dd->scanLineOrderOnly();
 }
 
-template< typename T >
-std::vector< T > listToVector( const boost::python::list &names )
+static DisplayDriverPtr displayDriverCreate( const std::string &typeName, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const boost::python::list &channelNames, CompoundDataPtr parameters )
 {
-	std::vector< T > n;
-	boost::python::container_utils::extend_container( n, names );
-	return n;
-}
-
-static DisplayDriverPtr displayDriverCreate( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const boost::python::list &channelNames, CompoundDataPtr parameters )
-{
-	std::vector<std::string> names = listToVector<std::string>(channelNames);
+	std::vector<std::string> names;
+	boost::python::container_utils::extend_container( names, channelNames );
 	ScopedGILRelease gilRelease;
-	DisplayDriverPtr res = DisplayDriver::create( displayWindow, dataWindow, names, parameters );
+	DisplayDriverPtr res = DisplayDriver::create( typeName, displayWindow, dataWindow, names, parameters );
 	return res;
 }
 
 void bindDisplayDriver()
 {
-	scope displayDriverScope = RunTimeTypedClass<DisplayDriver>()
+	RunTimeTypedClass<DisplayDriver>()
 		.def( "imageData", &displayDriverImageData )
 		.def( "imageClose", &displayDriverImageClose )
 		.def( "scanLineOrderOnly", &displayDriverScanLineOrderOnly )
@@ -143,13 +98,6 @@ void bindDisplayDriver()
 		.def( "dataWindow", &DisplayDriver::dataWindow )
 		.def( "channelNames", &channelNames )
 		.def( "create", &displayDriverCreate ).staticmethod("create")
-		.def( "registerFactory", &DisplayDriver::registerFactory ).staticmethod("registerFactory")
-		.def( "unregisterFactory", &DisplayDriver::unregisterFactory ).staticmethod("unregisterFactory")
-	;
-
-	RunTimeTypedClass<DisplayDriver::DisplayDriverCreator, DisplayDriverCreatorWrapPtr>()
-		.def( init<>() )
-		.def( "create", &DisplayDriverCreatorWrap::create )
 	;
 }
 

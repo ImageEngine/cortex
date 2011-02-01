@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,15 +43,23 @@
 #include "OpenEXR/ImathColor.h"
 
 #include "DDImage/Matrix4.h"
+#include "DDImage/Vector2.h"
 #include "DDImage/Vector3.h"
 #include "DDImage/Vector4.h"
 #include "DDImage/Box.h"
+#include "DDImage/Box3.h"
 
 /// Specialising in the IECore namespace. This is OK because the Nuke types
 /// will never be referenced in IECore. And it means that all the convert<>
 /// functions are in one namespace.
 namespace IECore
 {
+
+template<>
+Imath::V2f convert( const DD::Image::Vector2 &from );
+
+template<>
+Imath::V2d convert( const DD::Image::Vector2 &from );
 
 /// Discards from.z
 template<>
@@ -104,6 +112,9 @@ Imath::M44d convert( const DD::Image::Matrix4 &from );
 
 template<>
 Imath::Box2i convert( const DD::Image::Box &from );
+
+template<>
+DD::Image::Box3 convert( const Imath::Box3f &from );
 
 } // namespace IECore
 

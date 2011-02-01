@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 // This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECore/ObjectVector.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -45,6 +46,13 @@ using namespace IECore;
 
 namespace IECorePython
 {
+
+static ObjectVectorPtr constructFromSequence( object o )
+{
+	ObjectVectorPtr result = new ObjectVector;
+	container_utils::extend_container( result->members(), o );
+	return result;
+}
 
 static std::vector<ObjectVector>::size_type convertIndex( ObjectVector &o, long index )
 {
@@ -125,6 +133,7 @@ void bindObjectVector()
 {
 	RunTimeTypedClass<ObjectVector>()
 		.def( init<>() )
+		.def( "__init__", make_constructor( &constructFromSequence ) )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )

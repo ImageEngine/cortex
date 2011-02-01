@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,8 @@ enum TypeId
 	ToNukeConverterTypeId = 107002,
 	ToNukeGeometryConverterTypeId = 107003,
 	FromNukePointsConverterTypeId = 107004,
+	FromNukeCameraConverterTypeId = 107005,
+	FromNukeTileConverterTypeId = 107006,
 	LastCoreNukeTypeId = 107999
 };
 

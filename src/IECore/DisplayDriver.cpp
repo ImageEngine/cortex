@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,8 +40,6 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( DisplayDriver );
 
-boost::mutex DisplayDriver::m_factoryMutex;
-
 DisplayDriver::DisplayDriver( const Box2i &displayWindow, const Box2i &dataWindow, const vector<string> &channelNames, ConstCompoundDataPtr parameters ) :
 	m_displayWindow( displayWindow ), m_dataWindow( dataWindow ), m_channelNames( channelNames )
 {
@@ -66,65 +64,26 @@ const std::vector<std::string> &DisplayDriver::channelNames() const
 	return m_channelNames;
 }
 
-DisplayDriverPtr DisplayDriver::create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
+DisplayDriverPtr DisplayDriver::create( const std::string &typeName, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
 {
-	m_factoryMutex.lock();
-
 	DisplayDriverPtr res;
-	std::vector< DisplayDriverCreatorPtr > &creators = factoryList();
-	for ( std::vector< DisplayDriverCreatorPtr >::iterator it = creators.begin(); it != creators.end(); it++ )
+	const TypeNamesToCreators &creators = typeNamesToCreators();
+	TypeNamesToCreators::const_iterator it = creators.find( typeName );
+	if( it != creators.end() )
 	{
-		res = (*it)->create( displayWindow, dataWindow, channelNames, parameters );
-		if ( res )
-		{
-			m_factoryMutex.unlock();
-			return res;
-		}
+		return it->second( displayWindow, dataWindow, channelNames, parameters );
 	}
-	m_factoryMutex.unlock();
-	throw Exception( "No display driver is compatible with the given parameters!" );
+	
+	throw Exception( boost::str( boost::format( "Display driver \"%s\" not registered" ) % typeName ) );
 }
 
-bool DisplayDriver::registerFactory( DisplayDriver::DisplayDriverCreatorPtr creator )
+void DisplayDriver::registerType( const std::string &typeName, CreatorFn creator )
 {
-	m_factoryMutex.lock();
-
-	std::vector< DisplayDriverCreatorPtr > &creators = factoryList();
-	for ( std::vector< DisplayDriverCreatorPtr >::iterator it = creators.begin(); it != creators.end(); it++ )
-	{
-		if ( *it == creator )
-		{
-			m_factoryMutex.unlock();
-			return false;
-		}
-	}
-	creators.insert( creators.begin(), creator );
-
-	m_factoryMutex.unlock();
-	return true;
+	typeNamesToCreators()[typeName] = creator;
 }
 
-bool DisplayDriver::unregisterFactory( DisplayDriver::DisplayDriverCreatorPtr creator )
+DisplayDriver::TypeNamesToCreators &DisplayDriver::typeNamesToCreators()
 {
-	m_factoryMutex.lock();
-
-	std::vector< DisplayDriverCreatorPtr > &creators = factoryList();
-	for ( std::vector< DisplayDriverCreatorPtr >::iterator it = creators.begin(); it != creators.end(); it++ )
-	{
-		if ( *it == creator )
-		{
-			creators.erase( it );
-			m_factoryMutex.unlock();
-			return true;
-		}
-	}
-	m_factoryMutex.unlock();
-	return false;
-}
-
-std::vector< DisplayDriver::DisplayDriverCreatorPtr > &DisplayDriver::factoryList()
-{
-	// guarantess that the registerFactory function can be used at any time.
-	static std::vector< DisplayDriverCreatorPtr > creators;
+	static TypeNamesToCreators creators;
 	return creators;
 }

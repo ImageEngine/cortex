@@ -44,32 +44,49 @@
 namespace IECore
 {
 
-/*
-* Display driver that creates an ImagePrimitive object.
-*/
+/// Display driver that creates an ImagePrimitive object held
+/// in memory.
 class ImageDisplayDriver : public DisplayDriver
 {
 	public:
 
 		IE_CORE_DECLARERUNTIMETYPED( ImageDisplayDriver, DisplayDriver );
 
-		// initializes the internal image primitive object.
-		// The image's blindData will keep the values given on the parameters CompoundData.
+		/// Initializes the internal ImagePrimitive.
+		/// The image's blindData will keep the values given on the parameters CompoundData.
 		ImageDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
 		virtual ~ImageDisplayDriver();
 
 		virtual bool scanLineOrderOnly() const;
-
-		// updates the internal image primitive.
 		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
-
 		virtual void imageClose();
 
+		/// Access to the image being created. This should always be valid for reading, even
+		/// before imageClose() has been called.
 		ConstImagePrimitivePtr image() const;
-
+		
+		//! @Image pool
+		/// It can be useful to store the images created by ImageDisplayDrivers for
+		/// later retrieval. Images can be stored by passing a StringData
+		/// "handle" parameter to the constructor or to the
+		/// DisplayDriver::create() method. The resulting image will then be
+		/// stored and can be retrieved using the methods below.
+		///////////////////////////////////////////////////////////////////////
+		//@{
+		/// Returns the image stored with the specified handle, or 0 if no
+		/// such image exists.
+		static ConstImagePrimitivePtr storedImage( const std::string &handle );
+		/// Removes the image stored with the specified handle from the pool. Returns
+		/// the image, or 0 if no such image existed.
+		static ConstImagePrimitivePtr removeStoredImage( const std::string &handle );
+		//@}
+		
 	private:
 
+		static const DisplayDriverDescription<ImageDisplayDriver> g_description;
+		
 		ImagePrimitivePtr m_image;
+		
 };
 
 IE_CORE_DECLAREPTR( ImageDisplayDriver )

@@ -60,7 +60,11 @@ if "CORTEX_OPTIONS_FILE" in os.environ :
 if "OPTIONS" in ARGUMENTS :
 	optionsFile = ARGUMENTS["OPTIONS"]
 
-o = Options( optionsFile, ARGUMENTS )
+try :
+	o = Variables( optionsFile, ARGUMENTS )
+except NameError :
+	# fallback for old scons versions
+	o = Options( optionsFile, ARGUMENTS )
 
 o.Add(
 	"CXX",
@@ -287,9 +291,15 @@ o.Add(
 
 # OpenGL options
 
-o.Add(
-	BoolOption( "WITH_GL", "Set this to build the IECoreGL library.", False ),
-)
+try :
+	o.Add(
+		BoolVariable( "WITH_GL", "Set this to build the IECoreGL library.", False ),
+	)
+except NameError :
+	# fallback for old scons versions
+	o.Add(
+		BoolOption( "WITH_GL", "Set this to build the IECoreGL library.", False ),
+	)
 
 o.Add(
 	"GLEW_INCLUDE_PATH",
@@ -335,14 +345,24 @@ o.Add(
 	"/usr/adlm/AdlmThinClientCustomEnv.xml",
 )
 
-o.Add(
-	BoolOption( 
-		"WITH_MAYA_PLUGIN_LOADER", 
-		"Set this to install the Maya plugin with a stub loader.",
-		 False
-	),
-)
-
+try :
+	o.Add(
+		BoolVariable( 
+			"WITH_MAYA_PLUGIN_LOADER", 
+			"Set this to install the Maya plugin with a stub loader.",
+			 False
+		),
+	)
+except NameError :
+	# fallback for old scons versions
+	o.Add(
+		BoolOption( 
+			"WITH_MAYA_PLUGIN_LOADER", 
+			"Set this to install the Maya plugin with a stub loader.",
+			 False
+		),
+	)
+	
 # Houdini options
 
 o.Add(
@@ -529,6 +549,12 @@ o.Add(
 	"INSTALL_HOUDINIPLUGIN_NAME",
 	"The name under which to install houdini plugins.",
 	"$INSTALL_PREFIX/houdini/dso/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_NUKEPLUGIN_NAME",
+	"The name under which to install nuke plugins.",
+	"$INSTALL_PREFIX/nuke/plugins/$IECORE_NAME",
 )
 
 o.Add(
@@ -885,7 +911,7 @@ def getPythonConfig( env, flags ) :
 		Exit( 1 )
 	return r
 
-pythonEnv = env.Copy()
+pythonEnv = env.Clone()
 pythonEnv.Replace( CXXFLAGS = env.subst("$PYTHONCXXFLAGS") )
 
 # decide where python is
@@ -920,7 +946,7 @@ pythonEnv.Append( LIBS = [
 )
 pythonEnv.Prepend( LIBPATH = [ "./lib" ] )
 
-pythonModuleEnv = pythonEnv.Copy()
+pythonModuleEnv = pythonEnv.Clone()
 
 pythonModuleEnv["SHLIBPREFIX"] = ""
 pythonModuleEnv["SHLIBSUFFIX"] = ".so"
@@ -932,7 +958,7 @@ if pythonModuleEnv["PLATFORM"]=="darwin" :
 # An environment for running tests
 ###########################################################################################
 
-testEnv = env.Copy()
+testEnv = env.Clone()
 testEnv.Replace( CXXFLAGS = env.subst("$TESTCXXFLAGS") )
 
 testEnv.Prepend( LIBPATH = [ "./lib" ] )
@@ -1059,10 +1085,10 @@ def createOpStubs( target, source, env ):
 # Build, install and test the core library and bindings
 ###########################################################################################
 
-coreEnv = env.Copy( IECORE_NAME="IECore" )
-corePythonEnv = pythonEnv.Copy( IECORE_NAME="IECorePython" )
-corePythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME="IECore" )
-coreTestEnv = testEnv.Copy()
+coreEnv = env.Clone( IECORE_NAME="IECore" )
+corePythonEnv = pythonEnv.Clone( IECORE_NAME="IECorePython" )
+corePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME="IECore" )
+coreTestEnv = testEnv.Clone()
 
 allCoreEnvs = ( coreEnv, corePythonEnv, corePythonModuleEnv, coreTestEnv )
 
@@ -1223,15 +1249,15 @@ coreTestEnv.Alias( "testCorePython", corePythonTest )
 # Build, install and test the coreRI library and bindings
 ###########################################################################################
 
-riEnv = coreEnv.Copy( IECORE_NAME = "IECoreRI" )
+riEnv = coreEnv.Clone( IECORE_NAME = "IECoreRI" )
 riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
-riPythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME = "IECoreRI" )
+riPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreRI" )
 riPythonModuleEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
-riPythonProceduralEnv = riPythonModuleEnv.Copy( IECORE_NAME = "iePython" )
+riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython" )
 
 haveRI = False
 riLibs = []
@@ -1367,7 +1393,7 @@ if doConfigure :
 		Default( [ riLibrary, riPythonModule, riPythonProcedural ] )
 		
 		# tests
-		riTestEnv = testEnv.Copy()
+		riTestEnv = testEnv.Clone()
 
 		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( [ "./lib" ] + riPythonModuleEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
@@ -1411,7 +1437,7 @@ if env["WITH_GL"] and doConfigure :
 		],
 	}
 	
-	glEnv = coreEnv.Copy( **glEnvSets )
+	glEnv = coreEnv.Clone( **glEnvSets )
 
 	glEnv.Append( **glEnvAppends )
 	glEnv.Prepend( **glEnvPrepends )
@@ -1479,7 +1505,7 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.Alias( "installGL", glslShaderInstall )		
 
 		glPythonSources = glob.glob( "src/IECoreGL/bindings/*.cpp" )
-		glPythonModuleEnv = pythonModuleEnv.Copy( **glEnvSets )
+		glPythonModuleEnv = pythonModuleEnv.Clone( **glEnvSets )
 		glPythonModuleEnv.Append( **glEnvAppends )
 		glPythonModuleEnv.Prepend( **glEnvPrepends )
 		glPythonModuleEnv.Append(
@@ -1505,7 +1531,7 @@ if env["WITH_GL"] and doConfigure :
 
 		Default( [ glLibrary, glPythonModule ] )
 
-		glTestEnv = testEnv.Copy()
+		glTestEnv = testEnv.Clone()
 		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":python"
 		for e in ["DISPLAY", "XAUTHORITY"] :
 			if e in os.environ :
@@ -1556,15 +1582,15 @@ elif env["PLATFORM"]=="darwin" :
 	mayaEnvAppends["LIBS"] += ["Foundation", "OpenMayaRender"]
 	mayaEnvAppends["FRAMEWORKS"] = ["AGL", "OpenGL"]
 
-mayaEnv = env.Copy( **mayaEnvSets )
+mayaEnv = env.Clone( **mayaEnvSets )
 mayaEnv.Append( **mayaEnvAppends )
 
 mayaEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 
-mayaPythonModuleEnv = pythonModuleEnv.Copy( **mayaEnvSets )
+mayaPythonModuleEnv = pythonModuleEnv.Clone( **mayaEnvSets )
 mayaPythonModuleEnv.Append( **mayaEnvAppends )
 
-mayaPluginEnv = mayaEnv.Copy( IECORE_NAME="ieCore" )
+mayaPluginEnv = mayaEnv.Clone( IECORE_NAME="ieCore" )
 
 if doConfigure :
 
@@ -1651,7 +1677,7 @@ if doConfigure :
 		
 			mayaPluginLoaderSources = [ 'src/IECoreMaya/plugin/Loader.cpp' ]
 		
-			mayaPluginLoaderEnv = mayaPluginEnv.Copy()
+			mayaPluginLoaderEnv = mayaPluginEnv.Clone()
 			mayaPluginLoaderEnv.Append(			
 				LIBS = [
 					"dl"
@@ -1700,7 +1726,7 @@ if doConfigure :
 
 		Default( [ mayaLibrary, mayaPlugin, mayaPythonModule ] )
 		
-		mayaTestEnv = testEnv.Copy()
+		mayaTestEnv = testEnv.Clone()
 		
 		mayaTestLibPaths = mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonModuleEnv["LIBPATH"] ) )
 		if haveRI :
@@ -1712,7 +1738,7 @@ if doConfigure :
 		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya:./test/IECoreMaya/plugins"
 		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
 		
-		mayaPythonTestEnv = mayaTestEnv.Copy()
+		mayaPythonTestEnv = mayaTestEnv.Clone()
 		
 		mayaTestEnv.Append( **mayaEnvAppends )
 		mayaTestEnv.Append( 
@@ -1748,18 +1774,42 @@ if doConfigure :
 		mayaPythonTestEnv.Alias( "testMayaPython", mayaPythonTest )			
 
 ###########################################################################################
-# Build and install the coreNuke library and headers
+# Build and install the coreNuke library, plugin, python module and headers
 ###########################################################################################
 
-nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
-nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
-nukeEnv.Prepend( LIBPATH = [ "$NUKE_ROOT", "./lib" ] )
-nukeEnv.Prepend( LIBS = [ "GLEW" ] )
-		
-nukePythonEnv = pythonEnv.Copy( IECORE_NAME = "IECoreNuke" )
+nukeEnvAppends = {
 
-nukeTestEnv = testEnv.Copy()
+	"CPPPATH" : [
+		"$NUKE_ROOT/include",
+		"$GLEW_INCLUDE_PATH",
+	],
+	
+	"CPPFLAGS" : [
+		pythonEnv["PYTHON_INCLUDE_FLAGS"],
+	],
+	
+	"LIBPATH" : [
+		"$NUKE_ROOT",
+		"./lib"
+	],
+
+	"LIBS" : [
+		"GLEW",
+	]
+
+}
+
+nukeEnv = env.Clone( IECORE_NAME = "IECoreNuke" )
+nukeEnv.Append( **nukeEnvAppends )
+		
+nukePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreNuke" )
+nukePythonModuleEnv.Append( **nukeEnvAppends )
+
+nukePluginEnv = nukeEnv.Clone( IECORE_NAME="ieCore" )
+
+nukeTestEnv = testEnv.Clone()
 nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
+nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
 
 if doConfigure :
 
@@ -1818,9 +1868,13 @@ if doConfigure :
 				c.Finish()
 				
 				# we can't add this earlier as then it's built during the configure stage, and that's no good
-				nukeEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+				nukeEnv.Append( LIBS = [
+					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+					os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				]	)
 				
-				nukeEnv.Append( LIBS = [ nukeLibName ] )
+				nukeEnv.Append( LIBS = [ nukeLibName, "boost_python$BOOST_LIB_SUFFIX" ] )
 
 				nukeEnv.Append(
 					CPPFLAGS = [
@@ -1828,10 +1882,16 @@ if doConfigure :
     					"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
 					]
 				)
-
+				
+				nukePythonModuleEnv.Append( LIBS = os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+				
 				nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
 				nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
+				nukePythonSources = glob.glob( "src/IECoreNuke/bindings/*.cpp" )
 				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
+				nukePluginSources = glob.glob( "src/IECoreNuke/plugin/*.cpp" )
+
+				# nuke library
 
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
 				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
@@ -1840,27 +1900,68 @@ if doConfigure :
 				nukeEnv.Alias( "installNuke", nukeLibraryInstall )
 				nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
 
+				# nuke headers
+
 				nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
 				nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
 				nukeEnv.Alias( "installNuke", nukeHeaderInstall )
 				nukeEnv.Alias( "install", nukeHeaderInstall )
 
-				nukePythonModuleInstall = nukePythonEnv.Install( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", nukePythonScripts )
-				nukePythonEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonEnv, nukePythonEnv["INSTALL_NUKEPYTHON_DIR"] ) )
-				nukePythonEnv.Alias( "install", nukePythonModuleInstall )
-				nukePythonEnv.Alias( "installNuke", nukePythonModuleInstall )
+				# nuke python module
+
+				nukePythonModule = nukePythonModuleEnv.SharedLibrary( "python/IECoreNuke/_IECoreNuke", nukePythonSources )
+				nukePythonModuleInstall = nukePythonModuleEnv.Install( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", nukePythonScripts + nukePythonModule )
+				nukePythonModuleEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonModuleEnv, nukePythonModuleEnv["INSTALL_NUKEPYTHON_DIR"] ) )
+				nukePythonModuleEnv.Alias( "install", nukePythonModuleInstall )
+				nukePythonModuleEnv.Alias( "installNuke", nukePythonModuleInstall )
 
 				if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
 					# this is the only way we could find to get a post action to run for an alias
 					nukeEnv.Alias( "install", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
 					nukeEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
 
-				Default( [ nukeLibrary ] )
+				# nuke plugin
+
+				nukePluginEnv.Append(
+					LIBPATH = [ "./lib" ],
+					LIBS = [
+						os.path.basename( coreEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
+						os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
+					]
+				)
+				nukePluginTarget = "plugins/nuke/" + os.path.basename( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) )
+				nukePlugin = nukePluginEnv.SharedLibrary( nukePluginTarget, nukePluginSources, SHLIBPREFIX="" )
+				nukePluginInstall = nukePluginEnv.Install( os.path.dirname( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukePlugin )
+		
+				nukePluginEnv.AddPostAction( nukePluginInstall, lambda target, source, env : makeSymLinks( nukePluginEnv, nukePluginEnv["INSTALL_NUKEPLUGIN_NAME"] ) )
+				nukePluginEnv.Alias( "install", nukePluginInstall )
+				nukePluginEnv.Alias( "installNuke", nukePluginInstall )
+		
+				Default( [ nukeLibrary, nukePlugin ] )
+				
+				# stubs for each of nodes within the plugin
+				
+				nukeStubs = []
+				for nodeName in [ "ieProcedural", "ieObject", "ieOp", "ieDrawable" ] :
+				
+					nukeStubEnv = nukePluginEnv.Clone( IECORE_NAME=nodeName )
+					nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"
+					nukeStub = nukePluginEnv.Command( nukeStubName, nukePlugin, "echo 'load ieCore' > $TARGET" )
+					nukeStubInstall = nukeStubEnv.Install( os.path.dirname( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukeStub )
+					nukeStubEnv.Alias( "install", nukeStubInstall )
+					nukeStubEnv.Alias( "installNuke", nukeStubInstall )
+					nukeStubs.append( nukeStub )
+					Default( [ nukeStub ] )
+
+				# nuke tests
 
 				nukeTest = nukeTestEnv.Command( "test/IECoreNuke/resultsPython.txt", nukeLibrary, "echo \"execfile( '$TEST_NUKE_SCRIPT' )\" | $NUKE_ROOT/Nuke${NUKE_MAJOR_VERSION}.${NUKE_MINOR_VERSION} -t" )
 				NoCache( nukeTest )
 				nukeTestEnv.Depends( nukeTest, glob.glob( "test/IECoreNuke/*.py" ) )
-				nukeTestEnv.Alias( "testNuke", nukeTest )			
+				nukeTestEnv.Depends( nukeTest, nukePythonModule )
+				nukeTestEnv.Depends( nukeTest, nukePlugin )
+				nukeTestEnv.Depends( nukeTest, nukeStubs )
+				nukeTestEnv.Alias( "testNuke", nukeTest )
 
 ###########################################################################################
 # Build, install and test the coreHoudini library and bindings
@@ -1909,16 +2010,16 @@ elif env["PLATFORM"]=="darwin" :
 	houdiniEnvAppends["FRAMEWORKS"] = ["OpenGL"]
 	houdiniEnvAppends["LIBS"] += [ "GR"]
 
-houdiniEnv = env.Copy( **houdiniEnvSets )
+houdiniEnv = env.Clone( **houdiniEnvSets )
 houdiniEnv.Append( **houdiniEnvAppends )
 
 houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 houdiniEnv.Append( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
 
-houdiniPythonModuleEnv = pythonModuleEnv.Copy( **houdiniEnvSets )
+houdiniPythonModuleEnv = pythonModuleEnv.Clone( **houdiniEnvSets )
 houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
 
-houdiniPluginEnv = houdiniEnv.Copy( IECORE_NAME="ieCoreHoudini" )
+houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 
 if doConfigure :
 	
@@ -2080,7 +2181,7 @@ if doConfigure :
 # Build and install the coreTruelight library and headers
 ###########################################################################################
 
-truelightEnv = env.Copy( IECORE_NAME = "IECoreTruelight" )
+truelightEnv = env.Clone( IECORE_NAME = "IECoreTruelight" )
 truelightEnv.Append( LIBS = [ "truelight" ] )
 
 # Remove all the boost and OpenEXR libs for the configure state- if we don't do this then the configure test can fail for some compilers. 
@@ -2095,7 +2196,7 @@ truelightEnv.Prepend( LIBPATH = [
 	]
 )
 
-truelightPythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME="IECoreTruelight" )
+truelightPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME="IECoreTruelight" )
 
 if doConfigure :
 
@@ -2161,8 +2262,7 @@ if doConfigure :
 		Default( [ truelightLibrary, truelightPythonModule ] )
 		
 		# tests
-		truelightTestEnv = testEnv.Copy()
-		#riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonModuleEnv["LIBPATH"] ) )
+		truelightTestEnv = testEnv.Clone()
 		truelightTestEnv["ENV"]["TRUELIGHT_ROOT"] = truelightEnv.subst( "$TRUELIGHT_ROOT" )
 		truelightTest = truelightTestEnv.Command( "test/IECoreTruelight/results.txt", truelightPythonModule, pythonExecutable + " $TEST_TRUELIGHT_SCRIPT" )
 		NoCache( truelightTest )
@@ -2174,7 +2274,7 @@ if doConfigure :
 # Documentation
 ###########################################################################################
 
-docEnv = env.Copy()
+docEnv = env.Clone()
 docEnv["ENV"]["PATH"] = os.environ["PATH"]
 
 if doConfigure :

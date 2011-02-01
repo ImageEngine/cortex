@@ -49,7 +49,7 @@ def getOption( name, default ) :
 
 	return result
 
-# decide what compiler/app we're targeting. we either pass COMPILER_VERSION and COMPILER
+# decide what compiler/app we're targeting. we either pass COMPILER_VERSION, COMPILER and PYTHON_VERSION
 # to do a straight install in /software/tools or we pass an APP and APP_VERSION pair
 # to do an install in /software/tools/app/appVersion - in this case the compiler and settings
 # are dictated by the application.
@@ -58,24 +58,34 @@ platform = IEEnv.platform()
 
 compiler = getOption( "COMPILER", None )
 compilerVersion = getOption( "COMPILER_VERSION", None )
+pythonVersion = getOption( "PYTHON_VERSION", None )
 targetApp = getOption( "APP", None )
-if targetApp and (compiler or compilerVersion) :
-	raise RuntimeError( "Must specify only one of COMPILER or APP" )
 
 if targetApp :
+	
 	if targetApp not in ( "nuke", "maya", "houdini" ) :
 		raise RuntimeError( "Check config logic applies to the new app and remove this exception." )
+	
+	if (compiler or compilerVersion) :
+		raise RuntimeError( "Must specify only one of COMPILER or APP" )
+		
+	if pythonVersion :
+		raise RuntimeError( "Must specify only one of PYTHON_VERSION or APP" )
+	
 	targetAppVersion = getOption( "APP_VERSION", os.environ.get( targetApp.upper() + "_VERSION" ) )
 		
 	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
 	openEXRVersion = targetAppReg.get( "openEXRVersion", "1.6.1" )
+	pythonVersion = targetAppReg["pythonVersion"]
 else :
 	if not compiler :
 		compiler = IEEnv.registry["platformDefaults"][platform]["compiler"]
 	if not compilerVersion :
 		compilerVersion = IEEnv.registry["platformDefaults"][platform]["compilerVersion"]
+	if not pythonVersion :
+		pythonVersion = "2.6"
 	openEXRVersion = "1.6.1"
 	
 # get the compiler location using the registry
@@ -156,8 +166,7 @@ if compilerVersionInt < 350 :
 	##########################################################################################################
 	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
 
-# determine the python version and use it to choose the boost version
-pythonVersion = getOption( "PYTHON_VERSION", "2.6" )
+# determine boost version from python version
 if pythonVersion == "2.6" :
 	boostVersion = "1.42.0"
 	boostVersionSuffix = "-mt-1_42"
@@ -253,10 +262,7 @@ if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and t
 			NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 			INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
-			boostVersion = "1.38.0"
-			boostVersionSuffix = "-mt-1_38"
-			BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-			BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
+			INSTALL_NUKEPLUGIN_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 	except :
 		pass
 

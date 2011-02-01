@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "tbb/mutex.h"
+
 #include "IECore/ImageDisplayDriver.h"
 
 using namespace boost;
@@ -41,6 +43,12 @@ using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageDisplayDriver );
 
+const DisplayDriver::DisplayDriverDescription<ImageDisplayDriver> ImageDisplayDriver::g_description;
+
+typedef std::map<std::string, ConstImagePrimitivePtr> ImagePool;
+static ImagePool g_pool;
+static tbb::mutex g_poolMutex;
+
 ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i &dataWindow, const vector<string> &channelNames, ConstCompoundDataPtr parameters ) :
 		DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
 		m_image( new ImagePrimitive( dataWindow, displayWindow ) )
@@ -49,7 +57,7 @@ ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i 
 	{
 		m_image->createChannel<float>( *it );
 	}
-	if ( parameters )
+	if( parameters )
 	{
 		CompoundDataMap &xData = m_image->blindData()->writable();
 		const CompoundDataMap &yData = parameters->readable();
@@ -57,6 +65,13 @@ ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i 
 		for ( ; iterY != yData.end(); iterY++ )
 		{
 			xData[iterY->first] = iterY->second->copy();
+		}
+	
+		ConstStringDataPtr handle = parameters->member<StringData>( "handle" );
+		if( handle )
+		{
+			tbb::mutex::scoped_lock lock( g_poolMutex );
+			g_pool[handle->readable()] = m_image;
 		}
 	}
 }
@@ -121,4 +136,28 @@ void ImageDisplayDriver::imageClose()
 ConstImagePrimitivePtr ImageDisplayDriver::image() const
 {
 	return m_image;
+}
+
+ConstImagePrimitivePtr ImageDisplayDriver::storedImage( const std::string &handle )
+{
+	tbb::mutex::scoped_lock lock( g_poolMutex );
+	ImagePool::const_iterator it = g_pool.find( handle );
+	if( it != g_pool.end() )
+	{
+		return it->second;
+	}
+	return 0;
+}
+
+ConstImagePrimitivePtr ImageDisplayDriver::removeStoredImage( const std::string &handle )
+{
+	ConstImagePrimitivePtr result = 0;
+	tbb::mutex::scoped_lock lock( g_poolMutex );
+	ImagePool::iterator it = g_pool.find( handle );
+	if( it != g_pool.end() )
+	{
+		result = it->second;
+		g_pool.erase( it );
+	}
+	return result;
 }

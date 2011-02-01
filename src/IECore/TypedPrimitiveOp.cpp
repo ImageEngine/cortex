@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
+#include "IECore/TypedObjectParameter.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/NullObject.h"
 #include "IECore/MeshPrimitive.h"
@@ -46,7 +46,7 @@ using namespace IECore;
 
 template<typename T>
 TypedPrimitiveOp<T>::TypedPrimitiveOp( const std::string &description )
-	:	ModifyOp( description, new ObjectParameter( "result", "The result", new T(), T::staticTypeId() ), new ObjectParameter( "input", "The Primitive to modify", new T(), T::staticTypeId() ) )
+	:	ModifyOp( description, new TypedObjectParameter<T>( "result", "The result", new T() ), new TypedObjectParameter<T>( "input", "The Primitive to modify", new T() ) )
 {
 }
 
