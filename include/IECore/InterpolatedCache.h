@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 
 #include "IECore/AttributeCache.h"
 #include "IECore/OversamplesCalculator.h"
-#include "IECore/ClassData.h"
 
 namespace IECore
 {
@@ -51,7 +50,6 @@ IE_CORE_FORWARDDECLARE( FileSequence );
 /// to be read are not safe to call while other threads are operating on the object. However, once
 /// the caches have been specified it is safe to call the read methods from multiple concurrent threads and
 /// with multiple different frame arguments. See the documentation of the individual methods for more details.
-/// \todo Remove the deprecated functions for cortex 6.
 /// \todo It might be great to pass interpolation and oversamples calculator to each read method rather
 /// than have them store as state. This would allow different interpolation and oversampling per call and per thread.
 /// If we did this I think we should look at replacing the OversamplesCalculator class with some more sensible
@@ -59,8 +57,6 @@ IE_CORE_FORWARDDECLARE( FileSequence );
 class InterpolatedCache : public RefCounted
 {
 	public :
-
-		typedef std::vector< AttributeCachePtr > CacheVector; /// \todo Remove for cortex 6
 		
 		typedef IECore::AttributeCache::ObjectHandle ObjectHandle;
 		typedef IECore::AttributeCache::HeaderHandle HeaderHandle;
@@ -83,14 +79,6 @@ class InterpolatedCache : public RefCounted
 			const OversamplesCalculator &o = OversamplesCalculator(),
 			size_t maxOpenFiles = 10
 		);
-
-		/// \deprecated Use the form which doesn't take a frame.
-		InterpolatedCache(
-			const std::string &pathTemplate = "",
-			float frame = 0.0,
-			Interpolation interpolation = None,
-			const OversamplesCalculator &o = OversamplesCalculator()
-		);
 		
 		~InterpolatedCache();
 
@@ -111,12 +99,6 @@ class InterpolatedCache : public RefCounted
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
 		size_t getMaxOpenFiles() const;
-		
-		/// \deprecated
-		/// Use the method calls which take a frame argument explicitly instead.
-		void setFrame( float frame );
-		/// \deprecated
-		float getFrame() const;
 
 		/// Sets the interpolation method.
 		/// \threading It is not safe to call this method while other threads are accessing
@@ -135,19 +117,14 @@ class InterpolatedCache : public RefCounted
 		/// Returns the current OversamplesCalculator.
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
-		/// \todo Should be returning a const reference
-		OversamplesCalculator getOversamplesCalculator() const;
+		const OversamplesCalculator &getOversamplesCalculator() const;
 
-		/// \deprecated Use the method which additionally specifies a frame.
-		ObjectPtr read( const ObjectHandle &obj, const AttributeHandle &attr ) const;
 		/// Read a piece of data associated with the specified object and attribute from the cache.
 		/// Throws an exception if the requested data is not present in the cache or if the cache file is not found.
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
 		ObjectPtr read( float frame, const ObjectHandle &obj, const AttributeHandle &attr ) const;
 		
-		/// \deprecated Use the method which additionally specifies a frame.
-		CompoundObjectPtr read( const ObjectHandle &obj ) const;
 		/// Read a piece of data associated with the specified object from the cache.
 		/// Returns a CompoundObject with attribute as keys.
 		/// Throws an exception if the requested data is not present in the cache or if the cache file is not found.
@@ -155,8 +132,6 @@ class InterpolatedCache : public RefCounted
 		/// methods of this class.
 		CompoundObjectPtr read( float frame, const ObjectHandle &obj ) const;
 
-		/// \deprecated Use the method which additionally specifies a frame.
-		ObjectPtr readHeader( const HeaderHandle &hdr ) const;
 		/// Read data associated with the specified header from the open cache files.
 		/// The result will be interpolated whenever possible. Objects not existent in
 		/// every opened file will not be interpolated and will be returned if they come from the nearest frame.
@@ -165,8 +140,6 @@ class InterpolatedCache : public RefCounted
 		/// methods of this class.
 		ObjectPtr readHeader( float frame, const HeaderHandle &hdr ) const;
 
-		/// \deprecated Use the method which additionally specifies a frame.
-		CompoundObjectPtr readHeader() const;
 		/// Creates a CompoundObject with the header names as keys.
 		/// Read all header data present in the open cache files. The result will be
 		/// interpolated whenever possible. Objects not existent in every opened file will not be interpolated and
@@ -176,48 +149,36 @@ class InterpolatedCache : public RefCounted
 		/// methods of this class.
 		CompoundObjectPtr readHeader( float frame ) const;
 		
-		/// \deprecated Use the method which additionally specifies a frame.
-		void objects( std::vector<ObjectHandle> &objs ) const;
 		/// Retrieve the list of object handles from the cache
 		/// Throws an exception if the cache file is not found.
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
 		void objects( float frame, std::vector<ObjectHandle> &objs ) const;
 		
-		/// \deprecated Use the method which additionally specifies a frame.
-		void headers( std::vector<HeaderHandle> &hds ) const;
 		/// Retrieve the list of header handles from the cache (from the nearest frame).
 		/// Throws an exception if the cache file is not found.
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
 		void headers( float frame, std::vector<HeaderHandle> &hds ) const;
 
-		/// \deprecated Use the method which additionally specifies a frame.
-		void attributes( const ObjectHandle &obj, std::vector<AttributeHandle> &attrs ) const;
 		/// Retrieve the list of attribute handles from the specified objects.
 		/// Throws an exception if the object is not within the cache or the cache file is not found.
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
 		void attributes( float frame, const ObjectHandle &obj, std::vector<AttributeHandle> &attrs ) const;
 		
-		/// \deprecated Use the method which additionally specifies a frame.
-		void attributes( const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs ) const;
 		/// Retrieve the list of attribute handles that match the given regex from the specified objects.
 		/// Throws an exception if the object is not within the cache or the cache file is not found.
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
 		void attributes( float frame, const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs ) const;
 
-		/// \deprecated Use the method which additionally specifies a frame.
-		bool contains( const ObjectHandle &obj ) const;
 		/// Determines whether or not the cache contains the specified object
 		/// Throws an exception if the cache file is not found.
 		/// \threading It is safe to call this method while other threads are calling const
 		/// methods of this class.
 		bool contains( float frame, const ObjectHandle &obj ) const;
 
-		/// \deprecated Use the method which additionally specifies a frame.
-		bool contains( const ObjectHandle &obj, const AttributeHandle &attr ) const;
 		/// Determines whether or not the cache contains the specified object and attribute
 		/// Throws an exception if the cache file is not found.
 		/// \threading It is safe to call this method while other threads are calling const
@@ -226,21 +187,8 @@ class InterpolatedCache : public RefCounted
 
 	private :
 
-		FileSequencePtr m_unused1; /// \todo Remove for cortex 6
-		Interpolation m_unused2; /// \todo Remove for cortex 6
-		float m_frame; /// \todo Remove for cortex 6
-		OversamplesCalculator m_unused3; /// \todo Remove for cortex 6
-
-		mutable bool m_unused4; /// \todo Remove for cortex 6
-		mutable unsigned m_unused5; /// \todo Remove for cortex 6
-		mutable bool m_unused6;  /// \todo Remove for cortex 6
-		mutable float m_unused7;  /// \todo Remove for cortex 6
-
-		mutable CacheVector m_unused8; /// \todo Remove for cortex 6
-		mutable std::vector< std::string> m_unused9; /// \todo Remove for cortex 6
-
 		IE_CORE_FORWARDDECLARE( Implementation );
-		static ClassData<InterpolatedCache, ImplementationPtr> g_implementations;
+		ImplementationPtr m_implementation;
 		
 };
 

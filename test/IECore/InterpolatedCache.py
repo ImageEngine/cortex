@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -98,26 +98,25 @@ class TestInterpolatedCache(unittest.TestCase):
 
 	def testConstructors(self):
 		"""Test InterpolatedCache constructors"""
-		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.None )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.None )
 		self.assertEqual( cache.getInterpolation(), InterpolatedCache.Interpolation.None )
 		self.assertEqual( cache.getPathTemplate(), self.pathTemplate )
-		self.assertEqual( cache.getFrame(), 0 )
 
 		os = OversamplesCalculator( frameRate = 20, samplesPerFrame = 1 )
-		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Linear, oversamplesCalculator = os )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Linear, oversamplesCalculator = os )
 		self.assertEqual( cache.getInterpolation(), InterpolatedCache.Interpolation.Linear )
 
 		os = OversamplesCalculator( frameRate = 24, samplesPerFrame = 1 )
-		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Cubic, oversamplesCalculator = os )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Cubic, oversamplesCalculator = os )
 
 	def testHeaders( self ):
 		"""Test InterpolatedCache headers"""
 
 		self.__createCache()
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
-		self.assert_( "testCache" in cache.headers() )
-		h = cache.readHeader( "testCache" )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Linear )
+		self.assert_( "testCache" in cache.headers( 1.5 ) )
+		h = cache.readHeader( 1.5, "testCache" )
 		self.assertEqual( h, self.__headerCompound( ( self.__time( 1 ) + self.__time( 2 ) ) / 2 ) )
 
 	def testAttributes(self):
@@ -125,40 +124,39 @@ class TestInterpolatedCache(unittest.TestCase):
 
 		self.__createCache()
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 1.2, interpolation = InterpolatedCache.Interpolation.Linear )
-		self.assertEqual( len( cache.attributes( "obj2" )), 2 )
-		self.assertEqual( len( cache.attributes( "obj2", "i.*" )), 1 )
-		self.assertEqual( len( cache.attributes( "obj1" )), 1 )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Linear )
+		self.assertEqual( len( cache.attributes( 1.2, "obj2" )), 2 )
+		self.assertEqual( len( cache.attributes( 1.2, "obj2", "i.*" )), 1 )
+		self.assertEqual( len( cache.attributes( 1.2, "obj1" )), 1 )
 
 	def testContains(self):
 		"""Test InterpolatedCache contains"""
 
 		self.__createCache()
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 1.2, interpolation = InterpolatedCache.Interpolation.Linear )
-		self.assert_( cache.contains( "obj1" ) )
-		self.assert_( cache.contains( "obj2", "i" ) )
-		self.failIf( cache.contains( "obj3" ) )
-		self.failIf( cache.contains( "obj2", "not_in_cache" ) )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Linear )
+		self.assert_( cache.contains( 1.2, "obj1" ) )
+		self.assert_( cache.contains( 1.2, "obj2", "i" ) )
+		self.failIf( cache.contains( 1.2, "obj3" ) )
+		self.failIf( cache.contains( 1.2, "obj2", "not_in_cache" ) )
 
 	def testReading(self):
 		"""Test InterpolatedCache read"""
 
 		self.__createCache()
 
-		cache = InterpolatedCache( self.pathTemplate, frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
-		self.assertEqual( cache.read( "obj2", "i" ), IntData( 1 ) )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 1.5 ) )
-		self.assertEqual( cache.read( "obj1" ), CompoundObject( { "v3fVec": self.__createV3f( 1.5 ) } ) )
+		cache = InterpolatedCache( self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Linear )
+		self.assertEqual( cache.read( 1.5, "obj2", "i" ), IntData( 1 ) )
+		self.assertEqual( cache.read( 1.5, "obj2", "d" ), DoubleData( 1.5 ) )
+		self.assertEqual( cache.read( 1.5, "obj1" ), CompoundObject( { "v3fVec": self.__createV3f( 1.5 ) } ) )
 
 	def testOversampledReading( self ) :
 
 		self.mark()
 
 		os = OversamplesCalculator( frameRate = 24, samplesPerFrame = 3 )
-		cache = InterpolatedCache(self.pathTemplate, frame = 1, interpolation = InterpolatedCache.Interpolation.Linear, oversamplesCalculator = os )
-		cache.setFrame( 2.0 )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 3, 4 )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Linear, oversamplesCalculator = os )
+		self.assertAlmostEqual( cache.read( 2, "obj2", "d" ).value, 3, 4 )
 
 
 	def testChangingParameters( self ):
@@ -166,34 +164,28 @@ class TestInterpolatedCache(unittest.TestCase):
 
 		self.__createCache()
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.None )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0 ) )
-		cache.setFrame( 0.8 )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0 ) )
-		cache.setFrame( 1 )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 1 ) )
-		cache.setFrame( 0.5 )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.None )
+		self.assertEqual( cache.read( 0, "obj2", "d" ), DoubleData( 0 ) )
+		self.assertEqual( cache.read( 0.8, "obj2", "d" ), DoubleData( 0 ) )
+		self.assertEqual( cache.read( 1, "obj2", "d" ), DoubleData( 1 ) )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Linear )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0.5 ) )
-		cache.setFrame( 2.25 )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.5, 3 )
+		self.assertEqual( cache.read( 0.5, "obj2", "d" ), DoubleData( 0.5 ) )
+		self.assertAlmostEqual( cache.read( 2.25, "obj2", "d" ).value, 2.5, 3 )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Cubic )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.4531, 3 )
-		cache.setFrame( 5 )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
+		self.assertAlmostEqual( cache.read( 2.25, "obj2", "d" ).value, 2.4531, 3 )
+		self.assertEqual( cache.read( 5, "obj2", "d" ), DoubleData( 16 ) )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Linear )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
+		self.assertEqual( cache.read( 5, "obj2", "d" ), DoubleData( 16 ) )
 		cache.setInterpolation( InterpolatedCache.Interpolation.None )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
+		self.assertEqual( cache.read( 5, "obj2", "d" ), DoubleData( 16 ) )
 
 	def testOldTransformationMatrixData( self ):
 
-		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.old.####.fio", frame = 4, interpolation = InterpolatedCache.Interpolation.Linear )
-		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
-		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd( 0.244525, 0, 0 )).length(), 0, 2 )
-		cache.setFrame( 4.5 )
-		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
-		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd(0.283422, 0, 0)).length(), 0, 2 )
+		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.old.####.fio", interpolation = InterpolatedCache.Interpolation.Linear )
+		self.assertEqual( cache.read( 4, ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
+		self.assertAlmostEqual( (cache.read( 4, ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd( 0.244525, 0, 0 )).length(), 0, 2 )
+		self.assertEqual( cache.read( 4.5, ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
+		self.assertAlmostEqual( (cache.read( 4.5, ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd(0.283422, 0, 0)).length(), 0, 2 )
 
 	def testThreading( self ) :
 	
@@ -231,7 +223,7 @@ class TestInterpolatedCache(unittest.TestCase):
 
 		self.__createCache()
 		
-		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Linear )
+		cache = InterpolatedCache(self.pathTemplate, interpolation = InterpolatedCache.Interpolation.Linear )
 					
 		threads = []
 		for i in range( 0, 1000 ) :
@@ -249,28 +241,28 @@ class TestInterpolatedCache(unittest.TestCase):
 		# If we provide a default constructor then it really oughn't to throw an exception
 		cache = InterpolatedCache()
 		# But if we try to do something with it before setting the template then it should complain
-		self.assertRaises( RuntimeError, cache.readHeader )
+		self.assertRaises( RuntimeError, cache.readHeader, 0 )
 		# And it should work as usual if we subsequently set the template
 		cache.setPathTemplate( self.pathTemplate )
-		cache.readHeader()
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0 ) )
+		cache.readHeader( 0 )
+		self.assertEqual( cache.read( 0, "obj2", "d" ), DoubleData( 0 ) )
 
 	def testReadMissing( self ) :
 
 		# check that trying to read missing caches fails
 		
 		cache = InterpolatedCache( "iDontExist.######.fio" )
-		self.assertRaises( RuntimeError, cache.read, "a", "b" )
+		self.assertRaises( RuntimeError, cache.read, 1.5, "a", "b" )
 	
 		# check that trying to read missing objects or attributes fails
 	
 		self.__createCache()
 	
 		cache = InterpolatedCache( self.pathTemplate )
-		cache.read( "obj2", "d" )
+		cache.read( 1.5, "obj2", "d" )
 		
-		self.assertRaises( RuntimeError, cache.read, "iDontExist", "a" )
-		self.assertRaises( RuntimeError, cache.read, "obj2", "iDontExist" )
+		self.assertRaises( RuntimeError, cache.read, 1.5, "iDontExist", "a" )
+		self.assertRaises( RuntimeError, cache.read, 1.5, "obj2", "iDontExist" )
 
 	def testMaxOpenFiles( self ) :
 

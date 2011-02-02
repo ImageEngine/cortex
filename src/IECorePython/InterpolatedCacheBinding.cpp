@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,11 +71,6 @@ struct InterpolatedCacheHelper
 		return objects;
 	}
 	
-	static list objectsDeprecated( ConstInterpolatedCachePtr cache )
-	{
-		return objects( cache, cache->getFrame() );
-	}
-
 	static list headers(ConstInterpolatedCachePtr cache, float frame )
 	{
 		HeaderHandleVector o;
@@ -93,11 +88,6 @@ struct InterpolatedCacheHelper
 		return headers;
 	}
 	
-	static list headersDeprecated(ConstInterpolatedCachePtr cache)
-	{
-		return headers( cache, cache->getFrame() );
-	}
-
 	static list attributes( ConstInterpolatedCachePtr cache, float frame, const InterpolatedCache::ObjectHandle &obj, object regex )
 	{
 		list attributes;
@@ -127,12 +117,7 @@ struct InterpolatedCacheHelper
 
 		return attributes;
 	}
-	
-	static list attributesDeprecated( ConstInterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj, object regex )
-	{
-		return attributes( cache, cache->getFrame(), obj, regex );
-	}
-	
+		
 	static ObjectPtr read( InterpolatedCachePtr cache, float frame, const InterpolatedCache::ObjectHandle &obj, const InterpolatedCache::AttributeHandle &attr )
 	{
 		ScopedGILRelease gilRelease;
@@ -144,19 +129,7 @@ struct InterpolatedCacheHelper
 		ScopedGILRelease gilRelease;
 		return cache->read( frame, obj );
 	}
-	
-	static ObjectPtr readDeprecated( InterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj, const InterpolatedCache::AttributeHandle &attr )
-	{
-		ScopedGILRelease gilRelease;
-		return cache->read( obj, attr );
-	}
-	
-	static ObjectPtr readDeprecated2( InterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj )
-	{
-		ScopedGILRelease gilRelease;
-		return cache->read( obj );
-	}
-	
+		
 	static ObjectPtr readHeader( InterpolatedCachePtr cache, float frame, const InterpolatedCache::HeaderHandle &hdr )
 	{
 		ScopedGILRelease gilRelease;
@@ -169,18 +142,6 @@ struct InterpolatedCacheHelper
 		return cache->readHeader( frame );
 	}
 		
-	static ObjectPtr readHeaderDeprecated( InterpolatedCachePtr cache, const InterpolatedCache::HeaderHandle &hdr )
-	{
-		ScopedGILRelease gilRelease;
-		return cache->readHeader( hdr );
-	}
-	
-	static CompoundObjectPtr readHeaderDeprecated2( InterpolatedCachePtr cache )
-	{
-		ScopedGILRelease gilRelease;
-		return cache->readHeader();
-	}
-
 	static bool contains( InterpolatedCachePtr cache, float frame, const InterpolatedCache::ObjectHandle &obj )
 	{
 		ScopedGILRelease gilRelease;
@@ -191,18 +152,6 @@ struct InterpolatedCacheHelper
 	{
 		ScopedGILRelease gilRelease;
 		return cache->contains( frame, obj, attr );
-	}
-	
-	static bool containsDeprecated( InterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj )
-	{
-		ScopedGILRelease gilRelease;
-		return cache->contains( obj );
-	}
-	
-	static bool containsDeprecated2( InterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj, const InterpolatedCache::AttributeHandle &attr )
-	{
-		ScopedGILRelease gilRelease;
-		return cache->contains( obj, attr );
 	}
 
 };
@@ -223,17 +172,6 @@ void bindInterpolatedCache()
 	}
 	interpolatedCacheClass
 		.def(
-			init<const std::string &, double, InterpolatedCache::Interpolation, const OversamplesCalculator &>
-			(
-				(
-					arg( "pathTemplate" ) = std::string(""),
-					arg( "frame" ) = double(0.0),
-					arg( "interpolation" ) = InterpolatedCache::None,
-					arg( "oversamplesCalculator" ) = OversamplesCalculator()
-				)
-			)
-		)
-		.def(
 			init<const std::string &, InterpolatedCache::Interpolation, const OversamplesCalculator &, size_t>
 			(
 				(
@@ -248,29 +186,18 @@ void bindInterpolatedCache()
 		.def("getPathTemplate", &InterpolatedCache::getPathTemplate, return_value_policy<copy_const_reference>() )
 		.def("setMaxOpenFiles", &InterpolatedCache::setMaxOpenFiles )
 		.def("getMaxOpenFiles", &InterpolatedCache::getMaxOpenFiles )
-		.def("setFrame", &InterpolatedCache::setFrame )
-		.def("getFrame", &InterpolatedCache::getFrame )
 		.def("setInterpolation", &InterpolatedCache::setInterpolation )
 		.def("getInterpolation", &InterpolatedCache::getInterpolation )
 		.def("setOversamplesCalculator", &InterpolatedCache::setOversamplesCalculator )
-		.def("getOversamplesCalculator", &InterpolatedCache::getOversamplesCalculator )
-		.def("read", &InterpolatedCacheHelper::readDeprecated )
-		.def("read", &InterpolatedCacheHelper::readDeprecated2 )
+		.def("getOversamplesCalculator", &InterpolatedCache::getOversamplesCalculator, return_value_policy<copy_const_reference>() )
 		.def("read", &InterpolatedCacheHelper::read )
 		.def("read", &InterpolatedCacheHelper::read2 )
-		.def("readHeader", &InterpolatedCacheHelper::readHeaderDeprecated )
-		.def("readHeader", &InterpolatedCacheHelper::readHeaderDeprecated2 )
 		.def("readHeader", &InterpolatedCacheHelper::readHeader )
 		.def("readHeader", &InterpolatedCacheHelper::readHeader2 )
-		.def("contains", &InterpolatedCacheHelper::containsDeprecated )
-		.def("contains", &InterpolatedCacheHelper::containsDeprecated2 )
 		.def("contains", &InterpolatedCacheHelper::contains )
 		.def("contains", &InterpolatedCacheHelper::contains2 )
 		.def("objects", &InterpolatedCacheHelper::objects)
-		.def("objects", &InterpolatedCacheHelper::objectsDeprecated)
 		.def("headers", &InterpolatedCacheHelper::headers)
-		.def("headers", &InterpolatedCacheHelper::headersDeprecated)
-		.def("attributes", make_function( &InterpolatedCacheHelper::attributesDeprecated, default_call_policies(), ( boost::python::arg_( "frame" ), boost::python::arg_( "obj" ), boost::python::arg_( "regex" ) = object() ) ) )
 		.def("attributes", make_function( &InterpolatedCacheHelper::attributes  , default_call_policies(), ( boost::python::arg_( "obj" ), boost::python::arg_( "regex" ) = object() ) ) )
 	;
 }
