@@ -1,0 +1,20 @@
+Cortex 6.0.0
+============
+
+Features :
+
+* New Nuke plugin provides hosting of procedurals and ops within Nuke.
+
+Improvements :
+
+* DisplayDriver factory mechanism has been improved, and support for mapping RenderMan displays to IECore::DisplayDrivers has been added to IECoreRI. Images can now be rendered direct to memory using 3delight with no intermediate rib or image files. See test/IECoreRI/DspyTest for examples.
+
+* AttributeCache now performs validation of names for headers, objects and attributes.
+
+Changes :
+
+* Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
+
+Bug fixes :
+
+* Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.
