@@ -37,6 +37,8 @@
 
 #include "boost/python.hpp"
 
+#include "tbb/tbb_thread.h"
+
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ExceptionBinding.h"
@@ -586,6 +588,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "withJPEG", &IECore::withJPEG );
 	def( "withFreeType", &IECore::withFreeType );
 	def( "initThreads", &PyEval_InitThreads );
+	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
 
 }
 

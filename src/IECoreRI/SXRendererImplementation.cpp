@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,8 @@
 
 #include "boost/algorithm/string/case_conv.hpp"
 #include "boost/format.hpp"
+
+#include "tbb/tbb_thread.h"
 
 #include <iostream>
 
@@ -109,6 +111,13 @@ IECoreRI::SXRendererImplementation::SXRendererImplementation( IECoreRI::SXRender
 	{
 		SxSetOption( m_stateStack.top().context.get(), "searchpath:texture", SxString, (SxData)&textureSearchPath );
 	}
+	
+	// we don't know how many threads the client will use this class on, but we have to tell
+	// 3delight how many there will be or it crashes. this should be a reasonable number for most
+	// use cases, and people will just have to set it themselves if they want to do something
+	// out of the ordinary.
+	int nThreads = tbb::tbb_thread::hardware_concurrency();
+	SxSetOption( m_stateStack.top().context.get(), "render:nthreads", SxInt, &nThreads );
 }
 
 IECoreRI::SXRendererImplementation::~SXRendererImplementation()
@@ -121,7 +130,38 @@ IECoreRI::SXRendererImplementation::~SXRendererImplementation()
 
 void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IECore::ConstDataPtr value )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", "Not implemented" );
+	if( name.compare( 0, 3, "ri:" )==0 || name.compare( 0, 3, "sx:" )==0 )
+	{
+		switch( value->typeId() )
+		{
+			case IntDataTypeId :
+				SxSetOption( m_stateStack.top().context.get(), name.c_str() + 3, SxInt, (void *)&(static_cast<const IntData *>( value.get() )->readable() ) );
+				break;
+			case FloatDataTypeId :
+				SxSetOption( m_stateStack.top().context.get(), name.c_str() + 3, SxFloat, (void *)&(static_cast<const FloatData *>( value.get() )->readable() ) );
+				break;
+			case StringDataTypeId :
+				{
+					const char *s = static_cast<const StringData *>( value.get() )->readable().c_str();
+					SxSetOption( m_stateStack.top().context.get(), name.c_str() + 3, SxString, &s );
+					break;	
+				}
+			default :
+				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", format( "Unsupport type \"%s\"." ) % value->typeName() );
+		}
+	}
+	else if( name.compare( 0, 5, "user:" )==0 )
+	{
+		msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", "User options not yet supported" );
+	}
+	else if( name.find_first_of( ":" )!=string::npos )
+	{
+		// ignore options prefixed for some other renderer
+	}
+	else
+	{
+		msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
+	}
 }
 
 IECore::ConstDataPtr IECoreRI::SXRendererImplementation::getOption( const std::string &name ) const

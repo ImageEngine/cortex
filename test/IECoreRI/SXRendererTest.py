@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -708,9 +708,59 @@ class SXRendererTest( unittest.TestCase ) :
 			del v[:]
 		
 		self.assertRaises( RuntimeError, r.shade, p )
-				
-	def tearDown( self ) :
 		
+	def testThreadedTextureLookups( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxTextureTest.sdl test/IECoreRI/shaders/sxTextureTest.sl" ), 0 )
+		
+		points = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )		
+		
+		# by default you should be able to run as many threads as the hardware will support
+		# concurrently.
+		
+		for i in range( 0, 10 ) :
+				
+			r = IECoreRI.SXRenderer()
+
+			r.shader( "surface", "test/IECoreRI/shaders/sxTextureTest.sdl", {
+				"fileName" : os.path.realpath( "./test/IECoreRI/data/textures/uvMap.256x256.tdl" ),
+			} )
+
+			threads = []
+			for i in range( 0, IECore.hardwareConcurrency() ) :
+				threads.append( threading.Thread( target = IECore.curry( r.shade, points ) ) )
+
+			for t in threads :
+				t.start()
+
+			for t in threads :
+				t.join()
+						
+		# but if you want to use more then you need to let the library know about it
+		# by calling setOption( "ri:render:nthreads" )
+		
+		for i in range( 0, 10 ) :
+				
+			r = IECoreRI.SXRenderer()
+			
+			r.setOption( "ri:render:nthreads", IECore.IntData( IECore.hardwareConcurrency() * 2 ) )
+
+			r.shader( "surface", "test/IECoreRI/shaders/sxTextureTest.sdl", {
+				"fileName" : os.path.realpath( "./test/IECoreRI/data/textures/uvMap.256x256.tdl" ),
+			} )
+
+			threads = []
+			for i in range( 0, IECore.hardwareConcurrency() * 2 ) :
+				threads.append( threading.Thread( target = IECore.curry( r.shade, points ) ) )
+
+			for t in threads :
+				t.start()
+
+			for t in threads :
+				t.join()
+						
+	def tearDown( self ) :
+				
 		files = [
 			"test/IECoreRI/shaders/sxTest.sdl",
 			"test/IECoreRI/shaders/splineTest.sdl",
@@ -726,6 +776,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sdl",
 			"test/IECoreRI/shaders/sxGetVarTest.sdl",
 			"test/IECoreRI/shaders/sxGetShaderTest.sdl",
+			"test/IECoreRI/shaders/sxTextureTest.sdl",
 		]
 		
 		for f in files :
