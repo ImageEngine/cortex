@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -98,7 +98,8 @@ void AttributeCache::writeHeader( const HeaderHandle &hdr, const Object *data)
 
 ObjectPtr AttributeCache::read( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
+	checkName( attr );
 	m_io->chdir("/objects");
 	m_io->chdir(obj);
 	ObjectPtr data = Object::load( m_io, attr );
@@ -107,7 +108,8 @@ ObjectPtr AttributeCache::read( const ObjectHandle &obj, const AttributeHandle &
 
 CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
+	
 	CompoundObjectPtr dict = new CompoundObject();
 
 	m_io->chdir("/objects");
@@ -128,7 +130,7 @@ CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 
 ObjectPtr AttributeCache::readHeader( const HeaderHandle &hdr )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( hdr );
 	m_io->chdir("/headers");
 	ObjectPtr data = Object::load( m_io, hdr );
 	return data;
@@ -189,7 +191,7 @@ void AttributeCache::objects(std::vector<AttributeCache::ObjectHandle> &objs)
 
 bool AttributeCache::contains( const ObjectHandle &obj )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
 	m_io->chdir("/objects");
 	try
 	{
@@ -204,7 +206,9 @@ bool AttributeCache::contains( const ObjectHandle &obj )
 
 bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
+	checkName( attr );
+	
 	m_io->chdir("/objects");
 	try
 	{
@@ -220,7 +224,8 @@ bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &a
 
 void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs)
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
+
 	attrs.clear();
 
 	m_io->chdir("/objects");
@@ -239,7 +244,8 @@ void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHa
 
 void AttributeCache::attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs)
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
+	
 	attrs.clear();
 
 	m_io->chdir("/objects");
@@ -259,7 +265,8 @@ void AttributeCache::attributes(const ObjectHandle &obj, const std::string regex
 
 void AttributeCache::remove( const ObjectHandle &obj )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
+	
 	m_io->chdir("/objects");
 
 	m_io->rm( obj );
@@ -267,7 +274,9 @@ void AttributeCache::remove( const ObjectHandle &obj )
 
 void AttributeCache::remove( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( obj );
+	checkName( attr );
+	
 	m_io->chdir("/objects");
 
 	m_io->chdir( obj );
@@ -276,7 +285,8 @@ void AttributeCache::remove( const ObjectHandle &obj, const AttributeHandle &att
 
 void AttributeCache::removeHeader( const HeaderHandle &hdr )
 {
-	// \todo Use checkName() on next Cortex major version.
+	checkName( hdr );
+	
 	m_io->chdir("/headers");
 
 	m_io->rm( hdr );
