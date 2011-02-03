@@ -325,6 +325,8 @@ class _ParameterModificationContext :
 		self.__originalValues = self.__fnPH.getParameterised()[0].parameters().getValue().copy()
 		self.__originalClasses = self.__fnPH._classParameterStates()
 		
+		return self.__fnPH.getParameterised()[0]
+		
 	def __exit__( self, type, value, traceBack ) :
 	
 		_IECoreMaya._parameterisedHolderAssignModificationState(

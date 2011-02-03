@@ -658,9 +658,8 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 	def testSetParameterValuesAndClassesUsingContext( self ) :
 	
 		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
-		op = fnOH.getOp()
 		
-		with fnOH.parameterModificationContext() :
+		with fnOH.parameterModificationContext() as op :
 			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
 			op["cp"]["a"].setNumericValue( 10101 )
 			
