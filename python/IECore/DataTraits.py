@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,11 +32,6 @@
 #
 ##########################################################################
 
-## \file DataTraits.py
-#  Provides some utility functions for inspecting Data objects/classes and their respective element datas.
-#
-# \ingroup python
-
 import string
 import datetime
 import _IECore as IECore
@@ -46,6 +41,7 @@ from Log import *
 # have one single value on it and are not IMath data types.
 # VectorData, CompoundData and IMath-type Data are not simple.
 # Returns a boolean indicating if the given object is a simple Data.
+## \ingroup python
 def isSimpleDataType(obj):
 
 	if not isinstance(obj, IECore.Data):
@@ -63,6 +59,7 @@ def isSimpleDataType(obj):
 ##	Utility function that recognizes objects that are numeric simple types. That means,
 #	have one single value on it, and it is numeric. For example, IntData. But not
 #	IntVectorData, nor CharData which just accepts characters (up to now).
+## \ingroup python
 def isSimpleNumericDataType(obj):
 	if not isinstance(obj, IECore.Data):
 		return False
@@ -78,6 +75,7 @@ def isSimpleNumericDataType(obj):
 
 ## Utility function that recognizes objects that hold values as matrices.
 # For example the IMath types: V2f, M33f, Color3f. But not vectors of those types.
+## \ingroup python
 def isMatrixDataType(obj):
 
 	if not hasattr(obj.__class__, "value"):
@@ -90,6 +88,7 @@ def isMatrixDataType(obj):
 
 ## Utility function that returns ``True`` if a Data object obj could be created with a dict.
 #
+## \ingroup python
 def isMappingDataType(obj):
 	objClass = type(obj)
 	info = __dataTypesConversionDict.get(objClass, None)
@@ -101,6 +100,7 @@ def isMappingDataType(obj):
 
 ## Utility function that returns ``True`` if a Data object obj could be created from a list.
 #
+## \ingroup python
 def isSequenceDataType(obj):
 	objClass = type(obj)
 	info = __dataTypesConversionDict.get(objClass, None)
@@ -210,6 +210,7 @@ __dataTypesConversionDict = {
 }
 
 ## Function that returns a list of Data derived classes.
+## \ingroup python
 def getDataDerivedTypes():
 
 	dataTypesList = __dataTypesConversionDict.keys()
@@ -220,6 +221,7 @@ def getDataDerivedTypes():
 # used to instantiate the Data type.
 # For example, if the Data class returns true from isSequenceType(), then this function returns the type 'list'.
 # See also: valueTypeFromSequenceType()
+## \ingroup python
 def elementTypeFromDataType(dataType):
 
 	dataInfo = __dataTypesConversionDict[dataType]
@@ -229,6 +231,7 @@ def elementTypeFromDataType(dataType):
 
 ## Returns the type (class) used on each indexed value on the given sequence type.
 # For example: it returns 'int' for the IntVectorData class.
+## \ingroup python
 def valueTypeFromSequenceType(sequenceType):
 
 	dataInfo = __dataTypesConversionDict[sequenceType]
@@ -239,6 +242,7 @@ def valueTypeFromSequenceType(sequenceType):
 	return dataInfo[2]
 
 ## Returns the Data class that is instantiable given an element type.
+## \ingroup python
 def dataTypeFromElementType(elementType):
 
 	for (dataType, value) in __dataTypesConversionDict.items():
@@ -250,6 +254,7 @@ def dataTypeFromElementType(elementType):
 
 ## Returns the Data class that is instantiable given a element data object.
 # It also instantiate container Data objects, like VectorData and CompoundData, given the proper list and dict.
+## \ingroup python
 def dataTypeFromElement(element):
 
 	# threat the VectorData type exception...
@@ -267,6 +272,7 @@ def dataTypeFromElement(element):
 # obj  -  any IECore simple structure objects (Color3f, V3f, ...) or python simple types (int, str, list, dict...)
 # Returns:
 # A Data object that holds the given element data object.
+## \ingroup python
 def dataFromElement(element):
 
 	# An empty list or empty set is ambiguous - we don't know if it should be a StringVectorData, IntVectorData, or anything

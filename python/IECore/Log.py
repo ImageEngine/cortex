@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,12 +32,6 @@
 #
 ##########################################################################
 
-## \file Log.py
-#
-# Defines useful functions for logging of messages.
-#
-# \ingroup python
-
 import os, sys, traceback
 import inspect, string
 import warnings
@@ -63,6 +57,7 @@ def initializeLog(level = None):
 # If the current message handler is also a LevelFilteredMessageHandler, this function pushes
 # it from the stack and register the new one.
 #
+## \ingroup python
 def setLogLevelByName( levelName ):
 
 	setLogLevel( MessageHandler.stringAsLevel( levelName ) )
@@ -74,6 +69,7 @@ def setLogLevelByName( levelName ):
 # This function sets the $IECORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
 # If the current message handler is also a LevelFilteredMessageHandler, this function pushes
 # it from the stack and register the new one.
+## \ingroup python
 def setLogLevel( level ):
 
 	assert( isinstance( level, MessageHandler.Level ) and level!=MessageHandler.Level.Invalid )
@@ -101,6 +97,7 @@ def __getCallContext(frame = None, withLineNumber = False):
 
 ## Help function to track dificult errors.
 # It prints the callstack giving the module name and the line number.
+## \ingroup python
 def showCallStack():
 
 	f = inspect.currentframe().f_back.f_back
@@ -114,6 +111,7 @@ def showCallStack():
 
 ## Use this function to get information about the context where the exception happened.
 # Returns a tuple of strings (location, stack trace) for the captured exception.
+## \ingroup python
 def exceptionInfo():
 	(exceptionType, exception, trace) = sys.exc_info()
 	etb = traceback.extract_tb(trace)
@@ -126,6 +124,7 @@ def exceptionInfo():
 ## Sends debug messages to the current message handler and appends a full description of the catched exception.
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
+## \ingroup python
 def debugException(*args):
 
 	# same as debug
@@ -143,6 +142,7 @@ def debugException(*args):
 # Every message include information about the module and line number from where this function was called.
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
+## \ingroup python
 def debug(*args):
 
 	stdStr = string.join(map(str, args), " ")
@@ -151,6 +151,7 @@ def debug(*args):
 # Sends warning messages to the current message handler.
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
+## \ingroup python
 def warning(*args):
 
 	stdStr = string.join(map(str, args), " ")
@@ -159,6 +160,7 @@ def warning(*args):
 # Sends info messages to the current message handler.
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
+## \ingroup python
 def info(*args):
 
 	stdStr = string.join(map(str, args), " ")
@@ -167,6 +169,7 @@ def info(*args):
 # Sends error messages to the current message handler.
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
+## \ingroup python
 def error(*args):
 
 	stdStr = string.join(map(str, args), " ")

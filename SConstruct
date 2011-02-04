@@ -1082,6 +1082,22 @@ def createOpStubs( target, source, env ):
 	for op in env['INSTALL_IECORE_OPS']:
 		createOpStub( env.subst( "$INSTALL_IECORE_OP_PATH" ), op[0], op[1] ) 
 
+def readLinesMinusLicense( f ) :
+
+	if isinstance( f, basestring ) :
+		f = open( f, "r" )
+
+	result = []
+	skippedLicense = False
+	for line in f.readlines() :
+	
+		if not line.startswith( "#" ) :
+			skippedLicense = True
+		if skippedLicense :
+			result.append( line )
+			
+	return result
+
 # Builder action that munges a nicely organised python module into a much less nicely organised one
 # that doxygen will understand. Otherwise it puts every class implemented in its own file
 # into its own namespace and the docs get mighty confusing.
@@ -1093,19 +1109,21 @@ def createDoxygenPython( target, source, env ) :
 	if not os.path.isdir( target ) :
 		os.makedirs( target )
 	
-	inFile = open( source, "r" )
 	outFile = open( target + "/__init__.py", "w" )
 	
-	for line in inFile.readlines() :
+	for line in readLinesMinusLicense( source ) :
 	
-		line = line.strip()
+		outFile.write( line )
+	
 		if line.startswith( "import" ) :
 		
 			# copy source file over to target directory
 			words = line.split()
 			fileName = os.path.dirname( source ) + "/" + words[1] + ".py"
 			if os.path.isfile( fileName ) :
-				shutil.copy( fileName, target )
+				destFile = open( target + "/" + words[1] + ".py", "w" )
+				for l in readLinesMinusLicense( fileName ) :
+					destFile.write( l )
 		
 		elif line.startswith( "from" ) :
 		
@@ -1113,12 +1131,11 @@ def createDoxygenPython( target, source, env ) :
 			words = line.split()
 			fileName = os.path.dirname( source ) + "/" + words[1] + ".py"
 			if os.path.isfile( fileName ) :
-				skippedLicense = False
-				for line in open( fileName ) :
-					if not line.startswith( "#" ) :
-						skippedLicense = True
-					if skippedLicense :
-						outFile.write( line )
+				
+				outFile.write( "\n" )
+				
+				for line in readLinesMinusLicense( fileName ) :
+					outFile.write( line )
 				
 				outFile.write( "\n" )
 	
@@ -2341,6 +2358,7 @@ if doConfigure :
 		f.close()
 		
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
+		docEnv.NoCache( docs )
 		
 		for modulePath in ( "python/IECore", "python/IECoreRI", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "contrib/IECoreHoudini/python/IECoreHoudini" ) :
 			
@@ -2348,6 +2366,7 @@ if doConfigure :
 			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )
 			docEnv.Depends( mungedModule, glob.glob( modulePath + "/*.py" ) )
 			docEnv.Depends( docs, mungedModule )
+			docEnv.NoCache( mungedModule )
 		
 		for inputDirectory in doxyfile["INPUT"].split( ' ' ) :
 		

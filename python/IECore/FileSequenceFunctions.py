@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,11 +32,6 @@
 #
 ##########################################################################
 
-## \file FileSequenceFunctions.py
-# Defines functions useful for creating and manipulating FileSequence objects.
-#
-# \ingroup python
-
 import re
 import os
 import re
@@ -52,6 +47,7 @@ IECore.FileSequence.fileNameValidator = staticmethod( lambda : re.compile( "^([^
 # specified by sequence2, where sequence1 and sequence2 are
 # FileSequence objects of equal length. This function is safe even if the
 # files specified by each sequence overlap.
+## \ingroup python
 def mv( sequence1, sequence2 ) :
 
 	if __sequencesClash( sequence1, sequence2 ) :
@@ -69,6 +65,7 @@ def mv( sequence1, sequence2 ) :
 # specified by sequence2, where sequence1 and sequence2 are
 # FileSequence objects of equal length. This function is safe even if the
 # files specified by each sequence overlap.
+## \ingroup python
 def cp( sequence1, sequence2 ) :
 
 	if __sequencesClash( sequence1, sequence2 ) :
@@ -78,6 +75,7 @@ def cp( sequence1, sequence2 ) :
 		shutil.copy( src, dst )
 
 ## Removes all the files specified by the sequence.
+## \ingroup python
 def rm( sequence ) :
 
 	for f in sequence.fileNames() :
@@ -86,6 +84,7 @@ def rm( sequence ) :
 
 ## Concetenates all the files specified by the sequence to stdout
 # \todo Allow destination file to be specified
+## \ingroup python
 def cat( sequence ) :
 
 	for f in sequence.fileNames() :

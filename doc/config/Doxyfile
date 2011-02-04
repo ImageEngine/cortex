@@ -633,24 +633,17 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = include/IECore \
-                         src/IECore \
                          doc/python/IECore \
                          include/IECoreRI \
-                         src/IECoreRI \
                          doc/python/IECoreRI \
                          include/IECoreNuke \
-                         src/IECoreNuke \
                          include/IECoreGL \
-                         src/IECoreGL \
                          doc/python/IECoreGL \
                          include/IECoreTruelight \
-                         src/IECoreTruelight \
                          include/IECoreMaya \
-                         src/IECoreMaya \
                          doc/python/IECoreMaya \
                          mel/IECoreMaya \
                          contrib/IECoreHoudini/include \
-                         contrib/IECoreHoudini/src \
                          doc/python/IECoreHoudini
 
 # This tag can be used to specify the character encoding of the source files
@@ -671,7 +664,6 @@ INPUT_ENCODING         = UTF-8
 
 FILE_PATTERNS          = *.h \
                          *.py \
-                         *.cpp \
                          *.mel
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories
@@ -1450,7 +1442,7 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by
 # the preprocessor.
 
-INCLUDE_PATH           =
+INCLUDE_PATH           = include
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the

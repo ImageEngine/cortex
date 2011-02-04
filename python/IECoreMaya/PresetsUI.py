@@ -79,11 +79,11 @@ ClassParameterUI.registerClassMenuCallback( __savePresetMenuModifier )
 ClassVectorParameterUI.registerClassMenuCallback( __savePresetMenuModifierVectorClass )
 ClassVectorParameterUI.registerToolsMenuCallback( __savePresetMenuModifier )
 
-### \group Wrapper classes
+### @name Wrapper functions
 ### These wrappers take only string arguments, to allow the PresetsUI
 ### To be invoked from a evalDeferred call. This is needed to make sure that
 ### all the tasks performed internally by the UI undo in one step.
-### {
+### @{
 def SavePresetUI( nodeName, attribute ) :
 
 	fnPh = FnParameterisedHolder( nodeName )
@@ -97,7 +97,7 @@ def LoadPresetUI( nodeName, attribute ) :
 	rootParam = fnPh.plugParameter( attribute )
 		
 	PresetsUI( nodeName, rootParam ).load()
-### }
+### @}
 
 ### This class provides a UI for loading and saving presets for nodes
 ### derived from the ParameterisedHolder class. Currently, it creates

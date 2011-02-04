@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,7 +65,7 @@ class ImageDisplayDriver : public DisplayDriver
 		/// before imageClose() has been called.
 		ConstImagePrimitivePtr image() const;
 		
-		//! @Image pool
+		//! @name Image pool
 		/// It can be useful to store the images created by ImageDisplayDrivers for
 		/// later retrieval. Images can be stored by passing a StringData
 		/// "handle" parameter to the constructor or to the
