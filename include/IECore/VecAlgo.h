@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,8 +40,8 @@
 
 #include "OpenEXR/ImathVec.h"
 
-/// Putting these operators in the Imath namespace so that the compiler can find them
-/// using argument dependent lookup.
+// Putting these operators in the Imath namespace so that the compiler can find them
+// using argument dependent lookup.
 namespace Imath
 {
 

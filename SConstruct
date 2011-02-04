@@ -36,6 +36,7 @@
 ##########################################################################
 
 import SCons
+import shutil
 import glob
 import sys
 import os
@@ -1080,6 +1081,46 @@ def createOpStub( op_install_path, full_class_name, stub_path ):
 def createOpStubs( target, source, env ):
 	for op in env['INSTALL_IECORE_OPS']:
 		createOpStub( env.subst( "$INSTALL_IECORE_OP_PATH" ), op[0], op[1] ) 
+
+# Builder action that munges a nicely organised python module into a much less nicely organised one
+# that doxygen will understand. Otherwise it puts every class implemented in its own file
+# into its own namespace and the docs get mighty confusing.
+def createDoxygenPython( target, source, env ) :
+
+	target = str( target[0] )
+	source = str( source[0] )
+	
+	if not os.path.isdir( target ) :
+		os.makedirs( target )
+	
+	inFile = open( source, "r" )
+	outFile = open( target + "/__init__.py", "w" )
+	
+	for line in inFile.readlines() :
+	
+		line = line.strip()
+		if line.startswith( "import" ) :
+		
+			# copy source file over to target directory
+			words = line.split()
+			fileName = os.path.dirname( source ) + "/" + words[1] + ".py"
+			if os.path.isfile( fileName ) :
+				shutil.copy( fileName, target )
+		
+		elif line.startswith( "from" ) :
+		
+			# cat source file directly into init file
+			words = line.split()
+			fileName = os.path.dirname( source ) + "/" + words[1] + ".py"
+			if os.path.isfile( fileName ) :
+				skippedLicense = False
+				for line in open( fileName ) :
+					if not line.startswith( "#" ) :
+						skippedLicense = True
+					if skippedLicense :
+						outFile.write( line )
+				
+				outFile.write( "\n" )
 	
 ###########################################################################################
 # Build, install and test the core library and bindings
@@ -2299,7 +2340,14 @@ if doConfigure :
 				
 		f.close()
 		
-		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN $SOURCE" )
+		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
+		
+		for modulePath in ( "python/IECore", "python/IECoreRI", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "contrib/IECoreHoudini/python/IECoreHoudini" ) :
+			
+			module = os.path.basename( modulePath )
+			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )
+			docEnv.Depends( mungedModule, glob.glob( modulePath + "/*.py" ) )
+			docEnv.Depends( docs, mungedModule )
 		
 		for inputDirectory in doxyfile["INPUT"].split( ' ' ) :
 		
