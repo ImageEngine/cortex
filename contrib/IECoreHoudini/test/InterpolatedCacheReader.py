@@ -242,8 +242,8 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		merge = cache.inputs()[0].createOutputNode( "merge" )
 		merge.setInput( 1, group )
 		cache.setInput( 0, merge )
-		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), 3, IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
-		self.assert_( "notData" in i.attributes( 'badObject' ) )
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
+		self.assert_( "notData" in i.attributes( 3, 'badObject' ) )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		self.assert_( "notData" not in result )
 		
@@ -258,8 +258,8 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		merge = cache.inputs()[0].createOutputNode( "merge" )
 		merge.setInput( 1, group )
 		cache.setInput( 0, merge )
-		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), 3, IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
-		self.assert_( "splineColor4fData" in i.attributes( 'badObject' ) )
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
+		self.assert_( "splineColor4fData" in i.attributes( 3, 'badObject' ) )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		self.assert_( "splineColor4fData" not in result )
 	
