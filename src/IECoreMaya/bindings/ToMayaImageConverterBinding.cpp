@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,16 +32,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include "boost/python.hpp"
 
-#include "ImageConverterTest.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/PointerFromSWIG.h"
 
-namespace IECoreMaya
+#include "IECoreMaya/ToMayaImageConverter.h"
+#include "IECoreMaya/StatusException.h"
+#include "IECoreMaya/bindings/ToMayaImageConverterBinding.h"
+
+using namespace IECoreMaya;
+using namespace boost::python;
+
+static void convert( ToMayaImageConverter &c, MImage &i )
 {
-
-void addImageConverterTest(boost::unit_test::test_suite* test)
-{
-	test->add( new ImageConverterTestSuite() );
+	MStatus s =  c.convert( i );
+	StatusException::throwIfError( s );
 }
+
+void IECoreMaya::bindToMayaImageConverter()
+{
+	
+	IECorePython::RunTimeTypedClass<ToMayaImageConverter>()
+		.def( init<IECore::ConstImagePrimitivePtr>() )
+		.def( "convert", &convert )
+	;
+	
+	IECorePython::PointerFromSWIG<MImage>();
 
 }

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -74,6 +74,7 @@ from ToMayaSkinClusterConverterTest import *
 from ToMayaGroupConverterTest import ToMayaGroupConverterTest
 from RunTimeTypedTest import RunTimeTypedTest
 from ToMayaParticleConverterTest import ToMayaParticleConverterTest
+from ImageConverterTest import ImageConverterTest
 
 IECoreMaya.TestProgram(
 

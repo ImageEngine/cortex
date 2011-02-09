@@ -39,7 +39,7 @@
 
 #include "IECoreMaya/ToMayaConverter.h"
 
-#include "IECore/Object.h"
+#include "IECore/ImagePrimitive.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/NumericParameter.h"
 
@@ -56,6 +56,8 @@ class ToMayaImageConverter : public ToMayaConverter
 
 	public :
 
+		ToMayaImageConverter( IECore::ConstImagePrimitivePtr image );
+		
 		typedef enum
 		{
 			Float,
@@ -65,12 +67,7 @@ class ToMayaImageConverter : public ToMayaConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaImageConverter, ToMayaImageConverterTypeId, ToMayaConverter );
 
 		/// Converts the srcParameter() value to an MImage value.
-		/// \todo Replace this function with one that calls a pure virtual doConversion
-		/// function taking the contents of parameters(), like the other converters. We might also
-		/// want a converter to create a new image rather than just fill an existing one.
-		virtual MStatus convert( MImage &image ) const;
-
-		static ToMayaImageConverterPtr create( const IECore::ObjectPtr src );
+		MStatus convert( MImage &image ) const;
 
 		IECore::IntParameterPtr typeParameter();
 		IECore::ConstIntParameterPtr typeParameter() const;
@@ -89,8 +86,6 @@ class ToMayaImageConverter : public ToMayaConverter
 		void writeAlpha( MImage &image, const T &alpha ) const;
 
 		void writeDepth( MImage &image, IECore::FloatVectorDataPtr channelData ) const;
-
-		ToMayaImageConverter( IECore::ConstObjectPtr obj );
 
 };
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -122,7 +122,7 @@ MStatus ImagePlaneHolder::loadImageMap ( const MString &fileName, int frame, MIm
 				return MS::kFailure;
 			}
 
-			ToMayaImageConverterPtr toMaya = ToMayaImageConverter::create( imageResult );
+			ToMayaImageConverterPtr toMaya = new ToMayaImageConverter( imageResult );
 
 			MStatus s = toMaya->convert( image );
 			if ( !s )
