@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,12 +42,14 @@
 #include "maya/MTime.h"
 #include "maya/MAngle.h"
 #include "maya/MDistance.h"
+#include "maya/MFnPluginData.h"
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/ToMayaPlugConverter.h"
+#include "IECoreMaya/ObjectData.h"
 
 using namespace IECoreMaya;
 using namespace IECore;
@@ -222,6 +224,22 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 		s = plug.setValue( (short) data->readable() );
 		return (s);
 	}
+
+	// simple types failed - see if it'll accept ObjectData
+	MFnAttribute fnAttr( attr );
+	if( fnAttr.accepts( ObjectData::id ) )
+	{		
+		MFnPluginData fnData;
+		MObject data = fnData.create( ObjectData::id );
+		
+		ObjectData *oData = dynamic_cast<ObjectData *>( fnData.data() );
+		oData->setObject( toConvert->copy() );
+
+		return plug.setValue( data );
+	}
+
+	// doesn't accept ObjectData, have a bash at storing
+	// an arbitrary MObject.
 
 	try
 	{

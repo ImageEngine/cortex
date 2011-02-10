@@ -75,6 +75,7 @@ from ToMayaGroupConverterTest import ToMayaGroupConverterTest
 from RunTimeTypedTest import RunTimeTypedTest
 from ToMayaParticleConverterTest import ToMayaParticleConverterTest
 from ImageConverterTest import ImageConverterTest
+from ObjectDataTest import ObjectDataTest
 
 IECoreMaya.TestProgram(
 

@@ -13,6 +13,8 @@ Improvements :
 
 * IECoreMaya::ToMayaImageConverter and IECoreMaya::FromMayaImageConverter now have python bindings. See test/IECoreMaya/ImageConverterTest.py for examples.
 
+* ToMayaPlugConverter can now set plugs which expect IECoreMaya::ObjectData values.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
