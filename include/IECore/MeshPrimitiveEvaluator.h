@@ -171,8 +171,6 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		const UVBoundTree *uvBoundTree() const;
 		//@}
 		
-		typedef tbb::mutex NormalsMutex;
-		
 	protected:
 
 		ConstMeshPrimitivePtr m_mesh;
@@ -205,7 +203,8 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		mutable bool m_haveSurfaceArea;
 		mutable float m_surfaceArea;
 
-		NormalsMutex &normalsMutex() const;
+		typedef tbb::mutex NormalsMutex;
+		mutable NormalsMutex m_normalsMutex;
 		mutable bool m_haveAverageNormals;
 		typedef int VertexIndex;
 		typedef int TriangleIndex;

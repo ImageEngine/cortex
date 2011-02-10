@@ -44,15 +44,11 @@
 #include "IECore/MeshPrimitiveEvaluator.h"
 #include "IECore/TriangleAlgo.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/Deleter.h"
-#include "IECore/ClassData.h"
 
 using namespace IECore;
 using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( MeshPrimitiveEvaluator );
-
-static IECore::ClassData< MeshPrimitiveEvaluator, MeshPrimitiveEvaluator::NormalsMutex > g_classData;
 
 static PrimitiveEvaluator::Description< MeshPrimitiveEvaluator > g_registraar = PrimitiveEvaluator::Description< MeshPrimitiveEvaluator >();
 
@@ -309,8 +305,6 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 	{
 		m_uvTree = 0;
 	}
-	
-	 g_classData.create( this );
 }
 
 PrimitiveEvaluatorPtr MeshPrimitiveEvaluator::create( ConstPrimitivePtr primitive )
@@ -330,8 +324,6 @@ MeshPrimitiveEvaluator::~MeshPrimitiveEvaluator()
 
 	delete m_uvTree;
 	m_uvTree = 0;
-	
-	g_classData.erase( this );
 }
 
 ConstPrimitivePtr MeshPrimitiveEvaluator::primitive() const
@@ -474,11 +466,6 @@ void MeshPrimitiveEvaluator::calculateMassProperties() const
 	m_haveMassProperties = true;
 }
 
-MeshPrimitiveEvaluator::NormalsMutex &MeshPrimitiveEvaluator::normalsMutex() const
-{
-	return g_classData[ this ];
-}
-
 void MeshPrimitiveEvaluator::calculateAverageNormals() const
 {
 	assert( m_mesh );
@@ -488,7 +475,7 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 		return;
 	}
 	
-	NormalsMutex::scoped_lock lock( normalsMutex() );
+	NormalsMutex::scoped_lock lock( m_normalsMutex );
 	if( m_haveAverageNormals )
 	{
 		// another thread may have calculated the normals while we waited for the mutex
