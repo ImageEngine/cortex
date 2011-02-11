@@ -24,3 +24,5 @@ Changes :
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.
+
+* TriangulateOp no longer changes the mesh interpolation.

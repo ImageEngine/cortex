@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -294,7 +294,7 @@ struct TriangulateOp::TriangulateFn
 			faceVertexIdStart += numFaceVerts;
 		}
 
-		m_mesh->setTopology( newVerticesPerFace, newVertexIds );
+		m_mesh->setTopology( newVerticesPerFace, newVertexIds, m_mesh->interpolation() );
 
 		/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
 		assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
