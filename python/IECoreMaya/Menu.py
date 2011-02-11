@@ -87,7 +87,7 @@ class Menu( UIElement ) :
 			# assume parent is a control which can accept a popup menu
 			menu = maya.cmds.popupMenu( parent=parent, button=button, allowOptionBoxes=True )
 
-		maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( self.__postMenu, menu, definition, useInterToUI=useInterToUI ) )
+		maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( self.__postMenu, menu, definition, useInterToUI ) )
 		
 		UIElement.__init__( self, menu )
 	
@@ -99,7 +99,7 @@ class Menu( UIElement ) :
 			# presumably a command in string form
 			return cb
 
-	def __postMenu( self, parent, definition, useInterToUI=True, *args ) :
+	def __postMenu( self, parent, definition, useInterToUI, *args ) :
 
 		if callable( definition ) :
 			definition = definition()
@@ -130,7 +130,7 @@ class Menu( UIElement ) :
 				if not name in done :
 					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, tearOff=True )
 					subMenuDefinition = definition.reRooted( "/" + name + "/" )
-					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, subMenuDefinition, useInterToUI=useInterToUI ) )
+					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, subMenuDefinition, useInterToUI ) )
 					done.add( name )
 			else :
 
@@ -141,7 +141,7 @@ class Menu( UIElement ) :
 				elif item.subMenu :
 
 					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, boldFont=boldFont, italicized=italicized )
-					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, item.subMenu, useInterToUI=useInterToUI ) )
+					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, item.subMenu, useInterToUI ) )
 
 				else :
 
