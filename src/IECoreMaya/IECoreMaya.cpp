@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,9 +36,6 @@
 #include <cassert>
 
 #include "boost/format.hpp"
-
-#include "IECoreGL/IECoreGL.h"
-#include "IECoreGL/GL.h"
 
 #include "maya/MPxNode.h"
 #include "maya/MPxLocatorNode.h"
@@ -98,11 +95,6 @@ MStatus initialize(MFnPlugin &plugin)
 
 	if (g_refCount == 0)
 	{
-
-		if( MGlobal::mayaState()==MGlobal::kInteractive )
-		{
-			IECoreGL::init( true );
-		}
 
 		// register plugin
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -111,6 +111,8 @@ MBoundingBox DrawableHolder::boundingBox() const
 
 void DrawableHolder::draw( M3dView &view, const MDagPath &path, M3dView::DisplayStyle style, M3dView::DisplayStatus displayStatus )
 {
+	IECoreGL::init( true );
+
 	IECoreGL::ConstScenePtr s = scene();
 	if( !s )
 	{
