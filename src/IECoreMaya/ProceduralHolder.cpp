@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,7 +60,6 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/AngleConversion.h"
-#include "IECore/ClassData.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnTypedAttribute.h"
@@ -113,18 +112,14 @@ MObject ProceduralHolder::aComponentBoundCenterX;
 MObject ProceduralHolder::aComponentBoundCenterY;
 MObject ProceduralHolder::aComponentBoundCenterZ;
 
-typedef std::map<IECore::InternedString, Imath::M44f> ComponentTransformsMap;
-static ClassData<ProceduralHolder, ComponentTransformsMap> g_componentTransforms;
 
 ProceduralHolder::ProceduralHolder()
 	:	m_boundDirty( true ), m_sceneDirty( true ), m_lastRenderer( 0 )
 {
-	g_componentTransforms.create( this );
 }
 
 ProceduralHolder::~ProceduralHolder()
 {
-	g_componentTransforms.erase( this );
 }
 
 void ProceduralHolder::postConstructor()
@@ -489,9 +484,7 @@ MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
 	{
 
 		scene(); // to get the component maps up to date
-		
-		const ComponentTransformsMap &componentTransforms = g_componentTransforms[this];
-		
+				
 		MArrayDataHandle queryHandle = dataBlock.inputArrayValue( aComponentQueries );
 
 		MArrayDataHandle transformHandle = dataBlock.outputArrayValue( aComponentTransform );
@@ -505,9 +498,9 @@ MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
 		
 			MString name = queryHandle.inputValue().asString();
 			
-			ComponentTransformsMap::const_iterator tIt = componentTransforms.find( name.asChar() );
+			ComponentTransformsMap::const_iterator tIt = m_componentTransforms.find( name.asChar() );
 			ComponentsMap::const_iterator cIt = m_componentsMap.find( name.asChar() );
-			if( tIt!=componentTransforms.end() && cIt!=m_componentsMap.end() )
+			if( tIt!=m_componentTransforms.end() && cIt!=m_componentsMap.end() )
 			{				
 				Imath::V3f translate, shear, rotate, scale;
 				Imath::extractSHRT( convert<Imath::M44f>( tIt->second ), scale, shear, rotate, translate );
@@ -764,7 +757,7 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 		m_componentsMap[name] = ComponentsMap::mapped_type( 0, group );
 	}
 	
-	g_componentTransforms[this][name] = groupTransform;
+	m_componentTransforms[name] = groupTransform;
 
 	const IECoreGL::Group::ChildContainer &children = group->children();
 
