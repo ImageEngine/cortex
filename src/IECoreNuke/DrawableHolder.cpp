@@ -174,8 +174,6 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 			m_scene->setCamera( 0 );
 
 		}
-		/// \todo I think python errors should be handled in the python wrappers - why should C++
-		/// code have to catch boost::python exceptions?
 		catch( boost::python::error_already_set )
 		{
 			IECorePython::ScopedGILLock gilLock;
