@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -118,28 +118,25 @@ void DrawableHolder::draw_handle( DD::Image::ViewerContext *ctx )
 		IECoreGL::ConstScenePtr s = scene();
 		if( s )
 		{
-			GLint prevProgram;
-			glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-				
-				// nuke apparently uses the name stack to determine which handle is under
-				// the mouse. the IECoreGL::NameStateComponent will ruin this by overwriting
-				// the current name. we work around this by pushing another name onto the stack.
-				// the NameStateComponent will overwrite this name, but nuke will still detect
-				// hits on the drawable using the original name one level lower in the stack.
-				glPushName( 0 );
+					
+			// nuke apparently uses the name stack to determine which handle is under
+			// the mouse. the IECoreGL::NameStateComponent will ruin this by overwriting
+			// the current name. we work around this by pushing another name onto the stack.
+			// the NameStateComponent will overwrite this name, but nuke will still detect
+			// hits on the drawable using the original name one level lower in the stack.
+			glPushName( 0 );
 
-					try
-					{
-						s->render();
-					}
-					catch( const std::exception &e )
-					{
-						IECore::msg( IECore::Msg::Error, "DrawableHolder::draw_handle", e.what() );
-					}
+				try
+				{
+					s->render();
+				}
+				catch( const std::exception &e )
+				{
+					IECore::msg( IECore::Msg::Error, "DrawableHolder::draw_handle", e.what() );
+				}
 
-				glPopName();
+			glPopName();
 	
-			glUseProgram( prevProgram );
 		}
 	}	
 }

@@ -128,10 +128,7 @@ void DrawableHolder::draw( M3dView &view, const MDagPath &path, M3dView::Display
 	}
 	
 	view.beginGL();
-	
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-		
+			
 		// maya can sometimes leave an error from it's own code,
 		// and we don't want that to confuse us in our drawing code.
 		while( glGetError()!=GL_NO_ERROR )
@@ -165,9 +162,7 @@ void DrawableHolder::draw( M3dView &view, const MDagPath &path, M3dView::Display
 		{
 			IECore::msg( IECore::Msg::Error, "DrawableHolder::draw", e.what() );
 		}
-	
-	glUseProgram( prevProgram );
-		
+			
 	view.endGL();
 }
 

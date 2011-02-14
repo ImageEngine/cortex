@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,6 +65,8 @@ void Scene::render( const State * state ) const
 		m_camera->render( state );
 	}
 
+	GLint prevProgram;
+	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
 
 		State::bindBaseState();
@@ -72,6 +74,7 @@ void Scene::render( const State * state ) const
 		root()->render( state );
 
 	glPopAttrib();
+	glUseProgram( prevProgram );
 }
 
 void Scene::render() const

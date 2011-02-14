@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,11 @@ class BoxPrimitive : public Primitive
 
 		virtual Imath::Box3f bound() const;
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+
+		/// Utility function which draws a box using GL_LINES.
+		static void renderWireframe( const Imath::Box3f &box );
+		/// Utility function which draws a box using GL_QUADS.
+		static void renderSolid( const Imath::Box3f &box );
 
 	protected :
 

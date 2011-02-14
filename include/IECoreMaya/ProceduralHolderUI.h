@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,20 +37,18 @@
 
 #include <map>
 
-#include "IECore/Object.h"
 #include "OpenEXR/ImathColor.h"
+
+#include "maya/MPxSurfaceShapeUI.h"
+
+#include "IECore/Object.h"
 
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/DisplayStyle.h"
 
-#include "maya/MPxSurfaceShapeUI.h"
-
-
-
 namespace IECoreGL
 {
 IE_CORE_FORWARDDECLARE( State );
-IE_CORE_FORWARDDECLARE( BoxPrimitive );
 IE_CORE_FORWARDDECLARE( Group );
 IE_CORE_FORWARDDECLARE( StateComponent );
 }
@@ -81,8 +79,6 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 		};
 
 		static void setWireFrameColors( MDrawRequest &request, M3dView::DisplayStatus status );
-
-		IECoreGL::BoxPrimitivePtr m_boxPrimitive;
 
 		typedef std::map< IECoreGL::GroupPtr, IECoreGL::StatePtr > StateMap;
 

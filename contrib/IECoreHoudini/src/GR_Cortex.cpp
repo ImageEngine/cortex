@@ -3,6 +3,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -159,10 +161,7 @@ IECoreGL::ConstStatePtr GR_Cortex::getDisplayState(
 void GR_Cortex::renderScene( IECoreGL::ConstScenePtr scene, IECoreGL::ConstStatePtr displayState )
 {
     // render our scene
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
 	scene->render( displayState );
-	glUseProgram( prevProgram );
 }
 
 // Renders an object directly (nbrmally from an opHolder)
@@ -183,10 +182,7 @@ void GR_Cortex::renderObject( const IECore::Object *object, IECoreGL::ConstState
 	scene->setCamera( 0 ); // houdini will be providing the camera
 	
 	// now render
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
 	scene->render( displayState );
-	glUseProgram( prevProgram );
 }
 
 // general cortex render function, takes a gu_detail and uses the NodePassData attribute

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 
 #include "DDImage/Op.h"
 
-#include "IECoreGL/BoxPrimitive.h"
 #include "IECoreGL/Scene.h"
 
 #include "IECoreNuke/ParameterisedHolder.h"
@@ -93,7 +92,7 @@ class ProceduralHolder : public ParameterisedHolderOp
 		IECoreGL::ScenePtr m_scene;
 		DD::Image::Hash m_sceneHash;
 		
-		IECoreGL::BoxPrimitivePtr m_bound;
+		Imath::Box3f m_bound;
 		DD::Image::Hash m_boundHash;
 		
 		DD::Image::Matrix4 m_transform;

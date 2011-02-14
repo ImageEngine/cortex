@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,8 +56,8 @@ class Scene : public Renderable
 		virtual ~Scene();
 
 		/// Renders the scene, using the passed state as
-		/// the root state - as with all Renderable calls
-		/// this state must already have been bound.
+		/// the root state - it is not necessary for this
+		/// state to already be bound.
 		virtual void render( const State *state ) const;
 		/// Convenience function to bind a default state
 		/// and then call render() with it.
