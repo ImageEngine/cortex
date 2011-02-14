@@ -2190,7 +2190,7 @@ if doConfigure :
 		#=====
 		# Houdini tests
 		#=====
-		houdiniTestEnv = testEnv.Copy()
+		houdiniTestEnv = testEnv.Clone()
 		
 		houdiniTestLibPaths = houdiniEnv.subst( ":".join( [ "./lib" ] + houdiniPythonModuleEnv["LIBPATH"] ) )
 		if haveRI :
