@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -104,7 +104,10 @@ static DataPtr evaluatePrimitiveVariable( std::vector<GxSurfacePoint> &points, c
 {
 	typename T::Ptr result = new T;
 	result->writable().resize( points.size() );
-	GxEvaluateSurface( points.size(), &(points[0]), primVarName.c_str(), result->baseSize() / points.size(), result->baseWritable() );
+	if( points.size() )
+	{
+		GxEvaluateSurface( points.size(), &(points[0]), primVarName.c_str(), result->baseSize() / points.size(), result->baseWritable() );
+	}
 	return result;
 }
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -252,6 +252,44 @@ class GXEvaluatorTest( unittest.TestCase ) :
 		# check we get the successes and failures we expect
 		
 		self.assertEqual( points["gxStatus"], expectedStatuses )
+		
+	def testZeroLengthInput( self ) :
+	
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ) ) )
+		e = IECoreRI.GXEvaluator( m )
+		
+		self.assertEqual( e.numFaces(), 1 )
+		
+		points = e.evaluate(
+			IECore.IntVectorData( [] ),
+			IECore.FloatVectorData( [] ),
+			IECore.FloatVectorData( [] ),
+			[ "P", "s", "t" ],
+		)
+		
+		self.failUnless( len( points ), 3 )
+		self.failUnless( "P" in points )
+		self.failUnless( "s" in points )
+		self.failUnless( "t" in points )
+		
+		self.assertEqual( len( points["P"] ), 0 )
+		self.assertEqual( len( points["s"] ), 0 )
+		self.assertEqual( len( points["t"] ), 0 )
+		
+		points = e.evaluate(
+			IECore.FloatVectorData( [] ),
+			IECore.FloatVectorData( [] ),
+			[ "P", "s", "t" ],
+		)
+		
+		self.failUnless( len( points ), 3 )
+		self.failUnless( "P" in points )
+		self.failUnless( "s" in points )
+		self.failUnless( "t" in points )
+		
+		self.assertEqual( len( points["P"] ), 0 )
+		self.assertEqual( len( points["s"] ), 0 )
+		self.assertEqual( len( points["t"] ), 0 )
 		
 if __name__ == "__main__":
     unittest.main()

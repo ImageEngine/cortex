@@ -26,3 +26,5 @@ Bug fixes :
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.
 
 * TriangulateOp no longer changes the mesh interpolation.
+
+* IECoreRI::GXEvaluator no longer crashes when zero length arrays are passed to the evaluate() method.
