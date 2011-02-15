@@ -28,3 +28,5 @@ Bug fixes :
 * TriangulateOp no longer changes the mesh interpolation.
 
 * IECoreRI::GXEvaluator no longer crashes when zero length arrays are passed to the evaluate() method.
+
+* Fixed bug which caused results from the wrong face to be returned when using the GXEValuator s,t based query.

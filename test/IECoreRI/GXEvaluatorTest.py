@@ -291,5 +291,25 @@ class GXEvaluatorTest( unittest.TestCase ) :
 		self.assertEqual( len( points["s"] ), 0 )
 		self.assertEqual( len( points["t"] ), 0 )
 		
+	def testFailingQuads( self ) :
+	
+		mesh = IECore.ObjectReader( "test/IECoreRI/data/gxProblemMesh.cob" ).read()
+		seeds = IECore.ObjectReader( "test/IECoreRI/data/gxProblemSeeds.cob" ).read()
+				
+		e = IECoreRI.GXEvaluator( mesh )
+		
+		points = e.evaluate( 
+			seeds["s"].data,
+			seeds["t"].data,
+			[ "P", "s", "t" ],
+		)
+		
+		pIn = seeds["P"].data
+		pOut = points["P"]
+		for i in range( 0, len( points["P"] ) ) :
+		
+			d = ( pIn[i] - pOut[i] ).length()
+			self.assertAlmostEqual( d, 0, 5 )
+		
 if __name__ == "__main__":
     unittest.main()

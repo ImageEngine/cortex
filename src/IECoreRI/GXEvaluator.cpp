@@ -185,7 +185,7 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s,
 		
 	buildSTEvaluator();
 	
-	PrimitiveEvaluator::ResultPtr evaluatorResult = m_stEvaluator->createResult();
+	MeshPrimitiveEvaluator::ResultPtr evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_stEvaluator->createResult() );
 	IntVectorDataPtr fData = new IntVectorData;
 	FloatVectorDataPtr uData = new FloatVectorData;
 	FloatVectorDataPtr vData = new FloatVectorData;
@@ -198,13 +198,14 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s,
 	const std::vector<float> &sReadable = s->readable();
 	const std::vector<float> &tReadable = t->readable();
 	
-	const PrimitiveVariable &fPrimVar = m_stEvaluator->primitive()->variables.find( "f" )->second;
 	const PrimitiveVariable &uPrimVar = m_stEvaluator->primitive()->variables.find( "u" )->second;
 	const PrimitiveVariable &vPrimVar = m_stEvaluator->primitive()->variables.find( "v" )->second;
 	for( size_t i=0; i<numPoints; i++ )
 	{
 		bool success = m_stEvaluator->pointAtUV( Imath::V2f( sReadable[i], tReadable[i] ), evaluatorResult );
-		fWritable[i] = success ? evaluatorResult->intPrimVar( fPrimVar ) : 0;
+		// dividing by 2 maps from the triangle index to the original face index of the mesh before it
+		// was triangulated - we can guarantee this because the original mesh was all quads.
+		fWritable[i] = success ? evaluatorResult->triangleIndex() / 2 : 0;
 		uWritable[i] = success ? evaluatorResult->floatPrimVar( uPrimVar ) : 0;
 		vWritable[i] = success ? evaluatorResult->floatPrimVar( vPrimVar ) : 0;
 		statusWritable[i] = success;
@@ -293,7 +294,6 @@ void GXEvaluator::buildSTEvaluator() const
 	mesh->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, vertexData->member<FloatVectorData>( "t" ) );
 	mesh->variables["u"] = PrimitiveVariable( PrimitiveVariable::Vertex, uData );
 	mesh->variables["v"] = PrimitiveVariable( PrimitiveVariable::Vertex, vData );
-	mesh->variables["f"] = PrimitiveVariable( PrimitiveVariable::Vertex, faceIndicesData );
 	
 	TriangulateOpPtr op = new TriangulateOp();
 	op->inputParameter()->setValue( mesh );
