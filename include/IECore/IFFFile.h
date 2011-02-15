@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,8 +68,7 @@ class IFFFile : public RefCounted
 			public :
 
 				Tag( );
-				/// \todo Should be const char *
-				Tag( char *buffer );
+				Tag( const char *buffer );
 				Tag( std::string str );
 				std::string name();
 				int id();
@@ -174,7 +173,7 @@ class IFFFile : public RefCounted
 		
 		// reads data from the char buffer into a more specific buffer, accounting for byte order
 		template<typename T>
-		static void readData( char *dataBuffer, T *attrBuffer, unsigned long n );
+		static void readData( const char *dataBuffer, T *attrBuffer, unsigned long n );
 };
 
 } // namespace IECore

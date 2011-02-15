@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -113,7 +113,7 @@ void IFFFile::Chunk::readData( T *dataBuffer, unsigned long n )
 }
 
 template<typename T>
-void IFFFile::readData( char *dataBuffer, T *attrBuffer, unsigned long n )
+void IFFFile::readData( const char *dataBuffer, T *attrBuffer, unsigned long n )
 {
 	for( unsigned long i=0; i < n; i++ )
 	{

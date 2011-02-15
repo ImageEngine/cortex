@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -241,7 +241,7 @@ IFFFile::Tag::Tag() : m_a( '\0' ), m_b( '\0' ), m_c( '\0' ), m_d( '\0' ), m_id( 
 {
 }
 
-IFFFile::Tag::Tag( char *buffer ) : m_a( buffer[0] ), m_b( buffer[1] ), m_c( buffer[2] ), m_d( buffer[3] )
+IFFFile::Tag::Tag( const char *buffer ) : m_a( buffer[0] ), m_b( buffer[1] ), m_c( buffer[2] ), m_d( buffer[3] )
 {
 	int intBuffer[1];
 	
