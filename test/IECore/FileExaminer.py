@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -62,6 +62,21 @@ class TestFileExaminer( unittest.TestCase ) :
 
 		d = e.dependencies()
 
+		self.assertEqual( len( expectedDependencies ), len( d ) )
+		for ed in expectedDependencies :
+			self.assert_( ed in d )
+
+	def testNukeWithSpacesInFileNames( self ) :
+	
+		e = FileExaminer.create( "test/IECore/data/nukeScripts/dependenciesWithSpaces.nk" )
+		
+		d = e.dependencies()
+		
+		expectedDependencies = [
+			"/tmp/thisFileHas Some Spaces.####.exr 1-10",
+			"/tmp/thisFileHas Some SpacesToo.####.exr 1-10",
+		]
+				
 		self.assertEqual( len( expectedDependencies ), len( d ) )
 		for ed in expectedDependencies :
 			self.assert_( ed in d )
