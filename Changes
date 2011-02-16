@@ -32,3 +32,5 @@ Bug fixes :
 * Fixed bug which caused results from the wrong face to be returned when using the GXEValuator s,t based query.
 
 * Fixed bugs which prevented NukeFileExaminer working with spaces in filenames or with Nuke's new # based padding syntax.
+
+* Fixed bug which caused SequenceLsOp to perform modificationTime comparisons in the wrong timezone.

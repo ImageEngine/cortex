@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -158,12 +158,12 @@ class SequenceLsOp( Op ) :
 								# \todo Use a TimePeriodParameter here instead of seaprate start/end times
 								DateTimeParameter(
 									name = "startTime",
-									description = "The start time at which to make modification time comparisons against",
+									description = "The (local) start time at which to make modification time comparisons against",
 									defaultValue = datetime.datetime.now()
 								),
 								DateTimeParameter(
 									name = "endTime",
-									description = "The end time at which to make modification time comparisons against",
+									description = "The (local) end time at which to make modification time comparisons against",
 									defaultValue = datetime.datetime.now()
 								),
 
@@ -311,19 +311,19 @@ class SequenceLsOp( Op ) :
 
 			assert( matchFn )
 
-			def matchModifcationTime( sequence ) :
+			def matchModificationTime( sequence ) :
 
 				# If any file in the sequence matches, we have a match.
 				for sequenceFile in sequence.fileNames() :
 
 					st = os.stat( sequenceFile )
-					modifiedTime = datetime.datetime.utcfromtimestamp( st.st_mtime )
+					modifiedTime = datetime.datetime.fromtimestamp( st.st_mtime )
 					if matchFn( modifiedTime ) :
 						return True
 
 				return False
 
-			filters.append( matchModifcationTime )
+			filters.append( matchModificationTime )
 
 		def matchAllFilters( sequence ) :
 
