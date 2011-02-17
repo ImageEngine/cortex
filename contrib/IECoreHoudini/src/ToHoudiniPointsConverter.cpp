@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,7 +58,15 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	GEO_PointList newPoints = appendPoints( geo, points->variableData<V3fVectorData>( "P" ) );
+	const IECore::V3fVectorData *positions = points->variableData<V3fVectorData>( "P" );
+	if ( !positions )
+	{
+		// accept "position" so we can convert the results of the PDCParticleReader without having to rename things
+		/// \todo: Consider making the ParticleReader create a P if it doesn't exist for Cortex 6.
+		positions = points->variableData<V3fVectorData>( "position" );
+	}
+	
+	GEO_PointList newPoints = appendPoints( geo, positions );
 	if ( !newPoints.entries() )
 	{
 		return false;
