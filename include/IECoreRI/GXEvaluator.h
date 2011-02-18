@@ -39,6 +39,7 @@
 
 #include "boost/noncopyable.hpp"
 
+/// \todo Can this include be relocated so you don't need a direct dependency on 3Delight in the consuming code?
 #include "gx.h"
 
 #include "IECore/Primitive.h"
@@ -50,6 +51,7 @@ namespace IECoreRI
 
 /// This class simplifies the use of the Gx API by
 /// wrapping it to accept IECore datatypes for input and output.
+/// \todo Can we make this refcounted? It will help simplify most threaded implementations.
 class GXEvaluator : public boost::noncopyable
 {
 
