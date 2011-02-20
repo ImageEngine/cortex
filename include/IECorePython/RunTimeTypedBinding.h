@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,7 +63,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 #define IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\
 	virtual IECore::TypeId typeId() const\
 	{\
-		ScopedGILLock gilLock;\
+		IECorePython::ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "typeId" ) )\
 		{\
 			boost::python::object res = f(); \
@@ -72,7 +73,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	}\
 	virtual const char *typeName() const\
 	{\
-		ScopedGILLock gilLock;\
+		IECorePython::ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "typeName" ) )\
 		{\
 			boost::python::object res = f(); \
@@ -82,7 +83,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	}\
 	virtual bool isInstanceOf( IECore::TypeId typeId ) const\
 	{\
-		ScopedGILLock gilLock;\
+		IECorePython::ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
 		{\
 			boost::python::object res = f( typeId ); \
@@ -92,7 +93,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	}\
 	virtual bool isInstanceOf( const char *typeName ) const\
 	{\
-		ScopedGILLock gilLock;\
+		IECorePython::ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
 		{\
 			boost::python::object res = f( typeName ); \
