@@ -178,7 +178,6 @@ State::CreatorMap *State::creators()
 void State::bindBaseState()
 {
 	glEnable( GL_BLEND );
-	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_COLOR_MATERIAL );
 	glColorMaterial( GL_FRONT_AND_BACK, GL_DIFFUSE );
 	float black[4] = { 0, 0, 0, 0 };

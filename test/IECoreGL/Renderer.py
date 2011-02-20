@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -117,6 +118,7 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:procedural:reentrant" ), BoolData( True ) )
 			if withFreeType() :
 				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "mesh" ) )
+			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( True ) )
 
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
 			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
@@ -175,6 +177,9 @@ class TestRenderer( unittest.TestCase ) :
 			if withFreeType() :
 				r.setAttribute( "gl:textPrimitive:type", StringData( "sprite" ) )
 				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "sprite" ) )
+				
+			r.setAttribute( "gl:depthTest", BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( False ) )	
 
 			r.worldEnd()
 		
@@ -976,6 +981,48 @@ class TestRenderer( unittest.TestCase ) :
 		r.procedural( p )
 		r.worldEnd()
 
+	def testDepthTest( self ) :
+	
+		def doTest( depthTest, r, g, b ) :
+		
+			renderer = Renderer()
+			renderer.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+			renderer.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+
+			renderer.camera( "main", {
+					"projection" : IECore.StringData( "orthographic" ),
+					"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+					"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+					"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				}
+			)
+			renderer.display( os.path.dirname( __file__ ) + "/output/depthTest.tif", "tif", "rgba", {} )
+
+			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+
+			with IECore.WorldBlock( renderer ) :
+
+				renderer.setAttribute( "gl:depthTest", IECore.BoolData( depthTest ) )
+
+				renderer.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+				renderer.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+				m.render( renderer )
+
+				renderer.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+				renderer.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) } )
+				m.render( renderer )
+
+			i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/depthTest.tif" ).read()
+			for p in i["R"].data :
+				self.assertEqual( p, r )
+			for p in i["G"].data :
+				self.assertEqual( p, g )
+			for p in i["B"].data :
+				self.assertEqual( p, b )
+			
+		doTest( True, 1, 0, 0 )
+		doTest( False, 0, 1, 0 )
+		
 	def tearDown( self ) :
 
 		files = [
@@ -983,6 +1030,7 @@ class TestRenderer( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/output/testImage.tif",
 			os.path.dirname( __file__ ) + "/output/testStackBug.tif",
 			os.path.dirname( __file__ ) + "/output/proceduralTest.tif",
+			os.path.dirname( __file__ ) + "/output/depthTest.tif",
 		]
 
 		for f in files :

@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -186,6 +187,11 @@ typedef TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId> PolygonS
 template<>
 void PolygonSmoothingStateComponent::bind() const;
 
+/// Used to specify enable state of GL_DEPTH_TEST
+typedef TypedStateComponent<bool, DepthTestStateComponentTypeId> DepthTestStateComponent;
+template<>
+void DepthTestStateComponent::bind() const;
+
 // \todo: implement CurrentSpace, ShaderSpace, CameraSpace, ScreenSpace, RasterSpace and NDCSpace like in Renderman interface.
 enum RendererSpace
 {
@@ -212,6 +218,7 @@ IE_CORE_DECLAREPTR( PointColorStateComponent );
 IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
 IE_CORE_DECLAREPTR( PointSmoothingStateComponent );
+IE_CORE_DECLAREPTR( DepthTestStateComponent );
 IE_CORE_DECLAREPTR( CullingSpaceStateComponent );
 IE_CORE_DECLAREPTR( CullingBoxStateComponent );
 IE_CORE_DECLAREPTR( ProceduralThreadingStateComponent );

@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -181,6 +182,26 @@ void PolygonSmoothingStateComponent::bind() const
 }
 
 template class TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId>;
+
+// depth specialisations and instantiations
+//////////////////////////////////////////////////////////////////////
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( DepthTestStateComponent, bool, true );
+
+template<>
+void DepthTestStateComponent::bind() const
+{
+	if( m_value )
+	{
+		glEnable( GL_DEPTH_TEST );
+	}
+	else
+	{
+		glDisable( GL_DEPTH_TEST );
+	}
+}
+
+template class TypedStateComponent<bool, DepthTestStateComponentTypeId>;
 
 // instantiation of simple types
 //////////////////////////////////////////////////////////////////////
