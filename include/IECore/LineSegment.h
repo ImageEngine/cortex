@@ -80,9 +80,9 @@ class LineSegment
 		/// t ranges from 0 at p0 to 1 at p1.
 		T operator() ( BaseType t ) const;
 
-		/// p0 - p1
+		/// p1 - p0
 		T direction() const;
-		/// (p0 - p1).normalized()
+		/// (p1 - p0).normalized()
 		T normalizedDirection() const;
 
 		/// Distance between p0 and p1
