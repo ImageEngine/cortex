@@ -23,6 +23,8 @@ Changes :
 
 * Removed deprecated methods classParameterModificationContext, setClassParameterClass and setClassVectorParameterClasses from IECoreMaya.FnParameterisedHolder. The parameterModificationContext method should be used instead.
 
+* Removed deprecated IECore.initializeLog function - a FilteredMessageHandler created based on IECORE_LOG_LEVEL is automatically created now anyway.
+
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.

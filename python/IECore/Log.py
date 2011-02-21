@@ -37,18 +37,6 @@ import inspect, string
 import warnings
 from IECore import *
 
-## \todo: remove me for major version 6!
-def initializeLog(level = None):
-	
-	warnings.warn( "Do not use initializeLog.", DeprecationWarning, 2 )
-	
-	if level is None:
-		level = LevelFilteredMessageHandler.defaultLevel()
-	else:
-		level = MessageHandler.stringAsLevel( level )
-
-	setLogLevel( level )
-
 ## Set the environment variable and the current LevelFilteredMessageHandler.
 # Parameters:
 # level: a string with the name of the log level as defined in MessageHandler.Level.
