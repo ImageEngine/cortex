@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,6 +53,7 @@ namespace IECore
 /// influences per iteration and the unlocked weights will be normalized accordingly. There is an optional vertexIndices
 /// parameter which applies smoothing to user chosen vertices only. In this case, the smoothing weights will still be
 /// interpolated from all connected vertices, regardless of which vertices have been selected.
+/// \ingroup skinningGroup
 class SmoothSmoothSkinningWeightsOp : public ModifyOp
 {
 	public :

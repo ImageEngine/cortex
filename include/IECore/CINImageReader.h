@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ namespace IECore
 /// The CINImageReader reads Kodak Cineon (CIN) files.
 /// Currently, only the overwhelmingly popular 10-bit log-encoded pixel-interlaced
 /// 32-bit word boundary format is loaded.
+/// \ingroup ioGroup
 class CINImageReader : public ImageReader
 {
 

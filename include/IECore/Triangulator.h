@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,7 @@ namespace IECore
 
 /// The Triangulator template class performs triangulation of simple planar polygons. It
 /// uses a MeshBuilder class to build the triangulated mesh.
+/// \ingroup geometryProcessingGroup
 template<typename PointIterator, typename MeshBuilder = MeshPrimitiveBuilder >
 class Triangulator : public RefCounted
 {

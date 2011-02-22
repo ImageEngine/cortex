@@ -49,6 +49,7 @@ namespace IECore
 /// to increase the contrast between the most important joints from the lesser ones.
 /// The shape of the step function varies from linear to a hard step function with the contrast ratio parameter and the
 /// middle contrast point is defined by contrast center parameter.
+/// \ingroup skinningGroup
 class ContrastSmoothSkinningWeightsOp : public ModifyOp
 {
 	public :

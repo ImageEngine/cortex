@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 //! \file MatrixAlgo.h
 /// Defines useful operations on Imath::Matrix types.
+/// \ingroup mathGroup
 
 #ifndef IE_CORE_MATRIXALGO_H
 #define IE_CORE_MATRIXALGO_H

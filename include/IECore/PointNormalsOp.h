@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// normals for particle simulations and the like rather than surface reconstruction.
 /// \todo This was written for a production and then never needed. The normals it produces
 /// are somewhat noisy - we could probably do with improving the process.
+/// \ingroup geometryProcessingGroup
 class PointNormalsOp : public Op
 {
 	public :

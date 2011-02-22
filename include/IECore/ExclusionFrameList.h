@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@ namespace IECore
 
 /// This is the simplest FrameList derived type, and it has few uses as it simply
 /// returns an empty list.
+/// \ingroup fileSequenceGroup
 class ExclusionFrameList : public FrameList
 {
 	public:

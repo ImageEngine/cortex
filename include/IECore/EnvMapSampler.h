@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,8 @@ namespace IECore
 /// of light positions and orientations based on a lat-long environment
 /// map image.
 /// \todo: use SphericalToEuclideanTransform that is based on right-hand coordinate system. Currently it is left-hand to match 3delight environment light mapping. But maya and nuke and the spherical harmonics implementation in IECore are right-handed.
+/// \ingroup renderingGroup
+/// \ingroup imageProcessingGroup
 class EnvMapSampler : public Op
 {
 	public :

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,8 @@ namespace IECore
 // Based on "An efficient representation for irradiance environment maps." by Ramamoorthi, Ravi and Hanrahan, Pat - 2001.
 // Using 3 bands you get diffuse irradiance environment maps.
 // Using more bands you get sharper maps ( for specular convolution ).
+/// \ingroup imageProcessingGroup
+/// \ingroup shGroup
 class ImageConvolveOp : public ChannelOp
 {
 	public:

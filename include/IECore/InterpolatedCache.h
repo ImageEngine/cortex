@@ -53,7 +53,8 @@ IE_CORE_FORWARDDECLARE( FileSequence );
 /// \todo It might be great to pass interpolation and oversamples calculator to each read method rather
 /// than have them store as state. This would allow different interpolation and oversampling per call and per thread.
 /// If we did this I think we should look at replacing the OversamplesCalculator class with some more sensible
-/// Time or TimeSampler class, and passing everything in one argument. 
+/// Time or TimeSampler class, and passing everything in one argument.
+/// \ingroup ioGroup
 class InterpolatedCache : public RefCounted
 {
 	public :

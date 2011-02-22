@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -43,6 +43,9 @@
 
 namespace IECore
 {
+
+IE_CORE_FORWARDDECLARE( SmoothSkinningData )
+
 /// Defines a data class for storing smooth skinning data along with influenceNames and their respective pre-bind matrices.
 /// SmoothSkinningData stores bind information for points that can be deformed using multiple weighted transforms.
 /// The most common usecase is probably smooth skinning / smooth binding of points on a geometry to a skeleton hierarchy.
@@ -81,9 +84,7 @@ namespace IECore
 /// The 'pointInfluenceIndices' are referring to the index of our data in the 'influencePose' and 'influenceNames'
 /// arrays. In our example, the 4th point is influenced by 0.9*trfA and 0.1*trfB. The 2nd point is influenced by 1.0*trfA
 /// and the third point is influenced by 50% from both infA and infB.
-
-IE_CORE_FORWARDDECLARE( SmoothSkinningData )
-
+/// \ingroup skinningGroup
 class SmoothSkinningData : public Data
 {
 	public:

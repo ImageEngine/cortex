@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,17 +45,18 @@
 namespace IECore
 {
 
-// This class computes Spherical Harmonics triple product integrals, also called tensors.
-// It is used on the SphericalHarmonicsTransferMatrix and the product of two SH objects.
-// Work based on: 
-// "Some properties of the coupling coefﬁcients of real spherical harmonics and their relation to Gaunt coefﬁcients"
-// By Herbert H.H. Homeier, E. Otto Steinborn, 1996.
-// I've based on equation 26 as opposed to the optimized special case equations. 
-// In order to get the triple product integrals I had to ignore the conjugate of U on equation 26. 
-// Gaunt and Wigner 3J symbols computation based on:
-// Wolfram Mathworld : http://mathworld.wolfram.com/Wigner3j-Symbol.html and
-// Sage Documentation : http://www.sagemath.org/doc/reference/sage/functions/wigner.html
-// Lucio Moser - March 2010
+/// This class computes Spherical Harmonics triple product integrals, also called tensors.
+/// It is used on the SphericalHarmonicsTransferMatrix and the product of two SH objects.
+/// Work based on: 
+/// "Some properties of the coupling coefﬁcients of real spherical harmonics and their relation to Gaunt coefﬁcients"
+/// By Herbert H.H. Homeier, E. Otto Steinborn, 1996.
+/// I've based on equation 26 as opposed to the optimized special case equations. 
+/// In order to get the triple product integrals I had to ignore the conjugate of U on equation 26. 
+/// Gaunt and Wigner 3J symbols computation based on:
+/// Wolfram Mathworld : http://mathworld.wolfram.com/Wigner3j-Symbol.html and
+/// Sage Documentation : http://www.sagemath.org/doc/reference/sage/functions/wigner.html
+/// Lucio Moser - March 2010
+/// \ingroup shGroup
 class SphericalHarmonicsTensor : private boost::noncopyable
 {
 	public :

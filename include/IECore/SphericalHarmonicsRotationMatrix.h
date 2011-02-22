@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,37 +41,36 @@
 namespace IECore
 {
 
-/*
-* Rotation class for Spherical Harmonics.
-* Implements complex spherical harmonics rotation as described in 
-* Choi, Cheol Ho et al, "Rapid and stable determination of rotation
-* matrices between spherical harmonics by direct recursion", J. Chem.
-* Phys. Vol 111, No. 19, 1999, pp 8825-8831.
-*
-* In order to actually work, I've changed the following equations: 
-* Equation 8.7: I used transposed W instead of the hermitian conjugate of W. That's the only way that 
-*     the solution for R at equation 8.15 can be computed from F and G at 5.4-5.5 and 8.4-8.7. 
-* Equation 8.10: looks wrong because it always compute the same value for m!=0. 
-*     Figuring out the correct values for alpha and beta that fit the equations 8.11-8.14 is hard.
-*     Instead, I've reapplied equation 8.7 and found the following relationships that substitutes 8.11-8.14:
-*     i=0,j=0: R(i,j) = F(0,0) + i*G(0,0) ( G(0,0) is always zero )
-*     i>0,j>0 or i<0,j<0: R(i,j) = sign(j)*((-1)^|j|)*F(-|i|,|j| + F(-|i|,-|j|)
-*     i<0,j>0 or i>0,j<0: R(i,j) = ((-1)^|j|*G(-|i|,|j|) + sign(j)*G(-|i|,-|j|)
-*     i=0,j>0 or i>0,j=0: R(i,j) = sqrt(2)*F(-|i|,-|j|)
-*     i=0,j<0 or i<0,j=0: R(i,j) = sign(j+.5)*sqrt(2)*G(-|i|,-|j|)
-*
-* Lucio Moser March 2009
-* 
-* Additional changes to the original equations:
-* The resulting SH rotation was not matching IECore/OpenEXR rotation conventions ( right-hand rule for X, Y and Z ).
-* In order to match it I've reverted signs on the following cells of the M44 rotation matrix 
-* before computing the complex rotation matrix:
-* R(0,2), R(2,0), R(1,2), R(2,1).
-*
-* Lucio Moser May 2009
-*
-* \todo Current implementation does not take advantage of the matrix sparsity.
-*/
+/// Rotation class for Spherical Harmonics.
+/// Implements complex spherical harmonics rotation as described in 
+/// Choi, Cheol Ho et al, "Rapid and stable determination of rotation
+/// matrices between spherical harmonics by direct recursion", J. Chem.
+/// Phys. Vol 111, No. 19, 1999, pp 8825-8831.
+/// 
+/// In order to actually work, I've changed the following equations: 
+/// Equation 8.7: I used transposed W instead of the hermitian conjugate of W. That's the only way that 
+/// 	the solution for R at equation 8.15 can be computed from F and G at 5.4-5.5 and 8.4-8.7. 
+/// Equation 8.10: looks wrong because it always compute the same value for m!=0. 
+/// 	Figuring out the correct values for alpha and beta that fit the equations 8.11-8.14 is hard.
+/// 	Instead, I've reapplied equation 8.7 and found the following relationships that substitutes 8.11-8.14:
+/// 	i=0,j=0: R(i,j) = F(0,0) + i*G(0,0) ( G(0,0) is always zero )
+/// 	i>0,j>0 or i<0,j<0: R(i,j) = sign(j)*((-1)^|j|)*F(-|i|,|j| + F(-|i|,-|j|)
+/// 	i<0,j>0 or i>0,j<0: R(i,j) = ((-1)^|j|*G(-|i|,|j|) + sign(j)*G(-|i|,-|j|)
+/// 	i=0,j>0 or i>0,j=0: R(i,j) = sqrt(2)*F(-|i|,-|j|)
+/// 	i=0,j<0 or i<0,j=0: R(i,j) = sign(j+.5)*sqrt(2)*G(-|i|,-|j|)
+/// 
+/// Lucio Moser March 2009
+/// 
+/// Additional changes to the original equations:
+/// The resulting SH rotation was not matching IECore/OpenEXR rotation conventions ( right-hand rule for X, Y and Z ).
+/// In order to match it I've reverted signs on the following cells of the M44 rotation matrix 
+/// before computing the complex rotation matrix:
+/// R(0,2), R(2,0), R(1,2), R(2,1).
+/// 
+/// Lucio Moser May 2009
+/// 
+/// \todo Current implementation does not take advantage of the matrix sparsity.
+/// \ingroup shGroup 
 template < typename V >
 class SphericalHarmonicsRotationMatrix
 {

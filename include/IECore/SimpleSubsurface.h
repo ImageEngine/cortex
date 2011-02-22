@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,7 @@ namespace IECore
 /// A simple subsurface scattering implementation using a hierarchical pointcloud. Rather
 /// than use the standard dipole approximation it allows the falloff to be controlled
 /// explicitly using a spline.
+/// \ingroup renderingGroup
 class SimpleSubsurface : public IECore::RefCounted
 {
 

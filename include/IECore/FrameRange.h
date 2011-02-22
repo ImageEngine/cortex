@@ -42,6 +42,7 @@ namespace IECore
 
 /// The FrameRange class simply stores an integer range consisting of a start, end and step.
 /// Exceptions are thrown if these members are modified in such a way as to create an invalid range.
+/// \ingroup fileSequenceGroup
 class FrameRange : public FrameList
 {
 	public:

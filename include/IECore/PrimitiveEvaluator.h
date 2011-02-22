@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ IE_CORE_FORWARDDECLARE( PrimitiveEvaluator );
 /// from a given UV coordinate, etc. Individual primitive types derive their own evaluators from this interface, and register
 /// them by creating static instances of PrimitiveEvaluator::Description. The evaluator takes an internal copy of the primitive,
 /// so subsequent changes to it will not be reflected in the evaluator's results.
+/// \ingroup geometryProcessingGroup
 class PrimitiveEvaluator : public RunTimeTyped
 {
 	public:

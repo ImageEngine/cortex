@@ -34,6 +34,7 @@
 
 //! \file VecAlgo.h
 /// Defines additional functions for operating on Imath::Vec2 and Imath::Vec3 types.
+/// \ingroup mathGroup
 
 #ifndef IECORE_VECALGO_H
 #define IECORE_VECALGO_H

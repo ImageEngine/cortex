@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@ namespace IECore
 
 /// A template class to tranform Imath random number generators
 /// into a model of STL RandomNumberGenerator function objects.
+/// \ingroup mathGroup
 template<typename T>
 class ImathRandAdapter
 {

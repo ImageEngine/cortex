@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,11 +44,11 @@ namespace IECore
 {
 
 /// Defines a transformation matrix that supports scale and rotation pivots in the same way Maya defines MTransformationMatrix.
-// Provides direct access to the transformation components and a utility function that builds the final matrix. The matrix is built
-// with the following operations:
-// translate( -scalePivot ) * scale( scale ) * shear( shear ) * translate( scalePivot ) * translate( scalePivotTranslation ) * translate( -rotatePivot ) * rotate( rotationOrientation ) * rotate( rotate ) * translate( rotatePivot ) * translate( rotatePivotTranslation) * translate( translate )
-// \todo add more utility methods.
-
+/// Provides direct access to the transformation components and a utility function that builds the final matrix. The matrix is built
+/// with the following operations:
+/// translate( -scalePivot ) * scale( scale ) * shear( shear ) * translate( scalePivot ) * translate( scalePivotTranslation ) * translate( -rotatePivot ) * rotate( rotationOrientation ) * rotate( rotate ) * translate( rotatePivot ) * translate( rotatePivotTranslation) * translate( translate )
+/// \todo add more utility methods.
+/// \ingroup mathGroup
 template< class T >
 class TransformationMatrix
 {

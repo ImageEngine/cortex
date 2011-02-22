@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,6 +54,8 @@ IE_CORE_FORWARDDECLARE( CompoundObject )
 /// by the doRenderState() virtual method, which gives ParameterisedProcedurals the
 /// opportunity to specify any attribute state they need to exist before the procedural
 /// itself is declared.
+/// \ingroup renderingGroup
+/// \ingroup coreGroup
 class ParameterisedProcedural : public VisibleRenderable, public ParameterisedInterface
 {
 	public:

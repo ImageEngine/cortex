@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@ namespace IECoreMaya
 
 /// This template class can convert from various IECore TypedVectorData types
 /// into various maya array types.
+/// \ingroup conversionGroup
 template<typename From, typename To>
 class ToMayaArrayDataConverter : public ToMayaObjectConverter
 {

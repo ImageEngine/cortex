@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,19 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Scene );
 
+/// \addtogroup environmentGroup
+///
+/// <b>IECOREGL_SHADER_PATHS</b><br>
+/// <b>IECOREGL_SHADER_INCLUDE_PATHS</b><br>
+/// <b>IECOREGL_TEXTURE_PATHS</b><br>
+/// <b>IECORE_FONT_PATHS</b><br>
+/// Used to specify default resource locations for the IECoreGL::Renderer.
+
+/// The IECoreGL::Renderer class implements the IECore::Renderer interface to
+/// allow rendering to OpenGL. Immediate mode rendering allows the generation of
+/// images and deferred mode rendering allows scenes to be captured for later interactive
+/// display.
+/// \ingroup renderingGroup
 class Renderer : public IECore::Renderer
 {
 	public :

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,7 @@ namespace IECore
 /// Each new influence requires a name, a pose matrix, and an index representing it's position
 /// in the influence list. The new influences will be added one at a time and each index will
 /// refer to the influence list at the time that the associated influence is being added.
+/// \ingroup skinningGroup
 class AddSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :

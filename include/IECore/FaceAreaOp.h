@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,9 @@
 namespace IECore
 {
 
+/// The FaceAreaOp computes area and texture area for each face of a MeshPrimitive,
+/// storing the result as a PrimitiveVariable.
+/// \ingroup geometryProcessingGroup
 class FaceAreaOp : public MeshPrimitiveOp
 {
 	public:

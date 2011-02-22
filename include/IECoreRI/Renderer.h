@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ namespace IECoreRI
 /// However, when rendering live (with a Renderer constructed with Renderer( "" )), procedurals may
 /// be expanded concurrently in multiple threads, and in this case each procedural will see a separate
 /// Renderer instance to provide thread safety.
+/// \ingroup renderingGroup
 class Renderer : public IECore::Renderer
 {
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ namespace IECore
 /// This simply wraps boost::timer with a more flexible interface
 /// that allows for starting and stopping while accumulating
 /// elapsed time. Time values returned are in seconds.
+/// \ingroup utilityGroup
 class Timer
 {
 

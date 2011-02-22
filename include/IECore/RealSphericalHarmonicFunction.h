@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,8 +43,9 @@
 namespace IECore
 {
 
-// Class for computing Real Spherical Harmonics functions
-// Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
+/// Class for computing Real Spherical Harmonics functions
+/// Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
+/// \ingroup shGroup
 template < typename V >
 class RealSphericalHarmonicFunction
 {

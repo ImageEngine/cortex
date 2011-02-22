@@ -61,15 +61,12 @@ MStatus uninitialize( MFnPlugin &plugin );
 ///
 /// <br>
 
-/// \defgroup environmentgroup Environment variables
-///
-/// Various aspects of the IECoreMaya library are configured using environment variables.
-/// These are listed below.
+/// \addtogroup environmentGroup
 ///
 /// <b>IECOREMAYA_DISABLEOUTPUTREDIRECTION</b><br>
 /// By default all python output and IECore::MessageHandler output are redirected through
 /// the appropriate MGlobal::display*() functions, so that they appear in the script editor.
-/// Setting this environment variables disables this redirection, causing the messages to appear
+/// Setting this environment variable disables this redirection, causing the messages to appear
 /// in the shell.
 
 #endif // IE_COREMAYA_COREMAYA_H

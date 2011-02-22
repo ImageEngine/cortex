@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ namespace IECore
 /// motionBegin/motionEnd block containing a Primitive. There's nothing to
 /// stop you from calling motionBegin/motionEnd to construct motion blocks yourself
 /// but this form is simple, and loadable and savable and copyable and all that.
+/// \ingroup renderingGroup
 class MotionPrimitive : public VisibleRenderable
 {
 	public:

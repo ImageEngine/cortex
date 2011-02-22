@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@ namespace IECore
 /// it can impose a maximum number of influences per point, or it can zero specific influences for all points.
 /// There is a parameter to control whether the result should be compressed or left as is. Locks can be applied
 /// in WeightLimit and MaxInfluences mode to control which influences are affected.
+/// \ingroup skinningGroup
 class LimitSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :

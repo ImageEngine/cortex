@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ namespace IECore
 /// The WorldBlock class provides a simple means of ensuring that renderer->worldBegin()
 /// calls are matched by renderer->worldEnd() calls, even in the face of exceptions and
 /// multiple return statements from a function.
+/// \ingroup renderingGroup
 class WorldBlock : public boost::noncopyable
 {
 	public :

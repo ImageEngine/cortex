@@ -2334,21 +2334,7 @@ if doConfigure :
 	if os.path.exists( docEnv["DOXYGEN"] ) :
 	
 		sys.stdout.write( "yes\n" )
-		
-		f = open( "doc/config/Doxyfile", "r" )
-		
-		doxyfile = {}
-		
-		for line in f.readlines() :
-		
-			m = re.compile( "^([ \t])*([A-Z_]+)([ \t])*=([ \t])*(.*)" ).match( line )
-			if m  :
-			
-				pair = m.group( 2,5 )
-				doxyfile[ pair[0] ] = pair[1]
 				
-		f.close()
-		
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
 		docEnv.NoCache( docs )
 		
@@ -2360,15 +2346,7 @@ if doConfigure :
 			docEnv.Depends( docs, mungedModule )
 			docEnv.NoCache( mungedModule )
 		
-		for inputDirectory in doxyfile["INPUT"].split( ' ' ) :
-		
-			for filePattern in doxyfile["FILE_PATTERNS"].split( ' ' ) :
-			
-				docEnv.Depends( docs, glob.glob( inputDirectory + "/" + filePattern ) )
-				
-		docEnv.Depends( docs, doxyfile["HTML_HEADER"] )
-		docEnv.Depends( docs, doxyfile["HTML_FOOTER"] )
-		docEnv.Depends( docs, doxyfile["HTML_STYLESHEET"] )						
+		docEnv.Depends( docs, glob.glob( "include/*/*.h" ) )			
 				
 		docEnv.Alias( "doc", "doc/html/index.html" )
 		

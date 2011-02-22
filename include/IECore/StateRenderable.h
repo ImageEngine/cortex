@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,7 @@ namespace IECore
 /// The StateRenderable class is an abstract base class for all Renderables
 /// which modify RendererState (current attributes, shaders, transforms etc)
 /// but do not cause any objects to be rendered.
+/// \ingroup renderingGroup
 class StateRenderable : public Renderable
 {
 	public:

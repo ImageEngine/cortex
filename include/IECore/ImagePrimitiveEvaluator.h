@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ namespace IECore
 {
 
 /// An implementation of PrimitiveEvaluator to allow queries to be performed on ImagePrimitive instances
+/// \ingroup imageProcessingGroup
 class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:

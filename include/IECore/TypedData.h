@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,6 +57,7 @@ namespace IECore
 /// like baseReadable, baseWritable and baseSize. They are available
 /// only when the data can be seen as an array of a base type. Use
 /// hasBase for checking that.
+/// \ingroup coreGroup
 template <class T>
 class TypedData : public Data
 {

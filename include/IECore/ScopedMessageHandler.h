@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ IE_CORE_DECLAREPTR( MessageHandler );
 /// The ScopedMessageHandler does not actually implement the MessageHandler
 /// interface. Instead it provides a simple way of managing the duration for
 /// which another MessageHandler is current.
+/// \ingroup utilityGroup
 class ScopedMessageHandler : public boost::noncopyable
 {
 

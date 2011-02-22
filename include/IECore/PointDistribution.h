@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,12 +45,18 @@
 namespace IECore
 {
 
+/// \addtogroup environmentGroup
+///
+/// <b>CORTEX_POINTDISTRIBUTION_TILESET</b><br>
+/// Defines the location of the tileset used by IECore::PointDistribution::defaultInstance().
+
 /// An implementation of the following paper for producing nice 2d point
 /// distributions with varying density.
 ///
 ///	Recursive Wang Tiles for Real-Time Blue Noise
 ///	Johannes Kopf, Daniel Cohen-Or, Oliver Deussen, Dani Lischinski
 ///	In ACM Transactions on Graphics 25, 3 (Proc. SIGGRAPH 2006)
+/// \ingroup mathGroup
 class PointDistribution : public boost::noncopyable
 {
 

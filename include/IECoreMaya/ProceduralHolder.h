@@ -63,12 +63,6 @@ IE_CORE_FORWARDDECLARE( Renderer );
 namespace IECoreMaya
 {
 
-/// \addtogroup environmentgroup
-///
-/// <b>IECORE_PROCEDURAL_PATHS</b><br>
-/// This environment variable is used to find procedural classes to be held by the ProceduralHolder
-/// node.
-
 /// The ProceduralHolder class represents implementation of the IECore::Renderer::Procedural
 /// class, presenting the procedural parameters as maya attributes. It also draws a bounding
 /// box for the procedural in the scene.

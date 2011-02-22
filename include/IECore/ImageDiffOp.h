@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,6 +50,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// exceeds a specified threshold. Unless the "skip missing channels" parameter is
 /// enabled, it will also return true if either image contains a channel which
 /// the other doesn't.
+/// \ingroup imageProcessingGroup
 class ImageDiffOp : public Op
 {
 	public :

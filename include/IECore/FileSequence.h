@@ -51,6 +51,7 @@ IE_CORE_FORWARDDECLARE( FileSequence );
 
 /// The FrameList class defines an abstract base class for classes which are
 /// able to generate a list of frame numbers.
+/// \ingroup fileSequenceGroup
 class FileSequence : public RunTimeTyped
 {
 	public:

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,6 +51,7 @@ namespace IECore
 /// corresponding vertex on a third mesh, the direction mesh. In addition rays can be cast in
 /// both directions ("inside" and "outside") with the closest intersection point being used as
 /// the projected point, or in either one of these directions only.
+/// \ingroup geometryProcessingGroup
 class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 {
 	public:

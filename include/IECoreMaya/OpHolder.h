@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,12 +41,6 @@
 
 namespace IECoreMaya
 {
-
-/// \addtogroup environmentgroup
-///
-/// <b>IECORE_OP_PATHS</b><br>
-/// This environment variable is used to find Op classes to be held by the OpHolder
-/// node.
 
 /// The OpHolder class presents op parameters as maya attributes, evaluating the result
 /// of the Op within compute() when appropriate.

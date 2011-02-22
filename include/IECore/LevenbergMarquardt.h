@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,6 +83,7 @@ struct DefaultLevenbergMarquardtTraits;
 /// \todo No need for TypedData. Template on vector iterators instead.
 /// \todo Consider to pass the parameter changed when building the Jacobian. Most of the problems would not affect all the
 ///       outputs when just one parameter changes. Some space for considerable optimization there.
+/// \ingroup mathGroup
 template<typename T, typename ErrorFn, template<typename> class Traits = DefaultLevenbergMarquardtTraits >
 class LevenbergMarquardt : public boost::noncopyable
 {

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 
 /// The MappedRandomPointDistributionOp distributes points over a mesh using a random distribution. Evenness is
 /// approximated by weighting the amount of expected particles per mesh face to be proportional to that face's area.
+/// \ingroup geometryProcessingGroup
 class MappedRandomPointDistributionOp : public UniformRandomPointDistributionOp
 {
 	public :

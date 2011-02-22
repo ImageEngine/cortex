@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,13 @@ IE_CORE_FORWARDDECLARE( CachedReader );
 IE_CORE_FORWARDDECLARE( ModifyOp );
 IE_CORE_FORWARDDECLARE( Object );
 
+/// \addtogroup environmentGroup
+///
+/// <b>IECORE_CACHEDREADER_MEMORY</b><br>
+/// <b>IECORE_CACHEDREADER_PATHS</b><br>
+/// Used to specify the settings for the default CachedReader. See
+/// CachedReader::defaultCachedReader() for more information.
+
 /// The CachedReader class provides a means of loading files
 /// using the Reader subclasses, but caching them in memory to
 /// allow fast repeated loads.
@@ -56,6 +63,7 @@ IE_CORE_FORWARDDECLARE( Object );
 /// \todo Stats on cache misses etc.
 /// \todo Can we do something to make sure that two paths to the same
 /// file (symlinks) result in only a single cache entry?
+/// \ingroup ioGroup
 class CachedReader : public RefCounted
 {
 

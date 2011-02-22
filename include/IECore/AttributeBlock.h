@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ namespace IECore
 /// The AttributeBlock class provides a simple means of ensuring that renderer->attributeBegin()
 /// calls are matched by renderer->attributeEnd() calls, even in the face of exceptions and
 /// multiple return statements from a function.
+/// \ingroup renderingGroup
 class AttributeBlock : public boost::noncopyable
 {
 	public :

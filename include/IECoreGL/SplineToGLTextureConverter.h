@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@ namespace IECoreGL
 
 /// Converts IECore::SplineData objects into IECoreGL::Texture objects.
 /// The default conversion gives an image of 8x512 and it can return a ColorTexture or a LuminanceTexture.
+/// \ingroup conversionGroup
 class SplineToGLTextureConverter : public ToGLConverter
 {
 

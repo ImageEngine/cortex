@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ namespace IECore
 /// The EXRImageWriter class serializes images to the OpenEXR HDR image format.
 /// N.B Both Shake and Nuke seem to assume channel names "R", "G", "B", and "A"
 /// - lowercase do not work as expected.
+/// \ingroup ioGroup
 class EXRImageWriter : public ImageWriter
 {
 

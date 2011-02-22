@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,6 +77,8 @@ struct SmootherStepFalloff
 /// providing a falloff function - see SmoothStepFalloff for an example
 /// of one of these.
 /// \todo 4d ones
+/// \ingroup mathGroup
+/// \ingroup renderingGroup
 template<typename P, typename V, typename F>
 class PerlinNoise
 {

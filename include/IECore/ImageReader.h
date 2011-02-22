@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,6 +54,7 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 /// If 'rawChannels' is On, then it will return an ImagePrimitive with channels that are the close as 
 /// possible to the original data type stored on the file. Note that most image Ops available on IECore
 /// will only work on float data channels.
+/// \ingroup ioGroup
 class ImageReader : public Reader
 {
 

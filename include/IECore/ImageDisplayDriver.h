@@ -46,6 +46,7 @@ namespace IECore
 
 /// Display driver that creates an ImagePrimitive object held
 /// in memory.
+/// \ingroup renderingGroup
 class ImageDisplayDriver : public DisplayDriver
 {
 	public:

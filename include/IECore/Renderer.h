@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -87,6 +87,7 @@ IE_CORE_FORWARDDECLARE( Renderer );
 /// Used to specify data for the purposes of users. The renderer should store the value
 /// and make it available for query, but otherwise it should have no effect. This applies
 /// mostly to the attribute and option calls.
+/// \ingroup renderingGroup
 class Renderer : public RunTimeTyped
 {
 

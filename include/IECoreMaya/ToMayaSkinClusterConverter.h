@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,11 +41,11 @@
 namespace IECoreMaya
 {
 
-/// The ToMayaSkinClusterConverter converts IECore::SmoothSkinningData to the smooth bind data for a maya skinCluster node
-/// and sets the data on the given skinCluster
-
 IE_CORE_FORWARDDECLARE( ToMayaSkinClusterConverter );
 
+/// The ToMayaSkinClusterConverter converts IECore::SmoothSkinningData to the smooth bind data for a maya skinCluster node
+/// and sets the data on the given skinCluster
+/// \ingroup conversionGroup.
 class ToMayaSkinClusterConverter : public ToMayaObjectConverter
 {
 	public:

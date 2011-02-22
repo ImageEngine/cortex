@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ namespace IECore
 /// Template parameters are the key by which the data is accessed and a smart pointer type which can be used
 /// to point to the data.
 /// \threading It should be safe to call the methods of LRUCache from concurrent threads.
+/// \ingroup utilityGroup
 template<typename Key, typename Ptr>
 class LRUCache : private boost::noncopyable
 {

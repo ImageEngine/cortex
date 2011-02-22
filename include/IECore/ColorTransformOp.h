@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ namespace IECore
 /// transform the colors of a Primitive. By default the "Cs" or "R",
 /// "G", and "B" channels are transformed but this can be changed
 /// using the appropriate parameters.
+/// \ingroup imageProcessingGroup
 class ColorTransformOp : public PrimitiveOp
 {
 	public :

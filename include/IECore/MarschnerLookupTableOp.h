@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -76,7 +76,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter );
 ///
 /// NOTE: This this is keyed with the -1.0 values of s/t at 0. In an OpenGL
 /// implementation you may need to use 1-t as your lookup, rather than t.
-
+/// \ingroup renderingGroup
 class MarschnerLookupTableOp : public Op
 {
 	public :

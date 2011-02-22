@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,8 @@ namespace IECoreMaya
 class ToMayaMeshConverter;
 IE_CORE_DECLAREPTR( ToMayaMeshConverter );
 
+/// This class converts IECore::MeshPrimitives to maya mesh objects.
+/// \ingroup conversionGroup
 class ToMayaMeshConverter : public ToMayaObjectConverter
 {
 	public:

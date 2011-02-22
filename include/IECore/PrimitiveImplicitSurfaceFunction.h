@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ namespace IECore
 /// A model of ImplicitSurfaceFunction for creating a signed distance field with respect to a Primitive. This will
 /// only work on continuous surfaces, as it expects the signed distance to be computable from only the closest point
 /// and closest normal.
+/// \ingroup implicitGroup
 class PrimitiveImplicitSurfaceFunction : public ImplicitSurfaceFunction< Imath::V3f, float >
 {
         public:

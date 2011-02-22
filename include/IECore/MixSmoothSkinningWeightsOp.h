@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ namespace IECore
 /// The MixSmoothSkinningWeightsOp mixes two sets of SmoothSkinningData using FloatVectorData to interpolate between the weights.
 /// Both SmoothSkinningData are required to have the same number of points and influences. The FloatVectorData provided represents
 /// interpolation weights for the SmoothSkinningData given to the input parameter. The resulting SmoothSkinningData will be compressed.
+/// \ingroup skinningGroup
 class MixSmoothSkinningWeightsOp : public ModifyOp
 {
 	public :

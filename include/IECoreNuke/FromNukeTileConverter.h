@@ -42,6 +42,8 @@
 namespace IECoreNuke
 {
 
+/// The FromNukeTileConverter converts DD::Image::Tiles into IECore::ImagePrimitives.
+/// \ingroup conversionGroup.
 class FromNukeTileConverter : public FromNukeConverter
 {
 

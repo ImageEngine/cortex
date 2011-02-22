@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,7 @@ namespace IECore
 /// An SRGB->Rec709 op can be constructed from a combination of SRGB->Linear followed by Linear->Rec709. If multiple paths are possible
 /// for a requested conversion then the shorted one is used. Static and dynamic registration mechanisms are provided to allow the
 /// addition of new transformations.
+/// \ingroup imageProcessingGroup
 class ColorSpaceTransformOp : public ImagePrimitiveOp
 {
 	public:

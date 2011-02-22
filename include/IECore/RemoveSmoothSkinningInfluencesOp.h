@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ namespace IECore
 
 /// The RemoveSmoothSkinningInfluencesOp removes influences from the SmoothSkinningData, regardless of
 /// existing weights. It is the user's responsibility to normalize the resulting SmoothSkinningData if desired.
+/// \ingroup skinningGroup
 class RemoveSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :

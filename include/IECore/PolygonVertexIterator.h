@@ -45,6 +45,7 @@ namespace IECore
 /// be a std::vector::const_iterator instantiated from the Data of a PrimitiveVariable.
 /// Generally PolygonVertexIterators aren't created directly, instead they'd be created with
 /// the PolygonIterator::vertexBegin() and PolygonIterator::vertexEnd() methods.
+/// \ingroup geometryProcessingGroup
 template<typename VertexValueIterator, typename VertexIndexIterator=std::vector<int>::const_iterator>
 class PolygonVertexIterator
 {

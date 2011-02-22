@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@ template< typename, typename > class EuclideanToSphericalTransform;
 /// A templated SpaceTransform class to perform Spherical coordinates to Euclidean coordinates.
 /// Spherical coordinates are defined by two angles: phi and theta stored in x and y components of a Imath::Vec2 structure respectively. They can optionally have a third component specifying the radius. So type F can be either Imath::Vec2<> or Imath::Vec3<>.
 /// The theta ranges from 0 to PI and it represents the angle from Z axis. The phi component ranges from 0 to 2*PI and represents the angle of rotation on the XY plane.
+/// \ingroup mathGroup
 template<typename F, typename T>
 class SphericalToEuclideanTransform : public SpaceTransform< F, T >
 {

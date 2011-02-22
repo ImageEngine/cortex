@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -278,5 +278,75 @@ bool withFreeType();
 /// Despite these limitations it is possible to write threaded code making use of a number of useful features of the libraries. See the IECore::PrimitiveEvaluator,
 /// IECore::KDTree and IECore::BoundedKDTree classes for examples of some algorithms which may be used concurrently by parallel threads.
 
+/// \defgroup mathGroup Math
+
+/// \defgroup coreGroup Core
+
+/// \defgroup geometryGroup Geometry
+
+/// \defgroup geometryProcessingGroup Geometry Processing
+
+/// \defgroup skinningGroup Smooth Skinning
+/// \ingroup geometryProcessingGroup
+
+/// \defgroup implicitGroup Implicit Surfaces
+/// \ingroup geometryProcessingGroup
+
+/// \defgroup imageProcessingGroup Image Processing
+
+/// \defgroup renderingGroup Rendering
+
+/// \defgroup shGroup Spherical Harmonics
+/// \ingroup mathGroup
+
+/// \defgroup utilityGroup Utilities
+///
+/// Basic classes and functions.
+
+/// \defgroup fileSequenceGroup File Sequences
+///
+/// Cortex has a robust and easy to use set of classes and functions for representing and manipulating
+/// file sequences.
+/// \ingroup utilityGroup
+
+/// \defgroup ioGroup IO
+///
+/// Cortex provides io operations for many standard industry formats, in addition to a set of native formats.
+/// All IECore::Objects can be serialised to the native .cob file format using the IECore::ObjectWriter
+/// and loaded using the IECore::ObjectReader. Many other formats are supported using a similar pairing of IECore::Reader
+/// and IECore::Writer subclasses. All such classes use Parameters to control the io process.
+///
+/// Random access caching is provided by the IECore::AttributeCache class. Caches created this way can be used with
+/// the IECore::InterpolatedCache class, which provides automatic interpolation of values and threadsafe parallel operation.
+
+/// \defgroup conversionGroup Conversions
+///
+/// Cortex provides conversions to and from native Cortex types and many common types in 3rd party APIs.
+/// Conversions for lightweight types like vectors and matrices are performed using the IECore::convert
+/// template function, which is specialised for most useful types. For conversion of larger types such as
+/// meshes, classes derived from IECore::ToCoreConverter and IECore::FromCoreConverter are used - these utilise Parameters
+/// to allow aspects of the conversion to be controlled.
+
+/// \defgroup environmentGroup Environment variables
+///
+/// Various aspects of the cortex libraries are configured using environment variables.
+/// These are listed below.
+///
+/// <b>IECORE_CONFIG_PATHS</b><br>
+/// Defines a series of paths on which config files may be located. When the IECore python module
+/// loads for the first time all *.py files on these paths will be sourced.
+///
+/// <b>IECORE_OP_PATHS</b><br>
+/// This environment variable is used to search for Op classes to be loaded from disk.
+///
+/// <b>IECORE_OP_PRESET_PATHS</b><br>
+/// Used to save and load presets for use with Ops.
+///
+/// <b>IECORE_PROCEDURAL_PATHS</b><br>
+/// This environment variable is used to search for ParameterisedProcedural classes to be loaded from disk.
+/// node.
+///
+/// <b>IECORE_PROCEDURAL_PRESET_PATHS</b><br>
+/// Used to save and load presets for use with ParameterisedProcedurals.
 
 #endif // IE_CORE_CORE_H

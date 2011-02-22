@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ namespace IECore
 /// webpage for a nice friendly description.
 ///
 /// http://homepages.inf.ed.ac.uk/rbf/HIPR2/hitmiss.htm
+/// \ingroup imageProcessingGroup
 class HitMissTransform : public ChannelOp
 {
 	public:

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,6 +83,7 @@ namespace IECore
 /// \todo Define standard depth channel ("Z"? "depth"?)
 /// \todo I think we should perhaps rethink the centering of the object space. It seems odd that rendering two images
 /// where one has an offset display window should result in them rendering over the top of each other.
+/// \ingroup imageProcessingGroup
 class ImagePrimitive : public Primitive
 {
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -49,11 +49,11 @@
 namespace IECoreMaya
 {
 
-/// The FromMayaSkinClusterConverter converts the smooth bind data on a maya skinCluster node
-/// into IECore::SmoothSkinningData
-
 IE_CORE_FORWARDDECLARE( FromMayaSkinClusterConverter );
 
+/// The FromMayaSkinClusterConverter converts the smooth bind data on a maya skinCluster node
+/// into IECore::SmoothSkinningData.
+/// \ingroup conversionGroup
 class FromMayaSkinClusterConverter : public FromMayaObjectConverter
 {
 

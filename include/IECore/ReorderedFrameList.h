@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,7 @@ namespace IECore
 /// The ReorderedFrameList is a base class for any FrameList classes which
 /// hold a child FrameList and return some reordering of that list in the
 /// asList() method.
+/// \ingroup fileSequenceGroup
 class ReorderedFrameList : public FrameList
 {
 	public:

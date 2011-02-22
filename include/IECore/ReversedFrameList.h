@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ namespace IECore
 /// when rendering a sequence of images, as you get a slow refinement of
 /// the whole sequence, providing earlier information about stuff going on
 /// in the middle and end of the sequence.
+/// \ingroup fileSequenceGroup
 class ReversedFrameList : public ReorderedFrameList
 {
 	public:

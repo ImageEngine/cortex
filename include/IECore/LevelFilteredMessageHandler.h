@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,8 +43,19 @@ namespace IECore
 class LevelFilteredMessageHandler;
 IE_CORE_DECLAREPTR( LevelFilteredMessageHandler );
 
+/// \addtogroup environmentGroup
+///
+/// <b>IECORE_LOG_LEVEL</b><br>
+/// Specifies the default filtering level for messages. Valid values are :
+///
+///   - ERROR
+///   - WARNING
+///   - INFO
+///   - DEBUG
+		
 /// This class implements a FilteredMessageHandler that only passes
 /// messages which have a Level below a certain threshold.
+/// \ingroup utilityGroup
 class LevelFilteredMessageHandler : public FilteredMessageHandler
 {
 	public :

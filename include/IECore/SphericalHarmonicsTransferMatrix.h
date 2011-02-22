@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,10 +41,10 @@
 namespace IECore
 {
 
-// This class represents the transfer matrix for any given SH object.
-// It can be applied to any given SH object by the multiplication operator.
-// \todo: should consider matrix sparsity.
-template< class S >
+/// This class represents the transfer matrix for any given SH object.
+/// It can be applied to any given SH object by the multiplication operator.
+/// \todo: should consider matrix sparsity.
+/// \ingroup shGroup
 class SphericalHarmonicsTransferMatrix
 {
 	public:

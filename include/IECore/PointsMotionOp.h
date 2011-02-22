@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,8 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// The PointsMotionOp creates a MotionPrimitive object from a list of PointsPrimitive objects.
 /// If a point does not exist on any given snapshot then it's non-masked primvars are copied from the closest available snapshot. 
 /// Masked primvars are set to zero.
+/// \ingroup geometryProcessingGroup
+/// \ingroup renderingGroup
 class PointsMotionOp : public Op
 {
 	public :

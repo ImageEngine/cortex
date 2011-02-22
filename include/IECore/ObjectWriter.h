@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,7 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( ObjectParameter )
 
 /// An ObjectWriter writes instances of a single Object to a file with a .cob extension
+/// \ingroup ioGroup
 class ObjectWriter : public Writer
 {
 

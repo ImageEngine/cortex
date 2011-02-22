@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 /// based on some input parameters and returns a result derived from Object.
 /// Parameter objects are used to define both the format of the inputs and
 /// the result.
+/// \ingroup coreGroup
 class Op : public Parameterised
 {
 	public :

@@ -43,6 +43,7 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( Renderer );
 
 /// An abstract class to define objects which are renderable
+/// \ingroup renderingGroup
 class Renderable : public BlindDataHolder
 {
 	public:

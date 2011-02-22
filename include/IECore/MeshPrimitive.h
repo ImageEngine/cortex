@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,6 +51,7 @@ class PolygonIterator;
 /// point of view of the camera - this can be changed at the point of rendering by
 /// setting attributes in the Renderer. This definition of winding order is the same as
 /// the OpenGL and Maya conventions but the opposite of RenderMan's.
+/// \ingroup geometryGroup
 class MeshPrimitive : public Primitive
 {
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@ template< typename, typename > class SphericalToEuclideanTransform;
 /// A templated SpaceTransform class to perform Euclidean to Spherical coordinates.
 /// The Spherical coordinate structure can optionally have a third component specifying the radius. So type T can be either Imath::Vec2<> or Imath::Vec3<>.
 /// Check documentation about SphericalToEuclideanTransform for more details on spherical coordinates.
+/// \ingroup mathGroup
 template<typename F, typename T>
 class EuclideanToSphericalTransform : public SpaceTransform< F, T >
 {

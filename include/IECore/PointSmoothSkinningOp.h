@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -56,7 +56,8 @@ namespace IECore
 /// parameter (which defaults to "P"). Optionally one can also deform a normal V3fVectorData primitive variable (which
 /// defaults to "N"). These variables must have the same number of elements and must match the number of points in the
 /// SmoothSkinningData.
-
+/// \ingroup geometryProcessingGroup
+/// \ingroup skinningGroup
 class PointSmoothSkinningOp : public ModifyOp
 {
 	public:

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,10 +42,11 @@ namespace IECore
 {
 
 /// A base class for warp operations on ImagePrimitive objects.
-// This Op modifies an image by remapping pixels values to other locations.
-// The display window does not change in this process, but the data window may change.
-// The mapping is determined by the derived classes. The base class is responsible for resizing the
-// data window and applying filter on the colors based on the floating point positions returned by warp method.
+/// This Op modifies an image by remapping pixels values to other locations.
+/// The display window does not change in this process, but the data window may change.
+/// The mapping is determined by the derived classes. The base class is responsible for resizing the
+/// data window and applying filter on the colors based on the floating point positions returned by warp method.
+/// \ingroup imageProcessingGroup
 class WarpOp : public ImagePrimitiveOp
 {
 	public:

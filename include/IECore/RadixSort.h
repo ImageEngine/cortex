@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ namespace IECore
 /// A RadixSort implementation derived from Pierre Terdiman's OPCODE library, which has as "free for use in any commercial
 /// or non-commercial program" licence. The RadixSort class maintains state so that successive calls to it are able to exploit any coherence
 /// in the source data. Sorting is done in ascending order.
+/// \ingroup mathGroup
 class RadixSort
 {
 	public:

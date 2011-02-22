@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,8 @@ namespace IECore
 /// it can operate across a broad range of input and output types. The template
 /// parameter N is simply the type of a PerlinNoise instantiation to be used
 /// in generating the turbulence.
+/// \ingroup mathGroup
+/// \ingroup renderingGroup
 template<typename N>
 class Turbulence
 {

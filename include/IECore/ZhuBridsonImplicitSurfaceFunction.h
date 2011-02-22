@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,6 +51,7 @@ namespace IECore
 /// described in "Animating Sand as a Fluid", Zhu & Bridson, Siggraph 2005. 
 /// NB. The paper stipulates that the particle radii should be a close estimate to the distance to the surface,
 /// and that a post-step may sometimes be necessary to remove any artefacts around concave areas.
+/// \ingroup implicitGroup
 template<typename P, typename V>
 class ZhuBridsonImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 {

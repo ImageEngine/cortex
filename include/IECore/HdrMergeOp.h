@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,7 +45,8 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( ObjectParameter )
 
 /// The HdrMergeOp merges a set of images with different exposures into a single HDR image.
-//\todo Take in consideration Alpha channel from input images.
+/// \todo Take in consideration Alpha channel from input images.
+/// \ingroup imageProcessingGroup
 class HdrMergeOp : public Op
 {
 	public :

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ namespace IECore
 
 /// The NormalizeSmoothSkinningWeightsOp normalizes SmoothSkinningData weights between the existing influences for each point
 /// Locks can be applied to the influences and the unlocked weights will be normalized accordingly.
+/// \ingroup skinningGroup
 class NormalizeSmoothSkinningWeightsOp : public ModifyOp
 {
 	public :

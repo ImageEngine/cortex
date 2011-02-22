@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 /// \threading It is not safe to use an instance of this class from multiple concurrent threads. See
 /// the InterpolatedCache class for a threadsafe means of reading the files with automatic
 /// interpolation.
+/// \ingroup ioGroup
 class AttributeCache : public RefCounted
 {
 	public:

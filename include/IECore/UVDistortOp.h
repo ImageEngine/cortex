@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ namespace IECore
 // This Op expects an UV map with the red and green values being normalized coordinates (x,y) from the undistorted image.
 // The normalized coordinates (0,0)x(1,1) in the uv map will map to the display window of the input image.
 // The resulting image will have the same data window as the reference UV map.
+/// \ingroup imageProcessingGroup
 class UVDistortOp : public WarpOp
 {
 	public:

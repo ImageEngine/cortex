@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ IE_CORE_FORWARDDECLARE( FrameList );
 
 /// The FrameList class defines an abstract base class for classes which are
 /// able to generate a list of frame numbers.
+/// \ingroup fileSequenceGroup
 class FrameList : public RunTimeTyped
 {
 	public:

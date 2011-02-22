@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ namespace IECore
 /// a Container type may be specified as well, in which case the range may be specified
 /// by evaluating the beginning and end of the container whenever needed - this form
 /// is of use when items will be removed from the container during iteration.
+/// \ingroup utilityGroup
 template<typename Iterator, typename Container=void>
 class CircularIterator
 {

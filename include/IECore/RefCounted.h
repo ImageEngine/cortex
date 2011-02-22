@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,6 +70,7 @@ typedef IECore::IntrusivePtr< const TYPENAME > Const ## TYPENAME ## Ptr; \
 /// A simple class to count references.
 /// \todo Disallow construction on the heap by having a private destructor - do we
 /// need to do this for all derived classes as well?
+/// \ingroup utilityGroup
 class RefCounted : private boost::noncopyable
 {
 	public:

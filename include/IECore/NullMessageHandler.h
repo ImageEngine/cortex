@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ IE_CORE_DECLAREPTR( NullMessageHandler );
 /// MessageHandler which just throws away all it's
 /// messages. It can therefore be used to
 /// suppress all message output.
+/// \ingroup utilityGroup
 class NullMessageHandler : public MessageHandler
 {
 

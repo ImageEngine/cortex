@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -58,7 +58,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// string).
 ///
 /// Pnew = P + ( v * sampleLength )
-
+/// \ingroup geometryProcessingGroup
 class PointVelocityDisplaceOp : public ModifyOp
 {
 	public :
