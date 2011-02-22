@@ -163,6 +163,6 @@ def error(*args):
 	stdStr = string.join(map(str, args), " ")
 	Msg.output(Msg.Level.Error, __getCallContext(), stdStr )
 
-__all__ = [ "initializeLog", "setLogLevelByName", "setLogLevel", "showCallStack",
+__all__ = [ "setLogLevelByName", "setLogLevel", "showCallStack",
 		"exceptionInfo", "debugException", "debug", "warning", "info", "error",
 ]
