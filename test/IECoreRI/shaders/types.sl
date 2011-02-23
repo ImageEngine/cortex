@@ -14,6 +14,7 @@ surface types(
 	color cav[] = {};
 	point pav[] = {};
 	matrix mav[] = {};
+	float f3[3] = { 1, 2, 3 };
 )
 {
 	Ci = 1;

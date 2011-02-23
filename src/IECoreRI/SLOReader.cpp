@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -201,6 +201,11 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 						{
 							SLO_VISSYMDEF *a = Slo_GetArrayArgElement( arg, j );
 							vData->writable().push_back( *(a->svd_default.scalarval) );
+						}
+						if( arg->svd_arraylen==3 )
+						{
+							// allow V3fData and V3fVectorData to be mapped to float[3] parameters.
+							typeHints->writable().insert( pair<string, DataPtr>( arg->svd_name, new StringData( "float[3]" ) ) );
 						}
 					}
 				}

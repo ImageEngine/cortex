@@ -491,11 +491,11 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 			{
 				unsigned numParameters = SxGetNumParameters( shaderInfo );
 				SxType type = SxInvalid;
+				unsigned arraySize;
 				for( unsigned i=0; i<numParameters; i++ )
 				{
 					bool varying;
 					SxData defaultValue;
-					unsigned arraySize;
 					const char *name = SxGetParameterInfo( shaderInfo, i, &type, &varying, &defaultValue, &arraySize );
 					if( 0==strcmp( name, it->first.value().c_str() ) )
 					{
@@ -510,9 +510,13 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 				{
 					SxSetParameter( parameterList, it->first.value().c_str(), type, (void *)&(static_cast<const V3fData *>( it->second.get() )->readable() ) );
 				}
+				else if( type==SxFloat && arraySize==3 )
+				{
+					SxSetParameter( parameterList, it->first.value().c_str(), type, (void *)&(static_cast<const V3fData *>( it->second.get() )->readable() ), false, arraySize );
+				}
 				else
 				{
-					msg( Msg::Warning, "IECoreRI::SXRendererImplementation::createShader", boost::format( "Parameter \"%s\" is not a point, vector or normal and will be ignored" ) % it->second->typeName() );
+					msg( Msg::Warning, "IECoreRI::SXRendererImplementation::createShader", boost::format( "Parameter \"%s\" is not a point, vector, normal or float[3] and will be ignored" ) % it->second->typeName() );
 				}
 				break;
 			}

@@ -120,7 +120,10 @@ class TestSLOReader( unittest.TestCase ) :
 			["cav", Color3fVectorData() ],
 			["pav", V3fVectorData() ],
 			["mav", M44fVectorData() ],
+			["f3", FloatVectorData( [ 1, 2, 3 ] ) ],
 		]
+
+		self.assertEqual( len( expectedParams ), len( s.parameters ) )
 
 		for p in expectedParams :
 

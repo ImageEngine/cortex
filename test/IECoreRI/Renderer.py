@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -446,6 +446,51 @@ class RendererTest( unittest.TestCase ) :
 			r.setAttribute( k, v )
 			self.assertEqual( r.getAttribute( k ), v )
 
+	def testFloat3ShaderParameters( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+		with WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : V3fData( V3f( 4, 5, 6 ) ) } )
+	
+		l = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() ).replace( "\n", "" )
+		
+		self.failUnless( "Surface \"test/IECoreRI/shaders/types\"" in l )
+		self.failUnless( "\"float[3] f3\" [ 4 5 6 ]" in l )
+		
+	def testFloat3PrimitiveVariables( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+		with WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : V3fData( V3f( 4, 5, 6 ) ) } )
+			
+			r.mesh(
+				IntVectorData( [ 4, 4 ] ),
+				IntVectorData( [ 0, 1, 2, 3, 3, 2, 4, 5 ] ),
+				"linear",
+				{
+					"P" : PrimitiveVariable(
+						PrimitiveVariable.Interpolation.Vertex,
+						V3fVectorData( [ V3f( 0, 0, 0 ), V3f( 0, 1, 0 ), V3f( 1, 1, 0 ), V3f( 1, 0, 0 ), V3f( 2, 1, 0 ), V3f( 2, 0, 0 ) ] )
+					),
+					"f3" : PrimitiveVariable(
+						PrimitiveVariable.Interpolation.Uniform,
+						V3fVectorData( [ V3f( 0 ), V3f( 1 ) ] ),
+					)
+				}
+			)
+	
+		l = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() ).replace( "\n", "" )
+				
+		self.failUnless( "\"uniform float[3] f3\" [ 0 0 0 1 1 1 ]" in l )
+
 	def tearDown( self ) :
 
 		files = [
@@ -463,6 +508,7 @@ class RendererTest( unittest.TestCase ) :
 			"test/IECoreRI/output/missingShaders.rib",
 			"test/IECoreRI/output/getUserOption.rib",
 			"test/IECoreRI/output/getUserAttribute.rib",
+			"test/IECoreRI/shaders/types.sdl",
 		]
 
 		for f in files :

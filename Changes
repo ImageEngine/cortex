@@ -17,6 +17,8 @@ Improvements :
 
 * IECoreGL::Renderer provides control over GL_DEPTH_TEST with the new gl:depthTest attribute.
 
+* IECoreRI now accepts V3fData and V3fVectorData as values for shader parameters of type float[3]. This is handy for passing vectors when you do not want the automatic object->current transformation to be performed.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,7 +60,8 @@ class SXExecutor : public boost::noncopyable
 		/// you must also pass the context the shaders were created in, and the coshaders and lights from that context.
 		/// It is the caller's responsibility to ensure that the context and ShaderVectors remain alive for as long as the executor is in use.
 		SXExecutor( const ShaderVector &shaders, SxContext context, const ShaderVector &coshaders, const ShaderVector &lights );
-
+		~SXExecutor();
+		
 		/// Executes the shaders for the specified points. The points are considered
 		/// to have no specific connectivity, meaning that area and filtering functions
 		/// will be effectively disabled during shader execution.
@@ -75,27 +76,8 @@ class SXExecutor : public boost::noncopyable
 
 	private :
 
-		SxType predefinedParameterType( const char *name ) const;
-		SxType assumedParameterType( IECore::TypeId type ) const;
-				
-		void setVariables( SxParameterList parameterList, const IECore::CompoundData *points, size_t expectedSize ) const;		
-		void setVariable( SxParameterList parameterList, const char *name, SxType type, bool predefined, const IECore::Data *data, size_t expectedSize ) const;
-		template<SxType>
-		void setVariable2( SxParameterList parameterList, const char *name, bool predefined, const IECore::Data *data, size_t expectedSize ) const;
-		
-		IECore::CompoundDataPtr getVariables( SxParameterList parameterList ) const;
-		template<SxType>
-		void getVariable( SxParameterList parameterList, const char *name, IECore::CompoundData *result ) const;
-
-		SxContext m_context;
-		const ShaderVector &m_shaders;
-		const ShaderVector &m_coshaders;
-		const ShaderVector &m_lights;
-		
-		void storeParameterTypes( SxShader shader );
-		typedef std::map<IECore::InternedString, SxType> TypeMap;
-		TypeMap m_inputParameterTypes;
-		TypeMap m_outputParameterTypes;
+		IE_CORE_FORWARDDECLARE( Implementation );
+		ImplementationPtr m_implementation;
 
 };
 

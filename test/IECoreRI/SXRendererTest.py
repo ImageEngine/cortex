@@ -208,7 +208,8 @@ class SXRendererTest( unittest.TestCase ) :
 			"mustBeTwo" : IECore.V3f( 2 ),
 			"mustBeThree" : IECore.V3f( 3 ),
 			"mustBeFour" : IECore.V3f( 4 ),
-			"mustBeHelloWorld" : "helloWorld"
+			"mustBeHelloWorld" : "helloWorld",
+			"mustBeOneTwoThree" : IECore.V3f( 1, 2, 3 ),
 		} )
 				
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
@@ -216,6 +217,31 @@ class SXRendererTest( unittest.TestCase ) :
 		s = r.shade( self.__rectanglePoints( b ) )
 		
 		self.assertEqual( s["Ci"][0], IECore.Color3f( 0, 1, 0 ) )
+		
+	def testFloat3PrimitiveVariable( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxParameterTest.sdl test/IECoreRI/shaders/sxParameterTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+				
+		r.shader( "surface", "test/IECoreRI/shaders/sxParameterTest.sdl", {
+			"mustBeOne" : 1.0,
+			"mustBeRed" : IECore.Color3f( 1, 0, 0 ),
+			"mustBeTwo" : IECore.V3f( 2 ),
+			"mustBeThree" : IECore.V3f( 3 ),
+			"mustBeFour" : IECore.V3f( 4 ),
+			"mustBeHelloWorld" : "helloWorld",
+		} )
+				
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 10 ) )
+
+		points = self.__rectanglePoints( b )
+		points["mustBeOneTwoThree"] = IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ) ] * len( points["P"] ) )
+
+		s = r.shade( points )
+		
+		for c in s["Ci"] :
+			self.assertEqual( c, IECore.Color3f( 0, 1, 0 ) )
 	
 	def testIntParameterSupport( self ) :
 	
@@ -229,7 +255,8 @@ class SXRendererTest( unittest.TestCase ) :
 			"mustBeTwo" : IECore.V3f( 2 ),
 			"mustBeThree" : IECore.V3f( 3 ),
 			"mustBeFour" : IECore.V3f( 4 ),
-			"mustBeHelloWorld" : "helloWorld"
+			"mustBeHelloWorld" : "helloWorld",
+			"mustBeOneTwoThree" : IECore.V3f( 1, 2, 3 ),
 		} )
 				
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
@@ -250,7 +277,8 @@ class SXRendererTest( unittest.TestCase ) :
 			"mustBeTwo" : IECore.V3f( 2 ),
 			"mustBeThree" : IECore.V3f( 3 ),
 			"mustBeFour" : IECore.V3f( 4 ),
-			"mustBeHelloWorld" : "helloWorld"
+			"mustBeHelloWorld" : "helloWorld",
+			"mustBeOneTwoThree" : IECore.V3f( 1, 2, 3 ),
 		} )
 				
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
