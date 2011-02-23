@@ -45,6 +45,7 @@ namespace IECore
 /// It can be applied to any given SH object by the multiplication operator.
 /// \todo: should consider matrix sparsity.
 /// \ingroup shGroup
+template< class S >
 class SphericalHarmonicsTransferMatrix
 {
 	public:
