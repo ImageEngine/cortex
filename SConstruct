@@ -730,8 +730,12 @@ o.Add(
 	"used when running tests.",
 	""
 )
+
+if Environment()["PLATFORM"]=="darwin" :	
+	libraryPathEnvVar = "DYLD_LIBRARY_PATH"
+else :
+	libraryPathEnvVar = "LD_LIBRARY_PATH"
 	
-libraryPathEnvVar = "DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "LD_LIBRARY_PATH"
 o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
 	"This is a curious one, probably only ever necessary at image engine. It "
@@ -954,7 +958,7 @@ pythonModuleEnv["SHLIBSUFFIX"] = ".so"
 
 if pythonModuleEnv["PLATFORM"]=="darwin" :
 	pythonModuleEnv.Append( SHLINKFLAGS = "-single_module" )
-	
+
 ###########################################################################################
 # An environment for running tests
 ###########################################################################################
@@ -1363,7 +1367,7 @@ if doConfigure :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
 		
-		if c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter" ) :
+		if haveDelight and c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
@@ -1375,9 +1379,11 @@ if doConfigure :
 			riSources.remove( "src/IECoreRI/SXExecutor.cpp" )
 			riPythonSources.remove( "src/IECoreRI/bindings/SXRendererBinding.cpp" )
 
-			sys.stderr.write( "WARNING : Supported Sx API version not found - not building SXRenderer. Use 3delight 9.0.36 or later.\n" )
+			if haveDelight :
+			
+				sys.stderr.write( "WARNING : Supported Sx API version not found - not building SXRenderer. Use 3delight 9.0.36 or later.\n" )
 		
-		if c.CheckCXXHeader( "gx.h" ) and c.CheckFunc( "GxGetGeometry" ) :
+		if haveDelight and c.CheckCXXHeader( "gx.h" ) and c.CheckFunc( "GxGetGeometry" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_GX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_GX" )
@@ -1386,8 +1392,10 @@ if doConfigure :
 		
 			riSources.remove( "src/IECoreRI/GXEvaluator.cpp" )
 			riPythonSources.remove( "src/IECoreRI/bindings/GXEvaluatorBinding.cpp" )
-
-			sys.stderr.write( "WARNING : Gx API not found - not building GXEvaluator. Use 3delight 9.0.39 or later.\n" )
+			
+			if haveDelight :
+			
+				sys.stderr.write( "WARNING : Gx API not found - not building GXEvaluator. Use 3delight 9.0.39 or later.\n" )
 			
 		c.Finish()	
 
