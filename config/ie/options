@@ -77,7 +77,7 @@ if targetApp :
 	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
-	openEXRVersion = targetAppReg.get( "openEXRVersion", "1.6.1" )
+	openEXRVersion = targetAppReg.get( "OpenEXRVersion", "1.6.1" )
 	pythonVersion = targetAppReg["pythonVersion"]
 else :
 	if not compiler :
