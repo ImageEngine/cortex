@@ -179,7 +179,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		s = r.shade( self.__rectanglePoints( b ) )
 		
-		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/spline.cob" ).read() )
+		self.__assertVectorDataAlmostEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/spline.cob" ).read() )
 			
 	# make sure that users don't have to provide values for every varying shader parameter if
 	# they don't want to. this used to crash.
