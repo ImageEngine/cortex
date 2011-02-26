@@ -116,7 +116,7 @@ typename CubeColorLookup<T>::ColorType CubeColorLookup<T>::operator() ( const Co
 	assert( m_data.size() > 0 );
 	boost::const_multi_array_ref< ColorType, 3 > colorArray( &m_data[0], boost::extents[ m_dimension.x ][ m_dimension.y ][ m_dimension.z ] );
 
-	const ColorType clampedColor = Imath::closestPointInBox( color, m_domain );
+	const ColorType clampedColor = Imath::closestPointInBox( static_cast<VecType>( color ), m_domain );
 
 	switch ( m_interpolation )
 	{
