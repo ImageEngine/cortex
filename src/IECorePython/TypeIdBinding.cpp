@@ -389,6 +389,7 @@ void bindTypeId()
 		.value( "EnvMapSHProjector", EnvMapSHProjectorTypeId )
 		.value( "Light", LightTypeId )
 		.value( "ContrastSmoothSkinningWeightsOp", ContrastSmoothSkinningWeightsOpTypeId )
+		.value( "PointDistributionOp", PointDistributionOpTypeId )
 	;
 }
 
