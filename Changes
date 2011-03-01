@@ -5,6 +5,8 @@ Features :
 
 * New Nuke plugin provides hosting of procedurals and ops within Nuke.
 
+* IECoreHoudini has a context for safely setting parmater values within a with block
+
 Improvements :
 
 * DisplayDriver factory mechanism has been improved, and support for mapping RenderMan displays to IECore::DisplayDrivers has been added to IECoreRI. Images can now be rendered direct to memory using 3delight with no intermediate rib or image files. See test/IECoreRI/DspyTest.py for examples.
