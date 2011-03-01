@@ -5,7 +5,7 @@ Features :
 
 * New Nuke plugin provides hosting of procedurals and ops within Nuke.
 
-* IECoreHoudini has a context for safely setting parmater values within a with block
+* IECoreHoudini has a context for safely setting parameter values within a with block
 
 Improvements :
 
