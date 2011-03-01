@@ -41,6 +41,7 @@ import glob
 import sys
 import os
 import re
+import subprocess
 
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
@@ -909,9 +910,10 @@ Help( o.GenerateHelpText( env ) )
 
 def getPythonConfig( env, flags ) :
 
-	f = os.popen( env["PYTHON_CONFIG"] + " " + flags )
-	r = f.read().strip()
-	if f.close() :
+	f = subprocess.Popen( env["PYTHON_CONFIG"] + " " + flags, env=env["ENV"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True )
+	stdOut, stdErr = f.communicate()	
+	r = stdOut.strip()
+	if f.returncode :
 		sys.stderr.write( "ERROR : Error running \"%s\".\n" % env["PYTHON_CONFIG"] )
 		Exit( 1 )
 	return r
