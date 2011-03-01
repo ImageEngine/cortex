@@ -1,9 +1,6 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
-#
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,44 +32,56 @@
 #
 ##########################################################################
 
-import sys
-import unittest
 import hou
+
 import IECore
-import IECoreHoudini
 
-from ProceduralHolder import *
-from OpHolder import *
-from CortexWriter import *
-from CortexRmanInject import *
-from ActiveTake import *
-from NodeHandle import *
-from FromHoudiniPointsConverter import *
-from FromHoudiniPolygonsConverter import *
-from ToHoudiniPointsConverter import *
-from ToHoudiniPolygonsConverter import *
-from AttributeRemap import *
-from ToHoudiniConverterOp import *
-from FromHoudiniCurvesConverter import *
-from ToHoudiniCurvesConverter import *
-from CobIOTranslator import *
-from FromHoudiniGroupConverter import *
-from TemporaryParameterValuesTest import * 
+## A context manager for controlling houdini parameter values in with statements.
+# It sets parameters to requested values on entering the block and resets them to
+# their previous values on exiting the block.
+class TemporaryParameterValues :
 
-## these tests use python functions that aren't available before Houdini 11
-## \todo: remove this clause once we drop support for Houdini 10
-if hou.applicationVersion()[0] >= 11 :
-	from InterpolatedCacheReader import *
-	from ToHoudiniGroupConverter import *
+	def __init__( self, parametersAndValues = {}, **kw ) :
 
-IECoreHoudini.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreHoudini/test/resultsPython.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+		self.__parametersAndValues = parametersAndValues
+		self.__parametersAndValues.update( kw )
+
+	def __enter__( self ) :
+		
+		handlers = {
+			"Int" : self.__simpleParmHandler,
+			"Float" : self.__simpleParmHandler,
+			"String" : self.__simpleParmHandler,
+		}
+
+		self.__restoreCommands = []
+		for parmName, value in self.__parametersAndValues.items() :
+			
+			# check we can handle this type
+			parm = hou.parm( parmName ) or hou.parmTuple( parmName )
+			if not parm :
+				raise TypeError( "Parameter \"%s\" does not exist." % parmName )
+			
+			parmType = parm.parmTemplate().dataType().name()
+			handler = handlers.get( parmType, None )
+			if not handler :
+				raise TypeError( "Parameter \"%s\" has unsupported type \"%s\"." % ( parmName, parmType ) )
+
+			# store a command to restore the parameter value later
+			command = IECore.curry( parm.set, parm.eval() )
+			self.__restoreCommands.append( command )
+
+			# and change the parameter value
+			handler( parm, value )
+
+	def __exit__( self, type, value, traceBack ) :
+		
+		for command in self.__restoreCommands :
+			command()
+
+	def __simpleParmHandler( self, parm, value ) :
+		
+		if isinstance( parm, hou.ParmTuple ) and not isinstance( value, tuple ) :
+			value = value,
+		
+		parm.set( value )
