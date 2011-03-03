@@ -42,3 +42,5 @@ Bug fixes :
 * Fixed bugs which prevented NukeFileExaminer working with spaces in filenames or with Nuke's new # based padding syntax.
 
 * Fixed bug which caused SequenceLsOp to perform modificationTime comparisons in the wrong timezone.
+
+* CameraController::unproject now actually works.

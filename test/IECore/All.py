@@ -246,6 +246,7 @@ from CamelCaseTest import CamelCaseTest
 from CapturingRendererTest import CapturingRendererTest
 from LightTest import LightTest
 from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
+from CameraControllerTest import CameraControllerTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

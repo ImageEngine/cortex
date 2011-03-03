@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +37,7 @@
 #include "IECore/Camera.h"
 #include "IECore/MatrixTransform.h"
 #include "IECore/Exception.h"
+#include "IECore/AngleConversion.h"
 
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
@@ -186,15 +188,15 @@ void CameraController::unproject( const Imath::V2i rasterPosition, Imath::V3f &n
 	if( m_projection->readable()=="perspective" )
 	{
 		float fov = m_fov->readable();
-		float d = tan( M_PI * fov/180.0f ); // camera x coordinate at screen window x==1
-		V3f camera( screen.x * d, screen.y * d, 1.0f );
+		float d = tan( degreesToRadians( fov / 2.0f ) ); // camera x coordinate at screen window x==1
+		V3f camera( screen.x * d, screen.y * d, -1.0f );
 		near = camera * clippingPlanes[0];
-		far = camera * clippingPlanes[0];
+		far = camera * clippingPlanes[1];
 	}
 	else
 	{
-		near = V3f( screen.x, screen.y, clippingPlanes[0] );
-		far = V3f( screen.x, screen.y, clippingPlanes[1] );
+		near = V3f( screen.x, screen.y, -clippingPlanes[0] );
+		far = V3f( screen.x, screen.y, -clippingPlanes[1] );
 	}
 
 	near = near * m_transform->matrix;
