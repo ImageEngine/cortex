@@ -310,8 +310,14 @@ PtDspyError Dspy::imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne,
 			if( strcmp( e.what(), "stop" ) == 0 )
 			{
 				/// \todo I would prefer DisplayDriver::imageData to have a return
-				/// value which could be used to request stop/continue behaviour.
+				/// value which could be used to request stop/continue behaviour. 
+				/// prman doesn't seem to support PkDspyErrorStop, which should
+				/// also be resolved at some point.
+#ifdef PRMANEXPORT			
+				return PkDspyErrorUndefined;
+#else				
 				return PkDspyErrorStop;
+#endif				
 			}
 			else
 			{
