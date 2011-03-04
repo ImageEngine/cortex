@@ -1545,6 +1545,7 @@ if env["WITH_GL"] and doConfigure :
 		glSources = glob.glob( "src/IECoreGL/*.cpp" )
 		if not "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
 			glSources.remove( "src/IECoreGL/Font.cpp" )
+			glSources.remove( "src/IECoreGL/FontLoader.cpp" )
 			glSources.remove( "src/IECoreGL/TextPrimitive.cpp" )
 		
 		glLibrary = glEnv.SharedLibrary( "lib/" + os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glSources )

@@ -21,6 +21,8 @@ Improvements :
 
 * IECoreRI now accepts V3fData and V3fVectorData as values for shader parameters of type float[3]. This is handy for passing vectors when you do not want the automatic object->current transformation to be performed.
 
+* Improved performance of IECoreGL::Renderer text rendering when using many renderers - they can now share a cache of fonts rather than each recomputing their own copies.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
