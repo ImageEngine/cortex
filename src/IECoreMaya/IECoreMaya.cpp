@@ -48,6 +48,11 @@
 #include "IECore/Parameterised.h"
 #include "IECore/LevelFilteredMessageHandler.h"
 
+#ifdef IECOREMAYA_WITH_RI
+// for DL_INTERFACE as used below
+#include "ri.h"
+#endif
+
 #include "IECoreMaya/IECoreMaya.h"
 #include "IECoreMaya/CacheSet.h"
 #include "IECoreMaya/ParameterisedHolder.h"
@@ -198,7 +203,7 @@ MStatus initialize(MFnPlugin &plugin)
 			
 		s = plugin.registerContextCommand("ieParameterisedHolderManipContext", &ParameterisedHolderManipContextCommand::creator );
 		
-#ifdef IECOREMAYA_WITH_RI
+#ifdef DL_INTERFACE // we are building for 3delight
 		s = plugin.registerCommand( "ieDelightProceduralCache", DelightProceduralCacheCommand::creator, DelightProceduralCacheCommand::newSyntax );
 #endif
 
@@ -267,7 +272,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterCommand( "ieParameterisedHolderSetValue" );
 		s = plugin.deregisterContextCommand("ieParameterisedHolderManipContext");
 
-#ifdef IECOREMAYA_WITH_RI
+#ifdef DL_INTERFACE // we are building for 3delight
 		s = plugin.deregisterCommand( "ieDelightProceduralCache" );
 #endif
 

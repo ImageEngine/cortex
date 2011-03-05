@@ -1691,7 +1691,8 @@ if doConfigure :
 			mayaEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 			mayaEnv.Append( CPPFLAGS = [ "-DIECORERI_RMANPROCEDURAL_NAME=" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ) ] )
 			mayaEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		else :
+			
+		if not haveRI or havePRMan :
 			mayaSources.remove( "src/IECoreMaya/DelightProceduralCacheCommand.cpp" )
 
 		# we can't append this before configuring, as then it gets built as
