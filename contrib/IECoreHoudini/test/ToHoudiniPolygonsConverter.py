@@ -717,7 +717,30 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( vertexAttr ) )
 		self.comparePrimAndSop( mesh, vertexAttr )
-
+	
+	def testEmptyString( self ) :
+		mesh = self.mesh()
+		sop = self.emptySop()
+		mesh['stringPoint'].data[1] = ""
+		
+		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+		
+		geo = sop.geometry()
+		sopPoints = geo.points()
+		data = mesh["stringPoint"].data
+		dataIndices = mesh["stringPointIndices"].data
+		for i in range( 0, data.size() ) :
+			self.assertEqual( data[ dataIndices[i] ], sopPoints[i].attribValue( "stringPoint" ) )
+		
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
+		self.assertEqual( result.verticesPerFace, mesh.verticesPerFace )
+		self.assertEqual( result.vertexIds, mesh.vertexIds )
+		self.assertEqual( result.keys(), mesh.keys() )
+		self.assertEqual( result["stringPoint"].data[0], mesh["stringPoint"].data[0] )
+		for i in range( 1, data.size() - 1 ) :
+			self.assertEqual( result["stringPoint"].data[i], mesh["stringPoint"].data[i+1] )
+		self.assertEqual( result["stringPoint"].data[-1], mesh["stringPoint"].data[1] )
+	
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestToHoudiniPolygonsConverter.__testScene ) :
