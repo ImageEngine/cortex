@@ -90,7 +90,15 @@ GB_AttributeRef ToHoudiniStringVectorAttribConverter::doVectorConversion( const 
 	for ( size_t i=0; i < entries; i++ )
 	{
 		attribHandle.setElement( (*container)[i] );
-		attribHandle.setString( definedStrings( adjustedIndices[i] ) );
+		
+		if ( adjustedIndices[i] < 0 )
+		{
+			attribHandle.setString( "" );
+		}
+		else
+		{
+			attribHandle.setString( definedStrings( adjustedIndices[i] ) );
+		}
 	}
 	
 	return attrRef;
