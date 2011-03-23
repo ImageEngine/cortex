@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -101,6 +101,17 @@ bool RunTimeTyped::inheritsFrom( const char *typeName )
 	return false;
 }
 
+bool RunTimeTyped::inheritsFrom( TypeId type, TypeId baseType )
+{
+	const std::vector<TypeId> &baseTypes = baseTypeIds( type );
+	return find( baseTypes.begin(), baseTypes.end(), baseType ) != baseTypes.end();
+}
+
+bool RunTimeTyped::inheritsFrom( const char *typeName, const char *baseTypeName )
+{
+	return inheritsFrom( typeIdFromTypeName( typeName ), typeIdFromTypeName( baseTypeName ) );
+}
+		
 void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId )
 {
 	assert( derivedTypeName );
@@ -300,6 +311,10 @@ RunTimeTyped::TypeIdsToTypeNamesMap &RunTimeTyped::typeIdsToTypeNames()
 {
 	static TypeIdsToTypeNamesMap *m = new TypeIdsToTypeNamesMap();
 	assert( m );
+	if( !m->size() )
+	{
+		(*m)[staticTypeId()] = staticTypeName();
+	}
 	return *m;
 }
 
@@ -307,5 +322,9 @@ RunTimeTyped::TypeNamesToTypeIdsMap &RunTimeTyped::typeNamesToTypeIds()
 {
 	static TypeNamesToTypeIdsMap *m = new TypeNamesToTypeIdsMap();
 	assert( m );
+	if( !m->size() )
+	{
+		(*m)[staticTypeName()] = staticTypeId();
+	}
 	return *m;
 }

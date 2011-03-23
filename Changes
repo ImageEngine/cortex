@@ -23,6 +23,8 @@ Improvements :
 
 * Improved performance of IECoreGL::Renderer text rendering when using many renderers - they can now share a cache of fonts rather than each recomputing their own copies.
 
+* Added IECore::RunTimeTyped::inheritsFrom() overloads taking two arguments, to simplify querying whether or not one class derives from another.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
@@ -46,3 +48,5 @@ Bug fixes :
 * Fixed bug which caused SequenceLsOp to perform modificationTime comparisons in the wrong timezone.
 
 * CameraController::unproject now actually works.
+
+* Fixed bugs which meant that RunTimeTyped::typeNameFromTypeId( RunTimeTypedTypeId ) and RunTimeTyped::typeIdFromTypeName( "RunTimeTyped" ) returned incorrect results.

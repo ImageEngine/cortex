@@ -258,6 +258,10 @@ class RunTimeTyped : public RefCounted
 		static bool inheritsFrom( TypeId typeId );
 		/// Returns true if this class inherits from the specified type.
 		static bool inheritsFrom( const char *typeName );
+		/// Returns true if type inherits from baseType.
+		static bool inheritsFrom( TypeId type, TypeId baseType );
+		/// Returns true if typeName inherits from baseTypeName.
+		static bool inheritsFrom( const char *typeName, const char *baseTypeName );
 
 		/// Returns the base type of the given type, or InvalidTypeId if no such base exists.
 		static TypeId baseTypeId( TypeId typeId );

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -157,7 +157,25 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( "CompoundParameter" ) )
 		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( IECore.TypeId.CompoundParameter ) )
 		self.assertRaises( TypeError, IECore.OptionalCompoundParameter( "", "" ).isInstanceOf, 10 )
+	
+	def testTypeNameFromRunTimeTypedTypeId( self ) :
+	
+		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( "RunTimeTyped" ), IECore.TypeId.RunTimeTyped )
 
+	def testRunTimeTypedTypeIdFromTypeName( self ) :
+	
+		self.assertEqual( IECore.RunTimeTyped.typeNameFromTypeId( IECore.TypeId.RunTimeTyped ), "RunTimeTyped" )
+		
+	def testInheritsFromWithTwoArguments( self ) :
+	
+		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.Object, IECore.TypeId.RunTimeTyped ) )		
+		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "Object", "RunTimeTyped" ) )
+
+		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.MeshPrimitive, IECore.TypeId.Object ) )
+		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "MeshPrimitive", "Object" ) )
+		
+		self.failIf( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.MeshPrimitive, IECore.TypeId.Writer ) )
+		self.failIf( IECore.RunTimeTyped.inheritsFrom( "MeshPrimitive", "Writer" ) )
 
 
 if __name__ == "__main__":
