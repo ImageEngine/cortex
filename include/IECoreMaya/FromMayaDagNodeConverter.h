@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,11 +77,7 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 		class Description
 		{
 			public :
-				/// fromTypes should be an array terminated by MFn::kInvalid and resultTypes should
-				/// be an array terminated by IECore::InvalidTypeId. resultTypes is only provided as an array
-				/// so you can register all the subclasses of the actual resultType - ideally this would be done
-				/// automatically using as yet unavailable functionality in RunTimeTyped.
-				Description( const MFn::Type *fromTypes, const IECore::TypeId *resultTypes );
+				Description( MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion );
 			private :
 				static FromMayaDagNodeConverterPtr creator( const MDagPath &dagPath );
 		};
@@ -93,9 +89,11 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 		typedef FromMayaDagNodeConverterPtr (*CreatorFn)( const MDagPath &dagPath );
 		typedef std::pair<MFn::Type, IECore::TypeId> Types;
 		typedef std::map<Types, CreatorFn> TypesToFnsMap;
+		typedef std::map<MFn::Type, TypesToFnsMap::const_iterator> DefaultConvertersMap;
 
-		static TypesToFnsMap *typesToFns();
-		static void registerConverter( const MFn::Type fromType, IECore::TypeId resultType, CreatorFn creator );
+		static TypesToFnsMap &typesToFns();
+		static DefaultConvertersMap &defaultConverters();
+		static void registerConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConverter, CreatorFn creator );
 
 };
 

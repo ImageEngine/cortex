@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,9 +44,6 @@ namespace IECoreMaya
 {
 
 template<typename F, typename T>
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaArrayDataConverter<F,T> > FromMayaArrayDataConverter<F,T>::m_description( MArrayTraits<F>::dataType(), T::staticTypeId() );
-
-template<typename F, typename T>
 FromMayaArrayDataConverter<F,T>::FromMayaArrayDataConverter( const MObject &object )
 	:	FromMayaObjectConverter( "Converts maya array data types to IECore::TypedVectorData types.", object )
 {
@@ -83,14 +80,20 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVV3f
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVV3d, FromMayaArrayDataConverterVV3dTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVC3f, FromMayaArrayDataConverterVC3fTypeId )
 
-/// Explicit instantiations.
-template class FromMayaArrayDataConverter<MIntArray, IntVectorData>;
-template class FromMayaArrayDataConverter<MIntArray, BoolVectorData>;
-template class FromMayaArrayDataConverter<MDoubleArray, DoubleVectorData>;
-template class FromMayaArrayDataConverter<MDoubleArray, FloatVectorData>;
-template class FromMayaArrayDataConverter<MStringArray, StringVectorData>;
-template class FromMayaArrayDataConverter<MVectorArray, V3fVectorData>;
-template class FromMayaArrayDataConverter<MVectorArray, V3dVectorData>;
-template class FromMayaArrayDataConverter<MVectorArray, Color3fVectorData>;
+// Registrations and instantiations
+
+#define REGISTER_AND_INSTANTIATE( F, T, DEFAULT ) \
+	template<> \
+	FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaArrayDataConverter<F, T> > FromMayaArrayDataConverter<F, T>::m_description( MArrayTraits<F>::dataType(), T::staticTypeId(), DEFAULT ); \
+	template class FromMayaArrayDataConverter<F, T>;
+
+REGISTER_AND_INSTANTIATE( MIntArray, IntVectorData, true )
+REGISTER_AND_INSTANTIATE( MIntArray, BoolVectorData, false )
+REGISTER_AND_INSTANTIATE( MDoubleArray, DoubleVectorData, true )
+REGISTER_AND_INSTANTIATE( MDoubleArray, FloatVectorData, false )
+REGISTER_AND_INSTANTIATE( MStringArray, StringVectorData, true )
+REGISTER_AND_INSTANTIATE( MVectorArray, V3fVectorData, false )
+REGISTER_AND_INSTANTIATE( MVectorArray, V3dVectorData, true )
+REGISTER_AND_INSTANTIATE( MVectorArray, Color3fVectorData, false );
 
 } // namespace IECoreMaya

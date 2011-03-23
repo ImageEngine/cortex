@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,8 +42,10 @@
 using namespace IECoreMaya;
 using namespace IECore;
 
-template<typename T>
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaMatrixDataConverter<T> > FromMayaMatrixDataConverter<T>::m_description( MFn::kMatrixData, T::staticTypeId() );
+template<>
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaMatrixDataConverter<M44dData> > FromMayaMatrixDataConverter<M44dData>::m_description( MFn::kMatrixData, M44dData::staticTypeId(), true );
+template<>
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaMatrixDataConverter<M44fData> > FromMayaMatrixDataConverter<M44fData>::m_description( MFn::kMatrixData, M44fData::staticTypeId(), false );
 
 template<typename T>
 FromMayaMatrixDataConverter<T>::FromMayaMatrixDataConverter( const MObject &object )

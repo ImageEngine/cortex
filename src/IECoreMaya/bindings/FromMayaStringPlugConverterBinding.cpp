@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,24 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_FROMMAYADAGNODECONVERTER_INL
-#define IECOREMAYA_FROMMAYADAGNODECONVERTER_INL
+#include "boost/python.hpp"
 
-namespace IECoreMaya
-{
+#include "IECoreMaya/FromMayaStringPlugConverter.h"
+#include "IECoreMaya/bindings/FromMayaStringPlugConverterBinding.h"
 
-template<class T>
-FromMayaDagNodeConverter::Description<T>::Description( const MFn::Type fromType, const IECore::TypeId resultType, bool defaultConversion )
+#include "IECorePython/RunTimeTypedBinding.h"
+
+using namespace IECoreMaya;
+using namespace boost::python;
+
+void IECoreMaya::bindFromMayaStringPlugConverter()
 {
-	FromMayaDagNodeConverter::registerConverter( fromType, resultType, defaultConversion, creator );
+	IECorePython::RunTimeTypedClass<FromMayaStringPlugConverter>();
 }
-
-template<class T>
-FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::Description<T>::creator( const MDagPath &dagPath )
-{
-	return new T( dagPath );
-}
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_FROMMAYADAGNODECONVERTER_INL

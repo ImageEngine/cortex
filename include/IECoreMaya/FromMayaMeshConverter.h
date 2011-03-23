@@ -122,8 +122,8 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		IECore::BoolParameterPtr m_extraST;
 		IECore::StringParameterPtr m_primVarAttrPrefix;
 
-
 		static Description<FromMayaMeshConverter> m_description;
+		static Description<FromMayaMeshConverter> m_dataDescription;
 
 };
 

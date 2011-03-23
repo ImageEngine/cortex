@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,28 +41,12 @@ namespace IECoreMaya
 {
 
 template<class T>
-FromMayaShapeConverter::Description<T>::Description( MFn::Type fromType, IECore::TypeId resultType )
+FromMayaShapeConverter::Description<T>::Description( MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion )
 {
 	// first register with the object converter
-	FromMayaObjectConverter::FromMayaObjectConverterDescription<T> c( fromType, resultType );
+	FromMayaObjectConverter::FromMayaObjectConverterDescription<T> c( fromType, resultType, defaultConversion );
 	// then register with the shape converter
-	FromMayaShapeConverter::registerShapeConverter( fromType, resultType, creator );
-}
-
-template<class T>
-FromMayaShapeConverter::Description<T>::Description( const MFn::Type *fromTypes, const IECore::TypeId *resultTypes )
-{
-	// first register with the object converter
-	FromMayaObjectConverter::FromMayaObjectConverterDescription<T> c( fromTypes, resultTypes );
-	// then register with the shape converter
-	while( *fromTypes!=MFn::kInvalid )
-	{
-		for( const IECore::TypeId *t = resultTypes; *t!=IECore::InvalidTypeId; t++ )
-		{
-			FromMayaShapeConverter::registerShapeConverter( *fromTypes, *t, creator );
-		}
-		fromTypes++;
-	}
+	FromMayaShapeConverter::registerShapeConverter( fromType, resultType, defaultConversion, creator );
 }
 
 template<class T>

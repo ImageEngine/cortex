@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -56,6 +56,19 @@ class FromMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		# get the skin cluster objectname
 		scName = maya.cmds.ls(type="skinCluster")[0]
 		return scName
+
+	def testFactory( self ) :
+	
+		sc = self.buildTestSetup()
+		
+		converter = IECoreMaya.FromMayaObjectConverter.create( sc )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECore.SmoothSkinningData.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECore.Data.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
 
 	def testSimple( self ) :
 		sc = self.buildTestSetup()

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,16 +48,15 @@ using namespace Imath;
 namespace IECoreMaya
 {
 
-static const MFn::Type fromTypes[] = { MFn::kMatrixData, MFn::kTransform, MFn::kInvalid };
-
-static const IECore::TypeId toTypesf[] = { TransformationMatrixfData::staticTypeId(), InvalidTypeId };
-static const IECore::TypeId toTypesd[] = { TransformationMatrixdData::staticTypeId(), InvalidTypeId };
+template<>
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixdData> > FromMayaTransformationMatrixConverter<TransformationMatrixdData>::g_description( MFn::kTransform, TransformationMatrixdData::staticTypeId(), false );
+template<>
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixdData> > FromMayaTransformationMatrixConverter<TransformationMatrixdData>::g_dataDescription( MFn::kMatrixData, TransformationMatrixdData::staticTypeId(), false );
 
 template<>
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixdData> > FromMayaTransformationMatrixConverter<TransformationMatrixdData>::m_description( fromTypes, toTypesd );
-
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixfData> > FromMayaTransformationMatrixConverter<TransformationMatrixfData>::g_description( MFn::kTransform, TransformationMatrixfData::staticTypeId(), false );
 template<>
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixfData> > FromMayaTransformationMatrixConverter<TransformationMatrixfData>::m_description( fromTypes, toTypesf );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixfData> > FromMayaTransformationMatrixConverter<TransformationMatrixfData>::g_dataDescription( MFn::kMatrixData, TransformationMatrixfData::staticTypeId(), false );
 
 template<typename T>
 FromMayaTransformationMatrixConverter<T>::FromMayaTransformationMatrixConverter( const MObject &object )

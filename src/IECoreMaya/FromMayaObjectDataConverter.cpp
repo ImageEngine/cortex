@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@
 using namespace IECoreMaya;
 using namespace IECore;
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaObjectDataConverter> FromMayaObjectDataConverter::g_description( MFn::kPluginData, Object::staticTypeId() );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaObjectDataConverter> FromMayaObjectDataConverter::g_description( MFn::kPluginData, Object::staticTypeId(), true );
 
 FromMayaObjectDataConverter::FromMayaObjectDataConverter( const MObject &object )
 	:	FromMayaObjectConverter( "Converts IECoreMaya::ObjectData to an IECore::Object.", object )

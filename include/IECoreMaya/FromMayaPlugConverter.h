@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -89,21 +89,27 @@ class FromMayaPlugConverter : public FromMayaConverter
 	private :
 
 		typedef FromMayaPlugConverterPtr (*CreatorFn)( const MPlug &plug );
-		static void registerConverter( MFnNumericData::Type fromType, IECore::TypeId resultType, CreatorFn creator );
-		static void registerConverter( MFnData::Type fromType, IECore::TypeId resultType, CreatorFn creator );
-		static void registerConverter( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, CreatorFn creator );
+		static void registerConverter( MFnNumericData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter, CreatorFn creator );
+		static void registerConverter( MFnData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter, CreatorFn creator );
+		static void registerConverter( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, bool isDefaultConverter, CreatorFn creator );
 
 		typedef std::pair<MFnNumericData::Type, IECore::TypeId> NumericTypePair;
 		typedef std::map<NumericTypePair, CreatorFn> NumericTypesToFnsMap;
-		static NumericTypesToFnsMap *numericTypesToFns();
+		typedef std::map<MFnNumericData::Type, NumericTypesToFnsMap::const_iterator> NumericDefaultConvertersMap;
+		static NumericTypesToFnsMap &numericTypesToFns();
+		static NumericDefaultConvertersMap &numericDefaultConverters();
 
 		typedef std::pair<MFnData::Type, IECore::TypeId> TypedTypePair;
 		typedef std::map<TypedTypePair, CreatorFn> TypedTypesToFnsMap;
-		static TypedTypesToFnsMap *typedTypesToFns();
+		typedef std::map<MFnData::Type, TypedTypesToFnsMap::const_iterator> TypedDefaultConvertersMap;
+		static TypedTypesToFnsMap &typedTypesToFns();
+		static TypedDefaultConvertersMap &typedDefaultConverters();
 
 		typedef std::pair<MFnUnitAttribute::Type, IECore::TypeId> UnitTypePair;
 		typedef std::map<UnitTypePair, CreatorFn> UnitTypesToFnsMap;
-		static UnitTypesToFnsMap *unitTypesToFns();
+		typedef std::map<MFnUnitAttribute::Type, UnitTypesToFnsMap::const_iterator> UnitDefaultConvertersMap;
+		static UnitTypesToFnsMap &unitTypesToFns();
+		static UnitDefaultConvertersMap &unitDefaultConverters();
 
 		MPlug m_plug;
 

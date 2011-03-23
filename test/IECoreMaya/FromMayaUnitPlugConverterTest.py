@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,6 +38,22 @@ import IECore
 import IECoreMaya
 
 class FromMayaUnitPlugConverterTest( IECoreMaya.TestCase ) :
+
+	def testFactory( self ) :
+	
+		locator = maya.cmds.spaceLocator()[0]
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.DoubleData.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.FloatData.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterf.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.Data.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
 
 	def testDistance( self ) :
 

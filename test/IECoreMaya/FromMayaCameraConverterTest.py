@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -39,6 +39,20 @@ import IECoreMaya
 
 class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 
+	def testFactory( self ) :
+	
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape" )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
+				
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECore.Camera.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECore.Renderable.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECore.Writer.staticTypeId() )
+		self.assertEqual( converter, None )
+		
 	def test( self ) :
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape" )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -118,12 +118,12 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 		class Description
 		{
 			public :
-				Description( MFn::Type fromType, IECore::TypeId resultType );
-				/// fromTypes should be an array terminated by MFn::kInvalid and resultTypes should
-				/// be an array terminated by IECore::InvalidTypeId. resultTypes is only provided as an array
-				/// so you can register all the subclasses of the actual resultType - ideally this would be done
-				/// automatically using as yet unavailable functionality in RunTimeTyped.
-				Description( const MFn::Type *fromTypes, const IECore::TypeId *resultTypes );
+				/// \param fromType The maya type which can be converted.
+				/// \param resultType The cortex type which will result from the conversion.
+				/// \param defaultConversion Should be true if this conversion is the "best" for a given fromType. If
+				/// this is true then this is the converter that will be used when create() is called without specifying
+				/// a resultType.
+				Description( MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion );
 			private :
 				static FromMayaShapeConverterPtr creator( const MDagPath &dagPath );
 		};
@@ -141,9 +141,11 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 		typedef FromMayaShapeConverterPtr (*ShapeCreatorFn)( const MDagPath &dagPath );
 		typedef std::pair<MFn::Type, IECore::TypeId> ShapeTypes;
 		typedef std::map<ShapeTypes, ShapeCreatorFn> ShapeTypesToFnsMap;
+		typedef std::map<MFn::Type, ShapeTypesToFnsMap::const_iterator> DefaultConvertersMap;
 
-		static ShapeTypesToFnsMap *shapeTypesToFns();
-		static void registerShapeConverter( const MFn::Type fromType, IECore::TypeId resultType, ShapeCreatorFn creator );
+		static ShapeTypesToFnsMap &shapeTypesToFns();
+		static DefaultConvertersMap &defaultConverters();
+		static void registerShapeConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConverter, ShapeCreatorFn creator );
 
 };
 

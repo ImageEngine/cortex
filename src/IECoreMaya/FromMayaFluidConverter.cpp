@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,7 +52,9 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaFluidConverter );
 
-FromMayaShapeConverter::Description<FromMayaFluidConverter> FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId() );
+// Not registering as the default converter as at some point I presume we'll have a converter to some sort of voxel object, and that would make
+// a better default.
+FromMayaShapeConverter::Description<FromMayaFluidConverter> FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId(), false );
 
 FromMayaFluidConverter::FromMayaFluidConverter( const MObject &object )
 	:	FromMayaShapeConverter( "Converts maya fluid data to IECore::PointsPrimitive Object", object )

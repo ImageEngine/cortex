@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,15 +47,15 @@ using namespace std;
 using namespace Imath;
 
 // 3d vector conversion
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Double( MFn::kData3Double, V3dDataTypeId );
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Float( MFn::kData3Float, V3fDataTypeId );
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Int( MFn::kData3Int, V3iDataTypeId );
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Short( MFn::kData3Short, V3iDataTypeId );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Double( MFn::kData3Double, V3dDataTypeId, true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Float( MFn::kData3Float, V3fDataTypeId, true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Int( MFn::kData3Int, V3iDataTypeId, true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_3Short( MFn::kData3Short, V3iDataTypeId, true );
 // 2d vector conversion
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Double( MFn::kData2Double, V2dDataTypeId );
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Float( MFn::kData2Float, V2fDataTypeId );
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Int( MFn::kData2Int, V2iDataTypeId );
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Short( MFn::kData2Short, V3iDataTypeId );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Double( MFn::kData2Double, V2dDataTypeId, true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Float( MFn::kData2Float, V2fDataTypeId, true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Int( MFn::kData2Int, V2iDataTypeId, true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataConverter> FromMayaNumericDataConverter::g_2Short( MFn::kData2Short, V3iDataTypeId , true);
 
 
 FromMayaNumericDataConverter::FromMayaNumericDataConverter( const MObject &object )

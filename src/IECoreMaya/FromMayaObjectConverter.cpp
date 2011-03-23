@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -215,47 +215,52 @@ IECore::ConstBoolParameterPtr FromMayaObjectConverter::blindDataRemoveNamespaceP
 
 FromMayaObjectConverterPtr FromMayaObjectConverter::create( const MObject &object, IECore::TypeId resultType )
 {
-	const TypesToFnsMap *m = typesToFns();
-
-	TypesToFnsMap::const_iterator it = m->find( Types( object.apiType(), resultType ) );
-	if( it!=m->end() )
+	const TypesToFnsMap &m = typesToFns();
+	
+	TypesToFnsMap::const_iterator it = m.find( Types( object.apiType(), resultType ) );
+	if( it!=m.end() )
 	{
 		return it->second( object );
 	}
-
+	
+	// if not then see if the default converter is suitable
+	DefaultConvertersMap &dc = defaultConverters();
+	DefaultConvertersMap::const_iterator dcIt = dc.find( object.apiType() );
+	if( dcIt != dc.end() )
+	{
+		// we only use the default converter if no result type has been specified, or if the requested type is a base class
+		// of the type the default converter will create.
+		if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
+		{
+			return dcIt->second->second( object );
+		}
+	}
+	
 	return 0;
 }
 
-void FromMayaObjectConverter::registerConverter( const MFn::Type fromType, IECore::TypeId resultType, CreatorFn creator )
-{
-	TypesToFnsMap *m = typesToFns();
-	m->insert( TypesToFnsMap::value_type( Types( fromType, resultType ), creator ) );
-	m->insert( TypesToFnsMap::value_type( Types( fromType, IECore::InvalidTypeId ), creator ) ); // for the create function which doesn't care about resultType
+void FromMayaObjectConverter::registerConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion, CreatorFn creator )
+{	
+	TypesToFnsMap &m = typesToFns();
+	TypesToFnsMap::const_iterator it = m.insert( TypesToFnsMap::value_type( Types( fromType, resultType), creator ) ).first;
+	if( defaultConversion )
+	{
+		DefaultConvertersMap &dc = defaultConverters();
+		if( ! dc.insert( DefaultConvertersMap::value_type( fromType, it ) ).second )
+		{
+			IECore::msg( IECore::Msg::Error, "FromMayaObjectConverter::registerConverter", boost::format( "Default conversion for MFn::Type %d already registered - ignoring second registration." ) % fromType );
+		}
+	}
 }
 
-FromMayaObjectConverter::TypesToFnsMap *FromMayaObjectConverter::typesToFns()
+FromMayaObjectConverter::TypesToFnsMap &FromMayaObjectConverter::typesToFns()
 {
-	static TypesToFnsMap *m = new TypesToFnsMap;
+	static TypesToFnsMap m;
 	return m;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// Implementation of nested Types class
-/////////////////////////////////////////////////////////////////////////////////
-
-FromMayaObjectConverter::Types::Types( MFn::Type from, IECore::TypeId result )
-	:	fromType( from ), resultType( result )
+FromMayaObjectConverter::DefaultConvertersMap &FromMayaObjectConverter::defaultConverters()
 {
-}
-
-bool FromMayaObjectConverter::Types::operator < ( const Types &other ) const
-{
-	if( fromType != other.fromType )
-	{
-		return fromType < other.fromType;
-	}
-	else
-	{
-		return resultType < other.resultType;
-	}
+	static DefaultConvertersMap m;
+	return m;
 }

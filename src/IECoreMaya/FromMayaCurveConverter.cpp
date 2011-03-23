@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,10 +51,8 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaCurveConverter );
 
-static const MFn::Type fromTypes[] = { MFn::kNurbsCurve, MFn::kNurbsCurveData, MFn::kInvalid };
-static const IECore::TypeId toTypes[] = { IECore::BlindDataHolderTypeId, IECore::RenderableTypeId, IECore::VisibleRenderableTypeId, IECore::PrimitiveTypeId, IECore::CurvesPrimitiveTypeId, IECore::InvalidTypeId };
-
-IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( fromTypes, toTypes );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( MFn::kNurbsCurve, IECore::CurvesPrimitiveTypeId, true );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_dataDescription( MFn::kNurbsCurveData, IECore::CurvesPrimitiveTypeId, true );
 
 FromMayaCurveConverter::FromMayaCurveConverter( const MObject &object )
 	:	FromMayaShapeConverter( "Converts maya curve shapes into IECore::CurvesPrimitive objects.", object )

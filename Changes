@@ -15,6 +15,8 @@ Improvements :
 
 * IECoreMaya::ToMayaImageConverter and IECoreMaya::FromMayaImageConverter now have python bindings. See test/IECoreMaya/ImageConverterTest.py for examples.
 
+* IECoreMaya::FromMayaStringPlugConverter now has python bindings.
+
 * ToMayaPlugConverter can now set plugs which expect IECoreMaya::ObjectData values.
 
 * IECoreGL::Renderer provides control over GL_DEPTH_TEST with the new gl:depthTest attribute.
@@ -50,3 +52,5 @@ Bug fixes :
 * CameraController::unproject now actually works.
 
 * Fixed bugs which meant that RunTimeTyped::typeNameFromTypeId( RunTimeTypedTypeId ) and RunTimeTyped::typeIdFromTypeName( "RunTimeTyped" ) returned incorrect results.
+
+* Fixed a long standing bug which meant that the various FromMaya*Converter::create() functions wouldn't always return the same type of converter. As an additional benefit converters are matched against the base classes of the types they return, making it possible to request a result type of Primitive from a mesh and have the FromMayaMeshConverter be considered as a match.

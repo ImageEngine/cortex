@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,25 +40,11 @@
 namespace IECoreMaya
 {
 
-template<class T>
-FromMayaObjectConverter::FromMayaObjectConverterDescription<T>::FromMayaObjectConverterDescription( MFn::Type fromType, IECore::TypeId resultType )
-{
-	FromMayaObjectConverter::registerConverter( fromType, resultType, creator );
-	/// \todo Derive FromMayaObjectConverterDescription from RunTimeTyped::TypeDescription instead of calling this manually.
-	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
-}
 
 template<class T>
-FromMayaObjectConverter::FromMayaObjectConverterDescription<T>::FromMayaObjectConverterDescription( const MFn::Type *fromTypes, const IECore::TypeId *resultTypes )
+FromMayaObjectConverter::FromMayaObjectConverterDescription<T>::FromMayaObjectConverterDescription( MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion )
 {
-	while( *fromTypes!=MFn::kInvalid )
-	{
-		for( const IECore::TypeId *t = resultTypes; *t!=IECore::InvalidTypeId; t++ )
-		{
-			FromMayaObjectConverter::registerConverter( *fromTypes, *t, creator );
-		}
-		fromTypes++;
-	}
+	FromMayaObjectConverter::registerConverter( fromType, resultType, defaultConversion, creator );
 	/// \todo Derive FromMayaObjectConverterDescription from RunTimeTyped::TypeDescription instead of calling this manually.
 	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }

@@ -71,6 +71,7 @@ class FromMayaCurveConverter : public FromMayaShapeConverter
 		IECore::PrimitivePtr doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const;
 
 		static Description<FromMayaCurveConverter> m_description;
+		static Description<FromMayaCurveConverter> m_dataDescription;
 
 		IECore::BoolParameterPtr m_linearParameter;
 

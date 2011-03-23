@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,11 +43,7 @@ namespace IECoreMaya
 template<class T>
 FromMayaPlugConverter::Description<T>::Description( MFnNumericData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter )
 {
-	FromMayaPlugConverter::registerConverter( fromType, resultType, creator );
-	if( isDefaultConverter )
-	{
-		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
-	}
+	FromMayaPlugConverter::registerConverter( fromType, resultType, isDefaultConverter, creator );
 	/// \todo Derive FromMayaPlugConverter::Description from RunTimeTyped::TypeDescription instead of calling this manually.
 	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }
@@ -55,11 +51,7 @@ FromMayaPlugConverter::Description<T>::Description( MFnNumericData::Type fromTyp
 template<class T>
 FromMayaPlugConverter::Description<T>::Description( MFnData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter )
 {
-	FromMayaPlugConverter::registerConverter( fromType, resultType, creator );
-	if( isDefaultConverter )
-	{
-		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
-	}
+	FromMayaPlugConverter::registerConverter( fromType, resultType, isDefaultConverter, creator );
 	/// \todo Derive FromMayaPlugConverter::Description from RunTimeTyped::TypeDescription instead of calling this manually.
 	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }
@@ -67,11 +59,7 @@ FromMayaPlugConverter::Description<T>::Description( MFnData::Type fromType, IECo
 template<class T>
 FromMayaPlugConverter::Description<T>::Description( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, bool isDefaultConverter )
 {
-	FromMayaPlugConverter::registerConverter( fromType, resultType, creator );
-	if( isDefaultConverter )
-	{
-		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
-	}
+	FromMayaPlugConverter::registerConverter( fromType, resultType, isDefaultConverter, creator );
 	/// \todo Derive FromMayaPlugConverter::Description from RunTimeTyped::TypeDescription instead of calling this manually.
 	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 }

@@ -62,7 +62,8 @@ class FromMayaTransformationMatrixConverter : public FromMayaObjectConverter
 
 	private :
 
-		static FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter> m_description;
+		static FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter> g_description;
+		static FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter> g_dataDescription;
 
 };
 

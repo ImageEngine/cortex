@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,13 +83,6 @@ class FromMayaObjectConverter : public FromMayaConverter
 		/// If resultType is specified then only converters which create objects of that
 		/// type will be returned - the default value allows any suitable converter to be
 		/// created. If no matching converters exist then returns 0.
-		/// \todo The availability of a default conversion by using the default value for
-		/// resultType is troublesome. As we add new converters the default conversion changes,
-		/// and in addition I think it may change based on the order of static initialisation
-		/// of the registrar classes, which I don't think is guaranteed to be consistent. It is
-		/// therefore a very good idea to avoid the use of the default parameter - perhaps we
-		/// should remove it at some point. This also applies to the factory functions in the
-		/// other converters.
 		static FromMayaObjectConverterPtr create( const MObject &object, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 
@@ -106,7 +99,7 @@ class FromMayaObjectConverter : public FromMayaConverter
 
 		typedef FromMayaObjectConverterPtr (*CreatorFn)( const MObject &object );
 
-		static void registerConverter( const MFn::Type fromType, IECore::TypeId resultType, CreatorFn creator );
+		static void registerConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion, CreatorFn creator );
 
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.
@@ -114,12 +107,12 @@ class FromMayaObjectConverter : public FromMayaConverter
 		class FromMayaObjectConverterDescription
 		{
 			public :
-				FromMayaObjectConverterDescription( MFn::Type fromType, IECore::TypeId resultType );
-				/// fromTypes should be an array terminated by MFn::kInvalid and resultTypes should
-				/// be an array terminated by IECore::InvalidTypeId. resultTypes is only provided as an array
-				/// so you can register all the subclasses of the actual resultType - ideally this would be done
-				/// automatically using as yet unavailable functionality in RunTimeTyped.
-				FromMayaObjectConverterDescription( const MFn::Type *fromTypes, const IECore::TypeId *resultTypes );
+				/// \param fromType The maya type which can be converted.
+				/// \param resultType The cortex type which will result from the conversion.
+				/// \param defaultConversion Should be true if this conversion is the "best" for a given fromType. If
+				/// this is true then this is the converter that will be used when create() is called without specifying
+				/// a resultType.
+				FromMayaObjectConverterDescription( MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion );
 			private :
 				static FromMayaObjectConverterPtr creator( const MObject &object );
 		};
@@ -132,16 +125,12 @@ class FromMayaObjectConverter : public FromMayaConverter
 		IECore::StringParameterPtr m_blindDataAttrPrefixParameter;
 		IECore::BoolParameterPtr m_blindDataRemoveNamespaceParameter;
 
-		struct Types
-		{
-			Types( MFn::Type from, IECore::TypeId result );
-			MFn::Type fromType;
-			IECore::TypeId resultType;
-			bool operator < ( const Types &other ) const;
-		};
-
+		typedef std::pair<MFn::Type, IECore::TypeId> Types;
 		typedef std::map<Types, CreatorFn> TypesToFnsMap;
-		static TypesToFnsMap *typesToFns();
+		typedef std::map<MFn::Type, TypesToFnsMap::const_iterator> DefaultConvertersMap;
+		
+		static TypesToFnsMap &typesToFns();
+		static DefaultConvertersMap &defaultConverters();
 
 };
 

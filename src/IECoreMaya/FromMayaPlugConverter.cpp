@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,13 +38,8 @@
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnUnitAttribute.h"
 #include "maya/MFnTypedAttribute.h"
-#include "maya/MString.h"
-#include "maya/MTime.h"
-#include "maya/MAngle.h"
-#include "maya/MDistance.h"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaPlugConverter.h"
@@ -64,40 +59,82 @@ const MPlug &FromMayaPlugConverter::plug() const
 	return m_plug;
 }
 
-FromMayaPlugConverter::NumericTypesToFnsMap *FromMayaPlugConverter::numericTypesToFns()
+FromMayaPlugConverter::NumericTypesToFnsMap &FromMayaPlugConverter::numericTypesToFns()
 {
-	static NumericTypesToFnsMap *m = new NumericTypesToFnsMap;
+	static NumericTypesToFnsMap m;
 	return m;
 }
 
-void FromMayaPlugConverter::registerConverter( const MFnNumericData::Type fromType, IECore::TypeId resultType, CreatorFn creator )
+FromMayaPlugConverter::NumericDefaultConvertersMap &FromMayaPlugConverter::numericDefaultConverters()
 {
-	NumericTypesToFnsMap *m = numericTypesToFns();
-	(*m)[NumericTypePair( fromType, resultType )] = creator;
-}
-
-FromMayaPlugConverter::TypedTypesToFnsMap *FromMayaPlugConverter::typedTypesToFns()
-{
-	static TypedTypesToFnsMap *m = new TypedTypesToFnsMap;
+	static NumericDefaultConvertersMap m;
 	return m;
 }
 
-void FromMayaPlugConverter::registerConverter( const MFnData::Type fromType, IECore::TypeId resultType, CreatorFn creator )
+void FromMayaPlugConverter::registerConverter( const MFnNumericData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter, CreatorFn creator )
 {
-	TypedTypesToFnsMap *m = typedTypesToFns();
-	(*m)[TypedTypePair( fromType, resultType )] = creator;
+	NumericTypesToFnsMap &m = numericTypesToFns();
+	NumericTypesToFnsMap::const_iterator it = m.insert( NumericTypesToFnsMap::value_type( NumericTypePair( fromType, resultType ), creator ) ).first;
+	if( isDefaultConverter )
+	{
+		NumericDefaultConvertersMap &dc = numericDefaultConverters();
+		if( ! dc.insert( NumericDefaultConvertersMap::value_type( fromType, it ) ).second )
+		{
+			IECore::msg( IECore::Msg::Error, "FromMayaPlugConverter::registerConverter", boost::format( "Default conversion for MFnNumericData::Type %d already registered - ignoring second registration." ) % fromType );
+		}
+	}
 }
 
-FromMayaPlugConverter::UnitTypesToFnsMap *FromMayaPlugConverter::unitTypesToFns()
+FromMayaPlugConverter::TypedTypesToFnsMap &FromMayaPlugConverter::typedTypesToFns()
 {
-	static UnitTypesToFnsMap *m = new UnitTypesToFnsMap;
+	static TypedTypesToFnsMap m;
 	return m;
 }
 
-void FromMayaPlugConverter::registerConverter( const MFnUnitAttribute::Type fromType, IECore::TypeId resultType, CreatorFn creator )
+FromMayaPlugConverter::TypedDefaultConvertersMap &FromMayaPlugConverter::typedDefaultConverters()
 {
-	UnitTypesToFnsMap *m = unitTypesToFns();
-	(*m)[UnitTypePair( fromType, resultType )] = creator;
+	static TypedDefaultConvertersMap m;
+	return m;
+}
+
+void FromMayaPlugConverter::registerConverter( const MFnData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter, CreatorFn creator )
+{
+	TypedTypesToFnsMap &m = typedTypesToFns();
+	TypedTypesToFnsMap::const_iterator it = m.insert( TypedTypesToFnsMap::value_type( TypedTypePair( fromType, resultType ), creator ) ).first;
+	if( isDefaultConverter )
+	{
+		TypedDefaultConvertersMap &dc = typedDefaultConverters();
+		if( ! dc.insert( TypedDefaultConvertersMap::value_type( fromType, it ) ).second )
+		{
+			IECore::msg( IECore::Msg::Error, "FromMayaPlugConverter::registerConverter", boost::format( "Default conversion for MFnData::Type %d already registered - ignoring second registration." ) % fromType );
+		}
+	}
+}
+
+FromMayaPlugConverter::UnitTypesToFnsMap &FromMayaPlugConverter::unitTypesToFns()
+{
+	static UnitTypesToFnsMap m;
+	return m;
+}
+
+FromMayaPlugConverter::UnitDefaultConvertersMap &FromMayaPlugConverter::unitDefaultConverters()
+{
+	static UnitDefaultConvertersMap m;
+	return m;
+}
+
+void FromMayaPlugConverter::registerConverter( const MFnUnitAttribute::Type fromType, IECore::TypeId resultType, bool isDefaultConverter, CreatorFn creator )
+{
+	UnitTypesToFnsMap &m = unitTypesToFns();
+	UnitTypesToFnsMap::const_iterator it = m.insert(UnitTypesToFnsMap::value_type( UnitTypePair( fromType, resultType ), creator ) ).first;
+	if( isDefaultConverter )
+	{
+		UnitDefaultConvertersMap &dc = unitDefaultConverters();
+		if( ! dc.insert( UnitDefaultConvertersMap::value_type( fromType, it ) ).second )
+		{
+			IECore::msg( IECore::Msg::Error, "FromMayaPlugConverter::registerConverter", boost::format( "Default conversion for MFnUnitAttribute::Type %d already registered - ignoring second registration." ) % fromType );
+		}
+	}
 }
 
 FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::TypeId resultType )
@@ -107,36 +144,63 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 	if( attribute.hasFn( MFn::kUnitAttribute ) )
 	{
 		MFnUnitAttribute fnUAttr( attribute );
-		const UnitTypesToFnsMap *m = unitTypesToFns();
-		UnitTypesToFnsMap::const_iterator it = m->find( UnitTypePair( fnUAttr.unitType(), resultType ) );
-		if( it!=m->end() )
+		const UnitTypesToFnsMap &m = unitTypesToFns();
+		UnitTypesToFnsMap::const_iterator it = m.find( UnitTypePair( fnUAttr.unitType(), resultType ) );
+		if( it!=m.end() )
 		{
-			FromMayaConverterPtr result = it->second( plug );
-			return result;
+			return it->second( plug );
+		}
+		
+		UnitDefaultConvertersMap &dc = unitDefaultConverters();
+		UnitDefaultConvertersMap::const_iterator dcIt = dc.find( fnUAttr.unitType() );
+		if( dcIt != dc.end() )
+		{
+			if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
+			{
+				return dcIt->second->second( plug );
+			}
 		}
 	}
 
 	if( attribute.hasFn( MFn::kNumericAttribute ) )
 	{
 		MFnNumericAttribute fnNAttr( attribute );
-		const NumericTypesToFnsMap *m = numericTypesToFns();
-		NumericTypesToFnsMap::const_iterator it = m->find( NumericTypePair( fnNAttr.unitType(), resultType ) );
-		if( it!=m->end() )
+		const NumericTypesToFnsMap &m = numericTypesToFns();
+		NumericTypesToFnsMap::const_iterator it = m.find( NumericTypePair( fnNAttr.unitType(), resultType ) );
+		if( it!=m.end() )
 		{
-			FromMayaConverterPtr result = it->second( plug );
-			return result;
+			return it->second( plug );
+		}
+		
+		NumericDefaultConvertersMap &dc = numericDefaultConverters();
+		NumericDefaultConvertersMap::const_iterator dcIt = dc.find( fnNAttr.unitType() );
+		if( dcIt != dc.end() )
+		{
+			if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
+			{
+				return dcIt->second->second( plug );
+			}
 		}
 	}
 
 	if( attribute.hasFn( MFn::kTypedAttribute ) )
 	{
 		MFnTypedAttribute fnTAttr( attribute );
-		const TypedTypesToFnsMap *m = typedTypesToFns();
-		TypedTypesToFnsMap::const_iterator it = m->find( TypedTypePair( fnTAttr.attrType(), resultType ) );
-		if( it!=m->end() )
+		const TypedTypesToFnsMap &m = typedTypesToFns();
+		TypedTypesToFnsMap::const_iterator it = m.find( TypedTypePair( fnTAttr.attrType(), resultType ) );
+		if( it!=m.end() )
 		{
-			FromMayaConverterPtr result = it->second( plug );
-			return result;
+			return it->second( plug );
+		}
+		
+		TypedDefaultConvertersMap &dc = typedDefaultConverters();
+		TypedDefaultConvertersMap::const_iterator dcIt = dc.find( fnTAttr.attrType() );
+		if( dcIt != dc.end() )
+		{
+			if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
+			{
+				return dcIt->second->second( plug );
+			}
 		}
 	}
 
@@ -151,3 +215,4 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		return FromMayaObjectConverter::create( o, resultType );
 	}
 }
+

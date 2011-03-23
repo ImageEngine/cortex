@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,12 +49,9 @@ using namespace IECore;
 using namespace std;
 using namespace Imath;
 
-static const MFn::Type fromTypes[] = { MFn::kTransform, MFn::kInvalid };
-static const IECore::TypeId toTypes[] = { GroupTypeId, InvalidTypeId };
-
 IE_CORE_DEFINERUNTIMETYPED( FromMayaGroupConverter );
 
-FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( fromTypes, toTypes );
+FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( MFn::kTransform, GroupTypeId, true );
 
 FromMayaGroupConverter::FromMayaGroupConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts transforms to Group objects.", dagPath )

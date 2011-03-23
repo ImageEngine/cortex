@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,10 +54,7 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaCameraConverter );
 
-static const MFn::Type fromTypes[] = { MFn::kCamera, MFn::kInvalid };
-static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, PreWorldRenderableTypeId, CameraTypeId, InvalidTypeId };
-
-FromMayaDagNodeConverter::Description<FromMayaCameraConverter> FromMayaCameraConverter::m_description( fromTypes, toTypes );
+FromMayaDagNodeConverter::Description<FromMayaCameraConverter> FromMayaCameraConverter::m_description( MFn::kCamera, CameraTypeId, true );
 
 FromMayaCameraConverter::FromMayaCameraConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts maya camera shape nodes into IECore::Camera objects.", dagPath )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -284,25 +284,54 @@ const MDagPath *FromMayaShapeConverter::dagPath( bool emitSpaceWarnings ) const
 
 FromMayaShapeConverterPtr FromMayaShapeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
 {
-	const ShapeTypesToFnsMap *m = shapeTypesToFns();
-	ShapeTypesToFnsMap::const_iterator it = m->find( ShapeTypes( dagPath.apiType(), resultType ) );
-	if( it!=m->end() )
+	const ShapeTypesToFnsMap &m = shapeTypesToFns();
+	
+	// see if there's a specific converter for us
+	ShapeTypesToFnsMap::const_iterator it = m.find( ShapeTypes( dagPath.apiType(), resultType ) );
+	if( it != m.end() )
 	{
 		return it->second( dagPath );
 	}
+
+	// if not then see if the default converter is suitable
+	DefaultConvertersMap &dc = defaultConverters();
+	DefaultConvertersMap::const_iterator dcIt = dc.find( dagPath.apiType() );
+	if( dcIt != dc.end() )
+	{
+		// we only use the default converter if no result type has been specified, or if the requested type is a base class
+		// of the type the default converter will create.
+		if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
+		{
+			return dcIt->second->second( dagPath );
+		}		
+	}
+	
 	return 0;
 }
 
-void FromMayaShapeConverter::registerShapeConverter( const MFn::Type fromType, IECore::TypeId resultType, ShapeCreatorFn creator )
+void FromMayaShapeConverter::registerShapeConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConverter, ShapeCreatorFn creator )
 {
-	ShapeTypesToFnsMap *m = shapeTypesToFns();
-	m->insert( ShapeTypesToFnsMap::value_type( ShapeTypes( fromType, resultType ), creator ) );
-	m->insert( ShapeTypesToFnsMap::value_type( ShapeTypes( fromType, IECore::InvalidTypeId ), creator ) ); // for the create function which doesn't care about resultType
+	ShapeTypesToFnsMap &m = shapeTypesToFns();
+	ShapeTypesToFnsMap::const_iterator it = m.insert( ShapeTypesToFnsMap::value_type( ShapeTypes( fromType, resultType ), creator ) ).first;
+	if( defaultConverter )
+	{
+		DefaultConvertersMap &dc = defaultConverters();
+		if( ! dc.insert( DefaultConvertersMap::value_type( fromType, it ) ).second )
+		{
+			IECore::msg( IECore::Msg::Error, "FromMayaShapeConverter::registerShapeConverter", boost::format( "Default conversion for MFn::Type %d already registered - ignoring second registration." ) % fromType );
+		}
+	}
 }
 
-FromMayaShapeConverter::ShapeTypesToFnsMap *FromMayaShapeConverter::shapeTypesToFns()
+FromMayaShapeConverter::ShapeTypesToFnsMap &FromMayaShapeConverter::shapeTypesToFns()
 {
-	static ShapeTypesToFnsMap *m = new ShapeTypesToFnsMap;
+	static ShapeTypesToFnsMap m;
+	return m;
+}
+
+FromMayaShapeConverter::DefaultConvertersMap &FromMayaShapeConverter::defaultConverters()
+{
+	static DefaultConvertersMap m;
 	return m;
 }
 

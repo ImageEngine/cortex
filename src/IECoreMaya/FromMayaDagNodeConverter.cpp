@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
 
 #include "IECore/CompoundObject.h"
+#include "IECore/MessageHandler.h"
 
 using namespace IECoreMaya;
 
@@ -56,23 +57,49 @@ IECore::ObjectPtr FromMayaDagNodeConverter::doConversion( const MObject &object,
 
 FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
 {
-	const TypesToFnsMap *m = typesToFns();
-	TypesToFnsMap::const_iterator it = m->find( Types( dagPath.apiType(), resultType ) );
-	if( it!=m->end() )
+	const TypesToFnsMap &m = typesToFns();
+	TypesToFnsMap::const_iterator it = m.find( Types( dagPath.apiType(), resultType ) );
+	if( it!=m.end() )
 	{
 		return it->second( dagPath );
 	}
+	
+	// if not then see if the default converter is suitable
+	DefaultConvertersMap &dc = defaultConverters();
+	DefaultConvertersMap::const_iterator dcIt = dc.find( dagPath.apiType() );
+	if( dcIt != dc.end() )
+	{
+		if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
+		{
+			return dcIt->second->second( dagPath );
+		}
+	}
+	
 	return 0;
 }
 
-FromMayaDagNodeConverter::TypesToFnsMap *FromMayaDagNodeConverter::typesToFns()
+FromMayaDagNodeConverter::TypesToFnsMap &FromMayaDagNodeConverter::typesToFns()
 {
-	static TypesToFnsMap *t = new TypesToFnsMap;
-	return t;
+	static TypesToFnsMap m;
+	return m;
 }
 
-void FromMayaDagNodeConverter::registerConverter( const MFn::Type fromType, IECore::TypeId resultType, CreatorFn creator )
+FromMayaDagNodeConverter::DefaultConvertersMap &FromMayaDagNodeConverter::defaultConverters()
 {
-	typesToFns()->insert( TypesToFnsMap::value_type( Types( fromType, resultType), creator ) );
-	typesToFns()->insert( TypesToFnsMap::value_type( Types( fromType, IECore::InvalidTypeId), creator ) );
+	static DefaultConvertersMap m;
+	return m;
+}
+
+void FromMayaDagNodeConverter::registerConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion, CreatorFn creator )
+{
+	TypesToFnsMap &m = typesToFns();
+	TypesToFnsMap::const_iterator it = m.insert( TypesToFnsMap::value_type( Types( fromType, resultType), creator ) ).first;
+	if( defaultConversion )
+	{
+		DefaultConvertersMap &dc = defaultConverters();
+		if( ! dc.insert( DefaultConvertersMap::value_type( fromType, it ) ).second )
+		{
+			IECore::msg( IECore::Msg::Error, "FromMayaDagNodeConverter::registerConverter", boost::format( "Default conversion for MFn::Type %d already registered - ignoring second registration." ) % fromType );
+		}
+	}
 }
