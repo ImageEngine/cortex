@@ -79,6 +79,7 @@ T parameterPresets( const boost::python::object &o );
 /// See src/bindings/PathParameterBinding.cpp for an example of use, and the discussion above
 /// for a description of what is going on.
 #define IECOREPYTHON_PARAMETERWRAPPERFNS( CLASSNAME )													\
+	IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME );													\
 	virtual bool valueValid( const IECore::Object *value, std::string *reason = 0 ) const				\
 	{																									\
 		ScopedGILLock gilLock;																			\
