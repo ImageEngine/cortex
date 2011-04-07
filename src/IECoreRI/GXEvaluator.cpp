@@ -86,6 +86,7 @@ GXEvaluator::~GXEvaluator()
 {
 	RtContextHandle c = RiGetContext();
 	RiContext( m_context );
+	GxFreeGeometry( m_geo );
 	RiEnd();
 	if( c!=m_context )
 	{
