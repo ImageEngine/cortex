@@ -150,6 +150,7 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	}
 	
 	MPlugArray connectedPlugs;
+	/// \todo: if bindPose is missing, bypass functionality rather than throwing exceptions
 	MPlug bindPlug = fnSkinClusterNode.findPlug( "bindPose", true, &s );
 	if ( !bindPlug.connectedTo( connectedPlugs, true, false ) )
 	{
