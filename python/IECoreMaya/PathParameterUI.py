@@ -123,6 +123,7 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 			# This is a little different in concept to the path, but they key is
 			# never dynamic in terms of the parameter, so I think it makes sense.
 			uiUserData = self.parameter.userData().get( 'UI', {} )
+			## \todo: replace with ["fileDialog"]["key"] for Cortex 6
 			key = uiUserData.get( 'fileDialogKey', IECore.StringData() ).value
 			if key:
 				kw["key"] = key

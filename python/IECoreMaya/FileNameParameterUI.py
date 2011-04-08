@@ -44,10 +44,11 @@ class FileNameParameterUI( IECoreMaya.PathParameterUI ) :
 	def _fileDialog( self ) :
 		
 		tools = IECoreMaya.FileBrowser.FileExtensionFilter( self.parameter.extensions )
-
+		
 		IECoreMaya.PathParameterUI._fileDialog( self, 
 			filter = tools.filter,
-			validate = tools.validate
+			validate = tools.validate,
+			saveMode = self.parameter.userData().get( "UI", {} ).get( "fileDialog", {} ).get( "saveMode", False ),
 		)
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.FileNameParameter, FileNameParameterUI )
