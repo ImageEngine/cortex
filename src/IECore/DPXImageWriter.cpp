@@ -118,7 +118,7 @@ struct DPXImageWriter::ChannelConverter
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
 			{
 				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ]
-					|= ((unsigned int)(converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) * 1023 )) << m_bitShift;
+					|= std::min((unsigned int)1023, (unsigned int)(converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) * 1023 )) << m_bitShift;
 			}
 		}
 	};
