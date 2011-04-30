@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORERI_DSPY_H
-#define IECORERI_DSPY_H
+#include "IECoreRI/Dspy.h"
 
-#include "ndspy.h"
-
-namespace IECoreRI
+extern "C"
 {
 
-/// Defines functions to allow the RenderMan Dspy interface to be
-/// implemented in terms of IECore::DisplayDrivers. These functions are
-/// automatically registered with RenderMan using DspyRegisterDriverTable,
-/// but are public to allow their use in implementing display driver dsos
-/// as well.
-class Dspy
+PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, const char *fileName, int width, int height, int paramcount, const UserParameter *parameters, int formatCount, PtDspyDevFormat *format, PtFlagStuff *flags )
 {
-	
-	public :
+	return IECoreRI::Dspy::imageOpen( image, driverName, fileName, width, height, paramcount, parameters, formatCount, format, flags );
+}
 
-		/// A function suitable for implementing DspyImageOpen. This uses IECore::DisplayDriver::create() to make a driver. The reference count is incremented on the
-		/// driver and a pointer to it is placed in image.
-		static PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const char *fileName, int width, int height, int paramcount, const UserParameter *parameters, int formatCount, PtDspyDevFormat *format, PtFlagStuff *flags );
-		/// Expects image to have been created by the imageOpen above, but currently implements no queries.
-		static PtDspyError imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size, void *data );
-		/// Expects image to have been created by the imageOpen above, and uses data to make a call do DisplayDriver::imageData().
-		static PtDspyError imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data );
-		/// Decrements the reference count, destroying the IECore::DisplayDriver if nothing else owns a reference.
-		static PtDspyError imageClose( PtDspyImageHandle image );
+PtDspyError DspyImageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size, void *data )
+{
+	return IECoreRI::Dspy::imageQuery( image, type, size, data );
+}
 
-	private :
-	
-		class Registration;
-		static Registration g_registration;
+PtDspyError DspyImageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data )
+{
+	return IECoreRI::Dspy::imageData( image, xMin, xMaxPlusOne, yMin, yMaxPlusOne, entrySize, data );
+}
 
-};
+PtDspyError DspyImageClose( PtDspyImageHandle image )
+{
+	return IECoreRI::Dspy::imageClose( image );
+}
 
-}  // namespace IECore
-
-#endif // IECORERI_DSPY_H
+} // extern "C"

@@ -506,6 +506,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_RMANDISPLAY_NAME",
+	"The name under which to install the renderman displays.",
+	"$INSTALL_PREFIX/rmanDisplays/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_RSL_HEADER_DIR",
 	"The directory in which to install RSL headers.",
 	"$INSTALL_PREFIX/rsl",
@@ -1324,6 +1330,9 @@ riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
 riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython" )
 
+riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ie", SHLIBPREFIX="" )
+riDisplayDriverEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
 haveRI = False
 riLibs = []
 
@@ -1431,6 +1440,15 @@ if doConfigure :
 		riPythonProceduralEnv.Alias( "install", riPythonProceduralInstall )
 		riPythonProceduralEnv.Alias( "installRI", riPythonProceduralInstall )
 		riPythonProceduralForTest = riPythonProceduralEnv.Command( "src/rmanProcedurals/python/python.so", riPythonProcedural, Copy( "$TARGET", "$SOURCE" ) )
+		
+		# display driver
+		riDisplayDriver = riDisplayDriverEnv.SharedLibrary( "src/rmanDisplays/ieDisplay/" + os.path.basename( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), "src/rmanDisplays/ieDisplay/IEDisplay.cpp" )
+		riDisplayDriverInstall = riEnv.Install( os.path.dirname( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), riDisplayDriver )
+		riDisplayDriverEnv.NoCache( riDisplayDriverInstall )
+		riDisplayDriverEnv.AddPostAction( riDisplayDriverInstall, lambda target, source, env : makeLibSymLinks( riDisplayDriverEnv, libNameVar="INSTALL_RMANDISPLAY_NAME" ) )
+		riDisplayDriverEnv.Alias( "install", riDisplayDriverInstall )
+		riDisplayDriverEnv.Alias( "installRI", riDisplayDriverInstall )
+		riDisplayDriverForTest = riDisplayDriverEnv.Command( "src/rmanDisplays/ieDisplay/ieTestDisplay.so", riDisplayDriver, Copy( "$TARGET", "$SOURCE" ) )
 
 		# rsl headers
 		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" ) + glob.glob( "rsl/IECoreRI/*.inl" )
@@ -1473,7 +1491,7 @@ if doConfigure :
 		
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
 		NoCache( riTest )
-		riTestEnv.Depends( riTest, [ corePythonModule + riPythonProceduralForTest ] )
+		riTestEnv.Depends( riTest, [ corePythonModule + riPythonProceduralForTest + riDisplayDriverForTest ] )
 		riTestEnv.Depends( riTest, glob.glob( "test/IECoreRI/*.py" ) )
 		riTestEnv.Alias( "testRI", riTest )
 

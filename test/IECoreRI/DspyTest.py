@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@ from __future__ import with_statement
 
 import os
 import unittest
+import time
 
 import IECore
 import IECoreRI
@@ -77,11 +78,57 @@ class DspyTest( unittest.TestCase ) :
 		i2.blindData().clear()
 		
 		self.failIf( IECore.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
-				
+	
+	def testDisplayDriver( self ) :
+	
+		server = IECore.DisplayDriverServer( 1559 )
+		time.sleep( 2 )
+		
+		rib = """
+		Option "searchpath" "string display" "@:./src/rmanDisplays/ieDisplay"
+		
+		Display "test" "ie" "rgba"
+			"quantize" [ 0 0 0 0 ]
+			"string driverType" "ClientDisplayDriver"
+			"string displayHost" "localhost"
+			"string displayPort" "1559"
+			"string remoteDisplayType" "ImageDisplayDriver"
+			"string handle" "myLovelySphere"
+			
+		Display "+test/IECoreRI/output/sphere.tif" "tiff" "rgba" "quantize" [ 0 0 0 0 ]
+			
+		Projection "perspective" "float fov" [ 40 ]
+		
+		WorldBegin
+		
+			Translate 0 0 5			
+			Sphere 1 -1 1 360
+
+		WorldEnd
+		"""
+		
+		ribFile = open( "test/IECoreRI/output/display.rib", "w" )
+		ribFile.write( rib )
+		ribFile.close()
+		
+		os.system( "renderdl test/IECoreRI/output/display.rib" )
+		
+		i = IECore.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
+		i2 = IECore.TIFFImageReader( "test/IECoreRI/output/sphere.tif" ).read()
+		
+		i.blindData().clear()
+		i2.blindData().clear()
+		
+		self.failIf( IECore.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
+								
 	def tearDown( self ) :
 	
-		if os.path.exists( "test/IECoreRI/output/sphere.tif" ) :
-			os.remove( "test/IECoreRI/output/sphere.tif" )
-		
+		for f in [
+			"test/IECoreRI/output/sphere.tif",
+			"test/IECoreRI/output/display.rib"
+		] :
+			if os.path.exists( f ) :
+				os.remove( f )
+				
 if __name__ == "__main__":
     unittest.main()
