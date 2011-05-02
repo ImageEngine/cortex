@@ -79,12 +79,15 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	Box2iDataPtr dataWindowData = new Box2iData( dataWindow );
 	StringVectorDataPtr channelNamesData = new StringVectorData( channelNames );
 
+	IECore::CompoundDataPtr tmpParameters = parameters->copy();
+	tmpParameters->writable()[ "clientPID" ] = new IntData( getpid() );
+
 	// build the data block
 	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), "/", IndexedIO::Exclusive | IndexedIO::Write );
 	displayWindowData->Object::save( io, "displayWindow" );
 	dataWindowData->Object::save( io, "dataWindow" );
 	channelNamesData->Object::save( io, "channelNames" );
-	parameters->Object::save( io, "parameters" );
+	tmpParameters->Object::save( io, "parameters" );
 	buf = io->buffer();
 
 	size_t dataSize = buf->readable().size();

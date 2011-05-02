@@ -49,6 +49,7 @@ namespace IECore
 
 /// Connects to a DisplayDriverServer and pass every call do DisplayDriver functions to it as socket messages.
 /// The protocol is explained in DisplayDriverServer class. This client class works synchronously.
+/// It forwards all parameters to the server and also includes one called "clientPID" to help grouping AOVs from the same render.
 /// \ingroup renderingGroup
 class ClientDisplayDriver : public DisplayDriver
 {
