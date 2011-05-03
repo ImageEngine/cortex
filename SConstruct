@@ -1996,6 +1996,7 @@ if doConfigure :
 				nukePythonModuleEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonModuleEnv, nukePythonModuleEnv["INSTALL_NUKEPYTHON_DIR"] ) )
 				nukePythonModuleEnv.Alias( "install", nukePythonModuleInstall )
 				nukePythonModuleEnv.Alias( "installNuke", nukePythonModuleInstall )
+				nukePythonModuleEnv.Depends( nukePythonModule, corePythonModule )
 
 				if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
 					# this is the only way we could find to get a post action to run for an alias
