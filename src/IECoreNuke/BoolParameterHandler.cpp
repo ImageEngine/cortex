@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,7 +56,7 @@ void BoolParameterHandler::knobs( const IECore::Parameter *parameter, const char
 	}
 	
 	m_knob = Bool_knob( f, &m_storage, knobName, knobLabel( parameter ) );
-	setFlagsAndTooltip( parameter, f );
+	setKnobProperties( parameter, f, m_knob );
 }
 
 void BoolParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSource valueSource )

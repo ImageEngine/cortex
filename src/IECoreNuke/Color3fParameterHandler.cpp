@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ void Color3fParameterHandler::knobs( const IECore::Parameter *parameter, const c
 	}
 			
 	m_knob = Color_knob( f, &m_storage.x, knobName, knobLabel( parameter ) );
-	setFlagsAndTooltip( parameter, f );
+	setKnobProperties( parameter, f, m_knob );
 }
 
 void Color3fParameterHandler::setParameterValue( Parameter *parameter, ValueSource valueSource )

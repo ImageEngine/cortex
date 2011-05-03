@@ -1891,6 +1891,7 @@ nukePluginEnv = nukeEnv.Clone( IECORE_NAME="ieCore" )
 nukeTestEnv = testEnv.Clone()
 nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
 nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
+nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
 
 if doConfigure :
 

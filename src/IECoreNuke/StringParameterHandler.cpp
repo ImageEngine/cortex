@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,7 +60,7 @@ void StringParameterHandler::knobs( const IECore::Parameter *parameter, const ch
 	/// and the variables in the strings confuse nuke no end, so we're disabling expressions for now.
 	/// \todo Can we do better and allow the two to coexist?
 	SetFlags( f, DD::Image::Knob::NO_ANIMATION );
-	setFlagsAndTooltip( parameter, f );
+	setKnobProperties( parameter, f, m_knob );
 }
 
 void StringParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSource valueSource )

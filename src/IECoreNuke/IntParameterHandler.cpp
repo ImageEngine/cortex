@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ void IntParameterHandler::knobs( const IECore::Parameter *parameter, const char 
 	DD::Image::IRange range( intParameter->minValue(), intParameter->maxValue() );
 	m_knob = Int_knob( f, &m_storage, range, knobName, knobLabel( parameter ) );
 	DD::Image::SetFlags( f, DD::Image::Knob::FORCE_RANGE );
-	setFlagsAndTooltip( parameter, f );
+	setKnobProperties( parameter, f, m_knob );
 }
 
 void IntParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSource valueSource )

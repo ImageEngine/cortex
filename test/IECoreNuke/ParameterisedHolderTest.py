@@ -398,6 +398,32 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 			
 		self.__checkParameterKnobs( parameterised.parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs )
 		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs )
+	
+	def testDefaultExpression( self ) :
+	
+		# create opholder and check the default expression we asked for works
+	
+		fnOH = IECoreNuke.FnOpHolder.create( "op", "add", 1 )
+		self.assertEqual( fnOH.node().knob( "parm_a" ).toScript(), '{"frame * 2"}' )
+		self.failUnless( fnOH.node().knob( "parm_a" ).isAnimated() )
+	
+		self.assertEqual( nuke.frame(), 1 )
+		self.assertEqual( fnOH.node().knob( "parm_a" ).getValue(), 2 )
+	
+		# remove the expression, cut and paste the node, and make sure
+		# it doesn't reappear
+	
+		fnOH.node().knob( "parm_a" ).clearAnimated()
+		self.failIf( fnOH.node().knob( "parm_a" ).isAnimated() )
+	
+		nuke.nodeCopy( "test/IECoreNuke/parameterisedHolder.nk" )
+
+		nuke.scriptClear()
+	
+		n = nuke.nodePaste( "test/IECoreNuke/parameterisedHolder.nk" )
+	   
+		fnOH = IECoreNuke.FnOpHolder( n )
+		self.assertEqual( fnOH.node().knob( "parm_a" ).toScript(), "2" )	   
 			
 	def tearDown( self ) :
 	

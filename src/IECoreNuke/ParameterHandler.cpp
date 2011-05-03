@@ -122,7 +122,7 @@ const char *ParameterHandler::knobLabel( const IECore::Parameter *parameter ) co
 	return parameter->name().c_str();
 }
 
-void ParameterHandler::setFlagsAndTooltip( const IECore::Parameter *parameter, DD::Image::Knob_Callback f ) const
+void ParameterHandler::setKnobProperties( const IECore::Parameter *parameter, DD::Image::Knob_Callback f, DD::Image::Knob *knob ) const
 {
 	const CompoundObject *userData = parameter->userData();
 	const CompoundObject *ui = userData->member<CompoundObject>( "UI" );
@@ -139,4 +139,20 @@ void ParameterHandler::setFlagsAndTooltip( const IECore::Parameter *parameter, D
 	
 	SetFlags( f, flags );
 	Tooltip( f, parameter->description() );
+	
+	if( f.makeKnobs() )
+	{
+		const CompoundObject *nuke = userData->member<CompoundObject>( "nuke" );
+		if( nuke )
+		{
+			const StringData *defaultExpression = nuke->member<StringData>( "defaultExpression" );
+			if( defaultExpression )
+			{
+				if( knob->from_script( defaultExpression->readable().c_str() ) )
+				{
+					knob->changed();
+				}
+			}
+		}
+	}
 }

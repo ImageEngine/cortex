@@ -104,10 +104,10 @@ class ParameterHandler : public IECore::RefCounted
 	
 		/// Should be called by derived classes to get a good label for the main knob
 		const char *knobLabel( const IECore::Parameter *parameter ) const;
-		/// Should be called by derived classes to set the flags for the main knob based
-		/// on userData on the parameter. This deals with things like visibility etc, and also
-		/// sets the tooltip based on the parameter description.
-		void setFlagsAndTooltip( const IECore::Parameter *parameter, DD::Image::Knob_Callback f ) const;
+		/// Should be called by derived classes to set the properties for the main knob based
+		/// on userData on the parameter. This sets visibility and tooltip and applies any default
+		/// expressions.
+		void setKnobProperties( const IECore::Parameter *parameter, DD::Image::Knob_Callback f, DD::Image::Knob *knob ) const;
 		
 		template<typename T>
 		class Description

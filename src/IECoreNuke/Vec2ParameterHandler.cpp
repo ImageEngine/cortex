@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ void Vec2ParameterHandler<T>::knobs( const IECore::Parameter *parameter, const c
 			
 	m_knob = XY_knob( f, &m_storage.x, knobName, knobLabel( parameter ) );
 	SetFlags( f, DD::Image::Knob::NO_PROXYSCALE | DD::Image::Knob::NO_HANDLES );
-	setFlagsAndTooltip( parameter, f );
+	setKnobProperties( parameter, f, m_knob );
 }
 
 template<typename T>
