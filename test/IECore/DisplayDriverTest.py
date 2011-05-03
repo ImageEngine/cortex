@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import os
 import gc
 import glob
 import sys
@@ -161,6 +162,7 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 		idd.imageClose()
 		
 		newImg = ImageDisplayDriver.removeStoredImage( "myHandle" )
+		params["clientPID"] = IntData( os.getpid() )
 		self.assertEqual( newImg.blindData(), params )
 		# remove blindData for comparison
 		newImg.blindData().clear()
