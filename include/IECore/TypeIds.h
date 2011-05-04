@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -387,6 +387,10 @@ enum TypeId
 	LightTypeId = 341,
 	ContrastSmoothSkinningWeightsOpTypeId = 342,
 	PointDistributionOpTypeId = 343,
+	LineSegment3fDataTypeId = 344,
+	LineSegment3dDataTypeId = 345,
+	LineSegment3fParameterTypeId = 346,
+	LineSegment3dParameterTypeId = 347,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -69,5 +69,7 @@ IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( M44f, M44fParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( M44d, M44dParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( TransformationMatrixf, TransformationMatrixfParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( TransformationMatrixd, TransformationMatrixdParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( LineSegment3f, LineSegment3fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( LineSegment3d, LineSegment3dParameter )
 
 }

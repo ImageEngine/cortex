@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 
 #include "IECore/LineSegment.h"
 #include "IECorePython/LineSegmentBinding.h"
+#include "IECorePython/IECoreBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -95,6 +96,23 @@ static std::string repr( L &x )
 	return s.str();
 }
 
+#define DEFINESTRSPECIALISATION( TYPE ) \
+template<> \
+std::string str( TYPE &x ) \
+{ \
+	std::stringstream s; \
+	object item0( x.p0 ); \
+	s << call_method< std::string >( item0.ptr(), "__str__" ) << " "; \
+	object item1( x.p1 ); \
+	s << call_method< std::string >( item1.ptr(), "__str__" ); \
+	return s.str(); \
+}
+
+DEFINESTRSPECIALISATION( LineSegment2f )
+DEFINESTRSPECIALISATION( LineSegment2d )
+DEFINESTRSPECIALISATION( LineSegment3f )
+DEFINESTRSPECIALISATION( LineSegment3d )
+
 template<class L>
 static tuple closestPoints( const L &l, const L &l2 )
 {
@@ -133,6 +151,7 @@ static void bind3D()
 		.def( init<Vec, Vec>() )
 		.def_readwrite( "p0", &L::p0 )
 		.def_readwrite( "p1", &L::p1 )
+		.def( "__str__", &str<L> )
 		.def( "__repr__", &repr<L> )
 		.def( "__call__", &L::operator() )
 		.def( "direction", &L::direction )
@@ -151,6 +170,7 @@ static void bind3D()
 		.def( self * M() )
 		.def( self == self )
 		.def( self != self )
+		.def( "dimensions", &L::dimensions ).staticmethod( "dimensions" )
 	;
 
 }
@@ -182,6 +202,7 @@ static void bind2D()
 		.def( self * M() )
 		.def( self == self )
 		.def( self != self )
+		.def( "dimensions", &L::dimensions ).staticmethod( "dimensions" )
 	;
 
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREMAYA_LINESEGMENTPARAMETERHANDLER_H
+#define IECOREMAYA_LINESEGMENTPARAMETERHANDLER_H
 
-#include "IECorePython/TypedParameterBinding.h"
-#include "IECore/SimpleTypedParameter.h"
+#include "IECoreMaya/ParameterHandler.h"
 
-using namespace std;
-using namespace Imath;
-
-namespace IECorePython
+namespace IECoreMaya
 {
 
-void bindSimpleTypedParameter()
+template<typename T>
+class LineSegmentParameterHandler : public ParameterHandler
 {
-	bindTypedParameter<bool>();
-	bindTypedParameter<V2i>();
-	bindTypedParameter<V3i>();
-	bindTypedParameter<V2f>();
-	bindTypedParameter<V3f>();
-	bindTypedParameter<V2d>();
-	bindTypedParameter<V3d>();
-	bindTypedParameter<Color3f>();
-	bindTypedParameter<Color4f>();
-	bindTypedParameter<Box2i>();
-	bindTypedParameter<Box3i>();
-	bindTypedParameter<Box2f>();
-	bindTypedParameter<Box3f>();
-	bindTypedParameter<Box2d>();
-	bindTypedParameter<Box3d>();
-	bindTypedParameter<M44f>();
-	bindTypedParameter<M44d>();
-	bindTypedParameter<string>();
-	bindTypedParameter<IECore::TransformationMatrixf>();
-	bindTypedParameter<IECore::TransformationMatrixd>();
-	bindTypedParameter<IECore::LineSegment3f>();
-	bindTypedParameter<IECore::LineSegment3d>();
-}
 
-} // namespace IECorePython
+	protected :
+	
+		typedef typename T::ValueType LineSegment;
+		typedef typename LineSegment::Point Point;
+	
+		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;
+		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
+		
+};
+
+
+} // namespace IECoreMaya
+
+#endif // IECOREMAYA_LINESEGMENTPARAMETERHANDLER_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -89,6 +89,8 @@ IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( M44fData, M44fDataTypeId, 16 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( M44dData, M44dDataTypeId, 16 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( QuatfData, QuatfDataTypeId, 4 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( QuatdData, QuatdDataTypeId, 4 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( LineSegment3fData, LineSegment3fDataTypeId, 6 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( LineSegment3dData, LineSegment3dDataTypeId, 6 )
 
 template<>
 void StringData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
@@ -226,5 +228,7 @@ template class TypedData<Imath::M44f>;
 template class TypedData<Imath::M44d>;
 template class TypedData<Imath::Quatf>;
 template class TypedData<Imath::Quatd>;
+template class TypedData<LineSegment3f>;
+template class TypedData<LineSegment3d>;
 
 } // namespace IECore

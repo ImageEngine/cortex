@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORENUKE_LINESEGMENT3PARAMETERHANDLER_H
+#define IECORENUKE_LINESEGMENT3PARAMETERHANDLER_H
 
-#include "IECorePython/TypedParameterBinding.h"
-#include "IECore/SimpleTypedParameter.h"
+#include "IECoreNuke/ParameterHandler.h"
 
-using namespace std;
-using namespace Imath;
-
-namespace IECorePython
+namespace IECoreNuke
 {
 
-void bindSimpleTypedParameter()
+template<typename T>
+class LineSegment3ParameterHandler : public ParameterHandler
 {
-	bindTypedParameter<bool>();
-	bindTypedParameter<V2i>();
-	bindTypedParameter<V3i>();
-	bindTypedParameter<V2f>();
-	bindTypedParameter<V3f>();
-	bindTypedParameter<V2d>();
-	bindTypedParameter<V3d>();
-	bindTypedParameter<Color3f>();
-	bindTypedParameter<Color4f>();
-	bindTypedParameter<Box2i>();
-	bindTypedParameter<Box3i>();
-	bindTypedParameter<Box2f>();
-	bindTypedParameter<Box3f>();
-	bindTypedParameter<Box2d>();
-	bindTypedParameter<Box3d>();
-	bindTypedParameter<M44f>();
-	bindTypedParameter<M44d>();
-	bindTypedParameter<string>();
-	bindTypedParameter<IECore::TransformationMatrixf>();
-	bindTypedParameter<IECore::TransformationMatrixd>();
-	bindTypedParameter<IECore::LineSegment3f>();
-	bindTypedParameter<IECore::LineSegment3d>();
-}
 
-} // namespace IECorePython
+	public :
+				
+		LineSegment3ParameterHandler();
+		
+		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
+		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
+		virtual void setKnobValue( const IECore::Parameter *parameter );
+				
+	private :
+	
+		IECore::LineSegment3f m_storage;
+		DD::Image::Knob *m_startKnob;
+		DD::Image::Knob *m_endKnob;
+	
+		static Description<LineSegment3ParameterHandler> g_description;
+		
+};
+
+} // namespace IECoreNuke
+
+#endif // IECORENUKE_LINESEGMENT3PARAMETERHANDLER_H

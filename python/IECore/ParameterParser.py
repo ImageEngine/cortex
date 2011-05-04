@@ -298,7 +298,7 @@ def __parseNumericCompound( dataType, elementType, n, integer, args, parameter )
 
 	parameter.setValidatedValue( dataType( elementType( *values ) ) )
 
-def __parseBox( dataType, boxType, elementType, integer, args, parameter ) :
+def __parseBoxOrLine( dataType, boxType, elementType, integer, args, parameter ) :
 
 	n = elementType.dimensions() * 2
 
@@ -524,12 +524,14 @@ ParameterParser.registerType( IECore.Color3fParameter.staticTypeId(), ( lambda a
 ParameterParser.registerType( IECore.Color4fParameter.staticTypeId(), ( lambda args, parameter : __parseNumericCompound( IECore.Color4fData, IECore.Color4f, 4, False, args, parameter ) ), __serialiseUsingSplitStr )
 ParameterParser.registerType( IECore.M44fParameter.staticTypeId(), ( lambda args, parameter : __parseNumericCompound( IECore.M44fData, IECore.M44f, 16, False, args, parameter ) ), __serialiseUsingSplitStr )
 ParameterParser.registerType( IECore.M44dParameter.staticTypeId(), ( lambda args, parameter : __parseNumericCompound( IECore.M44dData, IECore.M44d, 16, False, args, parameter ) ), __serialiseUsingSplitStr )
-ParameterParser.registerType( IECore.Box2fParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box2fData, IECore.Box2f, IECore.V2f, False, args, parameter ) ), __serialiseUsingSplitStr )
-ParameterParser.registerType( IECore.Box3fParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box3fData, IECore.Box3f, IECore.V3f, False, args, parameter ) ), __serialiseUsingSplitStr )
-ParameterParser.registerType( IECore.Box2dParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box2dData, IECore.Box2d, IECore.V2d, False, args, parameter ) ), __serialiseUsingSplitStr )
-ParameterParser.registerType( IECore.Box3dParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box3dData, IECore.Box3d, IECore.V3d, False, args, parameter ) ), __serialiseUsingSplitStr )
-ParameterParser.registerType( IECore.Box2iParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box2iData, IECore.Box2i, IECore.V2i, True, args, parameter ) ), __serialiseUsingSplitStr )
-ParameterParser.registerType( IECore.Box3iParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box3iData, IECore.Box3i, IECore.V3i, True, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.Box2fParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.Box2fData, IECore.Box2f, IECore.V2f, False, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.Box3fParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.Box3fData, IECore.Box3f, IECore.V3f, False, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.Box2dParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.Box2dData, IECore.Box2d, IECore.V2d, False, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.Box3dParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.Box3dData, IECore.Box3d, IECore.V3d, False, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.Box2iParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.Box2iData, IECore.Box2i, IECore.V2i, True, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.Box3iParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.Box3iData, IECore.Box3i, IECore.V3i, True, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.LineSegment3fParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.LineSegment3fData, IECore.LineSegment3f, IECore.V3f, False, args, parameter ) ), __serialiseUsingSplitStr )
+ParameterParser.registerType( IECore.LineSegment3dParameter.staticTypeId(), ( lambda args, parameter : __parseBoxOrLine( IECore.LineSegment3dData, IECore.LineSegment3d, IECore.V3d, False, args, parameter ) ), __serialiseUsingSplitStr )
 ParameterParser.registerType( IECore.SplineffParameter.staticTypeId(), None, _serialiseUsingRepr )
 ParameterParser.registerType( IECore.SplinefColor3fParameter.staticTypeId(), None, _serialiseUsingRepr )
 ParameterParser.registerType( IECore.TransformationMatrixfParameter.staticTypeId(), ( lambda args, parameter : __parseTransformationMatrix( IECore.TransformationMatrixfData, args, parameter ) ), __serialiseTransformationMatrix )

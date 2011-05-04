@@ -112,6 +112,9 @@ class LineSegment
 		template<class S>
 		bool intersectT( const Imath::Plane3<S> &plane, BaseType &t ) const;
 
+		/// Simply returns the dimensions of the underlying point type.
+		static unsigned int	dimensions();
+
 };
 
 typedef LineSegment<Imath::V3f> LineSegment3f;

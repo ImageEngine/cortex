@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -246,6 +246,8 @@ DEFINETYPEDDATASTRSPECIALISATION( M44f );
 DEFINETYPEDDATASTRSPECIALISATION( M44d );
 DEFINETYPEDDATASTRSPECIALISATION( Quatf );
 DEFINETYPEDDATASTRSPECIALISATION( Quatd );
+DEFINETYPEDDATASTRSPECIALISATION( LineSegment3f );
+DEFINETYPEDDATASTRSPECIALISATION( LineSegment3d );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // an rvalue converter to get TypedData<T> from a python object convertible to T
@@ -443,6 +445,9 @@ void bindAllSimpleTypedData()
 	bindSimpleData<Color4fData>();
 
 	bindSimpleData<Color4dData>();
+
+	bindSimpleData<LineSegment3fData>();
+	bindSimpleData<LineSegment3dData>();
 
 }
 

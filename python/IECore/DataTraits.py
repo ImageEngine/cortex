@@ -193,6 +193,9 @@ __dataTypesConversionDict = {
 	IECore.TransformationMatrixfData: ( IECore.TransformationMatrixf, True ),
 	IECore.TransformationMatrixdData: ( IECore.TransformationMatrixd, True ),
 
+	IECore.LineSegment3fData: ( IECore.LineSegment3f, True ),
+	IECore.LineSegment3dData: ( IECore.LineSegment3d, True ),
+
 	IECore.SplineffData: ( IECore.Splineff, True ),
 	IECore.SplineddData: ( IECore.Splinedd, True ),
 	IECore.SplinefColor3fData: ( IECore.SplinefColor3f, True ),

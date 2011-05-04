@@ -337,6 +337,36 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertEqual( t.scalePivot, IECore.V3f( 46,47,48 ) )
 		self.assertEqual( t.scalePivotTranslation, IECore.V3f( 56,57,58 ) )
 
+	def testLineSegmentParsing( self ) :
+	
+		p = IECore.CompoundParameter(
+			
+			members = [
+			
+				IECore.LineSegment3fParameter(
+					name = "f",
+					description = "",
+					defaultValue = IECore.LineSegment3f( IECore.V3f( 1 ), IECore.V3f( 2 ) )
+				),
+				
+				IECore.LineSegment3dParameter(
+					name = "d",
+					description = "",
+					defaultValue = IECore.LineSegment3d( IECore.V3d( 1 ), IECore.V3d( 2 ) )
+				),
+			
+			]
+		
+		)
+		
+		args = "-f 1 2 3 4 5 6 -d 6 5 4 3 2 1".split()
+		IECore.ParameterParser().parse( args, p )
+
+		self.assertEqual( p["f"].getTypedValue(), IECore.LineSegment3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ) )
+		self.assertEqual( p["d"].getTypedValue(), IECore.LineSegment3d( IECore.V3d( 6, 5, 4 ), IECore.V3d( 3, 2, 1 ) ) )
+		
+		self.assertEqual( IECore.ParameterParser().serialise( p ), args )
+
 	def testDatetimeParsing( self ) :
 
 		import datetime

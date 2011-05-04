@@ -372,8 +372,10 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 	
 		# the parameters for which we know we have no handler
 		unsupported = set( ( "c", "e", "f", "h", "compound.j", "compound.k", "m", "s", "u", "v", "x", "y", "p2", "p3", "p5", "p6", "p7" ) )
-		# the parameter for which we have a handler but expect inputs instead of knobs
+		# the parameters for which we have a handler but expect inputs instead of knobs
 		inputsNotKnobs = set( ( "p1", "p4", ) )
+		# the parameters for which we'll do our own testing because they are not straightforward to deal with in __checkParameterKnobs
+		notEasy = set ( ( "p8", "p9" ) )
 		
 		mh = IECore.CapturingMessageHandler()
 		with mh :
@@ -390,14 +392,21 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 					break
 			self.assertEqual( found, True )			
 		
-		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs )
+		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs | notEasy )
+	
+		self.assertEqual( fnOH.node().knob( "parm_p8Start" ).getValue(), [ 1, 1, 1 ] )
+		self.assertEqual( fnOH.node().knob( "parm_p8End" ).getValue(), [ 1, 1, 1 ] )
 	
 		with fnOH.parameterModificationContext() as parameterised :
 		
 			parameterised.parameters()["d"].setTypedValue( "lalal" )
+			parameterised.parameters()["p8"].setTypedValue( IECore.LineSegment3f( IECore.V3f( 10, 11, 12 ), IECore.V3f( 12, 10, 9 ) ) )
 			
-		self.__checkParameterKnobs( parameterised.parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs )
-		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs )
+		self.__checkParameterKnobs( parameterised.parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs | notEasy )
+		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs | notEasy )
+	
+		self.assertEqual( fnOH.node().knob( "parm_p8Start" ).getValue(), [ 10, 11, 12 ] )
+		self.assertEqual( fnOH.node().knob( "parm_p8End" ).getValue(), [ 2, -1, -3 ] )
 	
 	def testDefaultExpression( self ) :
 	
