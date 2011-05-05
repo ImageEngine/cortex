@@ -32,53 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
+#ifndef IECORENUKE_VECPARAMETERHANDLER_H
+#define IECORENUKE_VECPARAMETERHANDLER_H
 
-#include "IECore/SimpleTypedParameter.h"
+#include "IECoreNuke/ParameterHandler.h"
 
-#include "IECoreNuke/Vec2ParameterHandler.h"
-
-using namespace IECore;
-using namespace IECoreNuke;
-
-template<typename T>
-ParameterHandler::Description<Vec2ParameterHandler<T> > Vec2ParameterHandler<T>::g_description( T::staticTypeId() );
-
-template<typename T>
-Vec2ParameterHandler<T>::Vec2ParameterHandler()
+namespace IECoreNuke
 {
-}
+
+template<typename T>
+class VecParameterHandler : public ParameterHandler
+{
+
+	public :
+				
+		VecParameterHandler();
 		
-template<typename T>
-void Vec2ParameterHandler<T>::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
-{
-	const T *vecParameter = static_cast<const T *>( parameter );
+		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
+		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
+		virtual void setKnobValue( const IECore::Parameter *parameter );
+				
+	private :
 	
-	if( f.makeKnobs() )
-	{
-		m_storage = vecParameter->typedDefaultValue();
-	}
-			
-	m_knob = XY_knob( f, &m_storage.x, knobName, knobLabel( parameter ) );
-	SetFlags( f, DD::Image::Knob::NO_PROXYSCALE | DD::Image::Knob::NO_HANDLES );
-	setKnobProperties( parameter, f, m_knob );
-}
+		float m_storage[3]; // enough for either V2 or V3
+		DD::Image::Knob *m_knob;
+	
+		static Description<VecParameterHandler> g_description;
+		
+};
 
-template<typename T>
-void Vec2ParameterHandler<T>::setParameterValue( Parameter *parameter, ValueSource valueSource )
-{
-	static_cast<T *>( parameter )->setTypedValue( m_storage );
-}
+} // namespace IECoreNuke
 
-template<typename T>
-void Vec2ParameterHandler<T>::setKnobValue( const IECore::Parameter *parameter )
-{
-	typename T::ValueType value = static_cast<const T *>( parameter )->getTypedValue();
-	m_knob->set_value( value[0], 0 );
-	m_knob->set_value( value[1], 1 );
-}
-
-// explicit instantiation
-
-template class Vec2ParameterHandler<V2fParameter>;
-template class Vec2ParameterHandler<V2dParameter>;
+#endif // IECORENUKE_VECPARAMETERHANDLER_H

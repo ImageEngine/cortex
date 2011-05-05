@@ -75,6 +75,8 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 					if isinstance( parameter, IECore.V2dParameter ) :
 						# getKnobValue defaults to V2f
 						knobValue = IECore.V2d( knobValue[0], knobValue[1] )
+					elif isinstance( parameter, IECore.V3dParameter ) :
+						knobValue = IECore.V3d( knobValue[0], knobValue[1], knobValue[2] )
 				except :
 					# not all knob types have accessors yet. some of the numeric
 					# knobs don't have them because nuke has bugs and returns those
@@ -371,7 +373,7 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 	def testParameterTypes( self ) :
 	
 		# the parameters for which we know we have no handler
-		unsupported = set( ( "c", "e", "f", "h", "compound.j", "compound.k", "m", "s", "u", "v", "x", "y", "p2", "p3", "p5", "p6", "p7" ) )
+		unsupported = set( ( "c", "e", "f", "compound.k", "m", "s", "u", "v", "x", "y", "p2", "p3", "p5", "p6", "p7" ) )
 		# the parameters for which we have a handler but expect inputs instead of knobs
 		inputsNotKnobs = set( ( "p1", "p4", ) )
 		# the parameters for which we'll do our own testing because they are not straightforward to deal with in __checkParameterKnobs
