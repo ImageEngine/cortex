@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -366,6 +366,9 @@ class ParameterUI( IECoreMaya.UIElement ) :
 		typeId = parameter.typeId()
 		while typeId!=IECore.TypeId.Invalid :
 			handlerType = ParameterUI.handlers.get( ( typeId, uiTypeHint ), None )
+			if handlerType is not None :
+				break
+			handlerType = ParameterUI.handlers.get( ( typeId, None ), None )
 			if handlerType is not None :
 				break
 			typeId = IECore.RunTimeTyped.baseTypeId( typeId )

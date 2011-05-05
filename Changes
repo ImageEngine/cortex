@@ -29,6 +29,8 @@ Improvements :
 
 * Added IECore::RunTimeTyped::inheritsFrom() overloads taking two arguments, to simplify querying whether or not one class derives from another.
 
+* IECoreMaya.ParameterUI.create() now falls back to uis registered without a typeHint if a ui with the specific typeHint can't be found.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
