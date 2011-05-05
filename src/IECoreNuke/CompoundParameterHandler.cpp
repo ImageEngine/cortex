@@ -35,6 +35,7 @@
 #include "DDImage/Knobs.h"
 
 #include "IECore/CompoundParameter.h"
+#include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
 
 #include "IECoreNuke/CompoundParameterHandler.h"
@@ -142,17 +143,11 @@ void CompoundParameterHandler::setParameterValue( IECore::Parameter *parameter, 
 		
 void CompoundParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {	
-	if( strcmp( knobName, "parm" ) ) // only make a group if non-top-level parameters
-	{
-		DD::Image::BeginClosedGroup( f, knobName, knobLabel( parameter ) );
-	}
+	beginGroup( parameter, knobName, f );
 
 		childKnobs( parameter, knobName, f );
-	
-	if( strcmp( knobName, "parm" ) )
-	{
-		DD::Image::EndGroup( f );
-	}
+		
+	endGroup( parameter, knobName, f );
 }
 
 void CompoundParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSource valueSource )
@@ -229,21 +224,116 @@ IECore::ObjectPtr CompoundParameterHandler::getState( const IECore::Parameter *p
 	
 	return 0;
 }
-		
+
+void CompoundParameterHandler::beginGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
+{
+	if( 0==strcmp( knobName, "parm" ) )
+	{
+		// we don't need any grouping for the top level compound parameter
+		return;
+	}
+	
+	switch( containerType( parameter ) )
+	{
+		case Tab :
+			DD::Image::Tab_knob( f, knobLabel( parameter ) );
+			break;
+		case Toolbar :
+			DD::Image::BeginToolbar( f, knobName, knobLabel( parameter ) );
+			break;
+		case Collapsible :
+		default :
+			DD::Image::BeginClosedGroup( f, knobName, knobLabel( parameter ) );
+			break;
+	}
+}
+
+void CompoundParameterHandler::endGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
+{
+	if( 0==strcmp( knobName, "parm" ) )
+	{
+		// we don't need any grouping for the top level compound parameter
+		return;
+	}
+	
+	switch( containerType( parameter ) )
+	{
+		case Tab :
+			// don't need to do anything to close a tab
+			break;
+		case Toolbar :
+			DD::Image::EndToolbar( f );
+			break;
+		case Collapsible :
+		default :
+			DD::Image::EndGroup( f );
+			break;
+	}
+}		
+				
 void CompoundParameterHandler::childKnobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	const CompoundParameter *compoundParameter = static_cast<const CompoundParameter *>( parameter );
 
+	bool inTabGroup = false;
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
 		ParameterHandlerPtr h = handler( *cIt, true );
 		if( h )
 		{
+			bool wantTabGroup = false;
+			const CompoundParameter *childCompound = runTimeCast<CompoundParameter>( *cIt );
+			if( childCompound )
+			{
+				wantTabGroup = containerType( childCompound ) == Tab;
+			}
+			if( wantTabGroup && !inTabGroup )
+			{
+				DD::Image::BeginTabGroup( f, "" );
+				inTabGroup = true;
+			}
+			else if( !wantTabGroup && inTabGroup )
+			{
+				DD::Image::EndTabGroup( f );
+				inTabGroup = false;
+			}
+		
 			std::string childKnobName = std::string( knobName ) + "_" + (*cIt)->name();
 			h->knobs( cIt->get(), childKnobName.c_str(), f );
 		}
 	}
+}
+
+CompoundParameterHandler::ContainerType CompoundParameterHandler::containerType( const IECore::Parameter *parameter )
+{
+	const CompoundObject *userData = parameter->userData();
+	const CompoundObject *ui = userData->member<CompoundObject>( "UI" );
+	if( !ui )
+	{
+		return Collapsible;
+	}
+	
+	const StringData *typeHint = ui->member<StringData>( "typeHint" );
+	if( !typeHint )
+	{
+		return Collapsible;	
+	}
+	
+	if( typeHint->readable()=="collapsible" || typeHint->readable()=="collapsable" )
+	{
+		return Collapsible;
+	}
+	else if( typeHint->readable()=="tab" )
+	{
+		return Tab;
+	}
+	else if( typeHint->readable()=="toolbar" )
+	{
+		return Toolbar;
+	}
+
+	return Collapsible;
 }
 
 ParameterHandlerPtr CompoundParameterHandler::handler( const Parameter *child, bool createIfMissing )

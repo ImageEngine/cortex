@@ -60,9 +60,19 @@ class CompoundParameterHandler : public ParameterHandler
 		
 	protected :
 	
+		void beginGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		void childKnobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
+		void endGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 						
 	private :
+	
+		enum ContainerType
+		{
+			Collapsible,
+			Tab,
+			Toolbar
+		};
+		ContainerType containerType( const IECore::Parameter *parameter );
 	
 		void inputs( const IECore::Parameter *parameter, int &minimum, int &maximum, bool &error );
 	

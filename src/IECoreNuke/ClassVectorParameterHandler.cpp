@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,13 +61,13 @@ ClassVectorParameterHandler::ClassVectorParameterHandler()
 		
 void ClassVectorParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {	
-	DD::Image::BeginClosedGroup( f, knobName, knobLabel( parameter ) );
+	beginGroup( parameter, knobName, f );
 		
 		childKnobs( parameter, knobName, f );
 		
 		addClassKnob( parameter, knobName, f );
 
-	DD::Image::EndGroup( f );
+	endGroup( parameter, knobName, f );
 }
 
 void ClassVectorParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSource valueSource )
