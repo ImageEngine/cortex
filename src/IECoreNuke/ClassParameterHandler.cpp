@@ -159,15 +159,7 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
-		std::string classNameFilter = "*";
-		const CompoundObject *userData = parameter->userData();
-		if( const CompoundObject *ui = userData->member<CompoundObject>( "UI" ) )
-		{
-			if( const StringData *classNameFilterData = ui->member<StringData>( "classNameFilter" ) )
-			{
-				classNameFilter = classNameFilterData->readable();
-			}
-		}
+		// get current class name, and set label from it
 		
 		object mainModule = import( "__main__" );
 		object mainModuleNamespace = mainModule.attr( "__dict__" );
@@ -181,13 +173,41 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 			int classVersion = extract<int>( classInfo[2] )();
 			label = className + " v" + lexical_cast<string>( classVersion );
 		}
-				
-		std::string searchPathEnvVar = extract<const char *>( classInfo[3] )();
 		
+		// if there is a current class, then add a menu item
+		// to allow it to be removed.
+		
+		std::string parameterPath = knobName + 5; // naughty! we're not meant to know the knob name format
+		replace_all( parameterPath, "_", "']['" );		
+		boost::format setClassFormat(
+			"with IECoreNuke.FnParameterisedHolder( nuke.thisNode() ).parameterModificationContext() as parameters :"
+			"	parameters['%s'].setClass( '%s', %d )"
+		);
+		
+		if( className!="" )
+		{		
+			menuItems.push_back( "Remove" );
+			menuItems.push_back( ( setClassFormat % parameterPath % "" % 0 ).str() );
+		}
+		
+		// find alternative classes which could be loaded
+		
+		std::string classNameFilter = "*";
+		const CompoundObject *userData = parameter->userData();
+		if( const CompoundObject *ui = userData->member<CompoundObject>( "UI" ) )
+		{
+			if( const StringData *classNameFilterData = ui->member<StringData>( "classNameFilter" ) )
+			{
+				classNameFilter = classNameFilterData->readable();
+			}
+		}
+						
+		std::string searchPathEnvVar = extract<const char *>( classInfo[3] )();
 		object ieCore = import( "IECore" );
 		object classLoader = ieCore.attr( "ClassLoader" ).attr( "defaultLoader" )( searchPathEnvVar );
-		
 		object classNames = classLoader.attr( "classNames" )( classNameFilter );
+		
+		// and build menu items to allow each of the alternative classes to be loaded
 		
 		int numClasses = len( classNames );
 		for( int i=0; i<numClasses; i++ )
@@ -210,17 +230,7 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 					menuItems.push_back( className );
 				}
 				
-				std::string parameterPath = knobName + 5; // naughty! we're not meant to know the knob name format
-				replace_all( parameterPath, "_", "']['" );
-				
-				std::string cmd = ( boost::format(
-				
-					"with IECoreNuke.FnParameterisedHolder( nuke.thisNode() ).parameterModificationContext() as parameters :"
-					"	parameters['%s'].setClass( '%s', %d )"
-					
-				) % parameterPath % className % versionString ).str();
-					
-				menuItems.push_back( cmd );
+				menuItems.push_back( ( setClassFormat % parameterPath % className % versionString ).str() );
 			}
 		}
 		
