@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
 #
@@ -116,4 +116,3 @@ from MessageHandlerOverwriting import *
 from ConfigLoader import loadConfig
 from Preset import Preset
 from BasicPreset import BasicPreset
-import CamelCase

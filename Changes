@@ -33,6 +33,8 @@ Improvements :
 
 * IECoreMaya.ParameterUI.create() now falls back to uis registered without a typeHint if a ui with the specific typeHint can't be found.
 
+* The IECore.CamelCase functions are now implemented in C++ in IECore/CamelCase.h. This makes them available in both C++ and Python.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
