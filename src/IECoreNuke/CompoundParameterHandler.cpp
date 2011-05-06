@@ -35,7 +35,7 @@
 #include "DDImage/Knobs.h"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/SimpleTypedData.h"
+#include "IECore/SimpleTypedParameter.h"
 #include "IECore/MessageHandler.h"
 
 #include "IECoreNuke/CompoundParameterHandler.h"
@@ -334,6 +334,32 @@ CompoundParameterHandler::ContainerType CompoundParameterHandler::containerType(
 	}
 
 	return Collapsible;
+}
+
+const char *CompoundParameterHandler::knobLabel( const IECore::Parameter *parameter ) const
+{	
+	// Code to display the same label as would be displayed in maya.
+	// this relies on the convention of having an invisible StringParameter named
+	// label immediately under the CompoundParameter. not very pretty.
+	/// \todo Perhaps we could come up with a better means of specifying labels and header
+	/// parameters for ClassParameter and ClassVectorParameter.
+	const CompoundParameter *compoundParameter = static_cast<const CompoundParameter *>( parameter );
+	const StringParameter *labelParameter = compoundParameter->parameter<StringParameter>( "label" );
+	if( labelParameter )
+	{
+		const CompoundObject *userData = labelParameter->userData();
+		const CompoundObject *ui = userData->member<CompoundObject>( "UI" );
+		if( ui )
+		{
+			const BoolData *visible = ui->member<BoolData>( "visible" );
+			if( visible && !visible->readable() )
+			{
+				return labelParameter->getTypedValue().c_str();
+			}
+		}
+	}
+		
+	return ParameterHandler::knobLabel( parameter );
 }
 
 ParameterHandlerPtr CompoundParameterHandler::handler( const Parameter *child, bool createIfMissing )

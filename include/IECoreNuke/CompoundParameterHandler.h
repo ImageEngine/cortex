@@ -65,6 +65,8 @@ class CompoundParameterHandler : public ParameterHandler
 		void endGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 						
 	private :
+
+		const char *knobLabel( const IECore::Parameter *parameter ) const;
 	
 		enum ContainerType
 		{
