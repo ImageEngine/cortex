@@ -9,6 +9,8 @@ Additions :
 
 * LineSegmentParameters provide a convenient means of specifying lines to Parameterised classes, and are represented in Nuke as a line which can be manipulated in the viewport.
 
+* StringAlgo.h now provides useful isUpperCase and isLowerCase functions.
+
 Improvements :
 
 * DisplayDriver factory mechanism has been improved, and support for mapping RenderMan displays to IECore::DisplayDrivers has been added to IECoreRI. Images can now be rendered direct to memory using 3delight with no intermediate rib or image files. A display driver dso for 3delight also allows images to be rendered from rib to any cortex DisplayDriver. See test/IECoreRI/DspyTest.py for examples.
