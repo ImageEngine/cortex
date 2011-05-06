@@ -68,6 +68,7 @@ class TemporaryParameterValues :
 				raise TypeError( "Parameter \"%s\" has unsupported type \"%s\"." % ( parmName, parmType ) )
 
 			# store a command to restore the parameter value later
+			## \todo: this doesn't support expressions or unexpanded strings
 			command = IECore.curry( parm.set, parm.eval() )
 			self.__restoreCommands.append( command )
 
