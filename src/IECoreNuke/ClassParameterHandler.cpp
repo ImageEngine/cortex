@@ -161,9 +161,6 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 	{
 		// get current class name, and set label from it
 		
-		object mainModule = import( "__main__" );
-		object mainModuleNamespace = mainModule.attr( "__dict__" );
-	
 		boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
 		boost::python::tuple classInfo = extract<boost::python::tuple>( pythonParameter.attr( "getClass" )( true ) );
 
