@@ -66,7 +66,7 @@ class CompoundParameterHandler : public ParameterHandler
 						
 	private :
 
-		const char *knobLabel( const IECore::Parameter *parameter ) const;
+		std::string knobLabel( const IECore::Parameter *parameter ) const;
 	
 		enum ContainerType
 		{

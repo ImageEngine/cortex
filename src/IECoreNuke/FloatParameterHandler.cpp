@@ -58,8 +58,9 @@ void FloatParameterHandler::knobs( const IECore::Parameter *parameter, const cha
 		m_storage = floatParameter->numericDefaultValue();
 	}
 			
+	std::string label = knobLabel( parameter );
 	DD::Image::IRange range( floatParameter->minValue(), floatParameter->maxValue() );
-	m_knob = Float_knob( f, &m_storage, range, knobName, knobLabel( parameter ) );
+	m_knob = Float_knob( f, &m_storage, range, knobName, label.c_str() );
 	DD::Image::SetFlags( f, DD::Image::Knob::FORCE_RANGE );
 	if( !(floatParameter->hasMinValue() && floatParameter->hasMaxValue()) )
 	{

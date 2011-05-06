@@ -103,7 +103,7 @@ class ParameterHandler : public IECore::RefCounted
 		ParameterHandler();
 	
 		/// Should be called by derived classes to get a good label for the main knob
-		const char *knobLabel( const IECore::Parameter *parameter ) const;
+		std::string knobLabel( const IECore::Parameter *parameter ) const;
 		/// Should be called by derived classes to set the properties for the main knob based
 		/// on userData on the parameter. This sets visibility and tooltip and applies any default
 		/// expressions.

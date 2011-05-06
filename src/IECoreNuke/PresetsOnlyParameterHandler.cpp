@@ -62,7 +62,8 @@ void PresetsOnlyParameterHandler::knobs( const IECore::Parameter *parameter, con
 		m_names.push_back( 0 );
 	}
 	
-	m_knob = Enumeration_knob( f, &m_storage, &(m_names[0]), knobName, knobLabel( parameter ) );
+	std::string label = knobLabel( parameter );
+	m_knob = Enumeration_knob( f, &m_storage, &(m_names[0]), knobName, label.c_str() );
 	
 	setKnobProperties( parameter, f, m_knob );
 }

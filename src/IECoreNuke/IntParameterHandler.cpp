@@ -58,8 +58,9 @@ void IntParameterHandler::knobs( const IECore::Parameter *parameter, const char 
 		m_storage = intParameter->numericDefaultValue();
 	}
 		
+	std::string label = knobLabel( parameter );
 	DD::Image::IRange range( intParameter->minValue(), intParameter->maxValue() );
-	m_knob = Int_knob( f, &m_storage, range, knobName, knobLabel( parameter ) );
+	m_knob = Int_knob( f, &m_storage, range, knobName, label.c_str() );
 	DD::Image::SetFlags( f, DD::Image::Knob::FORCE_RANGE );
 	setKnobProperties( parameter, f, m_knob );
 }

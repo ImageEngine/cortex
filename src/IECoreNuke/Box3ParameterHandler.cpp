@@ -60,7 +60,8 @@ void Box3ParameterHandler<T>::knobs( const IECore::Parameter *parameter, const c
 		m_storage.max = defaultValue.max;
 	}
 	
-	m_knob = Box3_knob( f, (float *)&m_storage, knobName, knobLabel( parameter ) );
+	std::string label = knobLabel( parameter );
+	m_knob = Box3_knob( f, (float *)&m_storage, knobName, label.c_str() );
 	setKnobProperties( parameter, f, m_knob );
 }
 

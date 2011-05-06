@@ -63,15 +63,16 @@ void VecParameterHandler<T>::knobs( const IECore::Parameter *parameter, const ch
 		}
 	}
 	
+	std::string label = knobLabel( parameter );
 	if( T::ValueType::dimensions()==2 )
 	{		
-		m_knob = XY_knob( f, m_storage, knobName, knobLabel( parameter ) );
+		m_knob = XY_knob( f, m_storage, knobName, label.c_str() );
 		SetFlags( f, DD::Image::Knob::NO_PROXYSCALE | DD::Image::Knob::NO_HANDLES );
 	}
 	else
 	{
 		assert( T::ValueType::dimensions()==3 );
-		m_knob = XYZ_knob( f, m_storage, knobName, knobLabel( parameter ) );
+		m_knob = XYZ_knob( f, m_storage, knobName, label.c_str() );
 	}
 	
 	setKnobProperties( parameter, f, m_knob );

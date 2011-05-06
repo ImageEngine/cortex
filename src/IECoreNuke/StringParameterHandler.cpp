@@ -55,7 +55,8 @@ void StringParameterHandler::knobs( const IECore::Parameter *parameter, const ch
 		m_storage = static_cast<const StringParameter *>( parameter )->typedDefaultValue().c_str();
 	}
 
-	m_knob = String_knob( f, &m_storage, knobName, knobLabel( parameter ) );
+	std::string label = knobLabel( parameter );
+	m_knob = String_knob( f, &m_storage, knobName, label.c_str() );
 	/// we have a lot of procedurals which do their own variable expansion using a SubstitutedDict,
 	/// and the variables in the strings confuse nuke no end, so we're disabling expressions for now.
 	/// \todo Can we do better and allow the two to coexist?

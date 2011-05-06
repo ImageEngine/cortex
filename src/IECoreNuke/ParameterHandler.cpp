@@ -36,6 +36,7 @@
 
 #include "IECore/CompoundObject.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/CamelCase.h"
 
 #include "IECoreNuke/ParameterHandler.h"
 #include "IECoreNuke/PresetsOnlyParameterHandler.h"
@@ -116,10 +117,9 @@ ParameterHandler::CreatorFnMap &ParameterHandler::creatorFns()
 	return creators;
 }
 
-const char *ParameterHandler::knobLabel( const IECore::Parameter *parameter ) const
+std::string ParameterHandler::knobLabel( const IECore::Parameter *parameter ) const
 {
-	/// \todo Implement some nice camel case based string formatting
-	return parameter->name().c_str();
+	return IECore::CamelCase::toSpaced( parameter->name().c_str() );
 }
 
 void ParameterHandler::setKnobProperties( const IECore::Parameter *parameter, DD::Image::Knob_Callback f, DD::Image::Knob *knob ) const

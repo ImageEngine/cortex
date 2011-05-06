@@ -55,7 +55,8 @@ void BoolParameterHandler::knobs( const IECore::Parameter *parameter, const char
 		m_storage = static_cast<const BoolParameter *>( parameter )->typedDefaultValue();
 	}
 	
-	m_knob = Bool_knob( f, &m_storage, knobName, knobLabel( parameter ) );
+	std::string label = knobLabel( parameter );
+	m_knob = Bool_knob( f, &m_storage, knobName, label.c_str() );
 	DD::Image::SetFlags( f, DD::Image::Knob::STARTLINE );
 	setKnobProperties( parameter, f, m_knob );
 }

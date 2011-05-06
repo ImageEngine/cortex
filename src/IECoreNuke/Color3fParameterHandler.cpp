@@ -56,7 +56,8 @@ void Color3fParameterHandler::knobs( const IECore::Parameter *parameter, const c
 		m_storage = color3fParameter->typedDefaultValue();
 	}
 			
-	m_knob = Color_knob( f, &m_storage.x, knobName, knobLabel( parameter ) );
+	std::string label = knobLabel( parameter );
+	m_knob = Color_knob( f, &m_storage.x, knobName, label.c_str() );
 	setKnobProperties( parameter, f, m_knob );
 }
 

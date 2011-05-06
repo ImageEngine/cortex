@@ -233,17 +233,19 @@ void CompoundParameterHandler::beginGroup( const IECore::Parameter *parameter, c
 		return;
 	}
 	
+	std::string label = knobLabel( parameter );
+	
 	switch( containerType( parameter ) )
 	{
 		case Tab :
-			DD::Image::Tab_knob( f, knobLabel( parameter ) );
+			DD::Image::Tab_knob( f, label.c_str() );
 			break;
 		case Toolbar :
-			DD::Image::BeginToolbar( f, knobName, knobLabel( parameter ) );
+			DD::Image::BeginToolbar( f, knobName, label.c_str() );
 			break;
 		case Collapsible :
 		default :
-			DD::Image::BeginClosedGroup( f, knobName, knobLabel( parameter ) );
+			DD::Image::BeginClosedGroup( f, knobName, label.c_str() );
 			break;
 	}
 }
@@ -336,7 +338,7 @@ CompoundParameterHandler::ContainerType CompoundParameterHandler::containerType(
 	return Collapsible;
 }
 
-const char *CompoundParameterHandler::knobLabel( const IECore::Parameter *parameter ) const
+std::string CompoundParameterHandler::knobLabel( const IECore::Parameter *parameter ) const
 {	
 	// Code to display the same label as would be displayed in maya.
 	// this relies on the convention of having an invisible StringParameter named
@@ -354,7 +356,7 @@ const char *CompoundParameterHandler::knobLabel( const IECore::Parameter *parame
 			const BoolData *visible = ui->member<BoolData>( "visible" );
 			if( visible && !visible->readable() )
 			{
-				return labelParameter->getTypedValue().c_str();
+				return labelParameter->getTypedValue();
 			}
 		}
 	}
