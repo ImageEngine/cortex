@@ -63,10 +63,9 @@ class CompoundParameterHandler : public ParameterHandler
 		void beginGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		void childKnobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		void endGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
+		std::string knobLabel( const IECore::Parameter *parameter ) const;
 						
 	private :
-
-		std::string knobLabel( const IECore::Parameter *parameter ) const;
 	
 		enum ContainerType
 		{

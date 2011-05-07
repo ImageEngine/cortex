@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,7 +54,9 @@ class ClassVectorParameterHandler : public CompoundParameterHandler
 				
 	private :
 		
-		void addClassKnob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
+		void addEditKnobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
+		void buildAddMenu( DD::Image::Knob *knob, const IECore::Parameter *parameter, const std::string &parameterPath );
+		void buildRemoveMenu( DD::Image::Knob *knob, const IECore::Parameter *parameter, const std::string &parameterPath );
 		
 		static Description<ClassVectorParameterHandler> g_description;
 		
