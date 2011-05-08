@@ -2022,7 +2022,12 @@ if doConfigure :
 		
 				Default( [ nukeLibrary, nukePlugin ] )
 				
-				# stubs for each of nodes within the plugin
+				# nuke menu
+				
+				nukeMenuInstall = nukePluginEnv.Install( os.path.dirname( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), "src/IECoreNuke/plugin/menu.py" )
+				nukePluginEnv.Alias( "install", nukeMenuInstall )
+				
+				# stubs for each of the nodes within the plugin
 				
 				nukeStubs = []
 				for nodeName in [ "ieProcedural", "ieObject", "ieOp", "ieDrawable" ] :

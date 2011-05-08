@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,15 +32,13 @@
 #
 ##########################################################################
 
-from _IECoreNuke import *
+import IECoreNuke
 
-from KnobAccessors import setKnobValue, getKnobValue
-from FnAxis import FnAxis
-from StringUtil import nukeFileSequence, ieCoreFileSequence
-from KnobConverters import registerParameterKnobConverters, createKnobsFromParameter, setKnobsFromParameter, setParameterFromKnobs
-from FnParameterisedHolder import FnParameterisedHolder
-from FnProceduralHolder import FnProceduralHolder
-from UndoManagers import UndoState, UndoDisabled, UndoEnabled, UndoBlock
-from TestCase import TestCase
-from FnOpHolder import FnOpHolder
-import Menus
+nodesMenu = nuke.menu( "Nodes" )
+cortexMenu = nodesMenu.addMenu( "Cortex" )
+
+proceduralMenu = cortexMenu.addMenu( "Procedural" )
+IECoreNuke.Menus.addProceduralCreationCommands( proceduralMenu )
+
+opMenu = cortexMenu.addMenu( "Op" )
+IECoreNuke.Menus.addOpCreationCommands( opMenu )
