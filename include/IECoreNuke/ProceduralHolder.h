@@ -80,6 +80,9 @@ class ProceduralHolder : public ParameterisedHolderOp
 		virtual void build_handles( DD::Image::ViewerContext *ctx );
 		virtual void draw_handle( DD::Image::ViewerContext *ctx );
 
+		/// Implemented to distinguish these nodes from others.
+		const char *node_shape() const;
+		
 	private :
 	
 		static const Description g_description;

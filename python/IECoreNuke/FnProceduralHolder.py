@@ -55,6 +55,7 @@ class FnProceduralHolder( IECoreNuke.FnParameterisedHolder ) :
 	
 		node = nuke.createNode( "ieProcedural" )
 		node.setName( nodeName )
+		node.knob( "postage_stamp" ).setValue( False )
 		fnPH = FnProceduralHolder( node )
 		fnPH.setProcedural( className, classVersion )
 		

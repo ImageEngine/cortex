@@ -177,6 +177,11 @@ void ProceduralHolder::draw_handle( DD::Image::ViewerContext *ctx )
 	}
 }
 
+const char *ProceduralHolder::node_shape() const
+{
+	return "()";
+}
+
 IECore::ConstParameterisedProceduralPtr ProceduralHolder::procedural()
 {
 	return IECore::runTimeCast<const IECore::ParameterisedProcedural>( parameterised() );
