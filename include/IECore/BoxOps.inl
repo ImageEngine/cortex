@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -304,6 +304,69 @@ bool boxIntersects(
 
 	return true;
 
+}
+
+template<typename T>
+void boxSplit( const T &box, T &low, T &high, int axis )
+{
+	typedef typename BoxTraits<T>::BaseType Vec;
+	typedef typename VectorTraits<Vec>::BaseType Float;
+	Vec min = BoxTraits<T>::min( box );
+	Vec max = BoxTraits<T>::max( box );
+	
+	Vec lowMin;
+	Vec lowMax;
+	Vec highMin;
+	Vec highMax;
+	for( int i=0, d=VectorTraits<Vec>::dimensions(); i<d; i++ )
+	{
+		if( i==axis )
+		{
+			Float mid = (vecGet( min, i ) + vecGet( max, i )) / 2;
+			vecSet( lowMin, i, vecGet( min, i ) );
+			vecSet( lowMax, i, mid );
+			vecSet( highMin, i, mid );
+			vecSet( highMax, i, vecGet( max, i ) );
+		}
+		else
+		{
+			vecSet( lowMin, i, vecGet( min, i ) );
+			vecSet( lowMax, i, vecGet( max, i ) );
+			vecSet( highMin, i, vecGet( min, i ) );
+			vecSet( highMax, i, vecGet( max, i ) );
+		}
+	}
+	
+	BoxTraits<T>::setMin( low, lowMin );
+	BoxTraits<T>::setMax( low, lowMax );
+	
+	BoxTraits<T>::setMin( high, highMin );
+	BoxTraits<T>::setMax( high, highMax );
+}
+
+template<typename T>
+void boxSplit( const T &box, T &low, T &high )
+{
+	boxSplit( box, low, high, boxMajorAxis( box ) );
+}
+
+template<typename T>
+int boxMajorAxis( const T &box )
+{
+	typedef typename BoxTraits<T>::BaseType Vec;
+	
+	Vec size = boxSize( box );
+	
+	int major = 0;
+	for( int i=0, d=VectorTraits<Vec>::dimensions(); i<d; i++ )
+	{
+		if( vecGet( size, i ) > vecGet( size, major ) )
+		{
+			major = i;
+		}
+	}
+	
+	return major;
 }
 
 

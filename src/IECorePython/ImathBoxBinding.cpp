@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -107,6 +107,22 @@ DEFINEBOXSTRSPECIALISATION( Box2d );
 DEFINEBOXSTRSPECIALISATION( Box3d );
 
 template<typename T>
+static tuple split1( const Box<T> &box, int axis )
+{
+	Box<T> low, high;
+	boxSplit( box, low, high, axis );
+	return make_tuple( low, high );
+}
+
+template<typename T>
+static tuple split2( const Box<T> &box )
+{
+	Box<T> low, high;
+	boxSplit( box, low, high );
+	return make_tuple( low, high );
+}
+
+template<typename T>
 class_< Box<T> > bindBox(const char *bindName)
 {
 	void (Box<T>::*eb1)(const T&) = &Box<T>::extendBy;
@@ -145,6 +161,11 @@ class_< Box<T> > bindBox(const char *bindName)
 
 		.def( "__str__", &IECorePython::str<Box<T> > )
 		.def( "__repr__", &IECorePython::repr<Box<T> > )
+	
+		.def( "split", &split1<T> )
+		.def( "split", &split2<T> )
+		
+
 	;
 	return myClass;
 }

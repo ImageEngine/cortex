@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -571,6 +571,28 @@ class ImathBox3f(unittest.TestCase):
 		self.assert_( not b3.contains( b1 ) )
 		self.assert_( not b1.contains( b3 ) )
 
+	def testSplit( self ) :
+	
+		r = Rand32()
+		for i in range( 0, 100 ) :
+		
+			b = Box3f()
+			b.extendBy( r.nextV3f() )
+			b.extendBy( r.nextV3f() )
+			
+			major = b.majorAxis()
+			
+			low, high = b.split()
+			low2, high2 = b.split( major )
+			
+			self.assertEqual( low, low2 )
+			self.assertEqual( high, high2 )
+			
+			b2 = Box3f()
+			b2.extendBy( low )
+			b2.extendBy( high )
+			
+			self.assertEqual( b, b2 )
 
 class ImathQuatf(unittest.TestCase):
 	def testConstructors(self):

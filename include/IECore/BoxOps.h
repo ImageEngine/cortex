@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -91,6 +91,18 @@ bool boxIntersects(
         const typename BoxTraits<T>::BaseType &direction,
         typename BoxTraits<T>::BaseType &result
 );
+
+/// Splits the box into two across the specified axis.
+template<typename T>
+void boxSplit( const T &box, T &low, T &high, int axis );
+
+/// Splits the box into two across the major axis.
+template<typename T>
+void boxSplit( const T &box, T &low, T &high );
+
+/// Returns the longest axis of the box.
+template<typename T>
+int boxMajorAxis( const T &box );
 
 } // namespace IECore
 
