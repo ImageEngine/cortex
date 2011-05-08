@@ -32,13 +32,24 @@
 #
 ##########################################################################
 
-import IECoreNuke
+## \addtogroup environmentGroup
+#
+# IECORENUKE_DISABLE_MENU
+# Set this to a value of 1 to disable the creation of the Cortex menu
+# in Nuke. You can then use the helper functions in IECoreNuke.Menus
+# to build your own site-specific menu structure.
 
-nodesMenu = nuke.menu( "Nodes" )
-cortexMenu = nodesMenu.addMenu( "Cortex" )
+import os
 
-proceduralMenu = cortexMenu.addMenu( "Procedural" )
-IECoreNuke.Menus.addProceduralCreationCommands( proceduralMenu )
+if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
 
-opMenu = cortexMenu.addMenu( "Op" )
-IECoreNuke.Menus.addOpCreationCommands( opMenu )
+	import IECoreNuke
+
+	nodesMenu = nuke.menu( "Nodes" )
+	cortexMenu = nodesMenu.addMenu( "Cortex" )
+
+	proceduralMenu = cortexMenu.addMenu( "Procedural" )
+	IECoreNuke.Menus.addProceduralCreationCommands( proceduralMenu )
+
+	opMenu = cortexMenu.addMenu( "Op" )
+	IECoreNuke.Menus.addOpCreationCommands( opMenu )
