@@ -101,13 +101,10 @@ void CurveLookup<T>::knob( DD::Image::Knob_Callback f )
 		for( unsigned i=0; i<m_namesAndDefaultsStrings->size(); i+=2 )
 		{
 			DD::Image::CurveDescription d;
+			memset( &d, 0, sizeof( d ) );
 			d.name = (*m_namesAndDefaultsStrings)[i].c_str();
 			d.defaultValue = (*m_namesAndDefaultsStrings)[i+1].c_str();
 			d.flags = 0;
-#if (DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR >= 2) || DD_IMAGE_VERSION_MAJOR >= 6
-			// nuke 5.2 introduced this special "it's-not-for-you-but-if-you-don't-set-it-to-0-then-i-will-crash" field
-			d.buildCallback = 0;
-#endif
 			m_curveDescriptions->push_back( d );
 		}
 		DD::Image::CurveDescription endMarker = { 0 };

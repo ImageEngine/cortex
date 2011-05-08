@@ -66,3 +66,5 @@ Bug fixes :
 * Fixed a long standing bug which meant that the various FromMaya*Converter::create() functions wouldn't always return the same type of converter. As an additional benefit converters are matched against the base classes of the types they return, making it possible to request a result type of Primitive from a mesh and have the FromMayaMeshConverter be considered as a match.
 
 * Fixed bugs which meant that the RunTimeTyped methods of python classes derived from some Parameter types would not function correctly.
+
+* Fixed IECoreNuke::CurveLookup to be compatible with Nuke 6.2.
