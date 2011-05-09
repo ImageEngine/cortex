@@ -127,7 +127,7 @@ class Renderer : public IECore::Renderer
 		/// specify just part of a scene (without a world block). This hacky parameter is therefore provided
 		/// to cause the immediate output of the camera to support this situation.
 		///
-		/// \todo Support moving cameras.
+		/// \todo Support moving cameras, and named cameras using RiCamera.
 		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );
 
