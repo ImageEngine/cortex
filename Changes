@@ -39,6 +39,8 @@ Improvements :
 
 * The IECore.CamelCase functions are now implemented in C++ in IECore/CamelCase.h. This makes them available in both C++ and Python.
 
+* IECoreHoudini.TemporaryParameterValues now handles unexpanded strings and expressions correctly.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
