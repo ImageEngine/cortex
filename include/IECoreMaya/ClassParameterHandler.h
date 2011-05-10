@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,13 +61,6 @@ class ClassParameterHandler : public ParameterHandler
 		/// This function typically shouldn't be called directly, as a combination of direct access
 		/// to parameters and IECoreMaya.FnParameterisedHolder should be enough to achieve most things.
 		static void currentClass( const MPlug &plug, MString &className, int &classVersion, MString &searchPathEnvVar );
-
-		/// Called to restore a parameter's properties when a file is loaded or the version of a held class
-		/// has been updated.
-		/// \todo Make this a properly documented virtual function in ParameterHandler, and protect it along
-		/// with the others. Then tidy up the code in ParameterisedHolder where this is called. Do this for
-		/// major version 6 to avoid breaking compatibility now.
-		static MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter );
 	
 	protected:
 
@@ -75,6 +68,7 @@ class ClassParameterHandler : public ParameterHandler
 		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
+		virtual MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 		
 	private :
 	

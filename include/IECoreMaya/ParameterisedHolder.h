@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -118,9 +118,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		/// plug value has changed since the last time the value was set.
 		MStatus setParameterisedValues( bool lazy );
 		/// Creates an attribute to represent the specified parameter, or updates an existing attribute.
-		MStatus createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName );
-		/// \todo Remove call above and default callRestore to false for major version 6.
-		MStatus createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName, bool callRestore );
+		MStatus createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName, bool callRestore=false );
 
 	private:
 

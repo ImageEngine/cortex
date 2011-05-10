@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -104,6 +104,19 @@ MStatus ParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr para
 		return MS::kFailure;
 	}
 	return h->doSetValue( plug, parameter );
+}
+
+MStatus ParameterHandler::restore( const MPlug &plug, IECore::ParameterPtr parameter )
+{
+	assert( parameter );
+	assert( ! plug.isNull() );
+
+	ConstParameterHandlerPtr h = ParameterHandler::create( IECore::staticPointerCast<const IECore::Parameter> (parameter) );
+	if( !h )
+	{
+		return MS::kFailure;
+	}
+	return h->doRestore( plug, parameter );
 }
 
 ConstParameterHandlerPtr ParameterHandler::create( IECore::ConstParameterPtr parameter )
@@ -220,4 +233,9 @@ MStatus ParameterHandler::finishUpdating( IECore::ConstParameterPtr parameter, M
 	fnNode.addAttribute( attribute );
 	MPlug plug( node, attribute );
 	return finishUpdating( parameter, plug );
+}
+
+MStatus ParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const
+{
+	return MS::kSuccess;
 }

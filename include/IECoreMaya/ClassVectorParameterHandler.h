@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,9 +60,6 @@ class ClassVectorParameterHandler : public ParameterHandler
 		/// Again, this function typically shouldn't be called directly, as a combination of direct access
 		/// to parameters and IECoreMaya.FnParameterisedHolder should be enough to achieve most things.
 		static void currentClasses( const MPlug &plug, MStringArray &parameterNames, MStringArray &classNames, MIntArray &classVersions );
-
-		/// \todo See ClassParameterHandler.
-		static MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter );
 	
 	protected:
 
@@ -70,6 +67,7 @@ class ClassVectorParameterHandler : public ParameterHandler
 		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
+		virtual MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 		
 	private :
 		

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -211,7 +211,7 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 	return finishUpdating( parameter, plug );
 }
 
-MStatus ClassVectorParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPtr parameter )
+MStatus ClassVectorParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	MStringArray parameterNames;
 	MStringArray classNames;

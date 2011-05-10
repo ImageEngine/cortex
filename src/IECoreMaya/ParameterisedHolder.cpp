@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,8 +62,6 @@
 #include "IECoreMaya/PythonCmd.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/ObjectData.h"
-#include "IECoreMaya/ClassParameterHandler.h"
-#include "IECoreMaya/ClassVectorParameterHandler.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
@@ -699,12 +697,6 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName )
-{
-	return createOrUpdateAttribute( parameter, attributeName, false );
-}
-
-template<typename B>
 MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName, bool callRestore )
 {
 	MObject node =  B::thisMObject();
@@ -719,17 +711,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		MStatus s = MS::kSuccess;
 		if( callRestore )
 		{
-			/// \todo Make restore() a proper part of ParameterHandler so we don't have to do
-			/// this manual downcasting. Do this for major version 6 to avoid breaking
-			/// compatibility now.
-			if( parameter->isInstanceOf( "ClassParameter" ) )
-			{
-				s = ClassParameterHandler::doRestore( plug, parameter );
-			}
-			else if( parameter->isInstanceOf( "ClassVectorParameter" ) )
-			{
-				s = ClassVectorParameterHandler::doRestore( plug, parameter );
-			}
+			ParameterHandler::restore( plug, parameter );
 		}
 	
 		if( s )

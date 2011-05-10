@@ -43,6 +43,8 @@ Improvements :
 
 * Maya plugin now has a menu for the creation of nodes holding procedurals and ops. This can be disabled by setting the IECOREMAYA_DISABLE_MENU environment variable to 1. Similar menus can be constructed using the functions in IECoreMaya.Menus.
 
+* ClassParameterHandler::doRestore() and ClassVectorParameterHandler::doRestore() are now proper virtual functions overriding a new ParameterHandler::doRestore() method. Clients simply call the ParameterHandler::restore method now rather than downcasting to the Class*ParameterHandler types first. Other ParameterHandlers may also implement doRestore() behaviour if necessary. This tidies up code which was added with the constraint of maintaining binary compatibility with major version 5.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.

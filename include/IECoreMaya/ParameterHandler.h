@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,8 +71,11 @@ class ParameterHandler : public IECore::RefCounted
 		static MStatus update( IECore::ConstParameterPtr parameter, MPlug &plug );
 		/// Sets the value of plug to reflect the value of parameter.
 		static MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug );
-		/// Sets the value of parameer to reflect the value of plug.
+		/// Sets the value of parameter to reflect the value of plug.
 		static MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter );
+		/// Called to restore a parameter's properties when a file is loaded or the version of a held class
+		/// has been updated.
+		static MStatus restore( const MPlug &plug, IECore::ParameterPtr parameter );
 
 		virtual ~ParameterHandler();
 
@@ -116,6 +119,7 @@ class ParameterHandler : public IECore::RefCounted
 		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const = 0;
+		virtual MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 
 	private:
 
