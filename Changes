@@ -41,6 +41,8 @@ Improvements :
 
 * IECoreHoudini.TemporaryParameterValues now handles unexpanded strings and expressions correctly.
 
+* IECoreMaya.FnOpHolder.create() now loads the default version for the op if no version is specified.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
