@@ -68,9 +68,7 @@ class TemporaryParameterValues :
 				raise TypeError( "Parameter \"%s\" has unsupported type \"%s\"." % ( parmName, parmType ) )
 
 			# store a command to restore the parameter value later
-			## \todo: this doesn't support expressions or unexpanded strings
-			command = IECore.curry( parm.set, parm.eval() )
-			self.__restoreCommands.append( command )
+			self.__restoreCommands.append( parm.asCode() )
 
 			# and change the parameter value
 			handler( parm, value )
@@ -78,11 +76,12 @@ class TemporaryParameterValues :
 	def __exit__( self, type, value, traceBack ) :
 		
 		for command in self.__restoreCommands :
-			command()
+			exec( command )
 
 	def __simpleParmHandler( self, parm, value ) :
 		
 		if isinstance( parm, hou.ParmTuple ) and not isinstance( value, tuple ) :
 			value = value,
 		
+		parm.deleteAllKeyframes()
 		parm.set( value )
