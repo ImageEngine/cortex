@@ -43,6 +43,8 @@ Improvements :
 
 * IECoreMaya.FnOpHolder.create() now loads the default version for the op if no version is specified.
 
+* Maya plugin now has a menu for the creation of nodes holding procedurals and ops. This can be disabled by setting the IECOREMAYA_DISABLE_MENU environment variable to 1. Similar menus can be constructed using the functions in IECoreMaya.Menus.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.

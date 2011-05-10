@@ -224,6 +224,12 @@ MStatus initialize(MFnPlugin &plugin)
 			h = new IECore::LevelFilteredMessageHandler( h, IECore::LevelFilteredMessageHandler::defaultLevel() );
 			IECore::MessageHandler::pushHandler( h );
 		}
+		
+		if( MGlobal::mayaState() == MGlobal::kInteractive )
+		{
+			MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.Menus.createCortexMenu()" );
+		}
+		
 	}
 
 	g_refCount ++;
@@ -287,6 +293,12 @@ MStatus uninitialize(MFnPlugin &plugin)
 		// guarantee that we're popping the one we pushed (other people could have pushed their own
 		// handlers since ours, and not popped 'em). Not sure - maybe we need some guidelines as to
 		// the nesting of handlers?
+		
+		if( MGlobal::mayaState() == MGlobal::kInteractive )
+		{
+			MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.Menus.removeCortexMenu()" );
+		}
+		
 	}
 
 	return s;

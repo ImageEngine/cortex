@@ -93,3 +93,4 @@ import ProceduralHolderUI
 from ManipulatorUI import *
 from TransformationMatrixParameterUI import TransformationMatrixParameterUI
 from LineSegmentParameterUI import LineSegmentParameterUI
+import Menus
