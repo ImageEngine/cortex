@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -371,6 +371,7 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	if( outputNow )
 	{
 		outputCamera( camera );
+		m_camera = 0;
 	}
 	else
 	{
@@ -470,7 +471,10 @@ void IECoreRI::RendererImplementation::display( const std::string &name, const s
 void IECoreRI::RendererImplementation::worldBegin()
 {
 	ScopedContext scopedContext( m_context );
-	outputCamera( m_camera );
+	if( m_camera )
+	{
+		outputCamera( m_camera );
+	}
 	RiWorldBegin();
 }
 
