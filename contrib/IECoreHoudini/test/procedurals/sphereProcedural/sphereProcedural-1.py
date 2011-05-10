@@ -3,6 +3,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -39,26 +41,25 @@ import IECore
 # renders a sphere
 class sphereProcedural( IECore.ParameterisedProcedural ) :
         def __init__( self ) :
-                IECore.ParameterisedProcedural.__init__( self,
-														"Renders a sphere." )
+                IECore.ParameterisedProcedural.__init__( self, "Renders a sphere." )
 
-		rad_param = IECore.FloatParameter( name = "radius",
-						   description = "Sphere radius.",
-						   defaultValue = 1,
-						   minValue = 0.01,
-						   maxValue = 100.0,
-						   userData = { "label":IECore.StringData("Radius"),
-										"gui_update": IECore.BoolData(True) }
-						   )
+		rad_param = IECore.FloatParameter(
+			name = "radius",
+			description = "Sphere radius.",
+			defaultValue = 1,
+			minValue = 0.01,
+			maxValue = 100.0,
+			userData = { 'UI': { "update" : IECore.BoolData( True ) } }
+		)
 
-		theta_param = IECore.FloatParameter( name = "theta",
-						   description = "Sphere theta.",
-						   defaultValue = 360,
-						   minValue = 1,
-						   maxValue = 360,
-						   userData = { "label":IECore.StringData("Theta"),
-										"gui_update": IECore.BoolData(True) }
-						   )
+		theta_param = IECore.FloatParameter(
+			name = "theta",
+			description = "Sphere theta.",
+			defaultValue = 360,
+			minValue = 1,
+			maxValue = 360,
+			userData = { 'UI': { "update" : IECore.BoolData( True ) } }
+		)
 
 		self.parameters().addParameters( [rad_param, theta_param] )
 

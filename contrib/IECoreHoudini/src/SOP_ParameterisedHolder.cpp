@@ -660,17 +660,10 @@ void SOP_ParameterisedHolder::updateParameter( ParameterPtr parm, float now, std
 		bool do_update = true;
 		if( CompoundObjectPtr uiData = parm->userData()->member<CompoundObject>( "UI" ) )
 		{
-			// World space parameter values
 			if( BoolDataPtr update_data = uiData->member<BoolData>( "update" ) )
 			{
 				do_update = update_data->readable();
 			}
-		}
-
-		/// \todo: This gui_update userData flag is deprecated!
-		if ( BoolDataPtr update_data = parm->userData()->member<BoolData>("gui_update") )
-		{
-			do_update = update_data->readable();
 		}
 
 		// handle the different parameter types
