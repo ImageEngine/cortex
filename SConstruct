@@ -598,9 +598,14 @@ o.Add(
 		( "IECore.SearchReplaceOp", "common/fileSystem/searchReplace" ),
 		( "IECore.CheckImagesOp", "common/fileSystem/checkImages" ),
 		( "IECore.FileSequenceGraphOp", "common/fileSystem/fileSequenceGraph" ),
-		( "IECore.MeshPrimitiveImplicitSurfaceOp", "common/primitive/mesh/implicitSurface" ), 	
+		( "IECore.TriangulateOp", "common/primitive/mesh/triangulate" ),
+		( "IECore.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
+		( "IECore.MeshTangentsOp", "common/primitive/mesh/addTangents" ),
+		( "IECore.MeshMergeOp", "common/primitive/mesh/merge" ),
+		( "IECore.MeshPrimitiveImplicitSurfaceOp", "common/primitive/mesh/implicitSurface" ),
 		( "IECore.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
-		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),	 		
+		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
+		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
 		( "IECore.Grade", "common/colorSpace/grade" ),
 		( "IECore.CubeColorTransformOp", "common/colorSpace/cubeColorTransform" ),
 		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),
@@ -621,6 +626,7 @@ o.Add(
 		( "IECore.NormalizeSmoothSkinningWeightsOp", "rigging/smoothSkinning/normalizeWeights" ),
 		( "IECore.ReorderSmoothSkinningInfluencesOp", "rigging/smoothSkinning/reorderInfluences" ),
 		( "IECore.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
+		( "IECore.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
 		( "IECore.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
 	]
 )
@@ -1040,6 +1046,32 @@ def makeSymLinks( env, target ) :
 				target = linkName
 				done = False	
 
+# Makes versioned symlinks for use during installation
+## \todo: this was written hastily and only tested for the op stubs...
+def makeSymLinkFiles( env, target ) :
+
+	links = {
+		"$IECORE_MAJORMINORPATCH_VERSION" : "$IECORE_MAJORMINOR_VERSION",
+		"$IECORE_MAJORMINOR_VERSION" : "$IECORE_MAJOR_VERSION",
+	}
+		
+	done = False
+	while not done :
+	
+		done = True
+		for key in links.keys() :
+			
+			substKey = env.subst( key )
+			keyIndex = target.find( substKey )
+			if keyIndex != -1 :
+			
+				linkName = target.replace( substKey, env.subst( links[key] ) )
+								
+				makeSymLink( linkName, target )
+				
+				target = linkName
+				done = False
+
 # Makes versioned symlinks for the library an environment makes.
 # This function is necessary as there's some name munging to get
 # the right prefix and suffix on the library names.
@@ -1074,7 +1106,7 @@ def makeSymLink( target, source ) :
 	os.symlink( relativeSource, target )
 	
 # Create an op stub so that a C++ op can be loaded by IECore.ClassLoader
-def createOpStub( op_install_path, full_class_name, stub_path ):
+def createOpStub( op_install_path, full_class_name, stub_path, version ) :
 	module_name = full_class_name.split('.')[0]
 	class_name = '.'.join( full_class_name.split('.')[1:])
 	stub_name = stub_path.split('/')[-1]
@@ -1085,15 +1117,18 @@ def createOpStub( op_install_path, full_class_name, stub_path ):
 		os.makedirs( install_path )
 		
 	# write our stub file
-	stub_filename = "%s/%s-1.py" % ( install_path, stub_name )
+	stub_filename = "%s/%s-%s.py" % ( install_path, stub_name, version )
 	stub = open( stub_filename, "w" )
 	stub.write( "from %s import %s as %s\n" % ( module_name, class_name, stub_name ) )
 	stub.close()
 	
+	return stub_filename
+	
 # builder action that creates the C++ op stubs
 def createOpStubs( target, source, env ):
 	for op in env['INSTALL_IECORE_OPS']:
-		createOpStub( env.subst( "$INSTALL_IECORE_OP_PATH" ), op[0], op[1] ) 
+		stub = createOpStub( env.subst( "$INSTALL_IECORE_OP_PATH" ), op[0], op[1], env.subst( "$IECORE_MAJORMINORPATCH_VERSION" ) )
+		makeSymLinkFiles( env, stub )
 
 def readLinesMinusLicense( f ) :
 

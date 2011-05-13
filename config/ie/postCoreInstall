@@ -1,6 +1,6 @@
 ########################################################################## 
 # 
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved. 
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved. 
 # 
 #  Redistribution and use in source and binary forms, with or without 
 #  modification, are permitted provided that the following conditions are 
@@ -51,58 +51,7 @@ ieCorePatchVersion=ARGUMENTS['PATCH']
 
 ieCoreVersion = "%s.%s.%s" % ( ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion )
 
-# op wrappers
-
-coreOps = [ 
-	[ "SequenceLsOp", "seqLs", "common/fileSystem" ], 
-	[ "SequenceCpOp", "seqCp", "common/fileSystem" ], 
-	[ "SequenceMvOp", "seqMv", "common/fileSystem" ], 
-	[ "SequenceRmOp", "seqRm", "common/fileSystem" ], 
-	[ "SequenceRenumberOp", "seqRenumber", "common/fileSystem" ], 
-	[ "SequenceConvertOp", "seqConvert", "common/fileSystem" ],
-	[ "SequenceCatOp", "seqCat", "common/fileSystem" ],
-	[ "RemovePrimitiveVariables", "removeVariables", "common/primitive" ], 
-	[ "RenamePrimitiveVariables", "renameVariables", "common/primitive" ], 
-	[ "PointsExpressionOp", "pointsExpression", "common/primitive" ],
-	[ "ClassLsOp", "classLs", "common/classes" ], 
-	[ "FileDependenciesOp", "depLs", "common/fileSystem" ], 
-	[ "CheckFileDependenciesOp", "depCheck", "common/fileSystem" ], 
-	[ "LsHeaderOp", "lsHeader", "common/fileSystem" ],
-	[ "SearchReplaceOp", "searchReplace", "common/fileSystem" ],
-	[ "CheckImagesOp", "checkImages", "common/fileSystem" ],
-	[ "FileSequenceGraphOp", "fileSequenceGraph", "common/fileSystem" ],
-	[ "MeshPrimitiveImplicitSurfaceOp", "implicitSurface", "common/primitive/mesh" ], 	
-	[ "MeshVertexReorderOp", "vertexReorder", "common/primitive/mesh" ],
-	[ "MeshPrimitiveShrinkWrapOp", "shrinkWrap", "common/primitive/mesh" ],	 		
-	[ "Grade", "grade", "common/colorSpace" ],
-	[ "CubeColorTransformOp", "cubeColorTransform", "common/colorSpace" ],
-	[ "CineonToLinearOp", "cineonToLinear", "common/colorSpace" ],
-	[ "LinearToCineonOp", "linearToCineon", "common/colorSpace" ],
-	[ "SRGBToLinearOp", "SRGBToLinear", "common/colorSpace" ],
-	[ "LinearToSRGBOp", "linearToSRGB", "common/colorSpace" ],
-	[ "Rec709ToLinearOp", "Rec709ToLinear", "common/colorSpace" ],
-	[ "LinearToRec709Op", "linearToRec709", "common/colorSpace" ],
-	[ "PanalogToLinearOp", "panalogToLinear", "common/colorSpace" ],
-	[ "LinearToPanalogOp", "linearToPanalog", "common/colorSpace" ],
-	[ "UVDistortOp", "uvDistort", "common/2d/image" ],
-	[ "ImageCompositeOp", "imageComposite", "common/2d/image" ],
-	[ "ImageConvolveOp", "imageConvolve", "common/2d/image" ],
-	[ 'AddSmoothSkinningInfluencesOp', 'addInfluences', 'rigging/smoothSkinning' ],
-	[ 'RemoveSmoothSkinningInfluencesOp', 'removeInfluences', 'rigging/smoothSkinning' ],
-	[ 'CompressSmoothSkinningDataOp', 'compress', 'rigging/smoothSkinning' ],
-	[ 'DecompressSmoothSkinningDataOp', 'decompress', 'rigging/smoothSkinning' ],
-	[ 'NormalizeSmoothSkinningWeightsOp', 'normalizeWeights', 'rigging/smoothSkinning' ],
-	[ 'ReorderSmoothSkinningInfluencesOp', 'reorderInfluences', 'rigging/smoothSkinning' ],
-	[ 'SmoothSmoothSkinningWeightsOp', 'smoothWeights', 'rigging/smoothSkinning' ],
-	[ 'ContrastSmoothSkinningWeightsOp', 'contrastWeights', 'rigging/smoothSkinning' ],
-	[ 'LimitSmoothSkinningInfluencesOp', 'limitInfluences', 'rigging/smoothSkinning' ],
-]
-
-for op in coreOps : 
-
-	IEBuild.OpWrapper( ARGUMENTS, op[0], "IECore", ieCoreVersion, op[2], op[1], ieCoreMajorVersion, useVersionControl = False ).finalize()
-
-
+## \todo: consider moving this install process to the SConstruct and eliminating this file
 coreProcedurals = [ 
 	[ "ReadProcedural", "read", "" ], 
 	[ "VisualiserProcedural", "visualiser", "" ], 
