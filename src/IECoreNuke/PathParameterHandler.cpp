@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,58 +34,21 @@
 
 #include "DDImage/Knobs.h"
 
-#include "IECore/SimpleTypedParameter.h"
+#include "IECore/PathParameter.h"
 
-#include "IECoreNuke/StringParameterHandler.h"
+#include "IECoreNuke/PathParameterHandler.h"
 
 using namespace IECore;
 using namespace IECoreNuke;
 
-ParameterHandler::Description<StringParameterHandler> StringParameterHandler::g_description( StringParameter::staticTypeId() );
+ParameterHandler::Description<PathParameterHandler> PathParameterHandler::g_description( PathParameter::staticTypeId() );
 
-StringParameterHandler::StringParameterHandler()
-	:	m_storage( 0 ), m_knob( 0 )
+PathParameterHandler::PathParameterHandler()
 {
 }
 		
-void StringParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
-{
-	if( f.makeKnobs() )
-	{
-		m_storage = static_cast<const StringParameter *>( parameter )->typedDefaultValue().c_str();
-	}
-
-	m_knob = knob( parameter, knobName, f, &m_storage );
-	/// we have a lot of procedurals which do their own variable expansion using a SubstitutedDict,
-	/// and the variables in the strings confuse nuke no end, so we're disabling expressions for now.
-	/// \todo Can we do better and allow the two to coexist?
-	SetFlags( f, DD::Image::Knob::NO_ANIMATION );
-	setKnobProperties( parameter, f, m_knob );
-}
-
-void StringParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSource valueSource )
-{
-	StringParameter *stringParameter = static_cast<StringParameter *>( parameter );
-	if( valueSource==Storage )
-	{
-		stringParameter->setTypedValue( m_storage );
-	}
-	else
-	{
-		std::ostringstream s;
-		m_knob->to_script( s, 0, false );
-		stringParameter->setTypedValue( s.str() );
-	}
-}
-
-void StringParameterHandler::setKnobValue( const IECore::Parameter *parameter )
-{
-	const StringParameter *stringParameter = static_cast<const StringParameter *>( parameter );
-	m_knob->set_text( stringParameter->getTypedValue().c_str() );	
-}
-
-DD::Image::Knob *StringParameterHandler::knob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f, const char **storage )
+DD::Image::Knob *PathParameterHandler::knob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f, const char **storage )
 {
 	std::string label = knobLabel( parameter );
-	return String_knob( f, storage, knobName, label.c_str() );
+	return File_knob( f, storage, knobName, label.c_str() );
 }
