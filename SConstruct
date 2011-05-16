@@ -819,6 +819,7 @@ env.Prepend(
 		"$FREETYPE_INCLUDE_PATH",
 	],
 	LIBPATH = [
+		"./lib",
 		"$TBB_LIB_PATH",
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
@@ -963,7 +964,6 @@ pythonEnv.Append( LIBS = [
 		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
 	]
 )
-pythonEnv.Prepend( LIBPATH = [ "./lib" ] )
 
 pythonModuleEnv = pythonEnv.Clone()
 
@@ -979,8 +979,6 @@ if pythonModuleEnv["PLATFORM"]=="darwin" :
 
 testEnv = env.Clone()
 testEnv.Replace( CXXFLAGS = env.subst("$TESTCXXFLAGS") )
-
-testEnv.Prepend( LIBPATH = [ "./lib" ] )
 
 testEnvLibPath = ":".join( testEnv["LIBPATH"] )
 if testEnv["TEST_LIBPATH"] != "" :
@@ -1448,7 +1446,6 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		riEnv.Prepend( LIBPATH = [ "./lib" ] )
 		riEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		riPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 	
@@ -1517,7 +1514,7 @@ if doConfigure :
 		# tests
 		riTestEnv = testEnv.Clone()
 
-		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( [ "./lib" ] + riPythonModuleEnv["LIBPATH"] ) )
+		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( riPythonModuleEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTestEnv["ENV"]["DELIGHT"] = riEnv.subst( "$RMAN_ROOT" )
 		riTestEnv["ENV"]["DL_SHADERS_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" ) + ":./"
@@ -1543,9 +1540,6 @@ if env["WITH_GL"] and doConfigure :
 	glEnvPrepends = {
 		"CPPPATH" : [
 		],
-		"LIBPATH" : [
-			"./lib",
-		]
 	}
 	glEnvAppends = {
 		
@@ -1750,7 +1744,6 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		mayaEnv.Prepend( LIBPATH = [ "./lib" ] )
 		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mayaEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
@@ -1785,7 +1778,6 @@ if doConfigure :
 		
 		# maya plugin
 		mayaPluginEnv.Append(
-			LIBPATH = [ "./lib" ],
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
 				os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
@@ -1852,7 +1844,7 @@ if doConfigure :
 		
 		mayaTestEnv = testEnv.Clone()
 		
-		mayaTestLibPaths = mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonModuleEnv["LIBPATH"] ) )
+		mayaTestLibPaths = mayaEnv.subst( ":".join( mayaPythonModuleEnv["LIBPATH"] ) )
 		if haveRI :
 			mayaTestLibPaths += ":" + mayaEnv.subst( "$RMAN_ROOT/lib" )
 		mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mayaTestLibPaths
@@ -1906,7 +1898,6 @@ nukeEnvAppends = {
 	
 	"LIBPATH" : [
 		"$NUKE_ROOT",
-		"./lib"
 	],
 
 	"LIBS" : [
@@ -2041,7 +2032,6 @@ if doConfigure :
 				# nuke plugin
 
 				nukePluginEnv.Append(
-					LIBPATH = [ "./lib" ],
 					LIBS = [
 						os.path.basename( coreEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
 						os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
@@ -2169,7 +2159,6 @@ if doConfigure :
 		
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		houdiniEnv.Prepend( LIBPATH = [ "./lib" ] )
 		houdiniEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
@@ -2198,7 +2187,6 @@ if doConfigure :
 		# build houdini plugin
 		#=====
 		houdiniPluginEnv.Append(
-			LIBPATH = [ "./lib" ],
 			LIBS=[
 				os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ),
 			],
@@ -2215,7 +2203,6 @@ if doConfigure :
 		# build python module
 		#=====
 		houdiniPythonModuleEnv.Append(
-			LIBPATH = [ "./lib" ],
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
@@ -2265,7 +2252,7 @@ if doConfigure :
 		#=====
 		houdiniTestEnv = testEnv.Clone()
 		
-		houdiniTestLibPaths = houdiniEnv.subst( ":".join( [ "./lib" ] + houdiniPythonModuleEnv["LIBPATH"] ) )
+		houdiniTestLibPaths = houdiniEnv.subst( ":".join( houdiniPythonModuleEnv["LIBPATH"] ) )
 		if haveRI :
 			houdiniTestLibPaths += ":" + houdiniEnv.subst( "$RMAN_ROOT/lib" )
 		houdiniTestEnv["ENV"][houdiniTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + houdiniTestLibPaths
@@ -2314,7 +2301,6 @@ truelightEnv["LIBS"] = [ x for x in truelightEnv["LIBS"] if ( x.find( "boost_" )
 
 truelightEnv.Append( CPPPATH = [ "$TRUELIGHT_ROOT/include" ] )
 truelightEnv.Prepend( LIBPATH = [
-		"./lib",
 		"$TRUELIGHT_ROOT/lib"
 	]
 )
