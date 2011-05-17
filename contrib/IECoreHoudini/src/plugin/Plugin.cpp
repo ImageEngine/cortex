@@ -40,6 +40,7 @@
 
 // Houdini
 #include <UT/UT_DSOVersion.h>
+#include <UT/UT_IOTable.h>
 #include <UT/UT_Version.h>
 #include <OP/OP_OperatorTable.h>
 #include <GR/GR_RenderTable.h>
@@ -116,4 +117,14 @@ void newRenderHook( GR_RenderTable *table )
 void newGeometryIO( void * )
 {
 	GU_Detail::registerIOTranslator( new GEO_CobIOTranslator() );
+	
+	UT_ExtensionList *geoextension = UTgetGeoExtensions();
+	if ( !geoextension->findExtension( "cob" ) )
+	{
+		geoextension->addExtension( "cob" );
+	}
+	if ( !geoextension->findExtension( "pdc" ) )
+	{
+		geoextension->addExtension( "pdc" );
+	}
 }
