@@ -574,7 +574,7 @@ o.Add(
 o.Add(
 	"INSTALL_IECORE_OP_PATH",
 	"The directory in which to install the IECore op stubs.",
-	"$INSTALL_PREFIX/ops",
+	"$INSTALL_PREFIX/ops/$IECORE_NAME-1.py",
 )
 
 o.Add(
@@ -1015,18 +1015,20 @@ testEnv["ENV"]["PYTHONPATH"] = "./python"
 	
 # Makes versioned symlinks for use during installation
 def makeSymLinks( env, target ) :
-
+	
 	links = {
 		"$IECORE_MAJORMINORPATCH_VERSION" : "$IECORE_MAJORMINOR_VERSION",
 		"$IECORE_MAJORMINOR_VERSION" : "$IECORE_MAJOR_VERSION",
+		"${IECORE_MAJORMINORPATCH_VERSION}" : "${IECORE_MAJORMINOR_VERSION}",
+		"${IECORE_MAJORMINOR_VERSION}" : "${IECORE_MAJOR_VERSION}",
 	}
 		
 	done = False
 	while not done :
-	
+		
 		done = True
 		for key in links.keys() :
-		
+			
 			keyIndex = target.find( key )
 			if keyIndex != -1 :
 			
@@ -1036,45 +1038,19 @@ def makeSymLinks( env, target ) :
 					# in the middle of the path somewhere, not in the last
 					# component. truncate the path.
 					target = target[:nextSlashIndex]
-
+				
 				linkName = target.replace( key, links[key] )
-								
+				
 				makeSymLink( env.subst( linkName ), env.subst( target ) )
 				
 				target = linkName
 				done = False	
 
-# Makes versioned symlinks for use during installation
-## \todo: this was written hastily and only tested for the op stubs...
-def makeSymLinkFiles( env, target ) :
-
-	links = {
-		"$IECORE_MAJORMINORPATCH_VERSION" : "$IECORE_MAJORMINOR_VERSION",
-		"$IECORE_MAJORMINOR_VERSION" : "$IECORE_MAJOR_VERSION",
-	}
-		
-	done = False
-	while not done :
-	
-		done = True
-		for key in links.keys() :
-			
-			substKey = env.subst( key )
-			keyIndex = target.find( substKey )
-			if keyIndex != -1 :
-			
-				linkName = target.replace( substKey, env.subst( links[key] ) )
-								
-				makeSymLink( linkName, target )
-				
-				target = linkName
-				done = False
-
 # Makes versioned symlinks for the library an environment makes.
 # This function is necessary as there's some name munging to get
 # the right prefix and suffix on the library names.
 def makeLibSymLinks( env, libNameVar="INSTALL_LIB_NAME" ) :
-
+	
 	p = env[libNameVar]
 	
 	d = os.path.dirname( p )
@@ -1082,7 +1058,7 @@ def makeLibSymLinks( env, libNameVar="INSTALL_LIB_NAME" ) :
 		
 	n = "$SHLIBPREFIX" + n + "$SHLIBSUFFIX"
 	p = os.path.join( d, n )
-		
+	
 	makeSymLinks( env, p )
 
 # Make a symlink pointing from target to source
@@ -1102,31 +1078,6 @@ def makeSymLink( target, source ) :
 			Exit( 1 )
 
 	os.symlink( relativeSource, target )
-	
-# Create an op stub so that a C++ op can be loaded by IECore.ClassLoader
-def createOpStub( op_install_path, full_class_name, stub_path, version ) :
-	module_name = full_class_name.split('.')[0]
-	class_name = '.'.join( full_class_name.split('.')[1:])
-	stub_name = stub_path.split('/')[-1]
-	
-	# make sure our directory exists
-	install_path = "%s/%s" % ( op_install_path, stub_path )
-	if not os.path.exists( install_path ):
-		os.makedirs( install_path )
-		
-	# write our stub file
-	stub_filename = "%s/%s-%s.py" % ( install_path, stub_name, version )
-	stub = open( stub_filename, "w" )
-	stub.write( "from %s import %s as %s\n" % ( module_name, class_name, stub_name ) )
-	stub.close()
-	
-	return stub_filename
-	
-# builder action that creates the C++ op stubs
-def createOpStubs( target, source, env ):
-	for op in env['INSTALL_IECORE_OPS']:
-		stub = createOpStub( env.subst( "$INSTALL_IECORE_OP_PATH" ), op[0], op[1], env.subst( "$IECORE_MAJORMINORPATCH_VERSION" ) )
-		makeSymLinkFiles( env, stub )
 
 def readLinesMinusLicense( f ) :
 
@@ -1295,7 +1246,6 @@ corePythonLibrary = corePythonEnv.SharedLibrary( "lib/" + os.path.basename( core
 corePythonLibraryInstall = corePythonEnv.Install( os.path.dirname( corePythonEnv.subst( "$INSTALL_LIB_NAME" ) ), corePythonLibrary )
 corePythonEnv.NoCache( corePythonLibraryInstall )
 corePythonEnv.AddPostAction( corePythonLibraryInstall, lambda target, source, env : makeLibSymLinks( corePythonEnv, libNameVar="INSTALL_PYTHONLIB_NAME" ) )
-corePythonEnv.AddPostAction( corePythonLibraryInstall, createOpStubs )
 corePythonEnv.Alias( "install", [ corePythonLibraryInstall ] )
 corePythonEnv.Alias( "installCore", [ corePythonLibraryInstall ] )
 corePythonEnv.Alias( "installLib", [ corePythonLibraryInstall ] )
@@ -1315,6 +1265,15 @@ corePythonModuleInstall = corePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECo
 corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
 corePythonModuleEnv.Alias( "install", corePythonModuleInstall )
 corePythonModuleEnv.Alias( "installCore", corePythonModuleInstall )
+
+# op stubs
+for op in env['INSTALL_IECORE_OPS'] :
+	stubName = os.path.basename( op[1] )
+	stubEnv = corePythonModuleEnv.Clone( IECORE_NAME=os.path.join( op[1], stubName ) )
+	stubInstall = stubEnv.Command( "$INSTALL_IECORE_OP_PATH", None, 'echo "from %s import %s as %s" > $TARGET' % ( op[0].rpartition( "." )[0], op[0].rpartition( "." )[-1], stubName ) )
+	stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, env["INSTALL_IECORE_OP_PATH"] ) )
+	stubEnv.Alias( "install", stubInstall )
+	stubEnv.Alias( "installCore", stubInstall )
 
 Default( coreLibrary, corePythonLibrary, corePythonModule )
 
