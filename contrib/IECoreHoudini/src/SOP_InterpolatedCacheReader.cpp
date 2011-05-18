@@ -34,6 +34,7 @@
 
 #include "boost/format.hpp"
 
+#include "OP/OP_Director.h"
 #include "PRM/PRM_Default.h"
 #include "PRM/PRM_Template.h"
 
@@ -111,13 +112,13 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 	std::string attributeSuffix = paramVal.toStdString();
 	
 	int frameMultiplier = evalInt( "frameMultiplier", 0, time );
-	
 	// create the InterpolatedCache
 	if ( cacheFileName.compare( m_cacheFileName ) != 0 || frameMultiplier != m_frameMultiplier )
 	{
 		try
 		{
-			OversamplesCalculator calc( 24.0, 1, 24 * frameMultiplier );
+			float fps = OPgetDirector()->getChannelManager()->getSamplesPerSec();
+			OversamplesCalculator calc( fps, 1, (int)fps * frameMultiplier );
 			m_cache = new InterpolatedCache( cacheFileName, frame, InterpolatedCache::Linear, calc );
 		}
 		catch ( IECore::InvalidArgumentException e )
