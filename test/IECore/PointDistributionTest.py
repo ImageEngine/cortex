@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -111,7 +111,31 @@ class PointDistributionTest( unittest.TestCase ) :
 		for p in points :
 			self.assert_( bound.intersects( p ) )
 			self.assert_( (p - IECore.V2f( 0.5 )).length() < 0.5 )
+	
+	def testDistanceBetweenPoints( self ) :
 		
+		pd = IECore.PointDistribution.defaultInstance()
+		
+		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
+		
+		def density( p ) :
+		
+			if (p - IECore.V2f( 0.5 )).length() < 0.5 :
+				return 1
+			else :
+				return 0
+		
+		positions = pd( bound, 20000, density )
+		
+		tree = IECore.V2fTree( positions )
+		
+		for i in range( 0, positions.size() ) :
+			neighbours = list(tree.nearestNNeighbours( positions[i], 6 ))
+			self.failUnless( i in neighbours )
+			neighbours.remove( i )
+			for n in neighbours :
+				self.failUnless( ( positions[i] - positions[n] ).length() > 0.004 )
+
 	def setUp( self ) :
 	
 		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"
