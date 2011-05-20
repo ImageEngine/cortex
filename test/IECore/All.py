@@ -247,6 +247,7 @@ from CapturingRendererTest import CapturingRendererTest
 from LightTest import LightTest
 from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
 from CameraControllerTest import CameraControllerTest
+from PointDistributionOpTest import PointDistributionOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

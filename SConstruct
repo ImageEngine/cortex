@@ -606,6 +606,7 @@ o.Add(
 		( "IECore.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
 		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
 		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
+		( "IECore.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
 		( "IECore.Grade", "common/colorSpace/grade" ),
 		( "IECore.CubeColorTransformOp", "common/colorSpace/cubeColorTransform" ),
 		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),

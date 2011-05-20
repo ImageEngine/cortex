@@ -291,6 +291,7 @@
 #include "IECorePython/LightBinding.h"
 #include "IECorePython/ContrastSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/CamelCaseBinding.h"
+#include "IECorePython/PointDistributionOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -580,7 +581,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLight();
 	bindContrastSmoothSkinningWeightsOp();
 	bindCamelCase();
-		
+	bindPointDistributionOp();
+	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );

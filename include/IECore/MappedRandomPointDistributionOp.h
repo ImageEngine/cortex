@@ -47,6 +47,8 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 
 /// The MappedRandomPointDistributionOp distributes points over a mesh using a random distribution. Evenness is
 /// approximated by weighting the amount of expected particles per mesh face to be proportional to that face's area.
+/// For a fast, even distribution, the PointDistributionOp may be preferable to this one. However, if the mesh UVs
+/// are poorly layed out, this op may be the best choice.
 /// \ingroup geometryProcessingGroup
 class MappedRandomPointDistributionOp : public UniformRandomPointDistributionOp
 {

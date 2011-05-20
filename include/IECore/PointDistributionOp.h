@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,72 +32,64 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
-#define IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
+#ifndef IECORE_POINTDISTRIBUTIONOP_H
+#define IECORE_POINTDISTRIBUTIONOP_H
 
 #include "IECore/Op.h"
+#include "IECore/MeshPrimitiveEvaluator.h"
 #include "IECore/NumericParameter.h"
-#include "IECore/MeshPrimitive.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/TypedPrimitiveParameter.h"
 
 namespace IECore
 {
 
-IE_CORE_FORWARDDECLARE( ObjectParameter )
-
-/// The UniformRandomPointDistributionOp distributes points over a mesh using a random distribution. Evenness is
-/// approximated by weighting the amount of expected particles per mesh face to be proportional to that face's area.
-/// For a fast, even distribution, the PointDistributionOp may be preferable to this one. However, if the mesh UVs
-/// are poorly layed out, this op may be the best choice.
+/// The PointDistributionOp distributes points over a mesh using an IECore::PointDistribution in UV space
+/// and mapping it to 3d space. It gives a more even distribution than MappedRandomPointDistributionOp,
+/// but requires UVs that are well layed out in order to work efficiently.
 /// \ingroup geometryProcessingGroup
-class UniformRandomPointDistributionOp : public Op
+class PointDistributionOp : public Op
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPED( UniformRandomPointDistributionOp, Op );
+		IE_CORE_DECLARERUNTIMETYPED( PointDistributionOp, Op );
 
-		UniformRandomPointDistributionOp();
-		virtual ~UniformRandomPointDistributionOp();
+		PointDistributionOp();
+		virtual ~PointDistributionOp();
 
-		MeshPrimitiveParameter * meshParameter();
-		const MeshPrimitiveParameter * meshParameter() const;
-
-		IntParameter * numPointsParameter();
-		const IntParameter * numPointsParameter() const;
-
-		IntParameter * seedParameter();
-		const IntParameter * seedParameter() const;
-
-		BoolParameter * addSTParameter();
-		const BoolParameter * addSTParameter() const;
-
+		MeshPrimitiveParameter *meshParameter();
+		const MeshPrimitiveParameter *meshParameter() const;
+		
+		FloatParameter *densityParameter();
+		const FloatParameter *densityParameter() const;
 
 	protected :
 
-		void constructCommon();
-
-		UniformRandomPointDistributionOp( const std::string &description );
-
-		/// Derived classes can override this method and return a number in the range [0,1] defining the
-		/// required density at the given point.
-		virtual float density( const MeshPrimitive * mesh, const Imath::V3f &point, const Imath::V2f &uv ) const;
-
-		struct DistributeFn;
-
+		void processMesh( const IECore::MeshPrimitive *mesh );
+		
 		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 
 		MeshPrimitiveParameterPtr m_meshParameter;
-		IntParameterPtr m_numPointsParameter;
-		IntParameterPtr m_seedParameter;
-		BoolParameterPtr m_addSTParameter;
+		FloatParameterPtr m_densityParameter;
+		V2fParameterPtr m_offsetParameter;
+		StringParameterPtr m_densityPrimVarNameParameter;
+		StringParameterPtr m_pRefPrimVarNameParameter;
+		StringParameterPtr m_uPrimVarNameParameter;
+		StringParameterPtr m_vPrimVarNameParameter;
+		
+		struct Emitter;
+		
+		// filled in by processMesh()
+		MeshPrimitivePtr m_mesh;
+		MeshPrimitiveEvaluatorPtr m_meshEvaluator;
+		MeshPrimitiveEvaluator::ResultPtr m_evaluatorResult;
 
 };
 
-IE_CORE_DECLAREPTR( UniformRandomPointDistributionOp );
+IE_CORE_DECLAREPTR( PointDistributionOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
+#endif // IECORE_POINTDISTRIBUTIONOP_H
