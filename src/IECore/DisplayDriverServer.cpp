@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,8 +63,7 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 		m_endpoint(tcp::v4(), portNumber),
 		m_service(),
 		m_acceptor( m_service ),
-		m_thread(),
-		m_startThread(false)
+		m_thread()
 {
 	m_acceptor.open(  m_endpoint.protocol() );
 	m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true));
@@ -75,19 +74,15 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
 			boost::asio::placeholders::error));
 	fixSocketFlags( m_acceptor.native() );
-	boost::thread newThread( boost::bind(&DisplayDriverServer::serverThread, this) );
-	m_thread.swap( newThread );
-	m_startThread = true;
+	tbb::tbb_thread newThread( boost::bind(&DisplayDriverServer::serverThread, this) );
+	m_thread = newThread;
 }
 
 DisplayDriverServer::~DisplayDriverServer()
 {
-	if (m_startThread)
-	{
-		m_acceptor.cancel();
-		m_acceptor.close();
-		m_thread.join();
-	}
+	m_acceptor.cancel();
+	m_acceptor.close();
+	m_thread.join();
 }
 
 void DisplayDriverServer::serverThread()

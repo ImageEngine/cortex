@@ -42,7 +42,7 @@
 #include <string>
 
 #include "boost/asio.hpp"
-#include "boost/thread.hpp"
+#include "tbb/tbb_thread.h"
 
 #include "IECore/RunTimeTyped.h"
 #include "IECore/VectorTypedData.h"
@@ -52,21 +52,8 @@ namespace IECore
 {
 
 
-/// Opens a socket port and pass every socket request to a named DisplayDriver object in the display driver pool.
-/// The protocol is the following:
-/// 1. Server waits for a header block.
-/// 2. Depending on the message type:
-/// 	- imageOpen : The data block followint the header is a MemoryIndexedIO buffer containing the parameters for
-/// 				  the imageOpen function ( displayWindow, dataWindow, channelNames, parameters )
-/// 	- imageData : The data block is a MemoryIndexedIO buffer containing "box" and "data" parameters for imageData function.
-/// 	- imageClose : The data block is zero bytes length.
-/// 3. Returns the result using the same header block structure.
-///    If there was any exception while executing the request, then the message
-///    type will be 'exception' and the data block will be a StringData object.
-///    Otherwise it will match the incomming message type.
-///    In the case of imageOpen, it will return a data block of one byte containing
-///    the resulting scanLineOrderOnly value.
-///    For imageData messages there will be no confirmation message to not compromise performance.
+/// Server class that receives images from ClientDisplayDriver connections and forwards the data to local display drivers.
+/// The type of the local display drivers is defined by the 'remoteDisplayType' parameter.
 /// 
 /// The server object creates a thread to control the socket connection. The thread dies when the object is destroyed.
 /// \ingroup renderingGroup
@@ -156,8 +143,7 @@ class DisplayDriverServer : public RunTimeTyped
 		boost::asio::ip::tcp::endpoint m_endpoint;
 		boost::asio::io_service m_service;
 		boost::asio::ip::tcp::acceptor m_acceptor;
-		boost::thread m_thread;
-		bool m_startThread;
+		tbb::tbb_thread m_thread;
 };
 
 IE_CORE_DECLAREPTR( DisplayDriverServer )
