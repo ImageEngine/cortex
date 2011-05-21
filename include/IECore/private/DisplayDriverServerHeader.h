@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,51 +32,54 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file DisplayDriverServer.h
-/// Defines the DisplayDriverServer class.
+#ifndef IE_CORE_DISPLAYDRIVERSERVERHEADER
+#define IE_CORE_DISPLAYDRIVERSERVERHEADER
 
-#ifndef IE_CORE_DISPLAYDRIVERSERVER
-#define IE_CORE_DISPLAYDRIVERSERVER
-
-#include "IECore/RunTimeTyped.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/DisplayDriver.h"
+#include "IECore/DisplayDriverServer.h"
 
 namespace IECore
 {
 
-
-/// Server class that receives images from ClientDisplayDriver connections and forwards the data to local display drivers.
-/// The type of the local display drivers is defined by the 'remoteDisplayType' parameter.
-/// 
-/// The server object creates a thread to control the socket connection. The thread dies when the object is destroyed.
-/// \ingroup renderingGroup
-class DisplayDriverServer : public RunTimeTyped
+/* Header block used by back and forth messages with the server.
+* 7 bytes long:
+* [0] - magic number ( 0x82 )
+* [1] - protocol version ( 1 )
+* [2] - message type ( imageOpen, imageData, imageClose )
+* [3-6] - length of following data block.
+*/
+class DisplayDriverServerHeader
 {
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPED( DisplayDriverServer, RunTimeTyped );
+		enum MessageType { imageOpen = 1, imageData = 2, imageClose = 3, exception = 4 };
 
-		DisplayDriverServer( int portNumber );
-		virtual ~DisplayDriverServer();
+		static const unsigned char headerLength = 7;
+		static const unsigned char magicNumber = 0x82;
+		static const unsigned char currentProtocolVersion = 1;
+
+		DisplayDriverServerHeader();
+		DisplayDriverServerHeader( MessageType msg, size_t dataSize );
+
+		// returns internal buffer ( length = headerLength constant )
+		unsigned char *buffer();
+
+		// checks if the header is valid.
+		bool valid();
+
+		// returns the number of bytes is expected to follow the current header down from the socket connection.
+		size_t getDataSize();
+
+		// sets the number of bytes that will follow this header on the socket connection.
+		void setDataSize( size_t dataSize );
+
+		// returns the message type defined in the header.
+		MessageType messageType();
 
 	private:
 
-		// Session class
-		// Takes care of one client connection.
-		class Session;
-		IE_CORE_DECLAREPTR( Session );
-
-		void serverThread();
-		void handleAccept( DisplayDriverServer::SessionPtr session, const boost::system::error_code& error);
-
-		class PrivateData;
-		IE_CORE_DECLAREPTR( PrivateData );
-		PrivateDataPtr m_data;
+		unsigned char m_header[ headerLength ];
 };
-
-IE_CORE_DECLAREPTR( DisplayDriverServer )
 
 } // namespace IECore
 
-#endif // IE_CORE_DISPLAYDRIVERSERVER
+#endif // IE_CORE_DISPLAYDRIVERSERVERHEADER

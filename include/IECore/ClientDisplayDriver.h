@@ -38,10 +38,7 @@
 #ifndef IE_CORE_CLIENTDISPLAYDRIVER
 #define IE_CORE_CLIENTDISPLAYDRIVER
 
-#include "boost/asio.hpp"
-
 #include "IECore/DisplayDriver.h"
-#include "IECore/DisplayDriverServer.h"
 
 namespace IECore
 {
@@ -80,14 +77,12 @@ class ClientDisplayDriver : public DisplayDriver
 
 		static const DisplayDriverDescription<ClientDisplayDriver> g_description;
 
-		void sendHeader( DisplayDriverServer::MessageType msg, size_t dataSize );
-		size_t receiveHeader( DisplayDriverServer::MessageType msg );
+		void sendHeader( int msg, size_t dataSize );
+		size_t receiveHeader( int msg );
 
-		boost::asio::io_service m_service;
-		std::string m_host;
-		std::string m_port;
-		bool m_scanLineOrderOnly;
-		boost::asio::ip::tcp::socket m_socket;
+		class PrivateData;
+		IE_CORE_DECLAREPTR( PrivateData );
+		PrivateDataPtr m_data;
 
 };
 

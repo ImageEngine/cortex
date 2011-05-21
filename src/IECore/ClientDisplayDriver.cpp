@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/asio.hpp"
 #include "boost/bind.hpp"
 
 #include "IECore/ClientDisplayDriver.h"
-#include "IECore/DisplayDriverServer.h"
+#include "IECore/private/DisplayDriverServerHeader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MemoryIndexedIO.h"
 
@@ -45,28 +46,48 @@ using namespace Imath;
 using namespace IECore;
 using boost::asio::ip::tcp;
 
+struct ClientDisplayDriver::PrivateData : public RefCounted
+{
+	public :
+		PrivateData() :
+		m_service(), m_host(""), m_port(""), m_scanLineOrderOnly(false), m_socket( m_service )
+		{
+		}
+
+		~PrivateData()
+		{
+			m_socket.close();
+		}
+
+		boost::asio::io_service m_service;
+		std::string m_host;
+		std::string m_port;
+		bool m_scanLineOrderOnly;
+		boost::asio::ip::tcp::socket m_socket;
+};
+
 IE_CORE_DEFINERUNTIMETYPED( ClientDisplayDriver );
 
 const DisplayDriver::DisplayDriverDescription<ClientDisplayDriver> ClientDisplayDriver::g_description;
 
 ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters ) :
 		DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
-		m_service(), m_host(""), m_port(""), m_scanLineOrderOnly(false), m_socket( m_service )
+		m_data( new PrivateData() )
 {
 	// expects three custom StringData parameters : displayHost, displayPort and displayType
 	const StringData *displayHostData = parameters->member<StringData>( "displayHost", true /* throw if missing */ );
 	const StringData *displayPortData = parameters->member<StringData>( "displayPort", true /* throw if missing */ );
 	
-	m_host = displayHostData->readable();
-	m_port = displayPortData->readable();
+	m_data->m_host = displayHostData->readable();
+	m_data->m_port = displayPortData->readable();
 	
-	tcp::resolver resolver(m_service);
-	tcp::resolver::query query(m_host, m_port);
+	tcp::resolver resolver(m_data->m_service);
+	tcp::resolver::query query(m_data->m_host, m_data->m_port);
 	tcp::resolver::iterator iterator = resolver.resolve(query);
 
 	try
 	{
-		m_socket.connect( *iterator );
+		m_data->m_socket.connect( *iterator );
 	}
 	catch( std::exception &e )
 	{
@@ -92,59 +113,58 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 
 	size_t dataSize = buf->readable().size();
 
-	sendHeader( DisplayDriverServer::imageOpen, dataSize );
+	sendHeader( DisplayDriverServerHeader::imageOpen, dataSize );
 
-	m_socket.send( boost::asio::buffer( &(buf->readable()[0]), dataSize ) );
+	m_data->m_socket.send( boost::asio::buffer( &(buf->readable()[0]), dataSize ) );
 
-	if ( receiveHeader( DisplayDriverServer::imageOpen ) != sizeof(m_scanLineOrderOnly) )
+	if ( receiveHeader( DisplayDriverServerHeader::imageOpen ) != sizeof(m_data->m_scanLineOrderOnly) )
 	{
 		throw Exception( "Invalid returned scanLineOrder from display driver server!" );
 	}
-	m_socket.receive( boost::asio::buffer( &m_scanLineOrderOnly, sizeof(m_scanLineOrderOnly) ) );
+	m_data->m_socket.receive( boost::asio::buffer( &m_data->m_scanLineOrderOnly, sizeof(m_data->m_scanLineOrderOnly) ) );
 
 }
 
 ClientDisplayDriver::~ClientDisplayDriver()
 {
-	m_socket.close();
 }
 
 std::string ClientDisplayDriver::host() const
 {
-	return m_host;
+	return m_data->m_host;
 }
 
 std::string ClientDisplayDriver::port() const
 {
-	return m_port;
+	return m_data->m_port;
 }
 
 bool ClientDisplayDriver::scanLineOrderOnly() const
 {
-	return m_scanLineOrderOnly;
+	return m_data->m_scanLineOrderOnly;
 }
 
-void ClientDisplayDriver::sendHeader( DisplayDriverServer::MessageType msg, size_t dataSize )
+void ClientDisplayDriver::sendHeader( int msg, size_t dataSize )
 {
-	DisplayDriverServer::Header header( msg, dataSize );
-	m_socket.send( boost::asio::buffer( header.buffer(), header.headerLength ) );
+	DisplayDriverServerHeader header( (DisplayDriverServerHeader::MessageType)msg, dataSize );
+	m_data->m_socket.send( boost::asio::buffer( header.buffer(), header.headerLength ) );
 }
 
-size_t ClientDisplayDriver::receiveHeader( DisplayDriverServer::MessageType msg )
+size_t ClientDisplayDriver::receiveHeader( int msg )
 {
-	DisplayDriverServer::Header header;
-	m_socket.receive( boost::asio::buffer( header.buffer(), header.headerLength ) );
+	DisplayDriverServerHeader header;
+	m_data->m_socket.receive( boost::asio::buffer( header.buffer(), header.headerLength ) );
 	if ( !header.valid() )
 	{
 		throw Exception( "Invalid display driver header block on socket package." );
 	}
 	size_t bytesAhead = header.getDataSize();
 
-	if ( header.messageType() == DisplayDriverServer::exception )
+	if ( header.messageType() == DisplayDriverServerHeader::exception )
 	{
 		vector<char> txt;
 		txt.resize( bytesAhead );
-		m_socket.receive( boost::asio::buffer( &(txt[0]), bytesAhead ) );
+		m_data->m_socket.receive( boost::asio::buffer( &(txt[0]), bytesAhead ) );
 		throw Exception( std::string("Error on remote display driver: ") + &(txt[0]) );
 	}
 	if ( header.messageType() != msg )
@@ -169,15 +189,15 @@ void ClientDisplayDriver::imageData( const Box2i &box, const float *data, size_t
 	buf = io->buffer();
 	size_t blockSize = buf->readable().size();
 
-	sendHeader( DisplayDriverServer::imageData, blockSize );
+	sendHeader( DisplayDriverServerHeader::imageData, blockSize );
 
-	m_socket.send( boost::asio::buffer( &(buf->readable()[0]), blockSize) );
+	m_data->m_socket.send( boost::asio::buffer( &(buf->readable()[0]), blockSize) );
 }
 
 void ClientDisplayDriver::imageClose()
 {
-	sendHeader( DisplayDriverServer::imageClose, 0 );
-	receiveHeader( DisplayDriverServer::imageClose );
-	m_socket.close();
+	sendHeader( DisplayDriverServerHeader::imageClose, 0 );
+	receiveHeader( DisplayDriverServerHeader::imageClose );
+	m_data->m_socket.close();
 }
 
