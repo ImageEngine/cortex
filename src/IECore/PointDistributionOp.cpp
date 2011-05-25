@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "tbb/tbb.h"
+#include "tbb/concurrent_vector.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/FaceAreaOp.h"
@@ -150,7 +151,7 @@ void PointDistributionOp::processMesh( const IECore::MeshPrimitive *mesh )
 	op->inputParameter()->setValue( const_cast<MeshPrimitive *>( mesh ) );
 	op->throwExceptionsParameter()->setTypedValue( false );
 	m_mesh = runTimeCast<MeshPrimitive>( op->operate() );
-	if ( !m_mesh )
+	if ( !m_mesh || !m_mesh->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "PointDistributionOp: The input mesh could not be triangulated" );
 	}
@@ -180,20 +181,20 @@ void PointDistributionOp::processMesh( const IECore::MeshPrimitive *mesh )
 	}
  	
 	m_meshEvaluator = new IECore::MeshPrimitiveEvaluator( m_mesh );
-	m_evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
 	
 	assert( m_mesh );
 	assert( m_meshEvaluator );
-	assert( m_evaluatorResult );
+
 }
 
 struct PointDistributionOp::Emitter
 {
 	public :
 	
-		Emitter( MeshPrimitiveEvaluator *evaluator, MeshPrimitiveEvaluator::Result *evaluatorResult, const PrimitiveVariable &densityVar, std::vector<Imath::V3f> *positions, size_t triangleIndex, const Imath::V2f &v0, const Imath::V2f &v1, const Imath::V2f &v2 )
-			: m_meshEvaluator( evaluator ), m_evaluatorResult( evaluatorResult ), m_densityVar( densityVar ), m_p( positions ), m_triangleIndex( triangleIndex ), m_v0( v0 ), m_v1( v1 ), m_v2( v2 )
+		Emitter( MeshPrimitiveEvaluator *evaluator, const PrimitiveVariable &densityVar, tbb::concurrent_vector<Imath::V3f> &positions, size_t triangleIndex, const Imath::V2f &v0, const Imath::V2f &v1, const Imath::V2f &v2 )
+			: m_meshEvaluator( evaluator ), m_densityVar( densityVar ), m_p( positions ), m_triangleIndex( triangleIndex ), m_v0( v0 ), m_v1( v1 ), m_v2( v2 )
 		{
+			m_evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
 		}
 
 		void operator() ( const Imath::V2f pos, float densityThreshold )
@@ -204,7 +205,7 @@ struct PointDistributionOp::Emitter
 				m_meshEvaluator->barycentricPosition( m_triangleIndex, bary, m_evaluatorResult );
 				if ( m_evaluatorResult->floatPrimVar( m_densityVar ) >= densityThreshold )
 				{
-					m_p->push_back( m_evaluatorResult->point() );
+					m_p.push_back( m_evaluatorResult->point() );
 				}
 			}
 		}
@@ -212,20 +213,71 @@ struct PointDistributionOp::Emitter
 	private :
 	
 		MeshPrimitiveEvaluator *m_meshEvaluator;
-		MeshPrimitiveEvaluator::Result *m_evaluatorResult;
 		const PrimitiveVariable &m_densityVar;
-		std::vector<Imath::V3f> *m_p;
+		tbb::concurrent_vector<Imath::V3f> &m_p;
 		size_t m_triangleIndex;
 		Imath::V2f m_v0;
 		Imath::V2f m_v1;
 		Imath::V2f m_v2;
 		
+		MeshPrimitiveEvaluator::ResultPtr m_evaluatorResult;
+
+};
+
+struct PointDistributionOp::Generator
+{
+	public :
+		
+		Generator( tbb::concurrent_vector<Imath::V3f> &positions, MeshPrimitiveEvaluator *evaluator, const std::vector<float> &s, const std::vector<float> &t, const std::vector<float> &faceArea, const std::vector<float> &textureArea, float density, const PrimitiveVariable &densityVar, Imath::V2f offset )
+			: m_positions( positions ), m_meshEvaluator( evaluator ), m_s( s ), m_t( t ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset )
+		{
+		}
+		
+		void operator()( const tbb::blocked_range<size_t> &r ) const
+		{
+			for ( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				float textureDensity = m_density * m_faceArea[i] / m_textureArea[i];
+				
+				size_t v0I = i * 3;
+				size_t v1I = v0I + 1;
+				size_t v2I = v1I + 1;
+
+				Imath::V2f st0( m_s[v0I], m_t[v0I] );
+				Imath::V2f st1( m_s[v1I], m_t[v1I] );
+				Imath::V2f st2( m_s[v2I], m_t[v2I] );
+
+				st0 += m_offset;
+				st1 += m_offset;
+				st2 += m_offset;
+
+				Imath::Box2f stBounds;
+				stBounds.extendBy( st0 );
+				stBounds.extendBy( st1 );
+				stBounds.extendBy( st2 );
+				
+				Emitter emitter( m_meshEvaluator, m_densityVar, m_positions, i, st0, st1, st2 );
+				PointDistribution::defaultInstance()( stBounds, textureDensity, emitter );
+			}
+		}
+	
+	private :
+		
+		tbb::concurrent_vector<Imath::V3f> &m_positions;
+		MeshPrimitiveEvaluator *m_meshEvaluator;
+		const std::vector<float> &m_s;
+		const std::vector<float> &m_t;
+		const std::vector<float> &m_faceArea;
+		const std::vector<float> &m_textureArea;
+		float m_density;
+		const PrimitiveVariable &m_densityVar;
+		Imath::V2f m_offset;
+
 };
 
 ObjectPtr PointDistributionOp::doOperation( const CompoundObject * operands )
 {
-	V3fVectorDataPtr p = new V3fVectorData();
-	std::vector<Imath::V3f> *positions = &(p->writable());
+	tbb::concurrent_vector<Imath::V3f> threadablePositions;
 	
 	processMesh( m_meshParameter->getTypedValue<MeshPrimitive>() );
 	
@@ -240,32 +292,16 @@ ObjectPtr PointDistributionOp::doOperation( const CompoundObject * operands )
 	const std::vector<float> &faceArea = m_mesh->variableData<FloatVectorData>( "faceArea", PrimitiveVariable::Uniform )->readable();
 	const std::vector<float> &textureArea = m_mesh->variableData<FloatVectorData>( "textureArea", PrimitiveVariable::Uniform )->readable();
 	
-	size_t numFaces = m_mesh->verticesPerFace()->readable().size();
-	/// \todo: this could do with some threading...
-	for ( size_t i=0; i < numFaces; i++ )
-	{
-		float textureDensity = density * faceArea[i] / textureArea[i];
-		
-		size_t v0I = i * 3;
-		size_t v1I = v0I + 1;
-		size_t v2I = v1I + 1;
-
-		Imath::V2f st0( s[v0I], t[v0I] );
-		Imath::V2f st1( s[v1I], t[v1I] );
-		Imath::V2f st2( s[v2I], t[v2I] );
-
-		st0 += offset;
-		st1 += offset;
-		st2 += offset;
-		
-		Imath::Box2f stBounds;
-		stBounds.extendBy( st0 );
-		stBounds.extendBy( st1 );
-		stBounds.extendBy( st2 );
-
-		Emitter emitter( m_meshEvaluator, m_evaluatorResult, densityVar, positions, i, st0, st1, st2 );
-		PointDistribution::defaultInstance()( stBounds, textureDensity, emitter );
-	}
-
-	return new PointsPrimitive( p );
+	size_t numFaces = m_mesh->verticesPerFace()->readable().size();	
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, numFaces ),
+		Generator( threadablePositions, m_meshEvaluator, s, t, faceArea, textureArea, density, densityVar, offset )
+	);
+	
+	V3fVectorDataPtr pData = new V3fVectorData();
+	std::vector<Imath::V3f> &positions = pData->writable();
+	positions.resize( threadablePositions.size() );
+	std::copy( threadablePositions.begin(), threadablePositions.end(), positions.begin() );
+	
+	return new PointsPrimitive( pData );
 }

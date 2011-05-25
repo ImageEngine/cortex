@@ -80,11 +80,11 @@ class PointDistributionOp : public Op
 		StringParameterPtr m_vPrimVarNameParameter;
 		
 		struct Emitter;
+		struct Generator;
 		
 		// filled in by processMesh()
 		MeshPrimitivePtr m_mesh;
 		MeshPrimitiveEvaluatorPtr m_meshEvaluator;
-		MeshPrimitiveEvaluator::ResultPtr m_evaluatorResult;
 
 };
 
