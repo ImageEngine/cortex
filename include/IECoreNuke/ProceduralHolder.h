@@ -77,6 +77,9 @@ class ProceduralHolder : public ParameterisedHolderOp
 	protected :
 	
 		/// Implemented to draw the procedural
+#if	kDDImageVersionInteger >= 62000
+		virtual bool doAnyHandles( DD::Image::ViewerContext *ctx );
+#endif
 		virtual void build_handles( DD::Image::ViewerContext *ctx );
 		virtual void draw_handle( DD::Image::ViewerContext *ctx );
 

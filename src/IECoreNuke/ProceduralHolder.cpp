@@ -105,6 +105,31 @@ void ProceduralHolder::knobs( DD::Image::Knob_Callback f )
 	
 }
 
+#if	kDDImageVersionInteger >= 62000
+
+// Op::doAnyHandles() was introduced in Nuke 6.2.
+bool ProceduralHolder::doAnyHandles( DD::Image::ViewerContext *ctx )
+{
+	if( ParameterisedHolderOp::doAnyHandles( ctx ) )
+	{
+		return true;
+	}
+	
+	if( panel_visible() )
+	{
+		return true;
+	}
+	
+	if( ctx->connected()==DD::Image::SHOW_OBJECT )
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+#endif
+
 void ProceduralHolder::build_handles( DD::Image::ViewerContext *ctx )
 {	
 	if( ctx->transform_mode() == DD::Image::VIEWER_2D )
