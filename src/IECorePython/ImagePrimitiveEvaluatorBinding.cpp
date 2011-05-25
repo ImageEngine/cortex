@@ -48,7 +48,7 @@ namespace IECorePython
 struct ImagePrimitiveEvaluatorHelper
 {
 
-	static bool pointAtPixel( ImagePrimitiveEvaluator &evaluator, const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result )
+	static bool pointAtPixel( ImagePrimitiveEvaluator &evaluator, const Imath::V2i &pixel, PrimitiveEvaluator::Result *result )
 	{
 		evaluator.validateResult( result );
 

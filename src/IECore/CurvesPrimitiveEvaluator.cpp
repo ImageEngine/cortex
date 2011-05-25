@@ -370,9 +370,9 @@ PrimitiveEvaluator::ResultPtr CurvesPrimitiveEvaluator::createResult() const
 	return new Result( m_p, m_curvesPrimitive->basis() == CubicBasisf::linear(), m_curvesPrimitive->periodic() );
 }
 
-void CurvesPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+void CurvesPrimitiveEvaluator::validateResult( PrimitiveEvaluator::Result *result ) const
 {
-	if( ! dynamicPointerCast<CurvesPrimitiveEvaluator::Result>( result ) )
+	if( ! dynamic_cast<CurvesPrimitiveEvaluator::Result *>( result ) )
 	{
 		throw InvalidArgumentException( "CurvesPrimitiveEvaluator: Invalid result type" );
 	}
@@ -393,14 +393,14 @@ Imath::V3f CurvesPrimitiveEvaluator::centerOfGravity() const
 	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }
 
-bool CurvesPrimitiveEvaluator::closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
+bool CurvesPrimitiveEvaluator::closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const
 {
 	if( !m_verticesPerCurve.size() )
 	{
 		return false;
 	}
 
-	Result *typedResult = static_cast<Result *>( result.get() );
+	Result *typedResult = static_cast<Result *>( result );
 	// the cast isn't pretty but i think is the best of the alternatives. we want to delay building the tree until the first
 	// closestPoint() query so people don't pay the overhead if they're just using other queries. the alternative to
 	// the cast is to make the tree members mutable, but i'd rather keep them immutable so that the compiler tells us if
@@ -469,13 +469,13 @@ void CurvesPrimitiveEvaluator::closestPointWalk( Box3fTree::NodeIndex nodeIndex,
 	}
 }
 
-bool CurvesPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
+bool CurvesPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const
 {
 	return pointAtV( 0, uv[1], result );
 }
 
 bool CurvesPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-	const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
+	PrimitiveEvaluator::Result *result, float maxDistance ) const
 {
 	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }
@@ -486,13 +486,13 @@ int CurvesPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }
 
-bool CurvesPrimitiveEvaluator::pointAtV( unsigned curveIndex, float v, const PrimitiveEvaluator::ResultPtr &result ) const
+bool CurvesPrimitiveEvaluator::pointAtV( unsigned curveIndex, float v, PrimitiveEvaluator::Result *result ) const
 {
 	if( curveIndex >= m_verticesPerCurve.size() || v < 0.0f || v > 1.0f )
 	{
 		return false;
 	}
-	Result *typedResult = static_cast<Result *>( result.get() );
+	Result *typedResult = static_cast<Result *>( result );
 	(typedResult->*typedResult->m_init)( curveIndex, v, this );
 	return true;
 }

@@ -182,9 +182,9 @@ PrimitiveEvaluator::ResultPtr PointsPrimitiveEvaluator::createResult() const
 	return new Result( this );
 }
 
-void PointsPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+void PointsPrimitiveEvaluator::validateResult( PrimitiveEvaluator::Result *result ) const
 {
-	if( ! dynamicPointerCast<PointsPrimitiveEvaluator::Result>( result ) )
+	if( ! dynamic_cast<PointsPrimitiveEvaluator::Result *>( result ) )
 	{
 		throw InvalidArgumentException( "PointsPrimitiveEvaluator: Invalid result type" );
 	}
@@ -205,7 +205,7 @@ Imath::V3f PointsPrimitiveEvaluator::centerOfGravity() const
 	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }
 
-bool PointsPrimitiveEvaluator::closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
+bool PointsPrimitiveEvaluator::closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const
 {
 	if( !m_pointsPrimitive->getNumPoints() )
 	{
@@ -219,18 +219,18 @@ bool PointsPrimitiveEvaluator::closestPoint( const Imath::V3f &p, const Primitiv
 	const_cast<PointsPrimitiveEvaluator *>( this )->buildTree();
 
 	V3fTree::Iterator it = m_tree.nearestNeighbour( p );
-	static_cast<Result *>( result.get() )->m_pointIndex = it - m_pVector->begin();
+	static_cast<Result *>( result )->m_pointIndex = it - m_pVector->begin();
 	
 	return true;
 }
 
-bool PointsPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
+bool PointsPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const
 {
 	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }
 
 bool PointsPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-	const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
+	PrimitiveEvaluator::Result *result, float maxDistance ) const
 {
 	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }

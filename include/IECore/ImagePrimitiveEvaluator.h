@@ -109,17 +109,17 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 
-		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
 
-		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
 
-		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
 
 		/// Returns the object-space point at the center of the specified pixel
-		virtual bool pointAtPixel( const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual bool pointAtPixel( const Imath::V2i &pixel, PrimitiveEvaluator::Result *result ) const;
 
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const;
+			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
 
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;

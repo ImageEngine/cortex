@@ -326,9 +326,9 @@ PrimitiveEvaluatorPtr ImagePrimitiveEvaluator::create( ConstPrimitivePtr primiti
 	return new ImagePrimitiveEvaluator( image );
 }
 
-void ImagePrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+void ImagePrimitiveEvaluator::validateResult( PrimitiveEvaluator::Result *result ) const
 {
-	if (! dynamicPointerCast< ImagePrimitiveEvaluator::Result >( result ) )
+	if (! dynamic_cast<ImagePrimitiveEvaluator::Result *>( result ) )
 	{
 		throw InvalidArgumentException("ImagePrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
 	}
@@ -363,9 +363,9 @@ PrimitiveEvaluator::ResultPtr ImagePrimitiveEvaluator::createResult() const
 	return new Result( m_image->bound(), m_image->getDataWindow() );
 }
 
-bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
+bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, PrimitiveEvaluator::Result *result ) const
 {
-	Result *r = static_cast<Result *>( result.get() );
+	Result *r = static_cast<Result *>( result );
 	assert( r );
 
 	r->m_p = closestPointInBox( p, m_image->bound() );
@@ -373,9 +373,9 @@ bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluat
 	return true;
 }
 
-bool ImagePrimitiveEvaluator::pointAtUV( const V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
+bool ImagePrimitiveEvaluator::pointAtUV( const V2f &uv, PrimitiveEvaluator::Result *result ) const
 {
-	Result *r = static_cast<Result *>( result.get() );
+	Result *r = static_cast<Result *>( result );
 	assert( r );
 
 	if ( uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 )
@@ -392,9 +392,9 @@ bool ImagePrimitiveEvaluator::pointAtUV( const V2f &uv, const PrimitiveEvaluator
 	return true;
 }
 
-bool ImagePrimitiveEvaluator::pointAtPixel( const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result ) const
+bool ImagePrimitiveEvaluator::pointAtPixel( const Imath::V2i &pixel, PrimitiveEvaluator::Result *result ) const
 {
-	Result *r = static_cast<Result *>( result.get() );
+	Result *r = static_cast<Result *>( result );
 	assert( r );
 
 	V3f imageSize = boxSize( m_image->bound() );
@@ -413,9 +413,9 @@ bool ImagePrimitiveEvaluator::pointAtPixel( const Imath::V2i &pixel, const Primi
 }
 
 bool ImagePrimitiveEvaluator::intersectionPoint( const V3f &origin, const V3f &direction,
-                const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
+                PrimitiveEvaluator::Result *result, float maxDistance ) const
 {
-	Result *r = static_cast<Result *>( result.get() );
+	Result *r = static_cast<Result *>( result );
 	assert( r );
 
 	/// \todo Why are we doing dynamic memory allocation in here? Why doesn't intersectionPoints()

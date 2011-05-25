@@ -55,6 +55,8 @@ Changes :
 
 * Removed deprecated IECore.initializeLog function - a FilteredMessageHandler created based on IECORE_LOG_LEVEL is automatically created now anyway.
 
+* PrimitiveEvaluator queries require raw pointers to the PrimitiveEvaluator::Result rather than references to smart pointers.
+
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.

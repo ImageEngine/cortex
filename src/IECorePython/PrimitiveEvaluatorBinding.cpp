@@ -65,28 +65,28 @@ struct PrimitiveEvaluatorHelper
 		return distance;
 	}
 
-	static bool closestPoint( PrimitiveEvaluator &evaluator, const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result )
+	static bool closestPoint( PrimitiveEvaluator &evaluator, const Imath::V3f &p, PrimitiveEvaluator::Result *result )
 	{
 		evaluator.validateResult( result );
 
 		return evaluator.closestPoint( p, result );
 	}
 
-	static bool pointAtUV( PrimitiveEvaluator &evaluator, const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result )
+	static bool pointAtUV( PrimitiveEvaluator &evaluator, const Imath::V2f &uv, PrimitiveEvaluator::Result *result )
 	{
 		evaluator.validateResult( result );
 
 		return evaluator.pointAtUV( uv, result );
 	}
 
-	static bool intersectionPoint( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result )
+	static bool intersectionPoint( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, PrimitiveEvaluator::Result *result )
 	{
 		evaluator.validateResult( result );
 
 		return evaluator.intersectionPoint( origin, direction, result );
 	}
 
-	static bool intersectionPointMaxDist( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result, float maxDist )
+	static bool intersectionPointMaxDist( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, PrimitiveEvaluator::Result *result, float maxDist )
 	{
 		evaluator.validateResult( result );
 
@@ -162,8 +162,8 @@ void bindPrimitiveEvaluator()
 	list (*intersectionPoints)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &) = &PrimitiveEvaluatorHelper::intersectionPoints;
 	list (*intersectionPointsMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, float) = &PrimitiveEvaluatorHelper::intersectionPoints;
 
-	bool (*intersectionPoint)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &) = &PrimitiveEvaluatorHelper::intersectionPoint;
-	bool (*intersectionPointMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &, float ) = &PrimitiveEvaluatorHelper::intersectionPointMaxDist;
+	bool (*intersectionPoint)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, PrimitiveEvaluator::Result *) = &PrimitiveEvaluatorHelper::intersectionPoint;
+	bool (*intersectionPointMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, PrimitiveEvaluator::Result *, float ) = &PrimitiveEvaluatorHelper::intersectionPointMaxDist;
 
 	object p = RunTimeTypedClass<PrimitiveEvaluator>()
 		.def( "create", &PrimitiveEvaluatorHelper::create ).staticmethod("create")

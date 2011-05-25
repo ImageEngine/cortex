@@ -138,7 +138,7 @@ float MappedRandomPointDistributionOp::density( const MeshPrimitive * mesh, cons
 		placedUv.y = fmod( (double)placedUv.y, 1.0 );
 	}
 
-	bool found = m_imageEvaluator->pointAtUV( placedUv, m_result );
+	bool found = m_imageEvaluator->pointAtUV( placedUv, constPointerCast<PrimitiveEvaluator::Result>( m_result ) );
 
 	if ( found )
 	{

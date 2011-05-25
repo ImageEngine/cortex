@@ -102,7 +102,7 @@ class PointsPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual ConstPrimitivePtr primitive() const;
 		
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
-		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
 
 		//! @name Standard Query Functions
 		////////////////////////////////////////////////////////////////////////////////////////
@@ -114,12 +114,12 @@ class PointsPrimitiveEvaluator : public PrimitiveEvaluator
 		/// Not yet implemented.
 		virtual Imath::V3f centerOfGravity() const;
 		/// Operates only on the point centres without taking into account their width.
-		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
 		/// Not yet implemented.
-		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
 		/// Not yet implemented.	
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const;
+			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
 		/// Not yet implemented.	
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;

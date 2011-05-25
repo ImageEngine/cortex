@@ -749,15 +749,15 @@ PrimitiveEvaluator::ResultPtr MeshPrimitiveEvaluator::createResult() const
       return new Result();
 }
 
-void MeshPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+void MeshPrimitiveEvaluator::validateResult( PrimitiveEvaluator::Result *result ) const
 {
-	if (! dynamicPointerCast< MeshPrimitiveEvaluator::Result >( result ) )
+	if (! dynamic_cast<MeshPrimitiveEvaluator::Result *>( result ) )
 	{
 		throw InvalidArgumentException("MeshPrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
 	}
 }
 
-bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
+bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, PrimitiveEvaluator::Result *result ) const
 {
 	assert( dynamicPointerCast< Result >( result ) );
 
@@ -768,7 +768,7 @@ bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluato
 
 	assert( m_tree );
 
-	ResultPtr mr = staticPointerCast< Result >( result );
+	Result *mr = static_cast<Result *>( result );
 
 	float maxDistSqrd = limits<float>::max();
 
@@ -777,7 +777,7 @@ bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluato
 	return true;
 }
 
-bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
+bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const
 {
 	assert( dynamicPointerCast< Result >( result ) );
 
@@ -787,13 +787,13 @@ bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEva
 	}
 
 	assert( m_uvTree );
-	ResultPtr mr = staticPointerCast< Result >( result );
+	Result *mr = static_cast<Result *>( result );
 
 	return pointAtUVWalk( m_uvTree->rootIndex(), uv, mr );
 }
 
 bool MeshPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-	const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
+	PrimitiveEvaluator::Result *result, float maxDistance ) const
 {
 	assert( dynamicPointerCast< Result >( result ) );
 
@@ -804,7 +804,7 @@ bool MeshPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const 
 
 	assert( m_tree );
 
-	ResultPtr mr = staticPointerCast< Result >( result );
+	Result *mr = static_cast<Result *>( result );
 
 	float maxDistSqrd = maxDistance * maxDistance;
 
@@ -841,14 +841,14 @@ int MeshPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, const 
 	return results.size();
 }
 
-bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, const PrimitiveEvaluator::ResultPtr &result ) const
+bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, PrimitiveEvaluator::Result *result ) const
 {
 	if( triangleIndex > m_triangles.size() )
 	{
 		return false;
 	}
 
-	Result *r = static_cast<Result *>( result.get() );
+	Result *r = static_cast<Result *>( result );
 	
 	r->m_triangleIdx = triangleIndex;
 	r->m_bary = barycentricCoordinates;
@@ -875,7 +875,7 @@ bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, co
 	return true;
 }
 
-void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const
+void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const V3f &p, float &closestDistanceSqrd, Result *result ) const
 {
 	assert( m_tree );
 
@@ -967,7 +967,7 @@ void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex node
 	}
 }
 
-bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, const ResultPtr &result ) const
+bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, Result *result ) const
 {
 	assert( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid);
 	assert( m_uvTree );
@@ -1036,7 +1036,7 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, co
 }
 
 
-bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const
+bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, Result *result, bool &hit ) const
 {
 	assert( m_tree );
 

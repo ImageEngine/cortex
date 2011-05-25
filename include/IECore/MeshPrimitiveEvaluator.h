@@ -112,20 +112,20 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 
-		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
 
-		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
 
-		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
+		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
 
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const;
+			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
 
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
 
 		/// A query specific to the MeshPrimitiveEvaluator, this just chooses a barycentric position on a specific triangle.
-		bool barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, const PrimitiveEvaluator::ResultPtr &result ) const;
+		bool barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, PrimitiveEvaluator::Result *result ) const;
 
 		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
 
@@ -184,9 +184,9 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		UVBoundVector m_uvTriangles;		
 		UVBoundTree *m_uvTree;
 
-		bool pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, const ResultPtr &result ) const;
-		void closestPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;
-		bool intersectionPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
+		bool pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, Result *result ) const;
+		void closestPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, Result *result ) const;
+		bool intersectionPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, Result *result, bool &hit ) const;
 		void intersectionPointsWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;
 
 		void calculateMassProperties() const;

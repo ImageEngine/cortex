@@ -230,9 +230,9 @@ PrimitiveEvaluator::ResultPtr SpherePrimitiveEvaluator::createResult() const
       return new Result();
 }
 
-void SpherePrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+void SpherePrimitiveEvaluator::validateResult( PrimitiveEvaluator::Result *result ) const
 {
-	if (! dynamicPointerCast< SpherePrimitiveEvaluator::Result >( result ) )
+	if (! dynamic_cast< SpherePrimitiveEvaluator::Result *>( result ) )
 	{
 		throw InvalidArgumentException("SpherePrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
 	}
@@ -243,22 +243,22 @@ ConstPrimitivePtr SpherePrimitiveEvaluator::primitive() const
 	return m_sphere;
 }
 
-bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
+bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, PrimitiveEvaluator::Result *result ) const
 {
 	assert( dynamicPointerCast< Result >( result ) );
 
-	ResultPtr sr = staticPointerCast< Result >( result );
+	Result *sr = static_cast<Result *>( result );
 
 	sr->m_p = p.normalized() * m_sphere->radius();
 
 	return true;
 }
 
-bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
+bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const
 {
 	assert( dynamicPointerCast< Result >( result ) );
 
-	ResultPtr sr = staticPointerCast< Result >( result );
+	Result *sr = static_cast<Result *>( result );
 
 	/// \todo Once we support partial spheres we'll need to get these quantities from the primitive
 	const float zMin = -1.0f;
@@ -284,11 +284,11 @@ bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveE
 /// Implementation derived from Wild Magic (Version 2) Software Library, available
 /// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
 bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-	const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
+	PrimitiveEvaluator::Result *result, float maxDistance ) const
 {
 	assert( dynamicPointerCast< Result >( result ) );
 
-	ResultPtr sr = staticPointerCast< Result >( result );
+	Result *sr = static_cast<Result *>( result );
 
 	Imath::V3f dir = direction.normalized();
 	(void)direction;

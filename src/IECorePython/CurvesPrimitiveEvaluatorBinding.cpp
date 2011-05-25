@@ -47,7 +47,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static bool pointAtV( const CurvesPrimitiveEvaluator &e, unsigned curveIndex, float v, const PrimitiveEvaluator::ResultPtr &r )
+static bool pointAtV( const CurvesPrimitiveEvaluator &e, unsigned curveIndex, float v, PrimitiveEvaluator::Result *r )
 {
 	e.validateResult( r );
 	return e.pointAtV( curveIndex, v, r );
