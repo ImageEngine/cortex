@@ -356,7 +356,10 @@ void ParameterisedHolder<BaseType>::replaceKnobs()
 		std::map<std::string, std::string>::const_iterator it = knobScripts.find( pKnob->name() );
 		if( it!=knobScripts.end() )
 		{
-			pKnob->from_script( it->second.c_str() );			
+			if( pKnob->from_script( it->second.c_str() ) )
+			{
+				pKnob->changed();
+			}			
 		}
 	}
 

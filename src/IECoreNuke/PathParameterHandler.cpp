@@ -50,5 +50,9 @@ PathParameterHandler::PathParameterHandler()
 DD::Image::Knob *PathParameterHandler::knob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f, const char **storage )
 {
 	std::string label = knobLabel( parameter );
-	return File_knob( f, storage, knobName, label.c_str() );
+	/// \todo This should be a call to File_knob, but when we have a File_knob the value
+	/// restoration code in ParameterisedHolder::replaceKnobs() fails silently. We'd rather
+	/// keep our values than have a file selector button. I think this is a bug in Nuke, so
+	/// if it ever gets fixed we could introduce File_knob again (tested in 6.2v4).
+	return String_knob( f, storage, knobName, label.c_str() );
 }

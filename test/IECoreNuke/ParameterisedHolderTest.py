@@ -435,7 +435,20 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 	   
 		fnOH = IECoreNuke.FnOpHolder( n )
 		self.assertEqual( fnOH.node().knob( "parm_a" ).toScript(), "2" )	   
-			
+	
+	def testReloadShouldntLoseFilenameParameterValues( self ) :
+		
+		fnPH = IECoreNuke.FnProceduralHolder.create( "procedural", "read", 1 )
+		
+		self.assertEqual( fnPH.node().knob( "parm_files_name" ).getText(), "" )
+		
+		fnPH.node().knob( "parm_files_name" ).setValue( "abcdef" )
+		self.assertEqual( fnPH.node().knob( "parm_files_name" ).getText(), "abcdef" )
+		
+		fnPH.node().knob( "classReload" ).execute() # trigger reload
+		
+		self.assertEqual( fnPH.node().knob( "parm_files_name" ).getText(), "abcdef" )
+				
 	def tearDown( self ) :
 	
 		for f in [
