@@ -139,6 +139,10 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			buf[3*i+1] = green[i+offset]
 			buf[3*i+2] = red[i+offset]
 
+	def testUsedPortException( self ):
+		
+		self.assertRaises( RuntimeError, lambda : DisplayDriverServer( 1559 ) ) 
+
 	def testTransfer( self ):
 
 		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()

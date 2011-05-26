@@ -78,24 +78,34 @@ class DisplayDriverServer::Session : public RefCounted
 
 struct DisplayDriverServer::PrivateData : public RefCounted
 {
+	bool m_success;
 	boost::asio::ip::tcp::endpoint m_endpoint;
 	boost::asio::io_service m_service;
 	boost::asio::ip::tcp::acceptor m_acceptor;
 	tbb::tbb_thread m_thread;
 
 	PrivateData( int portNumber ) :
+		m_success(false),
 		m_endpoint(tcp::v4(), portNumber),
 		m_service(),
 		m_acceptor( m_service ),
 		m_thread()
 	{
+		m_acceptor.open(  m_endpoint.protocol() );
+		m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true));
+		m_acceptor.bind( m_endpoint );
+		m_acceptor.listen();
+		m_success = true;
 	}
 
 	~PrivateData()
 	{
-		m_acceptor.cancel();
-		m_acceptor.close();
-		m_thread.join();
+		if ( m_success )
+		{
+			m_acceptor.cancel();
+			m_acceptor.close();
+			m_thread.join();
+		}
 	}
 };
 
@@ -110,12 +120,10 @@ static void fixSocketFlags( int socketDesc )
 }
 
 DisplayDriverServer::DisplayDriverServer( int portNumber ) :
-		m_data( new DisplayDriverServer::PrivateData( portNumber ) )
+		m_data( 0 )
 {
-	m_data->m_acceptor.open(  m_data->m_endpoint.protocol() );
-	m_data->m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true));
-	m_data->m_acceptor.bind( m_data->m_endpoint );
-	m_data->m_acceptor.listen();	
+	m_data = new DisplayDriverServer::PrivateData( portNumber );
+
 	DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_data->m_service ) );
 	m_data->m_acceptor.async_accept( newSession->socket(),
 			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
