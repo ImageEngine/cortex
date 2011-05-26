@@ -118,6 +118,28 @@ class PointDistributionOpTest( unittest.TestCase ) :
 			for n in neighbours :
 				self.assert_( ( positions[i] - positions[n] ).length() > 1.0 / density )
 	
+	def testPointOrder( self ) :
+		
+		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m2 = m.copy()
+		m2['P'].data += V3f( 0, 5, 0 )
+		pos = m["P"].data
+		pos2 = m2["P"].data
+		for i in range( 0, pos.size() ) :
+			self.assertNotEqual( pos[i], pos2[i] )
+
+		density = 500
+		p = PointDistributionOp()( mesh = m, density = density )
+		p2 = PointDistributionOp()( mesh = m2, density = density )
+		self.pointTest( m, p, density )
+		self.pointTest( m2, p2, density )
+		self.assertEqual( p.numPoints, p2.numPoints )
+		
+		pos = p["P"].data
+		pos2 = p2["P"].data
+		for i in range( 0, p.numPoints ) :
+			self.failUnless( pos2[i].equalWithRelError( pos[i] + V3f( 0, 5, 0 ), 1e-6 ) )
+	
 	def setUp( self ) :
 	
 		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"
