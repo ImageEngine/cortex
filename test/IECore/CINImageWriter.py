@@ -216,6 +216,25 @@ class TestCINWriter(unittest.TestCase):
 
 			self.tearDown()
 
+	def testClamp(self):
+
+		wnd = Box2i(
+			V2i( 0, 0 ),
+			V2i( 10, 10 )
+		)
+		img = self.__makeFloatImage( wnd, wnd )
+		c = img["R"].data
+		c *= 0
+		c += 10000
+		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, c.copy() )
+		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, c.copy() )
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, c.copy() )
+		
+		Writer.create( img, "test/IECore/data/cinFiles/output.cin" )()
+		imgNew = Reader.create( "test/IECore/data/cinFiles/output.cin" )()
+		
+		self.assertEqual( int(imgNew['R'].data[0]), 13 )
+
 	def testColorConversion(self):
 
 		r = Reader.create( "test/IECore/data/cinFiles/ramp.cin" )
