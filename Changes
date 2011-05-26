@@ -47,6 +47,8 @@ Improvements :
 
 * ClassParameterHandler::doRestore() and ClassVectorParameterHandler::doRestore() are now proper virtual functions overriding a new ParameterHandler::doRestore() method. Clients simply call the ParameterHandler::restore method now rather than downcasting to the Class*ParameterHandler types first. Other ParameterHandlers may also implement doRestore() behaviour if necessary. This tidies up code which was added with the constraint of maintaining binary compatibility with major version 5.
 
+* LRUCache is now usable directly from Python rather than just from C++. See test/IECore/LRUCacheTest.py for an example. LRUCache should also now be usable with boost::shared_ptr as the pointer type.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.

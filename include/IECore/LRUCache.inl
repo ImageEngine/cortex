@@ -46,7 +46,7 @@ namespace IECore
 
 template<typename Key, typename Ptr>
 LRUCache<Key, Ptr>::CacheEntry::CacheEntry()
-	:	cost( 0 ), status( New ), data( 0 )
+	:	cost( 0 ), status( New ), data()
 {
 }
 			
@@ -132,8 +132,8 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 	
 	if( cacheEntry.status==New || cacheEntry.status==Erased || cacheEntry.status==TooCostly )
 	{
-		assert( cacheEntry.data==0 );
-		Ptr data = 0;
+		assert( cacheEntry.data==Ptr() );
+		Ptr data = Ptr();
 		Cost cost = 0;
 		try
 		{
@@ -180,7 +180,7 @@ bool LRUCache<Key, Ptr>::set( const Key &key, const Ptr &data, Cost cost )
 	if( cacheEntry.status==Cached )
 	{
 		m_currentCost -= cacheEntry.cost;
-		cacheEntry.data = 0;
+		cacheEntry.data = Ptr();
 		m_list.erase( cacheEntry.listIterator );
 	}
 	
@@ -236,7 +236,7 @@ bool LRUCache<Key, Ptr>::erase( const Key &key )
 	{
 		m_currentCost -= it->second.cost;
 		m_list.erase( it->second.listIterator );
-		it->second.data = 0;
+		it->second.data = Ptr();
 	}
 	
 	it->second.status = Erased;
