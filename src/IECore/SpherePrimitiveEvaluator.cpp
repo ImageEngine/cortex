@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -245,7 +245,7 @@ ConstPrimitivePtr SpherePrimitiveEvaluator::primitive() const
 
 bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, PrimitiveEvaluator::Result *result ) const
 {
-	assert( dynamicPointerCast< Result >( result ) );
+	assert( dynamic_cast<Result *>( result ) );
 
 	Result *sr = static_cast<Result *>( result );
 
@@ -256,7 +256,7 @@ bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, PrimitiveEvaluator::R
 
 bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const
 {
-	assert( dynamicPointerCast< Result >( result ) );
+	assert( dynamic_cast<Result *>( result ) );
 
 	Result *sr = static_cast<Result *>( result );
 
@@ -286,7 +286,7 @@ bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, PrimitiveEvaluat
 bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 	PrimitiveEvaluator::Result *result, float maxDistance ) const
 {
-	assert( dynamicPointerCast< Result >( result ) );
+	assert( dynamic_cast<Result *>( result ) );
 
 	Result *sr = static_cast<Result *>( result );
 
