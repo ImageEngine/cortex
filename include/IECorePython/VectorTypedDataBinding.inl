@@ -505,6 +505,16 @@ class VectorTypedDataFunctions
 			return x_;
 		}
 
+		static boost::python::object toString( ThisClass &x )
+		{
+			return boost::python::object(
+				boost::python::handle<>(
+					PyString_FromStringAndSize( reinterpret_cast<const char*>( x.baseReadable() ), x.baseSize() * sizeof( typename ThisClass::BaseType ) )
+				)
+			);
+		}
+
+
 	protected:
 		/*
 		 * Utility functions
@@ -709,6 +719,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 				.def("__mul__", &ThisBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname)				\
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname)		\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
+				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
 			;																						\
 		}
 
@@ -726,6 +737,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 				.def("__div__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
+				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
 			;																						\
 		}
 
@@ -743,6 +755,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 				.def("__div__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::cmp, "comparison operators (<, >, >=, <=) : The comparison is element-wise, like a string comparison. \n")	\
+				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
 			;																						\
 		}
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 
 import math
 import unittest
+
 from IECore import *
 
 
@@ -1189,6 +1190,19 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IECore.ShortVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
 
+class TestVectorDataToString( unittest.TestCase ) :
+
+	def test( self ) :
+	
+		d = UCharVectorData()
+		for i in range( 0, 255 ) :
+			d.append( i )
+			
+		s = d.toString()
+		for i in range( 0, 255 ) :
+			self.assertEqual( s[i], chr( i ) )
+					
 if __name__ == "__main__":
     unittest.main()
+	
 
