@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -184,6 +184,12 @@ class TestParameter( unittest.TestCase ) :
 		self.assert_( p.getValue() == FloatData( 1 ) )
 		p.smartSetValue( q.getValue() )
 		self.assert_( p.getValue() == IntData( 2 ) )
+		
+	def testNoneIsValid( self ) :
+	
+		p = Parameter( "p", "description", FloatData( 1 ) )
+
+		self.failIf( p.valueValid( None )[0] )
 
 class TestNumericParameter( unittest.TestCase ) :
 

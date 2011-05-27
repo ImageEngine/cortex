@@ -82,3 +82,5 @@ Bug fixes :
 * Fixed bugs which meant that the RunTimeTyped methods of python classes derived from some Parameter types would not function correctly.
 
 * Fixed IECoreNuke::CurveLookup to be compatible with Nuke 6.2.
+
+* Fixed crash when calling Parameter.valueValid( None ) in Python or Parameter::valueValid( 0 ) in C++.

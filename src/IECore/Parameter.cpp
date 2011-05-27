@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -122,6 +122,14 @@ const CompoundObject *Parameter::userData() const
 
 bool Parameter::valueValid( const Object *value, std::string *reason ) const
 {
+	if( !value )
+	{
+		if( reason )
+		{
+			*reason = "Value is a null pointer.";
+		}
+		return false;
+	}
 	if( value->typeId()==NullObject::staticTypeId() )
 	{
 		if( reason )
