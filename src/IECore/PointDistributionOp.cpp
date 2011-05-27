@@ -312,10 +312,7 @@ ObjectPtr PointDistributionOp::doOperation( const CompoundObject * operands )
 	tbb::parallel_reduce( tbb::blocked_range<size_t>( 0, numFaces ), gen );
 	
 	V3fVectorDataPtr pData = new V3fVectorData();
-	std::vector<Imath::V3f> &positions = pData->writable();
-	std::vector<Imath::V3f> &generatedPositions = gen.positions();
-	positions.resize( generatedPositions.size() );
-	std::copy( generatedPositions.begin(), generatedPositions.end(), positions.begin() );
+	pData->writable().swap( gen.positions() );
 	
 	return new PointsPrimitive( pData );
 }
