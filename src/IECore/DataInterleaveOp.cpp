@@ -91,7 +91,7 @@ ObjectVectorParameter *DataInterleaveOp::dataParameter()
 	return parameters()->parameter<ObjectVectorParameter>( g_dataName );
 }
 
-const ObjectParameter *DataInterleaveOp::dataParameter() const
+const ObjectVectorParameter *DataInterleaveOp::dataParameter() const
 {
 	return parameters()->parameter<ObjectVectorParameter>( g_dataName );
 }
@@ -189,7 +189,6 @@ struct DataInterleaveOp::InterleaveFnStage2
 		writable.resize( m_rawDataArrays.size() * m_arrayLength / dimensions );
 		
 		BaseType *baseWritable = data->baseWritable();
-		(void)baseWritable;
 		
 		ScaledDataConversion<FromBaseType, BaseType> converter;
 		

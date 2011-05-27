@@ -58,7 +58,7 @@ class DataInterleaveOp : public Op
 		/// as an ObjectVector containing Data objects of
 		/// identical type and length.
 		ObjectVectorParameter *dataParameter();
-		const ObjectParameter *dataParameter() const;
+		const ObjectVectorParameter *dataParameter() const;
 
 		/// The typeId for the type of Data to be returned
 		/// as the result;
@@ -72,7 +72,7 @@ class DataInterleaveOp : public Op
 	private :
 	
 		struct InterleaveFnStage1;
-		template<class From>
+		template<class FromBaseType>
 		struct InterleaveFnStage2;
 	
 		static InternedString g_dataName;
