@@ -49,6 +49,8 @@ Improvements :
 
 * LRUCache is now usable directly from Python rather than just from C++. See test/IECore/LRUCacheTest.py for an example. LRUCache should also now be usable with boost::shared_ptr as the pointer type.
 
+* TypeTraits.h has new IsNumericBasedVectorTypedData, IsNumericBasedSimpleTypedData and is IsNumericBasedTypedData classes. These help when using despatchTypedData with a functor which operates using TypeData::baseReadable() and TypedData::baseWritable().
+
 * Hiding implementation details from ClientDisplayDriver and DisplayDriverServer. Also switching from boost::thread to tbb::thread.
 
 Changes :
