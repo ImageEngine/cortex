@@ -33,7 +33,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "tbb/tbb.h"
-#include "tbb/concurrent_vector.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/FaceAreaOp.h"
@@ -191,7 +190,7 @@ struct PointDistributionOp::Emitter
 {
 	public :
 	
-		Emitter( MeshPrimitiveEvaluator *evaluator, const PrimitiveVariable &densityVar, tbb::concurrent_vector<Imath::V3f> &positions, size_t triangleIndex, const Imath::V2f &v0, const Imath::V2f &v1, const Imath::V2f &v2 )
+		Emitter( MeshPrimitiveEvaluator *evaluator, const PrimitiveVariable &densityVar, std::vector<Imath::V3f> &positions, size_t triangleIndex, const Imath::V2f &v0, const Imath::V2f &v1, const Imath::V2f &v2 )
 			: m_meshEvaluator( evaluator ), m_densityVar( densityVar ), m_p( positions ), m_triangleIndex( triangleIndex ), m_v0( v0 ), m_v1( v1 ), m_v2( v2 )
 		{
 			m_evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
@@ -214,7 +213,7 @@ struct PointDistributionOp::Emitter
 	
 		MeshPrimitiveEvaluator *m_meshEvaluator;
 		const PrimitiveVariable &m_densityVar;
-		tbb::concurrent_vector<Imath::V3f> &m_p;
+		std::vector<Imath::V3f> &m_p;
 		size_t m_triangleIndex;
 		Imath::V2f m_v0;
 		Imath::V2f m_v1;
@@ -228,12 +227,17 @@ struct PointDistributionOp::Generator
 {
 	public :
 		
-		Generator( tbb::concurrent_vector<Imath::V3f> &positions, MeshPrimitiveEvaluator *evaluator, const std::vector<float> &s, const std::vector<float> &t, const std::vector<float> &faceArea, const std::vector<float> &textureArea, float density, const PrimitiveVariable &densityVar, Imath::V2f offset )
-			: m_positions( positions ), m_meshEvaluator( evaluator ), m_s( s ), m_t( t ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset )
+		Generator( MeshPrimitiveEvaluator *evaluator, const std::vector<float> &s, const std::vector<float> &t, const std::vector<float> &faceArea, const std::vector<float> &textureArea, float density, const PrimitiveVariable &densityVar, Imath::V2f offset )
+			: m_positions(), m_meshEvaluator( evaluator ), m_s( s ), m_t( t ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset )
 		{
 		}
 		
-		void operator()( const tbb::blocked_range<size_t> &r ) const
+		Generator( Generator &that, tbb::split )
+			: m_positions(), m_meshEvaluator( that.m_meshEvaluator ), m_s( that.m_s ), m_t( that.m_t ), m_faceArea( that.m_faceArea ), m_textureArea( that.m_textureArea ), m_density( that.m_density ), m_densityVar( that.m_densityVar ), m_offset( that.m_offset )
+		{
+		}
+		
+		void operator()( const tbb::blocked_range<size_t> &r )
 		{
 			for ( size_t i=r.begin(); i!=r.end(); ++i )
 			{
@@ -261,9 +265,20 @@ struct PointDistributionOp::Generator
 			}
 		}
 	
+		void join( Generator &that )
+		{
+			size_t numThisPoints = this->m_positions.size();
+			this->m_positions.resize( numThisPoints + that.m_positions.size() );
+			std::copy( that.m_positions.begin(), that.m_positions.end(), this->m_positions.begin() + numThisPoints );
+		}
+		
+		std::vector<Imath::V3f> &positions()
+		{
+			return m_positions;
+		}
+
 	private :
 		
-		tbb::concurrent_vector<Imath::V3f> &m_positions;
 		MeshPrimitiveEvaluator *m_meshEvaluator;
 		const std::vector<float> &m_s;
 		const std::vector<float> &m_t;
@@ -272,13 +287,13 @@ struct PointDistributionOp::Generator
 		float m_density;
 		const PrimitiveVariable &m_densityVar;
 		Imath::V2f m_offset;
+		
+		std::vector<Imath::V3f> m_positions;
 
 };
 
 ObjectPtr PointDistributionOp::doOperation( const CompoundObject * operands )
 {
-	tbb::concurrent_vector<Imath::V3f> threadablePositions;
-	
 	processMesh( m_meshParameter->getTypedValue<MeshPrimitive>() );
 	
 	float density = m_densityParameter->getNumericValue();
@@ -293,15 +308,14 @@ ObjectPtr PointDistributionOp::doOperation( const CompoundObject * operands )
 	const std::vector<float> &textureArea = m_mesh->variableData<FloatVectorData>( "textureArea", PrimitiveVariable::Uniform )->readable();
 	
 	size_t numFaces = m_mesh->verticesPerFace()->readable().size();	
-	tbb::parallel_for(
-		tbb::blocked_range<size_t>( 0, numFaces ),
-		Generator( threadablePositions, m_meshEvaluator, s, t, faceArea, textureArea, density, densityVar, offset )
-	);
+	Generator gen( m_meshEvaluator, s, t, faceArea, textureArea, density, densityVar, offset );
+	tbb::parallel_reduce( tbb::blocked_range<size_t>( 0, numFaces ), gen );
 	
 	V3fVectorDataPtr pData = new V3fVectorData();
 	std::vector<Imath::V3f> &positions = pData->writable();
-	positions.resize( threadablePositions.size() );
-	std::copy( threadablePositions.begin(), threadablePositions.end(), positions.begin() );
+	std::vector<Imath::V3f> &generatedPositions = gen.positions();
+	positions.resize( generatedPositions.size() );
+	std::copy( generatedPositions.begin(), generatedPositions.end(), positions.begin() );
 	
 	return new PointsPrimitive( pData );
 }
