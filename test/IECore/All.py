@@ -249,6 +249,7 @@ from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpT
 from CameraControllerTest import CameraControllerTest
 from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
+from DataInterleaveOpTest import DataInterleaveOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

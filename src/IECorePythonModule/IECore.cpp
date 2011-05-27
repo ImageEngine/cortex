@@ -293,6 +293,7 @@
 #include "IECorePython/CamelCaseBinding.h"
 #include "IECorePython/PointDistributionOpBinding.h"
 #include "IECorePython/LRUCacheBinding.h"
+#include "IECorePython/DataInterleaveOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -584,6 +585,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCamelCase();
 	bindPointDistributionOp();
 	bindLRUCache();
+	bindDataInterleaveOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

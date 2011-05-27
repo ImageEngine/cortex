@@ -391,6 +391,7 @@ enum TypeId
 	LineSegment3dDataTypeId = 345,
 	LineSegment3fParameterTypeId = 346,
 	LineSegment3dParameterTypeId = 347,
+	DataInterleaveOpTypeId = 348,
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.
