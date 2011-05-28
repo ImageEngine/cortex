@@ -42,7 +42,9 @@
 namespace IECore
 {
 
-/// The CastDatatOp performs cast convertion on Data types.
+/// The CastDataOp performs cast convertion on Data types.
+/// \ingroup coreGroup
+/// \see DataPromoteOp, DataConvertOp
 class DataCastOp : public Op
 {
 	public :

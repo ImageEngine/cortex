@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,55 +32,59 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATAPROMOTEOP_H
-#define IE_CORE_DATAPROMOTEOP_H
-
-#include "boost/static_assert.hpp"
+#ifndef IECORE_DATACONVERTOP_H
+#define IECORE_DATACONVERTOP_H
 
 #include "IECore/Op.h"
-#include "IECore/ObjectParameter.h"
+#include "IECore/TypedObjectParameter.h"
 #include "IECore/NumericParameter.h"
 
 namespace IECore
 {
 
-/// The DataPromoteOp promotes data of simple scalar types
-/// to data of compound types - for instance constructing
-/// V3f from float or int. It differs from the DataCastOp
-/// in that the former keeps the rawSize() of the data constant,
-/// while this keeps the size() constant (e.g. one V3f is made from
-/// each float).
+/// The DataConvertOp converts between different vector data types
+/// using the ScaledDataConversion class. This distinguishes it from
+/// the DataCastOp which simply casts the elements from one type to
+/// another without scaling.
 /// \ingroup coreGroup
-/// \see DataCastOp, DataConvertOp
-class DataPromoteOp : public Op
+/// \see DataCastOp, DataPromoteOp
+class DataConvertOp : public Op
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPED( DataPromoteOp, Op );
+		IE_CORE_DECLARERUNTIMETYPED( DataConvertOp, Op );
 
-		DataPromoteOp();
-		virtual ~DataPromoteOp();
+		DataConvertOp();
+		virtual ~DataConvertOp();
+	
+		/// The data to be interleaved. This is specified
+		/// as an ObjectVector containing Data objects of
+		/// identical type and length.
+		ObjectParameter *dataParameter();
+		const ObjectParameter *dataParameter() const;
+
+		/// The typeId for the type of Data to be returned
+		/// as the result;
+		IntParameter *targetTypeParameter();
+		const IntParameter *targetTypeParameter() const;
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
-
+		virtual ObjectPtr doOperation( const CompoundObject *operands );
+		
 	private :
+	
+		struct ConvertFnStage1;
+		template<class FromBaseType>
+		struct ConvertFnStage2;
+	
+		static InternedString g_dataName;
+		static InternedString g_targetTypeName;
 
-		struct Promote1Fn;
-
-		template<typename T, typename E=void >
-		struct Promote2Fn
-		{
-			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
-		};
-
-		ObjectParameterPtr m_objectParameter;
-		IntParameterPtr m_targetTypeParameter;
 };
 
-IE_CORE_DECLAREPTR( DataPromoteOp );
+IE_CORE_DECLAREPTR( DataConvertOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_DATAPROMOTEOP_H
+#endif // IECORE_DATACONVERTOP_H

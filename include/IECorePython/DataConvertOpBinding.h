@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,55 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATAPROMOTEOP_H
-#define IE_CORE_DATAPROMOTEOP_H
+#ifndef IECOREPYTHON_DATACONVERTOPBINDING_H
+#define IECOREPYTHON_DATACONVERTOPBINDING_H
 
-#include "boost/static_assert.hpp"
-
-#include "IECore/Op.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NumericParameter.h"
-
-namespace IECore
+namespace IECorePython
 {
+void bindDataConvertOp();
+}
 
-/// The DataPromoteOp promotes data of simple scalar types
-/// to data of compound types - for instance constructing
-/// V3f from float or int. It differs from the DataCastOp
-/// in that the former keeps the rawSize() of the data constant,
-/// while this keeps the size() constant (e.g. one V3f is made from
-/// each float).
-/// \ingroup coreGroup
-/// \see DataCastOp, DataConvertOp
-class DataPromoteOp : public Op
-{
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPED( DataPromoteOp, Op );
-
-		DataPromoteOp();
-		virtual ~DataPromoteOp();
-
-	protected :
-
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
-
-	private :
-
-		struct Promote1Fn;
-
-		template<typename T, typename E=void >
-		struct Promote2Fn
-		{
-			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
-		};
-
-		ObjectParameterPtr m_objectParameter;
-		IntParameterPtr m_targetTypeParameter;
-};
-
-IE_CORE_DECLAREPTR( DataPromoteOp );
-
-} // namespace IECore
-
-#endif // IE_CORE_DATAPROMOTEOP_H
+#endif // IECOREPYTHON_DATACONVERTOPBINDING_H

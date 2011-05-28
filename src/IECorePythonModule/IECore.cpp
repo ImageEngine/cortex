@@ -294,6 +294,7 @@
 #include "IECorePython/PointDistributionOpBinding.h"
 #include "IECorePython/LRUCacheBinding.h"
 #include "IECorePython/DataInterleaveOpBinding.h"
+#include "IECorePython/DataConvertOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -586,6 +587,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointDistributionOp();
 	bindLRUCache();
 	bindDataInterleaveOp();
+	bindDataConvertOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
