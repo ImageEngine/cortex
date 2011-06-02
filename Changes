@@ -61,6 +61,8 @@ Improvements :
 
 * Numeric VectorTypedData classes now have a toString() method bound in python, allowing access to the raw data as a byte string. This is particularly useful if using the DataInterleaveOp for preparing images to be passed to ui toolkits like PyQt.
 
+* Houdini parameters on a SOP_ParameterisedHolder now use the cooresponding Cortex parameter descriptions as help documentation.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
