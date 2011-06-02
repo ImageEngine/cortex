@@ -515,6 +515,16 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertNotEqual( tuple(op.parameters()['frequency'].defaultValue.value), holder2.parmTuple( "parm_frequency" ).eval() )
 		self.assertEqual( tuple(op.parameters()['frequency'].getTypedValue()), holder2.parmTuple( "parm_frequency" ).eval() )
 	
+	def testParameterDescriptions( self ) :
+		( holder, fn ) = self.testOpHolder()
+		fn.setOp( "parameters/compoundParameters" )
+		parameters = fn.getOp().parameters()
+		self.assertEqual( parameters['blah'].description, holder.parm( "parm_blah" ).parmTemplate().help() )
+		self.assertEqual( parameters['compound_1']['j'].description, holder.parmTuple( "parm_compound_1_j" ).parmTemplate().help() )
+		self.assertEqual( parameters['compound_1']['k'].description, holder.parmTuple( "parm_compound_1_k" ).parmTemplate().help() )
+		self.assertEqual( parameters['compound_3']['compound_4']['some_int'].description, holder.parm( "parm_compound_3_compound_4_some_int" ).parmTemplate().help() )
+		self.assertEqual( parameters['compound_5']['bool_1'].description, holder.parm( "parm_compound_5_bool_1" ).parmTemplate().help() )
+	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
 		self.__torusTestFile = "contrib/IECoreHoudini/test/test_data/torus.cob"

@@ -320,7 +320,8 @@ const char *SOP_ParameterisedHolder::inputLabel( unsigned pos ) const
 		return "";
 	}
 	
-	return m_inputParameters[pos]->name().c_str();
+	const Parameter *parm = m_inputParameters[pos];
+	return ( parm->name() + ": " + parm->description() ).c_str();
 }
 
 unsigned SOP_ParameterisedHolder::minInputs() const
