@@ -481,6 +481,38 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		self.assertEqual( c.newParameterName(), "p0" )
-			
+	
+	def testUserData( self ) :
+		
+		c = IECore.ClassVectorParameter(
+			"n",
+			"d",
+			"IECORE_OP_PATHS"
+		)
+		
+		c.setClasses(
+		
+			[
+				( "p0", "classVectorParameterTest", 1 ),
+			]
+		
+		)
+		
+		loader = IECore.ClassLoader.defaultLoader( "IECORE_OP_PATHS" )
+		instance = loader.load( "classVectorParameterTest", 1 )()
+		
+		self.assertEqual( c["p0"].userData(), instance.parameters().userData() )
+					
+		c.setClasses( 
+		
+			[
+				( "p0", "compoundObjectInOut", 1 ),
+			]
+		
+		)
+		
+		self.assertEqual( c["p0"].userData(), IECore.CompoundObject() )
+		
+		
 if __name__ == "__main__" :
 	unittest.main()

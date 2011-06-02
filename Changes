@@ -19,6 +19,8 @@ Additions :
 
 * New class DataConvertOp provides a means of converting between different numeric VectorTypedData types, with scaling performed by ScaledDataConversion. See test/IECore/DataConvertOpTest.py for examples.
 
+* New maya UI handler called NotesParameterUI, for displaying a StringParameter with its "typeHint" set to "note". This displays the string as a label in the attribute editor, with an edit button next to it which launches an edit dialog.
+
 Improvements :
 
 * DisplayDriver factory mechanism has been improved, and support for mapping RenderMan displays to IECore::DisplayDrivers has been added to IECoreRI. Images can now be rendered direct to memory using 3delight with no intermediate rib or image files. A display driver dso for 3delight also allows images to be rendered from rib to any cortex DisplayDriver. See test/IECoreRI/DspyTest.py for examples.
@@ -68,6 +70,8 @@ Changes :
 * Removed deprecated IECore.initializeLog function - a FilteredMessageHandler created based on IECORE_LOG_LEVEL is automatically created now anyway.
 
 * PrimitiveEvaluator queries require raw pointers to the PrimitiveEvaluator::Result rather than references to smart pointers.
+
+* ClassVectorParameter now copies the userData over for each of its classes, so that if you set self.parameters().userData() in the constructor of any of the classes it contains, this info is now copied over.
 
 Bug fixes :
 

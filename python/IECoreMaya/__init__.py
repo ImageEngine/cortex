@@ -47,6 +47,7 @@ from VectorParameterUI import VectorParameterUI
 from ColorParameterUI import ColorParameterUI
 from BoxParameterUI import BoxParameterUI
 from SplineParameterUI import SplineParameterUI
+from NoteParameterUI import NoteParameterUI
 from NodeParameter import NodeParameter
 from DAGPathParameter import DAGPathParameter
 from DAGPathVectorParameter import DAGPathVectorParameter
