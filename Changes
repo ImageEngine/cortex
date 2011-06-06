@@ -63,6 +63,8 @@ Improvements :
 
 * Houdini parameters on a SOP_ParameterisedHolder now use the cooresponding Cortex parameter descriptions as help documentation.
 
+* IECoreMaya.StringParameterUI now supports the additional values "parent", "parentFull" and "parentPartial" for the ["UI"]["acceptedNodeNameFormat"] user data key.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.

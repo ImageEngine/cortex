@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -70,7 +70,9 @@ import IECoreMaya
 # StringData ["UI"]["acceptedNodeNameFormat"] "partial"
 # Specifies either "partial" or "full", to define whether the shortest
 # unique node name will be used for the features above, or whether
-# the full path will be used.
+# the full path will be used. Specify "parent" or "parentPartial" or
+# "parentFull" to get the direct transform parent node path. "parent"
+# behaves the same as "parentPartial".
 class StringParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
@@ -144,6 +146,14 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 					lskw["long"] = True
 
 			nodeNames = maya.cmds.ls( **lskw )
+			with IECore.IgnoredExceptions( KeyError ) :
+				if "parent" in self.parameter.userData()["UI"]["acceptedNodeNameFormat"].value :
+					for i in range( len( nodeNames ) ) :
+						nodeNames[i] = maya.cmds.listRelatives(
+							nodeNames[i], parent=True, path=True,
+						 	fullPath = (self.parameter.userData()["UI"]["acceptedNodeNameFormat"].value == "parentFull")
+						)[0]
+
 			if nodeNames :
 
 				definition.append( "/NodesDivider", { "divider" : True } )
