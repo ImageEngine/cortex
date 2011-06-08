@@ -106,3 +106,5 @@ Bug fixes :
 * Fixed bug in DPXImageWriter and CINImageWriter to prevent color "wrap around" when the intensities are higher than what these formats can represent ( > 13 ).
 
 * Fixed crash when calling Parameter.valueValid( None ) in Python or Parameter::valueValid( 0 ) in C++.
+
+* Fixed bug in IECore.Enum.__hash__, whereby the type of the Enum wasn't taken into account and values from distinct Enums would regularly hash equal.

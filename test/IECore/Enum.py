@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -53,6 +53,23 @@ class TestEnum( unittest.TestCase ) :
 
 		self.assertRaises( ValueError, E, 3 )
 
+	def testHash( self ) :
+	
+		E = Enum.create( "Red", "Green", "Blue" )
+		E2 = Enum.create( "Red", "Green", "Blue" )
+		
+		self.assertEqual( hash( E.Red ), hash( E.Red ) )
+		self.assertEqual( hash( E2.Red ), hash( E2.Red ) )
+		self.assertNotEqual( hash( E.Red ), hash( E2.Red ) )
+		
+		d = {}
+		d[E.Red] = "a"
+		d[E2.Red] = "b"
+		
+		self.assertEqual( len( d ), 2 )
+		self.assertEqual( d[E.Red], "a" )
+		self.assertEqual( d[E2.Red], "b" )
+		
 if __name__ == "__main__":
 	unittest.main()
 
