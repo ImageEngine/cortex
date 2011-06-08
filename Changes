@@ -61,7 +61,7 @@ Improvements :
 
 * Numeric VectorTypedData classes now have a toString() method bound in python, allowing access to the raw data as a byte string. This is particularly useful if using the DataInterleaveOp for preparing images to be passed to ui toolkits like PyQt.
 
-* Houdini parameters on a SOP_ParameterisedHolder now use the cooresponding Cortex parameter descriptions as help documentation.
+* Houdini parameters on a SOP_ParameterisedHolder now use the corresponding Cortex parameter descriptions as help documentation.
 
 * IECoreMaya.StringParameterUI now supports the additional values "parent", "parentFull" and "parentPartial" for the ["UI"]["acceptedNodeNameFormat"] user data key.
 
