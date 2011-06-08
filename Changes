@@ -77,6 +77,8 @@ Changes :
 
 * ClassVectorParameter now copies the userData over for each of its classes, so that if you set self.parameters().userData() in the constructor of any of the classes it contains, this info is now copied over.
 
+* ClassLoader now prints a warning on load if the class didn't register as RunTimeTyped.
+
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.

@@ -38,7 +38,7 @@ import glob
 import re
 import os.path
 from fnmatch import fnmatch
-from IECore import Msg, msg, SearchPath
+from IECore import Msg, msg, SearchPath, warning
 
 ## This class defines methods for creating instances of classes
 # defined in python modules on disk. We could just use the standard
@@ -156,7 +156,10 @@ class ClassLoader :
 			raise IOError( "File \"%s\" does not define a class named \"%s\"." % ( fileName, nameTail ) )
 
 		result = getattr( module, nameTail )
-
+		
+		if getattr( result, 'staticTypeName', None ) == getattr( result.__bases__[0], 'staticTypeName', None ) :
+			warning( "Class \"%s\" has the same staticTypeName as its Base Class. Perhaps you should call registerRunTimeTyped." % name )
+		
 		result.path = name
 		result.version = version
 
