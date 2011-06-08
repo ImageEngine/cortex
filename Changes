@@ -79,6 +79,8 @@ Changes :
 
 * ClassLoader now prints a warning on load if the class didn't register as RunTimeTyped.
 
+* Removed obsolete ProceduralTypeId from TypeId python bindings.
+
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.

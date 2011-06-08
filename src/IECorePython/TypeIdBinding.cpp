@@ -186,7 +186,7 @@ void bindTypeId()
 		.value( "ModifyOp", ModifyOpTypeId )
 		.value( "ImageOp", ImageOpTypeId )
 		.value( "PrimitiveOp", PrimitiveOpTypeId )
-		.value( "Procedural", ProceduralTypeId )
+		// skipping binding for obsolete ProceduralTypeId
 		.value( "Box3iParameter", Box3iParameterTypeId )
 		.value( "V2iParameter", V2iParameterTypeId )
 		.value( "V3iParameter", V3iParameterTypeId )
