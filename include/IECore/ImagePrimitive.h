@@ -101,7 +101,7 @@ class ImagePrimitive : public Primitive
 		/// no primitive variables.
 		ImagePrimitive( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
 
-		/// Returns the display window of the image on the XY-plane.
+		/// Returns the display window of the image, centered on the origin of the XY-plane.
 		virtual Imath::Box3f bound() const;
 
 		/// Returns the data window.
