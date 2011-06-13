@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -80,8 +80,21 @@ class Wrapper : public boost::python::wrapper<T>, public WrapperGarbageCollector
 		{
 			assert(m_pyObject);
 			assert(m_pyObject == boost::python::detail::wrapper_base_::get_owner(*this));
-
-			boost::python::override func = this->boost::python::wrapper<T>::get_override(name);
+			
+			boost::python::override func = this->boost::python::wrapper<T>::get_override( name );
+			
+			// boost's get_override calls PyObject_GetAttrString indiscriminately
+			// and doesn't clear the error status if it fails - this can cause havoc elsewhere.
+			// so if there's an attribute exception aftre the call above we clear it now.
+			// see ParameterisedProceduralTest.py for a test case that exercises the problem.
+			if( PyObject *err = PyErr_Occurred() )
+			{
+				if( PyErr_GivenExceptionMatches( err, PyExc_AttributeError ) )
+				{
+					PyErr_Clear();
+				}
+			}
+			
 			return func;
 		}
 
