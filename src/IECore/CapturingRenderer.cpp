@@ -274,7 +274,7 @@ class CapturingRenderer::Implementation
 				return;
 			}
 			
-			if( 0 )
+			if( 0 ) /// \todo Replace this with a test of a threading attribute equivalent to "gl:procedural:reentrant" and "ri:procedural:reentrant" 
 			{
 				procedural->render( renderer );
 			}
