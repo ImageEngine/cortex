@@ -81,6 +81,8 @@ Changes :
 
 * Removed obsolete ProceduralTypeId from TypeId python bindings.
 
+* FromHoudiniPolygonsConverter returns an empty MeshPrimitive (rather than throwing an exception) if there are no polygon vertices in the GU_Detail.
+
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.

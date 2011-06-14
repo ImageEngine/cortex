@@ -99,11 +99,6 @@ PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detai
 		numVerts += prim->getVertexCount();
 	}
 	
-	if ( !numVerts )
-	{
-		throw runtime_error( "FromHoudiniPolygonsConverter: Geometry does not contain polygon vertices" );
-	}
-	
 	// loop over primitives gathering mesh data
 	std::vector<int> vertIds;
 	std::vector<int> vertsPerFace;
@@ -122,7 +117,10 @@ PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detai
 	
 	result->setTopology( new IntVectorData( vertsPerFace ), new IntVectorData( vertIds ) );
 	
-	transferAttribs( geo, result );
+	if ( numVerts )
+	{
+		transferAttribs( geo, result );
+	}
 	
 	return result;
 }

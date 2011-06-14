@@ -305,11 +305,20 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
 	
+	def testConvertNull( self ) :
+		obj = hou.node("/obj")
+		geo = obj.createNode("geo", run_init_scripts=False)
+		null = geo.createNode( "null" )
+		m = IECoreHoudini.FromHoudiniPolygonsConverter( null ).convert()
+		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+		self.assertEqual( m, IECore.MeshPrimitive() )
+	
 	# convert some points
 	def testConvertPoints( self ) :
 		points = self.createPoints()
-		converter = IECoreHoudini.FromHoudiniPolygonsConverter( points )
-		self.assertRaises( RuntimeError, converter.convert )
+		m = IECoreHoudini.FromHoudiniPolygonsConverter( points ).convert()
+		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+		self.assertEqual( m, IECore.MeshPrimitive() )
 
 	# simple attribute conversion
 	def testSetupAttributes( self ) :
@@ -542,8 +551,9 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		add = pointAttr.createOutputNode( "add" )
 		add.parm( "keep" ).set( 1 ) # deletes primitive and leaves points
 		
-		converter = IECoreHoudini.FromHoudiniPolygonsConverter( add )
-		self.assertRaises( RuntimeError, converter.convert )
+		m = IECoreHoudini.FromHoudiniPolygonsConverter( add ).convert()
+		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+		self.assertEqual( m, IECore.MeshPrimitive() )
 	
 	# testing winding order
 	def testWindingOrder( self ) :
