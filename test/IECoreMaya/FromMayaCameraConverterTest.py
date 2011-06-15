@@ -60,6 +60,12 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 
 		camera = converter.convert()
 		self.assert_( camera.isInstanceOf( IECore.Camera.staticTypeId() ) )
+		
+	def testConstructor( self ) :
+	
+		converter = IECoreMaya.FromMayaCameraConverter( "perspShape" )
+		camera = converter.convert()
+		self.assert_( camera.isInstanceOf( IECore.Camera.staticTypeId() ) )	
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

@@ -65,6 +65,8 @@ Improvements :
 
 * IECoreMaya.StringParameterUI now supports the additional values "parent", "parentFull" and "parentPartial" for the ["UI"]["acceptedNodeNameFormat"] user data key.
 
+* IECoreMaya.FromMayaCameraConverter can now be constructed directly in Python, in addition to the previous ability to create one using the FromMayaDagNodeConverter.create() factory method.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
