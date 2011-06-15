@@ -3,6 +3,8 @@ Cortex 6.0.0
 
 Additions :
 
+* Added ieRayConeIntersection to RayAlgo.h
+
 * New Nuke plugin provides hosting of procedurals and ops within Nuke.
 
 * LineSegmentParameters provide a convenient means of specifying lines to Parameterised classes, and are represented in Nuke as a line which can be manipulated in the viewport.

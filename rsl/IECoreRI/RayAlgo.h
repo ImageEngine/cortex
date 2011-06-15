@@ -47,9 +47,9 @@ float ieRaySphereIntersection(
 {
 
 	float b = 2 * ((vector rayOrigin) . rayDirection);
-    float c = ((vector rayOrigin) . (vector rayOrigin)) - sphereRadius*sphereRadius;
-    float discrim = b*b - 4*c;
-    float solutions;
+    	float c = ((vector rayOrigin) . (vector rayOrigin)) - sphereRadius*sphereRadius;
+    	float discrim = b*b - 4*c;
+    	float solutions;
 	if( discrim > 0 )
 	{
 		discrim = sqrt( discrim );
@@ -100,4 +100,118 @@ float ieRayPlaneIntersection(
 
 	return solutions;
 }
+
+
+/// Intersections between a ray and a cone on the negative Z axis, with its apex at the origin and the specified cone angle:
+
+//  This always returns 0 or two solutions. t0 is always where the ray enters the cone (could be -10000000,
+//  meaning minus infinity ), and t1 is always where the ray leaves the cone (could be 10000000, meaning
+//  plus infinity ). If t0 or t1 are negative, this means the corresponding hit occurred behind you.
+
+//  If there are no hits, but the ray flies past the -z cone, then t1 is set equal to t0.
+
+float ieRayConeIntersection(
+	point rayOrigin;
+	vector rayDirection;
+	float coneAngle;
+	output float t0;
+	output float t1;
+)
+{
+	
+	// multiply the z coordinate by this factor to get the desired cone angle:
+	float k = tan( coneAngle / 2 );
+	k = k * k;
+	
+	// ok - we're working out an intersection with the 45 degree double cone defined by x^2 + y^2 - z^2 = 0
+	float c = rayOrigin[0] * rayOrigin[0] + rayOrigin[1] * rayOrigin[1] - k * rayOrigin[2] * rayOrigin[2];
+	float b = 2 * ( rayOrigin[0] * rayDirection[0] + rayOrigin[1] * rayDirection[1] - k * rayOrigin[2] * rayDirection[2] );
+	float a = rayDirection[0] * rayDirection[0] + rayDirection[1] * rayDirection[1] - k * rayDirection[2] * rayDirection[2];
+	
+    	float discrim = b * b - 4 * a * c;
+	
+	float solutions = 0;
+	
+	if( discrim < 0 )
+	{
+		t0 = t1 = ( - b ) / ( 2 * a );
+		return 0;
+	}
+	
+	discrim = sqrt( discrim );
+
+	t0 = (-discrim - b) / ( 2 * a );
+	t1 = ( discrim - b) / ( 2 * a );
+
+	if( a < 0 )
+	{
+		// This means k^2 dz^2 > dx^2 + d^2 - ie the ray's gonna hit the -z cone and the +z cone.
+
+		// Get the parameter value of the single valid cone hit - ie the one that hit the -z cone:
+		float t = ( rayOrigin[2] + t1 * rayDirection[2] > 0 ) ? t0 : t1;
+
+		if( c < 0  && rayOrigin[2] < 0 )
+		{
+			// x^2 + y^2 < k^2 z^2, and z > 0: ray origin is inside the -z cone:
+			if( t > 0 )
+			{
+				// started inside the cone, the intersection is ahead of us, so we'll say
+				// the ray entered the cone at t0 = minus infinity and exited the cone at
+				// t1 = t:
+				t0 = -10000000;
+				t1 = t;
+			}
+			else
+			{
+				// started inside the cone, the intersection is behind us, so we'll say
+				// the ray entered the cone at t0 = t, and exited the cone at
+				// t1 = infinity:
+				t0 = t;
+				t1 = 10000000;
+			}
+		}
+		else
+		{
+			// x^2 + y^2 > k^2 z^2, or z > 0: ray origin is outside the -z cone:
+			if( t > 0 )
+			{
+				// started outside the cone, the intersection is ahead of us, so we'll say
+				// the ray entered the cone at t0 = t and exited the cone at
+				// t1 = infinity:
+				t0 = t;
+				t1 = 10000000;
+			}
+			else
+			{
+				// started outside the cone, the intersection is behind us, so we'll say
+				// the ray entered the cone at t0 = minus infinity and exited the cone at
+				// t1 = t:
+				t0 = -10000000;
+				t1 = t;
+			}
+		}
+
+		return 2;
+
+	}
+	else
+	{
+		// this means k^2 dz^2 < dx^2 + d^2, so the two hits are both gonna be on the +z cone, or both on the -z cone:
+		if( rayOrigin[2] + t1 * rayDirection[2] > 0 )
+		{
+			// ok - we've hit the positive cone. Never mind then:
+			t0 = t1 = ( - b ) / ( 2 * a );
+			return 0;
+		}
+		else
+		{
+			// two hits on the negative cone!
+			return 2;
+		}
+	}
+		
+	
+}
+
+
 #endif // IECORERI_RAYALGO_H
