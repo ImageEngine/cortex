@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -65,9 +65,9 @@ class CoshaderTest( unittest.TestCase ) :
 		
 		s = IECoreRI.SLOReader( "test/IECoreRI/shaders/coshaderTest.sdl" ).read()
 		
-		# this for sure isn't what we really want, but that's all the information the Slo library
-		# gives us.
-		self.assertEqual( s.type, "<unknown>" )
+		# old versions of 3delight reported the type as <unknown> (which we don't really want) but
+		# new versions report it correctly as "shader".
+		self.failUnless( s.type == "<unknown>" or s.type == "shader" )
 	
 		k = s.parameters.keys()
 		self.assertEqual( len( k ), 2 )
