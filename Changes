@@ -75,8 +75,6 @@ Improvements :
 
 Changes :
 
-* Brought the ieRayConeIntersection function more in line with the other functions in RayAlgo.h 
-
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
 
 * Removed deprecated methods classParameterModificationContext, setClassParameterClass and setClassVectorParameterClasses from IECoreMaya.FnParameterisedHolder. The parameterModificationContext method should be used instead.
