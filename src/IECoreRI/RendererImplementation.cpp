@@ -119,8 +119,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 		m_fontSearchPath.setPaths( fontPath, ":" );
 	}
 
-	const char *shaderPathE = getenv( "DL_SHADERS_PATH" );
-	m_shaderCache = new CachedReader( SearchPath( shaderPathE ? shaderPathE : "", ":" ), g_shaderCacheSize );
+	m_shaderCache = defaultShaderCache();
 
 	m_setOptionHandlers["ri:searchpath:shader"] = &IECoreRI::RendererImplementation::setShaderSearchPathOption;
 	m_setOptionHandlers["ri:pixelsamples"] = &IECoreRI::RendererImplementation::setPixelSamplesOption;
@@ -962,6 +961,15 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const s
 		}
 	}
 	return 0;
+}
+
+IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
+{
+	static IECore::CachedReaderPtr g_defaultShaderCache = new CachedReader(
+		SearchPath( getenv( "DL_SHADERS_PATH" ) ? getenv( "DL_SHADERS_PATH" ) : "", ":" ),
+		g_shaderCacheSize
+	);
+	return g_defaultShaderCache;
 }
 
 void IECoreRI::RendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )

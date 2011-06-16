@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -150,6 +150,7 @@ class RendererImplementation : public IECore::Renderer
 		std::stack<AttributeState> m_attributeStack;
 		static const unsigned int g_shaderCacheSize;
 		IECore::CachedReaderPtr m_shaderCache;
+		static IECore::CachedReaderPtr defaultShaderCache();
 
 		typedef void (RendererImplementation::*SetAttributeHandler)( const std::string &name, IECore::ConstDataPtr d );
 		typedef IECore::ConstDataPtr (RendererImplementation::*GetAttributeHandler)( const std::string &name ) const;

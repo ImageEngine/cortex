@@ -71,6 +71,8 @@ Improvements :
 
 * The iePython renderman procedural now prevents python from registering the signal handler which turns Ctrl-C into a python KeyboardInterrupt exception.
 
+* IECoreRI::Renderers now share a single shader cache unless they have been given non-default searchpaths. This can significantly reduce time spent loading shaders if many shaders are loaded by many procedurals.
+
 Changes :
 
 * Brought the ieRayConeIntersection function more in line with the other functions in RayAlgo.h 
