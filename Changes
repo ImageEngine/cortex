@@ -69,6 +69,8 @@ Improvements :
 
 * IECoreMaya.FromMayaCameraConverter can now be constructed directly in Python, in addition to the previous ability to create one using the FromMayaDagNodeConverter.create() factory method.
 
+* The iePython renderman procedural now prevents python from registering the signal handler which turns Ctrl-C into a python KeyboardInterrupt exception.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.

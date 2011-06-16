@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,10 +65,13 @@ struct PythonInitialiser
 				// load the IECoreRI and IECore modules so people don't have to do that in the string
 				// they pass to be executed. this also means people don't have to worry about which
 				// version to load. also set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
-				// cross module rtti errors on linux.
+				// cross module rtti errors on linux, and get rid of the python signal handler that
+				// turns Ctrl-C into that annoying KeyboardInterrupt exception.
 				string toExecute =	"import sys\n"
 									"import ctypes\n"
 									"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
+									"import signal\n"
+									"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
 									"import IECore\n"
 									"import IECoreRI\n";
 
