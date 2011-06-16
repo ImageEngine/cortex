@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,9 +47,9 @@ float ieRaySphereIntersection(
 {
 
 	float b = 2 * ((vector rayOrigin) . rayDirection);
-    	float c = ((vector rayOrigin) . (vector rayOrigin)) - sphereRadius*sphereRadius;
-    	float discrim = b*b - 4*c;
-    	float solutions;
+	float c = ((vector rayOrigin) . (vector rayOrigin)) - sphereRadius*sphereRadius;
+	float discrim = b*b - 4*c;
+	float solutions;
 	if( discrim > 0 )
 	{
 		discrim = sqrt( discrim );
@@ -102,18 +102,12 @@ float ieRayPlaneIntersection(
 }
 
 
-/// Intersections between a ray and a cone on the negative Z axis, with its apex at the origin and the specified cone angle:
-
-//  This always returns 0 or two solutions. t0 is always where the ray enters the cone (could be -10000000,
-//  meaning minus infinity ), and t1 is always where the ray leaves the cone (could be 10000000, meaning
-//  plus infinity ). If t0 or t1 are negative, this means the corresponding hit occurred behind you.
-
-//  If there are no hits, but the ray flies past the -z cone, then t1 is set equal to t0.
-
+/// Intersections between a ray and a cone on the negative Z axis, with its apex at the origin and the specified cone angle.
 float ieRayConeIntersection(
 	point rayOrigin;
 	vector rayDirection;
 	float coneAngle;
+	float epsilon;
 	output float t0;
 	output float t1;
 )
@@ -123,7 +117,7 @@ float ieRayConeIntersection(
 	float k = tan( coneAngle / 2 );
 	k = k * k;
 	
-	// ok - we're working out an intersection with the 45 degree double cone defined by x^2 + y^2 - z^2 = 0
+	// ok - we're working out an intersection with the double cone defined by x^2 + y^2 - k^2 z^2 = 0
 	float c = rayOrigin[0] * rayOrigin[0] + rayOrigin[1] * rayOrigin[1] - k * rayOrigin[2] * rayOrigin[2];
 	float b = 2 * ( rayOrigin[0] * rayDirection[0] + rayOrigin[1] * rayDirection[1] - k * rayOrigin[2] * rayDirection[2] );
 	float a = rayDirection[0] * rayDirection[0] + rayDirection[1] * rayDirection[1] - k * rayDirection[2] * rayDirection[2];
@@ -134,7 +128,6 @@ float ieRayConeIntersection(
 	
 	if( discrim < 0 )
 	{
-		t0 = t1 = ( - b ) / ( 2 * a );
 		return 0;
 	}
 	
@@ -153,45 +146,35 @@ float ieRayConeIntersection(
 		if( c < 0  && rayOrigin[2] < 0 )
 		{
 			// x^2 + y^2 < k^2 z^2, and z > 0: ray origin is inside the -z cone:
-			if( t > 0 )
+			if( t > epsilon )
 			{
-				// started inside the cone, the intersection is ahead of us, so we'll say
-				// the ray entered the cone at t0 = minus infinity and exited the cone at
-				// t1 = t:
-				t0 = -10000000;
-				t1 = t;
+				// started inside the cone, the intersection is ahead of us:
+				t0 = t;
+				return 1;
 			}
 			else
 			{
-				// started inside the cone, the intersection is behind us, so we'll say
-				// the ray entered the cone at t0 = t, and exited the cone at
-				// t1 = infinity:
-				t0 = t;
-				t1 = 10000000;
+				// started inside the cone, the intersection is behind us, so we aint hit nuffink:
+				return 0;
 			}
 		}
 		else
 		{
 			// x^2 + y^2 > k^2 z^2, or z > 0: ray origin is outside the -z cone:
-			if( t > 0 )
+			if( t > epsilon )
 			{
-				// started outside the cone, the intersection is ahead of us, so we'll say
-				// the ray entered the cone at t0 = t and exited the cone at
-				// t1 = infinity:
+				// started outside the cone, the intersection is ahead of us:
 				t0 = t;
-				t1 = 10000000;
+				return 1;
 			}
 			else
 			{
-				// started outside the cone, the intersection is behind us, so we'll say
-				// the ray entered the cone at t0 = minus infinity and exited the cone at
-				// t1 = t:
-				t0 = -10000000;
-				t1 = t;
+				// started outside the cone, the intersection is behind us, so we aint hit nuffink:
+				return 0;
 			}
 		}
 
-		return 2;
+		//return t1 > epsilon ? 2 : 0;
 
 	}
 	else
@@ -200,13 +183,30 @@ float ieRayConeIntersection(
 		if( rayOrigin[2] + t1 * rayDirection[2] > 0 )
 		{
 			// ok - we've hit the positive cone. Never mind then:
-			t0 = t1 = ( - b ) / ( 2 * a );
 			return 0;
 		}
 		else
 		{
-			// two hits on the negative cone!
-			return 2;
+			// we've hit the negative cone! Probably.
+			if( t1 > epsilon )
+			{
+				// foremost hit is valid:
+				if( t0 > epsilon )
+				{
+					// other hit is valid too:
+					return 2;
+				}
+				else
+				{
+					// only the foremost hit is valid: 
+					t0 = t1;
+					return 1;
+				}
+			}
+			else
+			{
+				return 0;
+			}
 		}
 	}
 		
