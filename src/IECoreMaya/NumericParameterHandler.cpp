@@ -78,9 +78,30 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 	{
 		fnNAttr.setMin( p->minValue() );
 	}
+	else
+	{
+		// parameter has no min value
+		if( fnNAttr.hasMin() )
+		{
+			// there is no way of unsetting a minimum value
+			// in maya.
+			return MS::kFailure;
+		}
+	}
+	
 	if( p->maxValue()!=Imath::limits<T>::max() )
 	{
 		fnNAttr.setMax( p->maxValue() );
+	}
+	else
+	{
+		// parameter has no max value
+		if( fnNAttr.hasMax() )
+		{
+			// there is no way of unsetting a maximum value
+			// in maya.
+			return MS::kFailure;
+		}
 	}
 	
 	T v;

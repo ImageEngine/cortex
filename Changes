@@ -122,3 +122,5 @@ Bug fixes :
 * Fixed bug in IECore.Enum.__hash__, whereby the type of the Enum wasn't taken into account and values from distinct Enums would regularly hash equal.
 
 * Fixed a bug which could cause crashes and erroneous python error reports when a python class subclassing a c++ class didn't provide an override for a method which was not directly bound (for instance the protected doRender() method of ParameterisedProcedural).
+
+* Fixed a bug which prevented the attribute range in maya being set correctly when the minimum or maximum value was removed from a NumericParameter.

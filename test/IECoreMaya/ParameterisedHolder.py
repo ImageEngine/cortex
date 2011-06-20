@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1676,6 +1676,82 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), True )
 		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maximum=True, node=opNode )[0], 10 )
 	
+	def testNumericParameterRangeAdded( self ) :
+	
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0
+			)
+		)
+	
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder(  opNode )
+		fnOH.setParameterised( op )
+		
+		iPlugPath = fnOH.parameterPlugPath( op["i"] )
+		
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minExists=True, node=opNode ), False )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), False )
+		
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0,
+				minValue = -2,
+				maxValue = 2,
+			)
+		)
+		
+		fnOH.setParameterised( op )
+
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minExists=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minimum=True, node=opNode )[0], -2 )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maximum=True, node=opNode )[0], 2 )
+		
+	def testNumericParameterRangeRemoved( self ) :
+	
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0,
+				minValue = -2,
+				maxValue = 2,
+			)
+		)
+		
+		opNode = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder(  opNode )
+		fnOH.setParameterised( op )
+		
+		iPlugPath = fnOH.parameterPlugPath( op["i"] )
+		
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minExists=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minimum=True, node=opNode )[0], -2 )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), True )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maximum=True, node=opNode )[0], 2 )	
+	
+		op = IECore.Op( "", IECore.IntParameter( "result", "", 0 ) )
+		op.parameters().addParameter(
+			IECore.IntParameter(
+				"i",
+				"d",
+				0
+			)
+		)
+		
+		fnOH.setParameterised( op )
+
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], minExists=True, node=opNode ), False )
+		self.assertEqual( cmds.attributeQuery( iPlugPath.rpartition( "." )[-1], maxExists=True, node=opNode ), False )
+			
 	def testParameterTypeChanges( self ) :
 	
 		"""Test maya attribute type with changing parameters types."""
