@@ -80,6 +80,12 @@ class SequenceLsOp( Op ) :
 					defaultValue = 1000,
 					minValue = 1,
 				),
+				IntParameter(
+					name = "minSequenceSize",
+					description = "The minimum number of files to be considered a sequence",
+					defaultValue = 2,
+					minValue = 1,
+				),
 				StringParameter(
 					name = "type",
 					description = "The file types of the sequences to classify.",
@@ -212,7 +218,7 @@ class SequenceLsOp( Op ) :
 		if baseDirectory != "/" and baseDirectory[-1] == '/' :
 			baseDirectory = baseDirectory[:-1]
 
-		sequences = ls( baseDirectory )
+		sequences = ls( baseDirectory, operands["minSequenceSize"].value )
 
 		# If we've passed in a directory which isn't the current one it is convenient to get that included in the returned sequence names
 		relDir = os.path.normpath( baseDirectory ) != "."
@@ -234,7 +240,7 @@ class SequenceLsOp( Op ) :
 					dirs[:] = []
 
 				for d in dirs :
-					ss = ls( os.path.join( root, d ) )
+					ss = ls( os.path.join( root, d ), operands["minSequenceSize"].value )
 					if ss :
 						for s in ss :
 

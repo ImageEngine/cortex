@@ -91,6 +91,8 @@ Changes :
 
 * FromHoudiniPolygonsConverter returns an empty MeshPrimitive (rather than throwing an exception) if there are no polygon vertices in the GU_Detail.
 
+* Exposed the minSequenceSize parameter of IECore.ls() to SequenceLsOp
+
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.
