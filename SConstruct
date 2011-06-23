@@ -928,7 +928,7 @@ def getPythonConfig( env, flags ) :
 	stdOut, stdErr = f.communicate()	
 	r = stdOut.strip()
 	if f.returncode :
-		sys.stderr.write( "ERROR : Error running \"%s\".\n" % env["PYTHON_CONFIG"] )
+		sys.stderr.write( "ERROR : Error running \"%s\".\n%s" % ( env["PYTHON_CONFIG"], stdErr ) )
 		Exit( 1 )
 	return r
 
