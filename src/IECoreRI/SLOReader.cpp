@@ -279,6 +279,29 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 					}
 				}
 				break;
+				
+			case SLO_TYPE_SHADER :
+				{
+					if( arg->svd_arraylen==0 )
+					{
+						if( !arg->svd_valisvalid )
+						{
+							// variable length array
+							data = new StringVectorData();
+						}
+						else
+						{
+							data = new StringData();
+						}
+					}
+					else
+					{
+						StringVectorDataPtr sData = new StringVectorData();
+						data = sData;
+						sData->writable().resize( arg->svd_arraylen );
+					}
+				}
+				break;
 
 			default :
 

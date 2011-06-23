@@ -121,6 +121,9 @@ class TestSLOReader( unittest.TestCase ) :
 			["pav", V3fVectorData() ],
 			["mav", M44fVectorData() ],
 			["f3", FloatVectorData( [ 1, 2, 3 ] ) ],
+			["sh", StringData( "" ) ],
+			["sha", StringVectorData() ],
+			["sha3", StringVectorData( [ "", "", "" ] ) ],
 		]
 
 		self.assertEqual( len( expectedParams ), len( s.parameters ) )
