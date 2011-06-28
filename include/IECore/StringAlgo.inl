@@ -61,27 +61,43 @@ typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterat
 template<class String>
 bool isUpperCase( const String &s )
 {
+	bool haveAlpha = false;
 	for( typename String::const_iterator it = s.begin(), end=s.end(); it != end; ++it )
 	{
-		if( !isupper( *it ) )
+		if( isalpha( *it ) )
 		{
-			return false;
+			if( !isupper( *it ) )
+			{
+				return false;
+			}
+			else
+			{
+				haveAlpha = true;
+			}
 		}
 	}
-	return true;
+	return haveAlpha;
 }
 
 template<class String>
 bool isLowerCase( const String &s )
 {
+	bool haveAlpha = false;
 	for( typename String::const_iterator it = s.begin(), end=s.end(); it != end; ++it )
 	{
-		if( !islower( *it ) )
+		if( isalpha( *it ) )
 		{
-			return false;
+			if( !islower( *it ) )
+			{
+				return false;
+			}
+			else
+			{
+				haveAlpha = true;
+			}
 		}
 	}
-	return true;
+	return haveAlpha;
 }
 
 } // namespace IECore

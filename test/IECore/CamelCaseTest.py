@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
+#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -80,6 +81,11 @@ class CamelCaseTest( unittest.TestCase ) :
 		self.assertEqual( IECore.CamelCase.fromSpaced( "camel case", IECore.CamelCase.Caps.All ), "CamelCase" )
 		self.assertEqual( IECore.CamelCase.fromSpaced( "camel case", IECore.CamelCase.Caps.First ), "Camelcase" )
 		self.assertEqual( IECore.CamelCase.fromSpaced( "camel case", IECore.CamelCase.Caps.AllExceptFirst ), "camelCase" )
+	
+	def testNumericCharacters( self ) :
+	
+		self.assertEqual( IECore.CamelCase.split( "linearToRec709" ), [ "linear", "To", "Rec709" ] )
+		self.assertEqual( IECore.CamelCase.split( "Rec709ToLinear" ), [ "Rec709", "To", "Linear" ] )
 	
 if __name__ == "__main__":
 	unittest.main()
