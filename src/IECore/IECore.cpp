@@ -109,4 +109,13 @@ bool withFreeType()
 #endif
 }
 
+bool withPNG()
+{
+#ifdef IECORE_WITH_PNG
+	return true;
+#else
+	return false;
+#endif
+}
+
 }

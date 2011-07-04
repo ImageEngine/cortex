@@ -189,6 +189,20 @@ o.Add(
 	"/usr/local/lib",
 )
 
+# PNG options
+
+o.Add(
+	"PNG_INCLUDE_PATH",
+	"The path to the PNG include directory.",
+	"/usr/local/include/",
+)
+
+o.Add(
+	"PNG_LIB_PATH",
+	"The path to the PNG lib directory.",
+	"/usr/local/lib",
+)
+
 # TIFF options
 
 o.Add(
@@ -815,6 +829,7 @@ env.Prepend(
 		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
 		os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
 		"$BOOST_INCLUDE_PATH",
+        "$PNG_INCLUDE_PATH",
 		"$JPEG_INCLUDE_PATH",
 		"$TIFF_INCLUDE_PATH",
 		"$FREETYPE_INCLUDE_PATH",
@@ -825,6 +840,7 @@ env.Prepend(
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$ILMBASE_LIB_PATH",
+        "$PNG_LIB_PATH",
 		"$JPEG_LIB_PATH",
 		"$TIFF_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
@@ -1215,6 +1231,14 @@ if doConfigure :
 		coreSources.remove( "src/IECore/JPEGImageReader.cpp" )
 		corePythonSources.remove( "src/IECorePython/JPEGImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECorePython/JPEGImageWriterBinding.cpp" )
+	
+	if c.CheckLibWithHeader( "png", ["stdio.h", "png.h"], "CXX" ) :
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_PNG' )
+	else :
+		sys.stderr.write( "WARNING: no PNG library found, no PNG support, check PNG_INCLUDE_PATH and PNG_LIB_PATH.\n" )
+		coreSources.remove( "src/IECore/PNGImageReader.cpp" )
+		corePythonSources.remove( "src/IECorePython/PNGImageReaderBinding.cpp" )
 	
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :

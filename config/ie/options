@@ -179,6 +179,7 @@ TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/2.2"
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", IEEnv.platform(), "boost", boostVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/OpenEXR/" + openEXRVersion
 TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
+PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
 JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 GLEW_INCLUDE_PATH = '/software/tools/include/glew/1.4.0'
 FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"

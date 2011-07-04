@@ -396,6 +396,7 @@ void bindTypeId()
 		.value( "LineSegment3dParameter", LineSegment3dParameterTypeId )
 		.value( "DataInterleaveOp", DataInterleaveOpTypeId )
 		.value( "DataConvertOp", DataConvertOpTypeId )
+		.value( "PNGImageReader", PNGImageReaderTypeId )
 	;
 }
 

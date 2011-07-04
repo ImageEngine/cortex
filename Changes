@@ -3,6 +3,8 @@ Cortex 6.0.0
 
 Additions :
 
+# Added PNGImageReader using libpng
+
 * Added ieRayConeIntersection to RayAlgo.h
 
 * New Nuke plugin provides hosting of procedurals and ops within Nuke.
