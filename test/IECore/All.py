@@ -251,6 +251,7 @@ from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
+from PNGImageReader import TestPNGReader
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
