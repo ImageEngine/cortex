@@ -251,7 +251,6 @@ from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
-from PNGImageReader import TestPNGReader
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
@@ -266,6 +265,9 @@ if IECore.withJPEG() :
 
 if IECore.withFreeType() :
 	from FontTest import *
+
+if IECore.withPNG() :
+	from PNGImageReader import TestPNGReader
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
