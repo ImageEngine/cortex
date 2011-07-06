@@ -122,6 +122,22 @@ float ieRayConeIntersection(
 	float b = 2 * ( rayOrigin[0] * rayDirection[0] + rayOrigin[1] * rayDirection[1] - k * rayOrigin[2] * rayDirection[2] );
 	float a = rayDirection[0] * rayDirection[0] + rayDirection[1] * rayDirection[1] - k * rayDirection[2] * rayDirection[2];
 	
+	if( a == 0 )
+	{
+		// b t + c == 0
+		t0 = - c / b;
+		
+		if( t0 > epsilon )
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	// a t * t + b t + c == 0
     	float discrim = b * b - 4 * a * c;
 	
 	float solutions = 0;
