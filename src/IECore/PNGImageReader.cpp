@@ -231,7 +231,7 @@ Imath::Box2i PNGImageReader::displayWindow()
 
 std::string PNGImageReader::sourceColorSpace() const
 {
-	return "srgb";
+	return "linear";
 }
 
 template<typename FromType, typename ToType>
