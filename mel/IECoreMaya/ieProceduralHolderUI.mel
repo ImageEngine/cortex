@@ -43,7 +43,9 @@
 /// with them.
 global proc ieProceduralHolderUIFixLightLinking()
 {
+	itemFilter -e -cls "other" lightLinkingObjectFilter; // must reclassify to allow renaming in maya 2012
 	string $l = `rename lightLinkingObjectFilter lightLinkingObjectFilterBeforeIEProcedurals`;
+	itemFilter -e -cls "builtIn" lightLinkingObjectFilterBeforeIEProcedurals;
 	string $p = `itemFilter -cls "builtIn" -byType ieProceduralHolder ieProceduralHolderFilter`;
 	itemFilter -union $l ieProceduralHolderFilter -cls "builtIn" lightLinkingObjectFilter;
 }

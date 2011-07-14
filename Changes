@@ -130,3 +130,5 @@ Bug fixes :
 * Fixed a bug which could cause crashes and erroneous python error reports when a python class subclassing a c++ class didn't provide an override for a method which was not directly bound (for instance the protected doRender() method of ParameterisedProcedural).
 
 * Fixed a bug which prevented the attribute range in maya being set correctly when the minimum or maximum value was removed from a NumericParameter.
+
+* Fixed plugin load error caused by ieProceduralHolderUI.mel in Maya 2012.
