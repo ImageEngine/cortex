@@ -1,6 +1,6 @@
-	##########################################################################
+##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -101,7 +101,12 @@ class TestBasicPreset( unittest.TestCase ) :
 		
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
 		
-		p = IECore.BasicPreset( "%s/%s" % ( savePath, "basicPresetLoadTest/basicPresetLoadTest-1.cob" ) )
+		messageHandler = IECore.CapturingMessageHandler()
+		with messageHandler :
+		
+			p = IECore.BasicPreset( "%s/%s" % ( savePath, "basicPresetLoadTest/basicPresetLoadTest-1.cob" ) )
+		
+		self.assertEqual( len( messageHandler.messages ), 0 )
 		
 		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
 		self.failIf( p.applicableTo( testObj2, testObj2.parameters() ) )
@@ -187,8 +192,14 @@ class TestBasicPreset( unittest.TestCase ) :
 		preset = IECore.BasicPreset( testObj, testObj.parameters() )
 		preset.save( savePath, "basicPresetTestClassLoader" )
 		
-		loader = IECore.ClassLoader( IECore.SearchPath( savePath, ":" ) )
-		p = loader.load( "basicPresetTestClassLoader" )()
+		# make sure that no messages are emitted during loading
+		messageHandler = IECore.CapturingMessageHandler()
+		with messageHandler :
+		
+			loader = IECore.ClassLoader( IECore.SearchPath( savePath, ":" ) )
+			p = loader.load( "basicPresetTestClassLoader" )()
+		
+		self.assertEqual( len( messageHandler.messages ), 0 )
 		
 		self.failUnless( isinstance( p, IECore.BasicPreset ) )
 		

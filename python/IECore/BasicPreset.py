@@ -249,7 +249,7 @@ class BasicPreset( IECore.Preset ) :
 		f = open( fileName, "w" )
 		f.write(
 		
-"""import IECore.BasicPreset
+"""import IECore
 import os.path
 
 class %s( IECore.BasicPreset ):
@@ -257,8 +257,10 @@ class %s( IECore.BasicPreset ):
 	def __init__( self ):
 		dir = os.path.dirname( __file__ )
 		IECore.BasicPreset.__init__( self, dir+"/%s"	)
+
+IECore.registerRunTimeTyped( %s )
 		
-""" % (	className,	cob, )
+""" % (	className, cob, className )
 
 		)
 		
