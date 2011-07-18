@@ -78,28 +78,31 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache = self.cacheSop()
 		self.failUnless( isinstance( cache.geometry(), hou.Geometry ) )
 		cache.parm( "frameMultiplier" ).set( 250 )
-		self.assertRaises( hou.OperationFailed, cache.cook )
-		self.failUnless( cache.errors() )
+		##\todo: re-activate this test when hou.Node.warnings works properly
+		#self.failUnless( cache.warnings() )
+		self.assertEqual( len(cache.geometry().points()), 0 )
 		shutil.copyfile( "contrib/IECoreHoudini/test/test_data/torusVertCache.0001.fio", "contrib/IECoreHoudini/test/test_data/torusVertCache.0250.fio" )
 		# need to refresh the LRUCache in order to get passed the original error
 		cache.parm( "frameMultiplier" ).set( 1 )
 		cache.cook()
 		cache.parm( "frameMultiplier" ).set( 250 )
-		self.failUnless( isinstance( cache.geometry(), hou.Geometry ) )
+		self.assertEqual( len(cache.geometry().points()), 100 )
 		os.remove( "contrib/IECoreHoudini/test/test_data/torusVertCache.0250.fio" )
 	
 	def testNonExistantFile( self ) :
 		cache = self.cacheSop()
 		cache.parm( "cacheSequence" ).set( "contrib/IECoreHoudini/test/test_data/fake.####.fio" )
-		self.assertRaises( hou.OperationFailed, cache.cook )
-		self.failUnless( cache.errors() )
+		##\todo: re-activate this test when hou.Node.warnings works properly
+		#self.failUnless( cache.warnings() )
+		self.assertEqual( len(cache.geometry().points()), 0 )
 		
 	def testNoFileForFrame( self ) :
 		cache = self.cacheSop()
 		cache.parm( "cacheSequence" ).set( "contrib/IECoreHoudini/test/test_data/torusVertCache.####.fio" )
 		hou.setFrame( 4 )
-		self.assertRaises( hou.OperationFailed, cache.cook )
-		self.failUnless( cache.errors() )
+		##\todo: re-activate this test when hou.Node.warnings works properly
+		#self.failUnless( cache.warnings() )
+		self.assertEqual( len(cache.geometry().points()), 0 )
 	
 	def testBadObjectHandle( self ) :
 		cache = self.cacheSop()

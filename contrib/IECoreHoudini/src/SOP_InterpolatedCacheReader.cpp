@@ -91,8 +91,6 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 	
 	gdp->stashAll();
 	
-	duplicatePointSource( 0, context );
-	
 	float time = context.getTime();
 	float frame = context.getFloatFrame();
 	
@@ -124,7 +122,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 		}
 		catch ( IECore::InvalidArgumentException e )
 		{
-			addError( SOP_ATTRIBUTE_INVALID, e.what() );
+			addWarning( SOP_ATTRIBUTE_INVALID, e.what() );
 			unlockInputs();
 			return error();
 		}
@@ -149,10 +147,12 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 	}
 	catch ( IECore::Exception e )
 	{
-		addError( SOP_ATTRIBUTE_INVALID, e.what() );
+		addWarning( SOP_ATTRIBUTE_INVALID, e.what() );
 		unlockInputs();
 		return error();
 	}
+	
+	duplicatePointSource( 0, context );
 	
 	GB_Group *group;
 	const GB_GroupList &pointGroups = gdp->pointGroups();

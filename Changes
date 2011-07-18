@@ -97,6 +97,8 @@ Changes :
 
 * Exposed the minSequenceSize parameter of IECore.ls() to SequenceLsOp
 
+* SOP_InterpolatedCacheReader returns an empty GU_Detail and a warning when the cache is missing, rather than an error.
+
 Bug fixes :
 
 * Fixed crashes caused by using SxRenderer with texture lookup shaders in multiple threads.
