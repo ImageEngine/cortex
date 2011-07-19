@@ -85,7 +85,7 @@ class Wrapper : public boost::python::wrapper<T>, public WrapperGarbageCollector
 			
 			// boost's get_override calls PyObject_GetAttrString indiscriminately
 			// and doesn't clear the error status if it fails - this can cause havoc elsewhere.
-			// so if there's an attribute exception aftre the call above we clear it now.
+			// so if there's an attribute exception after the call above we clear it now.
 			// see ParameterisedProceduralTest.py for a test case that exercises the problem.
 			if( PyObject *err = PyErr_Occurred() )
 			{
