@@ -447,6 +447,12 @@ o.Add(
 )
 
 o.Add(
+	BoolVariable( "INSTALL_PKG_CONFIG_FILE", 
+				"Install a pkg-config configuration in $INSTALL_PREFIX/lib/pkgconfig.", 
+				True ),
+)
+
+o.Add(
 	"INSTALL_HEADER_DIR",
 	"The directory in which to install headers.",
 	"$INSTALL_PREFIX/include",
@@ -1152,6 +1158,41 @@ def createDoxygenPython( target, source, env ) :
 					outFile.write( line )
 				
 				outFile.write( "\n" )
+				
+# installs the core/python build configurations to a pkg-config configuration file
+def writePkgConfig( env, python_env ):
+	global ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion
+	prefix = env.subst( env['INSTALL_PREFIX'] )
+	filedir = os.path.join( prefix, 'lib/pkgconfig' )
+	if not os.path.exists(filedir):
+		os.makedirs(filedir)
+	fd = open( os.path.join( filedir, 'cortex.pc' ), 'w' )
+	fd.write( "prefix=%s\n" % prefix )
+	fd.write( "exec_prefix=${prefix}\n" )
+	fd.write( "libdir=${prefix}/lib\n" )
+	fd.write( "includedir=%s\n" % env.subst(env['INSTALL_HEADER_DIR']) )
+	fd.write( "\n" )
+	fd.write( "Name: Cortex\n" )
+	fd.write( "Description: Open-source libraries for VFX development.\n" )
+	fd.write( "Version: %d.%d.%d\n" % ( ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion ) )
+	corelib = os.path.basename( env.subst("$INSTALL_LIB_NAME") )
+	pythonlib = os.path.basename( python_env.subst("$INSTALL_PYTHONLIB_NAME") )
+	fd.write( "Libs: -L${libdir} -l%s -l%s -L%s -lboost_python%s\n" % ( corelib,
+																	pythonlib,
+																	env['BOOST_LIB_PATH'], 
+																	python_env["BOOST_LIB_SUFFIX"] ) )
+	python_includes = python_env.subst("$PYTHON_INCLUDE_FLAGS")
+	openexr_includes = "-I%s -I%s/OpenEXR" % (env['OPENEXR_INCLUDE_PATH'], 
+											env['OPENEXR_INCLUDE_PATH'])
+	if env['ILMBASE_INCLUDE_PATH']!=env['OPENEXR_INCLUDE_PATH']:
+		openexr_includes = "-I%s -I%s/OpenEXR -I%s -I%s/OpenEXR" % (env['ILMBASE_INCLUDE_PATH'], 
+																	env['ILMBASE_INCLUDE_PATH'], 
+																	env['OPENEXR_INCLUDE_PATH'], 
+																	env['OPENEXR_INCLUDE_PATH'])
+	fd.write( "Cflags: -I${includedir} %s -I%s %s\n" % (openexr_includes,  
+														env['BOOST_INCLUDE_PATH'], 
+														python_includes ) ) 
+	fd.close()
 	
 ###########################################################################################
 # Build, install and test the core library and bindings
@@ -1262,6 +1303,8 @@ coreEnv.Alias( "installLib", [ coreLibraryInstall ] )
 # headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
+if env["INSTALL_PKG_CONFIG_FILE"]:
+        coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : writePkgConfig( coreEnv, corePythonEnv ) )
 coreEnv.Alias( "install", headerInstall )
 coreEnv.Alias( "installCore", headerInstall )
 
