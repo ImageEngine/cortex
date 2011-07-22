@@ -69,6 +69,11 @@ class OpHolder : public ParameterisedHolder<BaseType>
 
 	private :
 	
+		static MObject aResultDependency;
+	
+		IE_CORE_FORWARDDECLARE( PostLoadCallback );
+		PostLoadCallbackPtr m_postLoadCallback;
+		
 		MStatus createResultAttribute();
 
 };

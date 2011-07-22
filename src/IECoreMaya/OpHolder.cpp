@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@
 #include "maya/MFnAttribute.h"
 #include "maya/MDGModifier.h"
 #include "maya/MGlobal.h"
+#include "maya/MFnNumericAttribute.h"
 
 #include "IECoreMaya/OpHolder.h"
 #include "IECoreMaya/ParameterHandler.h"
@@ -61,8 +62,41 @@ using namespace IECore;
 using namespace IECoreMaya;
 
 template<typename B>
+MObject OpHolder<B>::aResultDependency;
+
+// this post load callback is used to dirty the result plug
+// following loading - see further  comments in initialize.
+template<typename B>
+class OpHolder<B>::PostLoadCallback : public IECoreMaya::PostLoadCallback
+{
+
+	public :
+	
+		PostLoadCallback( OpHolder<B> *node )
+			:	m_node( node )
+		{
+		}
+	
+	protected :
+
+		OpHolder<B> *m_node;
+
+		virtual void postLoad()
+		{	
+			MFnDependencyNode fnDN( m_node->thisMObject() );
+	
+			MPlug plug = fnDN.findPlug( aResultDependency );
+			plug.setValue( 1 );
+
+			m_node->m_postLoadCallback = 0; // remove this callback
+		}
+		
+};
+		
+template<typename B>
 OpHolder<B>::OpHolder()
 {
+	m_postLoadCallback = new PostLoadCallback( this );
 }
 
 template<typename B>
@@ -79,21 +113,46 @@ void *OpHolder<B>::creator()
 template<typename B>
 MStatus OpHolder<B>::initialize()
 {
-	return inheritAttributesFrom( ParameterisedHolder<B>::typeName );
+	MStatus s = inheritAttributesFrom( ParameterisedHolder<B>::typeName );
+	if( !s )
+	{
+		return s;
+	}
+	
+	// when we create the result attribute in createResultAttribute(), we make it
+	// non-storable. it's common for the result to be a large object such as a mesh so
+	// storing it would be prohibitively expensive, and in any case it doesn't make sense to
+	// store something which can be recomputed.
+	// 
+	// however, that causes problems because maya seems incapable of realising that because
+	// it didn't save the attribute in the file, it can't possibly have a valid value.
+	// maya also doesn't call setDependentsDirty() during scene open, so we don't get a
+	// chance to dirty the result at that point either. to work around this, we create this dummy dependency
+	// attribute, which we change the value of in a post load callback. this value change
+	// triggers setDependentsDirty and we're able to dirty the result before anyone tries to use
+	// it. see FnParameterisedHolderTest.testResultAttrSaveLoad() for a test case exercising this
+	// workaround.
+	MFnNumericAttribute fnNAttr;
+	aResultDependency = fnNAttr.create( "resultDependency", "rdep", MFnNumericData::kInt, 0 );
+	fnNAttr.setStorable( false );
+	fnNAttr.setHidden( true );
+	
+	return B::addAttribute( aResultDependency );
 }
 
 template<typename B>
 MStatus OpHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
+	
 	/// This isn't the best way of doing it, but at this point we can't even be sure that the Op has been loaded,
 	/// so calling plugParameter() may not work. We can't call getOp() or getParameterised() here, as it seems
 	/// we can't do things such as adding/removing attributes within this function
-	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == ParameterisedHolder<B>::g_attributeNamePrefix )
+	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == ParameterisedHolder<B>::g_attributeNamePrefix || plug==aResultDependency )
 	{
 		MFnDependencyNode fnDN( B::thisMObject() );
 		MStatus s;
 		MPlug resultPlug = fnDN.findPlug( "result" , &s);
-		if ( s && !plug.isNull() )
+		if ( s && !resultPlug.isNull() )
 		{
 			plugArray.append( resultPlug );
 		}
