@@ -135,4 +135,6 @@ Bug fixes :
 
 * Fixed plugin load error caused by ieProceduralHolderUI.mel in Maya 2012.
 
+* Worked around Maya problem which prevented OpHolder values being computed properly when scenes were first loaded.
+
 * ToHoudiniGroupConverter now accounts for transforms on the groups and applys them to the children.
