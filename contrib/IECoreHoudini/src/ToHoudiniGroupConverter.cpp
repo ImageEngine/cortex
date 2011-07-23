@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,7 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/CompoundParameter.h"
+#include "IECore/NullObject.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/TransformOp.h"
 
 #include "ToHoudiniGroupConverter.h"
 
@@ -46,10 +49,27 @@ ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> ToHoudiniGroupC
 ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::VisibleRenderable *renderable ) :
 	ToHoudiniGeometryConverter( renderable, "Converts an IECore::Group to a Houdini GU_Detail." )
 {
+	m_transformParameter = new M44fParameter(
+		"transform",
+		"The matrix used to transform the children.",
+		new M44fData()
+	);
+	
+	parameters()->addParameter( m_transformParameter );
 }
 
 ToHoudiniGroupConverter::~ToHoudiniGroupConverter()
 {
+}
+
+M44fParameter *ToHoudiniGroupConverter::transformParameter()
+{
+	return m_transformParameter;
+}
+
+const M44fParameter *ToHoudiniGroupConverter::transformParameter() const
+{
+	return m_transformParameter;
 }
 
 bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
@@ -60,16 +80,41 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 		return false;
 	}
 	
+	Imath::M44f transform = ( runTimeCast<const M44fData>( m_transformParameter->getValue() ) )->readable();
+	const Transform *groupTransform = group->getTransform();
+	if ( groupTransform )
+	{
+		transform = transform * groupTransform->transform();
+	}
+	
+	TransformOpPtr transformOp = new TransformOp();
+	M44fDataPtr transformData = new M44fData( transform );
+	transformOp->matrixParameter()->setValue( transformData );
+	
 	StringDataPtr groupName = group->blindData()->member<StringData>( "name" );
 	
 	const Group::ChildContainer &children = group->children();
 	for ( Group::ChildContainer::const_iterator it=children.begin(); it != children.end(); it++ )
 	{
-		const VisibleRenderable *child = *it;
+		ConstVisibleRenderablePtr child = *it;
+		
+		ConstPrimitivePtr primitive = runTimeCast<const Primitive>( child );
+		if ( primitive )
+		{
+			transformOp->inputParameter()->setValue( constPointerCast<Primitive>( primitive ) );
+			child = staticPointerCast<VisibleRenderable>( transformOp->operate() );
+		}
+		
 		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child );
 		if ( !converter )
 		{
 			continue;
+		}
+		
+		ToHoudiniGroupConverter *groupConverter = runTimeCast<ToHoudiniGroupConverter>( converter );
+		if ( groupConverter )
+		{
+			groupConverter->transformParameter()->setValue( transformData );
 		}
 		
 		size_t origNumPrims = geo->primitives().entries();

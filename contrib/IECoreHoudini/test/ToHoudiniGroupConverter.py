@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@ import IECore
 import IECoreHoudini
 import unittest
 import os
+import random
 
 class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 
@@ -365,6 +366,26 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			for prim in primGroups[i].prims() :
 				self.assertEqual( prim.stringListAttribValue( "commonString" ), tuple( [ "", expected[i] ] ) )
 				self.assertEqual( prim.attribValue( "commonString" ), expected[i] )
+	
+	def testTransforms( self ) :
+		
+		def add( parent, child, vec ) :
+			child.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( vec ) ) )
+			parent.addChild( child )
+			if random.random() > 0.75 :
+				child.addChild( self.mesh() )
+		
+		group = IECore.Group()
+		group.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 5, 0, 0 ) ) ) )
+		for i in range( 0, 50 ) :
+			add( group, self.meshGroup(), IECore.V3f( random.random(), random.random(), random.random() ) * 3 )
+		
+		null = self.emptySop()
+		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( null ) )
+		
+		houdiniBound = null.geometry().boundingBox()
+		bound = IECore.Box3f( IECore.V3f( list(houdiniBound.minvec()) ), IECore.V3f( list(houdiniBound.maxvec()) ) )
+		self.assertEqual( group.bound(), bound )
 
 if __name__ == "__main__":
     unittest.main()

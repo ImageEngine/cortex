@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_TOHOUDINIGROUPCONVERTER_H
 
 #include "IECore/Group.h"
+#include "IECore/SimpleTypedParameter.h"
 
 #include "TypeIds.h"
 #include "ToHoudiniGeometryConverter.h"
@@ -53,6 +54,9 @@ class ToHoudiniGroupConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 		ToHoudiniGroupConverter( const IECore::VisibleRenderable *renderable );
 
 		virtual ~ToHoudiniGroupConverter();
+		
+		IECore::M44fParameter *transformParameter();
+		const IECore::M44fParameter *transformParameter() const;
 	
 	protected :
 		
@@ -62,6 +66,9 @@ class ToHoudiniGroupConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 	private :
 
 		static ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> m_description;
+		
+		IECore::M44fParameterPtr m_transformParameter;
+
 };
 
 // register our converter

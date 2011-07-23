@@ -134,3 +134,5 @@ Bug fixes :
 * Fixed a bug which prevented the attribute range in maya being set correctly when the minimum or maximum value was removed from a NumericParameter.
 
 * Fixed plugin load error caused by ieProceduralHolderUI.mel in Maya 2012.
+
+* ToHoudiniGroupConverter now accounts for transforms on the groups and applys them to the children.
