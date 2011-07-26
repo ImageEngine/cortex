@@ -77,6 +77,8 @@ Improvements :
 
 * The IECoreRI::SLOReader now reads parameters of type shader and shader[], adding StringData and StringVectorData objects to Shader::parameters respectively.
 
+* Added support for installing a pkgConfig configuration file in $INSTALL_PREFIX/lib/pkgconfig. This can be used to simplify the process of building against Cortex.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
