@@ -3,10 +3,6 @@ Cortex 6.0.0
 
 Additions :
 
-# Added PNGImageReader using libpng
-
-* Added ieRayConeIntersection to RayAlgo.h
-
 * New Nuke plugin provides hosting of procedurals and ops within Nuke.
 
 * LineSegmentParameters provide a convenient means of specifying lines to Parameterised classes, and are represented in Nuke as a line which can be manipulated in the viewport.
@@ -24,6 +20,10 @@ Additions :
 * New class DataConvertOp provides a means of converting between different numeric VectorTypedData types, with scaling performed by ScaledDataConversion. See test/IECore/DataConvertOpTest.py for examples.
 
 * New maya UI handler called NotesParameterUI, for displaying a StringParameter with its "typeHint" set to "note". This displays the string as a label in the attribute editor, with an edit button next to it which launches an edit dialog.
+
+* Added PNGImageReader.
+
+* Added ieRayConeIntersection to RayAlgo.h
 
 Improvements :
 
@@ -79,7 +79,7 @@ Improvements :
 
 * Added support for installing a pkgConfig configuration file in $INSTALL_PREFIX/lib/pkgconfig. This can be used to simplify the process of building against Cortex.
 
-* The CapturingRenderer accepts the attribute "cp:procedural:reentrant" to decide whether or not to renderer on multiple threads.
+* The CapturingRenderer accepts the attribute "cp:procedural:reentrant" to decide whether or not to render procedurals on multiple threads.
 
 Changes :
 
@@ -143,4 +143,4 @@ Bug fixes :
 
 * ToHoudiniGroupConverter now accounts for transforms on the groups and applys them to the children.
 
-* SOP_ToHoudiniConverter properly handles the GIL before using the CapturingRendering
+* SOP_ToHoudiniConverter properly handles the GIL before using the CapturingRenderer.
