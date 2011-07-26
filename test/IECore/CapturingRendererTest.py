@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -412,7 +412,35 @@ class CapturingRendererTest( unittest.TestCase ) :
 		checkProceduralGroup( w.children()[0] )
 		
 		IECore.ObjectWriter( w, "/tmp/flake.cob" ).write()
+	
+	def testDisableProceduralThreading( self ) :
+	
+		# this is necessary so python will allow threads created by the renderer
+		# to enter into python when those threads execute procedurals.
+		IECore.initThreads()
 		
+		self.SnowflakeProcedural.threadUse.clear()
+		
+		rThreaded = IECore.CapturingRenderer()
+	
+		with IECore.WorldBlock( rThreaded ) :
+		
+			rThreaded.procedural( self.SnowflakeProcedural( maxLevel = 3 ) )
+		
+		self.failUnless( len( self.SnowflakeProcedural.threadUse ) > 1 )
+		self.assertEqual( sum( self.SnowflakeProcedural.threadUse.values() ), 156 )
+
+		self.SnowflakeProcedural.threadUse.clear()
+		
+		rNonthreaded = IECore.CapturingRenderer()
+	
+		with IECore.WorldBlock( rNonthreaded ) :
+			rNonthreaded.setAttribute( "cp:procedural:reentrant", IECore.BoolData( False ) )		
+			rNonthreaded.procedural( self.SnowflakeProcedural( maxLevel = 3 ) )
+		
+		self.failUnless( len( self.SnowflakeProcedural.threadUse ) == 1 )
+		self.assertEqual( sum( self.SnowflakeProcedural.threadUse.values() ), 156 )
+	
 	def testProceduralExceptionHandling( self ) :
 			
 		# this is necessary so python will allow threads created by the renderer

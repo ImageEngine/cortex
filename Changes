@@ -79,6 +79,8 @@ Improvements :
 
 * Added support for installing a pkgConfig configuration file in $INSTALL_PREFIX/lib/pkgconfig. This can be used to simplify the process of building against Cortex.
 
+* The CapturingRenderer accepts the attribute "cp:procedural:reentrant" to decide whether or not to renderer on multiple threads.
+
 Changes :
 
 * Removed deprecated methods from InterpolatedCache - all queries now specify a frame, allowing efficient sharing of one cache among multiple threads.
@@ -140,3 +142,5 @@ Bug fixes :
 * Worked around Maya problem which prevented OpHolder values being computed properly when scenes were first loaded.
 
 * ToHoudiniGroupConverter now accounts for transforms on the groups and applys them to the children.
+
+* SOP_ToHoudiniConverter properly handles the GIL before using the CapturingRendering

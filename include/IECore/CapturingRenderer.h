@@ -79,6 +79,12 @@ class CapturingRenderer : public Renderer
 
 		virtual void attributeBegin();
 		virtual void attributeEnd();
+		/// \par Implementation specific procedural attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"cp:procedural:reentrant" BoolData true</b><br>
+		/// When true, procedurals may be evaluated in multiple parallel threads.
+		/// When false they will be evaluated from the thread they were specified from.
 		virtual void setAttribute( const std::string &name, ConstDataPtr value );
 		virtual ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters );
