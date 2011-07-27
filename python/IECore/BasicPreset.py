@@ -506,17 +506,11 @@ IECore.registerRunTimeTyped( %s )
 			)
 		
 	def _addClassToVector( self, parameter, parameterName, className, classVersion ) :
-				
+			
 		classes = parameter.getClasses( True )
 		parameterNames = [ c[1] for c in classes ]
-			
-		## \todo Currently this is in ClassVectorParameterUI, should there
-		## be some default name mechanism outside of the UI code for continuity?
 		if parameterName in parameterNames:
-			for i in range( 0, len( classes ) + 1 ) :
-				parameterName = "p%d" % i
-				if parameterName not in parameterNames :
-					break
+			parameterName = parameter.newParameterName()
 		
 		parameter.setClass( parameterName, className, classVersion )
 		return parameter.getClass( parameterName, True )
