@@ -1,3 +1,13 @@
+Additions :
+
+Improvements :
+
+Changes :
+
+Bug Fixes :
+
+* Fixed build bug which meant that the binary component of the IECoreNuke python module wasn't built unless "install" was in the SCons command.
+
 Cortex 6.0.0
 ============
 

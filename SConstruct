@@ -2072,7 +2072,7 @@ if doConfigure :
 				nukePluginEnv.Alias( "install", nukePluginInstall )
 				nukePluginEnv.Alias( "installNuke", nukePluginInstall )
 		
-				Default( [ nukeLibrary, nukePlugin ] )
+				Default( [ nukeLibrary, nukePythonModule, nukePlugin ] )
 				
 				# nuke menu
 				
