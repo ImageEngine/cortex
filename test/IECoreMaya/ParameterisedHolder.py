@@ -376,6 +376,30 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = fnPH.getParameterised()[0]
 		self.assertEqual( op["input"].getValue(), op["input"].defaultValue )
 	
+	def testMeshParameterIOProblem( self ) :
+	
+		fnOP = IECoreMaya.FnOpHolder.create( "merge", "meshMerge", 1 )
+		op = fnOP.getOp()
+		
+		mesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -2, -2, -2 ), IECore.V3f( 2, 3, 4 ) ) )
+		op.parameters()["input"].setValue( mesh )
+		fnOP.setNodeValues()
+		
+		cmds.file( rename = os.getcwd() + "/test/IECoreMaya/meshParameterIO.ma" )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+		
+		fnOP = IECoreMaya.FnOpHolder( "merge" )
+		fnOP.setParameterisedValues()
+		op = fnOP.getOp()
+		
+		mesh2 = op.parameters()["input"].getValue()
+		self.failUnless( mesh2.arePrimitiveVariablesValid() )
+		del mesh2["N"]
+		self.assertEqual( mesh2, mesh )
+	
 	def testOpHolder( self ) :
 	
 		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "maths/multiply", 2 )
@@ -1911,6 +1935,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			"test/IECoreMaya/nonStorableObjectParameter.ma",
 			"test/IECoreMaya/connectedNodeReference.ma",
 			"test/IECoreMaya/connectedNodeReference2.ma",
+			"test/IECoreMaya/meshParameterIO.ma",
 		] :
 
 			if os.path.exists( f ) :

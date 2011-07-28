@@ -8,6 +8,8 @@ Bug Fixes :
 
 * Fixed build bug which meant that the binary component of the IECoreNuke python module wasn't built unless "install" was in the SCons command.
 
+* Fixed bug in IECoreMaya::MeshParameterHandler which prevented saved files containing MeshParameters from loading properly.
+
 Cortex 6.0.0
 ============
 
