@@ -280,6 +280,40 @@ class TestBasicPreset( unittest.TestCase ) :
 		classes2 = [ c[1:] for c in testObj2.parameters()["c"].getClasses( True ) ]
 		
 		self.assertEqual( classes1, classes2 )
+
+	def testReorderProblem( self ):
+		# Checks that if overwriteMatchingComponents is True then it keeps the 
+		# order of the items in a ClassVectorParameter from the Preset, no matter the current order.
+
+		def createTestObj():
+			testObj = IECore.Parameterised( "testParameterised1" )
+			testObj.parameters().addParameters(
+				[
+					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),	
+				]
+			)
+			testObj.parameters()["b"].setClasses(
+				[
+					( "p0", "maths/multiply", 2 ),
+					( "p1", "compoundObjectInOut", 1 ),
+					( "p2", "floatParameter", 1 ),
+				]
+			)
+			return testObj
+
+		testObj = createTestObj()
+		testObj2 = createTestObj()
+		testObj2["b"].removeClass("p0")
+		testObj2["b"].removeClass("p1")				
+		
+		p = IECore.BasicPreset( testObj, testObj.parameters() )
+		p['overwriteMatchingComponents'] = True
+		p( testObj2, testObj2.parameters() )
+		
+		classes1 = [ c[1:] for c in testObj.parameters()["b"].getClasses( True ) ]
+		classes2 = [ c[1:] for c in testObj2.parameters()["b"].getClasses( True ) ]
+		
+		self.assertEqual( classes1, classes2 )
 		
 	def tearDown( self ) :
 		
