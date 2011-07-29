@@ -43,12 +43,7 @@ class RelativePreset( IECore.Preset ) :
 
 	## \param currParameter, IECore.Parameter, represents the parameter state after all changes have been made. 
 	## \param oldParameter, IECore.Parameter, represents the parameter state before any changes. 
-	## \param referenceData, bool, When enabled, this stops the preset mechanism from
-	##              copying the value data from the parameters it encapsulates. This can save memory
-	##              when the preset is to be written straight to disk. The default behaviour
-	##				copies any parameter values so the preset is not dependent on the source
-	##				parameters state at the time of application.
-	def __init__( self, currParameter=None, oldParameter=None, referenceData=False ) :
+	def __init__( self, currParameter=None, oldParameter=None ) :
 		
 		IECore.Preset.__init__( self )
 
@@ -66,9 +61,6 @@ class RelativePreset( IECore.Preset ) :
 				raise TypeError, "Mismatching types for currParameter and oldParameter!"
 
 		RelativePreset.__grabParameterChanges( currParameter, oldParameter, self.__data )
-			
-		if not referenceData:
-			self.__data = self.__data.copy()
 	
 	## \see IECore.Preset.applicableTo	
 	def applicableTo( self, parameterised, rootParameter ) :
@@ -140,7 +132,7 @@ class RelativePreset( IECore.Preset ) :
 				return
 
 		data["_type_"] = IECore.StringData( currParameter.typeName() )
-		data["_value_"] = currParameter.getValue()
+		data["_value_"] = currParameter.getValue().copy()
 	
 	@staticmethod
 	def __grabClassParameterChanges( currParameter, oldParameter, data, paramPath ) :
