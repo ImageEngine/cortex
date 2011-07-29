@@ -1,5 +1,7 @@
 Additions :
 
+* Added RelativePreset class. Can be used to apply parameter changes on similar Parameterised objects.
+
 Improvements :
 
 Changes :
