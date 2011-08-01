@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <vector>
-
 #include "IECorePython/WrapperGarbageCollector.h"
+
+#include <vector>
 
 using namespace IECorePython;
 
