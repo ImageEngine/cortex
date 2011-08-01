@@ -2,6 +2,8 @@ Additions :
 
 * Added RelativePreset class. Can be used to apply parameter changes on similar Parameterised objects.
 
+* Added PkgConfig configuration file, generated on install.
+
 Improvements :
 
 Changes :
