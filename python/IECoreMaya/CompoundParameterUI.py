@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -56,27 +56,28 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	# A list of strings specifying the full parameter paths for
 	# parameters which should be displayed. Any parameters not in
 	# this list will not be visible.
-	def __init__( self, node, parameter, **kw  ) :
-
-		fnPH = IECoreMaya.FnParameterisedHolder( node )
+	#
+	# bool "labelVisible"
+	# If not None, specifies whether or not the parameter label is visible. This
+	# is used by the ClassVectorParameterUI ChildUI class.
+	def __init__( self, node, parameter, labelVisible=None, **kw  ) :
 		
-		collapsable = not parameter.isSame( fnPH.getParameterised()[0].parameters() )
-		with IECore.IgnoredExceptions( KeyError ) :
-			collapsable = parameter.userData()["UI"]["collapsable"].value
-			
-		collapsable = kw.get( "withCompoundFrame", False ) or collapsable
+		originalParent = maya.cmds.setParent( query=True )
 				
 		IECoreMaya.ParameterUI.__init__( self,
 			
 			node,
 			parameter,
 			maya.cmds.frameLayout(
-				collapsable = collapsable,
-				manage = False,
+				labelVisible = False,
+				collapsable = False,
 			),
 			**kw
 			
-		)	
+		)
+		
+		# passing borderVisible=False to the constructor does bugger all
+		maya.cmds.frameLayout( self._topLevelUI(), edit=True, borderVisible=False )
 		
 		self.__childUIs = {}
 		self.__headerCreated = False
@@ -84,51 +85,44 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		
 		self.__kw["hierarchyDepth"] = self.__kw.get( "hierarchyDepth", -1 ) + 1
 		
-		collapsed = self._retrieveCollapsedState( collapsable )
-							
-		maya.cmds.frameLayout(
-			self._topLevelUI(),
-			edit = True,
+		collapsible = self.__parameterIsCollapsible()
+		collapsed = self._retrieveCollapsedState( collapsible )
+		
+		# we always use a Collapsible ui to hold our children, and just hide
+		# the header if we don't actually want to collapse it ever.
+				
+		self.__collapsible = IECoreMaya.Collapsible(
+
 			label = self.label(),
-			font = self._labelFont( self.__kw["hierarchyDepth"] ),
+			labelFont = self._labelFont( self.__kw["hierarchyDepth"] ),
 			labelIndent = self._labelIndent( self.__kw["hierarchyDepth"] ),
-			labelVisible = collapsable,
-			borderVisible = False,
+			labelVisible = labelVisible if labelVisible is not None else collapsible,
+			collapsed = collapsed,
+			annotation = self.description(),
 			expandCommand = self.__expand,
 			preExpandCommand = self.__preExpand,
 			collapseCommand = self.__collapse,
-			collapsable = collapsable,
-			collapse = collapsed,
-			manage = True,
-		)
 		
+		)
+			
 		self.__columnLayout = maya.cmds.columnLayout(
-			parent = self._topLevelUI(),
+			parent = self.__collapsible.frameLayout(),
 			width = 381
 		)
 
 		if not collapsed :
 			self.__preExpand()
 			
-		maya.cmds.setParent("..")
-		maya.cmds.setParent("..")
+		maya.cmds.setParent( originalParent )
 
 	def replace( self, node, parameter ) :
 		
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
-		
-		fnPH = IECoreMaya.FnParameterisedHolder( node )
-		
-		collapsable = not parameter.isSame( fnPH.getParameterised()[0].parameters() )
-		with IECore.IgnoredExceptions( KeyError ) :
-			collapsable = parameter.userData()["UI"]["collapsable"].value
-		
-		if collapsable :
+				
+		if self.__parameterIsCollapsible() :
 			collapsed = self._retrieveCollapsedState( self.getCollapsed() )
 			self.setCollapsed( collapsed, **self.__kw )	
-		
-		maya.cmds.frameLayout( self._topLevelUI(), edit=True, collapsable=collapsable )
-		
+				
 		if len( self.__childUIs ) :
 		
 			for pName in self.__childUIs.keys() :
@@ -140,14 +134,14 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 				
 		else :
 		
-			if not maya.cmds.frameLayout( self._topLevelUI(), query=True, collapse=True ) :
+			if not self.getCollapsed() :
 				with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
 					self.__createChildUIs()
 	
 	## Gets the collapsed state for the frame holding the child parameter uis.
 	def getCollapsed( self ) :
 	
-		return maya.cmds.frameLayout( self.layout(), query=True, collapse=True )
+		return self.__collapsible.getCollapsed()
 		
 	## Sets the collapsed state for the frame holding the child parameter uis.
 	# \param propagateToChildren How many levels of hierarchy to propagate 
@@ -162,8 +156,10 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			# maya only calls preexpand when the ui is expanded by user action,
 			# not by a script - how annoying.
 			self.__preExpand()
-			
-		maya.cmds.frameLayout( self.layout(), edit=True, collapse=collapsed )
+		
+		if self.__parameterIsCollapsible() :	
+			self.__collapsible.setCollapsed( collapsed )
+		
 		self._storeCollapsedState( collapsed )
 		
 		if propagateToChildren > 0 :
@@ -189,6 +185,22 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		
 		key = self.__kw.get( "collapsedUserDataKey", CompoundParameterUI._collapsedUserDataKey )
 		self.parameter.userData()["UI"][key] = IECore.BoolData( state )
+	
+	# Returns True if the ui should be collapsible for this parameter, False
+	# otherwise.
+	def __parameterIsCollapsible( self ) :
+	
+		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+		
+		collapsible = not self.parameter.isSame( fnPH.getParameterised()[0].parameters() )
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsible = self.parameter.userData()["UI"]["collapsible"].value
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsible = self.parameter.userData()["UI"]["collapsable"].value
+			
+		collapsible = self.__kw.get( "withCompoundFrame", False ) or collapsible
+		
+		return collapsible
 		
 	@staticmethod
 	def _labelFont( hierarchyDepth ) :

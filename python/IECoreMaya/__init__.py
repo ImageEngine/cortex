@@ -94,4 +94,5 @@ import ProceduralHolderUI
 from ManipulatorUI import *
 from TransformationMatrixParameterUI import TransformationMatrixParameterUI
 from LineSegmentParameterUI import LineSegmentParameterUI
+from Collapsible import Collapsible
 import Menus
