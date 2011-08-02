@@ -62,8 +62,19 @@ class MeshMergeOp : public MeshPrimitiveOp
 	private :
 
 		struct AppendPrimVars;
+		struct PrependPrimVars;
+		
+		template<class T>
+		struct DefaultValue;
+		
+		template<class T>
+		struct DefaultValue<Imath::Vec3<T> >;
+
+		template<class T>
+		struct DefaultValue<Imath::Vec2<T> >;
 
 		MeshPrimitiveParameterPtr m_meshParameter;
+		BoolParameterPtr m_removePrimVarsParameter;
 
 };
 

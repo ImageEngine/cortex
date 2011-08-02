@@ -8,6 +8,8 @@ Improvements :
 
 * Improved the appearance of parameter user interfaces in Maya 2011 and 2012.
 
+* MeshMergeOp will merge PrimitiveVariables from either the input mesh or the secondary mesh. It also optionally ignores variables that don't exist on both meshes or fills the data with default values.
+
 Changes :
 
 Bug Fixes :

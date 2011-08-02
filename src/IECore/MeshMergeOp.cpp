@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,8 +53,15 @@ MeshMergeOp::MeshMergeOp()
 		"The mesh to be merged with the input.",
 		new MeshPrimitive
 	);
-
+	
+	m_removePrimVarsParameter = new BoolParameter(
+		"removeNonMatchingPrimVars",
+		"If true, PrimitiveVariables that exist on one mesh and not the other will be removed. If false, the PrimitiveVariable data will be expanded using a default value.",
+		false
+	);
+	
 	parameters()->addParameter( m_meshParameter );
+	parameters()->addParameter( m_removePrimVarsParameter );
 }
 
 MeshMergeOp::~MeshMergeOp()
@@ -71,34 +78,129 @@ const MeshPrimitiveParameter * MeshMergeOp::meshParameter() const
 	return m_meshParameter;
 }
 
+template<class T>
+struct MeshMergeOp::DefaultValue
+{
+	T operator()()
+	{
+		return T();
+	}
+};
+
+template<class T>
+struct MeshMergeOp::DefaultValue<Imath::Vec3<T> >
+{
+	Imath::Vec3<T> operator()()
+	{
+		return Imath::Vec3<T>( 0 );
+	}
+};
+
+template<class T>
+struct MeshMergeOp::DefaultValue<Imath::Vec2<T> >
+{
+	Imath::Vec2<T> operator()()
+	{
+		return Imath::Vec2<T>( 0 );
+	}
+};
+
 struct MeshMergeOp::AppendPrimVars
 {
 	typedef void ReturnType;
 
-	AppendPrimVars( const MeshPrimitive * mesh2, const std::string &name )
-		:	m_mesh2( mesh2 ), m_name( name )
+	AppendPrimVars( MeshPrimitive *mesh, const MeshPrimitive *mesh2, const std::string &name, const PrimitiveVariable::Interpolation interpolation, const bool remove, std::set<DataPtr> &visitedData )
+		:	m_mesh( mesh ), m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_remove( remove ), m_visitedData( visitedData )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( T * data )
+	ReturnType operator()( typename T::Ptr data )
 	{
-
-		PrimitiveVariableMap::const_iterator it = m_mesh2->variables.find( m_name );
-		if( it!=m_mesh2->variables.end() )
+		if ( m_visitedData.find( data ) != m_visitedData.end() )
 		{
-			const T *data2 = runTimeCast<const T>( it->second.data );
-			if( data2 )
-			{
-				data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
-			}
+			return;
 		}
+
+		const T *data2 = m_mesh2->variableData<T>( m_name, m_interpolation );
+		if ( data2 )
+		{
+			data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
+		}
+		else if ( m_remove )
+		{
+			m_mesh->variables.erase( m_name );
+		}
+		else
+		{
+			typedef typename T::ValueType::value_type ValueType;
+ 			ValueType defaultValue = DefaultValue<ValueType>()();
+ 			size_t size = m_mesh2->variableSize( m_interpolation );
+			
+ 			data->writable().insert( data->writable().end(), size, defaultValue );
+		}
+		
+		m_visitedData.insert( data );
 	}
 
 	private :
 
-		const MeshPrimitive * m_mesh2;
-		std::string m_name;
+		MeshPrimitive *m_mesh;
+		const MeshPrimitive *m_mesh2;
+		const std::string m_name;
+		const PrimitiveVariable::Interpolation m_interpolation;
+		const bool m_remove;
+		std::set<DataPtr> &m_visitedData;
+
+};
+
+struct MeshMergeOp::PrependPrimVars
+{
+	typedef void ReturnType;
+	
+	PrependPrimVars( MeshPrimitive *mesh, const std::string &name, const PrimitiveVariable::Interpolation interpolation, const bool remove, std::map<ConstDataPtr, DataPtr> &visitedData )
+		:	m_mesh( mesh ), m_name( name ), m_interpolation( interpolation ), m_remove( remove ), m_visitedData( visitedData )
+	{
+	}
+	
+	template<typename T>
+	ReturnType operator()( typename T::ConstPtr data )
+	{
+		PrimitiveVariableMap::iterator it = m_mesh->variables.find( m_name );
+		if ( it == m_mesh->variables.end() && !m_remove )
+		{
+			typename T::Ptr data2 = 0;
+
+			std::map<ConstDataPtr, DataPtr>::iterator dataIt = m_visitedData.find( data );
+			if ( dataIt != m_visitedData.end() )
+			{
+				data2 = runTimeCast<T>( dataIt->second );
+			}
+			
+			if ( !data2 )
+			{
+				typedef typename T::ValueType::value_type ValueType;
+				ValueType defaultValue = DefaultValue<ValueType>()();
+				size_t size = m_mesh->variableSize( m_interpolation ) - data->readable().size();
+				
+				data2 = new T();
+				data2->writable().insert( data2->writable().end(), size, defaultValue );
+				data2->writable().insert( data2->writable().end(), data->readable().begin(), data->readable().end() );
+			}
+			
+			m_mesh->variables[m_name] = PrimitiveVariable( m_interpolation, data2 );
+			
+			m_visitedData[data] = data2;
+		}
+	}
+	
+	private :
+
+		MeshPrimitive *m_mesh;
+		const std::string m_name;
+		const PrimitiveVariable::Interpolation m_interpolation;
+		const bool m_remove;
+		std::map<ConstDataPtr, DataPtr> &m_visitedData;
 
 };
 
@@ -126,14 +228,26 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 	transform( vertexIds2.begin(), vertexIds2.end(), it, bind2nd( plus<int>(), vertexIdOffset ) );
 
 	mesh->setTopology( verticesPerFaceData, vertexIdsData, mesh->interpolation() );
-
+	
+	std::set<DataPtr> visitedData;
 	PrimitiveVariableMap::iterator pvIt;
 	for( pvIt=mesh->variables.begin(); pvIt!=mesh->variables.end(); pvIt++ )
 	{
 		if( pvIt->second.interpolation!=PrimitiveVariable::Constant )
 		{
-			AppendPrimVars f( mesh2, pvIt->first );
+			AppendPrimVars f( mesh, mesh2, pvIt->first, pvIt->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData );
 			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data, f );
+		}
+	}
+	
+	std::map<ConstDataPtr, DataPtr> visitedData2;
+	PrimitiveVariableMap::const_iterator pvIt2;
+	for ( pvIt2=mesh2->variables.begin(); pvIt2 != mesh2->variables.end(); pvIt2++ )
+	{
+		if ( pvIt2->second.interpolation != PrimitiveVariable::Constant )
+		{
+			PrependPrimVars f( mesh, pvIt2->first, pvIt2->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData2 );
+			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt2->second.data, f );
 		}
 	}
 }
