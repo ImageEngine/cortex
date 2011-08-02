@@ -14,6 +14,8 @@ Bug Fixes :
 
 * Fixed bug in IECoreMaya::MeshParameterHandler which prevented saved files containing MeshParameters from loading properly.
 
+* IECoreMaya.FnParameterisedHolder.parameterPlug() now returns a null MPlug if no plug exists, rather than erroring.
+
 Cortex 6.0.0
 ============
 

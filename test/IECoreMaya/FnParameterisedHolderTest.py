@@ -812,6 +812,21 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node + ".parm_f" ), 50.5 )
 		self.assertEqual( maya.cmds.getAttr( node + ".result" ), 50.5 )
 	
+	def testParameterPlugForMissingPlug( self ) :
+	
+		## Make sure that null plugs are returned from the parameterPlug() method
+		# if no plug exists.
+	
+		node = maya.cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnOpHolder( node )
+		fnPH.setOp( "floatParameter" )
+		
+		op = fnPH.getOp()
+		
+		plug = fnPH.parameterPlug( op.parameters() )
+		self.failUnless( isinstance( plug, maya.OpenMaya.MPlug ) )
+		self.failUnless( plug.isNull() )
+	
 	def tearDown( self ) :
 
 		for f in [

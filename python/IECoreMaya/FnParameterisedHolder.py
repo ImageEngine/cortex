@@ -153,6 +153,8 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	def parameterPlug( self, parameter ) :
 
 		plugName = _IECoreMaya._parameterisedHolderParameterPlug( self, parameter )
+		if plugName == "" :
+			return maya.OpenMaya.MPlug()
 		
 		return StringUtil.plugFromString( self.fullPathName() + "." + plugName )
 
