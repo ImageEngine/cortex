@@ -1,3 +1,6 @@
+Cortex 6.1.0
+============
+
 Additions :
 
 * Added RelativePreset class. Can be used to apply parameter changes on similar Parameterised objects.
