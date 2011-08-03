@@ -1798,7 +1798,7 @@ if doConfigure :
 		mayaEnv.Alias( "installMaya", mayaMelInstall )
 		
 		# maya icons
-		mayaIcons = glob.glob( "icons/IECoreMaya/*.xpm" )
+		mayaIcons = glob.glob( "icons/IECoreMaya/*.xpm" ) + glob.glob( "icons/IECoreMaya/*.png" )
 		mayaIconInstall = mayaEnv.Install( "$INSTALL_MAYAICON_DIR", source=mayaIcons )
 		mayaEnv.Alias( "install", mayaIconInstall )
 		mayaEnv.Alias( "installMaya", mayaIconInstall )
