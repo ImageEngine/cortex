@@ -1,3 +1,17 @@
+Cortex 6.1.1
+============
+
+Additions :
+
+Improvements :
+
+Changes :
+
+* SOP_InterpolatedCache attempts to account for doubled endpoints from CurvesPrimitives when applying a cache.
+
+Bug Fixes :
+
+
 Cortex 6.1.0
 ============
 
