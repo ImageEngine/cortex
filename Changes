@@ -3,6 +3,8 @@ Cortex 6.1.1
 
 Additions :
 
+* Added support in python for the minSequenceSize argument for IECore.findSequence function. Defaults to 2, which was the original behaviour.
+
 Improvements :
 
 Changes :

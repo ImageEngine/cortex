@@ -400,6 +400,16 @@ class testLs( unittest.TestCase ) :
 		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif" ] )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], FileSequence( "b.####.gif", FrameRange( 10, 11 ) ) )
+		
+		# test minSequenceSize for findSequences
+		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif", "c.tif" ], 1 )
+		self.assertEqual( len( l ), 2 )
+		self.assertTrue( FileSequence( "a.####.tif", FrameRange( 1, 1 ) ) in l )
+		self.assertTrue( FileSequence( "b.####.gif", FrameRange( 10, 11 ) ) in l )
+
+		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif", "b.0012.gif", "c.tif" ], 3 )
+		self.assertEqual( len( l ), 1 )
+		self.assertTrue( FileSequence( "b.####.gif", FrameRange( 10, 12 ) ) in l )
 
 		s1 = FileSequence( "test/sequences/lsTest/a.#.tif", FrameRange( 1, 1 ) )
 		for f in s1.fileNames() :
@@ -410,7 +420,7 @@ class testLs( unittest.TestCase ) :
 
 		l = ls( "test/sequences/lsTest/a.#.tif", 1 )
 		self.assertEqual( s1, l )
-
+		
 	def testSpecialExtensions( self ):
 		l = findSequences( [ "a.001.cr2", "b.002.cr2", "b.003.cr2" ] )
 		self.assertEqual( len( l ), 1 )
