@@ -53,7 +53,7 @@ namespace IECorePython
 
 struct FileSequenceFunctionsHelper
 {
-	static list findSequences( list namesList )
+	static list findSequences( list namesList, size_t minSequenceSize = 2 )
 	{
 		list result;
 
@@ -70,7 +70,7 @@ struct FileSequenceFunctionsHelper
 		}
 
 		std::vector< FileSequencePtr > sequences;
-		IECore::findSequences( names, sequences );
+		IECore::findSequences( names, sequences, minSequenceSize );
 		for ( std::vector< FileSequencePtr >::const_iterator it = sequences.begin(); it != sequences.end(); ++it )
 		{
 			result.append( *it );
@@ -128,7 +128,7 @@ struct FileSequenceFunctionsHelper
 
 void bindFileSequenceFunctions()
 {
-	def( "findSequences", &FileSequenceFunctionsHelper::findSequences );
+	def( "findSequences", &FileSequenceFunctionsHelper::findSequences, ( arg_("namesList"), arg_( "minSequenceSize" ) = 2 ) );
 	def( "ls", &FileSequenceFunctionsHelper::ls, ( arg_("path"), arg_( "minSequenceSize" ) = 2 ) );
 	def( "frameListFromList", &FileSequenceFunctionsHelper::frameListFromList );
 }
