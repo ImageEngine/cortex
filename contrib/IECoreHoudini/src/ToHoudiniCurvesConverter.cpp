@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -110,6 +110,11 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 	{
 		size_t numVerts = duplicatedEnds ? verticesPerCurve[c] - 4 : verticesPerCurve[c];
 		GU_PrimNURBCurve *curve = GU_PrimNURBCurve::build( geo, numVerts, order, periodic, interpEnds, false );
+		if ( !curve )
+		{
+			return false;
+		}
+		
 		newPrims.append( curve );
 		
 		for ( size_t v=0; v < numVerts; v++ )

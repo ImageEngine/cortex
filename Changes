@@ -13,6 +13,7 @@ Changes :
 
 Bug Fixes :
 
+* ToHoudiniCurvesConverter returns false rather than a seg fault when asked to convert and un-buildable curve.
 
 Cortex 6.1.0
 ============

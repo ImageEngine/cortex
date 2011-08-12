@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -817,6 +817,15 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 		del curves["floatVert"]
 		self.comparePrimAndSop( curves, sop )
+	
+	def testBadCurve( self ) :
+		
+		curves = IECore.CurvesPrimitive( IECore.IntVectorData( [ 7 ] ), IECore.CubicBasisf.bSpline(), False )
+		curves['P'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 2 ), IECore.V3f( 2 ) ] ) )
+		self.failUnless( curves.arePrimitiveVariablesValid() )
+		
+		sop = self.emptySop()
+		self.assertFalse( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 	
 	def tearDown( self ) :
 		
