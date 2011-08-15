@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -194,15 +194,27 @@ IECore::Data *ImmediateRendererImplementation::getUserAttribute( const IECore::I
 
 void ImmediateRendererImplementation::addPrimitive( PrimitivePtr primitive )
 {
-	primitive->render( m_stateStack.top() );
+	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
+	if( visible )
+	{
+		primitive->render( m_stateStack.top() );
+	}
 }
 
 void ImmediateRendererImplementation::addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
 {
-	proc->render( renderer );
+	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
+	if( visible )
+	{
+		proc->render( renderer );
+	}
 }
 
 void ImmediateRendererImplementation::addInstance( GroupPtr grp )
 {
-	grp->render( m_stateStack.top() );
+	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
+	if( visible )
+	{
+		grp->render( m_stateStack.top() );
+	}
 }

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2011, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -119,6 +119,7 @@ class TestRenderer( unittest.TestCase ) :
 			if withFreeType() :
 				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "mesh" ) )
 			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( True ) )
 
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
 			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
@@ -181,10 +182,11 @@ class TestRenderer( unittest.TestCase ) :
 			r.setAttribute( "gl:depthTest", BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( False ) )	
 
+			r.setAttribute( "gl:visibility:camera", BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( False ) )
+
 			r.worldEnd()
 		
-			
-
 	def testOtherRendererAttributes( self ) :
 
 		"""Attributes destined for other renderers should be silently ignored."""
@@ -1023,6 +1025,51 @@ class TestRenderer( unittest.TestCase ) :
 		doTest( True, 1, 0, 0 )
 		doTest( False, 0, 1, 0 )
 		
+	def testCameraVisibility( self ) :
+	
+		def doRender( mode, visibility ) :
+	
+			r = Renderer()
+			r.setOption( "gl:mode", IECore.StringData( mode ) )
+		
+			r.camera( "main", {
+					"projection" : IECore.StringData( "perspective" ),
+					"projection:fov" : IECore.FloatData( 20 ),
+					"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+					"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+					"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+				}
+			)
+			if mode=="immediate" :
+				r.display( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif", "tif", "rgba", {} )
+		
+			with IECore.WorldBlock( r ) :
+
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			
+				r.setAttribute( "gl:visibility:camera", IECore.BoolData( visibility ) )
+				r.points( 1, { "P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } ) 
+			
+			return r
+		
+		# test immediate renderer by checking images
+			
+		doRender( "immediate", True )
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
+		self.failUnless( i["A"].data[256 * 128 + 128] > .99 )
+		
+		doRender( "immediate", False )
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
+		self.assertEqual( i["A"].data, IECore.FloatVectorData( [ 0 ] * 256 * 256 ) )
+		
+		# test deferred renderer by checking scene
+		
+		r = doRender( "deferred", True )
+		self.assertEqual(  len( r.scene().root().children()[0].children() ), 1 )
+		
+		r = doRender( "deferred", False )
+		self.assertEqual( len( r.scene().root().children() ), 0 )
+		
 	def tearDown( self ) :
 
 		files = [
@@ -1031,6 +1078,7 @@ class TestRenderer( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/output/testStackBug.tif",
 			os.path.dirname( __file__ ) + "/output/proceduralTest.tif",
 			os.path.dirname( __file__ ) + "/output/depthTest.tif",
+			os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif",
 		]
 
 		for f in files :

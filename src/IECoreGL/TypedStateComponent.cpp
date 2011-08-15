@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -214,5 +214,6 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointColorStateComponent,
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingSpaceStateComponent, CullingSpaceStateComponentTypeId, RendererSpace, ObjectSpace );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingBoxStateComponent, CullingBoxStateComponentTypeId, Imath::Box3f, Imath::Box3f() );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( ProceduralThreadingStateComponent, ProceduralThreadingStateComponentTypeId, bool, true );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CameraVisibilityStateComponent, CameraVisibilityStateComponentTypeId, bool, true );
 
 } // namespace IECoreGL

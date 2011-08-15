@@ -329,6 +329,16 @@ class Renderer : public IECore::Renderer
 		///
 		/// \li <b>"gl:depthTest" BoolData true</b><br>
 		/// Maps to glEnable/Disable GL_DEPTH_TEST
+		///
+		/// \par Implementation specific visibility attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"gl:visibility:camera" BoolData true</b><br>
+		/// Specifies whether or not objects are visible to the camera.
+		/// If a procedural is not visible then it will not be opened
+		/// to discover if it's contents might turn visibility back on.
+		///
+		////////////////////////////////////////////////////////////
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		/// Supports only shader type "surface" or "gl:surface", looking for "name.vert" and  "name.frag" GLSL source files

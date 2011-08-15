@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -207,6 +207,9 @@ typedef TypedStateComponent<Imath::Box3f, CullingBoxStateComponentTypeId> Cullin
 /// Defines whether or not procedurals will be executed in parallel threads.
 typedef TypedStateComponent<bool, ProceduralThreadingStateComponentTypeId> ProceduralThreadingStateComponent;
 
+/// Defines camera visibility.
+typedef TypedStateComponent<bool, CameraVisibilityStateComponentTypeId> CameraVisibilityStateComponent;
+
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( BlendColorStateComponent );
 IE_CORE_DECLAREPTR( BlendFuncStateComponent );
@@ -222,6 +225,7 @@ IE_CORE_DECLAREPTR( DepthTestStateComponent );
 IE_CORE_DECLAREPTR( CullingSpaceStateComponent );
 IE_CORE_DECLAREPTR( CullingBoxStateComponent );
 IE_CORE_DECLAREPTR( ProceduralThreadingStateComponent );
+IE_CORE_DECLAREPTR( CameraVisibilityStateComponent );
 
 } // namespace IECoreGL
 
