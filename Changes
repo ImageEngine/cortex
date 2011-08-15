@@ -1,3 +1,7 @@
+Bug fixes :
+
+* PointDistributionOp density parameter no longer accepts negative values.
+
 Cortex 6.1.1
 ============
 

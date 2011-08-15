@@ -140,6 +140,13 @@ class PointDistributionOpTest( unittest.TestCase ) :
 		for i in range( 0, p.numPoints ) :
 			self.failUnless( pos2[i].equalWithRelError( pos[i] + V3f( 0, 5, 0 ), 1e-6 ) )
 	
+	def testDensityRange( self ) :
+	
+		p = PointDistributionOp()
+		p["density"].setNumericValue( -1 )
+		
+		self.assertRaises( RuntimeError, p["density"].validate )
+	
 	def setUp( self ) :
 	
 		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"
