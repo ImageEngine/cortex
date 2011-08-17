@@ -62,10 +62,7 @@ class _CollapsibleMotif( IECoreMaya.UIElement ) :
 		collapseCommand = None,
 	) :
 		
-		IECoreMaya.UIElement.__init__( self, maya.cmds.formLayout() )
 	
-		# implementation for motif is pretty simple - just a frame layout		
-		
 		kw = {}
 		if preExpandCommand is not None :
 			kw["preExpandCommand"] = preExpandCommand
@@ -73,34 +70,41 @@ class _CollapsibleMotif( IECoreMaya.UIElement ) :
 			kw["expandCommand"] = expandCommand
 		if collapseCommand is not None :
 			kw["collapseCommand"] = collapseCommand
-		
-		self.__frameLayout = maya.cmds.frameLayout(
-		
-			label = label,
-			labelVisible = labelVisible,
-			labelIndent = labelIndent,
-			font = labelFont,
-			borderVisible = False,
-			collapsable = True,
-			collapse = collapsed,
-			marginWidth = 0,
-			**kw
+
+		# implementation for motif is pretty simple - just a frame layout
 			
+		IECoreMaya.UIElement.__init__( self,
+			maya.cmds.frameLayout(
+		
+				label = label,
+				labelVisible = labelVisible,
+				labelIndent = labelIndent,
+				labelAlign = "center",
+				font = labelFont,
+				borderVisible = False,
+				collapsable = True,
+				collapse = collapsed,
+				marginWidth = 0,
+				**kw
+			
+			)
 		)
+				
+		self.__frameLayout = self._topLevelUI()
 		
 	## The maya frameLayout whose collapsibility is controlled by this
 	# class. Add children by editing the contents of this layout.
 	def frameLayout( self ) :
 	
-		return self.__frameLayout
+		return self._topLevelUI()
 
 	def getCollapsed( self ) :
 	
-		return maya.cmds.frameLayout( self.__frameLayout, query=True, collapse=True )
+		return maya.cmds.frameLayout( self.frameLayout(), query=True, collapse=True )
 		
 	def setCollapsed( self, collapsed ) :
 	
-		maya.cmds.frameLayout( self.__frameLayout, edit=True, collapse=collapsed )
+		maya.cmds.frameLayout( self.frameLayout(), edit=True, collapse=collapsed )
 
 class _CollapsibleQt(  IECoreMaya.UIElement ) :
 
