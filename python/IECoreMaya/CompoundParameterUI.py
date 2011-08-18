@@ -62,49 +62,51 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	# is used by the ClassVectorParameterUI ChildUI class.
 	def __init__( self, node, parameter, labelVisible=None, **kw  ) :
 		
-		originalParent = maya.cmds.setParent( query=True )
-				
-		IECoreMaya.ParameterUI.__init__( self,
-			
-			node,
-			parameter,
-			maya.cmds.frameLayout(
-				labelVisible = False,
-				collapsable = False,
-			),
-			**kw
-			
-		)
-		
-		# passing borderVisible=False to the constructor does bugger all
-		maya.cmds.frameLayout( self._topLevelUI(), edit=True, borderVisible=False )
-		
 		self.__childUIs = {}
 		self.__headerCreated = False
 		self.__kw = kw.copy()
 		
 		self.__kw["hierarchyDepth"] = self.__kw.get( "hierarchyDepth", -1 ) + 1
-		
-		collapsible = self.__parameterIsCollapsible()
-		collapsed = self._retrieveCollapsedState( collapsible )
+	
+		originalParent = maya.cmds.setParent( query=True )
+				
+		collapsible = self.__parameterIsCollapsible( node, parameter )
+		collapsed = self._retrieveCollapsedState( collapsible, parameter )
 		
 		# we always use a Collapsible ui to hold our children, and just hide
 		# the header if we don't actually want to collapse it ever.
-				
+
 		self.__collapsible = IECoreMaya.Collapsible(
 
-			label = self.label(),
+			# need to specify a label on creation or maya gets the size wrong.
+			# we'll update the label below, once we can call the base class label() method.
+			label = "mustSpecifySomething",
 			labelFont = self._labelFont( self.__kw["hierarchyDepth"] ),
 			labelIndent = self._labelIndent( self.__kw["hierarchyDepth"] ),
 			labelVisible = labelVisible if labelVisible is not None else collapsible,
 			collapsed = collapsed,
-			annotation = self.description(),
 			expandCommand = self.__expand,
 			preExpandCommand = self.__preExpand,
 			collapseCommand = self.__collapse,
 		
 		)
+
+		IECoreMaya.ParameterUI.__init__( self,
 			
+			node,
+			parameter,
+			# stealing someone else's top level ui for use as your own is really breaking the rules.
+			# but we need to do it to reduce the nesting associated with making a new top level to put
+			# the Collapsible class in, because otherwise maya 2010 will crash with deeply nested
+			# hierarchies. we could stop doing this when we no longer need maya 2010 support.
+			self.__collapsible._topLevelUI(),
+			**kw
+			
+		)				
+
+		self.__collapsible.setLabel( self.label() )
+		self.__collapsible.setAnnotation( self.description() )
+				
 		self.__columnLayout = maya.cmds.columnLayout(
 			parent = self.__collapsible.frameLayout(),
 			width = 381
@@ -168,11 +170,14 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	
 	# This will retrieve the collapsedState from the parameters userData. It uses the
 	# default key if 'collapsedUserDataKey' was not provided in the UI constructor's **kw.
-	def _retrieveCollapsedState( self, default=True ) :
+	def _retrieveCollapsedState( self, default=True, parameter=None ) :
+		
+		if parameter is None :	
+			parameter = self.parameter
 		
 		key = self.__kw.get( "collapsedUserDataKey", CompoundParameterUI._collapsedUserDataKey )
-		if "UI" in self.parameter.userData() and key in self.parameter.userData()["UI"] :		
-			return self.parameter.userData()["UI"][ key ].value
+		if "UI" in parameter.userData() and key in parameter.userData()["UI"] :	   
+			return parameter.userData()["UI"][ key ].value
 		else :
 			return default
 	
@@ -188,15 +193,20 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	
 	# Returns True if the ui should be collapsible for this parameter, False
 	# otherwise.
-	def __parameterIsCollapsible( self ) :
+	def __parameterIsCollapsible( self, node=None, parameter=None ) :
 	
-		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+		if node is None :
+			node = self.node()
+		if parameter is None :
+			parameter = self.parameter
+	
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
 		
-		collapsible = not self.parameter.isSame( fnPH.getParameterised()[0].parameters() )
+		collapsible = not parameter.isSame( fnPH.getParameterised()[0].parameters() )
 		with IECore.IgnoredExceptions( KeyError ) :
-			collapsible = self.parameter.userData()["UI"]["collapsible"].value
+			collapsible = parameter.userData()["UI"]["collapsible"].value
 		with IECore.IgnoredExceptions( KeyError ) :
-			collapsible = self.parameter.userData()["UI"]["collapsable"].value
+			collapsible = parameter.userData()["UI"]["collapsable"].value
 			
 		collapsible = self.__kw.get( "withCompoundFrame", False ) or collapsible
 		
