@@ -5,6 +5,7 @@ Additions :
 Bug fixes :
 
 * PointDistributionOp density parameter no longer accepts negative values.
+* RelativePreset was creating unnecessary data for empty class parameters and not working if there was no differences at all.
 
 Cortex 6.1.1
 ============

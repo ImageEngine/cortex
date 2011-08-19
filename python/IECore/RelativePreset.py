@@ -73,12 +73,13 @@ class RelativePreset( IECore.Preset ) :
 		if not self.applicableTo( parameterised, rootParameter ) :
 			raise RuntimeError, "Sorry, this preset is not applicable to the given parameter."
 		
-		self.__applyParameterChanges( rootParameter, self.__data )
+		if len( self.__data ) :
+			self.__applyParameterChanges( rootParameter, self.__data )
 
 	@staticmethod
 	def __grabParameterChanges( currParameter, oldParameter, data, paramPath = "" ) :
 
-		if oldParameter :
+		if not oldParameter is None:
 
 			if currParameter.staticTypeId() != oldParameter.staticTypeId() :
 				raise Exception, "Incompatible parameter %s!" % paramPath
@@ -106,7 +107,7 @@ class RelativePreset( IECore.Preset ) :
 			
 			newData = IECore.CompoundObject()
 			childOldParam = None
-			if oldParameter :
+			if not oldParameter is None :
 				if p in oldParameter.keys() :
 					childOldParam = oldParameter[p]
 
@@ -126,7 +127,7 @@ class RelativePreset( IECore.Preset ) :
 	@staticmethod
 	def __grabSimpleParameterChanges( currParameter, oldParameter, data, paramPath ) :
 
-		if oldParameter :
+		if not oldParameter is None :
 
 			if currParameter.getValue() == oldParameter.getValue() :
 				return
@@ -139,24 +140,23 @@ class RelativePreset( IECore.Preset ) :
 		
 		c = currParameter.getClass( True )
 		
-		className = IECore.StringData( c[1] )
-		classVersion = IECore.IntData( c[2] )
-		classSearchPaths = IECore.StringData( c[3] )
+		className = c[1]
+		classVersion = c[2]
 		classNameFilter = "*"
 		try :
 			classNameFilter = currParameter.userData()["UI"]["classNameFilter"].value
 		except :
 			pass
-		classNameFilter = IECore.StringData( classNameFilter )
 
 		oldClassName = None
 		oldClassVersion = None
 		childOldParam = None
-		if oldParameter :
+		if not oldParameter is None :
 			oldClass = oldParameter.getClass( True )
 			oldClassName = oldClass[1]
 			oldClassVersion = oldClass[2]
-			childOldParam = oldClass[0].parameters()
+			if oldClass[0] :
+				childOldParam = oldClass[0].parameters()
 
 		classValue = IECore.CompoundObject()
 
@@ -172,10 +172,11 @@ class RelativePreset( IECore.Preset ) :
 		if len(classValue):
 			data["_classValue_"] = classValue
 
+		# \todo: save oldClassName, so we know that we can change the class when applying these changes?
 		if len(data) or className != oldClassName or classVersion != oldClassVersion :
-			data["_className_"] = className
-			data["_classVersion_"] = classVersion
-			data["_classNameFilter_"] = classNameFilter
+			data["_className_"] = IECore.StringData(className)
+			data["_classVersion_"] = IECore.IntData(classVersion)
+			data["_classNameFilter_"] = IECore.StringData(classNameFilter)
 			data["_type_"] = IECore.StringData( "ClassParameter" )
 	
 	@staticmethod		
@@ -183,8 +184,6 @@ class RelativePreset( IECore.Preset ) :
 		
 		classes = currParameter.getClasses( True )
 				
-		classSearchPaths = IECore.StringData( currParameter.searchPathEnvVar() )
-
 		classNameFilter = "*"
 		try :
 			classNameFilter = currParameter.userData()["UI"]["classNameFilter"].value
@@ -208,9 +207,10 @@ class RelativePreset( IECore.Preset ) :
 			v = IECore.CompoundObject()
 
 			childOldParam = None
-			if oldParameter and pName in oldParameter.keys() :
+			if not oldParameter is None and pName in oldParameter.keys() :
 				oldClass = oldParameter.getClass( pName )
-				childOldParam = oldClass.parameters()
+				if oldClass :
+					childOldParam = oldClass.parameters()
 
 			RelativePreset.__grabParameterChanges(
 				c[0].parameters(),
@@ -223,7 +223,7 @@ class RelativePreset( IECore.Preset ) :
 				values[c[1]] = v
 
 		removedParams = []
-		if oldParameter :
+		if not oldParameter is None :
 			removedParams = list( set( oldParameter.keys() ).difference( classOrder ) )
 			if removedParams :
 				data["_removedParamNames_"] = IECore.StringVectorData( removedParams )
@@ -244,7 +244,7 @@ class RelativePreset( IECore.Preset ) :
 			oldClassName = None
 			oldClassVersion = None
 
-			if oldParameter :
+			if not oldParameter is None :
 				try:
 					oldClass = oldParameter.getClass( pName, True )
 					oldClassName = oldClass[1]
@@ -279,7 +279,7 @@ class RelativePreset( IECore.Preset ) :
 
 		parameterOrder = classOrder
 		baseOrder = classOrder
-		if oldParameter :
+		if not oldParameter is None :
 			baseOrder = IECore.StringVectorData( filter( lambda n: not n in removedParams, oldParameter.keys() ) )
 			
 		if baseOrder != parameterOrder :
@@ -385,15 +385,6 @@ class RelativePreset( IECore.Preset ) :
 		
 		className = data["_className_"].value
 		classVersion = data["_classVersion_"].value
-
-		if data["_className_"].value != className :
-			IECore.msg(
-				IECore.Msg.Level.Warning, 
-				"IECore.RelativePreset", 
-				"Unable to set preset on '%s'. Expected to find %s but the current class is %s."
-					% ( paramPath, data["_className_"].value, className )
-			)
-			return
 
 		if c[1] != className or c[2] != classVersion :
 			parameter.setClass( className, classVersion )
@@ -531,7 +522,10 @@ class RelativePreset( IECore.Preset ) :
 		
 	@staticmethod
 	def __applicableTo( parameter, data ) :
-				
+		
+		if len(data) == 0 :
+			return True
+
 		if parameter.staticTypeId() == IECore.TypeId.CompoundParameter :
 			
 			if data["_type_"].value != "CompoundParameter":

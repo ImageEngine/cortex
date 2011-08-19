@@ -263,6 +263,14 @@ class TestRelativePreset( unittest.TestCase ) :
 
 		testObjB = createParameterised()
 
+		# test no differences
+		r = IECore.RelativePreset( testObjB.parameters(), testObjA.parameters() )
+		# the diff should be empty!
+		self.assertEqual( r._RelativePreset__data, IECore.CompoundObject() )
+		# applying empty diff should not break
+		r( testObjB, testObjB.parameters() )
+		self.assertEqual( testObjA.parameters().getValue(), testObjB.parameters().getValue() )
+
 		# now we modify the object a lot!!
 		testObjB["a"] = False
 		testObjB["c"] = True
