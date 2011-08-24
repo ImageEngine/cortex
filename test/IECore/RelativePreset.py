@@ -38,6 +38,7 @@ import shutil
 import unittest
 import IECore
 
+
 class TestRelativePreset( unittest.TestCase ) :
 
 	def testSparseSimpleChanges( self ) :
@@ -341,5 +342,141 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( testObj2["b"]["p2"]["cv"].getClass( "p2", True )[1], "maths/multiply" )	# ok, the Preset added a new parameter "p2" with the "p1" Preset...
 		self.assertEqual( testObj2["b"]["p2"]["cv"].getClass( "p4", True )[1], "floatParameter" )	# ok, the Preset added a new parameter "p4" with the "p3" Preset...
 
+	def __checkOrder( self, localChangesParam, applyToParam, expectedOrder ):
+		r = IECore.RelativePreset( localChangesParam, baseVec() )
+		testObj = IECore.Parameterised( "test" )
+		testObj.parameters().addParameters( 
+			[
+						applyToParam 
+			]
+		)
+		r( testObj, applyToParam )
+		resultOrder = map( lambda c: c[1], applyToParam.getClasses( True ) )
+		self.assertEqual( resultOrder, expectedOrder )
+	
+	def testBaseInsertions( self ):
+		# easy tests applying to base vector
+		self.__checkOrder( topInsert(), baseVec(), [ 'p5', 'p1', 'p2', 'p3', 'p4' ] )
+		self.__checkOrder( doubleTopInsert(), baseVec(), [ 'p5', 'p6', 'p1', 'p2', 'p3', 'p4' ] )
+		self.__checkOrder( bottomInsert(), baseVec(), [ 'p1', 'p2', 'p3', 'p4', 'p5' ] )
+		self.__checkOrder( centerInsert(), baseVec(), [ 'p1', 'p2', 'p5', 'p3', 'p4' ] )
+		self.__checkOrder( doubleCenterInsert(), baseVec(), [ 'p1', 'p2', 'p5', 'p6', 'p3', 'p4' ] )
+		self.__checkOrder( twoInserts(), baseVec(), [ 'p1', 'p2', 'p5', 'p3', 'p6', 'p4' ] )
+
+	def testEmptyVectorInsertions(self):
+		# tests applying to empty classes vector
+		self.__checkOrder( topInsert(), emptyVec(), [ 'p5' ] )
+		self.__checkOrder( doubleTopInsert(), emptyVec(), [ 'p5', 'p6' ] )
+		self.__checkOrder( bottomInsert(), emptyVec(), [ 'p5' ] )
+		self.__checkOrder( centerInsert(), emptyVec(), [ 'p5' ] )
+		self.__checkOrder( doubleCenterInsert(), emptyVec(), [ 'p5', 'p6' ] )
+		self.__checkOrder( twoInserts(), emptyVec(), [ 'p5', 'p6' ] )
+
+	def testRemovedP2Insertions( self ):
+		# tests applying to "removed P2" vector
+		self.__checkOrder( topInsert(), removedP2Vec(), [ 'p5', 'p1', 'p3', 'p4' ] )
+		self.__checkOrder( doubleTopInsert(), removedP2Vec(), [ 'p5', 'p6', 'p1', 'p3', 'p4' ] )
+		self.__checkOrder( bottomInsert(), removedP2Vec(), [ 'p1', 'p3', 'p4', 'p5' ] )
+		self.__checkOrder( centerInsert(), removedP2Vec(), [ 'p1', 'p5', 'p3', 'p4' ] )
+		self.__checkOrder( doubleCenterInsert(), removedP2Vec(), [ 'p1', 'p5', 'p6', 'p3', 'p4' ] )
+		self.__checkOrder( twoInserts(), removedP2Vec(), [ 'p1', 'p5', 'p3', 'p6', 'p4' ] )
+
+	def testRemovedP3Insertions( self ):
+		# tests applying to "removed P3" vector
+		self.__checkOrder( topInsert(), removedP3Vec(), [ 'p5', 'p1', 'p2', 'p4' ] )
+		self.__checkOrder( doubleTopInsert(), removedP3Vec(), [ 'p5', 'p6', 'p1', 'p2', 'p4' ] )
+		self.__checkOrder( bottomInsert(), removedP3Vec(), [ 'p1', 'p2', 'p4', 'p5' ] )
+		self.__checkOrder( centerInsert(), removedP3Vec(), [ 'p1', 'p2', 'p5', 'p4' ] )
+		self.__checkOrder( doubleCenterInsert(), removedP3Vec(), [ 'p1', 'p2', 'p5', 'p6', 'p4' ] )
+		self.__checkOrder( twoInserts(), removedP3Vec(), [ 'p1', 'p2', 'p5', 'p6', 'p4' ] )
+
+	def testReversedBaseInsertions(self):
+		# tests applying to reversed base vector
+		self.__checkOrder( topInsert(), reversedBaseVec(), [ 'p5', 'p4', 'p3', 'p2', 'p1' ] )
+		self.__checkOrder( doubleTopInsert(), baseVec(), [ 'p5', 'p6', 'p4', 'p3', 'p2', 'p1' ] )
+		self.__checkOrder( bottomInsert(), reversedBaseVec(), [ 'p4', 'p3', 'p2', 'p1', 'p5' ] )
+		self.__checkOrder( centerInsert(), reversedBaseVec(), [ 'p4', 'p3', 'p2', 'p5', 'p1' ] )
+		self.__checkOrder( doubleCenterInsert(), reversedBaseVec(), [ 'p4', 'p3', 'p2', 'p5', 'p6', 'p1' ] )
+		self.__checkOrder( twoInserts(), reversedBaseVec(), [ 'p4', 'p3', 'p6', 'p2', 'p5', 'p1' ] )
+
+	def testDifferentInsertions(self):
+		# tests applying to different classes and names vector
+		self.__checkOrder( topInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5' ] )
+		self.__checkOrder( doubleTopInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5', 'p6' ] )
+		self.__checkOrder( bottomInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5' ] )
+		self.__checkOrder( centerInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5' ] )
+		self.__checkOrder( doubleCenterInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5', 'p6' ] )
+		self.__checkOrder( twoInserts(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5', 'p6' ] )
+
+	def testNameClashingInsertions(self):
+		# tests applying to name clashing vector
+		self.__checkOrder( topInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0' ] )
+		self.__checkOrder( doubleTopInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0', 'p1' ] )
+		self.__checkOrder( bottomInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0' ] )
+		self.__checkOrder( centerInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0' ] )
+		self.__checkOrder( doubleCenterInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0', 'p1' ] )
+		self.__checkOrder( twoInserts(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0', 'p1' ] )
+
+	def testUnrelatedInsertions(self):
+		# tests applying to unrelated vector
+		self.__checkOrder( topInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5' ] )
+		self.__checkOrder( doubleTopInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5', 'p6' ] )
+		self.__checkOrder( bottomInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5' ] )
+		self.__checkOrder( centerInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5' ] )
+		self.__checkOrder( doubleCenterInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5', 'p6' ] )
+		self.__checkOrder( twoInserts(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5', 'p6' ] )
+
+
+def createVec( classes ) :
+	testObj = IECore.ClassVectorParameter( "vec", "", "IECORE_OP_PATHS" )
+	for (pName,cName) in classes :
+		testObj.setClass( pName, cName, 1 )
+	return testObj
+
+# creating some shared data for the following tests....
+def baseVec():
+	return createVec( [ ('p1','floatParameter'), ('p2','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
+
+def topInsert():
+	return createVec( [ ('p5','maths/multiply'), ('p1','floatParameter'), ('p2','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
+
+def doubleTopInsert():
+	return createVec( [ ('p5','maths/multiply'), ('p6','maths/multiply'), ('p1','floatParameter'), ('p2','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
+
+def bottomInsert():
+	return createVec( [ ('p1','floatParameter'), ('p2','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter'), ('p5','maths/multiply') ] )
+
+def centerInsert():
+	return createVec( [ ('p1','floatParameter'), ('p2','maths/multiply'), ('p5','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
+
+def doubleCenterInsert():
+	return createVec( [ ('p1','floatParameter'), ('p2','maths/multiply'), ('p5','maths/multiply'), ('p6','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
+
+def twoInserts():
+	return createVec( [ ('p1','floatParameter'), ('p2','maths/multiply'), ('p5','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p6','maths/multiply'), ('p4', 'floatParameter') ] )
+
+def removedP2Vec():
+	return createVec( [ ('p1','floatParameter'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
+
+def removedP3Vec():
+	return createVec( [ ('p1','floatParameter'), ('p2','maths/multiply'), ('p4', 'floatParameter') ] )
+
+def reversedBaseVec():
+	return createVec( [ ('p4', 'floatParameter'), ('p3', 'compoundObjectInOut'), ('p2','maths/multiply'), ('p1','floatParameter') ] )
+
+def emptyVec():
+	return createVec( [] )
+
+def differentClassesVec():
+	return createVec( [ ('p1','maths/multiply'), ('p2','floatParameter'), ('p3', 'floatParameter') ] )
+
+def nameclashingVec():
+	return createVec( [ ('p5','maths/multiply'), ('p6','floatParameter'), ('p7', 'floatParameter')  ] )
+
+def unrelatedVec():
+	return createVec( [ ('p10','maths/multiply'), ('p11','floatParameter'), ('p12', 'floatParameter')  ] )
+
+		
 if __name__ == "__main__":
 	unittest.main()
+
