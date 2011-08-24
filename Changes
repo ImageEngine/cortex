@@ -10,6 +10,8 @@ Bug fixes :
 
 * Fixed a maya 2010 crash triggered by deep levels of nesting in parameter uis.
 
+* Fixed a bug in the IECoreRI::Renderer, causing incorrect results when querying projection matricies
+
 Cortex 6.1.1
 ============
 
