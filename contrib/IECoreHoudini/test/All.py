@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 
 import sys
 import unittest
-import hou
 import IECore
 import IECoreHoudini
 
@@ -58,12 +57,8 @@ from ToHoudiniCurvesConverter import *
 from CobIOTranslator import *
 from FromHoudiniGroupConverter import *
 from TemporaryParameterValuesTest import * 
-
-## these tests use python functions that aren't available before Houdini 11
-## \todo: remove this clause once we drop support for Houdini 10
-if hou.applicationVersion()[0] >= 11 :
-	from InterpolatedCacheReader import *
-	from ToHoudiniGroupConverter import *
+from InterpolatedCacheReader import *
+from ToHoudiniGroupConverter import *
 
 IECoreHoudini.TestProgram(
 	testRunner = unittest.TextTestRunner(
