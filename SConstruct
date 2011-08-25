@@ -341,6 +341,12 @@ o.Add(
 	"$GLEW_LIB_PATH",
 )
 
+o.Add(
+	"GL_CXX_FLAGS",
+	"C++ Flags to pass to the OpenGL compilation.",
+	"",
+)
+
 # Maya options
 
 o.Add(
@@ -1562,6 +1568,9 @@ if env["WITH_GL"] and doConfigure :
 
 	glEnvSets = {
 		"IECORE_NAME" : "IECoreGL",
+		"CXXFLAGS" : [
+			"$GL_CXX_FLAGS"
+		],
 	}
 
 	glEnvPrepends = {
