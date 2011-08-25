@@ -55,6 +55,10 @@ class RelativePreset( IECore.Preset ) :
 
 		self.__data = IECore.CompoundObject()
 
+		# accepts no parameters at all.
+		if currParameter is None and oldParameter is None :
+			return
+
 		if not isinstance( currParameter, IECore.Parameter ) :
 			raise TypeError, "Parameter currParameter must be a IECore.Parameter object!"
 
@@ -72,6 +76,17 @@ class RelativePreset( IECore.Preset ) :
 	def applicableTo( self, parameterised, rootParameter ) :
 		
 		return RelativePreset.__applicableTo( rootParameter, self.__data )
+
+	def getDiffData( self ):
+		"""Returns a IECore.CompoundObject instance that contains the description of all the differences between the two parameters provided when creating this preset."""
+		return self.__data.copy()
+
+	def setDiffData( self, data ):
+		"""Use this function to recreate a RelativePreset from data previously returned by getDiffData()."""
+		if not isinstance( data, IECore.CompoundObject ):
+			raise TypeError, "Invalid data type! Must be a IECore.CompoundObject"
+
+		self.__data = data.copy()
 
 	## \see IECore.Preset.__call__
 	def __call__( self, parameterised, rootParameter ) :

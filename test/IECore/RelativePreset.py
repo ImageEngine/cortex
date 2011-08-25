@@ -41,6 +41,15 @@ import IECore
 
 class TestRelativePreset( unittest.TestCase ) :
 
+	def testDiffData( self ):
+
+		emptyPreset = IECore.RelativePreset()
+		a = emptyPreset.getDiffData()
+		self.assertTrue( isinstance( a, IECore.CompoundObject ) )
+		self.assertEqual( len(a), 0 )
+		emptyPreset.setDiffData( IECore.CompoundObject() )
+		self.assertRaises( Exception, lambda : emptyPreset.setDiffData( IECore.CompoundData() ) )
+
 	def testSparseSimpleChanges( self ) :
 	
 		def createTestObj():
