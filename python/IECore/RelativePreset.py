@@ -38,7 +38,13 @@ import os
 import re
 
 ## Implements a Preset that represents changes between two Parameter objects.
-##
+# The comparison on elements in a ClassVectorParameters takes in consideration both the parameter name and 
+# the loaded class name in order to consider the "same" element. We do that do try to work around the fact
+# that the parameter names ("p0", "p1", etc) are very simple and easy to reapper after a sequence of removal/addition
+# operations in a ClassVectorParameter. The method is not 100% safe but should work for most cases.
+# \todo Consider adding a protected member that is responsible for that comparison and enable derived classes to
+# do other kinds of comparisons, for example, using additional parameters such as user labels.
+#
 class RelativePreset( IECore.Preset ) :
 
 	## \param currParameter, IECore.Parameter, represents the parameter state after all changes have been made. 
@@ -172,7 +178,6 @@ class RelativePreset( IECore.Preset ) :
 		if len(classValue):
 			data["_classValue_"] = classValue
 
-		# \todo: save oldClassName, so we know that we can change the class when applying these changes?
 		if len(data) or className != oldClassName or classVersion != oldClassVersion :
 			data["_className_"] = IECore.StringData(className)
 			data["_classVersion_"] = IECore.IntData(classVersion)
@@ -267,6 +272,7 @@ class RelativePreset( IECore.Preset ) :
 						data["_removedClassNames_"] = IECore.StringVectorData()
 					data["_removedParamNames_"].append(pName)
 					data["_removedClassNames_"].append(oldClassName)
+					removedParams.append(pName)
 					added = True
 
 				addedParam.append( added )
@@ -277,13 +283,27 @@ class RelativePreset( IECore.Preset ) :
 			data["_modifiedClassVersions_"] = modifiedClassVersions
 			data["_addedParam_"] = addedParam
 
-		parameterOrder = classOrder
-		baseOrder = classOrder
+		# get all non-new parameters
+		parameterOrder = filter( lambda n: not n in modifiedParams or not addedParam[ modifiedParams.index(n) ], classOrder )
+		baseOrder = parameterOrder
 		if not oldParameter is None :
-			baseOrder = IECore.StringVectorData( filter( lambda n: not n in removedParams, oldParameter.keys() ) )
+			# get all non-deleted original parameters
+			baseOrder = filter( lambda n: not n in removedParams, oldParameter.keys() )
 			
 		if baseOrder != parameterOrder :
-			data["_parameterOrder_"] = parameterOrder
+
+			if len(baseOrder) != len(parameterOrder):
+				raise Exception, "Unnexpected error. Unmatching parameter lists!"
+
+			# clamp to the smallest list containing the differences
+			for start in xrange(0,len(baseOrder)):
+				if baseOrder[start] != parameterOrder[start] :
+					break
+			for endPos in xrange(len(baseOrder),0,-1):
+				if baseOrder[endPos-1] != parameterOrder[endPos-1] :
+					break
+
+			data["_modifiedOrder_"] = IECore.StringVectorData( parameterOrder[start:endPos] )
 
 		if len(values):
 			# keep the original classes to which the parameters were edited
@@ -294,6 +314,8 @@ class RelativePreset( IECore.Preset ) :
 		if len(data):
 			data["_classNameFilter_" ] = classNameFilter
 			data["_type_"] = IECore.StringData( "ClassVectorParameter" )
+			data["_paramNames_"] = classOrder
+			data["_classNames_"] = classNames
 
 	@staticmethod
 	def __applyParameterChanges( parameter, data, paramPath = "" ) :
@@ -413,38 +435,22 @@ class RelativePreset( IECore.Preset ) :
 					if c and c[1] == data["_removedClassNames_"][i] :
 						parameter.removeClass( pName )
 
-		paramRemaps = {}		
+		paramRemaps = {}
 
 		if "_modifiedParamsNames_" in data :
 			modifiedParams = data["_modifiedParamsNames_"]
 			modifiedClassNames = data["_modifiedClassNames_"]
 			modifiedClassVersions = data["_modifiedClassVersions_"]
 			addedParam = data["_addedParam_"]
+			addedCount = 0
 
+			# first modify items
 			for i in range( len( modifiedClassNames ) ) :
 	
 				if addedParam[i] :
 
-					# must add a new parameter, no matter what.
-
-					paramName = modifiedParams[i]
-					if paramName in parameter:
-
-						newParamName = parameter.newParameterName()
-
-						if not re.match("^p[0-9]+$", paramName) :
-							IECore.msg(
-								IECore.Msg.Level.Warning, 
-								"IECore.RelativePreset", 
-								"Custom parameter %s.%s is being renamed to %s..."
-									% ( paramPath, paramName, newParamName )
-							)
-							
-						paramRemaps[ modifiedParams[i] ] = newParamName
-						paramName = newParamName
-
-					parameter.setClass( paramName, modifiedClassNames[i], modifiedClassVersions[i] )
-
+					addedCount += 1
+		
 				else :
 
 					# must find an existing matching parameter, no matter what
@@ -467,6 +473,118 @@ class RelativePreset( IECore.Preset ) :
 							"Unable to find parameter '%s.%s' in %s. Ignoring class change on this parameter."
 								% ( paramPath, modifiedParams[i], parameter.name )
 						)
+
+		# get a list of classes before the addition of new items
+		newOrder = False
+		newClassList = map( lambda c: c[1:], parameter.getClasses( True ) )
+		newParamList = map( lambda c: c[0], newClassList )
+		# compare each class with whatever existed when we created the RelativePreset and see which ones are the same
+		sameClasses = set()
+		for c in newClassList :
+
+			if '_modifiedParamsNames_' in data :
+				# If the preset has added this parameter it should not match current parameters in the vector, no matter if the class matches. Is it always the case?
+				if c[0] in data['_modifiedParamsNames_'] :
+					if data['_addedParam_'][ data['_modifiedParamsNames_'].index(c[0]) ] :
+						continue
+
+			try :
+				i = data['_paramNames_'].index(c[0])
+			except :
+				continue
+			if c[1] == data['_classNames_'][i] :
+				sameClasses.add( c[0] )
+
+		if "_modifiedOrder_" in data :
+			# there was some kind of change in the order of parameters as well...
+
+			modifiedOrder = filter( lambda pName: pName in sameClasses, data["_modifiedOrder_"] )
+
+			# find the range of parameters that lie between the reordered parameters in the current vector
+			firstParam = None
+			lastParam = None
+			for (i,pName) in enumerate(newParamList) :
+				if pName in modifiedOrder :
+					if firstParam is None:
+						firstParam = i
+					lastParam = i
+			
+			if firstParam != lastParam :
+
+				# adds one by one the unknown parameters that lied between the reordered parameters.
+				for pName in newParamList[firstParam:lastParam+1] :
+					if not pName in modifiedOrder :
+						modifiedOrder.insert( modifiedOrder.index(baseParam)+1, pName )
+					baseParam = pName
+
+				def classOrder( c1, c2 ):
+					# if both elements were on the original reordering operation we use their relationship
+					if c1[0] in modifiedOrder and c2[0] in modifiedOrder:
+						i1 = modifiedOrder.index( c1[0] )
+						i2 = modifiedOrder.index( c2[0] )
+						return cmp( i1, i2 )
+
+					# otherwise we use the current order.
+					i1 = newParamList.index( c1[0] )
+					i2 = newParamList.index( c2[0] )
+					return cmp( i1, i2 )
+
+				newClassList.sort( classOrder )
+				newParamList = map( lambda c: c[0], newClassList )
+				newOrder = True
+
+		if "_modifiedParamsNames_" in data :
+			# now add items to the appropriate spot in the newClassList and newParamList
+			if addedCount :
+
+				newOrder = True
+				prevActualParam = None
+				lastActualParamInsertion = None
+				currClasses = parameter.getClasses( True )
+
+				for pName in data["_paramNames_"] :
+					if pName in sameClasses :
+						if pName in newParamList :
+							prevActualParam = pName
+							continue
+					if pName in modifiedParams :
+						i = modifiedParams.index(pName)
+						if addedParam[ i ] :
+							if prevActualParam is None :
+								if lastActualParamInsertion is None :
+									# Here we assume that the new parameter should
+									# go to the top because its predecessors don't exist on the
+									# new vector. Maybe it could also print a warning message..
+									lastActualParamInsertion = 0
+								else :
+									lastActualParamInsertion += 1
+							else :
+								lastActualParamInsertion = newParamList.index( prevActualParam ) + 1
+								prevActualParam = None
+
+							if pName in parameter:
+
+								newParamName = parameter.newParameterName()
+
+								if not re.match("^p[0-9]+$", pName) :
+									IECore.msg(
+										IECore.Msg.Level.Warning, 
+										"IECore.RelativePreset", 
+										"Custom parameter %s.%s is being renamed to %s..."
+											% ( paramPath, pName, newParamName )
+									)		
+								paramRemaps[ pName ] = newParamName
+								pName = newParamName
+							# add the parameter to the vector, so that next calls to parameter.newParameterName() will work.
+							parameter.setClass( pName, modifiedClassNames[i], modifiedClassVersions[i] )
+							# update our official new arrays
+							newParamList.insert(lastActualParamInsertion, pName)
+							newClassList.insert(lastActualParamInsertion, (pName,modifiedClassNames[i], modifiedClassVersions[i]) )
+
+
+		# update parameters with new order
+		if newOrder :
+			parameter.setClasses( newClassList )
 
 		if "_values_" in data :
 
@@ -499,26 +617,6 @@ class RelativePreset( IECore.Preset ) :
 						"Unable to find parameter '%s.%s' in %s. Ignoring this preset changes."
 							% ( paramPath, remapedParamName, parameter.name )
 					)
-
-		if "_parameterOrder_" in data :
-			# there was some kind of change in the order of parameters as well...
-			# get tuples ( classInstance, parameterName, className, classVersion )
-			classList = parameter.getClasses( True )
-			originalOrder = list(data["_parameterOrder_"])
-			currOrder = map( lambda c: c[1], classList )
-
-			def classOrder( c1, c2 ):
-				try:
-					i1 = originalOrder.index( c1[1] )
-					i2 = originalOrder.index( c2[1] )
-					return cmp( i1, i2 )
-				except:
-					i1 = currOrder.index( c1[1] )
-					i2 = currOrder.index( c2[1] )
-					return cmp( i1, i2 )
-
-			classList.sort( classOrder )
-			parameter.setClasses( map( lambda c: c[1:], classList ) )
 		
 	@staticmethod
 	def __applicableTo( parameter, data ) :

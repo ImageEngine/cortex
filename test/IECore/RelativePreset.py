@@ -299,6 +299,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( classes1, classes2 )
 		classes1 = [ c[1:] for c in testObjB.parameters()["b"]["p2"]["cv"].getClasses( True ) ]
 		classes2 = [ c[1:] for c in testObj2.parameters()["b"]["p2"]["cv"].getClasses( True ) ]
+		self.assertEqual( testObjB.parameters()["b"]["p2"]["cv"].keys(), [ 'p0', 'p1', 'p3' ] )
 		self.assertEqual( len(classes2), 3 )
 		self.assertEqual( classes1, classes2 )
 		
@@ -329,7 +330,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		testObj2["b"].removeClass("p1")				# we remove "p1" - the same parameter that the preset will try to remove later... it should ignore it
 		testObj2["b"].setClass("p3", "compoundObjectInOut", 1 )	# we replace "p3" - the same parameter that the preset will try to remove later... it should not remove because it's a different class.
 		testObj2["b"]["p4"]["cp"]["a"] = 30			# we want this value to be replaced by 10 which was the relative change on that parameter
-		testObj2["b"]["p2"]["cv"].setClass("p1", "maths/multiply", 1 )	# replace an op that the preset will try to replace too...  but will not because the original class is be different
+		testObj2["b"]["p2"]["cv"].setClass("p1", "maths/multiply", 1 )	# replace an op that the preset will try to replace too...  but will not because the original class is different
 		testObj2["b"]["p2"]["cv"].setClass("p3", "compoundObjectInOut", 1 )	# add one op that the preset will try to add too... name clashes!
 
 		relPreset( testObj2, testObj2.parameters() )
@@ -341,6 +342,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( testObj2["b"]["p2"]["cv"].getClass( "p3", True )[1], "compoundObjectInOut" )	# ok, the Preset did not remove the current "p3" parameter...
 		self.assertEqual( testObj2["b"]["p2"]["cv"].getClass( "p2", True )[1], "maths/multiply" )	# ok, the Preset added a new parameter "p2" with the "p1" Preset...
 		self.assertEqual( testObj2["b"]["p2"]["cv"].getClass( "p4", True )[1], "floatParameter" )	# ok, the Preset added a new parameter "p4" with the "p3" Preset...
+		self.assertEqual( testObj2["b"]["p2"]["cv"].keys(), [ 'p0', 'p2', 'p4', 'p1', 'p3' ] )
 
 	def __checkOrder( self, localChangesParam, applyToParam, expectedOrder ):
 		r = IECore.RelativePreset( localChangesParam, baseVec() )
@@ -393,38 +395,50 @@ class TestRelativePreset( unittest.TestCase ) :
 	def testReversedBaseInsertions(self):
 		# tests applying to reversed base vector
 		self.__checkOrder( topInsert(), reversedBaseVec(), [ 'p5', 'p4', 'p3', 'p2', 'p1' ] )
-		self.__checkOrder( doubleTopInsert(), baseVec(), [ 'p5', 'p6', 'p4', 'p3', 'p2', 'p1' ] )
-		self.__checkOrder( bottomInsert(), reversedBaseVec(), [ 'p4', 'p3', 'p2', 'p1', 'p5' ] )
+		self.__checkOrder( doubleTopInsert(), reversedBaseVec(), [ 'p5', 'p6', 'p4', 'p3', 'p2', 'p1' ] )
+		self.__checkOrder( bottomInsert(), reversedBaseVec(), [ 'p4', 'p5', 'p3', 'p2', 'p1' ] )
 		self.__checkOrder( centerInsert(), reversedBaseVec(), [ 'p4', 'p3', 'p2', 'p5', 'p1' ] )
 		self.__checkOrder( doubleCenterInsert(), reversedBaseVec(), [ 'p4', 'p3', 'p2', 'p5', 'p6', 'p1' ] )
 		self.__checkOrder( twoInserts(), reversedBaseVec(), [ 'p4', 'p3', 'p6', 'p2', 'p5', 'p1' ] )
 
 	def testDifferentInsertions(self):
-		# tests applying to different classes and names vector
-		self.__checkOrder( topInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5' ] )
-		self.__checkOrder( doubleTopInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5', 'p6' ] )
-		self.__checkOrder( bottomInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5' ] )
-		self.__checkOrder( centerInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5' ] )
-		self.__checkOrder( doubleCenterInsert(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5', 'p6' ] )
-		self.__checkOrder( twoInserts(), differentClassesVec(), [ 'p1', 'p2', 'p3', 'p5', 'p6' ] )
+		# tests applying to different classes but same names vector
+		self.__checkOrder( topInsert(), differentClassesVec(), [ 'p5', 'p2', 'p1', 'p3' ] )
+		self.__checkOrder( doubleTopInsert(), differentClassesVec(), [ 'p5', 'p6', 'p2', 'p1', 'p3' ] )
+		self.__checkOrder( bottomInsert(), differentClassesVec(), [ 'p5', 'p2', 'p1', 'p3' ] )
+		self.__checkOrder( centerInsert(), differentClassesVec(), [ 'p5', 'p2', 'p1', 'p3' ] )
+		self.__checkOrder( doubleCenterInsert(), differentClassesVec(), [ 'p5', 'p6', 'p2', 'p1', 'p3' ] )
+		self.__checkOrder( twoInserts(), differentClassesVec(), [ 'p5', 'p6', 'p2', 'p1', 'p3' ] )
 
 	def testNameClashingInsertions(self):
-		# tests applying to name clashing vector
-		self.__checkOrder( topInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0' ] )
-		self.__checkOrder( doubleTopInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0', 'p1' ] )
-		self.__checkOrder( bottomInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0' ] )
-		self.__checkOrder( centerInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0' ] )
-		self.__checkOrder( doubleCenterInsert(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0', 'p1' ] )
-		self.__checkOrder( twoInserts(), nameclashingVec(), [ 'p5', 'p6', 'p7', 'p0', 'p1' ] )
+		# tests applying to unrelated but with name clashing vector
+		self.__checkOrder( topInsert(), nameclashingVec(), [ 'p0', 'p5', 'p6', 'p7' ] )
+		self.__checkOrder( doubleTopInsert(), nameclashingVec(), [ 'p0', 'p1', 'p5', 'p6', 'p7' ] )
+		self.__checkOrder( bottomInsert(), nameclashingVec(), [ 'p0', 'p5', 'p6', 'p7' ] )
+		self.__checkOrder( centerInsert(), nameclashingVec(), [ 'p0', 'p5', 'p6', 'p7' ] )
+		self.__checkOrder( doubleCenterInsert(), nameclashingVec(), [ 'p0', 'p1', 'p5', 'p6', 'p7' ] )
+		self.__checkOrder( twoInserts(), nameclashingVec(), [ 'p0', 'p1', 'p5', 'p6', 'p7' ] )
 
 	def testUnrelatedInsertions(self):
 		# tests applying to unrelated vector
-		self.__checkOrder( topInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5' ] )
-		self.__checkOrder( doubleTopInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5', 'p6' ] )
-		self.__checkOrder( bottomInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5' ] )
-		self.__checkOrder( centerInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5' ] )
-		self.__checkOrder( doubleCenterInsert(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5', 'p6' ] )
-		self.__checkOrder( twoInserts(), unrelatedVec(), [ 'p10', 'p11', 'p12', 'p5', 'p6' ] )
+		self.__checkOrder( topInsert(), unrelatedVec(), [ 'p5', 'p10', 'p11', 'p12' ] )
+		self.__checkOrder( doubleTopInsert(), unrelatedVec(), [ 'p5', 'p6', 'p10', 'p11', 'p12' ] )
+		self.__checkOrder( bottomInsert(), unrelatedVec(), [ 'p5', 'p10', 'p11', 'p12' ] )
+		self.__checkOrder( centerInsert(), unrelatedVec(), [ 'p5', 'p10', 'p11', 'p12' ] )
+		self.__checkOrder( doubleCenterInsert(), unrelatedVec(), [ 'p5', 'p6', 'p10', 'p11', 'p12' ] )
+		self.__checkOrder( twoInserts(), unrelatedVec(), [ 'p5', 'p6', 'p10', 'p11', 'p12' ] )
+
+	def testLocalizedReordering(self):
+		# simple localized reorder in place
+		self.__checkOrder( switchP2andP4(), baseVec(), [ 'p1', 'p4', 'p3', 'p2' ] )
+
+		# test reordering with unknown items in between.
+		extendedBaseVec = createVec( [ ('p0','floatParameter'), ('p1','floatParameter'), ('p5','floatParameter'), ('p2','maths/multiply'), ('p6','floatParameter'), ('p3', 'compoundObjectInOut'), ('p7','floatParameter'), ('p4', 'floatParameter'), ('p8','floatParameter') ] )
+		self.__checkOrder( switchP2andP4(), extendedBaseVec, [ 'p0', 'p1', 'p5', 'p4', 'p3', 'p7', 'p2', 'p6', 'p8' ] )
+
+		# now we prove that changes in the order of originally unmodified parameters are not affected when we apply the preset
+		invExtendedBaseVec = createVec( [ ('p8','floatParameter'), ('p2','maths/multiply'), ('p6','floatParameter'), ('p3', 'compoundObjectInOut'), ('p7','floatParameter'), ('p4', 'floatParameter'), ('p0','floatParameter'), ('p5','floatParameter'), ('p1','floatParameter') ] )
+		self.__checkOrder( switchP2andP4(), invExtendedBaseVec, [ 'p8', 'p4', 'p3', 'p7', 'p2', 'p6', 'p0', 'p5', 'p1' ] )
 
 
 def createVec( classes ) :
@@ -436,6 +450,9 @@ def createVec( classes ) :
 # creating some shared data for the following tests....
 def baseVec():
 	return createVec( [ ('p1','floatParameter'), ('p2','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
+
+def switchP2andP4():
+	return createVec( [ ('p1','floatParameter'), ('p4', 'floatParameter'), ('p3', 'compoundObjectInOut'), ('p2','maths/multiply') ] )
 
 def topInsert():
 	return createVec( [ ('p5','maths/multiply'), ('p1','floatParameter'), ('p2','maths/multiply'), ('p3', 'compoundObjectInOut'), ('p4', 'floatParameter') ] )
@@ -468,7 +485,7 @@ def emptyVec():
 	return createVec( [] )
 
 def differentClassesVec():
-	return createVec( [ ('p1','maths/multiply'), ('p2','floatParameter'), ('p3', 'floatParameter') ] )
+	return createVec( [ ('p2','floatParameter'), ('p1','maths/multiply'), ('p3', 'floatParameter') ] )
 
 def nameclashingVec():
 	return createVec( [ ('p5','maths/multiply'), ('p6','floatParameter'), ('p7', 'floatParameter')  ] )
