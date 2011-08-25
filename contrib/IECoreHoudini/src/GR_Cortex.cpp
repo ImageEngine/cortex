@@ -72,28 +72,30 @@ GR_Cortex::~GR_Cortex()
 }
 
 // Tell Houdini to only render GU_ProceduralDetails with this render hook.
-int GR_Cortex::getWireMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const
+GA_PrimCompat::TypeMask GR_Cortex::getWireMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const
 {
-	if ( gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) )
+	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	if ( attrRef.isValid() )
 	{
-		return 0;
+		return GA_PrimCompat::TypeMask( 0 );
 	}
 	else
 	{
-		return GEOPRIMALL;
+		return GEO_PrimTypeCompat::GEOPRIMALL;
 	}
 }
 
 // Tell Houdini to only render GU_ProceduralDetails with this render hook.
-int GR_Cortex::getShadedMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const
+GA_PrimCompat::TypeMask GR_Cortex::getShadedMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const
 {
-	if ( gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) )
+	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	if ( attrRef.isValid() )
 	{
-		return 0;
+		return GA_PrimCompat::TypeMask( 0 );
 	}
 	else
 	{
-		return GEOPRIMALL;
+		return GEO_PrimTypeCompat::GEOPRIMALL;
 	}
 }
 
@@ -168,19 +170,21 @@ void GR_Cortex::renderObject( const IECore::Object *object, IECoreGL::ConstState
 void GR_Cortex::render( GU_Detail *gdp, IECoreGL::ConstStatePtr displayState )
 {
 	// gl scene from a parameterised procedural
-	if ( !gdp->attribs().find("IECoreHoudini::NodePassData", GB_ATTRIB_MIXED) )
+	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	if ( attrRef.isInvalid() )
 	{
 		return;
 	}
 	
-	GB_AttributeRef attrOffset = gdp->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
-	NodePassData *pass_data = gdp->attribs().castAttribData<NodePassData>( attrOffset );
-
-	switch( pass_data->type() )
+	const GA_Attribute *attr = attrRef.getAttribute();
+	const GA_AIFBlindData *blindData = attr->getAIFBlindData();
+	const NodePassData passData = blindData->getValue<NodePassData>( attr, 0 );
+	
+	switch( passData.type() )
 	{
 		case IECoreHoudini::NodePassData::CORTEX_OPHOLDER :
 		{
-			SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>( const_cast<OP_Node*>( pass_data->nodePtr() ) );
+			SOP_OpHolder *sop = dynamic_cast<SOP_OpHolder*>( const_cast<OP_Node*>( passData.nodePtr() ) );
 			if ( !sop )
 			{
 				return;
@@ -199,7 +203,7 @@ void GR_Cortex::render( GU_Detail *gdp, IECoreGL::ConstStatePtr displayState )
 		}
 		case IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER :
 		{
-			SOP_ProceduralHolder *sop = dynamic_cast<SOP_ProceduralHolder*>( const_cast<OP_Node*>( pass_data->nodePtr() ) );
+			SOP_ProceduralHolder *sop = dynamic_cast<SOP_ProceduralHolder*>( const_cast<OP_Node*>( passData.nodePtr() ) );
 			if ( !sop )
 			{
 				return;

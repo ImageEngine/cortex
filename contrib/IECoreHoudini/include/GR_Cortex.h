@@ -39,6 +39,7 @@
 #define IECOREHOUDINI_GRCORTEX_H
 
 #include "GR/GR_Detail.h"
+#include "GR/GR_DisplayOption.h"
 #include "GR/GR_RenderHook.h"
 
 #include "IECoreGL/GL.h"
@@ -59,10 +60,10 @@ class GR_Cortex : public GR_RenderHook
 		virtual ~GR_Cortex();
 
 		/// Tell Houdini if a particular detail should be rendered using this render hook.
-		virtual int getWireMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const;
+		virtual GA_PrimCompat::TypeMask getWireMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const;
 
 		/// Tell Houdini if a particular detail should be rendered using this render hook.
-		virtual int getShadedMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const;
+		virtual GA_PrimCompat::TypeMask getShadedMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const;
 
 		/// Renders the ParameterisedProcedural in wireframe
 		virtual void renderWire( GU_Detail *gdp, RE_Render &ren, const GR_AttribOffset &ptinfo, const GR_DisplayOption *dopt, float lod, const GU_PrimGroupClosure *hidden_geometry );
