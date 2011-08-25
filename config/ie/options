@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -105,7 +105,7 @@ compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2
 compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ '-pipe', '-Wall' ]
+CXXFLAGS = [ '-pipe', '-Wall', '-DBOOST_FILESYSTEM_VERSION=2' ]
 if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
 	
@@ -168,8 +168,8 @@ if compilerVersionInt < 350 :
 
 # determine boost version from python version
 if pythonVersion == "2.6" :
-	boostVersion = "1.42.0"
-	boostVersionSuffix = "-mt-1_42"
+	boostVersion = "1.46.1"
+	boostVersionSuffix = "-mt-1_46_1"
 else :
 	boostVersion = "1.38.0"
 	boostVersionSuffix = "-mt-1_38"
@@ -232,6 +232,8 @@ except :
 
 # ask for opengl support
 WITH_GL=1
+# removing string format warnings to avoid "%d" int vs size_t discrepancy in Boost 1.46.1
+GL_CXX_FLAGS = [ "-Wno-format" ]
 
 # find maya if we're building for maya
 if targetApp=="maya" :
@@ -276,12 +278,14 @@ if targetApp=="houdini" :
 	boostVersion = houdiniReg["boostVersion"]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
 	
-	if boostVersion == "1.33.1" :
+	if int(boostVersion.split( "." )[-1]) :
 		BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + boostVersion.replace( ".", "_" )
-		if "-Werror" in CXXFLAGS :
-			CXXFLAGS.remove( "-Werror" )
 	else :
 		BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + "_".join( boostVersion.split( "." )[:-1] )
+	
+	if boostVersion == "1.33.1" :
+		if "-Werror" in CXXFLAGS :
+			CXXFLAGS.remove( "-Werror" )
 	
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = '-DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -c  -DGCC4 -DGCC3 -Wno-deprecated -Wall -W -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wno-uninitialized -Wunused -Wno-unused-parameter -Wno-strict-aliasing -O2 -DMAKING_DSO'
