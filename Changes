@@ -1,3 +1,7 @@
+
+Cortex 6.1.2
+============
+
 Additions :
 
 * IECoreGL::Renderer class now supports the "gl:visibility:camera" attribute.
