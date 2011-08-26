@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GA/GA_AIFBlindData.h"
 #include "UT/UT_Interrupt.h"
 
 #include "IECore/CapturingRenderer.h"
@@ -95,29 +96,27 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 	    	return error();
 	}
 	
-	const NodePassData *passData = 0;
-	if ( inputGeo->attribs().find( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED ) )
-	{
-		GB_AttributeRef attrOffset = inputGeo->attribs().getOffset( "IECoreHoudini::NodePassData", GB_ATTRIB_MIXED );
-		passData = inputGeo->attribs().castAttribData<NodePassData>( attrOffset );
-	};
-
-	if ( !passData )
+	const GA_ROAttributeRef attrRef = inputGeo->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	if ( attrRef.isInvalid() )
 	{
 		addError( SOP_MESSAGE, "Could not find Cortex Object on input geometry!" );
 		boss->opEnd();
 		return error();
 	}
-
-	IECore::ConstVisibleRenderablePtr renderable = 0;
-	SOP_ParameterisedHolder *sop = dynamic_cast<SOP_ParameterisedHolder*>( const_cast<OP_Node*>( passData->nodePtr() ) );
 	
-	if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
+	const GA_Attribute *attr = attrRef.getAttribute();
+	const GA_AIFBlindData *blindData = attr->getAIFBlindData();
+	const NodePassData passData = blindData->getValue<NodePassData>( attr, 0 );
+	
+	IECore::ConstVisibleRenderablePtr renderable = 0;
+	SOP_ParameterisedHolder *sop = dynamic_cast<SOP_ParameterisedHolder*>( const_cast<OP_Node*>( passData.nodePtr() ) );
+	
+	if ( passData.type() == IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
 	{
 		IECore::Op *op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
 		renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( op->resultParameter()->getValue() );
 	}
-	else if ( passData->type() == IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER )
+	else if ( passData.type() == IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER )
 	{
 		IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( sop->getParameterised() );
 		IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
