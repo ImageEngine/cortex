@@ -97,15 +97,20 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 /// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
 void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, AttributeMap &pointAttributeMap, AttributeMap &primitiveAttributeMap ) const
 {
-	const GB_AttributeTable &attribs = geo->attribs();
-	GB_Attribute *remap_attr = attribs.find("rixlate", GB_ATTRIB_INDEX);
-	if ( remap_attr==0 )
+	const GA_ROAttributeRef remapRef = geo->findGlobalAttribute( "rixlate" );
+	if ( remapRef.isInvalid() )
 	{
 		return;
 	}
 	
-	std::vector<std::string> strings;
-	for ( int i=0; i < remap_attr->getIndexSize(); ++i )
+	const GA_Attribute *remapAttr = remapRef.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = remapAttr->getAIFSharedStringTuple();
+	if ( !tuple )
+	{
+		return;
+	}
+
+	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( remapAttr ); !it.atEnd(); ++it )
 	{
 		RemapInfo info;
 
