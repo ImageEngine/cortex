@@ -64,7 +64,7 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	GEO_PointList newPoints;
+	GA_Range newPoints;
 	bool periodic = curves->periodic();
 	bool duplicatedEnds = !periodic && ( curves->basis() == CubicBasisf::bSpline() );
 	
@@ -78,7 +78,7 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 			// only remove duplicates from vertex variables
 			if ( it->second.interpolation == IECore::PrimitiveVariable::Vertex )
 			{
-				modifiedData[it->first] = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorGbAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
+				modifiedData[it->first] = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
 			}
 		}
 		
@@ -95,17 +95,27 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 		newPoints = appendPoints( geo, curves->variableData<V3fVectorData>( "P" ) );
 	}
 	
-	if ( !newPoints.entries() )
+	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
 	}
 	
-	GEO_PrimList newPrims;
+	GA_OffsetList pointOffsets;
+	pointOffsets.reserve( newPoints.getEntries() );
+	for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
+	{
+		pointOffsets.append( it.getOffset() );
+	}
+	
 	const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
 	int order = ( curves->basis() == CubicBasisf::bSpline() ) ? 4 : 2;
 	bool interpEnds = !(periodic && ( curves->basis() == CubicBasisf::bSpline() ));
 	
+	GA_OffsetList offsets;
+	offsets.reserve( verticesPerCurve.size() );
+	
 	size_t vertCount = 0;
+	size_t numPrims = geo->getNumPrimitives();
 	for ( size_t c=0; c < verticesPerCurve.size(); c++ )
 	{
 		size_t numVerts = duplicatedEnds ? verticesPerCurve[c] - 4 : verticesPerCurve[c];
@@ -115,17 +125,18 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 			return false;
 		}
 		
-		newPrims.append( curve );
+		offsets.append( geo->primitiveOffset( numPrims + c ) );
 		
 		for ( size_t v=0; v < numVerts; v++ )
 		{
-			curve->setVertex( v, newPoints[ vertCount + v ] );
+			curve->setVertexPoint( v, pointOffsets.get( vertCount + v ) );
 		}
 		
 		vertCount += numVerts;
 	}
 	
-	transferAttribs( curves, geo, &newPoints, &newPrims, PrimitiveVariable::Vertex );
+	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
+	transferAttribs( curves, geo, newPoints, newPrims, PrimitiveVariable::Vertex );
 	
 	// add the modified vertex variables
 	for ( std::map<std::string, DataPtr>::const_iterator it=modifiedData.begin() ; it != modifiedData.end(); it++ )
@@ -143,7 +154,7 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
  			continue;
  		}
 
- 		converter->convert( it->first, geo, &newPoints );
+ 		converter->convert( it->first, geo, newPoints );
 	}
 	
 	return true;

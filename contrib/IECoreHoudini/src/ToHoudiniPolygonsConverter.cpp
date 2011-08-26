@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,31 +60,42 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 		return false;
 	}
 	
-	GEO_PointList newPoints = appendPoints( geo, mesh->variableData<V3fVectorData>( "P" ) );
-	if ( !newPoints.entries() )
+	GA_Range newPoints = appendPoints( geo, mesh->variableData<V3fVectorData>( "P" ) );
+	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
 	}
 	
-	GEO_PrimList newPrims;
+	GA_OffsetList pointOffsets;
+	pointOffsets.reserve( newPoints.getEntries() );
+	for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
+	{
+		pointOffsets.append( it.getOffset() );
+	}
+	
 	const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
 	
+	GA_OffsetList offsets;
+	offsets.reserve( verticesPerFace.size() );
+	
 	size_t vertCount = 0;
+	size_t numPrims = geo->getNumPrimitives();
 	for ( size_t f=0; f < verticesPerFace.size(); f++ )
 	{
 		GU_PrimPoly *poly = GU_PrimPoly::build( geo, 0, GU_POLY_CLOSED, 0 );
-		newPrims.append( poly );
+		offsets.append( geo->primitiveOffset( numPrims + f ) );
 		
 		for ( size_t v=0; v < verticesPerFace[f]; v++ )
 		{
-			poly->appendVertex( newPoints[ vertexIds[ vertCount + verticesPerFace[f] - 1 - v ] ] );
+			poly->appendVertex( pointOffsets.get( vertexIds[ vertCount + verticesPerFace[f] - 1 - v ] ) );
 		}
 		
 		vertCount += verticesPerFace[f];
 	}
 	
-	transferAttribs( mesh, geo, &newPoints, &newPrims );
+	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
+	transferAttribs( mesh, geo, newPoints, newPrims );
 	
 	return true;
 }
