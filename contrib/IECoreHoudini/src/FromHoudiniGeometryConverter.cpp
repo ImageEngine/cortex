@@ -280,46 +280,218 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	}
 }
 
+void FromHoudiniGeometryConverter::transferAttribData(
+	IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation,
+	const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo
+) const
+{
+	DataPtr dataPtr = 0;
+
+	// we use this initial value to indicate we don't have a remapping so just
+	// guess what destination type to use.
+	IECore::TypeId varType = IECore::InvalidTypeId;
+	int elementIndex = -1;
+	if ( remapInfo )
+	{
+		varType = remapInfo->type;
+		elementIndex = remapInfo->elementIndex;
+	}
+	
+	const GA_Attribute *attr = attrRef.getAttribute();
+	
+	switch ( attrRef.getStorageClass() )
+	{
+		case GA_STORECLASS_FLOAT :
+		{
+			switch ( attr->getTupleSize() )
+			{
+				case 1 :
+				{
+					dataPtr = extractData<FloatVectorData>( attr, range );
+					break;
+				}
+				case 2 :
+				{
+					// it can be either a single float (sub-component), or (default) just a V2f
+					switch( varType )
+					{
+						case FloatVectorDataTypeId :
+						{
+							dataPtr = extractData<FloatVectorData>( attr, range, elementIndex );
+							break;
+						}
+						default :
+						{
+							dataPtr = extractData<V2fVectorData>( attr, range );
+							break;
+						}
+					}
+					break;
+				}
+				case 3 :
+				{
+					// it can be either a single float (sub-component), Color3f or (default) just a V3f
+					switch( varType )
+					{
+						case FloatVectorDataTypeId :
+						{
+							dataPtr = extractData<FloatVectorData>( attr, range, elementIndex );
+							break;
+						}
+						case Color3fVectorDataTypeId :
+						{
+							dataPtr = extractData<Color3fVectorData>( attr, range );
+							break;
+						}
+						default :
+						{
+							switch( attr->getTypeInfo() )
+							{
+								case GA_TYPE_COLOR :
+								{
+									dataPtr = extractData<Color3fVectorData>( attr, range );
+									break;
+								}
+								default :
+								{
+									dataPtr = extractData<V3fVectorData>( attr, range );
+									break;
+								}
+
+							}
+							break;
+						}
+					}
+					break;
+				}
+				default :
+				{
+					break;
+				}
+			}
+			break;
+		}
+		case GA_STORECLASS_INT :
+ 		{
+			switch ( attr->getTupleSize() )
+			{
+				case 1 :
+				{
+					dataPtr = extractData<IntVectorData>( attr, range );
+					break;
+				}
+				case 2 :
+				{
+					dataPtr = extractData<V2iVectorData>( attr, range );
+					break;
+				}
+				case 3 :
+				{
+					dataPtr = extractData<V3iVectorData>( attr, range );
+					break;
+				}
+				default :
+				{
+					break;
+				}
+			}
+			break;
+ 		}
+		case GA_STORECLASS_STRING :
+ 		{
+			/// \todo: replace this with IECore::IndexedData once it exists...
+			IntVectorDataPtr indexDataPtr = 0;
+			dataPtr = extractStringVectorData( attr, range, indexDataPtr );
+			if ( indexDataPtr )
+			{
+				std::string name( attr->getName() );
+				if ( remapInfo )
+				{
+					name = remapInfo->name;
+					interpolation = remapInfo->interpolation;
+				}
+				
+				name = name + "Indices";
+				result->variables[name] = PrimitiveVariable( interpolation, indexDataPtr );
+				interpolation = PrimitiveVariable::Constant;
+			}
+			break;
+		}
+		default :
+		{
+			break;
+		}
+	}
+
+	if ( dataPtr )
+	{
+		std::string varName( attr->getName() );
+		PrimitiveVariable::Interpolation varInterpolation = interpolation;
+
+		// remap our name and interpolation
+		if ( remapInfo )
+		{
+			varName = remapInfo->name;
+			varInterpolation = remapInfo->interpolation;
+		}
+		
+		// add the primitive variable to our result
+		result->variables[ varName ] = PrimitiveVariable( varInterpolation, dataPtr );
+	}
+}
+
 void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
-	const GB_AttributeTable &attribs = geo->attribs();
+	const GA_AttributeDict &attribs = geo->attribs();
 	
-	for( UT_LinkNode *current=attribs.head(); current != 0; current = attribs.next( current ) )
+	for ( GA_AttributeDict::iterator it=attribs.begin(); it != attribs.end(); ++it )
 	{
-		GB_Attribute *attr = dynamic_cast<GB_Attribute*>( current );
+		GA_Attribute *attr = it.attrib();
 		if ( !attr )
 		{
 			continue;
 		}
 		
-		GB_AttributeRef attrRef = geo->findAttrib( attr );
-		if ( GBisAttributeRefInvalid( attrRef ) )
+		const GA_ROAttributeRef attrRef( attr );
+		if ( attrRef.isInvalid() )
 		{
 			continue;
 		}
 		
 		DataPtr dataPtr = 0;
 		
-		switch ( attr->getType() )
+		switch ( attrRef.getStorageClass() )
 		{
-			case GB_ATTRIB_FLOAT :
+			case GA_STORECLASS_FLOAT :
 			{
-				unsigned dimensions = attr->getSize() / sizeof( float );
-				switch ( dimensions )
+				switch ( attr->getTupleSize() )
 				{
 					case 1 :
 					{
-						dataPtr = extractData<FloatData>( attribs, attrRef );
+						dataPtr = extractData<FloatData>( attr );
 						break;
 					}
 					case 2 :
 					{
-						dataPtr = extractData<V2fData>( attribs, attrRef );
+						dataPtr = extractData<V2fData>( attr );
 						break;
 					}
 					case 3 :
 					{
-						dataPtr = extractData<V3fData>( attribs, attrRef );
+						switch( attr->getTypeInfo() )
+						{
+							case GA_TYPE_COLOR :
+							{
+								dataPtr = extractData<Color3fData>( attr );
+								break;
+							}
+							default :
+							{
+								dataPtr = extractData<V3fData>( attr );
+								break;
+							}
+
+						}
 						break;
 					}
 					default :
@@ -329,24 +501,23 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 				}
 				break;
 			}
-			case GB_ATTRIB_INT :
+			case GA_STORECLASS_INT :
  			{
-				unsigned dimensions = attr->getSize() / sizeof( float );
-				switch ( dimensions )
+				switch ( attr->getTupleSize() )
 				{
 					case 1 :
 					{
-						dataPtr = extractData<IntData>( attribs, attrRef );
+						dataPtr = extractData<IntData>( attr );
 						break;
 					}
 					case 2 :
 					{
-						dataPtr = extractData<V2iData>( attribs, attrRef );
+						dataPtr = extractData<V2iData>( attr );
 						break;
 					}
 					case 3 :
 					{
-						dataPtr = extractData<V3iData>( attribs, attrRef );
+						dataPtr = extractData<V3iData>( attr );
 						break;
 					}
 					default :
@@ -356,16 +527,7 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 				}
 				break;
  			}
- 			case GB_ATTRIB_VECTOR :
- 			{
-				unsigned dimensions = attr->getSize() / (sizeof( float ) * 3);
-				if ( dimensions == 1 ) // only support single element vectors
-				{
-					dataPtr = extractData<V3fData>( attribs, attrRef );
-				}
- 				break;
- 			}
-			case GB_ATTRIB_INDEX :
+			case GA_STORECLASS_STRING :
  			{
 				dataPtr = extractStringData( geo, attr );
 				break;
