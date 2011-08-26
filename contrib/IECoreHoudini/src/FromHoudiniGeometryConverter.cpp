@@ -473,15 +473,56 @@ void FromHoudiniGeometryConverter::transferVertexAttribs( const GU_Detail *geo, 
 	}
 }
 
-DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, const GB_Attribute *attr ) const
+DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IntVectorDataPtr &indexData ) const
+{
+	StringVectorDataPtr data = new StringVectorData();
+	
+	std::vector<std::string> &dest = data->writable();
+	
+	size_t numStrings = 0;
+	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
+	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( attr ); !it.atEnd(); ++it )
+	{
+		dest.push_back( it.getString() );
+		numStrings++;
+	}
+	
+	indexData = new IntVectorData();
+	std::vector<int> &indexContainer = indexData->writable();
+	indexContainer.resize( range.getEntries() );
+	int *indices = indexData->baseWritable();
+	
+	size_t i = 0;
+	bool adjustedDefault = false;
+	for ( GA_Iterator it=range.begin(); !it.atEnd(); ++it, ++i )
+	{
+		const int index = tuple->getHandle( attr, it.getOffset() );
+		
+		if ( index < 0 )
+		{
+			if ( !adjustedDefault )
+			{
+				dest.push_back( "" );
+				adjustedDefault = true;
+			}
+			
+			indices[i] = numStrings;
+		}
+		else
+		{
+			indices[i] = index;
+		}
+	}
+	
+	return data;
+}
+
+DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const
 {
 	StringDataPtr data = new StringData();
-
-	GEO_AttributeHandle attribHandle = geo->getAttribute( GEO_DETAIL_DICT, attr->getName() );
-	attribHandle.setElement( geo );
 	
-	UT_String src;
-	if ( attribHandle.getString( src ) )
+	const char *src = attr->getAIFStringTuple()->getString( attr, 0 );
+	if ( src )
 	{
 		data->writable() = src;
 	}
