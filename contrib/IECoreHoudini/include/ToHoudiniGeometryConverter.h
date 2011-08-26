@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -93,14 +93,14 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		};
 		
 		/// Appends points to the GU_Detail from the given V3fVectorData.
-		/// Returns a GEO_PointList containing the newly added points.
-		GEO_PointList appendPoints( GU_Detail *geo, const IECore::V3fVectorData *positions ) const;
+		/// Returns a GA_Range containing the GA_Offsets for the newly added points.
+		GA_Range appendPoints( GA_Detail *geo, const IECore::V3fVectorData *positions ) const;
 		
 		/// Extracts primitive variables from the IECore::Primitive provided and appends them to the GU_Detail.
 		/// In most cases, this is the only transfer function that derived classes will need to use
 		void transferAttribs(
 			const IECore::Primitive *primitive, GU_Detail *geo,
-			GEO_PointList *newPoints = 0, GEO_PrimList *newPrims = 0,
+			const GA_Range &newPoints, const GA_Range &newPrims,
 			IECore::PrimitiveVariable::Interpolation vertexInterpolation = IECore::PrimitiveVariable::FaceVarying,
 			IECore::PrimitiveVariable::Interpolation primitiveInterpolation = IECore::PrimitiveVariable::Uniform,
 			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,60 +75,59 @@ bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
 	return doConversion( renderable, geo );
 }
 
-GEO_PointList ToHoudiniGeometryConverter::appendPoints( GU_Detail *geo, const IECore::V3fVectorData *positions ) const
+GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, const IECore::V3fVectorData *positions ) const
 {
 	if ( !positions )
 	{
-		return GEO_PointList();
+		return GA_Range();
 	}
 	
-	GEO_PointList points;
 	const std::vector<Imath::V3f> &pos = positions->readable();
+	GA_OffsetList offsets;
+	offsets.reserve( pos.size() );
+	
 	for ( size_t i=0; i < pos.size(); i++ )
 	{
-		GEO_Point *p = geo->appendPoint();
-		p->setPos( IECore::convert<UT_Vector3>( pos[i] ) );
-		points.append( p );
+		GA_Offset offset = geo->appendPoint();
+		geo->setPos3( offset, IECore::convert<UT_Vector3>( pos[i] ) );
+		offsets.append( offset );
 	}
 	
-	return points;
+	return GA_Range( geo->getPointMap(), offsets );
 }
 
 void ToHoudiniGeometryConverter::transferAttribs(
 	const Primitive *primitive, GU_Detail *geo,
-	GEO_PointList *newPoints, GEO_PrimList *newPrims,
+	const GA_Range &newPoints, const GA_Range &newPrims,
 	PrimitiveVariable::Interpolation vertexInterpolation,
 	PrimitiveVariable::Interpolation primitiveInterpolation,
 	PrimitiveVariable::Interpolation pointInterpolation,
 	PrimitiveVariable::Interpolation detailInterpolation
 ) const
 {
-	// gather the vertices
-	size_t numVerts = 0;
-	size_t numPrims = newPrims ? newPrims->entries() : 0;
-	for ( size_t i=0; i < numPrims; i++ )
+	GA_OffsetList offsets;
+	if ( newPrims.isValid() )
 	{
-		numVerts += (*newPrims)[i]->getVertexCount();
-	}
-	
-	size_t vertCount = 0;
-	ToHoudiniAttribConverter::VertexList vertices( numVerts );
-	for ( size_t i=0; i < numPrims; i++ )
-	{
-		GEO_Primitive *prim = (*newPrims)[i];
-		size_t numPrimVerts = prim->getVertexCount();
-		for ( size_t v=0; v < numPrimVerts; v++, vertCount++ )
+		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+		for ( GA_Iterator it=newPrims.begin(); !it.atEnd(); ++it )
 		{
-			if ( prim->getPrimitiveId() & GEOPRIMPOLY )
+			const GA_Primitive *prim = primitives.get( it.getOffset() );
+			size_t numPrimVerts = prim->getVertexCount();
+			for ( size_t v=0; v < numPrimVerts; v++ )
 			{
-				vertices[vertCount] = &prim->getVertex( numPrimVerts - 1 - v );
-			}
-			else
-			{
-				vertices[vertCount] = &prim->getVertex( v );
+				if ( prim->getTypeId() == GEO_PRIMPOLY )
+				{
+					offsets.append( prim->getVertexOffset( numPrimVerts - 1 - v ) );
+				}
+				else
+				{
+					offsets.append( prim->getVertexOffset( v ) );
+				}
 			}
 		}
 	}
+
+	GA_Range vertRange( geo->getVertexMap(), offsets );
 	
 	// P should already have been added as points
 	std::vector<std::string> variablesToIgnore;
@@ -202,7 +201,7 @@ void ToHoudiniGeometryConverter::transferAttribs(
 		else if ( interpolation == vertexInterpolation )
 		{
 			// add vertex attribs
-			converter->convert( it->first, geo, &vertices );
+			converter->convert( it->first, geo, vertRange );
 		}
 	}
 }
