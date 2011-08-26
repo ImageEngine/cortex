@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -95,121 +95,105 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 }
 
 /// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
-FromHoudiniGeometryConverter::AttributeRemapping FromHoudiniGeometryConverter::getAttributeRemapping( const GU_Detail *geo ) const
+void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, AttributeMap &pointAttributeMap, AttributeMap &primitiveAttributeMap ) const
 {
-	AttributeRemapping remap;
-	remap[RemappingInfo::Point] = MappingMap();
-	remap[RemappingInfo::Primitive] = MappingMap();
-
 	const GB_AttributeTable &attribs = geo->attribs();
 	GB_Attribute *remap_attr = attribs.find("rixlate", GB_ATTRIB_INDEX);
-	if ( remap_attr!=0 )
+	if ( remap_attr==0 )
 	{
-		std::vector<std::string> strings;
-		int num_strings = remap_attr->getIndexSize();
-		for ( int i=0; i<num_strings; ++i )
+		return;
+	}
+	
+	std::vector<std::string> strings;
+	for ( int i=0; i < remap_attr->getIndexSize(); ++i )
+	{
+		RemapInfo info;
+
+		// split up our rixlate string
+		typedef boost::char_separator< char > Sep;
+		typedef boost::tokenizer< Sep > Tokeniser;
+		std::vector<std::string> tokens;
+		Tokeniser attributeSplit( std::string( it.getString() ), Sep( ":" ) );
+		for ( Tokeniser::iterator it=attributeSplit.begin(); it != attributeSplit.end(); ++it )
 		{
-			RemappingInfo info;
-			const char *str = remap_attr->getIndex(i);
-			std::string attribute_str( str );
+			tokens.push_back( *it );
+		}
 
-			// split up our rixlate string
-			typedef boost::char_separator< char > Sep;
-			typedef boost::tokenizer< Sep > Tokeniser;
-			std::vector<std::string> tokens;
-			Tokeniser attribute_split( attribute_str, Sep(":") );
-			for ( Tokeniser::iterator it=attribute_split.begin(); it!=attribute_split.end(); ++it )
+		// not enough elements!
+		if ( tokens.size() < 4 )
+		{
+			continue;
+		}
+
+		// our data types
+		std::vector<std::string> dataTokens;
+		Tokeniser dataSplit( tokens[3], Sep("_") );
+		for ( Tokeniser::iterator it=dataSplit.begin(); it != dataSplit.end(); ++it )
+		{
+			dataTokens.push_back( *it );
+		}
+
+		if ( dataTokens.size() == 2 ) // we need both class & type!
+		{
+			// our interpolation type
+			std::string classStr = dataTokens[0];
+			if ( classStr == "vtx" )
 			{
-				tokens.push_back( *it );
+				info.interpolation = IECore::PrimitiveVariable::Vertex;
+			}
+			else if ( classStr == "v" )
+			{
+				info.interpolation = IECore::PrimitiveVariable::Varying;
+			}
+			else if ( classStr == "u" )
+			{
+				info.interpolation = IECore::PrimitiveVariable::Uniform;
+			}
+			else if ( classStr == "c" )
+			{
+				info.interpolation = IECore::PrimitiveVariable::Constant;
 			}
 
-			// not enough elements!
-			if ( tokens.size()<4 )
+			// our types
+			std::string typeStr = dataTokens[1];
+			if ( typeStr == "float" )
 			{
-				continue;
+				info.type = IECore::FloatVectorDataTypeId;
 			}
-
-			// our attribute type
-			RemappingInfo::AttrType attr_type = RemappingInfo::Point;
-			if ( tokens[0]=="prim" )
-				attr_type = RemappingInfo::Primitive;
-
-			// our source attribute
-			std::string from_name = tokens[1];
-
-			// our destination attribute
-			info.name = tokens[2];
-
-			// our data types
-			std::vector<std::string> data_tokens;
-			Tokeniser data_split( tokens[3], Sep("_") );
-			for ( Tokeniser::iterator it=data_split.begin(); it!=data_split.end(); ++it )
+			else if ( typeStr == "color" )
 			{
-				data_tokens.push_back( *it );
+				info.type = IECore::Color3fVectorDataTypeId;
 			}
-			if ( data_tokens.size()==2 ) // we need both class & type!
+			else if ( typeStr == "point" )
 			{
-				// our interpolation type
-				std::string class_str = data_tokens[0];
-				if ( class_str=="vtx" )
-				{
-					info.interpolation = IECore::PrimitiveVariable::Vertex;
-				}
-				else if ( class_str=="v" )
-				{
-					info.interpolation = IECore::PrimitiveVariable::Varying;
-				}
-				else if ( class_str=="u" )
-				{
-					info.interpolation = IECore::PrimitiveVariable::Uniform;
-				}
-				else if ( class_str=="c" )
-				{
-					info.interpolation = IECore::PrimitiveVariable::Constant;
-				}
-
-				// our types
-				std::string type_str = data_tokens[1];
-				if ( type_str=="float" )
-				{
-					info.type = IECore::FloatVectorDataTypeId;
-				}
-				else if ( type_str=="color" )
-				{
-					info.type = IECore::Color3fVectorDataTypeId;
-				}
-				else if ( type_str=="point" )
-				{
-					info.type = IECore::V3fVectorDataTypeId;
-				}
-				else if ( type_str=="vector" )
-				{
-					info.type = IECore::V3fVectorDataTypeId;
-				}
-				else if ( type_str=="normal" )
-				{
-					info.type = IECore::V3fVectorDataTypeId;
-				}
-				else if ( type_str=="string" )
-				{
-					info.type = IECore::StringVectorDataTypeId;
-				}
+				info.type = IECore::V3fVectorDataTypeId;
 			}
-
-			// our data offset
-			info.offset = 0;
-			if ( tokens.size()==5 )
+			else if ( typeStr == "vector" )
 			{
-				info.offset = boost::lexical_cast<int>( tokens[4] );
+				info.type = IECore::V3fVectorDataTypeId;
 			}
+			else if ( typeStr == "normal" )
+			{
+				info.type = IECore::V3fVectorDataTypeId;
+			}
+			else if ( typeStr == "string" )
+			{
+				info.type = IECore::StringVectorDataTypeId;
+			}
+		}
 
-			// put our remapping information into our map
-			remap[attr_type][from_name].push_back( info );
+		info.name = tokens[2];
+		info.elementIndex = ( tokens.size() == 5 ) ? boost::lexical_cast<int>( tokens[4] ) : 0;
+
+		if ( tokens[0] == "prim" )
+		{
+			primitiveAttributeMap[ tokens[1] ].push_back( info );
+		}
+		else
+		{
+			pointAttributeMap[ tokens[1] ].push_back( info );
 		}
 	}
-
-	// return our vector of attribute maps - 0: point attrs, 1: prim attrs
-	return remap;
 }
 
 void FromHoudiniGeometryConverter::transferAttribs(
@@ -220,9 +204,6 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	PrimitiveVariable::Interpolation detailInterpolation
 ) const
 {
-	// get RI remapping information from the detail
-	AttributeRemapping attribute_remapping = getAttributeRemapping( geo );
-
 	// add position
 	unsigned i = 0;
 	const GEO_PointList &points = geo->points();
@@ -235,6 +216,11 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData ) );
 	
+	// get RI remapping information from the detail
+	AttributeMap pointAttributeMap;
+	AttributeMap primitiveAttributeMap;
+	remapAttributes( geo, pointAttributeMap, primitiveAttributeMap );
+	
 	// add detail attribs	
 	if ( result->variableSize( detailInterpolation ) == 1 )
 	{
@@ -244,7 +230,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	// add point attribs
 	if ( result->variableSize( pointInterpolation ) == numPoints )
 	{
-		transferPointAttribs( geo, result, pointInterpolation, points, attribute_remapping );
+		transferPointAttribs( geo, result, pointInterpolation, points, pointAttributeMap );
 	}
 	
 	// add primitive attribs
@@ -253,7 +239,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
-		transferPrimitiveAttribs( geo, result, primitiveInterpolation, primitives, attribute_remapping );
+		transferPrimitiveAttribs( geo, result, primitiveInterpolation, primitives, primitiveAttributeMap );
 	}
 	
 	// add vertex attribs
@@ -376,7 +362,7 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 	}
 }
 
-void FromHoudiniGeometryConverter::transferPointAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points, AttributeRemapping &attribute_remap ) const
+void FromHoudiniGeometryConverter::transferPointAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points, AttributeMap &attributeMap ) const
 {
 	const GEO_PointAttribDict &attribs = geo->pointAttribs();
 	
@@ -395,24 +381,22 @@ void FromHoudiniGeometryConverter::transferPointAttribs( const GU_Detail *geo, P
 		}
 		
 		// check for remapping information for this attribute
-		std::string attr_name(attr->getName());
-		if ( attribute_remap[RemappingInfo::Point].count(attr_name)==1 )
+		if ( attributeMap.count( attr->getName() ) == 1 )
 		{
-			std::vector<RemappingInfo> &map = attribute_remap[RemappingInfo::Point][attr_name];
-			for ( std::vector<RemappingInfo>::iterator it=map.begin();
-					it!=map.end(); ++it )
+			std::vector<RemapInfo> &map = attributeMap[attr->getName()];
+			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
 			{
 				transferAttribData<GEO_PointList>( points, result, interpolation, attr, attrRef, &*it );
 			}
 		}
-		else // no remapping - use regular transfer
+		else
 		{
 			transferAttribData<GEO_PointList>( points, result, interpolation, attr, attrRef );
 		}
 	}
 }
 
-void FromHoudiniGeometryConverter::transferPrimitiveAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives, AttributeRemapping &attribute_remap ) const
+void FromHoudiniGeometryConverter::transferPrimitiveAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives, AttributeMap &attributeMap ) const
 {
 	const GEO_PrimAttribDict &attribs = geo->primitiveAttribs();
 	
@@ -431,17 +415,15 @@ void FromHoudiniGeometryConverter::transferPrimitiveAttribs( const GU_Detail *ge
 		}
 
 		// check for remapping information for this attribute
-		std::string attr_name(attr->getName());
-		if ( attribute_remap[RemappingInfo::Primitive].count(attr_name)==1 )
+		if ( attributeMap.count( attr->getName() ) == 1 )
 		{
-			std::vector<RemappingInfo> &map = attribute_remap[RemappingInfo::Primitive][attr_name];
-			for ( std::vector<RemappingInfo>::iterator it=map.begin();
-					it!=map.end(); ++it )
+			std::vector<RemapInfo> &map = attributeMap[attr->getName()];
+			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
 			{
 				transferAttribData<GEO_PrimList>( primitives, result, interpolation, attr, attrRef, &*it );
 			}
 		}
-		else // no remapping - use regular transfer
+		else
 		{
 			transferAttribData<GEO_PrimList>( primitives, result, interpolation, attr, attrRef );
 		}
