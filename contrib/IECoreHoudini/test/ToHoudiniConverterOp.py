@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -72,10 +72,9 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		to_cortex.parm("parm_quiet").set(True)
 		to_houdini = to_cortex.createOutputNode("ieToHoudiniConverter")
 		geo = to_houdini.geometry()
-		attr_names = []
-		for p in geo.pointAttribs():
-			attr_names.append(p.name())
-		self.assertEqual( attr_names, ["P", "Pw", "testAttribute"] )
+		attrNames = [ p.name() for p in geo.pointAttribs() ]
+		attrNames.sort()
+		self.assertEqual( attrNames, ["P", "Pw", "testAttribute"] )
 		self.assertEqual( len(geo.points()), 5000 )
 		self.assertEqual( len(geo.prims()), 0 )
 	
@@ -86,10 +85,9 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		geo = torus.geometry()
 		self.assertEqual( len(geo.points()), 100 )
 		self.assertEqual( len(geo.prims()), 100 )
-		attr_names = []
-		for p in geo.pointAttribs():
-			attr_names.append(p.name())
-		self.assertEqual( attr_names, ["P", "Pw"] )
+		attrNames = [ p.name() for p in geo.pointAttribs() ]
+		attrNames.sort()
+		self.assertEqual( attrNames, ["P", "Pw"] )
 		for p in geo.prims():
 			self.assertEqual( p.numVertices(), 4 )
 			self.assertEqual( p.type(), hou.primType.Polygon )
