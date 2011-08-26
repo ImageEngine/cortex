@@ -209,10 +209,10 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.verticesPerFace, prim.verticesPerFace )
 		self.assertEqual( result.vertexIds, prim.vertexIds )
 		self.assertEqual( result.keys(), prim.keys() )
-		## \todo: remove this logic if we ever get Color3fData supported by the FromHoudiniGeometryConverter
-		for key in [ x for x in prim.keys() if x not in [ "color3fDetail", "color3fPoint", "color3fPrim", "color3fVert" ] ] :
+		for key in prim.keys() :
 			self.assertEqual( result[key], prim[key] )
-		
+		self.assertEqual( result, prim )
+			
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=False ) :
 		geo = sop.geometry()
 		for key in [ "floatDetail", "intDetail", "stringDetail", "stringDetail" ] :

@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -259,7 +259,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		# test primitive attributes
 		self.assert_( "Cd" in result )
-		self.assertEqual( result["Cd"].data.typeId(), IECore.TypeId.V3fVectorData )
+		self.assertEqual( result["Cd"].data.typeId(), IECore.TypeId.Color3fVectorData )
 		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( result["Cd"].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 		

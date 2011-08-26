@@ -254,9 +254,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertEqual( result.verticesPerCurve(), prim.verticesPerCurve() )
 		self.assertEqual( result.keys(), prim.keys() )
-		## \todo: remove this logic if we ever get Color3fData supported by the FromHoudiniGeometryConverter
-		for key in [ x for x in prim.keys() if x not in [ "color3fDetail", "color3fPoint", "color3fPrim" ] ] :
+		for key in prim.keys() :
 			self.assertEqual( result[key], prim[key] )
+		self.assertEqual( result, prim )
 		
 	def compareOpenSplinePrimAndSop( self, prim, sop ) :
 		geo = sop.geometry()
@@ -317,10 +317,10 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertEqual( result.verticesPerCurve(), prim.verticesPerCurve() )
 		self.assertEqual( result.keys(), prim.keys() )
-		## \todo: remove this logic if we ever get Color3fData supported by the FromHoudiniGeometryConverter
-		for key in [ x for x in prim.keys() if x not in [ "color3fDetail", "color3fPoint", "color3fPrim" ] ] :
+		for key in prim.keys() :
 			self.assertEqual( result[key], prim[key] )
-		
+		self.assertEqual( result, prim )
+			
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=False ) :
 		geo = sop.geometry()
 		for key in [ "floatDetail", "intDetail", "stringDetail" ] :

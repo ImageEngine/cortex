@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -84,7 +84,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.assertEqual( object['P'].data.typeId(), IECore.TypeId.V3fVectorData )
 		self.failUnless( 'Cd' in object )
 		self.assertEqual( object['Cd'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( object['Cd'].data.typeId(), IECore.TypeId.V3fVectorData )
+		self.assertEqual( object['Cd'].data.typeId(), IECore.TypeId.Color3fVectorData )
 		
 	def testBasicRemapping(self):
 		(op, attr) = self.testCreateObjects()

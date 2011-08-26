@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -139,10 +139,10 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.keys(), prim.keys() )
-		## \todo: remove this logic if we ever get Color3fData supported by the FromHoudiniGeometryConverter
-		for key in [ x for x in prim.keys() if x not in [ "color3fDetail", "color3fPoint" ] ] :
+		for key in prim.keys() :
 			self.assertEqual( result[key], prim[key] )
-		
+		self.assertEqual( result, prim )
+			
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=False ) :
 		geo = sop.geometry()
 		for key in [ "floatDetail", "intDetail", "stringDetail" ] :
