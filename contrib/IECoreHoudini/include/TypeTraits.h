@@ -77,6 +77,11 @@ template<typename T> struct IsDetailAttribTypedData : boost::mpl::or_< IsDetailA
 /// IsVectorAttribTypedData
 template<typename T> struct IsVectorAttribTypedData : boost::mpl::or_< IsVectorAttribFloatTypedData<T>, IsVectorAttribIntTypedData<T> > {};
 
+/// IsAttribColorTypedData
+template<typename T> struct IsAttribColorTypedData : public boost::false_type {};
+template<> struct IsAttribColorTypedData< IECore::Color3fData > : public boost::true_type {};
+template<> struct IsAttribColorTypedData< IECore::Color3fVectorData > : public boost::true_type {};
+
 } // namespace TypeTraits
 
 } // namespace IECoreHoudini
