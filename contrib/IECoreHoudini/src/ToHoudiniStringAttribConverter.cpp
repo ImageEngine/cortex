@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/MessageHandler.h"
+
 #include "ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
@@ -66,8 +68,8 @@ ConstIntVectorParameterPtr ToHoudiniStringVectorAttribConverter::indicesParamete
 
 GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const
 {
-	/// \todo: this used to be supported. why?
-	throw IECore::Exception( "ToHoudiniStringVectorAttribConverter does not support Detail attributes." );
+	IECore::msg( IECore::MessageHandler::Error, "ToHoudiniStringVectorAttribConverter", "Does not support Detail attributes." );
+	return GA_RWAttributeRef();
 }
 
 GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const
