@@ -209,14 +209,12 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	PrimitiveVariable::Interpolation detailInterpolation
 ) const
 {
-	// add position
-	unsigned i = 0;
-	const GEO_PointList &points = geo->points();
-	size_t numPoints = points.entries();
-	std::vector<Imath::V3f> pData( numPoints );
-	for ( const GEO_Point *point = points.head(); point !=0 ; point = points.next( point ), i++ )
+	// add position (this can't be done as a regular attrib because it would be V4fVectorData)
+	GA_Range pointRange = geo->getPointRange();
+	std::vector<Imath::V3f> pData( pointRange.getEntries() );
+	for ( GA_Iterator it=pointRange.begin(); !it.atEnd(); ++it )
 	{
-		pData[i] = IECore::convert<Imath::V3f>( point->getPos() );
+		pData[it.getIndex()] = IECore::convert<Imath::V3f>( geo->getPos3( it.getOffset() ) );
 	}
 	
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData ) );
@@ -233,48 +231,45 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	}
 	
 	// add point attribs
-	if ( result->variableSize( pointInterpolation ) == numPoints )
+	if ( result->variableSize( pointInterpolation ) == geo->getNumPoints() )
 	{
 		transferPointAttribs( geo, result, pointInterpolation, points, pointAttributeMap );
 	}
 	
 	// add primitive attribs
-	const GEO_PrimList &primitives = geo->primitives();
-	size_t numPrims = primitives.entries();
-	
+	size_t numPrims = geo->getNumPrimitives();
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
 		transferPrimitiveAttribs( geo, result, primitiveInterpolation, primitives, primitiveAttributeMap );
 	}
 	
 	// add vertex attribs
-	size_t numVerts = 0;
-	
-	for ( size_t i=0; i < numPrims; i++ )
+	size_t numVerts = geo->getNumVertices();
+	if ( geo->vertexAttribs().entries() && result->variableSize( vertexInterpolation ) == numVerts )
 	{
-		numVerts += primitives[i]->getVertexCount();
-	}
-	
-	if ( geo->vertexAttribs().length() && result->variableSize( vertexInterpolation ) == numVerts )
-	{
-		size_t vertCount = 0;
-		VertexList vertices( numVerts );
-		for ( size_t i=0; i < numPrims; i++ )
+		GA_Range primRange = geo->getPrimitiveRange();
+		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+		
+		GA_OffsetList offsets;
+		offsets.reserve( numVerts );
+		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
 		{
-			const GEO_Primitive *prim = primitives[i];
+			const GA_Primitive *prim = primitives.get( it.getOffset() );
 			size_t numPrimVerts = prim->getVertexCount();
-			for ( size_t v=0; v < numPrimVerts; v++, vertCount++ )
+			for ( size_t v=0; v < numPrimVerts; v++ )
 			{
-				if ( prim->getPrimitiveId() & GEOPRIMPOLY )
+				if ( prim->getTypeId() == GEO_PRIMPOLY )
 				{
-					vertices[vertCount] = &prim->getVertex( numPrimVerts - 1 - v );
+					offsets.append( prim->getVertexOffset( numPrimVerts - 1 - v ) );
 				}
 				else
 				{
-					vertices[vertCount] = &prim->getVertex( v );
+					offsets.append( prim->getVertexOffset( v ) );
 				}
 			}
 		}
+		
+		GA_Range vertRange( geo->getVertexMap(), offsets );
 		
 		transferVertexAttribs( geo, result, vertexInterpolation, vertices );
 	}
