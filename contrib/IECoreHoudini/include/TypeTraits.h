@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,37 +45,37 @@ namespace IECoreHoudini
 namespace TypeTraits
 {
 
-/// IsDetailGbAttribFloatTypedData
-template<typename T> struct IsDetailGbAttribFloatTypedData : public boost::false_type {};
-template<> struct IsDetailGbAttribFloatTypedData< IECore::FloatData > : public boost::true_type {};
-template<> struct IsDetailGbAttribFloatTypedData< IECore::V2fData > : public boost::true_type {};
-template<> struct IsDetailGbAttribFloatTypedData< IECore::V3fData > : public boost::true_type {};
-template<> struct IsDetailGbAttribFloatTypedData< IECore::Color3fData > : public boost::true_type {};
+/// IsDetailAttribFloatTypedData
+template<typename T> struct IsDetailAttribFloatTypedData : public boost::false_type {};
+template<> struct IsDetailAttribFloatTypedData< IECore::FloatData > : public boost::true_type {};
+template<> struct IsDetailAttribFloatTypedData< IECore::V2fData > : public boost::true_type {};
+template<> struct IsDetailAttribFloatTypedData< IECore::V3fData > : public boost::true_type {};
+template<> struct IsDetailAttribFloatTypedData< IECore::Color3fData > : public boost::true_type {};
 
-/// IsDetailGbAttribIntTypedData
-template<typename T> struct IsDetailGbAttribIntTypedData : public boost::false_type {};
-template<> struct IsDetailGbAttribIntTypedData< IECore::IntData > : public boost::true_type {};
-template<> struct IsDetailGbAttribIntTypedData< IECore::V2iData > : public boost::true_type {};
-template<> struct IsDetailGbAttribIntTypedData< IECore::V3iData > : public boost::true_type {};
+/// IsDetailAttribIntTypedData
+template<typename T> struct IsDetailAttribIntTypedData : public boost::false_type {};
+template<> struct IsDetailAttribIntTypedData< IECore::IntData > : public boost::true_type {};
+template<> struct IsDetailAttribIntTypedData< IECore::V2iData > : public boost::true_type {};
+template<> struct IsDetailAttribIntTypedData< IECore::V3iData > : public boost::true_type {};
 
-/// IsVectorGbAttribFloatTypedData
-template<typename T> struct IsVectorGbAttribFloatTypedData : public boost::false_type {};
-template<> struct IsVectorGbAttribFloatTypedData< IECore::FloatVectorData > : public boost::true_type {};
-template<> struct IsVectorGbAttribFloatTypedData< IECore::V2fVectorData > : public boost::true_type {};
-template<> struct IsVectorGbAttribFloatTypedData< IECore::V3fVectorData > : public boost::true_type {};
-template<> struct IsVectorGbAttribFloatTypedData< IECore::Color3fVectorData > : public boost::true_type {};
+/// IsVectorAttribFloatTypedData
+template<typename T> struct IsVectorAttribFloatTypedData : public boost::false_type {};
+template<> struct IsVectorAttribFloatTypedData< IECore::FloatVectorData > : public boost::true_type {};
+template<> struct IsVectorAttribFloatTypedData< IECore::V2fVectorData > : public boost::true_type {};
+template<> struct IsVectorAttribFloatTypedData< IECore::V3fVectorData > : public boost::true_type {};
+template<> struct IsVectorAttribFloatTypedData< IECore::Color3fVectorData > : public boost::true_type {};
 
-/// IsVectorGbAttribIntTypedData
-template<typename T> struct IsVectorGbAttribIntTypedData : public boost::false_type {};
-template<> struct IsVectorGbAttribIntTypedData< IECore::IntVectorData > : public boost::true_type {};
-template<> struct IsVectorGbAttribIntTypedData< IECore::V2iVectorData > : public boost::true_type {};
-template<> struct IsVectorGbAttribIntTypedData< IECore::V3iVectorData > : public boost::true_type {};
+/// IsVectorAttribIntTypedData
+template<typename T> struct IsVectorAttribIntTypedData : public boost::false_type {};
+template<> struct IsVectorAttribIntTypedData< IECore::IntVectorData > : public boost::true_type {};
+template<> struct IsVectorAttribIntTypedData< IECore::V2iVectorData > : public boost::true_type {};
+template<> struct IsVectorAttribIntTypedData< IECore::V3iVectorData > : public boost::true_type {};
 
-/// IsDetailGbAttribTypedData
-template<typename T> struct IsDetailGbAttribTypedData : boost::mpl::or_< IsDetailGbAttribFloatTypedData<T>, IsDetailGbAttribIntTypedData<T> > {};
+/// IsDetailAttribTypedData
+template<typename T> struct IsDetailAttribTypedData : boost::mpl::or_< IsDetailAttribFloatTypedData<T>, IsDetailAttribIntTypedData<T> > {};
 
-/// IsVectorGbAttribTypedData
-template<typename T> struct IsVectorGbAttribTypedData : boost::mpl::or_< IsVectorGbAttribFloatTypedData<T>, IsVectorGbAttribIntTypedData<T> > {};
+/// IsVectorAttribTypedData
+template<typename T> struct IsVectorAttribTypedData : boost::mpl::or_< IsVectorAttribFloatTypedData<T>, IsVectorAttribIntTypedData<T> > {};
 
 } // namespace TypeTraits
 
