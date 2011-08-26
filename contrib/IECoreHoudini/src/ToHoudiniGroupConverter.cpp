@@ -117,7 +117,7 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 			groupConverter->transformParameter()->setValue( transformData );
 		}
 		
-		size_t origNumPrims = geo->primitives().entries();
+		size_t origNumPrims = geo->getNumPrimitives();
 		
 		GU_DetailHandle handle;
 		handle.allocateAndSet( geo, false );
@@ -133,19 +133,14 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 			continue;
 		}
 		
-		std::string name = childName ? childName->readable() : groupName->readable();		
-		GB_PrimitiveGroup *childGroup = geo->findPrimitiveGroup( name.c_str() );
-		if ( !childGroup )
+		std::string name = childName ? childName->readable() : groupName->readable();
+		GA_ElementGroup *childGroup = geo->findPrimitiveGroup( name.c_str() );
+		if ( !childGroup || childGroup->classType() != GA_GROUP_PRIMITIVE )
 		{
-			childGroup = geo->newPrimitiveGroup( name.c_str() );
+			childGroup = geo->createElementGroup( GA_ATTRIB_PRIMITIVE, name.c_str() );
 		}
 		
-		GEO_PrimList &primitives = geo->primitives();
-		size_t numPrims = primitives.entries();
-		for ( size_t i=origNumPrims; i < numPrims; i++ )
-		{
-			childGroup->add( primitives( i ) );
-		}
+		childGroup->addRange( geo->getOrderedPrimitiveRange( origNumPrims ) );
 	}
 	
 	return true;
