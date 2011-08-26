@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,6 +78,16 @@ class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConv
 			ReturnType operator()( typename T::Ptr data ) const;
 			
 			const std::vector<int> &m_vertsPerCurve;
+		};
+		
+		static bool compatiblePrimitive( GA_PrimitiveTypeId type )
+		{
+			if ( ( type == GEO_PRIMNURBCURVE ) || ( type == GEO_PRIMBEZCURVE ) )
+			{
+				return true;
+			}
+			
+			return false;
 		};
 };
 
