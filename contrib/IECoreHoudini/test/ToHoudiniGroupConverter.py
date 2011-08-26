@@ -364,7 +364,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, len(primGroups) ) :
 			self.assertEqual( len(primGroups[i].prims()), 6 )
 			for prim in primGroups[i].prims() :
-				self.assertEqual( prim.stringListAttribValue( "commonString" ), tuple( [ "", expected[i] ] ) )
+				self.assertEqual( prim.stringListAttribValue( "commonString" ), tuple( [ expected[i] ] ) )
 				self.assertEqual( prim.attribValue( "commonString" ), expected[i] )
 	
 	def testTransforms( self ) :

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -736,10 +736,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.verticesPerFace, mesh.verticesPerFace )
 		self.assertEqual( result.vertexIds, mesh.vertexIds )
 		self.assertEqual( result.keys(), mesh.keys() )
-		self.assertEqual( result["stringPoint"].data[0], mesh["stringPoint"].data[0] )
-		for i in range( 1, data.size() - 1 ) :
-			self.assertEqual( result["stringPoint"].data[i], mesh["stringPoint"].data[i+1] )
-		self.assertEqual( result["stringPoint"].data[-1], mesh["stringPoint"].data[1] )
+		self.assertEqual( result["stringPoint"], mesh["stringPoint"] )
 	
 	def tearDown( self ) :
 		
