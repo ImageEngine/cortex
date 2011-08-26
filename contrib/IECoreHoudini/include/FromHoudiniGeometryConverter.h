@@ -38,7 +38,7 @@
 #ifndef IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_H
 #define IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_H
 
-#include "GB/GB_AttributeRef.h"
+#include "GA/GA_AttributeRef.h"
 #include "GU/GU_Detail.h"
 #include "GU/GU_DetailHandle.h"
 #include "SOP/SOP_Node.h"
@@ -130,8 +130,6 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			IECore::PrimitiveVariable::Interpolation detailInterpolation = IECore::PrimitiveVariable::Constant
 		) const;
 		
-		typedef UT_PtrArray<const GEO_Vertex*> VertexList;
-
 		/// This simple class is used to describe the destination mapping for point or primitive
 		/// attributes that have been remapped using the 'attribute' sop.
 		struct RemapInfo
@@ -145,32 +143,29 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// Attribute remapping
 		typedef std::map<std::string, std::vector<RemapInfo> > AttributeMap;
 		void remapAttributes( const GU_Detail *geo, AttributeMap &pointAttributeMap, AttributeMap &primitiveAttributeMap ) const;
-		
+
 		/// Utility functions for transfering each attrib type from Houdini onto the IECore::Primitive provided
 		void transferDetailAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation ) const;
-		void transferPointAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points, AttributeMap &attributeMap ) const;
-		void transferPrimitiveAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives, AttributeMap &attributeMap  ) const;
-		void transferVertexAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation, const VertexList &vertices ) const;
+		void transferElementAttribs(
+			const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, AttributeMap &attributeMap,
+			IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation
+		) const;
 		
-		template <typename Container>
 		void transferAttribData(
-			const Container &container, IECore::Primitive *result,
-			IECore::PrimitiveVariable::Interpolation interpolation,
-			const GB_Attribute *attr, const GB_AttributeRef &attrRef,
-			const RemapInfo *remapInfo=0
+			IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation,
+			const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo = 0
 		) const;
 		
 		/// Utility functions for extracting attrib data from Houdini and storing it as a DataPtr of type T
 		/// @parm index allows a single component to be extracted from a larger container
-		template <typename T, typename Container>
-		IECore::DataPtr extractData( const Container &container, const GB_AttributeRef &attrRef, int index=-1 ) const;
+		template <typename T>
+		IECore::DataPtr extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex = -1 ) const;
 		
 		template <typename T>
-		IECore::DataPtr extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const;
+		IECore::DataPtr extractData( const GA_Attribute *attr ) const;
 		
-		template <typename Container>
-		IECore::DataPtr extractStringVectorData( const Container &container, const GB_Attribute *attr, const GB_AttributeRef &attrRef, IECore::IntVectorDataPtr &indexData ) const;
-		IECore::DataPtr extractStringData( const GU_Detail *geo, const GB_Attribute *attr ) const;
+		IECore::DataPtr extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IECore::IntVectorDataPtr &indexData ) const;
+		IECore::DataPtr extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const;
 
 	private :
 		
