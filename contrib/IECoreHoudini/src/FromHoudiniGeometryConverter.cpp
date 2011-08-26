@@ -216,7 +216,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	{
 		pData[it.getIndex()] = IECore::convert<Imath::V3f>( geo->getPos3( it.getOffset() ) );
 	}
-	
+
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData ) );
 	
 	// get RI remapping information from the detail
@@ -233,14 +233,14 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	// add point attribs
 	if ( result->variableSize( pointInterpolation ) == geo->getNumPoints() )
 	{
-		transferPointAttribs( geo, result, pointInterpolation, points, pointAttributeMap );
+		transferElementAttribs( geo, geo->getPointRange(), geo->pointAttribs(), pointAttributeMap, result, pointInterpolation );
 	}
 	
 	// add primitive attribs
 	size_t numPrims = geo->getNumPrimitives();
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
-		transferPrimitiveAttribs( geo, result, primitiveInterpolation, primitives, primitiveAttributeMap );
+		transferElementAttribs( geo, geo->getPrimitiveRange(), geo->primitiveAttribs(), primitiveAttributeMap, result, primitiveInterpolation );
 	}
 	
 	// add vertex attribs
@@ -271,7 +271,40 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		
 		GA_Range vertRange( geo->getVertexMap(), offsets );
 		
-		transferVertexAttribs( geo, result, vertexInterpolation, vertices );
+		AttributeMap defaultMap;
+		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), defaultMap, result, vertexInterpolation );
+	}
+}
+
+void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+{
+	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
+	{
+		GA_Attribute *attr = it.attrib();
+		if ( !attr )
+		{
+			continue;
+		}
+		
+		const GA_ROAttributeRef attrRef( attr );
+		if ( attrRef.isInvalid() )
+		{
+			continue;
+		}
+		
+		// check for remapping information for this attribute
+		if ( attributeMap.count( attr->getName() ) == 1 )
+		{
+			std::vector<RemapInfo> &map = attributeMap[attr->getName()];
+			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
+			{
+				transferAttribData( result, interpolation, attrRef, range, &*rIt );
+			}
+		}
+		else
+		{
+			transferAttribData( result, interpolation, attrRef, range );
+		}
 	}
 }
 
@@ -537,96 +570,6 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 		{
 			result->variables[ std::string( attr->getName() ) ] = PrimitiveVariable( interpolation, dataPtr );
 		}
-	}
-}
-
-void FromHoudiniGeometryConverter::transferPointAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PointList &points, AttributeMap &attributeMap ) const
-{
-	const GEO_PointAttribDict &attribs = geo->pointAttribs();
-	
-	for( UT_LinkNode *current=attribs.head(); current != 0; current = attribs.next( current ) )
-	{
-		GB_Attribute *attr = dynamic_cast<GB_Attribute*>( current );
-		if ( !attr )
-		{
-			continue;
-		}
-		
-		GB_AttributeRef attrRef = geo->findPointAttrib( attr );
-		if ( GBisAttributeRefInvalid( attrRef ) )
-		{
-			continue;
-		}
-		
-		// check for remapping information for this attribute
-		if ( attributeMap.count( attr->getName() ) == 1 )
-		{
-			std::vector<RemapInfo> &map = attributeMap[attr->getName()];
-			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
-			{
-				transferAttribData<GEO_PointList>( points, result, interpolation, attr, attrRef, &*it );
-			}
-		}
-		else
-		{
-			transferAttribData<GEO_PointList>( points, result, interpolation, attr, attrRef );
-		}
-	}
-}
-
-void FromHoudiniGeometryConverter::transferPrimitiveAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const GEO_PrimList &primitives, AttributeMap &attributeMap ) const
-{
-	const GEO_PrimAttribDict &attribs = geo->primitiveAttribs();
-	
-	for( UT_LinkNode *current=attribs.head(); current != 0; current = attribs.next( current ) )
-	{
-		GB_Attribute *attr = dynamic_cast<GB_Attribute*>( current );
-		if ( !attr )
-		{
-			continue;
-		}
-		
-		GB_AttributeRef attrRef = geo->findPrimAttrib( attr );
-		if ( GBisAttributeRefInvalid( attrRef ) )
-		{
-			continue;
-		}
-
-		// check for remapping information for this attribute
-		if ( attributeMap.count( attr->getName() ) == 1 )
-		{
-			std::vector<RemapInfo> &map = attributeMap[attr->getName()];
-			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
-			{
-				transferAttribData<GEO_PrimList>( primitives, result, interpolation, attr, attrRef, &*it );
-			}
-		}
-		else
-		{
-			transferAttribData<GEO_PrimList>( primitives, result, interpolation, attr, attrRef );
-		}
-	}
-}
-
-void FromHoudiniGeometryConverter::transferVertexAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation, const VertexList &vertices ) const
-{
-	const GEO_VertexAttribDict &attribs = geo->vertexAttribs();
-	
-	for( UT_LinkNode *current=attribs.head(); current != 0; current = attribs.next( current ) )
-	{
-		GB_Attribute *attr = dynamic_cast<GB_Attribute*>( current );
-		if ( !attr )
-		{
-			continue;
-		}
-		
-		GB_AttributeRef attrRef = geo->findVertexAttrib( attr );
-		if ( GBisAttributeRefInvalid( attrRef ) )
-		{
-			continue;
-		}
-		
-		transferAttribData<VertexList>( vertices, result, interpolation, attr, attrRef );
 	}
 }
 

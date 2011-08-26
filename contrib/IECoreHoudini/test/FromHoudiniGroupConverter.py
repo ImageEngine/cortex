@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -230,11 +230,12 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.twoTorii() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 2 )
+		childNames = [ x.blindData()["name"].value for x in result.children() ]
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[0].blindData()["name"].value, "torusAGroup" )
+		self.failUnless( "torusAGroup" in childNames )
 		self.assertEqual( result.children()[0]["P"].data.size(), 100 )
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[1].blindData()["name"].value, "torusBGroup" )
+		self.failUnless( "torusBGroup" in childNames )
 		self.assertEqual( result.children()[1]["P"].data.size(), 100 )
 	
 	def testConvertUngroupedMultiPolygons( self ) :
