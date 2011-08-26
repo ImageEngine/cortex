@@ -53,6 +53,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/WorldBlock.h"
 #include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 #include "CoreHoudini.h"
 #include "FromHoudiniGeometryConverter.h"
@@ -441,9 +442,17 @@ void SOP_ParameterisedHolder::setInputParameterValues()
 			{
 				IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( sop->getParameterised() );
 				IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
+				// We are acquiring and releasing the GIL here to ensure that it is released when we render. This has
+				// to be done because a procedural might jump between c++ and python a few times (i.e. if it spawns
+				// subprocedurals that are implemented in python). In a normal call to cookMySop, this wouldn't be an
+				// issue, but if cookMySop was called from HOM, hou.Node.cook appears to be holding onto the GIL.
+				IECorePython::ScopedGILLock gilLock;
 				{
-					IECore::WorldBlock worldBlock( renderer );
-					procedural->render( renderer );
+					IECorePython::ScopedGILRelease gilRelease;
+					{
+						IECore::WorldBlock worldBlock( renderer );
+						procedural->render( renderer );
+					}
 				}
 				result = IECore::runTimeCast<const IECore::Object>( renderer->world() );
 			}
