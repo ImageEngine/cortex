@@ -114,7 +114,7 @@ PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail 
 	size_t numPrims = primitives.entries();
 	if ( !numPrims || !( primitives[0]->getPrimitiveId() & GEOCURVE ) )
 	{
-		throw runtime_error( "FromHoudiniCurvesConverter: Geometry contains no curves or non-curve primitives" );
+		throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains no curves or non-curve primitives" );
 	}
 	
 	// set periodic based on the first curve
@@ -143,18 +143,18 @@ PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail 
 		const GEO_Primitive *prim = primitives( i );
 		if ( !( prim->getPrimitiveId() & GEOCURVE ) )
 		{
-			throw runtime_error( "FromHoudiniCurvesConverter: Geometry contains non-curve primitives" );
+			throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains non-curve primitives" );
 		}
 		
 		const GEO_Curve *curve = (const GEO_Curve*)prim;
 		if ( curve->getOrder() != order )
 		{
-			throw runtime_error( "FromHoudiniCurvesConverter: Geometry contains multiple curves with differing order. Set all curves to order 2 (linear) or 4 (cubic bSpline)" );
+			throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains multiple curves with differing order. Set all curves to order 2 (linear) or 4 (cubic bSpline)" );
 		}
 		
 		if ( curve->isClosed() != periodic )
 		{
-			throw runtime_error( "FromHoudiniCurvesConverter: Geometry contains both open and closed curves" );
+			throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains both open and closed curves" );
 		}
 		
 		int numPrimVerts = prim->getVertexCount();
@@ -171,7 +171,7 @@ PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail 
 	
 	if ( !origVertsPerCurve.size() )
 	{
-		throw runtime_error( "FromHoudiniCurvesConverter: Geometry does not contain curve vertices" );
+		throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry does not contain curve vertices" );
 	}
 	
 	result->setTopology( new IntVectorData( origVertsPerCurve ), basis, periodic );
@@ -190,7 +190,7 @@ PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail 
 		// only duplicate point and vertex attrib end points
 		if ( it->second.interpolation == IECore::PrimitiveVariable::Vertex )
 		{
-			despatchTypedData<DuplicateEnds, TypeTraits::IsVectorGbAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
+			despatchTypedData<DuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
 		}
 	}
 	
