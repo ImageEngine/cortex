@@ -302,17 +302,25 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 				unsigned dimensions = attr->getSize() / sizeof( float );
 				switch ( dimensions )
 				{
-					case 1:
+					case 1 :
+					{
 						dataPtr = extractData<FloatData>( attribs, attrRef );
 						break;
-					case 2:
+					}
+					case 2 :
+					{
 						dataPtr = extractData<V2fData>( attribs, attrRef );
 						break;
-					case 3:
+					}
+					case 3 :
+					{
 						dataPtr = extractData<V3fData>( attribs, attrRef );
 						break;
-					default:
+					}
+					default :
+					{
 						break;
+					}
 				}
 				break;
 			}
@@ -321,17 +329,25 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 				unsigned dimensions = attr->getSize() / sizeof( float );
 				switch ( dimensions )
 				{
-					case 1:
+					case 1 :
+					{
 						dataPtr = extractData<IntData>( attribs, attrRef );
 						break;
-					case 2:
+					}
+					case 2 :
+					{
 						dataPtr = extractData<V2iData>( attribs, attrRef );
 						break;
-					case 3:
+					}
+					case 3 :
+					{
 						dataPtr = extractData<V3iData>( attribs, attrRef );
 						break;
-					default:
+					}
+					default :
+					{
 						break;
+					}
 				}
 				break;
  			}
