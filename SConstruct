@@ -1568,9 +1568,6 @@ if env["WITH_GL"] and doConfigure :
 
 	glEnvSets = {
 		"IECORE_NAME" : "IECoreGL",
-		"CXXFLAGS" : [
-			"$GL_CXX_FLAGS"
-		],
 	}
 
 	glEnvPrepends = {
@@ -1586,6 +1583,9 @@ if env["WITH_GL"] and doConfigure :
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
 			"$GLUT_LIB_PATH",
+		],
+		"CXXFLAGS" : [
+			"$GL_CXX_FLAGS"
 		],
 	}
 	
