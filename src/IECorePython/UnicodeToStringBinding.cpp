@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,7 +67,7 @@ struct ExtractStringFromUnicode
 		}
 		else
 		{
-			data->convertible = 0;
+			throw_error_already_set();
 		}
 	}
 };

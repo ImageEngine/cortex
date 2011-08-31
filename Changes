@@ -2,6 +2,8 @@ Bug fixes :
 
 * SOP_ParameterisedHolder properly handles the GIL before using the CapturingRenderer.
 
+* Fixed crashes which could be triggered by passing a python unicode string with non-ascii characters into Cortex.
+
 Cortex 6.1.2
 ============
 
