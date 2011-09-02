@@ -1,3 +1,7 @@
+Changes :
+
+* Allocated a TypeId range for use in the Gaffer project.
+
 Bug fixes :
 
 * SOP_ParameterisedHolder properly handles the GIL before using the CapturingRenderer.
