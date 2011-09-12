@@ -35,9 +35,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/tokenizer.hpp"
-
 #include "GEO/GEO_AttributeHandle.h"
+#include "UT/UT_WorkArgs.h"
 
 #include "IECore/CompoundObject.h"
 
@@ -109,20 +108,20 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 	{
 		return;
 	}
-
-	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( remapAttr ); !it.atEnd(); ++it )
+	
+	UT_StringArray remapStrings;
+	UT_IntArray remapHandles;
+	tuple->extractStrings( remapAttr, remapStrings, remapHandles );
+	
+	for ( size_t i=0; i < remapStrings.entries(); ++i )
 	{
 		RemapInfo info;
-
+		
 		// split up our rixlate string
-		typedef boost::char_separator< char > Sep;
-		typedef boost::tokenizer< Sep > Tokeniser;
+		UT_WorkArgs workArgs;
 		std::vector<std::string> tokens;
-		Tokeniser attributeSplit( std::string( it.getString() ), Sep( ":" ) );
-		for ( Tokeniser::iterator it=attributeSplit.begin(); it != attributeSplit.end(); ++it )
-		{
-			tokens.push_back( *it );
-		}
+		remapStrings( i ).tokenize( workArgs, ":" );
+		workArgs.toStringVector( tokens );
 
 		// not enough elements!
 		if ( tokens.size() < 4 )
@@ -131,12 +130,11 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 		}
 
 		// our data types
+		UT_WorkArgs dataWorkArgs;
 		std::vector<std::string> dataTokens;
-		Tokeniser dataSplit( tokens[3], Sep("_") );
-		for ( Tokeniser::iterator it=dataSplit.begin(); it != dataSplit.end(); ++it )
-		{
-			dataTokens.push_back( *it );
-		}
+		UT_String dataString( tokens[3] );
+		dataString.tokenize( dataWorkArgs, "_" );
+		dataWorkArgs.toStringVector( dataTokens );
 
 		if ( dataTokens.size() == 2 ) // we need both class & type!
 		{
