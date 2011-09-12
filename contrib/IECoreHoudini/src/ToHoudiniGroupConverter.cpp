@@ -140,7 +140,7 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 			childGroup = geo->createElementGroup( GA_ATTRIB_PRIMITIVE, name.c_str() );
 		}
 		
-		childGroup->addRange( geo->getOrderedPrimitiveRange( origNumPrims ) );
+		childGroup->addRange( geo->getPrimitiveRangeSlice( origNumPrims ) );
 	}
 	
 	return true;
