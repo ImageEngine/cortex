@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -131,6 +131,39 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		transform = maya.cmds.createNode( "transform" )
 		converter.convert( transform )
 		self.assertEqual( maya.cmds.nodeType( maya.cmds.listRelatives( transform, shapes=True )[0] ), "mesh" )
+	
+	def testNormals( self ) :
+		
+		sphere = maya.cmds.polySphere( subdivisionsX=4, subdivisionsY=3, constructionHistory=False )
+		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
+		maya.cmds.polySoftEdge( sphere, angle=145 )
+
+		mesh = IECoreMaya.FromMayaShapeConverter.create( sphere ).convert()
+		self.failUnless( "N" in mesh )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertEqual( mesh["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
+		
+		transform = maya.cmds.createNode( "transform" )
+		IECoreMaya.ToMayaObjectConverter.create( mesh ).convert( transform )
+		newSphere = maya.cmds.listRelatives( transform, shapes=True )[0]
+		
+		normals3d = IECore.DataConvertOp()( data=mesh["N"].data, targetType=IECore.TypeId.V3dVectorData )
+		del mesh["N"]
+		mesh["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, normals3d )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.failUnless( isinstance( mesh["N"].data, IECore.V3dVectorData ) )
+		
+		transform2 = maya.cmds.createNode( "transform" )
+		IECoreMaya.ToMayaObjectConverter.create( mesh ).convert( transform2 )
+		newSphere2 = maya.cmds.listRelatives( transform2, shapes=True )[0]
+		
+		for i in range( 0, len(maya.cmds.ls( sphere+'.vtx[*]', fl=True )) ) :
+			origNormal = maya.cmds.polyNormalPerVertex( sphere+'.vtx['+str(i)+']', query=True, xyz=True )
+			normal3f = maya.cmds.polyNormalPerVertex( newSphere+'.vtx['+str(i)+']', query=True, xyz=True )
+			normal3d = maya.cmds.polyNormalPerVertex( newSphere2+'.vtx['+str(i)+']', query=True, xyz=True )
+			self.assertEqual( origNormal, normal3f )
+			self.assertEqual( origNormal, normal3d )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
