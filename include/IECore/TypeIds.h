@@ -424,8 +424,8 @@ enum TypeId
 	FirstCoreMayaTypeId = 109000,
 	LastCoreMayaTypeId = 109999,
 
-	FirstIERenderTypeId = 110000,
-	LastIERenderTypeId = 110499,
+	FirstGafferTypeId = 110000,
+	LastGafferTypeId = 110999,
 
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,

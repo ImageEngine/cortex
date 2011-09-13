@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -271,7 +271,18 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 					vertexNormalsArray[i] = IECore::convert<MFloatVector, Imath::V3f>( n->readable()[i] );
 				}
 
-				fnMesh.setNormals( vertexNormalsArray );
+				int index = 0;
+				MIntArray polygonVertices;
+				for ( int i=0; i < numPolygons; i++ )
+				{
+					fnMesh.getPolygonVertices( i, polygonVertices );
+					int numVertices = polygonVertices.length();
+					for ( int j=0; j < numVertices; j++, index++ )
+					{
+						MVector normal( vertexNormalsArray[index] );
+						fnMesh.setFaceVertexNormal( normal, i, polygonVertices[j], MSpace::kObject );
+					}
+				}
 			}
 			else
 			{
@@ -286,7 +297,18 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 						vertexNormalsArray[i] = IECore::convert<MFloatVector, Imath::V3d>( n->readable()[i] );
 					}
 
-					fnMesh.setNormals( vertexNormalsArray );
+					int index = 0;
+					MIntArray polygonVertices;
+					for ( int i=0; i < numPolygons; i++ )
+					{
+						fnMesh.getPolygonVertices( i, polygonVertices );
+						int numVertices = polygonVertices.length();
+						for ( int j=0; j < numVertices; j++, index++ )
+						{
+							MVector normal( vertexNormalsArray[index] );
+							fnMesh.setFaceVertexNormal( normal, i, polygonVertices[j], MSpace::kObject );
+						}
+					}
 
 				}
 				else

@@ -62,10 +62,7 @@ class _CollapsibleMotif( IECoreMaya.UIElement ) :
 		collapseCommand = None,
 	) :
 		
-		IECoreMaya.UIElement.__init__( self, maya.cmds.formLayout() )
 	
-		# implementation for motif is pretty simple - just a frame layout		
-		
 		kw = {}
 		if preExpandCommand is not None :
 			kw["preExpandCommand"] = preExpandCommand
@@ -73,34 +70,60 @@ class _CollapsibleMotif( IECoreMaya.UIElement ) :
 			kw["expandCommand"] = expandCommand
 		if collapseCommand is not None :
 			kw["collapseCommand"] = collapseCommand
-		
-		self.__frameLayout = maya.cmds.frameLayout(
-		
-			label = label,
-			labelVisible = labelVisible,
-			labelIndent = labelIndent,
-			font = labelFont,
-			borderVisible = False,
-			collapsable = True,
-			collapse = collapsed,
-			marginWidth = 0,
-			**kw
+
+		# implementation for motif is pretty simple - just a frame layout
 			
+		IECoreMaya.UIElement.__init__( self,
+			maya.cmds.frameLayout(
+		
+				label = label,
+				labelVisible = labelVisible,
+				labelIndent = labelIndent,
+				labelAlign = "center",
+				font = labelFont,
+				borderVisible = False,
+				collapsable = True,
+				collapse = collapsed,
+				marginWidth = 0,
+				**kw
+			
+			)
 		)
+		
+		# can't display it but at least we can store it
+		self.__annotation = annotation
+		
+		self.__frameLayout = self._topLevelUI()
 		
 	## The maya frameLayout whose collapsibility is controlled by this
 	# class. Add children by editing the contents of this layout.
 	def frameLayout( self ) :
 	
-		return self.__frameLayout
+		return self._topLevelUI()
+
+	def setLabel( self, label ) :
+	
+		maya.cmds.frameLayout( self.frameLayout(), edit=True, label = label )
+
+	def getLabel( self ) :
+	
+		return maya.cmds.frameLayout( self.frameLayout(), query=True, label = True )
+
+	def setAnnotation( self, annotation ) :
+	
+		self.__annotation = annotation
+		
+	def getAnnotation( self ) :
+	
+		return self.__annotation
 
 	def getCollapsed( self ) :
 	
-		return maya.cmds.frameLayout( self.__frameLayout, query=True, collapse=True )
+		return maya.cmds.frameLayout( self.frameLayout(), query=True, collapse=True )
 		
 	def setCollapsed( self, collapsed ) :
 	
-		maya.cmds.frameLayout( self.__frameLayout, edit=True, collapse=collapsed )
+		maya.cmds.frameLayout( self.frameLayout(), edit=True, collapse=collapsed )
 
 class _CollapsibleQt(  IECoreMaya.UIElement ) :
 
@@ -147,6 +170,7 @@ class _CollapsibleQt(  IECoreMaya.UIElement ) :
 		########################################################################
 				
 		self.__collapsibleIcon = None
+		self.__labelControl = None
 		if labelVisible :
 						
 			# have to make one button for the icon and one for the label
@@ -158,12 +182,12 @@ class _CollapsibleQt(  IECoreMaya.UIElement ) :
 				height = 20,
 				width = 15,
 				image = "arrowRight.xpm",
-				command = self._createCallback( self.__toggle ),
+				command = self.__toggle,
 				annotation = annotation,
 				
 			)
 		
-			collapsibleLabel = maya.cmds.iconTextButton(
+			self.__labelControl = maya.cmds.iconTextButton(
 			
 				parent = self._topLevelUI(),
 				height = 20,
@@ -172,17 +196,17 @@ class _CollapsibleQt(  IECoreMaya.UIElement ) :
 				# miraculously be supported in the future?
 				font = labelFont,
 				style = "textOnly", 
-				command = self._createCallback( self.__toggle ),
+				command = self.__toggle,
 				annotation = annotation,
 				
 			)
 			
 			attachForm.append( ( self.__collapsibleIcon, "left", labelIndent ) )
 			attachForm.append( ( self.__collapsibleIcon, "top", 0 ) )
-			attachForm.append( ( collapsibleLabel, "top", 0 ) )
+			attachForm.append( ( self.__labelControl, "top", 0 ) )
 			
-			attachControl.append( ( collapsibleLabel, "left", 0, self.__collapsibleIcon ) )
-			attachControl.append( ( self.__frameLayout, "top", 0, collapsibleLabel ) )
+			attachControl.append( ( self.__labelControl, "left", 0, self.__collapsibleIcon ) )
+			attachControl.append( ( self.__frameLayout, "top", 0, self.__labelControl ) )
 			
 		else :
 		
@@ -196,7 +220,9 @@ class _CollapsibleQt(  IECoreMaya.UIElement ) :
 		)
 		
 		maya.cmds.setParent( self.__frameLayout )
-			
+		
+		self.__annotation = annotation
+		self.__labelText = label	
 		self.__preExpandCommand = preExpandCommand
 		self.__expandCommand = expandCommand
 		self.__collapseCommand = collapseCommand
@@ -206,6 +232,27 @@ class _CollapsibleQt(  IECoreMaya.UIElement ) :
 	def frameLayout( self ) :
 	
 		return self.__frameLayout
+
+	def setLabel( self, label ) :
+	
+		self.__labelText = label
+		if self.__labelControl is not None :
+			maya.cmds.iconTextButton( self.__labelControl, edit=True, label=label )
+
+	def getLabel( self ) :
+	
+		return self.__labelText
+
+	def setAnnotation( self, annotation ) :
+	
+		self.__annotation = annotation
+		if self.__labelControl is not None :
+			maya.cmds.iconTextButton( self.__labelControl, edit=True, annotation=annotation )
+			maya.cmds.iconTextButton( self.__collapsibleIcon, edit=True, annotation=annotation )
+					
+	def getAnnotation( self ) :
+	
+		return self.__annotation
 
 	def getCollapsed( self ) :
 	

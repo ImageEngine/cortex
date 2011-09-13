@@ -1179,6 +1179,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:cullingSpace"] = rendererSpaceSetter<CullingSpaceStateComponent>;
 		(*a)["gl:cullingBox"] = typedAttributeSetter<CullingBoxStateComponent>;
 		(*a)["gl:procedural:reentrant"] = typedAttributeSetter<ProceduralThreadingStateComponent>;
+		(*a)["gl:visibility:camera"] = typedAttributeSetter<CameraVisibilityStateComponent>;
 		(*a)["gl:depthTest"] = typedAttributeSetter<DepthTestStateComponent>;
 	}
 	return a;
@@ -1225,6 +1226,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:cullingSpace"] = rendererSpaceGetter<CullingSpaceStateComponent>;
 		(*a)["gl:cullingBox"] = typedAttributeGetter<CullingBoxStateComponent>;
 		(*a)["gl:procedural:reentrant"] = typedAttributeGetter<ProceduralThreadingStateComponent>;
+		(*a)["gl:visibility:camera"] = typedAttributeGetter<CameraVisibilityStateComponent>;
 		(*a)["gl:depthTest"] = typedAttributeGetter<DepthTestStateComponent>;
 	}
 	return a;

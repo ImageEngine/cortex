@@ -1,3 +1,32 @@
+Changes :
+
+* Allocated a TypeId range for use in the Gaffer project.
+
+Bug fixes :
+
+* SOP_ParameterisedHolder properly handles the GIL before using the CapturingRenderer.
+
+* Fixed crashes which could be triggered by passing a python unicode string with non-ascii characters into Cortex.
+
+* Fixed bug with conversion of normals in ToMayaMeshConverter.
+
+Cortex 6.1.2
+============
+
+Additions :
+
+* IECoreGL::Renderer class now supports the "gl:visibility:camera" attribute.
+
+Bug fixes :
+
+* PointDistributionOp density parameter no longer accepts negative values.
+
+* RelativePreset was creating unnecessary data for empty class parameters and not working if there was no differences at all.
+
+* Fixed a maya 2010 crash triggered by deep levels of nesting in parameter uis.
+
+* Fixed a bug in the IECoreRI::Renderer, causing incorrect results when querying projection matricies
+
 Cortex 6.1.1
 ============
 

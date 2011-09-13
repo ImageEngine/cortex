@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -112,6 +112,7 @@ enum TypeId
 	ToGLPointsConverterTypeId = 105069,
 	ProceduralThreadingStateComponentTypeId = 105070,
 	DepthTestStateComponentTypeId = 105071,
+	CameraVisibilityStateComponentTypeId = 105072,
 	LastCoreGLTypeId = 105999,
 };
 

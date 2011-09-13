@@ -105,7 +105,7 @@ compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2
 compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ '-pipe', '-Wall', '-DBOOST_FILESYSTEM_VERSION=2' ]
+CXXFLAGS = [ '-pipe', '-Wall' ]
 if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
 	

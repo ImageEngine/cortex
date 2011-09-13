@@ -525,15 +525,10 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 	ScopedContext scopedContext( m_context );
 
 	M44f result;
-	RtPoint p[4] = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 }, { 0, 0, 0 } };
-	if( RiTransformPoints( (char *)coordinateSystem.c_str(), "world", 4, p ) )
+	RtMatrix matrix;
+	if( RxTransform( (char *)coordinateSystem.c_str(), "world", 0.0f, matrix ) == 0 )
 	{
-		V3f o = convert<Imath::V3f>( p[3] );
-		V3f x = convert<Imath::V3f>( p[0] ) - o;
-		V3f y = convert<Imath::V3f>( p[1] ) - o;
-		V3f z = convert<Imath::V3f>( p[2] ) - o;
-
-		result = IECore::matrixFromBasis<float>( x, y, z, o );
+		result = M44f( matrix );
 	}
 	else
 	{
