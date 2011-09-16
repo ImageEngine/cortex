@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -75,6 +75,18 @@ class FromMayaTransformConverterTest( IECoreMaya.TestCase ) :
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) )
+
+		# test custom space
+		customSpace = IECore.M44f()
+		customSpace.setScale( IECore.V3f( 0.5, 0.5, 0.5 ) )
+		c["space"].setValue( "Custom" )
+		c["customSpace"].setValue( IECore.M44fData( customSpace ) )
+		t = c.convert()
+		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		expectedResult = IECore.M44d( 2, 0, 0, 0,   0, 2, 0, 0,   0, 0, 2, 0,   4, 4, 26, 1 )
+		self.assertEqual( t.value.transform, expectedResult )
+		# sanity check: if we apply the custom space to the result we should get the world space result
+		self.assertEqual( t.value.transform * IECore.M44d.createScaled( IECore.V3d( 0.5, 0.5, 0.5 ) ), IECore.M44d.createTranslated( IECore.V3d( 2, 2, 13 ) ) )
 
 		locatorShape = maya.cmds.listRelatives( locatorTransform, children=True )[0]
 
