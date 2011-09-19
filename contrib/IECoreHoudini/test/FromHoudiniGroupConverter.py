@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -304,6 +304,36 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		g2 = converter.convert()
 		self.assertEqual( g2, g1 )
 		self.assertRaises( RuntimeError, IECore.curry( IECoreHoudini.FromHoudiniGeometryConverter.create, torii ) )
+
+	def testAdjustedStringVectorIndices( self ) :
+		box = self.box()
+		geo = box.parent()
+		group = box.createOutputNode( "group" )
+		attr = group.createOutputNode( "attribcreate" )
+		attr.parm( "class" ).set( 1 ) # prim
+		attr.parm( "type" ).set( 3 ) # string
+		attr.parm( "string" ).set( "box1" )
+		box2 = geo.createNode( "box" )
+		group2 = box2.createOutputNode( "group" )
+		attr2 = group2.createOutputNode( "attribcreate" )
+		attr2.parm( "class" ).set( 1 ) # prim
+		attr2.parm( "type" ).set( 3 ) # string
+		attr2.parm( "string" ).set( "box2" )
+		merge = attr.createOutputNode( "merge" )
+		merge.setInput( 1, attr2 )
+		g = IECoreHoudini.FromHoudiniGroupConverter( merge ).convert()
+		for c in g.children() :
+			null = geo.createNode( "null" )
+			IECoreHoudini.ToHoudiniPolygonsConverter( c ).convert( null )
+			m = IECoreHoudini.FromHoudiniPolygonsConverter( null ).convert()
+			self.assertEqual( m.vertexIds, c.vertexIds )
+			self.assertEqual( m.verticesPerFace, c.verticesPerFace )
+			self.assertEqual( m.keys(), c.keys() )
+			for key in m.keys() :
+				self.assertEqual( m[key].interpolation, c[key].interpolation )
+				self.assertEqual( m[key].data, c[key].data )
+				self.assertEqual( m[key], c[key] )
+
 
 if __name__ == "__main__":
     unittest.main()
