@@ -590,6 +590,15 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 	indexContainer.resize( range.getEntries() );
 	int *indices = indexData->baseWritable();
 	
+	UT_IntArray handles;
+	tuple->extractHandles( attr, handles );
+	std::map<int, int> adjustedHandles;
+	size_t numHandles = handles.entries();
+	for ( size_t i=0; i < numHandles; i++ )
+	{
+		adjustedHandles[ handles[i] ] = i;
+	}
+	
 	size_t i = 0;
 	bool adjustedDefault = false;
 	for ( GA_Iterator it=range.begin(); !it.atEnd(); ++it, ++i )
@@ -608,7 +617,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 		}
 		else
 		{
-			indices[i] = index;
+			indices[i] = adjustedHandles[index];
 		}
 	}
 	
