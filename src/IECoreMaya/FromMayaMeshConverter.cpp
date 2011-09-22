@@ -394,7 +394,7 @@ IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool fo
 		if ( forceRgb )
 		{
 			Color3fVectorDataPtr colorVec = new Color3fVectorData();
-			colorVec->writable().resize( numColors, Imath::Color3f(-1) );
+			colorVec->writable().resize( numColors, Imath::Color3f(1) );
 			std::vector< Imath::Color3f >::iterator it = colorVec->writable().begin();
 			for ( int i = 0; i < availableColors; i++, it++ )
 			{
@@ -419,7 +419,7 @@ IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool fo
 		if ( rep == MFnMesh::kRGB || forceRgb )
 		{
 			Color3fVectorDataPtr colorVec = new Color3fVectorData();
-			colorVec->writable().resize( numColors, Imath::Color3f(-1) );
+			colorVec->writable().resize( numColors, Imath::Color3f(0,0,0) );
 			std::vector< Imath::Color3f >::iterator it = colorVec->writable().begin();
 			for ( int i = 0; i < availableColors; i++, it++ )
 			{
@@ -431,7 +431,7 @@ IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool fo
 		else
 		{
 			Color4fVectorDataPtr colorVec = new Color4fVectorData();
-			colorVec->writable().resize( numColors, Imath::Color4f(-1) );
+			colorVec->writable().resize( numColors, Imath::Color4f(0,0,0,1) );
 			std::vector< Imath::Color4f >::iterator it = colorVec->writable().begin();
 			for ( int i = 0; i < availableColors; i++, it++ )
 			{
