@@ -405,7 +405,7 @@ IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool fo
 		else
 		{
 			FloatVectorDataPtr colorVec = new FloatVectorData();
-			colorVec->writable().resize( numColors, -1 );
+			colorVec->writable().resize( numColors, 1 );
 			std::vector< float >::iterator it = colorVec->writable().begin();
 			for ( int i = 0; i < availableColors; i++, it++ )
 			{
