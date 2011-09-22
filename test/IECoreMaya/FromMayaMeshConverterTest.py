@@ -34,6 +34,7 @@
 
 import os.path
 import maya.cmds
+import maya.OpenMaya as OpenMaya
 
 import IECore
 import IECoreMaya
@@ -274,7 +275,47 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( "map2_s" in m )
 		self.assert_( "map2_t" in m )
 		self.assert_( "map2Indices" in m )
-		
+
+	def testColors( self ):
+
+		# test alpha to rgb conversion
+		mesh = "pPlaneShape1"
+		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/colouredPlane.ma", force = True, open = True )
+		sel = OpenMaya.MSelectionList()
+		sel.add( mesh )
+		planeObj = OpenMaya.MObject()
+		sel.getDependNode( 0, planeObj )
+		fnMesh = OpenMaya.MFnMesh( planeObj )
+		fnMesh.setCurrentColorSetName( "cAlpha" )
+		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECore.MeshPrimitive.staticTypeId() )
+		converter['colors'] = True
+		m = converter.convert()
+		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(0), IECore.Color3f(1), IECore.Color3f(0.8), IECore.Color3f(0.5) ] ) )
+
+		# test rgba to rgb conversion
+		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/colouredPlane.ma", force = True, open = True )
+		sel = OpenMaya.MSelectionList()
+		sel.add( mesh )
+		planeObj = OpenMaya.MObject()
+		sel.getDependNode( 0, planeObj )
+		fnMesh = OpenMaya.MFnMesh( planeObj )
+		fnMesh.setCurrentColorSetName( "cRGBA" )
+		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECore.MeshPrimitive.staticTypeId() )
+		converter['colors'] = True
+		m = converter.convert()
+		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f( 1, 1, 0 ), IECore.Color3f( 1, 1, 1 ), IECore.Color3f( 0, 1, 1 ), IECore.Color3f( 0, 1, 0 ) ] ) )
+
+	def testExtraColors( self ):
+
+		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/colouredPlane.ma", force = True, open = True )
+
+		mesh = "pPlaneShape1"
+		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECore.MeshPrimitive.staticTypeId() )
+		converter['extraColors'] = True
+		m = converter.convert()
+		self.assertEqual( m['cAlpha_Cs'].data, IECore.FloatVectorData( [ 0, 1, 0.8, 0.5 ] ) )
+		self.assertEqual( m['cRGB_Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(1,0,0), IECore.Color3f(0), IECore.Color3f(0,0,1), IECore.Color3f(0,1,0) ] ) )
+		self.assertEqual( m['cRGBA_Cs'].data, IECore.Color4fVectorData( [ IECore.Color4f( 1, 1, 0, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ), IECore.Color4f( 0, 1, 1, 1 ), IECore.Color4f( 0, 1, 0, 0.5 ) ] ) )
 		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

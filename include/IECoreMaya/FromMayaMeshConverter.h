@@ -82,6 +82,14 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		/// logical uv at a vertex. By comparing the uv indices this information can be
 		/// obtained.
 		IECore::IntVectorDataPtr stIndices( const MString &uvSet="" ) const;
+		/// Returns just the face-varying colors for the mesh.
+		/// @param forceRgb will do appropriate conversions to return rgb colors.
+		IECore::DataPtr colors( const MString &colorSet="", bool forceRgb = false ) const;
+		/// Returns just the face-varying colors for the mesh.
+		template< class T >	typename IECore::TypedData< T >::Ptr colors( const MString &colorSet="" ) const
+		{
+			return IECore::dynamicPointerCast< T >( colors( colorSet, false  ) );
+		}
 
 		//! @name Parameter accessors
 		//////////////////////////////////////////////////////////
@@ -100,6 +108,13 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 
 		IECore::BoolParameterPtr extraSTParameter();
 		IECore::BoolParameterPtr extraSTParameter() const;
+
+		IECore::BoolParameterPtr colorsParameter();
+		IECore::ConstBoolParameterPtr colorsParameter() const;
+
+		IECore::BoolParameterPtr extraColorsParameter();
+		IECore::ConstBoolParameterPtr extraColorsParameter() const;
+
 		//@}
 
 	protected :

@@ -1,5 +1,7 @@
 Changes :
 
+* Added face-varying color conversion in FromMayaMeshConverter.
+
 * Added custom space input to FromMayaTransformConverter.
 
 * Allocated a TypeId range for use in the Gaffer project.
