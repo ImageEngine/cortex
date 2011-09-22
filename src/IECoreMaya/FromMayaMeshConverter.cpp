@@ -161,7 +161,7 @@ void FromMayaMeshConverter::constructCommon()
 	BoolParameterPtr colors = new BoolParameter(
 		"colors",
 		"When this is on the default color set is added to the result as primitive variable named \"Cs\".",
-		true,
+		false,
 		colorsPresets
 	);
 
@@ -175,7 +175,7 @@ void FromMayaMeshConverter::constructCommon()
 	BoolParameterPtr extraColors = new BoolParameter(
 		"extraColors",
 		"When this is on, all color sets are added to the result as primitive variables named \"setName_Cs\".",
-		true,
+		false,
 		extraColorsPresets
 	);
 
