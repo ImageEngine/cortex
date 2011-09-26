@@ -56,6 +56,7 @@ class SequenceCpOp( Op ) :
 					defaultValue = "",
 					check = FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
+					minSequenceSize = 1,
 				),
 				FileSequenceParameter(
 					name = "dst",
@@ -63,6 +64,7 @@ class SequenceCpOp( Op ) :
 					defaultValue = "",
 					check = FileSequenceParameter.CheckType.MustNotExist,
 					allowEmptyString = False,
+					minSequenceSize = 1,
 				)
 			]
 		)

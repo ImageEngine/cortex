@@ -45,6 +45,7 @@ class SequenceRenumberOp( Op ) :
 				defaultValue = "",
 				check = FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
+				minSequenceSize = 1,
 			)
 		)
 
@@ -56,6 +57,7 @@ class SequenceRenumberOp( Op ) :
 					defaultValue = "",
 					check = FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
+					minSequenceSize = 1,
 				),
 				FileSequenceParameter(
 					name = "dst",
@@ -63,6 +65,7 @@ class SequenceRenumberOp( Op ) :
 					defaultValue = "",
 					check = FileSequenceParameter.CheckType.DontCare,
 					allowEmptyString = True,
+					minSequenceSize = 1,
 				),
 				IntParameter(
 					name = "multiply",

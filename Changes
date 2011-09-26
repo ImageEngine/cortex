@@ -6,6 +6,8 @@ Changes :
 
 * Allocated a TypeId range for use in the Gaffer project.
 
+* Changed minSequenceSize to 1 for FileSequenceParameters in common sequence utility ops (Sequence*Op)
+
 Bug fixes :
 
 * SOP_ParameterisedHolder properly handles the GIL before using the CapturingRenderer.

@@ -63,6 +63,7 @@ class SequenceMergeOp( Op ) :
 					check = FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					extensions = extensions,
+					minSequenceSize = 1,
 				),
 				FileSequenceParameter(
 					name = "fileSequence2",
@@ -71,6 +72,7 @@ class SequenceMergeOp( Op ) :
 					check = FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					extensions = extensions,
+					minSequenceSize = 1,
 				),
 				FileSequenceParameter(
 					name = "outputFileSequence",
@@ -78,6 +80,7 @@ class SequenceMergeOp( Op ) :
 					defaultValue = "",
 					allowEmptyString = False,
 					check = FileSequenceParameter.CheckType.MustNotExist,
+					minSequenceSize = 1,
 				),
 			]
 		)

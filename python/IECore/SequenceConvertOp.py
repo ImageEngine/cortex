@@ -53,6 +53,7 @@ class SequenceConvertOp( Op ) :
 				defaultValue = "",
 				check = FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
+				minSequenceSize = 1,
 			)
 		)
 
@@ -64,7 +65,8 @@ class SequenceConvertOp( Op ) :
 					defaultValue = "",
 					check = FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
-					extensions = Reader.supportedExtensions()
+					extensions = Reader.supportedExtensions(),
+					minSequenceSize = 1,
 				),
 				FileSequenceParameter(
 					name = "dst",
@@ -72,7 +74,8 @@ class SequenceConvertOp( Op ) :
 					defaultValue = "",
 					check = FileSequenceParameter.CheckType.MustNotExist,
 					allowEmptyString = False,
-					extensions = Writer.supportedExtensions()
+					extensions = Writer.supportedExtensions(),
+					minSequenceSize = 1,
 				)
 			]
 		)

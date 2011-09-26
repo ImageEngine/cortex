@@ -45,6 +45,7 @@ class SequenceRmOp( Op ) :
 				defaultValue = "",
 				check = FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
+				minSequenceSize = 1,
 			)
 		)
 
@@ -56,6 +57,7 @@ class SequenceRmOp( Op ) :
 					defaultValue = "",
 					check = FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
+					minSequenceSize = 1,
 				)
 			]
 		)
