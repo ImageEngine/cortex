@@ -397,6 +397,9 @@ void bindTypeId()
 		.value( "DataInterleaveOp", DataInterleaveOpTypeId )
 		.value( "DataConvertOp", DataConvertOpTypeId )
 		.value( "PNGImageReader", PNGImageReaderTypeId )
+		.value( "DeepImageReader", DeepImageReaderTypeId )
+		.value( "DeepImageWriter", DeepImageWriterTypeId )
+
 	;
 }
 

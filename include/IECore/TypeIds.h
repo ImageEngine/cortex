@@ -394,6 +394,8 @@ enum TypeId
 	DataInterleaveOpTypeId = 348,
 	DataConvertOpTypeId = 349,
 	PNGImageReaderTypeId = 350,
+	DeepImageReaderTypeId = 351,
+	DeepImageWriterTypeId = 352,
 
 	// Remember to update TypeIdBinding.cpp !!!
 
