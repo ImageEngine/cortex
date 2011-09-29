@@ -1,3 +1,7 @@
+Additions :
+
+* Added DeepPixel to represent arbitrary channel data stored at varying depths in space.
+
 Changes :
 
 * Added face-varying color conversion in FromMayaMeshConverter.

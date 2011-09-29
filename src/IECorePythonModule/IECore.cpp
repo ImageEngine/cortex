@@ -296,6 +296,7 @@
 #include "IECorePython/DataInterleaveOpBinding.h"
 #include "IECorePython/DataConvertOpBinding.h"
 #include "IECorePython/PNGImageReaderBinding.h"
+#include "IECorePython/DeepPixelBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -596,6 +597,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPNGImageReader();
 	
 #endif
+	
+	bindDeepPixel();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
