@@ -60,6 +60,12 @@ RATDeepImageReader::RATDeepImageReader( const std::string &fileName )
 
 RATDeepImageReader::~RATDeepImageReader()
 {
+	if ( m_inputFile )
+	{
+		m_inputFile->close();
+	}
+	
+	delete m_ratPixel;
 	delete m_inputFile;
 }
 
@@ -148,7 +154,8 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 		// we already opened the right file successfully
 		return true;
 	}
-
+	
+	delete m_ratPixel;
 	delete m_inputFile;
 	m_inputFile = new IMG_DeepShadow;
 	m_inputFileName = "";
@@ -164,7 +171,6 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 	if ( m_inputFile->open( fileName().c_str() ) && m_inputFile->depthInterp() == IMG_COMPRESS_DISCRETE )
 	{
 		m_inputFileName = fileName();
-		// it appears deleting this will cause a seg fault. perhaps houdini is holding a reference too?
 		m_ratPixel = new IMG_DeepPixelReader( *m_inputFile );
 		
 		const IMG_DeepShadowChannel *channel = 0;
@@ -214,6 +220,7 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 	
 	if ( !success )
 	{
+		delete m_ratPixel;
 		delete m_inputFile;
 		m_inputFile = 0;
 		m_inputFileName = "";
