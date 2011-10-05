@@ -6,6 +6,8 @@ Additions :
 
 * Added IECoreHoudini::RATDeepImageReader to read Houdini deep texture files. Supports Deep Camera Maps and Deep Shadow Maps.
 
+* Added IECoreHoudini::RATDeepImageWriter to write Houdini deep texture files. 
+
 Improvements :
 
 Changes :
