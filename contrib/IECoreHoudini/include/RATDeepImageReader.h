@@ -44,7 +44,12 @@
 namespace IECoreHoudini
 {
 
-/// The RATDeepImageReader class reads Houdini deep texture files.
+/// The RATDeepImageReader class reads Houdini deep texture files. Currently, it
+/// only supports reading C and Of channels (RGBA or A). In the case of a DCM, 
+/// (C and Of) it will assume Of is identical to the A sub-channel of C and can
+/// be discarded. In the case of a DSM (Of only) the first Of sub-channel will
+/// be used as A and the other 2 sub-channels will be discarded.
+/// \todo: add support for arbitrary channels
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
 class RATDeepImageReader : public IECore::DeepImageReader
