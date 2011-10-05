@@ -298,6 +298,7 @@
 #include "IECorePython/PNGImageReaderBinding.h"
 #include "IECorePython/DeepPixelBinding.h"
 #include "IECorePython/DeepImageReaderBinding.h"
+#include "IECorePython/DeepImageWriterBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -601,6 +602,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	
 	bindDeepPixel();
 	bindDeepImageReader();
+	bindDeepImageWriter();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

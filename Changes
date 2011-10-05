@@ -1,6 +1,9 @@
 Additions :
 
 * Added DeepImageReader abstract base class for reading deep images. DeepImageReader::readPixel returns an individual DeepPixel, while DeepImageReader::read returns a composited ImagePrimitive without depth information.
+
+* Added DeepImageWriter abstract base class for writing deep images.
+
 * Added IECoreHoudini::RATDeepImageReader to read Houdini deep texture files. Supports Deep Camera Maps and Deep Shadow Maps.
 
 Improvements :
