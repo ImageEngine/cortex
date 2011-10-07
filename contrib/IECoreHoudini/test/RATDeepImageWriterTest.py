@@ -72,7 +72,9 @@ class TestRATDeepImageWriter( IECoreHoudini.TestCase ) :
 		self.assertEqual( writer.parameters()['fileName'].getTypedValue(), "" )
 		self.assertEqual( writer.parameters()['channelNames'].getValue(), IECore.StringVectorData( list("RGBA") ) )
 		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), IECore.V2i( 2048, 1556 ) )
-		self.assertRaises( RuntimeError, IECore.curry( writer.writePixel, 0, 0, IECore.DeepPixel( "RGBA" ) ) )
+		p = IECore.DeepPixel( "RGBA" )
+		p.addSample( 1, [ 1, 0, 0, 1 ] )
+		self.assertRaises( RuntimeError, IECore.curry( writer.writePixel, 0, 0, p ) )
 	
 	def testParameters( self ) :
 	
@@ -397,7 +399,7 @@ class TestRATDeepImageWriter( IECoreHoudini.TestCase ) :
 		self.assertEqual( rp.getDepth( 1 ), 1.5 )
 		self.assertEqual( rp[0], ( 0.5, ) )
 		self.assertEqual( rp[1], ( 0.75, ) )
-	
+		
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestRATDeepImageWriter.__output ) :

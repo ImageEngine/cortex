@@ -88,6 +88,21 @@ const V2iParameter *DeepImageWriter::resolutionParameter() const
 	return m_resolutionParameter;
 }
 
+void DeepImageWriter::writePixel( int x, int y, const DeepPixel *pixel )
+{
+	if ( !pixel || !pixel->numSamples() )
+	{
+		return;
+	}
+	
+	if ( pixel->numChannels() != m_channelsParameter->getTypedValue().size() )
+	{
+		throw InvalidArgumentException( std::string( "DeepPixel does not have the correct channels." ) );
+	}
+	
+	doWritePixel( x, y, pixel );
+}
+
 void DeepImageWriter::registerDeepImageWriter( const std::string &extensions, CanWriteFn canWrite, CreatorFn creator, TypeId typeId )
 {
 	assert( canWrite );

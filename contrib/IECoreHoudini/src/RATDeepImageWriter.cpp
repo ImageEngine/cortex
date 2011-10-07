@@ -72,26 +72,9 @@ bool RATDeepImageWriter::canWrite( const std::string &fileName )
 	return IMG_DeepShadow().open( fileName.c_str(), 2, 2 );
 }
 
-void RATDeepImageWriter::writePixel( int x, int y, const DeepPixel *pixel )
+void RATDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 {
 	open();
-	
-	if ( !pixel )
-	{
-		return;
-	}
-	
-	unsigned numSamples = pixel->numSamples();
-	if ( !numSamples )
-	{
-		return;
-	}
-	
-	unsigned numChannels = pixel->numChannels();
-	if ( numChannels != m_channelsParameter->getTypedValue().size() )
-	{
-		throw InvalidArgumentException( std::string( "DeepPixel does not have the correct channels." ) );
-	}
 	
 	const float *channelData = 0;
 	
@@ -109,6 +92,8 @@ void RATDeepImageWriter::writePixel( int x, int y, const DeepPixel *pixel )
 	
 	m_outputFile->pixelStart( x, y );
 	
+	unsigned numChannels = pixel->numChannels();
+	unsigned numSamples = pixel->numSamples();
 	for ( unsigned i=0; i < numSamples; ++i )
 	{
 		channelData = pixel->channelData( i );

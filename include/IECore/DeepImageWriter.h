@@ -82,11 +82,10 @@ class DeepImageWriter : public Parameterised
 		const IECore::V2iParameter *resolutionParameter() const;
 		
 		/// Writes an individual DeepPixel to the file. Should throw if the data could not
-		/// be written. Derived classes must implement this method. Note that regardless
-		/// of image format, x and y should be specified as if the origin is in the upper
-		/// left corner of the displayWindow. It is up to the derived classes to account
-		/// for that fact if necessary.
-		virtual void writePixel( int x, int y, const DeepPixel *pixel ) = 0;
+		/// be written. Note that regardless of image format, x and y should be specified
+		/// as if the origin is in the upper left corner of the displayWindow. It is up to
+		/// the derived classes to account for that fact if necessary.
+		void writePixel( int x, int y, const DeepPixel *pixel );
 
 		/// Fills the passed vector with all the extensions for which a DeepImageWriter is
 		/// available. Extensions are of the form "exr" - ie without a preceding '.'.
@@ -100,6 +99,15 @@ class DeepImageWriter : public Parameterised
 
 		DeepImageWriter( const std::string &description );
 
+		/// Writes an individual DeepPixel. This is called by the public writePixel() method
+		/// and must be implemented in all derived classes. It is guaranteed that the given
+		/// DeepPixel is a valid pointer, has at least one depth sample, and has the correct
+		/// number of channels. For speed, channel name verification is avoided. Note that
+		/// regardless of image format, x and y should be specified as if the origin is in
+		/// the upper left corner of the displayWindow. It is up to the derived classes to
+		/// account for that fact if necessary.
+		virtual void doWritePixel( int x, int y, const DeepPixel *pixel ) = 0;
+		
 		/// Definition of a function which can create a DeepImageWriter when given a fileName.
 		typedef DeepImageWriterPtr (*CreatorFn)( const std::string &fileName );
 		/// Definition of a function to answer the question can this file be opened for writing?

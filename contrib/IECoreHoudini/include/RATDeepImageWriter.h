@@ -65,11 +65,11 @@ class RATDeepImageWriter : public IECore::DeepImageWriter
 
 		static bool canWrite( const std::string &filename );
 
-		virtual void writePixel( int x, int y, const IECore::DeepPixel *pixel );
-
 	private :
 
 		static const DeepImageWriterDescription<RATDeepImageWriter> g_writerDescription;
+
+		virtual void doWritePixel( int x, int y, const IECore::DeepPixel *pixel );
 
 		/// Tries to open the file for writing, throwing on failure. On success,
 		/// all of the private members will be valid.
