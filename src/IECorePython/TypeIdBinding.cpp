@@ -399,6 +399,7 @@ void bindTypeId()
 		.value( "PNGImageReader", PNGImageReaderTypeId )
 		.value( "DeepImageReader", DeepImageReaderTypeId )
 		.value( "DeepImageWriter", DeepImageWriterTypeId )
+		.value( "DeepImageConverter", DeepImageConverterTypeId )
 
 	;
 }

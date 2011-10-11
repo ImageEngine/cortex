@@ -396,6 +396,7 @@ enum TypeId
 	PNGImageReaderTypeId = 350,
 	DeepImageReaderTypeId = 351,
 	DeepImageWriterTypeId = 352,
+	DeepImageConverterTypeId = 353,
 
 	// Remember to update TypeIdBinding.cpp !!!
 
