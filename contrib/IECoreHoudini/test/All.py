@@ -60,6 +60,7 @@ from FromHoudiniGroupConverter import *
 from TemporaryParameterValuesTest import * 
 from RATDeepImageReaderTest import *
 from RATDeepImageWriterTest import *
+from DeepImageConverter import *
 
 ## these tests use python functions that aren't available before Houdini 11
 ## \todo: remove this clause once we drop support for Houdini 10

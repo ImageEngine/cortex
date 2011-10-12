@@ -8,6 +8,8 @@ Additions :
 
 * Added IECoreHoudini::RATDeepImageWriter to write Houdini deep texture files. 
 
+* Added DeepImageConverter to convert from one deep image format to another.
+
 Improvements :
 
 Changes :

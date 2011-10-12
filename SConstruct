@@ -47,7 +47,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=6
-ieCoreMinorVersion=2
+ieCoreMinorVersion=3
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -640,6 +640,7 @@ o.Add(
 		( "IECore.UVDistortOp", "common/2d/image/uvDistort" ),
 		( "IECore.ImageCompositeOp", "common/2d/image/imageComposite" ),
 		( "IECore.ImageConvolveOp", "common/2d/image/imageConvolve" ),
+		( "IECore.DeepImageConverter", "common/2d/deepImage/convert" ),
 		( "IECore.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
 		( "IECore.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
 		( "IECore.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
