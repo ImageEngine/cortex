@@ -257,11 +257,12 @@ if targetApp=="maya" :
 	INSTALL_MAYAPLUGIN_NAME = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 	INSTALL_MAYAICON_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/icons"
 	WITH_MAYA_PLUGIN_LOADER = 1
-
-	mtoaVersion = getOption( "MTOA_VERSION", os.environ["MTOA_VERSION"] )
-	MTOA_ROOT = "/software/apps/mtoa/" + mtoaVersion + "/" + platform + "/" + mayaMajorVersion
-	MTOA_SOURCE_ROOT = "/home/john/opendev/mtoa" ## \todo Remove when this hack is no longer necessary
-	INSTALL_MTOAEXTENSION_NAME = "$INSTALL_PREFIX/tools/mtoa/" + mtoaVersion + "/maya" + mayaMajorVersion + "/cortex$IECORE_MAJOR_VERSION/extensions/" + platform + "/$IECORE_NAME"
+	
+	if mayaMajorVersion == "2012" :
+		mtoaVersion = getOption( "MTOA_VERSION", os.environ["MTOA_VERSION"] )
+		MTOA_ROOT = "/software/apps/mtoa/" + mtoaVersion + "/" + platform + "/" + mayaMajorVersion
+		MTOA_SOURCE_ROOT = "/home/john/opendev/mtoa" ## \todo Remove when this hack is no longer necessary
+		INSTALL_MTOAEXTENSION_NAME = "$INSTALL_PREFIX/tools/mtoa/" + mtoaVersion + "/maya" + mayaMajorVersion + "/cortex$IECORE_MAJOR_VERSION/extensions/" + platform + "/$IECORE_NAME"
 
 else :
 
