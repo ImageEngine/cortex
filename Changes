@@ -1,3 +1,6 @@
+Cortex 6.3.0
+============
+
 Additions :
 
 * Added DeepImageReader abstract base class for reading deep images. DeepImageReader::readPixel returns an individual DeepPixel, while DeepImageReader::read returns a composited ImagePrimitive without depth information.
