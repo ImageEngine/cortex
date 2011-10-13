@@ -10,6 +10,8 @@ Additions :
 
 * Added DeepImageConverter to convert from one deep image format to another.
 
+* Added initial support for Arnold.
+
 Improvements :
 
 Changes :

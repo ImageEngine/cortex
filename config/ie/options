@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -229,6 +229,15 @@ try :
 		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
 except :
 	pass
+	
+# find arnold. we only build the arnold stuff if the compiler we're building with is suitable.
+arnoldVersion = getOption( "ARNOLD_VERSION", os.environ["ARNOLD_VERSION"] )
+try :
+	arnoldReg = IEEnv.registry["apps"]["arnold"][arnoldVersion][platform]
+	if arnoldReg["compiler"]==compiler and arnoldReg["compilerVersion"]==compilerVersion :
+		ARNOLD_ROOT = arnoldReg["location"]
+except :
+	pass
 
 # ask for opengl support
 WITH_GL=1
@@ -248,6 +257,11 @@ if targetApp=="maya" :
 	INSTALL_MAYAPLUGIN_NAME = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 	INSTALL_MAYAICON_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/icons"
 	WITH_MAYA_PLUGIN_LOADER = 1
+
+	mtoaVersion = getOption( "MTOA_VERSION", os.environ["MTOA_VERSION"] )
+	MTOA_ROOT = "/software/apps/mtoa/" + mtoaVersion + "/" + platform + "/" + mayaMajorVersion
+	MTOA_SOURCE_ROOT = "/home/john/opendev/mtoa" ## \todo Remove when this hack is no longer necessary
+	INSTALL_MTOAEXTENSION_NAME = "$INSTALL_PREFIX/tools/mtoa/" + mtoaVersion + "/maya" + mayaMajorVersion + "/cortex$IECORE_MAJOR_VERSION/extensions/" + platform + "/$IECORE_NAME"
 
 else :
 
@@ -329,6 +343,8 @@ if targetApp :
 	# install the procedurals into /tmp where they can't do any harm.
 	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_RMANDISPLAY_NAME = "/tmp/unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_ARNOLDPROCEDURAL_NAME = "/tmp/unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 else :
 	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
@@ -336,6 +352,8 @@ else :
 	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/" + pythonVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_RMANPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/procedurals/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_RMANDISPLAY_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/displayDrivers/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
+	INSTALL_ARNOLDPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/arnold/" + arnoldVersion + "/plugins/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
+	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "$INSTALL_PREFIX/tools/arnold/" + arnoldVersion + "/plugins/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
 
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_GLSL_SHADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
