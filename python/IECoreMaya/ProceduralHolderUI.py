@@ -162,7 +162,7 @@ def __printComponents( proceduralHolder, *unused ) :
 	names = fnP.componentNames()
 	names = list( names )
 	names.sort()
-	print " ".join( names )
+	print " ".join( names ) ,
 
 def __printSelectedComponents( proceduralHolder, *unused ) :
 
@@ -170,7 +170,7 @@ def __printSelectedComponents( proceduralHolder, *unused ) :
 	selectedNames = fnP.selectedComponentNames()
 	selectedNames = list( selectedNames )
 	selectedNames.sort()
-	print " ".join( selectedNames )
+	print " ".join( selectedNames ) ,
 
 def _convertToGeometry( proceduralHolder, *unused ) :
 
