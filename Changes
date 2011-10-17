@@ -4,6 +4,8 @@ Improvements :
 
 * Fixed some compiler warnings emitted by GCC 4.4.4.
 
+* IECoreMaya.StringParameterUI now supports glob style expressions in the Objects->Select context menu item.
+
 Changes :
 
 Bug Fixes :

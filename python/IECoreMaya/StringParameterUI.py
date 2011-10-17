@@ -34,7 +34,11 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
 from __future__ import with_statement
+
+import fnmatch
+import re
 
 import maya.cmds
 
@@ -221,7 +225,17 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 	def __selectComponents( self ) :
 
 		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
-		fnPH.selectComponentNames( set( maya.cmds.getAttr( self.plugName() ).split() ) )
+		
+		regexes = [ re.compile( fnmatch.translate( x ) ) for x in maya.cmds.getAttr( self.plugName() ).split() ]
+		
+		toSelect = set()
+		for name in fnPH.componentNames() :
+			for r in regexes :
+				if r.match( name ) is not None :
+					toSelect.add( name )
+					break
+		
+		fnPH.selectComponentNames( toSelect )
 
 	def __setToSelectedCoordinateSystem( self ) :
 	
