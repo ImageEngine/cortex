@@ -6,7 +6,11 @@ Improvements :
 
 * IECoreMaya.StringParameterUI now supports glob style expressions in the Objects->Select context menu item.
 
+* Tweaked ieArray* RSL functions to work around issues with 3delight 10.0.7.
+
 Changes :
+
+* Deprecated ieArrayLength() function in RSL ArrayAlgo.h - use arraylength() instead.
 
 Bug Fixes :
 
