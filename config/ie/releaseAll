@@ -48,7 +48,7 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.103", "PYTHON_VERSION=2.6" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.111", "PYTHON_VERSION=2.6" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.132", "PYTHON_VERSION=2.6" ] )
-	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.6", "PYTHON_VERSION=2.6" ] )
+	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.7", "PYTHON_VERSION=2.6" ] )
 	build( [ "APP=maya", "APP_VERSION=2010", "DL_VERSION=9.0.111" ] )
 	build( [ "APP=maya", "APP_VERSION=2011", "DL_VERSION=9.0.111" ] )
 	build( [ "APP=maya", "APP_VERSION=2012", "DL_VERSION=9.0.111" ] )
