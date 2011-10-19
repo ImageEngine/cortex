@@ -1,0 +1,232 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#include "ai_drivers.h"
+
+#include "IECore/DisplayDriver.h"
+#include "IECore/BoxAlgo.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "IECoreArnold/ToArnoldConverter.h"
+
+using namespace Imath;
+using namespace IECore;
+using namespace IECoreArnold;
+
+static AtVoid driverParameters( AtList *params, AtMetaDataStore *metaData )
+{
+	AiParameterSTR( "driverType", "" );
+}
+
+static AtVoid driverInitialize( AtNode *node, AtParamValue *parameters )
+{
+	AiDriverInitialize( node, FALSE, new DisplayDriverPtr );
+}
+
+static AtVoid driverUpdate( AtNode *node, AtParamValue *parameters )
+{
+}
+
+static AtBoolean driverSupportsPixelType( AtNode *node, AtInt pixelType )
+{
+	switch( pixelType )
+	{
+		case AI_TYPE_RGB:
+		case AI_TYPE_RGBA:
+		case AI_TYPE_FLOAT :
+			return true;
+		default:
+			return false;
+	}
+}
+
+static const char **driverExtension()
+{
+   return 0;
+}
+
+static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
+{	
+	std::vector<std::string> channelNames;
+	
+	const char *name = 0;
+	int pixelType = 0;
+	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, 0 ) )
+	{
+		switch( pixelType )
+		{
+			/// \todo Should we prefix the R, G, and B with the
+			/// name? only if the name isn't "RGB"?
+			case AI_TYPE_RGB :
+				channelNames.push_back( "R" );
+				channelNames.push_back( "G" );
+				channelNames.push_back( "B" );
+				break;
+			case AI_TYPE_RGBA :
+				channelNames.push_back( "R" );
+				channelNames.push_back( "G" );
+				channelNames.push_back( "B" );
+				channelNames.push_back( "A" );
+				break;
+			case AI_TYPE_FLOAT :
+				channelNames.push_back( name );
+				break;
+		}
+	}
+
+	/// \todo Make Convert.h
+	Box2i cortexDisplayWindow(
+		V2i( displayWindow.minx, displayWindow.miny ),
+		V2i( displayWindow.maxx, displayWindow.maxy )
+	);
+
+	Box2i cortexDataWindow(
+		V2i( dataWindow.minx, dataWindow.miny ),
+		V2i( dataWindow.maxx, dataWindow.maxy )
+	);
+		
+	CompoundDataPtr parameters = new CompoundData();
+	ToArnoldConverter::getParameters( node, parameters->writable() );	
+
+	const char *driverType = AiNodeGetStr( node, "driverType" );
+	
+	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
+	*driver = IECore::DisplayDriver::create( driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters );
+}
+
+static AtVoid driverPrepareBucket( AtNode *node, AtInt x, AtInt y, AtInt sx, AtInt sy, AtInt tId )
+{
+}
+
+static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, AtInt x, AtInt y, AtInt sx, AtInt sy ) 
+{
+	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
+
+	const int numOutputChannels = (*driver)->channelNames().size();
+
+	std::vector<float> interleavedData;
+	interleavedData.resize( sx * sy * numOutputChannels );
+
+	int pixelType = 0;
+	const AtVoid *bucketData;
+	int outChannelOffset = 0;
+	while( AiOutputIteratorGetNext( iterator, 0, &pixelType, &bucketData ) )
+	{
+		int numChannels = 0;
+		switch( pixelType )
+		{
+			case AI_TYPE_RGB :
+				numChannels = 3;
+				break;
+			case AI_TYPE_RGBA :
+				numChannels = 4;
+				break;
+			case AI_TYPE_FLOAT :
+				numChannels = 1;
+				break;
+		}
+		
+		for( int c = 0; c < numChannels; c++ )
+		{
+			float *in = (float *)(bucketData) + c;
+			float *out = &(interleavedData[0]) + outChannelOffset;
+			for( int j = 0; j < sy; j++ )
+			{
+				for( int i = 0; i < sx; i++ )
+				{
+					*out = *in;
+					out += numOutputChannels;
+					in += numChannels;
+				}
+			}
+			outChannelOffset += 1;
+		}
+		
+	}
+	
+	Box2i bucketBox(
+		V2i( x, y ),
+		V2i( x + sx - 1, y + sy - 1 )
+	);
+
+	(*driver)->imageData( bucketBox, &(interleavedData[0]), interleavedData.size() );
+}
+
+static AtVoid driverClose( AtNode *node, struct AtOutputIterator *iterator )
+{
+	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
+	(*driver)->imageClose();  
+}
+
+static AtVoid driverFinish( AtNode *node )
+{
+	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
+	delete driver;
+	AiDriverDestroy( node );
+}
+
+AI_EXPORT_LIB AtBoolean NodeLoader( int i, AtNodeLib *node )
+{
+	if( i==0 )
+	{		
+		static AtCommonMethods commonMethods = { 
+			driverParameters,
+			driverInitialize,
+			driverUpdate,
+			driverFinish
+		};
+		static AtDriverNodeMethods driverMethods = {
+			driverSupportsPixelType,
+			driverExtension,
+			driverOpen,
+			driverPrepareBucket,
+			driverWriteBucket,
+			driverClose
+		};
+		static AtNodeMethods nodeMethods = {
+			&commonMethods,
+			&driverMethods
+		};
+		
+		node->node_type = AI_NODE_DRIVER;
+		node->output_type = AI_TYPE_NONE;
+		node->name = "ieDisplay";
+		node->methods = &nodeMethods;
+		sprintf( node->version, AI_VERSION );
+		
+		return true;
+	}
+
+	return false;
+}
