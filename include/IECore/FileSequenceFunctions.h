@@ -54,7 +54,7 @@ void findSequences( const std::vector< std::string > &names, std::vector< FileSe
 /// Generates all sequences with at least minSequenceSize elements residing in given directory in the form of a list of FileSequences.
 void ls( const std::string &path, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize = 2 );
 
-/// Attempts to find a sequnece matching the given sequence template (e.g. with at least one '#' character).
+/// Attempts to find a sequence matching the given sequence template (e.g. with at least one '#' character).
 void ls( const std::string &sequencePath, FileSequencePtr &sequence, size_t minSequenceSize = 2 );
 
 /// Returns a FrameList instance that "best" represents the specified list of integer

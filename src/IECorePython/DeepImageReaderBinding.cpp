@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,23 +34,32 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreMaya/FromMayaMeshConverter.h"
-#include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
-
+#include "IECore/DeepImageReader.h"
+#include "IECore/VectorTypedData.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
-using namespace IECoreMaya;
 using namespace boost::python;
+using namespace IECore;
 
-void IECoreMaya::bindFromMayaMeshConverter()
+namespace IECorePython
 {
-	IECorePython::RunTimeTypedClass<FromMayaMeshConverter>()
-		.def( init<const MDagPath &>() )
-		.def( "points", &FromMayaMeshConverter::points )
-		.def( "normals", &FromMayaMeshConverter::normals )
-		.def( "colors", (IECore::DataPtr (FromMayaMeshConverter::*)( const MString &, bool) const)&FromMayaMeshConverter::colors, arg( "forceRgb" ) = false )
-		.def( "s", &FromMayaMeshConverter::s )
-		.def( "t", &FromMayaMeshConverter::t )
-		.def( "stIndices", &FromMayaMeshConverter::stIndices )
+
+static StringVectorDataPtr channelNames( DeepImageReader &that )
+{
+	StringVectorDataPtr result( new StringVectorData );
+	that.channelNames( result->writable() );
+	return result;
+}
+
+void bindDeepImageReader()
+{
+	RunTimeTypedClass<DeepImageReader>()
+		.def( "isComplete", &DeepImageReader::isComplete )
+		.def( "channelNames", &channelNames )
+		.def( "dataWindow", &DeepImageReader::dataWindow )
+		.def( "displayWindow", &DeepImageReader::displayWindow )
+		.def( "readPixel", &DeepImageReader::readPixel, ( arg_( "x" ), arg_( "y" ) ) )
 	;
 }
+
+} // namespace IECorePython

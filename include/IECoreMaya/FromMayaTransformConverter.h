@@ -59,7 +59,8 @@ class FromMayaTransformConverter : public FromMayaDagNodeConverter
 		enum Space
 		{
 			Local = 0,
-			World = 1
+			World = 1,
+			Custom = 2
 		};
 
 		IECore::IntParameterPtr spaceParameter();

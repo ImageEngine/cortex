@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,9 @@
 /// Returns the length of the array. This is simply arraylength(), but
 /// is provided so as to have a more complete set of functions with
 /// the same naming convention.
+/// \deprecated This function isn't useful in any way, serves only to
+/// rename an existing function, adds the potential for suboptimal 
+/// shader code and confuses the shader compiler in 3delight 10.0.7.
 float ieArrayLength( float a[] )
 {
 	return arraylength( a );
@@ -56,7 +59,7 @@ float ieArrayLength( color a[] )
 /// Returns the sum of all the values in the array.
 float ieArraySum( float a[] )
 {
-	float l = ieArrayLength( a );
+	float l = arraylength( a );
 	float s = 0;
 	float i = 0;
 	for( i=0; i<l; i+=1 )
@@ -69,7 +72,7 @@ float ieArraySum( float a[] )
 /// Returns the number of times v is present in a.
 float ieArrayCount( float a[]; float v )
 {
-	float l = ieArrayLength( a );
+	float l = arraylength( a );
 	float c = 0;
 	float i = 0;
 	for( i=0; i<l; i+=1 )
@@ -86,7 +89,7 @@ float ieArrayCount( float a[]; float v )
 /// outputs an informative error using context and arrayName.
 float ieArrayLengthCheck( float array[]; float length; string context; string arrayName )
 {
-	uniform float l = ieArrayLength( array );
+	uniform float l = arraylength( array );
 	if( l!=length )
 	{
 		printf( "ERROR : %s : Incorrect length for %s (%f but should be %f).\n", context, arrayName, l, length );
@@ -97,7 +100,7 @@ float ieArrayLengthCheck( float array[]; float length; string context; string ar
 
 float ieArrayLengthCheck( string array[]; float length; string context; string arrayName )
 {
-	uniform float l = ieArrayLength( array );
+	uniform float l = arraylength( array );
 	if( l!=length )
 	{
 		printf( "ERROR : %s : Incorrect length for %s (%f but should be %f).\n", context, arrayName, l, length );
@@ -108,7 +111,7 @@ float ieArrayLengthCheck( string array[]; float length; string context; string a
 
 float ieArrayLengthCheck( color array[]; float length; string context; string arrayName )
 {
-	uniform float l = ieArrayLength( array );
+	uniform float l = arraylength( array );
 	if( l!=length )
 	{
 		printf( "ERROR : %s : Incorrect length for %s (%f but should be %f).\n", context, arrayName, l, length );
@@ -120,7 +123,7 @@ float ieArrayLengthCheck( color array[]; float length; string context; string ar
 /// Multiplies all the elements of an array in place.
 void ieArrayMultiply( output color array[]; color multiplier )
 {
-	uniform float l = ieArrayLength( array );
+	uniform float l = arraylength( array );
 	uniform float i = 0;
 	for( i=0; i<l; i+=1 )
 	{
@@ -131,7 +134,7 @@ void ieArrayMultiply( output color array[]; color multiplier )
 /// Multiplies all the elements of an array in place.
 void ieArrayMultiply( output float array[]; float multiplier )
 {
-	uniform float l = ieArrayLength( array );
+	uniform float l = arraylength( array );
 	uniform float i = 0;
 	for( i=0; i<l; i+=1 )
 	{
@@ -142,7 +145,7 @@ void ieArrayMultiply( output float array[]; float multiplier )
 /// Adds the elements from array2 onto the corresponding elements of array, in place.
 void ieArrayAdd( output color array[]; color array2[] )
 {
-	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float l = min( arraylength( array ), arraylength( array2 ) );
 	uniform float i = 0;
 	for( i=0; i<l; i+=1 )
 	{
@@ -153,7 +156,7 @@ void ieArrayAdd( output color array[]; color array2[] )
 /// Adds the elements from array2 onto the corresponding elements of array, in place.
 void ieArrayAdd( output float array[]; float array2[] )
 {
-	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float l = min( arraylength( array ), arraylength( array2 ) );
 	uniform float i = 0;
 	for( i=0; i<l; i+=1 )
 	{
@@ -164,7 +167,7 @@ void ieArrayAdd( output float array[]; float array2[] )
 /// Compute dot product from the two arrays.
 color ieArrayDot( color array[]; color array2[] )
 {
-	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float l = min( arraylength( array ), arraylength( array2 ) );
 	uniform float i = 0;
 	color result = 0;
 	for( i=0; i<l; i+=1 )
@@ -177,7 +180,7 @@ color ieArrayDot( color array[]; color array2[] )
 /// Compute dot product from the two arrays.
 color ieArrayDot( color array[]; float array2[] )
 {
-	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float l = min( arraylength( array ), arraylength( array2 ) );
 	uniform float i = 0;
 	color result = 0;
 	for( i=0; i<l; i+=1 )

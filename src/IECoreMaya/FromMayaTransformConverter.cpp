@@ -56,17 +56,25 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 	IECore::IntParameter::PresetsContainer spacePresets;
 	spacePresets.push_back( IECore::IntParameter::Preset( "Local", Local ) );
 	spacePresets.push_back( IECore::IntParameter::Preset( "World", World ) );
+	spacePresets.push_back( IECore::IntParameter::Preset( "Custom", Custom ) );
 	m_spaceParameter = new IECore::IntParameter(
 		"space",
 		"The space in which the transform is converted.",
 		World,
 		Local,
-		World,
+		Custom,
 		spacePresets,
 		true
 	);
 
 	parameters()->addParameter( m_spaceParameter );
+
+	IECore::M44fParameterPtr customSpace = new IECore::M44fParameter(
+		"customSpace",
+		"If 'space' is 'Custom' then this parameter defines the space which the transform should be relative to. The operation is transform * inverse(customSpace).",
+		new IECore::M44fData()
+	);
+	parameters()->addParameter( customSpace );
 
 	m_lastRotationValid = false;
 	m_eulerFilterParameter = new IECore::BoolParameter(
@@ -148,6 +156,12 @@ IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagP
 
 		MFnMatrixData fnM( matrix );
 		transform = fnM.transformation();
+
+		if ( m_spaceParameter->getNumericValue() == Custom )
+		{
+			// multiply world transform by the inverse of the custom space matrix.
+			transform = transform.asMatrix() * IECore::convert< MMatrix, Imath::M44f >( operands->member< IECore::M44fData >("customSpace", true)->readable().inverse() );
+		}
 	}
 
 	if( m_zeroPivotsParameter->getTypedValue() )

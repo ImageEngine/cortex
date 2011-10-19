@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,25 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORE_DEEPIMAGEWRITER_INL
+#define IECORE_DEEPIMAGEWRITER_INL
 
-#include "IECoreMaya/FromMayaMeshConverter.h"
-#include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace IECoreMaya;
-using namespace boost::python;
-
-void IECoreMaya::bindFromMayaMeshConverter()
+namespace IECore
 {
-	IECorePython::RunTimeTypedClass<FromMayaMeshConverter>()
-		.def( init<const MDagPath &>() )
-		.def( "points", &FromMayaMeshConverter::points )
-		.def( "normals", &FromMayaMeshConverter::normals )
-		.def( "colors", (IECore::DataPtr (FromMayaMeshConverter::*)( const MString &, bool) const)&FromMayaMeshConverter::colors, arg( "forceRgb" ) = false )
-		.def( "s", &FromMayaMeshConverter::s )
-		.def( "t", &FromMayaMeshConverter::t )
-		.def( "stIndices", &FromMayaMeshConverter::stIndices )
-	;
+
+template<class T>
+DeepImageWriter::DeepImageWriterDescription<T>::DeepImageWriterDescription( const std::string &extensions )
+{
+	DeepImageWriter::registerDeepImageWriter( extensions, T::canWrite, creator, T::staticTypeId() );
 }
+
+template<class T>
+DeepImageWriterPtr DeepImageWriter::DeepImageWriterDescription<T>::creator( const std::string &fileName )
+{
+	return new T( fileName );
+}
+
+} // namespace IECore
+
+#endif // IECORE_DEEPIMAGEWRITER_INL

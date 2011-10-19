@@ -296,6 +296,9 @@ bool withPNG();
 
 /// \defgroup imageProcessingGroup Image Processing
 
+/// \defgroup deepCompositingGroup Deep Compositing
+/// \ingroup imageProcessingGroup
+
 /// \defgroup renderingGroup Rendering
 
 /// \defgroup shGroup Spherical Harmonics

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREPYTHON_DEEPPIXELBINDING_H
+#define IECOREPYTHON_DEEPPIXELBINDING_H
 
-#include "IECoreMaya/FromMayaMeshConverter.h"
-#include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace IECoreMaya;
-using namespace boost::python;
-
-void IECoreMaya::bindFromMayaMeshConverter()
+namespace IECorePython
 {
-	IECorePython::RunTimeTypedClass<FromMayaMeshConverter>()
-		.def( init<const MDagPath &>() )
-		.def( "points", &FromMayaMeshConverter::points )
-		.def( "normals", &FromMayaMeshConverter::normals )
-		.def( "colors", (IECore::DataPtr (FromMayaMeshConverter::*)( const MString &, bool) const)&FromMayaMeshConverter::colors, arg( "forceRgb" ) = false )
-		.def( "s", &FromMayaMeshConverter::s )
-		.def( "t", &FromMayaMeshConverter::t )
-		.def( "stIndices", &FromMayaMeshConverter::stIndices )
-	;
+
+void bindDeepPixel();
+
 }
+
+#endif // IECOREPYTHON_DEEPPIXELBINDING_H

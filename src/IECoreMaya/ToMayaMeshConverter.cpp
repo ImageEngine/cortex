@@ -43,6 +43,7 @@
 #include "maya/MFloatVectorArray.h"
 #include "maya/MFloatArray.h"
 #include "maya/MIntArray.h"
+#include "maya/MItMeshPolygon.h"
 #include "maya/MGlobal.h"
 
 #include "IECore/MeshPrimitive.h"
@@ -246,7 +247,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		polygonConnects[i] = vertexIds->readable()[i];
 	}
 
-	fnMesh.create( numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, to, &s );
+	MObject mObj = fnMesh.create( numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, to, &s );
 
 	if (!s)
 	{
@@ -259,7 +260,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		if (it->second.interpolation == IECore::PrimitiveVariable::FaceVarying )
 		{
 			/// \todo Employ some M*Array converters to simplify this
-			MFloatVectorArray vertexNormalsArray;
+			MVectorArray vertexNormalsArray;
 			IECore::ConstV3fVectorDataPtr n = IECore::runTimeCast<const IECore::V3fVectorData>(it->second.data);
 			if (n)
 			{
@@ -268,20 +269,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				vertexNormalsArray.setLength( numVertexNormals );
 				for (int i = 0; i < numVertexNormals; i++)
 				{
-					vertexNormalsArray[i] = IECore::convert<MFloatVector, Imath::V3f>( n->readable()[i] );
-				}
-
-				int index = 0;
-				MIntArray polygonVertices;
-				for ( int i=0; i < numPolygons; i++ )
-				{
-					fnMesh.getPolygonVertices( i, polygonVertices );
-					int numVertices = polygonVertices.length();
-					for ( int j=0; j < numVertices; j++, index++ )
-					{
-						MVector normal( vertexNormalsArray[index] );
-						fnMesh.setFaceVertexNormal( normal, i, polygonVertices[j], MSpace::kObject );
-					}
+					vertexNormalsArray[i] = IECore::convert<MVector, Imath::V3f>( n->readable()[i] );
 				}
 			}
 			else
@@ -294,26 +282,40 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 					vertexNormalsArray.setLength( numVertexNormals );
 					for (int i = 0; i < numVertexNormals; i++)
 					{
-						vertexNormalsArray[i] = IECore::convert<MFloatVector, Imath::V3d>( n->readable()[i] );
+						vertexNormalsArray[i] = IECore::convert<MVector, Imath::V3d>( n->readable()[i] );
 					}
-
-					int index = 0;
-					MIntArray polygonVertices;
-					for ( int i=0; i < numPolygons; i++ )
-					{
-						fnMesh.getPolygonVertices( i, polygonVertices );
-						int numVertices = polygonVertices.length();
-						for ( int j=0; j < numVertices; j++, index++ )
-						{
-							MVector normal( vertexNormalsArray[index] );
-							fnMesh.setFaceVertexNormal( normal, i, polygonVertices[j], MSpace::kObject );
-						}
-					}
-
 				}
 				else
 				{
 					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"N\" has unsupported type \"%s\"." ) % it->second.data->typeName() );
+				}
+			}
+			
+			if ( vertexNormalsArray.length() )
+			{
+				MStatus status;
+				MItMeshPolygon itPolygon( mObj, &status );
+				if( status != MS::kSuccess )
+				{
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to create mesh iterator" );
+				}
+
+				unsigned v = 0;
+				MIntArray vertexIds;
+				MIntArray faceIds;
+				
+				for ( ; !itPolygon.isDone(); itPolygon.next() )
+				{
+					for ( v=0; v < itPolygon.polygonVertexCount(); ++v )
+					{
+						faceIds.append( itPolygon.index() );
+						vertexIds.append( itPolygon.vertexIndex( v ) );
+					}
+				}
+
+				if( !fnMesh.setFaceVertexNormals( vertexNormalsArray, faceIds, vertexIds ) )
+				{
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Setting normals failed" );
 				}
 			}
 		}

@@ -76,7 +76,6 @@ class ToMayaObjectConverter : public ToMayaConverter
 
 		/// Must be implemented by subclasses. Is guaranteed only to be called when object()
 		/// returns a valid IECore::Object of a type specified when the converter was registered.
-		/// \todo I don't think that guarantee is accurate at all.
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const = 0;
 
 		typedef ToMayaObjectConverterPtr (*CreatorFn)( IECore::ConstObjectPtr object );

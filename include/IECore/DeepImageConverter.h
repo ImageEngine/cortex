@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORE_DEEPIMAGECONVERTER_H
+#define IECORE_DEEPIMAGECONVERTER_H
 
-#include "IECoreMaya/FromMayaMeshConverter.h"
-#include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
+#include "IECore/Op.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace IECoreMaya;
-using namespace boost::python;
-
-void IECoreMaya::bindFromMayaMeshConverter()
+namespace IECore
 {
-	IECorePython::RunTimeTypedClass<FromMayaMeshConverter>()
-		.def( init<const MDagPath &>() )
-		.def( "points", &FromMayaMeshConverter::points )
-		.def( "normals", &FromMayaMeshConverter::normals )
-		.def( "colors", (IECore::DataPtr (FromMayaMeshConverter::*)( const MString &, bool) const)&FromMayaMeshConverter::colors, arg( "forceRgb" ) = false )
-		.def( "s", &FromMayaMeshConverter::s )
-		.def( "t", &FromMayaMeshConverter::t )
-		.def( "stIndices", &FromMayaMeshConverter::stIndices )
-	;
-}
+
+IE_CORE_FORWARDDECLARE( FileNameParameter );
+
+/// The DeepImageConverter provides a simplified process for converting deep image files
+/// from one format to another. It reads any file supported by DeepImageReader and writes
+/// the data to any file supported by DeepImageWriter.
+/// \todo: should this operate on a FileSequence rather than a single file?
+/// \ingroup deepCompositingGroup
+/// \ingroup ioGroup
+class DeepImageConverter : public Op
+{
+	public:
+
+		IE_CORE_DECLARERUNTIMETYPED( DeepImageConverter, Op );
+
+		DeepImageConverter();
+		virtual ~DeepImageConverter();
+
+	protected :
+
+		virtual ObjectPtr doOperation( const CompoundObject *operands );
+
+	private :
+
+		FileNameParameterPtr m_inputFileParameter;
+		FileNameParameterPtr m_outputFileParameter;
+
+};
+
+IE_CORE_DECLAREPTR( DeepImageConverter );
+
+} // namespace IECore
+
+#endif // IECORE_DEEPIMAGECONVERTER_H
+

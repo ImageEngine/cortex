@@ -153,6 +153,34 @@ void FromMayaMeshConverter::constructCommon()
 
 	parameters()->addParameter( m_extraST );
 
+	// colors
+	BoolParameter::PresetsContainer colorsPresets;
+	colorsPresets.push_back( BoolParameter::Preset( "poly", false ) );
+	colorsPresets.push_back( BoolParameter::Preset( "subdiv", false ) );
+
+	BoolParameterPtr colors = new BoolParameter(
+		"colors",
+		"When this is on the default color set is added to the result as primitive variable named \"Cs\".",
+		false,
+		colorsPresets
+	);
+
+	parameters()->addParameter( colors );
+
+	// extra colors
+	BoolParameter::PresetsContainer extraColorsPresets;
+	extraColorsPresets.push_back( BoolParameter::Preset( "poly", false ) );
+	extraColorsPresets.push_back( BoolParameter::Preset( "subdiv", false ) );
+
+	BoolParameterPtr extraColors = new BoolParameter(
+		"extraColors",
+		"When this is on, all color sets are added to the result as primitive variables named \"setName_Cs\".",
+		false,
+		extraColorsPresets
+	);
+
+	parameters()->addParameter( extraColors );
+
 }
 
 FromMayaMeshConverter::~FromMayaMeshConverter()
@@ -211,6 +239,26 @@ IECore::BoolParameterPtr FromMayaMeshConverter::extraSTParameter()
 IECore::BoolParameterPtr FromMayaMeshConverter::extraSTParameter() const
 {
 	return m_extraST;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::colorsParameter()
+{
+	return parameters()->parameter< BoolParameter >( "colors" );
+}
+
+IECore::ConstBoolParameterPtr FromMayaMeshConverter::colorsParameter() const
+{
+	return parameters()->parameter< BoolParameter >( "colors" );
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::extraColorsParameter()
+{
+	return parameters()->parameter< BoolParameter >( "extraColors" );
+}
+
+IECore::ConstBoolParameterPtr FromMayaMeshConverter::extraColorsParameter() const
+{
+	return parameters()->parameter< BoolParameter >( "extraColors" );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,6 +368,82 @@ IECore::IntVectorDataPtr FromMayaMeshConverter::stIndices( const MString &uvSet 
 	return resultData;
 }
 
+IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool forceRgb ) const
+{
+	MFnMesh fnMesh( object() );
+	MFnMesh::MColorRepresentation rep = fnMesh.getColorRepresentation( colorSet );
+
+	int numColors = fnMesh.numFaceVertices();
+	MColorArray colors;
+	MColor defaultColor(0,0,0,1);
+	if ( !fnMesh.getFaceVertexColors( colors, &colorSet, &defaultColor ) )
+	{
+		throw Exception( ( boost::format( "Failed to obtain colors from color set '%s'" ) % colorSet ).str() );
+	}
+
+	int availableColors = colors.length();
+	if ( availableColors > numColors )
+	{
+		availableColors = numColors;
+	}
+
+	DataPtr data;
+	
+	if ( rep == MFnMesh::kAlpha )
+	{
+		if ( forceRgb )
+		{
+			Color3fVectorDataPtr colorVec = new Color3fVectorData();
+			colorVec->writable().resize( numColors, Imath::Color3f(1) );
+			std::vector< Imath::Color3f >::iterator it = colorVec->writable().begin();
+			for ( int i = 0; i < availableColors; i++, it++ )
+			{
+				*it = Imath::Color3f( colors[i][3] );
+			}
+			data = colorVec;
+		}
+		else
+		{
+			FloatVectorDataPtr colorVec = new FloatVectorData();
+			colorVec->writable().resize( numColors, 1 );
+			std::vector< float >::iterator it = colorVec->writable().begin();
+			for ( int i = 0; i < availableColors; i++, it++ )
+			{
+				*it = colors[i][3];
+			}
+			data = colorVec;
+		}
+	}
+	else
+	{
+		if ( rep == MFnMesh::kRGB || forceRgb )
+		{
+			Color3fVectorDataPtr colorVec = new Color3fVectorData();
+			colorVec->writable().resize( numColors, Imath::Color3f(0,0,0) );
+			std::vector< Imath::Color3f >::iterator it = colorVec->writable().begin();
+			for ( int i = 0; i < availableColors; i++, it++ )
+			{
+				const MColor &c = colors[i];
+				*it = Imath::Color3f( c[0], c[1], c[2] );
+			}
+			data = colorVec;
+		}
+		else
+		{
+			Color4fVectorDataPtr colorVec = new Color4fVectorData();
+			colorVec->writable().resize( numColors, Imath::Color4f(0,0,0,1) );
+			std::vector< Imath::Color4f >::iterator it = colorVec->writable().begin();
+			for ( int i = 0; i < availableColors; i++, it++ )
+			{
+				const MColor &c = colors[i];
+				*it = Imath::Color4f( c[0], c[1], c[2], c[3] );
+			}
+			data = colorVec;
+		}
+	}
+	return data;
+}
+
 IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnMesh fnMesh( object );
@@ -391,6 +515,31 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 			result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
 			result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
 			result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+		}
+	}
+
+	bool convertColors = colorsParameter()->getTypedValue();
+	bool convertExtraColors = extraColorsParameter()->getTypedValue();
+	if ( convertColors || convertExtraColors )
+	{
+		MString currentColorSet;
+		fnMesh.getCurrentColorSetName( currentColorSet );
+		MStringArray colorSets;
+		fnMesh.getColorSetNames( colorSets );
+		for( unsigned int i=0; i<colorSets.length(); i++ )
+		{
+			if( convertColors && colorSets[i]==currentColorSet )
+			{
+				// Cs is always converted to Color3f
+				result->variables["Cs"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, colors( currentColorSet, true ) );
+			}
+			
+			if( convertExtraColors )
+			{
+				MString sName = colorSets[i] + "_Cs";
+				// Extra color sets are not converted
+				result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, colors( colorSets[i] ) );
+			}
 		}
 	}
 

@@ -394,6 +394,9 @@ enum TypeId
 	DataInterleaveOpTypeId = 348,
 	DataConvertOpTypeId = 349,
 	PNGImageReaderTypeId = 350,
+	DeepImageReaderTypeId = 351,
+	DeepImageWriterTypeId = 352,
+	DeepImageConverterTypeId = 353,
 
 	// Remember to update TypeIdBinding.cpp !!!
 
@@ -426,6 +429,9 @@ enum TypeId
 
 	FirstGafferTypeId = 110000,
 	LastGafferTypeId = 110999,
+	
+	FirstCoreArnoldTypeId = 111000,
+	LastCoreArnoldTypeId = 111999,
 
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,
