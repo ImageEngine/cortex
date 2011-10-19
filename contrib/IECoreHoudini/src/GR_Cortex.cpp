@@ -74,7 +74,7 @@ GR_Cortex::~GR_Cortex()
 // Tell Houdini to only render GU_ProceduralDetails with this render hook.
 GA_PrimCompat::TypeMask GR_Cortex::getWireMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const
 {
-	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData" );
 	if ( attrRef.isValid() )
 	{
 		return GA_PrimCompat::TypeMask( 0 );
@@ -88,7 +88,7 @@ GA_PrimCompat::TypeMask GR_Cortex::getWireMask( GU_Detail *gdp, const GR_Display
 // Tell Houdini to only render GU_ProceduralDetails with this render hook.
 GA_PrimCompat::TypeMask GR_Cortex::getShadedMask( GU_Detail *gdp, const GR_DisplayOption *dopt ) const
 {
-	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData" );
 	if ( attrRef.isValid() )
 	{
 		return GA_PrimCompat::TypeMask( 0 );
@@ -170,7 +170,7 @@ void GR_Cortex::renderObject( const IECore::Object *object, IECoreGL::ConstState
 void GR_Cortex::render( GU_Detail *gdp, IECoreGL::ConstStatePtr displayState )
 {
 	// gl scene from a parameterised procedural
-	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	const GA_ROAttributeRef attrRef = gdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData" );
 	if ( attrRef.isInvalid() )
 	{
 		return;

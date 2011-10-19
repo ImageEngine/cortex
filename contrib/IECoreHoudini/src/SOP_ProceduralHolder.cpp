@@ -142,7 +142,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	{
 		// put our cortex passdata on our gdp as a detail attribute
 		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER );
-		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData", NULL, NULL, "blinddata" );
+		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData", NULL, NULL, "blinddata" );
 		GA_Attribute *attr = attrRef.getAttribute();
 		const GA_AIFBlindData *blindData = attr->getAIFBlindData();
 		blindData->setDataSize( attr, sizeof(IECoreHoudini::NodePassData), &data );

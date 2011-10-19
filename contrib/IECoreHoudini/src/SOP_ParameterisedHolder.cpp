@@ -423,7 +423,7 @@ void SOP_ParameterisedHolder::setInputParameterValues()
 			continue;
 		}
 		
-		const GA_ROAttributeRef attrRef = inputGdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+		const GA_ROAttributeRef attrRef = inputGdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData" );
 		if ( attrRef.isValid() )
 		{
 			// looks like data passed from another ParameterisedHolder

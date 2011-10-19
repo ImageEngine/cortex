@@ -107,7 +107,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 
 		// pass ourselves onto the GR_Cortex render hook
 		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_OPHOLDER );
-		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData", NULL, NULL, "blinddata" );
+		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData", NULL, NULL, "blinddata" );
 		GA_Attribute *attr = attrRef.getAttribute();
 		const GA_AIFBlindData *blindData = attr->getAIFBlindData();
 		blindData->setDataSize( attr, sizeof(IECoreHoudini::NodePassData), &data );

@@ -96,7 +96,7 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 	    	return error();
 	}
 	
-	const GA_ROAttributeRef attrRef = inputGeo->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudini::NodePassData" );
+	const GA_ROAttributeRef attrRef = inputGeo->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData" );
 	if ( attrRef.isInvalid() )
 	{
 		addError( SOP_MESSAGE, "Could not find Cortex Object on input geometry!" );
