@@ -1,6 +1,61 @@
+Cortex 6.3.1
+============
+
+Additions :
+
+Improvements :
+
+* Fixed some compiler warnings emitted by GCC 4.4.4.
+
+* IECoreMaya.StringParameterUI now supports glob style expressions in the Objects->Select context menu item.
+
+* Tweaked ieArray* RSL functions to work around issues with 3delight 10.0.7.
+
 Changes :
 
+* Deprecated ieArrayLength() function in RSL ArrayAlgo.h - use arraylength() instead.
+
+Bug Fixes :
+
+Cortex 6.3.0
+============
+
+Additions :
+
+* Added DeepImageReader abstract base class for reading deep images. DeepImageReader::readPixel returns an individual DeepPixel, while DeepImageReader::read returns a composited ImagePrimitive without depth information.
+
+* Added DeepImageWriter abstract base class for writing deep images.
+
+* Added IECoreHoudini::RATDeepImageReader to read Houdini deep texture files. Supports Deep Camera Maps and Deep Shadow Maps.
+
+* Added IECoreHoudini::RATDeepImageWriter to write Houdini deep texture files. 
+
+* Added DeepImageConverter to convert from one deep image format to another.
+
+* Added initial support for Arnold.
+
+Improvements :
+
+Changes :
+
+Bug Fixes :
+
+Cortex 6.2.0
+============
+
+Additions :
+
+* Added DeepPixel to represent arbitrary channel data stored at varying depths in space.
+
+Changes :
+
+* Added face-varying color conversion in FromMayaMeshConverter.
+
+* Added custom space input to FromMayaTransformConverter.
+
 * Allocated a TypeId range for use in the Gaffer project.
+
+* Changed minSequenceSize to 1 for FileSequenceParameters in common sequence utility ops (Sequence*Op)
 
 Bug fixes :
 

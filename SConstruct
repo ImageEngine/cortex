@@ -47,8 +47,8 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=6
-ieCoreMinorVersion=1
-ieCorePatchVersion=2
+ieCoreMinorVersion=3
+ieCorePatchVersion=1
 
 ###########################################################################################
 # Command line options
@@ -423,6 +423,26 @@ o.Add(
 	"",
 )
 
+# Arnold options
+
+o.Add(
+	"ARNOLD_ROOT",
+	"The directory in which Arnold is installed.",
+	"/usr/local",
+)
+
+o.Add(
+	"MTOA_ROOT",
+	"The directory in which MtoA is installed.",
+	"/usr/local",
+)
+
+o.Add(
+	"MTOA_SOURCE_ROOT",
+	"The directory in which the MtoA source is installed.",
+	"/usr/local",
+)
+
 # Build options
 
 o.Add(
@@ -592,6 +612,24 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_ARNOLDPROCEDURAL_NAME",
+	"The name under which to install the arnold procedurals.",
+	"$INSTALL_PREFIX/arnoldProcedurals/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_ARNOLDOUTPUTDRIVER_NAME",
+	"The name under which to install the arnold procedurals.",
+	"$INSTALL_PREFIX/arnoldOutputDrivers/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_MTOAEXTENSION_NAME",
+	"The name under which to install MtoA extensions.",
+	"$INSTALL_PREFIX/mtoaExtensions/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_DOC_DIR",
 	"The directory in which to install the documentation.",
 	"$INSTALL_PREFIX/share/cortex",
@@ -646,6 +684,7 @@ o.Add(
 		( "IECore.UVDistortOp", "common/2d/image/uvDistort" ),
 		( "IECore.ImageCompositeOp", "common/2d/image/imageComposite" ),
 		( "IECore.ImageConvolveOp", "common/2d/image/imageConvolve" ),
+		( "IECore.DeepImageConverter", "common/2d/deepImage/convert" ),
 		( "IECore.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
 		( "IECore.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
 		( "IECore.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
@@ -762,6 +801,14 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreNuke/All.py"
+)
+
+o.Add(
+	"TEST_ARNOLD_SCRIPT",
+	"The python script to run for the arnold tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"contrib/IECoreArnold/test/IECoreArnold/All.py"
 )
 
 o.Add(
@@ -1746,6 +1793,8 @@ mayaPythonModuleEnv.Append( **mayaEnvAppends )
 
 mayaPluginEnv = mayaEnv.Clone( IECORE_NAME="ieCore" )
 
+haveMaya = False
+
 if doConfigure :
 
 	c = Configure( mayaEnv )
@@ -1758,6 +1807,8 @@ if doConfigure :
 	else :
 
 		c.Finish()
+		
+		haveMaya = True
 
 		mayaSources = glob.glob( "src/IECoreMaya/*.cpp" )
 		mayaHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/*.h" ) + glob.glob( "include/IECoreMaya/*.inl" )
@@ -2415,7 +2466,178 @@ if doConfigure :
 		truelightTestEnv.Depends( truelightTest, truelightPythonModule )
 		truelightTestEnv.Depends( truelightTest, glob.glob( "test/IECoreTruelight/*.py" ) )
 		truelightTestEnv.Alias( "testTruelight", truelightTest )
+
+###########################################################################################
+# Build, install and test the IECoreArnold library and bindings
+###########################################################################################
+
+arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
+arnoldEnv.Append(
+	CPPPATH = [
+		"$ARNOLD_ROOT/include",
+		"contrib/IECoreArnold/include",
+	]
+)
+arnoldEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
+
+arnoldPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreArnold" )
+arnoldPythonModuleEnv.Append(
+	CPPPATH = [
+		"$ARNOLD_ROOT/include",
+		"contrib/IECoreArnold/include",
+		"contrib/IECoreArnold/include/bindings",
+	]
+)
+arnoldPythonModuleEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
+
+arnoldProceduralEnv = arnoldPythonModuleEnv.Clone( IECORE_NAME = "ieProcedural" )
+arnoldProceduralEnv["SHLIBPREFIX"] = ""
+arnoldProceduralEnv["SHLIBSUFFIX"] = ".so"
+
+arnoldDriverEnv = arnoldEnv.Clone( IECORE_NAME = "ieOutputDriver" )
+arnoldDriverEnv["SHLIBPREFIX"] = ""
+arnoldDriverEnv["SHLIBSUFFIX"] = ".so"
+
+haveArnold = False
+
+if doConfigure :
+
+	c = Configure( arnoldEnv )
+
+	if not c.CheckLibWithHeader( "ai", "ai.h", "CXX" ) :
+	
+		sys.stderr.write( "WARNING : no ai library found, not building IECoreArnold - check ARNOLD_ROOT.\n" )
+		c.Finish()
+
+	else :
+			
+		haveArnold = True
 		
+		arnoldSources = glob.glob( "contrib/IECoreArnold/src/IECoreArnold/*.cpp" )
+		arnoldHeaders = glob.glob( "contrib/IECoreArnold/include/IECoreArnold/*.h" ) + glob.glob( "contrib/IECoreArnold/include/IECoreArnold/*.inl" )
+		arnoldPythonSources = glob.glob( "contrib/IECoreArnold/src/IECoreArnold/bindings/*.cpp" )
+		arnoldPythonScripts = glob.glob( "contrib/IECoreArnold/python/IECoreArnold/*.py" )
+				
+		c.Finish()	
+
+		# we can't append this before configuring, as then it gets built as
+		# part of the configure process
+		arnoldEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		arnoldPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
+		arnoldProceduralEnv.Append(
+			LIBS = [ 
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+			]
+		)
+
+		arnoldDriverEnv.Append(
+			LIBS = [
+				"ai",
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+				
+		# library
+		arnoldLibrary = arnoldEnv.SharedLibrary( "lib/" + os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ), arnoldSources )
+		arnoldLibraryInstall = arnoldEnv.Install( os.path.dirname( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ), arnoldLibrary )
+		arnoldEnv.NoCache( arnoldLibraryInstall )
+		arnoldEnv.AddPostAction( arnoldLibraryInstall, lambda target, source, env : makeLibSymLinks( arnoldEnv ) )
+		arnoldEnv.Alias( "install", arnoldLibraryInstall )
+		arnoldEnv.Alias( "installArnold", arnoldLibraryInstall )
+		arnoldEnv.Alias( "installLib", [ arnoldLibraryInstall ] )
+
+		# headers
+		arnoldHeaderInstall = arnoldEnv.Install( "$INSTALL_HEADER_DIR/IECoreArnold", arnoldHeaders )
+		arnoldEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreArnold", lambda target, source, env : makeSymLinks( arnoldEnv, arnoldEnv["INSTALL_HEADER_DIR"] ) )
+		arnoldEnv.Alias( "install", arnoldHeaderInstall )
+		arnoldEnv.Alias( "installArnold", arnoldHeaderInstall )
+		
+		# python module
+		arnoldPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		arnoldPythonModule = arnoldPythonModuleEnv.SharedLibrary( "contrib/IECoreArnold/python/IECoreArnold/_IECoreArnold", arnoldPythonSources )
+		arnoldPythonModuleEnv.Depends( arnoldPythonModule, arnoldLibrary )
+
+		arnoldPythonModuleInstall = arnoldPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreArnold", arnoldPythonScripts + arnoldPythonModule )
+		arnoldPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreArnold", lambda target, source, env : makeSymLinks( arnoldPythonModuleEnv, arnoldPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		arnoldPythonModuleEnv.Alias( "install", arnoldPythonModuleInstall )
+		arnoldPythonModuleEnv.Alias( "installArnold", arnoldPythonModuleInstall )
+
+		# procedural
+		arnoldProcedural = arnoldProceduralEnv.SharedLibrary( "contrib/IECoreArnold/src/IECoreArnold/procedural/" + os.path.basename( arnoldProceduralEnv.subst( "$INSTALL_ARNOLDPROCEDURAL_NAME" ) ), "contrib/IECoreArnold/src/IECoreArnold/procedural/Procedural.cpp" )
+		arnoldProceduralInstall = arnoldProceduralEnv.Install( os.path.dirname( arnoldProceduralEnv.subst( "$INSTALL_ARNOLDPROCEDURAL_NAME" ) ), arnoldProcedural )
+		arnoldProceduralEnv.NoCache( arnoldProceduralInstall )
+		arnoldProceduralEnv.AddPostAction( arnoldProceduralInstall, lambda target, source, env : makeLibSymLinks( arnoldProceduralEnv, libNameVar="INSTALL_ARNOLDPROCEDURAL_NAME" ) )
+		arnoldProceduralEnv.Alias( "install", arnoldProceduralInstall )
+		arnoldProceduralEnv.Alias( "installArnold", arnoldProceduralInstall )
+		arnoldProceduralForTest = arnoldProceduralEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/plugins/ieProcedural.so", arnoldProcedural, Copy( "$TARGET", "$SOURCE" ) )
+	
+		# output driver
+		arnoldDriver = arnoldDriverEnv.SharedLibrary( "contrib/IECoreArnold/src/IECoreArnold/outputDriver/" + os.path.basename( arnoldDriverEnv.subst( "$INSTALL_ARNOLDOUTPUTDRIVER_NAME" ) ), "contrib/IECoreArnold/src/IECoreArnold/outputDriver/OutputDriver.cpp" )
+		arnoldDriverInstall = arnoldDriverEnv.Install( os.path.dirname( arnoldDriverEnv.subst( "$INSTALL_ARNOLDOUTPUTDRIVER_NAME" ) ), arnoldDriver )
+		arnoldDriverEnv.NoCache( arnoldDriverInstall )
+		arnoldDriverEnv.AddPostAction( arnoldDriverInstall, lambda target, source, env : makeLibSymLinks( arnoldDriverEnv, libNameVar="INSTALL_ARNOLDOUTPUTDRIVER_NAME" ) )
+		arnoldDriverEnv.Alias( "install", arnoldDriverInstall )
+		arnoldDriverEnv.Alias( "installArnold", arnoldDriverInstall )
+		arnoldDriverForTest = arnoldDriverEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/plugins/ieOutputDriver.so", arnoldDriver, Copy( "$TARGET", "$SOURCE" ) )
+		
+		Default( [ arnoldLibrary, arnoldPythonModule, arnoldProcedural, arnoldDriver ] )
+		
+		# tests
+		arnoldTestEnv = testEnv.Clone()
+		arnoldTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreArnold/python"
+		arnoldTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + arnoldEnv.subst( ":".join( arnoldPythonModuleEnv["LIBPATH"] ) )
+		arnoldTestEnv["ENV"]["PATH"] = arnoldEnv.subst( "$ARNOLD_ROOT/bin" ) + ":" + arnoldTestEnv["ENV"]["PATH"]
+		arnoldTestEnv["ENV"]["ARNOLD_PLUGIN_PATH"] = "contrib/IECoreArnold/test/IECoreArnold/plugins"
+		arnoldTest = arnoldTestEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/results.txt", arnoldPythonModule, pythonExecutable + " $TEST_ARNOLD_SCRIPT" )
+		NoCache( arnoldTest )
+		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldProceduralForTest + arnoldDriverForTest ] )
+		arnoldTestEnv.Depends( arnoldTest, glob.glob( "contrib/IECoreArnold/test/IECoreArnold/*.py" ) )
+		arnoldTestEnv.Alias( "testArnold", arnoldTest )
+
+###########################################################################################
+# Build, install and test the MtoA extension
+###########################################################################################
+
+mtoaEnv = mayaPluginEnv.Clone( IECORE_NAME = "ie" )
+## \todo Remove MTOA_SOURCE_ROOT when it's no longer necessary
+mtoaEnv.Append( CPPPATH = [ "$MTOA_ROOT/include", "$MTOA_SOURCE_ROOT/plugins/mtoa" ] )
+mtoaEnv.Append( CPPPATH = [ "$ARNOLD_ROOT/include" ] )
+mtoaEnv.Append( LIBPATH = [ "$MTOA_ROOT/bin" ] )
+mtoaEnv.Append( CXXFLAGS = [ "-D_LINUX" ] )
+mtoaEnv["SHLIBPREFIX"] = ""
+
+if doConfigure and haveMaya and haveArnold :
+
+	c = Configure( mtoaEnv )
+	
+	if not c.CheckCXXHeader( "translators/NodeTranslator.h" ) :
+	
+		sys.stderr.write( "WARNING : no MtoA headers found, not building extension - check MTOA_ROOT.\n" )
+		c.Finish()
+
+	else :
+	
+		c.Finish()
+		
+		mtoaEnv.Append( LIBS = [ "mtoa_api" ] )
+
+		mtoaExtension = mtoaEnv.SharedLibrary( "src/IECoreArnold/mtoaExtension/" + os.path.basename( mtoaEnv.subst( "$INSTALL_MTOAEXTENSION_NAME" ) ), glob.glob( "src/IECoreArnold/mtoaExtension/*.cpp" ) )
+		mtoaExtensionInstall = mtoaEnv.Install( os.path.dirname( mtoaEnv.subst( "$INSTALL_MTOAEXTENSION_NAME" ) ), mtoaExtension )
+		mtoaEnv.NoCache( mtoaExtensionInstall )
+		mtoaEnv.AddPostAction( mtoaExtensionInstall, lambda target, source, env : makeSymLinks( mtoaEnv, mtoaEnv["INSTALL_MTOAEXTENSION_NAME"] ) )
+		mtoaEnv.Alias( "install", mtoaExtensionInstall )
+		mtoaEnv.Alias( "installMtoA", mtoaExtensionInstall )
+		
+		Default( [ mtoaExtension ] )
+
 ###########################################################################################
 # Documentation
 ###########################################################################################
