@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,6 +63,8 @@
 #include "ToHoudiniCurvesConverterBinding.h"
 #include "FromHoudiniGroupConverterBinding.h"
 #include "ToHoudiniGroupConverterBinding.h"
+#include "RATDeepImageReaderBinding.h"
+#include "RATDeepImageWriterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -112,6 +114,8 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindToHoudiniCurvesConverter();
 	bindFromHoudiniGroupConverter();
 	bindToHoudiniGroupConverter();
+	bindRATDeepImageReader();
+	bindRATDeepImageWriter();
 	
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );

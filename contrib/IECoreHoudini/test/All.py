@@ -59,6 +59,9 @@ from FromHoudiniGroupConverter import *
 from TemporaryParameterValuesTest import * 
 from InterpolatedCacheReader import *
 from ToHoudiniGroupConverter import *
+from RATDeepImageReaderTest import *
+from RATDeepImageWriterTest import *
+from DeepImageConverter import *
 
 IECoreHoudini.TestProgram(
 	testRunner = unittest.TextTestRunner(
