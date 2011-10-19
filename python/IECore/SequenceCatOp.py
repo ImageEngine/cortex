@@ -53,6 +53,7 @@ class SequenceCatOp( Op ) :
 				defaultValue = "",
 				check = FileSequenceParameter.CheckType.MustExist,
 				allowEmptyString = False,
+				minSequenceSize = 1,
 			)
 		)
 
