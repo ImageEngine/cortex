@@ -252,6 +252,7 @@ from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
+from DeepPixelTest import DeepPixelTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,8 +71,8 @@ struct CompoundObjectTest
 		}
 		catch ( std::exception &e ) 
 		{
-			BOOST_WARN( "" == e.what() );
-			BOOST_CHECK( "" == "Exception thrown during member retrieval with exceptions disabled." );
+			BOOST_WARN( !e.what() );
+			BOOST_CHECK( !"Exception thrown during member retrieval with exceptions disabled." );
 		}
 		
 		try
@@ -87,14 +87,14 @@ struct CompoundObjectTest
 		}
 		catch ( std::exception &e ) 
 		{
-			BOOST_WARN( "" == e.what() );
-			BOOST_CHECK( "" == "Exception thrown during member retrieval." );
+			BOOST_WARN( !e.what() );
+			BOOST_CHECK( !"Exception thrown during member retrieval." );
 		}
 		
 		try
 		{
 			IntData *i = c->member<IntData>( "floatElement", true );
-			BOOST_CHECK( "" == "Exception not thrown during invalid member retrieval." );
+			BOOST_CHECK( !"Exception not thrown during invalid member retrieval." );
 			BOOST_CHECK( !i );
 		}
 		catch ( const Exception &e ) 
@@ -102,12 +102,12 @@ struct CompoundObjectTest
 		}
 		catch ( std::exception &e ) 
 		{
-			BOOST_CHECK( "" == "Exception should be of type IECore::Exception." );		
+			BOOST_CHECK( !"Exception should be of type IECore::Exception." );		
 		}
 		try
 		{
 			StringData *s = c->member<StringData>( "iAmMissing", true, false );
-			BOOST_CHECK( "" == "Exception not thrown during missing member retrieval." );
+			BOOST_CHECK( !"Exception not thrown during missing member retrieval." );
 			BOOST_CHECK( !s );		
 		}
 		catch ( const Exception &e ) 
@@ -115,7 +115,7 @@ struct CompoundObjectTest
 		}
 		catch ( std::exception &e ) 
 		{
-			BOOST_CHECK( "" == "Exception should be of type IECore::Exception." );		
+			BOOST_CHECK( !"Exception should be of type IECore::Exception." );		
 		}
 		
 		try
@@ -130,7 +130,7 @@ struct CompoundObjectTest
 		}
 		catch ( std::exception &e ) 
 		{
-			BOOST_CHECK( "" == "Exception thrown during creation of member." );
+			BOOST_CHECK( !"Exception thrown during creation of member." );
 		}
 		
 		const StringData *s = c->member<const StringData>( "stringElement" );
