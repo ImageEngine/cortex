@@ -192,7 +192,7 @@ OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + ope
 if platform == "cent6.x86_64" :
 	# use the /usr/lib versions of tiff, png, freetype and jpeg
 	FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
-	GLEW_INCLUDE_PATH = "/software/tools/include/glew/1.7.0"
+	GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/1.7.0"
 else :
 	TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
 	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
