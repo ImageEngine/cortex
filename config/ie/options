@@ -61,6 +61,11 @@ compilerVersion = getOption( "COMPILER_VERSION", None )
 pythonVersion = getOption( "PYTHON_VERSION", None )
 targetApp = getOption( "APP", None )
 
+# get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
+# fall back to the generic settings for this major version.
+cortexReg = IEEnv.registry["libraries"]["cortex"]["6"].get( platform, IEEnv.registry["libraries"]["cortex"]["6"] )
+
+tbbVersion = "2.2"
 if targetApp :
 	
 	if targetApp not in ( "nuke", "maya", "houdini" ) :
@@ -85,8 +90,9 @@ else :
 	if not compilerVersion :
 		compilerVersion = IEEnv.registry["platformDefaults"][platform]["compilerVersion"]
 	if not pythonVersion :
-		pythonVersion = "2.6"
-	openEXRVersion = "1.6.1"
+		pythonVersion = cortexReg["preferredPythonVersion"]
+	openEXRVersion = cortexReg["OpenEXRVersion"]
+	tbbVersion = cortexReg["tbbVersion"]
 	
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
@@ -166,24 +172,34 @@ if compilerVersionInt < 350 :
 	##########################################################################################################
 	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
 
-# determine boost version from python version
+# determine boost version from registry if we're using python 2.6
 if pythonVersion == "2.6" :
-	boostVersion = "1.42.0"
-	boostVersionSuffix = "-mt-1_42"
+	boostVersion = cortexReg["boostVersion"]
+	boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
+	while boostVersionSuffix.endswith( "_0" ) :
+		boostVersionSuffix = boostVersionSuffix[:-2]
 else :
+	# nasty fallback currently only invoked by houdini 11 builds.
+	## \todo Remove this when we can.
 	boostVersion = "1.38.0"
 	boostVersionSuffix = "-mt-1_38"
 
 # set the include paths
-TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/2.2"
-BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", IEEnv.platform(), "boost", boostVersion )
-OPENEXR_INCLUDE_PATH = "/software/tools/include/OpenEXR/" + openEXRVersion
-TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
-PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
-JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
-GLEW_INCLUDE_PATH = '/software/tools/include/glew/1.4.0'
-FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
-CPPPATH = "/software/tools/include/freetype/2.3.5"
+TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
+BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
+OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
+
+if platform == "cent6.x86_64" :
+	# use the /usr/lib versions of tiff, png, freetype and jpeg
+	FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
+	GLEW_INCLUDE_PATH = "/software/tools/include/glew/1.7.0"
+else :
+	TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
+	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
+	JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
+	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
+	CPPPATH = "/software/tools/include/freetype/2.3.5"
+	GLEW_INCLUDE_PATH = "/software/tools/include/glew/1.4.0"
 
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
