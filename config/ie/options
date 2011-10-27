@@ -65,7 +65,7 @@ targetApp = getOption( "APP", None )
 # fall back to the generic settings for this major version.
 cortexReg = IEEnv.registry["libraries"]["cortex"]["6"].get( platform, IEEnv.registry["libraries"]["cortex"]["6"] )
 
-tbbVersion = "2.2"
+tbbVersion = cortexReg["tbbVersion"]
 if targetApp :
 	
 	if targetApp not in ( "nuke", "maya", "houdini" ) :
@@ -82,8 +82,9 @@ if targetApp :
 	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
-	openEXRVersion = targetAppReg.get( "OpenEXRVersion", "1.6.1" )
+	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
+	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
 	if not compiler :
 		compiler = IEEnv.registry["platformDefaults"][platform]["compiler"]
@@ -143,13 +144,7 @@ TESTCXXFLAGS += [ "-O0" ]
 if not debug :
 
 	CXXFLAGS += [ "-O2" ]
-			
-
-if IEEnv.platformHardware() == "i686" :
-
-	CXXFLAGS += [ "-march=pentium4", "-mfpmath=sse" ]
-
-
+				
 PYTHONCXXFLAGS = copy.copy( CXXFLAGS )
 	
 ###########################################################################################
@@ -268,7 +263,7 @@ if targetApp=="maya" :
 	MAYA_ROOT = mayaReg["location"]
 	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 	MAYA_ADLM_ENV_FILE=mayaReg["wrapperEnvVars"].get( "AUTODESK_ADLM_THINCLIENT_ENV", "" )
-	INSTALL_MAYALIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_MAYALIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 	INSTALL_MAYAPLUGIN_NAME = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 	INSTALL_MAYAICON_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/icons"
@@ -306,14 +301,7 @@ if targetApp=="houdini" :
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	boostVersion = houdiniReg["boostVersion"]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-	
-	if boostVersion == "1.33.1" :
-		BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + boostVersion.replace( ".", "_" )
-		if "-Werror" in CXXFLAGS :
-			CXXFLAGS.remove( "-Werror" )
-	else :
-		BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + "_".join( boostVersion.split( "." )[:-1] )
-	
+		
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = '-DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -c  -DGCC4 -DGCC3 -Wno-deprecated -Wall -W -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wno-uninitialized -Wunused -Wno-unused-parameter -Wno-strict-aliasing -O2 -DMAKING_DSO'
 	INSTALL_HOUDINILIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
@@ -349,10 +337,10 @@ INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
 INSTALL_IECORE_OP_PATH = "$INSTALL_PREFIX/tools/ops/$IECORE_MAJOR_VERSION/$IECORE_NAME-${IECORE_MAJORMINORPATCH_VERSION}.py"
 
 if targetApp :
-	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/include/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
-	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/include/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
+	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 	# we don't want to build the renderman procedurals when we build houdini, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
 	# boost version houdini needs, whereas the other libraries are linking to the correct boost version for
