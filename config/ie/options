@@ -173,11 +173,6 @@ if pythonVersion == "2.6" :
 	boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
 	while boostVersionSuffix.endswith( "_0" ) :
 		boostVersionSuffix = boostVersionSuffix[:-2]
-else :
-	# nasty fallback currently only invoked by houdini 11 builds.
-	## \todo Remove this when we can.
-	boostVersion = "1.38.0"
-	boostVersionSuffix = "-mt-1_38"
 
 # set the include paths
 TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
