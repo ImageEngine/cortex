@@ -54,7 +54,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 	public :
 	
 		Implementation( const ShaderVector &shaders, SxContext context, const ShaderVector &coshaders, const ShaderVector &lights )
-			:	m_shaders( shaders ), m_context( context ), m_coshaders( coshaders ), m_lights( lights )
+			:	m_context( context ), m_shaders( shaders ), m_coshaders( coshaders ), m_lights( lights )
 		{
 			// build the map from parameter names to the expected type for that parameter
 			for( ShaderVector::const_iterator it=shaders.begin(); it!=shaders.end(); ++it )

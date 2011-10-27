@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/python.hpp" // this must come first!
+
 #include "boost/python/suite/indexing/container_utils.hpp"
 #include "boost/algorithm/string/replace.hpp"
 

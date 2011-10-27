@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -150,7 +150,7 @@ MStatus FloatSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 		// maya does this implicitly, so we skip duplicated endpoints when passing the splines into maya.
 		// this avoids users having to be responsible for managing the duplicates, and gives them some consistency
 		// with the splines they edit elsewhere in maya.
-		if( pointIndex==1 && *it == *spline.points.begin() || pointIndex==pointsSizeMinus2 && *it == *spline.points.rbegin()  )
+		if( ( pointIndex==1 && *it == *spline.points.begin() ) || ( pointIndex==pointsSizeMinus2 && *it == *spline.points.rbegin() ) )
 		{
 			continue;
 		}

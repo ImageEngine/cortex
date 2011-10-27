@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/python.hpp" // this include /must/ come first!
+
 #include "boost/format.hpp"
-#include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECore/DeepPixel.h"

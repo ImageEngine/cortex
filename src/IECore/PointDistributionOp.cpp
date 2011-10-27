@@ -229,12 +229,12 @@ struct PointDistributionOp::Generator
 	public :
 		
 		Generator( MeshPrimitiveEvaluator *evaluator, const std::vector<float> &s, const std::vector<float> &t, const std::vector<float> &faceArea, const std::vector<float> &textureArea, float density, const PrimitiveVariable &densityVar, Imath::V2f offset )
-			: m_positions(), m_meshEvaluator( evaluator ), m_s( s ), m_t( t ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset )
+			: m_meshEvaluator( evaluator ), m_s( s ), m_t( t ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset ), m_positions()
 		{
 		}
 		
 		Generator( Generator &that, tbb::split )
-			: m_positions(), m_meshEvaluator( that.m_meshEvaluator ), m_s( that.m_s ), m_t( that.m_t ), m_faceArea( that.m_faceArea ), m_textureArea( that.m_textureArea ), m_density( that.m_density ), m_densityVar( that.m_densityVar ), m_offset( that.m_offset )
+			: m_meshEvaluator( that.m_meshEvaluator ), m_s( that.m_s ), m_t( that.m_t ), m_faceArea( that.m_faceArea ), m_textureArea( that.m_textureArea ), m_density( that.m_density ), m_densityVar( that.m_densityVar ), m_offset( that.m_offset ), m_positions()
 		{
 		}
 		
