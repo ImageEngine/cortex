@@ -84,6 +84,7 @@ if targetApp :
 	compilerVersion = targetAppReg["compilerVersion"]
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
+	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
 	if not compiler :
@@ -94,6 +95,7 @@ else :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
+	boostVersion = cortexReg["boostVersion"]
 	
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
@@ -110,6 +112,11 @@ if not m:
 	
 compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
 compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+
+# figure out the suffix for boost libraries
+boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
+while boostVersionSuffix.endswith( "_0" ) :
+	boostVersionSuffix = boostVersionSuffix[:-2]
 
 debug = getOption( "DEBUG", False )
 CXXFLAGS = [ '-pipe', '-Wall' ]
@@ -166,13 +173,6 @@ if compilerVersionInt < 350 :
 	# versions.
 	##########################################################################################################
 	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
-
-# determine boost version from registry if we're using python 2.6
-if pythonVersion == "2.6" :
-	boostVersion = cortexReg["boostVersion"]
-	boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
-	while boostVersionSuffix.endswith( "_0" ) :
-		boostVersionSuffix = boostVersionSuffix[:-2]
 
 # set the include paths
 TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
@@ -294,7 +294,6 @@ if targetApp=="houdini" :
 	houdiniVersion = targetAppVersion
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
-	boostVersion = houdiniReg["boostVersion"]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
 		
 	HOUDINI_ROOT = houdiniReg['location']
