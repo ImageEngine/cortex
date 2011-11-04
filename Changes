@@ -2,6 +2,10 @@ Improvements :
 
 * Added IECoreMaya.DateTimeParameterHandler
 
+Bug Fixes :
+
+* Fixed a bug in python/IECoreMaya/PresetsOnlyParameterUI.py, which was preventing the ui updating for V2f, V3f and other vector type parameters
+
 Cortex 6.3.1
 ============
 

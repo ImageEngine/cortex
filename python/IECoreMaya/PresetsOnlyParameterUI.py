@@ -100,6 +100,12 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 		
 		if plug == myPlug :
 			self.__updateLabel()
+			return
+		
+		if plug.isChild():
+			if plug.parent() == myPlug :
+				self.__updateLabel()
+				return
 		
 	def __updateLabel( self ) :
 	
