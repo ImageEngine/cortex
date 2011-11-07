@@ -154,15 +154,8 @@ if not debug :
 				
 PYTHONCXXFLAGS = copy.copy( CXXFLAGS )
 	
-###########################################################################################
-# Warning flags. We'd like to set these for all environments but boost::python and
-# boost::unit_test generate loads of warnings so we can't set it for the python bindings
-# or C++ tests. GCC 4.3.0 gives out a lot of boost warnings in general, too. 
-# boost 1.38.0 generates construction initialization order warnings which we don't want, either.
-###########################################################################################		
-if compilerVersionInt < 430 :
-
-	CXXFLAGS += [ "-Werror", "-Wno-reorder" ]
+## \todo Try to reintroduce -Werror whenever we find a boost version not riddled with warnings, or
+# when we use a compiler which properly supports the #pragma diagnostic to ignore warnings from boost.
 	
 LINKFLAGS = []	
 if compilerVersionInt < 350 :
