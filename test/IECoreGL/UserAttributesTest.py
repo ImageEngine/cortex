@@ -67,8 +67,8 @@ class UserAtributesTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
-	def testUserAttributesInProcedural( self ):
-
+	def performProceduralTest( self, threaded ) :
+	
 		errors = list()
 
 		class SimpleProcedural( IECore.ParameterisedProcedural ):
@@ -105,13 +105,21 @@ class UserAtributesTest( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( False ) )
-		r.worldBegin()
-		p = SimpleProcedural()
-		p.render( r )
-		r.worldEnd()
+		with IECore.WorldBlock( r ) :
+			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( threaded ) )
+			p = SimpleProcedural()
+			p.render( r )
+		
 		if errors :
 			raise Exception, "ERRORS:\n".join( errors )
+
+	def testUserAttributesInSingleThreadedProcedural( self ) :
+
+		self.performProceduralTest( False )
+		
+	def testUserAttributesInMultiThreadedProcedural( self ) :
+	
+		self.performProceduralTest( True )
 
 	def testUserAttributesInImmediateMode( self ) :
 
