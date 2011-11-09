@@ -6,6 +6,8 @@ Bug Fixes :
 
 * Fixed a bug in python/IECoreMaya/PresetsOnlyParameterUI.py, which was preventing the ui updating for V2f, V3f and other vector type parameters
 
+* Fixed a bug which prevented user attributes from being passed correctly to multithreaded procedurals in the IECoreGL::Renderer.
+
 Cortex 6.3.1
 ============
 

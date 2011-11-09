@@ -83,8 +83,11 @@ class State : public Bindable
 
 		// binds this state
 		virtual void bind() const;
-
+		
+		/// Adds all the StateComponents and user attributes from s
+		/// into this State.
 		void add( StatePtr s );
+		
 		void add( StateComponentPtr s );
 		template<typename T>
 		typename T::Ptr get();
@@ -95,7 +98,7 @@ class State : public Bindable
 		template<typename T> void remove();
 		void remove( IECore::TypeId componentType );
 
-		// custom state attributes
+		/// Arbitrary state attributes for user manipulation.
 		UserAttributesMap &userAttributes();
 		const UserAttributesMap &userAttributes() const;
 
