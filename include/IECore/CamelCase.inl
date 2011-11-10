@@ -139,7 +139,7 @@ std::string CamelCase::join( Iterator begin, Iterator end, Caps caps, const std:
 				}
 				word[0] = std::toupper( word[0] );
 			}
-			else if( caps==AllExceptFirst && it==begin || (caps==First and it!=begin ) )
+			else if( (caps==AllExceptFirst && it==begin) || (caps==First and it!=begin ) )
 			{
 				boost::algorithm::to_lower( word );
 			}

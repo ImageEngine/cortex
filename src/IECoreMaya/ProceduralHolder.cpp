@@ -502,7 +502,7 @@ MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
 			ComponentsMap::const_iterator cIt = m_componentsMap.find( name.asChar() );
 			if( tIt!=m_componentTransforms.end() && cIt!=m_componentsMap.end() )
 			{				
-				Imath::V3f translate, shear, rotate, scale;
+				Imath::V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
 				Imath::extractSHRT( convert<Imath::M44f>( tIt->second ), scale, shear, rotate, translate );
 				rotate = radiansToDegrees( rotate );
 				

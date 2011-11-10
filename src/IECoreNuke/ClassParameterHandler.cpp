@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/python.hpp" // this must come first!
+
 #include "boost/algorithm/string/replace.hpp"
 
 #include "DDImage/Knobs.h"

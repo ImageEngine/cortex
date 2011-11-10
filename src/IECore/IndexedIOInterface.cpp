@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -89,7 +89,7 @@ void IndexedIOInterface::readable(const IndexedIO::EntryID &name) const
 
 void IndexedIOInterface::writable(const IndexedIO::EntryID &name) const
 {
-	if ( openMode() & (IndexedIO::Write | IndexedIO::Append) == 0)
+	if ( ( openMode() & (IndexedIO::Write | IndexedIO::Append) ) == 0)
 	{
 		throw PermissionDeniedIOException(name);
 	}

@@ -33,6 +33,7 @@
 ##########################################################################
 
 from IECore import *
+import datetime
 
 class parameterTypes( Op ) :
 
@@ -276,6 +277,11 @@ class parameterTypes( Op ) :
 					defaultValue = LineSegment3d( V3d( 1 ), V3d( 2 ) )
 				),
 				
+				DateTimeParameter(
+					name = "p10",
+					description = "",
+					defaultValue = datetime.datetime.now()
+				),
 			]
 		)
 

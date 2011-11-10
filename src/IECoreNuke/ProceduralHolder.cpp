@@ -60,10 +60,10 @@ const DD::Image::Op::Description ProceduralHolder::g_description( "ieProcedural"
 
 ProceduralHolder::ProceduralHolder( Node *node )
 	:	ParameterisedHolderOp( node ),
-		m_scene( 0 ),
 		m_drawContents( true ),
 		m_drawBound( true ),
 		m_drawCoordinateSystems( true ),
+		m_scene( 0 ),
 		m_transform( DD::Image::Matrix4::identity() ),
 		m_transformKnob( 0 )
 {

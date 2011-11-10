@@ -106,6 +106,10 @@ void State::add( StatePtr s )
 	{
 		add( it->second );
 	}
+	for( UserAttributesMap::iterator it=s->m_userAttributes.begin(); it!=s->m_userAttributes.end(); it++ )
+	{
+		m_userAttributes.insert( *it );
+	}
 }
 
 void State::add( StateComponentPtr s )
