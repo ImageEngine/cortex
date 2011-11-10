@@ -47,8 +47,8 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=6
-ieCoreMinorVersion=3
-ieCorePatchVersion=1
+ieCoreMinorVersion=4
+ieCorePatchVersion=0
 
 ###########################################################################################
 # Command line options
@@ -339,12 +339,6 @@ o.Add(
 	"GLUT_LIB_PATH",
 	"The path to the directory with libGLUT in it.",
 	"$GLEW_LIB_PATH",
-)
-
-o.Add(
-	"GL_CXX_FLAGS",
-	"C++ Flags to pass to the OpenGL compilation.",
-	"",
 )
 
 # Maya options
@@ -1472,9 +1466,9 @@ if doConfigure :
 		riEnv.Append( LIBS = riLibs )
 		riPythonModuleEnv.Append( LIBS = riLibs )
 		
-		riSources = glob.glob( "src/IECoreRI/*.cpp" )
+		riSources = sorted( glob.glob( "src/IECoreRI/*.cpp" ) )
 		riHeaders = glob.glob( "include/IECoreRI/*.h" ) + glob.glob( "include/IECoreRI/*.inl" )
-		riPythonSources = glob.glob( "src/IECoreRI/bindings/*.cpp" )
+		riPythonSources = sorted( glob.glob( "src/IECoreRI/bindings/*.cpp" ) )
 		riPythonScripts = glob.glob( "python/IECoreRI/*.py" )
 	
 		if c.CheckHeader( "pointcloud.h" ) :
@@ -1632,9 +1626,6 @@ if env["WITH_GL"] and doConfigure :
 			"$GLEW_LIB_PATH",
 			"$GLUT_LIB_PATH",
 		],
-		"CXXFLAGS" : [
-			"$GL_CXX_FLAGS"
-		],
 	}
 	
 	glEnv = coreEnv.Clone( **glEnvSets )
@@ -1673,7 +1664,7 @@ if env["WITH_GL"] and doConfigure :
 				]
 			)
 
-		glSources = glob.glob( "src/IECoreGL/*.cpp" )
+		glSources = sorted( glob.glob( "src/IECoreGL/*.cpp" ) )
 		if not "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
 			glSources.remove( "src/IECoreGL/Font.cpp" )
 			glSources.remove( "src/IECoreGL/FontLoader.cpp" )
@@ -1705,7 +1696,7 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.Alias( "install", glslShaderInstall )
 		glEnv.Alias( "installGL", glslShaderInstall )		
 
-		glPythonSources = glob.glob( "src/IECoreGL/bindings/*.cpp" )
+		glPythonSources = sorted( glob.glob( "src/IECoreGL/bindings/*.cpp" ) )
 		glPythonModuleEnv = pythonModuleEnv.Clone( **glEnvSets )
 		glPythonModuleEnv.Append( **glEnvAppends )
 		glPythonModuleEnv.Prepend( **glEnvPrepends )
@@ -1810,10 +1801,10 @@ if doConfigure :
 		
 		haveMaya = True
 
-		mayaSources = glob.glob( "src/IECoreMaya/*.cpp" )
+		mayaSources = sorted( glob.glob( "src/IECoreMaya/*.cpp" ) )
 		mayaHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/*.h" ) + glob.glob( "include/IECoreMaya/*.inl" )
 		mayaBindingHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/bindings/*.inl" )
-		mayaPythonSources = glob.glob( "src/IECoreMaya/bindings/*.cpp" )
+		mayaPythonSources = sorted( glob.glob( "src/IECoreMaya/bindings/*.cpp" ) )
 		mayaPythonScripts = glob.glob( "python/IECoreMaya/*.py" )
 		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
 		mayaPluginSources = [ "src/IECoreMaya/plugin/Plugin.cpp" ]
@@ -2082,10 +2073,10 @@ if doConfigure :
 				nukePythonModuleEnv.Append( LIBS = os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 				
 				nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
-				nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
-				nukePythonSources = glob.glob( "src/IECoreNuke/bindings/*.cpp" )
+				nukeSources = sorted( glob.glob( "src/IECoreNuke/*.cpp" ) )
+				nukePythonSources = sorted( glob.glob( "src/IECoreNuke/bindings/*.cpp" ) )
 				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
-				nukePluginSources = glob.glob( "src/IECoreNuke/plugin/*.cpp" )
+				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
 
 				# nuke library
 
@@ -2238,10 +2229,10 @@ if doConfigure :
 		#=====
 		# glob the files
 		#=====
-		houdiniSources = glob.glob( "contrib/IECoreHoudini/src/*.cpp" )
+		houdiniSources = sorted( glob.glob( "contrib/IECoreHoudini/src/*.cpp" ) )
 		houdiniHeaders = glob.glob( "contrib/IECoreHoudini/include/*.h" ) + glob.glob( "contrib/IECoreHoudini/include/*.inl" )
 		houdiniBindingHeaders = glob.glob( "contrib/IECoreHoudini/include/bindings/*.h" ) + glob.glob( "contrib/IECoreHoudini/include/bindings/*.inl" )
-		houdiniPythonSources = glob.glob( "contrib/IECoreHoudini/src/bindings/*.cpp" )
+		houdiniPythonSources = sorted( glob.glob( "contrib/IECoreHoudini/src/bindings/*.cpp" ) )
 		houdiniPythonScripts = glob.glob( "contrib/IECoreHoudini/python/IECoreHoudini/*.py" )
 		houdiniPluginSources = [ "contrib/IECoreHoudini/src/plugin/Plugin.cpp" ]
 		
@@ -2414,8 +2405,8 @@ if doConfigure :
 		truelightEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
 		truelightHeaders = glob.glob( "include/IECoreTruelight/*.h" ) + glob.glob( "include/IECoreTruelight/*.inl" )
-		truelightSources = glob.glob( "src/IECoreTruelight/*.cpp" )
-		truelightPythonSources = glob.glob( "src/IECoreTruelight/bindings/*.cpp" )
+		truelightSources = sorted( glob.glob( "src/IECoreTruelight/*.cpp" ) )
+		truelightPythonSources = sorted( glob.glob( "src/IECoreTruelight/bindings/*.cpp" ) )
 		truelightPythonScripts = glob.glob( "python/IECoreTruelight/*.py" )
 
 		# library
@@ -2513,9 +2504,9 @@ if doConfigure :
 			
 		haveArnold = True
 		
-		arnoldSources = glob.glob( "contrib/IECoreArnold/src/IECoreArnold/*.cpp" )
+		arnoldSources = sorted( glob.glob( "contrib/IECoreArnold/src/IECoreArnold/*.cpp" ) )
 		arnoldHeaders = glob.glob( "contrib/IECoreArnold/include/IECoreArnold/*.h" ) + glob.glob( "contrib/IECoreArnold/include/IECoreArnold/*.inl" )
-		arnoldPythonSources = glob.glob( "contrib/IECoreArnold/src/IECoreArnold/bindings/*.cpp" )
+		arnoldPythonSources = sorted( glob.glob( "contrib/IECoreArnold/src/IECoreArnold/bindings/*.cpp" ) )
 		arnoldPythonScripts = glob.glob( "contrib/IECoreArnold/python/IECoreArnold/*.py" )
 				
 		c.Finish()	
