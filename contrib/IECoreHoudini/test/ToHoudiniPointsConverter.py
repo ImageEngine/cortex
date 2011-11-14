@@ -438,14 +438,14 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribs( self ) :
 		points = self.points()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 0 ) # float
 		detailAttr.parm( "size" ).set( 1 ) # 1 element
 		detailAttr.parm( "value1" ).set( 123.456 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 0 ) # float
@@ -459,7 +459,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribsWithDifferentTypes( self ) :
 		points = self.points()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 1 ) # int
@@ -468,7 +468,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detailAttr.parm( "value2" ).set( 11 )
 		detailAttr.parm( "value3" ).set( 12 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 1 ) # int

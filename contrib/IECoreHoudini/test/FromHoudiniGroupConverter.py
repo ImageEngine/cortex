@@ -310,13 +310,13 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		box = self.box()
 		geo = box.parent()
 		group = box.createOutputNode( "group" )
-		attr = group.createOutputNode( "attribcreate" )
+		attr = group.createOutputNode( "attribcreate", exact_type_name=True )
 		attr.parm( "class" ).set( 1 ) # prim
 		attr.parm( "type" ).set( 3 ) # string
 		attr.parm( "string" ).set( "box1" )
 		box2 = geo.createNode( "box" )
 		group2 = box2.createOutputNode( "group" )
-		attr2 = group2.createOutputNode( "attribcreate" )
+		attr2 = group2.createOutputNode( "attribcreate", exact_type_name=True )
 		attr2.parm( "class" ).set( 1 ) # prim
 		attr2.parm( "type" ).set( 3 ) # string
 		attr2.parm( "string" ).set( "box2" )

@@ -62,7 +62,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		(op,fn) = self.testCreateToHoudiniConverter()
 		torus = op.createOutputNode( "ieToHoudiniConverter" )
 		scatter = torus.createOutputNode( "scatter" )
-		attr = scatter.createOutputNode( "attribcreate" )
+		attr = scatter.createOutputNode( "attribcreate", exact_type_name=True )
 		attr.parm("name").set("testAttribute")
 		attr.parm("value1").setExpression("$PT")
 		to_cortex = attr.createOutputNode( "ieOpHolder" )

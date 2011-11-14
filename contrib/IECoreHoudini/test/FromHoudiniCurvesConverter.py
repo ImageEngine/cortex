@@ -59,14 +59,14 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		curve.parm( "close" ).set( periodic )
 		curve.parm( "coords" ).set( TestFromHoudiniCurvesConverter.__curveCoordinates[coordIndex] )
 		
-		detailAttr = curve.createOutputNode( "attribcreate" )
+		detailAttr = curve.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm("name").set( "detailAttribute" )
 		detailAttr.parm("class").set( 0 ) # detail attribute
 		detailAttr.parm("type").set( 0 ) # float
 		detailAttr.parm("size").set( 1 ) # 1 element
 		detailAttr.parm("value1").set( 123.456 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm("name").set( "pointAttribute" )
 		pointAttr.parm("class").set( 2 ) # point
 		pointAttr.parm("type").set( 0 ) # float
@@ -75,7 +75,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm("value2").set( 654.321 )
 		pointAttr.parm("value2").set( 789.123 )
 
-		primAttr = pointAttr.createOutputNode( "attribcreate" )
+		primAttr = pointAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		primAttr.parm("name").set( "primAttribute" )
 		primAttr.parm("class").set( 1 ) # prim
 		primAttr.parm("type").set( 1 ) # int
@@ -83,7 +83,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		primAttr.parm("value1").set( 10 )
 		primAttr.parm("value2").set( 45 )
 
-		vertexAttr = primAttr.createOutputNode( "attribcreate" )
+		vertexAttr = primAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		vertexAttr.parm("name").set( "vertexAttribute" )
 		vertexAttr.parm("class").set( 3 ) # vertex
 		vertexAttr.parm("type").set( 0 ) # float

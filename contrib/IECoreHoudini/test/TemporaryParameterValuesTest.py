@@ -45,7 +45,7 @@ class TemporaryParameterValuesTest( IECoreHoudini.TestCase ) :
 
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
-		node = geo.createNode( "attribcreate" )
+		node = geo.createNode( "attribcreate", exact_type_name=True )
 		node.parm( "class" ).set( 1 )
 		node.parm( "writevalues" ).set( True )
 		node.parm( "size" ).set( 4 )
@@ -101,7 +101,7 @@ class TemporaryParameterValuesTest( IECoreHoudini.TestCase ) :
 		
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
-		node = geo.createNode( "attribcreate" )
+		node = geo.createNode( "attribcreate", exact_type_name=True )
 		node.parm( "class" ).setExpression( "$F" )
 		node.parm( "writevalues" ).setExpression( "$F" )
 		node.parm( "size" ).setExpression( "$F+1" )
@@ -161,7 +161,7 @@ class TemporaryParameterValuesTest( IECoreHoudini.TestCase ) :
 		
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
-		node = geo.createNode( "attribcreate" )
+		node = geo.createNode( "attribcreate", exact_type_name=True )
 		parm = node.parm( "string" )
 		parm.set( "hi" )
 		

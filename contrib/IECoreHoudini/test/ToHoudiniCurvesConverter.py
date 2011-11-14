@@ -745,21 +745,21 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribs( self ) :
 		curves = self.curves()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 0 ) # float
 		detailAttr.parm( "size" ).set( 1 ) # 1 element
 		detailAttr.parm( "value1" ).set( 123.456 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 0 ) # float
 		pointAttr.parm( "size" ).set( 1 ) # 1 element
 		pointAttr.parm( "value1" ).set( 123.456 )
 		
-		primAttr = pointAttr.createOutputNode( "attribcreate" )
+		primAttr = pointAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		primAttr.parm( "name" ).set( "floatPrim" )
 		primAttr.parm( "class" ).set( 1 ) # prim
 		primAttr.parm( "type" ).set( 0 ) # float
@@ -772,7 +772,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribsWithDifferentTypes( self ) :
 		curves = self.curves()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 1 ) # int
@@ -781,7 +781,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		detailAttr.parm( "value2" ).set( 11 )
 		detailAttr.parm( "value3" ).set( 12 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 1 ) # point
 		pointAttr.parm( "type" ).set( 1 ) # int
@@ -790,7 +790,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm( "value2" ).set( 11 )
 		pointAttr.parm( "value3" ).set( 12 )
 		
-		primAttr = pointAttr.createOutputNode( "attribcreate" )
+		primAttr = pointAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		primAttr.parm( "name" ).set( "floatPrim" )
 		primAttr.parm( "class" ).set( 1 ) # point
 		primAttr.parm( "type" ).set( 1 ) # int

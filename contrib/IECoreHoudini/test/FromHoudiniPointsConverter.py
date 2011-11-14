@@ -129,13 +129,13 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		primcol.setInput( 0, facet )
 
 		# add a load of different vertex attributes
-		vert_f1 = geo.createNode( "attribcreate", node_name = "vert_f1" )
+		vert_f1 = geo.createNode( "attribcreate", node_name = "vert_f1", exact_type_name=True )
 		vert_f1.parm("name").set("vert_f1")
 		vert_f1.parm("class").set(3)
 		vert_f1.parm("value1").setExpression("$VTX*0.1")
 		vert_f1.setInput( 0, primcol )
 
-		vert_f2 = geo.createNode( "attribcreate", node_name = "vert_f2" )
+		vert_f2 = geo.createNode( "attribcreate", node_name = "vert_f2", exact_type_name=True )
 		vert_f2.parm("name").set("vert_f2")
 		vert_f2.parm("class").set(3)
 		vert_f2.parm("size").set(2)
@@ -143,7 +143,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_f2.parm("value2").setExpression("$VTX*0.1")
 		vert_f2.setInput( 0, vert_f1 )
 
-		vert_f3 = geo.createNode( "attribcreate", node_name = "vert_f3" )
+		vert_f3 = geo.createNode( "attribcreate", node_name = "vert_f3", exact_type_name=True )
 		vert_f3.parm("name").set("vert_f3")
 		vert_f3.parm("class").set(3)
 		vert_f3.parm("size").set(3)
@@ -152,14 +152,14 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_f3.parm("value3").setExpression("$VTX*0.1")
 		vert_f3.setInput( 0, vert_f2 )
 
-		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1" )
+		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1", exact_type_name=True )
 		vert_i1.parm("name").set("vert_i1")
 		vert_i1.parm("class").set(3)
 		vert_i1.parm("type").set(1)
 		vert_i1.parm("value1").setExpression("$VTX*0.1")
 		vert_i1.setInput( 0, vert_f3 )
 
-		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2" )
+		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2", exact_type_name=True )
 		vert_i2.parm("name").set("vert_i2")
 		vert_i2.parm("class").set(3)
 		vert_i2.parm("type").set(1)
@@ -168,7 +168,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_i2.parm("value2").setExpression("$VTX*0.1")
 		vert_i2.setInput( 0, vert_i1 )
 
-		vert_i3 = geo.createNode( "attribcreate", node_name = "vert_i3" )
+		vert_i3 = geo.createNode( "attribcreate", node_name = "vert_i3", exact_type_name=True )
 		vert_i3.parm("name").set("vert_i3")
 		vert_i3.parm("class").set(3)
 		vert_i3.parm("type").set(1)
@@ -178,7 +178,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_i3.parm("value3").setExpression("$VTX*0.1")
 		vert_i3.setInput( 0, vert_i2 )
 
-		vert_v3f = geo.createNode( "attribcreate", node_name = "vert_v3f" )
+		vert_v3f = geo.createNode( "attribcreate", node_name = "vert_v3f", exact_type_name=True )
 		vert_v3f.parm("name").set("vert_v3f")
 		vert_v3f.parm("class").set(3)
 		vert_v3f.parm("type").set(2)
@@ -187,7 +187,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_v3f.parm("value3").setExpression("$VTX*0.1")
 		vert_v3f.setInput( 0, vert_i3 )
 
-		detail_i3 = geo.createNode( "attribcreate", node_name = "detail_i3" )
+		detail_i3 = geo.createNode( "attribcreate", node_name = "detail_i3", exact_type_name=True )
 		detail_i3.parm("name").set("detail_i3")
 		detail_i3.parm("class").set(0)
 		detail_i3.parm("type").set(1)
@@ -263,13 +263,13 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		primcol.setInput( 0, facet )
 
 		# add a load of different vertex attributes
-		vert_f1 = geo.createNode( "attribcreate", node_name = "vert_f1" )
+		vert_f1 = geo.createNode( "attribcreate", node_name = "vert_f1", exact_type_name=True )
 		vert_f1.parm("name").set("vert_f1")
 		vert_f1.parm("class").set(3)
 		vert_f1.parm("value1").setExpression("$VTX*0.1")
 		vert_f1.setInput( 0, primcol )
 
-		vert_f2 = geo.createNode( "attribcreate", node_name = "vert_f2" )
+		vert_f2 = geo.createNode( "attribcreate", node_name = "vert_f2", exact_type_name=True )
 		vert_f2.parm("name").set("vert_f2")
 		vert_f2.parm("class").set(3)
 		vert_f2.parm("size").set(2)
@@ -277,7 +277,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_f2.parm("value2").setExpression("$VTX*0.1")
 		vert_f2.setInput( 0, vert_f1 )
 
-		vert_f3 = geo.createNode( "attribcreate", node_name = "vert_f3" )
+		vert_f3 = geo.createNode( "attribcreate", node_name = "vert_f3", exact_type_name=True )
 		vert_f3.parm("name").set("vert_f3")
 		vert_f3.parm("class").set(3)
 		vert_f3.parm("size").set(3)
@@ -286,14 +286,14 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_f3.parm("value3").setExpression("$VTX*0.1")
 		vert_f3.setInput( 0, vert_f2 )
 
-		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1" )
+		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1", exact_type_name=True )
 		vert_i1.parm("name").set("vert_i1")
 		vert_i1.parm("class").set(3)
 		vert_i1.parm("type").set(1)
 		vert_i1.parm("value1").setExpression("$VTX*0.1")
 		vert_i1.setInput( 0, vert_f3 )
 
-		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2" )
+		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2", exact_type_name=True )
 		vert_i2.parm("name").set("vert_i2")
 		vert_i2.parm("class").set(3)
 		vert_i2.parm("type").set(1)
@@ -302,7 +302,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_i2.parm("value2").setExpression("$VTX*0.1")
 		vert_i2.setInput( 0, vert_i1 )
 
-		vert_i3 = geo.createNode( "attribcreate", node_name = "vert_i3" )
+		vert_i3 = geo.createNode( "attribcreate", node_name = "vert_i3", exact_type_name=True )
 		vert_i3.parm("name").set("vert_i3")
 		vert_i3.parm("class").set(3)
 		vert_i3.parm("type").set(1)
@@ -312,7 +312,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_i3.parm("value3").setExpression("$VTX*0.1")
 		vert_i3.setInput( 0, vert_i2 )
 
-		vert_v3f = geo.createNode( "attribcreate", node_name = "vert_v3f" )
+		vert_v3f = geo.createNode( "attribcreate", node_name = "vert_v3f", exact_type_name=True )
 		vert_v3f.parm("name").set("vert_v3f")
 		vert_v3f.parm("class").set(3)
 		vert_v3f.parm("type").set(2)
@@ -321,14 +321,14 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_v3f.parm("value3").setExpression("$VTX*0.1")
 		vert_v3f.setInput( 0, vert_i3 )
 		
-		vertString = geo.createNode( "attribcreate", node_name = "vertString" )
+		vertString = geo.createNode( "attribcreate", node_name = "vertString", exact_type_name=True )
 		vertString.parm("name").set("vertString")
 		vertString.parm("class").set(3)
 		vertString.parm("type").set(3)
 		vertString.parm("string").set("string $VTX!")
 		vertString.setInput( 0, vert_v3f )
 
-		detail_i3 = geo.createNode( "attribcreate", node_name = "detail_i3" )
+		detail_i3 = geo.createNode( "attribcreate", node_name = "detail_i3", exact_type_name=True )
 		detail_i3.parm("name").set("detail_i3")
 		detail_i3.parm("class").set(0)
 		detail_i3.parm("type").set(1)
@@ -436,7 +436,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testSetupAttributes( self ) :
 		points = self.createPoints()
 		geo = points.parent()
-		attr = geo.createNode( "attribcreate" )
+		attr = geo.createNode( "attribcreate", exact_type_name=True )
 		attr.setInput( 0, points )
 		attr.parm("name").set( "test_attribute" )
 		attr.parm("type").set(0) # float
@@ -638,7 +638,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		geo = obj.createNode( "geo", run_init_scripts=False )
 		popnet = geo.createNode( "popnet" )
 		location = popnet.createNode( "location" )
-		detailAttr = popnet.createOutputNode( "attribcreate" )
+		detailAttr = popnet.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm("name").set( "float3detail" )
 		detailAttr.parm("class").set( 0 ) # detail
 		detailAttr.parm("type").set( 0 ) # float
@@ -646,7 +646,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detailAttr.parm("value1").set( 1 )
 		detailAttr.parm("value2").set( 2 )
 		detailAttr.parm("value3").set( 3 )
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm("name").set( "float3point" )
 		pointAttr.parm("class").set( 2 ) # point
 		pointAttr.parm("type").set( 0 ) # float

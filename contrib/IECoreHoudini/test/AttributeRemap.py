@@ -161,9 +161,9 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 	def testDuplicateNaming(self):
 		(op, attr) = self.testCreateObjects()
 		top = attr.inputs()[0]
-		attr1 = top.createOutputNode( "attribcreate" )
+		attr1 = top.createOutputNode( "attribcreate", exact_type_name=True )
 		attr1.parm("name").set("test")
-		attr2 = attr1.createOutputNode( "attribcreate" )
+		attr2 = attr1.createOutputNode( "attribcreate", exact_type_name=True )
 		attr2.parm("class").set(1) # primitive
 		attr2.parm("name").set("test")
 		attr.setInput(0,attr2)
@@ -185,7 +185,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 	def testPrimAttributes(self):
 		(op, attr) = self.testCreateObjects()
 		top = attr.inputs()[0]
-		attr1 = top.createOutputNode( "attribcreate" )
+		attr1 = top.createOutputNode( "attribcreate", exact_type_name=True )
 		attr1.parm("class").set(1) # primitive
 		attr1.parm("name").set("test")
 		attr.setInput(0,attr1)
