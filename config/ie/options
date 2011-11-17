@@ -178,12 +178,15 @@ if platform == "cent6.x86_64" :
 	GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/1.7.0"
 else :
 	TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
-	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
 	JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
 	CPPPATH = "/software/tools/include/freetype/2.3.5"
 	GLEW_INCLUDE_PATH = "/software/tools/include/glew/1.4.0"
-
+	if targetApp != "nuke" :
+		# we use the system libpng when building for nuke, as it links to an older
+		# version than we have installed centrally.
+		PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
+	
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
 if IEEnv.platformOS().startswith( "osx" ) :
