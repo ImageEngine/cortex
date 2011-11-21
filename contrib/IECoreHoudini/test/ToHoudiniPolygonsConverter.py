@@ -737,6 +737,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.vertexIds, mesh.vertexIds )
 		self.assertEqual( result.keys(), mesh.keys() )
 		self.assertEqual( result["stringPoint"], mesh["stringPoint"] )
+		self.assertEqual( result["stringPointIndices"], mesh["stringPointIndices"] )
 	
 	def tearDown( self ) :
 		
