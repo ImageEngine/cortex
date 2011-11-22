@@ -34,6 +34,7 @@
 
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
+#include "IECore/MessageHandler.h"
 
 #include "Convert.h"
 #include "ToHoudiniAttribConverter.h"
@@ -138,6 +139,13 @@ void ToHoudiniGeometryConverter::transferAttribs(
 	PrimitiveVariableMap stringsToIndices;
 	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
 	{
+		if ( !primitive->isPrimitiveVariableValid( it->second ) )
+		{
+			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invilad. Ignoring." );
+			variablesToIgnore.push_back( it->first );
+			continue;
+		}
+
 		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
 		if ( !converter )
 		{
@@ -148,7 +156,7 @@ void ToHoudiniGeometryConverter::transferAttribs(
 		{
 			std::string indicesVariableName = it->first + "Indices";
 			PrimitiveVariableMap::const_iterator indices = primitive->variables.find( indicesVariableName );
-			if ( indices != primitive->variables.end() && indices->second.data->isInstanceOf( IntVectorDataTypeId ) )
+			if ( indices != primitive->variables.end() && indices->second.data->isInstanceOf( IntVectorDataTypeId ) && primitive->isPrimitiveVariableValid( indices->second ) )
 			{
 				stringsToIndices[it->first] = indices->second;
 				variablesToIgnore.push_back( indicesVariableName );
