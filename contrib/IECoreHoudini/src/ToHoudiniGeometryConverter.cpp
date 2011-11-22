@@ -141,7 +141,7 @@ void ToHoudiniGeometryConverter::transferAttribs(
 	{
 		if ( !primitive->isPrimitiveVariableValid( it->second ) )
 		{
-			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invilad. Ignoring." );
+			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invalid. Ignoring." );
 			variablesToIgnore.push_back( it->first );
 			continue;
 		}
