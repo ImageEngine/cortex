@@ -241,6 +241,135 @@ class TestShader( unittest.TestCase ) :
 		v = V2fVectorData( [ V2f(9,9), V2f(1,2), V2f(9,9) ] )
 		s.setUniformParameterFromVector( "vec2Parm", v, 1 )
 		self.assertEqual( s.getUniformParameter( "vec2Parm" ), V2fData( V2f( 1, 2 ) ) )
+	
+	def testUniformArrayParameters( self ) :
+		
+		# TODO: get bool/bvec2/bvec3 array parameters working, and test them.
+		
+		vertexSource = """
+		attribute float floatAttrib;
+		varying float varyingFloatParm;
+		void main()
+		{
+			gl_Position = ftransform();
+			varyingFloatParm = floatAttrib * gl_Position.x;
+		}
+		"""
+
+		fragmentSource = """
+		// uniform bool boolParm[4];
+		uniform int intParm[4];
+		uniform float floatParm[4];
+		
+		// uniform bvec2 bvec2Parm[4];
+		// uniform bvec3 bvec3Parm[4];
+		// uniform ivec4 bvec4Parm; // we have no suitable datatype for specifying this in IECore
+		
+		uniform ivec2 ivec2Parm[4];
+		uniform ivec3 ivec3Parm[4];
+		// uniform ivec4 ivec4Parm; // we have no suitable datatype for specifying this in IECore
+
+		uniform vec2 vec2Parm[4];
+		uniform vec3 vec3Parm[4];
+		uniform vec4 vec4Parm[4];
+
+		//uniform sampler2D s2D[4];
+
+		uniform struct {
+			int i;
+			float f;
+		} s;
+
+		uniform mat3 mat3Parm[4];
+		uniform mat4 mat4Parm[4];
+		
+		varying float varyingFloatParm;
+
+		void main()
+		{
+			float x = vec4Parm[0].r + vec3Parm[0].g + vec2Parm[0].y + floatParm[0] + float( intParm[0] ); // + float( boolParm[0] );
+			float xx = float( ivec2Parm[0].x ) + float( ivec3Parm[0].y ); // + float( bvec2Parm[0].x ) + float( bvec3Parm[0].y );
+			float xxx = vec2Parm[0].x;
+			vec4 p = mat4Parm[0] * gl_FragCoord;
+			vec3 pp = mat3Parm[0] * gl_FragCoord.xyz;
+			gl_FragColor = vec4( x + xx + xxx + p.x + pp.x, gl_Color.g, varyingFloatParm, 1 );
+		}
+		"""
+
+		s = Shader( vertexSource, fragmentSource )
+		self.assert_( s==s )
+
+		expectedParameterNamesAndTypes = {
+			"intParm" : TypeId.IntVectorData,
+			"floatParm" : TypeId.FloatVectorData,
+			"ivec2Parm" : TypeId.V2iVectorData,
+			"ivec3Parm" : TypeId.V3iVectorData,
+			"vec2Parm" : TypeId.V2fVectorData,
+			"vec3Parm" : TypeId.V3fVectorData,
+			"vec4Parm" : TypeId.Color4fVectorData,
+			"mat3Parm" : TypeId.M33fVectorData,
+			"mat4Parm" : TypeId.M44fVectorData,
+		}
+
+		parameterNames = s.uniformParameterNames()
+		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndTypes ) )
+		
+		for n in expectedParameterNamesAndTypes.keys() :
+			self.assert_( n in parameterNames )
+			self.assert_( s.hasUniformParameter( n ) )
+			self.assert_( not s.hasUniformParameter( n + "VeryUnlikelySuffix" ) )
+			
+			self.assertEqual( s.uniformParameterType( n ), expectedParameterNamesAndTypes[n] )
+
+		expectedNamesAndValues = {
+			"intParm" : IntVectorData( ),
+			"floatParm" : FloatVectorData( ),
+			"ivec2Parm" : V2iVectorData( ),
+			"vec2Parm" : V2fVectorData( ),
+			"ivec3Parm" : V3iVectorData( ),
+			"vec3Parm" : V3fVectorData( ),
+			"vec4Parm" : Color4fVectorData( ),
+		}
+		
+		# Initial values are not necessarily zero. So we just test for the value type here.
+		for name, value in expectedNamesAndValues.items() :
+			self.assertEqual( type(s.getUniformParameter( name ) ), type( value ) )
+
+		# must bind a shader before setting parameters
+		s.bind()
+		
+		def checkGetSet( test, s, paramName, paramData, expected=None ) :
+			s.setUniformParameter( paramName, paramData )
+			fetchedData = s.getUniformParameter( paramName )
+			if expected:
+				test.assertEqual( fetchedData, expected )
+			else :
+				test.assertEqual( fetchedData, paramData )
+				
+		
+		checkGetSet( self, s, "intParm", IntVectorData( range(0,4) ) )
+		checkGetSet( self, s, "floatParm", FloatVectorData( [ 0.0, 1.0, 2.0, 3.0 ]) )
+		checkGetSet( self, s, "ivec2Parm", V2iVectorData( [ V2i( 1, 2 ), V2i( 5, 4 ), V2i( 8, 5 ), V2i( 2, 3 ) ] ) )
+		checkGetSet( self, s, "ivec3Parm", V3iVectorData( [ V3i( 1 ), V3i( -2, 3, 5 ), V3i( 4 ), V3i( 10,12,45 ) ] ) )
+		checkGetSet( self, s, "vec2Parm", V2fVectorData( [ V2f( 1, 2 ), V2f( 5, 0.5 ), V2f( -12, 3 ), V2f( -1, 22 ) ] ) )
+		checkGetSet( self, s, "vec3Parm", Color3fVectorData( [ Color3f( 1 ), Color3f( 2,3,4 ), Color3f( 3 ), Color3f( 4 ) ] ), V3fVectorData( [ V3f( 1 ), V3f( 2,3,4 ), V3f( 3 ), V3f( 4 ) ] ) )
+		checkGetSet( self, s, "vec4Parm", Color4fVectorData( [ Color4f( 1 ), Color4f( 1.0,0.5,0.25, 1.0 ), Color4f( 4 ), Color4f( 3 ) ] ) )
+		checkGetSet( self, s, "mat3Parm", M33fVectorData( [ M33f.createTranslated( V2f( 1, 2 ) ), M33f.createTranslated( V2f( -1, 3 ) ), M33f.createTranslated( V2f( 2, 6 ) ), M33f.createTranslated( V2f( 4, 3 ) ) ] ) )
+		checkGetSet( self, s, "mat4Parm", M44fVectorData( [ M44f.createTranslated( V3f( 1, 2, 3 ) ), M44f.createTranslated( V3f( -3, 8, -3 ) ), M44f.createTranslated( V3f( 2, 5, 9 ) ), M44f.createTranslated( V3f( 7, 6, 4 ) ) ] ) )
+		
+		
+		# check that setting invalid values throws an Exception
+		self.assertRaises( Exception, s.setUniformParameter, "iDontExist", FloatVectorData( [2] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "intParm", FloatVectorData( [2] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "floatParm", IntVectorData( [2] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "ivec2Parm", V3iVectorData( [V3i( 2 )] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "ivec3Parm", V3fVectorData( [V3f( 2 )] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "vec2Parm", V3fVectorData( [V3f( 2 )] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "vec3Parm", V2fVectorData( [V2f( 2 )] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "vec4Parm", V3fVectorData( [V3f( 2 )] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "mat4Parm", V3fVectorData( [V3f( 2 )] ) )
+		self.assertRaises( Exception, s.setUniformParameter, "mat3Parm", V3fVectorData( [V3f( 2 )] ) )
+
 
 	def testVertexParameters( self ) :
 

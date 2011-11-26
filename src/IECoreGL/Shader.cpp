@@ -143,10 +143,16 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 				continue;
 			}
 			
-			// \todo: implement arrays
-			if ( d.size != 1 )
-				continue;
-
+			if( d.size > 1 )
+			{
+				// remove the "[0]" from the end of the string
+				size_t bracketPos = d.name.rfind( "[" );
+				if( bracketPos != std::string::npos )
+				{
+					d.name = d.name.substr( 0, bracketPos );
+				}
+			}
+			
 			m_uniformParameters[location] = d;
 		}
 	}
@@ -342,7 +348,39 @@ IECore::TypeId Shader::uniformParameterType( GLint parameterIndex ) const
 	}
 	else
 	{
-		throw Exception( "Array parameters not supported yet." );
+		switch( p.type )
+		{
+			// TODO: handle GL_BOOL, GL_BOOL_VEC2, GL_BOOL_VEC3
+			case GL_INT :
+				return IECore::IntVectorDataTypeId;
+
+			case GL_FLOAT :
+				return IECore::FloatVectorDataTypeId;
+
+			case GL_INT_VEC2 :
+				return IECore::V2iVectorDataTypeId;
+
+			case GL_FLOAT_VEC2 :
+				return IECore::V2fVectorDataTypeId;
+
+			case GL_INT_VEC3 :
+				return IECore::V3iVectorDataTypeId;
+
+			case GL_FLOAT_VEC3 :
+				return IECore::V3fVectorDataTypeId;
+
+			case GL_FLOAT_VEC4 :
+				return IECore::Color4fVectorDataTypeId;
+
+			case GL_FLOAT_MAT3 :
+				return IECore::M33fVectorDataTypeId;
+
+			case GL_FLOAT_MAT4 :
+				return IECore::M44fVectorDataTypeId;
+
+			default :
+				throw Exception( "Unsupported uniform parameter type." );
+		}
 	}
 }
 
@@ -417,13 +455,73 @@ IECore::DataPtr Shader::getUniformParameterDefault( GLint parameterIndex ) const
 	}
 	else
 	{
-		throw Exception( "Array parameters not supported yet." );
+		switch( p.type )
+		{
+			// TODO: GL_BOOL, GL_BOOL_VEC2, GL_BOOL_VEC3
+			case GL_INT :
+				{
+					IECore::IntVectorDataPtr data = new IECore::IntVectorData();
+					data->writable().resize( p.size, 0 );
+					return data;
+				}
+			case GL_FLOAT :
+				{
+					IECore::FloatVectorDataPtr data = new IECore::FloatVectorData();
+					data->writable().resize( p.size, 0.0f );
+					return data;
+				}
+			case GL_INT_VEC2 :
+				{
+					IECore::V2iVectorDataPtr data = new IECore::V2iVectorData();
+					data->writable().resize( p.size, Imath::V2i( 0 ) );
+					return data;
+				}
+			case GL_FLOAT_VEC2 :
+				{
+					IECore::V2fVectorDataPtr data = new IECore::V2fVectorData();
+					data->writable().resize( p.size, Imath::V2f( 0.0f ) );
+					return data;
+				}
+			case GL_INT_VEC3 :
+				{
+					IECore::V3iVectorDataPtr data = new IECore::V3iVectorData();
+					data->writable().resize( p.size, Imath::V3i( 0 ) );
+					return data;
+				}
+			case GL_FLOAT_VEC3 :
+				{
+					IECore::V3fVectorDataPtr data = new IECore::V3fVectorData();
+					data->writable().resize( p.size, Imath::V3f( 0 ) );
+					return data;
+				}
+			case GL_FLOAT_VEC4 :
+				{
+					IECore::Color4fVectorDataPtr data = new IECore::Color4fVectorData();
+					data->writable().resize( p.size, Imath::Color4f( 0.0 ) );
+					return data;
+				}
+			case GL_FLOAT_MAT3 :
+				{
+					IECore::M33fVectorDataPtr data = new IECore::M33fVectorData();
+					data->writable().resize( p.size, Imath::M33f( 0.0 ) );
+					return data;
+				}
+			case GL_FLOAT_MAT4 :
+				{
+					IECore::M44fVectorDataPtr data = new IECore::M44fVectorData();
+					data->writable().resize( p.size, Imath::M44f( 0.0 ) );
+					return data;
+				}
+			default :
+				throw Exception( "Unsupported uniform parameter type." );
+		}
 	}
 }
 
 IECore::DataPtr Shader::getUniformParameter( GLint parameterIndex ) const
 {
 	const ParameterDescription &p = uniformParameterDescription( parameterIndex );
+	
 	if( p.size==1 )
 	{
 		switch( p.type )
@@ -506,7 +604,173 @@ IECore::DataPtr Shader::getUniformParameter( GLint parameterIndex ) const
 	}
 	else
 	{
-		throw Exception( "Array parameters not supported yet." );
+		switch( p.type )
+		{
+			// TODO: Handle the case for GL_BOOL, GL_BOOL_VEC2, GL_BOOL_VEC3
+			case GL_INT :
+				{
+					IECore::IntVectorDataPtr result = new IECore::IntVectorData;
+					std::vector<int>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLint v = 0;
+						glGetUniformiv( m_program, parameterIndex + i, &v );
+						values[i] = v;
+					}
+					
+					return result;
+				}
+			case GL_FLOAT :
+				{
+					IECore::FloatVectorDataPtr result = new IECore::FloatVectorData;
+					std::vector<float>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLfloat v = 0;
+						glGetUniformfv( m_program, parameterIndex + i, &v );
+						values[i] = v;
+					}
+					
+					return result;
+				}
+			case GL_INT_VEC2 :
+				{
+					IECore::V2iVectorDataPtr result = new IECore::V2iVectorData;
+					std::vector<Imath::V2i>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLint v[2];
+						glGetUniformiv( m_program, parameterIndex + i, v );
+						values[i].x = v[0];
+						values[i].y = v[1];
+					}
+					
+					return result;
+				}
+			case GL_FLOAT_VEC2 :
+				{
+					IECore::V2fVectorDataPtr result = new IECore::V2fVectorData;
+					std::vector<Imath::V2f>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLfloat v[2];
+						glGetUniformfv( m_program, parameterIndex + i, v );
+						values[i].x = v[0];
+						values[i].y = v[1];
+					}
+					
+					return result;
+				}
+			case GL_INT_VEC3 :
+				{
+					IECore::V3iVectorDataPtr result = new IECore::V3iVectorData;
+					std::vector<Imath::V3i>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLint v[3];
+						glGetUniformiv( m_program, parameterIndex + i, v );
+						values[i].x = v[0];
+						values[i].y = v[1];
+						values[i].z = v[2];
+					}
+					
+					return result;
+				}
+			case GL_FLOAT_VEC3 :
+				{
+					IECore::V3fVectorDataPtr result = new IECore::V3fVectorData;
+					std::vector<Imath::V3f>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLfloat v[3];
+						glGetUniformfv( m_program, parameterIndex + i, v );
+						values[i].x = v[0];
+						values[i].y = v[1];
+						values[i].z = v[2];
+					}
+					
+					return result;
+				}
+			case GL_FLOAT_VEC4 :
+				{
+					IECore::Color4fVectorDataPtr result = new IECore::Color4fVectorData;
+					std::vector<Imath::Color4f>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLfloat v[4];
+						glGetUniformfv( m_program, parameterIndex + i, v );
+						values[i].r = v[0];
+						values[i].g = v[1];
+						values[i].b = v[2];
+						values[i].a = v[3];
+					}
+					
+					return result;
+				}
+			case GL_FLOAT_MAT3 :
+				{
+					IECore::M33fVectorDataPtr result = new IECore::M33fVectorData;
+					std::vector<Imath::M33f>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLfloat v[9];
+						glGetUniformfv( m_program, parameterIndex + i, v );
+						values[i][0][0] = v[0];
+						values[i][0][1] = v[1];
+						values[i][0][2] = v[2];
+						values[i][1][0] = v[3];
+						values[i][1][1] = v[4];
+						values[i][1][2] = v[5];
+						values[i][2][0] = v[6];
+						values[i][2][1] = v[7];
+						values[i][2][2] = v[8];
+					}
+					
+					return result;
+				}
+			case GL_FLOAT_MAT4 :
+				{
+					IECore::M44fVectorDataPtr result = new IECore::M44fVectorData;
+					std::vector<Imath::M44f>& values = result->writable();
+					values.resize( p.size );
+					for( int i=0; i < p.size; ++i )
+					{
+						GLfloat v[16];
+						glGetUniformfv( m_program, parameterIndex + i, v );
+						values[i][0][0] = v[0];
+						values[i][0][1] = v[1];
+						values[i][0][2] = v[2];
+						values[i][0][3] = v[3];
+						
+						values[i][1][0] = v[4];
+						values[i][1][1] = v[5];
+						values[i][1][2] = v[6];
+						values[i][1][3] = v[7];
+						
+						values[i][2][0] = v[8];
+						values[i][2][1] = v[9];
+						values[i][2][2] = v[10];
+						values[i][2][3] = v[11];
+						
+						values[i][3][0] = v[12];
+						values[i][3][1] = v[13];
+						values[i][3][2] = v[14];
+						values[i][3][3] = v[15];
+					}
+					
+					return result;
+				}
+			default :
+				throw Exception( "Unsupported uniform parameter type." );
+		}
 	}
 }
 
@@ -541,6 +805,10 @@ bool Shader::uniformValueValid( GLint parameterIndex, IECore::TypeId type ) cons
 	{
 		type = IECore::V3fDataTypeId;
 	}
+	else if( type==IECore::Color3fVectorDataTypeId )
+	{
+		type = IECore::V3fVectorDataTypeId;
+	}
 	return type==pt;
 }
 
@@ -554,12 +822,50 @@ bool Shader::uniformValueValid( const std::string &parameterName, const IECore::
 	return uniformValueValid( uniformParameterIndex( parameterName ), value );
 }
 
+struct GetDataSize
+{
+	typedef size_t ReturnType;
+
+	template<typename T>
+	size_t operator() ( T * data )
+	{
+		assert( data );
+		return data->readable().size();
+	}
+};
+
+static size_t getDataSize( const IECore::Data* data )
+{
+	return IECore::despatchTypedData< GetDataSize, IECore::TypeTraits::IsVectorTypedData >( const_cast< IECore::Data *>( data ) );
+}
+
+
 void Shader::setUniformParameter( GLint parameterIndex, const IECore::Data *value )
 {
 	if ( !uniformValueValid( parameterIndex, value ) )
 	{
 		throw Exception( "Can't set uniform parameter value. Type mismatch." );
 	}
+	
+	if( parameterIndex != GL_COLOR_PARAMETER )
+	{
+		int n = 1;
+		try
+		{
+			n = getDataSize( value );
+		}
+		catch(...)
+		{
+		}
+		
+		const ParameterDescription& pd = uniformParameterDescription( parameterIndex );
+		
+		if( n != pd.size )
+		{
+			throw Exception( str( boost::format( "Uniform parameter array %s wrong size. Expecting %d, got %d" ) % pd.name % pd.size % n ) );
+		}
+	}
+	
 	IECore::TypedDataAddress a;
 	setUniformParameter( 
 		parameterIndex, 
@@ -587,6 +893,9 @@ void Shader::setUniformParameter( GLint parameterIndex, IECore::TypeId type, con
 		}
 		return;
 	}
+	
+	const ParameterDescription& pd = uniformParameterDescription( parameterIndex );
+	
 	switch( type )
 	{
 		case IECore::BoolDataTypeId :
@@ -629,6 +938,60 @@ void Shader::setUniformParameter( GLint parameterIndex, IECore::TypeId type, con
 			break;
 		case IECore::M44fDataTypeId :
 			glUniformMatrix4fv( parameterIndex, 1, GL_FALSE, static_cast<const float *>(p) );
+			break;
+			
+		// TODO: Handle the case for BoolVectorDataTypeId
+		
+		case IECore::IntVectorDataTypeId :
+			glUniform1iv( parameterIndex, pd.size, static_cast<const GLint *>(p) );
+			break;
+		case IECore::FloatVectorDataTypeId :
+			glUniform1fv( parameterIndex, pd.size, static_cast<const GLfloat *>(p) );
+			break;
+		case IECore::V2fVectorDataTypeId :
+			glUniform2fv( parameterIndex, pd.size, static_cast<const GLfloat *>(p) );
+			break;
+		case IECore::V2iVectorDataTypeId :
+			{
+				const Imath::V2i* incomingData = static_cast<const Imath::V2i *>(p);
+				std::vector<GLint> rawData( 2 * pd.size );
+				for( int i=0; i < pd.size; ++i )
+				{
+					rawData[2 * i]     = incomingData[i].x;
+					rawData[2 * i + 1] = incomingData[i].y;
+				}
+				
+				glUniform2iv( parameterIndex, pd.size, &rawData.front() );
+			}
+			break;
+		case IECore::V3fVectorDataTypeId :
+			glUniform3fv( parameterIndex, pd.size, static_cast<const float *>(p) );
+			break;
+		case IECore::V3iVectorDataTypeId :
+			{
+				const Imath::V3i* incomingData = static_cast<const Imath::V3i *>(p);
+				std::vector<GLint> rawData( 3 * pd.size );
+				for( int i=0; i < pd.size; ++i )
+				{
+					rawData[3 * i]     = incomingData[i].x;
+					rawData[3 * i + 1] = incomingData[i].y;
+					rawData[3 * i + 2] = incomingData[i].z;
+				}
+				
+				glUniform3iv( parameterIndex, pd.size, &rawData.front() );
+			}
+			break;
+		case IECore::Color3fVectorDataTypeId :
+			glUniform3fv( parameterIndex, pd.size, static_cast<const float *>(p) );
+			break;
+		case IECore::Color4fVectorDataTypeId :
+			glUniform4fv( parameterIndex, pd.size, static_cast<const float *>(p) );
+			break;
+		case IECore::M33fVectorDataTypeId :
+			glUniformMatrix3fv( parameterIndex, pd.size, GL_FALSE, static_cast<const float *>(p) );
+			break;
+		case IECore::M44fVectorDataTypeId :
+			glUniformMatrix4fv( parameterIndex, pd.size, GL_FALSE, static_cast<const float *>(p) );
 			break;
 		default :
 			throw Exception( boost::str( boost::format( "Unsupported uniform parameter type \"%s\"." ) % IECore::RunTimeTyped::typeNameFromTypeId( type ) ) );
