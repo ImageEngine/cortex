@@ -822,23 +822,35 @@ bool Shader::uniformValueValid( const std::string &parameterName, const IECore::
 	return uniformValueValid( uniformParameterIndex( parameterName ), value );
 }
 
-struct GetDataSize
+size_t Shader::getDataSize( const IECore::Data* data )
 {
-	typedef size_t ReturnType;
-
-	template<typename T>
-	size_t operator() ( T * data )
+	switch( data->typeId() )
 	{
-		assert( data );
-		return data->readable().size();
+		case IECore::IntVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::IntVectorData >( data )->readable().size();
+		case IECore::FloatVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::FloatVectorData >( data )->readable().size();
+		case IECore::V2fVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::V2fVectorData >( data )->readable().size();
+		case IECore::V2iVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::V2iVectorData >( data )->readable().size();
+		case IECore::V3fVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::V3fVectorData >( data )->readable().size();
+		case IECore::V3iVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::V3iVectorData >( data )->readable().size();
+		case IECore::Color3fVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::Color3fVectorData >( data )->readable().size();
+		case IECore::Color4fVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::Color4fVectorData >( data )->readable().size();
+		case IECore::M33fVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::M33fVectorData >( data )->readable().size();
+		case IECore::M44fVectorDataTypeId :
+			return IECore::runTimeCast< const IECore::M44fVectorData >( data )->readable().size();
+		default :
+			return 1;
 	}
-};
 
-static size_t getDataSize( const IECore::Data* data )
-{
-	return IECore::despatchTypedData< GetDataSize, IECore::TypeTraits::IsVectorTypedData >( const_cast< IECore::Data *>( data ) );
 }
-
 
 void Shader::setUniformParameter( GLint parameterIndex, const IECore::Data *value )
 {
