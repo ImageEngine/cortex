@@ -1556,7 +1556,7 @@ if doConfigure :
 		riDisplayDriverEnv.AddPostAction( riDisplayDriverInstall, lambda target, source, env : makeLibSymLinks( riDisplayDriverEnv, libNameVar="INSTALL_RMANDISPLAY_NAME" ) )
 		riDisplayDriverEnv.Alias( "install", riDisplayDriverInstall )
 		riDisplayDriverEnv.Alias( "installRI", riDisplayDriverInstall )
-		riDisplayDriverForTest = riDisplayDriverEnv.Command( "src/rmanDisplays/ieDisplay/ieTestDisplay.so", riDisplayDriver, Copy( "$TARGET", "$SOURCE" ) )
+		riDisplayDriverForTest = riDisplayDriverEnv.Command( "src/rmanDisplays/ieDisplay/ieTestDisplay$SHLIBSUFFIX", riDisplayDriver, Copy( "$TARGET", "$SOURCE" ) )
 
 		# rsl headers
 		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" ) + glob.glob( "rsl/IECoreRI/*.inl" )

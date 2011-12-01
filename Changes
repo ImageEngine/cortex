@@ -5,6 +5,7 @@ Improvements :
 Bug Fixes :
 
 * Fixed build issue that prevented saved options files from being used
+* Fixed build issue that gave the test renderman display driver the wrong file suffix on mac
 
 Cortex 6.4.1
 ============
