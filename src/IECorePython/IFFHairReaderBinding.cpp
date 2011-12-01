@@ -57,6 +57,7 @@ void bindIFFHairReader()
 		.def( init<const std::string &>() )
 		.def( "numHairs", &IFFHairReader::numHairs )
 		.def( "frameTimes", &frameTimesWrap )
+		.def( "canRead", &IFFHairReader::canRead ).staticmethod( "canRead" )
 	;
 }
 

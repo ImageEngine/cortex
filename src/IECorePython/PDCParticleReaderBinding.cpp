@@ -50,6 +50,7 @@ void bindPDCParticleReader()
 	RunTimeTypedClass<PDCParticleReader>()
 		.def( init<>() )
 		.def( init<const std::string &>() )
+		.def( "canRead", &PDCParticleReader::canRead ).staticmethod( "canRead" )
 	;
 }
 

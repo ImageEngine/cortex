@@ -33,38 +33,38 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestReader(unittest.TestCase):
 
 	def testSupportedExtensions( self ) :
 
-		e = Reader.supportedExtensions()
+		e = IECore.Reader.supportedExtensions()
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
 		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "sgi", "bw", "rgba", "rgb", "tdl" ]
-		if withASIO() :
+		if IECore.withASIO() :
 			expectedExtensions += [ "obj" ]
-		if withTIFF() :
+		if IECore.withTIFF() :
 			expectedExtensions += [ "tif", "tiff" ]
-		if withJPEG() :
+		if IECore.withJPEG() :
 			expectedExtensions += [ "jpg", "jpeg" ]
-		if withPNG() :
+		if IECore.withPNG() :
 			expectedExtensions += [ "png" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
 
-		e = Reader.supportedExtensions( TypeId.ImageReader )
+		e = IECore.Reader.supportedExtensions( IECore.TypeId.ImageReader )
 		for ee in e :
 			self.assert_( type( ee ) is str )
 		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tdl", "tga" ]
-		if withTIFF() :
+		if IECore.withTIFF() :
 			expectedImageReaderExtensions += [ "tif", "tiff" ]
-		if withJPEG() :
+		if IECore.withJPEG() :
 			expectedImageReaderExtensions += [ "jpg", "jpeg" ]
-		if withPNG() :
+		if IECore.withPNG() :
 			expectedImageReaderExtensions += [ "png" ]
 
 		self.assertEqual( set( expectedImageReaderExtensions ), set( e ) )
@@ -80,9 +80,28 @@ class TestReader(unittest.TestCase):
 		this should definitely NOT create a valid reader
 		"""
 
-		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/empty' )
-		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null' )
-		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null.cin' )
+		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/empty' )
+		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null' )
+		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null.cin' )
+		
+	def testCanRead( self ) :
+	
+		# every reader subclass should have a canRead() static method, unless it's an abstract base class
+		
+		def isReader( x ) :
+		
+			abstractReaders = ( IECore.Reader, IECore.ImageReader, IECore.ParticleReader, IECore.DeepImageReader )
+		
+			try :
+				return issubclass( x, IECore.Reader ) and x not in abstractReaders
+			except TypeError :
+				return False
+				
+		allIECore = [ getattr( IECore, x ) for x in dir( IECore ) ]
+		allReaders = [ x for x in allIECore if isReader( x ) ]
+	
+		for reader in allReaders :
+			self.failUnless( hasattr( reader, "canRead" ) )
 
 if __name__ == "__main__":
 	unittest.main()

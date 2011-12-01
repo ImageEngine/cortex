@@ -50,6 +50,7 @@ namespace IECorePython
 	{
 		RunTimeTypedClass<OBJReader>()
 			.def(init<const std::string &>())
+			.def( "canRead", &OBJReader::canRead ).staticmethod( "canRead" )
 		;
   	}
 

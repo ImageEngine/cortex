@@ -56,6 +56,7 @@ void bindNParticleReader()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "frameTimes", &frameTimesWrap )
+		.def( "canRead", &NParticleReader::canRead ).staticmethod( "canRead" )
 	;
 }
 
