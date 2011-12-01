@@ -2,6 +2,10 @@ Improvements :
 
 * Implemented uniform array parameters in IECoreGL shaders (accepting IntVectorData, FloatVectorData, etc)
 
+Bug Fixes :
+
+* Fixed build issue that prevented saved options files from being used
+
 Cortex 6.4.1
 ============
 

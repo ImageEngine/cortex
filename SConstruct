@@ -845,7 +845,8 @@ env = Environment(
 if env["PLATFORM"]=="darwin" :
 	env["ENV"]["MACOSX_DEPLOYMENT_TARGET"] = "10.4"
 
-env["LIBPATH"] = env["LIBPATH"].split( ":" )
+if isinstance( env["LIBPATH"], basestring ) :
+	env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
 for e in env["ENV_VARS_TO_IMPORT"].split() :
 	if e in os.environ :
