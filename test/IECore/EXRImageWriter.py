@@ -217,6 +217,18 @@ class TestEXRWriter(unittest.TestCase):
 
 		self.__verifyImageRGB( imgNew, imgExpected )
 
+	def testCompressionParameter( self ):
+		
+		r = Reader.create( "test/IECore/data/exrFiles/oversizeDataWindow.exr" )
+		img = r.read()
+
+		w = Writer.create( img, "test/IECore/data/exrFiles/output.exr" )
+		w['compression'].setValue( w['compression'].presets()['zip'] )
+		w.write()
+
+		w = EXRImageWriter()
+		w['compression'].setValue( w['compression'].presets()['zip'] )
+
 	def testBlindDataToHeader( self ) :
 
 		displayWindow = Box2i(
