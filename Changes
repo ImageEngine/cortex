@@ -1,5 +1,14 @@
 Improvements :
 
+* IECore.loadConfig() now ignores files starting with ~. This avoids errors caused by certain popular text editors saving backup files next to the config file during editing.
+* The IECore.loadConfig() localsDict argument has been renamed to contextDict, and is now used as both the locals and globals for the execution of the config files. This works around python's annoying scoping whereby any modules would have to be imported within functions defined in the config files rather than
+at the file scope.
+
+Cortex 6.4.2
+============
+
+Improvements :
+
 * Implemented uniform array parameters in IECoreGL shaders (accepting IntVectorData, FloatVectorData, etc)
 
 Bug Fixes :

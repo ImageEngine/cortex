@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,36 +32,4 @@
 #
 ##########################################################################
 
-import re
-import os
-import os.path
-import sys
-import traceback
-import IECore
-
-## This function provides an easy means of providing a flexible configuration
-# mechanism for any software. It works by executing all .py files found on
-# a series of searchpaths. It is expected that these files will then make appropriate
-# calls to objects passed in via the specified contextDict.
-# \ingroup python
-def loadConfig( searchPaths, contextDict, raiseExceptions = False ) :
-
-	paths = searchPaths.paths
-	paths.reverse()
-	for path in paths :
-		# \todo Perhaps filter out filenames that begin with "~", also? This would
-		# exclude certain types of auto-generated backup files.
-		pyExtTest = re.compile( "^[^~].*\.py$" )
-		for dirPath, dirNames, fileNames in os.walk( path ) :
-			for fileName in filter( pyExtTest.search, fileNames ) :
-				fullFileName = os.path.join( dirPath, fileName )
-				if raiseExceptions:
-					execfile( fullFileName, contextDict, contextDict )
-				else:
-					try :
-						execfile( fullFileName, contextDict, contextDict )
-					except Exception, m :
-						stacktrace = traceback.format_exc()
-						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\".\n %s" % ( fullFileName, m, stacktrace ) )
-
-loadConfig( IECore.SearchPath( os.environ.get( "IECORE_CONFIG_PATHS", "" ), ":" ), { "IECore" : IECore } )
+raise RuntimeError( "I am a very naughty boy" )

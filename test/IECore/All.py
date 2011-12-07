@@ -253,6 +253,7 @@ from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
 from DeepPixelTest import DeepPixelTest
+from ConfigLoaderTest import ConfigLoaderTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
