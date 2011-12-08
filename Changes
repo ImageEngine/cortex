@@ -1,3 +1,16 @@
+
+Cortex 6.4.3
+============
+
+Improvements :
+
+* Implemented checkboxes in maya menus
+* Added a flag, "appendToExistingMenu", to IECoreMaya.Menu,createMenu(), so you can append a menu to an existing menu, rather than adding
+  it as a sub menu
+
+Cortex 6.4.2
+============
+
 Improvements :
 
 * Implemented uniform array parameters in IECoreGL shaders (accepting IntVectorData, FloatVectorData, etc)

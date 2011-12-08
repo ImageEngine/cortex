@@ -48,7 +48,7 @@ SConsignFile()
 
 ieCoreMajorVersion=6
 ieCoreMinorVersion=4
-ieCorePatchVersion=2
+ieCorePatchVersion=3
 
 ###########################################################################################
 # Command line options
