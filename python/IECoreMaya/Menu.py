@@ -68,21 +68,30 @@ class Menu( UIElement ) :
 	# paths in the definition. default to True but may well be defaulted to False in a future version
 	# and then deprecated.
 	#
+	# replaceExistingMenu :
+	# determines whether we add the menu as a submenu, or overwrite the contents of the existing menu
+	# (if the parent is a menu)
+	#
 	# \todo Change useInterToUI default value to False and deprecate its use.
-	def __init__( self, definition, parent, label="", insertAfter=None, radialPosition=None, button = 3, useInterToUI = True ) :
+	def __init__( self, definition, parent, label="", insertAfter=None, radialPosition=None, button = 3, useInterToUI = True, replaceExistingMenu = False ) :
 
 		menu = None
-		if maya.cmds.window( parent, query=True, exists=True ) :
+		if maya.cmds.window( parent, query=True, exists=True ) or maya.cmds.menuBarLayout( parent, query=True, exists=True ) :
 			# parent is a window - we're sticking it in the menubar
 			menu = maya.cmds.menu( label=label, parent=parent, allowOptionBoxes=True, tearOff=True )
 		elif maya.cmds.menu( parent, query=True, exists=True ) :
-			# parent is a menu - we're adding a submenu
-			kw = {}
-			if not (insertAfter is None) :
-				kw["insertAfter"] = insertAfter
-			if radialPosition :
-				kw["radialPosition"] = radialPosition
-			menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, allowOptionBoxes=True, **kw )
+			if replaceExistingMenu:
+				# parent is a menu - we're appending to it:
+				menu = parent
+				self.__postMenu( menu, definition, useInterToUI )
+			else:
+				# parent is a menu - we're adding a submenu
+				kw = {}
+				if not (insertAfter is None) :
+					kw["insertAfter"] = insertAfter
+				if radialPosition :
+					kw["radialPosition"] = radialPosition
+				menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, allowOptionBoxes=True, **kw )
 		else :
 			# assume parent is a control which can accept a popup menu
 			menu = maya.cmds.popupMenu( parent=parent, button=button, allowOptionBoxes=True )
@@ -149,7 +158,14 @@ class Menu( UIElement ) :
 					if callable( active ) :
 						active = active()
 
-					menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description, boldFont=boldFont, italicized=italicized )
+					kw = {}
+					
+					checked = item.checkBox
+					if callable( checked ) :
+						checked = checked()
+						kw["checkBox"] = checked
+					
+					menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description, boldFont=boldFont, italicized=italicized, **kw )
 					if item.command :
 						maya.cmds.menuItem( menuItem, edit=True, command=self.__wrapCallback( item.command ) )
 					if item.secondaryCommand :
