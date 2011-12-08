@@ -4,6 +4,10 @@ Improvements :
 * The IECore.loadConfig() localsDict argument has been renamed to contextDict, and is now used as both the locals and globals for the execution of the config files. This works around python's annoying scoping whereby any modules would have to be imported within functions defined in the config files rather than
 at the file scope.
 
+Bug Fixes :
+
+* Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.
+
 Cortex 6.4.2
 ============
 

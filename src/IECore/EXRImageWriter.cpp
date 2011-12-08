@@ -68,16 +68,25 @@ const Writer::WriterDescription<EXRImageWriter> EXRImageWriter::m_writerDescript
 EXRImageWriter::EXRImageWriter()
 		: ImageWriter( "Serializes images to the OpenEXR HDR image format")
 {
+	constructCommon();
 }
 
 EXRImageWriter::EXRImageWriter(ObjectPtr image, const string &fileName)
 		: ImageWriter( "Serializes images to the OpenEXR HDR image format" )
 {
+
+	constructCommon();
+	
 	assert( m_objectParameter );
 	assert( m_fileNameParameter );
 
 	m_objectParameter->setValue( image );
 	m_fileNameParameter->setTypedValue( fileName );
+	
+}
+
+void EXRImageWriter::constructCommon()
+{
 
 	// compression parameter
 	IntParameter::PresetsContainer compressionPresets;

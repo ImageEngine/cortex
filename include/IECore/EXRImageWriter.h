@@ -72,6 +72,8 @@ class EXRImageWriter : public ImageWriter
 
 	private:
 
+		void constructCommon();
+
 		static const WriterDescription<EXRImageWriter> m_writerDescription;
 
 		virtual void writeImage(const std::vector<std::string> &names,
