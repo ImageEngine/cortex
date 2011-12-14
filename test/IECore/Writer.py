@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -68,8 +69,28 @@ class TestWriter( unittest.TestCase ) :
 		self.assert_( not "pdc" in expectedImageWriterExtensions )
 		self.assert_( not "cob" in expectedImageWriterExtensions )
 
-
-
+	def testCanWriter( self ) :
+	
+		# every writer subclass should have a canWrite() static method, unless it's an abstract base class
+		
+		def isWriter( x ) :
+		
+			abstractWriters = ( IECore.Writer )
+		
+			try :
+				return issubclass( x, IECore.Writer ) and x not in abstractWriters
+			except TypeError :
+				return False
+				
+		allIECore = [ getattr( IECore, x ) for x in dir( IECore ) ]
+		allWriters = [ x for x in allIECore if isWriter( x ) ]
+	
+		for writer in allWriters :
+			hasCanWrite = False
+			with IECore.IgnoredExceptions( AttributeError ) :
+				writer.canWrite
+				hasCanWrite = True
+			self.failUnless( hasCanWrite )
 
 if __name__ == "__main__":
 	unittest.main()
