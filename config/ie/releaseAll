@@ -56,6 +56,7 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	build( [ "APP=nuke", "APP_VERSION=6.2v4" ] )
 	build( [ "APP=nuke", "APP_VERSION=6.3v1" ] )
 	build( [ "APP=nuke", "APP_VERSION=6.3v2" ] )
+	build( [ "APP=nuke", "APP_VERSION=6.3v5" ] )
 	build( [ "APP=houdini", "APP_VERSION=11.0.775" ] )
 	build( [ "APP=houdini", "APP_VERSION=11.1.22" ] )
 	
