@@ -1,3 +1,36 @@
+
+Cortex 6.4.3
+============
+
+Improvements :
+
+* Implemented checkboxes in maya menus
+* Added a flag, "appendToExistingMenu", to IECoreMaya.Menu,createMenu(), so you can append a menu to an existing menu, rather than adding
+  it as a sub menu
+
+Cortex 6.4.2
+============
+
+Improvements :
+
+* Implemented uniform array parameters in IECoreGL shaders (accepting IntVectorData, FloatVectorData, etc)
+
+Bug Fixes :
+
+* Fixed build issue that prevented saved options files from being used
+* Fixed build issue that gave the test renderman display driver the wrong file suffix on mac
+* Bound many missing canRead() functions for the Reader subclasses, and added a test case to make sure all future bindings will include them.
+
+Cortex 6.4.1
+============
+
+Bug Fixes :
+
+* Fixed a bug which prevented user attributes from being passed correctly to multithreaded procedurals in the IECoreGL::Renderer.
+
+Cortex 6.4.0
+============
+
 Improvements :
 
 * Added IECoreMaya.DateTimeParameterHandler
@@ -5,8 +38,6 @@ Improvements :
 Bug Fixes :
 
 * Fixed a bug in python/IECoreMaya/PresetsOnlyParameterUI.py, which was preventing the ui updating for V2f, V3f and other vector type parameters
-
-* Fixed a bug which prevented user attributes from being passed correctly to multithreaded procedurals in the IECoreGL::Renderer.
 
 Cortex 6.3.1
 ============

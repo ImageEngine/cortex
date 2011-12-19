@@ -53,6 +53,7 @@ void bindObjectReader()
 	RunTimeTypedClass<ObjectReader>()
 		.def( init<>() )
 		.def( init<const std::string &>() )
+		.def( "canRead", &ObjectReader::canRead ).staticmethod( "canRead" )
 	;
 }
 

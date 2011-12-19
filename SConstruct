@@ -48,7 +48,7 @@ SConsignFile()
 
 ieCoreMajorVersion=6
 ieCoreMinorVersion=4
-ieCorePatchVersion=0
+ieCorePatchVersion=3
 
 ###########################################################################################
 # Command line options
@@ -845,7 +845,8 @@ env = Environment(
 if env["PLATFORM"]=="darwin" :
 	env["ENV"]["MACOSX_DEPLOYMENT_TARGET"] = "10.4"
 
-env["LIBPATH"] = env["LIBPATH"].split( ":" )
+if isinstance( env["LIBPATH"], basestring ) :
+	env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
 for e in env["ENV_VARS_TO_IMPORT"].split() :
 	if e in os.environ :
@@ -1555,7 +1556,7 @@ if doConfigure :
 		riDisplayDriverEnv.AddPostAction( riDisplayDriverInstall, lambda target, source, env : makeLibSymLinks( riDisplayDriverEnv, libNameVar="INSTALL_RMANDISPLAY_NAME" ) )
 		riDisplayDriverEnv.Alias( "install", riDisplayDriverInstall )
 		riDisplayDriverEnv.Alias( "installRI", riDisplayDriverInstall )
-		riDisplayDriverForTest = riDisplayDriverEnv.Command( "src/rmanDisplays/ieDisplay/ieTestDisplay.so", riDisplayDriver, Copy( "$TARGET", "$SOURCE" ) )
+		riDisplayDriverForTest = riDisplayDriverEnv.Command( "src/rmanDisplays/ieDisplay/ieTestDisplay$SHLIBSUFFIX", riDisplayDriver, Copy( "$TARGET", "$SOURCE" ) )
 
 		# rsl headers
 		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" ) + glob.glob( "rsl/IECoreRI/*.inl" )

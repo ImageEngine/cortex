@@ -87,7 +87,7 @@ class DspyTest( unittest.TestCase ) :
 		rib = """
 		Option "searchpath" "string display" "@:./src/rmanDisplays/ieDisplay"
 		
-		Display "test" "ie" "rgba"
+		Display "test" "ieTestDisplay" "rgba"
 			"quantize" [ 0 0 0 0 ]
 			"string driverType" "ClientDisplayDriver"
 			"string displayHost" "localhost"

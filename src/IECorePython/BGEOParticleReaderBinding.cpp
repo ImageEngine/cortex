@@ -50,6 +50,7 @@ void bindBGEOParticleReader()
 	RunTimeTypedClass<BGEOParticleReader>()
 		.def( init<>() )
 		.def( init<const std::string &>() )
+		.def( "canRead", &BGEOParticleReader::canRead ).staticmethod( "canRead" )
 	;
 }
 

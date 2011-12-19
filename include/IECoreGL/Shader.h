@@ -244,6 +244,8 @@ class Shader : public Bindable
 		void compile( const std::string &source, GLenum type, GLuint &shader );
 		void release();
 
+		size_t getDataSize( const IECore::Data* data );
+
 		void setUniformParameter( GLint parameterIndex, IECore::TypeId type, const void *p );
 
 		GLuint m_vertexShader;
