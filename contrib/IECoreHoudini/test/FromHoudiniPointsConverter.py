@@ -678,6 +678,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points2 = converter.convert()
 		del points['generator']
 		del points['generatorIndices']
+		del points['born']
+		del points['source']
 		self.assertEqual( points2, points )
 	
 if __name__ == "__main__":
