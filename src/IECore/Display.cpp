@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 #include "IECore/Display.h"
 #include "IECore/Renderer.h"
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -126,6 +127,15 @@ void Display::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_type.capacity() );
 	a.accumulate( m_data.capacity() );
 	a.accumulate( m_parameters );
+}
+
+void Display::hash( MurmurHash &h ) const
+{
+	PreWorldRenderable::hash( h );
+	h.append( m_name );
+	h.append( m_type );
+	h.append( m_data );
+	m_parameters->hash( h );
 }
 
 void Display::setName( const std::string &name )

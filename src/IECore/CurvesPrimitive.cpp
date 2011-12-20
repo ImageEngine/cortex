@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/Renderer.h"
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -141,6 +142,16 @@ void CurvesPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	Primitive::memoryUsage( a );
 	a.accumulate( sizeof( CubicBasisf ) + sizeof( bool ) * 2 + sizeof( unsigned ) * 2 );
 	a.accumulate( m_vertsPerCurve );
+}
+
+void CurvesPrimitive::hash( MurmurHash &h ) const
+{
+	Primitive::hash( h );
+	h.append( m_basis.matrix );
+	h.append( m_basis.step );
+	h.append( m_linear );
+	h.append( m_periodic );
+	m_vertsPerCurve->hash( h );
 }
 
 size_t CurvesPrimitive::numCurves() const

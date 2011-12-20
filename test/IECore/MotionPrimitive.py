@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -87,6 +87,24 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		m[1] = PointsPrimitive( 2 )
 		self.assertEqual( m.items(), [ ( 0, PointsPrimitive( 1 ) ), ( 1, PointsPrimitive( 2 ) ) ] )
 
+	def testHash( self ) :
+	
+		m = MotionPrimitive()
+		m2 = MotionPrimitive()
+		self.assertEqual( m.hash(), m2.hash() )
+		
+		m[0] = SpherePrimitive()
+		self.assertNotEqual( m.hash(), m2.hash() )
+		
+		m2[0] = SpherePrimitive()
+		self.assertEqual( m.hash(), m2.hash() )
+
+		m[1] = SpherePrimitive()
+		self.assertNotEqual( m.hash(), m2.hash() )
+		
+		m2[2] = SpherePrimitive()
+		self.assertNotEqual( m.hash(), m2.hash() )
+		
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/motionPrimitive.fio" ):

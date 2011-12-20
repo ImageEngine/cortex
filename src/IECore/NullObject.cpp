@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,6 +74,11 @@ bool NullObject::isEqualTo( const Object *other ) const
 void NullObject::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Object::memoryUsage( a );
+}
+
+void NullObject::hash( MurmurHash &h ) const
+{
+	Object::hash( h );
 }
 
 NullObjectPtr NullObject::defaultNullObject()

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "IECore/Group.h"
 #include "IECore/Renderer.h"
 #include "IECore/AttributeBlock.h"
+#include "IECore/MurmurHash.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -334,6 +335,27 @@ void Group::memoryUsage( Object::MemoryAccumulator &a ) const
 	{
 		a.accumulate( *it );
 	}
+}
+
+void Group::hash( MurmurHash &h ) const
+{
+	VisibleRenderable::hash( h );
+	if( m_transform )
+	{
+		m_transform->hash( h );
+	}
+	
+	h.append( state().size() );
+	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
+	{
+		(*it)->hash( h );
+	}
+
+	h.append( children().size() );
+	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
+	{
+		(*it)->hash( h );
+	}	
 }
 
 void Group::render( Renderer *renderer ) const

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Renderer.h"
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 using namespace boost;
@@ -106,4 +107,10 @@ void CoordinateSystem::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	container->read( "name", m_name );
+}
+
+void CoordinateSystem::hash( MurmurHash &h ) const
+{
+	StateRenderable::hash( h );
+	h.append( m_name );
 }

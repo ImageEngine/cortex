@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -72,6 +72,14 @@ class TestNURBSPrimitive( unittest.TestCase ) :
 		nnn = nn.copy()
 		self.assertEqual( nnn, n )
 
+	def testHash( self ) :
+	
+		n = NURBSPrimitive()
+		n2 = NURBSPrimitive( 3, FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
+			2, FloatVectorData( [ 0, 0, 1, 1 ] ), 0, 1 )
+		
+		self.assertNotEqual( n.hash(), n2.hash() )
+		
 	def tearDown( self ) :
 
 		if os.path.isfile("test/IECore/nurbs.fio"):

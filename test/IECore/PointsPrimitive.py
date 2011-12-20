@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -139,5 +139,12 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		p.numPoints = 40
 		self.assertEqual( p.numPoints, 40 )
 
+	def testHash( self ) :
+	
+		p = PointsPrimitive( 1 )
+		p2 = PointsPrimitive( 2 )
+		
+		self.assertNotEqual( p.hash(), p2.hash() )
+		
 if __name__ == "__main__":
     unittest.main()

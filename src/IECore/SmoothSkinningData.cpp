@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -349,4 +349,15 @@ void SmoothSkinningData::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_pointInfluenceCounts );
 	a.accumulate( m_pointInfluenceIndices );
 	a.accumulate( m_pointInfluenceWeights );
+}
+
+void SmoothSkinningData::hash( MurmurHash &h ) const
+{
+	Data::hash( h );
+	m_influenceNames->hash( h );
+	m_influencePose->hash( h );
+	m_pointIndexOffsets->hash( h );
+	m_pointInfluenceCounts->hash( h );
+	m_pointInfluenceIndices->hash( h );
+	m_pointInfluenceWeights->hash( h );
 }

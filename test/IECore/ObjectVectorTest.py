@@ -169,7 +169,22 @@ class ObjectVectorTest( unittest.TestCase ) :
 		self.assertEqual( len( l ), len( o ) )
 		for i in range( 0, len( o ) ) :
 			self.failUnless( o[i].isSame( l[i] ) )
+	
+	def testHash( self ) :
+	
+		o = IECore.ObjectVector()
+		h = o.hash()
 		
+		o.append( IECore.IntData( 10 ) )
+		self.assertNotEqual( o.hash(), h )
+		
+	def testHashWithEmptyElements( self ) :
+	
+		o = IECore.ObjectVector( [ None, IECore.IntData( 10 ) ] )
+		o2 = IECore.ObjectVector( [ IECore.IntData( 10 ), None ] )
+		
+		self.assertNotEqual( o.hash(), o2.hash() )
+	
 	def tearDown( self ) :
 
 		if os.path.exists( "test/IECore/objectVector.cob" ) :

@@ -179,7 +179,23 @@ class TestGroup( unittest.TestCase ) :
 		# this used to crash if the group didn't have a transform
 		g = Group()
 		self.failUnless( g.memoryUsage() > 0 )
-
+	
+	def testHash( self ) :
+	
+		g = Group()
+		h = g.hash()
+		
+		g.addChild( SpherePrimitive() )
+		self.assertNotEqual( g.hash(), h )
+		h = g.hash()
+		
+		g.addState( AttributeState() )
+		self.assertNotEqual( g.hash(), h )
+		h = g.hash()
+		
+		g.setTransform( MatrixTransform( M44f() ) )
+		self.assertNotEqual( g.hash(), h )
+		
 	def tearDown( self ) :
 
 		if os.path.isfile("test/group.cob"):

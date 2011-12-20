@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -52,6 +52,14 @@ class TestTypedData( unittest.TestCase ) :
 		self.assertEqual( c["c"], IECore.StringData( "hello" ) )
 		self.assertEqual( c["d"], IECore.FloatData( 10.1 ) )
 		self.assertEqual( c["e"], IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		
+	def testHash( self ) :
+	
+		# although the underlying data is identical, these objects
+		# must not hash equal because they have different types.
+	
+		self.assertNotEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ).hash(), IECore.Color3fData( IECore.Color3f( 1, 2, 3 ) ).hash() )
+		self.assertNotEqual( IECore.IntVectorData( [ 0, 0, 0 ] ).hash(), IECore.UIntVectorData( [ 0, 0, 0 ] ).hash() )
 
 if __name__ == "__main__":
 	unittest.main()

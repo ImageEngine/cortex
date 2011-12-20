@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -187,6 +187,23 @@ class TestObject( unittest.TestCase ) :
 		b.copyFrom( m )
 		self.assertNotEqual( b, bb )
 		self.assertEqual( b.blindData(), m.blindData() )
-
+		
+	def testHash( self ) :
+	
+		allHashes = set()
+		objectsCreated = 0
+		for t in TypeId.names :
+			o = None
+			with IgnoredExceptions( RuntimeError ) :
+				o = Object.create( t )
+			if o is not None :
+				objectsCreated += 1
+				allHashes.add( str( o.hash() ) )
+				h = MurmurHash()
+				o.hash( h )
+				self.assertEqual( h, o.hash() )
+				
+		self.assertEqual( len( allHashes ), objectsCreated )
+				
 if __name__ == "__main__":
     unittest.main()

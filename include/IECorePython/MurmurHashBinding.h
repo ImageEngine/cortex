@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Data.h"
+#ifndef IECOREPYTHON_MURMURHASHBINDING_H
+#define IECOREPYTHON_MURMURHASHBINDING_H
 
-using namespace IECore;
-
-IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( Data );
-
-const unsigned int Data::m_ioVersion = 0;
-
-Data::~Data()
+namespace IECorePython
 {
+
+void bindMurmurHash();
+
 }
 
-void Data::copyFrom( const Object *other, CopyContext *context )
-{
-	Object::copyFrom( other, context );
-}
-
-bool Data::isEqualTo( const Object *other ) const
-{
-	return Object::isEqualTo( other );
-}
-
-void Data::save( SaveContext *context ) const
-{
-	Object::save( context );
-}
-
-void Data::load( LoadContextPtr context )
-{
-	Object::load( context );
-}
-
-void Data::memoryUsage( Object::MemoryAccumulator &a ) const
-{
-	Object::memoryUsage( a );
-}
-
-void Data::hash( MurmurHash &h ) const
-{
-	Object::hash( h );
-}
+#endif // IECOREPYTHON_MURMURHASHBINDING_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "IECore/PatchMeshPrimitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Renderer.h"
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 
@@ -211,6 +212,19 @@ void PatchMeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Primitive::memoryUsage( a );
 	a.accumulate( sizeof( CubicBasisf ) * 2 + sizeof( bool ) * 4 + sizeof( unsigned ) * 2 );
+}
+
+void PatchMeshPrimitive::hash( MurmurHash &h ) const
+{
+	Primitive::hash( h );
+	h.append( m_uPoints );
+	h.append( m_vPoints );
+	h.append( m_uBasis.matrix );
+	h.append( m_uBasis.step );
+	h.append( m_vBasis.matrix );
+	h.append( m_vBasis.step );
+	h.append( m_uPeriodic );
+	h.append( m_vPeriodic );
 }
 
 unsigned int PatchMeshPrimitive::uPoints() const

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -54,6 +54,16 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 		self.assertEqual( aaa, aa )
 		self.assertEqual( aaa.getName(), "b" )
+		
+	def testHash( self ) :
+	
+		a = IECore.CoordinateSystem( "a" )
+		b = IECore.CoordinateSystem( "a" )
+		
+		self.assertEqual( a.hash(), b.hash() )
+		
+		b.setName( "b" )
+		self.assertNotEqual( a.hash(), b.hash() )
 
 	def tearDown( self ) :
 

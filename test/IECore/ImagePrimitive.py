@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -377,7 +377,24 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assertEqual( i.matrix( ImagePrimitive.Space.Pixel, ImagePrimitive.Space.Object ), i.pixelToObjectMatrix() )
 		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.Pixel ), i.objectToPixelMatrix() )
 		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.UV ), i.objectToUVMatrix() )
-			
+	
+	def testHash( self ) :
+	
+		w = Box2i( V2i( 0 ), V2i( 10 ) )
+		i = ImagePrimitive( w, w )
+		h = i.hash()
+		
+		i.displayWindow = Box2i( V2i( 10 ), V2i( 20 ) )
+		self.assertNotEqual( i.hash(), h )
+		h = i.hash()
+		
+		i.dataWindow = Box2i( V2i( 10 ), V2i( 20 ) )
+		self.assertNotEqual( i.hash(), h )
+		h = i.hash()
+		
+		i["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
+		self.assertNotEqual( i.hash(), h )
+		
 	def tearDown( self ) :
 
 		if os.path.exists( "test/IECore/data/output.cob" ) :

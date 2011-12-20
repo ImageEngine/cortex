@@ -192,6 +192,21 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 	writable() = static_cast<unsigned short>( c );
 }
 
+template<>
+void TypedData<LineSegment3f>::hash( MurmurHash &h ) const
+{
+	Data::hash( h );
+	h.append( readable().p0 );
+	h.append( readable().p1 );	
+}
+
+template<>
+void TypedData<LineSegment3d>::hash( MurmurHash &h ) const
+{
+	Data::hash( h );
+	h.append( readable().p0 );
+	h.append( readable().p1 );	
+}
 
 template class TypedData<bool>;
 template class TypedData<float>;

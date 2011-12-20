@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -96,6 +96,12 @@ void ParameterisedProcedural::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	VisibleRenderable::memoryUsage( a );
 	a.accumulate( m_parameters->getValue() );
+}
+
+void ParameterisedProcedural::hash( MurmurHash &h ) const
+{
+	VisibleRenderable::hash( h );
+	m_parameters->getValue()->hash( h );
 }
 
 class ParameterisedProcedural::Forwarder : public Renderer::Procedural

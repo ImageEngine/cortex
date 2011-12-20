@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -118,7 +118,24 @@ namespace IECore {
 		base.translate.x = *p++;																	\
 		base.translate.y = *p++;																	\
 		base.translate.z = *p++;																	\
-	}
+	}\
+\
+	template<>\
+	void TNAME::hash( MurmurHash &h ) const\
+	{\
+		Data::hash( h );\
+		const TNAME::ValueType &v = TNAME::readable();\
+		h.append( v.scalePivot );\
+		h.append( v.scale );\
+		h.append( v.shear );\
+		h.append( v.scalePivotTranslation );\
+		h.append( v.rotatePivot );\
+		h.append( v.rotationOrientation );\
+		h.append( v.rotate );\
+		h.append( v.rotate.order() );\
+		h.append( v.rotatePivotTranslation );\
+		h.append( v.translate );\
+	}\
 
 #define IE_CORE_DEFINEDATASPECIALISATION( TNAME, TID )							\
 	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\

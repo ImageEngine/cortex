@@ -300,6 +300,7 @@
 #include "IECorePython/DeepImageReaderBinding.h"
 #include "IECorePython/DeepImageWriterBinding.h"
 #include "IECorePython/DeepImageConverterBinding.h"
+#include "IECorePython/MurmurHashBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -605,7 +606,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDeepImageReader();
 	bindDeepImageWriter();
 	bindDeepImageConverter();
-	
+	bindMurmurHash();
+
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );

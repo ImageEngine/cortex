@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -87,6 +87,18 @@ class DateTimeDataTest( unittest.TestCase ) :
 		self.assertEqual( repr(dd), "IECore.DateTimeData( " + repr(d) + " )" )
 
 		self.assertEqual( dd, eval( repr(dd) ) )
+
+	def testHash( self ) :
+	
+		self.assertEqual(
+			IECore.DateTimeData( datetime.datetime( 2009, 2, 12 ) ).hash(),
+			IECore.DateTimeData( datetime.datetime( 2009, 2, 12 ) ).hash()
+		)
+		
+		self.assertNotEqual(
+			IECore.DateTimeData( datetime.datetime( 2009, 2, 12 ) ).hash(),
+			IECore.DateTimeData( datetime.datetime( 2009, 3, 12 ) ).hash()
+		)
 
 	def setUp(self):
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -81,6 +81,22 @@ class LightTest( unittest.TestCase ) :
 		ss = s.copy()
 				
 		self.assertEqual( s, ss )
+		
+	def testHash( self ) :
 	
+		s = Light( "name", "handle" )
+		h = s.hash()
+		
+		s.name = "name2"
+		self.assertNotEqual( s.hash(), h )
+		h = s.hash()
+		
+		s.handle = "handle2"
+		self.assertNotEqual( s.hash(), h )
+		h = s.hash()
+		
+		s.parameters["a"] = StringData( "a" )
+		self.assertNotEqual( s.hash(), h )
+		
 if __name__ == "__main__":
     unittest.main()

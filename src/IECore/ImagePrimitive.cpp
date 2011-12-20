@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,7 @@
 #include "IECore/Renderer.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/MurmurHash.h"
 
 using namespace std;
 using namespace IECore;
@@ -208,6 +209,13 @@ void ImagePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	Primitive::memoryUsage( a );
 	a.accumulate( sizeof(m_displayWindow) );
 	a.accumulate( sizeof(m_dataWindow) );
+}
+
+void ImagePrimitive::hash( MurmurHash &h ) const
+{
+	Primitive::hash( h );
+	h.append( m_dataWindow );
+	h.append( m_displayWindow );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

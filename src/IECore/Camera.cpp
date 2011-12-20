@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #include "IECore/Transform.h"
 #include "IECore/Renderer.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -144,6 +145,17 @@ void Camera::memoryUsage( Object::MemoryAccumulator &a ) const
 		a.accumulate( m_transform );
 	}
 	a.accumulate( m_parameters );
+}
+
+void Camera::hash( MurmurHash &h ) const
+{
+	PreWorldRenderable::hash( h );
+	h.append( m_name );
+	if( m_transform )
+	{
+		m_transform->hash( h );
+	}
+	m_parameters->hash( h );
 }
 
 void Camera::setName( const std::string &name )

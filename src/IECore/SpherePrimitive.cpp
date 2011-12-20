@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #include "IECore/Renderer.h"
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/MurmurHash.h"
 
 using namespace std;
 using namespace IECore;
@@ -222,4 +223,13 @@ void SpherePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( sizeof( m_zMin ) );
 	a.accumulate( sizeof( m_zMax ) );
 	a.accumulate( sizeof( m_thetaMax ) );
+}
+
+void SpherePrimitive::hash( MurmurHash &h ) const
+{
+	Primitive::hash( h );
+	h.append( m_radius );
+	h.append( m_zMin );
+	h.append( m_zMax );
+	h.append( m_thetaMax );
 }

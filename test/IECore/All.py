@@ -254,6 +254,7 @@ from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
 from DeepPixelTest import DeepPixelTest
 from ConfigLoaderTest import ConfigLoaderTest
+from MurmurHashTest import MurmurHashTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

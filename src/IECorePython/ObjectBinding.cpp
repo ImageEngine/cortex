@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 #include <cassert>
 
 #include "IECore/Object.h"
+#include "IECore/MurmurHash.h"
 #include "IECorePython/ObjectBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
@@ -88,6 +89,8 @@ void bindObject()
 		.staticmethod( "load" )
 		.def( "save", (void (Object::*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & )const )&Object::save )
 		.def( "memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
+		.def( "hash", (MurmurHash (Object::*)() const)&Object::hash )
+		.def( "hash", (void (Object::*)( MurmurHash & ) const)&Object::hash )
 		.def( "registerType", registerType )
 		.def( "registerType", registerAbstractType )
 		.staticmethod( "registerType" )

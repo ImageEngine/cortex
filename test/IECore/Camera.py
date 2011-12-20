@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -103,7 +103,22 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 1, 1000 ) )
 		self.assertEqual( c.parameters()["shutter"].value, V2f( 1, 2 ) )
 
+	def testHash( self ) :
+	
+		c = Camera()
+		h = c.hash()
+		
+		c.setName( "summink" )
+		self.assertNotEqual( c.hash(), h )
+		h = c.hash()
 
+		c.setTransform( MatrixTransform( M44f() ) )
+		self.assertNotEqual( c.hash(), h )
+		h = c.hash()
+
+		c.addStandardParameters()
+		self.assertNotEqual( c.hash(), h )
+		
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/IECore/data/camera.cob" ) :

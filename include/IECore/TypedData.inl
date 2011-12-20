@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,8 @@
 /// files.
 
 #include <cassert>
+
+#include "IECore/MurmurHash.h"
 
 namespace IECore {
 
@@ -125,6 +127,13 @@ bool TypedData<T>::isEqualTo( const Object *other ) const
 	}
 	// pointers ain't the same - do a potentially slow comparison
 	return readable()==tOther->readable();
+}
+
+template <class T>
+void TypedData<T>::hash( MurmurHash &h ) const
+{
+	Data::hash( h );
+	h.append( readable() );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

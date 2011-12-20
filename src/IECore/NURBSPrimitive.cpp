@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 #include "IECore/NURBSPrimitive.h"
 #include "IECore/Renderer.h"
+#include "IECore/MurmurHash.h"
 
 using namespace std;
 using namespace IECore;
@@ -347,4 +348,17 @@ void NURBSPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( sizeof( m_uMin ) * 4 );
 	a.accumulate( m_uKnot );
 	a.accumulate( m_vKnot );
+}
+
+void NURBSPrimitive::hash( MurmurHash &h ) const
+{
+	Primitive::hash( h );
+	h.append( m_uOrder );
+	m_uKnot->hash( h );
+	h.append( m_uMin );
+	h.append( m_uMax );
+	h.append( m_vOrder );
+	m_vKnot->hash( h );
+	h.append( m_vMin );
+	h.append( m_vMax );
 }

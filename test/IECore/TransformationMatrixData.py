@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -190,7 +190,66 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 		self.assertNotEqual( a, b )
 		a.value = TransformationMatrixf( V3f( 0.00001, 0, 0 ), Eulerf(), V3f(0,0,0) )
 		self.assertEqual( a, b )
+		
+	def testHash( self ) :
+		
+		def modifyAndTest( data, field, index ) :
+		
+			h = data.hash()
+			v = data.value
+			f = getattr( v, field )
+			f[index] += 1
+			setattr( v, field, f )
+			data.value = v
+			self.assertNotEqual( data.hash(), h )
+		
+		d = TransformationMatrixfData()
 
+		modifyAndTest( d, "scalePivot", 0 )
+		modifyAndTest( d, "scalePivot", 1 )
+		modifyAndTest( d, "scalePivot", 2 )
+		
+		modifyAndTest( d, "scale", 0 )
+		modifyAndTest( d, "scale", 1 )
+		modifyAndTest( d, "scale", 2 )
+		
+		modifyAndTest( d, "shear", 0 )
+		modifyAndTest( d, "shear", 1 )
+		modifyAndTest( d, "shear", 2 )
+		
+		modifyAndTest( d, "scalePivotTranslation", 0 )
+		modifyAndTest( d, "scalePivotTranslation", 1 )
+		modifyAndTest( d, "scalePivotTranslation", 2 )
+		
+		modifyAndTest( d, "rotatePivot", 0 )
+		modifyAndTest( d, "rotatePivot", 1 )
+		modifyAndTest( d, "rotatePivot", 2 )
+
+		modifyAndTest( d, "rotationOrientation", 0 )
+		modifyAndTest( d, "rotationOrientation", 1 )
+		modifyAndTest( d, "rotationOrientation", 2 )
+		modifyAndTest( d, "rotationOrientation", 3 )
+
+		modifyAndTest( d, "rotate", 0 )
+		modifyAndTest( d, "rotate", 1 )
+		modifyAndTest( d, "rotate", 2 )
+		
+		modifyAndTest( d, "rotatePivotTranslation", 0 )
+		modifyAndTest( d, "rotatePivotTranslation", 1 )
+		modifyAndTest( d, "rotatePivotTranslation", 2 )
+		
+		modifyAndTest( d, "translate", 0 )
+		modifyAndTest( d, "translate", 1 )
+		modifyAndTest( d, "translate", 2 )
+		
+		h = d.hash()
+		v = d.value
+		r = v.rotate
+		r.setOrder( Eulerf.Order.ZYX )
+		v.rotate = r
+		d.value = v
+		self.assertNotEqual( d.hash(), h )
+		
 	def tearDown(self):
 		if os.path.exists( self.testFile ):
 			os.remove( self.testFile )

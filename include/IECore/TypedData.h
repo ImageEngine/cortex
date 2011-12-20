@@ -76,7 +76,8 @@ class TypedData : public Data
 		////////////////////////////////////////////////////////////
 		//@{
 		typename TypedData<T>::Ptr copy() const;
-		bool isEqualTo( const Object *other ) const;
+		virtual bool isEqualTo( const Object *other ) const;
+		virtual void hash( MurmurHash &h ) const;
 		//@}
 
 		/// Equivalent to writable() = data

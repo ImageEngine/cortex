@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -109,6 +109,17 @@ IE_CORE_DEFINETYPEDDATANOBASESIZE( CubeColorLookupdData )
 		const ValueType &s = readable();\
 		size_t m = s.m_data.size() * sizeof( ValueType::DataType::value_type ); \
 		accumulator.accumulate( m );\
+	}\
+\
+	template<>\
+	void TNAME::hash( MurmurHash &h ) const\
+	{\
+		Data::hash( h );\
+		const ValueType &s = readable();\
+		h.append( s.dimension() );\
+		h.append( s.domain() );\
+		h.append( (int)s.getInterpolation() );\
+		h.append( &(s.data()[0]), s.data().size() );\
 	}\
 
 SPECIALISE( CubeColorLookupfData )

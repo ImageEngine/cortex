@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -114,4 +114,10 @@ void AttributeState::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	m_attributes = context->load<CompoundData>( container, "attributes" );
+}
+
+void AttributeState::hash( MurmurHash &h ) const
+{
+	StateRenderable::hash( h );
+	m_attributes->hash( h );
 }

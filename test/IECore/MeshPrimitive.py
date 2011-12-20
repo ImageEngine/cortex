@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -100,7 +100,27 @@ class TestMeshPrimitive( unittest.TestCase ) :
 	def testEqualityOfEmptyMeshes( self ) :
 	
 		self.assertEqual( MeshPrimitive(), MeshPrimitive() )
-
+		
+	def testHash( self ) :
+	
+		m = MeshPrimitive( IntVectorData(), IntVectorData(), "linear", V3fVectorData() )
+		h = m.hash()
+		
+		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ), "linear" )
+		self.assertNotEqual( m.hash(), h )
+		h = m.hash()
+		
+		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 2, 1 ] ), "linear" )
+		self.assertNotEqual( m.hash(), h )
+		h = m.hash()
+		
+		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 2, 1 ] ), "catmullClark" )
+		self.assertNotEqual( m.hash(), h )
+		h = m.hash()
+		
+		m["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
+		self.assertNotEqual( m.hash(), h )
+		
 	def tearDown( self ) :
 
 		if os.path.isfile("test/IECore/mesh.fio"):

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -116,6 +116,21 @@ IE_CORE_DEFINETYPEDDATANOBASESIZE( SplinefColor4fData )
 		m += sizeof( ValueType );																\
 		accumulator.accumulate( m );															\
 	}																							\
+\
+	template<>\
+	void TNAME::hash( MurmurHash &h ) const\
+	{\
+		Data::hash( h );\
+		const ValueType &s = readable();\
+		h.append( s.basis.matrix );\
+		h.append( s.basis.step );\
+		ValueType::PointContainer::const_iterator it;\
+		for( it=s.points.begin(); it!=s.points.end(); it++ )\
+		{\
+			h.append( it->first );\
+			h.append( it->second );\
+		}\
+	}\
 
 SPECIALISE( SplineffData, float, 1 )
 SPECIALISE( SplineddData, double, 1 )

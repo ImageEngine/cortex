@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@ import unittest
 from IECore import *
 
 class TestBlindDataHolder(unittest.TestCase):
+
 	def testConstructors(self):
 		"""Test BlindDataHolder constructors"""
 		b = BlindDataHolder()
@@ -79,15 +80,21 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		b2 = Object.load( iface, "test" )
 		self.assertEqual( b1, b2 )
-
+		
+	def testHash( self ) :
+	
+		b1 = BlindDataHolder()
+		b2 = BlindDataHolder()
+		
+		self.assertEqual( b1.hash(), b2.hash() )
+		
+		b2.blindData()["a"] = FloatData( 1 )
+		self.assertNotEqual( b1.hash(), b2.hash() )
+		
 	def tearDown(self):
 
 		if os.path.isfile("./test/BlindDataHolder.fio") :
-                        os.remove("./test/BlindDataHolder.fio")
-
-
-
-
+			os.remove("./test/BlindDataHolder.fio")
 
 if __name__ == "__main__":
         unittest.main()

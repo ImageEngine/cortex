@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,8 +43,6 @@ using namespace IECore;
 
 LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeDescription( LongVectorDataTypeId, "LongVectorData" );
 
-/// \todo Rewrite without using macros
-
 #define IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )										\
 	template<>																								\
 	void TNAME::memoryUsage( Object::MemoryAccumulator &accumulator ) const			\
@@ -53,6 +51,14 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		accumulator.accumulate( &readable(), sizeof( TNAME::ValueType ) + readable().capacity() * sizeof( TNAME::ValueType::value_type ) );	\
 	}																										\
 
+#define IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )\
+	template<>\
+	void TNAME::hash( MurmurHash &h ) const\
+	{\
+		Data::hash( h );\
+		h.append( &(readable()[0]), readable().size() );\
+	}\
+	
 #define IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )											\
 	template <>																									\
 	size_t TNAME::baseSize() const																		\
@@ -165,12 +171,14 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
+	IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )					\
 	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, 1)				\
 
 #define IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( TNAME, TID, N )		\
 	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
+	IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )					\
 	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )				\
 
 namespace IECore
@@ -212,6 +220,7 @@ IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4dVectorData, Color4dVect
 
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( StringVectorData, StringVectorDataTypeId )
 IE_CORE_DEFINETYPEDDATANOBASESIZE( StringVectorData )
+IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( StringVectorData )
 IE_CORE_DEFINENOBASEVECTORTYPEDDATAIOSPECIALISATION( StringVectorData )
 
 template<>
@@ -230,13 +239,15 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 	accumulator.accumulate( &readable(), sizeof(std::vector<string>) + count );
 }
 
-// the boolean type need it's own io and memoryUsage so we don't use the whole macro for it's specialisations either
+// the boolean type need it's own io, hash and memoryUsage so we don't use the whole macro for it's specialisations either
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( BoolVectorData, BoolVectorDataTypeId )
 IE_CORE_DEFINETYPEDDATANOBASESIZE( BoolVectorData )
 
 // short and unsigned short data types save/load themelves as int and unsigned int arrays, respectively.
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( ShortVectorData, ShortVectorDataTypeId )
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( UShortVectorData, UShortVectorDataTypeId )
+IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( ShortVectorData )
+IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( UShortVectorData )
 
 
 template<>
@@ -244,6 +255,28 @@ void BoolVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
 	Data::memoryUsage( accumulator );
 	accumulator.accumulate( &readable(), sizeof(std::vector<bool>) + readable().capacity() / 8 );
+}
+
+template<>
+void BoolVectorData::hash( MurmurHash &h ) const
+{
+	Data::hash( h );
+	// we can't hash the raw data from inside the vector 'cos it's specialised
+	// to optimise for space, and that means the only access to the data is through
+	// a funny proxy class. so we repack the data into something we can deal with
+	// and hash that instead.
+	const std::vector<bool> &b = readable();
+	std::vector<unsigned char> p;
+	unsigned int s = b.size();
+	p.resize( s/8 + 1, 0 );
+	for( unsigned int i=0; i<b.size(); i++ )
+	{
+		if( b[i] )
+		{
+			p[i/8] |= 1 << (i % 8);
+		}
+	}
+	h.append( &(p[0]), p.size() );
 }
 
 template<>

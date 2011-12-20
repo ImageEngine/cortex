@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -87,6 +87,18 @@ class TimePeriodDataTest( unittest.TestCase ) :
 		self.assertEqual( repr(dd), "IECore.TimePeriodData( " + repr(d) + " )" )
 
 		self.assertEqual( dd, eval( repr(dd) ) )
+
+	def testHash( self ) :
+	
+		self.assertEqual(
+			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 3, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),
+			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 3, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),		
+		)
+
+		self.assertNotEqual(
+			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 3, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),
+			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 4, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),		
+		)
 
 	def setUp(self):
 

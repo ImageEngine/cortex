@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MotionPrimitive.h"
-#include "IECore/Renderer.h"
+#include <algorithm>
 
 #include "boost/format.hpp"
 
-#include <algorithm>
+#include "IECore/MotionPrimitive.h"
+#include "IECore/Renderer.h"
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 using namespace std;
@@ -232,5 +233,16 @@ void MotionPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
 		a.accumulate( it->second );
+	}
+}
+
+void MotionPrimitive::hash( MurmurHash &h ) const
+{
+	VisibleRenderable::hash( h );
+	h.append( m_snapshots.size() );
+	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
+	{
+		h.append( it->first );
+		it->second->hash( h );	
 	}
 }

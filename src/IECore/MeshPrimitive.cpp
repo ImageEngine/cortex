@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+#include <numeric>
+
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Renderer.h"
 #include "IECore/PolygonIterator.h"
-
-#include <algorithm>
-#include <numeric>
+#include "IECore/MurmurHash.h"
 
 using namespace std;
 using namespace IECore;
@@ -242,6 +243,14 @@ void MeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	Primitive::memoryUsage( a );
 	a.accumulate( m_verticesPerFace );
 	a.accumulate( m_vertexIds );
+}
+
+void MeshPrimitive::hash( MurmurHash &h ) const
+{
+	Primitive::hash( h );
+	m_verticesPerFace->hash( h );
+	m_vertexIds->hash( h );
+	h.append( m_interpolation );
 }
 
 MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )

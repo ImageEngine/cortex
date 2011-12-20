@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,6 +37,9 @@
 import os
 import math
 import unittest
+import sys
+import subprocess
+
 import IECore
 
 class CompoundDataTest(unittest.TestCase):
@@ -299,6 +302,74 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual( c["c"]["cc"], IECore.IntData( 20 ) )
 		self.assertEqual( len( c["d"] ), 1 )
 		self.assertEqual( c["d"]["dd"], IECore.IntData( 5 ) )
+		
+	def testHash( self ) :
+	
+		o1 = IECore.CompoundData()
+		o2 = IECore.CompoundData()
+		
+		o1["a"] = IECore.StringData( "a" )
+		o1["b"] = IECore.StringData( "b" )
+		
+		o2["b"] = IECore.StringData( "b" )
+		o2["a"] = IECore.StringData( "a" )
+		
+		self.assertEqual( o1.hash(), o2.hash() )
+		
+		o2["c"] = IECore.StringData( "c" )
+		
+		self.assertNotEqual( o1.hash(), o2.hash() )
+
+	def testHashIndependentFromOrderOfConstruction( self ) :
+	
+		# CompoundData internally uses a map from InternedString to Data.
+		# a naive iteration over this might yield a different order in each
+		# process as it's dependent on the addresses of the InternedStrings.
+		# we need to keep hashes consistent between processes.
+		
+		commands = [
+			"import IECore; IECore.InternedString( 'a' ); print IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
+			"import IECore; IECore.InternedString( 'b' ); print IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
+		]
+		
+		hashes = set()
+		for command in commands :
+			p = subprocess.Popen( [ sys.executable, "-c", command ], stdout=subprocess.PIPE )
+			hash, nothing = p.communicate()
+			hashes.add( hash )
+			
+		self.assertEqual( len( hashes ), 1 )
+	
+	def testHash( self ) :
+		
+		thingsToAdd = [
+			( "a", IECore.IntData( 1 ), True ),
+			( "a", IECore.UIntData( 1 ), True ),
+			( "a", IECore.IntData( 1 ), True ),
+			( "a", IECore.IntData( 1 ), False ),
+			( "b", IECore.StringVectorData( [ "a", "b", "c" ] ), True ),
+			( "b", IECore.StringVectorData( [ "a", "b" ] ), True ),		
+			( "b", IECore.StringVectorData( [ "a", "c" ] ), True ),
+			( "b", IECore.StringVectorData( [ "a", "c" ] ), False ),
+			( "d", IECore.StringVectorData( [ "a", "c" ] ), True ),
+			( "d", None, True ),
+		]
+		
+		o = IECore.CompoundData()
+		
+		for t in thingsToAdd :
+			h = o.hash()
+			for i in range( 0, 10 ) :
+				self.assertEqual( h, o.hash() )
+			if t[1] is not None :
+				o[t[0]] = t[1]
+			else :
+				del o[t[0]]
+			if t[2] :
+				self.assertNotEqual( h, o.hash() )
+			else :
+				self.assertEqual( h, o.hash() )
+			h = o.hash()
 
 	def tearDown(self):
 

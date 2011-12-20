@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ObjectVector.h"
+#include "IECore/MurmurHash.h"
 
 #include "boost/lexical_cast.hpp"
 #include "boost/format.hpp"
@@ -168,6 +169,23 @@ void ObjectVector::memoryUsage( Object::MemoryAccumulator &a ) const
 		if( *it )
 		{
 			a.accumulate( *it );
+		}
+	}
+}
+
+void ObjectVector::hash( MurmurHash &h ) const
+{
+	Object::hash( h );
+	h.append( m_members.size() );
+	for( MemberContainer::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
+	{
+		if( *it )
+		{
+			(*it)->hash( h );
+		}
+		else
+		{
+			h.append( 0 );
 		}
 	}
 }
