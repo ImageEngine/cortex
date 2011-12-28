@@ -12,6 +12,7 @@ at the file scope.
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.
+* The renderman python procedural is now built with the correct extension (.dylib) on OS X.
 
 Cortex 6.4.3
 ============

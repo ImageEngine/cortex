@@ -1454,7 +1454,7 @@ riPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreRI" )
 riPythonModuleEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
-riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython" )
+riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython", SHLIBSUFFIX=env["SHLIBSUFFIX"] )
 
 riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ie", SHLIBPREFIX="" )
 riDisplayDriverEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
@@ -1564,7 +1564,7 @@ if doConfigure :
 		riPythonProceduralEnv.AddPostAction( riPythonProceduralInstall, lambda target, source, env : makeLibSymLinks( riPythonProceduralEnv, libNameVar="INSTALL_RMANPROCEDURAL_NAME" ) )
 		riPythonProceduralEnv.Alias( "install", riPythonProceduralInstall )
 		riPythonProceduralEnv.Alias( "installRI", riPythonProceduralInstall )
-		riPythonProceduralForTest = riPythonProceduralEnv.Command( "src/rmanProcedurals/python/python.so", riPythonProcedural, Copy( "$TARGET", "$SOURCE" ) )
+		riPythonProceduralForTest = riPythonProceduralEnv.Command( "src/rmanProcedurals/python/python$SHLIBSUFFIX", riPythonProcedural, Copy( "$TARGET", "$SOURCE" ) )
 		
 		# display driver
 		riDisplayDriver = riDisplayDriverEnv.SharedLibrary( "src/rmanDisplays/ieDisplay/" + os.path.basename( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), "src/rmanDisplays/ieDisplay/IEDisplay.cpp" )
@@ -1602,7 +1602,7 @@ if doConfigure :
 			riPythonModuleEnv.Alias( "install", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
 			riPythonModuleEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
 
-		Default( [ riLibrary, riPythonModule, riPythonProcedural ] )
+		Default( [ riLibrary, riPythonModule, riPythonProcedural, riPythonProceduralForTest ] )
 		
 		# tests
 		riTestEnv = testEnv.Clone()
