@@ -692,6 +692,22 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_IECORE_PROCEDURAL_PATH",
+	"The directory in which to install the IECore procedural stubs.",
+	"$INSTALL_PREFIX/procedurals/$IECORE_NAME-1.py",
+)
+
+o.Add(
+	"INSTALL_IECORE_PROCEDURALS",
+	"The IECore procedurals to install via python stubs.",
+	[
+		( "IECore.ReadProcedural", "read" ), 
+		( "IECore.VisualiserProcedural", "visualiser" ), 
+	]
+)
+
+
+o.Add(
 	"INSTALL_CORE_POST_COMMAND",
 	"A command which is run following a successful installation of "
 	"the core library. This could be used to customise installation "
@@ -1383,14 +1399,15 @@ corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, 
 corePythonModuleEnv.Alias( "install", corePythonModuleInstall )
 corePythonModuleEnv.Alias( "installCore", corePythonModuleInstall )
 
-# op stubs
-for op in env['INSTALL_IECORE_OPS'] :
-	stubName = os.path.basename( op[1] )
-	stubEnv = corePythonModuleEnv.Clone( IECORE_NAME=os.path.join( op[1], stubName ) )
-	stubInstall = stubEnv.Command( "$INSTALL_IECORE_OP_PATH", None, 'echo "from %s import %s as %s" > $TARGET' % ( op[0].rpartition( "." )[0], op[0].rpartition( "." )[-1], stubName ) )
-	stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, env["INSTALL_IECORE_OP_PATH"] ) )
-	stubEnv.Alias( "install", stubInstall )
-	stubEnv.Alias( "installCore", stubInstall )
+# stubs
+for classes, installPath in ( ( env["INSTALL_IECORE_OPS"], "$INSTALL_IECORE_OP_PATH" ), ( env["INSTALL_IECORE_PROCEDURALS"], "$INSTALL_IECORE_PROCEDURAL_PATH" ) ) :
+	for cls in classes :
+		stubName = os.path.basename( cls[1] )
+		stubEnv = corePythonModuleEnv.Clone( IECORE_NAME=os.path.join( cls[1], stubName ) )
+		stubInstall = stubEnv.Command( installPath, None, 'echo "from %s import %s as %s" > $TARGET' % ( cls[0].rpartition( "." )[0], cls[0].rpartition( "." )[-1], stubName ) )
+		stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, installPath ) )
+		stubEnv.Alias( "install", stubInstall )
+		stubEnv.Alias( "installCore", stubInstall )
 
 Default( coreLibrary, corePythonLibrary, corePythonModule )
 

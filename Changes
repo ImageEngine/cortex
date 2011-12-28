@@ -1,3 +1,7 @@
+Additions :
+
+* Stubs for the IECore procedurals are now installed in addition to the stubs for the IECore ops.
+
 Improvements :
 
 * IECore.loadConfig() now ignores files starting with ~. This avoids errors caused by certain popular text editors saving backup files next to the config file during editing.
