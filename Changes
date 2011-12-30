@@ -1,17 +1,26 @@
 Additions :
 
+* Added the MurmurHash class, which implements the Murmur Hash version 3
+algorithm.
+
+* All Object derived classes now have a hash() method which can be used to
+generate a hash of their contents as an instance of the new MurmurHash class.
+
 * Stubs for the IECore procedurals are now installed in addition to the stubs for the IECore ops.
 
 Improvements :
 
 * IECore.loadConfig() now ignores files starting with ~. This avoids errors caused by certain popular text editors saving backup files next to the config file during editing.
+
 * The IECore.loadConfig() localsDict argument has been renamed to contextDict, and is now used as both the locals and globals for the execution of the config files. This works around python's annoying scoping whereby any modules would have to be imported within functions defined in the config files rather than
 at the file scope.
+
 * Added python bindings for the various Writer canWrite() methods.
 
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.
+
 * The renderman python procedural is now built with the correct extension (.dylib) on OS X.
 
 Cortex 6.4.3
