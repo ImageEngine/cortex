@@ -143,5 +143,4 @@ IE_CORE_DECLAREPTR( Renderer );
 
 } // namespace IECoreArnold
 
-
 #endif // IECOREARNOLD_RENDERER_H
