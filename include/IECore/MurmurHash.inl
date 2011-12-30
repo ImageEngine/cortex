@@ -86,12 +86,6 @@ inline MurmurHash &MurmurHash::append( uint64_t data )
 	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( size_t data )
-{
-	append( &data, sizeof( size_t ), sizeof( size_t ) );
-	return *this;
-}
-
 inline MurmurHash &MurmurHash::append( half data )
 {
 	append( &data, sizeof( half ), sizeof( half ) );

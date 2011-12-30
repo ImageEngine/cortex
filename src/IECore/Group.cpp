@@ -345,13 +345,11 @@ void Group::hash( MurmurHash &h ) const
 		m_transform->hash( h );
 	}
 	
-	h.append( state().size() );
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
 		(*it)->hash( h );
 	}
 
-	h.append( children().size() );
 	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
 	{
 		(*it)->hash( h );

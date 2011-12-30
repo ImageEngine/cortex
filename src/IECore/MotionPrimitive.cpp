@@ -239,7 +239,6 @@ void MotionPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void MotionPrimitive::hash( MurmurHash &h ) const
 {
 	VisibleRenderable::hash( h );
-	h.append( m_snapshots.size() );
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
 		h.append( it->first );

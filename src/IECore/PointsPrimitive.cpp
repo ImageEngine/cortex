@@ -109,7 +109,7 @@ void PointsPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void PointsPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
-	h.append( m_numPoints );
+	h.append( (uint64_t)m_numPoints );
 }
 
 size_t PointsPrimitive::getNumPoints() const

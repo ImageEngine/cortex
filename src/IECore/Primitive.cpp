@@ -163,7 +163,6 @@ void Primitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void Primitive::hash( MurmurHash &h ) const
 {
 	VisibleRenderable::hash( h );
-	h.append( variables.size() );
 	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
 	{
 		h.append( it->first );

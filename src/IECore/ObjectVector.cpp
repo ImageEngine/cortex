@@ -176,7 +176,6 @@ void ObjectVector::memoryUsage( Object::MemoryAccumulator &a ) const
 void ObjectVector::hash( MurmurHash &h ) const
 {
 	Object::hash( h );
-	h.append( m_members.size() );
 	for( MemberContainer::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
 	{
 		if( *it )
