@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/CoordinateSystem.h"
+#include "IECore/Transform.h"
 #include "IECorePython/CoordinateSystemBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
@@ -49,8 +50,11 @@ void bindCoordinateSystem()
 	RunTimeTypedClass<CoordinateSystem>()
 		.def( init<>() )
 		.def( init<const std::string &>() )
+		.def( init<const std::string &, TransformPtr>() )
 		.def( "getName", &CoordinateSystem::getName, return_value_policy<copy_const_reference>() )
 		.def( "setName", &CoordinateSystem::setName )
+		.def( "getTransform", (TransformPtr (CoordinateSystem::*)())&CoordinateSystem::getTransform )
+		.def( "setTransform", &CoordinateSystem::setTransform )
 	;
 }
 

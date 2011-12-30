@@ -17,6 +17,10 @@ at the file scope.
 
 * Added python bindings for the various Writer canWrite() methods.
 
+* The Renderer::coordinateSystem() call now creates coordinate systems which are
+scoped within attributeBegin()/attributeEnd() blocks. CoordinateSystem instances
+can now be given a transform to position them relative to their parent.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.

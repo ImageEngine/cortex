@@ -40,13 +40,17 @@
 namespace IECore
 {
 
+IE_CORE_FORWARDDECLARE( Transform )
+
+/// This calls allows the specification of coordinate systems to
+/// Renderers.
 /// \ingroup renderingGroup
 class CoordinateSystem : public StateRenderable
 {
 	public:
 
 		CoordinateSystem();
-		CoordinateSystem( const std::string &name );
+		CoordinateSystem( const std::string &name, TransformPtr transform=0 );
 		virtual ~CoordinateSystem();
 
 		IE_CORE_DECLAREOBJECT( CoordinateSystem, StateRenderable );
@@ -54,12 +58,25 @@ class CoordinateSystem : public StateRenderable
 		const std::string &getName() const;
 		void setName( const std::string &name );
 
-		/// Calls renderer->coordinateSystem( name )
+		/// Returns the Transform applied to the coordinate system.
+		/// This is the local transform relative to the parent of
+		/// the coordinate system (usually a Group). May return 0
+		/// if no transform has been applied.
+		TransformPtr getTransform();
+		ConstTransformPtr getTransform() const;
+		/// Sets the Transform applied to the coordinate system.
+		void setTransform( TransformPtr transform );
+
+		/// Calls renderer->coordinateSystem( name ). If a transform
+		/// has been applied then also scopes this in a
+		/// transformBegin/transformEnd with the appropriate
+		/// transformation.
 		virtual void render( Renderer *renderer ) const;
 
 	private:
 
 		std::string m_name;
+		TransformPtr m_transform;
 
 		static const unsigned int m_ioVersion;
 };
@@ -67,6 +84,5 @@ class CoordinateSystem : public StateRenderable
 IE_CORE_DECLAREPTR( CoordinateSystem );
 
 } // namespace IECore
-
 
 #endif // IECORE_COORDINATESYSTEM_H

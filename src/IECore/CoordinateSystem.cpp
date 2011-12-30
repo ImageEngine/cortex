@@ -35,6 +35,8 @@
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Renderer.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/Transform.h"
+#include "IECore/TransformBlock.h"
 
 using namespace IECore;
 using namespace boost;
@@ -43,12 +45,12 @@ const unsigned int CoordinateSystem::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CoordinateSystem );
 
 CoordinateSystem::CoordinateSystem()
-	: m_name( "unspecified" )
+	: m_name( "unspecified" ), m_transform( 0 )
 {
 }
 
-CoordinateSystem::CoordinateSystem( const std::string &name )
-	: m_name( name )
+CoordinateSystem::CoordinateSystem( const std::string &name, TransformPtr transform )
+	: m_name( name ), m_transform( transform )
 {
 }
 
@@ -66,8 +68,30 @@ void CoordinateSystem::setName( const std::string &name )
 	m_name = name;
 }
 
+TransformPtr CoordinateSystem::getTransform()
+{
+	return m_transform;
+}
+
+ConstTransformPtr CoordinateSystem::getTransform() const
+{
+	return m_transform;
+}
+
+void CoordinateSystem::setTransform( TransformPtr transform )
+{
+	m_transform = transform;
+}
+
 void CoordinateSystem::render( Renderer *renderer ) const
 {
+	TransformBlock transformBlock( renderer, m_transform );
+	
+	if( m_transform )
+	{
+		m_transform->render( renderer );
+	}
+	
 	renderer->coordinateSystem( m_name );
 }
 
@@ -78,13 +102,29 @@ bool CoordinateSystem::isEqualTo( const Object *other ) const
 		return false;
 	}
 	const CoordinateSystem *c = static_cast<const CoordinateSystem *>( other );
-	return m_name == c->m_name;
+	if( m_name != c->m_name )
+	{
+		return false;
+	}
+	if( (bool)m_transform != (bool)c->m_transform )
+	{
+		return false;
+	}
+	if( m_transform )
+	{
+		return m_transform->isEqualTo( c->m_transform );
+	}
+	return true;
 }
 
 void CoordinateSystem::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	StateRenderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() + sizeof( m_name ) );
+	if( m_transform )
+	{
+		a.accumulate( m_transform );
+	}
 }
 
 void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
@@ -92,6 +132,14 @@ void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 	StateRenderable::copyFrom( other, context );
 	const CoordinateSystem *c = static_cast<const CoordinateSystem *>( other );
 	m_name = c->m_name;
+	if( c->m_transform )
+	{
+		m_transform = context->copy<Transform>( c->m_transform );
+	}
+	else
+	{
+		m_transform = 0;
+	}
 }
 
 void CoordinateSystem::save( SaveContext *context ) const
@@ -99,6 +147,10 @@ void CoordinateSystem::save( SaveContext *context ) const
 	StateRenderable::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "name", m_name );
+	if( m_transform )
+	{
+		context->save( m_transform, container, "transform" );
+	}
 }
 
 void CoordinateSystem::load( LoadContextPtr context )
@@ -107,10 +159,22 @@ void CoordinateSystem::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	container->read( "name", m_name );
+	m_transform = 0;
+	try
+	{
+		m_transform = context->load<Transform>( container, "transform" );
+	}
+	catch( ... )
+	{
+	}
 }
 
 void CoordinateSystem::hash( MurmurHash &h ) const
 {
 	StateRenderable::hash( h );
 	h.append( m_name );
+	if( m_transform )
+	{
+		m_transform->hash( h );
+	}
 }
