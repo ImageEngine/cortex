@@ -146,7 +146,7 @@ void IECoreArnold::RendererImplementation::setOption( const std::string &name, I
 	if( 0 == name.compare( 0, 3, "ai:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		const AtParamEntry *parameter = AiNodeEntryLookUpParameter( options->base_node, name.c_str() + 3 );
+		const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( options ), name.c_str() + 3 );
 		if( parameter )
 		{
 			ToArnoldConverter::setParameter( options, name.c_str() + 3, value );
@@ -218,7 +218,7 @@ void IECoreArnold::RendererImplementation::display( const std::string &name, con
 	string nodeName = boost::str( boost::format( "ieCoreArnold:display%d" ) % m_outputDescriptions.size() );
 	AiNodeSetStr( driver, "name", nodeName.c_str() );
 	
-	const AtParamEntry *fileNameParameter = AiNodeEntryLookUpParameter( driver->base_node, "filename" );
+	const AtParamEntry *fileNameParameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( driver ), "filename" );
 	if( fileNameParameter )
 	{
 		AiNodeSetStr( driver, AiParamGetName( fileNameParameter ), name.c_str() );

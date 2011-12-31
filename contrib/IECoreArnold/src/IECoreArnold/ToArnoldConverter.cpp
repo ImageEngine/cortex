@@ -104,7 +104,7 @@ void ToArnoldConverter::setParameter( AtNode *node, const AtParamEntry *paramete
 
 void ToArnoldConverter::setParameter( AtNode *node, const char *name, const IECore::Data *value )
 {
-	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( node->base_node, name );
+	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), name );
 	if( parameter )
 	{
 		setParameter( node, parameter, value );
@@ -176,7 +176,7 @@ IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const AtUserParam
 		
 IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const char *name )
 {
-	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( node->base_node, name );
+	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), name );
 	if( parameter )
 	{
 		return getParameter( node, parameter );

@@ -66,7 +66,7 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	AiNodeSetArray(
 		result,
 		"num_points",
-		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ), true )
+		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
 	);
 
 	const V3fVectorData *p = curves->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
@@ -78,7 +78,7 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	AiNodeSetArray(
 		result,
 		"points",
-		AiArrayConvert( p->readable().size(), 1, AI_TYPE_POINT, (void *)&( p->readable()[0] ), true )
+		AiArrayConvert( p->readable().size(), 1, AI_TYPE_POINT, (void *)&( p->readable()[0] ) )
 	);
 	
 	// add radius
@@ -114,7 +114,7 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	AiNodeSetArray(
 		result,
 		"radius",
-		AiArrayConvert( radius->readable().size(), 1, AI_TYPE_FLOAT, (void *)&( radius->readable()[0] ), true )
+		AiArrayConvert( radius->readable().size(), 1, AI_TYPE_FLOAT, (void *)&( radius->readable()[0] ) )
 	);
 	
 	// set basis

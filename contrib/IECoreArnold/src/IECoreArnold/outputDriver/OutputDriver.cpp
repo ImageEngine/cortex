@@ -58,7 +58,7 @@ static AtVoid driverUpdate( AtNode *node, AtParamValue *parameters )
 {
 }
 
-static AtBoolean driverSupportsPixelType( AtNode *node, AtInt pixelType )
+static bool driverSupportsPixelType( const AtNode *node, AtByte pixelType )
 {
 	switch( pixelType )
 	{

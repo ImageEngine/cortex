@@ -65,14 +65,14 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 	AiNodeSetArray(
 		result,
 		"nsides",
-		AiArrayConvert( verticesPerFace.size(), 1, AI_TYPE_INT, (void *)&( verticesPerFace[0] ), true )
+		AiArrayConvert( verticesPerFace.size(), 1, AI_TYPE_INT, (void *)&( verticesPerFace[0] ) )
 	);
 
 	const std::vector<int> vertexIds = mesh->vertexIds()->readable();
 	AiNodeSetArray(
 		result,
 		"vidxs",
-		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ), true )
+		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
 	
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
@@ -84,7 +84,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 	AiNodeSetArray(
 		result,
 		"vlist",
-		AiArrayConvert( p->readable().size(), 1, AI_TYPE_POINT, (void *)&( p->readable()[0] ), true )
+		AiArrayConvert( p->readable().size(), 1, AI_TYPE_POINT, (void *)&( p->readable()[0] ) )
 	);
 	
 	// set subdivision
