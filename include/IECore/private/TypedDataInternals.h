@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,119 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDDATATRAITS_H
-#define IE_CORE_TYPEDDATATRAITS_H
-
-#include "boost/type_traits/integral_constant.hpp"
+#ifndef IECORE_TYPEDDATAINTERNALS_H
+#define IECORE_TYPEDDATAINTERNALS_H
 
 namespace IECore
 {
 
-/// Traits class for TypedData internal data structure
-/// This templated class was created so that it could define the base data type used
-/// in TypedData classes. That happens when the internal structure stored in
-/// the TypedData is made of only one data type, so that it could be addressed as an
-/// array of base data type values.
-/// Check TypedDataTraits.inl for utility macros that specializes TypedDataTraits.
+template<class T>
+class SimpleDataHolder
+{
+	
+	public :
+	
+		SimpleDataHolder()
+			: m_data()
+		{
+		}
+		
+		SimpleDataHolder( const T &data )
+			: m_data( data )
+		{
+		}
+		
+		const T &readable() const
+		{
+			return m_data;
+		}
+		
+		T &writable()
+		{
+			return m_data;
+		}
+		
+		bool operator == ( const SimpleDataHolder<T> &other ) const
+		{
+			return m_data == other.m_data;
+		}
+		
+	private :
+	
+		T m_data;
+
+};
+
+template<class T>
+class SharedDataHolder
+{
+
+	public :
+	
+		SharedDataHolder()
+			: m_data( new Shareable )
+		{
+		}
+		
+		SharedDataHolder( const T &data )
+			: m_data( new Shareable( data ) )
+		{
+		}
+		
+		const T &readable() const
+		{	
+			assert( m_data );
+			return m_data->data;
+		}
+		
+		T &writable()
+		{
+			assert( m_data );
+			if( m_data->refCount() > 1 )
+			{
+				// duplicate the data
+				m_data = new Shareable( m_data->data );
+			}
+			return m_data->data;
+		}
+		
+		bool operator == ( const SharedDataHolder<T> &other ) const
+		{
+			if( m_data==other.m_data )
+			{
+				// comparing the pointers is quick and that's good
+				return true;
+			}
+			// pointers ain't the same - do a potentially slow comparison
+			return readable()==other.readable();
+		}
+	
+	private :
+	
+		class Shareable : public RefCounted
+		{
+			public :
+			
+				Shareable() : data() {}
+				Shareable( const T &initData ) : data( initData ) {}
+				
+				T data;
+				
+		};
+		
+		IE_CORE_DECLAREPTR( Shareable )
+		ShareablePtr m_data;
+
+};
+
 template <class T>
 class TypedDataTraits
 {
 	public:
 		typedef void BaseType;
-		typedef boost::false_type HasBase;
+		typedef SimpleDataHolder<T> DataHolder;
 };
 
 } // namespace IECore
 
-#include "IECore/TypedDataTraits.inl"
-
-#endif // IE_CORE_TYPEDDATATRAITS_H
+#endif // IECORE_TYPEDDATAINTERNALS_H

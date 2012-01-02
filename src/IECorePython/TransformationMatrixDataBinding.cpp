@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -94,6 +94,7 @@ void bindTypedTransformationMatrixData()
 		.add_property( "value",   &getValue< TypedData< TransformationMatrix< T > > >,
 	    						  &setValue< TypedData< TransformationMatrix< T > > >, "The value contained by the object.")
 		.def("__cmp__", &cmp< TypedData< TransformationMatrix< T > > > )
+		.def( "hasBase", &TypedData< TransformationMatrix< T > >::hasBase ).staticmethod( "hasBase" )
 	;
 }
 

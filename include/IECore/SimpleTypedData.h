@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SIMPLETYPEDDATA_H
-#define IE_CORE_SIMPLETYPEDDATA_H
+#ifndef IECORE_SIMPLETYPEDDATA_H
+#define IECORE_SIMPLETYPEDDATA_H
 
 #include <string>
 
@@ -51,84 +51,43 @@ namespace IECore
 {
 
 // simple typeddata types
-typedef TypedData < bool > BoolData;
-typedef TypedData < float > FloatData;
-typedef TypedData < double > DoubleData;
-typedef TypedData < int > IntData;
-typedef TypedData < unsigned int > UIntData;
-typedef TypedData < char > CharData;
-typedef TypedData < unsigned char > UCharData;
-typedef TypedData < short > ShortData;
-typedef TypedData < unsigned short > UShortData;
-typedef TypedData < int64_t > Int64Data;
-typedef TypedData < uint64_t > UInt64Data;
-typedef TypedData < std::string > StringData;
-typedef TypedData<half> HalfData;
-typedef TypedData<Imath::V2i> V2iData;
-typedef TypedData<Imath::V3i> V3iData;
-typedef TypedData<Imath::V2f> V2fData;
-typedef TypedData<Imath::V3f> V3fData;
-typedef TypedData<Imath::V2d> V2dData;
-typedef TypedData<Imath::V3d> V3dData;
-typedef TypedData<Imath::Color3f> Color3fData;
-typedef TypedData<Imath::Color4f> Color4fData;
-typedef TypedData<Imath::Color3<double> > Color3dData;
-typedef TypedData<Imath::Color4<double> > Color4dData;
-typedef TypedData<Imath::Box2i> Box2iData;
-typedef TypedData<Imath::Box3i> Box3iData;
-typedef TypedData<Imath::Box2f> Box2fData;
-typedef TypedData<Imath::Box3f> Box3fData;
-typedef TypedData<Imath::Box2d> Box2dData;
-typedef TypedData<Imath::Box3d> Box3dData;
-typedef TypedData<Imath::M33f> M33fData;
-typedef TypedData<Imath::M33d> M33dData;
-typedef TypedData<Imath::M44f> M44fData;
-typedef TypedData<Imath::M44d> M44dData;
-typedef TypedData<Imath::Quatf> QuatfData;
-typedef TypedData<Imath::Quatd> QuatdData;
-typedef TypedData<LineSegment3f> LineSegment3fData;
-typedef TypedData<LineSegment3d> LineSegment3dData;
-
-// pointer declarations
-IE_CORE_DECLAREPTR( BoolData );
-IE_CORE_DECLAREPTR( FloatData );
-IE_CORE_DECLAREPTR( DoubleData );
-IE_CORE_DECLAREPTR( IntData );
-IE_CORE_DECLAREPTR( UIntData );
-IE_CORE_DECLAREPTR( CharData );
-IE_CORE_DECLAREPTR( UCharData );
-IE_CORE_DECLAREPTR( StringData );
-IE_CORE_DECLAREPTR( HalfData );
-IE_CORE_DECLAREPTR( ShortData );
-IE_CORE_DECLAREPTR( UShortData );
-IE_CORE_DECLAREPTR( Int64Data );
-IE_CORE_DECLAREPTR( UInt64Data );
-IE_CORE_DECLAREPTR( V2iData );
-IE_CORE_DECLAREPTR( V3iData );
-IE_CORE_DECLAREPTR( V2fData );
-IE_CORE_DECLAREPTR( V3fData );
-IE_CORE_DECLAREPTR( V2dData );
-IE_CORE_DECLAREPTR( V3dData );
-IE_CORE_DECLAREPTR( Color3fData );
-IE_CORE_DECLAREPTR( Color3dData );
-IE_CORE_DECLAREPTR( Color4fData );
-IE_CORE_DECLAREPTR( Color4dData );
-IE_CORE_DECLAREPTR( Box2iData );
-IE_CORE_DECLAREPTR( Box3iData );
-IE_CORE_DECLAREPTR( Box2fData );
-IE_CORE_DECLAREPTR( Box3fData );
-IE_CORE_DECLAREPTR( Box2dData );
-IE_CORE_DECLAREPTR( Box3dData );
-IE_CORE_DECLAREPTR( M33fData );
-IE_CORE_DECLAREPTR( M33dData );
-IE_CORE_DECLAREPTR( M44fData );
-IE_CORE_DECLAREPTR( M44dData );
-IE_CORE_DECLAREPTR( QuatfData );
-IE_CORE_DECLAREPTR( QuatdData );
-IE_CORE_DECLAREPTR( LineSegment3fData );
-IE_CORE_DECLAREPTR( LineSegment3dData );
-
-#include "IECore/SimpleTypedDataTraits.inl"
+IECORE_DECLARE_TYPEDDATA( BoolData, bool, bool, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( FloatData, float, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( DoubleData, double, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( IntData, int, int, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( UIntData, unsigned int, unsigned int, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( CharData, char, char, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( UCharData, unsigned char, unsigned char, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( ShortData, short, short, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( UShortData, unsigned short, unsigned short, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Int64Data, int64_t, int64_t, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( UInt64Data, uint64_t, uint64_t, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( StringData, std::string, std::string, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( HalfData, half, half, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( V2iData, Imath::V2i, int, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( V3iData, Imath::V3i, int, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( V2fData, Imath::V2f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( V3fData, Imath::V3f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( V2dData, Imath::V2d, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( V3dData, Imath::V3d, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color3fData, Imath::Color3f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color4fData, Imath::Color4f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color3dData, Imath::Color3<double>, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color4dData, Imath::Color4<double>, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box2iData, Imath::Box2i, int, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box3iData, Imath::Box3i, int, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box2fData, Imath::Box2f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box3fData, Imath::Box3f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box2dData, Imath::Box2d, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box3dData, Imath::Box3d, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( M33fData, Imath::M33f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( M33dData, Imath::M33d, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( M44fData, Imath::M44f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( M44dData, Imath::M44d, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( QuatfData, Imath::Quatf, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( QuatdData, Imath::Quatd, double, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( LineSegment3fData, LineSegment3f, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( LineSegment3dData, LineSegment3d, double, SimpleDataHolder )
 
 /// \deprecated This class allows data of the obsolete typeId LongDataTypeId or typename "LongData" to register
 /// itself with an IntData constructor to the Object factory. This allows temporary backwards compatibility (since
@@ -142,4 +101,4 @@ class LongDataAlias : private IntData
 
 } // namespace IECore
 
-#endif // IE_CORE_SIMPLETYPEDDATA_H
+#endif // IECORE_SIMPLETYPEDDATA_H

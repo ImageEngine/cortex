@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,31 +32,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDDATA_H
-#define IE_CORE_TYPEDDATA_H
+#ifndef IECORE_TYPEDDATA_H
+#define IECORE_TYPEDDATA_H
 
 #include "IECore/Data.h"
-#include "IECore/Exception.h"
-#include "IECore/TypedDataTraits.h"
+#include "IECore/private/TypedDataInternals.h"
 
 namespace IECore
 {
 
 /// A templated class which can be used to wrap useful data
-/// types and containers. The copyFrom() function is implemented
-/// so as to perform a lazy copy on write type behaviour - this
-/// makes the creation of read only copies of significant amounts
-/// of data relatively cheap. Note that as this class derives from
-/// Object, a proper instantiation requires a fair bit of specialisation
-/// of the methods reimplemented from Object. For this reason the
-/// template implementation is hidden from the public interface, and
-/// you can therefore only use only the typedefs in SimpleTypedData.h,
-/// VectorTypedData.h and CompoundData.h rather than being able
-/// to instantiate the template for arbitrary data types.
-/// It also provides low level access to its data through functions
-/// like baseReadable, baseWritable and baseSize. They are available
-/// only when the data can be seen as an array of a base type. Use
-/// hasBase for checking that.
+/// types and containers, while implementing all the io, copying
+/// and hashing abilities of the Object base class. The internal
+/// data may be accessed using the readable() and writable() accessors
+/// and in the case of it being composed of one or more contiguous
+/// elements of a simple base type it may also be accessed as raw data
+/// using the baseReadable() and baseWritable() methods.
+///
+/// Note that to use instantiations of this class you should utilise the
+/// appropriate typedefs as provided by headers such as SimpleTypedData.h
+/// or VectorTypedData.h.
+///
+/// Also note that you cannot simply instantiate this class with an
+/// arbitrary type without performing some specialisation of the functions
+/// for implementing IO and hashing. DateTimeData.h and the matching
+/// DateTimeData.cpp provide a good example for creating your own
+/// TypedData class - see comments in those files for further details.
 /// \ingroup coreGroup
 template <class T>
 class TypedData : public Data
@@ -92,12 +93,12 @@ class TypedData : public Data
 		const T &readable() const;
 		/// Gives read-write access to the internal data structure.
 		/// \threading Because calling writable() may cause data to be
-		/// copied behind the scenes, it may not be called while
+		/// modified behind the scenes, it may not be called while
 		/// other threads are operating on the same instance.
 		T &writable();
 
 		/// Base type used in the internal data structure.
-		typedef typename TypedDataTraits< TypedData<T> >::BaseType BaseType;
+		typedef typename TypedDataTraits<T>::BaseType BaseType;
 
 		/// Defines whether the internal data structure has a single base type.
 		static bool hasBase();
@@ -116,6 +117,8 @@ class TypedData : public Data
 
 	protected:
 
+		typedef typename TypedDataTraits<T>::DataHolder DataHolder;
+
 		virtual ~TypedData();
 
 		static Object::TypeDescription<TypedData<T> > m_typeDescription;
@@ -128,18 +131,33 @@ class TypedData : public Data
 		/// for this function.
 		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
 
-		class DataHolder : public RefCounted
-		{
-			public:
-				DataHolder() : data() {}
-				DataHolder(const T &initData) : data(initData) {}
-			public:
-				T data;
-		};
-		IE_CORE_DECLAREPTR( DataHolder );
-		DataHolderPtr m_data;
+		DataHolder m_data;
+		
 };
+
+/// Macro for the declaration of a new TypedData instantiation, holding
+/// a type T. TYPENAME is the name of the new TypedData class, T is the
+/// held type, BASETYPE is the base type or void if there is no base, and
+/// DataHolder is either SimpleDataHolder or ShareableDataHolder.
+/// SimpleDataHolder is appropriate where T is of a small fixed size and
+/// SharedDataHolder is appropriate where T is larger and/or varies
+/// in size. The difference being that ShareableDataHolder implements
+/// a lazy-copy-on-write behaviour useful for large types, but also incurs
+/// the cost of an extra allocation and reference count inappropriate
+/// for small types.
+#define IECORE_DECLARE_TYPEDDATA( TYPENAME, T, BASETYPE, DATAHOLDER ) \
+	template <> \
+	class TypedDataTraits<T> \
+	{ \
+		public : \
+			typedef BASETYPE BaseType; \
+			typedef DATAHOLDER<T> DataHolder; \
+	}; \
+	\
+	typedef TypedData<T> TYPENAME; \
+	\
+	IE_CORE_DECLAREPTR( TYPENAME ); \
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPEDDATA_H
+#endif // IECORE_TYPEDDATA_H

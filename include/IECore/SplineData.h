@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,16 +42,11 @@ namespace IECore
 {
 
 // Spline data types.
-typedef TypedData<Splineff> SplineffData;
-typedef TypedData<Splinedd> SplineddData;
-typedef TypedData<SplinefColor3f> SplinefColor3fData;
-typedef TypedData<SplinefColor4f> SplinefColor4fData;
 
-// pointer declarations
-IE_CORE_DECLAREPTR( SplineffData );
-IE_CORE_DECLAREPTR( SplineddData );
-IE_CORE_DECLAREPTR( SplinefColor3fData );
-IE_CORE_DECLAREPTR( SplinefColor4fData );
+IECORE_DECLARE_TYPEDDATA( SplineffData, Splineff, void, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( SplineddData, Splinedd, void, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( SplinefColor3fData, SplinefColor3f, void, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( SplinefColor4fData, SplinefColor4f, void, SharedDataHolder )
 
 }
 

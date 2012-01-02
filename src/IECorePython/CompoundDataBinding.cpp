@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -524,6 +524,7 @@ void bindCompoundData()
 		.def( "pop", &CompoundDataFunctions::pop, "m.pop(k [,default])\nReturns m[k] if found and removes it from m; otherwise, returns default if supplied or raises KeyError if not." )
 		.def( "pop", &CompoundDataFunctions::pop2 )
 		.def( "popitem", &CompoundDataFunctions::popitem, "m.popitem()\nRemvoes a random (key,value) pair from m and returns it as a tuple." )
+		.def( "hasBase", &CompoundData::hasBase ).staticmethod( "hasBase" )
 	;
 
 	CompoundDataFromPythonDict();

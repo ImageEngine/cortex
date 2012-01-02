@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,16 +48,37 @@ template<class T>
 Object::TypeDescription<TypedData<T> > TypedData<T>::m_typeDescription;
 
 //////////////////////////////////////////////////////////////////////////////////////
+// helper functions
+//////////////////////////////////////////////////////////////////////////////////////
+
+namespace Detail
+{
+
+template<typename T>
+inline size_t sizeOf()
+{
+	return sizeof( T );
+}
+
+template<>
+inline size_t sizeOf<void>()
+{
+	return 0;
+}
+
+} // namespace Detail
+
+//////////////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 //////////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-TypedData<T>::TypedData() : m_data( new DataHolder() )
+TypedData<T>::TypedData() : m_data()
 {
 }
 
 template<class T>
-TypedData<T>::TypedData(const T &data) : m_data ( new DataHolder(data) )
+TypedData<T>::TypedData(const T &data) : m_data ( data )
 {
 }
 
@@ -120,13 +141,7 @@ bool TypedData<T>::isEqualTo( const Object *other ) const
 		return false;
 	}
 	const TypedData<T> *tOther = static_cast<const TypedData<T> *>( other );
-	if( m_data==tOther->m_data )
-	{
-		// comparing the pointers is quick and that's good
-		return true;
-	}
-	// pointers ain't the same - do a potentially slow comparison
-	return readable()==tOther->readable();
+	return m_data == tOther->m_data;
 }
 
 template <class T>
@@ -155,22 +170,13 @@ void TypedData<T>::operator = (const TypedData<T> &typedData)
 template<class T>
 const T & TypedData<T>::readable() const
 {
-	assert( m_data );
-
-	return m_data->data;
+	return m_data.readable();
 }
 
 template<class T>
 T & TypedData<T>::writable()
 {
-	assert( m_data );
-	if (m_data->refCount() > 1)
-	{
-		// duplicate the data
-
-		m_data = new DataHolder(m_data->data);
-	}
-	return m_data->data;
+	return m_data.writable();
 }
 
 template<class T>
@@ -187,17 +193,19 @@ void TypedData<T>::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 template <class T>
 bool TypedData<T>::hasBase()
 {
-	return TypedDataTraits< TypedData<T> >::HasBase::value;
+	return boost::is_void<BaseType>::value == false;
 }
 
 template <class T>
 size_t TypedData<T>::baseSize() const
 {
-	if ( !TypedData<T>::hasBase() )
+	size_t sizeOfBaseType = Detail::sizeOf<BaseType>();
+	if( !sizeOfBaseType )
 	{
-		throw Exception( std::string( TypedData<T>::staticTypeName() ) + " has no base type." );
+		throw Exception( std::string( staticTypeName() ) + " has no base type." );
 	}
-	return ( sizeof( T ) / sizeof( typename TypedData<T>::BaseType ) );
+
+	return sizeof( T ) / sizeOfBaseType;
 }
 
 template <class T>
@@ -219,52 +227,6 @@ typename TypedData<T>::BaseType *TypedData<T>::baseWritable()
 	}
 	return reinterpret_cast< typename TypedData<T>::BaseType * >( &writable() );
 }
-
-//////////////////////////////////////////////////////////////////////////////////////
-// macros for TypedData function specializations
-//////////////////////////////////////////////////////////////////////////////////////
-
-#define IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID ) \
-	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )
-
-#define IE_CORE_DEFINETYPEDDATANOBASESIZE( TNAME )							\
-	template <>																\
-	size_t TNAME::baseSize() const									\
-	{																		\
-		throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );	\
-	}																		\
-
-#define IE_CORE_DEFINEBASETYPEDDATAIOSPECIALISATION( TNAME, N )										\
-																									\
-	template<>																						\
-	void TNAME::save( SaveContext *context ) const													\
-	{																								\
-		Data::save( context );																		\
-		assert( baseSize() == N );																	\
-		IndexedIOInterfacePtr container = context->rawContainer();									\
-		container->write( "value", TNAME::baseReadable(), TNAME::baseSize() );						\
-	}																								\
-																									\
-	template<>																						\
-	void TNAME::load( LoadContextPtr context )														\
-	{																								\
-		Data::load( context );																		\
-		assert( ( sizeof( TNAME::ValueType ) / sizeof( TNAME::BaseType ) ) == N );					\
-		IndexedIOInterfacePtr container;															\
-		TNAME::BaseType *p = TNAME::baseWritable();													\
-		try																							\
-		{																							\
-			container = context->rawContainer();													\
-			container->read( "value", p, N );														\
-		}																							\
-		catch( ... )																				\
-		{																							\
-			unsigned int v = 0;																		\
-			container = context->container( staticTypeName(), v );									\
-			container->read( "value", p, N );														\
-		}																							\
-	}																								\
-
 
 } // namespace IECore
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -696,6 +696,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 			.def("size", &ThisBinder::len, "s.size()\nReturns the number of elements on s. Same result as the len operator.")	\
 			.def("resize", &ThisBinder::resize, "s.resize( size )\nAdjusts the size of s.")	\
 			.def("resize", &ThisBinder::resizeWithValue, "s.resize( size, value )\nAdjusts the size of s, inserting elements of value as necessary.")	\
+			.def("hasBase", &ThisClass::hasBase ).staticmethod( "hasBase" ) \
 			.def("__str__", &str<ThisClass> )	\
 			.def("__repr__", &repr<ThisClass> )	\
 

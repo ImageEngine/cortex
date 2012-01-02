@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -69,7 +69,11 @@ class BoolVectorDataTest( unittest.TestCase ) :
 	def testStrAndRepr( self ) :
 
 		self.assertEqual( str( BoolVectorData( [True, False] ) ), "1 0" )
-		self.assertEqual( repr( BoolVectorData( [False, True] ) ), "BoolVectorData( [ 0, 1 ] )" )
+		self.assertEqual( repr( BoolVectorData( [False, True] ) ), "IECore.BoolVectorData( [ 0, 1 ] )" )
+
+	def testHasBase( self ) :
+	
+		self.failIf( BoolVectorData.hasBase() )
 
 	def tearDown( self ) :
 

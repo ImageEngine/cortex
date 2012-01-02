@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
 #
@@ -255,6 +255,7 @@ from DataConvertOpTest import DataConvertOpTest
 from DeepPixelTest import DeepPixelTest
 from ConfigLoaderTest import ConfigLoaderTest
 from MurmurHashTest import MurmurHashTest
+from BoolVectorData import BoolVectorDataTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

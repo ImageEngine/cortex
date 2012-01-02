@@ -99,6 +99,10 @@ class DateTimeDataTest( unittest.TestCase ) :
 			IECore.DateTimeData( datetime.datetime( 2009, 2, 12 ) ).hash(),
 			IECore.DateTimeData( datetime.datetime( 2009, 3, 12 ) ).hash()
 		)
+		
+	def testHasBase( self ) :
+	
+		self.failIf( IECore.DateTimeData.hasBase() )
 
 	def setUp(self):
 

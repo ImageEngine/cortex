@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_VECTORTYPEDDATA_H
-#define IE_CORE_VECTORTYPEDDATA_H
+#ifndef IECORE_VECTORTYPEDDATA_H
+#define IECORE_VECTORTYPEDDATA_H
 
 #include <string>
 #include <vector>
@@ -49,84 +49,46 @@
 namespace IECore
 {
 
-// vectors for basic types
-typedef TypedData< std::vector< bool > > BoolVectorData;
-typedef TypedData< std::vector< half > > HalfVectorData;
-typedef TypedData< std::vector< float > > FloatVectorData;
-typedef TypedData< std::vector< double > > DoubleVectorData;
-typedef TypedData< std::vector< int > > IntVectorData;
-typedef TypedData< std::vector< unsigned int > > UIntVectorData;
-typedef TypedData< std::vector< char > > CharVectorData;
-typedef TypedData< std::vector< unsigned char > > UCharVectorData;
-typedef TypedData< std::vector< short > > ShortVectorData;
-typedef TypedData< std::vector< unsigned short > > UShortVectorData;
-typedef TypedData< std::vector< int64_t > > Int64VectorData;
-typedef TypedData< std::vector< uint64_t > > UInt64VectorData;
-typedef TypedData< std::vector< std::string > > StringVectorData;
+// vectors of basic types
 
-// vectors for Imath types
-typedef TypedData< std::vector< Imath::V2f > > V2fVectorData;
-typedef TypedData< std::vector< Imath::V2d > > V2dVectorData;
-typedef TypedData< std::vector< Imath::V2i > > V2iVectorData;
-typedef TypedData< std::vector< Imath::V3f > > V3fVectorData;
-typedef TypedData< std::vector< Imath::V3d > > V3dVectorData;
-typedef TypedData< std::vector< Imath::V3i > > V3iVectorData;
-typedef TypedData< std::vector< Imath::Box2i > > Box2iVectorData;
-typedef TypedData< std::vector< Imath::Box2f > > Box2fVectorData;
-typedef TypedData< std::vector< Imath::Box2d > > Box2dVectorData;
-typedef TypedData< std::vector< Imath::Box3i > > Box3iVectorData;
-typedef TypedData< std::vector< Imath::Box3f > > Box3fVectorData;
-typedef TypedData< std::vector< Imath::Box3d > > Box3dVectorData;
-typedef TypedData< std::vector< Imath::M33f > > M33fVectorData;
-typedef TypedData< std::vector< Imath::M33d > > M33dVectorData;
-typedef TypedData< std::vector< Imath::M44f > > M44fVectorData;
-typedef TypedData< std::vector< Imath::M44d > > M44dVectorData;
-typedef TypedData< std::vector< Imath::Quatf > > QuatfVectorData;
-typedef TypedData< std::vector< Imath::Quatd > > QuatdVectorData;
-typedef TypedData< std::vector< Imath::Color3f > > Color3fVectorData;
-typedef TypedData< std::vector< Imath::Color4f > > Color4fVectorData;
-typedef TypedData< std::vector< Imath::Color3<double> > > Color3dVectorData;
-typedef TypedData< std::vector< Imath::Color4<double> > > Color4dVectorData;
+IECORE_DECLARE_TYPEDDATA( BoolVectorData, std::vector<bool>, void, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( HalfVectorData, std::vector<half>, half, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( FloatVectorData, std::vector<float>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( DoubleVectorData, std::vector<double>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( IntVectorData, std::vector<int>, int, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( UIntVectorData, std::vector<unsigned int>, unsigned int, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( CharVectorData, std::vector<char>, char, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( UCharVectorData, std::vector<unsigned char>, unsigned char, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( ShortVectorData, std::vector<short>, short, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( UShortVectorData, std::vector<unsigned short>, unsigned short, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Int64VectorData, std::vector<int64_t>, int64_t, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( UInt64VectorData, std::vector<uint64_t>, uint64_t, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( StringVectorData, std::vector<std::string>, std::string, SharedDataHolder )
 
-// pointers to vectors of basic types
-IE_CORE_DECLAREPTR( BoolVectorData );
-IE_CORE_DECLAREPTR( HalfVectorData );
-IE_CORE_DECLAREPTR( FloatVectorData );
-IE_CORE_DECLAREPTR( DoubleVectorData );
-IE_CORE_DECLAREPTR( IntVectorData );
-IE_CORE_DECLAREPTR( UIntVectorData );
-IE_CORE_DECLAREPTR( CharVectorData );
-IE_CORE_DECLAREPTR( UCharVectorData );
-IE_CORE_DECLAREPTR( ShortVectorData );
-IE_CORE_DECLAREPTR( UShortVectorData );
-IE_CORE_DECLAREPTR( StringVectorData );
-IE_CORE_DECLAREPTR( Int64VectorData );
-IE_CORE_DECLAREPTR( UInt64VectorData );
-// pointers to vectors of Imath types
-IE_CORE_DECLAREPTR( V2fVectorData );
-IE_CORE_DECLAREPTR( V2dVectorData );
-IE_CORE_DECLAREPTR( V2iVectorData );
-IE_CORE_DECLAREPTR( V3fVectorData );
-IE_CORE_DECLAREPTR( V3dVectorData );
-IE_CORE_DECLAREPTR( V3iVectorData );
-IE_CORE_DECLAREPTR( Box2iVectorData );
-IE_CORE_DECLAREPTR( Box2fVectorData );
-IE_CORE_DECLAREPTR( Box2dVectorData );
-IE_CORE_DECLAREPTR( Box3iVectorData );
-IE_CORE_DECLAREPTR( Box3fVectorData );
-IE_CORE_DECLAREPTR( Box3dVectorData );
-IE_CORE_DECLAREPTR( M33fVectorData );
-IE_CORE_DECLAREPTR( M33dVectorData );
-IE_CORE_DECLAREPTR( M44fVectorData );
-IE_CORE_DECLAREPTR( M44dVectorData );
-IE_CORE_DECLAREPTR( QuatfVectorData );
-IE_CORE_DECLAREPTR( QuatdVectorData );
-IE_CORE_DECLAREPTR( Color3fVectorData );
-IE_CORE_DECLAREPTR( Color4fVectorData );
-IE_CORE_DECLAREPTR( Color3dVectorData );
-IE_CORE_DECLAREPTR( Color4dVectorData );
+// vectors of Imath types
 
-#include "IECore/VectorTypedDataTraits.inl"
+IECORE_DECLARE_TYPEDDATA( V2fVectorData, std::vector<Imath::V2f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( V2dVectorData, std::vector<Imath::V2d>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( V2iVectorData, std::vector<Imath::V2i>, int, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( V3fVectorData, std::vector<Imath::V3f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( V3dVectorData, std::vector<Imath::V3d>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( V3iVectorData, std::vector<Imath::V3i>, int, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box2iVectorData, std::vector<Imath::Box2i>, int, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box2fVectorData, std::vector<Imath::Box2f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box2dVectorData, std::vector<Imath::Box2d>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box3iVectorData, std::vector<Imath::Box3i>, int, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box3fVectorData, std::vector<Imath::Box3f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Box3dVectorData, std::vector<Imath::Box3d>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( M33fVectorData, std::vector<Imath::M33f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( M33dVectorData, std::vector<Imath::M33d>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( M44fVectorData, std::vector<Imath::M44f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( M44dVectorData, std::vector<Imath::M44d>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( QuatfVectorData, std::vector<Imath::Quatf>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( QuatdVectorData, std::vector<Imath::Quatd>, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color3fVectorData, std::vector<Imath::Color3f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color3dVectorData, std::vector<Imath::Color3<double> >, double, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color4fVectorData, std::vector<Imath::Color4f>, float, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( Color4dVectorData, std::vector<Imath::Color4<double> >, double, SharedDataHolder )
 
 /// \deprecated This class allows data of the obsolete typeId LongVectorDataTypeId or typename "LongVectorData" to register
 /// itself with an IntVectorData constructor to the Object factory. This allows temporary backwards compatibility (since
@@ -140,4 +102,4 @@ class LongVectorDataAlias : private IntVectorData
 
 } // namespace IECore
 
-#endif // IE_CORE_VECTORTYPEDDATA_H
+#endif // IECORE_VECTORTYPEDDATA_H

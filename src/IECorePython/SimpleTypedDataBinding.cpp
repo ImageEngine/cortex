@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -332,6 +332,7 @@ static RunTimeTypedClass<T> bindSimpleData()
 	result.def( "__init__", make_constructor( &constructWithValue<T> ), "Construct with the specified value." );
 	result.def( "__str__", &str<T> );
 	result.def( "__repr__", &repr<T> );
+	result.def( "hasBase", &T::hasBase ).staticmethod( "hasBase" );
 	result.add_property( "value",	&getValue<T>,
 									&setValue<T>, "The value contained by the object.");
 

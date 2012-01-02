@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,15 +42,9 @@ namespace IECore
 {
 
 // TransformationMatrix data types.
-typedef TypedData < TransformationMatrixf > TransformationMatrixfData;
-typedef TypedData < TransformationMatrixd > TransformationMatrixdData;
-
-// pointer declarations
-IE_CORE_DECLAREPTR( TransformationMatrixfData );
-IE_CORE_DECLAREPTR( TransformationMatrixdData );
+IECORE_DECLARE_TYPEDDATA( TransformationMatrixfData, TransformationMatrixf, float, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( TransformationMatrixdData, TransformationMatrixd, double, SimpleDataHolder )
 
 }
-
-#include "IECore/TransformationMatrixDataTraits.inl"
 
 #endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H

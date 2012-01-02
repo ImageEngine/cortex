@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,21 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATETIMEDATA_H
-#define IE_CORE_DATETIMEDATA_H
+#ifndef IECORE_DATETIMEDATA_H
+#define IECORE_DATETIMEDATA_H
 
 #include "IECore/TypedData.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 
-#include <string>
-
 namespace IECore
 {
 
-typedef TypedData < boost::posix_time::ptime > DateTimeData;
-IE_CORE_DECLAREPTR( DateTimeData );
+/// DateTimeData provides a good example for the implementation of a TypedData class
+/// wrapping a custom data type. Here we declare a new class named DateTimeData, which
+/// wraps the boost ptime class, has no base type (hence the void argument) and will use
+/// a SimpleDataHolder to store the value internally. Were ptime to be a type requiring
+/// much more memory then SharedDataHolder would have been a more appropriate choice for
+/// the latter. See DateTimeData.cpp for further details.
+IECORE_DECLARE_TYPEDDATA( DateTimeData, boost::posix_time::ptime, void, SimpleDataHolder )
 
 } // namespace IECore
 
-#endif // IE_CORE_DATETIMEDATA_H
+#endif // IECORE_DATETIMEDATA_H

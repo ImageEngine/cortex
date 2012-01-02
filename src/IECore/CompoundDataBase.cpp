@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,7 +44,7 @@ using namespace IECore;
 namespace IECore
 {
 
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundDataBase, CompoundDataBaseTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundDataBase, CompoundDataBaseTypeId )
 
 template<>
 void CompoundDataBase::memoryUsage( Object::MemoryAccumulator &accumulator ) const
@@ -186,9 +186,7 @@ void CompoundDataBase::hash( MurmurHash &h ) const
 	}
 }
 
-IE_CORE_DEFINETYPEDDATANOBASESIZE( CompoundDataBase )
-
-}
+} // namespace IECore
 
 // Instantiate that bad boy.
 template class TypedData<CompoundDataMap>;

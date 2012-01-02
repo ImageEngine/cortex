@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -168,14 +168,14 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	}
 
 #define IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( TNAME, TID )			\
-	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
 	IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )					\
 	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, 1)				\
 
 #define IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( TNAME, TID, N )		\
-	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
 	IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )					\
@@ -218,8 +218,7 @@ IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4dVectorData, Color4dVect
 
 // the string type needs it's own memoryUsage so we don't use the whole macro for it's specialisations
 
-IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( StringVectorData, StringVectorDataTypeId )
-IE_CORE_DEFINETYPEDDATANOBASESIZE( StringVectorData )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( StringVectorData, StringVectorDataTypeId )
 IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( StringVectorData )
 IE_CORE_DEFINENOBASEVECTORTYPEDDATAIOSPECIALISATION( StringVectorData )
 
@@ -229,7 +228,7 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 	Data::memoryUsage( accumulator );
 
 	size_t count = 0;
-	const std::vector< std::string > &vector = m_data->data;
+	const std::vector< std::string > &vector = readable();
 	std::vector< std::string >::const_iterator iterV = vector.begin();
 	while (iterV != vector.end())
 	{
@@ -240,12 +239,11 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 }
 
 // the boolean type need it's own io, hash and memoryUsage so we don't use the whole macro for it's specialisations either
-IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( BoolVectorData, BoolVectorDataTypeId )
-IE_CORE_DEFINETYPEDDATANOBASESIZE( BoolVectorData )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( BoolVectorData, BoolVectorDataTypeId )
 
 // short and unsigned short data types save/load themelves as int and unsigned int arrays, respectively.
-IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( ShortVectorData, ShortVectorDataTypeId )
-IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( UShortVectorData, UShortVectorDataTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ShortVectorData, ShortVectorDataTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( UShortVectorData, UShortVectorDataTypeId )
 IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( ShortVectorData )
 IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( UShortVectorData )
 

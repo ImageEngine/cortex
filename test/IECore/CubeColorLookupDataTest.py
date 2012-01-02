@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -79,6 +79,9 @@ class CubeColorLookupDataTest( unittest.TestCase ) :
 		ObjectWriter( d3, "test/IECore/CubeColorLookupData.cob" ).write()
 		self.assertEqual( d3, ObjectReader( "test/IECore/CubeColorLookupData.cob" ).read() )
 
+	def testHasBase( self ) :
+	
+		self.failIf( CubeColorLookupfData.hasBase() )
 
 	def setUp(self):
 

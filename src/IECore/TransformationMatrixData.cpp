@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -138,7 +138,7 @@ namespace IECore {
 	}\
 
 #define IE_CORE_DEFINEDATASPECIALISATION( TNAME, TID )							\
-	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINETRANSFORMATIONMATRIXIOSPECIALIZATION( TNAME )
 
 IE_CORE_DEFINEDATASPECIALISATION( TransformationMatrixfData, TransformationMatrixfDataTypeId )
