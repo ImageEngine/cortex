@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,7 +47,9 @@ enum TypeId
 	RIBWriterTypeId = 106003,
 	SLOReaderTypeId = 106004,
 	SXRendererTypeId = 106005,
-
+	DTEXDeepImageReaderTypeId = 106006,
+	DTEXDeepImageWriterTypeId = 106007,
+	
 	/// If we ever get here we should start over again
 	LastCoreRITypeId = 106999,
 };

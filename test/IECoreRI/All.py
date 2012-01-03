@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 ##########################################################################
 
 import sys
+import unittest
 import IECore
 import IECoreRI
 
@@ -69,6 +70,10 @@ if hasattr( IECoreRI, "SXRenderer" ) :
 	
 if hasattr( IECoreRI, "GXEvaluator" ) :
 	from GXEvaluatorTest import GXEvaluatorTest
+
+if hasattr( IECoreRI, "DTEXDeepImageReader" ) :
+	from DTEXDeepImageReaderTest import TestDTEXDeepImageReader
+	from DTEXDeepImageWriterTest import TestDTEXDeepImageWriter
 
 if IECore.withFreeType() :
 

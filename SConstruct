@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 #  its affiliates and/or its licensors.
@@ -1535,6 +1535,22 @@ if doConfigure :
 			
 				sys.stderr.write( "WARNING : Gx API not found - not building GXEvaluator. Use 3delight 9.0.39 or later.\n" )
 			
+		if c.CheckCXXHeader( "RixDeepTexture.h" ) :
+			
+			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_RIXDEEP" )
+			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_RIXDEEP" )
+			
+		else :
+		
+			riSources.remove( "src/IECoreRI/DTEXDeepImageReader.cpp" )
+			riSources.remove( "src/IECoreRI/DTEXDeepImageWriter.cpp" )
+			riPythonSources.remove( "src/IECoreRI/bindings/DTEXDeepImageReaderBinding.cpp" )
+			riPythonSources.remove( "src/IECoreRI/bindings/DTEXDeepImageWriterBinding.cpp" )
+			
+			if havePRMan :
+			
+				sys.stderr.write( "WARNING : RixDeepTexture API not found - not building IECoreRI::DTEXDeepTexture functionality. Use PRMan 16.1 or later.\n" )
+		
 		c.Finish()	
 
 		# we can't append this before configuring, as then it gets built as
