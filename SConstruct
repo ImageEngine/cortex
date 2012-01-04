@@ -2240,7 +2240,7 @@ houdiniEnv = env.Clone( **houdiniEnvSets )
 houdiniEnv.Append( **houdiniEnvAppends )
 
 houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
-houdiniEnv.Append( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
+houdiniEnv.Prepend( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
 
 houdiniPythonModuleEnv = pythonModuleEnv.Clone( **houdiniEnvSets )
 houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
