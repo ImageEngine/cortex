@@ -5,6 +5,8 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 #  its affiliates and/or its licensors.
 #
+#  Copyright (c) 2012, John Haddon. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -705,7 +707,6 @@ o.Add(
 		( "IECore.VisualiserProcedural", "visualiser" ), 
 	]
 )
-
 
 o.Add(
 	"INSTALL_CORE_POST_COMMAND",
@@ -2021,7 +2022,10 @@ nukeEnvAppends = {
 
 nukeEnv = env.Clone( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( **nukeEnvAppends )
-		
+nukeEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+if env["PLATFORM"] == "darwin" :
+	nukeEnv.Append( FRAMEWORKS = [ "OpenGL" ] )
+	
 nukePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreNuke" )
 nukePythonModuleEnv.Append( **nukeEnvAppends )
 
@@ -2104,7 +2108,11 @@ if doConfigure :
 					]
 				)
 				
-				nukePythonModuleEnv.Append( LIBS = os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+				nukePythonModuleEnv.Append( LIBS = [
+					os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				] )
 				
 				nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
 				nukeSources = sorted( glob.glob( "src/IECoreNuke/*.cpp" ) )
@@ -2551,6 +2559,7 @@ if doConfigure :
 		arnoldPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 		arnoldProceduralEnv.Append(
 			LIBS = [ 
+				"ai",
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
