@@ -331,6 +331,8 @@ if targetApp :
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
 	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_RMANLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_ARNOLDLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	# we don't want to build the renderman procedurals when we build houdini, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
 	# boost version houdini needs, whereas the other libraries are linking to the correct boost version for
@@ -345,8 +347,10 @@ else :
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
 	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/" + pythonVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_RMANLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_RMANPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/procedurals/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_RMANDISPLAY_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/displayDrivers/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
+	INSTALL_ARNOLDLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_ARNOLDPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/arnold/" + arnoldVersion + "/plugins/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "$INSTALL_PREFIX/tools/arnold/" + arnoldVersion + "/plugins/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
 
