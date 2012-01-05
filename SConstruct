@@ -518,6 +518,22 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_RMANLIB_NAME",
+	"The name under which to install the RI libraries. This "
+	"can be used to build and install the library for multiple "
+	"PRMan/3delight versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_ARNOLDLIB_NAME",
+	"The name under which to install the Arnold libraries. This "
+	"can be used to build and install the library for multiple "
+	"Arnold versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
 	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
@@ -1377,7 +1393,7 @@ coreEnv.Alias( "installCore", headerInstall )
 # python library
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonLibrary = corePythonEnv.SharedLibrary( "lib/" + os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ), corePythonSources )
-corePythonLibraryInstall = corePythonEnv.Install( os.path.dirname( corePythonEnv.subst( "$INSTALL_LIB_NAME" ) ), corePythonLibrary )
+corePythonLibraryInstall = corePythonEnv.Install( os.path.dirname( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ), corePythonLibrary )
 corePythonEnv.NoCache( corePythonLibraryInstall )
 corePythonEnv.AddPostAction( corePythonLibraryInstall, lambda target, source, env : makeLibSymLinks( corePythonEnv, libNameVar="INSTALL_PYTHONLIB_NAME" ) )
 corePythonEnv.Alias( "install", [ corePythonLibraryInstall ] )
@@ -1459,6 +1475,7 @@ riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython", SHLIB
 
 riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ie", SHLIBPREFIX="" )
 riDisplayDriverEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
 
 haveRI = False
 riLibs = []
@@ -1560,8 +1577,8 @@ if doConfigure :
 		riPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 	
 		# library
-		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riSources )
-		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riLibrary )
+		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_RMANLIB_NAME" ) ), riSources )
+		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_RMANLIB_NAME" ) ), riLibrary )
 		riEnv.NoCache( riLibraryInstall )
 		riEnv.AddPostAction( riLibraryInstall, lambda target, source, env : makeLibSymLinks( riEnv ) )
 		riEnv.Alias( "install", riLibraryInstall )
@@ -2575,8 +2592,8 @@ if doConfigure :
 		)
 				
 		# library
-		arnoldLibrary = arnoldEnv.SharedLibrary( "lib/" + os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ), arnoldSources )
-		arnoldLibraryInstall = arnoldEnv.Install( os.path.dirname( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ), arnoldLibrary )
+		arnoldLibrary = arnoldEnv.SharedLibrary( "lib/" + os.path.basename( arnoldEnv.subst( "$INSTALL_ARNOLDLIB_NAME" ) ), arnoldSources )
+		arnoldLibraryInstall = arnoldEnv.Install( os.path.dirname( arnoldEnv.subst( "$INSTALL_ARNOLDLIB_NAME" ) ), arnoldLibrary )
 		arnoldEnv.NoCache( arnoldLibraryInstall )
 		arnoldEnv.AddPostAction( arnoldLibraryInstall, lambda target, source, env : makeLibSymLinks( arnoldEnv ) )
 		arnoldEnv.Alias( "install", arnoldLibraryInstall )
