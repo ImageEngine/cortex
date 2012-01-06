@@ -36,7 +36,7 @@
 #define IECORE_TYPEDDATA_H
 
 #include "IECore/Data.h"
-#include "IECore/private/TypedDataInternals.h"
+#include "IECore/TypedDataInternals.h"
 
 namespace IECore
 {
