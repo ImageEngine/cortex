@@ -27,6 +27,8 @@ Bug Fixes :
 
 * The renderman python procedural is now built with the correct extension (.dylib) on OS X.
 
+* Fixed problem with using the ClientDisplayDriver on ipv6 enabled machines.
+
 Cortex 6.4.3
 ============
 

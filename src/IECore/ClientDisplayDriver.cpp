@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,15 +84,21 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	
 	tcp::resolver resolver(m_data->m_service);
 	tcp::resolver::query query(m_data->m_host, m_data->m_port);
-	tcp::resolver::iterator iterator = resolver.resolve(query);
 
-	try
+	boost::system::error_code error;
+	tcp::resolver::iterator iterator = resolver.resolve( query, error );	
+	if( !error )
 	{
-		m_data->m_socket.connect( *iterator );
+		error = boost::asio::error::host_not_found;
+		while( error && iterator != tcp::resolver::iterator() )
+		{
+			m_data->m_socket.close();
+			m_data->m_socket.connect( *iterator++, error );
+		}
 	}
-	catch( std::exception &e )
+	if( error )
 	{
-		throw Exception( std::string("Could not connect to remote display driver server: ") + e.what() );
+		throw Exception( std::string( "Could not connect to remote display driver server : " ) + error.message() );
 	}
 
 	MemoryIndexedIOPtr io;

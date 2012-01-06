@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -172,6 +173,42 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 		newImg.blindData().clear()
 		img.blindData().clear()
 		self.assertEqual( newImg, img )
+
+	def testWrongSocketException( self ) :
+	
+		parameters = CompoundData( {
+			"displayHost" : "localhost",
+			"displayPort" : "1560", # wrong port
+			"remoteDisplayType" : "ImageDisplayDriver",
+		} )
+
+		dw = Box2i( V2i( 0 ), V2i( 255 ) )
+		self.assertRaises( RuntimeError, ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
+
+		try :
+			ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
+		except Exception, e :
+			pass
+	
+		self.failUnless( "Could not connect to remote display driver server : Connection refused" in str( e ) )
+
+	def testWrongHostException( self ) :
+	
+		parameters = CompoundData( {
+			"displayHost" : "thisHostDoesNotExist",
+			"displayPort" : "1559", # wrong port
+			"remoteDisplayType" : "ImageDisplayDriver",
+		} )
+
+		dw = Box2i( V2i( 0 ), V2i( 255 ) )
+		self.assertRaises( RuntimeError, ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
+
+		try :
+			ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
+		except Exception, e :
+			pass
+			
+		self.failUnless( "Could not connect to remote display driver server : Host not found" in str( e ) )
 
 	def tearDown( self ):
 		
