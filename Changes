@@ -8,6 +8,8 @@ generate a hash of their contents as an instance of the new MurmurHash class.
 
 * Stubs for the IECore procedurals are now installed in addition to the stubs for the IECore ops.
 
+* Added an ieDisplay nuke node, which accepts incoming renders from RenderMan or Nuke using the existing cortex display drivers.
+
 Improvements :
 
 * IECore.loadConfig() now ignores files starting with ~. This avoids errors caused by certain popular text editors saving backup files next to the config file during editing.
@@ -28,6 +30,8 @@ Bug Fixes :
 * The renderman python procedural is now built with the correct extension (.dylib) on OS X.
 
 * Fixed problem with using the ClientDisplayDriver on ipv6 enabled machines.
+
+* IECoreNuke and IECoreArnold now build successfully on OS X.
 
 Cortex 6.4.3
 ============

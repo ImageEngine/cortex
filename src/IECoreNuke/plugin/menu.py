@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -43,10 +44,14 @@ import os
 
 if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
 
+	import IECore
 	import IECoreNuke
 
 	nodesMenu = nuke.menu( "Nodes" )
 	cortexMenu = nodesMenu.addMenu( "Cortex" )
+
+	if IECore.withSignals() and IECore.withASIO() :
+		cortexMenu.addCommand( "Display", "nuke.createNode( 'ieDisplay' )" )
 
 	proceduralMenu = cortexMenu.addMenu( "Procedural" )
 	IECoreNuke.Menus.addProceduralCreationCommands( proceduralMenu )

@@ -1318,6 +1318,12 @@ if doConfigure :
 		coreSources.remove( "src/IECore/OBJReader.cpp" )
 		corePythonSources.remove( "src/IECorePython/OBJReaderBinding.cpp" )
 	
+	if c.CheckLibWithHeader( coreEnv.subst( "boost_signals" + env["BOOST_LIB_SUFFIX"] ), "boost/signal.hpp", "CXX" ) :
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_SIGNALS' )
+	else :
+		sys.stderr.write( "ERROR : unable to find boost signal library - some functionality will be disabled.\n" )
+						
 	if c.CheckCXXHeader( "boost/math/special_functions/factorials.hpp" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
@@ -2037,6 +2043,10 @@ nukeEnvAppends = {
 
 }
 
+if env["PLATFORM"] == "darwin" :
+	# FN_OS_MAC is required to work around isnan errors in DDImage/Matrix4.h
+	nukeEnvAppends["CPPFLAGS"].append( "-DFN_OS_MAC" )
+
 nukeEnv = env.Clone( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( **nukeEnvAppends )
 nukeEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
@@ -2136,7 +2146,14 @@ if doConfigure :
 				nukePythonSources = sorted( glob.glob( "src/IECoreNuke/bindings/*.cpp" ) )
 				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
 				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
-
+ 				nukeNodeNames = [ "ieProcedural", "ieObject", "ieOp", "ieDrawable", "ieDisplay" ]
+ 
+				if "-DIECORE_WITH_ASIO" in coreEnv["CPPFLAGS"] and "-DIECORE_WITH_SIGNALS" in coreEnv["CPPFLAGS"] :
+					nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] ),
+				else :
+					nukeSources.remove( "src/IECoreNuke/DisplayIop.cpp" )							
+					nukeNodeNames.remove( "ieDisplay" )
+					
 				# nuke library
 
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
@@ -2193,7 +2210,7 @@ if doConfigure :
 				# stubs for each of the nodes within the plugin
 				
 				nukeStubs = []
-				for nodeName in [ "ieProcedural", "ieObject", "ieOp", "ieDrawable" ] :
+				for nodeName in nukeNodeNames :
 				
 					nukeStubEnv = nukePluginEnv.Clone( IECORE_NAME=nodeName )
 					nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"

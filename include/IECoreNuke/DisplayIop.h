@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, J3P LLC. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#ifndef IECORENUKE_DISPLAYIOP_H
+#define IECORENUKE_DISPLAYIOP_H
+
+#include "DDImage/Iop.h"
+
+#include "IECore/DisplayDriverServer.h"
 
 namespace IECoreNuke
 {
 
-enum TypeId
+IE_CORE_FORWARDDECLARE( NukeDisplayDriver );
+
+class DisplayIop : public DD::Image::Iop
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LastCoreNukeTypeId = 107999
+
+	public :
+
+		DisplayIop( Node *node );
+		virtual ~DisplayIop();
+		
+		virtual const char *Class() const;
+		virtual const char *node_help() const;
+		
+		virtual void knobs( DD::Image::Knob_Callback f );
+		virtual int knob_changed( DD::Image::Knob *knob );
+		virtual void append( DD::Image::Hash &hash );
+		virtual void _validate( bool forReal );
+		virtual void engine( int y, int x, int r, const DD::Image::ChannelSet &channels, DD::Image::Row &row );
+		
+	private :
+	
+		static const Description g_description;
+		static DD::Image::Op *build( Node *node );
+		
+		void driverCreated( NukeDisplayDriver *driver );
+		void connectToDriver( NukeDisplayDriver *driver );
+		void driverDataReceived( NukeDisplayDriver *driver, const Imath::Box2i &box );
+		
+		int m_portNumber;
+		
+		DD::Image::Format m_format;
+		DD::Image::Format m_fullSizeFormat;
+		
+		unsigned int m_updateCount;
+		IECore::DisplayDriverServerPtr m_server;
+		IECoreNuke::NukeDisplayDriverPtr m_driver;
+		
+		
 };
 
 } // namespace IECoreNuke
 
-#endif // IECORENUKE_TYPEIDS_H
+#endif // IECORENUKE_DISPLAYIOP_H
