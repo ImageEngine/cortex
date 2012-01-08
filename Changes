@@ -33,6 +33,9 @@ Bug Fixes :
 
 * IECoreNuke and IECoreArnold now build successfully on OS X.
 
+* Fixed bugs in the arnold output driver which meant that exceptions in cortex display drivers went uncaught and became aborts when reaching arnold. Fixed further bugs where failure to create a cortex display driver would yield later
+segmentation faults rather than a graceful error report.
+
 Cortex 6.4.3
 ============
 
