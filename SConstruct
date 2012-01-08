@@ -2656,7 +2656,7 @@ if doConfigure :
 		arnoldDriverEnv.Alias( "installArnold", arnoldDriverInstall )
 		arnoldDriverForTest = arnoldDriverEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/plugins/ieOutputDriver.so", arnoldDriver, Copy( "$TARGET", "$SOURCE" ) )
 		
-		Default( [ arnoldLibrary, arnoldPythonModule, arnoldProcedural, arnoldDriver ] )
+		Default( [ arnoldLibrary, arnoldPythonModule, arnoldProcedural, arnoldProceduralForTest, arnoldDriver, arnoldDriverForTest ] )
 		
 		# tests
 		arnoldTestEnv = testEnv.Clone()
