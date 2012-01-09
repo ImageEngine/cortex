@@ -142,7 +142,12 @@ class TypedDataTraits
 {
 	public:
 		typedef void BaseType;
-		typedef SimpleDataHolder<T> DataHolder;
+		// DataHolder /must/ be specialised to something other than void
+		// using IECORE_DECLARE_TYPEDDATA. It is left void here so that
+		// you must include the appropriate *TypedData.h header - otherwise
+		// you might just include TypedData.h, missing a specialisation which
+		// then causes sizeof( TypedData<T> ) to be incorrect.
+		typedef void DataHolder;
 };
 
 } // namespace IECore

@@ -51,7 +51,7 @@ namespace IECore
 ///
 /// Note that to use instantiations of this class you should utilise the
 /// appropriate typedefs as provided by headers such as SimpleTypedData.h
-/// or VectorTypedData.h.
+/// or VectorTypedData.h, rather than include this header directly.
 ///
 /// Also note that you cannot simply instantiate this class with an
 /// arbitrary type without performing some specialisation of the functions
