@@ -92,9 +92,8 @@ void TimeDurationData::load( LoadContextPtr context )
 }
 
 template<>
-void TimeDurationData::hash( MurmurHash &h ) const
+void SimpleDataHolder<boost::posix_time::time_duration>::hash( MurmurHash &h ) const
 {
-	Data::hash( h );
 	h.append( boost::posix_time::to_simple_string( readable() ) );
 }
 

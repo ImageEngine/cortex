@@ -123,9 +123,8 @@ void TypedData< TimePeriod >::load( LoadContextPtr context )
 }
 
 template<>
-void TypedData<TimePeriod>::hash( MurmurHash &h ) const
+void SimpleDataHolder<TimePeriod>::hash( MurmurHash &h ) const
 {
-	Data::hash( h );
 	h.append( boost::posix_time::to_iso_string( readable().begin() ) );
 	h.append( boost::posix_time::to_iso_string( readable().end() ) );
 }

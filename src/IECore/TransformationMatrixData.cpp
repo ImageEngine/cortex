@@ -121,10 +121,9 @@ namespace IECore {
 	}\
 \
 	template<>\
-	void TNAME::hash( MurmurHash &h ) const\
+	void SimpleDataHolder<TNAME::ValueType>::hash( MurmurHash &h ) const\
 	{\
-		Data::hash( h );\
-		const TNAME::ValueType &v = TNAME::readable();\
+		const TNAME::ValueType &v = readable();\
 		h.append( v.scalePivot );\
 		h.append( v.scale );\
 		h.append( v.shear );\

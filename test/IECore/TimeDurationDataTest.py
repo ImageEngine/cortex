@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -86,6 +86,15 @@ class TimeDurationDataTest( unittest.TestCase ) :
 		self.assertEqual( repr(dd), "IECore.TimeDurationData( " + repr(d) + " )" )
 
 		self.assertEqual( dd, eval( repr(dd) ) )
+		
+	def testHash( self ) :
+	
+		d = IECore.TimeDurationData( datetime.timedelta( days = 15, hours = 3, minutes = 56, seconds = 12 ) )
+		d2 = IECore.TimeDurationData( datetime.timedelta( days = 15, hours = 3, minutes = 56, seconds = 10 ) )
+		
+		self.assertEqual( d.hash(), d.hash() )
+		self.assertEqual( d2.hash(), d2.hash() )
+		self.assertNotEqual( d.hash(), d2.hash() )
 
 	def setUp(self):
 

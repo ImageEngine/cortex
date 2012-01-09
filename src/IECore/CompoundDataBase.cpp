@@ -158,10 +158,8 @@ static inline bool comp( CompoundDataMap::const_iterator a, CompoundDataMap::con
 }
 
 template<>
-void CompoundDataBase::hash( MurmurHash &h ) const
-{
-	Data::hash( h );
-	
+void SimpleDataHolder<CompoundDataMap>::hash( MurmurHash &h ) const
+{	
 	// the CompoundDataMap is sorted by InternedString::operator <,
 	// which just compares addresses of the underlying interned object.
 	// this isn't stable between multiple processes.

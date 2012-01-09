@@ -1205,7 +1205,60 @@ class TestVectorDataToString( unittest.TestCase ) :
 		s = d.toString()
 		for i in range( 0, 255 ) :
 			self.assertEqual( s[i], chr( i ) )
-					
+
+class TestVectorDataHashOptimisation( unittest.TestCase ) :
+
+	def test( self ) :
+			
+		d = IntVectorData( 100 * 1024 * 1024 )
+		
+		t = Timer()
+		h = d.hash()
+		firstTime = t.stop()
+		
+		t = Timer()
+		h2 = d.hash()
+		secondTime = t.stop()
+		
+		self.assertEqual( h, h2 )
+		# hash computation should be cached the second time, so should be much faster
+		self.failUnless( secondTime < 0.0001 * firstTime )
+		
+		d2 = d.copy()
+		t = Timer()
+		h2 = d.hash()
+		secondTime = t.stop()
+		
+		self.assertEqual( h, h2 )
+		# cached hash should have been transferred to the copy, so also should be much faster
+		self.failUnless( secondTime < 0.0001 * firstTime )
+		
+		d[0] = 10
+		t = Timer()
+		hm = d.hash()
+		secondTime = t.stop()
+
+		self.assertNotEqual( h, hm )
+		# should be slow this time, as the hash is being recomputed
+		self.failIf( secondTime < 0.8 * firstTime )
+		
+		t = Timer()
+		h2 = d2.hash()
+		secondTime = t.stop()
+		
+		self.assertEqual( h, h2 )
+		# cached hash should remain in the copy, so should still be much faster
+		self.failUnless( secondTime < 0.0001 * firstTime )
+		
+		d2[0] = 10
+		t = Timer()
+		hm2 = d2.hash()
+		secondTime = t.stop()
+		
+		self.assertEqual( hm, hm2 )
+		# should be slow this time, as the hash is being recomputed
+		self.failIf( secondTime < 0.8 * firstTime )
+		
 if __name__ == "__main__":
     unittest.main()
 	

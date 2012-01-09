@@ -215,19 +215,17 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 }
 
 template<>
-void TypedData<LineSegment3f>::hash( MurmurHash &h ) const
+void SimpleDataHolder<LineSegment3f>::hash( MurmurHash &h ) const
 {
-	Data::hash( h );
 	h.append( readable().p0 );
-	h.append( readable().p1 );	
+	h.append( readable().p1 );
 }
 
 template<>
-void TypedData<LineSegment3d>::hash( MurmurHash &h ) const
+void SimpleDataHolder<LineSegment3d>::hash( MurmurHash &h ) const
 {
-	Data::hash( h );
 	h.append( readable().p0 );
-	h.append( readable().p1 );	
+	h.append( readable().p1 );
 }
 
 template class TypedData<bool>;

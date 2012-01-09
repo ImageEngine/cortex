@@ -35,6 +35,8 @@
 #ifndef IECORE_TYPEDDATAINTERNALS_H
 #define IECORE_TYPEDDATAINTERNALS_H
 
+#include "IECore/MurmurHash.h"
+
 namespace IECore
 {
 
@@ -67,6 +69,11 @@ class SimpleDataHolder
 		bool operator == ( const SimpleDataHolder<T> &other ) const
 		{
 			return m_data == other.m_data;
+		}
+
+		void hash( MurmurHash &h ) const
+		{
+			h.append( readable() );
 		}
 		
 	private :
@@ -105,6 +112,7 @@ class SharedDataHolder
 				// duplicate the data
 				m_data = new Shareable( m_data->data );
 			}
+			m_data->hashValid = false;
 			return m_data->data;
 		}
 		
@@ -118,17 +126,43 @@ class SharedDataHolder
 			// pointers ain't the same - do a potentially slow comparison
 			return readable()==other.readable();
 		}
+		
+		// The method called by the TypedData class when it wants to
+		// append the hash for the internal data into h. This is recomputed
+		// lazily only after writable() has been called. Rather than modify this
+		// function, instead specialise the protected hash() method if the underlying
+		// datatype has special needs.
+		void hash( MurmurHash &h ) const
+		{
+			if( !m_data->hashValid )
+			{
+				m_data->hash = hash();
+				m_data->hashValid = true;
+			}
+			h.append( m_data->hash );
+		}
+
+	protected :
 	
+		MurmurHash hash() const
+		{
+			MurmurHash result;
+			result.append( &(readable()[0]), readable().size() );
+			return result;
+		}
+
 	private :
 	
 		class Shareable : public RefCounted
 		{
 			public :
 			
-				Shareable() : data() {}
-				Shareable( const T &initData ) : data( initData ) {}
+				Shareable() : data(), hashValid( false ) {}
+				Shareable( const T &initData ) : data( initData ), hashValid( false ) {}
 				
 				T data;
+				MurmurHash hash;
+				volatile bool hashValid;
 				
 		};
 		

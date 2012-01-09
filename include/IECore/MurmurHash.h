@@ -99,6 +99,7 @@ class MurmurHash
 		inline MurmurHash &append( const Imath::Box3d &data );
 		inline MurmurHash &append( const Imath::Quatf &data );
 		inline MurmurHash &append( const Imath::Quatd &data );
+		inline MurmurHash &append( const MurmurHash &data );
 		
 		inline MurmurHash &append( const char *data, size_t numElements );
 		inline MurmurHash &append( const unsigned char *data, size_t numElements );

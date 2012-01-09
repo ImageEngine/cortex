@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -113,18 +113,19 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 	}																							\
 \
 	template<>\
-	void TNAME::hash( MurmurHash &h ) const\
+	MurmurHash SharedDataHolder<TNAME::ValueType>::hash() const\
 	{\
-		Data::hash( h );\
-		const ValueType &s = readable();\
-		h.append( s.basis.matrix );\
-		h.append( s.basis.step );\
-		ValueType::PointContainer::const_iterator it;\
+		MurmurHash result;\
+		const TNAME::ValueType &s = readable();\
+		result.append( s.basis.matrix );\
+		result.append( s.basis.step );\
+		TNAME::ValueType::PointContainer::const_iterator it;\
 		for( it=s.points.begin(); it!=s.points.end(); it++ )\
 		{\
-			h.append( it->first );\
-			h.append( it->second );\
+			result.append( it->first );\
+			result.append( it->second );\
 		}\
+		return result;\
 	}\
 
 SPECIALISE( SplineffData, float, 1 )

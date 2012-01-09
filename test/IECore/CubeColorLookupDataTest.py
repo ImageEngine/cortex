@@ -83,6 +83,35 @@ class CubeColorLookupDataTest( unittest.TestCase ) :
 	
 		self.failIf( CubeColorLookupfData.hasBase() )
 
+	def testHash( self ) :
+	
+		d = Color3fVectorData( [
+			Color3f( 1, 1, 1 ),
+			Color3f( 2, 2, 2 ),
+			Color3f( 3, 3, 3 ),
+			Color3f( 4, 4, 4 ),
+			Color3f( 5, 5, 5 ),
+			Color3f( 6, 6, 6 ),
+			Color3f( 7, 7, 7 ),
+			Color3f( 8, 8, 8 ),
+		] )
+		
+		cd = CubeColorLookupfData( CubeColorLookupf(
+			V3i( 2 ), d, Box3f( V3f( -1 ), V3f( 1 ) ), CubeColorLookupf.Interpolation.NoInterpolation,
+		) )
+		h = cd.hash()
+		self.assertEqual( cd.hash(), h )
+		
+		cd = CubeColorLookupfData( CubeColorLookupf(
+			V3i( 2 ), d, Box3f( V3f( -2 ), V3f( 2 ) ), CubeColorLookupf.Interpolation.NoInterpolation,
+		) )
+		self.assertNotEqual( h, cd.hash() )
+
+		cd = CubeColorLookupfData( CubeColorLookupf(
+			V3i( 2 ), d, Box3f( V3f( -1 ), V3f( 1 ) ), CubeColorLookupf.Interpolation.Linear,
+		) )
+		self.assertNotEqual( h, cd.hash() )
+
 	def setUp(self):
 
 		if os.path.isfile( "test/IECore/CubeColorLookupData.cob" ) :

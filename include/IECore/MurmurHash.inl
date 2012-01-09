@@ -248,6 +248,12 @@ inline MurmurHash &MurmurHash::append( const Imath::Quatd &data )
 	return *this;
 }
 
+inline MurmurHash &MurmurHash::append( const MurmurHash &data )
+{
+	append( &data.m_h1, 2 );
+	return *this;
+}
+
 inline MurmurHash &MurmurHash::append( const char *data, size_t numElements )
 {
 	append( data, numElements * sizeof( char ), sizeof( char ) );

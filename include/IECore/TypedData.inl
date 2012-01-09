@@ -148,7 +148,7 @@ template <class T>
 void TypedData<T>::hash( MurmurHash &h ) const
 {
 	Data::hash( h );
-	h.append( readable() );
+	m_data.hash( h );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -109,14 +109,15 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupdData, CubeColo
 	}\
 \
 	template<>\
-	void TNAME::hash( MurmurHash &h ) const\
+	MurmurHash SharedDataHolder<TNAME::ValueType>::hash() const\
 	{\
-		Data::hash( h );\
-		const ValueType &s = readable();\
-		h.append( s.dimension() );\
-		h.append( s.domain() );\
-		h.append( (int)s.getInterpolation() );\
-		h.append( &(s.data()[0]), s.data().size() );\
+		const TNAME::ValueType &s = readable();\
+		MurmurHash result;\
+		result.append( s.dimension() );\
+		result.append( s.domain() );\
+		result.append( (int)s.getInterpolation() );\
+		result.append( &(s.data()[0]), s.data().size() );\
+		return result;\
 	}\
 
 SPECIALISE( CubeColorLookupfData )

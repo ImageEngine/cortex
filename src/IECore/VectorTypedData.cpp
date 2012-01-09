@@ -50,14 +50,6 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		Data::memoryUsage( accumulator );																	\
 		accumulator.accumulate( &readable(), sizeof( TNAME::ValueType ) + readable().capacity() * sizeof( TNAME::ValueType::value_type ) );	\
 	}																										\
-
-#define IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )\
-	template<>\
-	void TNAME::hash( MurmurHash &h ) const\
-	{\
-		Data::hash( h );\
-		h.append( &(readable()[0]), readable().size() );\
-	}\
 	
 #define IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )											\
 	template <>																									\
@@ -171,14 +163,12 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
-	IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )					\
 	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, 1)				\
 
 #define IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( TNAME, TID, N )		\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
-	IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( TNAME )					\
 	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )				\
 
 namespace IECore
@@ -219,7 +209,6 @@ IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4dVectorData, Color4dVect
 // the string type needs it's own memoryUsage so we don't use the whole macro for it's specialisations
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( StringVectorData, StringVectorDataTypeId )
-IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( StringVectorData )
 IE_CORE_DEFINENOBASEVECTORTYPEDDATAIOSPECIALISATION( StringVectorData )
 
 template<>
@@ -244,8 +233,6 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( BoolVectorData, BoolVectorData
 // short and unsigned short data types save/load themelves as int and unsigned int arrays, respectively.
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ShortVectorData, ShortVectorDataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( UShortVectorData, UShortVectorDataTypeId )
-IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( ShortVectorData )
-IE_CORE_DEFINEVECTORTYPEDDATAHASHSPECIALISATION( UShortVectorData )
 
 
 template<>
@@ -256,9 +243,8 @@ void BoolVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 }
 
 template<>
-void BoolVectorData::hash( MurmurHash &h ) const
+MurmurHash SharedDataHolder<std::vector<bool> >::hash() const
 {
-	Data::hash( h );
 	// we can't hash the raw data from inside the vector 'cos it's specialised
 	// to optimise for space, and that means the only access to the data is through
 	// a funny proxy class. so we repack the data into something we can deal with
@@ -274,7 +260,9 @@ void BoolVectorData::hash( MurmurHash &h ) const
 			p[i/8] |= 1 << (i % 8);
 		}
 	}
-	h.append( &(p[0]), p.size() );
+	MurmurHash result;
+	result.append( &(p[0]), p.size() );
+	return result;
 }
 
 template<>

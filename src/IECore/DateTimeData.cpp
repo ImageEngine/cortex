@@ -100,11 +100,10 @@ void DateTimeData::load( LoadContextPtr context )
 	}
 }
 
-/// Here we specialise the TypedData::hash() method to appropriately add our internal data to the hash.
+/// Here we specialise the SimpleDataHolder::hash() method to appropriately add our internal data to the hash.
 template<>
-void DateTimeData::hash( MurmurHash &h ) const
+void SimpleDataHolder<boost::posix_time::ptime>::hash( MurmurHash &h ) const
 {
-	Data::hash( h );
 	h.append( boost::posix_time::to_iso_string( readable() ) );
 }
 
