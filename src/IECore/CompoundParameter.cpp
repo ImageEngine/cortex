@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,8 +47,9 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( CompoundParameter );
 
-CompoundParameter::CompoundParameter( const std::string &name, const std::string &description, ConstCompoundObjectPtr userData )
-	:	Parameter( name, description, new CompoundObject, PresetsContainer(), false, userData )
+CompoundParameter::CompoundParameter( const std::string &name, const std::string &description, ConstCompoundObjectPtr userData, bool adoptChildPresets )
+	:	Parameter( name, description, new CompoundObject, PresetsContainer(), false, userData ),
+		m_adoptChildPresets( adoptChildPresets )
 {
 }
 
@@ -73,6 +74,11 @@ const Object *CompoundParameter::defaultValue() const
 
 const Parameter::PresetsContainer &CompoundParameter::presets() const
 {
+	if( !m_adoptChildPresets )
+	{
+		return Parameter::presets();
+	}
+
 	// naughty? nah! it gives the right semantics to an outside observer
 	PresetsContainer &pr = const_cast<PresetsContainer &>( Parameter::presets() );
 	pr.clear();
@@ -142,7 +148,7 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 
 bool CompoundParameter::presetsOnly() const
 {
-	if( !m_parameters.size() )
+	if( !m_adoptChildPresets || !m_parameters.size() )
 	{
 		return false;
 	}

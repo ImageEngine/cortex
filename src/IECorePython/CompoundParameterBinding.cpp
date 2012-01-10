@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,8 +53,8 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 
 		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrap );
 
-		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0 )
-			:	CompoundParameter( name, description, userData ), Wrapper< CompoundParameter >( self, this )
+		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0, bool adoptChildPresets = true )
+			:	CompoundParameter( name, description, userData, adoptChildPresets ), Wrapper< CompoundParameter >( self, this )
 		{
 			addParametersFromMembers( members );
 		}
@@ -160,13 +160,14 @@ void bindCompoundParameter()
 
 	RunTimeTypedClass<CompoundParameter, CompoundParameterWrap::Ptr>()
 		.def(
-			init< const std::string &, const std::string &, boost::python::optional<const list &, CompoundObjectPtr > >
+			init< const std::string &, const std::string &, boost::python::optional<const list &, CompoundObjectPtr, bool > >
 			(
 				(
 					arg( "name" ) = std::string(""),
 					arg( "description" ) = std::string(""),
 					arg( "members" ) = list(),
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
+					arg( "userData" ) = CompoundObject::Ptr( 0 ),
+					arg( "adoptChildPresets" ) = true
 				)
 			)
 		)

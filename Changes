@@ -23,6 +23,9 @@ at the file scope.
 scoped within attributeBegin()/attributeEnd() blocks. CoordinateSystem instances
 can now be given a transform to position them relative to their parent.
 
+* CompoundParameter presets behaviour can now be controlled explicitly using the
+adoptChildPresets argument to the constructor.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,13 +54,15 @@ class CompoundParameter : public Parameter
 		/// A type to hold a vector of Parameters.
 		typedef std::vector<ParameterPtr> ParameterVector;
 
-		/// Creates an empty CompoundParameter.
-		CompoundParameter( const std::string &name = "", const std::string &description = "", ConstCompoundObjectPtr userData=0 );
+		/// Creates an empty CompoundParameter. If adoptChildPresets is true, then the presets
+		/// for this parameter will be the intersection of the presets of the child parameters.
+		/// If adoptChildPresets is false, then the CompoundParameter itself will have no presets.
+		CompoundParameter( const std::string &name = "", const std::string &description = "", ConstCompoundObjectPtr userData=0, bool adoptChildPresets=true );
 		/// Create a CompoundParameter containing all the parameters in the range specified
 		/// by the forward iterators membersBegin and membersEnd, which are expected to point
 		/// to ParameterPtr objects.
 		template<typename I>
-		CompoundParameter( const std::string &name, const std::string &description, I membersBegin, I membersEnd, ConstCompoundObjectPtr userData=0 );
+		CompoundParameter( const std::string &name, const std::string &description, I membersBegin, I membersEnd, ConstCompoundObjectPtr userData=0, bool adoptChildPresets=true );
 
 		//! @name Parameter method overrides.
 		////////////////////////////////////////////////////////////////////////
@@ -69,11 +71,13 @@ class CompoundParameter : public Parameter
 		/// of all the child objects.
 		/// \threading It is not safe to call this from multiple concurrent threads.
 		virtual const Object *defaultValue() const;
-		/// Implemented to update the presets with the intersection of the presets
-		/// of all the child parameters. Please note that the map returned may differ between
-		/// one call to presets() and the next.
+		/// If true was passed to adoptChildPresets at construction, then update the presets
+		/// with the intersection of the presets of all the child parameters, otherwise returns
+		/// an empty container. Please note that the map returned may differ between one call
+		/// to presets() and the next.
 		virtual const PresetsContainer &presets() const;
-		/// Implemented to return true only if all children have presetsOnly() true.
+		/// Implemented to return true only if all children have presetsOnly() true and
+		/// true was passed to adoptChildPresets at construction.
 		virtual bool presetsOnly() const;
 		/// Values are only valid if they are a CompoundObject with a valid member
 		/// for each child parameter, and no additional values.
@@ -154,6 +158,7 @@ class CompoundParameter : public Parameter
 
 		ParameterMap m_namesToParameters;
 		ParameterVector m_parameters;
+		bool m_adoptChildPresets;
 
 };
 

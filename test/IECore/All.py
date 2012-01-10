@@ -256,6 +256,7 @@ from DeepPixelTest import DeepPixelTest
 from ConfigLoaderTest import ConfigLoaderTest
 from MurmurHashTest import MurmurHashTest
 from BoolVectorData import BoolVectorDataTest
+from CompoundParameterTest import CompoundParameterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
