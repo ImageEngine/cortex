@@ -26,6 +26,8 @@ can now be given a transform to position them relative to their parent.
 * CompoundParameter presets behaviour can now be controlled explicitly using the
 adoptChildPresets argument to the constructor.
 
+* Reduced cross-inclusion of headers in TypedObjectParameter.h - this should improve recompilation times a little.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.
