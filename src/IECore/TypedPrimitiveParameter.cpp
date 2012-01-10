@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/TypedPrimitiveParameter.h"
+#include "IECore/TypedObjectParameter.inl"
 #include "IECore/MotionPrimitive.h"
 #include "IECore/Primitive.h"
 #include "IECore/ImagePrimitive.h"

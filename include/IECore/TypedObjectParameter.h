@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -45,17 +45,17 @@
 namespace IECore
 {
 
-class Renderable;
-class StateRenderable;
-class AttributeState;
-class Shader;
-class Transform;
-class MatrixMotionTransform;
-class MatrixTransform;
-class VisibleRenderable;
-class Group;
-class ObjectVector;
-class SmoothSkinningData;
+IE_CORE_FORWARDDECLARE( Renderable )
+IE_CORE_FORWARDDECLARE( StateRenderable )
+IE_CORE_FORWARDDECLARE( AttributeState )
+IE_CORE_FORWARDDECLARE( Shader )
+IE_CORE_FORWARDDECLARE( Transform )
+IE_CORE_FORWARDDECLARE( MatrixMotionTransform )
+IE_CORE_FORWARDDECLARE( MatrixTransform )
+IE_CORE_FORWARDDECLARE( VisibleRenderable )
+IE_CORE_FORWARDDECLARE( Group )
+IE_CORE_FORWARDDECLARE( ObjectVector )
+IE_CORE_FORWARDDECLARE( SmoothSkinningData )
 
 /// The TypedObjectParameter class implements an ObjectParameter which rigidly only
 /// accepts one type of Object
@@ -114,7 +114,5 @@ IE_CORE_DECLAREPTR( ObjectVectorParameter );
 IE_CORE_DECLAREPTR( SmoothSkinningDataParameter );
 
 } // namespace IECore
-
-#include "IECore/TypedObjectParameter.inl"
 
 #endif // IE_CORE_TYPEDOBJECTPARAMETER_H

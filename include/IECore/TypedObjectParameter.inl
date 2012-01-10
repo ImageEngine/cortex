@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -35,24 +35,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+/// This file contains the implementation of TypedObjectParameter. Rather than include it
+/// in a public header it is #included in TypedObjectParameter.cpp and TypedPrimitiveParameter.cpp,
+/// and the relevant template classes are explicitly instantiated there. This cuts down compilation
+/// times.
+
 #include "boost/static_assert.hpp"
 
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
-
-#include "IECore/Renderable.h"
-#include "IECore/StateRenderable.h"
-#include "IECore/AttributeState.h"
-#include "IECore/Shader.h"
-#include "IECore/Transform.h"
-#include "IECore/MatrixMotionTransform.h"
-#include "IECore/MatrixTransform.h"
-#include "IECore/VisibleRenderable.h"
-#include "IECore/Group.h"
-#include "IECore/ObjectVector.h"
-#include "IECore/SmoothSkinningData.h"
-
 
 namespace IECore
 {
