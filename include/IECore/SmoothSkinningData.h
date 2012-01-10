@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -157,6 +157,8 @@ class SmoothSkinningData : public Data
 		void validateOffsets() const;
 };
 
-} // namespace
+IE_CORE_DECLAREPTR( SmoothSkinningData )
+
+} // namespace IECore
 
 #endif // IE_CORE_SMOOTHSKINNINGDATA_H
