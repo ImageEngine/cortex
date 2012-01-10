@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ using namespace IECore;
 using namespace boost;
 
 const unsigned int Shader::m_ioVersion = 0;
-Object::TypeDescription<Shader> Shader::m_description;
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Shader );
 
 Shader::Shader(  const std::string &name, const std::string &type, const CompoundDataMap &parameters )
 	: m_name( name ), m_type( type ), m_parameters( new CompoundData( parameters ) )
