@@ -1181,6 +1181,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:procedural:reentrant"] = typedAttributeSetter<ProceduralThreadingStateComponent>;
 		(*a)["gl:visibility:camera"] = typedAttributeSetter<CameraVisibilityStateComponent>;
 		(*a)["gl:depthTest"] = typedAttributeSetter<DepthTestStateComponent>;
+		(*a)["gl:depthMask"] = typedAttributeSetter<DepthMaskStateComponent>;
 	}
 	return a;
 }
@@ -1228,6 +1229,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:procedural:reentrant"] = typedAttributeGetter<ProceduralThreadingStateComponent>;
 		(*a)["gl:visibility:camera"] = typedAttributeGetter<CameraVisibilityStateComponent>;
 		(*a)["gl:depthTest"] = typedAttributeGetter<DepthTestStateComponent>;
+		(*a)["gl:depthMask"] = typedAttributeGetter<DepthMaskStateComponent>;
 	}
 	return a;
 }
