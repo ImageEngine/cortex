@@ -148,6 +148,7 @@ DisplayIop::DisplayIop( Node *node )
 	:	Iop( node ), m_portNumber( 1559 ), m_updateCount( 0 ), m_server( g_servers.get( m_portNumber ) ), m_driver( 0 )
 {
 	inputs( 0 );
+	slowness( 0 ); // disable caching as we're buffering everything internally ourselves
 	NukeDisplayDriver::instanceCreatedSignal.connect( boost::bind( &DisplayIop::driverCreated, this, _1 ) );
 }
 
@@ -172,6 +173,7 @@ void DisplayIop::knobs( DD::Image::Knob_Callback f )
 	Iop::knobs( f );
 	
 	Int_knob( f, &m_portNumber, "portNumber", "Port Number" );
+	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS | Knob::NO_ANIMATION );
 	Tooltip(
 		f,
 		"The port on which to receive images. This must match "
@@ -181,10 +183,12 @@ void DisplayIop::knobs( DD::Image::Knob_Callback f )
 }
 
 int DisplayIop::knob_changed( DD::Image::Knob *knob )
-{
+{	
 	if( knob->is( "portNumber" ) )
 	{
-		m_server = g_servers.get( m_portNumber );
+	 	int portNumber = this->knob( "portNumber" )->get_value();
+		m_server = g_servers.get( portNumber );
+		return 1;
 	}
 	
 	return Iop::knob_changed( knob );
@@ -194,8 +198,8 @@ void DisplayIop::append( DD::Image::Hash &hash )
 {
 	Iop::append( hash );
 	
-	hash.append(__DATE__); 
-	hash.append(__TIME__);
+	hash.append( __DATE__ ); 
+	hash.append( __TIME__ );
 	hash.append( m_updateCount );
 }
 
@@ -206,7 +210,7 @@ void DisplayIop::_validate( bool forReal )
 	{
 		displayWindow = m_driver->image()->getDisplayWindow();
 	}
-			
+
 	m_format = m_fullSizeFormat = Format( displayWindow.size().x + 1, displayWindow.size().y + 1 );
 	// these set function don't copy the format, but instead reference its address.
 	// we therefore have to store the format as member data.
