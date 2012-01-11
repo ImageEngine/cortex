@@ -200,15 +200,16 @@ void DisplayIop::append( DD::Image::Hash &hash )
 	
 	hash.append( __DATE__ ); 
 	hash.append( __TIME__ );
-	hash.append( m_updateCount );
+	hash.append( firstDisplayIop()->m_updateCount );
 }
 
 void DisplayIop::_validate( bool forReal )
 {
 	Box2i displayWindow( V2i( 0, 0 ), V2i( 255, 255 ) );
-	if( m_driver )
+	
+	if( firstDisplayIop()->m_driver )
 	{
-		displayWindow = m_driver->image()->getDisplayWindow();
+		displayWindow = firstDisplayIop()->m_driver->image()->getDisplayWindow();
 	}
 
 	m_format = m_fullSizeFormat = Format( displayWindow.size().x + 1, displayWindow.size().y + 1 );
@@ -229,9 +230,9 @@ void DisplayIop::engine( int y, int x, int r, const DD::Image::ChannelSet &chann
 	const ImagePrimitive *image = 0;
 	Box2i inputDataWindow;
 	Box2i inputDisplayWindow;
-	if( m_driver )
+	if( firstDisplayIop()->m_driver )
 	{
-		image = m_driver->image().get();
+		image = firstDisplayIop()->m_driver->image().get();
 		inputDataWindow = image->getDataWindow();
 		inputDisplayWindow = image->getDisplayWindow();
 	}
@@ -262,25 +263,32 @@ DD::Image::Op *DisplayIop::build( Node *node )
 	return new DisplayIop( node );
 }
 
+DisplayIop *DisplayIop::firstDisplayIop()
+{
+	return static_cast<DisplayIop *>( firstOp() );
+}
+
 void DisplayIop::driverCreated( NukeDisplayDriver *driver )
 {
 	ConstStringDataPtr portNumber = driver->parameters()->member<StringData>( "displayPort" );
 	if( portNumber && boost::lexical_cast<int>( portNumber->readable() ) == m_portNumber )
 	{
-		connectToDriver( driver );
+		firstDisplayIop()->connectToDriver( driver );
 	}
 }
 
 void DisplayIop::connectToDriver( NukeDisplayDriver *driver )
 {
+	assert( this == firstDisplayIop() );
+
 	if( m_driver )
 	{
 		m_driver->dataReceivedSignal.disconnect( boost::bind( &DisplayIop::driverDataReceived, this, _1, _2 ) );
 	}
 	
-	if( driver )
+	m_driver = driver;
+	if( m_driver )
 	{
-		m_driver = driver;
 		m_driver->dataReceivedSignal.connect( boost::bind( &DisplayIop::driverDataReceived, this, _1, _2 ) );	
 	}
 	
@@ -290,6 +298,7 @@ void DisplayIop::connectToDriver( NukeDisplayDriver *driver )
 
 void DisplayIop::driverDataReceived( NukeDisplayDriver *driver, const Imath::Box2i &box )
 {
+	assert( this == firstDisplayIop() );
 	m_updateCount++;
 	asapUpdate();
 }

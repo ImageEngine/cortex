@@ -66,6 +66,7 @@ class DisplayIop : public DD::Image::Iop
 		static const Description g_description;
 		static DD::Image::Op *build( Node *node );
 		
+		DisplayIop *firstDisplayIop();
 		void driverCreated( NukeDisplayDriver *driver );
 		void connectToDriver( NukeDisplayDriver *driver );
 		void driverDataReceived( NukeDisplayDriver *driver, const Imath::Box2i &box );
@@ -74,11 +75,14 @@ class DisplayIop : public DD::Image::Iop
 		
 		DD::Image::Format m_format;
 		DD::Image::Format m_fullSizeFormat;
-		
-		unsigned int m_updateCount;
+				
 		IECore::DisplayDriverServerPtr m_server;
+		// we only bother updating these for firstDisplayIop(),
+		// and then refer to them from all other instances. this
+		// avoids problems where nuke might make new ops mid render
+		// and those ops would have missed the display driver creation.
+		unsigned int m_updateCount;
 		IECoreNuke::NukeDisplayDriverPtr m_driver;
-		
 		
 };
 
