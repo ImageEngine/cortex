@@ -1,3 +1,9 @@
+Cortex 6.4.4
+============
+
+Improvements :
+
+* Added "gl:depthMask" attribute state for IECoreGL::Renderer
 
 Cortex 6.4.3
 ============
