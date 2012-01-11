@@ -330,6 +330,9 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"gl:depthTest" BoolData true</b><br>
 		/// Maps to glEnable/Disable GL_DEPTH_TEST
 		///
+		/// \li <b>"gl:depthMask" BoolData true</b><br>
+		/// Maps to glDepthMask GL_TRUE/GL_FALSE
+		///
 		/// \par Implementation specific visibility attributes :
 		////////////////////////////////////////////////////////////
 		///
