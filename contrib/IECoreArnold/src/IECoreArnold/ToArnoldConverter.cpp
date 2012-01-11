@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +35,7 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreArnold/ToArnoldConverter.h"
 
@@ -154,6 +156,8 @@ IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const char *name,
 {
 	switch( parameterType )
 	{
+		case AI_TYPE_BOOLEAN :
+			return new BoolData( AiNodeGetBool( node, name ) );		
 		case AI_TYPE_INT :
 			return new IntData( AiNodeGetInt( node, name ) );
 		case AI_TYPE_FLOAT :
@@ -195,12 +199,24 @@ IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const char *name 
 
 void ToArnoldConverter::getParameters( AtNode *node, IECore::CompoundDataMap &values )
 {
-	/// \todo Error handling and non-user parameters
+	/// \todo Non-user parameters
 
 	AtUserParamIterator *it = AiNodeGetUserParamIterator( node );  	
 	while( const AtUserParamEntry *param = AiUserParamIteratorGetNext( it ) )
 	{
-		values[AiUserParamGetName( param )] = getParameter( node, param );
+		DataPtr d = getParameter( node, param );
+		if( d )
+		{
+			values[AiUserParamGetName( param )] = d;
+		}
+		else
+		{
+			msg(
+				Msg::Warning,
+				"ToArnoldConverter::getParameters",
+				boost::format( "Unable to convert user parameter \"%s\"" ) % AiUserParamGetName( param )
+			);
+		}
 	}
 	AiUserParamIteratorDestroy( it );
 }
