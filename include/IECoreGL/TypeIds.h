@@ -113,6 +113,7 @@ enum TypeId
 	ProceduralThreadingStateComponentTypeId = 105070,
 	DepthTestStateComponentTypeId = 105071,
 	CameraVisibilityStateComponentTypeId = 105072,
+	DepthMaskStateComponentTypeId = 105073,
 	LastCoreGLTypeId = 105999,
 };
 
