@@ -41,6 +41,8 @@ Bug Fixes :
 * Fixed bugs in the arnold output driver which meant that exceptions in cortex display drivers went uncaught and became aborts when reaching arnold. Fixed further bugs where failure to create a cortex display driver would yield later
 segmentation faults rather than a graceful error report.
 
+* Fixed bug which made it impossible to output more than one display from IECoreArnold::Renderers.
+
 Cortex 6.4.3
 ============
 
