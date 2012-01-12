@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -270,7 +271,7 @@ void IECoreArnold::RendererImplementation::worldBegin()
 	AtArray *outputsArray = AiArrayAllocate( m_outputDescriptions.size(), 1, AI_TYPE_STRING );
 	for( int i = 0, e = m_outputDescriptions.size(); i < e; i++ )
 	{
-		AiArraySetStr( outputsArray, 0, m_outputDescriptions[i].c_str() );
+		AiArraySetStr( outputsArray, i, m_outputDescriptions[i].c_str() );
 	}
 	AiNodeSetArray( options, "outputs", outputsArray ); 
 
