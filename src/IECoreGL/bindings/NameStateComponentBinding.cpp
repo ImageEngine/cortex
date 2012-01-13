@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,8 @@ void bindNameStateComponent()
 		.def( "glName", &NameStateComponent::glName )
 		.def( "nameFromGLName", &NameStateComponent::nameFromGLName, return_value_policy<copy_const_reference>() )
 		.staticmethod( "nameFromGLName" )
+		.def( "glNameFromName", &NameStateComponent::glNameFromName, ( arg( "name" ), arg( "createIfMissing" ) = false ) )
+		.staticmethod( "glNameFromName" )
 	;
 }
 

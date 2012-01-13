@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,6 +71,10 @@ class NameStateComponent : public StateComponent
 		/// typically will come from the contents of the select buffer. Raises an Exception
 		/// if glName does not map to a NameStateComponent name.
 		static const std::string &nameFromGLName( GLuint glName );
+		/// Returns the internal GL name used for the given public (string) name. If no
+		//// internal name has been created yet then throws an Exception, unless createIfMissing
+		/// is true in which case an appropriate GL name is created.
+		static GLuint glNameFromName( const std::string &name, bool createIfMissing=false );
 
 	private :
 
@@ -87,6 +91,8 @@ class NameStateComponent : public StateComponent
 			>
 		> NameMap;
 		typedef NameMap::nth_index_const_iterator<0>::type ConstNameIterator;
+
+		static ConstNameIterator iteratorFromName( const std::string &name, bool createIfMissing );
 
 		ConstNameIterator m_it;
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -53,6 +53,13 @@ class TestNameStateComponent( unittest.TestCase ) :
 		self.assertEqual( n.name(), "sphere" )
 		n = NameStateComponent( "sphere" )
 		self.assertEqual( n.name(), "sphere" )
+
+	def testStaticFunctions( self ) :
+	
+		self.assertRaises( RuntimeError, NameStateComponent.glNameFromName, "thisNameHasn'tBeenUsedYet" )
+		
+		n = NameStateComponent.glNameFromName( "neitherHasThisOneButWe'reMakingIt", True )
+		self.assertEqual( NameStateComponent.nameFromGLName( n ), "neitherHasThisOneButWe'reMakingIt" )
 
 if __name__ == "__main__":
     unittest.main()

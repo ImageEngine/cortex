@@ -28,6 +28,8 @@ adoptChildPresets argument to the constructor.
 
 * Reduced cross-inclusion of headers in TypedObjectParameter.h - this should improve recompilation times a little.
 
+* Added IECoreGL::NameStateComponent::glNameFromName() method to match the existing nameFromGLName() method.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.

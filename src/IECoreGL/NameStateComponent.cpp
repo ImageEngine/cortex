@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,19 +48,7 @@ StateComponent::Description<NameStateComponent> NameStateComponent::g_descriptio
 
 NameStateComponent::NameStateComponent( const std::string &name )
 {
-	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
-	const NameMap::nth_index<0>::type &index = g_nameMap.get<0>();
-	NameMap::nth_index<0>::type::const_iterator it = index.find( name );
-	if( it!=g_nameMap.end() )
-	{
-		m_it = it;
-	}
-	else
-	{
-		lock.upgrade_to_writer();
-		m_it = g_nameMap.insert( NamePair( name, g_nameMap.size() ) ).first;
-	}
-
+	m_it = iteratorFromName( name, true );
 }
 
 NameStateComponent::~NameStateComponent()
@@ -95,4 +83,35 @@ const std::string &NameStateComponent::nameFromGLName( GLuint glName )
 		);
 	}
 	return it->first.value();
+}
+
+GLuint NameStateComponent::glNameFromName( const std::string &name, bool createIfMissing )
+{
+	return iteratorFromName( name, createIfMissing )->second;
+}
+
+NameStateComponent::ConstNameIterator NameStateComponent::iteratorFromName( const std::string &name, bool createIfMissing )
+{
+	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
+	const NameMap::nth_index<0>::type &index = g_nameMap.get<0>();
+	NameMap::nth_index<0>::type::const_iterator it = index.find( name );
+	if( it!=g_nameMap.end() )
+	{
+		return it;
+	}
+	else
+	{
+		if( createIfMissing )
+		{
+			lock.upgrade_to_writer();
+			return g_nameMap.insert( NamePair( name, g_nameMap.size() ) ).first;
+		}
+		else
+		{
+			throw IECore::InvalidArgumentException( boost::str(
+					boost::format( "NameStateComponent::iteratorFromName : Invalid name (%1%)" ) % name 
+				)
+			);
+		}
+	}
 }
