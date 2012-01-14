@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -500,6 +500,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 			image="arrowRight.xpm",
 			command = self._createCallback( self.__toggleParameterVisibility ),
 			annotation = "Show parameters",
+			visible = self.__parameterIsCollapsible(),
 		)
 		
 		attachForm += [
@@ -571,7 +572,17 @@ class ChildUI( IECoreMaya.UIElement ) :
 			image = image,
 			annotation = annotation,
 		)
-				
+	
+	def __parameterIsCollapsible( self ) :
+	
+		collapsible = True
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsible = self.__parameter.userData()["UI"]["collapsible"].value
+		with IECore.IgnoredExceptions( KeyError ) :
+			collapsible = self.__parameter.userData()["UI"]["collapsable"].value
+
+		return collapsible
+	
 	def _topLevelUIDeleted( self ) :
 	
 		self.__attributeChangedCallbackId = None
@@ -790,13 +801,20 @@ class ChildUI( IECoreMaya.UIElement ) :
 			)
 			
 			if labelPlugPath :
-				renameMenu = IECore.MenuDefinition(
-					[
-						( "Change label...", { "command" : self.__changeLabel } ),
-					]
-				)
-				IECoreMaya.createMenu( renameMenu, self.__label )
-				IECoreMaya.createMenu( renameMenu, self.__label, button = 1 )
+				
+				lockedLabel = False
+				with IECore.IgnoredExceptions( KeyError ) :
+					lockedLabel = self.__parameter["label"].userData()["UI"]["locked"]
+				
+				if not lockedLabel :
+					
+					renameMenu = IECore.MenuDefinition(
+						[
+							( "Change label...", { "command" : self.__changeLabel } ),
+						]
+					)
+					IECoreMaya.createMenu( renameMenu, self.__label )
+					IECoreMaya.createMenu( renameMenu, self.__label, button = 1 )
 			
 			attachForm += [
 				( self.__label, "top", 0 ),
