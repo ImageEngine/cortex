@@ -1,3 +1,14 @@
+Improvements :
+
+* IECoreMaya.ClassVectorParameterUI no longer allows classes with a non-collapsible root parameter to collapse.
+* IECoreMaya.ClassVectorParameterUI header labels accept ["UI"]["locked"] userData, in which case they don't have a "Change Me" context menu.
+
+Cortex 6.4.4
+============
+
+Improvements :
+
+* Added "gl:depthMask" attribute state for IECoreGL::Renderer
 
 Cortex 6.4.3
 ============

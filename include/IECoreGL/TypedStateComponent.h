@@ -192,6 +192,11 @@ typedef TypedStateComponent<bool, DepthTestStateComponentTypeId> DepthTestStateC
 template<>
 void DepthTestStateComponent::bind() const;
 
+/// Used to set glDepthMask to GL_TRUE or GL_FALSE
+typedef TypedStateComponent<bool, DepthMaskStateComponentTypeId> DepthMaskStateComponent;
+template<>
+void DepthMaskStateComponent::bind() const;
+
 // \todo: implement CurrentSpace, ShaderSpace, CameraSpace, ScreenSpace, RasterSpace and NDCSpace like in Renderman interface.
 enum RendererSpace
 {

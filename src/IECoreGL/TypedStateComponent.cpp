@@ -203,6 +203,23 @@ void DepthTestStateComponent::bind() const
 
 template class TypedStateComponent<bool, DepthTestStateComponentTypeId>;
 
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( DepthMaskStateComponent, bool, true );
+
+template<>
+void DepthMaskStateComponent::bind() const
+{
+	if( m_value )
+	{
+		glDepthMask( GL_TRUE );
+	}
+	else
+	{
+		glDepthMask( GL_FALSE );
+	}
+}
+
+template class TypedStateComponent<bool, DepthMaskStateComponentTypeId>;
+
 // instantiation of simple types
 //////////////////////////////////////////////////////////////////////
 
