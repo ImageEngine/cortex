@@ -145,7 +145,7 @@ const DisplayDriver::DisplayDriverDescription<NukeDisplayDriver> NukeDisplayDriv
 const DD::Image::Iop::Description DisplayIop::g_description( "ieDisplay", DisplayIop::build );
 
 DisplayIop::DisplayIop( Node *node )
-	:	Iop( node ), m_portNumber( 1559 ), m_updateCount( 0 ), m_server( g_servers.get( m_portNumber ) ), m_driver( 0 )
+	:	Iop( node ), m_portNumber( 1559 ), m_server( g_servers.get( m_portNumber ) ), m_updateCount( 0 ), m_driver( 0 )
 {
 	inputs( 0 );
 	slowness( 0 ); // disable caching as we're buffering everything internally ourselves
@@ -173,7 +173,9 @@ void DisplayIop::knobs( DD::Image::Knob_Callback f )
 	Iop::knobs( f );
 	
 	Int_knob( f, &m_portNumber, "portNumber", "Port Number" );
-	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS | Knob::NO_ANIMATION );
+	// we must have KNOB_CHANGED_RECURSIVE set otherwise nuke doesn't give us knob_changed()
+	// calls when the knob value is changed from a knobChanged method of a PythonPanel.
+	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS | Knob::KNOB_CHANGED_RECURSIVE | Knob::NO_ANIMATION );
 	Tooltip(
 		f,
 		"The port on which to receive images. This must match "
