@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -63,7 +63,7 @@ targetApp = getOption( "APP", None )
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
 # fall back to the generic settings for this major version.
-cortexReg = IEEnv.registry["libraries"]["cortex"]["6"].get( platform, IEEnv.registry["libraries"]["cortex"]["6"] )
+cortexReg = IEEnv.registry["libraries"]["cortex"]["7"].get( platform, IEEnv.registry["libraries"]["cortex"]["7"] )
 
 tbbVersion = cortexReg["tbbVersion"]
 if targetApp :
@@ -237,7 +237,7 @@ arnoldVersion = getOption( "ARNOLD_VERSION", os.environ["ARNOLD_VERSION"] )
 try :
 	arnoldReg = IEEnv.registry["apps"]["arnold"][arnoldVersion][platform]
 	if arnoldReg["compiler"]==compiler and arnoldReg["compilerVersion"]==compilerVersion :
-		ARNOLD_ROOT = arnoldReg["location"]
+		pass#ARNOLD_ROOT = arnoldReg["location"]
 except :
 	pass
 
