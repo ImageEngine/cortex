@@ -35,6 +35,7 @@
 #include "IECoreMaya/FromMayaUnitPlugConverter.h"
 
 #include "IECore/CompoundParameter.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "maya/MAngle.h"
 #include "maya/MDistance.h"
