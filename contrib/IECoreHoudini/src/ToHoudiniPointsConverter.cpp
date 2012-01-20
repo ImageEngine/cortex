@@ -66,13 +66,13 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		positions = points->variableData<V3fVectorData>( "position" );
 	}
 	
-	GEO_PointList newPoints = appendPoints( geo, positions );
-	if ( !newPoints.entries() )
+	GA_Range newPoints = appendPoints( geo, positions );
+	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
 	}
 	
-	transferAttribs( points, geo, &newPoints, 0, PrimitiveVariable::Vertex );
+	transferAttribs( points, geo, newPoints, GA_Range(), PrimitiveVariable::Vertex );
 	
 	return true;
 }

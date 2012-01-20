@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,14 +67,14 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		
 	private :
 
-		typedef std::pair<unsigned, GB_PrimitiveGroup*> PrimIdGroupPair;
-		typedef std::map<unsigned, GB_PrimitiveGroup*> PrimIdGroupMap;
-		typedef std::map<unsigned, GB_PrimitiveGroup*>::iterator PrimIdGroupMapIterator;
+		typedef std::pair<unsigned, GA_PrimitiveGroup*> PrimIdGroupPair;
+		typedef std::map<unsigned, GA_PrimitiveGroup*> PrimIdGroupMap;
+		typedef std::map<unsigned, GA_PrimitiveGroup*>::iterator PrimIdGroupMapIterator;
 
-		/// Converts the contents of the GB_PrimitiveGroup into a VisibleRenderable
-		size_t doGroupConversion( const GU_Detail *geo, GB_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result ) const;
+		/// Converts the contents of the GA_PrimitiveGroup into a VisibleRenderable
+		size_t doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result ) const;
 
-		/// Regroups a single GB_PrimitiveGroup into several groups, based on primitive type ids
+		/// Regroups a single GA_PrimitiveGroup into several groups, based on primitive type ids
 		/// @param geo The GU_Detail containing the orginal group. New groups will be added based on primitive type ids
 		/// @param groupMap A map from primitive type id to the newly created group for that type
 		/// @return The number of newly created groups ( groupMap.size() )

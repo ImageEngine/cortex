@@ -79,9 +79,9 @@ namespace IECoreHoudini
 			//@{
 			/// \todo: the concept of class category is a hack to make the UI usable. remove this when
 			/// Houdini supports cascading menus for parameters.
-			static void buildClassCategoryMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * );
-			static void buildClassNameMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * );
-			static void buildVersionMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, PRM_Parm * );
+			static void buildClassCategoryMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
+			static void buildClassNameMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
+			static void buildVersionMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 			static int reloadClassCallback( void *data, int index, float time, const PRM_Template *tplate );
 			static int reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 			static void classNames( const std::string searchPathEnvVar, const std::string &matchString, std::vector<std::string> &names );

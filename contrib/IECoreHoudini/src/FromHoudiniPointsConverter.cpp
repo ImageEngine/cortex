@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,7 +59,7 @@ FromHoudiniPointsConverter::~FromHoudiniPointsConverter()
 
 FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConvert( const GU_Detail *geo )
 {
-	if ( !geo->primitives().entries() )
+	if ( !geo->getNumPrimitives() )
 	{
 		return Ideal;
 	}
@@ -69,9 +69,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConv
 
 PrimitivePtr FromHoudiniPointsConverter::doPrimitiveConversion( const GU_Detail *geo ) const
 {
-	const GEO_PointList &points = geo->points();
-	
-	PointsPrimitivePtr result = new PointsPrimitive( points.entries() );
+	PointsPrimitivePtr result = new PointsPrimitive( geo->getNumPoints() );
 	
 	transferAttribs( geo, result, PrimitiveVariable::Vertex );
 	

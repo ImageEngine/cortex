@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,6 +53,11 @@ GEO_CobIOTranslator::~GEO_CobIOTranslator()
 {
 }
 
+GEO_IOTranslator *GEO_CobIOTranslator::duplicate() const
+{
+	return new GEO_CobIOTranslator();
+}
+
 const char *GEO_CobIOTranslator::formatName() const
 {
 	return "Cortex Object Format";
@@ -75,7 +80,7 @@ int GEO_CobIOTranslator::checkMagicNumber( unsigned magic )
 	return 0;
 }
 
-bool GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic )
+GA_Detail::IOStatus GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic )
 {
 	((UT_IFStream&)is).close();
 	
@@ -112,12 +117,7 @@ bool GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_mag
 	return converter->convert( handle );
 }
 
-int GEO_CobIOTranslator::fileSave( const GEO_Detail *geo, ostream &os )
-{
-	return 0;
-}
-
-int GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName )
+GA_Detail::IOStatus GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName )
 {
 	((ofstream&)os).close();
 	

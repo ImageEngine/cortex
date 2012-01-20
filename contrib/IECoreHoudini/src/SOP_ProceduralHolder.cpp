@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GA/GA_AIFBlindData.h"
 #include "UT/UT_Interrupt.h"
 #include "PRM/PRM_Parm.h"
 
@@ -120,7 +121,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 		addError( SOP_MESSAGE, msg );
 		return error();
 	}
-
+	
 	if( lockInputs(context) >= UT_ERROR_ABORT )
 	{
 		return error();
@@ -137,12 +138,14 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	// update the SOP parameters to match the procedural parameters
 	updateParameter( procedural->parameters(), now, "", true );
 	
-	// calculate our bounding box
 	try
 	{
 		// put our cortex passdata on our gdp as a detail attribute
 		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER );
-		gdp->addAttrib( "IECoreHoudini::NodePassData", sizeof(IECoreHoudini::NodePassData), GB_ATTRIB_MIXED, &data );
+		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData", NULL, NULL, "blinddata" );
+		GA_Attribute *attr = attrRef.getAttribute();
+		const GA_AIFBlindData *blindData = attr->getAIFBlindData();
+		blindData->setDataSize( attr, sizeof(IECoreHoudini::NodePassData), &data );
 
 		// calculate our bounding box
 		Imath::Box3f bbox = procedural->bound();

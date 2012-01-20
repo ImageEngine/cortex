@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,202 +70,29 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGeometryConverter::Descr
 	return T::canConvert( geo );
 }
 
-template <typename Container>
-void FromHoudiniGeometryConverter::transferAttribData(
-	const Container &container, IECore::Primitive *result,
-	IECore::PrimitiveVariable::Interpolation interpolation,
-	const GB_Attribute *attr, const GB_AttributeRef &attrRef,
-	const RemappingInfo *remap_info
-) const
-{
-	IECore::DataPtr dataPtr = 0;
-
-	// we use this initial value to indicate we don't have a remapping so just
-	// guess what destination type to use.
-	IECore::TypeId var_type = IECore::InvalidTypeId;
-	int var_offset = -1;
-	if ( remap_info )
-	{
-		var_type = remap_info->type;
-		var_offset = remap_info->offset;
-	}
-
-	switch ( attr->getType() )
-	{
-		case GB_ATTRIB_FLOAT :
-		{
-			unsigned dimensions = attr->getSize() / sizeof( float );
-			switch ( dimensions )
-			{
-				case 1:
-					dataPtr = extractData<IECore::FloatVectorData>( container, attrRef );
-					break;
-				case 2:
-					// it can be either a single float (sub-component), or (default) just a V2f
-					switch( var_type )
-					{
-						case IECore::FloatVectorDataTypeId:
-						{
-							dataPtr = extractData<IECore::FloatVectorData>( container, attrRef, var_offset );
-							break;
-						}
-						default:
-						{
-							dataPtr = extractData<IECore::V2fVectorData>( container, attrRef );
-							break;
-						}
-					}
-					break;
-				case 3:
-					// it can be either a single float (sub-component), Color3f or (default) just a V3f
-					switch( var_type )
-					{
-						case IECore::FloatVectorDataTypeId:
-						{
-							dataPtr = extractData<IECore::FloatVectorData>( container, attrRef, var_offset );
-							break;
-						}
-						case IECore::Color3fVectorDataTypeId:
-						{
-							dataPtr = extractData<IECore::Color3fVectorData>( container, attrRef );
-							break;
-						}
-						default:
-						{
-							dataPtr = extractData<IECore::V3fVectorData>( container, attrRef );
-							break;
-						}
-					}
-					break;
-				default:
-					break;
-			}
-			break;
-		}
-		case GB_ATTRIB_INT :
- 		{
-			unsigned dimensions = attr->getSize() / sizeof( float );
-			switch ( dimensions )
-			{
-				case 1:
-					dataPtr = extractData<IECore::IntVectorData>( container, attrRef );
-					break;
-				case 2:
-					dataPtr = extractData<IECore::V2iVectorData>( container, attrRef );
-					break;
-				case 3:
-					dataPtr = extractData<IECore::V3iVectorData>( container, attrRef );
-					break;
-				default:
-					break;
-			}
-			break;
- 		}
- 		case GB_ATTRIB_VECTOR :
- 		{
-			unsigned dimensions = attr->getSize() / (sizeof( float ) * 3);
-			if ( dimensions == 1 ) // only support single element vectors
-			{
-				// a vector can be either a single float, a Color3f or a V3f
-				switch( var_type )
-				{
-					case IECore::FloatVectorDataTypeId:
-					{
-						dataPtr = extractData<IECore::FloatVectorData>( container, attrRef, var_offset );
-						break;
-					}
-					case IECore::Color3fVectorDataTypeId:
-					{
-						dataPtr = extractData<IECore::Color3fVectorData>( container, attrRef );
-						break;
-					}
-					default:
-					{
-						dataPtr = extractData<IECore::V3fVectorData>( container, attrRef );
-						break;
-					}
-				}
-			}
- 			break;
- 		}
-		case GB_ATTRIB_INDEX :
- 		{
-			/// \todo: replace this with IECore::IndexedData once it exists...
-			IECore::IntVectorDataPtr indexDataPtr = 0;
-			dataPtr = extractStringVectorData( container, attr, attrRef, indexDataPtr );
-			if ( indexDataPtr )
-			{
-				std::string name( attr->getName() );
-				if ( remap_info )
-				{
-					name = remap_info->name;
-					interpolation = remap_info->interpolation;
-				}
-				
-				name = name + "Indices";
-				result->variables[name] = IECore::PrimitiveVariable( interpolation, indexDataPtr );
-				interpolation = IECore::PrimitiveVariable::Constant;
-			}
-			break;
-		}
-		default :
-		{
-			break;
-		}
-	}
-
-	if ( dataPtr )
-	{
-		std::string var_name( attr->getName() );
-		IECore::PrimitiveVariable::Interpolation var_interp = interpolation;
-
-		// remap our name and interpolation
-		if ( remap_info )
-		{
-			var_name = remap_info->name;
-			var_interp = remap_info->interpolation;
-		}
-		
-		// add the primitive variable to our result
-		result->variables[ var_name ] = IECore::PrimitiveVariable( var_interp, dataPtr );
-	}
-}
-
-template <typename T, typename Container>
-IECore::DataPtr FromHoudiniGeometryConverter::extractData( const Container &container, const GB_AttributeRef &attrRef, int index ) const
+template <typename T>
+IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const
 {
 	typedef typename T::BaseType BaseType;
-	typedef typename T::ValueType::value_type ValueType;
-	
-	size_t size = container.entries();
 	
 	typename T::Ptr data = new T();
-	data->writable().resize( size );
+	data->writable().resize( range.getEntries() );
 	BaseType *dest = data->baseWritable();
 	
-	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
-	unsigned int offset = 0;
-	if ( index>=0 )
+	if ( elementIndex == -1 )
 	{
-		offset = index;
+		attr->getAIFTuple()->getRange( attr, range, dest );
 	}
-
-	for ( size_t i=0; i < size; i++ )
+	else
 	{
-		/// \todo: castAttribData() is deprecated in Houdini 11. replace this with getValue()
-		/// when we drop support for Houdini 10.
-		const BaseType *src = container[i]->template castAttribData<BaseType>( attrRef );
-		for ( size_t j=0; j < dimensions; j++ )
-		{
-			dest[ ( i * dimensions ) + j ] = src[j+offset];
-		}
+		attr->getAIFTuple()->getRange( attr, range, dest, elementIndex, 1 );
 	}
 
 	return data;
 }
 
 template <typename T>
-IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GB_AttributeTable &attribs, const GB_AttributeRef &attrRef ) const
+IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr ) const
 {
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType ValueType;
@@ -273,61 +100,9 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GB_AttributeTab
 	typename T::Ptr data = new T();
 	BaseType *dest = data->baseWritable();
 
-	/// \todo: castAttribData() is deprecated in Houdini 11. replace this with getValue()
-	/// when we drop support for Houdini 10.
-	const BaseType *src = attribs.castAttribData<BaseType>( attrRef );
-
 	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
-	for ( size_t j=0; j < dimensions; j++ )
-	{
-		dest[j] = src[j];
-	}
+	attr->getAIFTuple()->get( attr, 0, dest, dimensions );
 
-	return data;
-}
-
-template <typename Container>
-IECore::DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const Container &container, const GB_Attribute *attr, const GB_AttributeRef &attrRef, IECore::IntVectorDataPtr &indexData ) const
-{
-	IECore::StringVectorDataPtr data = new IECore::StringVectorData();
-	
-	std::vector<std::string> &dest = data->writable();
-	
-	size_t numStrings = attr->getIndexSize();
-	for ( size_t i=0; i < numStrings; i++ )
-	{
-		dest.push_back( attr->getIndex( i ) );
-	}
-	
-	indexData = new IECore::IntVectorData();
-	std::vector<int> &indexContainer = indexData->writable();
-	size_t entries = container.entries();
-	indexContainer.resize( entries );
-	int *indices = indexData->baseWritable();
-	
-	bool adjustedDefault = false;
-	for ( size_t i=0; i < entries; i++ )
-	{
-		/// \todo: castAttribData() is deprecated in Houdini 11. replace this with getValue()
-		/// when we drop support for Houdini 10.
-		const int *src = container[i]->template castAttribData<int>( attrRef );
-		
-		if ( src[0] < 0 )
-		{
-			if ( !adjustedDefault )
-			{
-				dest.push_back( "" );
-				adjustedDefault = true;
-			}
-			
-			indices[i] = numStrings;
-		}
-		else
-		{
-			indices[i] = src[0];
-		}
-	}
-	
 	return data;
 }
 

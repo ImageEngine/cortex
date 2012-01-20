@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,9 +35,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "UT/UT_Interrupt.h"
+#include "GA/GA_AIFBlindData.h"
 #include "PRM/PRM_Parm.h"
-#include "GB/GB_AttributeRef.h"
+#include "UT/UT_Interrupt.h"
 
 #include "IECore/Op.h"
 #include "IECore/VisibleRenderable.h"
@@ -100,7 +100,6 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	// update the SOP parameters to match the IECore::Op parameters
 	updateParameter( op->parameters(), now, "", true );
 
-	// if we have an op, make it do itself
 	try
 	{
 		// make our Cortex op do it's thing...
@@ -108,7 +107,10 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 
 		// pass ourselves onto the GR_Cortex render hook
 		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_OPHOLDER );
-		gdp->addAttrib( "IECoreHoudini::NodePassData", sizeof(IECoreHoudini::NodePassData), GB_ATTRIB_MIXED, &data );
+		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData", NULL, NULL, "blinddata" );
+		GA_Attribute *attr = attrRef.getAttribute();
+		const GA_AIFBlindData *blindData = attr->getAIFBlindData();
+		blindData->setDataSize( attr, sizeof(IECoreHoudini::NodePassData), &data );
 
 		// if our result is a visible renderable then set our bounds on our output gdp
 		const IECore::Object *result = op->resultParameter()->getValue();

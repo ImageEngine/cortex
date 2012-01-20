@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,6 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+
+#include "IECore/MessageHandler.h"
 
 #include "ToHoudiniStringAttribConverter.h"
 
@@ -64,27 +66,54 @@ ConstIntVectorParameterPtr ToHoudiniStringVectorAttribConverter::indicesParamete
 	return m_indicesParameter;
 }
 
-GB_AttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const
+GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const
 {
-	UT_PtrArray<GU_Detail*> geoList( 1 );
-	geoList[0] = geo;
+	IECore::msg( IECore::MessageHandler::Error, "ToHoudiniStringVectorAttribConverter", "Does not support Detail attributes." );
+	return GA_RWAttributeRef();
+}
+
+GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const
+{
+	assert( data );
+
+	const IECore::StringVectorData *stringVectorData = IECore::runTimeCast<const IECore::StringVectorData>( data );
+	if ( !stringVectorData )
+	{
+		throw IECore::Exception( ( boost::format( "ToHoudiniStringVectorAttribConverter::doConversion: PrimitiveVariable \"%s\" does not contain IECore::StringVectorData." ) % name ).str() );
+	}
 	
-	return doVectorConversion<UT_PtrArray<GU_Detail*> >( data, name, geo, &geoList, GEO_DETAIL_DICT );
-}
-
-GB_AttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PointList *points ) const
-{
-	return doVectorConversion<GEO_PointList>( data, name, geo, points, GEO_POINT_DICT );
-}
-
-GB_AttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const
-{
-	return doVectorConversion<GEO_PrimList>( data, name, geo, primitives, GEO_PRIMITIVE_DICT );
-}
-
-GB_AttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, VertexList *vertices ) const
-{
-	return doVectorConversion<VertexList>( data, name, geo, vertices, GEO_VERTEX_DICT );
+	GA_RWAttributeRef attrRef = geo->addStringTuple( range.getOwner(), name.c_str(), 1 );
+	if ( attrRef.isInvalid() )
+	{
+		throw IECore::Exception( ( boost::format( "ToHoudiniStringVectorAttribConverter::doConversion: Invalid GA_RWAttributeRef returned for PrimitiveVariable \"%s\"." ) % name ).str() );
+	}
+	
+	if ( !range.isValid() || range.empty() )
+	{
+		return attrRef;
+	}
+	
+	GA_Attribute *attr = attrRef.getAttribute();
+	
+	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
+	
+	UT_StringArray strings;
+	const std::vector<std::string> &stringVector = stringVectorData->readable();
+	
+	const std::vector<int> &indices = ((const IECore::IntVectorData *)m_indicesParameter->getValidatedValue())->readable();
+	if ( indices.empty() || stringVector.empty() )
+	{
+		return attrRef;
+	}
+	
+	size_t i = 0;
+	size_t numIndices = indices.size();
+	for ( GA_Iterator it=range.begin(); !it.atEnd(), i < numIndices; ++it, ++i )
+	{
+		tuple->setString( attr, it.getOffset(), stringVector[ indices[i] ].c_str(), 0 );
+	}
+	
+	return attrRef;
 }
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniStringDetailAttribConverter );
@@ -100,7 +129,7 @@ ToHoudiniStringDetailAttribConverter::~ToHoudiniStringDetailAttribConverter()
 {
 }
 
-GB_AttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const
+GA_RWAttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const
 {
 	assert( data );
 
@@ -110,38 +139,21 @@ GB_AttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECore
 		throw IECore::Exception( ( boost::format( "ToHoudiniStringDetailAttribConverter::doConversion: PrimitiveVariable \"%s\" does not contain IECore::StringData." ) % name ).str() );
 	}
 
-	GB_AttributeRef attrRef = geo->addAttribute( name.c_str(), sizeof( int ), GB_ATTRIB_INDEX, "", GEO_DETAIL_DICT );
-	if ( GBisAttributeRefInvalid( attrRef ) )
+	GA_RWAttributeRef attrRef = geo->addStringTuple( GA_ATTRIB_DETAIL, name.c_str(), 1 );
+	if ( attrRef.isInvalid() )
 	{
-		throw IECore::Exception( ( boost::format( "ToHoudiniStringDetailAttribConverter::doConversion: Invalid GB_AttributeRef returned for PrimitiveVariable \"%s\"." ) % name ).str() );
+		throw IECore::Exception( ( boost::format( "ToHoudiniStringDetailAttribConverter::doConversion: Invalid GA_RWAttributeRef returned for PrimitiveVariable \"%s\"." ) % name ).str() );
 	}
 	
-	GEO_AttributeHandle attribHandle = geo->getAttribute( GEO_DETAIL_DICT, name.c_str() );
-	attribHandle.addDefinedString( stringData->readable().c_str() );
-	
-	UT_StringArray definedStrings;
-	if ( attribHandle.getDefinedStrings( definedStrings ) && definedStrings.entries() )
-	{
-		attribHandle.setElement( geo );
-		attribHandle.setString( definedStrings( 0 ) );
-	}
+	GA_Attribute *attr = attrRef.getAttribute();
+	attr->getAIFSharedStringTuple()->setString( attr, 0, stringData->readable().c_str(), 0 );
 	
 	return attrRef;
 }
 
-GB_AttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PointList *points ) const
+GA_RWAttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const
 {
-	throw IECore::Exception( "ToHoudiniStringDetailAttribConverter does not support Point attributes." );
-}
-
-GB_AttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const
-{
-	throw IECore::Exception( "ToHoudiniStringDetailAttribConverter does not support Primitive attributes." );
-}
-
-GB_AttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, VertexList *vertices ) const
-{
-	throw IECore::Exception( "ToHoudiniStringDetailAttribConverter does not support Vertex attributes." );
+	throw IECore::Exception( "ToHoudiniStringDetailAttribConverter does not support Element attributes." );
 }
 
 } // namespace IECoreHoudini

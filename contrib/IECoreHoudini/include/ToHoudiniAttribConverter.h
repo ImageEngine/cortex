@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,8 @@
 #ifndef IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
 
-#include "GB/GB_AttributeRef.h"
+#include "GA/GA_AttributeRef.h"
 #include "GU/GU_Detail.h"
-#include "GU/GU_DetailHandle.h"
-#include "UT/UT_PtrArray.h"
 
 #include "IECore/Data.h"
 
@@ -59,16 +57,12 @@ class ToHoudiniAttribConverter : public ToHoudiniConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniAttribConverter, ToHoudiniAttribConverterTypeId, ToHoudiniConverter );
-
-		typedef UT_PtrArray<GEO_Vertex*> VertexList;
 		
 		/// Converts the IECore::Data into a GB_Attribute on the given GU_Detail and returns the
-		/// associated GB_AttributeRef. It is assumed that the user has aquired the write lock
+		/// associated GA_RWAttributeRef. It is assumed that the user has aquired the write lock
 		/// for the given GU_Detail.
-		GB_AttributeRef convert( std::string name, GU_Detail *geo ) const;
-		GB_AttributeRef convert( std::string name, GU_Detail *geo, GEO_PointList *points ) const;
-		GB_AttributeRef convert( std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const;
-		GB_AttributeRef convert( std::string name, GU_Detail *geo, VertexList *vertices ) const;
+		GA_RWAttributeRef convert( std::string name, GU_Detail *geo ) const;
+		GA_RWAttributeRef convert( std::string name, GU_Detail *geo, const GA_Range &range ) const;
 
 		/// Creates a converter which will convert the given IECore::Data to a Houdini GB_Attribute.
 		/// Returns 0 if no such converter can be found.
@@ -81,10 +75,8 @@ class ToHoudiniAttribConverter : public ToHoudiniConverter
 		virtual ~ToHoudiniAttribConverter();
 		
 		/// Must be implemented by derived classes to create a GB_Attribute on the given GU_Detail and fill it with the IECore::Data
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const = 0;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PointList *points ) const = 0;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const = 0;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, VertexList *vertices ) const = 0;
+		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const = 0;
+		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const = 0;
 		
 		typedef ToHoudiniAttribConverterPtr (*CreatorFn)( const IECore::Data *data );
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 
 #include "GEO/GEO_IOTranslator.h"
 #include "GU/GU_Detail.h"
+#include "UT/UT_IStream.h"
 
 namespace IECoreHoudini
 {
@@ -49,20 +50,19 @@ class GEO_CobIOTranslator : public GEO_IOTranslator
 
 		GEO_CobIOTranslator();
 		virtual ~GEO_CobIOTranslator();
-
+		
+		virtual GEO_IOTranslator *duplicate() const;
+		
 		virtual const char *formatName() const;
 
 		virtual int checkExtension( const char *fileName );
 		virtual int checkMagicNumber( unsigned magic );
 
 		/// Loads a cob if the content of the cob has a registered ToHoudiniGeometryConverter
-		virtual bool fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );
-		
-		/// \todo: Houdini 10 requires that this definition exist, even though it isn't used
-		virtual int fileSave( const GEO_Detail *geo, ostream &os );
+		virtual GA_Detail::IOStatus fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );
 		
 		/// Saves a cob by attempting to find a FromHoudiniGeometryConverter matching the given GEO_Detail
-		virtual int fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName );
+		virtual GA_Detail::IOStatus fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName );
 };
 
 } // namespace IECoreHoudini

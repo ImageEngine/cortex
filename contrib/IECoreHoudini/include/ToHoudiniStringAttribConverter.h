@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,7 +46,7 @@ namespace IECoreHoudini
 IE_CORE_FORWARDDECLARE( ToHoudiniStringVectorAttribConverter );
 
 /// A ToHoudiniStringVectorAttribConverter can convert from IECore::StringVectorData
-/// to a Houdini GB_Attribute on the provided GU_Detail.
+/// to a Houdini GA_Attribute on the provided GU_Detail.
 class ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
 {
 
@@ -63,13 +63,8 @@ class ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
 		
 	protected :
 		
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PointList *points ) const;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, VertexList *vertices ) const;
-		
-		template<typename Container>
-		GB_AttributeRef doVectorConversion( const IECore::Data *data, std::string name, GU_Detail *geo, Container *container, GEO_AttributeOwner owner ) const;
+		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
+		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const;
 		
 	private :
 			
@@ -83,7 +78,7 @@ class ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
 IE_CORE_FORWARDDECLARE( ToHoudiniStringDetailAttribConverter );
 
 /// A ToHoudiniStringDetailAttribConverter can convert from IECore::StringData
-/// to a Houdini GB_Attribute on the provided GU_Detail.
+/// to a Houdini GA_Attribute on the provided GU_Detail.
 class ToHoudiniStringDetailAttribConverter : public ToHoudiniAttribConverter
 {
 
@@ -97,10 +92,8 @@ class ToHoudiniStringDetailAttribConverter : public ToHoudiniAttribConverter
 		
 	protected :
 		
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PointList *points ) const;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, GEO_PrimList *primitives ) const;
-		virtual GB_AttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, VertexList *vertices ) const;
+		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
+		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const;
 
 	private :
 				
@@ -109,7 +102,5 @@ class ToHoudiniStringDetailAttribConverter : public ToHoudiniAttribConverter
 };
 
 } // namespace IECoreHoudini
-
-#include "ToHoudiniStringAttribConverter.inl"
 
 #endif // IECOREHOUDINI_TOHOUDINISTRINGATTRIBCONVERTER_H
