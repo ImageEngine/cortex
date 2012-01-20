@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -139,10 +139,10 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.keys(), prim.keys() )
-		## \todo: remove this logic if we ever get Color3fData supported by the FromHoudiniGeometryConverter
-		for key in [ x for x in prim.keys() if x not in [ "color3fDetail", "color3fPoint" ] ] :
+		for key in prim.keys() :
 			self.assertEqual( result[key], prim[key] )
-		
+		self.assertEqual( result, prim )
+			
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=False ) :
 		geo = sop.geometry()
 		for key in [ "floatDetail", "intDetail", "stringDetail" ] :
@@ -438,14 +438,14 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribs( self ) :
 		points = self.points()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 0 ) # float
 		detailAttr.parm( "size" ).set( 1 ) # 1 element
 		detailAttr.parm( "value1" ).set( 123.456 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 0 ) # float
@@ -459,7 +459,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribsWithDifferentTypes( self ) :
 		points = self.points()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 1 ) # int
@@ -468,7 +468,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detailAttr.parm( "value2" ).set( 11 )
 		detailAttr.parm( "value3" ).set( 12 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 1 ) # int
@@ -488,7 +488,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		sop = self.emptySop()
 		
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), points )
-		self.assertRaises( RuntimeError, IECore.curry( IECoreHoudini.ToHoudiniPointsConverter( points ).convert, sop ) )
+		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
 		
 		allAttribs = [ x.name() for x in sop.geometry().globalAttribs() ]
 		allAttribs.extend( [ x.name() for x in sop.geometry().pointAttribs() ] )
@@ -500,7 +500,6 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		del points["floatPrim"]
 		del points["floatVert"]
 		
-		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
 		self.comparePrimAndSop( points, sop )
 
 	def tearDown( self ) :

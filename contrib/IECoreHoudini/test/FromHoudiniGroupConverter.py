@@ -230,11 +230,12 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.twoTorii() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 2 )
+		childNames = [ x.blindData()["name"].value for x in result.children() ]
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[0].blindData()["name"].value, "torusAGroup" )
+		self.failUnless( "torusAGroup" in childNames )
 		self.assertEqual( result.children()[0]["P"].data.size(), 100 )
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[1].blindData()["name"].value, "torusBGroup" )
+		self.failUnless( "torusBGroup" in childNames )
 		self.assertEqual( result.children()[1]["P"].data.size(), 100 )
 	
 	def testConvertUngroupedMultiPolygons( self ) :
@@ -304,18 +305,18 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		g2 = converter.convert()
 		self.assertEqual( g2, g1 )
 		self.assertRaises( RuntimeError, IECore.curry( IECoreHoudini.FromHoudiniGeometryConverter.create, torii ) )
-
+		
 	def testAdjustedStringVectorIndices( self ) :
 		box = self.box()
 		geo = box.parent()
 		group = box.createOutputNode( "group" )
-		attr = group.createOutputNode( "attribcreate" )
+		attr = group.createOutputNode( "attribcreate", exact_type_name=True )
 		attr.parm( "class" ).set( 1 ) # prim
 		attr.parm( "type" ).set( 3 ) # string
 		attr.parm( "string" ).set( "box1" )
 		box2 = geo.createNode( "box" )
 		group2 = box2.createOutputNode( "group" )
-		attr2 = group2.createOutputNode( "attribcreate" )
+		attr2 = group2.createOutputNode( "attribcreate", exact_type_name=True )
 		attr2.parm( "class" ).set( 1 ) # prim
 		attr2.parm( "type" ).set( 3 ) # string
 		attr2.parm( "string" ).set( "box2" )
@@ -333,7 +334,6 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( m[key].interpolation, c[key].interpolation )
 				self.assertEqual( m[key].data, c[key].data )
 				self.assertEqual( m[key], c[key] )
-
 
 if __name__ == "__main__":
     unittest.main()

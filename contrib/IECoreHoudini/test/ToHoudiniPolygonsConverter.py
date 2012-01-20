@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -209,10 +209,10 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.verticesPerFace, prim.verticesPerFace )
 		self.assertEqual( result.vertexIds, prim.vertexIds )
 		self.assertEqual( result.keys(), prim.keys() )
-		## \todo: remove this logic if we ever get Color3fData supported by the FromHoudiniGeometryConverter
-		for key in [ x for x in prim.keys() if x not in [ "color3fDetail", "color3fPoint", "color3fPrim", "color3fVert" ] ] :
+		for key in prim.keys() :
 			self.assertEqual( result[key], prim[key] )
-		
+		self.assertEqual( result, prim )
+			
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=False ) :
 		geo = sop.geometry()
 		for key in [ "floatDetail", "intDetail", "stringDetail", "stringDetail" ] :
@@ -645,28 +645,28 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribs( self ) :
 		mesh = self.mesh()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 0 ) # float
 		detailAttr.parm( "size" ).set( 1 ) # 1 element
 		detailAttr.parm( "value1" ).set( 123.456 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 0 ) # float
 		pointAttr.parm( "size" ).set( 1 ) # 1 element
 		pointAttr.parm( "value1" ).set( 123.456 )
 		
-		primAttr = pointAttr.createOutputNode( "attribcreate" )
+		primAttr = pointAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		primAttr.parm( "name" ).set( "floatPrim" )
 		primAttr.parm( "class" ).set( 1 ) # prim
 		primAttr.parm( "type" ).set( 0 ) # float
 		primAttr.parm( "size" ).set( 1 ) # 1 element
 		primAttr.parm( "value1" ).set( 123.456 )
 		
-		vertexAttr = primAttr.createOutputNode( "attribcreate" )
+		vertexAttr = primAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		vertexAttr.parm( "name" ).set( "floatVert" )
 		vertexAttr.parm( "class" ).set( 3 ) # vertex
 		vertexAttr.parm( "type" ).set( 0 ) # float
@@ -679,7 +679,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testConvertingOverExistingAttribsWithDifferentTypes( self ) :
 		mesh = self.mesh()
 		sop = self.emptySop()
-		detailAttr = sop.createOutputNode( "attribcreate" )
+		detailAttr = sop.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm( "name" ).set( "floatDetail" )
 		detailAttr.parm( "class" ).set( 0 ) # detail
 		detailAttr.parm( "type" ).set( 1 ) # int
@@ -688,7 +688,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		detailAttr.parm( "value2" ).set( 11 )
 		detailAttr.parm( "value3" ).set( 12 )
 		
-		pointAttr = detailAttr.createOutputNode( "attribcreate" )
+		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 1 ) # int
@@ -697,7 +697,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm( "value2" ).set( 11 )
 		pointAttr.parm( "value3" ).set( 12 )
 		
-		primAttr = pointAttr.createOutputNode( "attribcreate" )
+		primAttr = pointAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		primAttr.parm( "name" ).set( "floatPrim" )
 		primAttr.parm( "class" ).set( 1 ) # prim
 		primAttr.parm( "type" ).set( 1 ) # int
@@ -706,7 +706,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		primAttr.parm( "value2" ).set( 11 )
 		primAttr.parm( "value3" ).set( 12 )
 		
-		vertexAttr = primAttr.createOutputNode( "attribcreate" )
+		vertexAttr = primAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		vertexAttr.parm( "name" ).set( "floatVert" )
 		vertexAttr.parm( "class" ).set( 3 ) # vert
 		vertexAttr.parm( "type" ).set( 1 ) # int
@@ -736,10 +736,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.verticesPerFace, mesh.verticesPerFace )
 		self.assertEqual( result.vertexIds, mesh.vertexIds )
 		self.assertEqual( result.keys(), mesh.keys() )
-		self.assertEqual( result["stringPoint"].data[0], mesh["stringPoint"].data[0] )
-		for i in range( 1, data.size() - 1 ) :
-			self.assertEqual( result["stringPoint"].data[i], mesh["stringPoint"].data[i+1] )
-		self.assertEqual( result["stringPoint"].data[-1], mesh["stringPoint"].data[1] )
+		self.assertEqual( result["stringPoint"], mesh["stringPoint"] )
+		self.assertEqual( result["stringPointIndices"], mesh["stringPointIndices"] )
 	
 	def tearDown( self ) :
 		
