@@ -232,6 +232,18 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 }
 
 template<>
+TypedData<LineSegment3f>::TypedData()
+	:	m_data( LineSegment3f( Imath::V3f( 0 ), Imath::V3f( 1, 0, 0 ) ) )
+{
+}
+
+template<>
+TypedData<LineSegment3d>::TypedData()
+	:	m_data( LineSegment3d( Imath::V3d( 0 ), Imath::V3d( 1, 0, 0 ) ) )
+{
+}
+
+template<>
 void SimpleDataHolder<LineSegment3f>::hash( MurmurHash &h ) const
 {
 	h.append( readable().p0 );

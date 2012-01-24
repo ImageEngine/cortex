@@ -38,7 +38,7 @@ adoptChildPresets argument to the constructor.
 
 * Added missing binding for IECoreGL::State::bindBaseState() method.
 
-* The default constructors for TypedData<Imath::Vec> and TypedData<Imath::Color> now initialise all components to zero.
+* The default constructors for TypedData<Imath::Vec> and TypedData<Imath::Color> now initialise all components to zero. The default constructors for TypedData<LineSegment> now initialise a unit length line in the positive X axis. Before the data was uninitialised, which could cause test failures in TestObject.testCopy() if the data happened to contain NaNs. Please note that the underlying Imath::Vec and IECore::LineSegment constructors remain unchanged and will not initialise the data - this is for performance reasons.
 
 Bug Fixes :
 

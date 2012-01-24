@@ -343,6 +343,17 @@ class BoolDataTest( unittest.TestCase ) :
 		oo = Object.load( iface, "test" )
 		self.assertEqual( o, oo )
 
+	def testLineSegmentData( self ) :
+	
+		for vt, dt in [
+			( V3f, LineSegment3fData ),
+			( V3d, LineSegment3dData ),
+		] :
+
+			d = dt()
+			self.assertEqual( d.value.p0, vt( 0, 0, 0 ) )
+			self.assertEqual( d.value.p1, vt( 1, 0, 0 ) )
+
 	def tearDown( self ) :
 
 		if os.path.isfile("test/IECore/o.fio"):
