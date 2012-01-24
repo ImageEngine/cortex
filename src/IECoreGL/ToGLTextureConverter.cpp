@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -94,15 +94,15 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 
 	if ( !y && r && g && b )
 	{
-			t = new ColorTexture( image );
+		t = new ColorTexture( image );
 	}
 	else if ( y && !r && !g && !b ) 
 	{
-			t = new LuminanceTexture( image );
+		t = new LuminanceTexture( image );
 	}
 	else
 	{
-		throw IECore::Exception( "Invald image format, ToGLTextureConverter supports RGB[A] and Y[A]." );
+		throw IECore::Exception( "Invalid image format, ToGLTextureConverter supports RGB[A] and Y[A]." );
 	}
 
 	if ( ! t )
