@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -103,7 +103,7 @@ class ImageReader : public Reader
 		/// Returns the dataWindow contained in the file. This is the dataWindow that
 		/// will be loaded if the dataWindowParameter() is left at its default value.
 		virtual Imath::Box2i dataWindow() = 0;
-		/// Returns the displayWIndow contained in the file. This is the displayWindow
+		/// Returns the displayWindow contained in the file. This is the displayWindow
 		/// that will be loaded if the displayWindowParameter() is left at its default value.
 		virtual Imath::Box2i displayWindow() = 0;
 		/// Reads the specified channel. This function obeys the dataWindowParameter(), so
