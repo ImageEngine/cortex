@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,7 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/TextureLoader.h"
-#include "IECoreGL/ColorTexture.h"
+#include "IECoreGL/ToGLTextureConverter.h"
+#include "IECoreGL/Texture.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Reader.h"
@@ -81,7 +82,8 @@ TexturePtr TextureLoader::load( const std::string &name )
 	TexturePtr t = 0;
 	try
 	{
-		t = new ColorTexture( i );
+		ToGLTextureConverterPtr converter = new ToGLTextureConverter( i );
+		t = IECore::runTimeCast<Texture>( converter->convert() );
 	}
 	catch( const std::exception &e )
 	{

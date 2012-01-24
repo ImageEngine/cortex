@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,37 +32,30 @@
 #
 ##########################################################################
 
+import os
+import unittest
+
 import IECore
+import IECoreGL
 
-from Shader import *
-from State import *
-from ShaderManager import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
-from Camera import *
-from Image import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
-from AlphaTextureTest import *
-from LuminanceTextureTest import *
-from UserAttributesTest import *
-from DeferredRenderer import *
-from DiskPrimitiveTest import DiskPrimitiveTest
-from ToGLTextureConverter import TestToGLTexureConverter
-from PrimitiveTest import *
-from CoordinateSystemTest import CoordinateSystemTest
-from TextureLoaderTest import TextureLoaderTest
+class TextureLoaderTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
+	def setUp( self ) :
+	
+		IECoreGL.init( False )
 
-	from TextTest import *
+	def testLoadRGB( self ) :
+	
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "./", ":" ) )
+		t = l.load( "test/IECore/data/exrFiles/carPark.exr" )
+		self.failUnless( isinstance( t, IECoreGL.ColorTexture ) )
 
+	def testLoadGreyscale( self ) :
+	
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "./", ":" ) )
+		t = l.load( "test/IECore/data/jpg/greyscaleCheckerBoard.jpg" )
+		self.failUnless( isinstance( t, IECoreGL.LuminanceTexture ) )
+	
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()
+
