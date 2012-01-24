@@ -36,6 +36,8 @@ adoptChildPresets argument to the constructor.
 
 * IECoreGL::Scene::select() now fills a vector<HitRecord> rather than a list<HitRecord>, as vector is better suited to this purpose.
 
+* Added missing binding for IECoreGL::State::bindBaseState() method.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.
