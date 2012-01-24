@@ -30,6 +30,8 @@ adoptChildPresets argument to the constructor.
 
 * Added IECoreGL::NameStateComponent::glNameFromName() method to match the existing nameFromGLName() method.
 
+* Added glColor() functions to IECoreGL/GL.h.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.

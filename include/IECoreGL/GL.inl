@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,16 @@
 
 namespace IECoreGL
 {
+
+inline void glColor( const Imath::V3f &c )
+{
+	glColor3fv( c.getValue() );
+}
+
+inline void glColor( const Imath::Color4f &c )
+{
+	glColor4fv( c.getValue() );
+}
 
 inline void glVertex( const Imath::V3f &v )
 {
