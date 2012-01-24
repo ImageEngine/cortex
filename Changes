@@ -32,6 +32,10 @@ adoptChildPresets argument to the constructor.
 
 * Added glColor() functions to IECoreGL/GL.h.
 
+* Factored out much of the IECoreGL::Scene::select() functionality into a new IECoreGL::Selector class, which allows selection to be performed easily even without a Scene.
+
+* IECoreGL::Scene::select() now fills a vector<HitRecord> rather than a list<HitRecord>, as vector is better suited to this purpose.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.

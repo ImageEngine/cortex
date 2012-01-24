@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,96 +32,46 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/Selector.h"
+#ifndef IECOREGL_SELECTOR_H
+#define IECOREGL_SELECTOR_H
 
-using namespace IECoreGL;
-using namespace Imath;
-using namespace std;
+#include <vector>
 
-IE_CORE_DEFINERUNTIMETYPED( Scene );
+#include "OpenEXR/ImathBox.h"
 
-Scene::Scene()
-	:	m_root( new Group ), m_camera( 0 )
+#include "IECoreGL/HitRecord.h"
+
+namespace IECoreGL
 {
-}
 
-Scene::~Scene()
+/// The Selector class simplifies the process of selecting objects
+/// rendered with OpenGL.
+class Selector
 {
-}
 
-void Scene::render( const State * state ) const
-{
-	if( m_camera )
-	{
-		m_camera->render( state );
-	}
+	public :
 
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-	glPushAttrib( GL_ALL_ATTRIB_BITS );
+		Selector();
+		
+		/// Starts an operation to select objects in the specified
+		/// region of NDC space (0,0-1,1 top left to bottom right).
+		/// Set up the GL camera, call this function, then render
+		/// the objects with appropriate glLoadName() calls with names
+		/// generated using NameStateComponent. Call selectEnd() to
+		/// retrieve the resulting selection hits. It is your responsibility
+		/// to keep the selector alive in between begin() and end() calls.
+		void begin( const Imath::Box2f &region );
+		/// Ends a selection operation, filling the provided vector
+		/// with records of all the objects hit. Returns the new size
+		/// of the hits vector.
+		size_t end( std::vector<HitRecord> &hits );
 
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
-
-	glPopAttrib();
-	glUseProgram( prevProgram );
-}
-
-void Scene::render() const
-{
-	render( State::defaultState() );
-}
-
-Imath::Box3f Scene::bound() const
-{
-	return root()->bound();
-}
-
-size_t Scene::select( const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
-{
-	ConstStatePtr state = State::defaultState();
-
-	if( m_camera )
-	{
-		m_camera->render( state );
-	}
-
-	Selector selector;
-	selector.begin( region );
+	private :
 	
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
+		std::vector<GLuint> m_selectBuffer;
+		
+};
 
-	return selector.end( hits );
-}
+} // namespace IECoreGL
 
-void Scene::setCamera( CameraPtr camera )
-{
-	m_camera = camera;
-}
-
-CameraPtr Scene::getCamera()
-{
-	return m_camera;
-}
-
-ConstCameraPtr Scene::getCamera() const
-{
-	return m_camera;
-}
-
-GroupPtr Scene::root()
-{
-	return m_root;
-}
-
-ConstGroupPtr Scene::root() const
-{
-	return m_root;
-}
+#endif // IECOREGL_SELECTOR_H

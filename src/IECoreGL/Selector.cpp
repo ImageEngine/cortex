@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,96 +32,68 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Camera.h"
+#include "boost/format.hpp"
+
+#include "IECoreGL/HitRecord.h"
 #include "IECoreGL/Selector.h"
 
+#include "IECore/MessageHandler.h"
+
 using namespace IECoreGL;
-using namespace Imath;
-using namespace std;
 
-IE_CORE_DEFINERUNTIMETYPED( Scene );
-
-Scene::Scene()
-	:	m_root( new Group ), m_camera( 0 )
+Selector::Selector()
 {
+	m_selectBuffer.resize( 20000 ); // enough to select 5000 distinct objects
 }
 
-Scene::~Scene()
-{
-}
+void Selector::begin( const Imath::Box2f &region )
+{	
+	GLdouble projectionMatrix[16];
+	glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix );
+	GLint viewport[4];
+	glGetIntegerv( GL_VIEWPORT, viewport );
 
-void Scene::render( const State * state ) const
-{
-	if( m_camera )
-	{
-		m_camera->render( state );
-	}
+	Imath::V2f regionCenter = region.center();
+	Imath::V2f regionSize = region.size();
+	regionCenter.x = viewport[0] + viewport[2] * regionCenter.x;
+	regionCenter.y = viewport[1] + viewport[3] * (1.0f - regionCenter.y);
+	regionSize.x *= viewport[2];
+	regionSize.y *= viewport[3];
 
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	gluPickMatrix( regionCenter.x, regionCenter.y, regionSize.x, regionSize.y, viewport );
+	glMultMatrixd( projectionMatrix );
+	glMatrixMode( GL_MODELVIEW );
+
+	// do the selection render
+	glSelectBuffer( m_selectBuffer.size(), &(m_selectBuffer[0]) );
+	glRenderMode( GL_SELECT );
+
+	glInitNames();
+	glPushName( 0 );
+
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
+}
 
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
-
+size_t Selector::end( std::vector<HitRecord> &hits )
+{
 	glPopAttrib();
-	glUseProgram( prevProgram );
-}
 
-void Scene::render() const
-{
-	render( State::defaultState() );
-}
-
-Imath::Box3f Scene::bound() const
-{
-	return root()->bound();
-}
-
-size_t Scene::select( const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
-{
-	ConstStatePtr state = State::defaultState();
-
-	if( m_camera )
+	int numHits = glRenderMode( GL_RENDER );
+	if( numHits < 0 )
 	{
-		m_camera->render( state );
+		IECore::msg( IECore::Msg::Warning, "IECoreGL::Selector::end", "Selection buffer overflow." );
+		numHits *= -1;
 	}
 
-	Selector selector;
-	selector.begin( region );
-	
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
-
-	return selector.end( hits );
-}
-
-void Scene::setCamera( CameraPtr camera )
-{
-	m_camera = camera;
-}
-
-CameraPtr Scene::getCamera()
-{
-	return m_camera;
-}
-
-ConstCameraPtr Scene::getCamera() const
-{
-	return m_camera;
-}
-
-GroupPtr Scene::root()
-{
-	return m_root;
-}
-
-ConstGroupPtr Scene::root() const
-{
-	return m_root;
+	// get the hits out of the select buffer.
+	GLuint *hitRecord = &(m_selectBuffer[0]);
+	for( int i=0; i<numHits; i++ )
+	{
+		HitRecord h( hitRecord );
+		hits.push_back( h );
+		hitRecord += h.offsetToNext();
+	}
+	return hits.size();
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,96 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Camera.h"
+#include <boost/python.hpp>
+
 #include "IECoreGL/Selector.h"
+#include "IECoreGL/bindings/SelectorBinding.h"
 
-using namespace IECoreGL;
-using namespace Imath;
-using namespace std;
+using namespace boost::python;
 
-IE_CORE_DEFINERUNTIMETYPED( Scene );
-
-Scene::Scene()
-	:	m_root( new Group ), m_camera( 0 )
+namespace IECoreGL
 {
-}
 
-Scene::~Scene()
+static list end( Selector &s )
 {
-}
-
-void Scene::render( const State * state ) const
-{
-	if( m_camera )
+	std::vector<HitRecord> hits;
+	s.end( hits );
+	list result;
+	for( std::vector<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
 	{
-		m_camera->render( state );
+		result.append( *it );
 	}
-
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-	glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
-
-	glPopAttrib();
-	glUseProgram( prevProgram );
+	return result;
 }
 
-void Scene::render() const
+void bindSelector()
 {
-	render( State::defaultState() );
+	class_<Selector>( "Selector", init<>() )
+		.def( "begin", &Selector::begin )
+		.def( "end", &end )
+	;
 }
 
-Imath::Box3f Scene::bound() const
-{
-	return root()->bound();
-}
-
-size_t Scene::select( const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
-{
-	ConstStatePtr state = State::defaultState();
-
-	if( m_camera )
-	{
-		m_camera->render( state );
-	}
-
-	Selector selector;
-	selector.begin( region );
-	
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
-
-	return selector.end( hits );
-}
-
-void Scene::setCamera( CameraPtr camera )
-{
-	m_camera = camera;
-}
-
-CameraPtr Scene::getCamera()
-{
-	return m_camera;
-}
-
-ConstCameraPtr Scene::getCamera() const
-{
-	return m_camera;
-}
-
-GroupPtr Scene::root()
-{
-	return m_root;
-}
-
-ConstGroupPtr Scene::root() const
-{
-	return m_root;
-}
+} // namespace IECoreGL

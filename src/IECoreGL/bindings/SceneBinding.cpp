@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,10 +49,10 @@ namespace IECoreGL
 
 static list select( Scene &s, const Imath::Box2f &b )
 {
-	std::list<HitRecord> hits;
+	std::vector<HitRecord> hits;
 	s.select( b, hits );
 	list result;
-	for( std::list<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
+	for( std::vector<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
 	{
 		result.append( *it );
 	}

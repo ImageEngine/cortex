@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,7 +71,7 @@ class Scene : public Renderable
 		/// using raw gl calls before calling Scene::select. In either case the region applies.
 		/// \todo Have an overload which takes a Box2i specifying a raster space region
 		/// instead.
-		unsigned select( const Imath::Box2f &region, std::list<HitRecord> &hits ) const;
+		size_t select( const Imath::Box2f &region, std::vector<HitRecord> &hits ) const;
 
 		/// Sets the camera used to view the scene. If unspecified then
 		/// you may position the scene using raw gl calls before
