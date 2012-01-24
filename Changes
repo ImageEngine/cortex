@@ -40,7 +40,7 @@ adoptChildPresets argument to the constructor.
 
 * The default constructors for TypedData<Imath::Vec> and TypedData<Imath::Color> now initialise all components to zero. The default constructors for TypedData<LineSegment> now initialise a unit length line in the positive X axis. Before the data was uninitialised, which could cause test failures in TestObject.testCopy() if the data happened to contain NaNs. Please note that the underlying Imath::Vec and IECore::LineSegment constructors remain unchanged and will not initialise the data - this is for performance reasons.
 
-* The IECoreGL.TextureLoader class can now load greyscale as well as colour textures. It now uses the ToGLTextureConverter class internally so supports all typed supported by that class.
+* The IECoreGL::TextureLoader class can now load greyscale as well as colour textures. It now uses the ToGLTextureConverter class internally so supports all types supported by that class.
 
 Bug Fixes :
 
