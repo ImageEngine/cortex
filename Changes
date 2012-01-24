@@ -38,6 +38,8 @@ adoptChildPresets argument to the constructor.
 
 * Added missing binding for IECoreGL::State::bindBaseState() method.
 
+* The default constructors for TypedData<Imath::Vec> and TypedData<Imath::Color> now initialise all components to zero.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.

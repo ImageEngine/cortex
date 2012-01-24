@@ -264,6 +264,8 @@ class SimpleTypedDataTest(unittest.TestCase):
 
 		for t, vt in types :
 
+			self.assertEqual( t(), t( vt( 0 ) ) )
+
 			v = vt( 10 )
 			self.assertEqual( " ".join( ["10"] * vt.dimensions() ), str( t( v ) ) )
 			self.assertEqual( "IECore." + t.__name__ + "( " + "IECore." + vt.__name__ + "( " + ", ".join( ["10"] * vt.dimensions() ) + " ) )", repr( t( v ) ) )
