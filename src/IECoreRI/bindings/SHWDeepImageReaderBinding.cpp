@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORERI_TYPEIDS_H
-#define IE_CORERI_TYPEIDS_H
+#include "boost/python.hpp"
 
-/// The IECoreRI namespace holds all the functionality implemented in libIECoreRI
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECoreRI/SHWDeepImageReader.h"
+
+using namespace boost::python;
+using namespace IECorePython;
+
 namespace IECoreRI
 {
 
-enum TypeId
+void bindSHWDeepImageReader()
 {
-	PTCParticleReaderTypeId = 106000,
-	PTCParticleWriterTypeId = 106001,
-	RendererTypeId = 106002,
-	RIBWriterTypeId = 106003,
-	SLOReaderTypeId = 106004,
-	SXRendererTypeId = 106005,
-	DTEXDeepImageReaderTypeId = 106006,
-	DTEXDeepImageWriterTypeId = 106007,
-	SHWDeepImageReaderTypeId = 106008,
-	SHWDeepImageWriterTypeId = 106009,
 
-	/// If we ever get here we should start over again
-	LastCoreRITypeId = 106999,
-};
+	RunTimeTypedClass<SHWDeepImageReader>()
+		.def( init<>() )
+		.def( init<const std::string &>() )
+		.def( "canRead", &SHWDeepImageReader::canRead ).staticmethod( "canRead" )
+	;
+
+}
 
 } // namespace IECoreRI
 
-#endif // IE_CORERI_TYPEIDS_H

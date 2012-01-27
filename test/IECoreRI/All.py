@@ -75,6 +75,10 @@ if hasattr( IECoreRI, "DTEXDeepImageReader" ) :
 	from DTEXDeepImageReaderTest import TestDTEXDeepImageReader
 	from DTEXDeepImageWriterTest import TestDTEXDeepImageWriter
 
+if hasattr( IECoreRI, "SHWDeepImageReader" ) :
+	from SHWDeepImageReaderTest import TestSHWDeepImageReader
+	from SHWDeepImageWriterTest import TestSHWDeepImageWriter
+
 if IECore.withFreeType() :
 
 	from TextTest import *

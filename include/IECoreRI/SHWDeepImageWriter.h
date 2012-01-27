@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORERI_TYPEIDS_H
-#define IE_CORERI_TYPEIDS_H
+#ifndef IECORERI_SHWDEEPIMAGEWRITER_H
+#define IECORERI_SHWDEEPIMAGEWRITER_H
 
-/// The IECoreRI namespace holds all the functionality implemented in libIECoreRI
+#include "dtex.h"
+
+#include "IECore/DeepImageWriter.h"
+
+#include "IECoreRI/TypeIds.h"
+
 namespace IECoreRI
 {
 
-enum TypeId
+/// The SHWDeepImageWriter class writes 3delight deep shadow files. As this is an Alpha-only format,
+/// only the A channel will be used and the rest will be ignored. If A does not exist, then the first
+/// channel will be used in its place, regardless of name.
+/// \ingroup deepCompositingGroup
+/// \ingroup ioGroup
+class SHWDeepImageWriter : public IECore::DeepImageWriter
 {
-	PTCParticleReaderTypeId = 106000,
-	PTCParticleWriterTypeId = 106001,
-	RendererTypeId = 106002,
-	RIBWriterTypeId = 106003,
-	SLOReaderTypeId = 106004,
-	SXRendererTypeId = 106005,
-	DTEXDeepImageReaderTypeId = 106006,
-	DTEXDeepImageWriterTypeId = 106007,
-	SHWDeepImageReaderTypeId = 106008,
-	SHWDeepImageWriterTypeId = 106009,
+	public :
 
-	/// If we ever get here we should start over again
-	LastCoreRITypeId = 106999,
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SHWDeepImageWriter, SHWDeepImageWriterTypeId, IECore::DeepImageWriter );
+
+		SHWDeepImageWriter();
+		SHWDeepImageWriter( const std::string &filename );
+
+		virtual ~SHWDeepImageWriter();
+
+		static bool canWrite( const std::string &filename );
+
+	private :
+
+		static const DeepImageWriterDescription<SHWDeepImageWriter> g_writerDescription;
+
+		virtual void doWritePixel( int x, int y, const IECore::DeepPixel *pixel );
+
+		/// Tries to open the file for writing, throwing on failure. On success,
+		/// all of the private members will be valid.
+		void open();
+		void clean();
+		
+		IECore::V2iParameterPtr m_tileSizeParameter;
+		
+		DtexFile *m_outputFile;
+		DtexCache *m_dtexCache;
+		DtexImage *m_dtexImage;
+		DtexPixel *m_dtexPixel;
+		
+		std::string m_outputFileName;
+		int m_alphaOffset;
+
 };
+
+IE_CORE_DECLAREPTR( SHWDeepImageWriter );
 
 } // namespace IECoreRI
 
-#endif // IE_CORERI_TYPEIDS_H
+#endif // IECORERI_SHWDEEPIMAGEWRITER_H

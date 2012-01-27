@@ -1575,6 +1575,18 @@ if doConfigure :
 			
 				sys.stderr.write( "WARNING : RixDeepTexture API not found - not building IECoreRI::DTEXDeepTexture functionality. Use PRMan 16.1 or later.\n" )
 		
+		if haveDelight and c.CheckCXXHeader( "dtex.h" ) :
+			
+			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_DEEPSHW" )
+			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_DEEPSHW" )
+			
+		else :
+		
+			riSources.remove( "src/IECoreRI/SHWDeepImageReader.cpp" )
+			riSources.remove( "src/IECoreRI/SHWDeepImageWriter.cpp" )
+			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageReaderBinding.cpp" )
+			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageWriterBinding.cpp" )
+		
 		c.Finish()	
 
 		# we can't append this before configuring, as then it gets built as

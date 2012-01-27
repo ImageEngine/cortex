@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORERI_TYPEIDS_H
-#define IE_CORERI_TYPEIDS_H
+#ifndef IECORERI_SHWDEEPIMAGEWRITERBINDING_H
+#define IECORERI_SHWDEEPIMAGEWRITERBINDING_H
 
-/// The IECoreRI namespace holds all the functionality implemented in libIECoreRI
 namespace IECoreRI
 {
 
-enum TypeId
-{
-	PTCParticleReaderTypeId = 106000,
-	PTCParticleWriterTypeId = 106001,
-	RendererTypeId = 106002,
-	RIBWriterTypeId = 106003,
-	SLOReaderTypeId = 106004,
-	SXRendererTypeId = 106005,
-	DTEXDeepImageReaderTypeId = 106006,
-	DTEXDeepImageWriterTypeId = 106007,
-	SHWDeepImageReaderTypeId = 106008,
-	SHWDeepImageWriterTypeId = 106009,
+void bindSHWDeepImageWriter();
 
-	/// If we ever get here we should start over again
-	LastCoreRITypeId = 106999,
-};
+}
 
-} // namespace IECoreRI
-
-#endif // IE_CORERI_TYPEIDS_H
+#endif // IECORERI_SHWDEEPIMAGEWRITERBINDING_H

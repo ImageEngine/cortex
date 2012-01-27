@@ -10,6 +10,8 @@ generate a hash of their contents as an instance of the new MurmurHash class.
 
 * Added an ieDisplay nuke node, which accepts incoming renders from RenderMan or Nuke using the existing cortex display drivers.
 
+* Added SHWDeepImageReader and SHWDeepImageWriter which read/write 3delight deep shadows. Note that this is an alpha only format.
+
 Improvements :
 
 * IECore.loadConfig() now ignores files starting with ~. This avoids errors caused by certain popular text editors saving backup files next to the config file during editing.
