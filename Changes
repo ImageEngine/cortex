@@ -1,7 +1,13 @@
+Cortex 6.4.5
+============
+
 Improvements :
 
 * IECoreMaya.ClassVectorParameterUI no longer allows classes with a non-collapsible root parameter to collapse.
 * IECoreMaya.ClassVectorParameterUI header labels accept ["UI"]["locked"] userData, in which case they don't have a "Change Me" context menu.
+
+Bug Fixes :
+* Fixed bug in IECoreMaya.SplineParameterUI where you could only open the edit window one spline parameter on a given node
 
 Cortex 6.4.4
 ============

@@ -13,9 +13,9 @@ def build( extraArgs = [] ) :
 	buildArgs.extend( extraArgs )
 	buildArgs.extend( sys.argv[1:] )	
 	
-	if subprocess.call( [ "scons" ] + buildArgs ) != 0 :
+	#if subprocess.call( [ "scons" ] + buildArgs ) != 0 :
 	
-		raise RuntimeError("Error : scons " + str( " ".join( buildArgs ) ) )
+	#	raise RuntimeError("Error : scons " + str( " ".join( buildArgs ) ) )
 		
 	if subprocess.call( [ "scons", "install" ] + buildArgs ) != 0 :
 	
