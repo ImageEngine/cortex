@@ -36,6 +36,7 @@ import IECore
 import IECoreMaya
 import maya.cmds
 from ParameterUI import ParameterUI
+import re
 
 class SplineParameterUI( ParameterUI ) :
 
@@ -85,7 +86,7 @@ class SplineParameterUI( ParameterUI ) :
 
 		if not self.__editWindow :
 
-			self.__editWindow = maya.cmds.window( self.nodeName() + " " + self.label(), retain=True, widthHeight=[ 600, 300 ] )
+			self.__editWindow = maya.cmds.window( re.sub( "[\|\.]" , "_", self.plugName() ), title=self.nodeName() + " " + self.label(), retain=True, widthHeight=[ 600, 300 ] )
 
 			layout = maya.cmds.formLayout()
 
