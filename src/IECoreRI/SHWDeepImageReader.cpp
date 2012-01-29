@@ -130,12 +130,23 @@ DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 	
 	DeepPixelPtr pixel = new DeepPixel( m_channelNames, numSamples );
 	
+	unsigned numRealChannels = DtexNumChan( m_dtexImage );
+	
 	float depth = 0;
-	float channelData[pixel->numChannels()];
+	float channelData[numRealChannels];
 	
 	for ( int i=0; i < numSamples; ++i )
 	{
 		DtexPixelGetPoint( m_dtexPixel, i, &depth, channelData );
+		
+		// SHW files represent occlusion, but we really want transparency,
+		// so we invert the data upon reading it.
+		/// \todo: consider a parameter to opt out of this behaviour
+		for ( unsigned j=0; j < numRealChannels; ++j )
+		{
+			channelData[j] = 1.0 - channelData[j];
+		}
+		
 		pixel->addSample( depth, channelData );
 	}
 	
@@ -164,7 +175,7 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		
 		DtexGetImageByIndex( m_inputFile, 0, &m_dtexImage );
 
-		int numChannels = DtexNumChan( m_dtexImage );
+		unsigned numChannels = DtexNumChan( m_dtexImage );
 		
 		// Since these are monochrome deep shadows, we know that regardless
 		// of numChannels, this is really just an Alpha value.
