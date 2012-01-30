@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,7 +42,6 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Font )
-IE_CORE_FORWARDDECLARE( MeshPrimitive )
 
 class TextPrimitive : public Primitive
 {
@@ -82,14 +81,10 @@ class TextPrimitive : public Primitive
 		FontPtr m_font;
 		std::string m_text;
 		Imath::Box3f m_bound;
-		typedef std::vector<Imath::V2f> AdvanceVector;
-		AdvanceVector m_advances;
-
+	
 		/// Mesh rendering bits
 		void renderMeshes( const State *state, IECore::TypeId style ) const;
-		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
-		mutable MeshVector m_meshes;
-
+	
 		/// Sprite rendering bits
 		void renderSprites( const State *state, IECore::TypeId style ) const;
 

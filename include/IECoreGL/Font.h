@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( MeshPrimitive );
+IE_CORE_FORWARDDECLARE( State );
 
 class Font : public IECore::RunTimeTyped
 {
@@ -56,17 +57,23 @@ class Font : public IECore::RunTimeTyped
 
 		IECore::FontPtr coreFont();
 
-		ConstMeshPrimitivePtr mesh( char c );
-		ConstAlphaTexturePtr texture();
+		ConstMeshPrimitivePtr mesh( char c ) const;
+		ConstAlphaTexturePtr texture() const;
+		
+		/// Emits a series of quads with appropriate texture coordinates,
+		/// such that if you have bound texture() you can render text.
+		void renderSprites( const std::string &text ) const;
+		/// Renders text as a series of meshes with the specified state and style.
+		void renderMeshes( const std::string &text, const State *state, IECore::TypeId style ) const;
 
 	private :
 
 		IECore::FontPtr m_font;
 
 		typedef std::map<char, ConstMeshPrimitivePtr> MeshMap;
-		MeshMap m_meshes;
+		mutable MeshMap m_meshes;
 
-		ConstAlphaTexturePtr m_texture;
+		mutable ConstAlphaTexturePtr m_texture;
 
 };
 

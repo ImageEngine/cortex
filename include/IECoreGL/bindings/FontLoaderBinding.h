@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,52 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
-
-#include "IECoreGL/Primitive.h"
-
-#include "IECore/VectorTypedData.h"
+#ifndef IECOREGL_FONTLOADERBINDING_H
+#define IECOREGL_FONTLOADERBINDING_H
 
 namespace IECoreGL
 {
 
-/// \todo Fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
-{
+void bindFontLoader();
 
-	public :
+}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
-
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds );
-		virtual ~MeshPrimitive();
-
-		IECore::ConstIntVectorDataPtr vertexIds() const;
-
-		virtual Imath::Box3f bound() const;
-
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-
-	protected :
-
-		virtual void render( const State *state, IECore::TypeId style ) const;
-
-	private :
-
-		class ToFaceVaryingConverter;
-
-		IECore::ConstIntVectorDataPtr m_vertIds;
-		Imath::Box3f m_bound;
-
-		/// So Font can use the render( state, style ) method.
-		friend class Font;
-
-};
-
-IE_CORE_DECLAREPTR( MeshPrimitive );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_MESHPRIMITIVE_H
+#endif // IECOREGL_FONTLOADERBINDING_H

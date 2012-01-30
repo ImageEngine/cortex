@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,14 +35,10 @@
 #include <cassert>
 
 #include "IECoreGL/TextPrimitive.h"
-#include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/Font.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TextureUnits.h"
-
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/ShaderStateComponent.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -73,7 +69,6 @@ TextPrimitive::TextPrimitive( const std::string &text, FontPtr font )
 			{
 				V2f a = m_font->coreFont()->advance( m_text[i], m_text[i+1] );
 				advanceSum += a;
-				m_advances.push_back( a );
 			}
 		}
 		m_bound.min = V3f( b.min.x, b.min.y, 0 );
@@ -119,34 +114,11 @@ void TextPrimitive::render( const State * state, IECore::TypeId style ) const
 
 void TextPrimitive::renderMeshes( const State * state, IECore::TypeId style ) const
 {
-	if( !m_meshes.size() )
-	{
-		for( unsigned i=0; i<m_text.size(); i++ )
-		{
-			ConstMeshPrimitivePtr mesh = m_font->mesh( m_text[i] );
-			m_meshes.push_back( mesh );
-		}
-	}
-
-	Shader *shader = state->get<ShaderStateComponent>()->shader();
-	glPushMatrix();
-
-		for( unsigned i=0; i<m_meshes.size(); i++ )
-		{
-			m_meshes[i]->setupVertexAttributes( shader );
-			m_meshes[i]->render( state, style );
-			if( i<m_advances.size() )
-			{
-				glTranslate( m_advances[i] );
-			}
-		}
-
-	glPopMatrix();
+	m_font->renderMeshes( m_text, state, style );
 }
 
 void TextPrimitive::renderSprites( const State * state, IECore::TypeId style ) const
 {
-	Box2f charBound = m_font->coreFont()->bound();
 	glPushAttrib( GL_TEXTURE_BIT | GL_ENABLE_BIT );
 	glPushMatrix();
 
@@ -169,35 +141,7 @@ void TextPrimitive::renderSprites( const State * state, IECore::TypeId style ) c
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-		float sStep = 1.0f / 16.0f;
-		float tStep = 1.0f / 8.0f;
-		float eps = 0.001; // a small inset seems necessary to avoid getting the border of the adjacent letters
-		for( unsigned i=0; i<m_text.size(); i++ )
-		{
-			char c = m_text[i];
-			int tx = c % 16;
-			int ty = 7 - (c / 16);
-
-			glBegin( GL_QUADS );
-
-				glTexCoord2f( tx * sStep + eps, ty * tStep + eps );
-				glVertex2f( charBound.min.x, charBound.min.y );
-
-				glTexCoord2f( (tx + 1) * sStep - eps, ty * tStep + eps );
-				glVertex2f( charBound.max.x, charBound.min.y );
-
-				glTexCoord2f( (tx + 1) * sStep - eps, (ty + 1) * tStep - eps );
-				glVertex2f( charBound.max.x, charBound.max.y );
-
-				glTexCoord2f( tx * sStep + eps, (ty + 1) * tStep - eps);
-				glVertex2f( charBound.min.x, charBound.max.y );
-
-			glEnd();
-			if( i<m_advances.size() )
-			{
-				glTranslate( m_advances[i] );
-			}
-		}
+		m_font->renderSprites( m_text );
 
 		if( GLEW_VERSION_2_0 )
 		{

@@ -67,7 +67,8 @@
 #include "IECoreGL/bindings/PrimitiveBinding.h"
 #include "IECoreGL/bindings/PointsPrimitiveBinding.h"
 #include "IECoreGL/bindings/SelectorBinding.h"
-
+#include "IECoreGL/bindings/FontBinding.h"
+#include "IECoreGL/bindings/FontLoaderBinding.h"
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -105,6 +106,8 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindPrimitive();
 	bindPointsPrimitive();
 	bindSelector();
+	bindFont();
+	bindFontLoader();
 
 	def( "init", &IECoreGL::init );
 }

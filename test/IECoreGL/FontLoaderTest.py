@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,39 +32,29 @@
 #
 ##########################################################################
 
+import unittest
+
 import IECore
+import IECoreGL
 
-from Shader import *
-from State import *
-from ShaderManager import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
-from Camera import *
-from Image import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
-from AlphaTextureTest import *
-from LuminanceTextureTest import *
-from UserAttributesTest import *
-from DeferredRenderer import *
-from DiskPrimitiveTest import DiskPrimitiveTest
-from ToGLTextureConverter import TestToGLTexureConverter
-from PrimitiveTest import *
-from CoordinateSystemTest import CoordinateSystemTest
-from TextureLoaderTest import TextureLoaderTest
-from FontTest import FontTest
-from FontLoaderTest import FontLoaderTest
+IECoreGL.init( False )
 
-if IECore.withFreeType() :
+class FontLoaderTest( unittest.TestCase ) :
 
-	from TextTest import *
+	def test( self ) :
 
+		fl = IECoreGL.FontLoader( IECore.SearchPath( "./test/IECore/data/fonts", ":" ) )
+		
+		f = fl.load( "Vera.ttf" )
+		self.failUnless( isinstance( f, IECoreGL.Font ) )
+		
+		f2 = fl.load( "Vera.ttf" )
+		self.failUnless( f.isSame( f2 ) )
+		
+		fl.clear()
+		
+		f3 = fl.load( "Vera.ttf" )
+		self.failIf( f3.isSame( f2 ) )
+		
 if __name__ == "__main__":
     unittest.main()
