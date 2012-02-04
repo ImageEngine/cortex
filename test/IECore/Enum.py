@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -44,14 +44,23 @@ class TestEnum( unittest.TestCase ) :
 		self.assertEqual( E.Red, E( 0 ) )
 		self.assertEqual( E.Green, E( 1 ) )
 		self.assertEqual( E.Blue, E( 2 ) )
+		self.assertEqual( E.Red, E( "Red" ) )
+		self.assertEqual( E.Green, E( "Green" ) )
+		self.assertEqual( E.Blue, E( "Blue" ) )
 		self.assertEqual( str( E.Red ), "Red" )
 		self.assertEqual( str( E.Green ), "Green" )
 		self.assertEqual( str( E.Blue ), "Blue" )
 		self.assertEqual( int( E.Red ), 0 )
 		self.assertEqual( int( E.Green ), 1 )
 		self.assertEqual( int( E.Blue ), 2 )
-
+		
+		self.failUnless( E.Red < E.Green )
+		self.failUnless( E.Green < E.Blue )
+		
+		self.assertEqual( E.values(), ( E.Red, E.Green, E.Blue ) )
+		
 		self.assertRaises( ValueError, E, 3 )
+		self.assertRaises( ValueError, E, "Tree" )
 
 	def testHash( self ) :
 	
@@ -69,7 +78,7 @@ class TestEnum( unittest.TestCase ) :
 		self.assertEqual( len( d ), 2 )
 		self.assertEqual( d[E.Red], "a" )
 		self.assertEqual( d[E2.Red], "b" )
-		
+
 if __name__ == "__main__":
 	unittest.main()
 

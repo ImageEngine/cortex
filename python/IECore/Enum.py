@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -50,8 +50,6 @@
 #
 # assert( E.Orange == E( 1 ) )
 # assert( E.Orange != E.Apple )
-#
-# \todo Add a classmethod to return a tuple of all values.
 def create( *names ) :
 
 	class Enum :
@@ -60,9 +58,18 @@ def create( *names ) :
 		__names = names
 
 		def __init__( self, value ) :
-
-			if value < 0 or value >= len( Enum.__names ) :
-				raise ValueError( "Enum value out of range." )
+			
+			if isinstance( value, str ) :
+				
+				if value not in Enum.__names :
+					raise ValueError( "Enum value out of range." )
+				
+				value = Enum.__names.index( value )
+			
+			else :
+				
+				if value < 0 or value >= len( Enum.__names ) :
+					raise ValueError( "Enum value out of range." )
 
 			self.__value = value
 
@@ -82,7 +89,12 @@ def create( *names ) :
 		def __str__( self ) :
 
 			return Enum.__names[self.__value]
-
+		
+		@classmethod
+		def values( cls ) :
+			
+			return tuple( cls( i ) for i in range( 0, len(cls.__names) ) )
+	
 	for i, name in enumerate( names ) :
 
 		setattr( Enum, name, Enum( i ) )

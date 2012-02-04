@@ -48,6 +48,10 @@ adoptChildPresets argument to the constructor.
 
 * Added Font::renderSprites() and Font::renderMeshes() methods, which make it possible to render text without constructing an IECoreGL::TextPrimitive.
 
+* IECore.Enum values can be instantiated from the appropriate string as well as the int.
+
+* IECore.Enum has a classmethod values() which returns a tuple of the available values.
+
 Bug Fixes :
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.
