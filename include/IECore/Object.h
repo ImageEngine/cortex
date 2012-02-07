@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,7 +63,7 @@ class MurmurHash;
 	public :																											\
 		TYPENAME::Ptr copy() const { return IECore::staticPointerCast<TYPENAME>( IECore::Object::copy() ); }			\
 		virtual bool isEqualTo( const IECore::Object *other ) const;													\
-		virtual void hash( MurmurHash &h ) const;																		\
+		virtual void hash( IECore::MurmurHash &h ) const;																		\
 	protected :																											\
 		virtual void copyFrom( const IECore::Object *other, IECore::Object::CopyContext *context );						\
 		virtual void save( IECore::Object::SaveContext *context ) const;								 				\
