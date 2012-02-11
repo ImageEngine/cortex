@@ -14,6 +14,8 @@ generate a hash of their contents as an instance of the new MurmurHash class.
 
 Improvements :
 
+* IECore.RelativePreset accepts now a compare filter that is a callback for ignoring some of the parameters when doing the diff.
+
 * IECore.loadConfig() now ignores files starting with ~. This avoids errors caused by certain popular text editors saving backup files next to the config file during editing.
 
 * The IECore.loadConfig() localsDict argument has been renamed to contextDict, and is now used as both the locals and globals for the execution of the config files. This works around python's annoying scoping whereby any modules would have to be imported within functions defined in the config files rather than
@@ -53,6 +55,8 @@ adoptChildPresets argument to the constructor.
 * IECore.Enum has a classmethod values() which returns a tuple of the available values.
 
 Bug Fixes :
+
+* ClassParameter.setClass() method was not taking advantage of a matching already loaded class if the searchPathEnvVar was None.
 
 * Fixed a bug whereby EXRImageWriter::EXRImageWriter() didn't create parameters that EXRImageWriter::EXRImageWriter( image, fileName ) did.
 
