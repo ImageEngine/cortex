@@ -64,13 +64,13 @@ class ClassParameter( IECore.CompoundParameter ) :
 	# the class' parameters are added to this parameter as children.		
 	def setClass( self, className, classVersion, searchPathEnvVar=None ) :
 	
-		if ( className, classVersion, searchPathEnvVar ) == ( self.__className, self.__classVersion, self.__searchPathEnvVar ) :
+		searchPathToUse = searchPathEnvVar if searchPathEnvVar is not None else self.__searchPathEnvVar
+
+		if ( className, classVersion, searchPathToUse ) == ( self.__className, self.__classVersion, self.__searchPathEnvVar ) :
 			return
 			
 		self.__classInstance = None
 		self.clearParameters()
-		
-		searchPathToUse = searchPathEnvVar if searchPathEnvVar is not None else self.__searchPathEnvVar
 		
 		if className!="" :
 		
