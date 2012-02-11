@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -150,6 +150,43 @@ class TestRelativePreset( unittest.TestCase ) :
 		classes1 = testObjB.parameters()["b"].getClass( True )
 		self.assertEqual( classes1[1:], classes2[1:] )
 		self.assertEqual( testObjB["a"].getTypedValue(), True )
+
+	def testCompareFilter( self ) :
+	
+		def createTestObj():
+			testObj = IECore.Parameterised( "testParameterised1" )
+			testObj.parameters().addParameters(
+				[
+					IECore.ClassParameter( "a", "", "IECORE_OP_PATHS" ),	
+					IECore.ClassParameter( "b", "", "IECORE_OP_PATHS" ),	
+				]
+			)
+			return testObj
+		
+		def filterCmp( p1, p2 ):
+			# only keep track of changes on parameter 'a'
+			return bool(p1.name in ['a', ''])
+
+		testObjA = createTestObj()
+		testObjB = createTestObj()
+
+		testObjA["a"].setClass( "maths/multiply", 2 )
+		testObjA["b"].setClass( "maths/multiply", 2 )
+		testObjB["a"].setClass( "maths/multiply", 2 )
+		testObjB["b"].setClass( "maths/multiply", 2 )
+		testObjB["a"]["a"].setTypedValue( 10 )
+		testObjB["a"]["b"].setTypedValue( 20 )
+		testObjB["b"]["a"].setTypedValue( 30 )
+		testObjB["b"]["b"].setTypedValue( 40 )
+		
+		r = IECore.RelativePreset( testObjB.parameters(), testObjA.parameters(), compareFilter = filterCmp )
+
+		r( testObjA, testObjA.parameters() )
+
+		self.assertEqual( testObjA["a"]["a"].getTypedValue(), 10 )
+		self.assertEqual( testObjA["a"]["b"].getTypedValue(), 2 )
+		self.assertEqual( testObjA["b"]["a"].getTypedValue(), 1 )
+		self.assertEqual( testObjA["b"]["b"].getTypedValue(), 2 )
 
 	def testClassVectors( self ) :
 	

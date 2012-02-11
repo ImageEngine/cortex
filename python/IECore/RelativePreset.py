@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,11 +49,17 @@ class RelativePreset( IECore.Preset ) :
 
 	## \param currParameter, IECore.Parameter, represents the parameter state after all changes have been made. 
 	## \param oldParameter, IECore.Parameter, represents the parameter state before any changes. 
-	def __init__( self, currParameter=None, oldParameter=None ) :
+	## \param compareFilter, callable function that receives currParameter and oldParameter child and it should 
+	## return a boolean to indicate if the difference should be computed or not.
+	def __init__( self, currParameter=None, oldParameter=None, compareFilter = None ) :
 		
 		IECore.Preset.__init__( self )
 
 		self.__data = IECore.CompoundObject()
+		if compareFilter is None :
+			self.__compareFilter = lambda x,y: True
+		else :
+			self.__compareFilter = compareFilter
 
 		# accepts no parameters at all.
 		if currParameter is None and oldParameter is None :
@@ -70,7 +76,7 @@ class RelativePreset( IECore.Preset ) :
 			if currParameter.typeId() != oldParameter.typeId() :
 				raise TypeError, "Mismatching types for currParameter and oldParameter!"
 
-		RelativePreset.__grabParameterChanges( currParameter, oldParameter, self.__data )
+		self.__grabParameterChanges( currParameter, oldParameter, self.__data )
 	
 	## \see IECore.Preset.applicableTo	
 	def applicableTo( self, parameterised, rootParameter ) :
@@ -97,32 +103,33 @@ class RelativePreset( IECore.Preset ) :
 		if len( self.__data ) :
 			self.__applyParameterChanges( rootParameter, self.__data )
 
-	@staticmethod
-	def __grabParameterChanges( currParameter, oldParameter, data, paramPath = "" ) :
+	def __grabParameterChanges( self, currParameter, oldParameter, data, paramPath = "" ) :
 
 		if not oldParameter is None:
 
 			if currParameter.staticTypeId() != oldParameter.staticTypeId() :
 				raise Exception, "Incompatible parameter %s!" % paramPath
 
+		if not self.__compareFilter( currParameter, oldParameter ) :
+			return
+
 		if isinstance( currParameter, IECore.ClassParameter ) :
 
-			RelativePreset.__grabClassParameterChanges( currParameter, oldParameter, data, paramPath )
+			self.__grabClassParameterChanges( currParameter, oldParameter, data, paramPath )
 			
 		elif isinstance( currParameter, IECore.ClassVectorParameter ) :
 			
-			RelativePreset.__grabClassVectorParameterChanges( currParameter, oldParameter, data, paramPath )
+			self.__grabClassVectorParameterChanges( currParameter, oldParameter, data, paramPath )
 			
 		elif isinstance( currParameter, IECore.CompoundParameter ) :
 			
-			RelativePreset.__grabCompoundParameterChanges( currParameter, oldParameter, data, paramPath )
+			self.__grabCompoundParameterChanges( currParameter, oldParameter, data, paramPath )
 
 		else :
 
-			RelativePreset.__grabSimpleParameterChanges( currParameter, oldParameter, data, paramPath )
+			self.__grabSimpleParameterChanges( currParameter, oldParameter, data, paramPath )
 
-	@staticmethod
-	def __grabCompoundParameterChanges( currParameter, oldParameter, data, paramPath ) :
+	def __grabCompoundParameterChanges( self, currParameter, oldParameter, data, paramPath ) :
 
 		for p in currParameter.keys() :
 			
@@ -132,7 +139,7 @@ class RelativePreset( IECore.Preset ) :
 				if p in oldParameter.keys() :
 					childOldParam = oldParameter[p]
 
-			RelativePreset.__grabParameterChanges(
+			self.__grabParameterChanges(
 				currParameter[p],
 				childOldParam, 
 				newData,
@@ -145,8 +152,7 @@ class RelativePreset( IECore.Preset ) :
 		if len(data):
 			data["_type_"] = IECore.StringData( "CompoundParameter" )
 
-	@staticmethod
-	def __grabSimpleParameterChanges( currParameter, oldParameter, data, paramPath ) :
+	def __grabSimpleParameterChanges( self, currParameter, oldParameter, data, paramPath ) :
 
 		if not oldParameter is None :
 
@@ -156,8 +162,7 @@ class RelativePreset( IECore.Preset ) :
 		data["_type_"] = IECore.StringData( currParameter.typeName() )
 		data["_value_"] = currParameter.getValue().copy()
 	
-	@staticmethod
-	def __grabClassParameterChanges( currParameter, oldParameter, data, paramPath ) :
+	def __grabClassParameterChanges( self, currParameter, oldParameter, data, paramPath ) :
 		
 		c = currParameter.getClass( True )
 		
@@ -183,7 +188,7 @@ class RelativePreset( IECore.Preset ) :
 
 		if c[0] :
 	
-			RelativePreset.__grabParameterChanges(
+			self.__grabParameterChanges(
 				c[0].parameters(),
 				childOldParam,
 				classValue,
@@ -199,8 +204,7 @@ class RelativePreset( IECore.Preset ) :
 			data["_classNameFilter_"] = IECore.StringData(classNameFilter)
 			data["_type_"] = IECore.StringData( "ClassParameter" )
 	
-	@staticmethod		
-	def __grabClassVectorParameterChanges( currParameter, oldParameter, data, paramPath ) :
+	def __grabClassVectorParameterChanges( self, currParameter, oldParameter, data, paramPath ) :
 		
 		classes = currParameter.getClasses( True )
 				
@@ -232,7 +236,7 @@ class RelativePreset( IECore.Preset ) :
 				if oldClass :
 					childOldParam = oldClass.parameters()
 
-			RelativePreset.__grabParameterChanges(
+			self.__grabParameterChanges(
 				c[0].parameters(),
 				childOldParam,
 				v,
