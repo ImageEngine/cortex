@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -80,6 +80,30 @@ template<>
 Imath::Box3f convert( const UT_BoundingBox &from )
 {
 	return Imath::Box3f( convert<Imath::V3f>( from.minvec() ), convert<Imath::V3f>( from.maxvec() ) );
+}
+
+template<>
+UT_Matrix4T<double> convert( const Imath::M44d &from )
+{
+	return UT_Matrix4T<double>( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
+}
+
+template<>
+Imath::M44d convert( const UT_Matrix4T<double> &from )
+{
+	return Imath::M44d( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
+}
+
+template<>
+UT_Matrix4T<float> convert( const Imath::M44f &from )
+{
+	return UT_Matrix4T<float>( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
+}
+
+template<>
+Imath::M44f convert( const UT_Matrix4T<float> &from )
+{
+	return Imath::M44f( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
 }
 
 } // namespace IECore

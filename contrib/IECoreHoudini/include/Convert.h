@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathEuler.h"
 
+#include "UT/UT_Matrix4.h"
 #include "UT/UT_Vector3.h"
 #include "UT/UT_BoundingBox.h"
 
@@ -71,6 +72,18 @@ UT_BoundingBox convert( const Imath::Box3f &from );
 
 template<>
 Imath::Box3f convert( const UT_BoundingBox &from );
+
+template<>
+UT_Matrix4T<double> convert( const Imath::M44d &from );
+
+template<>
+Imath::M44d convert( const UT_Matrix4T<double> &from );
+
+template<>
+UT_Matrix4T<float> convert( const Imath::M44f &from );
+
+template<>
+Imath::M44f convert( const UT_Matrix4T<float> &from );
 
 } // namespace IECore
 
