@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 #include "PRM/PRM_Name.h"
 
 #include "IECore/InterpolatedCache.h"
+#include "IECore/TransformationMatrix.h"
 
 namespace IECoreHoudini
 {
@@ -46,10 +47,11 @@ namespace IECoreHoudini
 /// SOP for applying an IECore::InterpolatedCache to the incoming Houdini geometry. The GB_PointGroups
 /// found on the incoming GU_Detail will be combined with the Object Prefix/Suffix parameters to
 /// form the IECore::InterpolatedCache::ObjectHandles. If IECore::InterpolatedCache::AttributeHandles
-/// exist for an ObjectHandle, they will be added to the GU_Detail as a GB_Attribute and the values will
-/// be transfered for the GB_Elements contained within the GB_PointGroup. The GB_Attribute name will be the
-/// difference between the AttributeHandle and the Attribute Prefix/Suffix parameters.
-/// \todo: allow PrimitiveAttribs to be created based on GB_PrimGroups
+/// exist for an ObjectHandle, they will be added to the GU_Detail as a GA_Attribute and the values will
+/// be transfered for the GA_Range definied by the GA_PointGroup. The GA_Attribute name will be the
+/// difference between the AttributeHandle and the Attribute Prefix/Suffix parameters. If transformAttribute
+/// is specified, and the associated data is a TransformationMatrix, it will be used to transform the GA_Range.
+/// \todo: allow PrimitiveAttribs to be created based on GA_PrimGroups
 class SOP_InterpolatedCacheReader : public SOP_Node
 {
 	public :
@@ -65,6 +67,9 @@ class SOP_InterpolatedCacheReader : public SOP_Node
 		virtual OP_ERROR cookMySop( OP_Context &context );
 
 	private :
+		
+		template<typename T>
+		void transformPoints( const IECore::TransformationMatrix<T> &transform, const GA_Range &range );
 		
 		IECore::InterpolatedCachePtr m_cache;
 		std::string m_cacheFileName;

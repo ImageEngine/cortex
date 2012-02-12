@@ -54,6 +54,8 @@ adoptChildPresets argument to the constructor.
 
 * IECore.Enum has a classmethod values() which returns a tuple of the available values.
 
+* SOP_InterpolatedCacheReader has a new transformAttribute parm which can be used to transform the points based on a TransformationMatrix in the cache.
+
 Bug Fixes :
 
 * ClassParameter.setClass() method was not taking advantage of a matching already loaded class if the searchPathEnvVar was None.

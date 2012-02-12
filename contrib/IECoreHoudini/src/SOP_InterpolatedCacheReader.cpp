@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 #include "PRM/PRM_Template.h"
 
 #include "IECore/CompoundObject.h"
+#include "IECore/TransformationMatrixData.h"
 #include "IECore/VectorTypedData.h"
 
 #include "Convert.h"
@@ -52,6 +53,7 @@ static PRM_Name parameterNames[] = {
 	PRM_Name( "cacheSequence", "Cache Sequence" ),
 	PRM_Name( "objectFixes", "Object Prefix/Suffix" ),
 	PRM_Name( "attributeFixes", "Attribute Prefix/Suffix" ),
+	PRM_Name( "transformAttribute", "Transform Attribute" ),
 	PRM_Name( "frameMultiplier", "Frame Multiplier" ),
 };
 
@@ -61,7 +63,8 @@ PRM_Template SOP_InterpolatedCacheReader::parameters[] = {
 	PRM_Template( PRM_FILE, 1, &parameterNames[0] ),
 	PRM_Template( PRM_STRING, 2, &parameterNames[1] ),
 	PRM_Template( PRM_STRING, 2, &parameterNames[2] ),
-	PRM_Template( PRM_INT, 1, &parameterNames[3], &frameMultiplierDefault ),
+	PRM_Template( PRM_STRING, 1, &parameterNames[3] ),
+	PRM_Template( PRM_INT, 1, &parameterNames[4], &frameMultiplierDefault ),
 	PRM_Template(),
 };
 
@@ -108,6 +111,9 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 	std::string attributePrefix = paramVal.toStdString();
 	evalString( paramVal, "attributeFixes", 1, time );
 	std::string attributeSuffix = paramVal.toStdString();
+	
+	evalString( paramVal, "transformAttribute", 0, time );
+	std::string transformAttribute = paramVal.toStdString();
 	
 	int frameMultiplier = evalInt( "frameMultiplier", 0, time );
 	
@@ -197,7 +203,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 			{
 				continue;
 			}
-
+			
 			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( data );
 			if ( !converter )
  			{
@@ -255,8 +261,40 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 				converter->convert( attrName, gdp, pointRange );
 			}
 		}
+		
+		// if transformAttribute is specified, use to to transform the points
+		if ( transformAttribute != "" )
+		{
+			const TransformationMatrixdData *transform = attributes->member<TransformationMatrixdData>( transformAttribute );
+			if ( transform )
+			{
+				transformPoints<double>( transform->readable(), pointRange );
+			}
+			else
+			{
+				const TransformationMatrixfData *transform = attributes->member<TransformationMatrixfData>( transformAttribute );
+				if ( transform )
+				{
+					transformPoints<float>( transform->readable(), pointRange );
+				}
+			}
+		}
 	}
 	
 	unlockInputs();
 	return error();
+}
+
+template<typename T>
+void SOP_InterpolatedCacheReader::transformPoints( const IECore::TransformationMatrix<T> &transform, const GA_Range &range )
+{
+	UT_Matrix4T<T> matrix = IECore::convert<UT_Matrix4T<T> >( transform.transform() );
+	
+	for ( GA_Iterator it=range.begin(); !it.atEnd(); ++it )
+	{
+		UT_Vector3 pos = gdp->getPos3( it.getOffset() );
+		pos *= matrix;
+		gdp->setPos3( it.getOffset(), pos );
+	}
+
 }

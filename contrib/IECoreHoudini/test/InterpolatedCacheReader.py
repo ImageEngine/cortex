@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -294,6 +294,26 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache.parm( "attributeFixes1" ).set( "wrong" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		self.assert_( "P" in result )
+	
+	def testTransformAttribute( self ) :
+		cache = self.cacheSop()
+		hou.setFrame( 2 )
+		orig = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		cache.parm( "transformAttribute" ).set( "transform" )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.assertNotEqual( orig, result )
+		self.assertNotEqual( orig['P'], result['P'] )
+		self.assertEqual( orig['P'].data.size(), result['P'].data.size() )
+		self.assertEqual( orig['Cd'], result['Cd'] )
+		self.assertEqual( orig['pointId'], result['pointId'] )
+		
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
+		matrix = i.read( 2, "torus", "transform" ).value.transform
+		origP = orig["P"].data
+		resultP = result["P"].data
+		for i in range( 0, origP.size() ) :
+			self.assertNotEqual( resultP[i], origP[i] )
+			self.assertEqual( resultP[i], matrix.multVecMatrix( origP[i] ) )
 
 if __name__ == "__main__":
 	unittest.main()
