@@ -1,3 +1,6 @@
+Cortex 6.5.0
+============
+
 Improvements :
 
 * IECore.RelativePreset accepts now a compare filter that is a callback for ignoring some of the parameters when doing the diff.
