@@ -249,7 +249,8 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 					addWarning( SOP_ATTRIBUTE_INVALID, ( boost::format( "Geometry/Cache mismatch: %s contains %d points, while cache expects %d." ) % group->getName().toStdString() % entries % pos.size() ).str().c_str() );
 					continue;
 				}
-
+				
+				/// \todo: try multi-threading this with a GA_SplittableRange
 				for ( GA_Iterator it=pointRange.begin(); !it.atEnd(); ++it, ++index )
 				{
 					gdp->setPos3( it.getOffset(), IECore::convert<UT_Vector3>( pos[index] ) );
@@ -290,11 +291,9 @@ void SOP_InterpolatedCacheReader::transformPoints( const IECore::TransformationM
 {
 	UT_Matrix4T<T> matrix = IECore::convert<UT_Matrix4T<T> >( transform.transform() );
 	
+	/// \todo: try multi-threading this with a GA_SplittableRange
 	for ( GA_Iterator it=range.begin(); !it.atEnd(); ++it )
 	{
-		UT_Vector3 pos = gdp->getPos3( it.getOffset() );
-		pos *= matrix;
-		gdp->setPos3( it.getOffset(), pos );
+		gdp->setPos3( it.getOffset(), gdp->getPos3( it.getOffset() ) * matrix );
 	}
-
 }
