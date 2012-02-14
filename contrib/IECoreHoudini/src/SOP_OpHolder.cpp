@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,7 +68,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 {
 	// some defaults and useful variables
 	Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );
-	float now = context.myTime;
+	float now = context.getTime();
 
 	// force eval of our nodes parameters with our hidden parameter expression
 	evalInt( "__evaluateParameters", 0, now );
