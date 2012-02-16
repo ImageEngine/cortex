@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -163,6 +163,8 @@ void ToHoudiniGeometryConverter::transferAttribs(
 			}
 		}
 	}
+	
+	/// \todo: should we convert s and t to uv automatically?
 	
  	// add the primitive variables to the various GEO_AttribDicts based on interpolation type
 	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
