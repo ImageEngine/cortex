@@ -114,7 +114,7 @@ MObject ProceduralHolder::aComponentBoundCenterZ;
 
 
 ProceduralHolder::ProceduralHolder()
-	:	m_boundDirty( true ), m_sceneDirty( true ), m_lastRenderer( 0 )
+	:	m_boundDirty( true ), m_sceneDirty( true ), m_lastRenderer( 0 ), m_sceneUpdateCount( 0 )
 {
 }
 
@@ -642,8 +642,9 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		{
 			msg( Msg::Error, "ProceduralHolder::scene", "Caught unknown exception" );
 		}
+		++m_sceneUpdateCount;
 	}
-
+	
 	m_sceneDirty = false;
 	return m_scene;
 }
@@ -771,6 +772,11 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 			buildComponents( nameState, group, groupTransform );
 		}
 	}
+}
+
+int ProceduralHolder::getSceneUpdateCount()
+{
+	return m_sceneUpdateCount;
 }
 
 void ProceduralHolder::buildComponents()

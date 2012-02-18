@@ -96,7 +96,10 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 
 		/// Returns an up to date scene from the procedural
 		IECoreGL::ConstScenePtr scene();
-
+		
+		/// Returns the number of times the opengl scene has been regenerated
+		int getSceneUpdateCount();
+		
 		static MObject aGLPreview;
 		static MObject aTransparent;
 		static MObject aDrawBound;
@@ -150,7 +153,9 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 
 		void buildComponents();
 		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, const Imath::M44f &parentTransform );
-
+		
+		int m_sceneUpdateCount;
+		
 		ComponentsMap m_componentsMap;
 		ComponentToGroupMap m_componentToGroupMap;
 		ComponentTransformsMap m_componentTransforms;
