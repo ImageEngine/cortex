@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -738,6 +738,21 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.keys(), mesh.keys() )
 		self.assertEqual( result["stringPoint"], mesh["stringPoint"] )
 		self.assertEqual( result["stringPointIndices"], mesh["stringPointIndices"] )
+	
+	def testGroupName( self ) :
+		
+		sop = self.emptySop()
+		mesh = self.mesh()
+		mesh.blindData()["name"] = IECore.StringData( "testGroup" )
+		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+		primGroups = sop.geometry().primGroups()
+		self.assertEqual( len(primGroups), 1 )
+		self.assertEqual( primGroups[0].name(), "testGroup" )
+		self.assertEqual( len(primGroups[0].prims()), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		pointGroups = sop.geometry().pointGroups()
+		self.assertEqual( len(pointGroups), 1 )
+		self.assertEqual( pointGroups[0].name(), "testGroup" )
+		self.assertEqual( len(pointGroups[0].points()), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
 	
 	def tearDown( self ) :
 		

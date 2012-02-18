@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -682,5 +682,21 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		del points['source']
 		self.assertEqual( points2, points )
 	
+	def testGroupName( self ) :
+		
+		points = self.createPoints()
+		particles = points.createOutputNode( "add" )
+		particles.parm( "addparticlesystem" ).set( True )
+		group = particles.createOutputNode( "group" )
+		group.parm( "crname" ).set( "testGroup" )
+		
+		particles.bypass( True )
+		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		
+		particles.bypass( False )
+		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
+		self.assertEqual( result.blindData()['name'].value, "testGroup" )
+
 if __name__ == "__main__":
     unittest.main()

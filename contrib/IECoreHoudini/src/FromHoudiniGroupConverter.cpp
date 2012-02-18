@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -121,7 +121,6 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			continue;
 		}
 		
-		renderable->blindData()->writable()["name"] = new StringData( group->getName().toStdString() );
 		result->addChild( renderable );
 	}
 	
@@ -131,7 +130,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 	}
 	
 	GU_Detail ungroupedGeo( (GU_Detail*)geo );
-	GA_PrimitiveGroup *ungrouped = static_cast<GA_PrimitiveGroup*>( ungroupedGeo.createElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__ungroupedPrimitives" ) );
+	GA_PrimitiveGroup *ungrouped = static_cast<GA_PrimitiveGroup*>( ungroupedGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__ungroupedPrimitives" ) );
 	for ( GA_GroupTable::iterator<GA_ElementGroup> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 	{
 		*ungrouped |= *static_cast<GA_PrimitiveGroup*>( it.group() );
@@ -179,11 +178,19 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	}
 
 	GroupPtr groupResult = new Group();
+	if ( !group->getInternal() )
+	{
+		groupResult->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
+	}
 	
 	for ( PrimIdGroupMapIterator it = groupMap.begin(); it != groupMap.end(); it++ )
 	{
 		VisibleRenderablePtr renderable = 0;
 		GU_Detail childGeo( &groupGeo, it->second );
+		for ( GA_GroupTable::iterator<GA_ElementGroup> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+		{
+			childGeo.destroyGroup( it.group() );
+		}
 		PrimitivePtr child = doPrimitiveConversion( &childGeo );
 		if ( child )
 		{
@@ -206,7 +213,7 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, PrimIdGroupMap &group
 		it = groupMap.find( primType );
 		if ( it == groupMap.end() )
 		{
-			PrimIdGroupPair pair( primType, static_cast<GA_PrimitiveGroup*>( geo->createElementGroup( GA_ATTRIB_PRIMITIVE, ( boost::format( "FromHoudiniGroupConverter__typedPrimitives%d" ) % primType ).str().c_str() ) ) );
+			PrimIdGroupPair pair( primType, static_cast<GA_PrimitiveGroup*>( geo->createInternalElementGroup( GA_ATTRIB_PRIMITIVE, ( boost::format( "FromHoudiniGroupConverter__typedPrimitives%d" ) % primType ).str().c_str() ) ) );
 			it = groupMap.insert( pair ).first;
 		}
 		

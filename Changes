@@ -56,6 +56,8 @@ adoptChildPresets argument to the constructor.
 
 * SOP_InterpolatedCacheReader has a new transformAttribute parm which can be used to transform the points based on a TransformationMatrix in the cache.
 
+* ToHoudiniGeometryConverter creates point and prim groups based on the blindData name, FromHoudiniGeometryConverter creates the blindData name based on prim group name, and To/FromHoudiniGroupConverters use their base classes to manipulate prim group names
+
 Bug Fixes :
 
 * ClassParameter.setClass() method was not taking advantage of a matching already loaded class if the searchPathEnvVar was None.

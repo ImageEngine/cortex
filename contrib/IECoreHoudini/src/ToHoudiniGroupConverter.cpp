@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -105,6 +105,12 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 			child = staticPointerCast<VisibleRenderable>( transformOp->operate() );
 		}
 		
+		StringDataPtr childName = child->blindData()->member<StringData>( "name" );
+		if ( !childName && groupName )
+		{
+			child->blindData()->member<StringData>( "name", false, true )->writable() = groupName->readable();
+		}
+		
 		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child );
 		if ( !converter )
 		{
@@ -117,8 +123,6 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 			groupConverter->transformParameter()->setValue( transformData );
 		}
 		
-		size_t origNumPrims = geo->getNumPrimitives();
-		
 		GU_DetailHandle handle;
 		handle.allocateAndSet( geo, false );
 		
@@ -126,21 +130,6 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 		{
 			continue;
 		}
-		
-		StringDataPtr childName = child->blindData()->member<StringData>( "name" );
-		if ( !childName && !groupName )
-		{
-			continue;
-		}
-		
-		std::string name = childName ? childName->readable() : groupName->readable();
-		GA_ElementGroup *childGroup = geo->findPrimitiveGroup( name.c_str() );
-		if ( !childGroup || childGroup->classType() != GA_GROUP_PRIMITIVE )
-		{
-			childGroup = geo->createElementGroup( GA_ATTRIB_PRIMITIVE, name.c_str() );
-		}
-		
-		childGroup->addRange( geo->getPrimitiveRangeSlice( origNumPrims ) );
 	}
 	
 	return true;

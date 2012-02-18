@@ -274,6 +274,19 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	}
 	
 	/// \todo: should we convert uv to s and t automatically?
+	
+	// add the name blindData based on prim group
+	GA_Range primRange = geo->getPrimitiveRange();
+	const GA_ElementGroupTable &primGroups = geo->primitiveGroups();
+	for ( GA_GroupTable::iterator<GA_ElementGroup> it = primGroups.beginTraverse(); !it.atEnd(); ++it )
+	{
+		GA_ElementGroup *group = it.group();
+		if ( !group->getInternal() && group->containsAny( primRange ) )
+		{
+			result->blindData()->member<StringData>( "name", false, true )->writable() = it.name();
+			break;
+		}
+	}
 }
 
 void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const

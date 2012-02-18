@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -249,9 +249,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		for x in primGroups :
 			primGroupMap[x.name()] = x
 		
-		self.assertEqual( len(primGroups), 4 )
-		self.failUnless( "pointsGroup" in primGroupMap )
-		self.assertEqual( len(primGroupMap["pointsGroup"].prims()), 0 )
+		self.assertEqual( len(primGroups), 3 )
 		self.failUnless( "meshGroupA" in primGroupMap )
 		self.assertEqual( len(primGroupMap["meshGroupA"].prims()), 6 )
 		self.failUnless( "meshGroupB" in primGroupMap )
@@ -275,9 +273,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		for x in primGroups :
 			primGroupMap[x.name()] = x
 		
-		self.assertEqual( len(primGroups), 4 )
-		self.failUnless( "pointsGroup" in primGroupMap )
-		self.assertEqual( len(primGroupMap["pointsGroup"].prims()), 0 )
+		self.assertEqual( len(primGroups), 3 )
 		self.failUnless( "meshGroupA" in primGroupMap )
 		self.assertEqual( len(primGroupMap["meshGroupA"].prims()), 6 )
 		self.failUnless( "meshGroupB" in primGroupMap )
@@ -295,9 +291,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null, append=True ) )
 		primGroups = null.geometry().primGroups()
 		
-		self.assertEqual( len(primGroups), 4 )
-		self.failUnless( "pointsGroup" in primGroupMap )
-		self.assertEqual( len(primGroupMap["pointsGroup"].prims()), 0 )
+		self.assertEqual( len(primGroups), 3 )
 		self.failUnless( "meshGroupA" in primGroupMap )
 		self.assertEqual( len(primGroupMap["meshGroupA"].prims()), 12 )
 		self.failUnless( "meshGroupB" in primGroupMap )
@@ -319,9 +313,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( null ) )
 		primGroups = null.geometry().primGroups()
 
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( primGroups[0].name(), "pointsGroup" )
-		self.assertEqual( len(primGroups[0].prims()), 0 )
+		self.assertEqual( len(primGroups), 0 )
 	
 	def testConvertGroupedMesh( self ) :
 		null = self.emptySop()
@@ -352,9 +344,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		primGroupMap = {}
 		for x in primGroups :
 			primGroupMap[x.name()] = x
-		self.assertEqual( len(primGroups), 2 )
-		self.failUnless( "pointsGroup" in primGroupMap )
-		self.assertEqual( len(primGroupMap["pointsGroup"].prims()), 0 )
+		self.assertEqual( len(primGroups), 1 )
 		self.failUnless( "curveBoxGroup"in primGroupMap )
 		self.assertEqual( len(primGroupMap["curveBoxGroup"].prims()), 12 )
 		

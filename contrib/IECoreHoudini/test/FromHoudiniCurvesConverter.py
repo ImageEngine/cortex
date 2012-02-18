@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -343,6 +343,14 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result2 = converter.convert()
 		self.assertNotEqual( result1["P"].data, result2["P"].data )
 		self.assertNotEqual( result1, result2 )
+	
+	def testGroupName( self ) :
+		
+		curves = self.createCurves( 4 )
+		group = curves.createOutputNode( "group" )
+		group.parm( "crname" ).set( "testGroup" )
+		result = IECoreHoudini.FromHoudiniCurvesConverter( group ).convert()
+		self.assertEqual( result.blindData()['name'].value, "testGroup" )
 	
 	def testErrorStates( self ) :
 		

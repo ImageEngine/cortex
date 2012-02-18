@@ -214,6 +214,35 @@ void ToHoudiniGeometryConverter::transferAttribs(
 			converter->convert( it->first, geo, vertRange );
 		}
 	}
+	
+	// add the groups based on blindData
+	const StringData *nameData = primitive->blindData()->member<StringData>( "name" );
+	if ( nameData )
+	{
+		const char *name = nameData->readable().c_str();
+		
+		if ( newPoints.isValid() )
+		{
+			GA_ElementGroup *group = geo->findPointGroup( name );
+			if ( !group || group->classType() != GA_GROUP_POINT )
+			{
+				group = geo->createElementGroup( GA_ATTRIB_POINT, name );
+			}
+			
+			group->addRange( newPoints );
+		}
+		
+		if ( newPrims.isValid() )
+		{
+			GA_ElementGroup *group = geo->findPrimitiveGroup( name );
+			if ( !group || group->classType() != GA_GROUP_PRIMITIVE )
+			{
+				group = geo->createElementGroup( GA_ATTRIB_PRIMITIVE, name );
+			}
+			
+			group->addRange( newPrims );
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////

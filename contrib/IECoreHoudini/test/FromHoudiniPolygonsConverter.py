@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -607,5 +607,13 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
 	
+	def testGroupName( self ) :
+		
+		torus = self.createTorus()
+		group = torus.createOutputNode( "group" )
+		group.parm( "crname" ).set( "testGroup" )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( group ).convert()
+		self.assertEqual( result.blindData()['name'].value, "testGroup" )
+
 if __name__ == "__main__":
     unittest.main()
