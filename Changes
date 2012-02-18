@@ -1,3 +1,10 @@
+Cortex 6.5.1
+============
+
+Improvements :
+
+* IECoreMaya ProceduralHolder node now uses gl display lists to speed up viewport refresh.
+
 Cortex 6.5.0
 ============
 
