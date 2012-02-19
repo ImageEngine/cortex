@@ -397,6 +397,8 @@ enum TypeId
 	DeepImageReaderTypeId = 351,
 	DeepImageWriterTypeId = 352,
 	DeepImageConverterTypeId = 353,
+	V2iVectorParameterTypeId = 354,
+	V3iVectorParameterTypeId = 355,
 
 	// Remember to update TypeIdBinding.cpp !!!
 
