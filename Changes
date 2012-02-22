@@ -77,6 +77,8 @@ segmentation faults rather than a graceful error report.
 
 * Fixed bug which made it impossible to output more than one display from IECoreArnold::Renderers.
 
+* Fixed threading issue with IECore.ClassLoader()
+
 Cortex 6.4.3
 ============
 
