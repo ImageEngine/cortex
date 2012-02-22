@@ -40,6 +40,8 @@ import os.path
 from fnmatch import fnmatch
 from IECore import Msg, msg, SearchPath, warning
 
+import threading
+
 ## This class defines methods for creating instances of classes
 # defined in python modules on disk. We could just use the standard
 # import mechanism for this but this gives us queries over what is
@@ -64,6 +66,7 @@ class ClassLoader :
 
 		self.__searchPaths = searchPaths
 		self.__defaultVersions = {}
+		self.__loadMutex = threading.RLock()
 		self.refresh()
 
 	## Returns an alphabetically sorted list
@@ -74,6 +77,7 @@ class ClassLoader :
 	def classNames( self, matchString = "*" ) :
 
 		self.__findAllClasses()
+
 		### \todo Support re, and allow exclusions, etc...
 		n = [ x for x in self.__classes.keys() if fnmatch( x, matchString ) ]
 		n.sort()
@@ -83,7 +87,6 @@ class ClassLoader :
 	# class as a list of ints, with the latest version last. 
 	# If the class doesn't exist returns an empty list.
 	def versions( self, name ) :
-
 		try :
 			c = self.__findClass( name )
 			return c["versions"]
@@ -128,44 +131,46 @@ class ClassLoader :
 	# It also adds two class attributes named "path" and "version"
 	# with the info necessary to reload the Op from ClassLoader.
 	def load( self, name, version = None ) :
-
-		c = self.__findClass( name )
-
-		if not version :
-			version = self.getDefaultVersion( name )
-
-		if not version in self.versions( name ) :
-			raise RuntimeError( "Class \"%s\" has no version %d." % (name, version) )
-
-		if version in c["imports"] :
-			return c["imports"][version]
-
-		nameTail = os.path.basename( name )
-		fileName = os.path.join( name, nameTail + "-" + str(version) + ".py" )
-		fileName = self.__searchPaths.find( fileName )
-		if fileName=="" :
-			raise IOError( "Unable to find implementation file for class \"%s\" version %d." % (name, version) )
-
-		fileForLoad = open( fileName, "r" )
-		try :
-			module = imp.load_module( "IECoreClassLoader" + name.replace( ".", "_" ) + str( version ), fileForLoad, fileName, ( ".py", "r", imp.PY_SOURCE ) )
-		finally :
-			fileForLoad.close()
-
-		if not getattr( module, nameTail, None ) :
-			raise IOError( "File \"%s\" does not define a class named \"%s\"." % ( fileName, nameTail ) )
-
-		result = getattr( module, nameTail )
 		
-		if getattr( result, 'staticTypeName', None ) == getattr( result.__bases__[0], 'staticTypeName', None ) :
-			warning( "Class \"%s\" has the same staticTypeName as its Base Class. Perhaps you should call registerRunTimeTyped." % name )
+		with self.__loadMutex:
 		
-		result.path = name
-		result.version = version
+			c = self.__findClass( name )
 
-		c["imports"][version] = result
+			if not version :
+				version = self.getDefaultVersion( name )
 
-		return result
+			if not version in self.versions( name ) :
+				raise RuntimeError( "Class \"%s\" has no version %d." % (name, version) )
+
+			if version in c["imports"] :
+				return c["imports"][version]
+
+			nameTail = os.path.basename( name )
+			fileName = os.path.join( name, nameTail + "-" + str(version) + ".py" )
+			fileName = self.__searchPaths.find( fileName )
+			if fileName=="" :
+				raise IOError( "Unable to find implementation file for class \"%s\" version %d." % (name, version) )
+
+			fileForLoad = open( fileName, "r" )
+			try :
+				module = imp.load_module( "IECoreClassLoader" + name.replace( ".", "_" ) + str( version ), fileForLoad, fileName, ( ".py", "r", imp.PY_SOURCE ) )
+			finally :
+				fileForLoad.close()
+
+			if not getattr( module, nameTail, None ) :
+				raise IOError( "File \"%s\" does not define a class named \"%s\"." % ( fileName, nameTail ) )
+
+			result = getattr( module, nameTail )
+
+			if getattr( result, 'staticTypeName', None ) == getattr( result.__bases__[0], 'staticTypeName', None ) :
+				warning( "Class \"%s\" has the same staticTypeName as its Base Class. Perhaps you should call registerRunTimeTyped." % name )
+
+			result.path = name
+			result.version = version
+
+			c["imports"][version] = result
+
+			return result
 
 	## The ClassLoader uses a caching mechanism to speed
 	# up frequent reloads of the same class. This method
@@ -181,30 +186,34 @@ class ClassLoader :
 		#						# this is filled in lazily by load()
 		# }
 		# this will be filled in lazily by __findClass and __findAllClasses
+
 		self.__classes = {}
 		self.__foundAllClasses = False
 
 	__defaultLoaders = {}
+	__defaultLoaderMutex = threading.Lock()
 	## Returns a ClassLoader configured to load from the paths defined by the
 	# specified environment variable. The same object is returned each time,
 	# allowing one loader to be shared by many callers.
 	@classmethod
 	def defaultLoader( cls, envVar ) :
 
-		loader = cls.__defaultLoaders.get( envVar, None )
-		if loader :
+		with cls.__defaultLoaderMutex:
+			
+			loader = cls.__defaultLoaders.get( envVar, None )
+			if loader :
+				return loader
+
+			sp = ""
+			if envVar in os.environ :
+				sp = os.environ[envVar]
+			else :
+				msg( Msg.Level.Warning, "ClassLoader.defaultLoader", "Environment variable %s not set." % envVar )
+
+			loader = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
+			cls.__defaultLoaders[envVar] = loader
+
 			return loader
-
-		sp = ""
-		if envVar in os.environ :
-			sp = os.environ[envVar]
-		else :
-			msg( Msg.Level.Warning, "ClassLoader.defaultLoader", "Environment variable %s not set." % envVar )
-
-		loader = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
-		cls.__defaultLoaders[envVar] = loader
-
-		return loader
 
 	## Returns a ClassLoader configured to load from the
 	# paths defined by the IECORE_OP_PATHS environment variable. The
