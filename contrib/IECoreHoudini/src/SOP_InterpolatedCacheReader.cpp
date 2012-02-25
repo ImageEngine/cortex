@@ -123,7 +123,9 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 		try
 		{
 			float fps = OPgetDirector()->getChannelManager()->getSamplesPerSec();
+			/// \todo: expose samplesPerFrame as a parameter
 			OversamplesCalculator calc( fps, 1, (int)fps * frameMultiplier );
+			/// \todo: expose interpolation type as a parameter
 			m_cache = new InterpolatedCache( cacheFileName, InterpolatedCache::Linear, calc );
 		}
 		catch ( IECore::InvalidArgumentException e )
