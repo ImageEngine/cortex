@@ -1423,14 +1423,19 @@ corePythonModuleEnv.Alias( "install", corePythonModuleInstall )
 corePythonModuleEnv.Alias( "installCore", corePythonModuleInstall )
 
 # stubs
-for classes, installPath in ( ( env["INSTALL_IECORE_OPS"], "$INSTALL_IECORE_OP_PATH" ), ( env["INSTALL_IECORE_PROCEDURALS"], "$INSTALL_IECORE_PROCEDURAL_PATH" ) ) :
+for classes, installPath in ( ( env['INSTALL_IECORE_OPS'], "$INSTALL_IECORE_OP_PATH" ), ( env["INSTALL_IECORE_PROCEDURALS"], "$INSTALL_IECORE_PROCEDURAL_PATH" ) ) :
 	for cls in classes :
 		stubName = os.path.basename( cls[1] )
 		stubEnv = corePythonModuleEnv.Clone( IECORE_NAME=os.path.join( cls[1], stubName ) )
 		stubInstall = stubEnv.Command( installPath, None, 'echo "from %s import %s as %s" > $TARGET' % ( cls[0].rpartition( "." )[0], cls[0].rpartition( "." )[-1], stubName ) )
-		stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, installPath ) )
+		# this switch is to avoid an issue with the lamda post actions baking args incorrectly.
+		if installPath == "$INSTALL_IECORE_OP_PATH" :
+			stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, env["INSTALL_IECORE_OP_PATH"] ) )
+		elif installPath == "$INSTALL_IECORE_PROCEDURAL_PATH" :
+			stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, env["INSTALL_IECORE_PROCEDURAL_PATH"] ) )
 		stubEnv.Alias( "install", stubInstall )
 		stubEnv.Alias( "installCore", stubInstall )
+		stubEnv.Alias( "installStubs", stubInstall )
 
 Default( coreLibrary, corePythonLibrary, corePythonModule )
 
