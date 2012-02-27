@@ -229,7 +229,14 @@ void ToHoudiniGeometryConverter::transferAttribs(
 				group = geo->createElementGroup( GA_ATTRIB_POINT, name );
 			}
 			
-			group->addRange( newPoints );
+			if ( group )
+			{
+				group->addRange( newPoints );
+			}
+			else
+			{
+				IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "Group " + nameData->readable() + " is invalid." );
+			}
 		}
 		
 		if ( newPrims.isValid() )
@@ -240,7 +247,14 @@ void ToHoudiniGeometryConverter::transferAttribs(
 				group = geo->createElementGroup( GA_ATTRIB_PRIMITIVE, name );
 			}
 			
-			group->addRange( newPrims );
+			if ( group )
+			{
+				group->addRange( newPrims );
+			}
+			else
+			{
+				IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "Group " + nameData->readable() + " is invalid." );
+			}
 		}
 	}
 }
