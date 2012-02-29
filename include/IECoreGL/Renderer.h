@@ -308,6 +308,25 @@ class Renderer : public IECore::Renderer
 		/// "min"<br>
 		/// "max"<br>
 		///
+		/// \li <b>"gl:alphaTest" BoolData false</b><br>
+		/// When this is true, gl alpha testing will be enabled.
+		///
+		/// \li <b>"gl:alphaTest:value" FloatData 0</b><br>
+		/// Alpha test comparison value for glAlphaFunc
+		///
+		/// \li <b>"gl:alphaTest:mode" StringData "always"</b><br>
+		/// Alpha test comparison mode for glAlphaFunc. 
+		/// Valid values are listed below, and map directly onto the corresponding
+		/// GLenum values.<br><br>
+		/// "never"<br>
+		/// "less"<br>
+		/// "equal"<br>
+		/// "lequal"<br>
+		/// "greater"<br>
+		/// "notequal"<br>
+		/// "gequal"<br>
+		/// "always"<br>
+		///
 		/// \par Implementation specific antialiasing attributes :
 		///////////////////////////////////////////////////////////
 		///

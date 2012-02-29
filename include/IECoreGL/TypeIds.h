@@ -114,6 +114,8 @@ enum TypeId
 	DepthTestStateComponentTypeId = 105071,
 	CameraVisibilityStateComponentTypeId = 105072,
 	DepthMaskStateComponentTypeId = 105073,
+	AlphaTestStateComponentTypeId = 105074,
+	AlphaFuncStateComponentTypeId = 105075,
 	LastCoreGLTypeId = 105999,
 };
 

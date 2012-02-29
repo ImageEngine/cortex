@@ -119,6 +119,12 @@ class TestRenderer( unittest.TestCase ) :
 			if withFreeType() :
 				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "mesh" ) )
 			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:depthMask" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:alphaTest" ), BoolData( False ) )
+			
+			self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), StringData( "always" ) )
+			self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), FloatData( 0.0 ) )
+			
 			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( True ) )
 
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
@@ -181,7 +187,28 @@ class TestRenderer( unittest.TestCase ) :
 				
 			r.setAttribute( "gl:depthTest", BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( False ) )	
+			
+			r.setAttribute( "gl:depthMask", BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:depthMask" ), BoolData( False ) )	
 
+			r.setAttribute( "gl:alphaTest", BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:alphaTest" ), BoolData( True ) )	
+			
+			alphaTestModes = [ "never", "less", "equal", "lequal", "greater", "notequal", "gequal", "always" ]
+			value = 0.1
+			for m in alphaTestModes :
+				last = r.getAttribute( "gl:alphaTest:value" )
+				r.setAttribute( "gl:alphaTest:mode", StringData( m ) )
+				self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), StringData( m ) )
+				self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), last )
+				
+				last = r.getAttribute( "gl:alphaTest:mode" )
+				r.setAttribute( "gl:alphaTest:value", FloatData( value ) )
+				self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), FloatData( value ) )
+				self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), last )
+				
+				value += 0.05
+			
 			r.setAttribute( "gl:visibility:camera", BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( False ) )
 

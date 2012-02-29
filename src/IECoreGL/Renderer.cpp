@@ -912,6 +912,117 @@ static void blendFactorSetter( const std::string &name, IECore::ConstDataPtr val
 	memberData->implementation->addState( new BlendFuncStateComponent( bf ) );
 }
 
+static void alphaFuncSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
+{
+
+	const AlphaFuncStateComponent *a = memberData->implementation->getState<AlphaFuncStateComponent>();
+	AlphaFunc af = a->value();
+	
+	if( name == "gl:alphaTest:mode" )
+	{
+		ConstStringDataPtr d = castWithWarning<const StringData>( value, name, "Renderer::setAttribute" );
+		if( !d )
+		{
+			return;
+		}
+		
+		GLenum m;
+		const std::string &v = d->readable();
+		if( v=="never" )
+		{
+			m = GL_NEVER;
+		}
+		else if( v=="less" )
+		{
+			m = GL_LESS;
+		}
+		else if( v=="equal" )
+		{
+			m = GL_EQUAL;
+		}
+		else if( v=="lequal" )
+		{
+			m = GL_LEQUAL;
+		}
+		else if( v=="greater" )
+		{
+			m = GL_GREATER;
+		}
+		else if( v=="notequal" )
+		{
+			m = GL_NOTEQUAL;
+		}
+		else if( v=="gequal" )
+		{
+			m = GL_GEQUAL;
+		}
+		else if( v=="always" )
+		{
+			m = GL_ALWAYS;
+		}
+		else
+		{
+			msg( Msg::Error, "Renderer::setAttribute", boost::format( "Unsupported value \"%s\" for attribute \"%s\"." ) % v % name );
+			return;
+		}
+		af.mode = m;
+	}
+	else if( name == "gl:alphaTest:value" )
+	{
+		ConstFloatDataPtr d = castWithWarning<const FloatData>( value, name, "Renderer::setAttribute" );
+		if( !d )
+		{
+			return;
+		}
+		af.value = d->readable();
+	}
+	else
+	{
+		return;
+	}
+	
+	memberData->implementation->addState( new AlphaFuncStateComponent( af ) );
+}
+
+static IECore::ConstDataPtr alphaFuncGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
+{
+	const AlphaFuncStateComponent *b = memberData->implementation->getState<AlphaFuncStateComponent>();
+	
+	if( name == "gl:alphaTest:mode" )
+	{
+		GLenum m = b->value().mode;
+		switch( m )
+		{
+			case GL_NEVER:
+				return new StringData( "never" );
+			case GL_LESS:
+				return new StringData( "less" );
+			case GL_EQUAL:
+				return new StringData( "equal" );
+			case GL_LEQUAL:
+				return new StringData( "lequal" );
+			case GL_GREATER:
+				return new StringData( "greater" );
+			case GL_NOTEQUAL:
+				return new StringData( "notequal" );
+			case GL_GEQUAL:
+				return new StringData( "gequal" );
+			case GL_ALWAYS:
+				return new StringData( "always" );
+			default :
+				msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
+				return new StringData( "invalid" );
+		}
+	}
+	else if( name == "gl:alphaTest:value" )
+	{
+		return new FloatData( b->value().value );
+	}
+	
+	msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
+	return 0;
+}
+
 static IECore::ConstDataPtr blendEquationGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
 	const BlendEquationStateComponent *b = memberData->implementation->getState<BlendEquationStateComponent>();
@@ -1182,6 +1293,9 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:visibility:camera"] = typedAttributeSetter<CameraVisibilityStateComponent>;
 		(*a)["gl:depthTest"] = typedAttributeSetter<DepthTestStateComponent>;
 		(*a)["gl:depthMask"] = typedAttributeSetter<DepthMaskStateComponent>;
+		(*a)["gl:alphaTest"] = typedAttributeSetter<AlphaTestStateComponent>;
+		(*a)["gl:alphaTest:mode"] = alphaFuncSetter;
+		(*a)["gl:alphaTest:value"] = alphaFuncSetter;
 	}
 	return a;
 }
@@ -1230,6 +1344,9 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:visibility:camera"] = typedAttributeGetter<CameraVisibilityStateComponent>;
 		(*a)["gl:depthTest"] = typedAttributeGetter<DepthTestStateComponent>;
 		(*a)["gl:depthMask"] = typedAttributeGetter<DepthMaskStateComponent>;
+		(*a)["gl:alphaTest"] = typedAttributeGetter<AlphaTestStateComponent>;
+		(*a)["gl:alphaTest:mode"] = alphaFuncGetter;
+		(*a)["gl:alphaTest:value"] = alphaFuncGetter;
 	}
 	return a;
 }

@@ -149,6 +149,14 @@ struct BlendFactors
 	GLenum dst;
 };
 
+struct AlphaFunc
+{
+	AlphaFunc( GLenum m, GLfloat value );
+	AlphaFunc( const AlphaFunc &other );
+	GLenum mode;
+	GLfloat value;
+};
+
 typedef TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId> BlendFuncStateComponent;
 template<>
 void BlendFuncStateComponent::bind() const;
@@ -160,6 +168,14 @@ void BlendColorStateComponent::bind() const;
 typedef TypedStateComponent<GLenum, BlendEquationStateComponentTypeId> BlendEquationStateComponent;
 template<>
 void BlendEquationStateComponent::bind() const;
+
+typedef TypedStateComponent<bool, AlphaTestStateComponentTypeId> AlphaTestStateComponent;
+template<>
+void AlphaTestStateComponent::bind() const;
+
+typedef TypedStateComponent<AlphaFunc, AlphaFuncStateComponentTypeId> AlphaFuncStateComponent;
+template<>
+void AlphaFuncStateComponent::bind() const;
 
 /// Used to specify enable state of GL_CULL_FACE
 typedef TypedStateComponent<bool, DoubleSidedStateComponentTypeId> DoubleSidedStateComponent;

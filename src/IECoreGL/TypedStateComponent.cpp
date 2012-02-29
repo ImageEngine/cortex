@@ -96,6 +96,49 @@ void BlendEquationStateComponent::bind() const
 
 template class TypedStateComponent<GLenum, BlendEquationStateComponentTypeId>;
 
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( AlphaTestStateComponent, bool, false );
+
+template<>
+void AlphaTestStateComponent::bind() const
+{
+	if( m_value )
+	{
+		glEnable( GL_ALPHA_TEST );
+	}
+	else
+	{
+		glDisable( GL_ALPHA_TEST );
+	}
+}
+
+template class TypedStateComponent<bool, AlphaTestStateComponentTypeId>;
+
+
+
+AlphaFunc::AlphaFunc( GLenum m, GLfloat v )
+	:	mode( m ), value( v )
+{
+}
+
+AlphaFunc::AlphaFunc( const AlphaFunc &other )
+	:	mode( other.mode ), value( other.value )
+{
+}
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( AlphaFuncStateComponent, AlphaFunc, AlphaFunc( GL_ALWAYS, 0.0f ) );
+
+template<>
+void AlphaFuncStateComponent::bind() const
+{
+	glAlphaFunc( m_value.mode, m_value.value );
+}
+
+template class TypedStateComponent<AlphaFunc, AlphaFuncStateComponentTypeId>;
+
+
+
+
 // doubleSided specialisations and instantiations
 //////////////////////////////////////////////////////////////////////
 
