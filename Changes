@@ -1,5 +1,9 @@
 Additions :
 
+* Added alpha test attributes for IECoreGL::Renderer
+
+* FloatParameter and DoubleParameter now respond to a 'precision' field in their UI userData in maya, allowing you to set the number of decimal places they're displayed at
+
 * Added the MurmurHash class, which implements the Murmur Hash version 3
 algorithm.
 
