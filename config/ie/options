@@ -83,6 +83,7 @@ if targetApp :
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
+	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
@@ -94,6 +95,7 @@ else :
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
+	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
 	
@@ -171,17 +173,16 @@ if compilerVersionInt < 350 :
 TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
+GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
 
 if platform == "cent6.x86_64" :
 	# use the /usr/lib versions of tiff, png, freetype and jpeg
 	FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
-	GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/1.7.0"
 else :
 	TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
 	JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
 	CPPPATH = "/software/tools/include/freetype/2.3.5"
-	GLEW_INCLUDE_PATH = "/software/tools/include/glew/1.4.0"
 	if targetApp != "nuke" :
 		# we use the system libpng when building for nuke, as it links to an older
 		# version than we have installed centrally.
@@ -193,8 +194,7 @@ if IEEnv.platformOS().startswith( "osx" ) :
 	BOOST_LIB_SUFFIX = "-xgcc" + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
 else:
 	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
-	
-	
+
 OPENEXR_LIB_SUFFIX = "-" + openEXRVersion
 
 # find the right libraries based on compiler and platform
