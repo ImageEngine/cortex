@@ -57,6 +57,42 @@ if( $ieProceduralHolderUIFixedLightLinking==0 )
 	$ieProceduralHolderUIFixedLightLinking = 1;
 }
 
+string $AEieProceduralHolderDisplaylistLayout = "";
+
+global proc AEieProceduralHolderDisplaylistParameterNew( string $attrName )
+{
+	global string $AEieProceduralHolderDisplaylistLayout;
+	
+	$AEieProceduralHolderDisplaylistLayout = `columnLayout`;
+	
+	setParent ..;
+	
+	AEieProceduralHolderDisplaylistParameterReplace( $attrName );
+	
+}
+
+global proc AEieProceduralHolderDisplaylistParameterReplace( string $attrName )
+{
+	global string $AEieProceduralHolderDisplaylistLayout;
+	
+	string $controls[] = `columnLayout -q -ca $AEieProceduralHolderDisplaylistLayout`;
+	
+	for( $c in $controls )
+	{
+		deleteUI $c;
+	}
+	
+	string $node = ieAttrNode( $attrName );
+	
+	if( `objExists ( $node + ".useDisplayLists" )` )
+	{
+		setParent $AEieProceduralHolderDisplaylistLayout;
+		attrControlGrp -l "Use Display Lists" -attribute ( $node + ".useDisplayLists" );
+		setParent ..;
+	}
+	
+}
+
 global proc AEieProceduralHolderTemplate( string $nodeName )
 {
 	editorTemplate -beginScrollLayout;
@@ -72,6 +108,7 @@ global proc AEieProceduralHolderTemplate( string $nodeName )
 			editorTemplate -addControl "drawBound";
 			editorTemplate -label "Coordinate Systems" -addControl "drawCoordinateSystems";
 			editorTemplate -addControl "transparent";
+			editorTemplate -callCustom "AEieProceduralHolderDisplaylistParameterNew" "AEieProceduralHolderDisplaylistParameterReplace" "iDontExist";
 
 		editorTemplate -endLayout;
 

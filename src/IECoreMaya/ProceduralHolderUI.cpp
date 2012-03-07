@@ -49,6 +49,7 @@
 #include "IECoreMaya/Convert.h"
 
 #include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "maya/MGlobal.h"
 #include "maya/MDrawData.h"
@@ -110,7 +111,7 @@ void ProceduralHolderUI::getDrawRequests( const MDrawInfo &info, bool objectAndA
 		setWireFrameColors( request, info.displayStatus() );
 		requests.add( request );
 	}
-
+	
 	// requests for the scene if necessary
 	MPlug pGLPreview( proceduralHolder->thisMObject(), ProceduralHolder::aGLPreview );
 	bool glPreview = false;
@@ -341,30 +342,37 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 					m_prevComponentSelection = componentSelection;
 				}
 				
-				DisplayListMap::iterator it = m_displayListIds.find( key );
-				
-				if( it == m_displayListIds.end() )
+				if( proceduralHolder->useDisplayLists() )
 				{
-					GLuint displayListId = glGenLists(1);
-					
-					m_displayListIds[ key ] = displayListId;
-					
-					glNewList( displayListId, GL_COMPILE_AND_EXECUTE );
-					
-					try
+					DisplayListMap::iterator it = m_displayListIds.find( key );
+
+					if( it == m_displayListIds.end() )
 					{
-						scene->render( displayState );
+						GLuint displayListId = glGenLists(1);
+
+						m_displayListIds[ key ] = displayListId;
+
+						glNewList( displayListId, GL_COMPILE_AND_EXECUTE );
+
+						try
+						{
+							scene->render( displayState );
+						}
+						catch( const IECoreGL::Exception &e )
+						{
+							IECore::msg( IECore::Msg::Error, "ProceduralHolderUI::draw", boost::format( "IECoreGL Exception : %s" ) % e.what() );
+						}
+
+						glEndList();
 					}
-					catch( const IECoreGL::Exception &e )
+					else
 					{
-						IECore::msg( IECore::Msg::Error, "ProceduralHolderUI::draw", boost::format( "IECoreGL Exception : %s" ) % e.what() );
+						glCallList( m_displayListIds[ key ] );
 					}
-					
-					glEndList();
 				}
 				else
 				{
-					glCallList( m_displayListIds[ key ] );
+					scene->render( displayState );
 				}
 				
 			}

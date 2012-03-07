@@ -89,16 +89,27 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		virtual void componentToPlugs( MObject &component, MSelectionList &selectionList ) const;
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
 
+
+		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p );
+		virtual MStatus updateParameterised();
+		virtual IECore::RunTimeTypedPtr getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut = 0 );
+
+
 		/// Calls setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" ).
 		MStatus setProcedural( const std::string &className, int classVersion );
 		/// Returns runTimeCast<ParameterisedProcedural>( getProcedural( className, classVersion ) ).
 		IECore::ParameterisedProceduralPtr getProcedural( std::string *className = 0, int *classVersion = 0 );
-
+		/// creates a user attribute called "useDisplayLists" if requested
+		MStatus createDisplaylistAttribute();
+		
 		/// Returns an up to date scene from the procedural
 		IECoreGL::ConstScenePtr scene();
 		
 		/// Returns the number of times the opengl scene has been regenerated
 		int getSceneUpdateCount();
+		
+		/// Returns whether or not to draw using display lists
+		bool useDisplayLists();
 		
 		static MObject aGLPreview;
 		static MObject aTransparent;
