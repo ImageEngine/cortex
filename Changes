@@ -62,7 +62,9 @@ adoptChildPresets argument to the constructor.
 
 * ToHoudiniGeometryConverter creates point and prim groups based on the blindData name, FromHoudiniGeometryConverter creates the blindData name based on prim group name, and To/FromHoudiniGroupConverters use their base classes to manipulate prim group names
 
-* Added V2iVectorParameter and V3iVectorParameter
+* Added V2iVectorParameter and V3iVectorParameter.
+
+* The ParameterParser accepts a new boolean parameter user data entry ["parser"]["acceptFlags"] for StringVectorParameters. This allows strings starting with "-" to be passed. This is only useful for the last parameter parsed, as it will place all remaining arguments into the StringVectorParameter.
 
 Bug Fixes :
 

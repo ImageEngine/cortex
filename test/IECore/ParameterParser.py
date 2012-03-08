@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -516,6 +517,26 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( s, p )
 		
 		self.assertEqual( p["n"].getTypedValue(), "test" )
+		
+	def testStringVectorParameterAcceptsFlags( self ) :
+	
+		p = IECore.CompoundParameter(
+			members = [
+				IECore.StringVectorParameter(
+					"s",
+					"",
+					IECore.StringVectorData(),
+				),
+			],
+		)
+		
+		self.assertRaises( SyntaxError, IECore.ParameterParser().parse, [ "-s", "something", "-ohNoAFlag" ], p )
+		
+		p["s"].userData()["parser"] = IECore.CompoundObject( { "acceptFlags" : IECore.BoolData( True ) } )
+
+		IECore.ParameterParser().parse( [ "-s", "something", "-flagsAreFine" ], p )
+
+		self.assertEqual( p["s"].getValue(), IECore.StringVectorData( [ "something", "-flagsAreFine" ] ) )
 
 if __name__ == "__main__":
         unittest.main()

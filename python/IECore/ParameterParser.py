@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -333,14 +334,23 @@ def __parseString( args, parameter ) :
 def __parseStringArray( args, parameter ) :
 
 	d = IECore.StringVectorData()
-	foundFlag = False
-	while len( args ) and not foundFlag :
-		a = args[0]
-		if len(a) and a[0] == "-" :
-			foundFlag = True
-		else :
-			d.append( a )
-			del args[0]
+	
+	acceptFlags = False
+	if "parser" in parameter.userData() and "acceptFlags" in parameter.userData()["parser"] :
+		acceptFlags = parameter.userData()["parser"]["acceptFlags"].value
+	
+	if acceptFlags :
+		d.extend( args )
+		del args[:]
+	else :
+		foundFlag = False
+		while len( args ) and not foundFlag :
+			a = args[0]
+			if len(a) and a[0] == "-" :
+				foundFlag = True
+			else :
+				d.append( a )
+				del args[0]
 
 	parameter.setValidatedValue( d )
 
