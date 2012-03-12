@@ -52,7 +52,7 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.29", "PYTHON_VERSION=2.6" ] )
 	build( [ "APP=maya", "APP_VERSION=2012", "DL_VERSION=9.0.111" ] )
 	build( [ "APP=nuke", "APP_VERSION=6.3v5" ] )
-	build( [ "APP=houdini", "APP_VERSION=12.0.535" ] )
+	build( [ "APP=houdini", "APP_VERSION=12.0.562" ] )
 	
 	installDocs()
 
