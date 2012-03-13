@@ -819,7 +819,7 @@ o.Add(
 	"The python script to run for the houdini tests. The default will run all the tests, "
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
-	"contrib/IECoreHoudini/test/All.py"
+	"test/IECoreHoudini/All.py"
 )
 
 o.Add(
@@ -2261,8 +2261,6 @@ houdiniEnvSets = {
 
 houdiniEnvAppends = {
 	"CPPPATH" : [
-		"contrib/IECoreHoudini/include",
-		"contrib/IECoreHoudini/include/bindings",
 		"$GLEW_INCLUDE_PATH",
 		"$HOUDINI_INCLUDE_PATH",
 	],
@@ -2322,12 +2320,12 @@ if doConfigure :
 		#=====
 		# glob the files
 		#=====
-		houdiniSources = sorted( glob.glob( "contrib/IECoreHoudini/src/*.cpp" ) )
-		houdiniHeaders = glob.glob( "contrib/IECoreHoudini/include/*.h" ) + glob.glob( "contrib/IECoreHoudini/include/*.inl" )
-		houdiniBindingHeaders = glob.glob( "contrib/IECoreHoudini/include/bindings/*.h" ) + glob.glob( "contrib/IECoreHoudini/include/bindings/*.inl" )
-		houdiniPythonSources = sorted( glob.glob( "contrib/IECoreHoudini/src/bindings/*.cpp" ) )
-		houdiniPythonScripts = glob.glob( "contrib/IECoreHoudini/python/IECoreHoudini/*.py" )
-		houdiniPluginSources = [ "contrib/IECoreHoudini/src/plugin/Plugin.cpp" ]
+		houdiniSources = sorted( glob.glob( "src/IECoreHoudini/*.cpp" ) )
+		houdiniHeaders = glob.glob( "include/IECoreHoudini/*.h" ) + glob.glob( "include/IECoreHoudini/*.inl" )
+		houdiniBindingHeaders = glob.glob( "include/IECoreHoudini/bindings/*.h" ) + glob.glob( "include/IECoreHoudini/bindings/*.inl" )
+		houdiniPythonSources = sorted( glob.glob( "src/IECoreHoudini/bindings/*.cpp" ) )
+		houdiniPythonScripts = glob.glob( "python/IECoreHoudini/*.py" )
+		houdiniPluginSources = [ "src/IECoreHoudini/plugin/Plugin.cpp" ]
 		
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
@@ -2381,7 +2379,7 @@ if doConfigure :
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 			]
 		)
-		houdiniPythonModule = houdiniPythonModuleEnv.SharedLibrary( "contrib/IECoreHoudini/python/IECoreHoudini/_IECoreHoudini", houdiniPythonSources )
+		houdiniPythonModule = houdiniPythonModuleEnv.SharedLibrary( "python/IECoreHoudini/_IECoreHoudini", houdiniPythonSources )
 		houdiniPythonModuleEnv.Depends( houdiniPythonModule, houdiniLib )
 		houdiniPythonModuleInstall = houdiniPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreHoudini", houdiniPythonScripts + houdiniPythonModule )
 		houdiniPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniPythonModuleEnv, houdiniPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
@@ -2391,8 +2389,8 @@ if doConfigure :
 		#=====
 		# build otls
 		#=====
-		otlPath = "contrib/IECoreHoudini/otls/ieCoreHoudini"
-		buildPath = "contrib/IECoreHoudini/otls/build"
+		otlPath = "otls/IECoreHoudini/ieCoreHoudini"
+		buildPath = "otls/IECoreHoudini/build"
 		otlTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$IECORE_NAME" ) ) + ".otl"
 		otlCommand = houdiniPluginEnv.Command( otlTarget, otlPath, "cp -r %s %s; $HOUDINI_BIN_PATH/hotl -C %s $TARGET; rm -rf %s" % ( otlPath, buildPath, buildPath, buildPath ) )
 		houdiniPluginEnv.Depends( otlTarget, glob.glob( otlPath + "/*" ) + glob.glob( otlPath + "/*/*" ) + glob.glob( otlPath + "/*/*/*" ) + glob.glob( otlPath + "/*/*/*/*" ) )
@@ -2404,7 +2402,7 @@ if doConfigure :
 		#=====
 		# install icons
 		#=====
-		houdiniIcons = glob.glob( "contrib/IECoreHoudini/icons/*.svg" )
+		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" )
 		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
 		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )
@@ -2412,7 +2410,7 @@ if doConfigure :
 		#=====
 		# install toolbar
 		#=====
-		houdiniToolbars = glob.glob( "contrib/IECoreHoudini/toolbar/*.shelf" )
+		houdiniToolbars = glob.glob( "menus/IECoreHoudini/*.shelf" )
 		houdiniToolbarInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINITOOLBAR_DIR", source=houdiniToolbars )
 		houdiniPluginEnv.Alias( "install", houdiniToolbarInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniToolbarInstall )
@@ -2440,20 +2438,20 @@ if doConfigure :
 			]
 		)
 		
-		houdiniTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreHoudini/python"
+		houdiniTestEnv["ENV"]["PYTHONPATH"] += ":./python"
 		houdiniTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:&"
 		houdiniTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:&"
 		
-		houdiniTestEnv["ENV"]["IECORE_OP_PATHS"] = "./contrib/IECoreHoudini/test/ops"
-		houdiniTestEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "./contrib/IECoreHoudini/test/procedurals"
+		houdiniTestEnv["ENV"]["IECORE_OP_PATHS"] = "./test/IECoreHoudini/ops"
+		houdiniTestEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "./test/IECoreHoudini/procedurals"
 		
 		houdiniPythonExecutable = "hython"
 		
-		houdiniPythonTest = houdiniTestEnv.Command( "contrib/IECoreHoudini/test/resultsPython.txt", houdiniPythonModule, houdiniPythonExecutable + " $TEST_HOUDINI_SCRIPT" )
+		houdiniPythonTest = houdiniTestEnv.Command( "test/IECoreHoudini/resultsPython.txt", houdiniPythonModule, houdiniPythonExecutable + " $TEST_HOUDINI_SCRIPT" )
 		NoCache( houdiniPythonTest )
 		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniPlugin, houdiniPythonModule ] )
-		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "contrib/IECoreHoudini/test/*.py" ) )
-		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "contrib/IECoreHoudini/python/IECoreHoudini/*.py" ) )
+		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "test/IECoreHoudini/*.py" ) )
+		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "python/IECoreHoudini/*.py" ) )
 		if env["WITH_GL"] :
 			houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
 		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
@@ -2741,7 +2739,7 @@ if doConfigure :
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
 		docEnv.NoCache( docs )
 		
-		for modulePath in ( "python/IECore", "python/IECoreRI", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "contrib/IECoreHoudini/python/IECoreHoudini" ) :
+		for modulePath in ( "python/IECore", "python/IECoreRI", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :
 			
 			module = os.path.basename( modulePath )
 			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )
