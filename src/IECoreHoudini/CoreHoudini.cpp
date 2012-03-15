@@ -35,6 +35,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "CH/CH_Manager.h" 
+
+#include "IECore/MessageHandler.h"
+
 #include "IECorePython/ScopedGILLock.h"
 
 #include "IECoreHoudini/CoreHoudini.h"
@@ -83,13 +87,8 @@ void CoreHoudini::import( const std::string &module )
 
 float CoreHoudini::currTime()
 {
-	IECorePython::ScopedGILLock lock;
-	float time = 0.f;
-	handle<> resultHandle( PyRun_String( "hou.time()", Py_eval_input,
-		globalContext().ptr(), globalContext().ptr() ) );
-	object result( resultHandle );
-	time = extract<float>(result)();
-	return time;
+	IECore::msg( IECore::MessageHandler::Warning, "CoreHoudini::currTime", "Deprecated method. Use CHgetEvalTime() instead." );
+	return CHgetEvalTime();
 }
 
 object CoreHoudini::evalPython( const std::string &cmd )

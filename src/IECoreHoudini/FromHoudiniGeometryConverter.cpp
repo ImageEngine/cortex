@@ -35,12 +35,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/lexical_cast.hpp"
+
+#include "CH/CH_Manager.h"
 #include "GEO/GEO_AttributeHandle.h"
 #include "UT/UT_WorkArgs.h"
 
 #include "IECore/CompoundObject.h"
 
-#include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
@@ -66,12 +68,9 @@ FromHoudiniGeometryConverter::~FromHoudiniGeometryConverter()
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
 {
-	// find global time
-	float time = CoreHoudini::currTime();
-
 	// create the work context
 	OP_Context context;
-	context.setTime( time );
+	context.setTime( CHgetEvalTime() );
 	
 	return ((SOP_Node*)sop)->getCookedGeoHandle( context );
 }

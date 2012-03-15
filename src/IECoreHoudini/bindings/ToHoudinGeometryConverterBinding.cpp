@@ -34,11 +34,11 @@
 
 #include "boost/python.hpp"
 
+#include "CH/CH_Manager.h"
 #include "SOP/SOP_Node.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
 #include "IECoreHoudini/bindings/ToHoudiniGeometryConverterBinding.h"
 
@@ -50,12 +50,9 @@ using namespace IECoreHoudini;
 /// will be cleared before conversion.
 static bool convert( ToHoudiniGeometryConverter &c, SOP_Node *sop, bool append )
 {
-	// find global time
-	float time = CoreHoudini::currTime();
-
 	// create the work context
 	OP_Context context;
-	context.setTime( time );
+	context.setTime( CHgetEvalTime() );
 	
 	GU_DetailHandle handle = sop->getCookedGeoHandle( context );
 	

@@ -68,6 +68,7 @@ class CoreHoudini
 		}
 
 		/// Utility method for getting the current global time
+		/// \todo: this is deprecated in favour of the native CHgetEvalTime(). Remove for Cortex 8.
 		static float currTime();
 
 		/// Run misc python command
