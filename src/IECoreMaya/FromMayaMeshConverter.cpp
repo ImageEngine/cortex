@@ -331,7 +331,7 @@ IECore::FloatVectorDataPtr FromMayaMeshConverter::sOrT( const MString &uvSet, un
 	{
 		for( int j=0; j<fnMesh.polygonVertexCount( i ); j++ )
 		{
-			float uv[2];
+			float uv[2] = { 0, 0 };
 			fnMesh.getPolygonUV( i, j, uv[0], uv[1], &uvSet );
 			result[resultIndex++] = index==1 ? 1-uv[index] : uv[index];
 		}
