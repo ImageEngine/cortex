@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -76,28 +76,20 @@ class TemporaryAttributeValues :
 				raise TypeError( "Attribute \"%s\" has unsupported type \"%s\"." % ( attr, attrType ) )
 
 			# store a command to restore the attribute value later
-			node = StringUtil.nodeFromAttributePath( attr )
-			s = maya.OpenMaya.MSelectionList()
-			s.add( attr )
-			p = maya.OpenMaya.MPlug()
-			s.getPlug( 0, p )
-			commands = []
-			p.getSetAttrCmds( commands )
-			for c in commands :
-
-				c = c.lstrip()
-				assert( c.startswith( "setAttr \"." ) )
-				c = "setAttr \"" + node + c[9:]
-				self.__restoreCommands.append( c )
+			origValue = maya.cmds.getAttr( attr )
+			if isinstance( origValue, list ) and isinstance( origValue[0], tuple ) :
+				origValue = origValue[0]
+			
+			self.__restoreCommands.append( IECore.curry( handler, attr, origValue ) )
 
 			# and change the attribute value
 			handler( attr, value )
 
 	def __exit__( self, type, value, traceBack ) :
 
-		for c in self.__restoreCommands :
-
-			maya.mel.eval( c )
+		for cmd in self.__restoreCommands :
+			
+			cmd()
 
 	def __simpleAttrHandler( self, attr, value ) :
 
