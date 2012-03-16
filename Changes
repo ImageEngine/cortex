@@ -16,6 +16,8 @@ generate a hash of their contents as an instance of the new MurmurHash class.
 
 * Added SHWDeepImageReader and SHWDeepImageWriter which read/write 3delight deep shadows. Note that this is an alpha only format.
 
+* Added HoudiniHeaderGenerator which stores Houdini version, scene name, frame rate, current, start, and end frames in the ObjectWriter headers.
+
 Improvements :
 
 * IECore.RelativePreset accepts now a compare filter that is a callback for ignoring some of the parameters when doing the diff.
@@ -84,6 +86,8 @@ segmentation faults rather than a graceful error report.
 * Fixed bug which made it impossible to output more than one display from IECoreArnold::Renderers.
 
 * Fixed threading issue with IECore.ClassLoader()
+
+* Fixed initialization issue with FromMayaMeshConverter uvs.
 
 Cortex 6.4.3
 ============
