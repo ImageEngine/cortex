@@ -1,5 +1,9 @@
 Additions :
 
+* Added object filter option to IECore.CapturingRenderer, so you can select the objects you want it to output
+
+* "Convert to Geometry" maya DAG menu option should now respect component selections - ie it only converts selected components
+
 * Added alpha test attributes for IECoreGL::Renderer
 
 * FloatParameter and DoubleParameter now respond to a 'precision' field in their UI userData in maya, allowing you to set the number of decimal places they're displayed at
