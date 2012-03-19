@@ -33,6 +33,7 @@
 ##########################################################################
 
 from __future__ import with_statement
+import re
 
 import maya.OpenMaya
 import maya.cmds
@@ -165,10 +166,27 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 			return None
 			
 		renderer = IECore.CapturingRenderer()
+		
+		selected = self.selectedComponentNames()
+		
+		objectFilter = set()
+		
+		for sel in selected:
+			# we want to output the selected components, and all of their children:
+			objectFilter.add( sel )
+			objectFilter.add( sel + "/*" )
+		
+		if len( objectFilter ):
+			renderer.setOption( "cp:objectFilter", IECore.StringVectorData( list( objectFilter ) ) )
+		
 		with IECore.WorldBlock( renderer ) :
 			procedural.render( renderer )
 		
 		world = renderer.world()
+		
+		# These things have a tendency to generate big, useless stacks of groups.
+		# Only the tree structure is actually useful to us, so lets remove these if possible:
+		self.__collapseGroups( world )
 		
 		if parent is None :
 			parent = maya.cmds.listRelatives( self.fullPathName(), fullPath=True, parent=True )
@@ -210,3 +228,44 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		maya.cmds.setAttr( fullPathName + ".componentQueries[" + str( i ) + "]", componentName, type="string" )
 		return i
 				
+	def __collapseGroups( self, group ) :
+
+		children = group.children()
+
+		if len( children ) == 0 :
+			return
+
+		# if this group is the parent of exactly one group, we merge it with
+		# its child
+		elif len( children ) == 1 :
+
+			child = children[0]
+
+			if isinstance( child, IECore.Group ):
+
+				parentGlobalTransform = group.globalTransformMatrix()
+
+				parentLocalTransform = group.transformMatrix()
+				childLocalTransform = child.transformMatrix()
+
+				group.setTransform( IECore.MatrixTransform( parentLocalTransform * childLocalTransform ) )
+
+				group.removeChild( child )
+
+				for c in child.children():
+					group.addChild( c )
+
+				# ok - lets call the function again on this group if it's got children:
+				if len( group.children() ) != 0:
+					self.__collapseGroups( group )
+
+				return
+
+		else:
+			# ok - we gots multiple children, so lets not mess around with it,
+			# lets just recurse:
+
+			for c in group.children():
+				if isinstance( c, IECore.Group ) :
+					self.__collapseGroups( c )
+		

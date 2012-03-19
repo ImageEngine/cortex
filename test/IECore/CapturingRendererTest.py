@@ -546,7 +546,183 @@ class CapturingRendererTest( unittest.TestCase ) :
 			r.procedural( self.GetOptionProcedural( maxLevel = 6 ) )
 		
 		self.assertEqual( self.GetOptionProcedural.failure, False )
+	
+	
+	class NamedSnowflakeProcedural( IECore.Renderer.Procedural ) :
+	
+	
+		def __init__( self, maxLevel = 3, level = 0, name="snowflake" ) :
 		
+			IECore.Renderer.Procedural.__init__( self )
+			
+			self.__maxLevel = maxLevel
+			self.__level = level
+			self.__name = name
+			
+		def bound( self ) :
+		
+			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+			
+		def render( self, renderer ) :
+						
+			def emit( offset, childname, recurse ) :
+						
+				with IECore.AttributeBlock( renderer ) :
+
+					renderer.concatTransform( IECore.M44f.createTranslated( offset ) )
+					renderer.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.5 ) ) )
+					
+					newName = self.__name + "/" + childname
+					
+					if not recurse:
+						newName = newName + "_leaf"
+					
+					renderer.setAttribute( "name", newName )
+					
+					if recurse:
+						renderer.procedural( CapturingRendererTest.NamedSnowflakeProcedural( self.__maxLevel, self.__level + 1, newName ) )
+					else:
+						renderer.sphere( 1, -1, 1, 360, {} )
+						
+			
+			recurse = self.__level < self.__maxLevel
+			
+			emit( IECore.V3f( 0, 1, 0 ), "one", recurse )
+			emit( IECore.V3f( -1, 0, 0 ), "two", recurse )
+			emit( IECore.V3f( 0, 0, 0 ), "three", recurse )
+			emit( IECore.V3f( 1, 0, 0 ), "four", recurse )
+			emit( IECore.V3f( 0, -1, 0 ), "five", recurse )
+			
+	def __getSphereNames( self, g, currentName = None ) :
+		
+		res = set()
+		
+		if isinstance( g, IECore.Group ):
+			
+			newName = currentName
+			
+			for s in g.state():
+				if isinstance( s, IECore.AttributeState ):
+					if "name" in s.attributes:
+						newName = s.attributes["name"].value
+			
+			for c in g.children():
+				if isinstance( c, IECore.Group ):
+					res = res | self.__getSphereNames( c, newName )
+				elif isinstance( c, IECore.SpherePrimitive ):
+					res.add( newName )
+		return res
+	
+	def __countSpheres( self, g ) :
+		res = 0
+		if isinstance( g, IECore.SpherePrimitive ):
+			res = res + 1
+		elif isinstance( g, IECore.Group ):
+			for c in g.children():
+				res = res + self.__countSpheres( c )
+		
+		return res
+		
+	def testObjectFilter( self ) :
+		
+		r = IECore.CapturingRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# the unfiltered procedural should output 125 spheres:
+		self.assertEqual( self.__countSpheres( r.world() ), 125 )
+		
+		
+		r.setOption( "cp:objectFilter", IECore.StringVectorData( [ "snowflake/*/*/two_leaf" ] ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# this should output 25 spheres:
+		self.assertEqual( self.__countSpheres( r.world() ), 25 )
+		
+		
+		r.setOption( "cp:objectFilter", IECore.StringVectorData( [ "snowflake/one/*/*" ] ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# this should also output 25 spheres:
+		self.assertEqual( self.__countSpheres( r.world() ), 25 )
+		
+		
+		r.setOption( "cp:objectFilter", IECore.StringVectorData( [ "snowflake/*/*/t*_leaf" ] ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# this should output 50 spheres:
+		self.assertEqual( self.__countSpheres( r.world() ), 50 )
+		
+		
+		# "*" at the end of the filter means all children of the filter.:
+		r.setOption( "cp:objectFilter", IECore.StringVectorData( [ "snowflake/one/*" ] ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# this should also output 25 spheres:
+		self.assertEqual( self.__countSpheres( r.world() ), 25 )
+		
+		
+		# this shouldn't output any spheres, cause we're just rendering a group:
+		r.setOption( "cp:objectFilter", IECore.StringVectorData( [ "snowflake/one" ] ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# this should also output 25 spheres:
+		self.assertEqual( self.__countSpheres( r.world() ), 0 )
+		
+		# test multiple filters:
+		r.setOption( "cp:objectFilter", IECore.StringVectorData( [ "snowflake/one/two/t*_leaf", "snowflake/one/three/one_leaf" ] ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# this should output 3 spheres:
+		self.assertEqual( self.__countSpheres( r.world() ), 3 )
+		
+		# check they've got the right names:
+		self.assertEqual( self.__getSphereNames( r.world() ), set( [ "snowflake/one/two/two_leaf", "snowflake/one/two/three_leaf", "snowflake/one/three/one_leaf" ] ) )
+		
+
+
+		# test names:
+		r.setOption( "cp:objectFilter", IECore.StringVectorData( [ "snowflake/one/t*/t*_leaf" ] ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.procedural( self.NamedSnowflakeProcedural( maxLevel = 2 ) )
+		
+		# check they've got the right names:
+		self.assertEqual(
+			self.__getSphereNames( r.world() ),
+			set(
+				[
+					"snowflake/one/two/two_leaf",
+					"snowflake/one/two/three_leaf",
+					"snowflake/one/three/two_leaf",
+					"snowflake/one/three/three_leaf"
+				]
+			)
+		)
+		
+	
+	
 if __name__ == "__main__":
 	unittest.main()
 

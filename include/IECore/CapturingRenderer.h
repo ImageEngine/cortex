@@ -59,7 +59,21 @@ class CapturingRenderer : public Renderer
 		CapturingRenderer();
 		virtual ~CapturingRenderer();
 
+		/// \par Implementation specific options :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"cp:objectFilter" StringVectorData []</b><br>
+		/// Use this to specify a list of object filters. Procedurals and primitives
+		/// where the "name" renderer attribute does not match one of the filters will
+		/// be skipped. The "name" attribute is interpreted as a path, and if a path is
+		/// requested, all parents of that path will be output as well. For example, if
+		/// you set the option to [ "/root/leftArm/thumb" ], "/root", "/root/leftArm"
+		/// and "/root/leftArm/thumb" will be output. Objects without a name will always
+		/// be output. The filters also support wildcards, so you can specify things like
+		/// "/root/wheel*Rim/bolt", "/root/torso/rib*", and "/root/*", the last of which
+		/// will output "/root" and all its descendants.
 		virtual void setOption( const std::string &name, ConstDataPtr value );
+		
 		virtual ConstDataPtr getOption( const std::string &name ) const;
 
 		virtual void camera( const std::string &name, const CompoundDataMap &parameters );
@@ -85,6 +99,7 @@ class CapturingRenderer : public Renderer
 		/// \li <b>"cp:procedural:reentrant" BoolData true</b><br>
 		/// When true, procedurals may be evaluated in multiple parallel threads.
 		/// When false they will be evaluated from the thread they were specified from.
+
 		virtual void setAttribute( const std::string &name, ConstDataPtr value );
 		virtual ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters );

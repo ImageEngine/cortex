@@ -177,7 +177,7 @@ def _convertToGeometry( proceduralHolder, *unused ) :
 	fnP = IECoreMaya.FnProceduralHolder( proceduralHolder )
 	
 	proceduralParent = maya.cmds.listRelatives( fnP.fullPathName(), parent=True, fullPath=True )[0]
-	geometryParent = maya.cmds.createNode( "transform", name = "convertedProcedural" )
+	geometryParent = maya.cmds.createNode( "transform", name = "convertedProcedural", skipSelect=True )
 	
 	proceduralTransform = maya.cmds.xform( proceduralParent, query=True, worldSpace=True, matrix=True )
 	maya.cmds.xform( geometryParent, worldSpace=True, matrix=proceduralTransform )

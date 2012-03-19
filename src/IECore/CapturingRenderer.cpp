@@ -33,6 +33,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <stack>
+#include <fnmatch.h>
+
+#include "boost/regex.hpp"
+#include "boost/tokenizer.hpp"
 
 #include "tbb/enumerable_thread_specific.h"
 #include "tbb/task_scheduler_init.h"
@@ -258,6 +262,12 @@ class CapturingRenderer::Implementation
 				return;
 			}
 			
+			// test current object against object filter option (if specified)
+			if( !testFilter() )
+			{
+				return;
+			}
+			
 			for( PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
 			{
 				primitive->variables[it->first] = PrimitiveVariable( it->second, true /* deep copy */ );
@@ -270,6 +280,12 @@ class CapturingRenderer::Implementation
 		{
 			ContextPtr context = currentContext();
 			if( !context )
+			{
+				return;
+			}
+			
+			// test current object against object filter option (if specified)
+			if( !testFilter() )
 			{
 				return;
 			}
@@ -417,6 +433,136 @@ class CapturingRenderer::Implementation
 			}
 			return stack.top();
 		}
+		
+		typedef boost::tokenizer<boost::char_separator<char> > PathTokenizer;
+		
+		int countTokens( const PathTokenizer& tok ) const
+		{
+			int count = 0;
+			for( PathTokenizer::const_iterator it=tok.begin(); it != tok.end(); ++it )
+			{
+				++count;
+			}
+			
+			return count;
+		}
+		
+		bool matchToFilter( const std::string& filter, const std::string& name ) const
+		{
+			
+			boost::char_separator<char> sep("/");
+			PathTokenizer filterPath( filter, sep );
+			PathTokenizer namePath( name, sep );
+			
+			// if the paths are of differing lengths, this aint a match:
+			if( countTokens( filterPath ) > countTokens( namePath ) )
+			{
+				return false;
+			}
+			
+			PathTokenizer::iterator filterIter = filterPath.begin();
+			PathTokenizer::iterator nameIter = namePath.begin();
+			
+			for( ; filterIter != filterPath.end(); ++filterIter, ++nameIter )
+			{
+				if( fnmatch( filterIter->c_str(), nameIter->c_str(), 0 ) )
+				{
+					// this means the tokens don't match: lets quit.
+					return false;
+				}
+				
+				// if the last token of the filter is a "*", that means we want to
+				// match all children of the filter, so lets just return a positive:
+				if( *filterIter == "*" )
+				{
+					PathTokenizer::iterator filterNext = filterIter;
+					++filterNext;
+
+					if( filterNext == filterPath.end() )
+					{
+						return true;
+					}
+				}
+			}
+			
+			if( countTokens( filterPath ) < countTokens( namePath ) )
+			{
+				return false;
+			}
+			
+			// match!!!
+			return true;
+
+		}
+		
+		
+		bool matchToParents( const std::string& filter, const std::string& name ) const
+		{
+			
+			boost::char_separator<char> sep("/");
+			PathTokenizer filterPath( filter, sep );
+			PathTokenizer namePath( name, sep );
+			
+			// we're expecting the filter path to be longer than the name path.
+			// otherwise, "name" can't be a parent of "filter", can it???
+			if( countTokens( namePath ) >= countTokens( filterPath ) )
+			{
+				return false;
+			}
+			
+			PathTokenizer::iterator filterIter = filterPath.begin();
+			PathTokenizer::iterator nameIter = namePath.begin();
+			
+			for( ; nameIter != namePath.end(); ++filterIter, ++nameIter )
+			{
+				if( fnmatch( filterIter->c_str(), nameIter->c_str(), 0 ) )
+				{
+					// this means the tokens don't match: lets quit.
+					return false;
+				}
+			}
+			
+			return true;
+		}
+		
+		bool testFilter()
+		{
+		
+			const StringData *name = IECore::runTimeCast<const StringData>( getAttribute( "name" ) );
+			
+			if( name )
+			{
+				const StringVectorData *objectFilter = IECore::runTimeCast<const StringVectorData>( getOption( "cp:objectFilter" ) );
+				
+				if( objectFilter )
+				{
+					
+					const std::vector< std::string >& filters = objectFilter->readable();
+					
+					for( size_t i = 0; i < filters.size(); ++i )
+					{
+						if( matchToFilter( filters[i], name->readable() ) )
+						{
+							// if the name directly matches the filter, then yeah, we want to render:
+							return true;
+						}
+						
+						if( matchToParents( filters[i], name->readable() ) )
+						{
+							// if the name could be a parent of the filter, then yeah, we also want to render:
+							return true;
+						}
+					}
+					
+					return false;
+					
+				}
+			}
+			
+			return true;
+			
+		}
+		
 		
 		void addChild( Context::State &state, VisibleRenderablePtr child )
 		{
