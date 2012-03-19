@@ -2449,13 +2449,14 @@ if doConfigure :
 		
 		houdiniPythonTest = houdiniTestEnv.Command( "test/IECoreHoudini/resultsPython.txt", houdiniPythonModule, houdiniPythonExecutable + " $TEST_HOUDINI_SCRIPT" )
 		NoCache( houdiniPythonTest )
-		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniPlugin, houdiniPythonModule ] )
+		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "test/IECoreHoudini/*.py" ) )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "python/IECoreHoudini/*.py" ) )
 		if env["WITH_GL"] :
 			houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
 		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
 		houdiniTestEnv.Alias( "testHoudiniPython", houdiniPythonTest )
+		
 
 ###########################################################################################
 # Build and install the coreTruelight library and headers
