@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,14 +50,12 @@
 namespace IECoreRI
 {
 
-IE_CORE_FORWARDDECLARE( RendererImplementation );
-
 class RendererImplementation : public IECore::Renderer
 {
 
 	public :
 
-		RendererImplementation();
+		RendererImplementation( RendererImplementationPtr parent = 0 );
 		RendererImplementation( const std::string &name );
 
 		virtual ~RendererImplementation();
@@ -120,8 +118,27 @@ class RendererImplementation : public IECore::Renderer
 
 		// Does things common to both constructors
 		void constructCommon();
-
+	
+		// When a procedural is processed, we make a new RendererImplementation
+		// for it to talk to. Some member data should be unique to the new RendererImplementation
+		// and other member data should be shared with the parent RendererImplementation. The
+		// shared data is stored in this SharedData class.
+		struct SharedData : IECore::RefCounted
+		{
+			IE_CORE_DECLAREMEMBERPTR( SharedData );
+			// A map from instance names as given to us, and those used by renderman itself.
+			// We use this because if RiObjectBeginV doesn't exist we don't get to choose the names.
+			// It is part of the shared data so that procedurals may share instances.
+			typedef std::map<std::string, const void *> ObjectHandleMap;
+			ObjectHandleMap objectHandles;	
+			// We need to mutex around access to objectHandles because it will be
+			// accessed from multiple threads when running threaded procedurals
+			typedef tbb::queuing_rw_mutex ObjectHandlesMutex;
+			ObjectHandlesMutex objectHandlesMutex;
+		};
+				
 		RtContextHandle m_context;
+		SharedData::Ptr m_sharedData;
 
 		typedef void (RendererImplementation::*SetOptionHandler)( const std::string &name, IECore::ConstDataPtr d );
 		typedef IECore::ConstDataPtr (RendererImplementation::*GetOptionHandler)( const std::string &name ) const;
@@ -178,6 +195,11 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getRightHandedOrientationAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
 
+		struct ProceduralData
+		{
+			IECore::Renderer::ProceduralPtr procedural;
+			RendererImplementationPtr parentRenderer; // the renderer the procedural call was made to
+		};
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );
 
@@ -187,8 +209,6 @@ class RendererImplementation : public IECore::Renderer
 
 		IECore::DataPtr  readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 
-		typedef std::map<std::string, const void *> ObjectHandleMap;
-		ObjectHandleMap m_objectHandles;
 		IECore::DataPtr objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -81,13 +81,14 @@ const unsigned int IECoreRI::RendererImplementation::g_shaderCacheSize = 10 * 10
 tbb::queuing_rw_mutex IECoreRI::RendererImplementation::g_nLoopsMutex;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
-IECoreRI::RendererImplementation::RendererImplementation()
-	:	m_context( 0 )
+IECoreRI::RendererImplementation::RendererImplementation( RendererImplementationPtr parent )
+	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : SharedData::Ptr( new SharedData ) )
 {
 	constructCommon();
 }
 
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
+	:	m_sharedData( new SharedData )
 {
 	constructCommon();
 	if( name!="" )
@@ -1367,12 +1368,13 @@ void IECoreRI::RendererImplementation::geometry( const std::string &type, const 
 void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
 	ScopedContext scopedContext( m_context );
-	Imath::Box3f bound = proc->bound();
 
+	Imath::Box3f bound = proc->bound();
 	if( bound.isEmpty() )
 	{
 		return;
 	}
+
 	RtBound riBound;
 	riBound[0] = bound.min.x;
 	riBound[1] = bound.max.x;
@@ -1381,25 +1383,29 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 	riBound[4] = bound.min.z;
 	riBound[5] = bound.max.z;
 
-	proc->addRef(); // we'll remove the reference in procFree
-	RiProcedural( proc.get(), riBound, procSubdivide, procFree );
+	ProceduralData *data = new ProceduralData;
+	data->procedural = proc;
+	data->parentRenderer = this;
+	
+	RiProcedural( data, riBound, procSubdivide, procFree );
 }
 
 void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 {
-	IECore::Renderer::Procedural *procedural = reinterpret_cast<IECore::Renderer::Procedural *>( data );
+	ProceduralData *proceduralData = reinterpret_cast<ProceduralData *>( data );
 	// we used to try to use the same IECoreRI::Renderer that had the original procedural() call issued to it.
 	// this turns out to be incorrect as each procedural subdivide invocation is in a new RtContextHandle
 	// and the original renderer would be trying to switch to its original context. so we just create a temporary
 	// renderer which doesn't own a context and therefore use the context 3delight has arranged to call subdivide with.
-	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer();
-	procedural->render( renderer );
+	// we do however share SharedData with the parent renderer, so that we can share instances among procedurals.
+	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer( new RendererImplementation( proceduralData->parentRenderer ) );
+	proceduralData->procedural->render( renderer );
 }
 
 void IECoreRI::RendererImplementation::procFree( void *data )
 {
-	IECore::Renderer::Procedural *procedural = reinterpret_cast<IECore::Renderer::Procedural *>( data );
-	procedural->removeRef();
+	ProceduralData *proceduralData = reinterpret_cast<ProceduralData *>( data );
+	delete proceduralData;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1409,16 +1415,18 @@ void IECoreRI::RendererImplementation::procFree( void *data )
 void IECoreRI::RendererImplementation::instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
-
 #ifdef IECORERI_WITH_OBJECTBEGINV
 	// we get to choose the name for the object
-	const char *tokens = "__handleid";
+	const char *tokens[] = { "__handleid", "scope" };
 	const char *namePtr = name.c_str();
-	const void *values = &namePtr;
-	m_objectHandles[name] = RiObjectBeginV( 1, (char **)&tokens, (void **)&values );
+	const char *scope = "world";
+	const void *values[] = { &namePtr, &scope };
+	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
+	m_sharedData->objectHandles[name] = RiObjectBeginV( 2, (char **)&tokens, (void **)&values );
 #else
 	// we have to put up with a rubbish name
-	m_objectHandles[name] = RiObjectBegin();
+	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandles );
+	m_sharedData->objectHandles[name] = RiObjectBegin();
 #endif
 }
 
@@ -1431,9 +1439,10 @@ void IECoreRI::RendererImplementation::instanceEnd()
 void IECoreRI::RendererImplementation::instance( const std::string &name )
 {
 	ScopedContext scopedContext( m_context );
-
-	ObjectHandleMap::const_iterator hIt = m_objectHandles.find( name );
-	if( hIt==m_objectHandles.end() )
+	
+	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex, false /* read only lock */ );
+	SharedData::ObjectHandleMap::const_iterator hIt = m_sharedData->objectHandles.find( name );
+	if( hIt==m_sharedData->objectHandles.end() )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::instance", boost::format( "No object named \"%s\" available for instancing." ) % name );
 		return;

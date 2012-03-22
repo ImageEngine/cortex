@@ -72,6 +72,9 @@ adoptChildPresets argument to the constructor.
 
 * The ParameterParser accepts a new boolean parameter user data entry ["parser"]["acceptFlags"] for StringVectorParameters. This allows strings starting with "-" to be passed. This is only useful for the last parameter parsed, as it will place all remaining arguments into the StringVectorParameter.
 
+* The IECoreRI.Renderer class uses 3delight's new instance scoping mechanism to
+place all instances created with instanceBegin() at the world scope. This allows procedurals to create instances to be used in other procedurals.
+
 Bug Fixes :
 
 * ClassParameter.setClass() method was not taking advantage of a matching already loaded class if the searchPathEnvVar was None.

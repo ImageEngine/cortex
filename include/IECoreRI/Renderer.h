@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,8 @@
 
 namespace IECoreRI
 {
+
+IE_CORE_FORWARDDECLARE( RendererImplementation );
 
 /// An IECore::Renderer subclass which renders through the renderman interface.
 /// \threading Scenes should be described to this class from a single thread.
@@ -164,7 +166,6 @@ class Renderer : public IECore::Renderer
 		/// Mapped to an RiAttribute "identifier" "name" call.
 		///
 		/// \li <b>"user:*"</b><br>
-		///
 		/// \par Implementation specific attributes :
 		////////////////////////////////////////////////////////////////////////////
 		///
@@ -301,6 +302,10 @@ class Renderer : public IECore::Renderer
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 	private :
+		
+		// Constructor used by RendererImplementation when rendering procedurals.
+		friend class RendererImplementation;
+		Renderer( IECore::RendererPtr implementation );
 
 		IECore::RendererPtr m_implementation;
 

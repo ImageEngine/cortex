@@ -98,6 +98,92 @@ class InstancingTest( unittest.TestCase ) :
 		self.assert_( "ObjectBegin" in rib )
 		self.assert_( "ObjectEnd" in rib )
 		self.assert_( "ObjectInstance" in rib )
+		
+	def testInstancingAcrossProcedurals( self ) :
+			
+		class InstanceInheritingProcedural( Renderer.Procedural ) :
+		
+			def __init__( self, root = True ) :
+			
+				Renderer.Procedural.__init__( self )
+				
+				self.__root = root
+				
+			def bound( self ) :
+			
+				return Box3f( V3f( -1 ), V3f( 1 ) )
+			
+			def render( self, renderer ) :
+			
+				if self.__root :
+					renderer.instanceBegin( "myLovelySphere", {} )
+					renderer.sphere( 1, -1, 1, 360, {} )
+					renderer.instanceEnd()
+					renderer.procedural( InstanceInheritingProcedural( False ) )
+				else :
+					renderer.instance( "myLovelySphere" )
+		
+		# test writing a rib
+		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		with WorldBlock( r ) :		
+			r.procedural( InstanceInheritingProcedural() )
+
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.failUnless( "ObjectInstance \"myLovelySphere\"" in rib )
+
+		# test doing an actual render
+
+		r = IECoreRI.Renderer( "" )
+		r.display( "test", "ie", "rgba",
+			{
+				"driverType" : StringData( "ImageDisplayDriver" ),
+				"handle" : StringData( "myLovelySphere" ),
+				"quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ),
+			}
+		)
+		
+		with WorldBlock( r ) :		
+			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -10 ) ) )
+			r.procedural( InstanceInheritingProcedural() )
+
+		image = ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
+		e = ImagePrimitiveEvaluator( image )
+		r = e.createResult()
+		e.pointAtUV( V2f( 0.5 ), r )
+		self.failUnless( r.floatPrimVar( image["R"] ) > 0.95 )
+		
+	def testInstancingWithThreadedProcedurals( self ) :
+			
+		class InstanceMakingProcedural( Renderer.Procedural ) :
+		
+			def __init__( self, instanceName ) :
+			
+				Renderer.Procedural.__init__( self )
+				
+				self.__instanceName = instanceName
+				
+			def bound( self ) :
+			
+				return Box3f( V3f( -10 ), V3f( 10 ) )
+				
+			def render( self, renderer ) :
+			
+				renderer.instanceBegin( self.__instanceName, {} )
+				renderer.sphere( 1, -1, 1, 360, {} )
+				renderer.instanceEnd()
+				
+				renderer.instance( self.__instanceName )
+				
+		initThreads()
+		r = IECoreRI.Renderer( "" )
+		
+		with WorldBlock( r ) :
+		
+			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -20 ) ) )
+		
+			for i in range( 0, 100 ) :
+				r.procedural( InstanceMakingProcedural( "instance%d" % i ) )
 
 	def tearDown( self ) :
 

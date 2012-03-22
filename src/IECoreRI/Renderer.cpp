@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,11 @@ Renderer::Renderer()
 
 Renderer::Renderer( const std::string &name )
 	:	m_implementation( new RendererImplementation( name ) )
+{
+}
+
+Renderer::Renderer( IECore::RendererPtr implementation )
+	:	m_implementation( implementation )
 {
 }
 
