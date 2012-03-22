@@ -155,12 +155,6 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
-	m_commandHandlers["objectBegin"] = &IECoreRI::RendererImplementation::objectBeginCommand;
-	m_commandHandlers["ri:objectBegin"] = &IECoreRI::RendererImplementation::objectBeginCommand;
-	m_commandHandlers["objectEnd"] = &IECoreRI::RendererImplementation::objectEndCommand;
-	m_commandHandlers["ri:objectEnd"] = &IECoreRI::RendererImplementation::objectEndCommand;
-	m_commandHandlers["objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
-	m_commandHandlers["ri:objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
 	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
 
@@ -1483,49 +1477,6 @@ IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std:
 		return 0;
 	}
 	RiReadArchiveV( (char *)nameData->readable().c_str(), 0, 0, 0, 0 );
-	return 0;
-}
-
-IECore::DataPtr IECoreRI::RendererImplementation::objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
-{
-	ConstStringDataPtr nameData;
-	CompoundDataMap::const_iterator it = parameters.find( "name" );
-	if( it!=parameters.end() )
-	{
-		nameData = runTimeCast<StringData>( it->second );
-	}
-	if( !nameData )
-	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:objectBegin command expects a StringData value called \"name\"." );
-		return 0;
-	}
-
-	instanceBegin( nameData->readable(), parameters );
-	return 0;
-}
-
-IECore::DataPtr IECoreRI::RendererImplementation::objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
-{
-	instanceEnd();
-	return 0;
-}
-
-IECore::DataPtr IECoreRI::RendererImplementation::objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
-{
-	ScopedContext scopedContext( m_context );
-
-	ConstStringDataPtr nameData;
-	CompoundDataMap::const_iterator it = parameters.find( "name" );
-	if( it!=parameters.end() )
-	{
-		nameData = runTimeCast<StringData>( it->second );
-	}
-	if( !nameData )
-	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:objectInstance command expects a StringData value called \"name\"." );
-		return 0;
-	}
-	instance( nameData->readable() );
 	return 0;
 }
 

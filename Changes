@@ -75,6 +75,10 @@ adoptChildPresets argument to the constructor.
 * The IECoreRI.Renderer class uses 3delight's new instance scoping mechanism to
 place all instances created with instanceBegin() at the world scope. This allows procedurals to create instances to be used in other procedurals.
 
+Changes :
+
+Removed deprecated "objectBegin", "objectEnd" and objectInstance" commands from IECoreRI.Renderer. Use the instanceBegin(), instanceEnd() and instance() methods instead.
+
 Bug Fixes :
 
 * ClassParameter.setClass() method was not taking advantage of a matching already loaded class if the searchPathEnvVar was None.

@@ -274,22 +274,6 @@ class Renderer : public IECore::Renderer
 		/// Expects a single StringData parameter called "name", and calls RiReadArchive with it.
 		/// \todo Make a VisibleRenderable subclass to encapsulate a call to this.
 		///
-		/// "objectBegin"
-		/// "ri:objectBegin"
-		/// Calls RiObjectBegin. Expects a single StringData parameter called "name", which
-		/// can be used in a later call to command( "ri:objectInstance" ) to instance the object.
-		///
-		/// "objectEnd"
-		/// "ri:objectEnd"
-		/// Calls RiObjectEnd.
-		///
-		/// "objectInstance"
-		/// "ri:objectInstance"
-		/// Calls RiObjectInstance. Expects a single StringData parameter called "name", which
-		/// refers to a name previously passed to command( "ri:objectBegin" ).
-		///
-		/// \deprecated Use the dedicated instancing methods instead of the objectInstance commands
-		///
 		/// "ri:archiveRecord"
 		/// Makes a call to RiArchiveRecord(). Expects StringData parameters called "type" and
 		/// "record".

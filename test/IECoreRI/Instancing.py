@@ -43,13 +43,13 @@ class InstancingTest( unittest.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
 
-		r.command( "ri:objectBegin", { "name" : StringData( "myObject" ) } )
+		r.instanceBegin( "myObject", {} )
 		r.geometry( "teapot", {}, {} )
-		r.command( "ri:objectEnd", {} )
+		r.instanceEnd()
 
 		r.worldBegin()
 
-		r.command( "ri:objectInstance", { "name" : StringData( "myObject" ) } )
+		r.instance( "myObject" )
 		r.worldEnd()
 
 		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
@@ -58,22 +58,20 @@ class InstancingTest( unittest.TestCase ) :
 		self.assert_( "ObjectEnd" in rib )
 		self.assert_( "ObjectInstance" in rib )
 
-
 	def test2( self ) :
 
-		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing2.rib" )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
 
-		r.command( "objectBegin", { "name" : StringData( "myObject" ) } )
+		r.instanceBegin( "myObject", {} )
 		r.geometry( "teapot", {}, {} )
-		r.command( "objectEnd", {} )
+		r.instanceEnd()
 
 		r.worldBegin()
 
-		r.command( "objectInstance", { "name" : StringData( "myObject" ) } )
-
+		r.instance( "myObject" )
 		r.worldEnd()
 
-		rib = "".join( open( "test/IECoreRI/output/instancing2.rib" ).readlines() )
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
 
 		self.assert_( "ObjectBegin" in rib )
 		self.assert_( "ObjectEnd" in rib )
