@@ -400,6 +400,8 @@ enum TypeId
 	V2iVectorParameterTypeId = 354,
 	V3iVectorParameterTypeId = 355,
 	DiskPrimitiveTypeId = 356,
+	LinearToAlexaLogcOpTypeId = 357,
+	AlexaLogcToLinearOpTypeId = 358,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

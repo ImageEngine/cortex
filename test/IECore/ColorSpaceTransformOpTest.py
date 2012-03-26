@@ -39,9 +39,9 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		self.assertEqual(  set( ColorSpaceTransformOp.colorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog'] ) )
-		self.assertEqual(  set( ColorSpaceTransformOp.inputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog'] ) )
-		self.assertEqual(  set( ColorSpaceTransformOp.outputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog'] ) )
+		self.assertEqual(  set( ColorSpaceTransformOp.colorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog', 'alexaLogC'] ) )
+		self.assertEqual(  set( ColorSpaceTransformOp.inputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog', 'alexaLogC'] ) )
+		self.assertEqual(  set( ColorSpaceTransformOp.outputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb', 'panalog', 'alexaLogC'] ) )
 
 	def testConversion( self ) :
 
