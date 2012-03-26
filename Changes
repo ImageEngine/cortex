@@ -22,6 +22,8 @@ generate a hash of their contents as an instance of the new MurmurHash class.
 
 * Added HoudiniHeaderGenerator which stores Houdini version, scene name, frame rate, current, start, and end frames in the ObjectWriter headers.
 
+* Added an IECore.DiskPrimitive class.
+
 Improvements :
 
 * IECore.RelativePreset accepts now a compare filter that is a callback for ignoring some of the parameters when doing the diff.

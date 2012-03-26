@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -402,6 +402,7 @@ void bindTypeId()
 		.value( "DeepImageReader", DeepImageReaderTypeId )
 		.value( "DeepImageWriter", DeepImageWriterTypeId )
 		.value( "DeepImageConverter", DeepImageConverterTypeId )
+		.value( "DiskPrimitive", DiskPrimitiveTypeId )
 
 	;
 }

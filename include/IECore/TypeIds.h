@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -399,6 +399,7 @@ enum TypeId
 	DeepImageConverterTypeId = 353,
 	V2iVectorParameterTypeId = 354,
 	V3iVectorParameterTypeId = 355,
+	DiskPrimitiveTypeId = 356,
 
 	// Remember to update TypeIdBinding.cpp !!!
 
