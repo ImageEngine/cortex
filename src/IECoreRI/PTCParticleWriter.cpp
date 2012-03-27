@@ -124,6 +124,19 @@ static void writeAttribute( float *target, DataPtr attr, int index )
 				write3DAttr<V3fVectorData>( target, f, index );
 			}
 			break;
+			
+		case Color3dVectorDataTypeId :
+			{
+				Color3dVectorDataPtr d = staticPointerCast<Color3dVectorData>( attr );
+				write3DAttr<Color3dVectorData>( target, d, index );
+			}
+			break;
+		case Color3fVectorDataTypeId :
+			{
+				Color3fVectorDataPtr f = staticPointerCast<Color3fVectorData>( attr );
+				write3DAttr<Color3fVectorData>( target, f, index );
+			}
+			break;
 
 		case M44fVectorDataTypeId :
 			{
@@ -221,6 +234,14 @@ void PTCParticleWriter::doWrite( const IECore::CompoundObject *operands )
 		case V3fVectorDataTypeId:
 			nPoints = staticPointerCast< V3fVectorData >( attr )->readable().size();
 			typeStr = "vector";
+			break;
+		case Color3dVectorDataTypeId:
+			nPoints = staticPointerCast< Color3dVectorData >( attr )->readable().size();
+			typeStr = "color";
+			break;
+		case Color3fVectorDataTypeId:
+			nPoints = staticPointerCast< Color3fVectorData >( attr )->readable().size();
+			typeStr = "color";
 			break;
 		case M44fVectorDataTypeId:
 			nPoints = staticPointerCast< M44fVectorData >( attr )->readable().size();
