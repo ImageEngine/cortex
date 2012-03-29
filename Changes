@@ -1,3 +1,22 @@
+7.1.0:
+
+Additions :
+
+* Added Alexa V3 Log C colorspace registered on for image reader and writers.
+
+* Added support for writing Color3fVectorData primvars in IECoreRI::PTCParticleWriter
+
+* Added DiskPrimitive
+
+* The IECoreRI.Renderer class uses 3delight's new instance scoping mechanism
+
+Changes :
+
+* Removed deprecated "objectBegin", "objectEnd" and objectInstance"
+
+
+7.0.0:
+
 Additions :
 
 * Added object filter option to IECore.CapturingRenderer, so you can select the objects you want it to output
