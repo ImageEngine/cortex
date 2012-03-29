@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -126,6 +126,9 @@ class Font : public RunTimeTyped
 		ConstImagePrimitivePtr image( char c ) const;
 		/// Returns an image containing a grid of 16x8 characters containing
 		/// all the chars from 0-127 inclusive. This too has a single "Y" channel.
+		/// \todo These images currently return a straight conversion of the data
+		/// from FreeType, which is intended for direct display without colour conversion.
+		/// I think we should linearise the data before returning it.
 		ImagePrimitivePtr image() const;
 
 	private :
