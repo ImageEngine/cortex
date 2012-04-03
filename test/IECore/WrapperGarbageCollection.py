@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 import unittest
 import gc
 import weakref
+import threading
 
 from IECore import *
 
@@ -128,6 +129,53 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 		self.assertEqual( self.callbackCalled, True )
 		self.assertEqual( w(), None )
+
+	def testThreading( self ) :
+	
+		class ClassWithDel :
+		
+			def __init__( self ) :
+			
+				pass
+				
+			def __del__( self ) :
+			
+				for i in range( 0, 100 ) :
+				
+					pass
+	
+		def f() :
+		
+			for i in range( 0, 100 ) :
+				o = Renderer.Procedural()
+				# The ClassWithDel class defines a __del__ method.
+				# This means that when it is deleted (when
+				# WrapperGarbageCollector::collect() calls Py_DECREF( o ) )
+				# arbitrary python code gets run. This in 
+				# turn means the interpreter might switch to
+				# a different thread. Which also might call
+				# WrapperGarbageCollector::collect(). Which
+				# will cause chaos if WrapperGarbageCollector::collect()
+				# isn't savvy to the possibility.
+				#
+				# In the wild it seems that this may be able to cause problems even
+				# without explicitly calling gc.collect() and RefCounted.collectGarbage(),
+				# but this test encourages things to go wrong by calling them regularly.
+				o.s = ClassWithDel()
+				if i % 10 == 0 :
+					while gc.collect() :
+						pass
+					RefCounted.collectGarbage()
+		
+		for j in range( 0, 10 ) :
+			threads = []
+			for i in range( 0, 8 ) :
+				t = threading.Thread( target = f )
+				t.start()
+				threads.append( t )
+				
+			for t in threads :
+				t.join()
 
 if __name__ == "__main__":
         unittest.main()
