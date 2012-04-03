@@ -35,7 +35,7 @@
 #include "IECorePython/WrapperGarbageCollector.h"
 
 #include <vector>
-
+#include <iostream>
 using namespace IECorePython;
 
 size_t WrapperGarbageCollector::g_allocCount = 0;
@@ -47,7 +47,7 @@ WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::Re
 {
 	g_allocCount++;
 
-	if (g_allocCount >= g_allocThreshold)
+	if ( g_allocThreshold > 0 && g_allocCount >= g_allocThreshold )
 	{
 		collect();
 	}
@@ -63,7 +63,7 @@ WrapperGarbageCollector::~WrapperGarbageCollector()
 void WrapperGarbageCollector::collect()
 {
 	std::vector<PyObject*> toCollect;
-
+	g_allocThreshold = 0;
 	do
 	{
 		toCollect.clear();
