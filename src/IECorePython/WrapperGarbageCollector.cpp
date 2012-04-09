@@ -35,7 +35,7 @@
 #include "IECorePython/WrapperGarbageCollector.h"
 
 #include <vector>
-#include <iostream>
+
 using namespace IECorePython;
 
 size_t WrapperGarbageCollector::g_allocCount = 0;
@@ -47,7 +47,7 @@ WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::Re
 {
 	g_allocCount++;
 
-	if ( g_allocThreshold > 0 && g_allocCount >= g_allocThreshold )
+	if (g_allocCount >= g_allocThreshold)
 	{
 		collect();
 	}
@@ -57,29 +57,50 @@ WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::Re
 
 WrapperGarbageCollector::~WrapperGarbageCollector()
 {
-	g_refCountedToPyObject.erase( m_object );
 }
 
 void WrapperGarbageCollector::collect()
 {
 	std::vector<PyObject*> toCollect;
-	g_allocThreshold = 0;
+
 	do
 	{
 		toCollect.clear();
-		for( InstanceMap::const_iterator it = g_refCountedToPyObject.begin(); it!=g_refCountedToPyObject.end(); it++ )
+		for( InstanceMap::iterator it = g_refCountedToPyObject.begin(); it!=g_refCountedToPyObject.end(); )
 		{
+			InstanceMap::iterator nextIt = it; nextIt++;
 			if( it->first->refCount()==1 )
 			{
 				if( it->second->ob_refcnt==1 )
 				{
+					// add to the list of objects to destroy
 					toCollect.push_back( it->second );
+					
+					// Make sure the object is removed from the list before the next loop, which
+					// destroys it. This is because Py_DECREF() can run arbitrary, multithreaded python
+					// code, (especially if the python object has a __del__ method) which may create
+					// WrapperGarbageCollector objects, effectively making this method recurse. It's also
+					// possible that this python code can call collect() directly. Removing the object
+					// from the list here avoids double deallocation.
+					g_refCountedToPyObject.erase( it );
 				}
 			}
+			it = nextIt;
 		}
 
 		for (std::vector<PyObject*>::const_iterator jt = toCollect.begin(); jt != toCollect.end(); ++jt)
 		{
+			// decrement the reference count for the python object, which will trigger the destruction
+			// of the WrapperGarbageCollector object.
+			
+			// NOTE: Py_DECREF() also used to be called in Wrapper::~Wrapper(), which inherits from WrapperGarbageCollector,
+			// and is defined in IECorePython/Wrapper.h. This was conditional on the reference count being greater than
+			// zero, and so didn't usually happen.
+			// Occasionally, however, the python code that was run during Py_DECREF() would create a python object with
+			// exactly the same address as (*jt), before invoking the c++ destructors. This meant that Wrapper::~Wrapper()
+			// would think it was still holding on to a python object with a non zero reference count, when really it
+			// was holding onto someone else's object. This means the new object would get destroyed, leading to dangling
+			// pointers and crashes, and has since been removed.
 			Py_DECREF( *jt );
 		}
 	} while( toCollect.size() );
