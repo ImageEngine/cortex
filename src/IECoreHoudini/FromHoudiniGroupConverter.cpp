@@ -189,8 +189,10 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 		GU_Detail childGeo( &groupGeo, it->second );
 		for ( GA_GroupTable::iterator<GA_ElementGroup> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 		{
-			childGeo.destroyGroup( it.group() );
+			it.group()->clear();
 		}
+		childGeo.destroyAllEmptyGroups();
+		
 		PrimitivePtr child = doPrimitiveConversion( &childGeo );
 		if ( child )
 		{
