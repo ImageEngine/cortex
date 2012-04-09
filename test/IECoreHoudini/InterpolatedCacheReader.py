@@ -78,8 +78,8 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache = self.cacheSop()
 		self.failUnless( isinstance( cache.geometry(), hou.Geometry ) )
 		cache.parm( "frameMultiplier" ).set( 250 )
-		##\todo: re-activate this test when hou.Node.warnings works properly
-		#self.failUnless( cache.warnings() )
+		cache.cook( force=True )
+		self.failUnless( cache.warnings() )
 		self.assertEqual( len(cache.geometry().points()), 0 )
 		shutil.copyfile( "test/IECoreHoudini/data/torusVertCache.0001.fio", "test/IECoreHoudini/data/torusVertCache.0250.fio" )
 		# need to refresh the LRUCache in order to get passed the original error
@@ -92,16 +92,16 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 	def testNonExistantFile( self ) :
 		cache = self.cacheSop()
 		cache.parm( "cacheSequence" ).set( "test/IECoreHoudini/data/fake.####.fio" )
-		##\todo: re-activate this test when hou.Node.warnings works properly
-		#self.failUnless( cache.warnings() )
+		cache.cook( force=True )
+		self.failUnless( cache.warnings() )
 		self.assertEqual( len(cache.geometry().points()), 0 )
 		
 	def testNoFileForFrame( self ) :
 		cache = self.cacheSop()
 		cache.parm( "cacheSequence" ).set( "test/IECoreHoudini/data/torusVertCache.####.fio" )
 		hou.setFrame( 4 )
-		##\todo: re-activate this test when hou.Node.warnings works properly
-		#self.failUnless( cache.warnings() )
+		cache.cook( force=True )
+		self.failUnless( cache.warnings() )
 		self.assertEqual( len(cache.geometry().points()), 0 )
 	
 	def testBadObjectHandle( self ) :
@@ -273,8 +273,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		group.parm( "crname" ).set( "badObject" )
 		cache.parm( "attributeFixes1" ).set( "short" )
 		cache.cook( force=True )
-		##\todo: re-activate this test when hou.Node.warnings works properly
-		#self.failUnless( "Geometry/Cache mismatch" in cache.warnings() )
+		self.failUnless( "Geometry/Cache mismatch" in cache.warnings() )
 	
 	def testLongP( self ) :
 		hou.setFrame( 3 )
@@ -283,8 +282,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		group.parm( "crname" ).set( "badObject" )
 		cache.parm( "attributeFixes1" ).set( "long" )
 		cache.cook( force=True )
-		##\todo: re-activate this test when hou.Node.warnings works properly
-		#self.failUnless( "Geometry/Cache mismatch" in cache.warnings() )
+		self.failUnless( "Geometry/Cache mismatch" in cache.warnings() )
 
 	def testWrongP( self ) :
 		hou.setFrame( 3 )
