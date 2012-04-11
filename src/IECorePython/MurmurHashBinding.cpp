@@ -56,6 +56,20 @@ static void appendArray( MurmurHash &hash, typename TypedData<std::vector<T> >::
 	hash.append( &(data->readable()[0]), data->readable().size() );
 }
 
+static void appendInt( MurmurHash &hash, int64_t v )
+{
+	// Function that keeps backward compatibility for int types.
+	// \todo Consider removing this function in Cortex 8
+	if ( v == int64_t(int(v)) )
+	{
+		hash.append( int(v) ); 
+	}
+	else
+	{
+		hash.append( v );
+	}
+}
+
 void bindMurmurHash()
 {
 
@@ -64,7 +78,7 @@ void bindMurmurHash()
 		.def( init<const MurmurHash &>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( float ))&MurmurHash::append, return_self<>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( double ))&MurmurHash::append, return_self<>() )
-		.def( "append", (MurmurHash &(MurmurHash::*)( int ))&MurmurHash::append, return_self<>() )
+		.def( "append", &appendInt, return_self<>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( const std::string & ))&MurmurHash::append, return_self<>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( const Imath::V2i & ))&MurmurHash::append, return_self<>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( const Imath::V2f & ))&MurmurHash::append, return_self<>() )

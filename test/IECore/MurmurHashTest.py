@@ -56,7 +56,7 @@ class MurmurHashTest( unittest.TestCase ) :
 	def testAppend( self ) :
 	
 		h = IECore.MurmurHash()
-		for k in [ "hello", 'a', 1, 2.0 ] :
+		for k in [ "hello", 'a', 1, 2.0, 2**62 ] :
 			h2 = IECore.MurmurHash( h )
 			h.append( k )
 			self.assertNotEqual( h, h2 )
