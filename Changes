@@ -1,3 +1,7 @@
+Bug fixes :
+
+* Fixed exceptions when passing 64bit integers from python to MurmurHash.append method.
+
 7.1.1:
 
 Bug Fixes :
