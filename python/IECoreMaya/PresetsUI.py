@@ -396,7 +396,7 @@ class LoadUI( UIElement ) :
 		
 		presets = self.__getPresets( parameterised[0], self.__rootParameter )
 		if not presets:
-			maya.cmds.confirmDialog( message="No presets found in the current search paths ($%s)." % self.__envVar, button="OK" )
+			maya.cmds.confirmDialog( message="No presets applicable to %s found in the current search paths ($%s)." % ( self.__rootParameter.name, self.__envVar ), button="OK" )
 			return
 			
 		self.__loadedPresets = {}
@@ -435,7 +435,8 @@ class LoadUI( UIElement ) :
 		
 		self.__loadedPresets = {}
 		
-		selected = self.__selector.selected()
+		classNames = self.__classLoader.classNames()
+		selected = [ s for s in self.__selector.selected() if s in classNames ]
 		presets = []
 		for s in selected:
 			self.__loadedPresets[s] = self.__classLoader.load( s )()
@@ -445,7 +446,9 @@ class LoadUI( UIElement ) :
 	
 	def __doLoad( self ) :
 
-		selected = self.__selector.selected()
+		loaded = self.__loadedPresets.keys()
+		selected = [ s for s in self.__selector.selected() if s in loaded ]
+		
 		if not selected :
 			maya.cmds.confirmDialog( message="Please select at least one preset to load.", button="OK" )
 			return
@@ -480,7 +483,7 @@ class LoadUI( UIElement ) :
 			if not isinstance( p, IECore.Preset ):
 				continue
 			if p.applicableTo( parameterised, parameter ):
-				validPresets.append( name )
+				validPresets.append( ( name, p ) )
 
 		return validPresets
 
@@ -606,9 +609,24 @@ class PresetSelector( UIElement ) :
 				enable=False
 			)
 
-		else :		
-			for p in presets:
-				maya.cmds.textScrollList( self.__list, edit=True, append=p )
+		else :
+			presetsByPath = {}
+			for ( name, p ) in presets :
+				print name, p
+				path = os.path.dirname( p._cob ).rpartition( p.typeName() )[0]
+				if path not in presetsByPath :
+					presetsByPath[path] = []
+				presetsByPath[path].append( name )
+			
+			for ( path, names ) in presetsByPath.items() :
+				
+				maya.cmds.textScrollList( self.__list, edit=True, append=path )
+				
+				for name in names :
+					
+					maya.cmds.textScrollList( self.__list, edit=True, append=name )
+				
+				maya.cmds.textScrollList( self.__list, edit=True, append="" )
 
 		maya.cmds.setParent( oldParent )
 

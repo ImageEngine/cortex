@@ -1,3 +1,7 @@
+Improvements :
+
+* IECoreMaya PresetsUI LoadUI organizes the applicable presets by the path they came from
+
 Bug fixes :
 
 * Fixed exceptions when passing 64bit integers from python to MurmurHash.append method.
