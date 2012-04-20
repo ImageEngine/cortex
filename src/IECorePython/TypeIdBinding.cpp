@@ -403,7 +403,8 @@ void bindTypeId()
 		.value( "DeepImageWriter", DeepImageWriterTypeId )
 		.value( "DeepImageConverter", DeepImageConverterTypeId )
 		.value( "DiskPrimitive", DiskPrimitiveTypeId )
-
+		.value( "LinearToAlexaLogcOp", LinearToAlexaLogcOpTypeId )
+		.value( "AlexaLogcToLinearOp", AlexaLogcToLinearOpTypeId )
 	;
 }
 
