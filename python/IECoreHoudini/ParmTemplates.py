@@ -114,6 +114,10 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 	if p.typeId()==IECore.TypeId.FileSequenceParameter:
 		parm = IECoreHoudini.ParmTemplates.pathParm( p, parent=parent )
 
+	# frame list
+	if p.typeId()==IECore.TypeId.FrameListParameter:
+		parm = IECoreHoudini.ParmTemplates.stringParm( p, parent=parent )
+
 	# color3f
 	if p.typeId()==IECore.TypeId.Color3fParameter:
 		parm = IECoreHoudini.ParmTemplates.colParm( p, 3, parent=parent )
