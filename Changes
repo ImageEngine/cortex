@@ -6,6 +6,8 @@ Bug fixes :
 
 * Fixed exceptions when passing 64bit integers from python to MurmurHash.append method.
 
+* Added "PHOTOMETRIC_MINISWHITE" to supported photometric interpretations in IECore::TIFFImageReader, so it can read 3delight's depthmap shadows.
+
 7.1.1:
 
 Bug Fixes :

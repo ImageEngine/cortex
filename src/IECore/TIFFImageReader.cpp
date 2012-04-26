@@ -151,7 +151,7 @@ void TIFFImageReader::channelNames( vector<string> &names )
 	}
 	else
 	{
-		assert( m_photometricInterpretation == PHOTOMETRIC_MINISBLACK );
+		assert( m_photometricInterpretation == PHOTOMETRIC_MINISBLACK || m_photometricInterpretation == PHOTOMETRIC_MINISWHITE );
 
 		/// Interpret first channel as luminance
 		names.push_back("Y");
@@ -614,6 +614,7 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 
 		m_photometricInterpretation = tiffFieldDefaulted<uint16>( TIFFTAG_PHOTOMETRIC );
 		if (! ( m_photometricInterpretation == PHOTOMETRIC_MINISBLACK ||
+				m_photometricInterpretation == PHOTOMETRIC_MINISWHITE ||
 		                m_photometricInterpretation == PHOTOMETRIC_RGB
 		      ))
 		{
