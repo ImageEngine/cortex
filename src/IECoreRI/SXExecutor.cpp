@@ -128,12 +128,12 @@ class SXExecutor::Implementation : public IECore::RefCounted
 		struct ParameterInfo
 		{
 			ParameterInfo()
-				:	type( SxInvalid ), arraySize( 0 )
+				:	type( SxInvalid ), arraySize( 0 ), varying( true )
 			{
 			}
 
-			ParameterInfo( SxType t, unsigned as )
-				:	type( t ), arraySize( as )
+			ParameterInfo( SxType t, unsigned as, bool v )
+				:	type( t ), arraySize( as ), varying( v )
 			{
 			}
 
@@ -149,6 +149,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 
 			SxType type;
 			unsigned arraySize;
+			bool varying;
 		};
 		
 		void storeParameterInfo( SxShader shader )
@@ -157,26 +158,22 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			for( unsigned i=0; i<numParameters; i++ )
 			{
 				ParameterInfo info;
-				bool varying;
 				SxData defaultValue;
 				const char *spaceName;
 				bool output;
-				const char *name = SxGetParameterInfo( shader, i, &info.type, &varying, &defaultValue, &info.arraySize, &spaceName, &output );
-				if( varying )
-				{
-					TypeMap &typeMap = output ? m_outputParameterTypes : m_inputParameterTypes;
+				const char *name = SxGetParameterInfo( shader, i, &info.type, &info.varying, &defaultValue, &info.arraySize, &spaceName, &output );
+				TypeMap &typeMap = output ? m_outputParameterTypes : m_inputParameterTypes;
 
-					TypeMap::const_iterator it = typeMap.find( name );
-					if( it != typeMap.end() )
+				TypeMap::const_iterator it = typeMap.find( name );
+				if( it != typeMap.end() )
+				{
+					if( it->second != info  )
 					{
-						if( it->second != info  )
-						{
-							msg( Msg::Warning, "SXExecutor::storeParameterTypes", boost::format( "Shaders request conflicting types for parameter \"%s\"" ) % name );
-						}
-						continue;
+						msg( Msg::Warning, "SXExecutor::storeParameterTypes", boost::format( "Shaders request conflicting types for parameter \"%s\"" ) % name );
 					}
-					typeMap[name] = info;
+					continue;
 				}
+				typeMap[name] = info;
 			}
 		}
 
@@ -186,20 +183,20 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				strcmp( name, "P" )==0
 			)
 			{
-				return ParameterInfo( SxPoint, 0 );
+				return ParameterInfo( SxPoint, 0, true );
 			}
 			else if( 
 				strcmp( name, "N" )==0 ||
 				strcmp( name, "Ng" )==0
 			)
 			{
-				return ParameterInfo( SxNormal, 0 );
+				return ParameterInfo( SxNormal, 0, true );
 			}
 			else if(
 				strcmp( name, "I" )==0
 			)
 			{
-				return ParameterInfo( SxVector, 0 );
+				return ParameterInfo( SxVector, 0, true );
 			}	
 			else if(
 				strcmp( name, "s" )==0 ||
@@ -210,7 +207,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				strcmp( name, "dv" )==0
 			)
 			{
-				return ParameterInfo( SxFloat, 0 );
+				return ParameterInfo( SxFloat, 0, true );
 			}
 			else if(
 				strcmp( name, "Cs" )==0 ||
@@ -220,7 +217,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				strcmp( name, "Cl" )==0 
 			)
 			{
-				return ParameterInfo( SxColor, 0 );
+				return ParameterInfo( SxColor, 0, true );
 			}
 
 			return ParameterInfo();
@@ -231,13 +228,24 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			switch( type )
 			{
 				case FloatVectorDataTypeId :
-					return ParameterInfo( SxFloat, 0 );
+					return ParameterInfo( SxFloat, 0, true );
 				case V3fVectorDataTypeId :
-					return ParameterInfo( SxVector, 0 );
+					return ParameterInfo( SxVector, 0, true );
 				case Color3fVectorDataTypeId :
-					return ParameterInfo( SxColor, 0 );
+					return ParameterInfo( SxColor, 0, true );
+				
+				case StringVectorDataTypeId :
+				case StringDataTypeId :
+					return ParameterInfo( SxString, 0, false );
+				case FloatDataTypeId :
+					return ParameterInfo( SxFloat, 0, false );
+				case V3fDataTypeId :
+					return ParameterInfo( SxVector, 0, false );
+				case Color3fDataTypeId :
+					return ParameterInfo( SxColor, 0, false );
+				
 				default :
-					return ParameterInfo( SxInvalid, 0 );
+					return ParameterInfo( SxInvalid, 0, true );
 			}
 		}
 
@@ -277,37 +285,73 @@ class SXExecutor::Implementation : public IECore::RefCounted
 
 		void setVariable( SxParameterList parameterList, const char *name, const ParameterInfo &info, bool predefined, const IECore::Data *data, size_t numPoints ) const
 		{
-			switch( info.type )
+			if( info.varying )
 			{
-				case SxFloat :
-					if( info.arraySize==3 && data->isInstanceOf( IECore::V3fVectorData::staticTypeId() ) )
-					{
-						setVariable2<SxFloat, V3fVectorData>( parameterList, name, predefined, data, numPoints, info.arraySize );
-					}
-					else
-					{
-						setVariable2<SxFloat, SXTypeTraits<SxFloat>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
-					}
-					break;
-				case SxColor :
-					setVariable2<SxColor, SXTypeTraits<SxColor>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
-					break;
-				case SxPoint :
-					setVariable2<SxPoint, SXTypeTraits<SxPoint>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
-					break;
-				case SxVector :
-					setVariable2<SxVector, SXTypeTraits<SxVector>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
-					break;
-				case SxNormal :
-					setVariable2<SxNormal, SXTypeTraits<SxNormal>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
-					break;
-				default :
-					throw Exception( boost::str( boost::format( "Input parameter \"%s\" has unsupported type." ) % name ) );
+				switch( info.type )
+				{
+					case SxFloat :
+						if( info.arraySize==3 && data->isInstanceOf( IECore::V3fVectorData::staticTypeId() ) )
+						{
+							setVaryingVariable<SxFloat, V3fVectorData>( parameterList, name, predefined, data, numPoints, info.arraySize );
+						}
+						else
+						{
+							setVaryingVariable<SxFloat, SXTypeTraits<SxFloat>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
+						}
+						break;
+					case SxColor :
+						setVaryingVariable<SxColor, SXTypeTraits<SxColor>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
+						break;
+					case SxPoint :
+						setVaryingVariable<SxPoint, SXTypeTraits<SxPoint>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
+						break;
+					case SxVector :
+						setVaryingVariable<SxVector, SXTypeTraits<SxVector>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
+						break;
+					case SxNormal :
+						setVaryingVariable<SxNormal, SXTypeTraits<SxNormal>::VectorDataType>( parameterList, name, predefined, data, numPoints, info.arraySize );
+						break;
+					default :
+						throw Exception( boost::str( boost::format( "Input parameter \"%s\" has unsupported type." ) % name ) );
+				}
+			}
+			else
+			{
+				switch( info.type )
+				{
+					case SxFloat :
+						if( info.arraySize==3 && data->isInstanceOf( IECore::V3fData::staticTypeId() ) )
+						{
+							setUniformVariable<SxFloat, V3fData>( parameterList, name, data, info.arraySize );
+						}
+						else
+						{
+							setUniformVariable<SxFloat, SXTypeTraits<SxFloat>::DataType>( parameterList, name, data, info.arraySize );
+						}
+						break;
+					case SxColor :
+						setUniformVariable<SxColor, SXTypeTraits<SxColor>::DataType>( parameterList, name, data, info.arraySize );
+						break;
+					case SxPoint :
+						setUniformVariable<SxPoint, SXTypeTraits<SxPoint>::DataType>( parameterList, name, data, info.arraySize );
+						break;
+					case SxVector :
+						setUniformVariable<SxVector, SXTypeTraits<SxVector>::DataType>( parameterList, name, data, info.arraySize );
+						break;
+					case SxNormal :
+						setUniformVariable<SxNormal, SXTypeTraits<SxNormal>::DataType>( parameterList, name, data, info.arraySize );
+						break;
+					case SxString :
+						setStringVariable( parameterList, name, data );
+						break;
+					default :
+						throw Exception( boost::str( boost::format( "Input parameter \"%s\" has unsupported type." ) % name ) );
+				}
 			}
 		}
 
 		template<SxType sxType, typename DataType>
-		void setVariable2( SxParameterList parameterList, const char *name, bool predefined, const IECore::Data *data, size_t numPoints, unsigned arraySize ) const
+		void setVaryingVariable( SxParameterList parameterList, const char *name, bool predefined, const IECore::Data *data, size_t numPoints, unsigned arraySize ) const
 		{
 
 			const DataType *td = IECore::runTimeCast<const DataType>( data );
@@ -332,6 +376,43 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				SxSetParameter( parameterList, name, sxType, rawData, true, arraySize );
 			}
 
+		}
+		
+		template<SxType sxType, typename DataType>
+		void setUniformVariable( SxParameterList parameterList, const char *name, const IECore::Data *data, unsigned arraySize ) const
+		{
+			const DataType *td = IECore::runTimeCast<const DataType>( data );
+			if( !td )
+			{
+				throw( Exception( boost::str( boost::format( "Input parameter \"%s\" has wrong type (%s but should be %s)." ) % name % data->typeName() % DataType::staticTypeName() ) ) );
+			}
+			
+			void *rawData = (void *)&(td->readable());
+			SxSetParameter( parameterList, name, sxType, rawData, false, arraySize );
+
+		}
+		
+		void setStringVariable( SxParameterList parameterList, const char *name, const IECore::Data *data ) const
+		{
+			if( const StringData *td = IECore::runTimeCast<const StringData>( data ) )
+			{
+				const char* str = td->readable().c_str();
+				SxSetParameter( parameterList, name, SxString, (void *)&str, false, 0 );
+			}
+			else if( const StringVectorData *td = IECore::runTimeCast<const StringVectorData>( data ) )
+			{
+				std::vector<const char*> strings;
+				for( size_t i=0; i < td->readable().size(); ++i )
+				{
+					strings.push_back( td->readable()[i].c_str() );
+				}
+				
+				SxSetParameter( parameterList, name, SxString, &strings[0], false, strings.size() );
+			}
+			else
+			{
+				throw( Exception( boost::str( boost::format( "Input parameter \"%s\" has wrong type (%s but should be StringData or StringVectorData)." ) % name % data->typeName() ) ) );
+			}
 		}
 
 		IECore::CompoundDataPtr getVariables( SxParameterList parameterList ) const

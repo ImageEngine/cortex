@@ -558,6 +558,55 @@ class SXRendererTest( unittest.TestCase ) :
 
 			self.assertEqual( s["Ci"], points["colorPrimVar"] )
 
+	def testUniformPrimitiveVariables( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxUniformPrimitiveVariableTest.sdl test/IECoreRI/shaders/sxUniformPrimitiveVariableTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/sxUniformPrimitiveVariableTest", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			points["colorPrimVar"] = IECore.Color3fData( IECore.Color3f( 0, 0.5, 1 ) )
+			points["floatPrimVar"] = IECore.FloatData( 16.0 )
+			points["vectorPrimVar"] = IECore.V3fData( IECore.V3f( 0.25, 0.5, 2 ) )
+			points["stringPrimVar"] = IECore.StringData( "hello shader!" )
+			points["stringVectorPrimVar"] = IECore.StringVectorData( ["who's", "a", "good", "boy" ] )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+			
+			for i in range( 0, len( points["P"] ) ) :
+				self.assertEqual( s["Ci"][i], IECore.Color3f( 0.125, 0.25, 0.75 ) )
+
+	def testUniformPrimitiveVariableShaderParameters( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxUniformPrimitiveVariableShaderParameterTest.sdl test/IECoreRI/shaders/sxUniformPrimitiveVariableShaderParameterTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/sxUniformPrimitiveVariableShaderParameterTest", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			points["colorPrimVar"] = IECore.Color3fData( IECore.Color3f( 0, 0.5, 1 ) )
+			points["floatPrimVar"] = IECore.FloatData( 16.0 )
+			points["vectorPrimVar"] = IECore.V3fData( IECore.V3f( 0.25, 0.5, 2 ) )
+			points["stringPrimVar"] = IECore.StringData( "hello shader!" )
+			points["stringVectorPrimVar"] = IECore.StringVectorData( ["who's", "a", "good", "boy" ] )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+			
+			for i in range( 0, len( points["P"] ) ) :
+				self.assertEqual( s["Ci"][i], IECore.Color3f( 0.125, 0.25, 0.5 ) )
+
+
 	def testThreading( self ) :
 	
 		# set up a renderer with a shader in it
