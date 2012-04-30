@@ -1,8 +1,8 @@
-Additions :
-
-* Added support for uniform primitive variables in IECoreRI::SXRenderer
+7.1.2:
 
 Improvements :
+
+* Added support for uniform primitive variables in IECoreRI::SXRenderer
 
 * IECoreMaya PresetsUI LoadUI organizes the applicable presets by the path they came from
 
