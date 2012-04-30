@@ -37,10 +37,10 @@ import imp
 import glob
 import re
 import os.path
-from fnmatch import fnmatch
-from IECore import Msg, msg, SearchPath, warning
-
 import threading
+from fnmatch import fnmatch
+
+from IECore import Msg, msg, SearchPath, warning
 
 ## This class defines methods for creating instances of classes
 # defined in python modules on disk. We could just use the standard
