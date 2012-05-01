@@ -65,6 +65,11 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 						IECore.V3f( 0 ),
 					),
 					
+					IECore.V3fParameter(
+						"extraTranslate",
+						"",
+						IECore.V3f( 0 ),
+					),
 				]
 			
 			)
@@ -77,12 +82,18 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 		def doRender( self, renderer, args ) :
 			
 			with IECore.AttributeBlock( renderer ) :
-			
-				renderer.concatTransform( IECore.M44f.createTranslated( args["translate"].value ) )
 				
-				renderer.setAttribute( "name", IECore.StringData( "mySphere" ) )
+				g = IECore.Group()
+				g.addState( IECore.AttributeState( { "name" : IECore.StringData( "mySphere" ) } ) )
+				g.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( args["translate"].value ) ) )
 				
-				renderer.sphere( args["radius"].value, -1, 1, 360, {} )
+				innerGroup = IECore.Group()
+				innerGroup.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( args["extraTranslate"].value ) ) )
+				innerGroup.addChild( IECore.SpherePrimitive( args["radius"].value, -1, 1, 360 ) )
+				
+				g.addChild( innerGroup )
+				
+				g.render( renderer )
 			
 		def doRenderState( self, renderer, args ) :
 			
@@ -100,7 +111,7 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 		prevScene = None
 		for i in range( 0, 10000 ) :
 		
-			maya.cmds.setAttr( radiusAttr, i )
+			maya.cmds.setAttr( radiusAttr, i + 1 )
 			scene = fnPH.scene()
 			self.failUnless( isinstance( scene, IECoreGL.Scene ) )
 			self.failIf( prevScene is not None and scene.isSame( prevScene ) )
@@ -177,7 +188,34 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMin" ), [ ( 0, -2, -2 ) ] )
 		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMax" ), [ ( 4, 2, 2 ) ] )
 		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundCenter" ), [ ( 2, 0, 0 ) ] )
+	
+	def testMoreComplicatedComponentTransforms( self ) :
+		
+		node = maya.cmds.createNode( "ieProceduralHolder" )
 
+		fnPH = IECoreMaya.FnProceduralHolder( node )
+		fnPH.setParameterised( self.SphereProcedural() )
+		
+		transformPlug = fnPH.componentTransformPlugPath( "mySphere" )
+		self.failUnless( maya.cmds.objExists( transformPlug ) )
+		
+		boundPlug = fnPH.componentBoundPlugPath( "mySphere" )
+		self.failUnless( maya.cmds.objExists( boundPlug ) )
+		
+		procedural = fnPH.getProcedural()
+		procedural["translate"].setValue( IECore.V3f( 2, 0, 0 ) )
+		procedural["radius"].setNumericValue( 2 )
+		procedural["extraTranslate"].setValue( IECore.V3f( 0, 2, 0 ) )
+		fnPH.setNodeValues()
+		
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentTranslate" ), [ ( 2, 0, 0 ) ] )
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentRotate" ), [ ( 0, 0, 0 ) ] )
+		self.assertEqual( maya.cmds.getAttr( transformPlug + ".componentScale" ), [ ( 1, 1, 1 ) ] )
+		
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMin" ), [ ( 0, 0, -2 ) ] )
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundMax" ), [ ( 4, 4, 2 ) ] )
+		self.assertEqual( maya.cmds.getAttr( boundPlug + ".componentBoundCenter" ), [ ( 2, 2, 0 ) ] )
+	
 	def testComponentBoundMinMax( self ) :
 	
 		node = maya.cmds.createNode( "ieProceduralHolder" )
