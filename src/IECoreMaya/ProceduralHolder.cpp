@@ -886,10 +886,9 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 		/// ensures a consistent ordering of components from frame to frame, which we'd not otherwise get due to IECore::Group using
 		/// a regular set (sorted by pointer) to store its children.
 		m_componentsMap[name] = ComponentsMap::mapped_type( 0, group );
+		m_componentTransforms[name] = groupTransform;
 	}
 	
-	m_componentTransforms[name] = groupTransform;
-
 	const IECoreGL::Group::ChildContainer &children = group->children();
 
 	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
