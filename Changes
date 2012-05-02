@@ -1,5 +1,11 @@
 7.1.2:
 
+Bug Fixes :
+
+* Fixed component bound output bug in maya ProceduralHolder node
+
+7.1.2:
+
 Improvements :
 
 * Added support for uniform primitive variables in IECoreRI::SXRenderer
