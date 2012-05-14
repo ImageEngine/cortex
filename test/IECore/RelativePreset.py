@@ -151,6 +151,16 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( classes1[1:], classes2[1:] )
 		self.assertEqual( testObjB["a"].getTypedValue(), True )
 
+		testObjA["b"].setClass( "maths/multiply", 1 )
+		classes1 = testObjB.parameters()["b"].getClass( True )
+		classes2 = testObjA.parameters()["b"].getClass( True )
+		self.assertNotEqual( classes1[1:], classes2[1:] )
+		r = IECore.RelativePreset( testObjB.parameters(), testObjA.parameters() )
+		r( testObj2, testObj2.parameters() )
+		classes1 = testObjB.parameters()["b"].getClass( True )
+		classes2 = testObj2.parameters()["b"].getClass( True )
+		self.assertEqual( classes1[1:], classes2[1:] )
+
 	def testCompareFilter( self ) :
 	
 		def createTestObj():

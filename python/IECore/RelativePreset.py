@@ -431,7 +431,7 @@ class RelativePreset( IECore.Preset ) :
 			parameter.setClass( className, classVersion )
 			
 		c = parameter.getClass( False )
-		if c :
+		if c and '_classValue_' in data :
 			RelativePreset.__applyParameterChanges( c.parameters(), data["_classValue_"], paramPath )
 		
 	@staticmethod
