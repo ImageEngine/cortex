@@ -1,3 +1,7 @@
+Improvements :
+
+* ClassParameters copy userData from their class instance, mirroring the ClassVectorParameter behaviour
+
 7.1.2:
 
 Bug Fixes :

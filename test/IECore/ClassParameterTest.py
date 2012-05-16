@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -146,7 +146,29 @@ class ClassParameterTest( unittest.TestCase ) :
 		self.assertEqual( c.keys(), [ "a", "b" ] )
 		self.assertEqual( c["a"].getNumericValue(), 10 )
 		self.assertEqual( c["b"].getNumericValue(), 20 )
+	
+	def testUserData( self ) :
 		
-				
+		c = IECore.ClassParameter(
+			"n",
+			"d",
+			"IECORE_OP_PATHS",
+			"classParameterTest",
+			1
+		)
+		
+		loader = IECore.ClassLoader.defaultLoader( "IECORE_OP_PATHS" )
+		instance = loader.load( "classParameterTest", 1 )()
+		
+		self.assertNotEqual( c.userData(), IECore.CompoundObject() )
+		self.assertEqual( c.userData(), instance.parameters().userData() )
+					
+		c.setClass( "maths/multiply", 2 )
+		self.assertEqual( c.userData(), IECore.CompoundObject() )
+		
+		c.setClass( "classParameterTest", 1 )
+		self.assertNotEqual( c.userData(), IECore.CompoundObject() )
+		self.assertEqual( c.userData(), instance.parameters().userData() )
+	
 if __name__ == "__main__" :
 	unittest.main()
