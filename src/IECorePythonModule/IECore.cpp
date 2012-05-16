@@ -302,6 +302,7 @@
 #include "IECorePython/DeepImageConverterBinding.h"
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/DiskPrimitiveBinding.h"
+#include "IECorePython/ClampOpBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -609,6 +610,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDeepImageConverter();
 	bindMurmurHash();
 	bindDiskPrimitive();
+	bindClampOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

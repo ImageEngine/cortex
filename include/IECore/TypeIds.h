@@ -402,6 +402,7 @@ enum TypeId
 	DiskPrimitiveTypeId = 356,
 	LinearToAlexaLogcOpTypeId = 357,
 	AlexaLogcToLinearOpTypeId = 358,
+	ClampOpTypeId = 359,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

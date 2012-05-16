@@ -1,3 +1,7 @@
+Additions :
+
+* Added a ClampOp, for clamping values in ImagePrimitives.
+
 Improvements :
 
 * ClassParameters copy userData from their class instance, mirroring the ClassVectorParameter behaviour

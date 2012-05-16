@@ -258,6 +258,7 @@ from MurmurHashTest import MurmurHashTest
 from BoolVectorData import BoolVectorDataTest
 from CompoundParameterTest import CompoundParameterTest
 from DiskPrimitiveTest import DiskPrimitiveTest
+from ClampOpTest import ClampOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
