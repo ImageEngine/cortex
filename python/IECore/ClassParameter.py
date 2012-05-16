@@ -82,8 +82,8 @@ class ClassParameter( IECore.CompoundParameter ) :
 				self.__classInstance.parameters().values()
 			)
 			
-			# copy user data over
-			self.userData().copyFrom( self.__classInstance.parameters().userData() )
+			# update with user data from Class instance
+			self.userData().update( self.__classInstance.parameters().userData() )
 		
 		self.__className = className
 		self.__classVersion = classVersion
