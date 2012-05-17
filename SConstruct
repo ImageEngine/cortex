@@ -1740,11 +1740,14 @@ if env["WITH_GL"] and doConfigure :
 			)
 
 		glSources = sorted( glob.glob( "src/IECoreGL/*.cpp" ) )
+		glPythonSources = sorted( glob.glob( "src/IECoreGL/bindings/*.cpp" ) )
 		if not "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
 			glSources.remove( "src/IECoreGL/Font.cpp" )
 			glSources.remove( "src/IECoreGL/FontLoader.cpp" )
 			glSources.remove( "src/IECoreGL/TextPrimitive.cpp" )
-		
+			glPythonSources.remove( "src/IECoreGL/bindings/FontBinding.cpp" )
+			glPythonSources.remove( "src/IECoreGL/bindings/FontLoaderBinding.cpp" )			
+					
 		glLibrary = glEnv.SharedLibrary( "lib/" + os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glSources )
 		glLibraryInstall = glEnv.Install( os.path.dirname( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glLibrary )
 		glEnv.NoCache( glLibraryInstall )
@@ -1771,7 +1774,6 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.Alias( "install", glslShaderInstall )
 		glEnv.Alias( "installGL", glslShaderInstall )		
 
-		glPythonSources = sorted( glob.glob( "src/IECoreGL/bindings/*.cpp" ) )
 		glPythonModuleEnv = pythonModuleEnv.Clone( **glEnvSets )
 		glPythonModuleEnv.Append( **glEnvAppends )
 		glPythonModuleEnv.Prepend( **glEnvPrepends )
