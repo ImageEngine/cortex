@@ -92,8 +92,15 @@ float ieSolveNormalizedCubic( varying float A; varying float B; varying float C;
 	float rootCount = 0;
 	if ( abs(C) < epsilon)
 	{
-		// 1 or 2 roots
+		// We're solving x^3 + A x^2 + Bx = 0. That's got a root where x = 0,
+		// and potentially two more where x^2 + A x + B = 0:
+		
+		// find quadratic roots, if they exist:
 		rootCount = ieSolveQuadratic( 1, A, B, roots );
+		
+		// add x = 0 root:
+		roots[ rootCount ] = 0;
+		rootCount = rootCount + 1;
 	}
 	else
 	{
@@ -129,7 +136,7 @@ float ieSolveCubic( varying float a; varying float b; varying float c; varying f
 	if (abs(a) < epsilon)
 	{
 		rootCount = ieSolveQuadratic (b, c, d, roots);
-    }
+	}
 	else
 	{
 		rootCount = ieSolveNormalizedCubic (b / a, c / a, d / a, roots);
