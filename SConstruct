@@ -1774,7 +1774,7 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.Alias( "install", glslShaderInstall )
 		glEnv.Alias( "installGL", glslShaderInstall )		
 
-		glPythonModuleEnv = pythonModuleEnv.Clone( **glEnvSets )
+		glPythonModuleEnv = corePythonModuleEnv.Clone( **glEnvSets )
 		glPythonModuleEnv.Append( **glEnvAppends )
 		glPythonModuleEnv.Prepend( **glEnvPrepends )
 		glPythonModuleEnv.Append(
