@@ -47,8 +47,6 @@ class classParameterTest( IECore.Op ) :
 			)
 		)
 		
-		self.parameters().userData()["testTransfer"] = IECore.BoolData( True )
-
 		self.parameters().addParameter(
 
 			IECore.ClassParameter(

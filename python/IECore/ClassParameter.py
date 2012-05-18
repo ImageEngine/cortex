@@ -81,9 +81,6 @@ class ClassParameter( IECore.CompoundParameter ) :
 			self.addParameters(
 				self.__classInstance.parameters().values()
 			)
-			
-			# update with user data from Class instance
-			self.userData().update( self.__classInstance.parameters().userData() )
 		
 		self.__className = className
 		self.__classVersion = classVersion
