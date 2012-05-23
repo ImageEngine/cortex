@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -212,6 +213,11 @@ void ParameterList::reserve( const IECore::Data *parameter )
 
 void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats )
 {
+	if( !d )
+	{
+		return;
+	}
+	
 	numStrings++; // for the formatted parameter name
 	IECore::TypeId t = d->typeId();
 	switch( t )
@@ -246,6 +252,11 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 
 void ParameterList::appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints )
 {
+	if( !d )
+	{
+		return;
+	}
+
 	// we have to deal with the spline types separately, as they map to two shader parameters rather than one.
 	IECore::TypeId typeId = d->typeId();
 	if( typeId==SplineffDataTypeId )

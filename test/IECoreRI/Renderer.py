@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -491,6 +492,14 @@ class RendererTest( unittest.TestCase ) :
 				
 		self.failUnless( "\"uniform float[3] f3\" [ 0 0 0 1 1 1 ]" in l )
 
+	def testNullShaderParameters( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		with WorldBlock( r ) :
+			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : None } )
+			
 	def tearDown( self ) :
 
 		files = [

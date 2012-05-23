@@ -6,6 +6,10 @@ Improvements :
 
 * ClassParameters copy userData from their class instance, mirroring the ClassVectorParameter behaviour
 
+Bug Fixes :
+
+* IECoreRI.Renderer now gracefully ignores null values in parameter lists rather than crashing.
+
 7.1.2:
 
 Bug Fixes :
