@@ -405,6 +405,7 @@ void bindTypeId()
 		.value( "DiskPrimitive", DiskPrimitiveTypeId )
 		.value( "LinearToAlexaLogcOp", LinearToAlexaLogcOpTypeId )
 		.value( "AlexaLogcToLinearOp", AlexaLogcToLinearOpTypeId )
+		.value( "ClampOp", ClampOpTypeId )
 	;
 }
 
