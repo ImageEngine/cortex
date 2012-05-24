@@ -1419,7 +1419,7 @@ void IECoreRI::RendererImplementation::instanceBegin( const std::string &name, c
 	m_sharedData->objectHandles[name] = RiObjectBeginV( 2, (char **)&tokens, (void **)&values );
 #else
 	// we have to put up with a rubbish name
-	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandles );
+	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
 	m_sharedData->objectHandles[name] = RiObjectBegin();
 #endif
 }
