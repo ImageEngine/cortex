@@ -929,7 +929,6 @@ class ChildUI( IECoreMaya.UIElement ) :
 				columnAttach = ( ( 1, "both", 0 ), ( 2, "both", 0  ), ( 3, "left", 0 ) ),
 				attribute = parameterPlugPath,
 				annotation = annotation,
-				width = 40,
 				showButton = False
 			)
 			
