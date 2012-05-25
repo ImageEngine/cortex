@@ -736,6 +736,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 	}
 
 	// reuse failed - create a new attribute
+	/// \todo: update ParameterisedHolder to accept null plugs when the todo in ParameterHandler::create is addressed
 	plug = IECoreMaya::ParameterHandler::create( parameter, attributeName, node );
 	if( plug.isNull() )
 	{

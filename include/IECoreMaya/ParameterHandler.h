@@ -62,6 +62,7 @@ class ParameterHandler : public IECore::RefCounted
 		/// Creates and returns an MPlug capable of representing the specified parameter.
 		/// The plug will have the specified name and be added to the specified node.
 		/// In the case of a failure MPlug::isNull() will be true for the return value.
+		/// \todo: return an MStatus like the other methods, and pass a plug reference as an argument (Cortex 8)
 		static MPlug create( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node );
 		/// Updates a previously created plug to reflect changes on the specified parameter.
 		/// Returns MStatus::kFailure if the plug is not suitable for the parameter.
