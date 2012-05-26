@@ -9,6 +9,7 @@ Improvements :
 Bug Fixes :
 
 * IECoreRI.Renderer now gracefully ignores null values in parameter lists rather than crashing.
+* IECoreMaya::ToMayaSkinClusterConverter now catches failures from MDGModifier::doIt(), calls  MDGModifier::undoIt(), and throws.
 
 7.1.2:
 

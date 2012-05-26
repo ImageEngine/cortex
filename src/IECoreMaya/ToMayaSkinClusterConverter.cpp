@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -217,7 +217,11 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		memberPlug.connectedTo( connectedPlugs, true, false );
 		dgModifier.disconnect( connectedPlugs[0], memberPlug );
 	}
-	dgModifier.doIt();
+	if ( !dgModifier.doIt() )
+	{
+		dgModifier.undoIt();
+		throw IECore::Exception( "ToMayaSkinClusterConverter: Unable to break the influence connections" );
+	}
 	
 	// make connections from influences to skinCluster and bindPose
 	for ( unsigned i=0; i < numInfluences; i++ )
@@ -260,7 +264,11 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	MFnDependencyNode fnInfluence( mObj );
 	MPlug influenceMessagePlug = fnInfluence.findPlug( "message", true, &s );
 	dgModifier.connect( influenceMessagePlug, paintPlug );
-	dgModifier.doIt();
+	if ( !dgModifier.doIt() )
+	{
+		dgModifier.undoIt();
+		throw IECore::Exception( "ToMayaSkinClusterConverter: Unable to create the influence connections" );
+	}
 	
 	// use influencePoseData as bindPreMatrix
 	for ( unsigned i=0; i < numInfluences; i++ )
