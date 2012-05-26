@@ -406,6 +406,7 @@ void bindTypeId()
 		.value( "LinearToAlexaLogcOp", LinearToAlexaLogcOpTypeId )
 		.value( "AlexaLogcToLinearOp", AlexaLogcToLinearOpTypeId )
 		.value( "ClampOp", ClampOpTypeId )
+		.value( "MeshFaceFilterOp", MeshFaceFilterOpTypeId )
 	;
 }
 

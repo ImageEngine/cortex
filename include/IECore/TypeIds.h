@@ -403,6 +403,7 @@ enum TypeId
 	LinearToAlexaLogcOpTypeId = 357,
 	AlexaLogcToLinearOpTypeId = 358,
 	ClampOpTypeId = 359,
+	MeshFaceFilterOpTypeId = 360,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

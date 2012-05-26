@@ -303,6 +303,7 @@
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/DiskPrimitiveBinding.h"
 #include "IECorePython/ClampOpBinding.h"
+#include "IECorePython/MeshFaceFilterOpBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -611,6 +612,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMurmurHash();
 	bindDiskPrimitive();
 	bindClampOp();
+	bindMeshFaceFilterOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
