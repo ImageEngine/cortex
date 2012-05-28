@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,6 +64,7 @@ class ToMayaSkinClusterConverter : public ToMayaObjectConverter
 	private :
 		
 		IECore::BoolParameterPtr m_ignoreMissingInfluencesParameter;
+		IECore::BoolParameterPtr m_ignoreBindPoseParameter;
 
 };
 

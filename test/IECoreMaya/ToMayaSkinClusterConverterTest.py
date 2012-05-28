@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -238,6 +238,62 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd2.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertEqual( ssd2.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertEqual( ssd2.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
+	
+	def testIgnoreBindPose( self ) :
+		
+		# test conversion
+		( sc, sc2 ) = self.buildTestSetup()
+		
+		bindPoses = maya.cmds.ls( type="dagPose" )
+		maya.cmds.delete( bindPoses )
+		
+		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
+		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
+		ssd = fromConverter.convert()
+		self.assertEqual( ssd.influenceNames(), IECore.StringVectorData( ['|joint1', '|joint1|joint2', '|joint1|joint2|joint3'] ) )
+		self.assertEqual( len(ssd.influencePose()), 3 )
+		self.assertEqual( len(ssd.pointInfluenceCounts()), 16 )
+		self.assertEqual( len(ssd.pointInfluenceIndices()), 32 )
+		ssd.validate()
+		
+		del fromConverter
+		
+		# make sure everything is different at first
+		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc2 )
+		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
+		ssd2 = fromConverter.convert()
+		self.assertEqual( ssd2.influenceNames(), IECore.StringVectorData( ['|joint4', '|joint4|joint5', '|joint4|joint5|joint6'] ) )
+		self.assertEqual( len(ssd2.influencePose()), 3 )
+		self.assertEqual( len(ssd2.pointInfluenceCounts()), 16 )
+		self.assertEqual( len(ssd2.pointInfluenceIndices()), 47 )
+		self.assertNotEqual( ssd.influenceNames(), ssd2.influenceNames() )
+		self.assertNotEqual( ssd.influencePose(), ssd2.influencePose() )
+		self.assertNotEqual( ssd.pointIndexOffsets(), ssd2.pointIndexOffsets() )
+		self.assertNotEqual( ssd.pointInfluenceCounts(), ssd2.pointInfluenceCounts() )
+		self.assertNotEqual( ssd.pointInfluenceIndices(), ssd2.pointInfluenceIndices() )
+		self.assertNotEqual( ssd.pointInfluenceWeights(), ssd2.pointInfluenceWeights() )
+		self.assertNotEqual( ssd, ssd2 )
+		
+		del fromConverter
+		del ssd2
+		
+		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
+		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
+		toConverter.parameters()["ignoreBindPose"].setTypedValue( True )
+		self.failUnless( toConverter.convert( sc2 ) )
+
+		# make sure everything is the same now
+		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc2 )
+		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
+		ssd2 = fromConverter.convert()
+		self.assertEqual( ssd2.influenceNames(), IECore.StringVectorData( ['|joint1', '|joint1|joint2', '|joint1|joint2|joint3'] ) )
+		self.assertEqual( ssd.influenceNames(), ssd2.influenceNames() )
+		self.assertEqual( ssd.influencePose(), ssd2.influencePose() )
+		self.assertEqual( ssd.pointIndexOffsets(), ssd2.pointIndexOffsets() )
+		self.assertEqual( ssd.pointInfluenceCounts(), ssd2.pointInfluenceCounts() )
+		self.assertEqual( ssd.pointInfluenceIndices(), ssd2.pointInfluenceIndices() )
+		self.assertEqual( ssd.pointInfluenceWeights(), ssd2.pointInfluenceWeights() )
+		self.assertEqual( ssd, ssd2 )
 	
 	def testErrorStates( self ) :
 		

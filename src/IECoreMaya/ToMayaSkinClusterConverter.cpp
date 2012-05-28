@@ -75,7 +75,14 @@ ToMayaSkinClusterConverter::ToMayaSkinClusterConverter( IECore::ConstObjectPtr o
 		false
 	);
 	
+	m_ignoreBindPoseParameter = new IECore::BoolParameter(
+		"ignoreBindPose",
+		"If True, does not make connections to the bindPose node",
+		false
+	);
+	
 	parameters()->addParameter( m_ignoreMissingInfluencesParameter );
+	parameters()->addParameter( m_ignoreBindPoseParameter );
 }
 
 bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
@@ -106,6 +113,7 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	std::vector<bool> ignoreInfluence( origNumInfluences, false );
 	std::vector<int> indexMap( origNumInfluences, -1 );
 	const bool ignoreMissingInfluences = m_ignoreMissingInfluencesParameter->getTypedValue();
+	const bool ignoreBindPose = m_ignoreBindPoseParameter->getTypedValue();
 	
 	// gather the influence objects
 	MObject mObj;
@@ -150,16 +158,30 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	}
 	
 	MPlugArray connectedPlugs;
-	/// \todo: if bindPose is missing, bypass functionality rather than throwing exceptions
+	
+	bool existingBindPose = true;
 	MPlug bindPlug = fnSkinClusterNode.findPlug( "bindPose", true, &s );
 	if ( !bindPlug.connectedTo( connectedPlugs, true, false ) )
 	{
-		throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" does not have a valid bindPose" ) % fnSkinClusterNode.name() ).str() );
+		existingBindPose = false;
+		if ( !ignoreBindPose )
+		{
+			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" does not have a valid bindPose" ) % fnSkinClusterNode.name() ).str() );
+		}
 	}
-	MFnDependencyNode fnBindPose( connectedPlugs[0].node() );
-	if ( fnBindPose.typeName() != "dagPose" )
+	
+	MPlug bindPoseMatrixArrayPlug;
+	MPlug bindPoseMemberArrayPlug;
+	if ( existingBindPose )
 	{
-		throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid bindPose" ) % fnBindPose.name() ).str() );
+		MFnDependencyNode fnBindPose( connectedPlugs[0].node() );
+		if ( fnBindPose.typeName() != "dagPose" )
+		{
+			throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: \"%s\" is not a valid bindPose" ) % fnBindPose.name() ).str() );
+		}
+		
+		bindPoseMatrixArrayPlug = fnBindPose.findPlug( "worldMatrix", true, &s );
+		bindPoseMemberArrayPlug = fnBindPose.findPlug( "members", true, &s );
 	}
 	
 	/// \todo: optional parameter to reset the skinCluster's geomMatrix plug
@@ -211,26 +233,28 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	}
 	
 	// break existing influence connections to the bind pose
-	MPlug bindPoseMatrixArrayPlug = fnBindPose.findPlug( "worldMatrix", true, &s );
-	for ( unsigned i=0; i < bindPoseMatrixArrayPlug.numConnectedElements(); i++ )
+	if ( existingBindPose )
 	{
-		MPlug matrixPlug = bindPoseMatrixArrayPlug.connectionByPhysicalIndex( i, &s );
-		matrixPlug.connectedTo( connectedPlugs, true, false );
-		if ( connectedPlugs.length() )
+		for ( unsigned i=0; i < bindPoseMatrixArrayPlug.numConnectedElements(); i++ )
 		{
-			dgModifier.disconnect( connectedPlugs[0], matrixPlug );
+			MPlug matrixPlug = bindPoseMatrixArrayPlug.connectionByPhysicalIndex( i, &s );
+			matrixPlug.connectedTo( connectedPlugs, true, false );
+			if ( connectedPlugs.length() )
+			{
+				dgModifier.disconnect( connectedPlugs[0], matrixPlug );
+			}
+		}
+		for ( unsigned i=0; i < bindPoseMemberArrayPlug.numConnectedElements(); i++ )
+		{
+			MPlug memberPlug = bindPoseMemberArrayPlug.connectionByPhysicalIndex( i, &s );
+			memberPlug.connectedTo( connectedPlugs, true, false );
+			if ( connectedPlugs.length() )
+			{
+				dgModifier.disconnect( connectedPlugs[0], memberPlug );
+			}
 		}
 	}
-	MPlug bindPoseMemberArrayPlug = fnBindPose.findPlug( "members", true, &s );
-	for ( unsigned i=0; i < bindPoseMemberArrayPlug.numConnectedElements(); i++ )
-	{
-		MPlug memberPlug = bindPoseMemberArrayPlug.connectionByPhysicalIndex( i, &s );
-		memberPlug.connectedTo( connectedPlugs, true, false );
-		if ( connectedPlugs.length() )
-		{
-			dgModifier.disconnect( connectedPlugs[0], memberPlug );
-		}
-	}
+	
 	if ( !dgModifier.doIt() )
 	{
 		dgModifier.undoIt();
@@ -268,10 +292,13 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 		dgModifier.connect( influenceLockPlug, lockPlug );
 		
 		// connect influence to the bindPose
-		MPlug bindPoseMatrixPlug = bindPoseMatrixArrayPlug.elementByLogicalIndex( index );
-		MPlug memberPlug = bindPoseMemberArrayPlug.elementByLogicalIndex( index );
-		dgModifier.connect( influenceMessagePlug, bindPoseMatrixPlug );
-		dgModifier.connect( influenceBindPosePlug, memberPlug );
+		if ( !ignoreBindPose )
+		{
+			MPlug bindPoseMatrixPlug = bindPoseMatrixArrayPlug.elementByLogicalIndex( index );
+			MPlug memberPlug = bindPoseMemberArrayPlug.elementByLogicalIndex( index );
+			dgModifier.connect( influenceMessagePlug, bindPoseMatrixPlug );
+			dgModifier.connect( influenceBindPosePlug, memberPlug );
+		}
 	}
 	unsigned firstIndex = find( ignoreInfluence.begin(), ignoreInfluence.end(), false ) - ignoreInfluence.begin();
 	influenceList.getDependNode( firstIndex, mObj );
