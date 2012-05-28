@@ -173,6 +173,11 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	{
 		MPlug matrixPlug = matrixArrayPlug.connectionByPhysicalIndex( i, &s );
 		matrixPlug.connectedTo( connectedPlugs, true, false );
+		if ( !connectedPlugs.length() )
+		{
+			continue;
+		}
+		
 		MFnIkJoint fnInfluence( connectedPlugs[0].node() );
 		fnInfluence.getPath( path );
 		if ( ignoreMissingInfluences && !influenceList.hasItem( path ) )
@@ -193,7 +198,10 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	{
 		MPlug lockPlug = lockArrayPlug.connectionByPhysicalIndex( i, &s );
 		lockPlug.connectedTo( connectedPlugs, true, false );
-		dgModifier.disconnect( connectedPlugs[0], lockPlug );
+		if ( connectedPlugs.length() )
+		{
+			dgModifier.disconnect( connectedPlugs[0], lockPlug );
+		}
 	}
 	MPlug paintPlug = fnSkinClusterNode.findPlug( "paintTrans", true, &s );
 	paintPlug.connectedTo( connectedPlugs, true, false );
@@ -208,14 +216,20 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	{
 		MPlug matrixPlug = bindPoseMatrixArrayPlug.connectionByPhysicalIndex( i, &s );
 		matrixPlug.connectedTo( connectedPlugs, true, false );
-		dgModifier.disconnect( connectedPlugs[0], matrixPlug );
+		if ( connectedPlugs.length() )
+		{
+			dgModifier.disconnect( connectedPlugs[0], matrixPlug );
+		}
 	}
 	MPlug bindPoseMemberArrayPlug = fnBindPose.findPlug( "members", true, &s );
 	for ( unsigned i=0; i < bindPoseMemberArrayPlug.numConnectedElements(); i++ )
 	{
 		MPlug memberPlug = bindPoseMemberArrayPlug.connectionByPhysicalIndex( i, &s );
 		memberPlug.connectedTo( connectedPlugs, true, false );
-		dgModifier.disconnect( connectedPlugs[0], memberPlug );
+		if ( connectedPlugs.length() )
+		{
+			dgModifier.disconnect( connectedPlugs[0], memberPlug );
+		}
 	}
 	if ( !dgModifier.doIt() )
 	{
