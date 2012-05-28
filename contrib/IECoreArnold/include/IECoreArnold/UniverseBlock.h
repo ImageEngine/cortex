@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,16 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREARNOLD_UNIVERSEBLOCK_H
+#define IECOREARNOLD_UNIVERSEBLOCK_H
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
+#include "boost/noncopyable.hpp"
 
-using namespace IECoreArnold;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreArnold )
+namespace IECoreArnold
 {
-	bindRenderer();
-	bindUniverseBlock();
-}
+
+/// The UniverseBlock provides a simple means of managing calls to AiBegin/AiEnd
+/// in a way which easily handles exceptions and multiple return statements from
+/// functions.
+class UniverseBlock : public boost::noncopyable
+{
+
+	public :
+
+		/// Calls AiBegin() and performs basic arnold initialisation
+		/// if AiUniverseIsActive()==false.
+		UniverseBlock();
+		/// Calls AiEnd() when the number of destructor calls
+		/// matches the number of constructor calls.
+		~UniverseBlock();
+		
+};
+
+} // namespace IECoreArnold
+
+#endif // IECOREARNOLD_UNIVERSEBLOCK_H

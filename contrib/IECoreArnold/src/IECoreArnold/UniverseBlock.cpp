@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,16 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "ai.h"
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
+#include "IECoreArnold/UniverseBlock.h"
 
 using namespace IECoreArnold;
-using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreArnold )
+static int g_count = 0;
+
+UniverseBlock::UniverseBlock()
 {
-	bindRenderer();
-	bindUniverseBlock();
+	g_count++;
+	if( AiUniverseIsActive() )
+	{
+		return;
+	}
+
+	AiBegin();
+	
+	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
+	if( pluginPaths )
+	{
+		AiLoadPlugins( pluginPaths );
+	}
 }
+
+UniverseBlock::~UniverseBlock()
+{
+	if( --g_count == 0 )
+	{
+		AiEnd();
+	}
+}
+

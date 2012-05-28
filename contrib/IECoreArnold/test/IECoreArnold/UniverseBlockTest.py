@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,5 +32,31 @@
 #
 ##########################################################################
 
-from _IECoreArnold import *
-from UniverseBlock import UniverseBlock
+from __future__ import with_statement
+
+import unittest
+import arnold
+
+import IECore
+import IECoreArnold
+
+class UniverseBlockTest( unittest.TestCase ) :
+
+	def test( self ) :
+
+		self.failIf( arnold.AiUniverseIsActive() )
+		
+		with IECoreArnold.UniverseBlock() :
+
+			self.failUnless( arnold.AiUniverseIsActive() )
+		
+			with IECoreArnold.UniverseBlock() :
+			
+				self.failUnless( arnold.AiUniverseIsActive() )
+	
+			self.failUnless( arnold.AiUniverseIsActive() )
+			
+		self.failIf( arnold.AiUniverseIsActive() )
+
+if __name__ == "__main__":
+    unittest.main()

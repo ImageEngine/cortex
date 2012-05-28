@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +41,7 @@
 #include "ai.h"
 
 #include "IECoreArnold/Renderer.h"
+#include "IECoreArnold/UniverseBlock.h"
 
 namespace IECoreArnold
 {
@@ -142,6 +144,8 @@ class RendererImplementation : public IECore::Renderer
 		static int procCleanup( void *userPtr );
 		static int procNumNodes( void *userPtr );
 		static AtNode *procGetNode( void *userPtr, int i );
+	
+		boost::shared_ptr<UniverseBlock> m_universe;
 	
 		Mode m_mode;
 		std::string m_assFileName;

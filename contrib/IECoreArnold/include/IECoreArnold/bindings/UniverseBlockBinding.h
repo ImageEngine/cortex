@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,16 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREARNOLD_UNIVERSEBLOCKBINDING_H
+#define IECOREARNOLD_UNIVERSEBLOCKBINDING_H
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
-
-using namespace IECoreArnold;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreArnold )
+namespace IECoreArnold
 {
-	bindRenderer();
-	bindUniverseBlock();
+
+void bindUniverseBlock();
+
 }
+
+#endif // IECOREARNOLD_UNIVERSEBLOCKBINDING_H

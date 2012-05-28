@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,5 +32,18 @@
 #
 ##########################################################################
 
-from _IECoreArnold import *
-from UniverseBlock import UniverseBlock
+import _IECoreArnold
+
+class UniverseBlock :
+
+	def __init__( self ) :
+
+		pass
+
+	def __enter__( self ) :
+
+		self.__universeBlock = _IECoreArnold._UniverseBlock()
+
+	def __exit__( self, type, value, traceBack ) :
+
+		self.__universeBlock = None

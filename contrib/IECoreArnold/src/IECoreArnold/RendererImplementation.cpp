@@ -110,17 +110,11 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 	m_mode = mode;
 	if( mode != Procedural )
 	{
-		AiBegin();
-	
+		m_universe = boost::shared_ptr<UniverseBlock>( new UniverseBlock() );
+		
 		/// \todo Control with an option
 		AiMsgSetConsoleFlags( AI_LOG_ALL );
 
-		const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
-		if( pluginPaths )
-		{
-			AiLoadPlugins( pluginPaths );
-		}
-		
 		// create a generic filter we can use for all displays
 		m_defaultFilter = AiNode( "gaussian_filter" );
 		AiNodeSetStr( m_defaultFilter, "name", "ieCoreArnold:defaultFilter" );

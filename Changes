@@ -4,6 +4,8 @@ Additions :
 
 * Added a ClampOp, for clamping values in ImagePrimitives.
 
+* Added IECoreArnold::UniverseBlock, for managing AiBegin/AiEnd pairs.
+
 Improvements :
 
 * ClassParameters copy userData from their class instance, mirroring the ClassVectorParameter behaviour
