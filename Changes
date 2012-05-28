@@ -8,7 +8,6 @@ Additions :
 
 Improvements :
 
-* ClassParameters copy userData from their class instance, mirroring the ClassVectorParameter behaviour
 * IECoreMaya::ToMayaSkinClusterConverter has a new parameter to ignore the bindPose node
 
 Bug Fixes :
