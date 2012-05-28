@@ -2027,7 +2027,7 @@ if doConfigure :
 						
 		mayaPythonTest = mayaPythonTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, "mayapy $TEST_MAYA_SCRIPT" )
 		NoCache( mayaPythonTest )
-		mayaPythonTestEnv.Depends( mayaPythonTest, [ mayaPlugin, mayaPythonModule ] )
+		mayaPythonTestEnv.Depends( mayaPythonTest, [ mayaPlugin, mayaPythonModule, mayaLibrary ] )
 		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "test/IECoreMaya/*.py" ) )
 		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "python/IECoreMaya/*.py" ) )
 		if env["WITH_MAYA_PLUGIN_LOADER"] :
