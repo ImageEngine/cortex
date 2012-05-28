@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -136,12 +136,6 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	MFnDependencyNode skinClusterNodeFn( object );
 
 	MPlug bindPreMatrixArrayPlug = skinClusterNodeFn.findPlug( "bindPreMatrix", true, &stat );
-
-	if ( int( bindPreMatrixArrayPlug .numElements() ) != influencesCount )
-	{
-		throw IECore::Exception( "FromMayaSkinClusterConverter: number of elements in the skinCluster.bindPreMatrix"
-								 "array plug does not match the number of influences" );
-	}
 
 	for (int i=0; i < influencesCount; i++)
 	{
