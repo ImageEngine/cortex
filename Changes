@@ -6,6 +6,8 @@ Additions :
 
 * Added IECoreArnold::UniverseBlock, for managing AiBegin/AiEnd pairs.
 
+* Added SWAReader, for reading Speed Tree forest files.
+
 Improvements :
 
 * IECoreMaya::ToMayaSkinClusterConverter has a new parameter to ignore the bindPose node

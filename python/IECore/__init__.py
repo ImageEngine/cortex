@@ -105,6 +105,7 @@ from ClassVectorParameter import ClassVectorParameter
 from CompoundStream import CompoundStream
 from IgnoredExceptions import IgnoredExceptions
 import ParameterAlgo
+from SWAReader import SWAReader
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
