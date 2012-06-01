@@ -676,30 +676,6 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( maya.cmds.getAttr( aPath ), 10101 )		
 
-	def testGetParameterisedObjectWithSavedScene( self ) :
-
-		# create the first holder
-		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
-		# apply changes to the "default" parameterised state
-		with fnOH.parameterModificationContext() as op :
-			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
-			op["cp"]["a"].setNumericValue( 10101 )
-		fullPath = fnOH.fullPathName()
-
-		# create a second holder to prove that it works in the same maya scene....
-		fnP = IECoreMaya.FnParameterisedHolder( fullPath )
-		op2 = fnP.getParameterised()[0]
-		self.assertEqual( op.parameters().getValue(), op2.parameters().getValue() )
-
-		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "resultGetParameterisedTest.ma" ) )
-		testScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
-		maya.cmds.file( testScene, f = True, o  = True )
-		
-		# now, tries to get the same thing from a fresh loaded maya scene...
-		fnP = IECoreMaya.FnParameterisedHolder( fullPath )
-		op2 = fnP.getParameterised()[0]
-		self.assertEqual( op.parameters().getValue(), op2.parameters().getValue() )
-		
 	def testBoxDefaultValue( self ) :
 
 		node = maya.cmds.createNode( "ieOpHolderNode" )

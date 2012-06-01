@@ -101,6 +101,8 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			self._despatchSetParameterisedCallbacks( self.fullPathName() )
 
 	## Returns a tuple of the form (parameterised, className, classVersion, searchPathEnvVar).
+	# The returned parameterised object is not guaranteed to be in sync with the plug values. 
+	# Use setParameterisedValues function if you need that.
 	def getParameterised( self ) :
 
 		return _IECoreMaya._parameterisedHolderGetParameterised( self )
