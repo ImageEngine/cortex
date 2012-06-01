@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import maya.OpenMaya
 
 import IECore
 import IECoreMaya
@@ -66,6 +67,57 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaCameraConverter( "perspShape" )
 		camera = converter.convert()
 		self.assert_( camera.isInstanceOf( IECore.Camera.staticTypeId() ) )	
+		
+	def testPerspective( self ) :
+		
+		camera = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
+		
+		self.assertEqual( camera.getName(), "perspShape" )
+		self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+		self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
+		self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+		self.assertEqual( camera.parameters()["projection"].value, "perspective" )
+		self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+		
+		sel = maya.OpenMaya.MSelectionList()
+		sel.add( "perspShape" )
+		dag = maya.OpenMaya.MDagPath()
+		sel.getDagPath( 0, dag )
+		fn = maya.OpenMaya.MFnCamera( dag )
+		self.assertAlmostEqual( camera.parameters()["projection:fov"].value, IECore.radiansToDegrees( fn.horizontalFieldOfView() ), 5 )
+	
+	def testOrthographic( self ) :
+		
+		camera = IECoreMaya.FromMayaCameraConverter( "topShape" ).convert()
+		
+		self.assertEqual( camera.getName(), "topShape" )
+		self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "top.worldMatrix[0]" ) ) )
+		self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
+		self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "topShape.nearClipPlane" ), maya.cmds.getAttr( "topShape.farClipPlane" ) ) )
+		self.assertEqual( camera.parameters()["projection"].value, "orthographic" )
+		self.assertEqual( camera.parameters()["screenWindow"].value.max.x - camera.parameters()["screenWindow"].value.min.x, maya.cmds.getAttr( "topShape.orthographicWidth" ) )
+		self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "topShape.horizontalFilmAperture" ), maya.cmds.getAttr( "topShape.verticalFilmAperture" ) ) )
+	
+	def testCustomResolution( self ) :
+		
+		converter = IECoreMaya.FromMayaCameraConverter( "perspShape" )
+		converter.parameters()["resolutionMode"].setValue( "specified" )
+		converter.parameters()["resolution"].setValue( "1K" )
+		camera = converter.convert()
+		
+		self.assertEqual( camera.getName(), "perspShape" )
+		self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+		self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( 1024, 778 ) )
+		self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+		self.assertEqual( camera.parameters()["projection"].value, "perspective" )
+		self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+		
+		sel = maya.OpenMaya.MSelectionList()
+		sel.add( "perspShape" )
+		dag = maya.OpenMaya.MDagPath()
+		sel.getDagPath( 0, dag )
+		fn = maya.OpenMaya.MFnCamera( dag )
+		self.assertAlmostEqual( camera.parameters()["projection:fov"].value, IECore.radiansToDegrees( fn.horizontalFieldOfView() ), 5 )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
