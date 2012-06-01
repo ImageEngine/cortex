@@ -279,7 +279,7 @@ void IECoreArnold::RendererImplementation::worldEnd()
 	}
 	else if( m_mode == AssGen )
 	{
-		AiASSWrite( m_assFileName.c_str(), AI_NODE_ALL, true );
+		AiASSWrite( m_assFileName.c_str(), AI_NODE_ALL, false );
 	}
 }
 
