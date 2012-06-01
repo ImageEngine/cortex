@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -115,6 +115,7 @@ enum TypeId
 	ToMayaGroupConverterTypeId = 109068,
 	ToMayaParticleConverterTypeId = 109069,
 	V3ManipulatorTypeId = 109070,
+	ToMayaCameraConverterTypeId = 109070,
 	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
 };

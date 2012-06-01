@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -118,6 +118,7 @@ void bindTypeId()
 		.value( "TransformationMatrixManipulator", TransformationMatrixManipulatorTypeId )
 		.value( "ToMayaGroupConverter", ToMayaGroupConverterTypeId )
 		.value( "ToMayaParticleConverter", ToMayaParticleConverterTypeId )
+		.value( "ToMayaCameraConverter", ToMayaCameraConverterTypeId )
 	;
 }
 
