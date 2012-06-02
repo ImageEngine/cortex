@@ -8,6 +8,8 @@ Additions :
 
 * Added SWAReader, for reading Speed Tree forest files.
 
+* Added IECoreMaya::ToMayaCameraConverter, which supports the same attributes as IECoreMaya::FromMayaCameraConverter
+
 Improvements :
 
 * IECoreMaya::ToMayaSkinClusterConverter has a new parameter to ignore the bindPose node
