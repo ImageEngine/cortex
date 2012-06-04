@@ -91,6 +91,8 @@ class SXRendererTest( unittest.TestCase ) :
 		p = IECore.V3fVectorData()
 		n = IECore.V3fVectorData()
 		i = IECore.V3fVectorData()
+		dPdu = IECore.V3fVectorData()
+		dPdv = IECore.V3fVectorData()
 		s = IECore.FloatVectorData()
 		t = IECore.FloatVectorData()
 		for y in range( box.min.y, box.max.y + 1 ) :
@@ -98,6 +100,8 @@ class SXRendererTest( unittest.TestCase ) :
 				p.append( IECore.V3f( x, y, 0 ) )
 				n.append( IECore.V3f( 0, 0, 1 ) )
 				i.append( IECore.V3f( 0, 0, -1 ) )
+				dPdu.append( IECore.V3f( 2, 0, 0 ) )
+				dPdv.append( IECore.V3f( 0, 2, 0 ) )
 				s.append( float( x ) / box.size().x )
 				t.append( float( y ) / box.size().y )
 				
@@ -106,6 +110,8 @@ class SXRendererTest( unittest.TestCase ) :
 			"N" : n,
 			"Ng" : n,
 			"I" : i,
+			"dPdu" : dPdu,
+			"dPdv" : dPdv,
 			"s" : s,
 			"t" : t,
 		} )
@@ -134,7 +140,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"I" : self.__loadImage( "test/IECoreRI/data/sxInput/cowI.exr" ),
 	
 		} )
-				
+		
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxTest.sdl test/IECoreRI/shaders/sxTest.sl" ), 0 )
 				
 		r.shader( "surface", "test/IECoreRI/shaders/sxTest.sdl", { "noiseFrequency" : 1.0, "tint" : IECore.Color3f( 1 ) } )
@@ -516,6 +522,24 @@ class SXRendererTest( unittest.TestCase ) :
 				c = s["Ci"][i]
 				self.assertEqual( points["P"][i], IECore.V3f( c[0], c[1], c[2] ) )
 	
+	def testPredefinedPrimitiveVariables( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxPredefinedPrimitiveVariableTest.sdl test/IECoreRI/shaders/sxPredefinedPrimitiveVariableTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/sxPredefinedPrimitiveVariableTest", {} )
+			
+			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
+			points = self.__rectanglePoints( b )
+			
+			s = r.shade( points, IECore.V2i( 21, 11 ) )
+									
+			for i in range( 0, len( points["P"] ) ) :
+				self.assertEqual( s["Ci"][i], IECore.Color3f( 1, 1, 1 ) )
+
 	def testNonPredefinedPrimitiveVariables( self ) :
 	
 		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sdl test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sl" ), 0 )
