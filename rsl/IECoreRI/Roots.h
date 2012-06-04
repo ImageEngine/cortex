@@ -36,7 +36,7 @@
 #define IECORERI_ROOTS_H
 
 // Solves a * x + b == 0
-float ieSolveLinear( varying float a; varying float b; output varying float root )
+float ieSolveLinear( float a; float b; output float root )
 {
 	float rootCount = -1;
 	if (a != 0)
@@ -51,12 +51,12 @@ float ieSolveLinear( varying float a; varying float b; output varying float root
 	return rootCount;
 }
 
-float ieCubicRoot( varying float v )
+float ieCubicRoot( float v )
 {
 	return sign(v)*pow( abs(v), 1/3 );
 }
 
-float ieSolveQuadratic( varying float a; varying float b; varying float c; output varying float roots[] )
+float ieSolveQuadratic( float a; float b; float c; output float roots[] )
 {
 	uniform float epsilon = 1e-16;
 	float rootCount = 0;
@@ -86,7 +86,7 @@ float ieSolveQuadratic( varying float a; varying float b; varying float c; outpu
 
 // Computes real roots for a given cubic polynomial (x^3+Ax^2+Bx+C = 0).
 // \todo: make sure it returns the same number of roots as in OpenEXR/ImathRoot.h
-float ieSolveNormalizedCubic( varying float A; varying float B; varying float C; output varying float roots[] )
+float ieSolveNormalizedCubic( float A; float B; float C; output float roots[] )
 {
 	uniform float epsilon = 1e-16;
 	float rootCount = 0;
@@ -129,7 +129,7 @@ float ieSolveNormalizedCubic( varying float A; varying float B; varying float C;
 	return rootCount;
 }
 
-float ieSolveCubic( varying float a; varying float b; varying float c; varying float d; output varying float roots[] )
+float ieSolveCubic( float a; float b; float c; float d; output float roots[] )
 {
 	float epsilon = 1e-16;
 	float rootCount;
