@@ -193,7 +193,9 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				return ParameterInfo( SxNormal, 0, true );
 			}
 			else if(
-				strcmp( name, "I" )==0
+				strcmp( name, "I" )==0 ||
+				strcmp( name, "dPdu" )==0 ||
+				strcmp( name, "dPdv" )==0
 			)
 			{
 				return ParameterInfo( SxVector, 0, true );
