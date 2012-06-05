@@ -407,6 +407,8 @@ void bindTypeId()
 		.value( "AlexaLogcToLinearOp", AlexaLogcToLinearOpTypeId )
 		.value( "ClampOp", ClampOpTypeId )
 		.value( "MeshFaceFilterOp", MeshFaceFilterOpTypeId )
+		.value( "TimeCodeData", TimeCodeDataTypeId )
+		.value( "TimeCodeParameter", TimeCodeParameterTypeId )
 	;
 }
 
