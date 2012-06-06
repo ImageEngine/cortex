@@ -304,6 +304,7 @@
 #include "IECorePython/DiskPrimitiveBinding.h"
 #include "IECorePython/ClampOpBinding.h"
 #include "IECorePython/MeshFaceFilterOpBinding.h"
+#include "IECorePython/ImfBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -613,6 +614,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDiskPrimitive();
 	bindClampOp();
 	bindMeshFaceFilterOp();
+	bindImf();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

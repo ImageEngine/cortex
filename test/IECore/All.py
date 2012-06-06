@@ -260,6 +260,7 @@ from CompoundParameterTest import CompoundParameterTest
 from DiskPrimitiveTest import DiskPrimitiveTest
 from ClampOpTest import ClampOpTest
 from SWAReaderTest import SWAReaderTest
+from ImfTest import *
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
