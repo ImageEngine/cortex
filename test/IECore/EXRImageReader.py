@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -87,7 +87,7 @@ class TestEXRReader(unittest.TestCase):
 
 		r = EXRImageReader( "test/IECore/data/exrFiles/manyChannels.exr" )
 		h = r.readHeader()
-
+		
 		c = h['channelNames']
 		self.assert_( c.staticTypeId()==StringVectorData.staticTypeId() )
 		self.assert_( len( c ), 7 )
@@ -335,6 +335,37 @@ class TestEXRReader(unittest.TestCase):
 
 		img = r.read()
 		self.assertEqual( img.blindData(), CompoundData(dictHeader) )
+		
+	def testTimeCodeInHeader( self ) :
+		
+		r = Reader.create( "test/IECore/data/exrFiles/uvMap.512x256.exr" )
+		header = r.readHeader()
+		self.failUnless( "timeCode" not in header )
+		
+		img = r.read()
+		self.failUnless( "timeCode" not in img.blindData() )
+		
+		td = TimeCodeData( TimeCode( 12, 5, 3, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 ) )
+		img2 = img.copy()
+		img2.blindData()["timeCode"] = td
+		w = Writer.create( img2, "test/IECore/data/exrFiles/testTimeCode.exr" )
+		w.write()
+		
+		r2 = Reader.create( "test/IECore/data/exrFiles/testTimeCode.exr" )
+		header = r2.readHeader()
+		self.failUnless( "timeCode" in header )
+		self.assertEqual( header["timeCode"], td )
+		
+		img3 = r2.read()
+		self.failUnless( "timeCode" in img3.blindData() )
+		self.assertEqual( img3.blindData()["timeCode"], td )
+		
+		self.assertEqual( img2.blindData(), img3.blindData() )
+		del img3.blindData()["timeCode"]
+		self.assertEqual( img.blindData(), img3.blindData() )
+		
+		if os.path.isfile( "test/IECore/data/exrFiles/testTimeCode.exr" ) :
+			os.remove( "test/IECore/data/exrFiles/testTimeCode.exr" )
 
 if __name__ == "__main__":
 	unittest.main()

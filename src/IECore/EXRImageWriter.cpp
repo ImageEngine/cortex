@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/BoxOps.h"
+#include "IECore/TimeCodeData.h"
 
 #include "OpenEXR/ImfFloatAttribute.h"
 #include "OpenEXR/ImfDoubleAttribute.h"
@@ -48,6 +49,7 @@
 #include "OpenEXR/ImfVecAttribute.h"
 #include "OpenEXR/ImfMatrixAttribute.h"
 #include "OpenEXR/ImfStringAttribute.h"
+#include "OpenEXR/ImfTimeCodeAttribute.h"
 
 #include "boost/format.hpp"
 
@@ -200,6 +202,11 @@ static void blindDataToHeader( const CompoundData *blindData, Imf::Header &heade
 			case StringDataTypeId:
 
 				header.insert( thisName.c_str(), Imf::StringAttribute( staticPointerCast< StringData >( it->second )->readable() ) );
+				break;
+
+			case TimeCodeDataTypeId:
+
+				header.insert( thisName.c_str(), Imf::TimeCodeAttribute( staticPointerCast< TimeCodeData >( it->second )->readable() ) );
 				break;
 
 			default:

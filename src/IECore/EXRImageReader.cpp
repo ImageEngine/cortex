@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
+#include "IECore/TimeCodeData.h"
 
 #include "boost/format.hpp"
 
@@ -57,6 +58,7 @@
 #include "OpenEXR/ImfVecAttribute.h"
 #include "OpenEXR/ImfMatrixAttribute.h"
 #include "OpenEXR/ImfStringAttribute.h"
+#include "OpenEXR/ImfTimeCodeAttribute.h"
 
 #include <algorithm>
 #include <fstream>
@@ -365,6 +367,10 @@ static DataPtr attributeToData( const Imf::Attribute &attr )
 	else if ( !strcmp( "v3f", attr.typeName() ) )
 	{
 		return new V3fData( static_cast< const Imf::V3fAttribute & >( attr ).value() );
+	}
+	else if ( !strcmp( "timecode", attr.typeName() ) )
+	{
+		return new TimeCodeData( static_cast< const Imf::TimeCodeAttribute & >( attr ).value() );
 	}
 	return 0;
 }
