@@ -11,7 +11,7 @@ def build( extraArgs = [] ) :
 	
 	buildArgs = [ "INSTALL_PREFIX=/software" ]
 	buildArgs.extend( extraArgs )
-	buildArgs.extend( sys.argv[1:] )	
+	buildArgs.extend( sys.argv[1:] )
 	
 	print " ".join( [ "scons" ] + buildArgs )
 	if subprocess.call( [ "scons" ] + buildArgs ) != 0 :
@@ -51,6 +51,8 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.132", "PYTHON_VERSION=2.6" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.33", "PYTHON_VERSION=2.6" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.36", "PYTHON_VERSION=2.6" ] )
+	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.38", "PYTHON_VERSION=2.6" ] )
+	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.43", "PYTHON_VERSION=2.6" ] )
 	build( [ "APP=maya", "APP_VERSION=2012.sp1", "DL_VERSION=9.0.111" ] )
 	build( [ "APP=nuke", "APP_VERSION=6.3v5" ] )
 	build( [ "APP=nuke", "APP_VERSION=6.3v7" ] )
