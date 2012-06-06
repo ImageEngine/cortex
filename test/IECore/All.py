@@ -261,6 +261,8 @@ from DiskPrimitiveTest import DiskPrimitiveTest
 from ClampOpTest import ClampOpTest
 from SWAReaderTest import SWAReaderTest
 from ImfTest import *
+from TimeCodeDataTest import TimeCodeDataTest
+from TimeCodeParameterTest import TimeCodeParameterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

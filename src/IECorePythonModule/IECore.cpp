@@ -305,6 +305,8 @@
 #include "IECorePython/ClampOpBinding.h"
 #include "IECorePython/MeshFaceFilterOpBinding.h"
 #include "IECorePython/ImfBinding.h"
+#include "IECorePython/TimeCodeDataBinding.h"
+#include "IECorePython/TimeCodeParameterBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -615,6 +617,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindClampOp();
 	bindMeshFaceFilterOp();
 	bindImf();
+	bindTimeCodeData();
+	bindTimeCodeParameter();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
