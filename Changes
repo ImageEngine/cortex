@@ -10,9 +10,15 @@ Additions :
 
 * Added IECoreMaya::ToMayaCameraConverter, which supports the same attributes as IECoreMaya::FromMayaCameraConverter
 
+* Added bindings for Imf::TimeCode
+
+* Added IECore::TimeCodeData and TimeCodeParameter
+
 Improvements :
 
 * IECoreMaya::ToMayaSkinClusterConverter has a new parameter to ignore the bindPose node
+
+* EXRImageReader and EXRImageWriter now handle Imf::TimeCodes if they are present in the exr header or ImagePrimitive blindData, respectively.
 
 Bug Fixes :
 
