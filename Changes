@@ -20,6 +20,8 @@ Improvements :
 
 * IECoreMaya::ToMayaSkinClusterConverter has a new parameter to ignore the bindPose node
 
+* IECoreMaya::ClassParameterHandler and ClassVectorParameterHandler have a 1-plug mode and a 4-plug mode to handle the held classes. The 4-plug mode is the default for compatibility, but will be removed completely in Cortex 8. Users can specify ['maya']['compactClassPlugs'] userData to help migrate existing scenes to the 1-plug mode.
+
 * EXRImageReader and EXRImageWriter now handle Imf::TimeCodes if they are present in the exr header or ImagePrimitive blindData, respectively.
 
 Bug Fixes :

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,9 @@
 #include "maya/MFnStringArrayData.h"
 #include "maya/MFnIntArrayData.h"
 #include "maya/MGlobal.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/IECoreBinding.h"
@@ -114,17 +117,52 @@ MStatus ClassVectorParameterHandler::getClasses( IECore::ConstParameterPtr param
 
 void ClassVectorParameterHandler::currentClasses( const MPlug &plug, MStringArray &parameterNames, MStringArray &classNames, MIntArray &classVersions )
 {
-	MObject parameterNamesObject = plug.child( 0 ).asMObject();
-	MFnStringArrayData fnSAD( parameterNamesObject );
-	fnSAD.copyTo( parameterNames );
+	MObject attribute = plug.attribute();
+	MFnTypedAttribute fnTAttr( attribute );
+	if ( !fnTAttr.hasObj( attribute ) || fnTAttr.attrType() != MFnData::kStringArray )
+	{
+		// compatibility for the deprecated compound plug behaviour
+		MObject parameterNamesObject = plug.child( 0 ).asMObject();
+		MFnStringArrayData fnSAD( parameterNamesObject );
+		fnSAD.copyTo( parameterNames );
+		
+		MObject classNamesObject = plug.child( 1 ).asMObject();
+		fnSAD.setObject( classNamesObject );
+		fnSAD.copyTo( classNames );
+		
+		MObject classVersionsObject = plug.child( 2 ).asMObject();
+		MFnIntArrayData fnIAD( classVersionsObject );
+		fnIAD.copyTo( classVersions );
+		return;
+	}
 	
-	MObject classNamesObject = plug.child( 1 ).asMObject();
-	fnSAD.setObject( classNamesObject );
-	fnSAD.copyTo( classNames );
+	parameterNames.clear();
+	classNames.clear();
+	classVersions.clear();
 	
-	MObject classVersionsObject = plug.child( 2 ).asMObject();
-	MFnIntArrayData fnIAD( classVersionsObject );
-	fnIAD.copyTo( classVersions );
+	MFnStringArrayData fnSAD( plug.asMObject() );
+	if ( fnSAD.length() == 0 )
+	{
+		return;
+	}
+	
+	if ( fnSAD.length() % 3 != 0 )
+	{
+		throw( IECore::InvalidArgumentException( ( plug.name() + " needs 3 values per class. Expected a series of name, className, version." ).asChar() ) );
+	}
+	
+	MStringArray storedClassInfo = fnSAD.array();
+	for ( unsigned i=0; i < storedClassInfo.length(); i+=3 )
+	{
+		if ( !storedClassInfo[i+2].isInt() )
+		{
+			throw( IECore::InvalidArgumentException( ( "Version values of " + plug.name() + " must represent an integer" ).asChar() ) );
+		}
+		
+		parameterNames.append( storedClassInfo[i] );
+		classNames.append( storedClassInfo[i+1] );
+		classVersions.append( storedClassInfo[i+2].asInt() );
+	}
 }
 				
 MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
@@ -135,74 +173,67 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 	}
 
 	MObject attribute = plug.attribute();
-	MFnCompoundAttribute fnCAttr( attribute );
-	if( !fnCAttr.hasObj( attribute ) )
+	MFnTypedAttribute fnTAttr( attribute );
+	// compatibility for the deprecated compound plug behaviour: should return MS::kFailure
+	if ( !fnTAttr.hasObj( attribute ) || fnTAttr.attrType() != MFnData::kStringArray )
 	{
-		return MS::kFailure;
-	}
-
-	if( fnCAttr.numChildren()!=3 )
-	{
-		return MS::kFailure;
-	}
-
-	MObject parameterNamesAttr = fnCAttr.child( 0 );
-	MFnTypedAttribute fnTAttr( parameterNamesAttr );
-	if( !fnTAttr.hasObj( parameterNamesAttr ) )
-	{
-		return MS::kFailure;	
-	}
-	if( fnTAttr.name() != fnCAttr.name() + "__parameterNames" )
-	{
-		return MS::kFailure;
-	}
-	if( fnTAttr.attrType()!=MFnData::kStringArray )
-	{
-		return MS::kFailure;
+		MFnCompoundAttribute fnCAttr( attribute );
+		if( !fnCAttr.hasObj( attribute ) )
+		{
+			return MS::kFailure;
+		}
+		
+		if( fnCAttr.numChildren()!=3 )
+		{
+			return MS::kFailure;
+		}
+		
+		MObject parameterNamesAttr = fnCAttr.child( 0 );
+		MFnTypedAttribute fnTAttr( parameterNamesAttr );
+		if( !fnTAttr.hasObj( parameterNamesAttr ) )
+		{
+			return MS::kFailure;	
+		}
+		if( fnTAttr.name() != fnCAttr.name() + "__parameterNames" )
+		{
+			return MS::kFailure;
+		}
+		if( fnTAttr.attrType()!=MFnData::kStringArray )
+		{
+			return MS::kFailure;
+		}
+		
+		MObject classNamesAttr = fnCAttr.child( 1 );
+		fnTAttr.setObject( classNamesAttr );
+		if( !fnTAttr.hasObj( classNamesAttr ) )
+		{
+			return MS::kFailure;	
+		}
+		if( fnTAttr.name() != fnCAttr.name() + "__classNames" )
+		{
+			return MS::kFailure;
+		}
+		if( fnTAttr.attrType()!=MFnData::kStringArray )
+		{
+			return MS::kFailure;
+		}
+		
+		MObject classVersionsAttr = fnCAttr.child( 2 );
+		fnTAttr.setObject( classVersionsAttr );
+		if( !fnTAttr.hasObj( classVersionsAttr ) )
+		{
+			return MS::kFailure;	
+		}
+		if( fnTAttr.name() != fnCAttr.name() + "__classVersions" )
+		{
+			return MS::kFailure;
+		}
+		if( fnTAttr.attrType()!=MFnData::kIntArray )
+		{
+			return MS::kFailure;
+		}
 	}
 	
-	MObject classNamesAttr = fnCAttr.child( 1 );
-	fnTAttr.setObject( classNamesAttr );
-	if( !fnTAttr.hasObj( classNamesAttr ) )
-	{
-		return MS::kFailure;	
-	}
-	if( fnTAttr.name() != fnCAttr.name() + "__classNames" )
-	{
-		return MS::kFailure;
-	}
-	if( fnTAttr.attrType()!=MFnData::kStringArray )
-	{
-		return MS::kFailure;
-	}
-	
-	MObject classVersionsAttr = fnCAttr.child( 2 );
-	fnTAttr.setObject( classVersionsAttr );
-	if( !fnTAttr.hasObj( classVersionsAttr ) )
-	{
-		return MS::kFailure;	
-	}
-	if( fnTAttr.name() != fnCAttr.name() + "__classVersions" )
-	{
-		return MS::kFailure;
-	}
-	if( fnTAttr.attrType()!=MFnData::kIntArray )
-	{
-		return MS::kFailure;
-	}
-
-	MObject parameterNamesObject = plug.child( 0 ).asMObject();
-	MFnStringArrayData fnSAD( parameterNamesObject );
-	MStringArray parameterNames = fnSAD.array();
-	
-	MObject classNamesObject = plug.child( 1 ).asMObject();
-	fnSAD.setObject( classNamesObject );
-	MStringArray classNames = fnSAD.array();
-	
-	MObject classVersionsObject = plug.child( 2 ).asMObject();
-	MFnIntArrayData fnIAD( classVersionsObject );
-	MIntArray classVersions = fnIAD.array();
-
 	if( !storeClasses( parameter, plug ) )
 	{
 		return MS::kFailure;
@@ -216,7 +247,17 @@ MStatus ClassVectorParameterHandler::doRestore( const MPlug &plug, IECore::Param
 	MStringArray parameterNames;
 	MStringArray classNames;
 	MIntArray classVersions;
-	currentClasses( plug, parameterNames, classNames, classVersions );
+	
+	try
+	{
+		currentClasses( plug, parameterNames, classNames, classVersions );
+	}
+	catch( const std::exception &e )
+	{
+		MGlobal::displayError( MString( "ClassVectorParameterHandler::doRestore : " ) + e.what() );
+		return MS::kFailure;
+	}
+	
 	return setClasses( parameter, parameterNames, classNames, classVersions );
 }
 
@@ -226,19 +267,43 @@ MPlug ClassVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter
 	{
 		return MPlug();
 	}
-
-	MFnCompoundAttribute fnCAttr;
-	MObject attribute = fnCAttr.create( plugName, plugName );
-
-	MFnTypedAttribute fnTAttr;
-	MObject parameterNamesAttr = fnTAttr.create( plugName + "__parameterNames", plugName + "__parameterNames", MFnData::kStringArray );
-	fnCAttr.addChild( parameterNamesAttr );
 	
-	MObject classNamesAttr = fnTAttr.create( plugName + "__classNames", plugName + "__classNames", MFnData::kStringArray );
-	fnCAttr.addChild( classNamesAttr );
+	/// \todo: Remove this userData for Cortex 8. Find all notes labelled "compatibility for the deprecated compound plug behaviour"
+	/// and remove the unnecessary code at that time.
+	bool compact = false;
+	IECore::ConstCompoundObjectPtr mayaUserData = parameter->userData()->member<IECore::CompoundObject>( "maya" );
+	if( mayaUserData )
+	{
+		IECore::ConstBoolDataPtr compactClassPlugs = mayaUserData->member<IECore::BoolData>( "compactClassPlugs" );
+		if ( compactClassPlugs )
+		{
+			compact = compactClassPlugs->readable();
+		}
+	}
 	
-	MObject classVersionsAttr = fnTAttr.create( plugName + "__classVersions", plugName + "__classVersions", MFnData::kIntArray );
-	fnCAttr.addChild( classVersionsAttr );
+	MObject attribute;
+	
+	if ( compact )
+	{
+		MFnTypedAttribute fnTAttr;
+		attribute = fnTAttr.create( plugName, plugName, MFnData::kStringArray );
+	}
+	else
+	{
+		// compatibility for the deprecated compound plug behaviour
+		MFnCompoundAttribute fnCAttr;
+		attribute = fnCAttr.create( plugName, plugName );
+
+		MFnTypedAttribute fnTAttr;
+		MObject parameterNamesAttr = fnTAttr.create( plugName + "__parameterNames", plugName + "__parameterNames", MFnData::kStringArray );
+		fnCAttr.addChild( parameterNamesAttr );
+
+		MObject classNamesAttr = fnTAttr.create( plugName + "__classNames", plugName + "__classNames", MFnData::kStringArray );
+		fnCAttr.addChild( classNamesAttr );
+
+		MObject classVersionsAttr = fnTAttr.create( plugName + "__classVersions", plugName + "__classVersions", MFnData::kIntArray );
+		fnCAttr.addChild( classVersionsAttr );
+	}
 	
 	MPlug result = finishCreating( parameter, attribute, node );
 	
@@ -290,63 +355,68 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 		unsigned storedClassNamesLength = storedClassNames.length();
 		unsigned storedClassVersionsLength = storedClassVersions.length();
 		
+		MStringArray updatedClassInfo;
+		// compatibility for the deprecated compound plug behaviour
 		MStringArray parameterNames;
 		MStringArray classNames;
 		MIntArray classVersions;
-	
+		
 		size_t l = IECorePython::len( classes );
-		bool parameterNamesChanged = l != storedParameterNamesLength;
-		bool classNamesChanged = l != storedClassNamesLength;
-		bool classVersionsChanged = l != storedClassVersionsLength;
+		bool changed = l != storedParameterNamesLength || l != storedClassNamesLength || l != storedClassVersionsLength;
+		
 		for( size_t i=0; i<l; i++ )
 		{
 			object cl = classes[i];
 			
 			MString parameterName = boost::python::extract<const char *>( cl[1] )();
+			updatedClassInfo.append( parameterName );
 			parameterNames.append( parameterName );
 			if( i < storedParameterNamesLength && parameterName != storedParameterNames[i] )
 			{
-				parameterNamesChanged = true;
+				changed = true;
 			}
 			
 			MString className = boost::python::extract<const char *>( cl[2] )();
+			updatedClassInfo.append( className );
 			classNames.append( className );
 			if( i < storedClassNamesLength && className != storedClassNames[i] )
 			{
-				classNamesChanged = true;
+				changed = true;
 			}
 			
 			int classVersion = boost::python::extract<int>( cl[3] );
+			MString classVersionStr;
+			classVersionStr.set( classVersion, 0 );
+			updatedClassInfo.append( classVersionStr );
 			classVersions.append( classVersion );
 			if( i < storedClassVersionsLength && classVersion != storedClassVersions[i] )
 			{
-				classVersionsChanged = true;
+				changed = true;
 			}
 		}
-	
-		MFnStringArrayData fnSAD;
-		MFnIntArrayData fnIAD;
-	
+		
 		// only set the plug values if the new value is genuinely different, as otherwise
 		// we end up generating unwanted reference edits.
-		if( parameterNamesChanged )
+		if ( changed )
 		{
-			MObject parameterNamesObject = fnSAD.create( parameterNames );
-			plug.child( 0 ).setValue( parameterNamesObject );
+			MObject attribute = plug.attribute();
+			MFnTypedAttribute fnTAttr( attribute );
+			if ( fnTAttr.attrType() == MFnData::kStringArray )
+			{
+				MObject data = MFnStringArrayData().create( updatedClassInfo );
+				plug.setValue( data );
+			}
+			else
+			{
+				// compatibility for the deprecated compound plug behaviour
+				MObject parameterNamesObject = MFnStringArrayData().create( parameterNames );
+				plug.child( 0 ).setValue( parameterNamesObject );
+				MObject classNamesObject = MFnStringArrayData().create( classNames );
+				plug.child( 1 ).setValue( classNamesObject );
+				MObject classVersionsObject = MFnIntArrayData().create( classVersions );
+				plug.child( 2 ).setValue( classVersionsObject );
+			}
 		}
-		
-		if( classNamesChanged )
-		{
-			MObject classNamesObject = fnSAD.create( classNames );
-			plug.child( 1 ).setValue( classNamesObject );
-		}
-		
-		if( classVersionsChanged )
-		{
-			MObject classVersionsObject = fnIAD.create( classVersions );
-			plug.child( 2 ).setValue( classVersionsObject );
-		}
-		
 	}
 	catch( boost::python::error_already_set )
 	{

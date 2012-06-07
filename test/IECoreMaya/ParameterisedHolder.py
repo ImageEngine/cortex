@@ -1069,6 +1069,68 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( cmds.getAttr( fPlugPath ), -1 )
 	
+	def testClassParameterCompactPlugs( self ) :
+		
+		class TestOp( IECore.Op ) :
+		
+			def __init__( self ) :
+
+				IECore.Op.__init__( self,
+					"",
+					IECore.FloatParameter(
+						"result",
+						"",
+						0.0
+					),
+				)
+				
+				self.parameters().addParameter(
+
+					IECore.ClassParameter(
+						"cp",
+						"",
+						"IECORE_OP_PATHS"
+					)
+
+				)
+				
+			def doOperation( self, operands ) :
+			
+				return IECore.FloatData( 1 )
+				
+		node = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnParameterisedHolder( str( node ) )
+
+		op = TestOp()
+		fnOH.setParameterised( op )
+		
+		with fnOH.parameterModificationContext() :
+			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( op["cp"]["a"] )
+		bPlugPath = fnOH.parameterPlugPath( op["cp"]["b"] )
+		cpPlugPath = fnOH.parameterPlugPath( op["cp"] )
+		
+		self.assertEqual( cmds.getAttr( cpPlugPath, type=True ), "TdataCompound" )
+		self.assertEqual( cmds.getAttr( cpPlugPath + "__className" ), "maths/multiply" )
+		self.assertEqual( cmds.getAttr( cpPlugPath + "__classVersion" ), 1 )
+		self.assertEqual( cmds.getAttr( cpPlugPath + "__searchPathEnvVar" ), "IECORE_OP_PATHS" )
+		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
+		
+		op["cp"].userData().update( { "maya" : { "compactClassPlugs" : IECore.BoolData( True ) } } )
+		node2 = cmds.createNode( "ieOpHolderNode" )
+		fnOH2 = IECoreMaya.FnParameterisedHolder( str( node2 ) )
+		fnOH2.setParameterised( op )
+		cpPlugPath = fnOH2.parameterPlugPath( op["cp"] )
+		
+		self.assertEqual( cmds.getAttr( cpPlugPath ), [ "maths/multiply", "1", "IECORE_OP_PATHS" ] )
+		self.failUnless( not cmds.objExists( cpPlugPath + "__className" ) )
+		self.failUnless( not cmds.objExists( cpPlugPath + "__classVersion" ) )
+		self.failUnless( not cmds.objExists( cpPlugPath + "__searchPathEnvVar" ) )
+		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
+	
 	def testOpHolderImport( self ) :
 	
 		# make a file with an op holder in it
@@ -1631,7 +1693,39 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( self.__numCallbacks, 3 )
 				
 		IECoreMaya.FnParameterisedHolder.removeSetClassVectorParameterClassesCallback( c )	
-
+	
+	def testClassVectorParameterCompactPlugs( self ) :
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		c = op["cv"]
+		self.assertEqual( c.typeName(), "ClassVectorParameter" )
+		self.assertEqual( len( c.getClasses() ), 0 )
+				
+		with fnOH.parameterModificationContext() :
+			c.setClasses( [
+				( "mult", "maths/multiply", 1 ),
+				( "coIO", "compoundObjectInOut", 1 ),
+			] )
+		
+		cPlugPath = fnOH.parameterPlugPath( c )
+		self.assertEqual( cmds.getAttr( cPlugPath, type=True ), "TdataCompound" )
+		self.assertEqual( cmds.getAttr( cPlugPath + "__parameterNames" ), [ "mult", "coIO" ] )
+		self.assertEqual( cmds.getAttr( cPlugPath + "__classNames" ), [ "maths/multiply", "compoundObjectInOut" ] )
+		self.assertEqual( cmds.getAttr( cPlugPath + "__classVersions" ), [ 1, 1 ] )
+		
+		op["cv"].userData().update( { "maya" : { "compactClassPlugs" : IECore.BoolData( True ) } } )
+		node2 = cmds.createNode( "ieOpHolderNode" )
+		fnOH2 = IECoreMaya.FnOpHolder( str( node2 ) )
+		fnOH2.setParameterised( op )
+		cPlugPath = fnOH2.parameterPlugPath( c )
+		
+		self.assertEqual( cmds.getAttr( cPlugPath ), [ "mult", "maths/multiply", "1", "coIO", "compoundObjectInOut", "1" ] )
+		self.failUnless( not cmds.objExists( cPlugPath + "__parameterNames" ) )
+		self.failUnless( not cmds.objExists( cPlugPath + "__classNames" ) )
+		self.failUnless( not cmds.objExists( cPlugPath + "__classVersions" ) )
+	
 	def testNumericParameterMinMax( self ) :
 	
 		# test no range

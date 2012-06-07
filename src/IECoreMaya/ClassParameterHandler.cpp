@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,8 +36,13 @@
 
 #include "maya/MFnCompoundAttribute.h"
 #include "maya/MFnNumericAttribute.h"
+#include "maya/MFnStringArrayData.h"
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MGlobal.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/Exception.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
@@ -96,9 +101,40 @@ MStatus ClassParameterHandler::getClass( IECore::ConstParameterPtr parameter, MS
 
 void ClassParameterHandler::currentClass( const MPlug &plug, MString &className, int &classVersion, MString &searchPathEnvVar )
 {
-	className = plug.child( 0 ).asString();
-	classVersion = plug.child( 1 ).asInt();
-	searchPathEnvVar = plug.child( 2 ).asString();
+	MObject attribute = plug.attribute();
+	MFnTypedAttribute fnTAttr( attribute );
+	if ( !fnTAttr.hasObj( attribute ) || fnTAttr.attrType() != MFnData::kStringArray )
+	{
+		// compatibility for the deprecated compound plug behaviour
+		className = plug.child( 0 ).asString();
+		classVersion = plug.child( 1 ).asInt();
+		searchPathEnvVar = plug.child( 2 ).asString();
+		return;
+	}
+	
+	MFnStringArrayData fnSAD( plug.asMObject() );
+	if ( fnSAD.length() == 0 )
+	{
+		className = "";
+		classVersion = 0;
+		searchPathEnvVar = "";
+		return;
+	}
+	
+	if ( fnSAD.length() != 3 )
+	{
+		throw( IECore::InvalidArgumentException( ( plug.name() + " has more than 3 values. Expected name, version, searchPath only." ).asChar() ) );
+	}
+
+	MStringArray storedClassInfo = fnSAD.array();
+	if ( !storedClassInfo[1].isInt() )
+	{
+		throw( IECore::InvalidArgumentException( ( "Second value of " + plug.name() + " must represent an integer" ).asChar() ) );
+	}
+	
+	className = storedClassInfo[0];
+	classVersion = storedClassInfo[1].asInt();
+	searchPathEnvVar = storedClassInfo[2];
 }
 
 MStatus ClassParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const
@@ -106,7 +142,17 @@ MStatus ClassParameterHandler::doRestore( const MPlug &plug, IECore::ParameterPt
 	MString className;
 	int classVersion;
 	MString searchPathEnvVar;
-	currentClass( plug, className, classVersion, searchPathEnvVar );
+	
+	try
+	{
+		currentClass( plug, className, classVersion, searchPathEnvVar );
+	}
+	catch( const std::exception &e )
+	{
+		MGlobal::displayError( MString( "ClassParameterHandler::doRestore : " ) + e.what() );
+		return MS::kFailure;
+	}
+	
 	return setClass( parameter, className, classVersion, searchPathEnvVar );
 }
 				
@@ -118,62 +164,72 @@ MStatus ClassParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MP
 	}
 
 	MObject attribute = plug.attribute();
-	MFnCompoundAttribute fnCAttr( attribute );
-	if( !fnCAttr.hasObj( attribute ) )
+	// compatibility for the deprecated compound plug behaviour: should return MS::kFailure
+	MFnTypedAttribute fnTAttr( attribute );
+	if ( !fnTAttr.hasObj( attribute ) || fnTAttr.attrType() != MFnData::kStringArray )
 	{
-		return MS::kFailure;
-	}
-
-	if( fnCAttr.numChildren()!=3 )
-	{
-		return MS::kFailure;
-	}
-
-	MObject classNameAttr = fnCAttr.child( 0 );
-	MFnTypedAttribute fnTAttr( classNameAttr );
-	if( !fnTAttr.hasObj( classNameAttr ) )
-	{
-		return MS::kFailure;	
-	}
-	if( fnTAttr.name() != fnCAttr.name() + "__className" )
-	{
-		return MS::kFailure;
-	}
-	if( fnTAttr.attrType()!=MFnData::kString )
-	{
-		return MS::kFailure;
+		MFnCompoundAttribute fnCAttr( attribute );
+		if( !fnCAttr.hasObj( attribute ) )
+		{
+			return MS::kFailure;
+		}
+		
+		if( fnCAttr.numChildren()!=3 )
+		{
+			return MS::kFailure;
+		}
+		
+		MObject classNameAttr = fnCAttr.child( 0 );
+		MFnTypedAttribute fnTAttr( classNameAttr );
+		if( !fnTAttr.hasObj( classNameAttr ) )
+		{
+			return MS::kFailure;	
+		}
+		if( fnTAttr.name() != fnCAttr.name() + "__className" )
+		{
+			return MS::kFailure;
+		}
+		if( fnTAttr.attrType()!=MFnData::kString )
+		{
+			return MS::kFailure;
+		}
+		
+		MObject classVersionAttr = fnCAttr.child( 1 );
+		MFnNumericAttribute fnNAttr( classVersionAttr );
+		if( !fnNAttr.hasObj( classVersionAttr ) )
+		{
+			return MS::kFailure;
+		}
+		if( fnNAttr.name() != fnCAttr.name() + "__classVersion" )
+		{
+			return MS::kFailure;
+		}
+		if( fnNAttr.unitType() != MFnNumericData::kInt )
+		{
+			return MS::kFailure;
+		}
+		
+		MObject searchPathEnvVarAttr = fnCAttr.child( 2 );
+		fnTAttr.setObject( searchPathEnvVarAttr );
+		if( !fnTAttr.hasObj( searchPathEnvVarAttr ) )
+		{
+			return MS::kFailure;	
+		}
+		if( fnTAttr.name() != fnCAttr.name() + "__searchPathEnvVar" )
+		{
+			return MS::kFailure;
+		}
+		if( fnTAttr.attrType()!=MFnData::kString )
+		{
+			return MS::kFailure;
+		}
+		
+		if( !storeClass( parameter, plug ) )
+		{
+			return MS::kFailure;
+		}
 	}
 	
-	MObject classVersionAttr = fnCAttr.child( 1 );
-	MFnNumericAttribute fnNAttr( classVersionAttr );
-	if( !fnNAttr.hasObj( classVersionAttr ) )
-	{
-		return MS::kFailure;
-	}
-	if( fnNAttr.name() != fnCAttr.name() + "__classVersion" )
-	{
-		return MS::kFailure;
-	}
-	if( fnNAttr.unitType() != MFnNumericData::kInt )
-	{
-		return MS::kFailure;
-	}
-	
-	MObject searchPathEnvVarAttr = fnCAttr.child( 2 );
-	fnTAttr.setObject( searchPathEnvVarAttr );
-	if( !fnTAttr.hasObj( searchPathEnvVarAttr ) )
-	{
-		return MS::kFailure;	
-	}
-	if( fnTAttr.name() != fnCAttr.name() + "__searchPathEnvVar" )
-	{
-		return MS::kFailure;
-	}
-	if( fnTAttr.attrType()!=MFnData::kString )
-	{
-		return MS::kFailure;
-	}
-
 	if( !storeClass( parameter, plug ) )
 	{
 		return MS::kFailure;
@@ -183,25 +239,49 @@ MStatus ClassParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MP
 }
 
 MPlug ClassParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
-{	
+{
 	if( !parameter || !parameter->isInstanceOf( IECore::ClassParameterTypeId ) )
 	{
 		return MPlug();
 	}
-
-	MFnCompoundAttribute fnCAttr;
-	MObject attribute = fnCAttr.create( plugName, plugName );
 	
-	MFnTypedAttribute fnTAttr;
-	MObject classNameAttr = fnTAttr.create( plugName + "__className", plugName + "__className", MFnData::kString );
-	fnCAttr.addChild( classNameAttr );
+	/// \todo: Remove this userData for Cortex 8. Find all notes labelled "compatibility for the deprecated compound plug behaviour"
+	/// and remove the unnecessary code at that time.
+	bool compact = false;
+	IECore::ConstCompoundObjectPtr mayaUserData = parameter->userData()->member<IECore::CompoundObject>( "maya" );
+	if( mayaUserData )
+	{
+		IECore::ConstBoolDataPtr compactClassPlugs = mayaUserData->member<IECore::BoolData>( "compactClassPlugs" );
+		if ( compactClassPlugs )
+		{
+			compact = compactClassPlugs->readable();
+		}
+	}
 	
-	MFnNumericAttribute fnNAttr;
-	MObject classVersionAttr = fnNAttr.create( plugName + "__classVersion", plugName + "__classVersion", MFnNumericData::kInt );
-	fnCAttr.addChild( classVersionAttr );
+	MObject attribute;
 	
-	MObject searchPathEnvVarAttr = fnTAttr.create( plugName + "__searchPathEnvVar", plugName + "__searchPathEnvVar", MFnData::kString );
-	fnCAttr.addChild( searchPathEnvVarAttr );
+	if ( compact )
+	{
+		MFnTypedAttribute fnTAttr;
+		attribute = fnTAttr.create( plugName, plugName, MFnData::kStringArray );
+	}
+	else
+	{
+		// compatibility for the deprecated compound plug behaviour
+		MFnCompoundAttribute fnCAttr;
+		attribute = fnCAttr.create( plugName, plugName );
+		
+		MFnTypedAttribute fnTAttr;
+		MObject classNameAttr = fnTAttr.create( plugName + "__className", plugName + "__className", MFnData::kString );
+		fnCAttr.addChild( classNameAttr );
+		
+		MFnNumericAttribute fnNAttr;
+		MObject classVersionAttr = fnNAttr.create( plugName + "__classVersion", plugName + "__classVersion", MFnNumericData::kInt );
+		fnCAttr.addChild( classVersionAttr );
+		
+		MObject searchPathEnvVarAttr = fnTAttr.create( plugName + "__searchPathEnvVar", plugName + "__searchPathEnvVar", MFnData::kString );
+		fnCAttr.addChild( searchPathEnvVarAttr );
+	}
 	
 	MPlug result = finishCreating( parameter, attribute, node );
 	
@@ -248,28 +328,37 @@ MStatus ClassParameterHandler::storeClass( IECore::ConstParameterPtr parameter, 
 		std::string className = boost::python::extract<std::string>( classInfo[1] );
 		int classVersion = boost::python::extract<int>( classInfo[2] );
 		std::string searchPathEnvVar = boost::python::extract<std::string>( classInfo[3] );
-	
+		
+		MString storedClassName;
+		int storedClassVersion;
+		MString storedSearchPathEnvVar;
+		currentClass( plug, storedClassName, storedClassVersion, storedSearchPathEnvVar );
+		
 		// only set the plug values if the new value is genuinely different, as otherwise
 		// we end up generating unwanted reference edits.
-		MPlug classNamePlug = plug.child( 0 );
-		MString storedClassName = classNamePlug.asString();
-		if( storedClassName != className.c_str() )
+		if ( storedClassName != className.c_str() || storedClassVersion != classVersion || storedSearchPathEnvVar != searchPathEnvVar.c_str() )
 		{
-			classNamePlug.setString( className.c_str() );
-		}
-		
-		MPlug classVersionPlug = plug.child( 1 );
-		int storedClassVersion = classVersionPlug.asInt();
-		if( storedClassVersion != classVersion )
-		{
-			classVersionPlug.setInt( classVersion );
-		}
-		
-		MPlug searchPathEnvVarPlug = plug.child( 2 );
-		MString storedSearchPathEnvVar = searchPathEnvVarPlug.asString();
-		if( storedSearchPathEnvVar != searchPathEnvVar.c_str() )
-		{
-			searchPathEnvVarPlug.setString( searchPathEnvVar.c_str() );
+			MStringArray updatedClassInfo;
+			updatedClassInfo.append( className.c_str() );
+			MString classVersionStr;
+			classVersionStr.set( classVersion, 0 );
+			updatedClassInfo.append( classVersionStr );
+			updatedClassInfo.append( searchPathEnvVar.c_str() );
+			
+			MObject attribute = plug.attribute();
+			MFnTypedAttribute fnTAttr( attribute );
+			if ( fnTAttr.attrType() == MFnData::kStringArray )
+			{
+				MObject data = MFnStringArrayData().create( updatedClassInfo );
+				plug.setValue( data );
+			}
+			else
+			{
+				// compatibility for the deprecated compound plug behaviour
+				plug.child( 0 ).setString( className.c_str() );
+				plug.child( 1 ).setInt( classVersion );
+				plug.child( 2 ).setString( searchPathEnvVar.c_str() );
+			}
 		}
 	}
 	catch( boost::python::error_already_set )
