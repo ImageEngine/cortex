@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -97,7 +97,7 @@ def __processUpstreamNode(data, meshDagPath, dgModifier):
 		data.meshNodeDestPlug.connectedTo(tempPlugArray, True, False)
 		assert( tempPlugArray.length() == 1 )
 
-		data.upstreamNodeSrcPlug = tempPlugArray[0]
+		data.upstreamNodeSrcPlug = OpenMaya.MPlug( tempPlugArray[0] )
 
 		data.upstreamNodeShape = data.upstreamNodeSrcPlug.node()
 
