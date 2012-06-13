@@ -1,3 +1,7 @@
+Improvements :
+
+* Fixed SXRenderer tests to account for new noise algorithm in 3delight.
+
 7.2.0:
 
 Additions :
