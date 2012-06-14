@@ -58,7 +58,7 @@ class RendererImplementation : public IECore::Renderer
 		// run in.
 		RendererImplementation( const RendererImplementation &other );
 		// Initialises transform and attribute stacks from proceduralNode - used to
-		// creat an appropriate context for the cortex procedural DSO.
+		// create an appropriate context for the cortex procedural DSO.
 		RendererImplementation( const AtNode *proceduralNode );
 	
 		virtual ~RendererImplementation();
