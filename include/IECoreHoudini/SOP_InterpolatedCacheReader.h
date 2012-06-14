@@ -68,9 +68,6 @@ class SOP_InterpolatedCacheReader : public SOP_Node
 
 	private :
 		
-		template<typename T>
-		void transformPoints( const IECore::TransformationMatrix<T> &transform, const GA_Range &range );
-		
 		IECore::InterpolatedCachePtr m_cache;
 		std::string m_cacheFileName;
 		int m_frameMultiplier;

@@ -271,14 +271,16 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 			const TransformationMatrixdData *transform = attributes->member<TransformationMatrixdData>( transformAttribute );
 			if ( transform )
 			{
-				transformPoints<double>( transform->readable(), pointRange );
+				UT_Matrix4 matrix( IECore::convert<UT_Matrix4T<double> >( transform->readable().transform() ) );
+				gdp->transformPoints( matrix, group );
 			}
 			else
 			{
 				const TransformationMatrixfData *transform = attributes->member<TransformationMatrixfData>( transformAttribute );
 				if ( transform )
 				{
-					transformPoints<float>( transform->readable(), pointRange );
+					UT_Matrix4 matrix = IECore::convert<UT_Matrix4>( transform->readable().transform() );
+					gdp->transformPoints( matrix, group );
 				}
 			}
 		}
@@ -286,16 +288,4 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 	
 	unlockInputs();
 	return error();
-}
-
-template<typename T>
-void SOP_InterpolatedCacheReader::transformPoints( const IECore::TransformationMatrix<T> &transform, const GA_Range &range )
-{
-	UT_Matrix4T<T> matrix = IECore::convert<UT_Matrix4T<T> >( transform.transform() );
-	
-	/// \todo: try multi-threading this with a GA_SplittableRange
-	for ( GA_Iterator it=range.begin(); !it.atEnd(); ++it )
-	{
-		gdp->setPos3( it.getOffset(), gdp->getPos3( it.getOffset() ) * matrix );
-	}
 }
