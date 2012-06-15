@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import threading
 
 from IECore import *
 import os
@@ -213,6 +214,40 @@ class CachedReaderTest( unittest.TestCase ) :
 		# shouldn't be wasting time attempting to load files again when
 		# it failed the first time
 		self.assertNotEqual( firstException, secondException )
+		
+	def testThreadingAndClear( self ) :
+		
+		# this tests a fix to the clear() method in the LRU cache,
+		# which was causing a crash (or at least a spurious "Previous attempt
+		# to get item failed" exception)
+		
+		def func1( r, files ):
+			for i in range( 0,10000 ):
+				r.read( files[ i % len( files ) ] )
+			
+		def func2( r ):
+			for i in range( 0,10000 ):
+				r.clear()
+		
+		files = [
+			"test/IECore/data/cobFiles/compoundData.cob",
+			"test/IECore/data/pdcFiles/particleShape1.250.pdc",
+			"test/IECore/data/cobFiles/polySphereQuads.cob",
+			"test/IECore/data/cachedReaderPath2/file.cob",
+		]
+		
+		r = CachedReader( SearchPath( "./", ":" ), 100 * 1024 * 1024 )
+		
+		t1 = threading.Thread( target=func1, args = [ r, files ] )
+		t2 = threading.Thread( target=func1, args = [ r, files ] )
+		t3 = threading.Thread( target=func2, args = [ r ] )
+		t1.start()
+		t2.start()
+		t3.start()
+		
+		t1.join()
+		t2.join()
+		t3.join()
 		
 if __name__ == "__main__":
     unittest.main()
