@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,6 +51,10 @@ IE_CORE_FORWARDDECLARE( FrameBuffer );
 /// \todo Provide some control over resizing (to power of 2), mipmapping,
 /// filtering etc. Rather than complicate the constructors in the subclasses
 /// we should probabaly make ToGLTextureConverters with a bunch of parameters.
+/// \todo Review Y axis ordering for Cortex 8 - currently a texture lookup in
+/// GLSL ends up with the image upside down from the expected, but perhaps there
+/// are other places relying on the current ordering? See TestTexture.performShaderParameterTest()
+/// for a test that should be checking this but isn't.
 class Texture : public Bindable
 {
 	public :
