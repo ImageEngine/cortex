@@ -74,7 +74,17 @@ void LRUCache<Key, Ptr>::clear()
 	
 	m_currentCost = Cost(0);
 	m_list.clear();
-	m_cache.clear();
+	
+	// TODO: make it so you can actually clear this map. If a clear happens while m_mutex has
+	// been released down in the get() method, bad things can happen, as iterators can get
+	// invalidated. Therefore, we don't erase the cache entries, we just erase the data.
+	for( typename Cache::iterator it = m_cache.begin(); it != m_cache.end(); ++it )
+	{
+		it->second.status = Erased;
+		it->second.cost = 0;
+		it->second.data = Ptr();
+	}
+	
 }
 
 
@@ -116,28 +126,38 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 {
 	Mutex::scoped_lock lock( m_mutex );
 
-	CacheEntry &cacheEntry = m_cache[key]; // creates an entry if one doesn't exist yet
+	m_cache[key]; // creates an entry if one doesn't exist yet
 	
-	if( cacheEntry.status==Caching )
+	// this must be an iterator rather than a reference to a CacheEntry, as there's no guarantee
+	// that the underlying pointer will remain valid if the map is modified. Iterators, however, always remain
+	// valid (unless they're erased).
+	
+	typename Cache::iterator it = m_cache.find( key );
+	
+	while( it->second.status==Caching )
 	{
 		// another thread is doing the work. we need to wait
 		// until it is done.
 		lock.release();
-			while( cacheEntry.status==Caching )
+			while( it->second.status==Caching )
 			{
 				tbb::this_tbb_thread::yield();	
 			}
 		lock.acquire( m_mutex );
+		
+		// we use a while loop, because at this point it's possible another thread could have
+		// set the status back to Caching, meaning we'd end up in the else block below and
+		// trigger an assertion failure.
 	}
 	
-	if( cacheEntry.status==New || cacheEntry.status==Erased || cacheEntry.status==TooCostly )
+	if( it->second.status==New || it->second.status==Erased || it->second.status==TooCostly )
 	{
-		assert( cacheEntry.data==Ptr() );
+		assert( it->second.data==Ptr() );
 		Ptr data = Ptr();
 		Cost cost = 0;
 		try
 		{
-			cacheEntry.status = Caching;
+			it->second.status = Caching;
 			lock.release(); // allows other threads to do stuff while we're computing the value
 				data = m_getter( key, cost );
 			lock.acquire( m_mutex );
@@ -145,27 +165,26 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 		catch( ... )
 		{
 			lock.acquire( m_mutex );
-			CacheEntry &cacheEntry = m_cache[key]; // in case some other thread erased our entry while we had released the lock
-			cacheEntry.status = Failed;
+			it->second.status = Failed;
 			throw;
 		}
 		assert( data );
-		assert( cacheEntry.status != Cached ); // this would indicate that another thread somehow
-		assert( cacheEntry.status != Failed ); // loaded the same thing as us, which is not the intention.
+		assert( it->second.status != Cached ); // this would indicate that another thread somehow
+		assert( it->second.status != Failed ); // loaded the same thing as us, which is not the intention.
 		set( key, data, cost );
 		return data;
 	}
-	else if( cacheEntry.status==Cached )
+	else if( it->second.status==Cached )
 	{
 		// move the entry to the front of the list
-		m_list.erase( cacheEntry.listIterator );
+		m_list.erase( it->second.listIterator );
 		m_list.push_front( key );
-		cacheEntry.listIterator = m_list.begin();
-		return cacheEntry.data;
+		it->second.listIterator = m_list.begin();
+		return it->second.data;
 	}
 	else
 	{
-		assert( cacheEntry.status==Failed );
+		assert( it->second.status==Failed );
 		throw Exception( "Previous attempt to get item failed." );
 	}
 }
