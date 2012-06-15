@@ -827,8 +827,14 @@ class SXRendererTest( unittest.TestCase ) :
 				"fileName" : os.path.realpath( "./test/IECoreRI/data/textures/uvMap.256x256.tdl" ),
 			} )
 
+			# note the -1 when determining the number of threads. 3delight behaviour changed around
+			# 10.0.35, such that render:nthreads (which defaults to hardwareConcurrency()) is the
+			# number of threads that will be making Sx calls of any sort, whereas prior to that it
+			# was the number of threads that would actually call SxCallShader. because we've set up
+			# the renderer on this thread, it's taken one off the count for the number of threads we
+			# can spawn to do the shading.
 			threads = []
-			for i in range( 0, IECore.hardwareConcurrency() ) :
+			for i in range( 0, IECore.hardwareConcurrency() - 1 ) :
 				threads.append( threading.Thread( target = IECore.curry( r.shade, points ) ) )
 
 			for t in threads :
@@ -844,7 +850,9 @@ class SXRendererTest( unittest.TestCase ) :
 				
 			r = IECoreRI.SXRenderer()
 			
-			r.setOption( "ri:render:nthreads", IECore.IntData( IECore.hardwareConcurrency() * 2 ) )
+			# see above - we're adding one to number of threads we'll be using to do the shading,
+			# because we've also used a thread (the current thread) to perform the setup.
+			r.setOption( "ri:render:nthreads", IECore.IntData( IECore.hardwareConcurrency() * 2 + 1 ) )
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxTextureTest.sdl", {
 				"fileName" : os.path.realpath( "./test/IECoreRI/data/textures/uvMap.256x256.tdl" ),
