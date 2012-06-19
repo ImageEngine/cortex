@@ -2,6 +2,12 @@ Improvements :
 
 * Fixed SXRenderer tests to account for new noise algorithm in 3delight.
 
+* ToMayaMeshConverter now converts all UV sets when converting to mesh data (through a plug). Previous behaviour only worked for shapes.
+
+Bug Fixes :
+
+* ToMayaMeshConverter no longer duplicates the default UV set when converting to a shape.
+
 7.2.0:
 
 Additions :

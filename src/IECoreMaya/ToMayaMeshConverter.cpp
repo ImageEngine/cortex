@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 
 #include "boost/format.hpp"
 
+#include "maya/MDagPath.h"
 #include "maya/MFnMeshData.h"
 #include "maya/MFnMesh.h"
 #include "maya/MPointArray.h"
@@ -138,10 +139,35 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 			vArray[i] = 1 - v->readable()[i];
 			uvIds[i] = i;
 		}
-
+		
 		if ( uvSetName )
 		{
-			fnMesh.createUVSetWithName( *uvSetName );
+			bool setExists = false;
+			MStringArray existingSets;
+			fnMesh.getUVSetNames( existingSets );
+			for ( unsigned i=0; i < existingSets.length(); ++i )
+			{
+				if ( *uvSetName == existingSets[i] )
+				{
+					fnMesh.clearUVs( uvSetName );
+					setExists = true;
+					break;
+				}
+			}
+			
+			if ( !setExists )
+			{
+				MDagPath dag;
+				MStatus s = fnMesh.getPath( dag );
+				if ( s )
+				{
+					fnMesh.createUVSetWithName( *uvSetName );
+				}
+				else
+				{
+					fnMesh.createUVSetDataMeshWithName( *uvSetName );
+				}
+			}
 		}
 
 		MStatus s = fnMesh.setUVs( uArray, vArray, uvSetName );
@@ -325,10 +351,11 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		}
 	}
 
-	/// Add default UV set
-	addUVSet( fnMesh, polygonCounts, mesh, "s", "t" );
-
-	/// Add other UV sets
+	bool haveDefaultUVs = false;
+	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( "s" );
+	IECore::RefCountedPtr sDataRef = ( sIt == mesh->variables.end() ) ? 0 : static_cast<IECore::RefCountedPtr>( sIt->second.data );
+	
+	/// Add named UV sets
 	std::set< std::string > uvSets;
 	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{
@@ -348,10 +375,21 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, &uvSetName );
 
 				uvSets.insert( uvSetNameStr );
+				
+				if ( sDataRef == static_cast<IECore::RefCountedPtr>( it->second.data ) )
+				{
+					haveDefaultUVs = true;
+				}
 			}
 		}
 	}
-
+	
+	/// Add default UV set if it isn't just a reference to a named set
+	if ( !haveDefaultUVs )
+	{
+		addUVSet( fnMesh, polygonCounts, mesh, "s", "t" );
+	}
+	
 	/// We do the search again, but looking for primvars ending "_t", so we can catch cases where either "UVSETNAME_s" or "UVSETNAME_t" is present, but not both, taking care
 	/// not to attempt adding any duplicate sets
 	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )

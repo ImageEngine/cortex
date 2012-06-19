@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -63,10 +63,10 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assert_( "s" in coreMesh )
 		self.assert_( "t" in coreMesh )
-
-		coreMesh[ "testUVSet_s" ] = coreMesh[ "s" ]
-		coreMesh[ "testUVSet_t" ] = coreMesh[ "t" ]
-
+		
+		coreMesh[ "testUVSet_s" ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
+		coreMesh[ "testUVSet_t" ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
+		
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
@@ -113,6 +113,88 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
 		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
 
+	def testUVConversionFromPlug( self ) :
+		
+		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		
+		self.assert_( "s" in coreMesh )
+		self.assert_( "t" in coreMesh )
+		
+		coreMesh[ "testUVSet_s" ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
+		coreMesh[ "testUVSet_t" ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
+		
+		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
+		op = fn.getOp()
+		with fn.parameterModificationContext() :
+			op["input"].setValue( coreMesh )
+		
+		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
+		maya.cmds.connectAttr( fn.name()+".result", mayaMesh+".inMesh", force=True )
+		
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 382 )
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 760 )
+		
+		bb = maya.cmds.polyEvaluate( mayaMesh, boundingBox=True )
+		
+		self.assertAlmostEqual( bb[0][0], -1, 4 )
+		self.assertAlmostEqual( bb[0][1],  1, 4 )
+		self.assertAlmostEqual( bb[1][0], -1, 4 )
+		self.assertAlmostEqual( bb[1][1],  1, 4 )
+		self.assertAlmostEqual( bb[2][0], -1, 4 )
+		self.assertAlmostEqual( bb[2][1],  1, 4 )
+		
+		l = OpenMaya.MSelectionList()
+		l.add( mayaMesh )
+		p = OpenMaya.MDagPath()
+		l.getDagPath( 0, p )
+		
+		fnMesh = OpenMaya.MFnMesh( p )
+		u = OpenMaya.MFloatArray()
+		v = OpenMaya.MFloatArray()
+		
+		fnMesh.getUVs( u, v )
+		
+		self.assertEqual( u.length(), 2280 )
+		self.assertEqual( v.length(), 2280 )
+		
+		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
+		self.assertEqual( v[0], 1.0 - coreMesh[ "t" ].data[0] )
+		
+		fnMesh.getUVs( u, v, "testUVSet" )
+		
+		self.assertEqual( u.length(), 2280 )
+		self.assertEqual( v.length(), 2280 )
+		
+		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
+		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
+	
+	def testUVConversionFromMayaMesh( self ) :
+		
+		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
+		coreMesh = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
+		
+		transform = maya.cmds.createNode( "transform" )
+		self.failUnless( IECoreMaya.ToMayaMeshConverter( coreMesh ).convert( transform ) )
+		mayaMesh2 = maya.cmds.listRelatives( transform, shapes=True )[0]
+		
+		l = OpenMaya.MSelectionList()
+		l.add( mayaMesh )
+		l.add( mayaMesh2 )
+		p = OpenMaya.MDagPath()
+		p2 = OpenMaya.MDagPath()
+		l.getDagPath( 0, p )
+		l.getDagPath( 1, p2 )
+		
+		uvSets = []
+		fnMesh = OpenMaya.MFnMesh( p )
+		fnMesh.getUVSetNames( uvSets )
+		
+		uvSets2 = []
+		fnMesh2 = OpenMaya.MFnMesh( p2 )
+		fnMesh2.getUVSetNames( uvSets2 )
+		
+		self.assertEqual( uvSets, uvSets2 )
+	
 	def testShadingGroup( self ) :
 	
 		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
@@ -166,4 +248,4 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 			self.assertEqual( origNormal, normal3d )
 
 if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
