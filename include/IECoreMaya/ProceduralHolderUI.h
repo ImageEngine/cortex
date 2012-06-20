@@ -110,8 +110,9 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 		
 			DisplayInfo(
 				M3dView::DisplayStatus status,
-				M3dView::DisplayStyle style
-			) : displayStatus( status ), displayStyle( style )
+				M3dView::DisplayStyle style,
+				int cull
+			) : displayStatus( status ), displayStyle( style ), culling( cull )
 			{}
 			
 			bool operator<( const DisplayInfo& other ) const
@@ -124,11 +125,16 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 				{
 					return true;
 				}
+				if( culling < other.culling )
+				{
+					return true;
+				}
 				return false;
 			}
 			
 			M3dView::DisplayStatus displayStatus;
 			M3dView::DisplayStyle displayStyle;
+			int culling;
 		};
 		
 		typedef std::map< DisplayInfo, GLuint > DisplayListMap;

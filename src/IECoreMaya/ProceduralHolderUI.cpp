@@ -276,7 +276,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 				// we don't want to call scene->render() more than we have to, because it's a bit slow, so
 				// we kind of cache the gl calls it generates in display lists, comme ca:
 				
-				IECoreGL::ConstStatePtr displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
+				IECoreGL::StatePtr displayState = new IECoreGL::State( *m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() ) );
 				
 				std::string componentSelection;
 				if( request.displayStatus() == M3dView::kLead )
@@ -323,7 +323,27 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 				m_prevSceneUpdate = sceneUpdate;
 				m_prevDisplayStatus = request.displayStatus();
 				
-				DisplayInfo key( request.displayStatus(), mayaDisplayStyle );
+				MPlug pCulling( proceduralHolder->thisMObject(), ProceduralHolder::aCulling );
+				int culling = 0;
+				pCulling.getValue( culling );
+				
+				switch( culling )
+				{
+					case 1:
+					{
+						displayState->add( new IECoreGL::DoubleSidedStateComponent( false ) );
+						break;
+					}
+					case 2:
+					{
+						displayState->add( new IECoreGL::DoubleSidedStateComponent( false ) );
+						displayState->add( new IECoreGL::RightHandedOrientationStateComponent( false ) );
+						break;
+					}
+					default: break;
+				}
+				
+				DisplayInfo key( request.displayStatus(), mayaDisplayStyle, culling );
 				
 				if(
 					( mayaDisplayStyle == M3dView::kWireFrame || mayaDisplayStyle == M3dView::kBoundingBox || mayaDisplayStyle == M3dView::kPoints) &&
@@ -341,6 +361,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 					}
 					m_prevComponentSelection = componentSelection;
 				}
+				
 				
 				if( proceduralHolder->useDisplayLists() )
 				{

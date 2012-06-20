@@ -64,6 +64,7 @@
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnDependencyNode.h"
+#include "maya/MFnEnumAttribute.h"
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnCompoundAttribute.h"
 #include "maya/MFnSingleIndexedComponent.h"
@@ -82,6 +83,7 @@ using namespace boost;
 
 MTypeId ProceduralHolder::id = ProceduralHolderId;
 MObject ProceduralHolder::aGLPreview;
+MObject ProceduralHolder::aCulling;
 MObject ProceduralHolder::aTransparent;
 MObject ProceduralHolder::aDrawBound;
 MObject ProceduralHolder::aDrawCoordinateSystems;
@@ -143,6 +145,7 @@ MStatus ProceduralHolder::initialize()
 	MFnNumericAttribute nAttr;
 	MFnTypedAttribute tAttr;
 	MFnCompoundAttribute cAttr;
+	MFnEnumAttribute eAttr;
 
 	// drawing attributes
 
@@ -188,6 +191,21 @@ MStatus ProceduralHolder::initialize()
 	nAttr.setHidden( false );
 
 	s = addAttribute( aDrawCoordinateSystems );
+	assert( s );
+	
+	aCulling = eAttr.create( "culling", "clg", 0, &s );
+	assert( s );
+	eAttr.setReadable( true );
+	eAttr.setWritable( true );
+	eAttr.setStorable( true );
+	eAttr.setConnectable( true );
+	eAttr.setHidden( false );
+	
+	eAttr.addField( "None", 0 );
+	eAttr.addField( "Back Face", 1 );
+	eAttr.addField( "Front Face", 2 );
+	
+	s = addAttribute( aCulling );
 	assert( s );
 
 	// component attributes
@@ -607,7 +625,6 @@ MStatus ProceduralHolder::createDisplaylistAttribute()
 	
 	return MS::kSuccess;
 }
-
 
 bool ProceduralHolder::useDisplayLists()
 {

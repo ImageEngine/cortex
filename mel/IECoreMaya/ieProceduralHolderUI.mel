@@ -108,6 +108,7 @@ global proc AEieProceduralHolderTemplate( string $nodeName )
 			editorTemplate -addControl "drawBound";
 			editorTemplate -label "Coordinate Systems" -addControl "drawCoordinateSystems";
 			editorTemplate -addControl "transparent";
+			editorTemplate -addControl "culling";
 			editorTemplate -callCustom "AEieProceduralHolderDisplaylistParameterNew" "AEieProceduralHolderDisplaylistParameterReplace" "iDontExist";
 
 		editorTemplate -endLayout;

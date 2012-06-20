@@ -112,6 +112,7 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		bool useDisplayLists();
 		
 		static MObject aGLPreview;
+		static MObject aCulling;
 		static MObject aTransparent;
 		static MObject aDrawBound;
 		static MObject aDrawCoordinateSystems;
