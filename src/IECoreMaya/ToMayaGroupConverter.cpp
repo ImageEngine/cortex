@@ -32,9 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
 
 #include "IECore/Group.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/AttributeState.h"
 
 #include "IECoreMaya/ToMayaGroupConverter.h"
 #include "IECoreMaya/Convert.h"
@@ -56,8 +59,44 @@ bool ToMayaGroupConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 		return false;
 	}
 	
+	// find the name of this group, if it has one:
+	std::string name;
+	IECore::Group::StateContainer::const_iterator it = group->state().begin();
+	IECore::Group::StateContainer::const_iterator end = group->state().end();
+	
+	for(; it != end; ++it )
+	{
+		IECore::ConstAttributeStatePtr attrs = IECore::runTimeCast< const IECore::AttributeState >( *it );
+		if( !attrs )
+		{
+			continue;
+		}
+
+		IECore::CompoundDataMap::const_iterator nameIt = attrs->attributes().find( "name" );
+		if( nameIt == attrs->attributes().end() )
+		{
+			continue;
+		}
+
+		IECore::ConstStringDataPtr nameData = IECore::runTimeCast< const IECore::StringData >( nameIt->second );
+		name = nameData->readable();
+		
+		// we only need the characters following the final slash:
+		size_t lastSlashPos = name.rfind("/");
+		if( lastSlashPos != std::string::npos )
+		{
+			name = std::string( name.begin() + lastSlashPos + 1, name.end() );
+		}
+		
+		break;
+	}
+	
 	MFnTransform fnTransform;
 	MObject oTransform = fnTransform.create( to );
+	if( name !=  "" )
+	{
+		fnTransform.setName( name.c_str() );
+	}
 	
 	IECore::ConstTransformPtr coreTransform = group->getTransform();
 	if( coreTransform )

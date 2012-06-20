@@ -89,6 +89,40 @@ class ToMayaGroupConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len( m2 ), 1 )
 		self.assertEqual( maya.cmds.nodeType( m2[0] ), "mesh" )
 		self.assertEqual( maya.cmds.polyEvaluate( m2[0], face=True ), 6 )
+	
+	def testNamedConversion( self ):
+		
+		g = IECore.Group()
+		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "topLevel" ) } ) )
+		
+		c1 = IECore.Group()
+		c1.addState( IECore.AttributeState( { "name" : IECore.StringData( "topLevel/child1" ) } ) )
+		g.addChild( c1 )
+		
+		c2 = IECore.Group()
+		c2.addState( IECore.AttributeState( { "name" : IECore.StringData( "child2" ) } ) )
+		g.addChild( c2 )
+
+		c3 = IECore.Group()
+		c3.addState( IECore.AttributeState( { "name" : IECore.StringData( "topLevel/child1/child3" ) } ) )
+		c1.addChild( c3 )
+		
+		# nameless group
+		g.addChild( IECore.Group() )
+		
+		p = maya.cmds.createNode( "transform" )
+		
+		IECoreMaya.ToMayaGroupConverter( g ).convert( p )
+		
+		mg = maya.cmds.listRelatives( p, fullPath=True, ad=True )
+		
+		expectedNames = set( [ "|transform1|topLevel|child1|child3", "|transform1|topLevel|child1", "|transform1|topLevel|child2", "|transform1|topLevel|transform2", "|transform1|topLevel" ] )
+		
+		actualNames = set()
+		for name in mg:
+			actualNames.add( str( name ) )
+		
+		self.assertEqual( expectedNames, actualNames )
 		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
