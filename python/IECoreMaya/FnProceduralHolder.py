@@ -187,6 +187,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		# These things have a tendency to generate big, useless stacks of groups.
 		# Only the tree structure is actually useful to us, so lets remove these if possible:
 		self.__collapseGroups( world )
+		self.__removeChildlessGroups( world )
 		
 		if parent is None :
 			parent = maya.cmds.listRelatives( self.fullPathName(), fullPath=True, parent=True )
@@ -227,7 +228,19 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 			
 		maya.cmds.setAttr( fullPathName + ".componentQueries[" + str( i ) + "]", componentName, type="string" )
 		return i
-				
+					
+	def __removeChildlessGroups( self, group ) :
+		
+		children = group.children()
+		
+		for c in group.children():
+			if isinstance( c, IECore.Group ) :
+				if len( c.children() ) == 0:
+					group.removeChild( c )
+				else:
+					self.__removeChildlessGroups( c )
+		
+
 	def __collapseGroups( self, group ) :
 
 		children = group.children()
