@@ -1,12 +1,24 @@
+7.3.0:
+
 Improvements :
 
 * Fixed SXRenderer tests to account for new noise algorithm in 3delight.
 
 * ToMayaMeshConverter now converts all UV sets when converting to mesh data (through a plug). Previous behaviour only worked for shapes.
 
+* ToMayaGroupConverter now uses a group's "name" attribute to name the converted transform.
+
+* FnProceduralHolder.convertToGeometry() now removes useless childless transforms.
+
 Bug Fixes :
 
 * ToMayaMeshConverter no longer duplicates the default UV set when converting to a shape.
+
+* Fixed threading bug in LRU cache, possibly leading to a crash if clear() was called while a read was happening
+
+Additions :
+
+* Added new 'culling' option to the ieProceduralHolder's display options, so the user can choose back face, front face or no culling
 
 7.2.0:
 
