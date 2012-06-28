@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +35,7 @@
 
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreArnold/ToArnoldMeshConverter.h"
 
@@ -95,7 +97,72 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 		AiNodeSetBool( result, "smoothing", true );
 	}
 	
-	/// \todo Normals, uvs
+	// add uvs
+	
+	const FloatVectorData *s = mesh->variableData<FloatVectorData>( "s" );
+	const FloatVectorData *t = mesh->variableData<FloatVectorData>( "t" );
+	if( s && t )
+	{
+		PrimitiveVariable::Interpolation sInterpolation = mesh->variables.find( "s" )->second.interpolation;
+		PrimitiveVariable::Interpolation tInterpolation = mesh->variables.find( "t" )->second.interpolation;		
+		if( sInterpolation == tInterpolation )
+		{
+			if( sInterpolation == PrimitiveVariable::Varying || sInterpolation == PrimitiveVariable::Vertex || sInterpolation == PrimitiveVariable::FaceVarying )
+			{
+				// interleave the uvs and set them
+				vector<float> st;
+				st.reserve( s->readable().size() * 2 );
+				for( vector<float>::const_iterator sIt = s->readable().begin(), tIt = t->readable().begin(), eIt = s->readable().end(); sIt != eIt; sIt++, tIt++ )
+				{
+					st.push_back( *sIt );
+					st.push_back( *tIt );
+				}
+				AiNodeSetArray( 
+					result,
+					"uvlist",
+					AiArrayConvert( s->readable().size(), 1, AI_TYPE_POINT2, (void *)&(st[0]) )
+				);
+				// build uv indices
+				if( sInterpolation == PrimitiveVariable::FaceVarying )
+				{
+					vector<int> uvIds;
+					uvIds.resize( mesh->variableSize( PrimitiveVariable::FaceVarying ) );
+					for( size_t i=0, e=uvIds.size(); i < e; i++ )
+					{
+						uvIds[i] = i;
+					}
+					AiNodeSetArray( 
+						result,
+						"uvidxs",
+						AiArrayConvert( uvIds.size(), 1, AI_TYPE_INT, (void *)&(uvIds[0]) )
+					);
+				}
+				else
+				{
+					/// \todo Can we just reuse the same AiArray as we gave to vidxs??
+					AiNodeSetArray(
+						result,
+						"uvidxs",
+						AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
+					);
+				}
+			}
+			else
+			{
+				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables s and t have unsupported interpolation type - not generating uvs." );						
+			}	
+		}
+		else
+		{
+			msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables s and t have different interpolation - not generating uvs." );			
+		}
+	}
+	else if( s || t )
+	{
+		msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Only one of s and t available - not generating uvs." );
+	}
+	
+	/// \todo Normals
 	
 	return result;
 }

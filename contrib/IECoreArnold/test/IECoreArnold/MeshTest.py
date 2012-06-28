@@ -1,6 +1,5 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -33,24 +32,31 @@
 #
 ##########################################################################
 
-import sys
+from __future__ import with_statement
+
+import os
 import unittest
 
 import IECore
+import IECoreArnold
 
-from RendererTest import RendererTest
-from ProceduralDSOTest import ProceduralDSOTest
-from UniverseBlockTest import UniverseBlockTest
-from MeshTest import MeshTest
+class MeshTest( unittest.TestCase ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreArnold/test/IECoreArnold/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testUVs( self ) :
+
+		r = IECoreArnold.Renderer()
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
+		with IECore.WorldBlock( r ) :		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.shader( "surface", "utility", { "shade_mode" : "flat", "color_mode" : "uv" } )
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
+			
+		del r
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
+		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/meshImages/expectedMeshUVs.exr" ).read()
+			
+		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value ) 
+		
+if __name__ == "__main__":
+    unittest.main()
