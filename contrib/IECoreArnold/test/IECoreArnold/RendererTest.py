@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -295,7 +296,64 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( r ), 0 )
 		self.assertAlmostEqual( result.floatPrimVar( g ), 1, 5 )
 		self.assertEqual( result.floatPrimVar( b ), 0 )
+
+	def testCameraAspectRatio( self ) :
 	
+		r = IECoreArnold.Renderer()
+		
+		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "screenWindow" : IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) } )	
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+					
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.shader( "surface", "utility", { "shading_mode" : "flat", "color" : IECore.Color3f( 1, 0, 0 ) } )
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 2 ), IECore.V2f( 638, 478 ) ) ).render( r )
+			
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.shader( "surface", "utility", { "shade_mode" : "flat", "color" : IECore.Color3f( 0, 1, 0 ) } )
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) ).render( r )
+	
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		self.failUnless( image is not None )
+
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+		r = e.R()
+		g = e.G()
+		
+		edges = [
+			IECore.V2i( 0 ),
+			IECore.V2i( 320, 0 ),
+			IECore.V2i( 639, 0 ),			 
+			IECore.V2i( 639, 240 ),			 
+			IECore.V2i( 639, 479 ),
+			IECore.V2i( 320, 479 ),
+			IECore.V2i( 0, 479 ),
+			IECore.V2i( 0, 240 ),
+		]
+		
+		for point in edges :							
+			self.failUnless( e.pointAtPixel( point, result ) )
+			self.failUnless( result.floatPrimVar( r ) < 0.1 )
+			self.failUnless( result.floatPrimVar( g ) > 0.8 )
+		
+		innerEdges = [
+			IECore.V2i( 3, 3 ),
+			IECore.V2i( 320, 3 ),
+			IECore.V2i( 637, 3 ),			 
+			IECore.V2i( 636, 240 ),			 
+			IECore.V2i( 636, 477 ),
+			IECore.V2i( 320, 477 ),
+			IECore.V2i( 3, 477 ),
+			IECore.V2i( 3, 240 ),
+		]
+		
+		for point in innerEdges :
+			self.failUnless( e.pointAtPixel( point, result ) )
+			self.failUnless( result.floatPrimVar( r ) > 0.8 )
+			self.failUnless( result.floatPrimVar( g ) < 0.1 )
+				
 	def testProcedural( self ) :
 	
 		attributeValues = []

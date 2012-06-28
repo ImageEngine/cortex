@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -86,8 +87,10 @@ AtNode *ToArnoldCameraConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	
 	// set screen window
 	const Imath::Box2f &screenWindow = camera->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
-	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y );
-	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y );
+	const Imath::V2i &resolution = camera->parametersData()->member<V2iData>( "resolution", true )->readable();
+	float aspect = (float)resolution.x / (float)resolution.y;
+	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
+	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
 	
 	return result;
 }
