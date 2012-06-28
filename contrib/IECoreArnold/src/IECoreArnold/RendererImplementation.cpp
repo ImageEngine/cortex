@@ -93,7 +93,7 @@ IECoreArnold::RendererImplementation::RendererImplementation( const std::string 
 IECoreArnold::RendererImplementation::RendererImplementation( const RendererImplementation &other )
 {
 	constructCommon( Procedural );
-	m_transformStack.push( other.m_transformStack.top() );
+	m_transformStack.push( M44f() );
 	m_attributeStack.push( AttributeState( other.m_attributeStack.top() ) );
 }
 
@@ -315,6 +315,7 @@ void IECoreArnold::RendererImplementation::setTransform( const std::string &coor
 
 Imath::M44f IECoreArnold::RendererImplementation::getTransform() const
 {
+	/// \todo This needs to be adjusted to take into account the parent transform of procedurals
 	return m_transformStack.top();
 }
 
@@ -533,7 +534,6 @@ AtNode* IECoreArnold::RendererImplementation::procGetNode( void *userPtr, int i 
 void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
 	Box3f bound = proc->bound();
-	bound = transform( bound, m_transformStack.top() );
 
 	AtNode *procedural = AiNode( "procedural" );
 	AiNodeSetPnt( procedural, "min", bound.min.x, bound.min.y, bound.min.z );

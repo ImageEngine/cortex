@@ -42,6 +42,7 @@ from RendererTest import RendererTest
 from ProceduralDSOTest import ProceduralDSOTest
 from UniverseBlockTest import UniverseBlockTest
 from MeshTest import MeshTest
+from ProceduralTest import ProceduralTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

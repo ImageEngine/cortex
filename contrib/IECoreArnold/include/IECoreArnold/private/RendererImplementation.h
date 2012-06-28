@@ -53,8 +53,7 @@ class RendererImplementation : public IECore::Renderer
 
 		RendererImplementation();
 		RendererImplementation( const std::string &assFileName );
-		// Initialises transform and attribute stacks from other - used to create
-		// an appropriate context for procedurals specified by procedural() to
+		// Used to create an appropriate context for procedurals specified by procedural() to
 		// run in.
 		RendererImplementation( const RendererImplementation &other );
 		// Initialises transform and attribute stacks from proceduralNode - used to
