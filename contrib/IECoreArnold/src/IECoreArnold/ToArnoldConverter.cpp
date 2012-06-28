@@ -69,6 +69,10 @@ void ToArnoldConverter::setParameter( AtNode *node, const char *name, int parame
 			{
 				AiNodeSetInt( node, name, data->readable() );
 			}
+			else
+			{
+				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected IntData)." ) % value->typeName() % name );			
+			}
 			break;
 		}
 		case AI_TYPE_FLOAT :
@@ -77,6 +81,10 @@ void ToArnoldConverter::setParameter( AtNode *node, const char *name, int parame
 			{
 				AiNodeSetFlt( node, name, data->readable() );
 			}
+			else
+			{
+				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected FloatData)." ) % value->typeName() % name );			
+			}
 			break;
 		}
 		case AI_TYPE_STRING :
@@ -84,6 +92,10 @@ void ToArnoldConverter::setParameter( AtNode *node, const char *name, int parame
 			if( const StringData *data = runTimeCast<const StringData>( value ) )
 			{
 				AiNodeSetStr( node, name, data->readable().c_str() );
+			}
+			else
+			{
+				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected StringData)." ) % value->typeName() % name );			
 			}
 			break;
 		}
@@ -94,8 +106,28 @@ void ToArnoldConverter::setParameter( AtNode *node, const char *name, int parame
 				const Imath::Color3f &c = data->readable();
 				AiNodeSetRGB( node, name, c[0], c[1], c[2] );
 			}
+			else
+			{
+				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected Color3fData)." ) % value->typeName() % name );			
+			}
 			break;
-		}		
+		}
+		case AI_TYPE_ENUM :
+		{
+			if( const StringData *data = runTimeCast<const StringData>( value ) )
+			{
+				AiNodeSetStr( node, name, data->readable().c_str() );
+			}
+			else
+			{
+				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected StringData)." ) % value->typeName() % name );			
+			}
+			break;
+		}
+		default :
+		{
+			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );	
+		}
 	}
 }
 
