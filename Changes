@@ -16,9 +16,15 @@ Bug Fixes :
 
 * Fixed threading bug in LRU cache, possibly leading to a crash if clear() was called while a read was happening
 
+* Fixed bugs with the JPEGImageWriter, DPXImageWriter and CINImageWriter classes where they would segfault when the data window was different to the display window.
+
+* Fixed bugs with the JPEGImageWriter, DPXImageWriter and CINImageWriter classes where the data window they would output was wrong.
+
 Additions :
 
 * Added new 'culling' option to the ieProceduralHolder's display options, so the user can choose back face, front face or no culling
+
+* Added new test cases for JPEGImageWriter, DPXImageWriter and CINImageWriter. The new case tests the writing of images with data windows that are different to the display window.
 
 7.2.0:
 
