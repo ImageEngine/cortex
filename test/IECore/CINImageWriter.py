@@ -345,6 +345,23 @@ class TestCINWriter(unittest.TestCase):
 
 		self.__verifyImageRGB( imgNew, imgExpected )
 
+	def testRegularDataWindow( self ) :
+
+		r = Reader.create( "test/IECore/data/exrFiles/uvMapWithDataWindow.100x100.exr" )
+		img = r.read()
+
+		w = Writer.create( img, "test/IECore/data/cinFiles/output.cin" )
+		self.assertEqual( type(w), CINImageWriter )
+		w.write()
+
+		r = Reader.create( "test/IECore/data/cinFiles/output.cin" )
+		imgNew = r.read()
+		
+		r = Reader.create( "test/IECore/data/expectedResults/uvMapWithDataWindow.100x100.cin" )
+		imgExpected = r.read()
+		
+		self.__verifyImageRGB( imgNew, imgExpected )
+		
 	def setUp( self ) :
 
 		if os.path.isfile( "test/IECore/data/cinFiles/output.cin") :

@@ -381,17 +381,36 @@ class TestJPEGImageWriter(unittest.TestCase):
 
 		self.__verifyImageRGB( imgNew, imgExpected )
 
+	def testRegularDataWindow( self ) :
+
+		r = Reader.create( "test/IECore/data/exrFiles/uvMapWithDataWindow.100x100.exr" )
+		r['colorSpace'] = 'linear'
+		img = r.read()
+
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )
+		w['colorSpace'] = 'linear'
+		w.write()
+
+		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
+		r['colorSpace'] = 'linear'
+		imgNew = r.read()
+
+		r = Reader.create( "test/IECore/data/expectedResults/uvMapWithDataWindow.100x100.jpg" )
+		r['colorSpace'] = 'linear'
+		imgExpected = r.read()
+
+		self.__verifyImageRGB( imgNew, imgExpected )
+
 	def setUp( self ) :
 
 		if os.path.exists( "test/IECore/data/jpg/output.jpg" ) :
-
 			os.remove( "test/IECore/data/jpg/output.jpg" )
 
 
 	def tearDown( self ) :
 
 		if os.path.exists( "test/IECore/data/jpg/output.jpg" ) :
-
 			os.remove( "test/IECore/data/jpg/output.jpg" )
 
 

@@ -279,6 +279,23 @@ class TestDPXWriter(unittest.TestCase):
 
 		self.__verifyImageRGB( imgNew, imgExpected )
 
+	def testRegularDataWindow( self ) :
+
+		r = Reader.create( "test/IECore/data/exrFiles/uvMapWithDataWindow.100x100.exr" )
+		img = r.read()
+
+		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
+		self.assertEqual( type(w), DPXImageWriter )
+		w.write()
+
+		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
+		imgNew = r.read()
+		
+		r = Reader.create( "test/IECore/data/expectedResults/uvMapWithDataWindow.100x100.dpx" )
+		imgExpected = r.read()
+		
+		self.__verifyImageRGB( imgNew, imgExpected )
+		
 	def setUp( self ) :
 
 		if os.path.isfile( "test/IECore/data/dpx/output.dpx") :
