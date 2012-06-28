@@ -125,21 +125,14 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 				// build uv indices
 				if( sInterpolation == PrimitiveVariable::FaceVarying )
 				{
-					vector<int> uvIds;
-					uvIds.resize( mesh->variableSize( PrimitiveVariable::FaceVarying ) );
-					for( size_t i=0, e=uvIds.size(); i < e; i++ )
-					{
-						uvIds[i] = i;
-					}
 					AiNodeSetArray( 
 						result,
 						"uvidxs",
-						AiArrayConvert( uvIds.size(), 1, AI_TYPE_INT, (void *)&(uvIds[0]) )
+						faceVaryingIndices( mesh )
 					);
 				}
 				else
 				{
-					/// \todo Can we just reuse the same AiArray as we gave to vidxs??
 					AiNodeSetArray(
 						result,
 						"uvidxs",
@@ -162,7 +155,61 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 		msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Only one of s and t available - not generating uvs." );
 	}
 	
-	/// \todo Normals
+	/// add normals
+	
+	PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
+	if( nIt != mesh->variables.end() )
+	{	
+		const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data );
+		if( n )
+		{
+			PrimitiveVariable::Interpolation nInterpolation = nIt->second.interpolation;
+			if( nInterpolation == PrimitiveVariable::Varying || nInterpolation == PrimitiveVariable::Vertex || nInterpolation == PrimitiveVariable::FaceVarying )
+			{
+				AiNodeSetArray(
+					result,
+					"nlist",
+					AiArrayConvert( n->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( n->readable()[0] ) )
+				);
+				if( nInterpolation == PrimitiveVariable::FaceVarying )
+				{
+					AiNodeSetArray(
+						result,
+						"nidxs",
+						faceVaryingIndices( mesh )
+					);
+				}
+				else
+				{
+					AiNodeSetArray(
+						result,
+						"nidxs",
+						AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
+					);
+				}
+				AiNodeSetBool( result, "smoothing", true );
+			}
+			else
+			{
+				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables \"N\" has unsupported interpolation type - not generating normals." );									
+			}
+		}
+		else
+		{
+			msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) );
+		}
+	}
 	
 	return result;
+}
+
+AtArray *ToArnoldMeshConverter::faceVaryingIndices( const IECore::MeshPrimitive *mesh )
+{
+	vector<int> ids;
+	ids.resize( mesh->variableSize( PrimitiveVariable::FaceVarying ) );
+	for( size_t i=0, e=ids.size(); i < e; i++ )
+	{
+		ids[i] = i;
+	}
+	return AiArrayConvert( ids.size(), 1, AI_TYPE_INT, (void *)&(ids[0]) );
 }

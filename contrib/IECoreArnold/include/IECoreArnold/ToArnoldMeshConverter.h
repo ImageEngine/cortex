@@ -59,6 +59,10 @@ class ToArnoldMeshConverter : public ToArnoldConverter
 
 		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
 
+	private :
+	
+		static AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh );
+
 };
 
 IE_CORE_DECLAREPTR( ToArnoldMeshConverter );
