@@ -145,7 +145,7 @@ struct JPEGImageWriter::ChannelConverter
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_numChannels( numChannels ), m_channelOffset( channelOffset ), m_imageBuffer( imageBuffer )
 	{
 	}
-
+	
 	template<typename T>
 	ReturnType operator()( T *dataContainer )
 	{
@@ -157,21 +157,27 @@ struct JPEGImageWriter::ChannelConverter
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< unsigned char, 3 > TargetArray3D;
 
-		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
-		TargetArray3D targetData( &m_imageBuffer[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ][ m_numChannels ] );
+		// Grab the display and data windows to avoid dereferencing pointers during the tight loop later...
+		const Box2i srcDisplayWindow = m_image->getDisplayWindow();
+		const Box2i srcDataWindow = m_image->getDataWindow();
+		
+		const SourceArray2D sourceData( &data[0], extents[ srcDataWindow.size().y + 1 ][ srcDataWindow.size().x + 1 ] );
+		TargetArray3D targetData( &m_imageBuffer[0], extents[ srcDisplayWindow.size().y + 1 ][ srcDisplayWindow.size().x + 1 ][ m_numChannels ] );
 
-		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( m_image->getDisplayWindow(), m_image->getDataWindow() ) );
+		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( srcDisplayWindow, srcDataWindow ) );
 
+		const unsigned int boxOffsetX = copyRegion.min.x - srcDisplayWindow.min.x;
+		const unsigned int boxOffsetY = copyRegion.min.y - srcDisplayWindow.min.y;
 		for ( int y = copyRegion.min.y; y <= copyRegion.max.y ; y++ )
 		{
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
 			{
-				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ][ m_channelOffset ]
-					= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] );
+				targetData[ (y - copyRegion.min.y) + boxOffsetY ][ (x - copyRegion.min.x) + boxOffsetX ][ m_channelOffset ]
+						= converter( sourceData[ y - srcDataWindow.min.y ][ x - srcDataWindow.min.x ] );
 			}
 		}
 	};
-
+	
 	struct ErrorHandler
 	{
 		template<typename T, typename F>

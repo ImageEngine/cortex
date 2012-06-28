@@ -97,7 +97,7 @@ struct DPXImageWriter::ChannelConverter
 	}
 
 	template<typename T>
-	ReturnType operator()( T *dataContainer )
+			ReturnType operator()( T *dataContainer )
 	{
 		assert( dataContainer );
 
@@ -107,18 +107,25 @@ struct DPXImageWriter::ChannelConverter
 
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< unsigned int, 2 > TargetArray2D;
+		
+		// Grab the display and data windows to avoid dereferencing pointers during the tight loop later...
+		const Box2i srcDisplayWindow = m_image->getDisplayWindow();
+		const Box2i srcDataWindow = m_image->getDataWindow();
+		
+		const SourceArray2D sourceData( &data[0], extents[ srcDataWindow.size().y + 1 ][ srcDataWindow.size().x + 1 ] );
+		TargetArray2D targetData( &m_imageBuffer[0], extents[ srcDisplayWindow.size().y + 1 ][ srcDisplayWindow.size().x + 1 ] );
 
-		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
-		TargetArray2D targetData( &m_imageBuffer[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ] );
-
-		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( m_image->getDisplayWindow(), m_image->getDataWindow() ) );
+		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( srcDisplayWindow, srcDataWindow ) );
+		
+		const unsigned int boxOffsetX = copyRegion.min.x - srcDisplayWindow.min.x;
+		const unsigned int boxOffsetY = copyRegion.min.y - srcDisplayWindow.min.y;
 
 		for ( int y = copyRegion.min.y; y <= copyRegion.max.y ; y++ )
 		{
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
 			{
-				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ]
-					|= std::min((unsigned int)1023, (unsigned int)(converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) * 1023 )) << m_bitShift;
+				targetData[ (y - copyRegion.min.y) + boxOffsetY ][ (x - copyRegion.min.x) + boxOffsetX ]
+						|= std::min((unsigned int)1023, (unsigned int)(converter( sourceData[ y - srcDataWindow.min.y ][ x - srcDataWindow.min.x ] ) * 1023 )) << m_bitShift;
 			}
 		}
 	};
@@ -126,14 +133,15 @@ struct DPXImageWriter::ChannelConverter
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( const T *data, const F& functor )
-		{
-			assert( data );
+				void operator()( const T *data, const F& functor )
+				{
+					assert( data );
 
-			throw InvalidArgumentException( ( boost::format( "DPXImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
-		}
+					throw InvalidArgumentException( ( boost::format( "DPXImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
+				}
 	};
 };
+
 
 void DPXImageWriter::writeImage( const vector<string> &names, const ImagePrimitive *image, const Box2i &dataWindow ) const
 {
