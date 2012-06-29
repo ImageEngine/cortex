@@ -89,7 +89,7 @@ class FileDialog():
 		self.__browser = IECoreMaya.FileBrowser( self.__window, **kw )
 
 		if path == "last" :
-			path = FileDialog.__getLastPath( self.__key )
+			path = FileDialog.__lastPath( self.__key )
 
 		self.__browser.setPath( path if path else os.getcwd() )
 
