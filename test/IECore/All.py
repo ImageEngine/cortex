@@ -263,6 +263,7 @@ from SWAReaderTest import SWAReaderTest
 from ImfTest import *
 from TimeCodeDataTest import TimeCodeDataTest
 from TimeCodeParameterTest import TimeCodeParameterTest
+from OptionsTest import OptionsTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

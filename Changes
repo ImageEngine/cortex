@@ -1,3 +1,7 @@
+Additions :
+
+* Added an Options class, for specifying renderer options.
+
 7.3.0:
 
 Improvements :

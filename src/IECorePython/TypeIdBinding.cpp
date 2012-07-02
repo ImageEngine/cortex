@@ -5,6 +5,8 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
+//  Copyright (c) 2012, John Haddon. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -409,6 +411,7 @@ void bindTypeId()
 		.value( "MeshFaceFilterOp", MeshFaceFilterOpTypeId )
 		.value( "TimeCodeData", TimeCodeDataTypeId )
 		.value( "TimeCodeParameter", TimeCodeParameterTypeId )
+		.value( "Options", OptionsTypeId )
 	;
 }
 
