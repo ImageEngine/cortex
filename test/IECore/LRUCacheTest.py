@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,8 @@
 ##########################################################################
 
 import unittest
+import threading
+import time
 
 import IECore
 
@@ -94,6 +96,109 @@ class LRUCacheTest( unittest.TestCase ) :
 			)
 			
 			self.failIf( c.currentCost() > 10 )
+	
+	def testClearCausesReloads( self ) :
+	
+		self.numGetterCalls = 0
+		self.multiplier = 2
+		
+		def getter( key ) :
+		
+			self.numGetterCalls += 1
+			return ( key * self.multiplier, 1 )
+			
+		c = IECore.LRUCache( getter, 10 )
+		
+		v = c.get( 10 )
+		self.assertEqual( v, 20 )
+		self.assertEqual( self.numGetterCalls, 1 )
+		
+		v = c.get( 10 )
+		self.assertEqual( v, 20 )
+		self.assertEqual( self.numGetterCalls, 1 )
+		
+		c.clear()
+		self.multiplier = 4
+		v = c.get( 10 )
+		self.assertEqual( v, 40 )
+		self.assertEqual( self.numGetterCalls, 2 )
+		
+	def testThreadingAndLimitCost( self ) :
+	
+		def getter( key ) :
+		
+			return ( key * 2, 1 )
+			
+		c = IECore.LRUCache( getter, 10 )
+		
+		def thrash() :
+		
+			for i in range( 0, 10000 ) :
+				v = c.get( i )
+				self.assertEqual( v, i * 2 )
+		
+		threads = []
+		for i in range( 0, 10 ) :
+			thread = threading.Thread( target=thrash )
+			threads.append( thread )
+			thread.start()
+			
+		for thread in threads :
+			thread.join()
+
+	def testThreadingAndClear( self ) :
+	
+		def getter( key ) :
+		
+			return ( key * 2, 1 )
+	
+		c = IECore.LRUCache( getter, 100000 )
+	
+		def f1() :
+			for i in range( 0, 10000 ) :
+				v = c.get( i )
+				self.assertEqual( v, i * 2 )
 				
+		def f2() :
+			for i in range( 0, 10000 ) :
+				c.clear()
+	
+		t1 = threading.Thread( target=f1 )
+		t2 = threading.Thread( target=f1 )
+		t3 = threading.Thread( target=f2 )
+		
+		t1.start()
+		t2.start()
+		t3.start()
+		
+		t1.join()
+		t2.join()
+		t3.join()
+
+	def testYieldGILInGetter( self ) :
+	
+		def getter( key ) :
+		
+			# this call simulates the gil getting
+			# yielded for some reason - in the real world
+			# perhaps an Op call or just the python interpreter
+			# deciding to switch threads.
+			time.sleep( 0.1 )
+			return ( key, 1 )
+			
+		c = IECore.LRUCache( getter, 100000 )
+		
+		def f() :
+		
+			c.get( 0 )
+		
+		t1 = threading.Thread( target=f )
+		t2 = threading.Thread( target=f )
+		
+		t1.start()
+		t2.start()
+		t1.join()
+		t2.join()
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,13 +38,13 @@
 
 #include "IECore/LRUCache.h"
 
+#include "IECorePython/ScopedGILRelease.h"
+
 using namespace boost::python;
 using namespace IECore;
 
 namespace IECorePython
 {
-
-typedef LRUCache<object, object> PythonLRUCache;
 
 struct LRUCacheGetter
 {
@@ -53,26 +53,72 @@ struct LRUCacheGetter
 	{
 	}
 	
-	object operator() ( object key, PythonLRUCache::Cost &cost )
+	object operator() ( object key, LRUCache<object, object>::Cost &cost )
 	{
 		tuple t = extract<tuple>( getter( key ) );
-		cost = extract<PythonLRUCache::Cost>( t[1] );
+		cost = extract<LRUCache<object, object>::Cost>( t[1] );
 		return t[0];
 	}
 	
 	object getter;
 };
 
-static PythonLRUCache *construct( object getter, PythonLRUCache::Cost maxCost )
+class PythonLRUCache : public LRUCache<object, object>
 {
-	return new PythonLRUCache( LRUCacheGetter( getter ), maxCost );
-} 
+	
+	public :
+	
+		PythonLRUCache( object getter, LRUCache<object, object>::Cost maxCost )
+			:	LRUCache<object, object>( LRUCacheGetter( getter ), maxCost )
+		{
+		}
+		
+		object get( const object &key )
+		{
+			// we must hold the GIL when entering LRUCache<object, object>::get()
+			// or any other of our base class' methods, because they manipulate
+			// boost::python::objects, which in turn use the python api. in addition,
+			// LRUCacheGetter enters python, giving us another reason to need the
+			// GIL. things are complicated slightly by the fact that the python code
+			// executed by LRUCacheGetter may release the GIL, either explicitly or
+			// because the interpreter does that from time to time anyway. this can
+			// allow another thread to make a call to get(), potentially with the same
+			// key as was passed to the current call. this would lead to deadlock -
+			// the first call doing the caching waits for the GIL to continue,
+			// and the second call holds the GIL and waits for the caching to be
+			// complete.
+			//
+			// the code below avoids this, by ensuring only one thread can be in
+			// LRUCache<object, object>::get(), at any given time, and by releasing
+			// the GIL while it waits for m_getMutex. this allows the first thread
+			// to finish caching (because it can reacquire the GIL), at which point
+			// it will release m_getMutex, allowing the second thread to go about
+			// its business.
+			//
+			// while this serialisation may seem inefficient, it's less of a big
+			// deal because all python execution is serialised anyway.
+			//
+			// see test/IECore/LRUCache.py, in particular testYieldGILInGetter().
+			
+			Mutex::scoped_lock lock;
+			{
+				ScopedGILRelease gilRelease;
+				lock.acquire( m_getMutex );
+			}
+			return LRUCache<object, object>::get( key );
+		}
+
+	private :
+	
+		Mutex m_getMutex;
+
+};
 
 void bindLRUCache()
 {
 	
 	class_<PythonLRUCache, boost::noncopyable>( "LRUCache", no_init )
-		.def( "__init__", make_constructor( &construct, default_call_policies(), ( boost::python::arg_( "getter" ), boost::python::arg_( "maxCost" )=500  ) ) )
+		.def( init<object, PythonLRUCache::Cost>( ( boost::python::arg_( "getter" ), boost::python::arg_( "maxCost" )=500  ) ) )
 		.def( "clear", &PythonLRUCache::clear )
 		.def( "erase", &PythonLRUCache::erase )
 		.def( "setMaxCost", &PythonLRUCache::setMaxCost )

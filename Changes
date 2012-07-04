@@ -2,6 +2,10 @@ Additions :
 
 * Added an Options class, for specifying renderer options.
 
+Bug Fixes :
+
+* Fixed deadlocks in the python LRUCache.
+
 7.3.0:
 
 Improvements :
