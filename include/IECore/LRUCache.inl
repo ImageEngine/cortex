@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,10 +74,14 @@ void LRUCache<Key, Ptr>::clear()
 	
 	m_currentCost = Cost(0);
 	m_list.clear();
-	
-	// todo: make it so you can actually clear this map. If a clear happens while m_mutex has
-	// been released down in the get() method, bad things can happen, as iterators can get
-	// invalidated. Therefore, we don't erase the cache entries, we just erase the data.
+
+	// we don't actually remove the entries from the cache for two reasons. firstly, it would
+	// invalidate iterators currently in use on other threads in get(). secondly, at
+	// some point we'll hopefully collect statistics for cache misses, reloads etc,
+	// and we'd want those to reflect the use of clear(). we could perhaps call limitCost( 0 )
+	// instead of having separate clearing code here, but this code avoids doing the many
+	// lookups that limitCost( 0 ) would do (because it removes entries in an order dictated
+	// by m_list, and therefore has to do lookups in m_cache). 
 	for( typename Cache::iterator it = m_cache.begin(); it != m_cache.end(); ++it )
 	{
 		it->second.status = Erased;
@@ -126,7 +130,7 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 {
 	Mutex::scoped_lock lock( m_mutex );
 
-	CacheEntry& cacheEntry = m_cache[key]; // creates an entry if one doesn't exist yet
+	CacheEntry &cacheEntry = m_cache[key]; // creates an entry if one doesn't exist yet
 	
 	while( cacheEntry.status==Caching )
 	{
