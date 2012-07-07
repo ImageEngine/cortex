@@ -127,6 +127,7 @@ class RendererImplementation : public IECore::Renderer
 	
 		void constructCommon( Mode mode );
 		void applyTransformToNode( AtNode *node );
+		void addNode( AtNode *node );
 		void addShape( AtNode *shape );
 	
 		// this is what we use in the userptr for procedurals. it contains
@@ -176,10 +177,10 @@ class RendererImplementation : public IECore::Renderer
 		typedef std::stack<AttributeState> AttributeStack;
 		AttributeStack m_attributeStack;
 		
-		// list of geometry that has been output so far. we have
+		// list of nodes that have been output so far. we have
 		// to collect this so we can support dripfeeding nodes to
 		// arnold one by one in procedurals.
-		std::vector<AtNode *> m_shapes;
+		std::vector<AtNode *> m_nodes;
 		
 		friend class IECoreArnold::Renderer;
 		

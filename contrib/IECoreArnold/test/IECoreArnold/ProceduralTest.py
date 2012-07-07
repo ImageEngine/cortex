@@ -82,6 +82,26 @@ class ProceduralTest( unittest.TestCase ) :
 					self.__child.render( renderer )
 				else :
 					renderer.procedural( self.__child )
+	
+	class ShaderProcedural( IECore.Renderer.Procedural ) :
+		
+		def __init__( self, shader, child ) :
+		
+			IECore.Renderer.Procedural.__init__( self )
+			
+			self.__shader = shader
+			self.__child = child
+			
+		def bound( self ) :
+		
+			return self.__child.bound()
+			
+		def render( self, renderer ) :
+		
+			with IECore.AttributeBlock( renderer ) :
+			
+				self.__shader.render( renderer )
+				renderer.procedural( self.__child )
 					
 	def arnoldMessageCallback( self, logMask, severity, msg, tabs ) :
 	
@@ -130,6 +150,29 @@ class ProceduralTest( unittest.TestCase ) :
 			)
 		
 		self.failIf( "incorrect user bounds" in self.__arnoldMessages )		
+
+	def testProceduralInheritsShader( self ) :
+	
+		r = IECoreArnold.Renderer()
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
+
+		with IECore.WorldBlock( r ) :
+				
+			r.procedural(
+				self.ShaderProcedural(
+					IECore.Shader( "flat", "surface", { "color" : IECore.Color3f( 0, 1, 0 ) } ),
+					self.SphereProcedural()
+				)
+			)
+
+		i = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
+		
+		e = IECore.ImagePrimitiveEvaluator( i )
+		r = e.createResult()
+		self.assertEqual( e.pointAtUV( IECore.V2f( 0.5 ), r ), True )
+		self.assertEqual( r.floatPrimVar( e.R() ), 0 )
+		self.assertEqual( r.floatPrimVar( e.G() ), 1 )
+		self.assertEqual( r.floatPrimVar( e.B() ), 0 )
 		
 if __name__ == "__main__":
     unittest.main()

@@ -255,10 +255,10 @@ IECore::DataPtr Renderer::command( const std::string &name, const IECore::Compou
 
 size_t Renderer::numProceduralNodes() const
 {
-	return m_implementation->m_shapes.size();
+	return m_implementation->m_nodes.size();
 }
 		
 void *Renderer::proceduralNode( size_t index )
 {
-	return m_implementation->m_shapes[index];
+	return m_implementation->m_nodes[index];
 }
