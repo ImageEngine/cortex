@@ -1,9 +1,6 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
-#
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,26 +32,22 @@
 #
 ##########################################################################
 
-# require HOM
 import hou
 
-# require IECore
-import IECore
+## A context object intended for use with python's "with" syntax. It ensures
+# that all operations in the with block are performed in the given hou.updateMode,
+# and that the updateMode is restored when the block exits.
+class UpdateMode :
+	
+	def __init__( self, mode ) :
 
-# our c++ module components
-from _IECoreHoudini import *
+		self.__mode = mode
+		self.__prevMode = hou.updateModeSetting()
 
-# function sets
-from FnParameterisedHolder import FnParameterisedHolder
-from FnOpHolder import FnOpHolder
-from FnProceduralHolder import FnProceduralHolder
+	def __enter__( self ) :
 
-# misc utility methods
-from TestCase import TestCase
-from TestProgram import TestProgram
-import ParmTemplates
-import Utils
+		hou.setUpdateMode( self.__mode )
 
-from ActiveTake import ActiveTake
-from TemporaryParameterValues import TemporaryParameterValues
-from UpdateMode import UpdateMode
+	def __exit__( self, type, value, traceBack ) :
+		
+		hou.setUpdateMode( self.__prevMode )

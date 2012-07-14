@@ -2,6 +2,8 @@ Additions :
 
 * Added an Options class, for specifying renderer options.
 
+* Added IECoreHoudini.UpdateMode to safely switch hou.updateModes using a python with statement.
+
 Bug Fixes :
 
 * Fixed deadlocks in the python LRUCache.

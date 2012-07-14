@@ -1,9 +1,6 @@
 ##########################################################################
 #
-#  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-#  its affiliates and/or its licensors.
-#
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,26 +32,52 @@
 #
 ##########################################################################
 
-# require HOM
+from __future__ import with_statement
+
 import hou
+import IECoreHoudini
+import unittest
 
-# require IECore
-import IECore
+class TestUpdateMode( IECoreHoudini.TestCase ) :
+	
+	def testSetMode( self ) :
+		
+		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
+		
+		with IECoreHoudini.UpdateMode( hou.updateMode.Manual ) :
+			
+			self.assertEqual( hou.updateModeSetting(), hou.updateMode.Manual )
+			
+			with IECoreHoudini.UpdateMode( hou.updateMode.AutoUpdate ) :
+				
+				self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
+			
+			self.assertEqual( hou.updateModeSetting(), hou.updateMode.Manual )
+		
+		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
+	
+	def testSetCurrentMode( self ) :
+		
+		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
+		
+		with IECoreHoudini.UpdateMode( hou.updateMode.AutoUpdate ) :
+			
+			self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
+		
+		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
+	
+	def testRaising( self ) :
+		
+		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
+		
+		try :
+			with IECoreHoudini.UpdateMode( hou.updateMode.Manual ) :
+				
+				raise RuntimeError, "This error is intentional"
+		
+		except RuntimeError:
+			
+			self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
 
-# our c++ module components
-from _IECoreHoudini import *
-
-# function sets
-from FnParameterisedHolder import FnParameterisedHolder
-from FnOpHolder import FnOpHolder
-from FnProceduralHolder import FnProceduralHolder
-
-# misc utility methods
-from TestCase import TestCase
-from TestProgram import TestProgram
-import ParmTemplates
-import Utils
-
-from ActiveTake import ActiveTake
-from TemporaryParameterValues import TemporaryParameterValues
-from UpdateMode import UpdateMode
+if __name__ == "__main__":
+    unittest.main()
