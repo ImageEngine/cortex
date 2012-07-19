@@ -412,6 +412,7 @@ void bindTypeId()
 		.value( "TimeCodeData", TimeCodeDataTypeId )
 		.value( "TimeCodeParameter", TimeCodeParameterTypeId )
 		.value( "Options", OptionsTypeId )
+		.value( "MPlayDisplayDriver", MPlayDisplayDriverTypeId )
 	;
 }
 

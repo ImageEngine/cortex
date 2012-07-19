@@ -4,6 +4,8 @@ Additions :
 
 * Added IECoreHoudini.UpdateMode to safely switch hou.updateModes using a python with statement.
 
+* Added MPlayDisplayDriver, for rendering images to MPlay using either RenderMan or Arnold (or anything else which can talk to an IECore.DisplayDriver).
+
 Bug Fixes :
 
 * Fixed deadlocks in the python LRUCache.

@@ -409,6 +409,7 @@ enum TypeId
 	TimeCodeDataTypeId = 361,
 	TimeCodeParameterTypeId = 362,
 	OptionsTypeId = 363,
+	MPlayDisplayDriverTypeId = 364,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 
