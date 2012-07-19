@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 	__testDir = "test/cobIO"
 	__testFile = "%s/testCobIO.cob" % __testDir
 	__testPDCFile = "%s/testPdcIO.pdc" % __testDir
+	__testPTCFile = "%s/testPtcIO.ptc" % __testDir
 	
 	def torus( self ) :
 		obj = hou.node( "/obj" )
@@ -195,6 +196,35 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
 		writer.cook()
+		self.assert_( reader.geometry() )
+		self.assert_( not reader.errors() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		result = converter.convert()
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
+	
+	def testReadWritePTC( self ) :
+		points = self.points()
+		writer = self.writer( points )
+		writer.parm( "file" ).set( TestCobIOTranslator.__testPTCFile )
+		reader = self.reader()
+		reader.parm( "file" ).set( TestCobIOTranslator.__testPTCFile )
+		
+		self.assert_( not reader.geometry() )
+		self.assert_( reader.errors() )
+		
+		# If IECoreRI isn't available, then we just can't read/write PTCs
+		try :
+			import IECoreRI
+		except ImportError :
+			self.assertRaises( hou.OperationFailed, writer.cook )
+			self.assert_( writer.errors() )
+			self.assert_( not reader.geometry() )
+			return
+		
+		writer.cook()
+		
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
 		

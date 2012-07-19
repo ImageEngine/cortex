@@ -66,8 +66,9 @@ const char *GEO_CobIOTranslator::formatName() const
 int GEO_CobIOTranslator::checkExtension( const char *fileName ) 
 {
 	UT_String sname( fileName );
-
-	if ( sname.fileExtension() && ( !strcmp( sname.fileExtension(), ".cob" ) || !strcmp( sname.fileExtension(), ".pdc" ) ) )
+	
+	/// \todo: support all extensions that can read/write any object supported by the To/FromHoudiniGeometryConverters
+	if ( sname.fileExtension() && ( !strcmp( sname.fileExtension(), ".cob" ) || !strcmp( sname.fileExtension(), ".pdc" ) || !strcmp( sname.fileExtension(), ".ptc" ) ) )
 	{
 		return true;
 	}
@@ -136,8 +137,15 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, 
 		return false;
 	}
 	
-	WriterPtr writer = Writer::create( object, fileName );
-	writer->write();
+	try
+	{
+		WriterPtr writer = Writer::create( object, fileName );
+		writer->write();
+	}
+	catch ( IECore::Exception e )
+	{
+		return false;
+	}
 	
 	return true;
 }

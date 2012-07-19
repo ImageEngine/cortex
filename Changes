@@ -6,6 +6,10 @@ Additions :
 
 * Added MPlayDisplayDriver, for rendering images to MPlay using either RenderMan or Arnold (or anything else which can talk to an IECore.DisplayDriver).
 
+Improvements :
+
+* IECoreHoudini GEO_IOTranslator accepts ptc files (if IECoreRI is available), so the file sop can be used to read ptcs.
+
 Bug Fixes :
 
 * Fixed deadlocks in the python LRUCache.
