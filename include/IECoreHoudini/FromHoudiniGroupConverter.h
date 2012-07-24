@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_FROMHOUDINIGROUPCONVERTER_H
 #define IECOREHOUDINI_FROMHOUDINIGROUPCONVERTER_H
 
+#include "IECore/Group.h"
+
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
@@ -67,19 +69,36 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		
 	private :
 
-		typedef std::pair<unsigned, GA_PrimitiveGroup*> PrimIdGroupPair;
 		typedef std::map<unsigned, GA_PrimitiveGroup*> PrimIdGroupMap;
-		typedef std::map<unsigned, GA_PrimitiveGroup*>::iterator PrimIdGroupMapIterator;
-
+		typedef PrimIdGroupMap::value_type PrimIdGroupPair;
+		typedef PrimIdGroupMap::iterator PrimIdGroupMapIterator;
+		
+		typedef std::pair<std::string, unsigned> AttributePrimIdPair;
+		typedef std::map<AttributePrimIdPair, GA_PrimitiveGroup*> AttributePrimIdGroupMap;
+		typedef AttributePrimIdGroupMap::value_type AttributePrimIdGroupPair;
+		typedef AttributePrimIdGroupMap::iterator AttributePrimIdGroupMapIterator;
+		
+		// add parameters needed by both contructors
+		void constructCommon();
+		
 		/// Converts the contents of the GA_PrimitiveGroup into a VisibleRenderable
 		size_t doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result ) const;
 
-		/// Regroups a single GA_PrimitiveGroup into several groups, based on primitive type ids
-		/// @param geo The GU_Detail containing the orginal group. New groups will be added based on primitive type ids
-		/// @param groupMap A map from primitive type id to the newly created group for that type
+		/// Converts the given GA_PrimitiveGroup to an IECore::Primitive and adds it to the IECore::Group
+		void convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, IECore::GroupPtr &result ) const;
+		
+		/// Regroups a single GA_PrimitiveGroup into several groups, based on GA_PrimitiveTypeId
+		/// @param geo The GU_Detail containing the orginal group. New groups will be added based on GA_PrimitiveTypeId
+		/// @param groupMap A map from GA_PrimitiveTypeId to the newly created group for that type
 		/// @return The number of newly created groups ( groupMap.size() )
 		size_t regroup( GU_Detail *geo, PrimIdGroupMap &groupMap ) const;
-
+		
+		/// Regroups the entire geo into several groups, based on attribute value and GA_PrimitiveTypeId
+		/// @param geo New groups will be added based on attribute value and GA_PrimitiveTypeId
+		/// @param groupMap A map from attribute value and GA_PrimitiveTypeId to the newly created group for that value/type pair
+		/// @return The number of newly created groups ( groupMap.size() )
+		size_t regroup( GU_Detail *geo, AttributePrimIdGroupMap &attrMap, GA_ROAttributeRef attrRef ) const;
+		
 		static FromHoudiniGeometryConverter::Description<FromHoudiniGroupConverter> m_description;
 };
 

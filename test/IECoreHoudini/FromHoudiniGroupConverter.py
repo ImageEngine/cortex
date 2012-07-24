@@ -177,7 +177,70 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.children()[3].children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[3].children()[1].blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[3].children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
+	
+	def testConvertSceneFromAttributeValue( self, keepGroups=False ) :
+		attribName = "notAGroup"
+		merge = self.buildScene()
+		attribs = []
+		values = []
+		groups = [ x for x in merge.parent().children() if x.type().name() == "group" ]
+		for group in groups :
+			group.bypass( not keepGroups )
+			attrib = group.createOutputNode( "attribcreate" )
+			attrib.parm( "name1" ).set( attribName )
+			attrib.parm( "class1" ).set( 1 ) # Prim
+			attrib.parm( "type1" ).set( 3 ) # String
+			attrib.parm( "string1" ).set( group.parm( "crname" ).eval() )
+			connection = group.outputConnections()[0]
+			connection.outputNode().setInput( connection.inputIndex(), attrib )
+			attribs.append( attrib )
+			values.append( attrib.parm( "string1" ).eval() )
 		
+		if not keepGroups :
+			self.assertEqual( merge.geometry().primGroups(), tuple() )
+		
+		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
+		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingAttribute"].setTypedValue( attribName )
+		result = converter.convert()
+		
+		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertEqual( len(result.children()), 5 )
+		self.assertEqual( set([ x.typeId() for x in result.children() ]), set([IECore._IECore.TypeId.CurvesPrimitive, IECore._IECore.TypeId.MeshPrimitive, IECore._IECore.TypeId.PointsPrimitive]) )
+		
+		for child in result.children() :
+			
+			self.assertEqual( child.blindData(), IECore.CompoundData() )
+			self.failUnless( child.arePrimitiveVariablesValid() )
+			self.failUnless( attribName in child )
+			self.failUnless( attribName+"Indices" in child )
+			self.assertEqual( child[attribName].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+			self.assertEqual( child[attribName+"Indices"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+			# all primitives point to the same grouping attribute value
+			self.assertEqual( child[attribName].data.size(), 1 )
+			correctAttrib = [ x for x in attribs if child[attribName].data[0] == x.parm( "string1" ).eval() ]
+			self.assertEqual( len(correctAttrib), 1 )
+			self.assertEqual( child[attribName+"Indices"].data, IECore.IntVectorData( [ 0 ] * child.variableSize( child[attribName+"Indices"].interpolation ) ) )
+			if child[attribName].data[0] == "pointsGroup" :
+				self.failUnless( child.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
+			elif child[attribName].data[0] == "torusAGroup" :
+				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+			elif child[attribName].data[0] == "torusBGroup" :
+				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+			elif child[attribName].data[0] == "curveBoxGroup" :
+				self.failUnless( child.isInstanceOf( IECore.TypeId.CurvesPrimitive ) or child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+			else :
+				raise RuntimeError, "An unexpected attribute value exists"
+		
+		null = merge.parent().createNode( "null" )
+		self.failUnless( IECoreHoudini.ToHoudiniGeometryConverter.create( result ).convert( null ) )
+		for prim in null.geometry().prims() :
+			self.failUnless( prim.stringAttribValue( attribName ) in values )
+	
+	def testConvertSceneFromAttributeValueWithGroups( self ) :
+		
+		self.testConvertSceneFromAttributeValue( keepGroups = True )
+	
 	def testConvertGroupedPoints( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.points() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
@@ -288,6 +351,32 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.children()[0].children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[0].children()[1].blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
+	
+	def testFakeAttributeValue( self ) :
+		converter = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() )
+		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingAttribute"].setTypedValue( "notAnAttr" )
+		result = converter.convert()
+		self.assertEqual( result, None )
+	
+	def testNonPrimitiveAttributeValue( self ) :
+		merge = self.buildScene()
+		attrib = merge.createOutputNode( "attribcreate" )
+		attrib.parm( "name1" ).set( "pointStr" )
+		attrib.parm( "class1" ).set( 2 ) # Point
+		attrib.parm( "type1" ).set( 3 ) # String
+		converter = IECoreHoudini.FromHoudiniGroupConverter( attrib )
+		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingAttribute"].setTypedValue( "pointStr" )
+		result = converter.convert()
+		self.assertEqual( result, None )
+	
+	def testNonStringAttributeValue( self ) :
+		converter = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() )
+		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingAttribute"].setTypedValue( "born" )
+		result = converter.convert()
+		self.assertEqual( result, None )
 	
 	def testObjectWasDeleted( self ) :
 		torii = self.twoTorii()
