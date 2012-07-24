@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -149,7 +149,8 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		group.bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( group )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-
+		
+		self.failUnless( IECore.TypeId.Group in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
 		
 		points = self.points()
 		torus = self.torusA()

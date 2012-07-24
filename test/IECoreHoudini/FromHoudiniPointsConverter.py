@@ -88,6 +88,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
+		
+		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
 
 	# performs geometry conversion
 	def testDoConversion( self ) :

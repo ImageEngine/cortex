@@ -75,6 +75,10 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 		
+		/// Fills the passed vector with all the IECore::TypeIds for which
+		/// a FromHoudiniGeometryConverter is available.
+		static void supportedTypes( std::vector<IECore::TypeId> &types );
+		
 		enum Convertability
 		{
 			Inapplicable = 0,

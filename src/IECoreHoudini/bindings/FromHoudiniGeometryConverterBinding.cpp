@@ -42,9 +42,24 @@
 using namespace boost::python;
 using namespace IECoreHoudini;
 
+static list supportedTypes()
+{
+	list result;
+	std::vector<IECore::TypeId> e;
+	FromHoudiniGeometryConverter::supportedTypes( e );
+	for( unsigned int i=0; i < e.size(); ++i )
+	{
+		result.append( e[i] );
+	}
+	
+	return result;
+}
+
 void IECoreHoudini::bindFromHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniGeometryConverter >()
 		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, IECore::TypeId ) )&FromHoudiniGeometryConverter::create, ( arg_( "sop" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+		.def( "supportedTypes", ( list(*)( ) ) &supportedTypes )
+		.staticmethod( "supportedTypes" )
 	;
 }

@@ -287,6 +287,19 @@ ToHoudiniGeometryConverter::TypesToFnsMap *ToHoudiniGeometryConverter::typesToFn
 	return m;
 }
 
+void ToHoudiniGeometryConverter::supportedTypes( std::vector<IECore::TypeId> &types )
+{
+	const TypesToFnsMap *m = typesToFns();
+	
+	types.clear();
+	types.reserve( m->size() );
+	
+	for ( TypesToFnsMap::const_iterator it=m->begin(); it != m->end(); it ++ )
+	{
+		types.push_back( it->first.fromType );
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 // Implementation of nested Types class
 /////////////////////////////////////////////////////////////////////////////////

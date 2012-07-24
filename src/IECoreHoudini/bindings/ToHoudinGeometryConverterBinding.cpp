@@ -77,11 +77,26 @@ static bool convert( ToHoudiniGeometryConverter &c, SOP_Node *sop, bool append )
 	return false;
 }
 
+static list supportedTypes()
+{
+	list result;
+	std::vector<IECore::TypeId> e;
+	ToHoudiniGeometryConverter::supportedTypes( e );
+	for( unsigned int i=0; i < e.size(); ++i )
+	{
+		result.append( e[i] );
+	}
+	
+	return result;
+}
+
 void IECoreHoudini::bindToHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass<ToHoudiniGeometryConverter>()
 		.def( "convert", &convert, ( arg_( "self" ), arg_( "sop" ), arg_( "append" ) = false ),
 			"Extracts the GU_DetailHandle from a SOP_Node and converts it. The append flag defaults to False, which will clear the GU_Detail before conversion. If append is True, the conversion will append to the existing GU_Detail instead." )
 		.def( "create", &ToHoudiniGeometryConverter::create ).staticmethod( "create" )
+		.def( "supportedTypes", ( list(*)( ) ) &supportedTypes )
+		.staticmethod( "supportedTypes" )
 	;
 }

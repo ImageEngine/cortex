@@ -67,6 +67,10 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// Creates a converter which will convert the given IECore::Primitive to a Houdini GU_Detail.
 		/// Returns 0 if no such converter can be found.
 		static ToHoudiniGeometryConverterPtr create( const IECore::VisibleRenderable *renderable );
+		
+		/// Fills the passed vector with all the IECore::TypeIds for which
+		/// a ToHoudiniGeometryConverter is available.
+		static void supportedTypes( std::vector<IECore::TypeId> &types );
 
 	protected :
 
