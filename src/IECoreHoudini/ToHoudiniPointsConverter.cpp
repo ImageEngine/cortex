@@ -72,7 +72,7 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	transferAttribs( points, geo, newPoints, GA_Range(), PrimitiveVariable::Vertex );
+	transferAttribs( points, geo, newPoints, GA_Range(), PrimitiveVariable::Vertex, PrimitiveVariable::Vertex );
 	
 	return true;
 }
