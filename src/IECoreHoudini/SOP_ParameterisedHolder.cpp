@@ -370,22 +370,47 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 		return;
 	}
 
+	std::set<IECore::TypeId> connectionTypes;
+	FromHoudiniGeometryConverter::supportedTypes( connectionTypes );
+	// adding Primitive explicitly since we want to allow PrimitiveParameters,
+	// but there is no direct converter for the abstract base class.
+	connectionTypes.insert( PrimitiveTypeId );
+	
 	// add inputs for the appropriate parameters
 	const CompoundParameter::ParameterVector &parameters = parameterised->parameters()->orderedParameters();
 	for ( CompoundParameter::ParameterVector::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		switch( (*it)->typeId() )
+		bool addConnection = false;
+		
+		// adding ObjectParameters explicitly so generic data can be passed through
+		// ParameterisedHolders even if they don't make particular sense in SOPs.
+		if ( (*it)->typeId() == ObjectParameterTypeId )
 		{
-			case ObjectParameterTypeId:
-			case PrimitiveParameterTypeId:
-			case PointsPrimitiveParameterTypeId:
-			case MeshPrimitiveParameterTypeId:
-			case CurvesPrimitiveParameterTypeId:
-			case GroupParameterTypeId:
-				m_inputParameters.push_back( (*it) );
-				break;
-			default:
-				break;
+			addConnection = true;
+		}
+		else
+		{
+			const ObjectParameter *objectParam = IECore::runTimeCast<ObjectParameter>( *it );
+			if ( !objectParam )
+			{
+				continue;
+			}
+			
+			ObjectParameter::TypeIdSet types = objectParam->validTypes();
+			for ( ObjectParameter::TypeIdSet::iterator tIt=types.begin(); tIt != types.end(); ++tIt )
+			{
+				/// \todo: we should probably also handle the base types of *tIt
+				if ( std::find( connectionTypes.begin(), connectionTypes.end(), *tIt ) != connectionTypes.end() )
+				{
+					addConnection = true;
+					break;
+				}
+			}
+		}
+		
+		if ( addConnection )
+		{
+			m_inputParameters.push_back( *it );
 		}
 
 		/// \todo: get proper warning in here...
