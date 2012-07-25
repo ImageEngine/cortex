@@ -63,14 +63,14 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// and false otherwise. Implemented to aquire the write lock on the GU_Detail held by the
 		/// GU_DetailHandle, call doConversion(), and finally unlock the GU_Detail.
 		bool convert( GU_DetailHandle handle ) const;
-
+		
 		/// Creates a converter which will convert the given IECore::Primitive to a Houdini GU_Detail.
 		/// Returns 0 if no such converter can be found.
 		static ToHoudiniGeometryConverterPtr create( const IECore::VisibleRenderable *renderable );
 		
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a ToHoudiniGeometryConverter is available.
-		static void supportedTypes( std::vector<IECore::TypeId> &types );
+		static void supportedTypes( std::set<IECore::TypeId> &types );
 
 	protected :
 

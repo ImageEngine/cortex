@@ -77,7 +77,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a FromHoudiniGeometryConverter is available.
-		static void supportedTypes( std::vector<IECore::TypeId> &types );
+		static void supportedTypes( std::set<IECore::TypeId> &types );
 		
 		enum Convertability
 		{

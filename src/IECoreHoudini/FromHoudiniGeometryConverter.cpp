@@ -719,16 +719,14 @@ FromHoudiniGeometryConverter::TypesToFnsMap *FromHoudiniGeometryConverter::types
 	return m;
 }
 
-void FromHoudiniGeometryConverter::supportedTypes( std::vector<IECore::TypeId> &types )
+void FromHoudiniGeometryConverter::supportedTypes( std::set<IECore::TypeId> &types )
 {
-	const TypesToFnsMap *m = typesToFns();
-	
 	types.clear();
-	types.reserve( m->size() );
 	
+	const TypesToFnsMap *m = typesToFns();
 	for ( TypesToFnsMap::const_iterator it=m->begin(); it != m->end(); it ++ )
 	{
-		types.push_back( it->first.resultType );
+		types.insert( it->first.resultType );
 	}
 }
 

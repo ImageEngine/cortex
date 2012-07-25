@@ -45,11 +45,11 @@ using namespace IECoreHoudini;
 static list supportedTypes()
 {
 	list result;
-	std::vector<IECore::TypeId> e;
+	std::set<IECore::TypeId> e;
 	FromHoudiniGeometryConverter::supportedTypes( e );
-	for( unsigned int i=0; i < e.size(); ++i )
+	for ( std::set<IECore::TypeId>::const_iterator it = e.begin(); it != e.end(); ++it )
 	{
-		result.append( e[i] );
+		result.append( *it );
 	}
 	
 	return result;
@@ -59,7 +59,7 @@ void IECoreHoudini::bindFromHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniGeometryConverter >()
 		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, IECore::TypeId ) )&FromHoudiniGeometryConverter::create, ( arg_( "sop" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-		.def( "supportedTypes", ( list(*)( ) ) &supportedTypes )
+		.def( "supportedTypes", &supportedTypes )
 		.staticmethod( "supportedTypes" )
 	;
 }
