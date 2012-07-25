@@ -73,6 +73,9 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, IECore::TypeId resultType=IECore::InvalidTypeId );
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, const std::set<IECore::TypeId> &resultTypes );
 		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, IECore::TypeId resultType=IECore::InvalidTypeId );
+		/// Conversion will always fail with this factory function, but it's useful to access parameters
+		/// of a derived converter before the geometry exists. See SOP_ParameterisedHolder for an example.
+		static FromHoudiniGeometryConverterPtr create( const std::set<IECore::TypeId> &resultTypes );
 		//@}
 		
 		/// Fills the passed vector with all the IECore::TypeIds for which

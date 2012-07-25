@@ -702,6 +702,29 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_D
 	return 0;
 }
 
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const std::set<IECore::TypeId> &resultTypes )
+{
+	const TypesToFnsMap *m = typesToFns();
+	
+	for ( std::set<IECore::TypeId>::iterator typeIt=resultTypes.begin(); typeIt != resultTypes.end(); typeIt++ )
+	{
+		const std::set<IECore::TypeId> &derivedTypes = RunTimeTyped::derivedTypeIds( *typeIt );
+		
+		// find any converter that works
+		for ( TypesToFnsMap::const_iterator it=m->begin(); it != m->end(); ++it )
+		{
+			if ( *typeIt == IECore::InvalidTypeId || *typeIt == it->first.resultType || find( derivedTypes.begin(), derivedTypes.end(), it->first.resultType ) != derivedTypes.end() )
+			{
+				// it works, therfor its good enough, since we have no handle to judge Convertability
+				return it->second.first( GU_DetailHandle() );
+			}
+		}
+	}
+	
+	// there were no suitable converters
+	return 0;
+}
+
 FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_Node *sop, IECore::TypeId resultType )
 {
 	return create( handle( sop ), resultType );

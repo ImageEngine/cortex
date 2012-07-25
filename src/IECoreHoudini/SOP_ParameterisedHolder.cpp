@@ -370,23 +370,15 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 		return;
 	}
 
-	std::set<IECore::TypeId> connectionTypes;
-	FromHoudiniGeometryConverter::supportedTypes( connectionTypes );
-	// adding Primitive explicitly since we want to allow PrimitiveParameters,
-	// but there is no direct converter for the abstract base class.
-	connectionTypes.insert( PrimitiveTypeId );
-	
 	// add inputs for the appropriate parameters
 	const CompoundParameter::ParameterVector &parameters = parameterised->parameters()->orderedParameters();
 	for ( CompoundParameter::ParameterVector::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		bool addConnection = false;
-		
 		// adding ObjectParameters explicitly so generic data can be passed through
 		// ParameterisedHolders even if they don't make particular sense in SOPs.
 		if ( (*it)->typeId() == ObjectParameterTypeId )
 		{
-			addConnection = true;
+			m_inputParameters.push_back( *it );
 		}
 		else
 		{
@@ -396,23 +388,14 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 				continue;
 			}
 			
-			ObjectParameter::TypeIdSet types = objectParam->validTypes();
-			for ( ObjectParameter::TypeIdSet::iterator tIt=types.begin(); tIt != types.end(); ++tIt )
+			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( objectParam->validTypes() );
+			if ( converter )
 			{
-				/// \todo: we should probably also handle the base types of *tIt
-				if ( std::find( connectionTypes.begin(), connectionTypes.end(), *tIt ) != connectionTypes.end() )
-				{
-					addConnection = true;
-					break;
-				}
+				m_inputParameters.push_back( *it );
+				/// \todo: add converter parameters for this input
 			}
 		}
 		
-		if ( addConnection )
-		{
-			m_inputParameters.push_back( *it );
-		}
-
 		/// \todo: get proper warning in here...
 		if ( m_inputParameters.size() > 4 )
 		{
@@ -509,6 +492,8 @@ void SOP_ParameterisedHolder::setInputParameterValues()
 			{
 				continue;
 			}
+			
+			/// \todo: set converter parameters for this input if they're still applicable
 			
 			try
 			{
