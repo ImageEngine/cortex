@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
+import warnings
 
 import hou
 import IECore
@@ -131,40 +133,34 @@ class FnParameterisedHolder():
 						lang = cached_data['expressions'][i][1]
 						p[i].setExpression( expr, lang )
 						
-	# count the number of spare parameters under the "Parameters" tab
-	def countSpareParameters(self):
-		num_folders = 0
-		for p in self.__node.spareParms():
-			if 'Parameters' in p.containingFolders():
-				num_folders += 1
-		return num_folders		
-
+	# return the spare parameters under the "Parameters" tab
+	def spareParameters( self, tuples=True ) :
+		
+		result = []
+		
+		for p in self.__node.spareParms() :
+			if "Parameters" in p.containingFolders() :
+				result.append( p.tuple() if tuples else p )
+		
+		return result
+	
+	## \todo: remove this method for the next major version
+	def countSpareParameters( self ) :
+		
+		warnings.warn( "FnParameterisedHolder.countSpareParameters() is deprecated.", DeprecationWarning, 2 )
+		return len(self.spareParameters( tuples=False ))
+	
 	# this method removes all spare parameters from the "Parameters" folder
-	def removeParameters(self):
-		if not self.nodeValid():
+	def removeParameters( self ) :
+		
+		if not self.nodeValid() :
 			return
 		
-		# remove regular parameters
-		num_spares = len(self.__node.parmTuplesInFolder(["Parameters"]))
-		for i in range(num_spares):
-			found = False
-			while not found:
-				for p in self.__node.parmTuplesInFolder(["Parameters"]):
-					self.__node.removeSpareParmTuple(p)
-					found = True
-					break
-				
-		# remove leftovers (probably folders)
-		num_leftovers = self.countSpareParameters()
-		while( num_leftovers>0 ):
-			found = False
-			while not found:
-				for p in self.__node.spareParms():
-					if 'Parameters' in p.containingFolders():
-						self.__node.removeSpareParmTuple( p.tuple() )
-						found = True
-						break
-			num_leftovers = self.countSpareParameters()
+		spareParms = self.spareParameters()
+		while spareParms :
+			self.__node.removeSpareParmTuple( spareParms[0] )
+			# this is needed to account for parms removed by a containing folder
+			spareParms = self.spareParameters()
 	
 	# add/remove parameters on our node so we correctly reflect our Procedural
 	def updateParameters( self, parameterised ) :
