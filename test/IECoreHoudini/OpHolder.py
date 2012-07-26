@@ -471,6 +471,30 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result["testIndices"].data, IECore.IntVectorData( [ 0 ] * 6 ) )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
 	
+	def testInputConnectionsSaveLoad( self ) :
+		hou.hipFile.clear( suppress_save_prompt=True )
+		
+		( holder, fn ) = self.testOpHolder()
+		fn.setOp( "parameters/groupParam", 2 )
+		
+		holderPath = holder.path()
+		torusPath = holder.createInputNode( 0, "torus" ).path()
+		boxPath = holder.createInputNode( 1, "box" ).path()
+		
+		self.assertEqual( len(holder.inputs()), 2 )
+		self.assertEqual( holder.inputs()[0].path(), torusPath )
+		self.assertEqual( holder.inputs()[1].path(), boxPath )
+		
+		hip = "test/opHolder_testData/opSave_test.hip"
+		hou.hipFile.save( hip )
+		hou.hipFile.clear( suppress_save_prompt=True )
+		hou.hipFile.load( hip )
+		
+		holder = hou.node( holderPath )
+		self.assertEqual( len(holder.inputs()), 2 )
+		self.assertEqual( holder.inputs()[0].path(), torusPath )
+		self.assertEqual( holder.inputs()[1].path(), boxPath )
+	
 	def testInvalidValidation(self):
 		(op,fn)=self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
