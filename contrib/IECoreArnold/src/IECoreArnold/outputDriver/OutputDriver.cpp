@@ -49,6 +49,10 @@ using namespace IECoreArnold;
 static AtVoid driverParameters( AtList *params, AtMetaDataStore *metaData )
 {
 	AiParameterSTR( "driverType", "" );
+
+	// we need to specify this metadata to keep MtoA happy.
+	AiMetaDataSetStr( metaData, 0, "maya.attr_prefix", "" );
+	AiMetaDataSetStr( metaData, 0, "maya.translator", "ie" );
 }
 
 static AtVoid driverInitialize( AtNode *node, AtParamValue *parameters )
