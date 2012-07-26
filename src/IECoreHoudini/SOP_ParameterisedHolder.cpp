@@ -392,7 +392,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 			if ( converter )
 			{
 				m_inputParameters.push_back( *it );
-				/// \todo: add converter parameters for this input
+				/// \todo: add converter parameters here once ParameterHandlers are defined in c++
 			}
 		}
 		
@@ -416,6 +416,11 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 }
 
 void SOP_ParameterisedHolder::setInputParameterValues()
+{
+	setInputParameterValues( 0 );
+}
+
+void SOP_ParameterisedHolder::setInputParameterValues( float now )
 {
 	for ( unsigned int i=0; i < m_inputParameters.size(); i++ )
 	{
@@ -493,7 +498,12 @@ void SOP_ParameterisedHolder::setInputParameterValues()
 				continue;
 			}
 			
-			/// \todo: set converter parameters for this input if they're still applicable
+			// set converter parameters from the node values
+			const CompoundParameter::ParameterVector &converterParameters = converter->parameters()->orderedParameters();
+			for ( CompoundParameter::ParameterVector::const_iterator it=converterParameters.begin(); it != converterParameters.end(); ++it )
+			{
+				updateParameter( *it, now, "parm_" + inputParameter->name() + "_" );
+			}
 			
 			try
 			{

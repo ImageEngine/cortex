@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -421,6 +421,56 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertRaises( hou.OperationFailed, op.cook )
 		self.assertNotEqual( op.errors(), "" )
 					
+	def testGroupParameterConversion( self ) :
+		( holder, fn ) = self.testOpHolder()
+		fn.setOp( "parameters/groupParam", 1 )
+		
+		merge = holder.createInputNode( 0, "merge" )
+		attrib1 = merge.createInputNode( 0, "attribcreate" )
+		attrib1.parm( "name1" ).set( "test" )
+		attrib1.parm( "class1" ).set( 1 ) # Prim
+		attrib1.parm( "type1" ).set( 3 ) # String
+		attrib1.parm( "string1" ).set( "torusGroup" )
+		group1 = attrib1.createInputNode( 0, "group" )
+		group1.parm( "crname" ).set( "torusGroup" )
+		torus = group1.createInputNode( 0, "torus" )
+
+		attrib2 = merge.createInputNode( 1, "attribcreate" )
+		attrib2.parm( "name1" ).set( "test" )
+		attrib2.parm( "class1" ).set( 1 ) # Prim
+		attrib2.parm( "type1" ).set( 3 ) # String
+		attrib2.parm( "string1" ).set( "boxGroup" )
+		group2 = attrib2.createInputNode( 0, "group" )
+		group2.parm( "crname" ).set( "boxGroup" )
+		box = group2.createInputNode( 0, "box" )
+		
+		holder.cook()
+		result = fn.getOp().resultParameter().getValue()
+		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.blindData()["name"].value, "torusGroup" )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		
+		group1.bypass( True )
+		group2.bypass( True )
+		holder.cook()
+		result = fn.getOp().resultParameter().getValue()
+		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 106 )
+		
+		holder.parm( "parm_input_groupByAttribute" ).set( True )
+		holder.parm( "parm_input_groupingAttribute" ).set( "test" )
+		holder.cook()
+		result = fn.getOp().resultParameter().getValue()
+		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertEqual( result["test"].data, IECore.StringVectorData( [ "boxGroup" ] ) )
+		self.assertEqual( result["testIndices"].data, IECore.IntVectorData( [ 0 ] * 6 ) )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+	
 	def testInvalidValidation(self):
 		(op,fn)=self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
@@ -432,7 +482,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn.setParameterised(cl)
 		self.assertRaises( hou.OperationFailed, op2.cook )
 		self.assertNotEqual( op2.errors(), "" )
-		
+	
 	def testInvalidOp(self):
 		(op,fn)=self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
@@ -498,7 +548,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.parm( "__classCategory" ).pressButton()
 		self.failUnless( len(fn.classNames()) > 4 )
 		op.parm( "__classMatchString" ).set( "parameters/*" )
-		self.assertEqual( len(fn.classNames()), 4 )
+		self.assertEqual( len(fn.classNames()), 5 )
 	
 	def testSetOpValues( self ) :
 		( holder, fn ) = self.testOpHolder()

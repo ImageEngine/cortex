@@ -120,6 +120,8 @@ class SOP_ParameterisedHolder : public SOP_Node
 		/// This method will cook the incomming nodes. If the input node derives from SOP_ParameterisedHolder,
 		/// it's Cortex output will be passed through. If it is a native Houdini node, it will be converted
 		/// using the appropriate FromHoudiniGeometryConverter.
+		void setInputParameterValues( float now );
+		/// \todo: this signature is deprecated. remove for next major version
 		void setInputParameterValues();
 
 		/// A vector of IECore::Parameters which are passed through SOP inputs rather than PRM_Templates

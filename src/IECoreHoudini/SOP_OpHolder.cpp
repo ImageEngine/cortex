@@ -95,7 +95,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	gdp->clearAndDestroy();
 
 	// push the input geo into the associated op parameters
-	setInputParameterValues();
+	setInputParameterValues( now );
 	
 	// update the SOP parameters to match the IECore::Op parameters
 	updateParameter( op->parameters(), now, "", true );

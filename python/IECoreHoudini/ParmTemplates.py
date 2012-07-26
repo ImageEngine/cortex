@@ -147,7 +147,16 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 3, parent=parent )
 	if p.typeId()==IECore.TypeId.Box3dParameter:
 		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 3, parent=parent )
-
+	
+	if p.isInstanceOf( IECore.TypeId.ObjectParameter ) :
+		# input connection parameter, may need to add conversion parameters
+		if set(p.validTypes()).intersection( set(IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes()) ) :
+			converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( p.validTypes() )
+			sub_folder = folders + [ parmLabel( p ) ]
+			name = parmName( p.name, prefix=parent )
+			for child in converter.parameters().values() :
+				results += createParm( child, sub_folder, parent=name )
+	
 	if parm:
 		# is this parameter hidden?
 		do_hide = False
