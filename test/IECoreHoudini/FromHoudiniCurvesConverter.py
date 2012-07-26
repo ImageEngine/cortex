@@ -134,6 +134,17 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.CurvesPrimitive ] )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
+	def testConvertFromHOMGeo( self ) :
+		geo = self.createCurve().geometry()
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo )
+		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
+		
+		result = converter.convert()
+		self.failUnless( result.isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
+		
+		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.CurvesPrimitive )
+		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
+
 	def verifyLinearCurves( self, sop ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.CurvesPrimitive )

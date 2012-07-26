@@ -42,6 +42,7 @@
 #include "OP/OP_Node.h"
 #include "SOP/SOP_Node.h"
 #include "HOM/HOM_Node.h"
+#include "HOM/HOM_Geometry.h"
 
 #include "IECore/Object.h"
 #include "IECore/Parameterised.h"
@@ -119,4 +120,6 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<SOP_Node>() );
+	
+	IECorePython::PointerFromSWIG<HOM_Geometry>();
 }

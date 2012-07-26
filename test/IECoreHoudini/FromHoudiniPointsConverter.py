@@ -103,6 +103,17 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 
+	def testConvertFromHOMGeo( self ) :
+		geo = self.createPoints().geometry()
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo )
+		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		
+		result = converter.convert()
+		self.failUnless( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
+		
+		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.PointsPrimitive )
+		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+
 	# convert a mesh
 	def testConvertMesh( self ) :
 		torus = self.createTorus()

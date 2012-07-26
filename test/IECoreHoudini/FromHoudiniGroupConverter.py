@@ -166,6 +166,17 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
 	
+	def testConvertFromHOMGeo( self ) :
+		geo = self.curveBox().geometry()
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo )
+		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+		
+		result = converter.convert()
+		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
+		
+		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.Group )
+		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+
 	def testConvertScene( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )

@@ -35,6 +35,8 @@
 #include "boost/python.hpp"
 
 #include "CH/CH_Manager.h"
+#include "HOM/HOM_Geometry.h"
+#include "HOM/HOM_GUDetailHandle.h"
 #include "SOP/SOP_Node.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -45,20 +47,16 @@
 using namespace boost::python;
 using namespace IECoreHoudini;
 
-/// Extracts the GU_DetailHandle from a SOP_Node and converts it. If append is true,
-/// the conversion will append to the existing GU_Detail. If append is false, the GU_Detail
-/// will be cleared before conversion.
-static bool convert( ToHoudiniGeometryConverter &c, SOP_Node *sop, bool append )
+static bool convert( ToHoudiniGeometryConverter &c, GU_DetailHandle &handle, bool append )
 {
-	// create the work context
-	OP_Context context;
-	context.setTime( CHgetEvalTime() );
-	
-	GU_DetailHandle handle = sop->getCookedGeoHandle( context );
+	if ( handle.isNull() )
+	{
+		return false;
+	}
 	
 	if ( !append )
 	{
-		GU_DetailHandleAutoWriteLock writeHandle( handle );	
+		GU_DetailHandleAutoWriteLock writeHandle( handle );
 		GU_Detail *geo = writeHandle.getGdp();
 		if ( !geo )
 		{
@@ -68,13 +66,53 @@ static bool convert( ToHoudiniGeometryConverter &c, SOP_Node *sop, bool append )
 		geo->clearAndDestroy();
 	}
 	
-	if ( c.convert( handle ) )
+	return c.convert( handle );
+}
+
+/// Extracts the GU_DetailHandle from a SOP_Node and converts it. If append is true,
+/// the conversion will append to the existing GU_Detail. If append is false, the GU_Detail
+/// will be cleared before conversion.
+static bool convertToSop( ToHoudiniGeometryConverter &c, SOP_Node *sop, bool append )
+{
+	// create the work context
+	OP_Context context;
+	context.setTime( CHgetEvalTime() );
+	
+	GU_DetailHandle handle = sop->getCookedGeoHandle( context );
+	
+	if ( convert( c, handle, append ) )
 	{
 		sop->setModelLock( true );
 		return true;
 	}
 	
 	return false;
+}
+
+/// Extracts the GU_DetailHandle from the HOM_Geometry and converts it. If append is true,
+/// the conversion will append to the existing GU_Detail. If append is false, the GU_Detail
+/// will be cleared before conversion.
+static bool convertToGeo( ToHoudiniGeometryConverter &c, HOM_Geometry *homGeo, bool append )
+{
+	if ( !homGeo )
+	{
+		return false;
+	}
+	
+	// this HOM manipulation was provided by SideFx, with a warning
+	// that it is safe but not really meant for HDK developers
+	HOM_GUDetailHandle *gu_handle = homGeo->_guDetailHandle();
+	if ( gu_handle->isReadOnly() )
+	{
+		return false;
+	}
+	
+	GU_Detail *geo = (GU_Detail *)gu_handle->_asVoidPointer();
+	
+	GU_DetailHandle handle;
+	handle.allocateAndSet( geo, false );
+	
+	return convert( c, handle, append );
 }
 
 static list supportedTypes()
@@ -93,8 +131,10 @@ static list supportedTypes()
 void IECoreHoudini::bindToHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass<ToHoudiniGeometryConverter>()
-		.def( "convert", &convert, ( arg_( "self" ), arg_( "sop" ), arg_( "append" ) = false ),
+		.def( "convert", &convertToSop, ( arg_( "self" ), arg_( "sop" ), arg_( "append" ) = false ),
 			"Extracts the GU_DetailHandle from a SOP_Node and converts it. The append flag defaults to False, which will clear the GU_Detail before conversion. If append is True, the conversion will append to the existing GU_Detail instead." )
+		.def( "convertToGeo", &convertToGeo, ( arg_( "self" ), arg_( "geo" ), arg_( "append" ) = false ),
+			"Extracts the GU_Detail from a hou.Geometry object and converts it. The append flag defaults to False, which will clear the GU_Detail before conversion. If append is True, the conversion will append to the existing GU_Detail instead." )
 		.def( "create", &ToHoudiniGeometryConverter::create ).staticmethod( "create" )
 		.def( "supportedTypes", &supportedTypes )
 		.staticmethod( "supportedTypes" )

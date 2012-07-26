@@ -36,11 +36,15 @@ import hou
 import IECore
 import IECoreHoudini
 import unittest
-import os
+import os, shutil
 import random
 
 class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
-
+	
+	__testOTL = "test/IECoreHoudini/data/otls/testHDAs.otl"
+	__testOTLBackups = os.path.join( os.path.dirname( __testOTL ), "backup" )
+	__testOTLCopy = os.path.join( __testOTLBackups, os.path.basename( __testOTL ) )
+	
 	def points( self ) :
 		pData = IECore.V3fVectorData( [
 			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
@@ -389,6 +393,70 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		houdiniBound = null.geometry().boundingBox()
 		bound = IECore.Box3f( IECore.V3f( list(houdiniBound.minvec()) ), IECore.V3f( list(houdiniBound.maxvec()) ) )
 		self.assertEqual( group.bound(), bound )
+
+	def testCannotConvertIntoReadOnlyHOMGeo( self ) :
+		
+		group = self.buildScene()
+		sop = self.emptySop()
+		
+		converter = IECoreHoudini.ToHoudiniGroupConverter( group )
+		self.failUnless( not converter.convertToGeo( sop.geometry() ) )
+		
+		self.assertEqual( sop.geometry().points(), tuple() )
+		self.assertEqual( sop.geometry().prims(), tuple() )
+	
+	def testConvertIntoWritableHOMGeo( self ) :
+		
+		if not os.path.isdir( TestToHoudiniGroupConverter.__testOTLBackups ) :
+			os.mkdir( TestToHoudiniGroupConverter.__testOTLBackups )
+		
+		shutil.copyfile( TestToHoudiniGroupConverter.__testOTL, TestToHoudiniGroupConverter.__testOTLCopy )
+		hou.hda.installFile( TestToHoudiniGroupConverter.__testOTLCopy )
+		
+		sop = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False ).createNode( "testPythonSop" )
+		geo = sop.geometry()
+		self.assertEqual( sop.geometry().points(), tuple() )
+		self.assertEqual( sop.geometry().prims(), tuple() )
+		
+		sop.type().definition().sections()["PythonCook"].setContents( """
+import IECore
+import IECoreHoudini
+group = IECore.Group()
+mesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
+mesh.blindData()["name"] = IECore.StringData( "mesh" )
+points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 20 ) ] ) )
+points.blindData()["name"] = IECore.StringData( "points" )
+curves = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 4 ) ] ) )
+curves.blindData()["name"] = IECore.StringData( "curves" )
+group.addChild( mesh )
+group.addChild( points )
+group.addChild( curves )
+IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry() )"""
+		)
+		
+		self.assertEqual( len(sop.geometry().points()), 32 )
+		self.assertEqual( len(sop.geometry().prims()), 7 )
+		
+		sop.createInputNode( 0, "torus" )
+		
+		self.assertEqual( len(sop.geometry().points()), 32 )
+		self.assertEqual( len(sop.geometry().prims()), 7 )
+		
+		code = sop.type().definition().sections()["PythonCook"].contents()
+		sop.type().definition().sections()["PythonCook"].setContents( code.replace( "convertToGeo( hou.pwd().geometry() )", "convertToGeo( hou.pwd().geometry(), append=True )" ) )
+		
+		self.assertEqual( len(sop.geometry().points()), 132 )
+		self.assertEqual( len(sop.geometry().prims()), 107 )
+		
+		sop.destroy()
+	
+	def tearDown( self ) :
+		
+		if TestToHoudiniGroupConverter.__testOTLCopy in "".join( hou.hda.loadedFiles() ) :
+			hou.hda.uninstallFile( TestToHoudiniGroupConverter.__testOTLCopy )
+		
+		if os.path.isdir( TestToHoudiniGroupConverter.__testOTLBackups ) :
+			shutil.rmtree( TestToHoudiniGroupConverter.__testOTLBackups )
 
 if __name__ == "__main__":
     unittest.main()

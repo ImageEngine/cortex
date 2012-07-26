@@ -103,6 +103,19 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 
+	def testConvertFromHOMGeo( self ) :
+		geo = self.createBox().geometry()
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo )
+		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
+		
+		result = converter.convert()
+		self.failUnless( result.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		
+		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.MeshPrimitive )
+		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
+		
+		## \todo: make sure we catch that bad_cast crash
+
 	# convert a mesh
 	def testConvertMesh( self ) :
 		

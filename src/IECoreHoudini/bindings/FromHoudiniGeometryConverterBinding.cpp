@@ -34,6 +34,9 @@
 
 #include "boost/python.hpp"
 
+#include "HOM/HOM_Geometry.h"
+#include "HOM/HOM_GUDetailHandle.h"
+
 #include "IECore/Exception.h"
 
 #include "IECorePython/IECoreBinding.h"
@@ -56,6 +59,19 @@ static list supportedTypes()
 	}
 	
 	return result;
+}
+
+static FromHoudiniGeometryConverterPtr createFromGeo( HOM_Geometry *homGeo, IECore::TypeId resultType )
+{
+	// this HOM manipulation was provided by SideFx, with a warning
+	// that it is safe but not really meant for HDK developers
+	HOM_GUDetailHandle *gu_handle = homGeo->_guDetailHandle();
+	GU_Detail *geo = (GU_Detail *)gu_handle->_asVoidPointer();
+	
+	GU_DetailHandle handle;
+	handle.allocateAndSet( geo, false );
+	
+	return FromHoudiniGeometryConverter::create( handle, resultType );
 }
 
 static FromHoudiniGeometryConverterPtr createDummy( object ids )
@@ -85,6 +101,7 @@ void IECoreHoudini::bindFromHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniGeometryConverter >()
 		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, IECore::TypeId ) )&FromHoudiniGeometryConverter::create, ( arg_( "sop" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+		.def( "createFromGeo", &createFromGeo, ( arg_( "geo" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "createFromGeo" )
 		.def( "createDummy", &createDummy, ( arg_( "resultTypes" ) ) ).staticmethod( "createDummy" )
 		.def( "supportedTypes", &supportedTypes )
 		.staticmethod( "supportedTypes" )
