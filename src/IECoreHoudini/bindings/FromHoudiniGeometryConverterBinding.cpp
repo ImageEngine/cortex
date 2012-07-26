@@ -34,6 +34,9 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/Exception.h"
+
+#include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
@@ -55,10 +58,34 @@ static list supportedTypes()
 	return result;
 }
 
+static FromHoudiniGeometryConverterPtr createDummy( object ids )
+{
+	extract<IECore::TypeId> ex( ids );
+	if( ex.check() )
+	{
+		return FromHoudiniGeometryConverter::create( ex() );
+	}
+	
+	std::set<IECore::TypeId> resultTypes;
+	for ( long i = 0; i < IECorePython::len( ids ); i++ )
+	{
+		extract<IECore::TypeId> ex( ids[i] );
+		if ( !ex.check() )
+		{
+			throw IECore::InvalidArgumentException( "FromHoudiniGeometryConverter.supportedTypes: List element is not an IECore.TypeId" );
+		}
+		
+		resultTypes.insert( ex() );
+	}
+	
+	return FromHoudiniGeometryConverter::create( resultTypes );
+}
+
 void IECoreHoudini::bindFromHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniGeometryConverter >()
 		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, IECore::TypeId ) )&FromHoudiniGeometryConverter::create, ( arg_( "sop" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+		.def( "createDummy", &createDummy, ( arg_( "resultTypes" ) ) ).staticmethod( "createDummy" )
 		.def( "supportedTypes", &supportedTypes )
 		.staticmethod( "supportedTypes" )
 	;

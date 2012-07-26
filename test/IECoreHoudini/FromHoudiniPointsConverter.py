@@ -90,6 +90,12 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.PointsPrimitive )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.PointsPrimitive ] )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 	# performs geometry conversion
 	def testDoConversion( self ) :

@@ -127,6 +127,12 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.CurvesPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.CurvesPrimitive )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.CurvesPrimitive ] )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
 	def verifyLinearCurves( self, sop ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()

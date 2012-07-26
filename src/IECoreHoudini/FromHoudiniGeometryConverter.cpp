@@ -730,6 +730,14 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_
 	return create( handle( sop ), resultType );
 }
 
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( IECore::TypeId resultType )
+{
+	std::set<IECore::TypeId> types;
+	types.insert( resultType );
+	
+	return create( types );
+}
+
 void FromHoudiniGeometryConverter::registerConverter( IECore::TypeId resultType, CreatorFn creator, ConvertabilityFn canConvert )
 {
 	TypesToFnsMap *m = typesToFns();

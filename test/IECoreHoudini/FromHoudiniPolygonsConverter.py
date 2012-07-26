@@ -90,6 +90,12 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.MeshPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.MeshPrimitive )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.MeshPrimitive ] )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
 	# performs geometry conversion
 	def testDoConversion( self ) :

@@ -152,6 +152,12 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		
 		self.failUnless( IECore.TypeId.Group in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
 		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.Group )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.Group ] )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+		
 		points = self.points()
 		torus = self.torusA()
 		merge = self.geo().createNode( "merge" )
@@ -159,7 +165,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		merge.setInput( 1, self.twoTorii() )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-
+	
 	def testConvertScene( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
