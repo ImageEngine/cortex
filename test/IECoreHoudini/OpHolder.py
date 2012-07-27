@@ -599,6 +599,45 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( parameters['compound_3']['compound_4']['some_int'].description, holder.parm( "parm_compound_3_compound_4_some_int" ).parmTemplate().help() )
 		self.assertEqual( parameters['compound_5']['bool_1'].description, holder.parm( "parm_compound_5_bool_1" ).parmTemplate().help() )
 	
+	def testNumericPresetMenus( self ) :
+		
+		# at present, Int/FloatParameters only support presetsOnly presets, due to the limitations of hou.MenuParmTemplate
+		( holder, fn ) = self.testOpHolder()
+		fn.setOp( "parameters/groupParam", 2 )
+		parm = holder.parm( "parm_switch" )
+		self.failUnless( isinstance( parm, hou.Parm ) )
+		template = parm.parmTemplate()
+		self.failUnless( isinstance( template, hou.MenuParmTemplate ) )
+		# the int values are stored as strings in this crazy Houdini world
+		self.assertEqual( template.menuItems(), ( "20", "30" ) )
+		self.assertEqual( template.menuLabels(), ( "A", "B" ) )
+		self.assertEqual( template.defaultValue(), 0 )
+		self.assertEqual( template.defaultValueAsString(), "20" )
+		self.assertEqual( parm.eval(), 0 )
+		self.assertEqual( parm.evalAsString(), "20" )
+		
+		# but on the op values are really the ints we require
+		op = fn.getOp()
+		self.assertEqual( op["switch"].getTypedValue(), 20 )
+		parm.set( 1 )
+		holder.cook()
+		self.assertEqual( op["switch"].getTypedValue(), 30 )
+		parm.set( 2 )
+		self.assertRaises( hou.OperationFailed, holder.cook )
+		parm.set( -1 )
+		self.assertRaises( hou.OperationFailed, holder.cook )
+		parm.set( 0 )
+		holder.cook()
+		self.failUnless( not holder.errors() )
+		
+		newHolder = holder.parent().createNode( "ieOpHolder" )
+		newFn = IECoreHoudini.FnOpHolder( newHolder )
+		op["switch"].setTypedValue( 30 )
+		newFn.setOp( op )
+		newParm = newHolder.parm( "parm_switch" )
+		self.assertEqual( newParm.eval(), 1 )
+		self.assertEqual( newParm.evalAsString(), "30" )
+	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
 		self.__torusTestFile = "test/IECoreHoudini/data/torus.cob"

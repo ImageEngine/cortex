@@ -207,7 +207,7 @@ def parmLabel( p ) :
 # sets the parmTemplate menu arguments for preset parameters
 def presetsMenuArgs( p ) :
 	menuLabels = p.presetNames()
-	menuItems = tuple( [ x.value for x in p.presetValues() ] )
+	menuItems = tuple( [ str(x.value) for x in p.presetValues() ] )
 	menuType = hou.menuType.Normal
 	if not p.presetsOnly :
 		menuType = hou.menuType.StringReplace
@@ -228,35 +228,40 @@ def intParm( p, dim=1, parent=None ):
 	# only simple floats have min/max values
 	if dim==1:
 		default = [(p.defaultValue.value)]
+		initialValue = [ p.getTypedValue() ]
 		min_val = 0
 		max_val = 10
 		min_lock = max_lock = False
+		naming = hou.parmNamingScheme.Base1
 		if p.hasMinValue():
 			min_val = p.minValue
 			min_lock = True
 		if p.hasMaxValue():
 			max_val = p.maxValue
 			max_lock = True
+		
 	else:
 		default = list(p.defaultValue.value)
+		initialValue = list(p.getTypedValue())
 		min_val = 0
 		max_val = 10
 		min_lock = max_lock = False
-
-	naming = hou.parmNamingScheme.Base1
-	if dim>1:
 		naming = hou.parmNamingScheme.XYZW
-
-	parm = hou.IntParmTemplate(
-		name, label, dim, default_value=default,
-	 	min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
-		naming_scheme=naming, help=p.description
-	)
 	
-	if dim == 1 :
-		initialValue = [ p.getTypedValue() ]
+	# Houdini can only handle presets for dim 1 ints, and even then its quite messy...
+	if dim == 1 and p.presetsOnly :
+		parm = hou.MenuParmTemplate(
+			name, label, default_value=p.presetValues().index( p.defaultValue ),
+			**presetsMenuArgs( p )
+		)
+		
+		initialValue = [ p.presetValues().index( p.getValue() ) ]
 	else :
-		initialValue = list(p.getTypedValue())
+		parm = hou.IntParmTemplate(
+			name, label, dim, default_value=default,
+	 		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
+			naming_scheme=naming, help=p.description
+		)
 	
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 

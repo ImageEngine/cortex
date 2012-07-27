@@ -17,9 +17,12 @@ class groupParam( IECore.Op ) :
 			IECore.IntParameter(
 				name = "switch",
 				description = "Switch between the groups",
-				defaultValue = 0,
-				minValue = 0,
-				maxValue = 1
+				defaultValue = 20,
+				presets = (
+					( "A", 20 ),
+					( "B", 30 ),
+				),
+				presetsOnly=True
 			),
 			IECore.GroupParameter(
 				name = "inputA",
@@ -35,10 +38,12 @@ class groupParam( IECore.Op ) :
 
 	def doOperation( self, args ) :
 		
-		group = args["inputB"] if args["switch"].value else args["inputA"]
+		group = args["inputA"] if args["switch"].value == 20 else args["inputB"]
 		
 		for child in group.children() :
 			if child.isInstanceOf( IECore.TypeId.Primitive ) :
 				return child.copy()
+		
+		return self.resultParameter().defaultValue.copy()
 
 IECore.registerRunTimeTyped( groupParam )

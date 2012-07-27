@@ -706,7 +706,27 @@ void SOP_ParameterisedHolder::updateParameter( ParameterPtr parm, float now, std
 			// int parameter
 			case IECore::IntParameterTypeId:
 			{
-				int val = evalInt( parm_name.c_str(), 0, now );
+				int val = static_cast<const IntData *>( parm->defaultValue() )->readable();
+				
+				// horrible hack to accomodate Houdini's MenuParmTemplate for IntParameters
+				// We really need ParameterHandlers in c++ and Houdini really needs to
+				// support proper menus on any ParmTemplate.
+				if ( parm->presetsOnly() )
+				{
+					UT_String hStr;
+					evalString( hStr, parm_name.c_str(), 0, now );
+					if ( !hStr.isInteger() )
+					{
+						throw IECore::InvalidArgumentException( "Attempt to set IntParameter " + parm->name() + " to a non-int value " + hStr.toStdString() );
+					}
+					
+					val = hStr.toInt();
+				}
+				else
+				{
+					val = evalInt( parm_name.c_str(), 0, now );
+				}
+				
 				checkForUpdate<int, IntData>( do_update, val, parm );
 				parm->setValue( new IECore::IntData(val) );
 				break;
