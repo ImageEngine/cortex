@@ -252,6 +252,7 @@ def intParm( p, dim=1, parent=None ):
 	if dim == 1 and p.presetsOnly :
 		parm = hou.MenuParmTemplate(
 			name, label, default_value=p.presetValues().index( p.defaultValue ),
+			help=p.description,
 			**presetsMenuArgs( p )
 		)
 		

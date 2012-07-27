@@ -72,7 +72,7 @@ void FromHoudiniGroupConverter::constructCommon()
 	
 	IntParameterPtr groupingMode = new IntParameter(
 		"groupingMode",
-		"Use the value of an attribute to separate Primitives during conversion (rather than Houdini PrimitiveGroups)",
+		"The mode used to separate Primitives during conversion",
 		PrimitiveGroup,
 		PrimitiveGroup,
 		AttributeValue,
