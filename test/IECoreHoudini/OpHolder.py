@@ -460,7 +460,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 106 )
 		
-		holder.parm( "parm_input_groupByAttribute" ).set( True )
+		holder.parm( "parm_input_groupingMode" ).set( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		holder.parm( "parm_input_groupingAttribute" ).set( "test" )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()

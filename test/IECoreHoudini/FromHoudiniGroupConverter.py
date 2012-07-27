@@ -217,7 +217,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( merge.geometry().primGroups(), tuple() )
 		
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
-		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		converter["groupingAttribute"].setTypedValue( attribName )
 		result = converter.convert()
 		
@@ -371,7 +371,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	
 	def testFakeAttributeValue( self ) :
 		converter = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() )
-		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		converter["groupingAttribute"].setTypedValue( "notAnAttr" )
 		result = converter.convert()
 		self.assertEqual( result, None )
@@ -383,14 +383,14 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		attrib.parm( "class1" ).set( 2 ) # Point
 		attrib.parm( "type1" ).set( 3 ) # String
 		converter = IECoreHoudini.FromHoudiniGroupConverter( attrib )
-		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		converter["groupingAttribute"].setTypedValue( "pointStr" )
 		result = converter.convert()
 		self.assertEqual( result, None )
 	
 	def testNonStringAttributeValue( self ) :
 		converter = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() )
-		converter["groupByAttribute"].setTypedValue( True )
+		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		converter["groupingAttribute"].setTypedValue( "born" )
 		result = converter.convert()
 		self.assertEqual( result, None )

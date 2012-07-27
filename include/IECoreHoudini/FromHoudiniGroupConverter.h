@@ -58,6 +58,12 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 
 		/// Determines if the given GU_Detail can be converted
 		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
+		
+		enum GroupingMode
+		{
+			PrimitiveGroup,
+			AttributeValue
+		};
 	
 	protected :
 		

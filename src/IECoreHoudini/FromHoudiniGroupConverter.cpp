@@ -36,6 +36,7 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/Group.h"
+#include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 
 #include "IECoreHoudini/FromHoudiniGroupConverter.h"
@@ -65,19 +66,27 @@ FromHoudiniGroupConverter::~FromHoudiniGroupConverter()
 
 void FromHoudiniGroupConverter::constructCommon()
 {
-	BoolParameterPtr groupByAttribute = new BoolParameter(
-		"groupByAttribute",
+	IntParameter::PresetsContainer groupingModePresets;
+	groupingModePresets.push_back( IntParameter::Preset( "PrimitiveGroup", PrimitiveGroup ) );
+	groupingModePresets.push_back( IntParameter::Preset( "AttributeValue", AttributeValue ) );
+	
+	IntParameterPtr groupingMode = new IntParameter(
+		"groupingMode",
 		"Use the value of an attribute to separate Primitives during conversion (rather than Houdini PrimitiveGroups)",
-		false
+		PrimitiveGroup,
+		PrimitiveGroup,
+		AttributeValue,
+		groupingModePresets,
+		true
 	);
 	
 	StringParameterPtr groupingAttribute = new StringParameter(
 		"groupingAttribute",
-		"The string attribute used to separate Primitives during conversion (if groupByAttribute is True)",
+		"The string attribute used to separate Primitives during conversion (if groupingMode is AttributeValue)",
 		""
 	);
 	
-	parameters()->addParameter( groupByAttribute );
+	parameters()->addParameter( groupingMode );
 	parameters()->addParameter( groupingAttribute );
 }
 
@@ -128,7 +137,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 	
 	GroupPtr result = new Group();
 	
-	if ( operands->member<const BoolData>( "groupByAttribute" )->readable() )
+	if ( operands->member<const IntData>( "groupingMode" )->readable() == AttributeValue )
 	{
 		const std::string attributeName = operands->member<const StringData>( "groupingAttribute" )->readable();
 		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( attributeName.c_str() );
