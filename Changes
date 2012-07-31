@@ -8,6 +8,8 @@ Additions :
 
 Improvements :
 
+* ClassVectorParameter now supports IECore.V2fParameters in the header, for the maya UI
+
 * IECoreHoudini GEO_IOTranslator accepts ptc files (if IECoreRI is available), so the file sop can be used to read ptcs.
 
 Bug Fixes :
