@@ -937,6 +937,27 @@ class ChildUI( IECoreMaya.UIElement ) :
 			control = maya.cmds.textField( annotation = annotation, width = 150 )
 			maya.cmds.connectControl( control, parameterPlugPath )
 
+		elif isinstance( parameter, IECore.V2fParameter ) :
+			
+			control = maya.cmds.rowLayout( nc=2, cw2=( 45, 45 ) )
+			
+			column1 = maya.cmds.floatField(
+				annotation = annotation,
+				width = 45,
+				pre = 2,
+				parent = control
+			)
+			
+			maya.cmds.connectControl( column1, parameterPlugPath + "X" )
+			column2 = maya.cmds.floatField(
+				annotation = annotation,
+				width = 45,
+				pre = 2,
+				parent = control
+			)
+			
+			maya.cmds.connectControl( column2, parameterPlugPath + "Y" )
+			
 		else :
 
 			IECore.msg( IECore.Msg.Level.Warning, "ClassVectorParameterUI", "Parameter \"%s\" has unsupported type for inclusion in header ( %s )." % ( parameter.name, parameter.typeName() ) )
