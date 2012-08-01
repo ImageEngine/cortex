@@ -183,9 +183,11 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		msg = "IECoreHoudini does not currently support parameters of type " + p.typeName()
 		
 		# H10 and hbatch/hython don't support ui.setStatusMessage()
+		## \todo: remove this if we can get the IECore.warning below handled by the SOP_Parameterised::messageHandler()
 		if ( hou.applicationVersion()[0]>10 and hou.isUIAvailable() ) :
 			hou.ui.setStatusMessage( msg, hou.severityType.Warning )
-		print "Warning: ", msg
+		
+		IECore.warning( msg )
 	
 	# our parent folder list
 	return results

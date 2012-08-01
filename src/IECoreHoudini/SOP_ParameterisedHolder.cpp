@@ -35,6 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/bind.hpp"
 #include "boost/python.hpp"
 #include "boost/format.hpp"
 
@@ -45,18 +46,20 @@
 
 #include "IECore/CapturingRenderer.h"
 #include "IECore/Group.h"
-#include "IECore/MessageHandler.h"
+#include "IECore/LevelFilteredMessageHandler.h"
 #include "IECore/Op.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/ParameterisedInterface.h"
 #include "IECore/ParameterisedProcedural.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/WorldBlock.h"
+
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
 
 #include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/MessageHandler.h"
 #include "IECoreHoudini/NodePassData.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
@@ -396,7 +399,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 			}
 		}
 		
-		/// \todo: get proper warning in here...
+		/// \todo: try using the messageHandler(). it might not work outside of a cook though...
 		if ( m_inputParameters.size() > 4 )
 		{
 			std::cerr << "ieParameterisedHolder does not support more than 4 input parameter connections." << std::endl;
@@ -970,12 +973,12 @@ void SOP_ParameterisedHolder::updateParameter( ParameterPtr parm, float now, std
 			// Compound
 			case IECore::CompoundParameterTypeId:
 			{
-				std::cerr << "TODO: need to add code to evaluate compoundParameters and it's children." << __FILE__ << ", " << __LINE__ << std::endl;
+				IECore::msg( IECore::Msg::Warning, "SOP_ParameterisedHolder::updateParameter", "todo: need to add code to evaluate compoundParameters and it's children." );
 				break;
 			}
 
 			default:
-				std::cerr << "Could not get parameter values from '" << parm_name << "' of type " << parm->typeName() << std::endl;
+				IECore::msg( IECore::Msg::Warning, "SOP_ParameterisedHolder::updateParameter", "Could not get parameter values from '" + parm_name + "' of type " + parm->typeName() );
 				break;
 		}
 	}
@@ -987,6 +990,22 @@ void SOP_ParameterisedHolder::updateParameter( ParameterPtr parm, float now, std
 	{
 		IECore::msg( IECore::Msg::Error, "SOP_ParameterisedHolder::updateParameter", "Caught unknown exception" );
 	}
+}
+
+IECore::MessageHandlerPtr SOP_ParameterisedHolder::messageHandler()
+{
+	IECoreHoudini::MessageHandler::HandlerFn errorFn = boost::bind( &SOP_ParameterisedHolder::addError, this, SOP_MESSAGE, _1 );
+	IECoreHoudini::MessageHandler::HandlerFn warningFn = boost::bind( &SOP_ParameterisedHolder::addWarning, this, SOP_MESSAGE, _1 );
+	IECoreHoudini::MessageHandler::HandlerFn infoFn = boost::bind( &SOP_ParameterisedHolder::addMessage, this, SOP_MESSAGE, _1 );
+	IECoreHoudini::MessageHandlerPtr sopHandler = new IECoreHoudini::MessageHandler( errorFn, warningFn, infoFn, infoFn );
+	
+	const IECore::MessageHandler *h = IECoreHoudini::MessageHandler::current();
+	if ( !h )
+	{
+		return 0;
+	}
+	
+	return new IECore::LevelFilteredMessageHandler( (IECore::MessageHandler*)h, IECore::LevelFilteredMessageHandler::defaultLevel() );
 }
 
 void SOP_ParameterisedHolder::classNames( const std::string searchPathEnvVar, const std::string &matchString, std::vector<std::string> &names )

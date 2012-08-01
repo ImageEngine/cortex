@@ -511,7 +511,6 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		(op,fn)=self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
 		fn.setParameterised( cl )
-		print "\n== Test expecting Exception(\"Must have primvar 'N' in primitive!\") =="
 		self.assertRaises( hou.OperationFailed, op.cook )
 		self.assertNotEqual( op.errors(), "" )
 		
@@ -637,6 +636,41 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		newParm = newHolder.parm( "parm_switch" )
 		self.assertEqual( newParm.eval(), 1 )
 		self.assertEqual( newParm.evalAsString(), "30" )
+	
+	def testMessageHandling( self ) :
+		
+		( holder, fn ) = self.testOpHolder()
+		fn.setOp( "noiseDeformer" )
+		
+		self.assertRaises( hou.OperationFailed, holder.cook )
+		self.failUnless( "Must have primvar 'N' in primitive!" in holder.errors() )
+		
+		torus = holder.createInputNode( 0, "torus" )
+		self.assertRaises( hou.OperationFailed, holder.cook )
+		self.failUnless( "Must have primvar 'N' in primitive!" in holder.errors() )
+		
+		holder2 = holder.createInputNode( 0, "ieOpHolder" )
+		fn2 = IECoreHoudini.FnOpHolder( holder2 )
+		fn2.setOp( "meshNormalsOp" )
+		holder2.setInput( 0, torus )
+		
+		holder.cook()
+		self.assertEqual( holder.errors(), "" )
+		self.assertEqual( holder2.errors(), "" )
+		
+		fn2.setOp( "objectDebug", 2 )
+		self.assertEqual( holder2.errors(), "" )
+		self.assertEqual( holder2.warnings(), "" )
+		
+		holder2.parm( "parm_messageLevel" ).set( int(IECore.MessageHandler.Level.Warning) )
+		holder2.cook()
+		self.assertEqual( holder2.errors(), "" )
+		self.assertNotEqual( holder2.warnings(), "" )
+		
+		holder2.parm( "parm_messageLevel" ).set( int(IECore.MessageHandler.Level.Error) )
+		self.assertRaises( hou.OperationFailed, holder2.cook )
+		self.assertNotEqual( holder2.errors(), "" )
+		self.assertEqual( holder2.warnings(), "" )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

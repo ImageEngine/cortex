@@ -40,8 +40,11 @@
 #include "PRM/PRM_Parm.h"
 
 #include "IECore/ParameterisedProcedural.h"
+#include "IECore/ScopedMessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+
 #include "IECorePython/ScopedGILLock.h"
+
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Camera.h"
 
@@ -105,6 +108,8 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 /// Cook the SOP! This method does all the work
 OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 {
+	IECore::ScopedMessageHandler handler( messageHandler() );
+	
 	// some defaults and useful variables
 	float now = context.getTime();
 
