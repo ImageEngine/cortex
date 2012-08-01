@@ -42,6 +42,8 @@
 namespace IECoreHoudini
 {
 
+/// A generic MessageHandler for Houdini.
+/// \todo: make this threadsafe
 class MessageHandler : public IECore::MessageHandler
 {
 
@@ -51,17 +53,11 @@ class MessageHandler : public IECore::MessageHandler
 		
 		typedef boost::function<void ( const char *m )> HandlerFn;
 		
-		/// Construction/destruction will push/pop the MessageHandler on the calling thread.
-		/// Note that this is not pushing to the IECore::MessageHandler stack, but rather to
-		/// the IECoreHoudini::MessageHandler thread local stack.
 		MessageHandler( HandlerFn errorFn = 0, HandlerFn warningFn = 0, HandlerFn infoFn = 0, HandlerFn debugFn = 0 );
 		virtual ~MessageHandler();
 		
 		virtual void handle( Level level, const std::string &context, const std::string &message );
 		
-		/// Returns the current handler for the calling thread
-		static const MessageHandler *current();
-	
 	private :
 		
 		HandlerFn m_errorFn;

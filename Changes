@@ -6,7 +6,7 @@ Additions :
 
 * Added MPlayDisplayDriver, for rendering images to MPlay using either RenderMan or Arnold (or anything else which can talk to an IECore.DisplayDriver).
 
-* Added a general purpose IECoreHoudini::MessageHandler that should be thread safe once Houdini starts threading their dag
+* Added a general purpose IECoreHoudini::MessageHandler
 
 Improvements :
 

@@ -997,15 +997,8 @@ IECore::MessageHandlerPtr SOP_ParameterisedHolder::messageHandler()
 	IECoreHoudini::MessageHandler::HandlerFn errorFn = boost::bind( &SOP_ParameterisedHolder::addError, this, SOP_MESSAGE, _1 );
 	IECoreHoudini::MessageHandler::HandlerFn warningFn = boost::bind( &SOP_ParameterisedHolder::addWarning, this, SOP_MESSAGE, _1 );
 	IECoreHoudini::MessageHandler::HandlerFn infoFn = boost::bind( &SOP_ParameterisedHolder::addMessage, this, SOP_MESSAGE, _1 );
-	IECoreHoudini::MessageHandlerPtr sopHandler = new IECoreHoudini::MessageHandler( errorFn, warningFn, infoFn, infoFn );
-	
-	const IECore::MessageHandler *h = IECoreHoudini::MessageHandler::current();
-	if ( !h )
-	{
-		return 0;
-	}
-	
-	return new IECore::LevelFilteredMessageHandler( (IECore::MessageHandler*)h, IECore::LevelFilteredMessageHandler::defaultLevel() );
+	IECore::MessageHandlerPtr h = new IECoreHoudini::MessageHandler( errorFn, warningFn, infoFn, infoFn );
+	return new IECore::LevelFilteredMessageHandler( h, IECore::LevelFilteredMessageHandler::defaultLevel() );
 }
 
 void SOP_ParameterisedHolder::classNames( const std::string searchPathEnvVar, const std::string &matchString, std::vector<std::string> &names )

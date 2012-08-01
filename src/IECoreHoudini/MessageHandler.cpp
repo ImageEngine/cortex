@@ -32,31 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <stack>
-
-#include "tbb/enumerable_thread_specific.h"
-
 #include "IECoreHoudini/MessageHandler.h"
 
 using namespace IECoreHoudini;
 
-typedef std::stack<const MessageHandler *> MessageHandlerStack;
-typedef tbb::enumerable_thread_specific<MessageHandlerStack> ThreadSpecificMessageHandlerStack;
-
-static ThreadSpecificMessageHandlerStack g_threadMessageHandlers;
-
 MessageHandler::MessageHandler( HandlerFn errorFn, HandlerFn warningFn, HandlerFn infoFn, HandlerFn debugFn )
 	: m_errorFn( errorFn ), m_warningFn( warningFn ), m_debugFn( debugFn ), m_infoFn( infoFn )
 {
-	MessageHandlerStack &stack = g_threadMessageHandlers.local();
-	stack.push( this );
 }
 
 MessageHandler::~MessageHandler()
 {
-	MessageHandlerStack &stack = g_threadMessageHandlers.local();
-	stack.pop();
-	
 	m_errorFn = 0;
 	m_warningFn = 0;
 	m_infoFn = 0;
@@ -97,15 +83,4 @@ void MessageHandler::handle( Level level, const std::string &context, const std:
 			// do nothing for invalid levels
 			break;
 	}
-}
-
-const MessageHandler *MessageHandler::current()
-{
-	MessageHandlerStack &stack = g_threadMessageHandlers.local();
-	if( !stack.size() )
-	{
-		return 0;
-	}
-	
-	return stack.top();
 }
