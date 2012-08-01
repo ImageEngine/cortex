@@ -277,7 +277,13 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, AttributePrimIdGroupM
 	{
 		GA_Primitive *prim = primitives.get( pIt.getOffset() );
 		unsigned primType = prim->getTypeId().get();
-		const char *value = attrAIF->getString( attr, pIt.getOffset() );
+		
+		std::string value = "";
+		const char *tmp = attrAIF->getString( attr, pIt.getOffset() );
+		if ( tmp )
+		{
+			value = tmp;
+		}
 		
 		AttributePrimIdPair key( value, primType );
 		it = groupMap.find( key );
