@@ -6,7 +6,9 @@ Additions :
 
 * Added MPlayDisplayDriver, for rendering images to MPlay using either RenderMan or Arnold (or anything else which can talk to an IECore.DisplayDriver).
 
-* Added a general purpose IECoreHoudini::MessageHandler
+* Added a general purpose IECoreHoudini::MessageHandler.
+
+* Added the beginings of Alembic read support in contrib/IECoreAlembic.
 
 Improvements :
 

@@ -176,7 +176,6 @@ o.Add(
 	"",
 )
 
-
 # JPEG options
 
 o.Add(
@@ -439,6 +438,46 @@ o.Add(
 	"/usr/local",
 )
 
+# Alembic options
+
+o.Add(
+	"ALEMBIC_INCLUDE_PATH",
+	"The path to the Alembic include directory.",
+	"/usr/local/include",
+)
+
+o.Add(
+	"ALEMBIC_LIB_PATH",
+	"The path to the Alembic lib directory.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"ALEMBIC_LIB_SUFFIX",
+	"The suffix appended to the names of the Alembic libraries. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
+)
+
+o.Add(
+	"HDF5_INCLUDE_PATH",
+	"The path to the hdf5 include directory.",
+	"/usr/local/include",
+)
+
+o.Add(
+	"HDF5_LIB_PATH",
+	"The path to the hdf5 lib directory.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"HDF5_LIB_SUFFIX",
+	"The suffix appended to the names of the HDF5 libraries. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
+)
+
 # Build options
 
 o.Add(
@@ -530,6 +569,14 @@ o.Add(
 	"The name under which to install the Arnold libraries. This "
 	"can be used to build and install the library for multiple "
 	"Arnold versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_ALEMBICLIB_NAME",
+	"The name under which to install the Alembic libraries. This "
+	"can be used to build and install the library for multiple "
+	"Alembic versions.",
 	"$INSTALL_PREFIX/lib/$IECORE_NAME",
 )
 
@@ -720,7 +767,7 @@ o.Add(
 	"The IECore procedurals to install via python stubs.",
 	[
 		( "IECore.ReadProcedural", "read" ), 
-		( "IECore.VisualiserProcedural", "visualiser" ), 
+		( "IECore.VisualiserProcedural", "visualiser" ),
 	]
 )
 
@@ -2724,6 +2771,95 @@ if doConfigure and haveMaya and haveArnold :
 		
 		Default( [ mtoaExtension ] )
 
+###########################################################################################
+# Build, install and test the IECoreAlembic library and bindings
+###########################################################################################
+
+alembicEnv = coreEnv.Clone( IECORE_NAME = "IECoreAlembic" )
+alembicEnvAppends = {
+	"CPPPATH" : [
+		"$ALEMBIC_INCLUDE_PATH",
+		"contrib/IECoreAlembic/include",
+		"$HDF5_INCLUDE_PATH",
+	],
+	"LIBPATH" : [
+		"$ALEMBIC_LIB_PATH",
+		"$HDF5_LIB_PATH",
+	],
+	"LIBS" : [ 
+		"AlembicAbcGeom$ALEMBIC_LIB_SUFFIX",
+		"AlembicAbc$ALEMBIC_LIB_SUFFIX",
+		"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
+		"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
+		"AlembicUtil$ALEMBIC_LIB_SUFFIX",
+		"hdf5$HDF5_LIB_SUFFIX",
+		"hdf5_hl$HDF5_LIB_SUFFIX",
+	],
+}
+alembicEnv.Append( **alembicEnvAppends )
+
+alembicPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAlembic" )
+alembicPythonModuleEnv.Append( **alembicEnvAppends )
+
+if doConfigure :
+
+	c = Configure( alembicEnv )
+
+	if not c.CheckLibWithHeader( "AlembicAbcGeom", "Alembic/AbcGeom/Foundation.h", "CXX" ) :
+	
+		sys.stderr.write( "WARNING : no AlembicAbcGeom library found, not building IECoreAlembic - check ALEMBIC_INCLUDE_PATH, ALEMBIC_LIB_PATH and config.log.\n" )
+		c.Finish()
+		
+	else :
+	
+		c.Finish()	
+		
+		alembicSources = sorted( glob.glob( "contrib/IECoreAlembic/src/IECoreAlembic/*.cpp" ) )
+		alembicHeaders = glob.glob( "contrib/IECoreAlembic/include/IECoreAlembic/*.h" ) + glob.glob( "contrib/IECoreAlembic/include/IECoreAlembic/*.inl" )
+		alembicPythonScripts = glob.glob( "contrib/IECoreAlembic/python/IECoreAlembic/*.py" )
+		alembicPythonSources = sorted( glob.glob( "contrib/IECoreAlembic/src/IECoreAlembic/bindings/*.cpp" ) )
+		
+		# we can't append this before configuring, as then it gets built as
+		# part of the configure process
+		alembicEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+				
+		# library
+		alembicLibrary = alembicEnv.SharedLibrary( "lib/" + os.path.basename( alembicEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), alembicSources )
+		alembicLibraryInstall = alembicEnv.Install( os.path.dirname( alembicEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), alembicLibrary )
+		alembicEnv.NoCache( alembicLibraryInstall )
+		alembicEnv.AddPostAction( alembicLibraryInstall, lambda target, source, env : makeLibSymLinks( alembicEnv ) )
+		alembicEnv.Alias( "install", alembicLibraryInstall )
+		alembicEnv.Alias( "installAlembic", alembicLibraryInstall )
+		alembicEnv.Alias( "installLib", [ alembicLibraryInstall ] )
+
+		# headers
+		alembicHeaderInstall = alembicEnv.Install( "$INSTALL_HEADER_DIR/IECoreAlembic", alembicHeaders )
+		alembicEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreAlembic", lambda target, source, env : makeSymLinks( alembicEnv, alembicEnv["INSTALL_HEADER_DIR"] ) )
+		alembicEnv.Alias( "install", alembicHeaderInstall )
+		alembicEnv.Alias( "installAlembic", alembicHeaderInstall )
+		
+		# python module
+		alembicPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( alembicEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		alembicPythonModule = alembicPythonModuleEnv.SharedLibrary( "contrib/IECoreAlembic/python/IECoreAlembic/_IECoreAlembic", alembicPythonSources )
+		alembicPythonModuleEnv.Depends( alembicPythonModule, alembicLibrary )
+
+		alembicPythonModuleInstall = alembicPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreAlembic", alembicPythonScripts + alembicPythonModule )
+		alembicPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreAlembic", lambda target, source, env : makeSymLinks( alembicPythonModuleEnv, alembicPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		alembicPythonModuleEnv.Alias( "install", alembicPythonModuleInstall )
+		alembicPythonModuleEnv.Alias( "installAlembic", alembicPythonModuleInstall )
+
+		alembicTestEnv = alembicEnv.Clone()
+		alembicTestEnv.Append( LIBS = "IECoreAlembic" )
+		Default( alembicTestEnv.Program( "alembicTest", "alembicTest.cpp" ) )
+
+		Default( [ alembicLibrary, alembicPythonModule ] )
+		
 ###########################################################################################
 # Documentation
 ###########################################################################################
