@@ -2854,10 +2854,6 @@ if doConfigure :
 		alembicPythonModuleEnv.Alias( "install", alembicPythonModuleInstall )
 		alembicPythonModuleEnv.Alias( "installAlembic", alembicPythonModuleInstall )
 
-		alembicTestEnv = alembicEnv.Clone()
-		alembicTestEnv.Append( LIBS = "IECoreAlembic" )
-		Default( alembicTestEnv.Program( "alembicTest", "alembicTest.cpp" ) )
-
 		Default( [ alembicLibrary, alembicPythonModule ] )
 		
 ###########################################################################################
