@@ -67,7 +67,12 @@ class AlembicInput : public IECore::RefCounted
 		
 		IECore::CompoundDataPtr metaData() const;
 		
+		/// Returns the bounding box of everything below this point in the
+		/// hierarchy, without the transform() applied.
 		Imath::Box3d bound() const;
+		/// Returns the transformation matrix of this node if it has one,
+		/// and the identity otherwise.
+		Imath::M44d transform() const;
 		
 		IECore::ObjectPtr convert( IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		

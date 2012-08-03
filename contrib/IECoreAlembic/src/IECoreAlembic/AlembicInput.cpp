@@ -126,18 +126,19 @@ Imath::Box3d AlembicInput::bound() const
 		IXformSchema &iXFormSchema = iXForm.getSchema();
 		XformSample sample;
 		iXFormSchema.get( sample );
-		Box3d childBounds = sample.getChildBounds();
-		if( childBounds.isEmpty() )
+		m_data->bound = sample.getChildBounds();
+		if( m_data->bound.isEmpty() )
 		{
 			// the child bounds weren't stored at write time. instead
 			// we have to compute them over and over at read time.
 			for( size_t i=0, n=numChildren(); i<n; i++ )
 			{
 				AlembicInputPtr c = child( i );
-				childBounds.extendBy( c->bound() );
+				Box3d childBound = c->bound();
+				childBound = Imath::transform( childBound, c->transform() );
+				m_data->bound.extendBy( childBound );
 			}
 		}
-		m_data->bound = transform( childBounds, sample.getMatrix() );
 	}
 	else
 	{
@@ -148,6 +149,20 @@ Imath::Box3d AlembicInput::bound() const
 	m_data->boundValid = true;
 
 	return m_data->bound;
+}
+
+Imath::M44d AlembicInput::transform() const
+{
+	M44d result;
+	if( IXform::matches( m_data->object.getMetaData() ) )
+	{
+		IXform iXForm( m_data->object, kWrapExisting );
+		IXformSchema &iXFormSchema = iXForm.getSchema();
+		XformSample sample;
+		iXFormSchema.get( sample );
+		return sample.getMatrix();
+	}
+	return result;
 }
 
 IECore::ObjectPtr AlembicInput::convert( IECore::TypeId resultType ) const

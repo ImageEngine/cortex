@@ -119,13 +119,27 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( a.bound(), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
 		
 		g = a.child( "group1" )
-		self.assertEqual( g.bound(), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
+		self.assertEqual( g.bound(), IECore.Box3d( IECore.V3d( -2, -1, -1 ), IECore.V3d( 0, 1, 1 ) ) )
 		
 		c = g.child( "pCube1" )
-		self.assertEqual( c.bound(), IECore.Box3d( IECore.V3d( -2, -1, -1 ), IECore.V3d( 0, 1, 1 ) ) )
+		self.assertEqual( c.bound(), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
 		
 		cs = c.child( "pCubeShape1" )
 		self.assertEqual( cs.bound(), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )		
+	
+	def testTransform( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/cube.abc" )
+		self.assertEqual( a.transform(), IECore.M44d() )
+				
+		g = a.child( "group1" )
+		self.assertEqual( g.transform(), IECore.M44d.createScaled( IECore.V3d( 2 ) ) * IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) )
+		
+		c = g.child( "pCube1" )
+		self.assertEqual( c.transform(), IECore.M44d.createTranslated( IECore.V3d( -1, 0, 0 ) ) )
+		
+		cs = c.child( "pCubeShape1" )
+		self.assertEqual( cs.transform(), IECore.M44d() )		
 	
 if __name__ == "__main__":
     unittest.main()
