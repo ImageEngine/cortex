@@ -57,7 +57,7 @@ static AtVoid driverParameters( AtList *params, AtMetaDataStore *metaData )
 
 static AtVoid driverInitialize( AtNode *node, AtParamValue *parameters )
 {
-	AiDriverInitialize( node, FALSE, new DisplayDriverPtr );
+	AiDriverInitialize( node, true, new DisplayDriverPtr );
 }
 
 static AtVoid driverUpdate( AtNode *node, AtParamValue *parameters )
@@ -90,22 +90,27 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 	int pixelType = 0;
 	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, 0 ) )
 	{
+		std::string namePrefix;
+		if( strcmp( name, "RGB" ) && strcmp( name, "RGBA" ) )
+		{
+			namePrefix = std::string( name ) + ".";
+		}
+		
 		switch( pixelType )
 		{
-			/// \todo Should we prefix the R, G, and B with the
-			/// name? only if the name isn't "RGB"?
 			case AI_TYPE_RGB :
-				channelNames.push_back( "R" );
-				channelNames.push_back( "G" );
-				channelNames.push_back( "B" );
+				channelNames.push_back( namePrefix + "R" );
+				channelNames.push_back( namePrefix + "G" );
+				channelNames.push_back( namePrefix + "B" );
 				break;
 			case AI_TYPE_RGBA :
-				channelNames.push_back( "R" );
-				channelNames.push_back( "G" );
-				channelNames.push_back( "B" );
-				channelNames.push_back( "A" );
+				channelNames.push_back( namePrefix + "R" );
+				channelNames.push_back( namePrefix + "G" );
+				channelNames.push_back( namePrefix + "B" );
+				channelNames.push_back( namePrefix + "A" );
 				break;
 			case AI_TYPE_FLOAT :
+				// no need for prefix because it's not a compound type
 				channelNames.push_back( name );
 				break;
 		}

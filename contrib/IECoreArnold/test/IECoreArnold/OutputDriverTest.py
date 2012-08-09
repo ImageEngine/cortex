@@ -1,6 +1,5 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -33,26 +32,35 @@
 #
 ##########################################################################
 
-import sys
+from __future__ import with_statement
+
+import os
+import time
 import unittest
 
 import IECore
+import IECoreArnold
 
-from RendererTest import RendererTest
-from ProceduralDSOTest import ProceduralDSOTest
-from UniverseBlockTest import UniverseBlockTest
-from MeshTest import MeshTest
-from ProceduralTest import ProceduralTest
-from OutputDriverTest import OutputDriverTest
+class OutputDriverTest( unittest.TestCase ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreArnold/test/IECoreArnold/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testMergedDisplays( self ) :
+
+		server = IECore.DisplayDriverServer( 1559 )
+		time.sleep( 2 )
+		
+		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/mergedDisplays.ass" )		
+		
+		image = IECore.ImageDisplayDriver.removeStoredImage( "mergedImage" )
+		channelNames = image.keys()
+		
+		self.assertEqual( len( channelNames ), 7 )
+		self.failUnless( "R" in channelNames )
+		self.failUnless( "G" in channelNames )
+		self.failUnless( "B" in channelNames )
+		self.failUnless( "A" in channelNames )
+		self.failUnless( "direct_diffuse.R" in channelNames )
+		self.failUnless( "direct_diffuse.G" in channelNames )
+		self.failUnless( "direct_diffuse.B" in channelNames )												
+		
+if __name__ == "__main__":
+    unittest.main()
