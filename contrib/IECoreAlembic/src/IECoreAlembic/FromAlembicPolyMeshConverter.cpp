@@ -76,6 +76,9 @@ IECore::ObjectPtr FromAlembicPolyMeshConverter::doConversion( IECore::ConstCompo
 	
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
 	
+	Alembic::AbcGeom::IV2fGeomParam &uvs = iPolyMeshSchema.getUVsParam();
+	convertUVs( uvs, result );
+	
 	ICompoundProperty arbGeomParams = iPolyMeshSchema.getArbGeomParams();
 	convertArbGeomParams( arbGeomParams, result );
 	

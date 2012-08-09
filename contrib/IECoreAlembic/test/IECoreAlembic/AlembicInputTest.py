@@ -179,6 +179,20 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.failUnless( "ABC_int" in m )
 		self.assertEqual( m["ABC_int"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["ABC_int"].data, IECore.IntVectorData( [ 10 ] ) )
+		
+	def testConvertUVs( self ) :
 	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/coloredMesh.abc" )
+		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).convert( IECore.MeshPrimitive.staticTypeId() )
+		
+		self.failUnless( "s" in m )
+		self.failUnless( "t" in m )				
+	
+		self.assertEqual( m["s"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( m["t"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		
+		self.failUnless( isinstance( m["s"].data, IECore.FloatVectorData ) )
+		self.failUnless( isinstance( m["t"].data, IECore.FloatVectorData ) )	
+		
 if __name__ == "__main__":
     unittest.main()

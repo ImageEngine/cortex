@@ -82,6 +82,9 @@ IECore::ObjectPtr FromAlembicSubDConverter::doConversion( IECore::ConstCompoundO
 	
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, interpolation, points );
 	
+	Alembic::AbcGeom::IV2fGeomParam &uvs = iSubDSchema.getUVsParam();
+	convertUVs( uvs, result );
+	
 	ICompoundProperty arbGeomParams = iSubDSchema.getArbGeomParams();
 	convertArbGeomParams( arbGeomParams, result );
 	

@@ -58,6 +58,8 @@ class FromAlembicGeomBaseConverter : public FromAlembicConverter
 
 		FromAlembicGeomBaseConverter( const std::string &description, Alembic::Abc::IObject iGeom );
 		
+		/// Should be called by subclasses to convert uvs onto a Primitive.
+		void convertUVs( Alembic::AbcGeom::IV2fGeomParam &uvs, IECore::Primitive *primitive ) const;
 		/// Should be called by subclasses to convert Alembic's arbitrary geometry parameter into
 		/// IECore::PrimitiveVariables.
 		void convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, IECore::Primitive *primitive ) const;
