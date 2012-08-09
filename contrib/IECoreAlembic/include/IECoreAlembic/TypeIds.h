@@ -44,6 +44,7 @@ enum TypeId
 	FromAlembicPolyMeshConverterTypeId = 112001,
 	FromAlembicXFormConverterTypeId = 112002,
 	FromAlembicSubDConverterTypeId = 112003,
+	FromAlembicGeomBaseConverterTypeId = 112004,
 	
 	LastCoreAlembicTypeId = 112999,
 };

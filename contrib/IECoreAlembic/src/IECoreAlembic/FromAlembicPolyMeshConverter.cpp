@@ -45,7 +45,7 @@ FromAlembicPolyMeshConverter::ConverterDescription<FromAlembicPolyMeshConverter>
 IE_CORE_DEFINERUNTIMETYPED( FromAlembicPolyMeshConverter );
 
 FromAlembicPolyMeshConverter::FromAlembicPolyMeshConverter( Alembic::Abc::IObject iPolyMesh )
-	:	FromAlembicConverter( "Converts AbcGeom::IPolyMesh objects to IECore::MeshPrimitive objects", iPolyMesh )
+	:	FromAlembicGeomBaseConverter( "Converts AbcGeom::IPolyMesh objects to IECore::MeshPrimitive objects", iPolyMesh )
 {
 }
 
@@ -74,8 +74,10 @@ IECore::ObjectPtr FromAlembicPolyMeshConverter::doConversion( IECore::ConstCompo
 	points->writable().resize( sample.getPositions()->size() );
 	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
 	
-	/// \todo Support for arbitrary primitive variables.
-	
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
+	
+	ICompoundProperty arbGeomParams = iPolyMeshSchema.getArbGeomParams();
+	convertArbGeomParams( arbGeomParams, result );
+	
 	return result;
 }

@@ -152,7 +152,33 @@ class AlembicInputTest( unittest.TestCase ) :
 		m = cs.convert( IECore.MeshPrimitive.staticTypeId() )
 		
 		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
-		self.assertEqual( m.interpolation, "catmullClark" )	
+		self.assertEqual( m.interpolation, "catmullClark" )
+		
+	def testConvertArbGeomParams( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/coloredMesh.abc" )
+		
+		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).convert( IECore.MeshPrimitive.staticTypeId() )
+				
+		self.failUnless( m.arePrimitiveVariablesValid() )
+				
+		self.failUnless( "colorSet1" in m )
+		self.assertEqual( m["colorSet1"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.failUnless( isinstance( m["colorSet1"].data, IECore.Color4fVectorData ) )
+		self.assertEqual( len( m["colorSet1"].data ), 4 )
+		self.assertEqual(
+			m["colorSet1"].data,
+			IECore.Color4fVectorData( [
+				IECore.Color4f( 0, 1, 0, 1 ),
+				IECore.Color4f( 0, 0, 1, 1 ),
+				IECore.Color4f( 0, 0, 0, 1 ),
+				IECore.Color4f( 1, 0, 0, 1 ),												
+			] )
+		)
+		
+		self.failUnless( "ABC_int" in m )
+		self.assertEqual( m["ABC_int"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( m["ABC_int"].data, IECore.IntVectorData( [ 10 ] ) )
 	
 if __name__ == "__main__":
     unittest.main()

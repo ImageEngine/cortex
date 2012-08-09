@@ -32,19 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICPOLYMESHCONVERTER_H
-#define IECOREALEMBIC_FROMALEMBICPOLYMESHCONVERTER_H
+#ifndef IECOREALEMBIC_FROMALEMBICGEOMBASECONVERTER_H
+#define IECOREALEMBIC_FROMALEMBICGEOMBASECONVERTER_H
 
 #include "Alembic/AbcGeom/IPolyMesh.h"
 
 #include "IECore/MeshPrimitive.h"
 
-#include "IECoreAlembic/FromAlembicGeomBaseConverter.h"
+#include "IECoreAlembic/FromAlembicConverter.h"
 
 namespace IECoreAlembic
 {
 
-class FromAlembicPolyMeshConverter : public FromAlembicGeomBaseConverter
+class FromAlembicGeomBaseConverter : public FromAlembicConverter
 {
 
 	public :
@@ -52,22 +52,27 @@ class FromAlembicPolyMeshConverter : public FromAlembicGeomBaseConverter
 		typedef Alembic::AbcGeom::IPolyMesh InputType;
 		typedef IECore::MeshPrimitive ResultType;
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicPolyMeshConverter, FromAlembicPolyMeshConverterTypeId, FromAlembicGeomBaseConverter );
-
-		FromAlembicPolyMeshConverter( Alembic::Abc::IObject iPolyMesh );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicGeomBaseConverter, FromAlembicGeomBaseConverterTypeId, FromAlembicConverter );
 
 	protected :
 
-		virtual IECore::ObjectPtr doConversion( const IECore::ConstCompoundObjectPtr operands ) const;
-
+		FromAlembicGeomBaseConverter( const std::string &description, Alembic::Abc::IObject iGeom );
+		
+		/// Should be called by subclasses to convert Alembic's arbitrary geometry parameter into
+		/// IECore::PrimitiveVariables.
+		void convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, IECore::Primitive *primitive ) const;
+		
 	private :
 	
-		static ConverterDescription<FromAlembicPolyMeshConverter> g_description;
+		IECore::PrimitiveVariable::Interpolation interpolationFromScope( Alembic::AbcGeom::GeometryScope scope ) const;
+		
+		template<typename T>
+		void convertArbGeomParam( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::PropertyHeader &paramHeader, IECore::Primitive *primitive ) const;
 		
 };
 
-IE_CORE_DECLAREPTR( FromAlembicPolyMeshConverter )
+IE_CORE_DECLAREPTR( FromAlembicGeomBaseConverter )
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_FROMALEMBICPOLYMESHCONVERTER_H
+#endif // IECOREALEMBIC_FROMALEMBICGEOMBASECONVERTER_H

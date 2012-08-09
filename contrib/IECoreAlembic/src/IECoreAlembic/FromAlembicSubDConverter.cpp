@@ -45,7 +45,7 @@ FromAlembicSubDConverter::ConverterDescription<FromAlembicSubDConverter> FromAle
 IE_CORE_DEFINERUNTIMETYPED( FromAlembicSubDConverter );
 
 FromAlembicSubDConverter::FromAlembicSubDConverter( Alembic::Abc::IObject iSubD )
-	:	FromAlembicConverter( "Converts AbcGeom::ISubD objects to IECore::MeshPrimitive objects", iSubD )
+	:	FromAlembicGeomBaseConverter( "Converts AbcGeom::ISubD objects to IECore::MeshPrimitive objects", iSubD )
 {
 }
 
@@ -80,8 +80,10 @@ IECore::ObjectPtr FromAlembicSubDConverter::doConversion( IECore::ConstCompoundO
 		interpolation = "catmullClark";
 	}
 	
-	/// \todo Support for arbitrary primitive variables.
-	
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, interpolation, points );
+	
+	ICompoundProperty arbGeomParams = iSubDSchema.getArbGeomParams();
+	convertArbGeomParams( arbGeomParams, result );
+	
 	return result;
 }

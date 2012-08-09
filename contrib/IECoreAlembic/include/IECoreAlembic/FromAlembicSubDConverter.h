@@ -39,12 +39,12 @@
 
 #include "IECore/MeshPrimitive.h"
 
-#include "IECoreAlembic/FromAlembicConverter.h"
+#include "IECoreAlembic/FromAlembicGeomBaseConverter.h"
 
 namespace IECoreAlembic
 {
 
-class FromAlembicSubDConverter : public FromAlembicConverter
+class FromAlembicSubDConverter : public FromAlembicGeomBaseConverter
 {
 
 	public :
@@ -52,7 +52,7 @@ class FromAlembicSubDConverter : public FromAlembicConverter
 		typedef Alembic::AbcGeom::ISubD InputType;
 		typedef IECore::MeshPrimitive ResultType;
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicSubDConverter, FromAlembicSubDConverterTypeId, FromAlembicConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicSubDConverter, FromAlembicSubDConverterTypeId, FromAlembicGeomBaseConverter );
 
 		FromAlembicSubDConverter( Alembic::Abc::IObject iSubD );
 
