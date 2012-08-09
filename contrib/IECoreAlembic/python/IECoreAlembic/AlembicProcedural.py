@@ -66,9 +66,8 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 		a = self.__alembicInput( args )
 		if a is None :
 			return IECore.Box3f()
-		else :
-			b = a.bound()
-			return IECore.Box3f( IECore.V3f( b.min ), IECore.V3f( b.max ) )
+		
+		return _ChildProcedural( a ).bound()
 
 	def doRenderState( self, renderer, args ) :
 	
@@ -107,7 +106,9 @@ class _ChildProcedural( IECore.Renderer.Procedural ) :
 		
 	def bound( self ) :
 	
-		return self.__alembicInput.bound()
+		b = self.__alembicInput.bound()
+		b = b.transform( self.__alembicInput.transform() )
+		return IECore.Box3f( IECore.V3f( b.min ), IECore.V3f( b.max ) )
 		
 	def render( self, renderer ) :
 	
