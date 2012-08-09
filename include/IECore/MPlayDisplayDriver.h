@@ -58,9 +58,21 @@ class MPlayDisplayDriver : public DisplayDriver
 		static const DisplayDriverDescription<MPlayDisplayDriver> g_description;
 
 		struct ImageHeader;
+		struct PlaneHeader;
 		struct TileHeader;
+
+		struct Plane
+		{
+			Plane( const std::string &n ) : name( n ) {}
+			std::string name;
+			std::vector<std::string> channelNames;
+			std::vector<size_t> channelIndices;
+		};
+
+		typedef std::vector<Plane> PlaneVector;
 		
 		FILE *m_imDisplayStdIn;
+		PlaneVector m_planes;
 		
 };
 

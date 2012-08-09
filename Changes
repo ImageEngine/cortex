@@ -2,6 +2,12 @@ Additions :
 
 * Added the beginings of Alembic read support in contrib/IECoreAlembic.
 
+Improvements :
+
+* The Arnold output driver now supports the rendering of multiple outputs via a single driver. Channel names are prefixed with the arnold aov name so the may be distinguished.
+
+* The MPlayDisplayDriver now supports multiple output planes, based on grouping channel names with common prefixes.
+
 7.4.0 :
 
 
