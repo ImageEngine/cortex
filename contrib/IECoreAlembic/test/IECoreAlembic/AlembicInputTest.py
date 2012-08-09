@@ -139,7 +139,20 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( c.transform(), IECore.M44d.createTranslated( IECore.V3d( -1, 0, 0 ) ) )
 		
 		cs = c.child( "pCubeShape1" )
-		self.assertEqual( cs.transform(), IECore.M44d() )		
+		self.assertEqual( cs.transform(), IECore.M44d() )
+		
+	def testConvertSubD( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/subdPlane.abc" )
+		
+		c = a.child( "pPlane1" )
+		self.assertEqual( c.convert( IECore.MeshPrimitive.staticTypeId() ), None )
+		
+		cs = c.child( "pPlaneShape1" )
+		m = cs.convert( IECore.MeshPrimitive.staticTypeId() )
+		
+		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+		self.assertEqual( m.interpolation, "catmullClark" )	
 	
 if __name__ == "__main__":
     unittest.main()

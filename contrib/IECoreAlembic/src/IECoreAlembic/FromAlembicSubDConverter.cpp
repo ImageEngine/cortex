@@ -32,22 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#include "IECore/MeshPrimitive.h"
 
-namespace IECoreAlembic
-{
+#include "IECoreAlembic/FromAlembicSubDConverter.h"
 
-enum TypeId
+using namespace IECore;
+using namespace IECoreAlembic;
+using namespace Alembic::AbcGeom;
+
+FromAlembicSubDConverter::ConverterDescription<FromAlembicSubDConverter> FromAlembicSubDConverter::g_description;
+
+IE_CORE_DEFINERUNTIMETYPED( FromAlembicSubDConverter );
+
+FromAlembicSubDConverter::FromAlembicSubDConverter( Alembic::Abc::IObject iSubD )
+	:	FromAlembicConverter( "Converts AbcGeom::ISubD objects to IECore::MeshPrimitive objects", iSubD )
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
+}
+
+IECore::ObjectPtr FromAlembicSubDConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+{
+	ISubD iSubD( m_iObject, kWrapExisting );
+	ISubDSchema &iSubDSchema = iSubD.getSchema();
 	
-	LastCoreAlembicTypeId = 112999,
-};
-
-} // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_TYPEIDS_H
+	ISubDSchema::Sample sample = iSubDSchema.getValue();
+	
+	IntVectorDataPtr verticesPerFace = new IntVectorData();
+	verticesPerFace->writable().insert(
+		verticesPerFace->writable().begin(),
+		sample.getFaceCounts()->get(),
+		sample.getFaceCounts()->get() + sample.getFaceCounts()->size()
+	);
+	
+	IntVectorDataPtr vertexIds = new IntVectorData();
+	vertexIds->writable().insert(
+		vertexIds->writable().begin(),
+		sample.getFaceIndices()->get(),
+		sample.getFaceIndices()->get() + sample.getFaceIndices()->size()
+	);
+	
+	V3fVectorDataPtr points = new V3fVectorData();
+	points->writable().resize( sample.getPositions()->size() );
+	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
+	
+	std::string interpolation = sample.getSubdivisionScheme();
+	if( interpolation == "catmull-clark" )
+	{
+		interpolation = "catmullClark";
+	}
+	
+	/// \todo Support for arbitrary primitive variables.
+	
+	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, interpolation, points );
+	return result;
+}

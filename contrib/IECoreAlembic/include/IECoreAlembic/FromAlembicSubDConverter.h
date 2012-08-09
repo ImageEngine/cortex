@@ -32,22 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#ifndef IECOREALEMBIC_FROMALEMBICSUBDCONVERTER_H
+#define IECOREALEMBIC_FROMALEMBICSUBDCONVERTER_H
+
+#include "Alembic/AbcGeom/ISubD.h"
+
+#include "IECore/MeshPrimitive.h"
+
+#include "IECoreAlembic/FromAlembicConverter.h"
 
 namespace IECoreAlembic
 {
 
-enum TypeId
+class FromAlembicSubDConverter : public FromAlembicConverter
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
+
+	public :
+
+		typedef Alembic::AbcGeom::ISubD InputType;
+		typedef IECore::MeshPrimitive ResultType;
+		
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicSubDConverter, FromAlembicSubDConverterTypeId, FromAlembicConverter );
+
+		FromAlembicSubDConverter( Alembic::Abc::IObject iSubD );
+
+	protected :
+
+		virtual IECore::ObjectPtr doConversion( const IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
 	
-	LastCoreAlembicTypeId = 112999,
+		static ConverterDescription<FromAlembicSubDConverter> g_description;
+		
 };
+
+IE_CORE_DECLAREPTR( FromAlembicSubDConverter )
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_TYPEIDS_H
+#endif // IECOREALEMBIC_FROMALEMBICSUBDCONVERTER_H
