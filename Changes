@@ -8,6 +8,8 @@ Improvements :
 
 * The MPlayDisplayDriver now supports multiple output planes, based on grouping channel names with common prefixes.
 
+* Added python binding for the SearchPath copy constructor.
+
 7.4.0 :
 
 

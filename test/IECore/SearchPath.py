@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -56,6 +56,13 @@ class SearchPathTest( unittest.TestCase ) :
 		s = SearchPath( "test/IECore/data/pdcFiles", ":" )
 
 		self.assertEqual( s.find( "particleShape1.250.pdc" ), "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+
+	def testCopyConstructor( self ) :
+	
+		s = SearchPath( "a:b:c", ":" )
+		s2 = SearchPath( s )
+		
+		self.assertEqual( s, s2 )
 
 if __name__ == "__main__":
     unittest.main()
