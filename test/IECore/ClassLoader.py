@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -101,5 +101,15 @@ class TestClassLoader( unittest.TestCase ) :
 		self.assertRaises( TypeError, l.setDefaultVersion, "maths/multiply", "iShouldBeAnInt" )
 		self.assertRaises( RuntimeError, l.setDefaultVersion, "maths/multiply", 10 )
 
+	def testSearchPathAccessor( self ) :
+	
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
+		self.assertEqual( l.searchPath(), IECore.SearchPath( "test/IECore/ops", ":" ) )
+	
+		# check a copy is returned so it can't be modified in place
+		s = l.searchPath()
+		s.setPaths( "a:b:c", ":" )
+		self.assertEqual( l.searchPath(), IECore.SearchPath( "test/IECore/ops", ":" ) )
+		
 if __name__ == "__main__":
         unittest.main()

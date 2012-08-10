@@ -69,6 +69,11 @@ class ClassLoader :
 		self.__loadMutex = threading.RLock()
 		self.refresh()
 
+	## Returns a copy of the searchpath used to find classes.
+	def searchPath( self ) :
+	
+		return SearchPath( self.__searchPaths )
+
 	## Returns an alphabetically sorted list
 	# of all the classes found
 	# on the searchpaths. The optional matchString

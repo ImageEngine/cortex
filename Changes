@@ -10,6 +10,8 @@ Improvements :
 
 * Added python binding for the SearchPath copy constructor.
 
+* The ClassLoader class now has a searchPath() method to provide access to the paths used to find classes.
+
 7.4.0 :
 
 
