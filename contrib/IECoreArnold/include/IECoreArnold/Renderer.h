@@ -87,6 +87,15 @@ class Renderer : public IECore::Renderer
 
 		virtual void attributeBegin();
 		virtual void attributeEnd();
+		/// \par Implementation specific attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"ai:visibility:camera" BoolData( true )</b>
+		/// \li <b>"ai:visibility:shadow" BoolData( true )</b>
+		/// \li <b>"ai:visibility:reflected" BoolData( true )</b>
+		/// \li <b>"ai:visibility:refracted" BoolData( true )</b>
+		/// \li <b>"ai:visibility:diffuse" BoolData( true )</b>
+		/// \li <b>"ai:visibility:glossy" BoolData( true )</b>
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );

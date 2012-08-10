@@ -464,7 +464,20 @@ class RendererTest( unittest.TestCase ) :
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performCurvesTest( c, "contrib/IECoreArnold/test/IECoreArnold/data/curveImages/bSpline.exr" )
-			
+	
+	def testVisibilityAttributes( self ) :
+	
+		r = IECoreArnold.Renderer()
+		self.assertEqual( r.getAttribute( "ai:visibility:camera" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:shadow" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:reflected" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:refracted" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:diffuse" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:glossy" ), IECore.BoolData( True ) )
+		
+		r.setAttribute( "ai:visibility:shadow", IECore.BoolData( False ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:shadow" ), IECore.BoolData( False ) )
+		
 	def tearDown( self ) :
 			
 		for f in [

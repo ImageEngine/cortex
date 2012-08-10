@@ -63,6 +63,12 @@ RendererImplementation::AttributeState::AttributeState()
 {
 	surfaceShader = AiNode( "utility" );
 	attributes = new CompoundData;
+	attributes->writable()["ai:visibility:camera"] = new BoolData( true );
+	attributes->writable()["ai:visibility:shadow"] = new BoolData( true );
+	attributes->writable()["ai:visibility:reflected"] = new BoolData( true );
+	attributes->writable()["ai:visibility:refracted"] = new BoolData( true );
+	attributes->writable()["ai:visibility:diffuse"] = new BoolData( true );
+	attributes->writable()["ai:visibility:glossy"] = new BoolData( true );
 }
 
 RendererImplementation::AttributeState::AttributeState( const AttributeState &other )
@@ -573,6 +579,48 @@ void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 	AiNodeSetMatrix( node, "matrix", mm );
 }
 
+void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
+{	
+	int visibility = 0;
+	const BoolData *visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:camera" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_CAMERA;
+	}
+	
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:shadow" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_SHADOW;
+	}
+
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:reflected" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_REFLECTED;
+	}
+	
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:refracted" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_REFRACTED;
+	}
+	
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuse" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_DIFFUSE;
+	}
+	
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:glossy" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_GLOSSY;
+	}
+	
+	AiNodeSetInt( node, "visibility", visibility );
+}
+	
 void IECoreArnold::RendererImplementation::addNode( AtNode *node )
 {
 	m_nodes.push_back( node );
@@ -581,7 +629,8 @@ void IECoreArnold::RendererImplementation::addNode( AtNode *node )
 void IECoreArnold::RendererImplementation::addShape( AtNode *shape )
 {
 	applyTransformToNode( shape );
-	AiNodeSetPtr( shape, "shader", m_attributeStack.top().surfaceShader );	
+	applyVisibilityToNode( shape );	
+	AiNodeSetPtr( shape, "shader", m_attributeStack.top().surfaceShader );
 	addNode( shape );
 }
 

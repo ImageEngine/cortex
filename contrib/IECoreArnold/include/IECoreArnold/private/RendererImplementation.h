@@ -127,6 +127,7 @@ class RendererImplementation : public IECore::Renderer
 	
 		void constructCommon( Mode mode );
 		void applyTransformToNode( AtNode *node );
+		void applyVisibilityToNode( AtNode *node );
 		void addNode( AtNode *node );
 		void addShape( AtNode *shape );
 	
