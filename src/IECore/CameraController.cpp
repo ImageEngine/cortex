@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2011, John Haddon. All rights reserved.
+//  Copyright (c) 2011-2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -277,8 +277,7 @@ void CameraController::tumble( const Imath::V2i &p )
 	xAxisInWorld.normalize();
 
 	M44f t;
-	t.translate( -centreOfInterestInWorld );
-
+	t.translate( centreOfInterestInWorld );
 
 		t.rotate( V3f( 0, -d.x / 100.0f, 0 ) );
 
@@ -287,7 +286,7 @@ void CameraController::tumble( const Imath::V2i &p )
 
 		t = xRotate * t;
 
-	t.translate( centreOfInterestInWorld );
+	t.translate( -centreOfInterestInWorld );
 
 	m_transform->matrix = m_motionMatrix * t;
 }
