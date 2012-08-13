@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDMESHCONVERTER_H
-#define IECOREARNOLD_TOARNOLDMESHCONVERTER_H
-
-#include "IECoreArnold/ToArnoldShapeConverter.h"
-
-namespace IECore
-{
-IE_CORE_FORWARDDECLARE( MeshPrimitive );
-} // namespace IECore
+#ifndef IECOREARNOLD_TOARNOLDMESHCONVERTERBINDING_H
+#define IECOREARNOLD_TOARNOLDMESHCONVERTERBINDING_H
 
 namespace IECoreArnold
 {
 
-class ToArnoldMeshConverter : public ToArnoldShapeConverter
-{
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldMeshConverter, ToArnoldMeshConverterTypeId, ToArnoldShapeConverter );
-
-		ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert );
-		virtual ~ToArnoldMeshConverter();
-
-	protected :
-
-		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-	
-		static AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh );
-
-};
-
-IE_CORE_DECLAREPTR( ToArnoldMeshConverter );
+void bindToArnoldMeshConverter();
 
 } // namespace IECoreArnold
 
-#endif // IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+#endif //  IECOREARNOLD_TOARNOLDMESHCONVERTERBINDING_H

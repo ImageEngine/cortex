@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDMESHCONVERTER_H
-#define IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+#ifndef IECOREARNOLD_TOARNOLDPOINTSCONVERTER_H
+#define IECOREARNOLD_TOARNOLDPOINTSCONVERTER_H
 
 #include "IECoreArnold/ToArnoldShapeConverter.h"
 
 namespace IECore
 {
-IE_CORE_FORWARDDECLARE( MeshPrimitive );
+IE_CORE_FORWARDDECLARE( PointsPrimitive );
 } // namespace IECore
 
 namespace IECoreArnold
 {
 
-class ToArnoldMeshConverter : public ToArnoldShapeConverter
+class ToArnoldPointsConverter : public ToArnoldShapeConverter
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldMeshConverter, ToArnoldMeshConverterTypeId, ToArnoldShapeConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldPointsConverter, ToArnoldPointsConverterTypeId, ToArnoldShapeConverter );
 
-		ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert );
-		virtual ~ToArnoldMeshConverter();
+		ToArnoldPointsConverter( IECore::PointsPrimitivePtr toConvert );
+		virtual ~ToArnoldPointsConverter();
 
 	protected :
 
 		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
 
-	private :
-	
-		static AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh );
-
 };
 
-IE_CORE_DECLAREPTR( ToArnoldMeshConverter );
+IE_CORE_DECLAREPTR( ToArnoldPointsConverter );
 
 } // namespace IECoreArnold
 
-#endif // IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+#endif // IECOREARNOLD_TOARNOLDPOINTSCONVERTER_H

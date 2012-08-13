@@ -12,6 +12,8 @@ Improvements :
 
 * The ClassLoader class now has a searchPath() method to provide access to the paths used to find classes.
 
+* Refactored IECoreArnold converters to share a ToArnoldShapeConverter base class. Added bindings so that they may be used from python in conjunction with the arnold python bindings. Added a ToArnoldPointsConverter for dealing with points primitives.
+
 Bug Fixes :
 
 * Fixed tumbling in CameraController when pivot is not at the centre of the world.

@@ -43,11 +43,13 @@
 #include "IECore/Transform.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/CurvesPrimitive.h"
+#include "IECore/PointsPrimitive.h"
 
 #include "IECoreArnold/private/RendererImplementation.h"
 #include "IECoreArnold/ToArnoldMeshConverter.h"
 #include "IECoreArnold/ToArnoldCameraConverter.h"
 #include "IECoreArnold/ToArnoldCurvesConverter.h"
+#include "IECoreArnold/ToArnoldPointsConverter.h"
 
 using namespace IECore;
 using namespace IECoreArnold;
@@ -419,7 +421,13 @@ void IECoreArnold::RendererImplementation::motionEnd()
 
 void IECoreArnold::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreArnold::RendererImplementation::points", "Not implemented" );
+	PointsPrimitivePtr points = new IECore::PointsPrimitive( numPoints );
+	points->variables = primVars;
+	
+	ToArnoldPointsConverterPtr converter = new ToArnoldPointsConverter( points );
+	AtNode *shape = converter->convert();
+
+	addShape( shape );
 }
 
 void IECoreArnold::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )

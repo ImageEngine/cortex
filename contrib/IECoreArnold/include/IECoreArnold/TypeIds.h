@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,8 @@ enum TypeId
 	ToArnoldMeshConverterTypeId = 111002,
 	ToArnoldCameraConverterTypeId = 111003,
 	ToArnoldCurvesConverterTypeId = 111004,
+	ToArnoldPointsConverterTypeId = 111005,
+	ToArnoldShapeConverterTypeId = 111006,
 	
 	LastCoreArnoldTypeId = 111999,
 };

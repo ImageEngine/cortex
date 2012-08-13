@@ -46,7 +46,7 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( ToArnoldMeshConverter );
 
 ToArnoldMeshConverter::ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert )
-	:	ToArnoldConverter( "Converts IECore::MeshPrimitives to arnold polymesh nodes", IECore::MeshPrimitive::staticTypeId() )
+	:	ToArnoldShapeConverter( "Converts IECore::MeshPrimitives to arnold polymesh nodes", IECore::MeshPrimitive::staticTypeId() )
 {
 	srcParameter()->setValue( toConvert );
 }
@@ -58,8 +58,13 @@ ToArnoldMeshConverter::~ToArnoldMeshConverter()
 AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
 {
 	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( from.get() );
-
-	// make the result mesh and add points
+	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+	if( !p )
+	{
+		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+	}
+	
+	// make the result mesh and add topology and points
 	
 	AtNode *result = AiNode( "polymesh" );
 
@@ -77,17 +82,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
 	
-	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-	if( !p )
-	{
-		AiNodeDestroy( result );
-		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
-	}
-	AiNodeSetArray(
-		result,
-		"vlist",
-		AiArrayConvert( p->readable().size(), 1, AI_TYPE_POINT, (void *)&( p->readable()[0] ) )
-	);
+	convertP( p, result, "vlist" );
 	
 	// set subdivision
 	

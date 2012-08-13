@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ from UniverseBlockTest import UniverseBlockTest
 from MeshTest import MeshTest
 from ProceduralTest import ProceduralTest
 from OutputDriverTest import OutputDriverTest
+from PointsTest import PointsTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

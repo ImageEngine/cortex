@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,73 +32,71 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/Exception.h"
-#include "IECore/SimpleTypedData.h"
+#include "ai.h"
 
-#include "IECoreArnold/ToArnoldCurvesConverter.h"
+#include "IECore/PointsPrimitive.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/MessageHandler.h"
+
+#include "IECoreArnold/ToArnoldPointsConverter.h"
 
 using namespace IECoreArnold;
 using namespace IECore;
 using namespace std;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldCurvesConverter );
+IE_CORE_DEFINERUNTIMETYPED( ToArnoldPointsConverter );
 
-ToArnoldCurvesConverter::ToArnoldCurvesConverter( IECore::CurvesPrimitivePtr toConvert )
-	:	ToArnoldShapeConverter( "Converts IECore::CurvesPrimitives to arnold curves nodes", IECore::CurvesPrimitive::staticTypeId() )
+ToArnoldPointsConverter::ToArnoldPointsConverter( IECore::PointsPrimitivePtr toConvert )
+	:	ToArnoldShapeConverter( "Converts IECore::PointsPrimitives to arnold points nodes", IECore::PointsPrimitive::staticTypeId() )
 {
 	srcParameter()->setValue( toConvert );
 }
 
-ToArnoldCurvesConverter::~ToArnoldCurvesConverter()
+ToArnoldPointsConverter::~ToArnoldPointsConverter()
 {
 }
 
-AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
 {
-	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( from.get() );
-	const V3fVectorData *p = curves->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+	const PointsPrimitive *points = static_cast<const PointsPrimitive *>( from.get() );
+	const V3fVectorData *p = points->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
-		throw Exception( "CurvesPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+		throw Exception( "PointsPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 	}
 	
-	// make the result curves and add points
+	// make the result points and set the positions
 	
-	AtNode *result = AiNode( "curves" );
-
-	const std::vector<int> verticesPerCurve = curves->verticesPerCurve()->readable();
-	AiNodeSetArray(
-		result,
-		"num_points",
-		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
-	);
-
+	AtNode *result = AiNode( "points" );
+		
 	convertP( p, result, "points" );
 	
-	// set basis
+	// mode
 	
-	if( curves->basis() == CubicBasisf::bezier() )
+	const StringData *t = points->variableData<StringData>( "type", PrimitiveVariable::Constant );
+	if( t )
 	{
-		AiNodeSetStr( result, "basis", "bezier" );
-		
+		if( t->readable() == "particle" || t->readable()=="disk" )
+		{
+			// default type is disk - no need to do anything
+		}
+		else if( t->readable() == "sphere" )
+		{
+			AiNodeSetStr( result, "mode", "sphere" );
+		}
+		else if( t->readable() == "patch" )
+		{
+			AiNodeSetStr( result, "mode", "quad" );
+		}
+		else
+		{
+			IECore::msg( IECore::Msg::Warning, "ToArnoldPointsConverter::doConversion", boost::format( "Unknown type \"%s\" - reverting to disk mode." ) % t->readable() );
+		}
 	}
-	else if( curves->basis() == CubicBasisf::bSpline() )
-	{
-		AiNodeSetStr( result, "basis", "b-spline" );
-	}
-	else if( curves->basis() == CubicBasisf::catmullRom() )
-	{
-		AiNodeSetStr( result, "basis", "catmull-rom" );
-	}
-	else
-	{
-		// just accept the default
-	}
-	
-	// add radius
-	
-	convertRadius( curves, result );
 
+	convertRadius( points, result );
+
+	/// \todo Aspect, rotation, primitive variables
+	
 	return result;
 }

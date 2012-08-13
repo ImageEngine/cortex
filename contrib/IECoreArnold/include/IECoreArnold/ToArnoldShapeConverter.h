@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDMESHCONVERTER_H
-#define IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+#ifndef IECOREARNOLD_TOARNOLDSHAPECONVERTER_H
+#define IECOREARNOLD_TOARNOLDSHAPECONVERTER_H
 
-#include "IECoreArnold/ToArnoldShapeConverter.h"
+#include "IECore/VectorTypedData.h"
+
+#include "IECoreArnold/ToArnoldConverter.h"
 
 namespace IECore
 {
-IE_CORE_FORWARDDECLARE( MeshPrimitive );
+IE_CORE_FORWARDDECLARE( Primitive )
 } // namespace IECore
 
 namespace IECoreArnold
 {
 
-class ToArnoldMeshConverter : public ToArnoldShapeConverter
+class ToArnoldShapeConverter : public ToArnoldConverter
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldMeshConverter, ToArnoldMeshConverterTypeId, ToArnoldShapeConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldShapeConverter, ToArnoldShapeConverterTypeId, ToArnoldConverter );
 
-		ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert );
-		virtual ~ToArnoldMeshConverter();
+		virtual ~ToArnoldShapeConverter();
 
 	protected :
 
-		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
+		ToArnoldShapeConverter( const std::string &description, IECore::TypeId supportedType );
 
-	private :
-	
-		static AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh );
+		/// \todo I think we could deal with motion blur in here, by having the additional
+		/// samples either provided by velocity or P1, P2 etc primitive variables, or by having
+		/// additional samples specified via a Parameter.
+		void convertP( const IECore::V3fVectorData *p, AtNode *shape, const char *name ) const;
+		void convertRadius( const IECore::Primitive *primitive, AtNode *shape ) const;
 
 };
 
-IE_CORE_DECLAREPTR( ToArnoldMeshConverter );
+IE_CORE_DECLAREPTR( ToArnoldShapeConverter );
 
 } // namespace IECoreArnold
 
-#endif // IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+#endif // IECOREARNOLD_TOARNOLDSHAPECONVERTER_H

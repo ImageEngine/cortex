@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDMESHCONVERTER_H
-#define IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+#include "boost/python.hpp"
 
-#include "IECoreArnold/ToArnoldShapeConverter.h"
+#include "IECoreArnold/ToArnoldConverter.h"
+#include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
 
-namespace IECore
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/Object.h"
+
+using namespace IECoreArnold;
+using namespace boost::python;
+
+static object convertWrapper( ToArnoldConverter &converter )
 {
-IE_CORE_FORWARDDECLARE( MeshPrimitive );
-} // namespace IECore
+	AtNode *node = converter.convert();
+	if( !node )
+	{
+		return object();
+	}
 
-namespace IECoreArnold
-{
-
-class ToArnoldMeshConverter : public ToArnoldShapeConverter
-{
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldMeshConverter, ToArnoldMeshConverterTypeId, ToArnoldShapeConverter );
-
-		ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert );
-		virtual ~ToArnoldMeshConverter();
-
-	protected :
-
-		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
+	object ctypes = import( "ctypes" );
+	object arnold = import( "arnold" );
 	
-		static AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh );
+	object atNodeType = arnold.attr( "AtNode" );
+	object pointerType = ctypes.attr( "POINTER" )( atNodeType );
+	object converted = ctypes.attr( "cast" )( (size_t)node, pointerType );
+	return converted;
+}
 
-};
-
-IE_CORE_DECLAREPTR( ToArnoldMeshConverter );
-
-} // namespace IECoreArnold
-
-#endif // IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+void IECoreArnold::bindToArnoldConverter()
+{
+	IECorePython::RunTimeTypedClass<ToArnoldConverter>()
+		.def( "convert", &convertWrapper )
+	;
+}

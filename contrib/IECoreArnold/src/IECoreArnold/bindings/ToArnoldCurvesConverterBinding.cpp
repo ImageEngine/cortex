@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDMESHCONVERTER_H
-#define IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+#include "boost/python.hpp"
 
-#include "IECoreArnold/ToArnoldShapeConverter.h"
+#include "IECoreArnold/ToArnoldCurvesConverter.h"
+#include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
 
-namespace IECore
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CurvesPrimitive.h"
+
+using namespace boost::python;
+
+void IECoreArnold::bindToArnoldCurvesConverter()
 {
-IE_CORE_FORWARDDECLARE( MeshPrimitive );
-} // namespace IECore
-
-namespace IECoreArnold
-{
-
-class ToArnoldMeshConverter : public ToArnoldShapeConverter
-{
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldMeshConverter, ToArnoldMeshConverterTypeId, ToArnoldShapeConverter );
-
-		ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert );
-		virtual ~ToArnoldMeshConverter();
-
-	protected :
-
-		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-	
-		static AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh );
-
-};
-
-IE_CORE_DECLAREPTR( ToArnoldMeshConverter );
-
-} // namespace IECoreArnold
-
-#endif // IECOREARNOLD_TOARNOLDMESHCONVERTER_H
+	IECorePython::RunTimeTypedClass<IECoreArnold::ToArnoldCurvesConverter>()
+		.def( init<IECore::CurvesPrimitivePtr>() )
+	;
+}

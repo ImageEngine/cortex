@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,11 @@
 
 #include "IECoreArnold/bindings/RendererBinding.h"
 #include "IECoreArnold/bindings/UniverseBlockBinding.h"
+#include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
+#include "IECoreArnold/bindings/ToArnoldShapeConverterBinding.h"
+#include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
+#include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
+#include "IECoreArnold/bindings/ToArnoldMeshConverterBinding.h"
 
 using namespace IECoreArnold;
 using namespace boost::python;
@@ -45,4 +50,9 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 {
 	bindRenderer();
 	bindUniverseBlock();
+	bindToArnoldConverter();
+	bindToArnoldShapeConverter();
+	bindToArnoldPointsConverter();
+	bindToArnoldCurvesConverter();
+	bindToArnoldMeshConverter();
 }
