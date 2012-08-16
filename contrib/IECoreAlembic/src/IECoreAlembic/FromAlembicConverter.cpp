@@ -32,6 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/CompoundParameter.h"
+#include "IECore/SimpleTypedData.h"
+
 #include "IECoreAlembic/FromAlembicConverter.h"
 
 using namespace Alembic::Abc;
@@ -42,6 +45,30 @@ IE_CORE_DEFINERUNTIMETYPED( FromAlembicConverter );
 FromAlembicConverter::FromAlembicConverter( const std::string &description, Alembic::Abc::IObject iObject )
 	:	ToCoreConverter( description ), m_iObject( iObject )
 {
+	parameters()->addParameter(
+		new IECore::IntParameter(
+			"sampleIndex",
+			"The sample to be converted.",
+			0
+		)
+	);
+}
+
+IECore::IntParameter *FromAlembicConverter::sampleIndexParameter()
+{
+	return parameters()->parameter<IECore::IntParameter>( "sampleIndex" );
+}
+
+const IECore::IntParameter *FromAlembicConverter::sampleIndexParameter() const
+{
+	return parameters()->parameter<IECore::IntParameter>( "sampleIndex" );
+}		
+
+IECore::ObjectPtr FromAlembicConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+{
+	ISampleSelector sampleSelector( (index_t)operands->member<IECore::IntData>( "sampleIndex" )->readable() );
+
+	return doAlembicConversion( m_iObject, sampleSelector, operands.get() );
 }
 
 FromAlembicConverterPtr FromAlembicConverter::create( Alembic::Abc::IObject object, IECore::TypeId resultType )

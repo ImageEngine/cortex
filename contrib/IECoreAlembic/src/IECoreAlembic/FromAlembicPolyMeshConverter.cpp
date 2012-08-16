@@ -49,12 +49,12 @@ FromAlembicPolyMeshConverter::FromAlembicPolyMeshConverter( Alembic::Abc::IObjec
 {
 }
 
-IECore::ObjectPtr FromAlembicPolyMeshConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+IECore::ObjectPtr FromAlembicPolyMeshConverter::doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const
 {
-	IPolyMesh iPolyMesh( m_iObject, kWrapExisting );
+	IPolyMesh iPolyMesh( iObject, kWrapExisting );
 	IPolyMeshSchema &iPolyMeshSchema = iPolyMesh.getSchema();
 	
-	IPolyMeshSchema::Sample sample = iPolyMeshSchema.getValue();
+	IPolyMeshSchema::Sample sample = iPolyMeshSchema.getValue( sampleSelector );
 	
 	IntVectorDataPtr verticesPerFace = new IntVectorData();
 	verticesPerFace->writable().insert(
@@ -77,10 +77,10 @@ IECore::ObjectPtr FromAlembicPolyMeshConverter::doConversion( IECore::ConstCompo
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
 	
 	Alembic::AbcGeom::IV2fGeomParam &uvs = iPolyMeshSchema.getUVsParam();
-	convertUVs( uvs, result );
+	convertUVs( uvs, sampleSelector, result );
 	
 	ICompoundProperty arbGeomParams = iPolyMeshSchema.getArbGeomParams();
-	convertArbGeomParams( arbGeomParams, result );
+	convertArbGeomParams( arbGeomParams, sampleSelector, result );
 	
 	return result;
 }

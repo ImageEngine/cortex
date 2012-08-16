@@ -58,7 +58,7 @@ class FromAlembicSubDConverter : public FromAlembicGeomBaseConverter
 
 	protected :
 
-		virtual IECore::ObjectPtr doConversion( const IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
 
 	private :
 	

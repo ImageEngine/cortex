@@ -36,8 +36,10 @@
 #define IECOREALEMBIC_FROMALEMBICCONVERTER_H
 
 #include "Alembic/Abc/IObject.h"
+#include "Alembic/Abc/ISampleSelector.h"
 
 #include "IECore/ToCoreConverter.h"
+#include "IECore/NumericParameter.h"
 
 #include "IECoreAlembic/TypeIds.h"
 
@@ -62,6 +64,9 @@ class FromAlembicConverter : public IECore::ToCoreConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicConverter, FromAlembicConverterTypeId, ToCoreConverter );
 
+		IECore::IntParameter *sampleIndexParameter();
+		const IECore::IntParameter *sampleIndexParameter() const;
+
 		//! @name Factory
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
@@ -76,9 +81,11 @@ class FromAlembicConverter : public IECore::ToCoreConverter
 
 		FromAlembicConverter( const std::string &description, Alembic::Abc::IObject iObject );
 
-		/// \todo Should this be made private and passed to an overloaded doConversion method?
-		Alembic::Abc::IObject m_iObject;
-
+		/// Implemented to call doAlembicConversion. Derived classes should implement doAlembicConversion()
+		/// instead.
+		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;		
+		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const = 0;		
+		
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.
 		template<class T>
@@ -108,6 +115,8 @@ class FromAlembicConverter : public IECore::ToCoreConverter
 		typedef std::vector<Registration> RegistrationVector;
 		static RegistrationVector &registrations();
 
+		Alembic::Abc::IObject m_iObject;
+		
 };
 
 } // namespace IECoreAlembic

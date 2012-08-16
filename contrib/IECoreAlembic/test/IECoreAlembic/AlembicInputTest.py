@@ -250,9 +250,30 @@ class AlembicInputTest( unittest.TestCase ) :
 				self.assertEqual( v[1], i )	
 				self.assertEqual( v[2], i + 1 )			
 	
-		def testBoundWithIndex( self ) :
+	def testConverterAccess( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
+		m = a.child( "pCube1" ).child( "pCubeShape1" )
+		c = m.converter()
 		
-			pass
+		mesh = c.convert()
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		
+	def testConvertAtIndices( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
+		m = a.child( "pCube1" ).child( "pCubeShape1" )
+		c = m.converter()
+		
+		mesh = c.convert()
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		
+		for i in range( 1, m.numSamples() ) :
+			c["sampleIndex"].setNumericValue( i )
+			mesh2 = c.convert()
+			self.failUnless( isinstance( mesh2, IECore.MeshPrimitive ) )
+			self.assertEqual( mesh.verticesPerFace, mesh2.verticesPerFace )
+			self.assertNotEqual( mesh["P"], mesh2["P"] )
 	
 if __name__ == "__main__":
     unittest.main()

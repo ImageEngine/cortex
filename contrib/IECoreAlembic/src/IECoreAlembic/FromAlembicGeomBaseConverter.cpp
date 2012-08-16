@@ -51,7 +51,7 @@ FromAlembicGeomBaseConverter::FromAlembicGeomBaseConverter( const std::string &d
 {
 }
 
-void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &uvs, IECore::Primitive *primitive ) const
+void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {	
 	if( !uvs.valid() )
 	{
@@ -61,7 +61,7 @@ void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &
 	/// \todo It'd be nice if we stored uvs as a single primitive variable instead of having to split them in two.
 	/// It'd also be nice if we supported indexed data directly.
 	typedef IV2fArrayProperty::sample_ptr_type SamplePtr;
-	SamplePtr sample = uvs.getExpandedValue().getVals();
+	SamplePtr sample = uvs.getExpandedValue( sampleSelector ).getVals();
 	size_t size = sample->size();
 	
 	FloatVectorDataPtr sData = new FloatVectorData;
@@ -81,7 +81,7 @@ void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &
 	primitive->variables["t"] = PrimitiveVariable( interpolation, tData );	
 }
 		
-void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, IECore::Primitive *primitive ) const
+void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
 	if( !params.valid() )
 	{
@@ -94,43 +94,43 @@ void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompound
 		
 		if( IFloatGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IFloatGeomParam>( params, header, primitive );
+			convertArbGeomParam<IFloatGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IDoubleGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IDoubleGeomParam>( params, header, primitive );
+			convertArbGeomParam<IDoubleGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IV3dGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IV3dGeomParam>( params, header, primitive );
+			convertArbGeomParam<IV3dGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IInt32GeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IInt32GeomParam>( params, header, primitive );
+			convertArbGeomParam<IInt32GeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IStringGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IStringGeomParam>( params, header, primitive );
+			convertArbGeomParam<IStringGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IV2fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IV2fGeomParam>( params, header, primitive );
+			convertArbGeomParam<IV2fGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IV3fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IV3fGeomParam>( params, header, primitive );
+			convertArbGeomParam<IV3fGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IC3fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IC3fGeomParam>( params, header, primitive );
+			convertArbGeomParam<IC3fGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IC4fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IC4fGeomParam>( params, header, primitive );
+			convertArbGeomParam<IC4fGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else if( IM44fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IM44fGeomParam>( params, header, primitive );
+			convertArbGeomParam<IM44fGeomParam>( params, header, sampleSelector, primitive );
 		}
 		else
 		{
@@ -159,7 +159,7 @@ IECore::PrimitiveVariable::Interpolation FromAlembicGeomBaseConverter::interpola
 }
 		
 template<typename T>
-void FromAlembicGeomBaseConverter::convertArbGeomParam( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::PropertyHeader &paramHeader, IECore::Primitive *primitive ) const
+void FromAlembicGeomBaseConverter::convertArbGeomParam( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::PropertyHeader &paramHeader, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
 	typedef typename T::prop_type::sample_type::value_vector ValueType;
@@ -172,7 +172,7 @@ void FromAlembicGeomBaseConverter::convertArbGeomParam( Alembic::Abc::ICompoundP
 		return;
 	}
 	
-	SamplePtr sample = param.getExpandedValue().getVals();
+	SamplePtr sample = param.getExpandedValue( sampleSelector ).getVals();
 	
   	typename DataType::Ptr data = new TypedData<ValueType>();
   	data->writable().resize( sample->size() );

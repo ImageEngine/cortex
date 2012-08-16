@@ -49,11 +49,11 @@ FromAlembicXFormConverter::FromAlembicXFormConverter( Alembic::Abc::IObject iXFo
 {
 }
 
-IECore::ObjectPtr FromAlembicXFormConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+IECore::ObjectPtr FromAlembicXFormConverter::doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const
 {
-	IXform iXForm( m_iObject, kWrapExisting );
+	IXform iXForm( iObject, kWrapExisting );
 	IXformSchema &iXFormSchema = iXForm.getSchema();
 	XformSample sample;
-	iXFormSchema.get( sample );
+	iXFormSchema.get( sample, sampleSelector );
 	return new M44fData( M44f( sample.getMatrix() ) );	
 }

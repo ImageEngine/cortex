@@ -40,6 +40,7 @@
 #include "IECore/RefCounted.h"
 #include "IECore/CompoundData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/ToCoreConverter.h"
 
 namespace IECoreAlembic
 {
@@ -101,6 +102,12 @@ class AlembicInput : public IECore::RefCounted
 		/// Returns the transformation matrix of this node if it has one,
 		/// and the identity otherwise.
 		Imath::M44d transform() const;
+		/// Returns a converter capable of converting the Alembic object into
+		/// the specified form, or 0 if no such converter exists. The converter
+		/// is returned as a ToCoreConverter rather than a FromAlembicConverter
+		/// as the latter exposes the underlying Alembic APIs, which we are
+		/// deliberately hiding with the AlembicInput class.
+		IECore::ToCoreConverterPtr converter( IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		/// Converts the alembic object into Cortex form, preferring conversions
 		/// yielding the specified result type.
 		IECore::ObjectPtr convert( IECore::TypeId resultType = IECore::ObjectTypeId ) const;

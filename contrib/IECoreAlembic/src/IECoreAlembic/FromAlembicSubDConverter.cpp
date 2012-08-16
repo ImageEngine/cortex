@@ -49,12 +49,12 @@ FromAlembicSubDConverter::FromAlembicSubDConverter( Alembic::Abc::IObject iSubD 
 {
 }
 
-IECore::ObjectPtr FromAlembicSubDConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+IECore::ObjectPtr FromAlembicSubDConverter::doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const
 {
-	ISubD iSubD( m_iObject, kWrapExisting );
+	ISubD iSubD( iObject, kWrapExisting );
 	ISubDSchema &iSubDSchema = iSubD.getSchema();
 	
-	ISubDSchema::Sample sample = iSubDSchema.getValue();
+	ISubDSchema::Sample sample = iSubDSchema.getValue( sampleSelector );
 	
 	IntVectorDataPtr verticesPerFace = new IntVectorData();
 	verticesPerFace->writable().insert(
@@ -83,10 +83,10 @@ IECore::ObjectPtr FromAlembicSubDConverter::doConversion( IECore::ConstCompoundO
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, interpolation, points );
 	
 	Alembic::AbcGeom::IV2fGeomParam &uvs = iSubDSchema.getUVsParam();
-	convertUVs( uvs, result );
+	convertUVs( uvs, sampleSelector, result );
 	
 	ICompoundProperty arbGeomParams = iSubDSchema.getArbGeomParams();
-	convertArbGeomParams( arbGeomParams, result );
+	convertArbGeomParams( arbGeomParams, sampleSelector, result );
 	
 	return result;
 }

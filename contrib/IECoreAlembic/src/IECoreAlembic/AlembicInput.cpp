@@ -237,12 +237,17 @@ Imath::M44d AlembicInput::transform() const
 	return result;
 }
 
+IECore::ToCoreConverterPtr AlembicInput::converter( IECore::TypeId resultType ) const
+{
+	return FromAlembicConverter::create( m_data->object, resultType );
+}
+		
 IECore::ObjectPtr AlembicInput::convert( IECore::TypeId resultType ) const
 {
-	FromAlembicConverterPtr converter = FromAlembicConverter::create( m_data->object, resultType );
-	if( converter )
+	FromAlembicConverterPtr c = FromAlembicConverter::create( m_data->object, resultType );
+	if( c )
 	{
-		return converter->convert();
+		return c->convert();
 	}
 	return 0;
 }
