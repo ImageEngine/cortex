@@ -60,6 +60,13 @@ static AlembicInputPtr getItem( AlembicInput *a, long index )
 	return a->child( index );
 }
 
+static tuple sampleInterval( AlembicInput *a, double time )
+{
+	size_t f, c;
+	double l = a->sampleInterval( time, f, c );
+	return make_tuple( l, f, c );
+}
+
 void IECoreAlembicBindings::bindAlembicInput()
 {
 	IECorePython::RefCountedClass<AlembicInput, IECore::RefCounted>( "AlembicInput" )
@@ -67,6 +74,9 @@ void IECoreAlembicBindings::bindAlembicInput()
 		.def( "name", &AlembicInput::name, return_value_policy<copy_const_reference>() )
 		.def( "fullName", &AlembicInput::fullName, return_value_policy<copy_const_reference>() )
 		.def( "metaData", &AlembicInput::metaData )
+		.def( "numSamples", &AlembicInput::numSamples )
+		.def( "sampleTime", &AlembicInput::sampleTime )
+		.def( "sampleInterval", &sampleInterval )
 		.def( "bound", &AlembicInput::bound )
 		.def( "transform", &AlembicInput::transform )
 		.def( "convert", &AlembicInput::convert, ( boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )

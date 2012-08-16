@@ -55,7 +55,7 @@ using namespace IECore;
 struct AlembicInput::DataMembers
 {
 	DataMembers()
-		: boundValid( false )
+		: boundValid( false ), numSamples( -1 )
 	{
 	}
 	
@@ -63,6 +63,8 @@ struct AlembicInput::DataMembers
 	IObject object;
 	bool boundValid;
 	Box3d bound;
+	int numSamples;
+	TimeSamplingPtr timeSampling;
 };
 
 AlembicInput::AlembicInput( const std::string &fileName )
@@ -101,6 +103,76 @@ IECore::CompoundDataPtr AlembicInput::metaData() const
 	}
 	
 	return resultData;
+}
+
+size_t AlembicInput::numSamples() const
+{
+	if( m_data->numSamples != -1 )
+	{
+		return m_data->numSamples;
+	}
+	
+	// wouldn't it be grand if the different things we had to call getNumSamples()
+	// on had some sort of base class where getNumSamples() was defined?
+	
+	const MetaData &md = m_data->object.getMetaData();
+	
+	if( !m_data->object.getParent() )
+	{
+		// top of archive
+		Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
+		m_data->numSamples = boundsProperty.getNumSamples();
+	}
+	else if( IXform::matches( md ) )
+	{
+		IXform iXForm( m_data->object, kWrapExisting );
+		m_data->numSamples = iXForm.getSchema().getNumSamples();
+	}
+	else
+	{
+		IGeomBaseObject geomBase( m_data->object, kWrapExisting );
+		m_data->numSamples = geomBase.getSchema().getNumSamples();
+	}
+	
+	return m_data->numSamples;
+}
+
+double AlembicInput::sampleTime( size_t sampleIndex ) const
+{
+	if( sampleIndex >= numSamples() )
+	{
+		throw InvalidArgumentException( "Sample index out of range" );
+	}
+	ensureTimeSampling();
+	return m_data->timeSampling->getSampleTime( sampleIndex );
+}
+
+double AlembicInput::sampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
+{
+	ensureTimeSampling();	
+	
+	std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> f = m_data->timeSampling->getFloorIndex( time, numSamples() );
+	if( fabs( time - f.second ) < 0.0001 )
+	{
+		// it's going to be very common to be reading on the whole frame, so we want to make sure
+		// that anything thereabouts is loaded as a single uninterpolated sample for speed.
+		floorIndex = ceilIndex = f.first;
+		return 0.0;
+	}
+	
+	std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> c = m_data->timeSampling->getCeilIndex( time, numSamples() );
+	if( f.first == c.first || fabs( time - c.second ) < 0.0001 )
+	{
+		// return a result not needing interpolation if possible. either we only had one sample
+		// to pick from or the ceiling sample was close enough to perfect.
+		floorIndex = ceilIndex = c.first;
+		return 0.0;
+	}
+	
+	floorIndex = f.first;
+	ceilIndex = c.first;
+	
+	return ( time - f.second ) / ( c.second - f.second );
 }
 
 Imath::Box3d AlembicInput::bound() const
@@ -218,3 +290,31 @@ AlembicInputPtr AlembicInput::child( const std::string &name ) const
 	result->m_data->object = c;
 	return result;
 }
+
+void AlembicInput::ensureTimeSampling() const
+{
+	if( m_data->timeSampling )
+	{
+		return;
+	}
+	
+	const MetaData &md = m_data->object.getMetaData();
+	
+	if( !m_data->object.getParent() )
+	{
+		// top of archive
+		Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
+		m_data->timeSampling = boundsProperty.getTimeSampling();
+	}
+	else if( IXform::matches( md ) )
+	{
+		IXform iXForm( m_data->object, kWrapExisting );
+		m_data->timeSampling = iXForm.getSchema().getTimeSampling();
+	}
+	else
+	{
+		IGeomBaseObject geomBase( m_data->object, kWrapExisting );
+		m_data->timeSampling = geomBase.getSchema().getTimeSampling();
+	}
+}
+

@@ -192,7 +192,67 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( m["t"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		
 		self.failUnless( isinstance( m["s"].data, IECore.FloatVectorData ) )
-		self.failUnless( isinstance( m["t"].data, IECore.FloatVectorData ) )	
+		self.failUnless( isinstance( m["t"].data, IECore.FloatVectorData ) )
 		
+	def testSamples( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
+		
+		self.assertEqual( a.numSamples(), 10 )
+		for i in range( 0, a.numSamples() ) :
+			self.assertAlmostEqual( a.sampleTime( i ), (i + 1) / 24.0 )
+		
+		p = a.child( "persp" )
+		self.assertEqual( p.numSamples(), 1 )	
+		self.assertEqual( p.sampleTime( 0 ), 1 / 24.0 )
+		
+		t = a.child( "pCube1" )
+		self.assertEqual( t.numSamples(), 10 )	
+		for i in range( 0, t.numSamples() ) :
+			self.assertAlmostEqual( t.sampleTime( i ), (i + 1) / 24.0 )
+	
+		m = t.child( "pCubeShape1" )
+		self.assertEqual( m.numSamples(), 10 )	
+		for i in range( 0, m.numSamples() ) :
+			self.assertAlmostEqual( m.sampleTime( i ), (i + 1) / 24.0 )
+			
+	def testOutOfRangeSamplesRaise( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )	
+	
+		self.assertRaises( Exception, a.sampleTime, 10 )
+		
+	def testSampleInterval( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
+		
+		# persp has only one sample, so should always be reading from that regardless the time
+		p = a.child( "persp" )
+		t = -1000
+		while t < 1000 :
+			t += .01
+			self.assertEqual( p.sampleInterval( t ), ( 0, 0, 0 ) )
+	
+		# pCube1 has a sample per frame
+		t = a.child( "pCube1" )
+		for i in range( 0, t.numSamples() ) :
+			# reads on the frame should not need
+			# interpolation.
+			v = t.sampleInterval( t.sampleTime( i ) )
+			self.assertEqual( v[0], 0 )
+			self.assertEqual( v[1], i )
+			self.assertEqual( v[1], i )
+			# reads in between frames should need
+			# interpolation
+			if i < t.numSamples() -1 :
+				v = t.sampleInterval( t.sampleTime( i ) + 1 / 48.0 )
+				self.assertAlmostEqual( v[0], 0.5 )
+				self.assertEqual( v[1], i )	
+				self.assertEqual( v[2], i + 1 )			
+	
+		def testBoundWithIndex( self ) :
+		
+			pass
+	
 if __name__ == "__main__":
     unittest.main()

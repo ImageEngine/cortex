@@ -62,29 +62,64 @@ class AlembicInput : public IECore::RefCounted
 		AlembicInput( const std::string &fileName );
 		virtual ~AlembicInput();
 		
+		//! @name Metadata
+		////////////////////////////////////////////////////////////
+		//@{
 		const std::string &name() const;
 		const std::string &fullName() const;
-		
 		IECore::CompoundDataPtr metaData() const;
+		//@}
 		
+		//! @name Sampling and time
+		/// Each level of the hierarchy may be sampled at differing
+		/// points in time. These functions provide queries mapping
+		/// from time to sample indices and back. The indices may
+		/// then be used in the conversion functions below. Note that
+		/// the values returned for the top level input (constructed
+		/// via fileName) are only valid in the case of the whole
+		/// cache using the same sampling. 
+		////////////////////////////////////////////////////////////
+		//@{
+		/// Returns the number of samples.
+		size_t numSamples() const;
+		/// Returns the time associated with the specified sample.
+		double sampleTime( size_t sampleIndex ) const;
+		/// Computes a sample interval suitable for use in producing interpolated
+		/// values, returning the appropriate lerp factor between the two samples.
+		/// In the case of time falling outside of the sample range, or coinciding
+		/// nearly exactly with a single sample, 0 is returned and floorIndex==ceilIndex
+		/// will hold.
+		double sampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
+		//@}
+		
+		//! @name Conversion
+		////////////////////////////////////////////////////////////
+		//@{
 		/// Returns the bounding box of everything below this point in the
 		/// hierarchy, without the transform() applied.
 		Imath::Box3d bound() const;
 		/// Returns the transformation matrix of this node if it has one,
 		/// and the identity otherwise.
 		Imath::M44d transform() const;
-		
+		/// Converts the alembic object into Cortex form, preferring conversions
+		/// yielding the specified result type.
 		IECore::ObjectPtr convert( IECore::TypeId resultType = IECore::ObjectTypeId ) const;
+		//@}
 		
+		//! @name Child access
+		////////////////////////////////////////////////////////////
+		//@{
 		size_t numChildren() const;
 		AlembicInputPtr child( size_t index ) const;
-
 		IECore::StringVectorDataPtr childNames() const;
 		AlembicInputPtr child( const std::string &name ) const;
+		//@}
 
 	private :
 	
 		AlembicInput();
+	
+		void ensureTimeSampling() const;
 	
 		struct DataMembers;
 		
