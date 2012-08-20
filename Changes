@@ -14,6 +14,8 @@ Improvements :
 
 * Refactored IECoreArnold converters to share a ToArnoldShapeConverter base class. Added bindings so that they may be used from python in conjunction with the arnold python bindings. Added a ToArnoldPointsConverter for dealing with points primitives.
 
+* IECoreArnold::Renderer::display() now recognises display types such as "tiff", "exr" and "jpeg" directly and maps them to "driver_tiff", "driver_exr" etc. This makes it easier to set up scenes targeting multiple renderers.
+
 Bug Fixes :
 
 * Fixed tumbling in CameraController when pivot is not at the centre of the world.

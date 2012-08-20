@@ -211,7 +211,22 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 
 void IECoreArnold::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
-	AtNode *driver = AiNode( type.c_str() );
+	AtNode *driver = 0;
+	if( AiNodeEntryLookUp( type.c_str() ) )
+	{
+		driver = AiNode( type.c_str() );
+	}
+	else
+	{
+		// automatically map tiff to driver_tiff and so on, to provide a degree of
+		// compatibility with existing renderman driver names.
+		std::string prefixedType = "driver_" + type;
+		if( AiNodeEntryLookUp( prefixedType.c_str() ) )
+		{
+			driver = AiNode( prefixedType.c_str() );
+		}
+	}
+	
 	if( !driver )
 	{
 		msg( Msg::Error, "IECoreArnold::RendererImplementation::display", boost::format( "Unable to create display of type \"%s\"" ) % type );

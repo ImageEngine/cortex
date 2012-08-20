@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ import IECoreArnold
 
 class RendererTest( unittest.TestCase ) :
 
-	__displayFileName = "contrib/IECoreArnold/test/IECoreArnold/output.exr"
+	__displayFileName = "contrib/IECoreArnold/test/IECoreArnold/output.tif"
 	__assFileName = "contrib/IECoreArnold/test/IECoreArnold/output.ass"
 	
 	def testTypeId( self ) :
@@ -92,7 +92,20 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 		
 		self.failIf( os.path.exists( self.__displayFileName ) )
-		r.display( self.__displayFileName, "driver_exr", "rgba", {} )
+		r.display( self.__displayFileName, "driver_tiff", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+			
+			r.sphere( 1, -1, 1, 360, {} )
+			
+		self.failUnless( os.path.exists( self.__displayFileName ) )
+
+	def testDisplayTypeMapping( self ) :
+	
+		r = IECoreArnold.Renderer()
+		
+		self.failIf( os.path.exists( self.__displayFileName ) )
+		r.display( self.__displayFileName, "tiff", "rgba", {} )
 		
 		with IECore.WorldBlock( r ) :
 			
