@@ -115,5 +115,53 @@ class PointsTest( unittest.TestCase ) :
 
 		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
 
+	def testConstantPrimitiveVariable( self ) :
+	
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
+		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
+		
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
+			self.assertEqual( arnold.AiNodeGetInt( n, "user:myPrimVar" ), 10 )
+	
+	def testConstantArrayPrimitiveVariable( self ) :
+	
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
+		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntVectorData( range( 0, 10 ) ) )
+	
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
+			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+			self.assertEqual( a.contents.nelements, 10 )
+			for i in range( 0, 10 ) :
+				self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
+			
+	def testUniformPrimitiveVariable( self ) :
+	
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
+		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( range( 0, 10 ) ) )
+		
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
+			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+			self.assertEqual( a.contents.nelements, 10 )
+			for i in range( 0, 10 ) :
+				self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
+			
+	def testBooleanPrimitiveVariable( self ) :
+	
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
+		p["truePrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.BoolData( True ) )
+		p["falsePrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.BoolData( False ) )
+		
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
+			self.assertEqual( arnold.AiNodeGetBool( n, "user:truePrimVar" ), True )
+			self.assertEqual( arnold.AiNodeGetBool( n, "user:falsePrimVar" ), False )
+		
 if __name__ == "__main__":
     unittest.main()

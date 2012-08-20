@@ -12,7 +12,7 @@ Improvements :
 
 * The ClassLoader class now has a searchPath() method to provide access to the paths used to find classes.
 
-* Refactored IECoreArnold converters to share a ToArnoldShapeConverter base class. Added bindings so that they may be used from python in conjunction with the arnold python bindings. Added a ToArnoldPointsConverter for dealing with points primitives.
+* Refactored IECoreArnold converters to share a ToArnoldShapeConverter base class. Added bindings so that they may be used from python in conjunction with the arnold python bindings. Added a ToArnoldPointsConverter for dealing with points primitives. Added support for converting arbitrary primitive variables into Arnold user parameters.
 
 * IECoreArnold::Renderer::display() now recognises display types such as "tiff", "exr" and "jpeg" directly and maps them to "driver_tiff", "driver_exr" etc. This makes it easier to set up scenes targeting multiple renderers.
 

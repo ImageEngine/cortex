@@ -42,6 +42,7 @@
 namespace IECore
 {
 IE_CORE_FORWARDDECLARE( Primitive )
+struct PrimitiveVariable;
 } // namespace IECore
 
 namespace IECoreArnold
@@ -65,6 +66,10 @@ class ToArnoldShapeConverter : public ToArnoldConverter
 		/// additional samples specified via a Parameter.
 		void convertP( const IECore::V3fVectorData *p, AtNode *shape, const char *name ) const;
 		void convertRadius( const IECore::Primitive *primitive, AtNode *shape ) const;
+		void convertPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name ) const;
+		/// Converts primitive variables from primitive into user parameters on shape, ignoring any variables
+		/// whose names are present in the ignore array.
+		void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shape, const char **namesToIgnore=0 ) const;
 
 };
 

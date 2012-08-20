@@ -96,7 +96,12 @@ AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECo
 
 	convertRadius( points, result );
 
-	/// \todo Aspect, rotation, primitive variables
+	/// \todo Aspect, rotation
 	
+	// add arbitrary user parameters
+	
+	const char *ignore[] = { "P", "width", "radius", 0 };
+	convertPrimitiveVariables( points, result, ignore );
+
 	return result;
 }

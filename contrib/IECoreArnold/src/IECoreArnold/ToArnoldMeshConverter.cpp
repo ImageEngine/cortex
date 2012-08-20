@@ -186,7 +186,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 			}
 			else
 			{
-				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables \"N\" has unsupported interpolation type - not generating normals." );									
+				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variable \"N\" has unsupported interpolation type - not generating normals." );									
 			}
 		}
 		else
@@ -194,6 +194,11 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 			msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) );
 		}
 	}
+	
+	// add arbitrary user parameters
+	
+	const char *ignore[] = { "P", "s", "t", "N", 0 };
+	convertPrimitiveVariables( mesh, result, ignore );
 	
 	return result;
 }

@@ -59,16 +59,24 @@ class ToArnoldConverter : public IECore::FromCoreConverter
 		AtNode *convert() const;
 
 		/// \todo Do these belong somewhere else?
-		static void setParameter( AtNode *node, const char *name, int parameterType, const IECore::Data *value );
 		static void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Data *value );
 		static void setParameter( AtNode *node, const char *name, const IECore::Data *value );
 		static void setParameters( AtNode *node, const IECore::CompoundDataMap &values );
 		
-		static IECore::DataPtr getParameter( AtNode *node, const char *name, int parameterType );
+		/// \todo Even if setParameter belongs here, perhaps getParameter belongs on
+		/// a FromArnoldConverter?
 		static IECore::DataPtr getParameter( AtNode *node, const AtParamEntry *parameter );
 		static IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter );
 		static IECore::DataPtr getParameter( AtNode *node, const char *name );
 		static void getParameters( AtNode *node, IECore::CompoundDataMap &values );
+		
+		/// Returns the Arnold parameter type (AI_TYPE_INT etc) suitable for
+		/// storing Cortex data of the specified type, setting array to true
+		/// or false depending on whether or not the Arnold type will be an
+		/// array. Returns AI_TYPE_NONE if there is no suitable Arnold type.
+		static int parameterType( IECore::TypeId dataType, bool &array );
+		
+		static AtArray *dataToArray( const IECore::Data *data );
 
 	protected:
 
@@ -80,6 +88,11 @@ class ToArnoldConverter : public IECore::FromCoreConverter
 		/// is of the supported type and the parameter values have been validated and placed in operands.
 		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const = 0;
 
+	private :
+	
+		static void setParameterInternal( AtNode *node, const char *name, int parameterType, bool array, const IECore::Data *value );
+		static IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parameterType );
+		
 };
 
 IE_CORE_DECLAREPTR( ToArnoldConverter );

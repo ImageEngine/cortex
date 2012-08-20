@@ -37,6 +37,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Primitive.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreArnold/ToArnoldShapeConverter.h"
 
@@ -102,4 +103,95 @@ void ToArnoldShapeConverter::convertRadius( const IECore::Primitive *primitive, 
 		"radius",
 		AiArrayConvert( radius->readable().size(), 1, AI_TYPE_FLOAT, (void *)&( radius->readable()[0] ) )
 	);
+}
+
+void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name ) const
+{
+	if( primitiveVariable.interpolation == PrimitiveVariable::Constant )
+	{
+		setParameter( shape, name, primitiveVariable.data.get() );
+	}
+	else 
+	{
+		bool isArray = false;
+		int type = parameterType( primitiveVariable.data->typeId(), isArray );
+		if( type == AI_TYPE_NONE || !isArray )
+		{
+			msg(
+				Msg::Warning,
+				"ToArnoldShapeConverter::convertPrimitiveVariable",
+				boost::format( "Unable to create user parameter \"%s\" for primitive variable of type \"%s\"" ) % name % primitiveVariable.data->typeName()
+			);
+			return;
+		}
+		
+		std::string typeString;
+		if( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
+		{
+			typeString = "uniform ";
+		}
+		else if( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
+		{
+			typeString = "varying ";
+		}
+		else if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Vertex ) )
+		{
+			typeString = "varying ";	
+		}
+		
+		if( typeString == "" )
+		{
+			msg(
+				Msg::Warning,
+				"ToArnoldShapeConverter::convertPrimitiveVariable",
+				boost::format( "Unable to create user parameter \"%s\" because primitive variable has unsupported interpolation" ) % name
+			);
+			return;
+		}
+					
+		typeString += AiParamGetTypeName( type );
+		AiNodeDeclare( shape, name, typeString.c_str() );
+		AtArray *array = dataToArray( primitiveVariable.data );
+		if( array )
+		{
+			AiNodeSetArray( shape, name, array );
+		}
+		else
+		{
+			msg(
+				Msg::Warning,
+				"ToArnoldShapeConverter::convertPrimitiveVariable",
+				boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
+			);	
+		}
+	}
+}
+
+void ToArnoldShapeConverter::convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shape, const char **namesToIgnore ) const
+{
+	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end(); it!=eIt; it++ )
+	{
+		if( namesToIgnore )
+		{	
+			bool skip = false;
+			for( const char **n = namesToIgnore; *n; n++ )
+			{
+				if( it->first == *n )
+				{
+					skip = true;
+					break;
+				}
+			}
+			if( skip )
+			{
+				continue;
+			}
+		}
+
+		// we prefix all the names, as otherwise the chance of a conflict between
+		// an arbitrary primitive variable name and an existing arnold parameter name
+		// seems too great.
+		string prefixedName = "user:" + it->first;		
+		convertPrimitiveVariable( primitive, it->second, shape, prefixedName.c_str() );
+	}
 }

@@ -36,6 +36,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/DespatchTypedData.h"
 
 #include "IECoreArnold/ToArnoldConverter.h"
 
@@ -59,81 +60,17 @@ AtNode *ToArnoldConverter::convert() const
 	return doConversion( srcParameter()->getValidatedValue(), operands );
 }
 
-void ToArnoldConverter::setParameter( AtNode *node, const char *name, int parameterType, const IECore::Data *value )
-{
-	switch( parameterType )
-	{
-		case AI_TYPE_INT :
-		{
-			if( const IntData *data = runTimeCast<const IntData>( value ) )
-			{
-				AiNodeSetInt( node, name, data->readable() );
-			}
-			else
-			{
-				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected IntData)." ) % value->typeName() % name );			
-			}
-			break;
-		}
-		case AI_TYPE_FLOAT :
-		{
-			if( const FloatData *data = runTimeCast<const FloatData>( value ) )
-			{
-				AiNodeSetFlt( node, name, data->readable() );
-			}
-			else
-			{
-				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected FloatData)." ) % value->typeName() % name );			
-			}
-			break;
-		}
-		case AI_TYPE_STRING :
-		{
-			if( const StringData *data = runTimeCast<const StringData>( value ) )
-			{
-				AiNodeSetStr( node, name, data->readable().c_str() );
-			}
-			else
-			{
-				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected StringData)." ) % value->typeName() % name );			
-			}
-			break;
-		}
-		case AI_TYPE_RGB :
-		{
-			if( const Color3fData *data = runTimeCast<const Color3fData>( value ) )
-			{
-				const Imath::Color3f &c = data->readable();
-				AiNodeSetRGB( node, name, c[0], c[1], c[2] );
-			}
-			else
-			{
-				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected Color3fData)." ) % value->typeName() % name );			
-			}
-			break;
-		}
-		case AI_TYPE_ENUM :
-		{
-			if( const StringData *data = runTimeCast<const StringData>( value ) )
-			{
-				AiNodeSetStr( node, name, data->readable().c_str() );
-			}
-			else
-			{
-				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected StringData)." ) % value->typeName() % name );			
-			}
-			break;
-		}
-		default :
-		{
-			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );	
-		}
-	}
-}
-
 void ToArnoldConverter::setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Data *value )
 {
-	setParameter( node, AiParamGetName( parameter ), AiParamGetType( parameter ), value );
+	bool isArray = false;
+	int type = AiParamGetType( parameter );
+	if( type == AI_TYPE_ARRAY )
+	{
+		type = AiParamGetDefault( parameter )->ARRAY->type;
+		isArray = true;
+	}
+	
+	setParameterInternal( node, AiParamGetName( parameter ), type, isArray, value );
 }
 
 void ToArnoldConverter::setParameter( AtNode *node, const char *name, const IECore::Data *value )
@@ -145,33 +82,26 @@ void ToArnoldConverter::setParameter( AtNode *node, const char *name, const IECo
 	}
 	else
 	{
-		int parameterType = AI_TYPE_NONE;
-		
-		switch( value->typeId() )
+		bool array = false;
+		int type = parameterType( value->typeId(), array );
+		if( type != AI_TYPE_NONE )
 		{
-			case IntDataTypeId :
-				AiNodeDeclare( node, name, "constant INT" );
-				parameterType = AI_TYPE_INT;
-				break;
-			case FloatDataTypeId :
-				AiNodeDeclare( node, name, "constant FLOAT" );
-				parameterType = AI_TYPE_FLOAT;
-				break;
-			case StringDataTypeId :
-				AiNodeDeclare( node, name, "constant STRING" );
-				parameterType = AI_TYPE_STRING;
-				break;
-			case Color3fDataTypeId :
-				AiNodeDeclare( node, name, "constant RGB" );
-				parameterType = AI_TYPE_RGB;
-				break;	
-			default :
-				break;
+			std::string typeString = "constant ";
+			if( array )
+			{
+				typeString += "ARRAY ";
+			}
+			typeString += AiParamGetTypeName( type );
+			AiNodeDeclare( node, name, typeString.c_str() );
+			setParameterInternal( node, name, type, array, value );
 		}
-		
-		if( parameterType != AI_TYPE_NONE )
+		else
 		{
-			setParameter( node, name, parameterType, value );
+			msg(
+				Msg::Warning,
+				"ToArnoldConverter::setParameter",
+				boost::format( "Unsupported data type \"%s\" for name \"%s\"" ) % value->typeName() % name
+			);
 		}
 	}
 }
@@ -184,30 +114,14 @@ void ToArnoldConverter::setParameters( AtNode *node, const IECore::CompoundDataM
 	}
 }
 
-IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const char *name, int parameterType )
-{
-	switch( parameterType )
-	{
-		case AI_TYPE_BOOLEAN :
-			return new BoolData( AiNodeGetBool( node, name ) );		
-		case AI_TYPE_INT :
-			return new IntData( AiNodeGetInt( node, name ) );
-		case AI_TYPE_FLOAT :
-			return new FloatData( AiNodeGetFlt( node, name ) );
-		case AI_TYPE_STRING :
-			return new StringData( AiNodeGetStr( node, name ) );
-	}
-	return 0;
-}
-
 IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const AtParamEntry *parameter )
 {
-	return getParameter( node, AiParamGetName( parameter ), AiParamGetType( parameter ) );
+	return getParameterInternal( node, AiParamGetName( parameter ), AiParamGetType( parameter ) );
 }
 
 IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const AtUserParamEntry *parameter )
 {
-	return getParameter( node, AiUserParamGetName( parameter ), AiUserParamGetType( parameter ) );
+	return getParameterInternal( node, AiUserParamGetName( parameter ), AiUserParamGetType( parameter ) );
 }
 		
 IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const char *name )
@@ -251,4 +165,158 @@ void ToArnoldConverter::getParameters( AtNode *node, IECore::CompoundDataMap &va
 		}
 	}
 	AiUserParamIteratorDestroy( it );
+}
+
+int ToArnoldConverter::parameterType( IECore::TypeId dataType, bool &array )
+{
+	switch( dataType )
+	{
+		// non-array types
+
+		case IntDataTypeId :
+			array = false;
+			return AI_TYPE_INT;
+		case FloatDataTypeId :
+			array = false;
+			return AI_TYPE_FLOAT;
+		case StringDataTypeId :
+			array = false;
+			return AI_TYPE_STRING;
+		case Color3fDataTypeId :
+			array = false;
+			return AI_TYPE_RGB;
+		case BoolDataTypeId :
+			array = false;
+			return AI_TYPE_BOOLEAN;
+
+		// array types
+
+		case IntVectorDataTypeId :
+			array = true;
+			return AI_TYPE_INT;
+		case FloatVectorDataTypeId :
+			array = true;
+			return AI_TYPE_FLOAT;
+		case StringVectorDataTypeId :
+			array = true;
+			return AI_TYPE_STRING;
+		case Color3fVectorDataTypeId :
+			array = true;
+			return AI_TYPE_RGB;
+		case BoolVectorDataTypeId :
+			array = true;
+			return AI_TYPE_BOOLEAN;
+		default :
+			return AI_TYPE_NONE;
+	}
+}
+
+AtArray *ToArnoldConverter::dataToArray( const IECore::Data *data )
+{
+	bool isArray = false;
+	int type = parameterType( data->typeId(), isArray );
+	if( type == AI_TYPE_NONE || !isArray )
+	{
+		return 0;
+	}
+	
+	const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( DataPtr( const_cast<Data *>( data ) ) );
+	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( DataPtr( const_cast<Data *>( data ) ) );
+	return AiArrayConvert( dataSize, 1, type, dataAddress );
+}
+
+template<typename T>
+static inline const T *dataCast( const char *name, const IECore::Data *data )
+{
+	const T *result = runTimeCast<const T>( data );
+	if( result )
+	{
+		return result;
+	}
+	msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected %s)." ) % data->typeName() % name % T::staticTypeName() );			
+	return 0;
+}
+
+void ToArnoldConverter::setParameterInternal( AtNode *node, const char *name, int parameterType, bool array, const IECore::Data *value )
+{
+	if( array )
+	{
+		AtArray *a = dataToArray( value );
+		if( !a )
+		{
+			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unable to create array from data of type \"%s\" for parameter \"%s\"" ) % value->typeName() % name );			
+			return;
+		}
+		if( a->type != parameterType )
+		{
+			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unable to create array of type %s from data of type \"%s\" for parameter \"%s\"" ) % AiParamGetTypeName( parameterType ) % value->typeName() % name );			
+			return;		
+		}
+		AiNodeSetArray( node, name, a );	
+	}
+	else
+	{
+		switch( parameterType )
+		{
+			case AI_TYPE_INT :
+				if( const IntData *data = dataCast<IntData>( name, value ) )
+				{
+					AiNodeSetInt( node, name, data->readable() );
+				}
+				break;
+			case AI_TYPE_FLOAT :
+				if( const FloatData *data = dataCast<FloatData>( name, value ) )
+				{
+					AiNodeSetFlt( node, name, data->readable() );
+				}
+				break;
+			case AI_TYPE_STRING :
+				if( const StringData *data = dataCast<StringData>( name, value ) )
+				{
+					AiNodeSetStr( node, name, data->readable().c_str() );
+				}
+				break;
+			case AI_TYPE_RGB :
+				if( const Color3fData *data = dataCast<Color3fData>( name, value ) )
+				{
+					const Imath::Color3f &c = data->readable();
+					AiNodeSetRGB( node, name, c[0], c[1], c[2] );
+				}
+				break;
+			case AI_TYPE_ENUM :
+				if( const StringData *data = dataCast<StringData>( name, value ) )
+				{
+					AiNodeSetStr( node, name, data->readable().c_str() );
+				}
+				break;
+			case AI_TYPE_BOOLEAN :
+			{
+				if( const BoolData *data = dataCast<BoolData>( name, value ) )
+				{
+					AiNodeSetBool( node, name, data->readable() );
+				}
+				break;
+			}
+			default :
+			{
+				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );	
+			}
+		}
+	}
+}
+
+IECore::DataPtr ToArnoldConverter::getParameterInternal( AtNode *node, const char *name, int parameterType )
+{
+	switch( parameterType )
+	{
+		case AI_TYPE_BOOLEAN :
+			return new BoolData( AiNodeGetBool( node, name ) );
+		case AI_TYPE_INT :
+			return new IntData( AiNodeGetInt( node, name ) );
+		case AI_TYPE_FLOAT :
+			return new FloatData( AiNodeGetFlt( node, name ) );
+		case AI_TYPE_STRING :
+			return new StringData( AiNodeGetStr( node, name ) );
+	}
+	return 0;
 }

@@ -100,5 +100,10 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	
 	convertRadius( curves, result );
 
+	// add arbitrary user parameters
+	
+	const char *ignore[] = { "P", "width", "radius", 0 };
+	convertPrimitiveVariables( curves, result, ignore );
+	
 	return result;
 }
