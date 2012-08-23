@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +33,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/CompoundObject.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/SimpleTypedParameter.h"
+
+#include "IECoreGL/BoxPrimitive.h"
+
 #include "IECoreMaya/TypeIds.h"
 #include "IECoreMaya/TransformationMatrixManipulator.h"
+#include "IECoreMaya/ParameterisedHolderInterface.h"
 
 #include <maya/MString.h> 
 #include <maya/MTypeId.h> 
@@ -47,6 +55,8 @@
 #include <maya/MEulerRotation.h>
 #include <maya/MPxTransformationMatrix.h>
 
+using namespace Imath;
+using namespace IECore;
 using namespace IECoreMaya;
 
 MTypeId TransformationMatrixManipulator::id = TransformationMatrixManipulatorTypeId;
@@ -147,6 +157,46 @@ MStatus TransformationMatrixManipulator::connectToDependNode( const MObject & no
 void TransformationMatrixManipulator::draw( M3dView & view, const MDagPath & path, M3dView::DisplayStyle style, M3dView::DisplayStatus status )
 {
 	MPxManipContainer::draw( view, path, style, status);
+
+	/// \todo Is it not a bit crazy that the parameter isn't just available
+	/// as a piece of member data along with m_plug? And that we instead have
+	/// to jump through these hoops?
+	
+	MFnDependencyNode fnDN( m_plug.node() );
+	ParameterisedHolderInterface *holder = dynamic_cast<ParameterisedHolderInterface *>( fnDN.userNode() );
+	if( !holder )
+	{
+		return;
+	}
+	TransformationMatrixfParameter *parameter = runTimeCast<TransformationMatrixfParameter>( holder->plugParameter( m_plug ) );
+	if( !parameter )
+	{
+		return;
+	}
+	
+	const CompoundObject *uiUserData = parameter->userData()->member<CompoundObject>( "UI" );
+	if( !uiUserData )
+	{
+		return;
+	}
+	
+	const Box3fData *box = uiUserData->member<Box3fData>( "manipulatorBox" );
+	if( box )
+	{
+		holder->setParameterisedValue( parameter );
+		TransformationMatrixf t = parameter->getTypedValue();
+		M44f m = t.transform();
+		
+		view.beginGL();
+			glPushMatrix();
+				glMultMatrixf( m.getValue() );
+				glPushAttrib( GL_CURRENT_BIT );
+					view.setDrawColor( 4 );
+					IECoreGL::BoxPrimitive::renderWireframe( box->readable() );
+				glPopAttrib();
+			glPopMatrix();
+		view.endGL();
+	}
 }
 
 MManipData TransformationMatrixManipulator::rotationToPlugConversion( unsigned int plugIndex )

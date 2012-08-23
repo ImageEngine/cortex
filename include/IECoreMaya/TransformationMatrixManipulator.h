@@ -48,9 +48,7 @@
 namespace IECoreMaya
 {
 
-/// This class provides a manipulator for TransofmationMatrixf and TransofmationMatrixd Parameters.
-/// Curently the node is only tested/registered for TransofmationMatrixf Parameter types.
-
+/// This class provides a manipulator for TransformationMatrixf Parameters.
 class TransformationMatrixManipulator : public ParameterManipContainer 
 {
 	public:
