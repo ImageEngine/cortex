@@ -98,6 +98,9 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ai:visibility:glossy" BoolData( true )</b>
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
+		/// Supports types "surface" and "ai:surface". In addition to loading shaders by name, names
+		/// of the form "reference:nodeName" will reference an already existing Arnold shader node
+		/// of the specified name.
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
 		virtual void illuminate( const std::string &lightHandle, bool on );

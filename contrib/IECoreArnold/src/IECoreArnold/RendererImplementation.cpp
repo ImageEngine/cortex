@@ -386,23 +386,38 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getAttribute( const s
 
 void IECoreArnold::RendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	if( type=="surface" )
+	if( type=="surface" || type=="ai:surface" )
 	{
-		AtNode *s = AiNode( name.c_str() );
-		if( !s )
+		AtNode *s = 0;
+		if( 0 == name.compare( 0, 10, "reference:" ) )
 		{
-			msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't load shader \"%s\"" ) % name );
-			return;
+			s = AiNodeLookUpByName( name.c_str() + 10 );
+			if( !s )
+			{
+				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't find shader \"%s\"" ) % name );
+				return;
+			}
+		}	
+		else
+		{
+			s = AiNode( name.c_str() );
+			if( !s )
+			{
+				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't load shader \"%s\"" ) % name );
+				return;
+			}
+			ToArnoldConverter::setParameters( s, parameters );
+			addNode( s );
 		}
-		
-		ToArnoldConverter::setParameters( s, parameters );
-		addNode( s );
-				
+			
 		m_attributeStack.top().surfaceShader = s;
 	}
 	else
 	{
-		msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Unsupported shader type \"%s\"" ) % type );
+		if( type.find( ':' ) == string::npos )
+		{
+			msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Unsupported shader type \"%s\"" ) % type );
+		}
 	}
 }
 

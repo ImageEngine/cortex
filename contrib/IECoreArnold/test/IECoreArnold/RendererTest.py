@@ -38,6 +38,8 @@ from __future__ import with_statement
 import os
 import unittest
 
+import arnold
+
 import IECore
 import IECoreArnold
 
@@ -176,6 +178,45 @@ class RendererTest( unittest.TestCase ) :
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
 		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
 		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+		
+	def testReferenceExistingShader( self ) :
+	
+		r = IECoreArnold.Renderer()
+		
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+
+		with IECore.WorldBlock( r ) :
+		
+			shader = arnold.AiNode( "standard" )
+			arnold.AiNodeSetStr( shader, "name", "red_shader" )
+			arnold.AiNodeSetFlt( shader, "emission", 1 )
+			arnold.AiNodeSetRGB( shader, "emission_color", 1, 0, 0 )
+			
+			r.shader( "surface", "reference:red_shader", {} )
+			r.sphere( 1, -1, 1, 360, {} )
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 1, 5 )
+		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
+		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )	
+
+	def testNonexistentReferencedShader( self ) :
+	
+		r = IECoreArnold.Renderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			m = IECore.CapturingMessageHandler()
+			with m :
+				r.shader( "surface", "reference:doesntExist", {} )
+				
+			self.assertEqual( len( m.messages ), 1 )
+			self.failUnless( "Couldn't find shader" in m.messages[0].message )
 
 	def testUnloadableShader( self ) :
 	
@@ -200,6 +241,18 @@ class RendererTest( unittest.TestCase ) :
 				r.shader( "thisShaderTypeDoesntExist", "utility", {} )
 				
 			self.assertEqual( len( m.messages ), 1 )
+	
+	def testOtherRendererShaderType( self ) :
+	
+		r = IECoreArnold.Renderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			m = IECore.CapturingMessageHandler()
+			with m :
+				r.shader( "ri:surface", "something", {} )
+				
+			self.assertEqual( len( m.messages ), 0 )			
 		
 	def testDefaultCamera( self ) :
 	
