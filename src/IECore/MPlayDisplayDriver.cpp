@@ -168,8 +168,7 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 	// Construct a command line calling imdisplay, and open it as a pipe
 	std::string commandLine = "imdisplay -f -p";
 	
-	V2i origin = dataWindow.min - displayWindow.min;
-	commandLine += boost::str( boost::format( " -o %d %d" ) % origin.x % origin.y );
+	commandLine += boost::str( boost::format( " -o %d %d" ) % displayWindow.min.x % displayWindow.min.y );
 	
 	V2i originalSize = displayWindow.size() + V2i( 1 );
 	commandLine += boost::str( boost::format( " -Z %d %d" ) % originalSize.x % originalSize.y );
