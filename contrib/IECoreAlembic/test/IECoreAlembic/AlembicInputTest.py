@@ -403,5 +403,15 @@ class AlembicInputTest( unittest.TestCase ) :
 			self.failUnless( tBound.min.equalWithAbsError( expectedMBound.min, 0.000001 ) )
 			self.failUnless( tBound.max.equalWithAbsError( expectedMBound.max, 0.000001 ) )
 			
+	def testConvertNormals( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
+		m = a.child( "pCube1" ).child( "pCubeShape1" )
+		mesh = m.objectAtSample( 0 )
+		
+		self.failUnless( "N" in mesh )
+		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
+		self.assertEqual( mesh["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		
 if __name__ == "__main__":
     unittest.main()

@@ -63,13 +63,13 @@ class FromAlembicGeomBaseConverter : public FromAlembicConverter
 		/// Should be called by subclasses to convert Alembic's arbitrary geometry parameter into
 		/// IECore::PrimitiveVariables.
 		void convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
-		
+		/// May be called by subclasses to convert other geometry parameters into IECore::PrimitiveVariables.
+		template<typename T>
+		void convertGeomParam( T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
+				
 	private :
 	
 		IECore::PrimitiveVariable::Interpolation interpolationFromScope( Alembic::AbcGeom::GeometryScope scope ) const;
-		
-		template<typename T>
-		void convertArbGeomParam( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::PropertyHeader &paramHeader, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
 		
 };
 

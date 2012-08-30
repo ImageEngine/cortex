@@ -76,6 +76,12 @@ IECore::ObjectPtr FromAlembicPolyMeshConverter::doAlembicConversion( const Alemb
 	
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
 	
+	IN3fGeomParam &normals = iPolyMeshSchema.getNormalsParam();
+	if( normals.valid() )
+	{
+		convertGeomParam( normals, sampleSelector, result );
+	}
+	
 	Alembic::AbcGeom::IV2fGeomParam &uvs = iPolyMeshSchema.getUVsParam();
 	convertUVs( uvs, sampleSelector, result );
 	

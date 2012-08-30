@@ -94,43 +94,58 @@ void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompound
 		
 		if( IFloatGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IFloatGeomParam>( params, header, sampleSelector, primitive );
+			IFloatGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IDoubleGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IDoubleGeomParam>( params, header, sampleSelector, primitive );
+			IDoubleGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IV3dGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IV3dGeomParam>( params, header, sampleSelector, primitive );
+			IV3dGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IInt32GeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IInt32GeomParam>( params, header, sampleSelector, primitive );
+			IInt32GeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IStringGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IStringGeomParam>( params, header, sampleSelector, primitive );
+			IStringGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IV2fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IV2fGeomParam>( params, header, sampleSelector, primitive );
+			IV2fGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IV3fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IV3fGeomParam>( params, header, sampleSelector, primitive );
+			IV3fGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IC3fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IC3fGeomParam>( params, header, sampleSelector, primitive );
+			IC3fGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IC4fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IC4fGeomParam>( params, header, sampleSelector, primitive );
+			IC4fGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IN3fGeomParam::matches( header ) )
+		{
+			IN3fGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IM44fGeomParam::matches( header ) )
 		{
-			convertArbGeomParam<IM44fGeomParam>( params, header, sampleSelector, primitive );
+			IM44fGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
 		}
 		else
 		{
@@ -159,16 +174,15 @@ IECore::PrimitiveVariable::Interpolation FromAlembicGeomBaseConverter::interpola
 }
 		
 template<typename T>
-void FromAlembicGeomBaseConverter::convertArbGeomParam( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::PropertyHeader &paramHeader, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
+void FromAlembicGeomBaseConverter::convertGeomParam( T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
 	typedef typename T::prop_type::sample_type::value_vector ValueType;
 	typedef TypedData<ValueType> DataType;
 
-	T param( params, paramHeader.getName() );
 	if( param.getArrayExtent() > 1 )
 	{
-		IECore::msg( IECore::Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParam", boost::format( "Param \"%s\" has unsupported array extent" ) % paramHeader.getName() );
+		IECore::msg( IECore::Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParam", boost::format( "Param \"%s\" has unsupported array extent" ) % param.getHeader().getName() );
 		return;
 	}
 	
@@ -182,6 +196,6 @@ void FromAlembicGeomBaseConverter::convertArbGeomParam( Alembic::Abc::ICompoundP
 	pv.interpolation = interpolationFromScope( param.getScope() );
 	pv.data = data;
 	
-	primitive->variables[paramHeader.getName()] = pv;
+	primitive->variables[param.getHeader().getName()] = pv;
 }
 
