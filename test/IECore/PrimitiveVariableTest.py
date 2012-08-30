@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -86,5 +87,16 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p, p2 )
 		self.failIf( p != p2 )
 		
+	def testEqualityWithNullData( self ) :
+	
+		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
+		p2 = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, None )	
+		
+		self.assertNotEqual( p, p2 )
+		self.assertNotEqual( p2, p )		
+		
+		self.assertEqual( p, p )
+		self.assertEqual( p2, p2 )
+				
 if __name__ == "__main__":
     unittest.main()

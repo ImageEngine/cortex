@@ -4,6 +4,10 @@ Improvements :
 
 * The IECoreMaya::TransformationMatrixManipulator now draws an optional box if a ["UI"]["manipulatorBox"] user data item is present on the parameter.
 
+Bug Fixes :
+
+* Fixed crashes caused by null data in PrimitiveVariable::operator==.
+
 7.5.0 :
 
 Additions :
