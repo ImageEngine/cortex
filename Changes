@@ -1,5 +1,7 @@
 Improvements :
 
+* changed MtoA Translater to be compatible with versions > 0.18.0 
+
 * IECoreArnold::Renderer::shader() now additionally accepts shader names of the form "reference:nodeName", to allow shaders already in an ass file to be referenced by procedurals.
 
 * The IECoreMaya::TransformationMatrixManipulator now draws an optional box if a ["UI"]["manipulatorBox"] user data item is present on the parameter.

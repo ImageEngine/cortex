@@ -37,7 +37,7 @@
 #include "maya/MPlugArray.h"
 
 #include "extension/Extension.h"
-#include "translators/NodeTranslator.h"
+#include "translators/shape/ShapeTranslator.h"
 
 #include "IECore/CompoundParameter.h"
 
@@ -47,7 +47,7 @@
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/PythonCmd.h"
 
-class ProceduralHolderTranslator : public CDagTranslator
+class ProceduralHolderTranslator : public CShapeTranslator
 {
 
 	public :
@@ -179,45 +179,11 @@ class ProceduralHolderTranslator : public CDagTranslator
 		/// since the GeometryTranslator isn't part of the MtoA public API.
 		AtNode *arnoldShader()
 		{
-			MFnDependencyNode fnDN( m_dagPath.node() );
+
+                        unsigned instNumber = m_dagPath.isInstanced() ? m_dagPath.instanceNumber() : 0;
+                        MPlug shadingGroupPlug = GetNodeShadingGroup(m_dagPath.node(), instNumber);
+                        return ExportNode( shadingGroupPlug );
 			
-			// get the shading group
-			
-			MPlug instObjGroups = fnDN.findPlug( "instObjGroups" );
-			unsigned instNumber = m_dagPath.isInstanced() ? m_dagPath.instanceNumber() : 0;
-			
-			MPlugArray connections;
-			instObjGroups.elementByLogicalIndex( instNumber ).connectedTo( connections, false, true );
-			
-			MObject shadingGroup;
-			for( unsigned i=0; i<connections.length(); i++ )
-			{
-				MObject connectedNode = connections[i].node();
-				if( connectedNode.apiType() == MFn::kShadingEngine )
-				{
-					shadingGroup = connectedNode;
-				}
-			}
-			
-			if( shadingGroup.isNull() )
-			{
-				return 0;
-			}
-			
-			// get the surface shader from it
-			
-			fnDN.setObject( shadingGroup );
-			MPlug shaderPlug = fnDN.findPlug( "surfaceShader" );
-			
-			connections.clear();
-			shaderPlug.connectedTo( connections, true, false );
-			if( !connections.length() )
-			{
-				return 0;
-			}
-			
-			MObject shader = connections[0].node();
-			return m_session->ExportNode( shader );
 		}
 
 };
