@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +38,7 @@
 #include "IECore/ObjectInterpolator.h"
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/Primitive.h"
 #include "IECore/DespatchTypedData.h"
 
 using namespace IECore;
@@ -123,6 +125,48 @@ void LinearInterpolator< Object >::operator()( const ObjectPtr &y0, const Object
 					xRes->members()[ it0->first ] = it0->second;
 				}
 			}
+		}
+	}
+	else if ( y0->isInstanceOf( PrimitiveTypeId ) )
+	{
+		PrimitivePtr x0 = assertedStaticCast<Primitive>( y0 );
+		PrimitivePtr x1 = assertedStaticCast<Primitive>( y1 );
+		
+		if( x0->variableSize( PrimitiveVariable::Uniform ) == x1->variableSize( PrimitiveVariable::Uniform ) &&
+			x0->variableSize( PrimitiveVariable::Varying ) == x1->variableSize( PrimitiveVariable::Varying ) &&
+			x0->variableSize( PrimitiveVariable::Vertex ) == x1->variableSize( PrimitiveVariable::Vertex ) &&
+			x0->variableSize( PrimitiveVariable::FaceVarying ) == x1->variableSize( PrimitiveVariable::FaceVarying )
+		)
+		{
+			PrimitivePtr xRes = assertedStaticCast<Primitive>( result );
+			xRes->Object::copyFrom( (Object *)x0.get() ); // to get topology and suchlike copied over
+			// interpolate blindData
+			ObjectPtr bd0 = x0->blindData();
+			ObjectPtr bd1 = x1->blindData();
+			ObjectPtr bdr = xRes->blindData();
+			LinearInterpolator<Object>()( bd0, bd1, x, bdr );			
+			// interpolate primitive variables
+			for( PrimitiveVariableMap::const_iterator it0 = x0->variables.begin(); it0 != x0->variables.end(); it0++ )
+			{
+				PrimitiveVariableMap::const_iterator it1 = x1->variables.find( it0->first );
+				if( it1 != x1->variables.end() &&
+					it0->second.data->typeId() == it1->second.data->typeId() &&
+					it0->second.interpolation == it1->second.interpolation
+				)
+				{
+					PrimitiveVariableMap::iterator itRes = xRes->variables.find( it0->first );
+					ObjectPtr resultData = linearObjectInterpolation( it0->second.data, it1->second.data, x );
+					if( resultData )
+					{
+						itRes->second.data = staticPointerCast<Data>( resultData );
+					}
+				}
+			}
+		}
+		else
+		{
+			// primitive topologies don't match
+			result = 0;		
 		}
 	}
 	else if ( result->isInstanceOf( DataTypeId ) )

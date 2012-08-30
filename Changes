@@ -4,6 +4,8 @@ Improvements :
 
 * The IECoreMaya::TransformationMatrixManipulator now draws an optional box if a ["UI"]["manipulatorBox"] user data item is present on the parameter.
 
+* linearObjectInterpolation now supports the interpolation of Primitive classes.
+
 Bug Fixes :
 
 * Fixed crashes caused by null data in PrimitiveVariable::operator==.
