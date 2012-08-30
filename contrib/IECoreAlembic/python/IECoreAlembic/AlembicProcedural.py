@@ -53,6 +53,17 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 					check = IECore.PathParameter.CheckType.MustExist,
 					extensions = "abc",
 				),
+				
+				IECore.FloatParameter(
+					name = "time",
+					description = "The time at which to load from the Alembic cache",
+					defaultValue = 0,
+					userData = {
+						"maya" : {
+							"defaultExpression" : IECore.StringData( " = time" ),
+						},
+					},
+				),
 					
 			],
 			
@@ -67,7 +78,7 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 		if a is None :
 			return IECore.Box3f()
 		
-		return _ChildProcedural( a ).bound()
+		return _ChildProcedural( a, args["time"].value ).bound()
 
 	def doRenderState( self, renderer, args ) :
 	
@@ -79,7 +90,7 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 		if a is None :
 			return
 			
-		renderer.procedural( _ChildProcedural( a ) )
+		renderer.procedural( _ChildProcedural( a, args["time"].value ) )
 		
 	def __alembicInput( self, args ) :
 	
@@ -98,16 +109,17 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 
 class _ChildProcedural( IECore.Renderer.Procedural ) :
 
-	def __init__( self, alembicInput ) :
+	def __init__( self, alembicInput, time ) :
 	
 		IECore.Renderer.Procedural.__init__( self )
 	
 		self.__alembicInput = alembicInput
+		self.__time = time
 		
 	def bound( self ) :
 	
-		b = self.__alembicInput.bound()
-		b = b.transform( self.__alembicInput.transform() )
+		b = self.__alembicInput.boundAtTime( self.__time )
+		b = b.transform( self.__alembicInput.transformAtTime( self.__time ) )
 		return IECore.Box3f( IECore.V3f( b.min ), IECore.V3f( b.max ) )
 		
 	def render( self, renderer ) :
@@ -116,15 +128,26 @@ class _ChildProcedural( IECore.Renderer.Procedural ) :
 		
 			renderer.setAttribute( "name", self.__alembicInput.fullName() )
 			
-			transform = self.__alembicInput.convert( IECore.M44fData.staticTypeId() )
+			transform = self.__alembicInput.transformAtTime( self.__time )
 			if transform is not None :
-				renderer.concatTransform( transform.value )
-			else :
-				primitive = self.__alembicInput.convert( IECore.Primitive.staticTypeId() )
-				if primitive is not None :
-					primitive.render( renderer )
+				transform = IECore.M44f(
+					transform[0,0], transform[0,1], transform[0,2], transform[0,3],
+				    transform[1,0], transform[1,1], transform[1,2], transform[1,3],
+				    transform[2,0], transform[2,1], transform[2,2], transform[2,3],
+				    transform[3,0], transform[3,1], transform[3,2], transform[3,3]
+				)
+				renderer.concatTransform( transform )
+			
+			primitive = self.__alembicInput.objectAtTime( self.__time, IECore.Primitive.staticTypeId() )
+			if primitive is not None :
+				primitive.render( renderer )
 									
 			for childIndex in range( 0, self.__alembicInput.numChildren() ) :
-				renderer.procedural( _ChildProcedural( self.__alembicInput.child( childIndex ) ) )
+				child = self.__alembicInput.child( childIndex )
+				childProcedural = _ChildProcedural( child, self.__time )
+				if child.hasStoredBound() :
+					renderer.procedural( childProcedural )
+				else :
+					childProcedural.render( renderer )
 				
 IECore.registerRunTimeTyped( AlembicProcedural )

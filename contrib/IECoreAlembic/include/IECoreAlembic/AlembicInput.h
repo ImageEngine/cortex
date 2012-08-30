@@ -84,24 +84,48 @@ class AlembicInput : public IECore::RefCounted
 		/// Returns the number of samples.
 		size_t numSamples() const;
 		/// Returns the time associated with the specified sample.
-		double sampleTime( size_t sampleIndex ) const;
+		double timeAtSample( size_t sampleIndex ) const;
 		/// Computes a sample interval suitable for use in producing interpolated
 		/// values, returning the appropriate lerp factor between the two samples.
 		/// In the case of time falling outside of the sample range, or coinciding
 		/// nearly exactly with a single sample, 0 is returned and floorIndex==ceilIndex
 		/// will hold.
-		double sampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
+		double sampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const;
 		//@}
 		
-		//! @name Conversion
+		//! @name Bounding box queries.
 		////////////////////////////////////////////////////////////
 		//@{
-		/// Returns the bounding box of everything below this point in the
-		/// hierarchy, without the transform() applied.
-		Imath::Box3d bound() const;
+		/// Alembic archives don't necessarily store bounding box
+		/// information for every object in the scene graph. This method
+		/// can be used to determine whether or not a bound has been
+		/// stored for this object. You should be able to rely on having
+		/// stored bounds at the top of the archive and at any geometry-containing
+		/// nodes.
+		bool hasStoredBound() const;
+		/// Returns the local bounding box of this node stored for the specified
+		/// sample. If hasStoredBound() is false then throws an Exception.
+		Imath::Box3d boundAtSample( size_t sampleIndex ) const;
+		/// Returns the interpolated local bounding box of this node at the
+		/// specified point in time. If hasStoredBound() is false, then
+		/// the archive is traversed and a bound computed recursively from
+		/// all descendants of this node. Beware! This can be slow.
+		Imath::Box3d boundAtTime( double time ) const;
+		//@}
+		
+		//! @name Transform queries.
+		////////////////////////////////////////////////////////////
+		//@{
 		/// Returns the transformation matrix of this node if it has one,
 		/// and the identity otherwise.
-		Imath::M44d transform() const;
+		Imath::M44d transformAtSample( size_t sampleIndex = 0 ) const;
+		/// As above, but interpolating between samples where necessary.
+		Imath::M44d transformAtTime( double time ) const;
+		//@}
+		
+		//! @name Conversion to IECore::Object
+		////////////////////////////////////////////////////////////
+		//@{
 		/// Returns a converter capable of converting the Alembic object into
 		/// the specified form, or 0 if no such converter exists. The converter
 		/// is returned as a ToCoreConverter rather than a FromAlembicConverter
@@ -110,7 +134,9 @@ class AlembicInput : public IECore::RefCounted
 		IECore::ToCoreConverterPtr converter( IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		/// Converts the alembic object into Cortex form, preferring conversions
 		/// yielding the specified result type.
-		IECore::ObjectPtr convert( IECore::TypeId resultType = IECore::ObjectTypeId ) const;
+		IECore::ObjectPtr objectAtSample( size_t sampleIndex = 0, IECore::TypeId resultType = IECore::ObjectTypeId ) const;
+		/// As above, but performing linear interpolation between samples where necessary.
+		IECore::ObjectPtr objectAtTime( double time, IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		//@}
 		
 		//! @name Child access

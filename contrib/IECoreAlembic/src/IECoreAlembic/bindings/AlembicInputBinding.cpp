@@ -60,10 +60,10 @@ static AlembicInputPtr getItem( AlembicInput *a, long index )
 	return a->child( index );
 }
 
-static tuple sampleInterval( AlembicInput *a, double time )
+static tuple sampleIntervalAtTime( AlembicInput *a, double time )
 {
 	size_t f, c;
-	double l = a->sampleInterval( time, f, c );
+	double l = a->sampleIntervalAtTime( time, f, c );
 	return make_tuple( l, f, c );
 }
 
@@ -75,12 +75,16 @@ void IECoreAlembicBindings::bindAlembicInput()
 		.def( "fullName", &AlembicInput::fullName, return_value_policy<copy_const_reference>() )
 		.def( "metaData", &AlembicInput::metaData )
 		.def( "numSamples", &AlembicInput::numSamples )
-		.def( "sampleTime", &AlembicInput::sampleTime )
-		.def( "sampleInterval", &sampleInterval )
-		.def( "bound", &AlembicInput::bound )
-		.def( "transform", &AlembicInput::transform )
+		.def( "timeAtSample", &AlembicInput::timeAtSample )
+		.def( "sampleIntervalAtTime", &sampleIntervalAtTime )
+		.def( "hasStoredBound", &AlembicInput::hasStoredBound )
+		.def( "boundAtSample", &AlembicInput::boundAtSample, ( boost::python::arg_( "sampleIndex" ) = 0 ) )
+		.def( "boundAtTime", &AlembicInput::boundAtTime )
+		.def( "transformAtSample", &AlembicInput::transformAtSample, ( boost::python::arg_( "sampleIndex" ) = 0 ) )
+		.def( "transformAtTime", &AlembicInput::transformAtTime, ( boost::python::arg_( "time" ) ) )
 		.def( "converter", &AlembicInput::converter, ( boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )
-		.def( "convert", &AlembicInput::convert, ( boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )
+		.def( "objectAtSample", &AlembicInput::objectAtSample, ( boost::python::arg_( "sampleIndex" ) = 0, boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )
+		.def( "objectAtTime", &AlembicInput::objectAtTime, ( boost::python::arg_( "time" ), boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )
 		.def( "numChildren", &AlembicInput::numChildren )
 		.def( "child", &getItem )
 		.def( "__len__", &AlembicInput::numChildren )

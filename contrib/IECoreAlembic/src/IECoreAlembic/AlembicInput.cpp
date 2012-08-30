@@ -45,6 +45,7 @@
 #include "IECoreAlembic/FromAlembicConverter.h"
 
 #include "IECore/SimpleTypedData.h"
+#include "IECore/ObjectInterpolator.h"
 
 using namespace Imath;
 using namespace Alembic::Abc;
@@ -55,14 +56,12 @@ using namespace IECore;
 struct AlembicInput::DataMembers
 {
 	DataMembers()
-		: boundValid( false ), numSamples( -1 )
+		: numSamples( -1 )
 	{
 	}
 	
 	boost::shared_ptr<IArchive> archive;
 	IObject object;
-	bool boundValid;
-	Box3d bound;
 	int numSamples;
 	TimeSamplingPtr timeSampling;
 };
@@ -137,7 +136,7 @@ size_t AlembicInput::numSamples() const
 	return m_data->numSamples;
 }
 
-double AlembicInput::sampleTime( size_t sampleIndex ) const
+double AlembicInput::timeAtSample( size_t sampleIndex ) const
 {
 	if( sampleIndex >= numSamples() )
 	{
@@ -147,7 +146,7 @@ double AlembicInput::sampleTime( size_t sampleIndex ) const
 	return m_data->timeSampling->getSampleTime( sampleIndex );
 }
 
-double AlembicInput::sampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
+double AlembicInput::sampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const
 {
 	ensureTimeSampling();	
 	
@@ -175,55 +174,98 @@ double AlembicInput::sampleInterval( double time, size_t &floorIndex, size_t &ce
 	return ( time - f.second ) / ( c.second - f.second );
 }
 
-Imath::Box3d AlembicInput::bound() const
+bool AlembicInput::hasStoredBound() const
 {
-	if( m_data->boundValid )
+	const MetaData &md = m_data->object.getMetaData();
+	if( !m_data->object.getParent() )
 	{
-		return m_data->bound;
+		// top of archive
+		/// \todo Is this assumption ok? If not then fix
+		/// this and update the comment in the header.
+		return true;
 	}
-	
+	else if( IXform::matches( md ) )
+	{
+		IXform iXForm( m_data->object, kWrapExisting );
+		IXformSchema &iXFormSchema = iXForm.getSchema();
+		return iXFormSchema.getChildBoundsProperty();
+	}
+	else
+	{
+		// assume we have some geometry. ideally we'd
+		// use IGeomBaseObject::matches( md ) to check
+		// that assumption but it always returns false.
+		return true;
+	}
+}
+		
+Imath::Box3d AlembicInput::boundAtSample( size_t sampleIndex ) const
+{	
 	const MetaData &md = m_data->object.getMetaData();
 
 	if( !m_data->object.getParent() )
 	{
 		// top of archive
-		m_data->bound = GetIArchiveBounds( *(m_data->archive) ).getValue();
+		return GetIArchiveBounds( *(m_data->archive) ).getValue( ISampleSelector( (index_t)sampleIndex ) );
 	}
 	else if( IXform::matches( md ) )
 	{
-		// intermediate transform. pray that we've been given the
-		// optional child bounds. pray that one day they stop being
-		// optional.
 		IXform iXForm( m_data->object, kWrapExisting );
 		IXformSchema &iXFormSchema = iXForm.getSchema();
-		XformSample sample;
-		iXFormSchema.get( sample );
-		m_data->bound = sample.getChildBounds();
-		if( m_data->bound.isEmpty() )
+		
+		if( !iXFormSchema.getChildBoundsProperty() )
 		{
-			// the child bounds weren't stored at write time. instead
-			// we have to compute them over and over at read time.
-			for( size_t i=0, n=numChildren(); i<n; i++ )
-			{
-				AlembicInputPtr c = child( i );
-				Box3d childBound = c->bound();
-				childBound = Imath::transform( childBound, c->transform() );
-				m_data->bound.extendBy( childBound );
-			}
+			throw IECore::Exception( "No stored bounds available" );
 		}
+		
+		XformSample sample;
+		iXFormSchema.get( sample, ISampleSelector( (index_t)sampleIndex ) );
+		return sample.getChildBounds();
 	}
 	else
 	{
 		IGeomBaseObject geomBase( m_data->object, kWrapExisting );
-		m_data->bound = geomBase.getSchema().getValue().getSelfBounds();
+		return geomBase.getSchema().getValue( ISampleSelector( (index_t)sampleIndex ) ).getSelfBounds();
 	}
-	
-	m_data->boundValid = true;
 
-	return m_data->bound;
+	return Box3d();
 }
 
-Imath::M44d AlembicInput::transform() const
+Imath::Box3d AlembicInput::boundAtTime( double time ) const
+{
+	if( hasStoredBound() )
+	{
+		size_t index0, index1;
+		double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
+		if( index0 == index1 )
+		{
+			return boundAtSample( index0 );
+		}
+		else
+		{
+			Box3d bound0 = boundAtSample( index0 );
+			Box3d bound1 = boundAtSample( index1 );		
+			Box3d result;
+			result.min = lerp( bound0.min, bound1.min, lerpFactor );	
+			result.max = lerp( bound0.max, bound1.max, lerpFactor );
+			return result;
+		}
+	}
+	else
+	{
+		Box3d result;
+		for( size_t i=0, n=numChildren(); i<n; i++ )
+		{
+			AlembicInputPtr c = child( i );
+			Box3d childBound = c->boundAtTime( time );
+			childBound = Imath::transform( childBound, c->transformAtTime( time ) );
+			result.extendBy( childBound );
+		}
+		return result;
+	}
+}
+
+Imath::M44d AlembicInput::transformAtSample( size_t sampleIndex ) const
 {
 	M44d result;
 	if( IXform::matches( m_data->object.getMetaData() ) )
@@ -231,27 +273,109 @@ Imath::M44d AlembicInput::transform() const
 		IXform iXForm( m_data->object, kWrapExisting );
 		IXformSchema &iXFormSchema = iXForm.getSchema();
 		XformSample sample;
-		iXFormSchema.get( sample );
+		iXFormSchema.get( sample, ISampleSelector( (index_t)sampleIndex ) );
 		return sample.getMatrix();
 	}
 	return result;
 }
 
+Imath::M44d AlembicInput::transformAtTime( double time ) const
+{
+	M44d result;
+	
+	if( IXform::matches( m_data->object.getMetaData() ) )
+	{
+		size_t index0, index1;
+		double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
+
+		IXform iXForm( m_data->object, kWrapExisting );
+		IXformSchema &iXFormSchema = iXForm.getSchema();
+	
+		if( index0 == index1 )
+		{
+			XformSample sample;
+			iXFormSchema.get( sample, ISampleSelector( (index_t)index0 ) );
+			result = sample.getMatrix();
+		}
+		else
+		{
+			XformSample sample0;
+			iXFormSchema.get( sample0, ISampleSelector( (index_t)index0 ) );
+			XformSample sample1;
+			iXFormSchema.get( sample1, ISampleSelector( (index_t)index1 ) );
+			
+			if( sample0.getNumOps() != sample1.getNumOps() ||
+				sample0.getNumOpChannels() != sample1.getNumOpChannels() 
+			)
+			{
+				throw IECore::Exception( "Unable to interpolate samples of different sizes" );
+			}
+					
+			XformSample interpolatedSample;
+			for( size_t opIndex = 0; opIndex < sample0.getNumOps(); opIndex++ )
+			{
+				XformOp op0 = sample0.getOp( opIndex );
+				XformOp op1 = sample1.getOp( opIndex );			
+				XformOp interpolatedOp( op0.getType(), op0.getHint() );
+				for( size_t channelIndex = 0; channelIndex < op0.getNumChannels(); channelIndex++ )
+				{
+					interpolatedOp.setChannelValue(
+						channelIndex,
+						lerp( op0.getChannelValue( channelIndex ), op1.getChannelValue( channelIndex ), lerpFactor )
+					);
+				}
+				
+				interpolatedSample.addOp( interpolatedOp );
+			}
+			
+			result = interpolatedSample.getMatrix();
+		}
+	}
+	
+	return result;
+}
+		
 IECore::ToCoreConverterPtr AlembicInput::converter( IECore::TypeId resultType ) const
 {
 	return FromAlembicConverter::create( m_data->object, resultType );
 }
 		
-IECore::ObjectPtr AlembicInput::convert( IECore::TypeId resultType ) const
+IECore::ObjectPtr AlembicInput::objectAtSample( size_t sampleIndex, IECore::TypeId resultType ) const
 {
 	FromAlembicConverterPtr c = FromAlembicConverter::create( m_data->object, resultType );
 	if( c )
 	{
+		c->sampleIndexParameter()->setNumericValue( sampleIndex );
 		return c->convert();
 	}
 	return 0;
 }
 
+IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId resultType ) const
+{
+	FromAlembicConverterPtr c = FromAlembicConverter::create( m_data->object, resultType );
+	if( !c )
+	{
+		return 0;
+	}
+	
+	size_t index0, index1;
+	double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
+	if( index0==index1 )
+	{
+		c->sampleIndexParameter()->setNumericValue( index0 );
+		return c->convert();
+	}
+	else
+	{
+		c->sampleIndexParameter()->setNumericValue( index0 );
+		ObjectPtr object0 = c->convert();
+		c->sampleIndexParameter()->setNumericValue( index1 );
+		ObjectPtr object1 = c->convert();
+		return linearObjectInterpolation( object0, object1, lerpFactor );
+	}
+}
+		
 size_t AlembicInput::numChildren() const
 {
 	return m_data->object.getNumChildren();
