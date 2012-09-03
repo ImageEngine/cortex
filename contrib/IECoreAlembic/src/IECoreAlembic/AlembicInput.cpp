@@ -190,13 +190,11 @@ bool AlembicInput::hasStoredBound() const
 		IXformSchema &iXFormSchema = iXForm.getSchema();
 		return iXFormSchema.getChildBoundsProperty();
 	}
-	else
+	else if( IGeomBase::matches( md ) )
 	{
-		// assume we have some geometry. ideally we'd
-		// use IGeomBaseObject::matches( md ) to check
-		// that assumption but it always returns false.
 		return true;
 	}
+	return false;
 }
 		
 Imath::Box3d AlembicInput::boundAtSample( size_t sampleIndex ) const

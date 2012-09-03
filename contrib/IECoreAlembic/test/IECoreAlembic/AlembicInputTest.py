@@ -340,6 +340,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		
 		self.assertEqual( a.hasStoredBound(), True )
 		self.assertEqual( a.child( "persp" ).hasStoredBound(), False )
+		self.assertEqual( a.child( "persp" ).child( "perspShape" ).hasStoredBound(), False )
 		self.assertEqual( a.child( "pCube1" ).hasStoredBound(), False )
 		self.assertEqual( a.child( "pCube1" ).child( "pCubeShape1" ).hasStoredBound(), True )		
 	
