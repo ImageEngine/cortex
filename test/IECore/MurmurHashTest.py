@@ -161,6 +161,18 @@ class MurmurHashTest( unittest.TestCase ) :
 					self.assertNotEqual( h, nextH )
 					h = nextH
 	
+	def testCopyFrom( self ) :
+
+		h1 = IECore.MurmurHash()
+		h2 = IECore.MurmurHash()
+		self.assertEqual( h1, h2 )
+		
+		h1.append( 1 )
+		self.assertNotEqual( h1, h2 )
+		
+		h2.copyFrom( h1 )
+		self.assertEqual( h1, h2 )
+			
 if __name__ == "__main__":
 	unittest.main()
 

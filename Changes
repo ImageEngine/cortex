@@ -1,3 +1,6 @@
+Improvements :
+
+* Bound MurmurHash assignment operator as Python copyFrom() method.
 
 7.6.0 :
 
