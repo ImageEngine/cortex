@@ -2,6 +2,10 @@ Improvements :
 
 * Bound MurmurHash assignment operator as Python copyFrom() method.
 
+* Added python bindings for IECoreGL ToGLMeshPrimitiveConverter, ToGLCurvesPrimitiveConverter and ToGLPointsPrimitiveConverter.
+
+* Added a ToGLConverter::create() factory method, for automatically creating a converter given an Object.
+
 7.6.0 :
 
 Improvements :

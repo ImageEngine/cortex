@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,13 +45,18 @@ namespace IECore
 namespace IECoreGL
 {
 
+IE_CORE_FORWARDDECLARE( CurvesPrimitive );
+
 /// Converts IECore::CurvesPrimitive objects into IECoreGL::CurvesPrimitive objects.
 /// \ingroup conversionGroup
 class ToGLCurvesConverter : public ToGLConverter
 {
 
 	public :
-
+		
+		typedef IECore::CurvesPrimitive InputType;
+		typedef IECoreGL::CurvesPrimitive ResultType;
+		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCurvesConverter, ToGLCurvesConverterTypeId, ToGLConverter );
 
 		ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert = 0 );
@@ -60,6 +65,10 @@ class ToGLCurvesConverter : public ToGLConverter
 	protected :
 
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
+	
+		static ConverterDescription<ToGLCurvesConverter> g_description;
 
 };
 

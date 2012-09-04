@@ -70,6 +70,9 @@
 #include "IECoreGL/bindings/SelectorBinding.h"
 #include "IECoreGL/bindings/FontBinding.h"
 #include "IECoreGL/bindings/FontLoaderBinding.h"
+#include "IECoreGL/bindings/ToGLMeshConverterBinding.h"
+#include "IECoreGL/bindings/ToGLPointsConverterBinding.h"
+#include "IECoreGL/bindings/ToGLCurvesConverterBinding.h"
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -107,6 +110,9 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindPrimitive();
 	bindPointsPrimitive();
 	bindSelector();
+	bindToGLMeshConverter();
+	bindToGLPointsConverter();
+	bindToGLCurvesConverter();
 
 #ifdef IECORE_WITH_FREETYPE
 

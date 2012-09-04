@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,43 +33,54 @@
 ##########################################################################
 
 import unittest
-import random
 
 import IECore
 import IECoreGL
 
 IECoreGL.init( False )
 
-class TestPrimitive( unittest.TestCase ) :
+class ToGLConverterTest( unittest.TestCase ) :
 
-	def testStateComponentsInstantiation( self ):
+	def testFactory( self ) :
 
-		IECoreGL.Primitive.DrawBound( False )
-		IECoreGL.Primitive.DrawWireframe( True )
-		IECoreGL.Primitive.WireframeWidth( 1.2 )
-		IECoreGL.Primitive.DrawSolid( True )
-		IECoreGL.Primitive.DrawOutline( True )
-		IECoreGL.Primitive.OutlineWidth( 2.2 )
-		IECoreGL.Primitive.DrawPoints( True )
-		IECoreGL.Primitive.PointWidth( 2.2 )
-		IECoreGL.Primitive.TransparencySort( True )
-
-	def testStateComponentsUsage( self ):
-
-		g = IECoreGL.Group()
-		g.getState().add( IECoreGL.Primitive.DrawBound( False ) )
-		g.getState().add( IECoreGL.Primitive.DrawWireframe( True ) )
-		g.getState().add( IECoreGL.Primitive.WireframeWidth( 1.2 ) )
-		g.getState().add( IECoreGL.Primitive.DrawSolid( True ) )
-		g.getState().add( IECoreGL.Primitive.DrawOutline( True ) )
-		g.getState().add( IECoreGL.Primitive.OutlineWidth( 2.2 ) )
-		g.getState().add( IECoreGL.Primitive.DrawPoints( True ) )
-		g.getState().add( IECoreGL.Primitive.PointWidth( 2.2 ) )
-		g.getState().add( IECoreGL.Primitive.TransparencySort( True ) )
+		# mesh
 		
-	def testRunTimeTyped( self ) :
-	
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECoreGL.Primitive.staticTypeId(), IECoreGL.Renderable.staticTypeId() ) )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		
+		c = IECoreGL.ToGLConverter.create( m )
+		self.failUnless( isinstance( c, IECoreGL.ToGLMeshConverter ) )
+		
+		c = IECoreGL.ToGLConverter.create( m, IECoreGL.Primitive.staticTypeId() )
+		self.failUnless( isinstance( c, IECoreGL.ToGLMeshConverter ) )
+		
+		c = IECoreGL.ToGLConverter.create( m, IECoreGL.Texture.staticTypeId() )
+		self.assertEqual( c, None )
+		
+		# points
+		
+		p = IECore.PointsPrimitive( 10 )
+				
+		c = IECoreGL.ToGLConverter.create( p )
+		self.failUnless( isinstance( c, IECoreGL.ToGLPointsConverter ) )
+		
+		c = IECoreGL.ToGLConverter.create( p, IECoreGL.Primitive.staticTypeId() )
+		self.failUnless( isinstance( c, IECoreGL.ToGLPointsConverter ) )
+		
+		c = IECoreGL.ToGLConverter.create( p, IECoreGL.Texture.staticTypeId() )
+		self.assertEqual( c, None )
+
+		# curves
+		
+		cv = IECore.CurvesPrimitive()
+				
+		c = IECoreGL.ToGLConverter.create( cv )
+		self.failUnless( isinstance( c, IECoreGL.ToGLCurvesConverter ) )
+		
+		c = IECoreGL.ToGLConverter.create( cv, IECoreGL.Primitive.staticTypeId() )
+		self.failUnless( isinstance( c, IECoreGL.ToGLCurvesConverter ) )
+		
+		c = IECoreGL.ToGLConverter.create( cv, IECoreGL.Texture.staticTypeId() )
+		self.assertEqual( c, None )
 
 if __name__ == "__main__":
     unittest.main()

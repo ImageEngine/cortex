@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,13 +43,22 @@
 namespace IECoreGL
 {
 
+IE_CORE_FORWARDDECLARE( ToGLConverter )
+
 /// The ToGLConverter class is a to be used as a base for all classes able to perform
 /// some kind of conversion from an IECore datatype to an IECoreGL datatype.
-/// \todo Some sort of factory mechanism accepting the desired source and destination types.
 class ToGLConverter : public IECore::FromCoreConverter
 {
 
 	public :
+
+		/// These typedefs describe the input and output types of the conversion
+		/// supported by this class. Derived classes /must/ override these typedefs
+		/// to more accurately describe their particular conversion in detail - they
+		/// will be used the by the ConverterDescription to register the converter
+		/// with the factory mechanism.
+		typedef IECore::Object InputType;
+		typedef IECore::RunTimeTyped ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLConverter, ToGLConverterTypeId, IECore::FromCoreConverter );
 
@@ -57,10 +66,31 @@ class ToGLConverter : public IECore::FromCoreConverter
 		/// type.
 		IECore::RunTimeTypedPtr convert();
 
+		//! @name Factory
+		/////////////////////////////////////////////////////////////////////////////////
+		//@{
+		/// Creates a converter which will convert the given IECore object to a GL Object.
+		/// If resultType is specified then only converters which create objects of that
+		/// type will be returned - the default value allows any suitable converter to be
+		/// created. If no matching converters exist then returns 0.
+		static ToGLConverterPtr create( IECore::ConstObjectPtr object, IECore::TypeId resultType=IECore::RunTimeTypedTypeId );
+		//@}
+		
 	protected :
 
 		ToGLConverter( const std::string &description, IECore::TypeId supportedType );
 		virtual ~ToGLConverter();
+
+		/// Creating a static instance of one of these (templated on your Converter type)
+		/// within your class will register your converter with the factory mechanism.
+		template<class T>
+		class ConverterDescription
+		{
+			public :			
+				ConverterDescription();
+			private :
+				static ToGLConverterPtr creator( IECore::ConstObjectPtr object );
+		};
 
 		/// Called by convert() to actually perform the operation.
 		/// operands contains the result of parameters()->getValidatedValue() -
@@ -68,10 +98,23 @@ class ToGLConverter : public IECore::FromCoreConverter
 		/// are in a bad state. Must be implemented in derived classes.
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const = 0;
 
+	private :
+	
+		typedef ToGLConverterPtr (*CreatorFn)( IECore::ConstObjectPtr object );
+		
+		struct Registration
+		{
+			IECore::TypeId resultType;
+			CreatorFn creator;
+		};
+		
+		typedef std::multimap<IECore::TypeId, Registration> Registrations;
+		static Registrations &registrations();
+		
 };
 
-IE_CORE_DECLAREPTR( ToGLConverter );
-
 } // namespace IECoreGL
+
+#include "IECoreGL/ToGLConverter.inl"
 
 #endif // IECOREGL_TOGLCONVERTER_H

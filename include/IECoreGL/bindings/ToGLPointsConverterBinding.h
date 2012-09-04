@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,46 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLPOINTSCONVERTER_H
-#define IECOREGL_TOGLPOINTSCONVERTER_H
-
-#include "IECoreGL/ToGLConverter.h"
-
-namespace IECore
-{
-	IE_CORE_FORWARDDECLARE( PointsPrimitive );
-}
+#ifndef IECOREGL_TOGLPOINTSCONVERTERBINDING_H
+#define IECOREGL_TOGLPOINTSCONVERTERBINDING_H
 
 namespace IECoreGL
 {
 
-IE_CORE_FORWARDDECLARE( PointsPrimitive );
+void bindToGLPointsConverter();
 
-/// Converts IECore::PointsPrimitive objects into IECoreGL::PointsPrimitive objects.
-/// \ingroup conversionGroup
-class ToGLPointsConverter : public ToGLConverter
-{
+}
 
-	public :
-
-		typedef IECore::PointsPrimitive InputType;
-		typedef IECoreGL::PointsPrimitive ResultType;
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLPointsConverter, ToGLPointsConverterTypeId, ToGLConverter );
-
-		ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert = 0 );
-		virtual ~ToGLPointsConverter();
-
-	protected :
-
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-	
-		static ConverterDescription<ToGLPointsConverter> g_description;
-
-};
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_TOGLPOINTSCONVERTER_H
+#endif // IECOREGL_TOGLPOINTSCONVERTERBINDING_H

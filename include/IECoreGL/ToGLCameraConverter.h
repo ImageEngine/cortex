@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,12 +42,17 @@
 namespace IECoreGL
 {
 
+IE_CORE_FORWARDDECLARE( Camera );
+
 /// Converts IECore::Camera objects into IECoreGL::Camera objects.
 /// \ingroup conversionGroup
 class ToGLCameraConverter : public ToGLConverter
 {
 
 	public :
+
+		typedef IECore::Camera InputType;
+		typedef IECoreGL::Camera ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCameraConverter, ToGLCameraConverterTypeId, ToGLConverter );
 
@@ -57,6 +62,10 @@ class ToGLCameraConverter : public ToGLConverter
 	protected :
 
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
+	
+		static ConverterDescription<ToGLCameraConverter> g_description;
 
 };
 

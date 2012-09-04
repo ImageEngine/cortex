@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,8 @@
 using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( ToGLCameraConverter );
+
+ToGLConverter::ConverterDescription<ToGLCameraConverter> ToGLCameraConverter::g_description;
 
 ToGLCameraConverter::ToGLCameraConverter( IECore::ConstCameraPtr toConvert )
 	:	ToGLConverter( "Converts IECore::Camera objects to IECoreGL::Camera objects.", IECore::CameraTypeId )

@@ -61,6 +61,7 @@ from CoordinateSystemTest import CoordinateSystemTest
 from TextureLoaderTest import TextureLoaderTest
 from FontTest import FontTest
 from FontLoaderTest import FontLoaderTest
+from ToGLConverterTest import ToGLConverterTest
 
 if IECore.withFreeType() :
 

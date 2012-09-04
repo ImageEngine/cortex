@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,4 +55,28 @@ IECore::RunTimeTypedPtr ToGLConverter::convert()
 {
 	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
 	return doConversion( srcParameter()->getValue(), operands );
+}
+
+ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::TypeId resultType )
+{
+	Registrations &r = registrations();
+		
+	Registrations::const_iterator low = r.lower_bound( object->typeId() );
+	Registrations::const_iterator high = r.upper_bound( object->typeId() );
+	for( Registrations::const_iterator it = low; it != high; it++ )
+	{
+		if( it->second.resultType == resultType ||
+			IECore::RunTimeTyped::inheritsFrom( it->second.resultType, resultType )
+		)
+		{
+			return it->second.creator( object );
+		}
+	}
+	return 0;
+}
+
+ToGLConverter::Registrations &ToGLConverter::registrations()
+{
+	static Registrations r;
+	return r; 
 }

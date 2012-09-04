@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,46 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLPOINTSCONVERTER_H
-#define IECOREGL_TOGLPOINTSCONVERTER_H
-
-#include "IECoreGL/ToGLConverter.h"
-
-namespace IECore
-{
-	IE_CORE_FORWARDDECLARE( PointsPrimitive );
-}
+#ifndef IECOREGL_TOGLCONVERTER_INL
+#define IECOREGL_TOGLCONVERTER_INL
 
 namespace IECoreGL
 {
 
-IE_CORE_FORWARDDECLARE( PointsPrimitive );
-
-/// Converts IECore::PointsPrimitive objects into IECoreGL::PointsPrimitive objects.
-/// \ingroup conversionGroup
-class ToGLPointsConverter : public ToGLConverter
+template<class T>
+ToGLConverter::ConverterDescription<T>::ConverterDescription()
 {
-
-	public :
-
-		typedef IECore::PointsPrimitive InputType;
-		typedef IECoreGL::PointsPrimitive ResultType;
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLPointsConverter, ToGLPointsConverterTypeId, ToGLConverter );
-
-		ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert = 0 );
-		virtual ~ToGLPointsConverter();
-
-	protected :
-
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-	
-		static ConverterDescription<ToGLPointsConverter> g_description;
-
+	Registration r;
+	r.resultType = T::ResultType::staticTypeId();
+	r.creator = creator;
+	registrations().insert( Registrations::value_type( T::InputType::staticTypeId(), r ) );
 };
+
+template<class T>
+ToGLConverterPtr ToGLConverter::ConverterDescription<T>::creator( IECore::ConstObjectPtr object )
+{
+	return new T( IECore::staticPointerCast<const typename T::InputType>( object ) );
+}
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLPOINTSCONVERTER_H
+#endif // IECOREGL_TOGLCONVERTER_INL

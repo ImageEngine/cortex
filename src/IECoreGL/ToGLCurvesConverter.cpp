@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,10 @@
 #include "IECoreGL/CurvesPrimitive.h"
 
 using namespace IECoreGL;
+
+IE_CORE_DEFINERUNTIMETYPED( ToGLCurvesConverter );
+
+ToGLConverter::ConverterDescription<ToGLCurvesConverter> ToGLCurvesConverter::g_description;
 
 ToGLCurvesConverter::ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert )
 	:	ToGLConverter( "Converts IECore::CurvesPrimitive objects to IECoreGL::CurvesPrimitiveObjects.", IECore::CurvesPrimitiveTypeId )
