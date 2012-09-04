@@ -202,7 +202,7 @@ void Primitive::render( const State * state ) const
 	
 				if( state->get<Primitive::DrawBound>()->value() )
 				{
-						Box3f b = bound();
+					Box3f b = bound();
 					constantShader->setUniformParameter( CsIndex, state->get<BoundColorStateComponent>()->value() );
 					glLineWidth( 1 );
 					glBegin( GL_LINE_LOOP );
@@ -224,7 +224,7 @@ void Primitive::render( const State * state ) const
 						glVertex3f( b.max.x, b.min.y, b.max.z );
 						glVertex3f( b.max.x, b.max.y, b.min.z );
 						glVertex3f( b.max.x, b.max.y, b.max.z );
-							glVertex3f( b.min.x, b.max.y, b.min.z );
+						glVertex3f( b.min.x, b.max.y, b.min.z );
 						glVertex3f( b.min.x, b.max.y, b.max.z );
 					glEnd();
 				}	
