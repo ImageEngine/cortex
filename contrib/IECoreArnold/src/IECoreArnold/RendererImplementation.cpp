@@ -578,6 +578,11 @@ AtNode* IECoreArnold::RendererImplementation::procGetNode( void *userPtr, int i 
 void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
 	Box3f bound = proc->bound();
+	if( bound.isEmpty() )
+	{
+		return;
+	}
+	
 	// we have to transform the bound, as we're not applying the current transform to the
 	// procedural node, but instead applying absolute transforms to the shapes the procedural
 	// generates.

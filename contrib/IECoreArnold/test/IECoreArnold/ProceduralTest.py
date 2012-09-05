@@ -174,5 +174,34 @@ class ProceduralTest( unittest.TestCase ) :
 		self.assertEqual( r.floatPrimVar( e.G() ), 1 )
 		self.assertEqual( r.floatPrimVar( e.B() ), 0 )
 		
+	def testEmptyProceduralIsIgnored( self ) :
+	
+		class EmptyProcedural( IECore.Renderer.Procedural ) :
+		
+			def __init__( self ) :
+		
+				IECore.Renderer.Procedural.__init__( self )
+				
+			def bound( self ) :
+			
+				return IECore.Box3f()
+				
+			def render( self, renderer ) :
+			
+				pass
+		
+		r = IECoreArnold.Renderer()
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
+
+		messageCallback = arnold.AtMsgCallBack( self.arnoldMessageCallback )
+		arnold.AiMsgSetCallback( messageCallback )
+		self.__arnoldMessages = ""
+		
+		with IECore.WorldBlock( r ) : 
+			
+			r.procedural( EmptyProcedural() )
+		
+		self.failIf( "ignoring parameter max" in self.__arnoldMessages )
+		
 if __name__ == "__main__":
     unittest.main()
