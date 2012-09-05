@@ -32,24 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#ifndef IECOREALEMBIC_FROMALEMBICCAMERACONVERTER_H
+#define IECOREALEMBIC_FROMALEMBICCAMERACONVERTER_H
+
+#include "Alembic/AbcGeom/ICamera.h"
+
+#include "IECore/Camera.h"
+
+#include "IECoreAlembic/FromAlembicConverter.h"
 
 namespace IECoreAlembic
 {
 
-enum TypeId
+class FromAlembicCameraConverter : public FromAlembicConverter
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
+
+	public :
+
+		typedef Alembic::AbcGeom::ICamera InputType;
+		typedef IECore::Camera ResultType;
+		
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicCameraConverter, FromAlembicCameraConverterTypeId, FromAlembicConverter );
+
+		FromAlembicCameraConverter( Alembic::Abc::IObject iCamera );
+
+	protected :
+
+		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
+
+	private :
 	
-	LastCoreAlembicTypeId = 112999,
+		static ConverterDescription<FromAlembicCameraConverter> g_description;
+		
 };
+
+IE_CORE_DECLAREPTR( FromAlembicCameraConverter )
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_TYPEIDS_H
+#endif // IECOREALEMBIC_FROMALEMBICCAMERACONVERTER_H

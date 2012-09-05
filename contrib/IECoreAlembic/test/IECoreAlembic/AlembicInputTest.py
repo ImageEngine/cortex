@@ -343,6 +343,8 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( a.child( "persp" ).child( "perspShape" ).hasStoredBound(), False )
 		self.assertEqual( a.child( "pCube1" ).hasStoredBound(), False )
 		self.assertEqual( a.child( "pCube1" ).child( "pCubeShape1" ).hasStoredBound(), True )		
+		self.assertEqual( a.child( "front" ).hasStoredBound(), False )
+		self.assertEqual( a.child( "front" ).child( "frontShape" ).hasStoredBound(), False )
 	
 	def testBoundAtSample( self ) :
 	
@@ -413,6 +415,16 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.failUnless( "N" in mesh )
 		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
 		self.assertEqual( mesh["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+	
+	def testCamera( self ) :
+	
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
+		
+		c = a.child( "persp" ).child( "perspShape" ).objectAtSample( 0 )
+		self.failUnless( isinstance( c, IECore.Camera ) )		
+		
+		c = a.child( "persp" ).child( "perspShape" ).objectAtTime( 0 )
+		self.failUnless( isinstance( c, IECore.Camera ) )		
 		
 if __name__ == "__main__":
     unittest.main()

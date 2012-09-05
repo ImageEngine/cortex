@@ -32,24 +32,39 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#include "IECore/SimpleTypedData.h"
+#include "IECore/Transform.h"
 
-namespace IECoreAlembic
-{
+#include "IECoreAlembic/FromAlembicCameraConverter.h"
 
-enum TypeId
+using namespace Imath;
+using namespace Alembic::AbcGeom;
+using namespace IECore;
+using namespace IECoreAlembic;
+
+FromAlembicCameraConverter::ConverterDescription<FromAlembicCameraConverter> FromAlembicCameraConverter::g_description;
+
+IE_CORE_DEFINERUNTIMETYPED( FromAlembicCameraConverter );
+
+FromAlembicCameraConverter::FromAlembicCameraConverter( Alembic::Abc::IObject iCamera )
+	:	FromAlembicConverter( "Converts AbcGeom::ICamera objects to IECore::Camera objects", iCamera )
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
+}
+
+IECore::ObjectPtr FromAlembicCameraConverter::doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const
+{
+	ICamera iCamera( iObject, kWrapExisting );
+	ICameraSchema &iCameraSchema = iCamera.getSchema();
+	CameraSample sample;
+	iCameraSchema.get( sample, sampleSelector );
 	
-	LastCoreAlembicTypeId = 112999,
-};
-
-} // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_TYPEIDS_H
+	CameraPtr result = new Camera;
+	result->parameters()["projection"] = new StringData( "perspective" );
+	
+	double top, bottom, left, right;
+	sample.getScreenWindow( top, bottom, left, right );
+	result->parameters()["screenWindow"] = new Box2fData( Box2f( V2f( left, bottom ), V2f( right, top ) ) );
+	result->parameters()["projection:fov"] = new FloatData( sample.getFieldOfView() );
+	
+	return result;
+}

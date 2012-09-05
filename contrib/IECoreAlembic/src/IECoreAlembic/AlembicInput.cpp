@@ -40,6 +40,7 @@
 #include "Alembic/AbcGeom/IGeomBase.h"
 #include "Alembic/AbcGeom/ArchiveBounds.h"
 #include "Alembic/AbcGeom/IXform.h"
+#include "Alembic/AbcGeom/ICamera.h"
 
 #include "IECoreAlembic/AlembicInput.h"
 #include "IECoreAlembic/FromAlembicConverter.h"
@@ -113,6 +114,7 @@ size_t AlembicInput::numSamples() const
 	
 	// wouldn't it be grand if the different things we had to call getNumSamples()
 	// on had some sort of base class where getNumSamples() was defined?
+	/// \todo See todo in ensureTimeSampling().
 	
 	const MetaData &md = m_data->object.getMetaData();
 	
@@ -126,6 +128,11 @@ size_t AlembicInput::numSamples() const
 	{
 		IXform iXForm( m_data->object, kWrapExisting );
 		m_data->numSamples = iXForm.getSchema().getNumSamples();
+	}
+	else if( ICamera::matches( md ) )
+	{
+		ICamera iCamera( m_data->object, kWrapExisting );
+		m_data->numSamples = iCamera.getSchema().getNumSamples();	
 	}
 	else
 	{
@@ -424,9 +431,13 @@ void AlembicInput::ensureTimeSampling() const
 	{
 		return;
 	}
-	
 	const MetaData &md = m_data->object.getMetaData();
 	
+	/// \todo It's getting a bit daft having to cover all the
+	/// types in here. We either need to find a generic way of
+	/// doing it (seems like that might not be Alembic's style though)
+	/// or perhaps we should have a timeSampling() method on the
+	/// converters?
 	if( !m_data->object.getParent() )
 	{
 		// top of archive
@@ -437,6 +448,11 @@ void AlembicInput::ensureTimeSampling() const
 	{
 		IXform iXForm( m_data->object, kWrapExisting );
 		m_data->timeSampling = iXForm.getSchema().getTimeSampling();
+	}
+	else if( ICamera::matches( md ) )
+	{
+		ICamera iCamera( m_data->object, kWrapExisting );
+		m_data->timeSampling = iCamera.getSchema().getTimeSampling();	
 	}
 	else
 	{
