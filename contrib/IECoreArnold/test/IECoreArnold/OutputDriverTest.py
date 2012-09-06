@@ -60,7 +60,31 @@ class OutputDriverTest( unittest.TestCase ) :
 		self.failUnless( "A" in channelNames )
 		self.failUnless( "direct_diffuse.R" in channelNames )
 		self.failUnless( "direct_diffuse.G" in channelNames )
-		self.failUnless( "direct_diffuse.B" in channelNames )												
+		self.failUnless( "direct_diffuse.B" in channelNames )
+		
+	def testVectorAndPointDisplays( self ) :
+			
+		server = IECore.DisplayDriverServer( 1559 )
+		time.sleep( 2 )
+		
+		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/vectorAndPointDisplays.ass" )		
+		
+		image = IECore.ImageDisplayDriver.removeStoredImage( "vectorAndPointImage" )
+		channelNames = image.keys()
+		
+		self.assertEqual( len( channelNames ), 10 )
+		self.failUnless( "R" in channelNames )
+		self.failUnless( "G" in channelNames )
+		self.failUnless( "B" in channelNames )
+		self.failUnless( "A" in channelNames )
+		self.failUnless( "P.R" in channelNames )
+		self.failUnless( "P.G" in channelNames )
+		self.failUnless( "P.B" in channelNames )
+		self.failUnless( "N.R" in channelNames )
+		self.failUnless( "N.G" in channelNames )
+		self.failUnless( "N.B" in channelNames )
+		
+		IECore.EXRImageWriter( image, "/tmp/test.exr" ).write()
 		
 if __name__ == "__main__":
     unittest.main()

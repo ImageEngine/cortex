@@ -6,6 +6,8 @@ Improvements :
 
 * Added a ToGLConverter::create() factory method, for automatically creating a converter given an Object.
 
+* The Arnold output driver now supports point and vector pixel types.
+
 7.6.0 :
 
 Improvements :

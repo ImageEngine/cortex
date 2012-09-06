@@ -68,9 +68,11 @@ static bool driverSupportsPixelType( const AtNode *node, AtByte pixelType )
 {
 	switch( pixelType )
 	{
-		case AI_TYPE_RGB:
-		case AI_TYPE_RGBA:
+		case AI_TYPE_RGB :
+		case AI_TYPE_RGBA :
 		case AI_TYPE_FLOAT :
+		case AI_TYPE_VECTOR :
+		case AI_TYPE_POINT :
 			return true;
 		default:
 			return false;
@@ -99,6 +101,8 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 		switch( pixelType )
 		{
 			case AI_TYPE_RGB :
+			case AI_TYPE_VECTOR :
+			case AI_TYPE_POINT :
 				channelNames.push_back( namePrefix + "R" );
 				channelNames.push_back( namePrefix + "G" );
 				channelNames.push_back( namePrefix + "B" );
@@ -171,6 +175,8 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
 		switch( pixelType )
 		{
 			case AI_TYPE_RGB :
+			case AI_TYPE_VECTOR :
+			case AI_TYPE_POINT :
 				numChannels = 3;
 				break;
 			case AI_TYPE_RGBA :
