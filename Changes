@@ -8,6 +8,8 @@ Improvements :
 
 * The Arnold output driver now supports point and vector pixel types.
 
+* MPlayDisplayDriver now deals with the case where the RGB plane is not the first one.
+
 7.6.0 :
 
 Improvements :

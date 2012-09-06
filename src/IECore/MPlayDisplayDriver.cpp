@@ -152,8 +152,8 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 		currentPlane->channelIndices.push_back( cIt - channelNames.begin() );
 	}
 	
-	// Validate that our planes match mplay requirements
-	for( vector<Plane>::const_iterator pIt = m_planes.begin(); pIt != m_planes.end(); pIt++ )
+	// Validate that our planes match mplay requirements.
+	for( vector<Plane>::iterator pIt = m_planes.begin(); pIt != m_planes.end(); pIt++ )
 	{
 		if(
 			pIt->channelNames.size() != 1 &&
@@ -162,6 +162,14 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 		)
 		{
 			throw Exception( "MPlayDisplayDriver only supports 1, 3, and 4 channel images" );
+		}
+		
+		// Make sure that the "C" plane is first, as otherwise MPlay
+		// gets a bit upset. It's ok to swap with the first plane because
+		// we already checked that one.
+		if( pIt->name == "C" && pIt != m_planes.begin() )
+		{
+			std::swap( *pIt, m_planes[0] );
 		}
 	}
 	
@@ -222,32 +230,25 @@ void MPlayDisplayDriver::imageData( const Imath::Box2i &box, const float *data, 
 		fwrite( &tileHeader, sizeof( tileHeader ), 1, m_imDisplayStdIn );
 		
 		const size_t numPixels = ( box.size().x + 1 ) * ( box.size().y + 1 );
-		if( false && m_planes.size() == 1 )
+		
+		// need to create interleaved data for the channels in the current plane
+		std::vector<float> planeData( plane.channelIndices.size() * numPixels );
+		const float *in = data;
+		float *out = &planeData[0];
+		const size_t numInChannels = channelNames().size();
+		const size_t numOutChannels = plane.channelIndices.size();
+								
+		for( size_t i=0; i<numPixels; ++i )
 		{
-			// the data is already just as we need it, so we can just write it as-is
-			fwrite( data, sizeof( float ), plane.channelIndices.size() * numPixels, m_imDisplayStdIn );
-		}
-		else
-		{
-			// need to create interleaved data for the channels in the current plane
-			std::vector<float> planeData( plane.channelIndices.size() * numPixels );
-			const float *in = data;
-			float *out = &planeData[0];
-			const size_t numInChannels = channelNames().size();
-			const size_t numOutChannels = plane.channelIndices.size();
-									
-			for( size_t i=0; i<numPixels; ++i )
+			for( size_t c=0; c<numOutChannels; ++c )
 			{
-				for( size_t c=0; c<numOutChannels; ++c )
-				{
-					*out++ = in[plane.channelIndices[c]];
-					
-				}
-				in += numInChannels;
+				*out++ = in[plane.channelIndices[c]];
+				
 			}
-			
-			fwrite( &planeData[0], sizeof( float ), planeData.size(), m_imDisplayStdIn );
+			in += numInChannels;
 		}
+		
+		fwrite( &planeData[0], sizeof( float ), planeData.size(), m_imDisplayStdIn );
 	}
 }
 
