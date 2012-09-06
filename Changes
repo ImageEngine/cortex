@@ -10,6 +10,8 @@ Improvements :
 
 * MPlayDisplayDriver now deals with the case where the RGB plane is not the first one.
 
+* Improved IECoreMaya.GenericParameterUI so it now works reasonably with StringParameters with a connectedNodeName value provider and acceptedNodeTypes ui userData.
+
 7.6.0 :
 
 Improvements :

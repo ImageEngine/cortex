@@ -79,6 +79,23 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 	
 		self.__attributeChangedCallbackId = None
 
+	def _popupMenuDefinition( self, **kw ) :
+	
+		definition = IECoreMaya.ParameterUI._popupMenuDefinition( self, **kw )
+		
+		acceptedConnectionTypes = None
+		with IECore.IgnoredExceptions( KeyError ) :
+			acceptedConnectionTypes = list( self.parameter.userData()["UI"]["acceptedNodeTypes"] )
+				
+		if acceptedConnectionTypes :
+			nodeNames = maya.cmds.ls( long=True, type=acceptedConnectionTypes )
+			if nodeNames :
+				definition.append( "/ConnectionsDivider", { "divider" : True } )
+				for nodeName in nodeNames :
+					definition.append( "/Connect To/%s" % nodeName, { "command" : IECore.curry( self.__connectToNode, nodeName ) } )
+		
+		return definition
+	
 	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
 				
 		if not (
@@ -123,7 +140,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 
 			maya.cmds.rowLayout(
 				numberOfColumns = 2,
-				columnWidth2 = [ IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 + 4, 20 ],
+				columnWidth2 = [ IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 - 40, 20 ],
 			)
 			
 			text = maya.cmds.text( align="left", label="Not connected", font="tinyBoldLabelFont" )
@@ -133,7 +150,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 			maya.cmds.iconTextButton(
 				annotation = "Clicking this takes you the connection editor for this connection.",
 				style = "iconOnly",
-				image = "listView.xpm",
+				image = "viewList.xpm",
 				font = "boldLabelFont",
 				command = IECore.curry( self.__connectionEditor, leftHandNode = None ),
 				height = 20,
@@ -153,11 +170,11 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		
 	def __drawConnection( self, plugName ) :
 	
-		fieldWidth = IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 - 25 
+		fieldWidth = IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 - 40
 	
 		maya.cmds.rowLayout(
 			numberOfColumns = 3,
-			columnWidth3 = [ fieldWidth , 25, 25 ]
+			columnWidth3 = [ fieldWidth , 20, 20 ]
 		)
 	
 		name = maya.cmds.text( l=plugName, font="tinyBoldLabelFont", align="left",
@@ -169,7 +186,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		maya.cmds.iconTextButton(
 			annotation = "Clicking this takes you the connection editor for this connection.",
 			style = "iconOnly",
-			image = "listView.xpm",
+			image = "viewList.xpm",
 			font = "boldLabelFont",
 			command = IECore.curry( self.__connectionEditor, leftHandNode = plugName ),
 			height = 20,
@@ -208,6 +225,11 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 	def __showEditor( self, attributeName ) :
 
 		maya.mel.eval( 'showEditor "' + IECoreMaya.StringUtil.nodeFromAttributePath( attributeName ) + '"' )
-				
+	
+	def __connectToNode( self, nodeName ) :
+	
+		maya.cmds.connectAttr( nodeName + ".message", self.plugName(), force=True )
+					
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI, 'generic' )
+IECoreMaya.ParameterUI.registerUI( IECore.TypeId.StringParameter, GenericParameterUI, 'generic' )
