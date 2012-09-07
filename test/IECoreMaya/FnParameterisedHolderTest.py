@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -811,6 +811,38 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( testScene, f = True, o  = True )
 		self.assertEqual( maya.cmds.getAttr( node + ".parm_f" ), 50.5 )
 		self.assertEqual( maya.cmds.getAttr( node + ".result" ), 50.5 )
+	
+	def testResultAttrSaveLoadMeshConnections( self ) :
+		
+		box = maya.cmds.listRelatives( maya.cmds.polyCube(), shapes=True )[0]
+		torus = maya.cmds.listRelatives( maya.cmds.polyTorus(), shapes=True )[0]
+		node = maya.cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnOpHolder( node )
+		fnPH.setOp( "meshMerge" )
+		
+		maya.cmds.connectAttr( box + ".outMesh", node + ".parm_input" )
+		maya.cmds.connectAttr( torus + ".outMesh", node + ".parm_mesh" )
+		mesh = maya.cmds.createNode( "mesh" )
+		maya.cmds.connectAttr( node + ".result", mesh + ".inMesh" )
+		quads = maya.cmds.polyQuad( mesh )[0]
+		## \todo: this makes the test fail, but not seg fault. remove once the seg fault is solved.
+		maya.cmds.setAttr( quads + ".nodeState", 1 )
+		joint = maya.cmds.createNode( "joint" )
+		cluster = maya.cmds.skinCluster( mesh, joint )
+		
+		fnMesh = maya.OpenMaya.MFnMesh( IECoreMaya.dependencyNodeFromString( mesh ) )
+		self.assertEqual( fnMesh.numVertices(), 408 )
+		self.assertEqual( fnMesh.numPolygons(), 406 )
+		
+		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "resultAttrLoadTest.ma" ) )
+		testScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+		maya.cmds.file( testScene, f = True, o  = True )
+		
+		fnMesh = maya.OpenMaya.MFnMesh( IECoreMaya.dependencyNodeFromString( mesh ) )
+		self.assertEqual( fnMesh.numVertices(), 408 )
+		self.assertEqual( fnMesh.numPolygons(), 406 )
+		
+		self.assertEqual( maya.cmds.getAttr( quads + ".nodeState" ), 0 ) # Known bug. See todo above.
 	
 	def testParameterPlugForMissingPlug( self ) :
 	
