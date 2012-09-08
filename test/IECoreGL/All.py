@@ -62,6 +62,7 @@ from TextureLoaderTest import TextureLoaderTest
 from FontTest import FontTest
 from FontLoaderTest import FontLoaderTest
 from ToGLConverterTest import ToGLConverterTest
+from CachedConverterTest import CachedConverterTest
 
 if IECore.withFreeType() :
 

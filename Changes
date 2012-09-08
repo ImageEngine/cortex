@@ -12,6 +12,8 @@ Improvements :
 
 * Improved IECoreMaya.GenericParameterUI so it now works reasonably with StringParameters with a connectedNodeName value provider and acceptedNodeTypes ui userData.
 
+* Added an IECoreGL::CachedConverter class, which performs conversion from IECore types to IECoreGL types, maintaining an LRUCache of recent conversions.
+
 7.6.0 :
 
 Improvements :
