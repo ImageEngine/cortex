@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -360,6 +360,15 @@ class Renderer : public IECore::Renderer
 		/// If a procedural is not visible then it will not be opened
 		/// to discover if it's contents might turn visibility back on.
 		///
+		/// \par Instancing attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"automaticInstancing" BoolData true</b><br>
+		/// \li <b>"gl:automaticInstancing" BoolData true</b><br>
+		/// Specifies that instances are automatically created if
+		/// identical primitives are passed to the renderer
+		/// repeatedly. This is currently implemented only for the
+		/// mesh, points and curves primitive types.
 		////////////////////////////////////////////////////////////
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -192,7 +192,7 @@ IECore::Data *ImmediateRendererImplementation::getUserAttribute( const IECore::I
 	return 0;
 }
 
-void ImmediateRendererImplementation::addPrimitive( PrimitivePtr primitive )
+void ImmediateRendererImplementation::addPrimitive( ConstPrimitivePtr primitive )
 {
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( visible )

@@ -14,6 +14,8 @@ Improvements :
 
 * Added an IECoreGL::CachedConverter class, which performs conversion from IECore types to IECoreGL types, maintaining an LRUCache of recent conversions.
 
+* Implemented automatic instancing of primitives for the IECoreGL::Renderer - when the same primitive is rendered repeatedly a previously converted GL primitive will be reused rather than performing another conversion. This can yield significant time and memory savings. 
+
 7.6.0 :
 
 Improvements :

@@ -65,6 +65,7 @@
 #include "IECoreGL/ToGLCurvesConverter.h"
 #include "IECoreGL/ToGLTextureConverter.h"
 #include "IECoreGL/ToGLPointsConverter.h"
+#include "IECoreGL/CachedConverter.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -126,6 +127,9 @@ T parameterValue( const char *name, const CompoundDataMap &parameters, T default
 // member data held in a single structure
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// \todo Now we're adding methods to this, we should probably rename it to Impl
+/// or Implementation. We should perhaps also rename the RendererImplementation
+/// classes to RendererBackend or something to avoid confusion.
 struct IECoreGL::Renderer::MemberData
 {
 	enum Mode
@@ -169,6 +173,8 @@ struct IECoreGL::Renderer::MemberData
 	InstanceMap instances;
 	Group *currentInstance;
 	
+	CachedConverterPtr cachedConverter;
+	
 	// we don't want to just destroy objects in the removeObject command, as we could be in
 	// any thread at the time, and we can only destroy gl resources on the thread which has
 	// the gl context. so we stash them in here until the editEnd command, and then destroy
@@ -177,6 +183,70 @@ struct IECoreGL::Renderer::MemberData
 	// being called from.
 	std::set<RenderablePtr> removedObjects;
 	tbb::mutex removedObjectsMutex;
+	
+	void addPrimitive( const IECore::Primitive *corePrimitive )
+	{
+		ConstPrimitivePtr glPrimitive;
+		if( implementation->getState<AutomaticInstancingStateComponent>()->value() )
+		{
+			glPrimitive = IECore::runTimeCast<const Primitive>( cachedConverter->convert( corePrimitive ) );
+		}
+		else
+		{
+			ToGLConverterPtr converter = ToGLConverter::create( corePrimitive, IECoreGL::Primitive::staticTypeId() );
+			glPrimitive = IECore::runTimeCast<const Primitive>( converter->convert() );
+		}
+				
+		addPrimitive( glPrimitive );
+	}
+	
+	void addPrimitive( IECoreGL::ConstPrimitivePtr glPrimitive )
+	{
+		if( currentInstance )
+		{
+			addCurrentInstanceChild( glPrimitive );
+		}
+		else if( checkCulling<IECoreGL::Primitive>( glPrimitive ) )
+		{
+			implementation->addPrimitive( glPrimitive );
+		}
+	}
+	
+	void addCurrentInstanceChild( IECoreGL::ConstRenderablePtr child )
+	{
+		IECoreGL::GroupPtr childGroup = new IECoreGL::Group();
+		childGroup->setTransform( transformStack.top() );
+		/// \todo See todo in DeferredRendererImplementation::addPrimitive().
+		childGroup->addChild( constPointerCast<Renderable>( child ) );
+		currentInstance->addChild( childGroup );
+	}
+	
+	template< typename T >
+	bool checkCulling( const T *p )
+	{
+		const Imath::Box3f &cullBox = implementation->getState<CullingBoxStateComponent>()->value();
+		if( cullBox.isEmpty() )
+		{
+			// culling is disabled... p should be rendered.
+			return true;
+		}
+	
+		Imath::Box3f b = p->bound();
+		switch( implementation->getState<CullingSpaceStateComponent>()->value() )
+		{
+			case ObjectSpace :
+				// if in local space we don't have to transform bounding box of p.
+				break;
+			case WorldSpace :
+				// transform procedural bounding box to world space to match culling box space.
+				b = Imath::transform( b, implementation->getTransform() );
+				break;
+			default :
+				msg( Msg::Warning, "Renderer::checkCulling", "Unnexpected culling space!" );
+				return true;
+		}
+		return cullBox.intersects( b );
+	}
 
 };
 
@@ -208,6 +278,8 @@ IECoreGL::Renderer::Renderer()
 	m_data->currentInstance = 0;
 	m_data->implementation = 0;
 	m_data->shaderManager = 0;
+	
+	m_data->cachedConverter = CachedConverter::defaultCachedConverter();
 }
 
 IECoreGL::Renderer::~Renderer()
@@ -1296,6 +1368,8 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:alphaTest"] = typedAttributeSetter<AlphaTestStateComponent>;
 		(*a)["gl:alphaTest:mode"] = alphaFuncSetter;
 		(*a)["gl:alphaTest:value"] = alphaFuncSetter;
+		(*a)["automaticInstancing"] = typedAttributeSetter<AutomaticInstancingStateComponent>;
+		(*a)["gl:automaticInstancing"] = typedAttributeSetter<AutomaticInstancingStateComponent>;
 	}
 	return a;
 }
@@ -1347,6 +1421,8 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:alphaTest"] = typedAttributeGetter<AlphaTestStateComponent>;
 		(*a)["gl:alphaTest:mode"] = alphaFuncGetter;
 		(*a)["gl:alphaTest:value"] = alphaFuncGetter;
+		(*a)["automaticInstancing"] = typedAttributeGetter<AutomaticInstancingStateComponent>;
+		(*a)["gl:automaticInstancing"] = typedAttributeGetter<AutomaticInstancingStateComponent>;
 	}
 	return a;
 }
@@ -1496,33 +1572,6 @@ void IECoreGL::Renderer::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template< typename T >
-static bool checkCulling( RendererImplementation *r, const T *p )
-{
-	const Imath::Box3f &cullBox = r->getState<CullingBoxStateComponent>()->value();
-	if ( cullBox.isEmpty() )
-	{
-		// culling is disabled... p should be rendered.
-		return true;
-	}
-
-	Imath::Box3f b = p->bound();
-	switch( r->getState<CullingSpaceStateComponent>()->value() )
-	{
-		case ObjectSpace :
-			// if in local space we don't have to transform bounding box of p.
-			break;
-		case WorldSpace :
-			// transform procedural bounding box to world space to match culling box space.
-			b = Imath::transform( b, r->getTransform() );
-			break;
-		default :
-			msg( Msg::Warning, "Renderer::checkCulling", "Unnexpected culling space!" );
-			return true;
-	}
-	return cullBox.intersects( b );
-}
-
 static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::PrimitiveVariableMap &primVars )
 {
 	// add primVars to the gl primitive
@@ -1539,29 +1588,13 @@ static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECo
 	}
 }
 
-static void addCurrentInstanceChild( IECoreGL::Renderer::MemberData *data, IECoreGL::Renderable *child )
-{
-	IECoreGL::GroupPtr childGroup = new IECoreGL::Group();
-	childGroup->setTransform( data->transformStack.top() );
-	childGroup->addChild( child );
-	data->currentInstance->addChild( childGroup );
-}
-
 void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
 	try
 	{
 		IECore::PointsPrimitivePtr p = new IECore::PointsPrimitive( numPoints );
 		p->variables = primVars;
-		IECoreGL::PointsPrimitivePtr prim = IECore::staticPointerCast<IECoreGL::PointsPrimitive>( ToGLPointsConverter( p ).convert() );
-		if ( m_data->currentInstance )
-		{
-			addCurrentInstanceChild( m_data, prim );
-		}
-		else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
-		{
-			m_data->implementation->addPrimitive( prim );
-		}
+		m_data->addPrimitive( p.get() );
 	}
 	catch( const std::exception &e )
 	{
@@ -1574,14 +1607,7 @@ void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECo
 {
 	DiskPrimitivePtr prim = new DiskPrimitive( radius, z, thetaMax );
 	addPrimVarsToPrimitive( prim, primVars );
-	if ( m_data->currentInstance )
-	{
-		addCurrentInstanceChild( m_data, prim );
-	}
-	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
-	{
-		m_data->implementation->addPrimitive( prim );
-	}
+	m_data->addPrimitive( prim );
 }
 
 void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
@@ -1590,15 +1616,7 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 	{
 		IECore::CurvesPrimitivePtr c = new IECore::CurvesPrimitive( numVertices, basis, periodic );
 		c->variables = primVars;
-		CurvesPrimitivePtr prim = IECore::staticPointerCast<CurvesPrimitive>( ToGLCurvesConverter( c ).convert() );
-		if ( m_data->currentInstance )
-		{
-			addCurrentInstanceChild( m_data, prim );
-		}
-		else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
-		{
-			m_data->implementation->addPrimitive( prim );
-		}
+		m_data->addPrimitive( c.get() );		
 	}
 	catch( const std::exception &e )
 	{
@@ -1623,14 +1641,7 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 
 	TextPrimitivePtr prim = new TextPrimitive( text, f );
 	addPrimVarsToPrimitive( prim, primVars );
-	if ( m_data->currentInstance )
-	{
-		addCurrentInstanceChild( m_data, prim );
-	}
-	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
-	{
-		m_data->implementation->addPrimitive( prim );
-	}
+	m_data->addPrimitive( prim );
 #else
 	IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." );
 #endif // IECORE_WITH_FREETYPE
@@ -1640,14 +1651,7 @@ void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float the
 {
 	SpherePrimitivePtr prim = new SpherePrimitive( radius, zMin, zMax, thetaMax );
 	addPrimVarsToPrimitive( prim, primVars );
-	if ( m_data->currentInstance )
-	{
-		addCurrentInstanceChild( m_data, prim );
-	}
-	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
-	{
-		m_data->implementation->addPrimitive( prim );
-	}
+	m_data->addPrimitive( prim );
 }
 
 static const std::string &imageFragmentShader()
@@ -1676,7 +1680,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
 
-	if ( !checkCulling<IECore::Primitive>( m_data->implementation, image ) )
+	if ( !m_data->checkCulling<IECore::Primitive>( image ) )
 	{
 		return;
 	}
@@ -1718,31 +1722,7 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 	{
 		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
 		m->variables = primVars;
-
-		if( interpolation!="linear" )
-		{
-			// it's a subdivision mesh. in the absence of a nice subdivision algorithm to display things with,
-			// we can at least make things look a bit nicer by calculating some smooth shading normals.
-			// if interpolation is linear and no normals are provided then we assume the faceted look is intentional.
-			if( primVars.find( "N" )==primVars.end() )
-			{
-				MeshNormalsOpPtr normalOp = new MeshNormalsOp();
-				normalOp->inputParameter()->setValue( m );
-				normalOp->copyParameter()->setTypedValue( false );
-				normalOp->operate();
-			}
-		}
-
-		ToGLMeshConverterPtr meshConverter = new ToGLMeshConverter( m );
-		MeshPrimitivePtr prim = IECore::staticPointerCast<MeshPrimitive>( meshConverter->convert() );
-		if ( m_data->currentInstance )
-		{
-			addCurrentInstanceChild( m_data, prim );
-		}
-		else if ( checkCulling<IECoreGL::Primitive>( m_data->implementation, prim ) )
-		{
-			m_data->implementation->addPrimitive( prim );
-		}
+		m_data->addPrimitive( m.get() );
 	}
 	catch( const std::exception &e )
 	{
@@ -1784,7 +1764,7 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 		IECore::msg( IECore::Msg::Warning, "Renderer::procedural", "Procedurals currently not supported inside instances." );
 		return;
 	}
-	if ( checkCulling<IECore::Renderer::Procedural>( m_data->implementation, proc ) )
+	if ( m_data->checkCulling<IECore::Renderer::Procedural>( proc ) )
 	{
 		m_data->implementation->addProcedural( proc, this );
 	}
@@ -1842,7 +1822,7 @@ void IECoreGL::Renderer::instance( const std::string &name )
 	if ( m_data->currentInstance )
 	{
 		// instance called within another instance
-		addCurrentInstanceChild( m_data, it->second );
+		m_data->addCurrentInstanceChild( it->second );
 	}
 	else if ( m_data->inWorld )
 	{

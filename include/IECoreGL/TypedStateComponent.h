@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -231,6 +231,10 @@ typedef TypedStateComponent<bool, ProceduralThreadingStateComponentTypeId> Proce
 /// Defines camera visibility.
 typedef TypedStateComponent<bool, CameraVisibilityStateComponentTypeId> CameraVisibilityStateComponent;
 
+/// Defines whether or not the renderer will create instances automatically when identical
+/// primitives are encountered.
+typedef TypedStateComponent<bool, AutomaticInstancingStateComponentTypeId> AutomaticInstancingStateComponent;
+
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( BlendColorStateComponent );
 IE_CORE_DECLAREPTR( BlendFuncStateComponent );
@@ -247,6 +251,7 @@ IE_CORE_DECLAREPTR( CullingSpaceStateComponent );
 IE_CORE_DECLAREPTR( CullingBoxStateComponent );
 IE_CORE_DECLAREPTR( ProceduralThreadingStateComponent );
 IE_CORE_DECLAREPTR( CameraVisibilityStateComponent );
+IE_CORE_DECLAREPTR( AutomaticInstancingStateComponent );
 
 } // namespace IECoreGL
 

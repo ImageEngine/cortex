@@ -63,6 +63,7 @@ from FontTest import FontTest
 from FontLoaderTest import FontLoaderTest
 from ToGLConverterTest import ToGLConverterTest
 from CachedConverterTest import CachedConverterTest
+from InstancingTest import InstancingTest
 
 if IECore.withFreeType() :
 

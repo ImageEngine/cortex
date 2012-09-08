@@ -65,6 +65,20 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 {
 	IECore::MeshPrimitivePtr mesh = IECore::staticPointerCast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
 
+	if( mesh->interpolation() != "linear" )
+	{
+		// it's a subdivision mesh. in the absence of a nice subdivision algorithm to display things with,
+		// we can at least make things look a bit nicer by calculating some smooth shading normals.
+		// if interpolation is linear and no normals are provided then we assume the faceted look is intentional.
+		if( mesh->variables.find( "N" )==mesh->variables.end() )
+		{
+			IECore::MeshNormalsOpPtr normalOp = new IECore::MeshNormalsOp();
+			normalOp->inputParameter()->setValue( mesh );
+			normalOp->copyParameter()->setTypedValue( false );
+			normalOp->operate();
+		}
+	}
+		
 	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
 	op->inputParameter()->setValue( mesh );
 	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
@@ -85,33 +99,6 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	{
 		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 	}
-
-	IECore::ConstV3fVectorDataPtr n = 0;
-	IECore::PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
-	if( nIt != mesh->variables.end() )
-	{
-		if( nIt->second.interpolation==IECore::PrimitiveVariable::Vertex || nIt->second.interpolation==IECore::PrimitiveVariable::Varying || nIt->second.interpolation==IECore::PrimitiveVariable::FaceVarying )
-		{
-			n = IECore::runTimeCast<const IECore::V3fVectorData>( nIt->second.data );
-		}
-		if( !n )
-		{
-			throw IECore::Exception( "Must specify primitive variable \"N\", of type V3fVectorData" );
-		}
-	}
-	else
-	{
-		IECore::MeshNormalsOpPtr normOp = new IECore::MeshNormalsOp();
-		normOp->inputParameter()->setValue( mesh );
-
-		mesh = IECore::runTimeCast< IECore::MeshPrimitive > ( normOp->operate() );
-		assert( mesh );
-
-		nIt = mesh->variables.find( "N" );
-		assert( nIt != mesh->variables.end() );
-		n = IECore::runTimeCast<const IECore::V3fVectorData>( nIt->second.data );
-	}
-	assert( n );
 
 	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->vertexIds() );
 

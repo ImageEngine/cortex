@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2011, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -127,6 +127,9 @@ class TestRenderer( unittest.TestCase ) :
 			
 			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( True ) )
 
+			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "automaticInstancing" ), BoolData( True ) )
+
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
 			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
 
@@ -211,6 +214,13 @@ class TestRenderer( unittest.TestCase ) :
 			
 			r.setAttribute( "gl:visibility:camera", BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( False ) )
+
+			r.setAttribute( "gl:automaticInstancing", BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( False ) )
+			self.assertEqual( r.getAttribute( "automaticInstancing" ), BoolData( False ) )
+			r.setAttribute( "automaticInstancing", BoolData( True ) )
+			self.assertEqual( r.getAttribute( "automaticInstancing" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( True ) )
 
 			r.worldEnd()
 		

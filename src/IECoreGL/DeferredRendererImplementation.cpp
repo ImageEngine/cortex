@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -256,7 +256,7 @@ IECore::Data *DeferredRendererImplementation::getUserAttribute( const IECore::In
 	return 0;
 }
 
-void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
+void DeferredRendererImplementation::addPrimitive( ConstPrimitivePtr primitive )
 {
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( !visible )
@@ -269,7 +269,12 @@ void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 	GroupPtr g = new Group;
 	g->setTransform( curContext->localTransform );
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
-	g->addChild( primitive );
+	/// \todo Make Groups have only const access to children and we won't need this
+	/// cast. This is going to be particularly important going forwards, as the key
+	/// to decent speed and memory usage is going to be automatically instanced primitives,
+	/// each referencing potentially shared vertex buffer objects. Modifying one of those
+	/// could have bad consequences for the others.
+	g->addChild( IECore::constPointerCast<Primitive>( primitive ) );
 
 	{
 		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
