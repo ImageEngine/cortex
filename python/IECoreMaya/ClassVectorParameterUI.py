@@ -902,7 +902,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 				minValue = parameter.minValue,
 				maxValue = parameter.maxValue,
 				width = 45,
-				pre = 2
+				pre = 4
 			)
 			maya.cmds.connectControl( control, parameterPlugPath )
 			
@@ -944,7 +944,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 			column1 = maya.cmds.floatField(
 				annotation = annotation,
 				width = 45,
-				pre = 2,
+				pre = 4,
 				parent = control
 			)
 			
@@ -952,7 +952,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 			column2 = maya.cmds.floatField(
 				annotation = annotation,
 				width = 45,
-				pre = 2,
+				pre = 4,
 				parent = control
 			)
 			
