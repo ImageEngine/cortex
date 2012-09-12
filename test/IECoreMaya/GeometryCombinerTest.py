@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -120,12 +120,12 @@ class GeometryCombinerTest( IECoreMaya.TestCase ) :
 		combiner = maya.cmds.createNode( "ieGeometryCombiner" )
 		maya.cmds.connectAttr( sphere + ".worldMesh", combiner + ".inputGeometry", nextAvailable=True )
 
-		self.assertEqual( maya.cmds.getAttr( combiner + ".convertInObjectSpace" ), False )
+		self.assertEqual( maya.cmds.getAttr( combiner + ".conversionSpace" ), IECoreMaya.FromMayaShapeConverter.Space.World.real )
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( combined.bound() ) )
 
-		maya.cmds.setAttr( combiner + ".convertInObjectSpace", True )
+		maya.cmds.setAttr( combiner + ".conversionSpace", IECoreMaya.FromMayaShapeConverter.Space.Object.real )
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( combined.bound() ) )

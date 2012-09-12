@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "maya/MFnGenericAttribute.h"
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnNumericAttribute.h"
+#include "maya/MFnEnumAttribute.h"
 #include "maya/MFnPluginData.h"
 #include "maya/MPlugArray.h"
 #include "maya/MDagPath.h"
@@ -52,7 +53,7 @@ const MTypeId GeometryCombiner::id = GeometryCombinerId;
 const MString GeometryCombiner::typeName = "ieGeometryCombiner";
 MObject GeometryCombiner::aConvertPrimVars;
 MObject GeometryCombiner::aConvertBlindData;
-MObject GeometryCombiner::aConvertInObjectSpace;
+MObject GeometryCombiner::aConversionSpace;
 MObject GeometryCombiner::aInputGeometry;
 MObject GeometryCombiner::aOutputGroup;
 
@@ -73,6 +74,7 @@ MStatus GeometryCombiner::initialize()
 {
 
 	MFnNumericAttribute fnNAttr;
+	MFnEnumAttribute fnEAttr;
 
 	aConvertPrimVars = fnNAttr.create( "convertPrimVars", "cpv", MFnNumericData::kBoolean, 0.0f );
 	addAttribute( aConvertPrimVars );
@@ -80,8 +82,10 @@ MStatus GeometryCombiner::initialize()
 	aConvertBlindData = fnNAttr.create( "convertBlindData", "cbd", MFnNumericData::kBoolean, 0.0f );
 	addAttribute( aConvertBlindData );
 
-	aConvertInObjectSpace = fnNAttr.create( "convertInObjectSpace", "cil", MFnNumericData::kBoolean, 0.0f );
-	addAttribute( aConvertInObjectSpace );
+	aConversionSpace = fnEAttr.create( "conversionSpace", "cs", FromMayaShapeConverter::World );
+    fnEAttr.addField( "World", FromMayaShapeConverter::World );
+    fnEAttr.addField( "Object", FromMayaShapeConverter::Object );
+	addAttribute( aConversionSpace );
 	
 	MFnGenericAttribute fnGAttr;
 	
@@ -109,7 +113,7 @@ MStatus GeometryCombiner::initialize()
 	
 	attributeAffects( aConvertPrimVars, aOutputGroup );
 	attributeAffects( aConvertBlindData, aOutputGroup );
-	attributeAffects( aConvertInObjectSpace, aOutputGroup );
+	attributeAffects( aConversionSpace, aOutputGroup );
 	attributeAffects( aInputGeometry, aOutputGroup );
 	
 	return MS::kSuccess;
@@ -123,7 +127,7 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 	
 		bool convertPrimVars = dataBlock.inputValue( aConvertPrimVars ).asBool();
 		bool convertBlindData = dataBlock.inputValue( aConvertBlindData ).asBool();
-		bool convertInObjectSpace = dataBlock.inputValue( aConvertInObjectSpace ).asBool();
+		FromMayaShapeConverter::Space conversionSpace = (FromMayaShapeConverter::Space)dataBlock.inputValue( aConversionSpace ).asInt();
 	
 		IECore::GroupPtr group = new IECore::Group;
 			
@@ -161,14 +165,7 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 			
 			if( converter )
 			{
-				if( convertInObjectSpace )
-				{
-					converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::Object );
-				}
-				else
-				{
-					converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::World );
-				}
+				converter->spaceParameter()->setNumericValue( conversionSpace );
 
 				if( !convertPrimVars )
 				{
