@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,6 +59,7 @@ class GeometryCombiner : public MPxNode
 
 		static MObject aConvertPrimVars;
 		static MObject aConvertBlindData;
+		static MObject aConvertInObjectSpace;
 		static MObject aInputGeometry;
 		static MObject aOutputGroup;
 

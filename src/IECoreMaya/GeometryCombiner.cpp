@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ const MTypeId GeometryCombiner::id = GeometryCombinerId;
 const MString GeometryCombiner::typeName = "ieGeometryCombiner";
 MObject GeometryCombiner::aConvertPrimVars;
 MObject GeometryCombiner::aConvertBlindData;
+MObject GeometryCombiner::aConvertInObjectSpace;
 MObject GeometryCombiner::aInputGeometry;
 MObject GeometryCombiner::aOutputGroup;
 
@@ -78,6 +79,9 @@ MStatus GeometryCombiner::initialize()
 	
 	aConvertBlindData = fnNAttr.create( "convertBlindData", "cbd", MFnNumericData::kBoolean, 0.0f );
 	addAttribute( aConvertBlindData );
+
+	aConvertInObjectSpace = fnNAttr.create( "convertInObjectSpace", "cil", MFnNumericData::kBoolean, 0.0f );
+	addAttribute( aConvertInObjectSpace );
 	
 	MFnGenericAttribute fnGAttr;
 	
@@ -105,6 +109,7 @@ MStatus GeometryCombiner::initialize()
 	
 	attributeAffects( aConvertPrimVars, aOutputGroup );
 	attributeAffects( aConvertBlindData, aOutputGroup );
+	attributeAffects( aConvertInObjectSpace, aOutputGroup );
 	attributeAffects( aInputGeometry, aOutputGroup );
 	
 	return MS::kSuccess;
@@ -118,6 +123,7 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 	
 		bool convertPrimVars = dataBlock.inputValue( aConvertPrimVars ).asBool();
 		bool convertBlindData = dataBlock.inputValue( aConvertBlindData ).asBool();
+		bool convertInObjectSpace = dataBlock.inputValue( aConvertInObjectSpace ).asBool();
 	
 		IECore::GroupPtr group = new IECore::Group;
 			
@@ -155,7 +161,14 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 			
 			if( converter )
 			{
-				converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::World );
+				if( convertInObjectSpace )
+				{
+					converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::Object );
+				}
+				else
+				{
+					converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::World );
+				}
 
 				if( !convertPrimVars )
 				{

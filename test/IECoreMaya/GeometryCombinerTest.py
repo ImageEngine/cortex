@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -110,6 +110,26 @@ class GeometryCombinerTest( IECoreMaya.TestCase ) :
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
 		
 		self.assertEqual( combined.children()[0].blindData()["ieString"].value, "banana" )
+
+	def testSpaces( self ) :
+
+		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
+		maya.cmds.move( 1, 2, 3, sphere )
+		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
+
+		combiner = maya.cmds.createNode( "ieGeometryCombiner" )
+		maya.cmds.connectAttr( sphere + ".worldMesh", combiner + ".inputGeometry", nextAvailable=True )
+
+		self.assertEqual( maya.cmds.getAttr( combiner + ".convertInObjectSpace" ), False )
+
+		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
+		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( combined.bound() ) )
+
+		maya.cmds.setAttr( combiner + ".convertInObjectSpace", True )
+
+		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
+		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( combined.bound() ) )
+
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
