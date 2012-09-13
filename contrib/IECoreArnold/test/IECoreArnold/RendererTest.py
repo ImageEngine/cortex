@@ -544,6 +544,70 @@ class RendererTest( unittest.TestCase ) :
 		r.setAttribute( "ai:visibility:shadow", IECore.BoolData( False ) )
 		self.assertEqual( r.getAttribute( "ai:visibility:shadow" ), IECore.BoolData( False ) )
 		
+	def __displacementRender( self, doDisplacement ) :
+		
+		r = IECoreArnold.Renderer()
+		
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		
+			r.setAttribute( "ai:polymesh:subdiv_iterations", IECore.IntData( 5 ) )
+		
+			r.shader( "surface", "utility", { "color_mode" : IECore.StringData( "ng" ), "shade_mode" : IECore.StringData( "flat" ) } )	
+			if doDisplacement :
+				r.shader( "displacement", "noise", {} )
+			
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			mesh.interpolation = "catmullClark"
+			mesh.render( r )
+
+		return IECore.ImageDisplayDriver.removeStoredImage( "test" )
+	
+	def testDisplacementShader( self ) :
+			
+		undisplaced1 = self.__displacementRender( doDisplacement = False )
+		undisplaced2 = self.__displacementRender( doDisplacement = False )
+		
+		displaced1 = self.__displacementRender( doDisplacement = True )
+		displaced2 = self.__displacementRender( doDisplacement = True )			
+
+		self.assertEqual( IECore.ImageDiffOp()( imageA=undisplaced1, imageB=undisplaced2, maxError=0.001 ), IECore.BoolData( False ) )
+		self.assertEqual( IECore.ImageDiffOp()( imageA=displaced1, imageB=displaced2, maxError=0.001 ), IECore.BoolData( False ) )
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA=displaced1, imageB=undisplaced1, maxError=0.1 ), IECore.BoolData( True ) )
+	
+	def __allNodes( self, type = arnold.AI_NODE_ALL ) :
+	
+		result = []
+		i = arnold.AiUniverseGetNodeIterator( type )
+		while not arnold.AiNodeIteratorFinished( i ) :
+			result.append( arnold.AiNodeIteratorGetNext( i ) )
+	
+		return result
+		
+	def testShapeAttributes( self ) :
+		
+		r = IECoreArnold.Renderer()
+		
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		
+			r.setAttribute( "ai:polymesh:subdiv_iterations", IECore.IntData( 10 ) )
+			
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			mesh.render( r )
+			
+			shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
+
+			self.assertEqual( len( shapes ), 1 )
+			self.assertEqual( arnold.AiNodeGetInt( shapes[0], "subdiv_iterations" ), 10 )
+						
 	def tearDown( self ) :
 			
 		for f in [

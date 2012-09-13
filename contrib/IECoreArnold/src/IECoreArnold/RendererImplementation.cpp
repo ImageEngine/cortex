@@ -64,6 +64,7 @@ using namespace boost;
 RendererImplementation::AttributeState::AttributeState()
 {
 	surfaceShader = AiNode( "utility" );
+	displacementShader = 0;
 	attributes = new CompoundData;
 	attributes->writable()["ai:visibility:camera"] = new BoolData( true );
 	attributes->writable()["ai:visibility:shadow"] = new BoolData( true );
@@ -76,6 +77,7 @@ RendererImplementation::AttributeState::AttributeState()
 RendererImplementation::AttributeState::AttributeState( const AttributeState &other )
 {
 	surfaceShader = other.surfaceShader;
+	displacementShader = other.displacementShader;
 	attributes = other.attributes->copy();
 }
 				
@@ -386,7 +388,7 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getAttribute( const s
 
 void IECoreArnold::RendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	if( type=="surface" || type=="ai:surface" )
+	if( type=="surface" || type=="ai:surface" || type=="displacement" || type=="ai:displacement" )
 	{
 		AtNode *s = 0;
 		if( 0 == name.compare( 0, 10, "reference:" ) )
@@ -409,8 +411,15 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 			ToArnoldConverter::setParameters( s, parameters );
 			addNode( s );
 		}
-			
-		m_attributeStack.top().surfaceShader = s;
+		
+		if( type=="surface" || type == "ai:surface" )
+		{
+			m_attributeStack.top().surfaceShader = s;
+		}
+		else
+		{
+			m_attributeStack.top().displacementShader = s;
+		}
 	}
 	else
 	{
@@ -673,7 +682,27 @@ void IECoreArnold::RendererImplementation::addShape( AtNode *shape )
 {
 	applyTransformToNode( shape );
 	applyVisibilityToNode( shape );	
+	
 	AiNodeSetPtr( shape, "shader", m_attributeStack.top().surfaceShader );
+		
+	if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( shape ), "disp_map" ) )
+	{
+		if( m_attributeStack.top().displacementShader )
+		{
+			AiNodeSetPtr( shape, "disp_map", m_attributeStack.top().displacementShader );
+		}
+	}
+	
+	std::string attributePrefix = std::string( "ai:" ) + AiNodeEntryGetName( AiNodeGetNodeEntry( shape ) ) + ":";
+	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
+	for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
+	{
+		if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
+		{
+			ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second );
+		}
+	}
+	
 	addNode( shape );
 }
 

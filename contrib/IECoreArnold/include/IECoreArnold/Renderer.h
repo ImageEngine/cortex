@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -96,11 +97,15 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ai:visibility:refracted" BoolData( true )</b>
 		/// \li <b>"ai:visibility:diffuse" BoolData( true )</b>
 		/// \li <b>"ai:visibility:glossy" BoolData( true )</b>
+		/// \li <b>"ai:*:*" Data</b><br>
+		/// Mapped to shape node parameters, such that "ai:nodeType:parameterName"
+		/// entries will set a parameter called parameterName on all shapes of type
+		/// nodeType.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
-		/// Supports types "surface" and "ai:surface". In addition to loading shaders by name, names
-		/// of the form "reference:nodeName" will reference an already existing Arnold shader node
-		/// of the specified name.
+		/// Supports types "surface", "ai:surface", "displacement" and "ai:displacement".
+		/// In addition to loading shaders by name, names of the form "reference:nodeName"
+		/// will reference an already existing Arnold shader node of the specified name.
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
 		virtual void illuminate( const std::string &lightHandle, bool on );

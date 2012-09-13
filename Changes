@@ -23,6 +23,10 @@ Improvements :
 
 * The MtoA procedural translator now automatically outputs any shading groups which are connected as inputs to the procedural in some way (connected to a parameter for instance). This can be useful to allow the procedural to assign maya shaders to the objects it generates, even though those shaders may not be assigned to anything in the Maya scene.
 
+* IECoreArnold::Renderer::shader() now supports shaders of type "displacement" and "ai:displacement", for specifying the disp_map parameter of polymesh and nurbs shapes.
+
+* IECoreArnold::Renderer::setAttribute() now supports attributes of the form ai:nodeType:parameterName for specifying parameter values for shape nodes.
+
 Additions :
 
 * Added a test case for ColorSpaceTransformOp that to test color space conversion on images that have been premulted with an alpha. The test will fail due to the current

@@ -171,6 +171,7 @@ class RendererImplementation : public IECore::Renderer
 				AttributeState( const AttributeState &other );
 		
 				AtNode *surfaceShader;
+				AtNode *displacementShader;
 				IECore::CompoundDataPtr attributes;
 		
 		};
