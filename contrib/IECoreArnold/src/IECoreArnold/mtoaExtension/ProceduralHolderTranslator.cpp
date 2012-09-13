@@ -39,6 +39,7 @@
 #include "maya/MFnDagNode.h"
 #include "maya/MBoundingBox.h"
 #include "maya/MPlugArray.h"
+#include "maya/MItDependencyGraph.h"
 
 #include "extension/Extension.h"
 #include "translators/shape/ShapeTranslator.h"
@@ -89,6 +90,13 @@ class ProceduralHolderTranslator : public CShapeTranslator
 			{
 				AiNodeSetBool( node, "opaque", plug.asBool() );
 			}
+			
+			// export any shading groups which look like they may be connected
+			// to procedural parameters. this ensures that maya shaders the procedural 
+			// will expect to find at rendertime will be exported to the ass file
+			// (they otherwise might not be if they're not assigned to any objects).
+			
+			exportShadingGroupInputs();
 			
 			// now set the procedural-specific parameters
 			
@@ -218,6 +226,20 @@ class ProceduralHolderTranslator : public CShapeTranslator
 			else
 			{
 				return 0;
+			}
+		}
+		
+		void exportShadingGroupInputs()
+		{
+			MObject proceduralNode = m_dagPath.node();
+			MItDependencyGraph itDG( proceduralNode, MFn::kShadingEngine, MItDependencyGraph::kUpstream );
+			while( !itDG.isDone() )
+			{
+				MObject node = itDG.currentItem();
+				MFnDependencyNode fnNode( node );
+				MPlug plug = fnNode.findPlug( "dsm" );
+				ExportNode( plug );
+				itDG.next();
 			}
 		}
 
