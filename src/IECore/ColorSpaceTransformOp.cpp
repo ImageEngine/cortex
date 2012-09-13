@@ -408,6 +408,12 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitive * image, const 
 		ImagePrimitivePtr result = 0;
 		if ( currentConversion->isInstanceOf( ChannelOpTypeId )	)
 		{
+			// TODO: The channel Op doesn't handle any unpremultiplication of the colour channels.
+			// Therefore the resulting colour transformation of any ChannelOpType that has been
+			// premultiplied will be wrong.
+			// This could be fixed here by applying an unpremult before and a premult after or on
+			// a more fundemental level inside ChannelOp. Either way it will need some discussion
+			// beforehand...
 			ChannelOpPtr op = assertedStaticCast< ChannelOp >( currentConversion );
 			op->channelNamesParameter()->setTypedValue( channelNames );
 			result = runTimeCast< ImagePrimitive >( op->operate() );

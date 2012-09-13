@@ -27,11 +27,6 @@ Improvements :
 
 * IECoreArnold::Renderer::setAttribute() now supports attributes of the form ai:nodeType:parameterName for specifying parameter values for shape nodes.
 
-Additions :
-
-* Added a test case for ColorSpaceTransformOp that to test color space conversion on images that have been premulted with an alpha. The test will fail due to the current
-  implementation ignoring whether the image is premulted or not. This differs to such nodes as the CubeColorTransformOp that has parameters to unpremult the image first...
-
 Bug Fixes :
 
 * Fixed bug which prevented the spline editor window for spline parameters in Maya being opened more than once.
