@@ -70,10 +70,15 @@ class SplineParameterUI( ParameterUI ) :
 
 	def replace( self, node, parameter ) :
 
+		if not parameter.isSame( self.parameter ) :
+			if self.__editWindow :
+				maya.cmds.deleteUI( self.__editWindow, window=True )
+				self.__editWindow = None
+
 		ParameterUI.replace( self, node, parameter )
+		
 		maya.cmds.gradientControl( self.__gradientControl, edit=True, attribute=self.plugName() )
 		maya.cmds.button( self.__button, edit=True, command=self.__openEditWindow )
-		self.__editWindow = None
 
 	## Returns True if we're a color ramp and False if we're a greyscale curve.
 	def __colored( self ) :
