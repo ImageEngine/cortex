@@ -70,6 +70,26 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 		)
 		self.failIf( diffResult.value )
 		
+	def testPremultConversion( self ) :
+		# Test the colourspace conversion of an image that has been premultipled with an alpha.
+		# The desired behaviour is to unpremult the image, apply the transform and premult it.
+		op = ColorSpaceTransformOp()
+		result = op(
+			inputColorSpace = "linear",
+			outputColorSpace = "srgb",
+
+			input = Reader.create( "test/IECore/data/exrFiles/checker2Premult.exr" ).read()
+		)
+		
+		# Result verified by eye
+		diff = ImageDiffOp()
+		diffResult = diff(
+			imageA = result,
+			imageB = Reader.create( "test/IECore/data/exrFiles/checker2PremultSRGB.exr" ).read(),
+			maxError = 0.0001
+		)
+		self.failIf( diffResult.value )
+		
 	def testLinearToPanalog( self ):
 		op = ColorSpaceTransformOp()
 		result = op(
