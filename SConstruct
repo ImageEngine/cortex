@@ -2762,7 +2762,7 @@ if doConfigure and haveMaya and haveArnold :
 		
 		mtoaEnv.Append( LIBS = [ "mtoa_api" ] )
 
-		mtoaExtension = mtoaEnv.SharedLibrary( "src/IECoreArnold/mtoaExtension/" + os.path.basename( mtoaEnv.subst( "$INSTALL_MTOAEXTENSION_NAME" ) ), glob.glob( "src/IECoreArnold/mtoaExtension/*.cpp" ) )
+		mtoaExtension = mtoaEnv.SharedLibrary( "contrib/IECoreArnold/src/IECoreArnold/mtoaExtension/" + os.path.basename( mtoaEnv.subst( "$INSTALL_MTOAEXTENSION_NAME" ) ), glob.glob( "contrib/IECoreArnold/src/IECoreArnold/mtoaExtension/*.cpp" ) )
 		mtoaExtensionInstall = mtoaEnv.Install( os.path.dirname( mtoaEnv.subst( "$INSTALL_MTOAEXTENSION_NAME" ) ), mtoaExtension )
 		mtoaEnv.NoCache( mtoaExtensionInstall )
 		mtoaEnv.AddPostAction( mtoaExtensionInstall, lambda target, source, env : makeSymLinks( mtoaEnv, mtoaEnv["INSTALL_MTOAEXTENSION_NAME"] ) )
