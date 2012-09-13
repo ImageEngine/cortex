@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +33,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/ScopedGILLock.h"
+
 #include "maya/MFnDagNode.h"
 #include "maya/MBoundingBox.h"
 #include "maya/MPlugArray.h"
@@ -40,9 +44,6 @@
 #include "translators/shape/ShapeTranslator.h"
 
 #include "IECore/CompoundParameter.h"
-
-#include "IECorePython/ScopedGILLock.h"
-#include "IECorePython/IECoreBinding.h"
 
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/PythonCmd.h"
@@ -63,7 +64,11 @@ class ProceduralHolderTranslator : public CShapeTranslator
 			
 			ExportMatrix( node, 0 );
 			
-			AiNodeSetPtr( node, "shader", arnoldShader() );
+			AtNode *shader = arnoldShader();
+			if( shader )
+			{
+				AiNodeSetPtr( node, "shader", shader );
+			}
 			
 			AiNodeSetInt( node, "visibility", ComputeVisibility() );
 			
@@ -174,16 +179,46 @@ class ProceduralHolderTranslator : public CShapeTranslator
 	
 	protected :
 	
-		/// Returns the arnold shader assigned to the procedural. This duplicates
-		/// code in GeometryTranslator.h, but there's not much can be done about that
-		/// since the GeometryTranslator isn't part of the MtoA public API.
+		/// Returns the arnold shader to assign to the procedural.
 		AtNode *arnoldShader()
-		{
-
-                        unsigned instNumber = m_dagPath.isInstanced() ? m_dagPath.instanceNumber() : 0;
-                        MPlug shadingGroupPlug = GetNodeShadingGroup(m_dagPath.node(), instNumber);
-                        return ExportNode( shadingGroupPlug );
+		{	
+			bool overrideShaders = false;
+			MPlug plug = FindMayaObjectPlug( "overrideProceduralShaders" );
+			if( !plug.isNull() )
+			{
+				// if we've been told explicitly not to override the shaders
+				// in the procedurals, then early out.
+				overrideShaders = plug.asBool();
+				if( !overrideShaders )
+				{
+					return 0;
+				}
+			}
 			
+			unsigned instNumber = m_dagPath.isInstanced() ? m_dagPath.instanceNumber() : 0;
+			MPlug shadingGroupPlug = GetNodeShadingGroup(m_dagPath.node(), instNumber);
+			
+			if( !overrideShaders )
+			{
+				// if we weren't explicitly told to override the shaders, then
+				// decide whether to or not based on whether a non-default
+				// shader has been applied to the shape by the user.
+				MObject shadingGroupNode = shadingGroupPlug.node();
+				MFnDependencyNode fnShadingGroupNode( shadingGroupNode );
+				if( fnShadingGroupNode.name() != "initialShadingGroup" )
+				{
+					overrideShaders = true;
+				}
+			}
+			
+			if( overrideShaders )
+			{
+				return ExportNode( shadingGroupPlug );
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
 };

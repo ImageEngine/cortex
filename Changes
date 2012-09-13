@@ -19,6 +19,8 @@ Improvements :
 
 * Implemented automatic instancing of primitives for the IECoreGL::Renderer - when the same primitive is rendered repeatedly a previously converted GL primitive will be reused rather than performing another conversion. This can yield significant time and memory savings. 
 
+* The MtoA procedural translator now supports an attribute called "overrideProceduralShaders" to determine whether or not to use the assigned Maya shader to override any shaders the procedural may apply internally. In the absence of this attribute, only non-default shaders will be applied as overrides.
+
 Additions :
 
 * Added a test case for ColorSpaceTransformOp that to test color space conversion on images that have been premulted with an alpha. The test will fail due to the current
