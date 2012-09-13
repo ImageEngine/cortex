@@ -1,3 +1,4 @@
+
 Improvements :
 
 * Changed the ClassVectorParameterUI Float and Double parameter's precision to 4 (from 2).
@@ -17,6 +18,11 @@ Improvements :
 * Added an IECoreGL::CachedConverter class, which performs conversion from IECore types to IECoreGL types, maintaining an LRUCache of recent conversions.
 
 * Implemented automatic instancing of primitives for the IECoreGL::Renderer - when the same primitive is rendered repeatedly a previously converted GL primitive will be reused rather than performing another conversion. This can yield significant time and memory savings. 
+
+Additions :
+
+* Added a test case for ColorSpaceTransformOp that to test color space conversion on images that have been premulted with an alpha. The test will fail due to the current
+  implementation ignoring whether the image is premulted or not. This differs to such nodes as the CubeColorTransformOp that has parameters to unpremult the image first...
 
 7.6.0 :
 
