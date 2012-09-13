@@ -40,6 +40,7 @@
 #include "maya/MBoundingBox.h"
 #include "maya/MPlugArray.h"
 #include "maya/MItDependencyGraph.h"
+#include "maya/MIteratorType.h"
 
 #include "extension/Extension.h"
 #include "translators/shape/ShapeTranslator.h"
@@ -91,12 +92,12 @@ class ProceduralHolderTranslator : public CShapeTranslator
 				AiNodeSetBool( node, "opaque", plug.asBool() );
 			}
 			
-			// export any shading groups which look like they may be connected
-			// to procedural parameters. this ensures that maya shaders the procedural 
-			// will expect to find at rendertime will be exported to the ass file
-			// (they otherwise might not be if they're not assigned to any objects).
+			// export any shading groups or displacement shaders which look like they
+			// may be connected to procedural parameters. this ensures that maya shaders
+			// the procedural will expect to find at rendertime will be exported to the
+			// ass file (they otherwise might not be if they're not assigned to any objects).
 			
-			exportShadingGroupInputs();
+			exportShadingInputs();
 			
 			// now set the procedural-specific parameters
 			
@@ -229,15 +230,31 @@ class ProceduralHolderTranslator : public CShapeTranslator
 			}
 		}
 		
-		void exportShadingGroupInputs()
+		void exportShadingInputs()
 		{
 			MObject proceduralNode = m_dagPath.node();
-			MItDependencyGraph itDG( proceduralNode, MFn::kShadingEngine, MItDependencyGraph::kUpstream );
+			MPlug nullPlug;
+			
+			MIteratorType filter;
+			MIntArray filterTypes;
+			filterTypes.append( MFn::kShadingEngine );
+			filterTypes.append( MFn::kDisplacementShader );			
+			filter.setFilterList( filterTypes );
+			
+			MItDependencyGraph itDG( proceduralNode, nullPlug, filter, MItDependencyGraph::kUpstream );
 			while( !itDG.isDone() )
 			{
 				MObject node = itDG.currentItem();
 				MFnDependencyNode fnNode( node );
-				MPlug plug = fnNode.findPlug( "dsm" );
+				MPlug plug;
+				if( fnNode.typeName() == "displacementShader" )
+				{
+					plug = fnNode.findPlug( "displacement" );
+				}
+				else
+				{
+					plug = fnNode.findPlug( "dsm" );
+				}
 				ExportNode( plug );
 				itDG.next();
 			}
