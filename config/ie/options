@@ -200,9 +200,10 @@ OPENEXR_LIB_SUFFIX = "-" + openEXRVersion
 # find the right libraries based on compiler and platform
 LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
 if targetApp :
-	## \todo This is very nuke specific. Perhaps we should have a registry option to
-	# say what paths are required by what app?
-	LIBPATH = targetAppReg["location"] + ":" + LIBPATH
+	## \todo: the final or in this statement is for Nuke. Remove once the Nuke registry has been updated to use libPaths
+	libPaths = [ os.path.join( targetAppReg["location"], x ) for x in targetAppReg.get( "libPaths", [] ) ] or [ targetAppReg["location"] ]
+	libPaths.append( LIBPATH )
+	LIBPATH = ":".join( libPaths )
 
 # ignore python-config stuff and specify it all explicitly ourselves
 pythonReg = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
@@ -291,7 +292,11 @@ if targetApp=="houdini" :
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-		
+	# Houdini currently uses an OpenEXR version that we can't install centrally
+	OPENEXR_INCLUDE_PATH = os.path.join( houdiniReg['location'], houdiniReg['includes'][0] )
+	OPENEXR_LIB_SUFFIX = ""
+	PNG_INCLUDE_PATH = OPENEXR_INCLUDE_PATH
+	
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = '-DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -c  -DGCC4 -DGCC3 -Wno-deprecated -Wall -W -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wno-uninitialized -Wunused -Wno-unused-parameter -Wno-strict-aliasing -O2 -DMAKING_DSO'
 	INSTALL_HOUDINILIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
