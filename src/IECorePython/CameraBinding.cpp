@@ -66,7 +66,7 @@ void bindCamera()
 		.def( "getName", &Camera::getName, return_value_policy<copy_const_reference>() )
 		.def( "setTransform", &Camera::setTransform )
 		.def( "getTransform", (TransformPtr (Camera::*)())&Camera::getTransform )
-		.def( "parameters", &Camera::parametersData )
+		.def( "parameters", (CompoundDataPtr (Camera::*)())&Camera::parametersData )
 		.def( "addStandardParameters", &Camera::addStandardParameters )
 	;
 }

@@ -198,6 +198,11 @@ CompoundDataPtr Camera::parametersData()
 	return m_parameters;
 }
 
+ConstCompoundDataPtr Camera::parametersData() const
+{
+	return m_parameters;
+}
+
 void Camera::addStandardParameters()
 {
 	// resolution
