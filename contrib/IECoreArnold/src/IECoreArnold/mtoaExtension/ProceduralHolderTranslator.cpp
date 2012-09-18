@@ -57,10 +57,60 @@ class ProceduralHolderTranslator : public CShapeTranslator
 	
 		virtual AtNode *CreateArnoldNodes()
 		{
+                  m_isMasterDag =  IsMasterInstance(m_masterDag);
+
+                  if (m_isMasterDag)
+                  {
+
 			return AddArnoldNode( "procedural" );
+                  }
+                  else
+                  {
+                        return AddArnoldNode( "ginstance" );
+                  }
 		}
 		
+
 		virtual void Export( AtNode *node )
+                {
+                  const char* nodeType = AiNodeEntryGetName(AiNodeGetNodeEntry(node));
+                  if (strcmp(nodeType, "ginstance") == 0)
+                  {
+                     ExportInstance(node, m_masterDag);
+                  }
+                  else
+                  {
+                     ExportProcedural(node);
+                  }
+                }
+
+                virtual AtNode* ExportInstance(AtNode *instance, const MDagPath& masterInstance)
+                {
+                   AtNode* masterNode = AiNodeLookUpByName(masterInstance.partialPathName().asChar());
+
+
+                   int instanceNum = m_dagPath.instanceNumber();
+
+                   if ( instanceNum > 0 )
+                     {
+                       AiNodeSetStr(instance, "name", m_dagPath.partialPathName().asChar());
+
+                       ExportMatrix(instance, 0);
+
+                       AiNodeSetPtr(instance, "node", masterNode);
+                       AiNodeSetBool(instance, "inherit_xform", false);
+                       int visibility = AiNodeGetInt(masterNode, "visibility");
+                       AiNodeSetInt(instance, "visibility", visibility);
+
+                       AiNodeSetPtr( instance, "shader", arnoldShader() );
+
+                       // Export light linking per instance
+                       ExportLightLinking(instance);
+                     }
+                   return instance;
+                }
+
+		virtual void ExportProcedural( AtNode *node )
 		{
 			// do basic node export
 			
@@ -259,6 +309,11 @@ class ProceduralHolderTranslator : public CShapeTranslator
 				itDG.next();
 			}
 		}
+
+
+        protected :
+                bool m_isMasterDag;
+                MDagPath m_masterDag;
 
 };
 
