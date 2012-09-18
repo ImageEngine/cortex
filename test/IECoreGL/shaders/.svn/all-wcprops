@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/3218/trunk/test/IECoreGL/shaders
+END
+image.frag
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/3218/trunk/test/IECoreGL/shaders/image.frag
+END
+failWithoutPreprocessing.frag
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/3218/trunk/test/IECoreGL/shaders/failWithoutPreprocessing.frag
+END
+grey.frag
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/3218/trunk/test/IECoreGL/shaders/grey.frag
+END
+rgbColor.frag
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/3218/trunk/test/IECoreGL/shaders/rgbColor.frag
+END
+color.frag
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/3218/trunk/test/IECoreGL/shaders/color.frag
+END

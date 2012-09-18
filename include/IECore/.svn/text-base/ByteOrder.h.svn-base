@@ -1,0 +1,200 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#ifndef IE_CORE_BYTEORDER_H
+#define IE_CORE_BYTEORDER_H
+
+#include <stdint.h>
+
+#include "boost/static_assert.hpp"
+
+#include "OpenEXR/ImfInt64.h"
+
+namespace IECore
+{
+
+#if defined(__PPC__) || defined(__ppc__) || defined(__POWERPC__) || defined(__powerpc__)
+	#define IE_CORE_BIG_ENDIAN
+#else
+	#define IE_CORE_LITTLE_ENDIAN
+#endif
+
+/// Returns true if running on a little endian
+/// platform.
+inline bool littleEndian()
+{
+#ifdef IE_CORE_LITTLE_ENDIAN
+	return true;
+#else
+	return false;
+#endif
+}
+
+/// Returns true if running on a big endian
+/// platform.
+inline bool bigEndian()
+{
+#ifdef IE_CORE_BIG_ENDIAN
+	return true;
+#else
+	return false;
+#endif
+}
+
+/// Returns a copy of x with reversed byte order.
+template<typename T>
+inline T reverseBytes( const T &x )
+{
+	// needs specialising for each type
+	BOOST_STATIC_ASSERT(sizeof(T)==0);
+}
+
+template<>
+inline char reverseBytes<char>( const char &x )
+{
+	return x;
+}
+
+template<>
+inline unsigned char reverseBytes<unsigned char>( const unsigned char &x )
+{
+	return x;
+}
+
+template<>
+inline int16_t reverseBytes<int16_t>( const int16_t &x )
+{
+	return 	((x & 255) << 8) |
+			((x >> 8) & 255 );
+}
+
+template<>
+inline uint16_t reverseBytes<uint16_t>( const uint16_t &x )
+{
+	return 	((x & 255) << 8) |
+			((x >> 8) & 255 );
+}
+
+template<>
+inline int32_t reverseBytes<int32_t>( const int32_t &x )
+{
+	return 	((x & 255) << 24) |
+			(((x >> 8) & 255 ) << 16 ) |
+			(((x >> 16) & 255 ) << 8 ) |
+			((x >> 24) & 255 );
+}
+
+template<>
+inline uint32_t reverseBytes<uint32_t>( const uint32_t &x )
+{
+	return 	((x & 255) << 24) |
+			(((x >> 8) & 255 ) << 16 ) |
+			(((x >> 16) & 255 ) << 8 ) |
+			((x >> 24) & 255 );
+}
+
+template<>
+inline float reverseBytes<float>( const float &x )
+{
+	BOOST_STATIC_ASSERT( sizeof(uint32_t) == sizeof(float) );
+	union {
+		uint32_t i;
+		float f;
+	} xx;
+	xx.f = x;
+	xx.i = reverseBytes( xx.i );
+	return xx.f;
+}
+
+template<>
+inline Imf::Int64 reverseBytes<Imf::Int64>( const Imf::Int64 &x )
+{
+	return ((x & 255) << 56) |
+			(((x >> 8) & 255) << 48) |
+			(((x >> 16) & 255 ) << 40 ) |
+			(((x >> 24) & 255 ) << 32 ) |
+			(((x >> 32) & 255 ) << 24 ) |
+			(((x >> 40) & 255 ) << 16 ) |
+			(((x >> 48) & 255 ) << 8 ) |
+			((x >> 56) & 255 );
+}
+
+template<>
+inline double reverseBytes<double>( const double &x )
+{
+	BOOST_STATIC_ASSERT( sizeof(Imf::Int64) == sizeof(double) );
+	union {
+		Imf::Int64 i;
+		double d;
+	} xx;
+	xx.d = x;
+	xx.i = 	reverseBytes<Imf::Int64>(xx.i);
+	return xx.d;
+}
+
+/// If running on a big endian platform,
+/// returns a copy of x with reversed bytes,
+/// otherwise returns x unchanged.
+template<typename T>
+inline T asLittleEndian( const T &x )
+{
+	if( bigEndian() )
+	{
+		return reverseBytes( x );
+	}
+	else
+	{
+		return x;
+	}
+}
+
+/// If running on a little endian platform,
+/// returns a copy of x with reversed bytes,
+/// otherwise returns x unchanged.
+template<typename T>
+inline T asBigEndian( const T &x )
+{
+	if( littleEndian() )
+	{
+		return reverseBytes( x );
+	}
+	else
+	{
+		return x;
+	}
+}
+
+}
+
+#endif // IE_CORE_BYTEORDER_H

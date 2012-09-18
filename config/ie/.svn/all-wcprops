@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/4855/trunk/config/ie
+END
+installTruelightOps
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/2945/trunk/config/ie/installTruelightOps
+END
+valgrindSuppressions
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/2001/trunk/config/ie/valgrindSuppressions
+END
+postCoreInstall
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/4202/trunk/config/ie/postCoreInstall
+END
+releaseAll
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/4855/trunk/config/ie/releaseAll
+END
+options
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/4853/trunk/config/ie/options
+END
+postCoreMayaInstall
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/2945/trunk/config/ie/postCoreMayaInstall
+END

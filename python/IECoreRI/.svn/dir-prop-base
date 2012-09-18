@@ -1,0 +1,12 @@
+K 10
+svn:ignore
+V 12
+*.pyc
+*.so
+
+
+K 9
+svn:igore
+V 11
+*.pyc\n*.so
+END

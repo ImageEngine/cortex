@@ -1,0 +1,11 @@
+*~
+*.so
+*.os
+*.o
+*.bak
+.cproject
+.project
+.pydevproject
+.sconf_temp
+.sconsign.dblite
+ 

@@ -1,0 +1,688 @@
+file /disk1/playpen/dev/cortex/SConstruct,line 1004:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ header file boost/version.hpp... 
+scons: Configure: ".sconf_temp/conftest_0.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_0.cpp <-
+  |  |
+  |  |#include "boost/version.hpp"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_0.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_0.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_0.cpp
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library boost_iostreams... 
+scons: Configure: ".sconf_temp/conftest_1.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.cpp <-
+  |  |
+  |  |
+  |  |#include "boost/iostreams/chain.hpp"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_1.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_1.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library Iex... 
+scons: Configure: ".sconf_temp/conftest_2.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_2.cpp <-
+  |  |
+  |  |
+  |  |#include "OpenEXR/ImfInputFile.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_2.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_2.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_2.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_2" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_2 .sconf_temp/conftest_2.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library tbb... 
+scons: Configure: ".sconf_temp/conftest_3.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_3.cpp <-
+  |  |
+  |  |
+  |  |#include "tbb/tbb.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_3.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_3.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_3.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_3" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_3 .sconf_temp/conftest_3.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 1348:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ header file boost/asio.hpp... 
+scons: Configure: ".sconf_temp/conftest_4.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_4.cpp <-
+  |  |
+  |  |#include "boost/asio.hpp"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_4.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_4.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_4.cpp
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library boost_signals... 
+scons: Configure: ".sconf_temp/conftest_5.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_5.cpp <-
+  |  |
+  |  |
+  |  |#include "boost/signal.hpp"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_5.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_5.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_5.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_5" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ header file boost/math/special_functions/factorials.hpp... 
+scons: Configure: ".sconf_temp/conftest_6.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_6.cpp <-
+  |  |
+  |  |#include "boost/math/special_functions/factorials.hpp"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_6.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_6.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_6.cpp
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library tiff... 
+scons: Configure: ".sconf_temp/conftest_7.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_7.cpp <-
+  |  |
+  |  |
+  |  |#include "tiff.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_7.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_7.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_7.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_7" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_7 .sconf_temp/conftest_7.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library jpeg... 
+scons: Configure: ".sconf_temp/conftest_8.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_8.cpp <-
+  |  |
+  |  |
+  |  |#include "stdio.h"
+  |  |#include "jpeglib.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_8.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_8.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_8.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_8" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_8 .sconf_temp/conftest_8.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library png... 
+scons: Configure: ".sconf_temp/conftest_9.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_9.cpp <-
+  |  |
+  |  |
+  |  |#include "stdio.h"
+  |  |#include "png.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_9.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_9.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_9.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_9" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_9 .sconf_temp/conftest_9.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library freetype... 
+scons: Configure: ".sconf_temp/conftest_10.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_10.cpp <-
+  |  |
+  |  |
+  |  |#include "ft2build.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_10.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_10.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 .sconf_temp/conftest_10.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_10" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_10 .sconf_temp/conftest_10.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 1543:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ library 3delight... 
+scons: Configure: ".sconf_temp/conftest_11.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_11.cpp <-
+  |  |
+  |  |
+  |  |#include "ri.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_11.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_11.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_11.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_11" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_11 .sconf_temp/conftest_11.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -l3delight
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library prman... 
+scons: Configure: ".sconf_temp/conftest_12.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_12.cpp <-
+  |  |
+  |  |
+  |  |#include "ri.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_12.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_12.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_12.cpp
+  |
+scons: Configure: Building ".sconf_temp/conftest_12" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_12 .sconf_temp/conftest_12.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -l3delight -lprman
+  |
+scons: Configure: (cached) no
+
+scons: Configure: Checking for C header file pointcloud.h... 
+scons: Configure: ".sconf_temp/conftest_13.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_13.c <-
+  |  |
+  |  |#include <pointcloud.h>
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_13.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_13.o -c -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_13.c
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C function RiObjectBeginV()... 
+scons: Configure: ".sconf_temp/conftest_14.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_14.c <-
+  |  |
+  |  |
+  |  |#include <assert.h>
+  |  |
+  |  |#ifdef __cplusplus
+  |  |extern "C"
+  |  |#endif
+  |  |char RiObjectBeginV();
+  |  |
+  |  |int main() {
+  |  |#if defined (__stub_RiObjectBeginV) || defined (__stub___RiObjectBeginV)
+  |  |  fail fail fail
+  |  |#else
+  |  |  RiObjectBeginV();
+  |  |#endif
+  |  |
+  |  |  return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_14.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_14.o -c -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -DIECORERI_WITH_PTC -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_14.c
+  |
+scons: Configure: ".sconf_temp/conftest_14" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_14 .sconf_temp/conftest_14.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -l3delight -l3delight
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ header file sx.h... 
+scons: Configure: ".sconf_temp/conftest_15.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_15.cpp <-
+  |  |
+  |  |#include "sx.h"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_15.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_15.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -DIECORERI_WITH_PTC -DIECORERI_WITH_OBJECTBEGINV -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_15.cpp
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C function SxGetParameter()... 
+scons: Configure: ".sconf_temp/conftest_16.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_16.c <-
+  |  |
+  |  |
+  |  |#include <assert.h>
+  |  |
+  |  |#ifdef __cplusplus
+  |  |extern "C"
+  |  |#endif
+  |  |char SxGetParameter();
+  |  |
+  |  |int main() {
+  |  |#if defined (__stub_SxGetParameter) || defined (__stub___SxGetParameter)
+  |  |  fail fail fail
+  |  |#else
+  |  |  SxGetParameter();
+  |  |#endif
+  |  |
+  |  |  return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_16.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_16.o -c -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -DIECORERI_WITH_PTC -DIECORERI_WITH_OBJECTBEGINV -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_16.c
+  |
+scons: Configure: ".sconf_temp/conftest_16" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_16 .sconf_temp/conftest_16.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -l3delight -l3delight
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ header file gx.h... 
+scons: Configure: ".sconf_temp/conftest_17.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_17.cpp <-
+  |  |
+  |  |#include "gx.h"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_17.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_17.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -DIECORERI_WITH_PTC -DIECORERI_WITH_OBJECTBEGINV -DIECORERI_WITH_SX -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_17.cpp
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C function GxGetGeometry()... 
+scons: Configure: ".sconf_temp/conftest_18.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_18.c <-
+  |  |
+  |  |
+  |  |#include <assert.h>
+  |  |
+  |  |#ifdef __cplusplus
+  |  |extern "C"
+  |  |#endif
+  |  |char GxGetGeometry();
+  |  |
+  |  |int main() {
+  |  |#if defined (__stub_GxGetGeometry) || defined (__stub___GxGetGeometry)
+  |  |  fail fail fail
+  |  |#else
+  |  |  GxGetGeometry();
+  |  |#endif
+  |  |
+  |  |  return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_18.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_18.o -c -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -DIECORERI_WITH_PTC -DIECORERI_WITH_OBJECTBEGINV -DIECORERI_WITH_SX -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_18.c
+  |
+scons: Configure: ".sconf_temp/conftest_18" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_18 .sconf_temp/conftest_18.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -l3delight -l3delight
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ header file RixDeepTexture.h... 
+scons: Configure: ".sconf_temp/conftest_19.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_19.cpp <-
+  |  |
+  |  |#include "RixDeepTexture.h"
+  |  |
+  |  |
+  |
+scons: Configure: Building ".sconf_temp/conftest_19.o" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_19.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -DIECORERI_WITH_PTC -DIECORERI_WITH_OBJECTBEGINV -DIECORERI_WITH_SX -DIECORERI_WITH_GX -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_19.cpp
+  |
+scons: Configure: (cached) no
+
+scons: Configure: Checking for C++ header file dtex.h... 
+scons: Configure: ".sconf_temp/conftest_20.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_20.cpp <-
+  |  |
+  |  |#include "dtex.h"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_20.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_20.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -DIECORERI_WITH_PTC -DIECORERI_WITH_OBJECTBEGINV -DIECORERI_WITH_SX -DIECORERI_WITH_GX -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/3delight/linux.centos6.x86_64/10.0.47/Linux-x86_64/include .sconf_temp/conftest_20.cpp
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 1758:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ library GLEW... 
+scons: Configure: ".sconf_temp/conftest_21.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_21.cpp <-
+  |  |
+  |  |
+  |  |#include "glew.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_21.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_21.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/glew/linux.centos6.x86_64/1.6.0/include/GL -I/software/glew/linux.centos6.x86_64/1.6.0/include/GL .sconf_temp/conftest_21.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_21" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_21 .sconf_temp/conftest_21.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/glew/linux.centos6.x86_64/1.6.0/lib64 -L/software/glew/linux.centos6.x86_64/1.6.0/lib64 -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -lGLEW
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 1915:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C header file maya/MVectorArray.h... 
+scons: Configure: ".sconf_temp/conftest_22.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_22.c <-
+  |  |
+  |  |#include <maya/MVectorArray.h>
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_22.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_22.o -c -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -D_BOOL -DREQUIRE_IOSTREAM -I/development/software/python/linux.centos6.x86_64/2.6.4/include/python2.6 -DLINUX -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/glew/linux.centos6.x86_64/1.6.0/include/GL -I/software/maya/linux.centos6.x86_64/2012/include .sconf_temp/conftest_22.c
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 2134:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ header file DDImage/Vector3.h... 
+scons: Configure: ".sconf_temp/conftest_23.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_23.cpp <-
+  |  |
+  |  |#include "DDImage/Vector3.h"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_23.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_23.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -I/development/software/python/linux.centos6.x86_64/2.6.4/include/python2.6 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/nuke/linux.centos6.x86_64/6.3v2/include -I/software/glew/linux.centos6.x86_64/1.6.0/include/GL .sconf_temp/conftest_23.cpp
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C++ library DDImage... 
+scons: Configure: ".sconf_temp/conftest_24.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_24.cpp <-
+  |  |
+  |  |
+  |  |#include "DDImage/Vector3.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_24.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_24.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -I/development/software/python/linux.centos6.x86_64/2.6.4/include/python2.6 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/nuke/linux.centos6.x86_64/6.3v2/include -I/software/glew/linux.centos6.x86_64/1.6.0/include/GL .sconf_temp/conftest_24.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_24" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_24 .sconf_temp/conftest_24.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/nuke/linux.centos6.x86_64/6.3v2 -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lGLEW -lDDImage
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 2358:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C header file SOP/SOP_API.h... 
+scons: Configure: ".sconf_temp/conftest_25.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_25.c <-
+  |  |
+  |  |#include <SOP/SOP_API.h>
+  |  |
+  |  |
+  |
+scons: Configure: Building ".sconf_temp/conftest_25.o" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_25.o -c -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -I/development/software/python/linux.centos6.x86_64/2.6.4/include/python2.6 -DLINUX -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/glew/linux.centos6.x86_64/1.6.0/include/GL -INOTHERE/toolkit/include .sconf_temp/conftest_25.c
+  |
+scons: Configure: (cached) no
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 2532:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ library truelight... 
+scons: Configure: ".sconf_temp/conftest_26.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_26.cpp <-
+  |  |
+  |  |
+  |  |#include "truelight.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: Building ".sconf_temp/conftest_26.o" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_26.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/usr/fl/truelight/include .sconf_temp/conftest_26.cpp
+  |
+scons: Configure: (cached) no
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 2637:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ library ai... 
+scons: Configure: ".sconf_temp/conftest_27.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_27.cpp <-
+  |  |
+  |  |
+  |  |#include "ai.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_27.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_27.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/arnold/linux.centos6.x86_64/4.0.8.0/include -Icontrib/IECoreArnold/include .sconf_temp/conftest_27.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_27" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_27 .sconf_temp/conftest_27.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/arnold/linux.centos6.x86_64/4.0.8.0/bin -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -lai
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 2752:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ header file translators/NodeTranslator.h... 
+scons: Configure: ".sconf_temp/conftest_28.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_28.cpp <-
+  |  |
+  |  |#include "translators/NodeTranslator.h"
+  |  |
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_28.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_28.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -D_LINUX -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -D_BOOL -DREQUIRE_IOSTREAM -I/development/software/python/linux.centos6.x86_64/2.6.4/include/python2.6 -DLINUX -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/glew/linux.centos6.x86_64/1.6.0/include/GL -I/software/maya/linux.centos6.x86_64/2012/include -I/disk1/playpen/dev/mtoa/plugins/mtoa -I/software/mtoa/linux.centos6.x86_64/0.19.0.dev/2012/include -I/software/arnold/linux.centos6.x86_64/4.0.8.0/include .sconf_temp/conftest_28.cpp
+  |
+scons: Configure: (cached) yes
+
+
+file /disk1/playpen/dev/cortex/SConstruct,line 2806:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ library AlembicAbcGeom... 
+scons: Configure: ".sconf_temp/conftest_29.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_29.cpp <-
+  |  |
+  |  |
+  |  |#include "Alembic/AbcGeom/Foundation.h"
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_29.o" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_29.o -c -pipe -Wall -O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS -DIE_CORE_MAJORVERSION=7 -DIE_CORE_MINORVERSION=7 -DIE_CORE_PATCHVERSION=1 -DBOOST_FILESYSTEM_VERSION=2 -DIECORE_WITH_ASIO -DIECORE_WITH_SIGNALS -DIECORE_WITH_BOOSTFACTORIAL -DIECORE_WITH_TIFF -DIECORE_WITH_JPEG -DIECORE_WITH_PNG -DIECORE_WITH_FREETYPE -Iinclude -I/development/software/tbb/linux.centos6.x86_64/3.0.221/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/software/openexr/linux.centos5.x86_64/1.7.0/include/OpenEXR -I/development/software/boost/linux.centos5.x86_64/1.47/include -I/usr/local/include -I/usr/local/include -I/usr/local/include -I/usr/include/freetype2 -I/software/alembic/linux.centos6.x86_64/1.0.5/include -Icontrib/IECoreAlembic/include -I/software/hdf5/linux.centos6.x86_64/1.8.7/include .sconf_temp/conftest_29.cpp
+  |
+scons: Configure: ".sconf_temp/conftest_29" is up to date.
+scons: Configure: The original builder output was:
+  |/software/wrappers/g++412 -o .sconf_temp/conftest_29 .sconf_temp/conftest_29.o -Llib -L/development/software/tbb/linux.centos6.x86_64/3.0.221/lib -L/development/software/boost/linux.centos5.x86_64/1.47/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/software/openexr/linux.centos5.x86_64/1.7.0/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -L/usr/lib -L/software/alembic/linux.centos6.x86_64/1.0.5/lib -L/software/hdf5/linux.centos6.x86_64/1.8.7/lib -lpthread -lboost_filesystem -lboost_regex -lboost_iostreams -lboost_date_time -lboost_thread -lboost_wave -lboost_system -lboost_iostreams -lIex -ltbb -lHalf -lIex -lImath -lIlmImf -lIlmThread -lz -lboost_signals -ltiff -ljpeg -lpng -lfreetype -lAlembicAbcGeom -lAlembicAbc -lAlembicAbcCoreHDF5 -lAlembicAbcCoreAbstract -lAlembicUtil -lhdf5 -lhdf5_hl -lAlembicAbcGeom
+  |
+scons: Configure: (cached) yes
+
+

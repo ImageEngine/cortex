@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/3849/trunk/glsl/IECoreGL
+END
+Lights.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/3218/trunk/glsl/IECoreGL/Lights.h
+END
+Specular.h
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/3849/trunk/glsl/IECoreGL/Specular.h
+END
+ColorAlgo.h
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/3218/trunk/glsl/IECoreGL/ColorAlgo.h
+END
+Diffuse.h
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/3849/trunk/glsl/IECoreGL/Diffuse.h
+END
+Light.h
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/3218/trunk/glsl/IECoreGL/Light.h
+END
+FilterAlgo.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/3218/trunk/glsl/IECoreGL/FilterAlgo.h
+END
