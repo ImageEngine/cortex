@@ -1,3 +1,7 @@
+Bug Fixes :
+
+* Fixed Bug in MtoA Translator that was inialising shaders on instances when the aronld node was Null
+
 7.7.0 :
 
 Improvements :
