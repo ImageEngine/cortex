@@ -66,6 +66,7 @@ class Camera : public PreWorldRenderable
 		/// function gives more direct access to the contents of the CompoundData
 		/// (it calls readable() or writable() for you).
 		CompoundDataPtr parametersData();
+		ConstCompoundDataPtr parametersData() const;
 		/// Adds the standard parameters documented as part of Renderer::camera(),
 		/// giving them the appropriate default values as documented there. Note that
 		/// this function will only modify existing parameters if they are of the incorrect

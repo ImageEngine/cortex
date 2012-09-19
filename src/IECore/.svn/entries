@@ -1,15 +1,15 @@
 10
 
 dir
-4855
+4862
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECore
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-13T17:35:17.213752Z
-4844
-luke.imageengine@gmail.com
+2012-09-18T20:06:00.689114Z
+4858
+thehaddonyoof
 has-props
 
 
@@ -4622,10 +4622,10 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-5ef32352858838058f465ce7120a6d2b
-2011-12-20T13:52:34.308995Z
-4498
+2012-09-19T08:39:08.428745Z
+119a09925737051eb97b62863fb8626f
+2012-09-18T20:06:00.689114Z
+4858
 thehaddonyoof
 
 
@@ -4648,7 +4648,7 @@ thehaddonyoof
 
 
 
-8848
+8927
 
 TimeDurationData.cpp
 file

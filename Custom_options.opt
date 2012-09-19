@@ -20,7 +20,7 @@ TBB_INCLUDE_PATH='/development/software/tbb/linux.centos6.x86_64/3.0.221/include
 MAYA_ROOT=os.environ['MAYA_LOCATION']
 NUKE_ROOT='/software/nuke/linux.centos6.x86_64/%s/' % os.environ['NUKE_VERSION']
 RMAN_ROOT=os.environ['DELIGHT']
-#HOUDINI_ROOT='/software/houdini/linux.centos6.x86_64/%s/' % (os.environ['HOUDINI_VERSION'])
+#HOUDINI_ROOT='/software/houdini/linux.centos6.x86_64/%s/' % (os.environ['HOUDINI_VERSION']) # not working ATM due to Boost issues (different versions .. etc)
 HOUDINI_ROOT='NOTHERE'
 ARNOLD_ROOT='/software/arnold/linux.centos6.x86_64/%s/' % (os.environ['ARNOLD_VERSION'])
 print "ARNOLD_ROOT",ARNOLD_ROOT

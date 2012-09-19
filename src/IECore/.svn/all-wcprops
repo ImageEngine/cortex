@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 35
-/svn/!svn/ver/4844/trunk/src/IECore
+/svn/!svn/ver/4858/trunk/src/IECore
 END
 ScopedTIFFErrorHandler.cpp
 K 25
@@ -9,17 +9,17 @@ svn:wc:ra_dav:version-url
 V 62
 /svn/!svn/ver/3915/trunk/src/IECore/ScopedTIFFErrorHandler.cpp
 END
-CurvesPrimitive.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/4498/trunk/src/IECore/CurvesPrimitive.cpp
-END
 SimpleTypedParameter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/4523/trunk/src/IECore/SimpleTypedParameter.cpp
+END
+CurvesPrimitive.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/4498/trunk/src/IECore/CurvesPrimitive.cpp
 END
 UVDistortOp.cpp
 K 25
@@ -45,17 +45,17 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/3086/trunk/src/IECore/ObjectParameter.cpp
 END
-DeepImageConverter.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 58
-/svn/!svn/ver/4416/trunk/src/IECore/DeepImageConverter.cpp
-END
 CubeColorLookupParameter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 64
 /svn/!svn/ver/2340/trunk/src/IECore/CubeColorLookupParameter.cpp
+END
+DeepImageConverter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/4416/trunk/src/IECore/DeepImageConverter.cpp
 END
 DeepImageWriter.cpp
 K 25
@@ -63,17 +63,17 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4414/trunk/src/IECore/DeepImageWriter.cpp
 END
-MixSmoothSkinningWeightsOp.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 66
-/svn/!svn/ver/3725/trunk/src/IECore/MixSmoothSkinningWeightsOp.cpp
-END
 PrimitiveImplicitSurfaceFunction.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 72
 /svn/!svn/ver/2466/trunk/src/IECore/PrimitiveImplicitSurfaceFunction.cpp
+END
+MixSmoothSkinningWeightsOp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/3725/trunk/src/IECore/MixSmoothSkinningWeightsOp.cpp
 END
 TransformationMatrixData.cpp
 K 25
@@ -201,17 +201,17 @@ svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/4213/trunk/src/IECore/DisplayDriverServerHeader.cpp
 END
-MessageHandler.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/3313/trunk/src/IECore/MessageHandler.cpp
-END
 SearchPath.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/3012/trunk/src/IECore/SearchPath.cpp
+END
+MessageHandler.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/3313/trunk/src/IECore/MessageHandler.cpp
 END
 CapturingRenderer.cpp
 K 25
@@ -255,17 +255,17 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4407/trunk/src/IECore/DeepImageReader.cpp
 END
-IECore.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 46
-/svn/!svn/ver/4520/trunk/src/IECore/IECore.cpp
-END
 Font.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 44
 /svn/!svn/ver/2466/trunk/src/IECore/Font.cpp
+END
+IECore.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/4520/trunk/src/IECore/IECore.cpp
 END
 PointVelocityDisplaceOp.cpp
 K 25
@@ -285,17 +285,17 @@ svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/3086/trunk/src/IECore/FileNameParameter.cpp
 END
-BGEOParticleReader.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 58
-/svn/!svn/ver/3802/trunk/src/IECore/BGEOParticleReader.cpp
-END
 YUVImageWriter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/3016/trunk/src/IECore/YUVImageWriter.cpp
+END
+BGEOParticleReader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/3802/trunk/src/IECore/BGEOParticleReader.cpp
 END
 MPlayDisplayDriver.cpp
 K 25
@@ -327,11 +327,11 @@ svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/2985/trunk/src/IECore/RefCounted.cpp
 END
-TimePeriod.cpp
+TGAImageReader.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 50
-/svn/!svn/ver/2108/trunk/src/IECore/TimePeriod.cpp
+V 54
+/svn/!svn/ver/2976/trunk/src/IECore/TGAImageReader.cpp
 END
 NullObject.cpp
 K 25
@@ -339,11 +339,11 @@ svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/4498/trunk/src/IECore/NullObject.cpp
 END
-TGAImageReader.cpp
+TimePeriod.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/2976/trunk/src/IECore/TGAImageReader.cpp
+V 50
+/svn/!svn/ver/2108/trunk/src/IECore/TimePeriod.cpp
 END
 Renderable.cpp
 K 25
@@ -765,23 +765,17 @@ svn:wc:ra_dav:version-url
 V 53
 /svn/!svn/ver/3016/trunk/src/IECore/EnvMapSampler.cpp
 END
-OStreamMessageHandler.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/192/trunk/src/IECore/OStreamMessageHandler.cpp
-END
 TypedPrimitiveOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/4069/trunk/src/IECore/TypedPrimitiveOp.cpp
 END
-ImageWriter.cpp
+OStreamMessageHandler.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 51
-/svn/!svn/ver/3016/trunk/src/IECore/ImageWriter.cpp
+V 60
+/svn/!svn/ver/192/trunk/src/IECore/OStreamMessageHandler.cpp
 END
 CompressSmoothSkinningDataOp.cpp
 K 25
@@ -789,11 +783,11 @@ svn:wc:ra_dav:version-url
 V 68
 /svn/!svn/ver/3725/trunk/src/IECore/CompressSmoothSkinningDataOp.cpp
 END
-ClientDisplayDriver.cpp
+ImageWriter.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 59
-/svn/!svn/ver/4518/trunk/src/IECore/ClientDisplayDriver.cpp
+V 51
+/svn/!svn/ver/3016/trunk/src/IECore/ImageWriter.cpp
 END
 MotionBlock.cpp
 K 25
@@ -801,23 +795,29 @@ svn:wc:ra_dav:version-url
 V 51
 /svn/!svn/ver/4189/trunk/src/IECore/MotionBlock.cpp
 END
+ClientDisplayDriver.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/4518/trunk/src/IECore/ClientDisplayDriver.cpp
+END
 MarschnerParameter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/3575/trunk/src/IECore/MarschnerParameter.cpp
 END
+Camera.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/4858/trunk/src/IECore/Camera.cpp
+END
 ImagePremultiplyOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/3016/trunk/src/IECore/ImagePremultiplyOp.cpp
-END
-Camera.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 46
-/svn/!svn/ver/4498/trunk/src/IECore/Camera.cpp
 END
 TimeDurationData.cpp
 K 25
@@ -843,17 +843,17 @@ svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/2466/trunk/src/IECore/EmptyFrameList.cpp
 END
-Object.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 46
-/svn/!svn/ver/4498/trunk/src/IECore/Object.cpp
-END
 ParameterisedProcedural.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 63
 /svn/!svn/ver/4498/trunk/src/IECore/ParameterisedProcedural.cpp
+END
+Object.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/4498/trunk/src/IECore/Object.cpp
 END
 CubeColorTransformOp.cpp
 K 25
@@ -873,17 +873,17 @@ svn:wc:ra_dav:version-url
 V 52
 /svn/!svn/ver/4498/trunk/src/IECore/CompoundData.cpp
 END
-TypedPrimitiveParameter.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 63
-/svn/!svn/ver/4527/trunk/src/IECore/TypedPrimitiveParameter.cpp
-END
 DeepPixel.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svn/!svn/ver/4400/trunk/src/IECore/DeepPixel.cpp
+END
+TypedPrimitiveParameter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/4527/trunk/src/IECore/TypedPrimitiveParameter.cpp
 END
 MemoryStream.cpp
 K 25
@@ -921,29 +921,29 @@ svn:wc:ra_dav:version-url
 V 61
 /svn/!svn/ver/3108/trunk/src/IECore/FileSequenceParameter.cpp
 END
-PNGImageReader.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/4278/trunk/src/IECore/PNGImageReader.cpp
-END
 LuminanceOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 51
 /svn/!svn/ver/3016/trunk/src/IECore/LuminanceOp.cpp
 END
-MeshMergeOp.cpp
+PNGImageReader.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 51
-/svn/!svn/ver/4310/trunk/src/IECore/MeshMergeOp.cpp
+V 54
+/svn/!svn/ver/4278/trunk/src/IECore/PNGImageReader.cpp
 END
 CompoundObject.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/4498/trunk/src/IECore/CompoundObject.cpp
+END
+MeshMergeOp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/4310/trunk/src/IECore/MeshMergeOp.cpp
 END
 IndexedIOFilter.cpp
 K 25
@@ -969,17 +969,17 @@ svn:wc:ra_dav:version-url
 V 61
 /svn/!svn/ver/3533/trunk/src/IECore/PointSmoothSkinningOp.cpp
 END
-ImageDisplayDriver.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 58
-/svn/!svn/ver/4069/trunk/src/IECore/ImageDisplayDriver.cpp
-END
 CurveExtrudeOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/3683/trunk/src/IECore/CurveExtrudeOp.cpp
+END
+ImageDisplayDriver.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/4069/trunk/src/IECore/ImageDisplayDriver.cpp
 END
 PointRepulsionOp.cpp
 K 25
@@ -1011,17 +1011,17 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4441/trunk/src/IECore/MemoryIndexedIO.cpp
 END
-SGIImageReader.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/2952/trunk/src/IECore/SGIImageReader.cpp
-END
 Primitive.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svn/!svn/ver/4509/trunk/src/IECore/Primitive.cpp
+END
+SGIImageReader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/2952/trunk/src/IECore/SGIImageReader.cpp
 END
 TransformOp.cpp
 K 25
@@ -1035,29 +1035,29 @@ svn:wc:ra_dav:version-url
 V 59
 /svn/!svn/ver/3086/trunk/src/IECore/PathVectorParameter.cpp
 END
-ToCoreConverter.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/2933/trunk/src/IECore/ToCoreConverter.cpp
-END
 DataCastOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/3898/trunk/src/IECore/DataCastOp.cpp
 END
-ValidatedStringParameter.cpp
+ToCoreConverter.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 64
-/svn/!svn/ver/3086/trunk/src/IECore/ValidatedStringParameter.cpp
+V 55
+/svn/!svn/ver/2933/trunk/src/IECore/ToCoreConverter.cpp
 END
 ColorSpaceTransformOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 61
 /svn/!svn/ver/4844/trunk/src/IECore/ColorSpaceTransformOp.cpp
+END
+ValidatedStringParameter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/3086/trunk/src/IECore/ValidatedStringParameter.cpp
 END
 CompoundMessageHandler.cpp
 K 25
@@ -1077,17 +1077,17 @@ svn:wc:ra_dav:version-url
 V 52
 /svn/!svn/ver/3444/trunk/src/IECore/CachedReader.cpp
 END
-DPXImageWriter.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/4736/trunk/src/IECore/DPXImageWriter.cpp
-END
 TransformationMatrix.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/1057/trunk/src/IECore/TransformationMatrix.cpp
+END
+DPXImageWriter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/4736/trunk/src/IECore/DPXImageWriter.cpp
 END
 DateTimeParameter.cpp
 K 25
@@ -1101,17 +1101,17 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/3683/trunk/src/IECore/MatrixMultiplyOp.cpp
 END
-LinearToRec709Op.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 56
-/svn/!svn/ver/3016/trunk/src/IECore/LinearToRec709Op.cpp
-END
 Renderer.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 48
 /svn/!svn/ver/2354/trunk/src/IECore/Renderer.cpp
+END
+LinearToRec709Op.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/3016/trunk/src/IECore/LinearToRec709Op.cpp
 END
 Interned.cpp
 K 25
@@ -1149,17 +1149,17 @@ svn:wc:ra_dav:version-url
 V 67
 /svn/!svn/ver/3086/trunk/src/IECore/FileSequenceVectorParameter.cpp
 END
-ImagePrimitiveEvaluator.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 63
-/svn/!svn/ver/4218/trunk/src/IECore/ImagePrimitiveEvaluator.cpp
-END
 AddSmoothSkinningInfluencesOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 69
 /svn/!svn/ver/3725/trunk/src/IECore/AddSmoothSkinningInfluencesOp.cpp
+END
+ImagePrimitiveEvaluator.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/4218/trunk/src/IECore/ImagePrimitiveEvaluator.cpp
 END
 PointBoundsOp.cpp
 K 25
@@ -1173,17 +1173,17 @@ svn:wc:ra_dav:version-url
 V 51
 /svn/!svn/ver/3016/trunk/src/IECore/PointMeshOp.cpp
 END
-Light.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 45
-/svn/!svn/ver/4498/trunk/src/IECore/Light.cpp
-END
 FrameRange.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/2466/trunk/src/IECore/FrameRange.cpp
+END
+Light.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/4498/trunk/src/IECore/Light.cpp
 END
 BINMeshReader.cpp
 K 25
@@ -1221,17 +1221,17 @@ svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/4498/trunk/src/IECore/PreWorldRenderable.cpp
 END
-NormalizeSmoothSkinningWeightsOp.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 72
-/svn/!svn/ver/3725/trunk/src/IECore/NormalizeSmoothSkinningWeightsOp.cpp
-END
 AssociatedLegendre.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/2196/trunk/src/IECore/AssociatedLegendre.cpp
+END
+NormalizeSmoothSkinningWeightsOp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/3725/trunk/src/IECore/NormalizeSmoothSkinningWeightsOp.cpp
 END
 CurveTangentsOp.cpp
 K 25
@@ -1239,17 +1239,17 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/3231/trunk/src/IECore/CurveTangentsOp.cpp
 END
-LevelFilteredMessageHandler.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 67
-/svn/!svn/ver/3313/trunk/src/IECore/LevelFilteredMessageHandler.cpp
-END
 SimpleTypedData.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4559/trunk/src/IECore/SimpleTypedData.cpp
+END
+LevelFilteredMessageHandler.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/3313/trunk/src/IECore/LevelFilteredMessageHandler.cpp
 END
 ImageUnpremultiplyOp.cpp
 K 25
@@ -1263,17 +1263,17 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/4505/trunk/src/IECore/CoordinateSystem.cpp
 END
-MedianCutSampler.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 56
-/svn/!svn/ver/3016/trunk/src/IECore/MedianCutSampler.cpp
-END
 OBJReader.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svn/!svn/ver/3016/trunk/src/IECore/OBJReader.cpp
+END
+MedianCutSampler.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/3016/trunk/src/IECore/MedianCutSampler.cpp
 END
 Exception.cpp
 K 25
@@ -1317,17 +1317,17 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/2933/trunk/src/IECore/HitMissTransform.cpp
 END
-PanalogToLinearOp.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 57
-/svn/!svn/ver/3845/trunk/src/IECore/PanalogToLinearOp.cpp
-END
 TIFFImageReader.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4654/trunk/src/IECore/TIFFImageReader.cpp
+END
+PanalogToLinearOp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/3845/trunk/src/IECore/PanalogToLinearOp.cpp
 END
 RadixSort.cpp
 K 25
@@ -1335,17 +1335,17 @@ svn:wc:ra_dav:version-url
 V 49
 /svn/!svn/ver/2466/trunk/src/IECore/RadixSort.cpp
 END
-MeshFaceFilterOp.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 56
-/svn/!svn/ver/4679/trunk/src/IECore/MeshFaceFilterOp.cpp
-END
 ScopedMessageHandler.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/2466/trunk/src/IECore/ScopedMessageHandler.cpp
+END
+MeshFaceFilterOp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/4679/trunk/src/IECore/MeshFaceFilterOp.cpp
 END
 ReorderedFrameList.cpp
 K 25
@@ -1371,17 +1371,17 @@ svn:wc:ra_dav:version-url
 V 61
 /svn/!svn/ver/4509/trunk/src/IECore/MatrixMotionTransform.cpp
 END
-PDCParticleWriter.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 57
-/svn/!svn/ver/3898/trunk/src/IECore/PDCParticleWriter.cpp
-END
 FrameListParameter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/3086/trunk/src/IECore/FrameListParameter.cpp
+END
+PDCParticleWriter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/3898/trunk/src/IECore/PDCParticleWriter.cpp
 END
 MeshPrimitiveShrinkWrapOp.cpp
 K 25
@@ -1395,17 +1395,17 @@ svn:wc:ra_dav:version-url
 V 69
 /svn/!svn/ver/3725/trunk/src/IECore/SmoothSmoothSkinningWeightsOp.cpp
 END
-TimePeriodParameter.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 59
-/svn/!svn/ver/2340/trunk/src/IECore/TimePeriodParameter.cpp
-END
 VectorTypedData.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4524/trunk/src/IECore/VectorTypedData.cpp
+END
+TimePeriodParameter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/2340/trunk/src/IECore/TimePeriodParameter.cpp
 END
 IFFFile.cpp
 K 25
@@ -1413,17 +1413,17 @@ svn:wc:ra_dav:version-url
 V 47
 /svn/!svn/ver/4094/trunk/src/IECore/IFFFile.cpp
 END
-ImageCropOp.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 51
-/svn/!svn/ver/3016/trunk/src/IECore/ImageCropOp.cpp
-END
 PointsPrimitive.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4509/trunk/src/IECore/PointsPrimitive.cpp
+END
+ImageCropOp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/3016/trunk/src/IECore/ImageCropOp.cpp
 END
 WarpOp.cpp
 K 25
@@ -1431,23 +1431,17 @@ svn:wc:ra_dav:version-url
 V 46
 /svn/!svn/ver/3016/trunk/src/IECore/WarpOp.cpp
 END
-VectorTypedParameter.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/4600/trunk/src/IECore/VectorTypedParameter.cpp
-END
 ObjectInterpolator.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/4804/trunk/src/IECore/ObjectInterpolator.cpp
 END
-TriangulateOp.cpp
+VectorTypedParameter.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 53
-/svn/!svn/ver/4086/trunk/src/IECore/TriangulateOp.cpp
+V 60
+/svn/!svn/ver/4600/trunk/src/IECore/VectorTypedParameter.cpp
 END
 SphericalHarmonics.cpp
 K 25
@@ -1455,17 +1449,23 @@ svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/2554/trunk/src/IECore/SphericalHarmonics.cpp
 END
-Grade.cpp
+TriangulateOp.cpp
 K 25
 svn:wc:ra_dav:version-url
-V 45
-/svn/!svn/ver/3016/trunk/src/IECore/Grade.cpp
+V 53
+/svn/!svn/ver/4086/trunk/src/IECore/TriangulateOp.cpp
 END
 ContrastSmoothSkinningWeightsOp.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/4013/trunk/src/IECore/ContrastSmoothSkinningWeightsOp.cpp
+END
+Grade.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/3016/trunk/src/IECore/Grade.cpp
 END
 ReversedFrameList.cpp
 K 25
@@ -1503,17 +1503,17 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/4523/trunk/src/IECore/NumericParameter.cpp
 END
-StateRenderable.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/4498/trunk/src/IECore/StateRenderable.cpp
-END
 SmoothSkinningData.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/4498/trunk/src/IECore/SmoothSkinningData.cpp
+END
+StateRenderable.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/4498/trunk/src/IECore/StateRenderable.cpp
 END
 MatrixAlgo.cpp
 K 25

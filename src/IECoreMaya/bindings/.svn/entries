@@ -1,7 +1,7 @@
 10
 
 dir
-4855
+4862
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreMaya/bindings
 http://cortex-vfx.googlecode.com/svn
 
@@ -468,40 +468,6 @@ john.imageengine
 
 2504
 
-MayaPythonUtilBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:03.000000Z
-8ab68a97c2da52b726af1174e8a39b92
-2007-11-15T21:16:05.580888Z
-282
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2013
-
 FromMayaParticleConverterBinding.cpp
 file
 
@@ -569,6 +535,40 @@ john.imageengine
 
 
 2669
+
+MayaPythonUtilBinding.cpp
+file
+
+
+
+
+2011-12-21T09:27:03.000000Z
+8ab68a97c2da52b726af1174e8a39b92
+2007-11-15T21:16:05.580888Z
+282
+mark.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2013
 
 FromMayaSkinClusterConverterBinding.cpp
 file

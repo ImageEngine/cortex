@@ -1,13 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 39
-/svn/!svn/ver/4812/trunk/include/IECore
+/svn/!svn/ver/4858/trunk/include/IECore
 END
-LevelFilteredMessageHandler.h
+Math.h
 K 25
 svn:wc:ra_dav:version-url
-V 69
-/svn/!svn/ver/4111/trunk/include/IECore/LevelFilteredMessageHandler.h
+V 46
+/svn/!svn/ver/2680/trunk/include/IECore/Math.h
 END
 SimpleTypedData.h
 K 25
@@ -15,11 +15,11 @@ svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/4511/trunk/include/IECore/SimpleTypedData.h
 END
-Math.h
+LevelFilteredMessageHandler.h
 K 25
 svn:wc:ra_dav:version-url
-V 46
-/svn/!svn/ver/2680/trunk/include/IECore/Math.h
+V 69
+/svn/!svn/ver/4111/trunk/include/IECore/LevelFilteredMessageHandler.h
 END
 ClassData.inl
 K 25
@@ -39,23 +39,17 @@ svn:wc:ra_dav:version-url
 V 64
 /svn/!svn/ver/4111/trunk/include/IECore/FilteredMessageHandler.h
 END
-StringAlgo.inl
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/4270/trunk/include/IECore/StringAlgo.inl
-END
 FromCoreConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 59
 /svn/!svn/ver/2933/trunk/include/IECore/FromCoreConverter.h
 END
-BoxOps.inl
+StringAlgo.inl
 K 25
 svn:wc:ra_dav:version-url
-V 50
-/svn/!svn/ver/4180/trunk/include/IECore/BoxOps.inl
+V 54
+/svn/!svn/ver/4270/trunk/include/IECore/StringAlgo.inl
 END
 CompositeAlgo.h
 K 25
@@ -63,17 +57,23 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/1929/trunk/include/IECore/CompositeAlgo.h
 END
-Writer.inl
+BoxOps.inl
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/2362/trunk/include/IECore/Writer.inl
+/svn/!svn/ver/4180/trunk/include/IECore/BoxOps.inl
 END
 Rec709ToLinearDataConversion.h
 K 25
 svn:wc:ra_dav:version-url
 V 70
 /svn/!svn/ver/2466/trunk/include/IECore/Rec709ToLinearDataConversion.h
+END
+Writer.inl
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/2362/trunk/include/IECore/Writer.inl
 END
 Interned.h
 K 25
@@ -195,17 +195,17 @@ svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/2768/trunk/include/IECore/Lookup.inl
 END
-ParameterisedProcedural.h
-K 25
-svn:wc:ra_dav:version-url
-V 65
-/svn/!svn/ver/4111/trunk/include/IECore/ParameterisedProcedural.h
-END
 Object.h
 K 25
 svn:wc:ra_dav:version-url
 V 48
 /svn/!svn/ver/4579/trunk/include/IECore/Object.h
+END
+ParameterisedProcedural.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/4111/trunk/include/IECore/ParameterisedProcedural.h
 END
 CubicBasis.h
 K 25
@@ -213,23 +213,17 @@ svn:wc:ra_dav:version-url
 V 52
 /svn/!svn/ver/4111/trunk/include/IECore/CubicBasis.h
 END
-BINMeshReader.h
-K 25
-svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/4111/trunk/include/IECore/BINMeshReader.h
-END
 TriangleAlgo.h
 K 25
 svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/4111/trunk/include/IECore/TriangleAlgo.h
 END
-VectorTypedParameter.h
+BINMeshReader.h
 K 25
 svn:wc:ra_dav:version-url
-V 62
-/svn/!svn/ver/4600/trunk/include/IECore/VectorTypedParameter.h
+V 55
+/svn/!svn/ver/4111/trunk/include/IECore/BINMeshReader.h
 END
 ObjectInterpolator.h
 K 25
@@ -237,11 +231,11 @@ svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/2531/trunk/include/IECore/ObjectInterpolator.h
 END
-TestTypedData.inl
+VectorTypedParameter.h
 K 25
 svn:wc:ra_dav:version-url
-V 57
-/svn/!svn/ver/2466/trunk/include/IECore/TestTypedData.inl
+V 62
+/svn/!svn/ver/4600/trunk/include/IECore/VectorTypedParameter.h
 END
 MarchingCubes.h
 K 25
@@ -249,17 +243,17 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4111/trunk/include/IECore/MarchingCubes.h
 END
+TestTypedData.inl
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/2466/trunk/include/IECore/TestTypedData.inl
+END
 CompoundData.h
 K 25
 svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/4111/trunk/include/IECore/CompoundData.h
-END
-PrimitiveImplicitSurfaceFunction.h
-K 25
-svn:wc:ra_dav:version-url
-V 74
-/svn/!svn/ver/4111/trunk/include/IECore/PrimitiveImplicitSurfaceFunction.h
 END
 MixSmoothSkinningWeightsOp.h
 K 25
@@ -267,11 +261,11 @@ svn:wc:ra_dav:version-url
 V 68
 /svn/!svn/ver/4111/trunk/include/IECore/MixSmoothSkinningWeightsOp.h
 END
-BGEOParticleReader.h
+PrimitiveImplicitSurfaceFunction.h
 K 25
 svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/4111/trunk/include/IECore/BGEOParticleReader.h
+V 74
+/svn/!svn/ver/4111/trunk/include/IECore/PrimitiveImplicitSurfaceFunction.h
 END
 YUVImageWriter.h
 K 25
@@ -279,17 +273,23 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/4111/trunk/include/IECore/YUVImageWriter.h
 END
-LinearToSRGBDataConversion.inl
+BGEOParticleReader.h
 K 25
 svn:wc:ra_dav:version-url
-V 70
-/svn/!svn/ver/2229/trunk/include/IECore/LinearToSRGBDataConversion.inl
+V 60
+/svn/!svn/ver/4111/trunk/include/IECore/BGEOParticleReader.h
 END
 ScaledDataConversion.inl
 K 25
 svn:wc:ra_dav:version-url
 V 64
 /svn/!svn/ver/2795/trunk/include/IECore/ScaledDataConversion.inl
+END
+LinearToSRGBDataConversion.inl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/2229/trunk/include/IECore/LinearToSRGBDataConversion.inl
 END
 CompoundMessageHandler.h
 K 25
@@ -333,17 +333,17 @@ svn:wc:ra_dav:version-url
 V 63
 /svn/!svn/ver/4111/trunk/include/IECore/PolygonVertexIterator.h
 END
-FileSequenceFunctions.h
-K 25
-svn:wc:ra_dav:version-url
-V 63
-/svn/!svn/ver/4398/trunk/include/IECore/FileSequenceFunctions.h
-END
 Object.inl
 K 25
 svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/3011/trunk/include/IECore/Object.inl
+END
+FileSequenceFunctions.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/4398/trunk/include/IECore/FileSequenceFunctions.h
 END
 XYZToXYYColorTransform.h
 K 25
@@ -369,17 +369,17 @@ svn:wc:ra_dav:version-url
 V 48
 /svn/!svn/ver/4529/trunk/include/IECore/Shader.h
 END
-QuatInterpolator.inl
-K 25
-svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/2466/trunk/include/IECore/QuatInterpolator.inl
-END
 Turbulence.h
 K 25
 svn:wc:ra_dav:version-url
 V 52
 /svn/!svn/ver/4111/trunk/include/IECore/Turbulence.h
+END
+QuatInterpolator.inl
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/2466/trunk/include/IECore/QuatInterpolator.inl
 END
 LinearToCineonOp.h
 K 25
@@ -759,11 +759,11 @@ svn:wc:ra_dav:version-url
 V 64
 /svn/!svn/ver/2475/trunk/include/IECore/TransformationMatrix.inl
 END
-SpaceTransform.h
+PDCParticleWriter.h
 K 25
 svn:wc:ra_dav:version-url
-V 56
-/svn/!svn/ver/2487/trunk/include/IECore/SpaceTransform.h
+V 59
+/svn/!svn/ver/4111/trunk/include/IECore/PDCParticleWriter.h
 END
 FrameListParameter.h
 K 25
@@ -771,11 +771,11 @@ svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/3086/trunk/include/IECore/FrameListParameter.h
 END
-PDCParticleWriter.h
+SpaceTransform.h
 K 25
 svn:wc:ra_dav:version-url
-V 59
-/svn/!svn/ver/4111/trunk/include/IECore/PDCParticleWriter.h
+V 56
+/svn/!svn/ver/2487/trunk/include/IECore/SpaceTransform.h
 END
 PointsPrimitiveEvaluator.h
 K 25
@@ -789,23 +789,17 @@ svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/2672/trunk/include/IECore/PolygonVertexIterator.inl
 END
-BinaryFrameList.h
-K 25
-svn:wc:ra_dav:version-url
-V 57
-/svn/!svn/ver/4111/trunk/include/IECore/BinaryFrameList.h
-END
 CompoundFrameList.h
 K 25
 svn:wc:ra_dav:version-url
 V 59
 /svn/!svn/ver/4111/trunk/include/IECore/CompoundFrameList.h
 END
-ImagePrimitiveEvaluator.h
+BinaryFrameList.h
 K 25
 svn:wc:ra_dav:version-url
-V 65
-/svn/!svn/ver/4218/trunk/include/IECore/ImagePrimitiveEvaluator.h
+V 57
+/svn/!svn/ver/4111/trunk/include/IECore/BinaryFrameList.h
 END
 AddSmoothSkinningInfluencesOp.h
 K 25
@@ -813,17 +807,23 @@ svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/4111/trunk/include/IECore/AddSmoothSkinningInfluencesOp.h
 END
-SimpleTypedParameter.h
+ImagePrimitiveEvaluator.h
 K 25
 svn:wc:ra_dav:version-url
-V 62
-/svn/!svn/ver/4167/trunk/include/IECore/SimpleTypedParameter.h
+V 65
+/svn/!svn/ver/4218/trunk/include/IECore/ImagePrimitiveEvaluator.h
 END
 CurvesPrimitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/4111/trunk/include/IECore/CurvesPrimitive.h
+END
+SimpleTypedParameter.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/4167/trunk/include/IECore/SimpleTypedParameter.h
 END
 VectorDataFilterOp.h
 K 25
@@ -849,17 +849,17 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/2466/trunk/include/IECore/Triangulator.inl
 END
-DeepImageConverter.h
-K 25
-svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/4416/trunk/include/IECore/DeepImageConverter.h
-END
 CubeColorLookupParameter.h
 K 25
 svn:wc:ra_dav:version-url
 V 66
 /svn/!svn/ver/2337/trunk/include/IECore/CubeColorLookupParameter.h
+END
+DeepImageConverter.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/4416/trunk/include/IECore/DeepImageConverter.h
 END
 ColorTransform.h
 K 25
@@ -909,17 +909,17 @@ svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/2997/trunk/include/IECore/MemoryStream.h
 END
-ValidatedStringParameter.h
-K 25
-svn:wc:ra_dav:version-url
-V 66
-/svn/!svn/ver/3086/trunk/include/IECore/ValidatedStringParameter.h
-END
 ColorSpaceTransformOp.h
 K 25
 svn:wc:ra_dav:version-url
 V 63
 /svn/!svn/ver/4111/trunk/include/IECore/ColorSpaceTransformOp.h
+END
+ValidatedStringParameter.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/3086/trunk/include/IECore/ValidatedStringParameter.h
 END
 SRGBToLinearDataConversion.inl
 K 25
@@ -951,17 +951,17 @@ svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/4218/trunk/include/IECore/PrimitiveEvaluator.h
 END
-DateTimeParameter.h
-K 25
-svn:wc:ra_dav:version-url
-V 59
-/svn/!svn/ver/2337/trunk/include/IECore/DateTimeParameter.h
-END
 XYYToXYZColorTransform.inl
 K 25
 svn:wc:ra_dav:version-url
 V 66
 /svn/!svn/ver/2466/trunk/include/IECore/XYYToXYZColorTransform.inl
+END
+DateTimeParameter.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/2337/trunk/include/IECore/DateTimeParameter.h
 END
 Exception.h
 K 25
@@ -969,17 +969,11 @@ svn:wc:ra_dav:version-url
 V 51
 /svn/!svn/ver/4111/trunk/include/IECore/Exception.h
 END
-ZhuBridsonImplicitSurfaceFunction.h
+TimePeriod.h
 K 25
 svn:wc:ra_dav:version-url
-V 75
-/svn/!svn/ver/4111/trunk/include/IECore/ZhuBridsonImplicitSurfaceFunction.h
-END
-TGAImageReader.h
-K 25
-svn:wc:ra_dav:version-url
-V 56
-/svn/!svn/ver/4111/trunk/include/IECore/TGAImageReader.h
+V 52
+/svn/!svn/ver/2466/trunk/include/IECore/TimePeriod.h
 END
 NullObject.h
 K 25
@@ -987,11 +981,17 @@ svn:wc:ra_dav:version-url
 V 52
 /svn/!svn/ver/2466/trunk/include/IECore/NullObject.h
 END
-TimePeriod.h
+TGAImageReader.h
 K 25
 svn:wc:ra_dav:version-url
-V 52
-/svn/!svn/ver/2466/trunk/include/IECore/TimePeriod.h
+V 56
+/svn/!svn/ver/4111/trunk/include/IECore/TGAImageReader.h
+END
+ZhuBridsonImplicitSurfaceFunction.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/4111/trunk/include/IECore/ZhuBridsonImplicitSurfaceFunction.h
 END
 WorldBlock.h
 K 25
@@ -1005,23 +1005,17 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/2811/trunk/include/IECore/TriangleAlgo.inl
 END
-OversamplesCalculator.inl
-K 25
-svn:wc:ra_dav:version-url
-V 65
-/svn/!svn/ver/2466/trunk/include/IECore/OversamplesCalculator.inl
-END
 LineSegment.inl
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4167/trunk/include/IECore/LineSegment.inl
 END
-MatrixAlgo.h
+OversamplesCalculator.inl
 K 25
 svn:wc:ra_dav:version-url
-V 52
-/svn/!svn/ver/4111/trunk/include/IECore/MatrixAlgo.h
+V 65
+/svn/!svn/ver/2466/trunk/include/IECore/OversamplesCalculator.inl
 END
 CubeColorLookup.h
 K 25
@@ -1029,11 +1023,11 @@ svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/2466/trunk/include/IECore/CubeColorLookup.h
 END
-SphericalHarmonicsTransferMatrix.h
+MatrixAlgo.h
 K 25
 svn:wc:ra_dav:version-url
-V 74
-/svn/!svn/ver/4113/trunk/include/IECore/SphericalHarmonicsTransferMatrix.h
+V 52
+/svn/!svn/ver/4111/trunk/include/IECore/MatrixAlgo.h
 END
 FileIndexedIO.h
 K 25
@@ -1041,11 +1035,11 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4111/trunk/include/IECore/FileIndexedIO.h
 END
-CineonToLinearDataConversion.h
+SphericalHarmonicsTransferMatrix.h
 K 25
 svn:wc:ra_dav:version-url
-V 70
-/svn/!svn/ver/2466/trunk/include/IECore/CineonToLinearDataConversion.h
+V 74
+/svn/!svn/ver/4113/trunk/include/IECore/SphericalHarmonicsTransferMatrix.h
 END
 CINImageWriter.h
 K 25
@@ -1053,17 +1047,11 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/4111/trunk/include/IECore/CINImageWriter.h
 END
-InverseDistanceWeightedInterpolation.inl
+CineonToLinearDataConversion.h
 K 25
 svn:wc:ra_dav:version-url
-V 80
-/svn/!svn/ver/3897/trunk/include/IECore/InverseDistanceWeightedInterpolation.inl
-END
-DataConvert.h
-K 25
-svn:wc:ra_dav:version-url
-V 53
-/svn/!svn/ver/2472/trunk/include/IECore/DataConvert.h
+V 70
+/svn/!svn/ver/2466/trunk/include/IECore/CineonToLinearDataConversion.h
 END
 ImageThinner.h
 K 25
@@ -1071,11 +1059,17 @@ svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/4111/trunk/include/IECore/ImageThinner.h
 END
-PanalogToLinearOp.h
+DataConvert.h
 K 25
 svn:wc:ra_dav:version-url
-V 59
-/svn/!svn/ver/4111/trunk/include/IECore/PanalogToLinearOp.h
+V 53
+/svn/!svn/ver/2472/trunk/include/IECore/DataConvert.h
+END
+InverseDistanceWeightedInterpolation.inl
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/3897/trunk/include/IECore/InverseDistanceWeightedInterpolation.inl
 END
 TIFFImageReader.h
 K 25
@@ -1083,17 +1077,11 @@ svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/4111/trunk/include/IECore/TIFFImageReader.h
 END
-ExclusionFrameList.h
+PanalogToLinearOp.h
 K 25
 svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/4111/trunk/include/IECore/ExclusionFrameList.h
-END
-Random.h
-K 25
-svn:wc:ra_dav:version-url
-V 48
-/svn/!svn/ver/1473/trunk/include/IECore/Random.h
+V 59
+/svn/!svn/ver/4111/trunk/include/IECore/PanalogToLinearOp.h
 END
 AssociatedLegendre.inl
 K 25
@@ -1101,17 +1089,29 @@ svn:wc:ra_dav:version-url
 V 62
 /svn/!svn/ver/2798/trunk/include/IECore/AssociatedLegendre.inl
 END
-DisplayDriver.h
+Random.h
 K 25
 svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/4111/trunk/include/IECore/DisplayDriver.h
+V 48
+/svn/!svn/ver/1473/trunk/include/IECore/Random.h
+END
+ExclusionFrameList.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/4111/trunk/include/IECore/ExclusionFrameList.h
 END
 TypeIds.h
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svn/!svn/ver/4774/trunk/include/IECore/TypeIds.h
+END
+DisplayDriver.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/4111/trunk/include/IECore/DisplayDriver.h
 END
 NURBSPrimitive.h
 K 25
@@ -1125,11 +1125,11 @@ svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/3235/trunk/include/IECore/MarschnerParameter.h
 END
-Math.inl
+ImageDisplayDriver.h
 K 25
 svn:wc:ra_dav:version-url
-V 48
-/svn/!svn/ver/2680/trunk/include/IECore/Math.inl
+V 60
+/svn/!svn/ver/4111/trunk/include/IECore/ImageDisplayDriver.h
 END
 CurveExtrudeOp.h
 K 25
@@ -1137,11 +1137,11 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/4111/trunk/include/IECore/CurveExtrudeOp.h
 END
-ImageDisplayDriver.h
+Math.inl
 K 25
 svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/4111/trunk/include/IECore/ImageDisplayDriver.h
+V 48
+/svn/!svn/ver/2680/trunk/include/IECore/Math.inl
 END
 MatrixMotionTransform.h
 K 25
@@ -1149,29 +1149,17 @@ svn:wc:ra_dav:version-url
 V 63
 /svn/!svn/ver/2928/trunk/include/IECore/MatrixMotionTransform.h
 END
-DecompressSmoothSkinningDataOp.h
-K 25
-svn:wc:ra_dav:version-url
-V 72
-/svn/!svn/ver/4111/trunk/include/IECore/DecompressSmoothSkinningDataOp.h
-END
 AlexaLogcToLinearDataConversion.inl
 K 25
 svn:wc:ra_dav:version-url
 V 75
 /svn/!svn/ver/4633/trunk/include/IECore/AlexaLogcToLinearDataConversion.inl
 END
-ObjectVector.h
+DecompressSmoothSkinningDataOp.h
 K 25
 svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/2466/trunk/include/IECore/ObjectVector.h
-END
-TransformationMatrixInterpolator.inl
-K 25
-svn:wc:ra_dav:version-url
-V 76
-/svn/!svn/ver/2520/trunk/include/IECore/TransformationMatrixInterpolator.inl
+V 72
+/svn/!svn/ver/4111/trunk/include/IECore/DecompressSmoothSkinningDataOp.h
 END
 VectorTraits.h
 K 25
@@ -1179,23 +1167,35 @@ svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/3693/trunk/include/IECore/VectorTraits.h
 END
+TransformationMatrixInterpolator.inl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/2520/trunk/include/IECore/TransformationMatrixInterpolator.inl
+END
+ObjectVector.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/2466/trunk/include/IECore/ObjectVector.h
+END
 SRGBToLinearOp.h
 K 25
 svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/4111/trunk/include/IECore/SRGBToLinearOp.h
 END
-ScaledDataConversion.h
-K 25
-svn:wc:ra_dav:version-url
-V 62
-/svn/!svn/ver/2228/trunk/include/IECore/ScaledDataConversion.h
-END
 LinearToSRGBDataConversion.h
 K 25
 svn:wc:ra_dav:version-url
 V 68
 /svn/!svn/ver/2466/trunk/include/IECore/LinearToSRGBDataConversion.h
+END
+ScaledDataConversion.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/2228/trunk/include/IECore/ScaledDataConversion.h
 END
 MeshPrimitiveBuilder.h
 K 25
@@ -1245,29 +1245,17 @@ svn:wc:ra_dav:version-url
 V 48
 /svn/!svn/ver/4180/trunk/include/IECore/BoxOps.h
 END
-CachedImplicitSurfaceFunction.inl
-K 25
-svn:wc:ra_dav:version-url
-V 73
-/svn/!svn/ver/2466/trunk/include/IECore/CachedImplicitSurfaceFunction.inl
-END
 ColorAlgo.inl
 K 25
 svn:wc:ra_dav:version-url
 V 53
 /svn/!svn/ver/2466/trunk/include/IECore/ColorAlgo.inl
 END
-Interpolator.inl
+CachedImplicitSurfaceFunction.inl
 K 25
 svn:wc:ra_dav:version-url
-V 56
-/svn/!svn/ver/2466/trunk/include/IECore/Interpolator.inl
-END
-ReorderedFrameList.inl
-K 25
-svn:wc:ra_dav:version-url
-V 62
-/svn/!svn/ver/2466/trunk/include/IECore/ReorderedFrameList.inl
+V 73
+/svn/!svn/ver/2466/trunk/include/IECore/CachedImplicitSurfaceFunction.inl
 END
 TetrahedronAlgo.inl
 K 25
@@ -1275,23 +1263,17 @@ svn:wc:ra_dav:version-url
 V 59
 /svn/!svn/ver/2466/trunk/include/IECore/TetrahedronAlgo.inl
 END
-TriangulateOp.h
+ReorderedFrameList.inl
 K 25
 svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/4111/trunk/include/IECore/TriangulateOp.h
+V 62
+/svn/!svn/ver/2466/trunk/include/IECore/ReorderedFrameList.inl
 END
-SphericalHarmonicsRotationMatrix.inl
+Interpolator.inl
 K 25
 svn:wc:ra_dav:version-url
-V 76
-/svn/!svn/ver/2523/trunk/include/IECore/SphericalHarmonicsRotationMatrix.inl
-END
-SphericalHarmonics.h
-K 25
-svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/4111/trunk/include/IECore/SphericalHarmonics.h
+V 56
+/svn/!svn/ver/2466/trunk/include/IECore/Interpolator.inl
 END
 CircularIterator.h
 K 25
@@ -1299,23 +1281,29 @@ svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/4111/trunk/include/IECore/CircularIterator.h
 END
+SphericalHarmonics.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/4111/trunk/include/IECore/SphericalHarmonics.h
+END
+SphericalHarmonicsRotationMatrix.inl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/2523/trunk/include/IECore/SphericalHarmonicsRotationMatrix.inl
+END
+TriangulateOp.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/4111/trunk/include/IECore/TriangulateOp.h
+END
 SphericalHarmonicsAlgo.h
 K 25
 svn:wc:ra_dav:version-url
 V 64
 /svn/!svn/ver/4111/trunk/include/IECore/SphericalHarmonicsAlgo.h
-END
-Spline.inl
-K 25
-svn:wc:ra_dav:version-url
-V 50
-/svn/!svn/ver/2966/trunk/include/IECore/Spline.inl
-END
-AssociatedLegendre.h
-K 25
-svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/4111/trunk/include/IECore/AssociatedLegendre.h
 END
 NormalizeSmoothSkinningWeightsOp.h
 K 25
@@ -1323,11 +1311,17 @@ svn:wc:ra_dav:version-url
 V 74
 /svn/!svn/ver/4111/trunk/include/IECore/NormalizeSmoothSkinningWeightsOp.h
 END
-ReversedFrameList.h
+AssociatedLegendre.h
 K 25
 svn:wc:ra_dav:version-url
-V 59
-/svn/!svn/ver/4111/trunk/include/IECore/ReversedFrameList.h
+V 60
+/svn/!svn/ver/4111/trunk/include/IECore/AssociatedLegendre.h
+END
+Spline.inl
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/2966/trunk/include/IECore/Spline.inl
 END
 DespatchTypedData.inl
 K 25
@@ -1335,11 +1329,11 @@ svn:wc:ra_dav:version-url
 V 61
 /svn/!svn/ver/3683/trunk/include/IECore/DespatchTypedData.inl
 END
-DataInterleaveOp.h
+ReversedFrameList.h
 K 25
 svn:wc:ra_dav:version-url
-V 58
-/svn/!svn/ver/4236/trunk/include/IECore/DataInterleaveOp.h
+V 59
+/svn/!svn/ver/4111/trunk/include/IECore/ReversedFrameList.h
 END
 MeshNormalsOp.h
 K 25
@@ -1347,23 +1341,17 @@ svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4111/trunk/include/IECore/MeshNormalsOp.h
 END
+DataInterleaveOp.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/4236/trunk/include/IECore/DataInterleaveOp.h
+END
 ClampOp.h
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svn/!svn/ver/4668/trunk/include/IECore/ClampOp.h
-END
-OBJReader.h
-K 25
-svn:wc:ra_dav:version-url
-V 51
-/svn/!svn/ver/4111/trunk/include/IECore/OBJReader.h
-END
-MedianCutSampler.h
-K 25
-svn:wc:ra_dav:version-url
-V 58
-/svn/!svn/ver/4111/trunk/include/IECore/MedianCutSampler.h
 END
 AlexaLogcToLinearDataConversion.h
 K 25
@@ -1371,17 +1359,23 @@ svn:wc:ra_dav:version-url
 V 73
 /svn/!svn/ver/4633/trunk/include/IECore/AlexaLogcToLinearDataConversion.h
 END
+MedianCutSampler.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/4111/trunk/include/IECore/MedianCutSampler.h
+END
+OBJReader.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/4111/trunk/include/IECore/OBJReader.h
+END
 IFFFile.inl
 K 25
 svn:wc:ra_dav:version-url
 V 51
 /svn/!svn/ver/4094/trunk/include/IECore/IFFFile.inl
-END
-PointsMotionOp.h
-K 25
-svn:wc:ra_dav:version-url
-V 56
-/svn/!svn/ver/4111/trunk/include/IECore/PointsMotionOp.h
 END
 CubeColorLookupData.h
 K 25
@@ -1389,11 +1383,11 @@ svn:wc:ra_dav:version-url
 V 61
 /svn/!svn/ver/4511/trunk/include/IECore/CubeColorLookupData.h
 END
-HierarchicalCache.h
+PointsMotionOp.h
 K 25
 svn:wc:ra_dav:version-url
-V 59
-/svn/!svn/ver/3021/trunk/include/IECore/HierarchicalCache.h
+V 56
+/svn/!svn/ver/4111/trunk/include/IECore/PointsMotionOp.h
 END
 SpherePrimitiveEvaluator.h
 K 25
@@ -1401,17 +1395,17 @@ svn:wc:ra_dav:version-url
 V 66
 /svn/!svn/ver/4218/trunk/include/IECore/SpherePrimitiveEvaluator.h
 END
+HierarchicalCache.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/3021/trunk/include/IECore/HierarchicalCache.h
+END
 RealSphericalHarmonicFunction.h
 K 25
 svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/4111/trunk/include/IECore/RealSphericalHarmonicFunction.h
-END
-LinearToRec709DataConversion.h
-K 25
-svn:wc:ra_dav:version-url
-V 70
-/svn/!svn/ver/2466/trunk/include/IECore/LinearToRec709DataConversion.h
 END
 ChannelOp.h
 K 25
@@ -1419,11 +1413,11 @@ svn:wc:ra_dav:version-url
 V 51
 /svn/!svn/ver/4111/trunk/include/IECore/ChannelOp.h
 END
-CircularIterator.inl
+LinearToRec709DataConversion.h
 K 25
 svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/2466/trunk/include/IECore/CircularIterator.inl
+V 70
+/svn/!svn/ver/2466/trunk/include/IECore/LinearToRec709DataConversion.h
 END
 SphericalHarmonics.inl
 K 25
@@ -1431,23 +1425,29 @@ svn:wc:ra_dav:version-url
 V 62
 /svn/!svn/ver/3034/trunk/include/IECore/SphericalHarmonics.inl
 END
+CircularIterator.inl
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/2466/trunk/include/IECore/CircularIterator.inl
+END
 EnvMapSampler.h
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4111/trunk/include/IECore/EnvMapSampler.h
 END
-MeshMergeOp.h
-K 25
-svn:wc:ra_dav:version-url
-V 53
-/svn/!svn/ver/4310/trunk/include/IECore/MeshMergeOp.h
-END
 CompoundObject.h
 K 25
 svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/3577/trunk/include/IECore/CompoundObject.h
+END
+MeshMergeOp.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/4310/trunk/include/IECore/MeshMergeOp.h
 END
 IntrusivePtr.h
 K 25
@@ -1485,17 +1485,17 @@ svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/4111/trunk/include/IECore/JPEGImageWriter.h
 END
-MatrixOps.h
-K 25
-svn:wc:ra_dav:version-url
-V 48
-/svn/!svn/ver/5/trunk/include/IECore/MatrixOps.h
-END
 CurvesMergeOp.h
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4111/trunk/include/IECore/CurvesMergeOp.h
+END
+MatrixOps.h
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/5/trunk/include/IECore/MatrixOps.h
 END
 LinearToAlexaLogcDataConversion.inl
 K 25
@@ -1509,17 +1509,17 @@ svn:wc:ra_dav:version-url
 V 54
 /svn/!svn/ver/4139/trunk/include/IECore/RunTimeTyped.h
 END
-BoxAlgo.h
-K 25
-svn:wc:ra_dav:version-url
-V 49
-/svn/!svn/ver/4111/trunk/include/IECore/BoxAlgo.h
-END
 SplineParameter.h
 K 25
 svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/2337/trunk/include/IECore/SplineParameter.h
+END
+BoxAlgo.h
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/4111/trunk/include/IECore/BoxAlgo.h
 END
 FileSequenceVectorParameter.h
 K 25
@@ -2179,7 +2179,7 @@ Camera.h
 K 25
 svn:wc:ra_dav:version-url
 V 48
-/svn/!svn/ver/2928/trunk/include/IECore/Camera.h
+/svn/!svn/ver/4858/trunk/include/IECore/Camera.h
 END
 ImagePremultiplyOp.h
 K 25

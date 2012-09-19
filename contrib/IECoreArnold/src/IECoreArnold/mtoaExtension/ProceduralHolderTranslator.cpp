@@ -102,7 +102,11 @@ class ProceduralHolderTranslator : public CShapeTranslator
                        int visibility = AiNodeGetInt(masterNode, "visibility");
                        AiNodeSetInt(instance, "visibility", visibility);
 
-                       AiNodeSetPtr( instance, "shader", arnoldShader() );
+                       AtNode *shader = arnoldShader();
+                       if( shader )
+                       {
+                           AiNodeSetPtr( instance, "shader", shader );
+                       }
 
                        // Export light linking per instance
                        ExportLightLinking(instance);
