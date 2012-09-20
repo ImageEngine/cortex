@@ -184,7 +184,7 @@ MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 		// of calling the parent shouldSave, but instead we set isSaving
 		// to always true and store our parm_ attributes even when they
 		// are at default values.  This is because it used to work that way
-		// for all parms, and  but Lucio is concerned that changing this
+		// for all parms, and Lucio is concerned that changing this
 		// could break something
 		isSaving = true;
 
