@@ -174,15 +174,25 @@ MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArra
 template<typename B>
 MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 {
-	/// Maya 8.5 and 2009 crash when saving a GenericAttribute (such as that
-	/// created by the MeshParameterHandler) containing an "empty" mesh.
-	/// This only applies to ASCII files, saving to binary works. Here
-	/// we prevent Maya saving the value.
-
-	isSaving = true;
 	ParameterPtr parameter = plugParameter( plug );
 	if( parameter )
 	{
+		// For parameters we found in the parameter map, we always handle
+		// them ourselves, setting isSaving to either true or false,
+		// and returning kSuccess, which means "Ignore the default behaviour"
+		// There is no particular reason not use the standard behaviour
+		// of calling the parent shouldSave, but instead we set isSaving
+		// to always true and store our parm_ attributes even when they
+		// are at default values.  This is because it used to work that way
+		// for all parms, and  but Lucio is concerned that changing this
+		// could break something
+		isSaving = true;
+
+
+		/// Maya 8.5 and 2009 crash when saving a GenericAttribute (such as that
+		/// created by the MeshParameterHandler) containing an "empty" mesh.
+		/// This only applies to ASCII files, saving to binary works. Here
+		/// we prevent Maya saving the value.
 		MFnGenericAttribute fnGA;
 		if( fnGA.hasObj( plug.attribute() ) )
 		{
@@ -193,9 +203,21 @@ MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 				isSaving = false;
 			}
 		}
+
+		return MS::kSuccess;
 	}
-	
-	return MS::kSuccess;
+	else
+	{
+		// For parameters that aren't special, use the default behaviour of
+		// the base class.
+		// NOTE: This is not very clear in the documentation, but for most
+		// parameters, the default behaviour is to not touch isSaving,
+		// and return kUnknownParameter, which Maya interprets as meaning
+		// that we're not doing anything special, so use the default 
+		// behaviour.  Maya then checks whether the plug has changed from
+		// default, and exports it if it has
+		return B::shouldSave( plug, isSaving );
+	}
 }
 
 template<typename B>
