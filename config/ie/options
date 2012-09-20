@@ -182,11 +182,8 @@ else :
 	TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
 	JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
+	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
 	CPPPATH = "/software/tools/include/freetype/2.3.5"
-	if targetApp != "nuke" :
-		# we use the system libpng when building for nuke, as it links to an older
-		# version than we have installed centrally.
-		PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
 	
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
@@ -304,6 +301,20 @@ if targetApp=="houdini" :
 	INSTALL_HOUDINIOTL_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/otls/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/"
 	INSTALL_HOUDINIICON_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/icons/"
 	INSTALL_HOUDINITOOLBAR_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/toolbar/"
+
+# find nuke if we're building for nuke
+if targetApp=="nuke" :
+	
+	nukeVersion = targetAppVersion
+	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
+	if "pngVersion" in nukeReg :
+		pngVersion = nukeReg["pngVersion"]
+		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + pngVersion
+		PNG_LIB_SUFFIX = "".join( pngVersion.split( "." )[:-1] )
+	else :
+		# we use the system libpng when building for Nuke 6 or below, as it links to an older
+		# version than we have installed centrally.
+		PNG_INCLUDE_PATH = "/usr/local/include/"
 
 # find truelight, unless we're on osx, where we haven't got it to link yet
 if not IEEnv.platformOS().startswith("osx") :

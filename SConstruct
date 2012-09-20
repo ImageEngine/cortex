@@ -204,6 +204,13 @@ o.Add(
 	"/usr/local/lib",
 )
 
+o.Add(
+	"PNG_LIB_SUFFIX",
+	"The suffix appended to the names of libpng. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
+)
+
 # TIFF options
 
 o.Add(
@@ -1408,7 +1415,7 @@ if doConfigure :
 		corePythonSources.remove( "src/IECorePython/JPEGImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECorePython/JPEGImageWriterBinding.cpp" )
 	
-	if c.CheckLibWithHeader( "png", ["stdio.h", "png.h"], "CXX" ) :
+	if c.CheckLibWithHeader( "png" + env["PNG_LIB_SUFFIX"], ["stdio.h", "png.h"], "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = '-DIECORE_WITH_PNG' )
 	else :
