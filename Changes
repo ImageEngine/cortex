@@ -1,3 +1,6 @@
+7.7.2 :
+
+Bug Fixes :
 
 * Modified behaviour of shouldSave method of ParameterisedHolder, which controls which attributes are saved to file
   - previously:
@@ -8,6 +11,8 @@
 	* attributes in the AttributeNameToParameterMap forced to always be written
     * anything else uses default Maya behaviour ( write only if changed from default )
  ( This was motivated by attributes created by mtoa, which would be ignored if unused on normal Maya objects, but were always saved on Cortex objects, and then caused problems if mtoa was not present on load )
+
+7.7.1 :
 
 Bug Fixes :
 
