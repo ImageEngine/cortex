@@ -9,21 +9,42 @@ import shutil
 
 def build( extraArgs = [] ) :
 	
-	buildArgs = [ "INSTALL_PREFIX=/software" ]
+	sysArgs = sys.argv[1:]
+	
+	install = False
+	if "install" in sysArgs :
+		install = True
+		sysArgs.remove( "install" )
+	
+	release = False
+	if "RELEASE=1" in sysArgs :
+		release = True
+		sysArgs.remove( "RELEASE=1" )
+	
+	if "J=" in " ".join( sysArgs ) :
+		sysArgs = " ".join( sysArgs ).replace( "J=", "-j " ).split( " " )
+	
+	installPrefix = "/software" if release else os.path.expanduser( "~" )
+	buildArgs = [ "INSTALL_PREFIX=" + installPrefix ]
 	buildArgs.extend( extraArgs )
-	buildArgs.extend( sys.argv[1:] )
+	buildArgs.extend( sysArgs )
 	
 	print " ".join( [ "scons" ] + buildArgs )
 	if subprocess.call( [ "scons" ] + buildArgs ) != 0 :
 	
 		raise RuntimeError("Error : scons " + str( " ".join( buildArgs ) ) )
 	
-	print " ".join( [ "scons", "install" ] + buildArgs )
-	if subprocess.call( [ "scons", "install" ] + buildArgs ) != 0 :
+	if install or release :
 	
-		raise RuntimeError("Error : scons install " + str( " ".join( buildArgs ) ) )
+		print " ".join( [ "scons", "install" ] + buildArgs )
+		if subprocess.call( [ "scons", "install" ] + buildArgs ) != 0 :
+		
+			raise RuntimeError("Error : scons install " + str( " ".join( buildArgs ) ) )
 
 def installDocs() :
+	
+	if "RELEASE=1" not in sys.argv :
+		return
 	
 	buildArgs = [ "INSTALL_PREFIX=/software" ]
 	
@@ -46,6 +67,7 @@ if IEEnv.platformOS() == "osx104" or IEEnv.platformOS() == "osx105" :
 	installDocs()
 
 elif IEEnv.platform() == "cent5.x86_64" :
+	
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=UNDEFINED", "PYTHON_VERSION=2.6", "ARNOLD_VERSION=4.0.6.0" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.43", "PYTHON_VERSION=2.6", "ARNOLD_VERSION=UNDEFINED" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=10.0.49", "PYTHON_VERSION=2.6", "ARNOLD_VERSION=UNDEFINED" ] )
