@@ -2,6 +2,8 @@ Improvements :
 
 * Added repr() functionality to NullObject and ObjectVector bindings.
 
+* Added CameraController::project() method.
+
 7.7.2 :
 
 Bug Fixes :

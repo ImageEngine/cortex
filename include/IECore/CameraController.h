@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,8 +78,11 @@ class CameraController
 
 		/// Computes the points on the near and far clipping planes that correspond
 		/// with the specified raster position. Points are computed in world space.
+		/// \todo Accept a V2f to provide extra precision and make this method const.
 		void unproject( const Imath::V2i rasterPosition, Imath::V3f &near, Imath::V3f &far );
-
+		/// Projects the point in world space into a raster space position.
+		Imath::V2f project( const Imath::V3f &worldPosition ) const;
+		
 		//! @name Motion
 		/// These functions facilitate the implementation of maya style
 		/// camera movement controls within a UI. All coordinates passed
