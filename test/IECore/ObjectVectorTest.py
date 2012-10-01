@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -184,6 +185,14 @@ class ObjectVectorTest( unittest.TestCase ) :
 		o2 = IECore.ObjectVector( [ IECore.IntData( 10 ), None ] )
 		
 		self.assertNotEqual( o.hash(), o2.hash() )
+	
+	def testRepr( self ) :
+	
+		l = [ IECore.IntData( x ) for x in range( 0, 10 ) ]
+		o = IECore.ObjectVector( l )
+		
+		o2 = eval( repr( o ) )
+		self.assertEqual( o, o2 )
 	
 	def tearDown( self ) :
 

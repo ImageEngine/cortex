@@ -264,6 +264,7 @@ from ImfTest import *
 from TimeCodeDataTest import TimeCodeDataTest
 from TimeCodeParameterTest import TimeCodeParameterTest
 from OptionsTest import OptionsTest
+from NullObjectTest import NullObjectTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

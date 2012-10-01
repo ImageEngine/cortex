@@ -43,10 +43,23 @@ using namespace IECore;
 namespace IECorePython
 {
 
+static std::string repr( NullObject *o )
+{
+	if( o == NullObject::defaultNullObject() )
+	{
+		return "IECore.NullObject.defaultNullObject()";
+	}
+	else
+	{
+		return "IECore.NullObject()";
+	}
+}
+
 void bindNullObject()
 {
 	RunTimeTypedClass<NullObject>()
 		.def( init<>() )
+		.def( "__repr__", &repr )
 		.def( "defaultNullObject", NullObject::defaultNullObject ).staticmethod( "defaultNullObject" )
 	;
 }
