@@ -311,6 +311,7 @@
 #include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
+#include "IECorePython/ModelCacheBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -625,6 +626,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimeCodeParameter();
 	bindOptions();
 	bindMPlayDisplayDriver();
+	bindModelCache();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

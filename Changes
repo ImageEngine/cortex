@@ -1,3 +1,7 @@
+Additions :
+
+* Added a new ModelCache class, for reading and writing hierarchical models in a random access fashion, backed by IndexedIO storage. Bounds for every level of the hierarchy are computed automatically during writing. Also added an ABCToMDC op to IECoreAlembic - this allows conversion of Alembic archives to ModelCache format.
+
 Improvements :
 
 * Added repr() functionality to NullObject and ObjectVector bindings.
