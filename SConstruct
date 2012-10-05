@@ -893,6 +893,14 @@ o.Add(
 )
 
 o.Add(
+	"TEST_ALEMBIC_SCRIPT",
+	"The python script to run for the alembic tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"contrib/IECoreAlembic/test/IECoreAlembic/All.py"
+)
+
+o.Add(
 	"TEST_LIBPATH",
 	"Additional colon separated paths to be prepended to the library path"
 	"used when running tests.",
@@ -2863,6 +2871,14 @@ if doConfigure :
 
 		Default( [ alembicLibrary, alembicPythonModule ] )
 		
+		# tests
+		alembicTestEnv = testEnv.Clone()
+		alembicTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAlembic/python"
+		alembicTest = alembicTestEnv.Command( "contrib/IECoreAlembic/test/IECoreAlembic/results.txt", alembicPythonModule, pythonExecutable + " $TEST_ALEMBIC_SCRIPT" )
+		NoCache( alembicTest )
+		alembicTestEnv.Depends( arnoldTest, glob.glob( "contrib/IECoreAlembic/test/IECoreAlembic/*.py" ) )
+		alembicTestEnv.Alias( "testAlembic", alembicTest )
+
 ###########################################################################################
 # Documentation
 ###########################################################################################
