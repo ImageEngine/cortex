@@ -2857,7 +2857,7 @@ if doConfigure :
 		alembicPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 				os.path.basename( alembicEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
