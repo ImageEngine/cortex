@@ -607,7 +607,51 @@ class RendererTest( unittest.TestCase ) :
 
 			self.assertEqual( len( shapes ), 1 )
 			self.assertEqual( arnold.AiNodeGetInt( shapes[0], "subdiv_iterations" ), 10 )
-						
+	
+	def testShaderConnections( self ) :
+	
+		r = IECoreArnold.Renderer()
+		
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			
+			r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
+			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )	
+			
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			mesh.render( r )
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		e = IECore.PrimitiveEvaluator.create( image )
+ 		result = e.createResult()
+		
+		e.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
+		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+	
+	def testMissingShaderConnectionWarnings( self ) :
+	
+		r = IECoreArnold.Renderer()
+		
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			
+	 		m = IECore.CapturingMessageHandler()
+ 			with m :
+				r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
+				r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )	
+		
+		self.assertEqual( len( m.messages ), 1 )
+		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Warning )
+		self.failUnless( "oopsWrongOne" in m.messages[0].message )
+		
 	def tearDown( self ) :
 			
 		for f in [

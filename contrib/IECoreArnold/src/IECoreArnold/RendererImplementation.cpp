@@ -78,6 +78,7 @@ RendererImplementation::AttributeState::AttributeState( const AttributeState &ot
 {
 	surfaceShader = other.surfaceShader;
 	displacementShader = other.displacementShader;
+	shaders = other.shaders;
 	attributes = other.attributes->copy();
 }
 				
@@ -388,7 +389,11 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getAttribute( const s
 
 void IECoreArnold::RendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	if( type=="surface" || type=="ai:surface" || type=="displacement" || type=="ai:displacement" )
+	if(
+		type=="shader" || type=="ai:shader" ||
+		type=="surface" || type=="ai:surface" ||
+		type=="displacement" || type=="ai:displacement"	
+	)
 	{
 		AtNode *s = 0;
 		if( 0 == name.compare( 0, 10, "reference:" ) )
@@ -408,11 +413,45 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't load shader \"%s\"" ) % name );
 				return;
 			}
-			ToArnoldConverter::setParameters( s, parameters );
+			for( CompoundDataMap::const_iterator parmIt=parameters.begin(); parmIt!=parameters.end(); parmIt++ )
+			{
+				if( parmIt->second->isInstanceOf( IECore::StringDataTypeId ) )
+				{
+					const std::string &potentialLink = static_cast<const StringData *>( parmIt->second.get() )->readable();
+					if( 0 == potentialLink.compare( 0, 5, "link:" ) )
+					{
+						std::string linkHandle = potentialLink.c_str() + 5;
+						AttributeState::ShaderMap::const_iterator shaderIt = m_attributeStack.top().shaders.find( linkHandle );
+						if( shaderIt != m_attributeStack.top().shaders.end() )
+						{
+							AiNodeLinkOutput( shaderIt->second, "", s, parmIt->first.value().c_str() );
+						}
+						else
+						{
+							msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't find shader handle \"%s\" for linking" ) % linkHandle );	
+						}
+						continue;
+					}
+				}
+				ToArnoldConverter::setParameter( s, parmIt->first.value().c_str(), parmIt->second );
+			}
 			addNode( s );
 		}
 		
-		if( type=="surface" || type == "ai:surface" )
+		if( type=="shader" || type == "ai:shader" )
+		{
+			CompoundDataMap::const_iterator handleIt = parameters.find( "__handle" );
+			if( handleIt != parameters.end() && handleIt->second->isInstanceOf( IECore::StringDataTypeId ) )
+			{
+				const std::string &handle = static_cast<const StringData *>( handleIt->second.get() )->readable();
+				m_attributeStack.top().shaders[handle] = s;
+			}
+			else
+			{
+				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", "No __handle parameter specified." );			
+			}
+		}
+		else if( type=="surface" || type == "ai:surface" )
 		{
 			m_attributeStack.top().surfaceShader = s;
 		}

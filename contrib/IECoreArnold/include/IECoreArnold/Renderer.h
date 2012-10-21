@@ -103,9 +103,13 @@ class Renderer : public IECore::Renderer
 		/// nodeType.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
-		/// Supports types "surface", "ai:surface", "displacement" and "ai:displacement".
-		/// In addition to loading shaders by name, names of the form "reference:nodeName"
-		/// will reference an already existing Arnold shader node of the specified name.
+		/// Supports types "surface", "ai:surface", "displacement", "ai:displacement",
+		/// "shader" and "ai:shader". The "shader" types require the parameter list to
+		/// contain an __handle parameter, specifying a string handle - this can then
+		/// be used in the parameter lists for subsequent shaders to create connections,
+		/// by providing a parameter value of "link:handle". In addition to loading shaders
+		/// by name, names of the form "reference:nodeName" will reference an already existing
+		/// Arnold shader node of the specified name.
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
 		virtual void illuminate( const std::string &lightHandle, bool on );

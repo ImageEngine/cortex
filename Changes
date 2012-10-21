@@ -8,6 +8,8 @@ Improvements :
 
 * Added CameraController::project() method.
 
+* IECoreArnold::Renderer::shader() now supports the creation of networks of shaders.
+
 7.7.2 :
 
 Bug Fixes :

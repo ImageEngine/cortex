@@ -172,6 +172,12 @@ class RendererImplementation : public IECore::Renderer
 		
 				AtNode *surfaceShader;
 				AtNode *displacementShader;
+				
+				// shaders specified using "shader" or "ai:shader" type.
+				// these are used as input connections to other shaders.
+				typedef std::map<std::string, AtNode *> ShaderMap;
+				ShaderMap shaders;
+				
 				IECore::CompoundDataPtr attributes;
 		
 		};
