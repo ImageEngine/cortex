@@ -1,0 +1,16 @@
+{
+version 0.8
+className	[ 0	locks=0 ]	(	[ className	nestedParent ] 	)
+classVersion	[ 0	locks=0 ]	(	[ classVersion	1 ] 	)
+parameterString	[ 0	locks=0 ]	(	[ parameterString	"" ] 	)
+standardfolder	[ 0	locks=0 ]	(	1	1	)
+folder0	[ 0	locks=0 ]	(	0	0	)
+vmproc_boxstyle	[ 0	locks=0 ]	(	soppath	)
+vmproc_soppath	[ 0	locks=0 ]	(	[ vmproc_soppath	/obj/np/np ] 	)
+vmproc_minbound	[ 0	locks=0 ]	(	-1	-1	-1	)
+vmproc_maxbound	[ 0	locks=0 ]	(	1	1	1	)
+riproc_boxstyle	[ 0	locks=0 ]	(	explicit	)
+riproc_soppath	[ 0	locks=0 ]	(	""	)
+riproc_minbound	[ 0	locks=0 ]	(	-1	-1	-1	)
+riproc_maxbound	[ 0	locks=0 ]	(	1	1	1	)
+}

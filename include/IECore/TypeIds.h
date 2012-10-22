@@ -449,6 +449,9 @@ enum TypeId
 	FirstCoreAlembicTypeId = 112000,
 	LastCoreAlembicTypeId = 112999,
 
+	FirstCoreMantraTypeId = 113000,
+	LastCoreMantraTypeId = 113999,
+
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,
 	LastDynamicTypeId = 399999,

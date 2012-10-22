@@ -1,0 +1,17 @@
+.OPdummydefs
+node_type
+cortexMantraInject1.init
+cortexMantraInject1.def
+cortexMantraInject1.userdata
+cortexMantraInject1/suboutput1.init
+cortexMantraInject1/suboutput1.def
+cortexMantraInject1/suboutput1.parm
+cortexMantraInject1/suboutput1.userdata
+cortexMantraInject1/ieprocedural1.init
+cortexMantraInject1/ieprocedural1.def
+cortexMantraInject1/ieprocedural1.spareparmdef
+cortexMantraInject1/ieprocedural1.chn
+cortexMantraInject1/ieprocedural1.parm
+cortexMantraInject1/ieprocedural1.userdata
+cortexMantraInject1.order
+cortexMantraInject1.net

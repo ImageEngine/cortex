@@ -1,0 +1,39 @@
+comment ""
+position 4.56461 1.79997
+cachesize 1
+connectornextid 48
+flags =  lock off model off template off footprint off xray off bypass off display on render on highlight off unload off savedata off compress off exposed on
+outputsNamed3
+{
+}
+inputsNamed3
+{
+24 	"" "" 1 "Properties"
+25 	"" "" 1 "Surface Shader"
+26 	"" "" 1 "Displacement Shader"
+27 	"" "" 1 "Light Shader"
+28 	"" "" 1 "Light Shadow Shader"
+29 	"" "" 1 "Fog Shader"
+30 	ieprocedural1 0 1 "Geometry Shader"
+}
+inputs
+{
+0 	"" 0 1
+1 	"" 0 1
+2 	"" 0 1
+3 	"" 0 1
+4 	"" 0 1
+5 	"" 0 1
+6 	ieprocedural1 0 1
+}
+stat
+{
+  create 1339084997
+  modify 1339085365
+  author dan@ws03
+  access 0777
+}
+color UT_Color RGB 0.8 0.8 0.8 
+delscript ""
+exprlanguage hscript
+end

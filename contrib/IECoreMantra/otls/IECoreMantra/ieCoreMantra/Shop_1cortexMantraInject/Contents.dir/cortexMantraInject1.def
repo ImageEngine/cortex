@@ -1,0 +1,49 @@
+comment ""
+position 2.79991 2.32939
+cachesize 1
+connectornextid 24
+flags =  lock off model off template off footprint off xray off bypass off display off render off highlight off unload off savedata off compress off exposed on
+outputsNamed3
+{
+0 "Properties"
+1 "Surface Shader"
+2 "Displacement Shader"
+3 "Light Shader"
+4 "Light Shadow Shader"
+5 "Fog Shader"
+6 "Geometry Shader"
+7 "Surface Shadow Shader"
+8 "Interior Shader"
+9 "Camera Lens Shader"
+10 "Output Shader"
+11 "Background Shader"
+12 "Photon Shader"
+13 "Light Emitter Shader"
+14 "Photon Volume Shader"
+15 "Environment Shader"
+16 "Contour Shader"
+17 "Contour Store Shader"
+18 "Contour Contrast Shader"
+19 "Texture Shader"
+20 "Image3d Shader"
+21 "CVEX"
+22 "Co-Shader"
+23 "next"
+}
+inputsNamed3
+{
+}
+inputs
+{
+}
+stat
+{
+  create 1339326113
+  modify 1339326390
+  author dan@ws03
+  access 0777
+}
+color UT_Color RGB 0.8 0.8 0.8 
+delscript ""
+exprlanguage python
+end

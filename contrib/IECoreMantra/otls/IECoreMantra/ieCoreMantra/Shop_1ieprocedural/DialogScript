@@ -1,0 +1,38 @@
+# Dialog script for ieprocedural automatically generated 06/07/12 17:20:07
+
+{
+    name	ieprocedural
+    script	ieprocedural
+    label	"Cortex Mantra Procedural"
+
+    rendermask	*
+
+    help {
+	""
+    }
+
+    parm {
+	name	"className"
+	label	"Class Name"
+	type	string
+	default	{ "visualiser" }
+	range	{ 0 1 }
+	export	none
+    }
+    parm {
+	name	"classVersion"
+	label	"Version"
+	type	integer
+	default	{ "1" }
+	range	{ 0 10 }
+	export	none
+    }
+    parm {
+	name	"parameterString"
+	label	"Parameter String"
+	type	string
+	default	{ "" }
+	range	{ 0 1 }
+	export	none
+    }
+}
