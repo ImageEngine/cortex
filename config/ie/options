@@ -326,6 +326,19 @@ if not IEEnv.platformOS().startswith("osx") :
 else :
 	TRUELIGHT_ROOT=""
 
+
+# find alembic:
+
+alembicVersion = "1.1.1"
+ALEMBIC_INCLUDE_PATH = "/software/tools/include/%s/Alembic/%s/include/" % ( platform, alembicVersion )
+ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
+INSTALL_ALEMBICLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+
+HDF5_INCLUDE_PATH = "/software/apps/hdf5/1.8.5/%s/gcc/4.1.2/include/" % platform
+HDF5_LIB_PATH = "/software/apps/hdf5/1.8.5/%s/gcc/4.1.2/lib/" % platform
+
+
+
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 
