@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -282,6 +282,39 @@ class TestBasicPreset( unittest.TestCase ) :
 		classes2 = [ c[1:] for c in testObj2.parameters()["c"].getClasses( True ) ]
 		
 		self.assertEqual( classes1, classes2 )
+	
+	def testCompoundVectorParameter( self ) :
+	
+		p = IECore.Parameterised( "test" )
+		p.parameters().addParameters(
+			[
+				IECore.BoolParameter( "a", "", False ),
+				IECore.CompoundVectorParameter(
+					"c",
+					"",
+					members = [
+						IECore.StringVectorParameter( "s", "", IECore.StringVectorData() ),
+						IECore.BoolVectorParameter( "b", "", IECore.BoolVectorData() ),
+					]
+				)	
+			]
+		)
+		
+		p["c"]["s"].setValue( IECore.StringVectorData( [ "1", "2", "3" ] ) )
+		p["c"]["b"].setValue( IECore.BoolVectorData( [ True, False, True ] ) )
+		
+		v = p.parameters().getValue().copy()
+		
+		preset = IECore.BasicPreset( p, p.parameters() )
+
+		self.failUnless( preset.applicableTo( p, p.parameters() ) )
+
+		p.parameters().setValue( p.parameters().defaultValue )
+		self.assertNotEqual( p.parameters().getValue(), v )
+		
+		preset( p, p.parameters() )
+		
+		self.assertEqual( p.parameters().getValue(), v )
 		
 	def tearDown( self ) :
 		
