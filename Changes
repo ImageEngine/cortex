@@ -6,6 +6,8 @@ Additions :
 
 Improvements :
 
+* Rewrote CurvesPrimitiveEvaluator::curveLength(), which should now work properly for polylines, return more accurate results for b splines, and not freeze in pathalogical cases
+
 * Added repr() functionality to NullObject and ObjectVector bindings.
 
 * Added CameraController::project() method.
