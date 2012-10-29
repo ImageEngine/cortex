@@ -282,3 +282,9 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 				if isinstance( c, IECore.Group ) :
 					self.__collapseGroups( c )
 		
+
+	## Returns the maya node type that this function set operates on
+	@classmethod
+	def _getMayaNodeType( cls ):
+		
+		return "ieProceduralHolder"

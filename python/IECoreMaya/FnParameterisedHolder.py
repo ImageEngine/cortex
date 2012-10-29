@@ -315,8 +315,39 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 				self._classParameterStates( c, parameterPath, result )
 
 		return result
-			
-						
+	
+	## Returns the maya node type that this function set operates on
+	@classmethod
+	def _getMayaNodeType( cls ):
+		
+		return "ieParameterisedHolderNode"
+		
+	## Lists the ieParameterisedHolderNodes in the current scene. The keyword arguments operate as follows :
+	#
+	# selection :
+	# Only list holders in the current selection. Defaults to False
+	#
+	# fnSets :
+	# Returns a list of FnParameterisedHolder instances if True, otherwise returns node names. Defaults to True
+	#
+	# classType :
+	# Python class: if specified, only lists holders holding this class
+	#
+	@classmethod
+	def ls( cls, selection=False, fnSets=True, classType=None ) :
+	
+		nodeNames = maya.cmds.ls( sl=selection, leaf=True, type=cls._getMayaNodeType() )
+		matches = []
+		for n in nodeNames :
+			fnH = cls( n )
+			if classType is None or isinstance( fnH.getParameterised()[0], classType ) :
+				matches.append( fnH )
+				
+		if fnSets :
+			return matches
+		else :
+			return [ x.fullPathName() for x in matches ]
+	
 class _ParameterModificationContext :
 
 	def __init__( self, fnPH ) :

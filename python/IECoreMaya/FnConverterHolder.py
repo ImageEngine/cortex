@@ -92,3 +92,9 @@ class FnConverterHolder( IECoreMaya.FnParameterisedHolder ) :
 		for f in frameList.asList() :
 
 			self.convertAtFrame( f )
+
+	## Returns the maya node type that this function set operates on
+	@classmethod
+	def _getMayaNodeType( cls ):
+		
+		return "ieConverterHolder"
