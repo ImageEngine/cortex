@@ -1,3 +1,5 @@
+7.8.0 :
+
 Additions :
 
 * Added an ls() method to IECoreMaya.FnParameterisedHolder, and a _getMayaNodeType() method so it works with derived classes
