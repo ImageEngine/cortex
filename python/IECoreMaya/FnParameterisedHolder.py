@@ -318,7 +318,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	
 	## Returns the maya node type that this function set operates on
 	@classmethod
-	def _getMayaNodeType( cls ):
+	def _mayaNodeType( cls ):
 		
 		return "ieParameterisedHolderNode"
 		
@@ -336,7 +336,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	@classmethod
 	def ls( cls, selection=False, fnSets=True, classType=None ) :
 	
-		nodeNames = maya.cmds.ls( sl=selection, leaf=True, type=cls._getMayaNodeType() )
+		nodeNames = maya.cmds.ls( sl=selection, leaf=True, type=cls._mayaNodeType() )
 		matches = []
 		for n in nodeNames :
 			fnH = cls( n )
