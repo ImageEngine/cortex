@@ -184,14 +184,7 @@ double AlembicInput::sampleIntervalAtTime( double time, size_t &floorIndex, size
 bool AlembicInput::hasStoredBound() const
 {
 	const MetaData &md = m_data->object.getMetaData();
-	if( !m_data->object.getParent() )
-	{
-		// top of archive
-		/// \todo Is this assumption ok? If not then fix
-		/// this and update the comment in the header.
-		return true;
-	}
-	else if( IXform::matches( md ) )
+	if( IXform::matches( md ) )
 	{
 		IXform iXForm( m_data->object, kWrapExisting );
 		IXformSchema &iXFormSchema = iXForm.getSchema();
