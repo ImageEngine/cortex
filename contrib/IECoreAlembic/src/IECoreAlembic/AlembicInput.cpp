@@ -184,7 +184,11 @@ double AlembicInput::sampleIntervalAtTime( double time, size_t &floorIndex, size
 bool AlembicInput::hasStoredBound() const
 {
 	const MetaData &md = m_data->object.getMetaData();
-	if( IXform::matches( md ) )
+	if( !m_data->object.getParent() )
+	{
+		return m_data->object.getProperties().getPropertyHeader( ".childBnds" ) != 0x0;
+	}
+	else if( IXform::matches( md ) )
 	{
 		IXform iXForm( m_data->object, kWrapExisting );
 		IXformSchema &iXFormSchema = iXForm.getSchema();

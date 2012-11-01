@@ -345,6 +345,9 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( a.child( "pCube1" ).child( "pCubeShape1" ).hasStoredBound(), True )		
 		self.assertEqual( a.child( "front" ).hasStoredBound(), False )
 		self.assertEqual( a.child( "front" ).child( "frontShape" ).hasStoredBound(), False )
+		
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc" )
+		self.assertEqual( a.hasStoredBound(), False )
 	
 	def testBoundAtSample( self ) :
 	
