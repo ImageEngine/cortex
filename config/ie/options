@@ -83,6 +83,8 @@ if targetApp :
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
+	alembicVersion = targetAppReg.get( "AlembicVersion", cortexReg["AlembicVersion"] )
+	hdf5Version = targetAppReg.get( "hdf5Version", cortexReg["hdf5Version"] )
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
@@ -95,6 +97,8 @@ else :
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
+	alembicVersion = cortexReg["AlembicVersion"]
+	hdf5Version = cortexReg["hdf5Version"]
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
@@ -329,14 +333,13 @@ else :
 
 
 # find alembic:
-
-alembicVersion = "1.1.1"
-ALEMBIC_INCLUDE_PATH = "/software/tools/include/%s/Alembic/%s/include/" % ( platform, alembicVersion )
+ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion, "include" )
 ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
 INSTALL_ALEMBICLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 
-HDF5_INCLUDE_PATH = "/software/apps/hdf5/1.8.5/%s/gcc/4.1.2/include/" % platform
-HDF5_LIB_PATH = "/software/apps/hdf5/1.8.5/%s/gcc/4.1.2/lib/" % platform
+# find hdf5:
+HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
+HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
 
 
 
