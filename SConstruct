@@ -2989,7 +2989,7 @@ if doConfigure :
 
 	c = Configure( alembicEnv )
 
-	if not c.CheckLibWithHeader( "AlembicAbcGeom$ALEMBIC_LIB_SUFFIX", "Alembic/AbcGeom/Foundation.h", "CXX" ) :
+	if not c.CheckLibWithHeader( alembicEnv.subst( "AlembicAbcGeom" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
 	
 		sys.stderr.write( "WARNING : no AlembicAbcGeom library found, not building IECoreAlembic - check ALEMBIC_INCLUDE_PATH, ALEMBIC_LIB_PATH and config.log.\n" )
 		c.Finish()
