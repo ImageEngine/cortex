@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -129,6 +130,20 @@ class CameraControllerTest( unittest.TestCase ) :
 					nearProjected, 0.0001
 				)
 			)
+	
+	def testCameraWithExistingTransform( self ) :
+	
+		camera = IECore.Camera()
+		transform = IECore.MatrixTransform( IECore.M44f() )
+		originalMatrix = transform.transform()
+		camera.setTransform( transform )
+		
+		controller = IECore.CameraController( camera )
+		
+		controller.motionStart( controller.MotionType.Track, IECore.V2i( 0 ) )
+		controller.motionEnd( IECore.V2i( 10 ) )
+		
+		self.assertNotEqual( transform.transform(), originalMatrix )
 		
 if __name__ == "__main__":
         unittest.main()

@@ -68,15 +68,12 @@ void CameraController::setCamera( CameraPtr camera )
 	{
 		m_fov = 0;
 	}
+	
 	TransformPtr transform = m_camera->getTransform();
-	if( !transform )
+	m_transform = runTimeCast<MatrixTransform>( transform );
+	if( !m_transform )
 	{
-		m_transform = new MatrixTransform;
-		m_camera->setTransform( m_transform );
-	}
-	else if( !transform->isInstanceOf( MatrixTransform::staticTypeId() ) )
-	{
-		m_transform = new MatrixTransform( transform->transform() );
+		m_transform = new MatrixTransform( transform ? transform->transform() : M44f() );
 		m_camera->setTransform( m_transform );
 	}
 
@@ -84,6 +81,11 @@ void CameraController::setCamera( CameraPtr camera )
 }
 
 CameraPtr CameraController::getCamera()
+{
+	return m_camera;
+}
+
+ConstCameraPtr CameraController::getCamera() const
 {
 	return m_camera;
 }

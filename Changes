@@ -1,3 +1,11 @@
+Additions :
+
+* Added const version of CameraController::getCamera().
+
+Bug Fixes :
+
+* Fixed bug in CameraController which could cause crashes for cameras with preexisting transforms, and failure to update transforms correctly after swapping cameras with setCamera().
+
 7.8.0 :
 
 Additions :

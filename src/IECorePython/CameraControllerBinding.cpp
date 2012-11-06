@@ -60,7 +60,7 @@ void bindCameraController()
 
 	scope s = class_<CameraController>( "CameraController", init<CameraPtr>() )
 		.def( "setCamera", &CameraController::setCamera )
-		.def( "getCamera", &CameraController::getCamera )
+		.def( "getCamera", (CameraPtr (CameraController::*)())&CameraController::getCamera )
 		.def( "setCentreOfInterest", &CameraController::setCentreOfInterest )
 		.def( "getCentreOfInterest", &CameraController::getCentreOfInterest )
 		.def( "setResolution", &CameraController::setResolution )

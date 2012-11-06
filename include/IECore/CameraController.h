@@ -57,6 +57,7 @@ class CameraController
 
 		void setCamera( CameraPtr camera );
 		CameraPtr getCamera();
+		ConstCameraPtr getCamera() const;
 
 		/// Positive.
 		void setCentreOfInterest( float centreOfInterest );
