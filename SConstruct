@@ -1264,6 +1264,10 @@ def makeSymLink( target, source ) :
 
 	if os.path.exists( target ) :
 		if os.path.islink( target ) :
+			# return if the existing link is exactly what we want already
+			if os.path.realpath( target ) == os.path.realpath( source ) :
+				return
+			
 			os.remove( target )
 		else :
 			# there's not a good reason for a non-link file to be here
