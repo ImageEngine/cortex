@@ -121,8 +121,15 @@ size_t AlembicInput::numSamples() const
 	if( !m_data->object.getParent() )
 	{
 		// top of archive
-		Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
-		m_data->numSamples = boundsProperty.getNumSamples();
+		if( m_data->object.getProperties().getPropertyHeader( ".childBnds" ) )
+		{
+			Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
+			m_data->numSamples = boundsProperty.getNumSamples();
+		}
+		else
+		{
+			m_data->numSamples = 0;
+		}
 	}
 	else if( IXform::matches( md ) )
 	{
