@@ -210,6 +210,10 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( m.numSamples(), 10 )	
 		for i in range( 0, m.numSamples() ) :
 			self.assertAlmostEqual( m.timeAtSample( i ), (i + 1) / 24.0 )
+		
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc" )
+		time = a.timeAtSample( 0 )
+		
 			
 	def testOutOfRangeSamplesRaise( self ) :
 	
