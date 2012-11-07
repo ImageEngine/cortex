@@ -333,7 +333,7 @@ else :
 
 
 # find alembic:
-ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion, "include" )
+ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
 ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
 INSTALL_ALEMBICLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 
