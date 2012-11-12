@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,30 +32,30 @@
 #
 ##########################################################################
 
-import sys
+from __future__ import with_statement
+
 import unittest
 
+import arnold
+
 import IECore
+import IECoreArnold
 
-from RendererTest import RendererTest
-from ProceduralDSOTest import ProceduralDSOTest
-from UniverseBlockTest import UniverseBlockTest
-from MeshTest import MeshTest
-from ProceduralTest import ProceduralTest
-from OutputDriverTest import OutputDriverTest
-from PointsTest import PointsTest
-from ToArnoldConverterTest import ToArnoldConverterTest
-from InstancingConverterTest import InstancingConverterTest
-from AutomaticInstancingTest import AutomaticInstancingTest
+class ToArnoldConverterTest( unittest.TestCase ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreArnold/test/IECoreArnold/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testFactory( self ) :
+
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		c = IECoreArnold.ToArnoldConverter.create( m )
+		self.failUnless( isinstance( c, IECoreArnold.ToArnoldMeshConverter ) )
+		
+		cp = IECore.CurvesPrimitive()
+		c = IECoreArnold.ToArnoldConverter.create( cp )
+		self.failUnless( isinstance( c, IECoreArnold.ToArnoldCurvesConverter ) )
+		
+		p = IECore.PointsPrimitive( 1 )
+		c = IECoreArnold.ToArnoldConverter.create( p )
+		self.failUnless( isinstance( c, IECoreArnold.ToArnoldPointsConverter ) )		
+		
+if __name__ == "__main__":
+    unittest.main()

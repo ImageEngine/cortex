@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,12 +45,21 @@
 namespace IECoreArnold
 {
 
+IE_CORE_FORWARDDECLARE( ToArnoldConverter );
+
 /// A base class for all classes which convert from an IECore datatype
 /// to an Arnold node.
 class ToArnoldConverter : public IECore::FromCoreConverter
 {
 
 	public :
+
+		/// This typedef describes the input object type for the converter.
+		/// Derived classes /must/ override this typedef to more accurately
+		/// describe their particular conversion in detail - it is used by
+		/// the ConverterDescription to correctly register the converter
+		/// with the factory mechanism.
+		typedef IECore::Object InputType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldConverter, ToArnoldConverterTypeId, IECore::FromCoreConverter );
 
@@ -77,7 +86,10 @@ class ToArnoldConverter : public IECore::FromCoreConverter
 		static int parameterType( IECore::TypeId dataType, bool &array );
 		
 		static AtArray *dataToArray( const IECore::Data *data );
-
+		
+		/// Creates a suitable ToArnoldConverter operating on the specified object.
+		static ToArnoldConverterPtr create( IECore::ObjectPtr object );
+		
 	protected:
 
 		ToArnoldConverter( const std::string &description, IECore::TypeId supportedType );
@@ -87,16 +99,31 @@ class ToArnoldConverter : public IECore::FromCoreConverter
 		/// Must be implemented by derived classes to perform the conversion. It is guaranteed that the object
 		/// is of the supported type and the parameter values have been validated and placed in operands.
 		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const = 0;
-
+		
+		/// Creating a static instance of one of these (templated on your Converter type)
+		/// within your class will register your converter with the factory mechanism.
+		template<class T>
+		class ConverterDescription
+		{
+			public :			
+				ConverterDescription();
+			private :
+				static ToArnoldConverterPtr creator( IECore::ObjectPtr object );
+		};
+		
 	private :
-	
+
+		typedef ToArnoldConverterPtr (*CreatorFn)( IECore::ObjectPtr );
+		typedef std::map<IECore::TypeId, CreatorFn> CreatorMap;
+		static CreatorMap &creators();
+
 		static void setParameterInternal( AtNode *node, const char *name, int parameterType, bool array, const IECore::Data *value );
 		static IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parameterType );
 		
 };
 
-IE_CORE_DECLAREPTR( ToArnoldConverter );
-
 } // namespace IECoreArnold
+
+#include "IECoreArnold/ToArnoldConverter.inl"
 
 #endif // IECOREARNOLD_TOARNOLDCONVERTER_H

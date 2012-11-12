@@ -46,6 +46,8 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( ToArnoldPointsConverter );
 
+ToArnoldPointsConverter::ConverterDescription<ToArnoldPointsConverter> ToArnoldPointsConverter::g_description;
+
 ToArnoldPointsConverter::ToArnoldPointsConverter( IECore::PointsPrimitivePtr toConvert )
 	:	ToArnoldShapeConverter( "Converts IECore::PointsPrimitives to arnold points nodes", IECore::PointsPrimitive::staticTypeId() )
 {

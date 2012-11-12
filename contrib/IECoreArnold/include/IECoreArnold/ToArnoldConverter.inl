@@ -32,43 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDPOINTSCONVERTER_H
-#define IECOREARNOLD_TOARNOLDPOINTSCONVERTER_H
-
-#include "IECoreArnold/ToArnoldShapeConverter.h"
-
-namespace IECore
-{
-IE_CORE_FORWARDDECLARE( PointsPrimitive );
-} // namespace IECore
+#ifndef IECOREARNOLD_TOARNOLDCONVERTER_INL
+#define IECOREARNOLD_TOARNOLDCONVERTER_INL
 
 namespace IECoreArnold
 {
 
-class ToArnoldPointsConverter : public ToArnoldShapeConverter
+template<class T>
+ToArnoldConverter::ConverterDescription<T>::ConverterDescription()
 {
-
-	public :
-
-		typedef IECore::PointsPrimitive InputType;
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldPointsConverter, ToArnoldPointsConverterTypeId, ToArnoldShapeConverter );
-
-		ToArnoldPointsConverter( IECore::PointsPrimitivePtr toConvert );
-		virtual ~ToArnoldPointsConverter();
-
-	protected :
-
-		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-
-		static ConverterDescription<ToArnoldPointsConverter> g_description;
-
+	creators()[T::InputType::staticTypeId()] = &creator;
 };
 
-IE_CORE_DECLAREPTR( ToArnoldPointsConverter );
+template<class T>
+ToArnoldConverterPtr ToArnoldConverter::ConverterDescription<T>::creator( IECore::ObjectPtr object )
+{
+	return new T( IECore::staticPointerCast<typename T::InputType>( object ) );
+}
 
 } // namespace IECoreArnold
 
-#endif // IECOREARNOLD_TOARNOLDPOINTSCONVERTER_H
+#endif // IECOREARNOLD_TOARNOLDCONVERTER_INL

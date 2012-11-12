@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,8 @@ using namespace IECore;
 using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( ToArnoldCurvesConverter );
+
+ToArnoldCurvesConverter::ConverterDescription<ToArnoldCurvesConverter> ToArnoldCurvesConverter::g_description;
 
 ToArnoldCurvesConverter::ToArnoldCurvesConverter( IECore::CurvesPrimitivePtr toConvert )
 	:	ToArnoldShapeConverter( "Converts IECore::CurvesPrimitives to arnold curves nodes", IECore::CurvesPrimitive::staticTypeId() )

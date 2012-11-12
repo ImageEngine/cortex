@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@
 
 namespace IECore
 {
-IE_CORE_FORWARDDECLARE(CurvesPrimitive );
+IE_CORE_FORWARDDECLARE( CurvesPrimitive );
 } // namespace IECore
 
 namespace IECoreArnold
@@ -50,6 +50,8 @@ class ToArnoldCurvesConverter : public ToArnoldShapeConverter
 
 	public :
 
+		typedef IECore::CurvesPrimitive InputType;
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldCurvesConverter, ToArnoldCurvesConverterTypeId, ToArnoldShapeConverter );
 
 		ToArnoldCurvesConverter( IECore::CurvesPrimitivePtr toConvert );
@@ -59,6 +61,10 @@ class ToArnoldCurvesConverter : public ToArnoldShapeConverter
 
 		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
 
+	private :
+
+		static ConverterDescription<ToArnoldCurvesConverter> g_description;
+		
 };
 
 IE_CORE_DECLAREPTR( ToArnoldCurvesConverter );

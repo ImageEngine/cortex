@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@ using namespace IECoreArnold;
 using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( ToArnoldCameraConverter );
+
+ToArnoldCameraConverter::ConverterDescription<ToArnoldCameraConverter> ToArnoldCameraConverter::g_description;
 
 ToArnoldCameraConverter::ToArnoldCameraConverter( IECore::CameraPtr toConvert )
 	:	ToArnoldConverter( "Converts IECore::Cameras to arnold camera nodes", IECore::Camera::staticTypeId() )
