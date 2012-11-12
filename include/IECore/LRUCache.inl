@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -166,10 +167,10 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 			cacheEntry.status = Failed;
 			throw;
 		}
-		assert( data );
 		assert( cacheEntry.status != Cached ); // this would indicate that another thread somehow
 		assert( cacheEntry.status != Failed ); // loaded the same thing as us, which is not the intention.
 		set( key, data, cost );
+		assert( m_list.size() <= m_cache.size() );
 		return data;
 	}
 	else if( cacheEntry.status==Cached )
@@ -178,6 +179,7 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 		m_list.erase( cacheEntry.listIterator );
 		m_list.push_front( key );
 		cacheEntry.listIterator = m_list.begin();
+		assert( m_list.size() <= m_cache.size() );
 		return cacheEntry.data;
 	}
 	else
@@ -216,6 +218,8 @@ bool LRUCache<Key, Ptr>::set( const Key &key, const Ptr &data, Cost cost )
 	cacheEntry.listIterator = m_list.begin();
 	
 	m_currentCost += cost;
+	
+	assert( m_list.size() <= m_cache.size() );
 	
 	return true;
 }
