@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -97,10 +97,21 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ai:visibility:refracted" BoolData( true )</b>
 		/// \li <b>"ai:visibility:diffuse" BoolData( true )</b>
 		/// \li <b>"ai:visibility:glossy" BoolData( true )</b>
+		///
 		/// \li <b>"ai:*:*" Data</b><br>
 		/// Mapped to shape node parameters, such that "ai:nodeType:parameterName"
 		/// entries will set a parameter called parameterName on all shapes of type
 		/// nodeType.
+		///
+		/// \par Instancing attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"automaticInstancing" BoolData true</b><br>
+		/// \li <b>"ai:automaticInstancing" BoolData true</b><br>
+		/// Specifies that instances are automatically created if
+		/// identical primitives are passed to the renderer
+		/// repeatedly.
+		////////////////////////////////////////////////////////////
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		/// Supports types "surface", "ai:surface", "displacement", "ai:displacement",

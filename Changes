@@ -8,6 +8,8 @@ Additions :
 
 * Added IECoreArnold::InstancingConverter class, which can be used to manage a series of conversions from IECore::Primitive to Arnold AtNodes, returning Arnold instances when duplicate geometry is detected.
 
+* IECoreArnold::Renderer now automatically creates instances when identical primitives are rendered repeatedly. This may be controlled using the new "ai:automaticInstancing" attribute.
+
 Bug Fixes :
 
 * Fixed bug in CameraController which could cause crashes for cameras with preexisting transforms, and failure to update transforms correctly after swapping cameras with setCamera().

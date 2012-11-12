@@ -47,6 +47,7 @@ from OutputDriverTest import OutputDriverTest
 from PointsTest import PointsTest
 from ToArnoldConverterTest import ToArnoldConverterTest
 from InstancingConverterTest import InstancingConverterTest
+from AutomaticInstancingTest import AutomaticInstancingTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

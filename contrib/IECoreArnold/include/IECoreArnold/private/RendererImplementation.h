@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include "IECoreArnold/Renderer.h"
 #include "IECoreArnold/UniverseBlock.h"
+#include "IECoreArnold/InstancingConverter.h"
 
 namespace IECoreArnold
 {
@@ -126,11 +127,13 @@ class RendererImplementation : public IECore::Renderer
 		};
 	
 		void constructCommon( Mode mode );
+		
+		void addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix );
+		void addShape( AtNode *shape );
 		void applyTransformToNode( AtNode *node );
 		void applyVisibilityToNode( AtNode *node );
 		void addNode( AtNode *node );
-		void addShape( AtNode *shape );
-	
+		
 		// this is what we use in the userptr for procedurals. it contains
 		// the procedural we wish to render, and a renderer which contains the
 		// state at the point the procedural was emitted.
@@ -147,6 +150,7 @@ class RendererImplementation : public IECore::Renderer
 		static AtNode *procGetNode( void *userPtr, int i );
 	
 		boost::shared_ptr<UniverseBlock> m_universe;
+		InstancingConverterPtr m_instancingConverter;
 	
 		Mode m_mode;
 		std::string m_assFileName;

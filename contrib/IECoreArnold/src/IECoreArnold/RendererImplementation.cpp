@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,7 @@
 #include "IECore/PointsPrimitive.h"
 
 #include "IECoreArnold/private/RendererImplementation.h"
-#include "IECoreArnold/ToArnoldMeshConverter.h"
 #include "IECoreArnold/ToArnoldCameraConverter.h"
-#include "IECoreArnold/ToArnoldCurvesConverter.h"
-#include "IECoreArnold/ToArnoldPointsConverter.h"
 
 using namespace IECore;
 using namespace IECoreArnold;
@@ -104,6 +101,7 @@ IECoreArnold::RendererImplementation::RendererImplementation( const std::string 
 IECoreArnold::RendererImplementation::RendererImplementation( const RendererImplementation &other )
 {
 	constructCommon( Procedural );
+	m_instancingConverter = other.m_instancingConverter;
 	m_transformStack.push( other.m_transformStack.top() );
 	m_attributeStack.push( AttributeState( other.m_attributeStack.top() ) );
 }
@@ -111,6 +109,7 @@ IECoreArnold::RendererImplementation::RendererImplementation( const RendererImpl
 IECoreArnold::RendererImplementation::RendererImplementation( const AtNode *proceduralNode )
 {
 	constructCommon( Procedural );
+	m_instancingConverter = new InstancingConverter;
 	/// \todo Initialise stacks properly!!
 	m_transformStack.push( M44f() );
 	m_attributeStack.push( AttributeState() );
@@ -122,6 +121,7 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 	if( mode != Procedural )
 	{
 		m_universe = boost::shared_ptr<UniverseBlock>( new UniverseBlock() );
+		m_instancingConverter = new InstancingConverter;
 		
 		/// \todo Control with an option
 		AiMsgSetConsoleFlags( AI_LOG_ALL );
@@ -500,12 +500,8 @@ void IECoreArnold::RendererImplementation::motionEnd()
 void IECoreArnold::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
 	PointsPrimitivePtr points = new IECore::PointsPrimitive( numPoints );
-	points->variables = primVars;
-	
-	ToArnoldPointsConverterPtr converter = new ToArnoldPointsConverter( points );
-	AtNode *shape = converter->convert();
-
-	addShape( shape );
+	points->variables = primVars;	
+	addPrimitive( points.get(), "ai:points:" );
 }
 
 void IECoreArnold::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
@@ -517,11 +513,7 @@ void IECoreArnold::RendererImplementation::curves( const IECore::CubicBasisf &ba
 {
 	CurvesPrimitivePtr curves = new IECore::CurvesPrimitive( numVertices, basis, periodic );
 	curves->variables = primVars;
-	
-	ToArnoldCurvesConverterPtr converter = new ToArnoldCurvesConverter( curves );
-	AtNode *shape = converter->convert();
-
-	addShape( shape );
+	addPrimitive( curves.get(), "ai:curves:" );
 }
 
 void IECoreArnold::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
@@ -559,11 +551,7 @@ void IECoreArnold::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr v
 {
 	MeshPrimitivePtr mesh = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
 	mesh->variables = primVars;
-	
-	ToArnoldMeshConverterPtr converter = new ToArnoldMeshConverter( mesh );
-	AtNode *shape = converter->convert();
-
-	addShape( shape );
+	addPrimitive( mesh.get(), "ai:polymesh:" );
 }
 
 void IECoreArnold::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
@@ -654,6 +642,84 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 	addNode( procedural );
 }
 
+void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix )
+{
+	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
+
+	bool automaticInstancing = true;
+	CompoundDataMap::const_iterator it = attributes.find( "ai:automaticInstancing" );
+	if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
+	{
+		automaticInstancing = static_cast<const IECore::BoolData *>( it->second.get() )->readable();
+	}
+	else
+	{
+		it = attributes.find( "automaticInstancing" );
+		if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
+		{
+			automaticInstancing = static_cast<const IECore::BoolData *>( it->second.get() )->readable();		
+		}	
+	}
+	
+	AtNode *shape = 0;
+	if( automaticInstancing )
+	{
+		IECore::MurmurHash hash = primitive->::IECore::Object::hash();
+		for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
+		{
+			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
+			{
+				hash.append( it->first.value() );
+				it->second->hash( hash );
+			}
+		}
+		shape = m_instancingConverter->convert( primitive, hash );
+	}
+	else
+	{
+		ToArnoldConverterPtr converter = ToArnoldConverter::create( const_cast<IECore::Primitive *>( primitive ) );
+		shape = converter->convert();
+	}
+	
+	if( strcmp( AiNodeEntryGetName( AiNodeGetNodeEntry( shape ) ), "ginstance" ) )
+	{
+		// it's not an instance, copy over attributes destined for this object type.
+		const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
+		for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
+		{
+			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
+			{
+				ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second );
+			}
+		}
+	}
+	else
+	{
+		// it's an instance - make sure we don't get double transformations.
+		AiNodeSetBool( shape, "inherit_xform", false );
+	}
+	
+	addShape( shape );
+}
+
+void IECoreArnold::RendererImplementation::addShape( AtNode *shape )
+{
+	applyTransformToNode( shape );
+	applyVisibilityToNode( shape );	
+	
+	AiNodeSetPtr( shape, "shader", m_attributeStack.top().surfaceShader );
+		
+	if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( shape ), "disp_map" ) )
+	{
+		if( m_attributeStack.top().displacementShader )
+		{
+			AiNodeSetPtr( shape, "disp_map", m_attributeStack.top().displacementShader );
+		}
+	}
+	
+	addNode( shape );
+}
+
 void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 {
 	/// \todo Make Convert.h
@@ -711,38 +777,10 @@ void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
 	
 	AiNodeSetInt( node, "visibility", visibility );
 }
-	
+
 void IECoreArnold::RendererImplementation::addNode( AtNode *node )
 {
 	m_nodes.push_back( node );
-}
-
-void IECoreArnold::RendererImplementation::addShape( AtNode *shape )
-{
-	applyTransformToNode( shape );
-	applyVisibilityToNode( shape );	
-	
-	AiNodeSetPtr( shape, "shader", m_attributeStack.top().surfaceShader );
-		
-	if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( shape ), "disp_map" ) )
-	{
-		if( m_attributeStack.top().displacementShader )
-		{
-			AiNodeSetPtr( shape, "disp_map", m_attributeStack.top().displacementShader );
-		}
-	}
-	
-	std::string attributePrefix = std::string( "ai:" ) + AiNodeEntryGetName( AiNodeGetNodeEntry( shape ) ) + ":";
-	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
-	for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
-	{
-		if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
-		{
-			ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second );
-		}
-	}
-	
-	addNode( shape );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
