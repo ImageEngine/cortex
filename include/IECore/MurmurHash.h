@@ -38,6 +38,8 @@
 #include <stdint.h>
 #include <iostream>
 
+#include "tbb/concurrent_hash_map.h"
+
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathVec.h"
@@ -151,6 +153,9 @@ class MurmurHash
 	
 		uint64_t m_h1;
 		uint64_t m_h2;
+		
+		template<typename T>
+		friend size_t tbb::tbb_hasher( const T &h );
 
 };
 

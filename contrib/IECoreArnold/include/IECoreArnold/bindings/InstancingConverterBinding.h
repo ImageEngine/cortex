@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,28 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREARNOLD_INSTANCINGCONVERTERBINDING_H
+#define IECOREARNOLD_INSTANCINGCONVERTERBINDING_H
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
-#include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldShapeConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldMeshConverterBinding.h"
-#include "IECoreArnold/bindings/InstancingConverterBinding.h"
-
-using namespace IECoreArnold;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreArnold )
+namespace IECoreArnold
 {
-	bindRenderer();
-	bindUniverseBlock();
-	bindToArnoldConverter();
-	bindToArnoldShapeConverter();
-	bindToArnoldPointsConverter();
-	bindToArnoldCurvesConverter();
-	bindToArnoldMeshConverter();
-	bindInstancingConverter();
-}
+
+void bindInstancingConverter();
+
+} // namespace IECoreArnold
+
+#endif //  IECOREARNOLD_INSTANCINGCONVERTERBINDING_H

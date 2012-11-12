@@ -2,6 +2,12 @@ Additions :
 
 * Added const version of CameraController::getCamera().
 
+* Added ToArnoldConverter::create() factory function.
+
+* Implemented tbb_hasher( const IECore::MurmurHash & ), allowing MurmurHash to be used as a key in tbb::concurrent_hash_map.
+
+* Added IECoreArnold::InstancingConverter class, which can be used to manage a series of conversions from IECore::Primitive to Arnold AtNodes, returning Arnold instances when duplicate geometry is detected.
+
 Bug Fixes :
 
 * Fixed bug in CameraController which could cause crashes for cameras with preexisting transforms, and failure to update transforms correctly after swapping cameras with setCamera().

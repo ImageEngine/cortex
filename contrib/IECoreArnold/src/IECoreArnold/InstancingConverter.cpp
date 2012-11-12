@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,28 +32,59 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "tbb/concurrent_hash_map.h"
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
-#include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldShapeConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldMeshConverterBinding.h"
-#include "IECoreArnold/bindings/InstancingConverterBinding.h"
+#include "IECoreArnold/InstancingConverter.h"
+#include "IECoreArnold/ToArnoldConverter.h"
 
 using namespace IECoreArnold;
-using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreArnold )
+struct InstancingConverter::MemberData
 {
-	bindRenderer();
-	bindUniverseBlock();
-	bindToArnoldConverter();
-	bindToArnoldShapeConverter();
-	bindToArnoldPointsConverter();
-	bindToArnoldCurvesConverter();
-	bindToArnoldMeshConverter();
-	bindInstancingConverter();
+	typedef tbb::concurrent_hash_map<IECore::MurmurHash, AtNode *> Cache;
+	Cache cache;
+};
+
+InstancingConverter::InstancingConverter()
+{
+	m_data = new MemberData();
+}
+
+InstancingConverter::~InstancingConverter()
+{
+	delete m_data;
+}
+
+AtNode *InstancingConverter::convert( const IECore::Primitive *primitive )
+{
+	IECore::MurmurHash h = primitive->::IECore::Object::hash();
+	return convert( primitive, h );
+}
+
+AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &hash )
+{
+	MemberData::Cache::accessor a;
+	if( m_data->cache.insert( a, hash ) )
+	{
+		ToArnoldConverterPtr converter = ToArnoldConverter::create( const_cast<IECore::Primitive *>( primitive ) );
+		if( !converter )
+		{
+			return 0;
+		}
+		a->second = converter->convert();
+		return a->second;
+	}
+	else
+	{
+		if( a->second )
+		{
+			AtNode *instance = AiNode( "ginstance" );
+			AiNodeSetPtr( instance, "node", a->second );
+			return instance;
+		}
+	}
+		
+	return 0;
+
+
 }

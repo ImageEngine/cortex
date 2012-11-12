@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,28 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
+#include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
+
+#include "IECoreArnold/InstancingConverter.h"
 #include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldShapeConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldMeshConverterBinding.h"
 #include "IECoreArnold/bindings/InstancingConverterBinding.h"
 
 using namespace IECoreArnold;
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreArnold )
+static object convertWrapper( InstancingConverter &c, IECore::Primitive *primitive )
 {
-	bindRenderer();
-	bindUniverseBlock();
-	bindToArnoldConverter();
-	bindToArnoldShapeConverter();
-	bindToArnoldPointsConverter();
-	bindToArnoldCurvesConverter();
-	bindToArnoldMeshConverter();
-	bindInstancingConverter();
+	AtNode *node;
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		node = c.convert( primitive );
+	}
+	return atNodeToPythonObject( node );
+}
+
+static object convertWrapper2( InstancingConverter &c, IECore::Primitive *primitive, const IECore::MurmurHash &h )
+{
+	AtNode *node;
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		node = c.convert( primitive, h );
+	}
+	return atNodeToPythonObject( node );
+}
+
+void IECoreArnold::bindInstancingConverter()
+{
+	IECorePython::RefCountedClass<InstancingConverter, IECore::RefCounted>( "InstancingConverter" )
+		.def( init<>() )
+		.def( "convert", &convertWrapper )
+		.def( "convert", &convertWrapper2 )
+	;
 }
