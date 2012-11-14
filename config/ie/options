@@ -280,19 +280,25 @@ else :
 
 	mayaMajorVersion = "0" # it needs a value just for the install setup below to execute			
 
-# find nuke, unless we're on intel macs where the library doesn't link right now
-if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and targetApp=="nuke" :
-	try :
-		nukeVersion = targetAppVersion
-		nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-		if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
-			NUKE_ROOT = nukeReg["location"]
-			NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
-			INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-			INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
-			INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
-	except :
-		pass
+# find nuke if we're building for nuke
+if targetApp=="nuke" :
+	
+	nukeVersion = targetAppVersion
+	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
+	if "pngVersion" in nukeReg :
+		pngVersion = nukeReg["pngVersion"]
+		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + pngVersion
+		PNG_LIB_SUFFIX = "".join( pngVersion.split( "." )[:-1] )
+	else :
+		# we use the system libpng when building for Nuke 6 or below, as it links to an older
+		# version than we have installed centrally.
+		PNG_INCLUDE_PATH = "/usr/local/include/"
+	
+	NUKE_ROOT = nukeReg["location"]
+	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
+	INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 
 # find houdini if we're building for houdini
 if targetApp=="houdini" :
@@ -313,21 +319,6 @@ if targetApp=="houdini" :
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
 	INSTALL_HOUDINIICON_DIR = os.path.join( appPrefix, "icons" )
 	INSTALL_HOUDINITOOLBAR_DIR = os.path.join( appPrefix, "toolbar" )
-
-# find nuke if we're building for nuke
-## \todo: combine this with the nuke app section above
-if targetApp=="nuke" :
-	
-	nukeVersion = targetAppVersion
-	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-	if "pngVersion" in nukeReg :
-		pngVersion = nukeReg["pngVersion"]
-		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + pngVersion
-		PNG_LIB_SUFFIX = "".join( pngVersion.split( "." )[:-1] )
-	else :
-		# we use the system libpng when building for Nuke 6 or below, as it links to an older
-		# version than we have installed centrally.
-		PNG_INCLUDE_PATH = "/usr/local/include/"
 
 # find truelight, unless we're on osx, where we haven't got it to link yet
 if not IEEnv.platformOS().startswith("osx") :
