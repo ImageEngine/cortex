@@ -668,6 +668,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_HOUDINIMENU_DIR",
+	"The directory under which to install houdini menu files.",
+	"$INSTALL_PREFIX/houdini",
+)
+
+o.Add(
 	"INSTALL_MAYAICON_DIR",
 	"The directory under which to install maya icons.",
 	"$INSTALL_PREFIX/maya/icons",
@@ -2531,20 +2537,20 @@ if doConfigure :
 			# headers
 			mantraHeaderInstall = mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra", mantraHeaders )
 			mantraHeaderInstall += mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra/bindings", mantraBindingHeaders )		
-			mantraEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HEADER_DIR"] ) )
+			mantraEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMantra", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HEADER_DIR"] ) )
 			mantraEnv.Alias( "install", mantraHeaderInstall )
 			mantraEnv.Alias( "installMantra", mantraHeaderInstall )
 			
 			# VRAY_ieProcedural.dso
 			mantraProceduralEnv.Append(
 				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ),
+					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
 				],
 			)
 			mantraProceduralTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
 			mantraProcedural = mantraProceduralEnv.SharedLibrary( mantraProceduralTarget, mantraProceduralSources, SHLIBPREFIX="" )
 			mantraProceduralInstall = mantraProceduralEnv.Install( os.path.dirname( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraProcedural )
-			mantraProceduralEnv.Depends( houdiniPlugin, corePythonModule )
+			mantraProceduralEnv.Depends( mantraProcedural, mantraLib )
 			mantraProceduralEnv.AddPostAction( mantraProceduralInstall, lambda target, source, env : makeSymLinks( mantraProceduralEnv, mantraProceduralEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
 			mantraProceduralEnv.Alias( "install", mantraProceduralInstall )
 			mantraProceduralEnv.Alias( "installMantra", mantraProceduralInstall )
@@ -2552,20 +2558,20 @@ if doConfigure :
 			# VRAY_ieWorld dso
 			mantraWorldEnv.Append(
 				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ),
+					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
 				],
 			)
 			mantraWorldTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
 			mantraWorld = mantraWorldEnv.SharedLibrary( mantraWorldTarget, mantraWorldSources, SHLIBPREFIX="" )
 			mantraWorldInstall = mantraWorldEnv.Install( os.path.dirname( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraWorld )
-			mantraWorldEnv.Depends( houdiniPlugin, corePythonModule )
+			mantraWorldEnv.Depends( mantraProcedural, mantraLib )
 			mantraWorldEnv.AddPostAction( mantraWorldInstall, lambda target, source, env : makeSymLinks( mantraWorldEnv, mantraWorldEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
 			mantraWorldEnv.Alias( "install", mantraWorldInstall )
 			mantraWorldEnv.Alias( "installMantra", mantraWorldInstall )
 			
-			# VRAYprocedural
+			# VRAYprocedural menu
 			mantraVrayInclude = 'contrib/IECoreMantra/src/IECoreMantra/procedural/VRAYprocedural'
-			mantraVrayInstall = mantraProceduralEnv.Install( os.path.dirname( mantraProceduralEnv.subst( "$INSTALL_HOUDINIOTL_DIR" )[0:-1] ), source=[ mantraVrayInclude ] )
+			mantraVrayInstall = mantraProceduralEnv.Install( mantraProceduralEnv.subst( "$INSTALL_HOUDINIMENU_DIR" ), source=[ mantraVrayInclude ] )
 			mantraVrayForTest = mantraProceduralEnv.Command( "contrib/IECoreMantra/plugins/houdini/VRAYprocedural", mantraVrayInclude, Copy( "$TARGET", "$SOURCE" ) )
 			mantraProceduralEnv.Alias( "install", mantraVrayInstall )
 			mantraProceduralEnv.Alias( "installMantra", mantraVrayInstall )
@@ -2574,7 +2580,7 @@ if doConfigure :
 			mantraPythonModuleEnv.Append(
 				LIBS = [
 					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( mantraEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
 					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 				]
 			)
@@ -2612,7 +2618,7 @@ if doConfigure :
 			mantraTestEnv.Append( 
 				LIBS = [ 
 					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), 
-					os.path.basename( mantraEnv.subst( "$INSTALL_LIB_NAME" ) ),				
+					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
 				]
 			)
 			

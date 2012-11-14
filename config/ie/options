@@ -319,6 +319,13 @@ if targetApp=="houdini" :
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
 	INSTALL_HOUDINIICON_DIR = os.path.join( appPrefix, "icons" )
 	INSTALL_HOUDINITOOLBAR_DIR = os.path.join( appPrefix, "toolbar" )
+	INSTALL_HOUDINIMENU_DIR = os.path.join( appPrefix, "generic" )
+	
+	# install IECoreMantra if we're using a recent Houdini
+	if houdiniReg.get( "compatibilityVersion", "12.0" ) >= "12.1" :
+		WITH_MANTRA = True
+		INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+		INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
 
 # find truelight, unless we're on osx, where we haven't got it to link yet
 if not IEEnv.platformOS().startswith("osx") :
