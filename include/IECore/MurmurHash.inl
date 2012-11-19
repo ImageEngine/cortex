@@ -483,19 +483,13 @@ inline bool MurmurHash::operator < ( const MurmurHash &other ) const
 	return m_h1 < other.m_h1 || ( m_h1 == other.m_h1 && m_h2 < other.m_h2 );
 }
 
-} // namespace IECore
-
-namespace tbb
-{
-
 /// Implementation of tbb_hasher for MurmurHash, allowing MurmurHash to be used
 /// as a key in tbb::concurrent_hash_map.
-template<>
-inline static size_t tbb_hasher( const IECore::MurmurHash &h )
+inline size_t tbb_hasher( const MurmurHash &h )
 {
 	return h.m_h1 ^ h.m_h2;
 }
 
-} // namespace tbb
+} // namespace IECore
 
 #endif // IECORE_MURMURHASH_INL

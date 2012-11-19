@@ -154,8 +154,7 @@ class MurmurHash
 		uint64_t m_h1;
 		uint64_t m_h2;
 		
-		template<typename T>
-		friend size_t tbb::tbb_hasher( const T &h );
+		friend size_t tbb_hasher( const MurmurHash &h );
 
 };
 
