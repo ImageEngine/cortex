@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef IE_CORE_OBJECTREADER_H
-#define IE_CORE_OBJECTEREADER_H
+#define IE_CORE_OBJECTREADER_H
 
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
