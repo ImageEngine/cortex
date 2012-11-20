@@ -57,6 +57,9 @@ class State : public Bindable
 		typedef IECore::CompoundDataMap UserAttributesMap;
 
 		// class that binds a state on the constructor and revert the changes on the destructor.
+		/// \todo This is way too slow. We need to rewrite it to avoid all memory allocation, meaning
+		/// we should modify currentState in place, and then restore the previous values to it in
+		/// the destructor. We could also make State::userAttributes() lazily created.
 		struct ScopedBinding : private boost::noncopyable
 		{
 			public :
