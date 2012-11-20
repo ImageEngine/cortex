@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -74,12 +74,10 @@ def __parseDateTime( args, parameter ) :
 	raise SyntaxError( "Not a valid date/time: '%s'" % ( dateStr ) )
 
 
-def __serialiseDateTime( parameter ) :
-
-	dt = parameter.getTypedValue()
+def __serialiseDateTime( parameter, value ) :
 
 	# strptime does not support fractional seconds
-	dt = dt.replace( microsecond = 0 )
+	dt = value.value.replace( microsecond = 0 )
 
 	return [ str( dt ) ]
 

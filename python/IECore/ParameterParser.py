@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
+import inspect
 
 import IECore
 
@@ -146,14 +148,18 @@ class ParameterParser :
 			except Exception, e :
 				raise SyntaxError( "Problem parsing parameter \"%s\" : %s " % ( name, e ) )
 
-	## Returns a list of strings representing the values contained within parameters.
-	# This can later be passed to parse() to retrieve the values. May
-	# throw an exception if the value held by any of the parameters is not valid.
-	def serialise( self, parameters ) :
+	## Returns a list of strings representing the values contained within parameters,
+	# or alternately, the values contained within the values argument. This can later
+	# be passed to parse() to retrieve the values. Parameter values will be validated,
+	# and may throw an exception, unless the alternate values argument is used.
+	def serialise( self, parameters, values=None ) :
+		
+		if values is None :
+			values = parameters.getValidatedValue()
+		
+		return self.__serialiseWalk( parameters, values, "" )
 
-		return self.__serialiseWalk( parameters, "" )
-
-	def __serialiseWalk(self, parameter, rootName):
+	def __serialiseWalk( self, parameter, value, rootName ) :
 
 		# Allow parameters to request not to be serialised.
 		if "parser" in parameter.userData() and "serialise" in parameter.userData()["parser"]:
@@ -185,7 +191,13 @@ class ParameterParser :
 		if serialiser is not None :
 			# we have a registered serialiser - use it
 			try:
-				s = serialiser( parameter )
+				if "value" in inspect.getargspec( serialiser ).args :
+					s = serialiser( parameter, value )
+				else :
+					## \todo: remove this in Cortex 8
+					IECore.warning( "ParameterParser: Serialiser \"%s\" has a deprecated signature. Should be func( parameter, value )" % serialiser )
+					s = serialiser( parameter )
+				
 				if not isinstance( s, list ) :
 					raise RuntimeError( "Serialiser did not return a list." )
 				for ss in s :
@@ -204,7 +216,10 @@ class ParameterParser :
 				path = path + parameter.name + '.'
 			# recurse
 			for childParm in parameter.values() :
-				result += self.__serialiseWalk( childParm, path )
+				if value is not None and childParm.name in value.keys() :
+					result += self.__serialiseWalk( childParm, value[childParm.name], path )
+				else :
+					result += self.__serialiseWalk( childParm, value, path )
 		
 		return result
 		
@@ -463,29 +478,29 @@ def __parseObject( args, parameter ) :
 	parameter.setValidatedValue( v )
 	del args[0]
 	
-def __serialiseString( parameter ) :
-
-	return [ parameter.getTypedValue() ]
-
-def __serialiseStringArray( parameter ) :
-
-	return list( parameter.getValue() )
-
-def __serialiseUsingStr( parameter ) :
-
-	return [ str( parameter.getValidatedValue() ) ]
+def __serialiseString( parameter, value ) :
 	
-def __serialiseUsingSplitStr( parameter ) :
+	return [ value.value ]
 
-	return str( parameter.getValidatedValue() ).split()	
+def __serialiseStringArray( parameter, value ) :
+	
+	return list(value)
 
-def _serialiseUsingRepr( parameter ) :
+def __serialiseUsingStr( parameter, value ) :
+	
+	return [ str(value) ]
+	
+def __serialiseUsingSplitStr( parameter, value ) :
+	
+	return str(value).split()	
 
-	return [ "python:" + repr( parameter.getValidatedValue() ) ]
+def _serialiseUsingRepr( parameter, value ) :
+	
+	return [ "python:" + repr(value) ]
 
-def __serialiseTransformationMatrix( parameter ) :
+def __serialiseTransformationMatrix( parameter, value ) :
 
-	t = parameter.getValidatedValue().value
+	t = value.value
 	retList = []
 	retList.extend( str(t.translate).split() )
 	retList.extend( str(t.scale).split() )
@@ -499,11 +514,10 @@ def __serialiseTransformationMatrix( parameter ) :
 	retList.extend( str(t.scalePivotTranslation).split() )
 	return retList
 
-def __serialiseObject( parameter ) :
+def __serialiseObject( parameter, value ) :
 
-	v = parameter.getValidatedValue()
 	mio = IECore.MemoryIndexedIO( IECore.CharVectorData(), "/", IECore.IndexedIOOpenMode.Write )
-	v.save( mio, "v" )
+	value.save( mio, "v" )
 	buf = mio.buffer()
 	return [ IECore.decToHexCharVector( buf ) ]
 	

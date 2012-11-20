@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -146,7 +146,34 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( s, a.parameters() )
 
 		a()
+		
+		# test alternate serialisation (without validation)
+		notValidated = IECore.ParameterParser().serialise( a.parameters(), values = a.parameters().getValue() )
+		IECore.ParameterParser().parse( notValidated, a.parameters() )
+		
+		a()
 
+	def testSerialisingNonValidParameterValues( self ) :
+
+		p = IECore.FileNameParameter(
+			name = "f",
+			description = "d",
+			extensions = "tif tiff jpg cin",
+			check = IECore.FileNameParameter.CheckType.MustExist,
+		)
+
+		p.setValue( IECore.StringData( "test" ) )
+		self.assertRaises( RuntimeError, p.getValidatedValue )
+		self.assertRaises( RuntimeError, IECore.curry( IECore.ParameterParser().serialise, p ) )
+		s = IECore.ParameterParser().serialise( p, values = p.getValue() )
+		self.assertRaises( SyntaxError, IECore.curry( IECore.ParameterParser().parse, s, p ) )
+		
+		realImage = IECore.StringData( "test/IECore/data/tiff/thinned.tif" )
+		s = IECore.ParameterParser().serialise( p, values = realImage )
+		self.assertRaises( RuntimeError, p.getValidatedValue )
+		IECore.ParameterParser().parse( s, p )
+		self.assertEqual( p.getValidatedValue(), realImage )
+	
 	def testStringParsing( self ) :
 
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "stringParsing" )()
