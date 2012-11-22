@@ -36,7 +36,7 @@ global string $ieCurrentAEParameterisedHolderClass;
 global int $ieCurrentAEParameterisedHolderVersion;
 
 /// \todo: rewrite all of this in python using ieAttributeEditorControl
-global proc AEieParameterisedHolderTemplate( string $nodeName )
+global proc AEieParameterisedHolderNodeTemplate( string $nodeName )
 {
 	editorTemplate -beginScrollLayout;
 	
