@@ -163,25 +163,32 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 		glGetProgramiv( m_program, GL_ACTIVE_ATTRIBUTES, &numVertexs );
 		GLint maxVertexNameLength = 0;
 		glGetProgramiv( m_program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxVertexNameLength );
-		vector<char> name( maxVertexNameLength );
-		for( int i=0; i<numVertexs; i++ )
+		
+		// some versions of the nvidia drivers are returning maxVertexNameLength==0 when
+		// no attributes other than built in gl_* ones are defined by the shader. we don't
+		// bother retrieving anything in this case, as we skip built in parameters anyway.
+		if( numVertexs && maxVertexNameLength )
 		{
-			ParameterDescription d;
-			glGetActiveAttrib( m_program, i, maxVertexNameLength, 0, &d.size, &d.type, &name[0] );
-			d.name = &name[0];
-			GLint location = glGetAttribLocation( m_program, &name[0] );
-
-			// ignore native parameters
-			if( 0 == d.name.compare( 0, 3, "gl_" ) )
+			vector<char> name( maxVertexNameLength );
+			for( int i=0; i<numVertexs; i++ )
 			{
-				continue;
+				ParameterDescription d;
+				glGetActiveAttrib( m_program, i, maxVertexNameLength, 0, &d.size, &d.type, &name[0] );
+				d.name = &name[0];
+				GLint location = glGetAttribLocation( m_program, &name[0] );
+
+				// ignore native parameters
+				if( 0 == d.name.compare( 0, 3, "gl_" ) )
+				{
+					continue;
+				}
+
+				// \todo: implement arrays
+				if ( d.size != 1 )
+					continue;
+
+				m_vertexParameters[location] = d;
 			}
-
-			// \todo: implement arrays
-			if ( d.size != 1 )
-				continue;
-
-			m_vertexParameters[location] = d;
 		}
 	}
 }

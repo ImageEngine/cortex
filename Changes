@@ -7,6 +7,7 @@ Bug Fixes :
 
 * ToMayaMeshConverter uses the stIndices variable to compress the UVs in the mesh if the variable is available.
 * Fixed include guard in ObjectReader.h
+* Added workaround for recent NVIDIA driver changes which could cause crashes in IECoreGL::Shader.
 
 7.9.0 :
 
