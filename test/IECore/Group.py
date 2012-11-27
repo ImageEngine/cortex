@@ -108,7 +108,55 @@ class TestGroup( unittest.TestCase ) :
 
 		del g
 		self.assert_( g2.parent() is None )
-
+	
+	def testAttributes( self ) :
+		
+		# create a little hierarchy
+		g = Group()
+		g2 = Group()
+		g3 = Group()
+		
+		g.addChild( g2 )
+		g2.addChild( g3 )
+		
+		# define an attribute at the top of the hierarchy
+		g.setAttribute( "toptest", BoolData( False ) )
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( False ) )
+		
+		# change our mind and set it to true:
+		g.setAttribute( "toptest", BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		
+		# add another attribute
+		g.setAttribute( "toptest2", BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest2" ), BoolData( True ) )
+		
+		
+		# make sure there's only one AttributeState on the group:
+		self.assertEqual( len( g.state() ), 1 )
+		
+		# define one in the middle
+		g2.setAttribute( "middletest", BoolData( True ) )
+		
+		# override the one at the top
+		g2.setAttribute( "toptest", BoolData( False ) )
+		
+		# define one at the bottom
+		g3.setAttribute( "bottomtest", BoolData( False ) )
+		
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		self.assertEqual( g.getAttribute( "middletest" ), None )
+		self.assertEqual( g.getAttribute( "bottomtest" ), None )
+		
+		self.assertEqual( g2.getAttribute( "toptest" ), BoolData( False ) )
+		self.assertEqual( g2.getAttribute( "middletest" ), BoolData( True ) )
+		self.assertEqual( g2.getAttribute( "bottomtest" ), None )
+		
+		self.assertEqual( g3.getAttribute( "toptest" ), BoolData( False ) )
+		self.assertEqual( g3.getAttribute( "middletest" ), BoolData( True ) )
+		self.assertEqual( g3.getAttribute( "bottomtest" ), BoolData( False ) )
+		
+	
 	def testExceptions( self ) :
 
 		g = Group()

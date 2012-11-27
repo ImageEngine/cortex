@@ -35,6 +35,7 @@
 #include "IECore/Group.h"
 #include "IECore/Renderer.h"
 #include "IECore/AttributeBlock.h"
+#include "IECore/AttributeState.h"
 #include "IECore/MurmurHash.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
@@ -123,6 +124,57 @@ void Group::clearState()
 const Group::StateContainer &Group::state() const
 {
 	return m_state;
+}
+
+
+IECore::ConstDataPtr Group::getAttribute( const std::string &name ) const
+{
+	StateContainer::const_iterator it = m_state.begin();
+	for( ; it != m_state.end(); ++it )
+	{
+		if( ConstAttributeStatePtr attr = runTimeCast< const AttributeState >( *it ) )
+		{
+			CompoundDataMap::const_iterator attrIt = attr->attributes().find( name );
+			if( attrIt != attr->attributes().end() )
+			{
+				return attrIt->second;
+			}
+		}
+	}
+	
+	if( m_parent )
+	{
+		return m_parent->getAttribute( name );
+	}
+	
+	return 0;
+}
+
+void Group::setAttribute( const std::string &name, ConstDataPtr value )
+{
+	// find existing attribute/override it ?
+	StateContainer::iterator it = m_state.begin();
+	AttributeStatePtr attr;
+	for( ; it != m_state.end(); ++it )
+	{
+		if( attr = runTimeCast< AttributeState >( *it ) )
+		{
+			CompoundDataMap::iterator attrIt = attr->attributes().find( name );
+			if( attrIt != attr->attributes().end() )
+			{
+				attr->attributes()[ name ] = value->copy();
+				return;
+			}
+		}
+	}
+	
+	if( !attr )
+	{
+		attr = new AttributeState;
+		addState( attr );
+	}
+	
+	attr->attributes()[ name ] = value->copy();
 }
 
 void Group::addChild( VisibleRenderablePtr child )

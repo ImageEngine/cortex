@@ -43,6 +43,7 @@ namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( Group );
+IE_CORE_FORWARDDECLARE( Data );
 
 /// This class allows the grouping and rendering of a set
 /// of VisibleRenderables, applying a specific set of Transforms
@@ -93,6 +94,12 @@ class Group : public VisibleRenderable
 		/// Const access to the internal data structure used
 		/// to hold the state.
 		const StateContainer &state() const;
+		/// Query an attribute from the group's scope. Tries to
+		/// find the attribute in the group's state, then traverses
+		/// the group's parents
+		IECore::ConstDataPtr getAttribute( const std::string &name ) const;
+		/// Set an attribute on this group.
+		void setAttribute( const std::string &name, ConstDataPtr value );
 
 		/// Adds a child to this Group. If the child is a Group itself
 		/// and already has a parent then it will be removed from that

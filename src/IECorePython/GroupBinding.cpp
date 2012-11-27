@@ -95,6 +95,18 @@ static void renderChildren( const Group &group, Renderer *renderer )
 	group.renderChildren( renderer );
 }
 
+static DataPtr getAttribute( Group &g, const std::string &name )
+{
+	ConstDataPtr d = g.getAttribute( name );
+	if( d )
+	{
+		return d->copy();
+	}
+	return 0;
+}
+
+
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS( transformMatrixOverloads, transformMatrix, 0, 1 );
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS( globalTransformMatrixOverloads, globalTransformMatrix, 0, 1 );
 
@@ -110,6 +122,8 @@ void bindGroup()
 		.def( "addState", &Group::addState )
 		.def( "removeState", &Group::removeState )
 		.def( "clearState", &Group::clearState )
+		.def( "setAttribute", &Group::setAttribute )
+		.def( "getAttribute", &getAttribute, "Returns a copy of the internal attribute data." )
 		.def( "getTransform", (TransformPtr (Group::*)())&Group::getTransform )
 		.def( "setTransform", &Group::setTransform )
 		.def( "transformMatrix", &Group::transformMatrix, transformMatrixOverloads() )
