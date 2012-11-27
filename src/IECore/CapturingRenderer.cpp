@@ -53,6 +53,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/Group.h"
 #include "IECore/AttributeState.h"
+#include "IECore/Shader.h"
 #include "IECore/MatrixTransform.h"
 
 using namespace std;
@@ -254,6 +255,23 @@ class CapturingRenderer::Implementation
 			return 0;
 		}
 		
+		void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters )
+		{
+			ContextPtr context = currentContext();
+			if( !context )
+			{
+				return;
+			}
+			
+			Context::State &state = context->stack.back();
+			state.shaders.push_back( new Shader( name, type, parameters ) );
+			if( state.group->children().size() )
+			{
+				state.canCollapseGroups = false;
+			}
+		}
+		
+		
 		void primitive( PrimitivePtr primitive, const PrimitiveVariableMap &primVars )
 		{
 			ContextPtr context = currentContext();
@@ -338,6 +356,7 @@ class CapturingRenderer::Implementation
 				
 				GroupPtr group;
 				CompoundDataMap attributes;
+				std::vector< ShaderPtr > shaders;
 				M44f localTransform;
 				M44f worldTransform;
 				bool canCollapseGroups;
@@ -585,7 +604,13 @@ class CapturingRenderer::Implementation
 				}
 				wrapper->addState( wrapperAttributeState );
 			}
-			
+			if( state.shaders.size() )
+			{
+				for( std::vector< ShaderPtr >::const_iterator it = state.shaders.begin(); it!=state.shaders.end(); it++ )
+				{
+					wrapper->addState( (*it)->copy() );
+				}
+			}
 			if( state.localTransform != M44f() )
 			{
 				wrapper->setTransform( new MatrixTransform( state.localTransform ) );
@@ -610,6 +635,14 @@ class CapturingRenderer::Implementation
 				}
 				state.group->addState( attributeState );
 			}
+			if( state.shaders.size() )
+			{
+				for( std::vector< ShaderPtr >::const_iterator it = state.shaders.begin(); it!=state.shaders.end(); it++ )
+				{
+					state.group->addState( (*it)->copy() );
+				}
+			}
+
 			
 			if( state.localTransform != M44f() )
 			{
@@ -741,7 +774,7 @@ ConstDataPtr CapturingRenderer::getAttribute( const std::string &name ) const
 
 void CapturingRenderer::shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "CapturingRenderer::shader", "Not implemented" );
+	m_implementation->shader( type, name, parameters );
 }
 
 void CapturingRenderer::light( const std::string &name, const std::string &handle, const CompoundDataMap &parameters )

@@ -41,7 +41,7 @@ import sys
 import IECore
 
 class CapturingRendererTest( unittest.TestCase ) :
-
+	
 	def testNoWorldYet( self ) :
 	
 		r = IECore.CapturingRenderer()
@@ -302,7 +302,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 		self.assertEqual( c[1].getTransform().matrix, IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) )
 		self.failUnless( isinstance( c[0].children()[0], IECore.SpherePrimitive ) )
 		self.failUnless( isinstance( c[1].children()[0], IECore.SpherePrimitive ) )
-					
+	
 	class SnowflakeProcedural( IECore.Renderer.Procedural ) :
 	
 		threadUse = {}
@@ -345,7 +345,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 			else :
 
 				renderer.sphere( 1, -1, 1, 360, {} )
-			
+	
 	def testTopLevelProceduralThreading( self ) :
 	
 		# this is necessary so python will allow threads created by the renderer
@@ -720,9 +720,272 @@ class CapturingRendererTest( unittest.TestCase ) :
 				]
 			)
 		)
+	
+	def checkStructure( self, g, structure ):
+
+		expectedAttributes = IECore.CompoundData( structure["attributes"] )
+		attributeState = IECore.CompoundData()
+
+		expectedShaders = set()
+		for sh in structure["shaders"]:
+			expectedShaders.add( str( sh ) )
 		
+		shaderState = set()
+
+		for s in g.state():
+			if isinstance( s, IECore.AttributeState ):
+				attributeState = s.attributes
+			elif isinstance( s, IECore.Shader ):
+				shaderState.add( str( ( s.type, s.name, s.parameters ) ) )
+
+		if expectedAttributes != attributeState :
+			raise Exception( "Attribute state mismatch!! Expected = " + str( expectedAttributes ) + ", Actual = " + str( attributeState ) )
+		
+		if str( expectedShaders ) != str( shaderState ):
+			raise Exception( "Shader state mismatch!!\n Expected = " + str( expectedShaders ) + ",\n Actual = " + str( shaderState ) )
+
+		expectedChildren = structure["children"]
+
+		if len( expectedChildren ) != len( g.children() ):
+			raise Exception( "Child count mismatch!!" )
+
+		for childgroup, expectedStructure in zip( g.children(), expectedChildren ):
+
+			if isinstance( childgroup, IECore.Group ):
+				self.checkStructure( childgroup, expectedStructure )
+			else:
+				if childgroup.typeName() != expectedStructure:
+					raise Exception( "Child type mismatch!!" )
 	
+	def printGroup( self, g, prefix="" ):
+
+		print prefix, g
+
+		if isinstance( g, IECore.Group ):
+
+			print prefix
+			for s in g.state():
+				if isinstance( s, IECore.AttributeState ):
+					print prefix, "attributes:", s.attributes
+				elif isinstance( s, IECore.Shader ):
+					print prefix, "shader:", s.name, s.type, s.parameters
+			print prefix
+
+			for c in g.children():
+				self.printGroup( c, prefix + "\t" )
 	
+	def testAttributesAndShaders( self ):
+		
+		r = IECore.CapturingRenderer()
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.setAttribute( "user:test", IECore.BoolData( True ) )
+			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
+			
+			with IECore.AttributeBlock( r ):
+				r.shader( "asdf2", "surface", { "aaa": IECore.IntData( 1 ) } )
+				
+				with IECore.AttributeBlock( r ):
+				
+					r.setAttribute( "name", IECore.StringData( "sphere1" ) )
+					r.setAttribute( "yahyah", IECore.StringData( "blahblah" ) )
+					r.shader( "sphere1Shader", "surface", { "aaa": IECore.IntData( 1 ) } )
+					r.sphere( 1, -1, 1, 360, {} )
+					
+					r.setAttribute( "name", IECore.StringData( "sphere2" ) )
+					r.shader( "sphere2Shader", "surface", { "bbb": IECore.IntData( 1 ) } )
+					r.sphere( 1, -1, 1, 360, {} )
+					
+				with IECore.AttributeBlock( r ):
+				
+					r.setAttribute( "name", IECore.StringData( "sphere1" ) )
+					r.setAttribute( "yahyah", IECore.StringData( "blahblah" ) )
+					r.shader( "sphere1Shader", "surface", { "aaa": IECore.IntData( 1 ) } )
+					r.sphere( 1, -1, 1, 360, {} )
+		
+		expectedStructure = {
+			"attributes" : { "user:test": IECore.BoolData( True ) },
+			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
+			"children" : [
+				{
+					"attributes" : {},
+					"shaders" : [ ( "asdf2", "surface", IECore.CompoundData( { "aaa": IECore.IntData( 1 ) } ) ) ],
+					"children" : [
+						{
+							"attributes" : {},
+							"shaders" : {},
+							"children" : [
+								{
+									"attributes" : { 'name':IECore.StringData( "sphere1" ), 'yahyah':IECore.StringData( "blahblah" ) },
+									"shaders" : [ ( "sphere1Shader", "surface", IECore.CompoundData( { "aaa": IECore.IntData( 1 ) } ) ) ],
+									"children" : [ "SpherePrimitive" ],
+								},
+								{
+									"attributes" : { 'name':IECore.StringData( "sphere2" ), 'yahyah':IECore.StringData( "blahblah" ) },
+									"shaders" : [
+										( "sphere1Shader", "surface", IECore.CompoundData( { "aaa": IECore.IntData( 1 ) } ) ),
+										( "sphere2Shader", "surface", IECore.CompoundData( { "bbb": IECore.IntData( 1 ) } ) )
+									],
+									"children" : [ "SpherePrimitive" ],
+								},
+							],
+
+						},
+
+						{
+							"attributes" : {'name':IECore.StringData( "sphere1" ),'yahyah':IECore.StringData( "blahblah" ) },
+							"shaders" : [ ( "sphere1Shader", "surface", IECore.CompoundData( { "aaa": IECore.IntData( 1 ) } ) ) ],
+							"children" : [ "SpherePrimitive" ],
+						},
+					]
+				}
+			]
+		}
+		
+		self.checkStructure( r.world(), expectedStructure )
+		
+
+	class ChainProcedural( IECore.Renderer.Procedural ) :
+
+		def __init__( self, maxLevel = 3, level = 0, withAttributeBlock = True ) :
+
+			IECore.Renderer.Procedural.__init__( self )
+
+			self.__maxLevel = maxLevel
+			self.__level = level
+			self.__withAttributeBlock = withAttributeBlock
+
+		def bound( self ) :
+
+			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+
+		def render( self, renderer ) :
+			
+			if self.__withAttributeBlock:
+				renderer.attributeBegin()
+
+			renderer.shader( "asdf", "surface", { "level": IECore.IntData( self.__level ) } )
+			renderer.setAttribute( "name", IECore.StringData(str( self.__level) ) )
+
+			if not renderer.getAttribute( "user:test" ) :
+				raise Exception( "couldn't read user:test attribute on level", self.__level, "ChainProcedural" )
+
+			if self.__level < self.__maxLevel :
+				renderer.procedural( CapturingRendererTest.ChainProcedural( self.__maxLevel, self.__level + 1, self.__withAttributeBlock ) )
+			else :
+				renderer.sphere( 1, -1, 1, 360, {} )
+			
+			if self.__withAttributeBlock:
+				renderer.attributeEnd()
+		
+	def testProceduralAttributesAndShaders( self ):
+	
+		r = IECore.CapturingRenderer()
+	
+		with IECore.WorldBlock( r ) :
+		
+			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( False ) )
+		
+			r.setAttribute( "user:test", IECore.BoolData( True ) )
+			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
+			
+			r.procedural( self.ChainProcedural( maxLevel = 1 ) )
+		
+		expectedStructure = {
+			"attributes" : {'user:test':IECore.BoolData( 1 ), "cp:procedural:reentrant": IECore.BoolData( False )},
+			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
+			"children" : [
+				{
+					"attributes" : {'name':IECore.StringData( "0" )},
+					"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ) ],
+					"children" : [
+						{
+							"attributes" : {'name':IECore.StringData( "1" )},
+							"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
+							"children" : [ "SpherePrimitive" ]
+						},
+					]
+				},
+			]
+		}
+		
+		self.checkStructure( r.world(), expectedStructure )	
+		
+		r = IECore.CapturingRenderer()
+	
+		with IECore.WorldBlock( r ) :
+		
+			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( False ) )
+		
+			r.setAttribute( "user:test", IECore.BoolData( True ) )
+			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
+			
+			r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = False ) )
+		
+		expectedStructure = {
+			"attributes" : {'name':IECore.StringData( "1" ),'user:test':IECore.BoolData( 1 ),'cp:procedural:reentrant':IECore.BoolData( 0 )},
+			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
+			"children" : [ "SpherePrimitive" ]
+		}
+		
+		self.checkStructure( r.world(), expectedStructure )
+			
+		
+	def testThreadedProceduralAttributesAndShaders( self ):
+	
+		r = IECore.CapturingRenderer()
+	
+		with IECore.WorldBlock( r ) :
+		
+			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( True ) )
+		
+			r.setAttribute( "user:test", IECore.BoolData( True ) )
+			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
+			
+			r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = True ) )
+		
+		
+		expectedStructure = {
+			"attributes" : {'user:test':IECore.BoolData( 1 ), "cp:procedural:reentrant": IECore.BoolData( 1 )},
+			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
+			"children" : [
+				{
+					"attributes" : {'name':IECore.StringData( "0" )},
+					"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ) ],
+					"children" : [
+						{
+							"attributes" : {'name':IECore.StringData( "1" )},
+							"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
+							"children" : [ "SpherePrimitive" ]
+						},
+					]
+				},
+			]
+		}
+		
+		self.checkStructure( r.world(), expectedStructure )
+
+		r = IECore.CapturingRenderer()
+	
+		with IECore.WorldBlock( r ) :
+		
+			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( True ) )
+		
+			r.setAttribute( "user:test", IECore.BoolData( True ) )
+			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
+			
+			r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = False ) )
+		
+		expectedStructure = {
+			"attributes" : {'name':IECore.StringData( "1" ),'user:test':IECore.BoolData( 1 ),'cp:procedural:reentrant':IECore.BoolData( 1 )},
+			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
+			"children" : [ "SpherePrimitive" ]
+		}
+		
+		self.checkStructure( r.world(), expectedStructure )
+		
+
 if __name__ == "__main__":
 	unittest.main()
 
