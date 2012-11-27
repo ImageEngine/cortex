@@ -49,7 +49,6 @@
 #include "IECoreMaya/Convert.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
 
 #include "maya/MGlobal.h"
 #include "maya/MDrawData.h"
@@ -67,7 +66,7 @@
 using namespace IECoreMaya;
 using namespace std;
 
-ProceduralHolderUI::ProceduralHolderUI() : m_prevSceneUpdate( -1 )
+ProceduralHolderUI::ProceduralHolderUI()
 {
 	IECoreGL::init( true );
 }
@@ -111,7 +110,7 @@ void ProceduralHolderUI::getDrawRequests( const MDrawInfo &info, bool objectAndA
 		setWireFrameColors( request, info.displayStatus() );
 		requests.add( request );
 	}
-	
+
 	// requests for the scene if necessary
 	MPlug pGLPreview( proceduralHolder->thisMObject(), ProceduralHolder::aGLPreview );
 	bool glPreview = false;
@@ -265,33 +264,18 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 			resetHilites();
 
 			IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
-			int sceneUpdate = proceduralHolder->getSceneUpdateCount();
-			M3dView::DisplayStyle mayaDisplayStyle = (M3dView::DisplayStyle)request.displayStyle();
-			
-			MObject selection = request.component();
-			
 			if( scene )
 			{
-				
-				// we don't want to call scene->render() more than we have to, because it's a bit slow, so
-				// we kind of cache the gl calls it generates in display lists, comme ca:
-				
-				IECoreGL::StatePtr displayState = new IECoreGL::State( *m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() ) );
-				
-				std::string componentSelection;
-				if( request.displayStatus() == M3dView::kLead )
-				{
-					componentSelection = "lead";
-				}
-				
-				if ( selection != MObject::kNullObj )
+				IECoreGL::ConstStatePtr displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
+
+				if ( request.component() != MObject::kNullObj )
 				{
 					MDoubleArray col;
 					s = MGlobal::executeCommand( "colorIndex -q 21", col );
 					assert( s );
 					IECoreGL::WireframeColorStateComponentPtr hilite = new IECoreGL::WireframeColorStateComponent( Imath::Color4f( col[0], col[1], col[2], 1.0f ) );
 
-					MFnSingleIndexedComponent fnComp( selection, &s );
+					MFnSingleIndexedComponent fnComp( request.component(), &s );
 					assert( s );
 
 					int len = fnComp.elementCount( &s );
@@ -299,7 +283,6 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 					for ( int j = 0; j < len; j++ )
 					{
 						int compId = fnComp.element(j);
-						componentSelection += str( boost::format( "%i " ) % compId );
 
 						assert( proceduralHolder->m_componentToGroupMap.find( compId ) != proceduralHolder->m_componentToGroupMap.end() );
 
@@ -310,94 +293,8 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 						);
 					}
 				}
-				
-				if( m_prevSceneUpdate != sceneUpdate || m_prevDisplayStatus != request.displayStatus() )
-				{
-					for( DisplayListMap::iterator it = m_displayListIds.begin(); it != m_displayListIds.end(); ++it )
-					{
-						glDeleteLists( it->second, 1 );
-					}
-					
-					m_displayListIds.clear();
-				}
-				m_prevSceneUpdate = sceneUpdate;
-				m_prevDisplayStatus = request.displayStatus();
-				
-				MPlug pCulling( proceduralHolder->thisMObject(), ProceduralHolder::aCulling );
-				int culling = 0;
-				pCulling.getValue( culling );
-				
-				switch( culling )
-				{
-					case 1:
-					{
-						displayState->add( new IECoreGL::DoubleSidedStateComponent( false ) );
-						break;
-					}
-					case 2:
-					{
-						displayState->add( new IECoreGL::DoubleSidedStateComponent( false ) );
-						displayState->add( new IECoreGL::RightHandedOrientationStateComponent( false ) );
-						break;
-					}
-					default: break;
-				}
-				
-				DisplayInfo key( request.displayStatus(), mayaDisplayStyle, culling );
-				
-				if(
-					( mayaDisplayStyle == M3dView::kWireFrame || mayaDisplayStyle == M3dView::kBoundingBox || mayaDisplayStyle == M3dView::kPoints) &&
-					( request.displayStatus() == M3dView::kHilite )
-				)
-				{
-					if( m_prevComponentSelection != componentSelection )
-					{
-						DisplayListMap::iterator it = m_displayListIds.find( key );
-						if( it != m_displayListIds.end() )
-						{
-							glDeleteLists( it->second, 1 );
-							m_displayListIds.erase( it );
-						}
-					}
-					m_prevComponentSelection = componentSelection;
-				}
-				
-				
-				if( proceduralHolder->useDisplayLists() )
-				{
-					DisplayListMap::iterator it = m_displayListIds.find( key );
-
-					if( it == m_displayListIds.end() )
-					{
-						GLuint displayListId = glGenLists(1);
-
-						m_displayListIds[ key ] = displayListId;
-
-						glNewList( displayListId, GL_COMPILE_AND_EXECUTE );
-
-						try
-						{
-							scene->render( displayState );
-						}
-						catch( const IECoreGL::Exception &e )
-						{
-							IECore::msg( IECore::Msg::Error, "ProceduralHolderUI::draw", boost::format( "IECoreGL Exception : %s" ) % e.what() );
-						}
-
-						glEndList();
-					}
-					else
-					{
-						glCallList( m_displayListIds[ key ] );
-					}
-				}
-				else
-				{
-					scene->render( displayState );
-				}
-				
+				scene->render( displayState );
 			}
-			
 		}
 	}
 	catch( const IECoreGL::Exception &e )
