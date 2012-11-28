@@ -721,6 +721,25 @@ class CapturingRendererTest( unittest.TestCase ) :
 			)
 		)
 	
+	# convenience method for debugging the following tests if you've broken them:
+	def printGroup( self, g, prefix="" ):
+
+		print prefix, g
+
+		if isinstance( g, IECore.Group ):
+
+			print prefix
+			for s in g.state():
+				if isinstance( s, IECore.AttributeState ):
+					print prefix, "attributes:", s.attributes
+				elif isinstance( s, IECore.Shader ):
+					print prefix, "shader:", s.name, s.type, s.parameters
+			print prefix
+
+			for c in g.children():
+				self.printGroup( c, prefix + "\t" )
+	
+	
 	def checkStructure( self, g, structure ):
 
 		expectedAttributes = IECore.CompoundData( structure["attributes"] )
@@ -739,7 +758,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 				shaderState.add( str( ( s.type, s.name, s.parameters ) ) )
 
 		if expectedAttributes != attributeState :
-			raise Exception( "Attribute state mismatch!! Expected = " + str( expectedAttributes ) + ", Actual = " + str( attributeState ) )
+			raise Exception( "Attribute state mismatch!!\n Expected = " + str( expectedAttributes ) + ",\n Actual = " + str( attributeState ) )
 		
 		if str( expectedShaders ) != str( shaderState ):
 			raise Exception( "Shader state mismatch!!\n Expected = " + str( expectedShaders ) + ",\n Actual = " + str( shaderState ) )
@@ -747,7 +766,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 		expectedChildren = structure["children"]
 
 		if len( expectedChildren ) != len( g.children() ):
-			raise Exception( "Child count mismatch!!" )
+			raise Exception( "Child count mismatch!! Expected = " + str( len( expectedChildren ) ) + " Actual = " + str( len( g.children() ) ) )
 
 		for childgroup, expectedStructure in zip( g.children(), expectedChildren ):
 
@@ -757,22 +776,6 @@ class CapturingRendererTest( unittest.TestCase ) :
 				if childgroup.typeName() != expectedStructure:
 					raise Exception( "Child type mismatch!!" )
 	
-	def printGroup( self, g, prefix="" ):
-
-		print prefix, g
-
-		if isinstance( g, IECore.Group ):
-
-			print prefix
-			for s in g.state():
-				if isinstance( s, IECore.AttributeState ):
-					print prefix, "attributes:", s.attributes
-				elif isinstance( s, IECore.Shader ):
-					print prefix, "shader:", s.name, s.type, s.parameters
-			print prefix
-
-			for c in g.children():
-				self.printGroup( c, prefix + "\t" )
 	
 	def testAttributesAndShaders( self ):
 		
@@ -844,7 +847,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 		}
 		
 		self.checkStructure( r.world(), expectedStructure )
-		
+	
 
 	class ChainProcedural( IECore.Renderer.Procedural ) :
 
@@ -865,8 +868,9 @@ class CapturingRendererTest( unittest.TestCase ) :
 			if self.__withAttributeBlock:
 				renderer.attributeBegin()
 
-			renderer.shader( "asdf", "surface", { "level": IECore.IntData( self.__level ) } )
+			renderer.shader( "shader%d" % self.__level, "surface", { "level": IECore.IntData( self.__level ) } )
 			renderer.setAttribute( "name", IECore.StringData(str( self.__level) ) )
+			renderer.setAttribute( "attr%d" % self.__level, IECore.StringData(str( self.__level) ) )
 
 			if not renderer.getAttribute( "user:test" ) :
 				raise Exception( "couldn't read user:test attribute on level", self.__level, "ChainProcedural" )
@@ -878,113 +882,107 @@ class CapturingRendererTest( unittest.TestCase ) :
 			
 			if self.__withAttributeBlock:
 				renderer.attributeEnd()
-		
+	
+	
 	def testProceduralAttributesAndShaders( self ):
-	
-		r = IECore.CapturingRenderer()
-	
-		with IECore.WorldBlock( r ) :
 		
-			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( False ) )
-		
-			r.setAttribute( "user:test", IECore.BoolData( True ) )
-			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
-			
-			r.procedural( self.ChainProcedural( maxLevel = 1 ) )
-		
-		expectedStructure = {
-			"attributes" : {'user:test':IECore.BoolData( 1 ), "cp:procedural:reentrant": IECore.BoolData( False )},
-			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
-			"children" : [
-				{
-					"attributes" : {'name':IECore.StringData( "0" )},
-					"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ) ],
-					"children" : [
-						{
-							"attributes" : {'name':IECore.StringData( "1" )},
-							"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
-							"children" : [ "SpherePrimitive" ]
-						},
-					]
-				},
-			]
-		}
-		
-		self.checkStructure( r.world(), expectedStructure )	
-		
-		r = IECore.CapturingRenderer()
-	
-		with IECore.WorldBlock( r ) :
-		
-			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( False ) )
-		
-			r.setAttribute( "user:test", IECore.BoolData( True ) )
-			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
-			
-			r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = False ) )
-		
-		expectedStructure = {
-			"attributes" : {'name':IECore.StringData( "1" ),'user:test':IECore.BoolData( 1 ),'cp:procedural:reentrant':IECore.BoolData( 0 )},
-			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
-			"children" : [ "SpherePrimitive" ]
-		}
-		
-		self.checkStructure( r.world(), expectedStructure )
-			
-		
-	def testThreadedProceduralAttributesAndShaders( self ):
-	
-		r = IECore.CapturingRenderer()
-	
-		with IECore.WorldBlock( r ) :
-		
-			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( True ) )
-		
-			r.setAttribute( "user:test", IECore.BoolData( True ) )
-			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
-			
-			r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = True ) )
-		
-		
-		expectedStructure = {
-			"attributes" : {'user:test':IECore.BoolData( 1 ), "cp:procedural:reentrant": IECore.BoolData( 1 )},
-			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
-			"children" : [
-				{
-					"attributes" : {'name':IECore.StringData( "0" )},
-					"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ) ],
-					"children" : [
-						{
-							"attributes" : {'name':IECore.StringData( "1" )},
-							"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
-							"children" : [ "SpherePrimitive" ]
-						},
-					]
-				},
-			]
-		}
-		
-		self.checkStructure( r.world(), expectedStructure )
+		# check that the reentrant structure is the same as the non reentrant one:
+		for reentrancy in [ False, True ]:
 
-		r = IECore.CapturingRenderer()
-	
-		with IECore.WorldBlock( r ) :
-		
-			r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( True ) )
-		
-			r.setAttribute( "user:test", IECore.BoolData( True ) )
-			r.shader( "asdf", "surface", { "sss": IECore.IntData( 1 ) } )
+			r = IECore.CapturingRenderer()
 			
-			r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = False ) )
+			with IECore.WorldBlock( r ) :
+
+				r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( reentrancy ) )
+				
+				# procedural throws an exception if the renderer can't do a getAttribute on this attribute,
+				# so this is a test that it's picking it up correctly in multi level nested procedurals
+				r.setAttribute( "user:test", IECore.BoolData( True ) )
+				r.shader( "topshader", "surface", { "sss": IECore.IntData( 1 ) } )
+
+				r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = False ) )
+			
+			expectedStructure = {			
+				"attributes" : {"cp:procedural:reentrant": IECore.BoolData( reentrancy ), "user:test": IECore.BoolData( True ) },
+				"shaders" : [ ( "topshader", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
+				"children" : [
+					{
+						"attributes" : {"name": IECore.StringData( "0" ), "attr0": IECore.StringData( "0" ) },
+						"shaders" : [ ( "shader0", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ) ],
+						"children" : [
+							{
+								"attributes" : {"name": IECore.StringData( "1" ), "attr1": IECore.StringData( "1" ) },
+								"shaders" : [ ( "shader1", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
+								"children" : [
+									"SpherePrimitive"
+								]
+							},
+						]
+					},
+				]
+
+			}
+			
+			self.checkStructure( r.world(), expectedStructure )
+	
+	
+	def testProceduralStateLeaking( self ):
 		
-		expectedStructure = {
-			"attributes" : {'name':IECore.StringData( "1" ),'user:test':IECore.BoolData( 1 ),'cp:procedural:reentrant':IECore.BoolData( 1 )},
-			"shaders" : [ ( "asdf", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ), ( "asdf", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
-			"children" : [ "SpherePrimitive" ]
-		}
+		# this used to result in attributes leaking out of the ChainProcedural and affecting the sphere
+		# following it - that shouldn't happen...
 		
-		self.checkStructure( r.world(), expectedStructure )
-		
+		for reentrancy in [ False, True ]:
+			
+			r = IECore.CapturingRenderer()
+			with IECore.WorldBlock( r ) :
+
+				r.setAttribute( "cp:procedural:reentrant", IECore.BoolData( reentrancy ) )
+
+				# procedural throws an exception if it can't do a getAttribute  
+				r.setAttribute( "user:test", IECore.BoolData( True ) )
+				r.shader( "topshader", "surface", { "sss": IECore.IntData( 1 ) } )
+
+				r.procedural( self.ChainProcedural( maxLevel = 1, withAttributeBlock = False ) )
+
+				r.setAttribute( "asdf", IECore.BoolData( True ) )
+
+				r.sphere( 1, -1, 1, 360, {} )
+
+			expectedStructure = {
+				"attributes" : {},
+				"shaders" : [],
+				"children" : [
+					{
+						"attributes" : {"cp:procedural:reentrant": IECore.BoolData( reentrancy ), "user:test": IECore.BoolData( True ) },
+						"shaders" : [ ( "topshader", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
+						"children" : [
+							{
+								"attributes" : {"name": IECore.StringData( "0" ), "attr0": IECore.StringData( "0" ) },
+								"shaders" : [ ( "shader0", "surface", IECore.CompoundData( { "level": IECore.IntData( 0 ) } ) ) ],
+								"children" : [
+									{
+										"attributes" : {"name": IECore.StringData( "1" ), "attr1": IECore.StringData( "1" ) },
+										"shaders" : [ ( "shader1", "surface", IECore.CompoundData( { "level": IECore.IntData( 1 ) } ) ) ],
+										"children" : [
+											"SpherePrimitive"
+										]
+									},
+								]
+							},
+						]
+					},
+					{
+						"attributes" : {"cp:procedural:reentrant": IECore.BoolData( reentrancy ), "user:test": IECore.BoolData( True ), "asdf": IECore.BoolData( True ) },
+						"shaders" : [ ( "topshader", "surface", IECore.CompoundData( { "sss": IECore.IntData( 1 ) } ) ) ],
+						"children" : [
+							"SpherePrimitive"
+						]
+					},
+				]
+			}
+
+			self.checkStructure( r.world(), expectedStructure )	
+	
 
 if __name__ == "__main__":
 	unittest.main()

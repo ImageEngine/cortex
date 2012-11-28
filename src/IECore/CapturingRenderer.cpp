@@ -252,7 +252,9 @@ class CapturingRenderer::Implementation
 				}
 			}
 			
-			return 0;
+			// if the attribute's not defined in the local state, maybe it's defined on the group, or one
+			// of its parents?
+			return stack.back().group->getAttribute( name );
 		}
 		
 		void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters )
@@ -330,7 +332,10 @@ class CapturingRenderer::Implementation
 			}
 			else
 			{
+				// enclose this in an attribute block to prevent leaking:
+				attributeBegin();
 				procedural->render( renderer );
+				attributeEnd();
 			}
 		}
 	
@@ -372,13 +377,6 @@ class CapturingRenderer::Implementation
 			{
 				stack.push_back( State() );
 				State &state = stack.back();
-				for( StateStack::const_iterator it=parent->stack.begin(); it!=parent->stack.end(); it++ )
-				{
-					for( CompoundDataMap::const_iterator dIt=it->attributes.begin(); dIt!=it->attributes.end(); dIt++ )
-					{
-						state.attributes.insert( *dIt );
-					}
-				}
 				state.worldTransform = parent->stack.back().worldTransform;
 			}
 		
