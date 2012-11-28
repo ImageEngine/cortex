@@ -1137,6 +1137,15 @@ class TestRenderer( unittest.TestCase ) :
 		
 		self.assertEqual( len( c.messages ), 0 )
 		
+		
+		# it should just ignore this, because of the "lg:" prefix:
+		c = CapturingMessageHandler()
+		with c :
+			with IECore.WorldBlock( r ):
+				r.shader( "lg:shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+		
+		self.assertEqual( len( c.messages ), 0 )
+		
 		# this aint right!:
 		c = CapturingMessageHandler()
 		with c :
