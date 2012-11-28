@@ -1387,6 +1387,7 @@ void Shader::setVertexParameter( GLint parameterIndex, const IECore::Data *value
 			glVertexAttribPointer( parameterIndex, 1, GL_DOUBLE, false, 0, ((const IECore::DoubleVectorData *)value)->baseReadable() );
 			break;
 		case IECore::CharVectorDataTypeId :
+			/// \todo Is normalize really right here? It seems to be being passed into the stride argument.
 			glVertexAttribPointer( parameterIndex, 1, GL_BYTE, false, normalize, ((const IECore::CharVectorData *)value)->baseReadable() );
 			break;
 		case IECore::UCharVectorDataTypeId :
