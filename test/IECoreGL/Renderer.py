@@ -1106,7 +1106,46 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r = doRender( "deferred", False )
 		self.assertEqual( len( r.scene().root().children() ), 0 )
+	
+	def testWarningMessages( self ):
+		r = Renderer()
 		
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		
+		# gl renderer only supports "surface" shaders, so it should complain about this:
+		c = CapturingMessageHandler()
+		with c :
+			with IECore.WorldBlock( r ):
+				r.shader( "shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+		
+		self.assertEqual( len( c.messages ), 1 )
+		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
+		
+		# it should just ignore this, because of the "ri:" prefix:
+		c = CapturingMessageHandler()
+		with c :
+			with IECore.WorldBlock( r ):
+				r.shader( "ri:shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+		
+		self.assertEqual( len( c.messages ), 0 )
+		
+		# this should work fine:
+		c = CapturingMessageHandler()
+		with c :
+			with IECore.WorldBlock( r ):
+				r.shader( "gl:surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+		
+		self.assertEqual( len( c.messages ), 0 )
+		
+		# this aint right!:
+		c = CapturingMessageHandler()
+		with c :
+			with IECore.WorldBlock( r ):
+				r.shader( "gl:nonsense", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+		
+		self.assertEqual( len( c.messages ), 1 )
+		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
+	
 	def tearDown( self ) :
 
 		files = [

@@ -1538,7 +1538,7 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 		}
 		m_data->implementation->addState( shaderState );
 	}
-	else
+	else if( type.find_first_of( "gl:" ) == 0 || type.find_first_of( ":" ) == string::npos )
 	{
 		msg( Msg::Warning, "Renderer::shader", boost::format( "Unsupported shader type \"%s\"." ) % type );
 	}
