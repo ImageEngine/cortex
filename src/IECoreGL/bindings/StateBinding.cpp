@@ -46,6 +46,11 @@ using namespace boost::python;
 namespace IECoreGL
 {
 
+static IECore::CompoundDataPtr userAttributes( State &s )
+{
+	return s.userAttributes();
+}
+
 static StatePtr defaultState()
 {
 	return IECore::constPointerCast< State >( State::defaultState() );
@@ -53,16 +58,22 @@ static StatePtr defaultState()
 
 void bindState()
 {
-	// \todo: add custom attribute get/add/remove/list? access functions
-	IECorePython::RunTimeTypedClass<State>()
+	scope s = IECorePython::RunTimeTypedClass<State>()
 		.def( init<bool>() )
+		.def( init<const State &>() )
 		.def( "add", (void (State::*)( StatePtr ) )&State::add )
 		.def( "add", (void (State::*)( StateComponentPtr ) )&State::add )
 		.def( "get", ( StateComponentPtr (State::*)( IECore::TypeId) )&State::get )
 		.def( "remove", (void (State::*)( IECore::TypeId) )&State::remove )
 		.def( "isComplete", &State::isComplete )
+		.def( "userAttributes", &userAttributes )
 		.def( "defaultState", &defaultState ).staticmethod( "defaultState" )
 		.def( "bindBaseState", &State::bindBaseState ).staticmethod( "bindBaseState" )
+	;
+	
+	// this is turned into the actual ScopedBinding class in IECoreGL/State.py.
+	class_<State::ScopedBinding, boost::noncopyable>( "_ScopedBinding", no_init )
+		.def( init<const State &, State &>() )
 	;
 }
 

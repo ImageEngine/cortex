@@ -53,7 +53,7 @@ Scene::~Scene()
 {
 }
 
-void Scene::render( const State * state ) const
+void Scene::render( State *state ) const
 {
 	if( m_camera )
 	{
@@ -74,7 +74,8 @@ void Scene::render( const State * state ) const
 
 void Scene::render() const
 {
-	render( State::defaultState() );
+	/// \todo Can we avoid this cast?
+	render( const_cast<State *>( State::defaultState().get() ) );
 }
 
 Imath::Box3f Scene::bound() const
@@ -84,7 +85,7 @@ Imath::Box3f Scene::bound() const
 
 size_t Scene::select( const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
 {
-	ConstStatePtr state = State::defaultState();
+	State *state = const_cast<State *>( State::defaultState().get() );
 
 	if( m_camera )
 	{

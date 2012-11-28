@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,34 +43,30 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( State );
 
-State::ScopedBinding::ScopedBinding( State &s, const State &currentState )
+State::ScopedBinding::ScopedBinding( const State &s, State &currentState )
+	:	m_currentState( currentState )
 {
 	m_savedComponents.reserve( s.m_components.size() );
 
 	for( ComponentMap::const_iterator it=s.m_components.begin(); it!=s.m_components.end(); it++ )
 	{
 		m_savedComponents.push_back( currentState.get( it->first ) );
+		m_currentState.add( it->second );
 	}
 	s.bind();
-
-	m_boundState = new State( currentState );
-	m_boundState->add( &s );
-}
-
-ConstStatePtr State::ScopedBinding::boundState() const
-{
-	return m_boundState;
 }
 
 State::ScopedBinding::~ScopedBinding()
 {
-	for( std::vector< ConstStateComponentPtr >::const_iterator it=m_savedComponents.begin(); it!=m_savedComponents.end(); it++ )
+	for( std::vector<StateComponentPtr>::const_iterator it=m_savedComponents.begin(); it!=m_savedComponents.end(); it++ )
 	{
 		(*it)->bind();
+		m_currentState.add( *it );
 	}
 }
 
 State::State( bool complete )
+	:	m_userAttributes( 0 )
 {
 	if( complete )
 	{
@@ -83,9 +79,9 @@ State::State( bool complete )
 }
 
 State::State( const State &other )
+	:	m_userAttributes( other.m_userAttributes ? other.m_userAttributes->copy() : 0 )
 {
 	m_components = other.m_components;
-	m_userAttributes = other.m_userAttributes;
 }
 
 State::~State()
@@ -106,9 +102,15 @@ void State::add( StatePtr s )
 	{
 		add( it->second );
 	}
-	for( UserAttributesMap::iterator it=s->m_userAttributes.begin(); it!=s->m_userAttributes.end(); it++ )
+	if( s->m_userAttributes )
 	{
-		m_userAttributes.insert( *it );
+		/// \todo Is it not a bit questionable that we don't take a copy here?
+		IECore::CompoundDataMap &a = userAttributes()->writable();
+		IECore::CompoundDataMap &ao = s->m_userAttributes->writable();
+		for( IECore::CompoundDataMap::iterator it=ao.begin(); it!=ao.end(); it++ )
+		{
+			a.insert( *it );
+		}
 	}
 }
 
@@ -147,14 +149,22 @@ void State::remove( IECore::TypeId componentType )
 	m_components.erase( it );
 }
 
-State::UserAttributesMap &State::userAttributes()
+IECore::CompoundData *State::userAttributes()
 {
-	return m_userAttributes;
+	if( !m_userAttributes )
+	{
+		m_userAttributes = new IECore::CompoundData;
+	}
+	return m_userAttributes.get();
 }
 
-const State::UserAttributesMap &State::userAttributes() const
+const IECore::CompoundData *State::userAttributes() const
 {
-	return m_userAttributes;
+	if( !m_userAttributes )
+	{
+		m_userAttributes = new IECore::CompoundData;
+	}
+	return m_userAttributes.get();
 }
 
 bool State::isComplete() const

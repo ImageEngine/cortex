@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,6 +32,26 @@
 #
 ##########################################################################
 
-from _IECoreGL import *
+import IECoreGL
 
-from State import State
+class __ScopedBinding :
+
+	def __init__( self, state, currentState ) :
+	
+		assert( isinstance( state, IECoreGL.State ) )
+		assert( isinstance( currentState, IECoreGL.State ) )
+		
+		self.__state = state
+		self.__currentState = currentState
+
+	def __enter__( self ) :
+
+		self.__scopedBinding = IECoreGL.State._ScopedBinding( self.__state, self.__currentState )
+		return self
+		
+	def __exit__( self, type, value, traceBack ) :
+	
+		del self.__scopedBinding
+		
+IECoreGL.State.ScopedBinding = __ScopedBinding
+State = IECoreGL.State

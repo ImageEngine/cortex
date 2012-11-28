@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 #ifndef IECOREGL_STATE_H
 #define IECOREGL_STATE_H
 
-#include "IECore/CompoundDataBase.h"
+#include "IECore/CompoundData.h"
 
 #include "IECoreGL/Bindable.h"
 
@@ -52,29 +52,29 @@ IE_CORE_FORWARDDECLARE( StateComponent );
 
 class State : public Bindable
 {
+
 	public :
 
-		typedef IECore::CompoundDataMap UserAttributesMap;
-
-		// class that binds a state on the constructor and revert the changes on the destructor.
-		/// \todo This is way too slow. We need to rewrite it to avoid all memory allocation, meaning
-		/// we should modify currentState in place, and then restore the previous values to it in
-		/// the destructor. We could also make State::userAttributes() lazily created.
+		/// This class binds a State upon construction, and on destruction makes
+		/// sure that the previous state is reverted to.
 		struct ScopedBinding : private boost::noncopyable
 		{
+		
 			public :
-				// binds the given state s and saving the modified values from current state.
-				ScopedBinding( State &s, const State &currentState );
-
-				ConstStatePtr boundState() const;
-	
-				// reverts the state changes.
+			
+				/// Binds the state s, updating currentState to reflect the
+				/// new bindings. It is the caller's responsibilty to keep both arguments
+				/// alive until after destruction of the ScopedBinding.
+				ScopedBinding( const State &s, State &currentState );
+				/// Reverts the state changes and modifications to currentState
+				/// made by the constructor.
 				~ScopedBinding();
 
 			private :
 
-				std::vector< ConstStateComponentPtr > m_savedComponents;
-				StatePtr m_boundState;
+				State &m_currentState;
+				std::vector<StateComponentPtr> m_savedComponents;
+
 		};
 
 		State( bool complete );
@@ -102,8 +102,8 @@ class State : public Bindable
 		void remove( IECore::TypeId componentType );
 
 		/// Arbitrary state attributes for user manipulation.
-		UserAttributesMap &userAttributes();
-		const UserAttributesMap &userAttributes() const;
+		IECore::CompoundData *userAttributes();
+		const IECore::CompoundData *userAttributes() const;
 
 		bool isComplete() const;
 
@@ -139,7 +139,7 @@ class State : public Bindable
 
 		typedef std::map<IECore::TypeId, StateComponentPtr> ComponentMap;
 		ComponentMap m_components;
-		UserAttributesMap m_userAttributes;
+		mutable IECore::CompoundDataPtr m_userAttributes;
 };
 
 } // namespace IECoreGL

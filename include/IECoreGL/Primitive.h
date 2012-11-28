@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,7 +78,7 @@ class Primitive : public Renderable
 		/// the protected render() method several times
 		/// in different OpenGL states, once for each style
 		/// present in state.
-		virtual void render( const State *state ) const;
+		virtual void render( State *currentState ) const;
 
 		/// Adds a primitive variable on this primitive.
 		/// Derived classes should implement any customized filtering and/or convertions or call the base class implementation.

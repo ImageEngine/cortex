@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,7 +59,7 @@ class PerspectiveCamera : public Camera
 
 		/// \todo Should the render() method actually draw a representation of the camera,
 		/// and some other method be used for setting the camera up?
-		virtual void render( const State *state ) const;
+		virtual void render( State *currentState ) const;
 
 	protected :
 

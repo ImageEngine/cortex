@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,13 +60,15 @@ class Renderable : public IECore::RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Renderable, RenderableTypeId, IECore::RunTimeTyped );
 
 		/// Renders the object in the current OpenGL context, using
-		/// the state specified. The state should already have been
-		/// bound into the current context, and state->isComplete()
-		/// must be true. Upon leaving render() the OpenGL state is
-		/// unchanged.
-		virtual void render( const State *state ) const = 0;
+		/// the state specified. The currentState should already have been
+		/// bound into the current context, and currentState->isComplete()
+		/// must be true. Upon leaving render() the OpenGL state and the
+		/// currentState object are as they were upon entry, but they may
+		/// be modified temporarily by the implementation.
+		virtual void render( State *currentState ) const = 0;
 		/// Returns the bounding box for the Renderable.
 		virtual Imath::Box3f bound() const = 0;
+		
 };
 
 IE_CORE_DECLAREPTR( Renderable );

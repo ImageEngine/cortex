@@ -178,14 +178,15 @@ StateComponent *ImmediateRendererImplementation::getState( IECore::TypeId type )
 
 void ImmediateRendererImplementation::addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value )
 {
-	m_stateStack.top()->userAttributes()[ name ] = value;
+	m_stateStack.top()->userAttributes()->writable()[ name ] = value;
 }
 
 IECore::Data *ImmediateRendererImplementation::getUserAttribute( const IECore::InternedString &name )
 {
 	State *curState = m_stateStack.top();
-	State::UserAttributesMap::iterator attrIt = curState->userAttributes().find( name );
-	if( attrIt != curState->userAttributes().end() )
+	IECore::CompoundDataMap &attrs = curState->userAttributes()->writable();
+	IECore::CompoundDataMap::iterator attrIt = attrs.find( name );
+	if( attrIt != attrs.end() )
 	{
 		return attrIt->second;
 	}

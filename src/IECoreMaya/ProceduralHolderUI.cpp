@@ -266,7 +266,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 			IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
 			if( scene )
 			{
-				IECoreGL::ConstStatePtr displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
+				IECoreGL::State *displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
 
 				if ( request.component() != MObject::kNullObj )
 				{
