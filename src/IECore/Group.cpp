@@ -129,8 +129,8 @@ const Group::StateContainer &Group::state() const
 
 IECore::ConstDataPtr Group::getAttribute( const std::string &name ) const
 {
-	StateContainer::const_iterator it = m_state.begin();
-	for( ; it != m_state.end(); ++it )
+	StateContainer::const_reverse_iterator it = m_state.rbegin();
+	for( ; it != m_state.rend(); ++it )
 	{
 		if( ConstAttributeStatePtr attr = runTimeCast< const AttributeState >( *it ) )
 		{
@@ -154,11 +154,12 @@ void Group::setAttribute( const std::string &name, ConstDataPtr value )
 {
 	// find existing attribute/override it ?
 	StateContainer::iterator it = m_state.begin();
-	AttributeStatePtr attr;
+	AttributeStatePtr attrFound;
 	for( ; it != m_state.end(); ++it )
 	{
-		if( attr = runTimeCast< AttributeState >( *it ) )
+		if( AttributeStatePtr attr = runTimeCast< AttributeState >( *it ) )
 		{
+			attrFound = attr;
 			CompoundDataMap::iterator attrIt = attr->attributes().find( name );
 			if( attrIt != attr->attributes().end() )
 			{
@@ -168,13 +169,13 @@ void Group::setAttribute( const std::string &name, ConstDataPtr value )
 		}
 	}
 	
-	if( !attr )
+	if( !attrFound )
 	{
-		attr = new AttributeState;
-		addState( attr );
+		attrFound = new AttributeState;
+		addState( attrFound );
 	}
 	
-	attr->attributes()[ name ] = value->copy();
+	attrFound->attributes()[ name ] = value->copy();
 }
 
 void Group::addChild( VisibleRenderablePtr child )

@@ -156,6 +156,24 @@ class TestGroup( unittest.TestCase ) :
 		self.assertEqual( g3.getAttribute( "middletest" ), BoolData( True ) )
 		self.assertEqual( g3.getAttribute( "bottomtest" ), BoolData( False ) )
 		
+		
+		# check that the final attribute state is returned by getAttribute:
+		g = Group()
+		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
+		g.addState( AttributeState( {"toptest": BoolData( True ) } ) )
+		
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		
+		# make sure attributes get added to existing attributeStates:
+		g = Group()
+		g.addState( Shader("yup","ddyup", {}) )
+		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
+		g.addState( Shader("yup","yup", {}) )
+		g.setAttribute( "blahblah", BoolData( True ) )
+		
+		self.assertEqual( len( g.state() ), 3 )
+		
+		
 	
 	def testExceptions( self ) :
 
