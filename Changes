@@ -2,12 +2,18 @@ Improvements :
 
 * ParameterParser.serialise accepts an alternate "values" argument, which can be used to avoid parameter validation or to serialise values that aren't held by the parameter.
 * Registered ParameterParser serialisation functions should use the new signature func( parameter, value ). The old signature is still supported, but deprecated.
+* Added shader support to IECore::CapturingRenderer
+* Added setAttribute()/getAttribute() methods to IECore::Group. The latter traverses the group's parents
+* IECoreGL::Renderer now ignores shader types with a prefix other than gl: (apart from "surface"), rather than complaining about them.
 
 Bug Fixes :
 
 * ToMayaMeshConverter uses the stIndices variable to compress the UVs in the mesh if the variable is available.
 * Fixed include guard in ObjectReader.h
 * Added workaround for recent NVIDIA driver changes which could cause crashes in IECoreGL::Shader.
+* Fixed a bug where writing an IECore::Group to disk then reading it back in again jumbled its state/children up
+* Fixed a bug where IECore::CapturingRenderer wrote redundant state into its output when multi threaded procedurals were being used
+* Fixed an attribute leaking bug with single threaded procedurals in IECore::CapturingRenderer
 
 7.9.0 :
 
