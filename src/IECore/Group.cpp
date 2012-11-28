@@ -41,6 +41,7 @@
 #include "OpenEXR/ImathBoxAlgo.h"
 
 #include "boost/format.hpp"
+#include "boost/lexical_cast.hpp"
 
 using namespace IECore;
 using namespace std;
@@ -293,6 +294,29 @@ void Group::save( SaveContext *context ) const
 	container->chdir( ".." );
 }
 
+bool Group::entryListCompare( const IndexedIO::Entry& a, const IndexedIO::Entry& b )
+{
+	int a_idx( 0 );
+	int b_idx( 0 );
+	
+	try
+	{
+		a_idx = boost::lexical_cast<int>( a.id() );
+	}
+	catch (...)
+	{
+	}
+	try
+	{
+		b_idx = boost::lexical_cast<int>( b.id() );
+	}
+	catch (...)
+	{
+	}
+	
+	return a_idx < b_idx;
+}
+
 void Group::load( LoadContextPtr context )
 {
 	VisibleRenderable::load( context );
@@ -309,6 +333,7 @@ void Group::load( LoadContextPtr context )
 	clearState();
 	container->chdir( "state" );
 		IndexedIO::EntryList l = container->ls();
+		l.sort( entryListCompare );
 		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
 		{
 			addState( context->load<StateRenderable>( container, it->id() ) );
@@ -317,6 +342,7 @@ void Group::load( LoadContextPtr context )
 	clearChildren();
 	container->chdir( "children" );
 		l = container->ls();
+		l.sort( entryListCompare );
 		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
 		{
 			addChild( context->load<VisibleRenderable>( container, it->id() ) );

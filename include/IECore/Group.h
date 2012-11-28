@@ -138,7 +138,9 @@ class Group : public VisibleRenderable
 		virtual Imath::Box3f bound() const;
 
 	private:
-
+		
+		static bool entryListCompare( const IECore::IndexedIO::Entry& a, const IECore::IndexedIO::Entry& b );
+		
 		static const unsigned int m_ioVersion;
 
 		TransformPtr m_transform;
