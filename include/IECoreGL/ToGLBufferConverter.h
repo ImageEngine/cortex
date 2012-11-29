@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,50 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IECOREGL_TOGLBUFFERCONVERTER_H
+#define IECOREGL_TOGLBUFFERCONVERTER_H
+
 #include "IECoreGL/ToGLConverter.h"
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-
-using namespace IECoreGL;
-using namespace IECore;
-
-IE_CORE_DEFINERUNTIMETYPED( ToGLConverter );
-
-ToGLConverter::ToGLConverter( const std::string &description, IECore::TypeId supportedType )
-	:	FromCoreConverter( description, supportedType )
+namespace IECore
 {
-}
 
-ToGLConverter::~ToGLConverter()
-{
-}
+IE_CORE_FORWARDDECLARE( Data )
 
-IECore::RunTimeTypedPtr ToGLConverter::convert()
-{
-	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
-	return doConversion( srcParameter()->getValue(), operands );
-}
+} // namespace IECore
 
-ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::TypeId resultType )
+namespace IECoreGL
 {
-	Registrations &r = registrations();
+
+IE_CORE_FORWARDDECLARE( Buffer )
+
+/// Converts IECore::Data objects into IECoreGL::Buffer objects.
+/// \ingroup conversionGroup
+class ToGLBufferConverter : public ToGLConverter
+{
+
+	public :
+
+		typedef IECore::Data InputType;
+		typedef IECoreGL::Buffer ResultType;
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLBufferConverter, ToGLBufferConverterTypeId, ToGLConverter );
+
+		ToGLBufferConverter( IECore::ConstDataPtr toConvert = 0 );
+		virtual ~ToGLBufferConverter();
+
+	protected :
+
+		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
 	
-	IECore::TypeId objectTypeId = object->typeId();
-	while( objectTypeId != InvalidTypeId )
-	{	
-		Registrations::const_iterator low = r.lower_bound( objectTypeId );
-		Registrations::const_iterator high = r.upper_bound( objectTypeId );
-		for( Registrations::const_iterator it = low; it != high; it++ )
-		{
-			if( it->second.resultType == resultType ||
-				IECore::RunTimeTyped::inheritsFrom( it->second.resultType, resultType )
-			)
-			{
-				return it->second.creator( object );
-			}
-		}
-		objectTypeId = IECore::RunTimeTyped::baseTypeId( objectTypeId );
-	}
-	return 0;
-}
+		static ConverterDescription<ToGLBufferConverter> g_description;
 
-ToGLConverter::Registrations &ToGLConverter::registrations()
-{
-	static Registrations r;
-	return r; 
-}
+};
+
+IE_CORE_DECLAREPTR( ToGLBufferConverter );
+
+} // namespace IECoreGL
+
+#endif // IECOREGL_TOGLBUFFERCONVERTER_H

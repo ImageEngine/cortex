@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/ToGLConverter.h"
+#include "IECore/Data.h"
+#include "IECore/DespatchTypedData.h"
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
+#include "IECoreGL/ToGLBufferConverter.h"
+#include "IECoreGL/Buffer.h"
 
-using namespace IECoreGL;
 using namespace IECore;
+using namespace IECoreGL;
 
-IE_CORE_DEFINERUNTIMETYPED( ToGLConverter );
+IE_CORE_DEFINERUNTIMETYPED( ToGLBufferConverter );
 
-ToGLConverter::ToGLConverter( const std::string &description, IECore::TypeId supportedType )
-	:	FromCoreConverter( description, supportedType )
+ToGLConverter::ConverterDescription<ToGLBufferConverter> ToGLBufferConverter::g_description;
+
+namespace IECoreGL
 {
-}
-
-ToGLConverter::~ToGLConverter()
+namespace Detail
 {
-}
 
-IECore::RunTimeTypedPtr ToGLConverter::convert()
+/// \todo Would this be useful in DespatchTypedData.h?
+struct TypedDataBytes
 {
-	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
-	return doConversion( srcParameter()->getValue(), operands );
-}
 
-ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::TypeId resultType )
-{
-	Registrations &r = registrations();
-	
-	IECore::TypeId objectTypeId = object->typeId();
-	while( objectTypeId != InvalidTypeId )
-	{	
-		Registrations::const_iterator low = r.lower_bound( objectTypeId );
-		Registrations::const_iterator high = r.upper_bound( objectTypeId );
-		for( Registrations::const_iterator it = low; it != high; it++ )
-		{
-			if( it->second.resultType == resultType ||
-				IECore::RunTimeTyped::inheritsFrom( it->second.resultType, resultType )
-			)
-			{
-				return it->second.creator( object );
-			}
-		}
-		objectTypeId = IECore::RunTimeTyped::baseTypeId( objectTypeId );
+	typedef size_t ReturnType;
+
+	template<typename T>
+	ReturnType operator()( typename T::ConstPtr data ) const
+	{
+		return sizeof( typename T::BaseType ) * data->baseSize();
 	}
-	return 0;
+
+};
+
+} // namespace Detail
+} // namespace IECoreGL
+
+ToGLBufferConverter::ToGLBufferConverter( IECore::ConstDataPtr toConvert )
+	:	ToGLConverter( "Converts IECore::Data objects to IECoreGL::Buffer objects.", IECore::DataTypeId )
+{
+	srcParameter()->setValue( IECore::constPointerCast<IECore::Data>( toConvert ) );
 }
 
-ToGLConverter::Registrations &ToGLConverter::registrations()
+ToGLBufferConverter::~ToGLBufferConverter()
 {
-	static Registrations r;
-	return r; 
+}
+
+IECore::RunTimeTypedPtr ToGLBufferConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
+{
+	IECore::ConstDataPtr data = IECore::staticPointerCast<const IECore::Data>( src ); // safe because the parameter validated it for us
+		
+	const void *address = despatchTypedData<TypedDataAddress, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( constPointerCast<Data>( data ) );
+	size_t size = despatchTypedData<Detail::TypedDataBytes, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( constPointerCast<Data>( data ) );
+
+	return new Buffer( address, size );
 }

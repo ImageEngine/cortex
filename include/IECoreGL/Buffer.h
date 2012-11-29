@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,67 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/ToGLConverter.h"
+#ifndef IECOREGL_BUFFER_H
+#define IECOREGL_BUFFER_H
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
+#include "IECore/RunTimeTyped.h"
 
-using namespace IECoreGL;
-using namespace IECore;
+#include "IECoreGL/GL.h"
+#include "IECoreGL/TypeIds.h"
 
-IE_CORE_DEFINERUNTIMETYPED( ToGLConverter );
-
-ToGLConverter::ToGLConverter( const std::string &description, IECore::TypeId supportedType )
-	:	FromCoreConverter( description, supportedType )
+namespace IECoreGL
 {
-}
 
-ToGLConverter::~ToGLConverter()
+/// The Buffer class provides a simple reference counted wrapper
+/// around an OpenGL buffer object, making the lifetime management
+/// of shared buffers straightforward.
+class Buffer : public IECore::RunTimeTyped
 {
-}
 
-IECore::RunTimeTypedPtr ToGLConverter::convert()
-{
-	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
-	return doConversion( srcParameter()->getValue(), operands );
-}
+	public :
 
-ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::TypeId resultType )
-{
-	Registrations &r = registrations();
-	
-	IECore::TypeId objectTypeId = object->typeId();
-	while( objectTypeId != InvalidTypeId )
-	{	
-		Registrations::const_iterator low = r.lower_bound( objectTypeId );
-		Registrations::const_iterator high = r.upper_bound( objectTypeId );
-		for( Registrations::const_iterator it = low; it != high; it++ )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Buffer, BufferTypeId, IECore::RunTimeTyped );
+
+		/// Wraps an existing buffer. Ownership of the buffer is taken,
+		/// and it will be deleted with glDeleteBuffers() in the destructor.
+		Buffer( GLuint buffer );
+		/// Creates a buffer from the specified data.
+		Buffer( const void *data, size_t sizeInBytes, GLenum target = GL_ARRAY_BUFFER, GLenum usage = GL_STATIC_DRAW );
+		/// Deletes the buffer with glDeleteBuffers().
+		virtual ~Buffer();
+		
+		/// Returns the size of the buffer in bytes.
+		size_t size() const;
+		
+		/// The ScopedBinding class allows the buffer to be bound to a target
+		/// for a specific duration, without worrying about remembering to
+		/// unbind it.
+		class ScopedBinding
 		{
-			if( it->second.resultType == resultType ||
-				IECore::RunTimeTyped::inheritsFrom( it->second.resultType, resultType )
-			)
-			{
-				return it->second.creator( object );
-			}
-		}
-		objectTypeId = IECore::RunTimeTyped::baseTypeId( objectTypeId );
-	}
-	return 0;
-}
+			
+			public :
+			
+				/// Binds the specified buffer to the specified target.
+				ScopedBinding( const Buffer &buffer, GLenum target = GL_ARRAY_BUFFER  );
+				/// Rebinds the previously bound buffer.
+				~ScopedBinding();
+				
+			private :
+			
+				GLenum m_target;
+				GLuint m_buffer;
+				GLint m_prevBuffer;
+			
+		};
+	
+	private :
+	
+		GLuint m_buffer;
+		
+};
 
-ToGLConverter::Registrations &ToGLConverter::registrations()
-{
-	static Registrations r;
-	return r; 
-}
+IE_CORE_DECLAREPTR( Buffer );
+
+} // namespace IECoreGL
+
+#endif // IECOREGL_BUFFER_H

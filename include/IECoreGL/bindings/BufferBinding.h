@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/ToGLConverter.h"
+#ifndef IE_COREGL_BUFFERBINDING_H
+#define IE_COREGL_BUFFERBINDING_H
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-
-using namespace IECoreGL;
-using namespace IECore;
-
-IE_CORE_DEFINERUNTIMETYPED( ToGLConverter );
-
-ToGLConverter::ToGLConverter( const std::string &description, IECore::TypeId supportedType )
-	:	FromCoreConverter( description, supportedType )
+namespace IECoreGL
 {
-}
 
-ToGLConverter::~ToGLConverter()
-{
-}
+void bindBuffer();
 
-IECore::RunTimeTypedPtr ToGLConverter::convert()
-{
-	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
-	return doConversion( srcParameter()->getValue(), operands );
-}
+} // namespace IECoreGL
 
-ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::TypeId resultType )
-{
-	Registrations &r = registrations();
-	
-	IECore::TypeId objectTypeId = object->typeId();
-	while( objectTypeId != InvalidTypeId )
-	{	
-		Registrations::const_iterator low = r.lower_bound( objectTypeId );
-		Registrations::const_iterator high = r.upper_bound( objectTypeId );
-		for( Registrations::const_iterator it = low; it != high; it++ )
-		{
-			if( it->second.resultType == resultType ||
-				IECore::RunTimeTyped::inheritsFrom( it->second.resultType, resultType )
-			)
-			{
-				return it->second.creator( object );
-			}
-		}
-		objectTypeId = IECore::RunTimeTyped::baseTypeId( objectTypeId );
-	}
-	return 0;
-}
-
-ToGLConverter::Registrations &ToGLConverter::registrations()
-{
-	static Registrations r;
-	return r; 
-}
+#endif // IE_COREGL_BUFFERBINDING_H

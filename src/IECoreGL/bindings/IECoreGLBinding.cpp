@@ -74,6 +74,7 @@
 #include "IECoreGL/bindings/ToGLPointsConverterBinding.h"
 #include "IECoreGL/bindings/ToGLCurvesConverterBinding.h"
 #include "IECoreGL/bindings/CachedConverterBinding.h"
+#include "IECoreGL/bindings/BufferBinding.h"
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -115,6 +116,7 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindToGLPointsConverter();
 	bindToGLCurvesConverter();
 	bindCachedConverter();
+	bindBuffer();
 
 #ifdef IECORE_WITH_FREETYPE
 
