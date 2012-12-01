@@ -102,7 +102,7 @@ void CurvesPrimitive::render( const State * state, IECore::TypeId style ) const
 
 void CurvesPrimitive::renderLines( const State * state, IECore::TypeId style ) const
 {
-	const V3f *p = &(m_points->readable()[0]);
+/*	const V3f *p = &(m_points->readable()[0]);
 	const std::vector<int> &v = m_vertsPerCurve->readable();
 
 	unsigned vertexCount = m_points->readable().size();
@@ -171,7 +171,7 @@ void CurvesPrimitive::renderLines( const State * state, IECore::TypeId style ) c
 
 		}
 
-	}
+	}*/
 }
 
 static inline V3f toCamera( const V3f &p, const V3f &cameraCentre, const V3f &cameraView, bool perspective )
@@ -190,7 +190,7 @@ static inline V3f uTangentAndNormal( const V3f &p, const V3d &cameraCentre, cons
 
 void CurvesPrimitive::renderRibbons( const State * state, IECore::TypeId style ) const
 {
-	float halfWidth = m_width/2.0f;
+/*	float halfWidth = m_width/2.0f;
 	const V3f *points = &(m_points->readable()[0]);
 	const std::vector<int> &vertsPerCurve = m_vertsPerCurve->readable();
 
@@ -409,5 +409,5 @@ void CurvesPrimitive::renderRibbons( const State * state, IECore::TypeId style )
 		}
 
 	}
-
+	*/
 }

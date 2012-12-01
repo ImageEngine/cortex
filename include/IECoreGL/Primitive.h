@@ -35,17 +35,15 @@
 #ifndef IECOREGL_PRIMITIVE_H
 #define IECOREGL_PRIMITIVE_H
 
-#include "boost/tuple/tuple.hpp"
+#include "OpenEXR/ImathBox.h"
 
-#include "IECoreGL/Renderable.h"
-#include "IECoreGL/GL.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/Shader.h"
-
-#include "IECore/Primitive.h"
+#include "IECore/PrimitiveVariable.h"
 #include "IECore/VectorTypedData.h"
 
-#include "OpenEXR/ImathBox.h"
+#include "IECoreGL/GL.h"
+#include "IECoreGL/Renderable.h"
+#include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/Shader.h"
 
 namespace IECoreGL
 {
@@ -81,13 +79,13 @@ class Primitive : public Renderable
 		virtual void render( State *currentState ) const;
 
 		/// Adds a primitive variable on this primitive.
-		/// Derived classes should implement any customized filtering and/or convertions or call the base class implementation.
+		/// Derived classes should implement any customized filtering and/or conversions or call the base class implementation.
 		/// Default implementation sets Constant variables as uniform shader parameters and all the
 		/// others as vertex shader parameters.
+		/// \todo MAYBE JUST HAVE ADDVERTEXATTRIBUTE AND ADDUNIFORMATTRIBUTE AND LET THE CONVERTERS DO IT?
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) = 0;
 
 		virtual Imath::Box3f bound() const = 0;
-
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -131,45 +129,17 @@ class Primitive : public Renderable
 		/// Called by derived classes to register a uniform attribute. There are no type or length checks on this call.
 		void addUniformAttribute( const std::string &name, IECore::ConstDataPtr data );
 
-		template<typename T>
-		typename IECore::TypedData<T>::ConstPtr getUniformAttribute( const std::string &name );
-
-		template<typename T>
-		typename IECore::TypedData< std::vector<T> >::ConstPtr getVertexAttribute( const std::string &name );
-
-		/// Can be called from a derived class' render() method to set
-		/// vertex parameters of the current shader based on the
-		/// data from vertex attributes. Only vertex parameter that matches the given
-		/// length will be considered. This must /not/ be called unless the style
-		/// parameter passed to render is PrimitiveSolid - in all other cases no shader
-		/// is bound and an Exception will result.
-		void setVertexAttributes( unsigned length ) const;
-		/// Can be called from a derived class' render() method to
-		/// set uniform parameters of the current shader based on a single element of
-		/// data from the vertex attributes. Only vertex parameter that matches the given
-		/// length will be considered. This must /not/ be called unless the
-		/// style parameter passed to render is PrimitiveSolid - in all other cases
-		/// no shader is bound and an Exception will result.
-		void setVertexAttributesAsUniforms( unsigned length, unsigned int vertexIndex ) const;
 		/// Convenience function for use in render() implementations. Returns
 		/// true if TransparentShadingStateComponent is true and
 		/// PrimitiveTransparencySortStateComponent is true.
 		bool depthSortRequested( const State *state ) const;
 
-		/// This method is called by Primitive::render() function but it can also be called
-		/// by derived classes when they use other primitives and call render(state,style)
-		/// directly, like TextPrimitive does.
-		void setupVertexAttributes( Shader *s ) const;
-
 	private :
 
-		typedef std::vector< boost::tuple< Shader::VertexToUniform, size_t > > UniformDataMap;
-		typedef std::vector< boost::tuple< GLint, IECore::ConstDataPtr, size_t > > VertexDataMap;
-
-		mutable Shader* m_shaderSetup;
-		mutable UniformDataMap m_uniformMap;	// holds the uniform shader attributes that match non-const prim vars.
-		mutable VertexDataMap m_vertexMap;	// holds the vertex shader attributes that match non-const prim vars.
-
+		typedef std::vector<Shader::SetupPtr> ShaderSetupVector;
+		mutable ShaderSetupVector m_shaderSetups;
+		const Shader::Setup *shaderSetup( Shader *shader ) const;
+		
 		typedef std::map<std::string, IECore::ConstDataPtr> AttributeMap;
 		AttributeMap m_vertexAttributes;
 		AttributeMap m_uniformAttributes;
@@ -179,7 +149,5 @@ class Primitive : public Renderable
 IE_CORE_DECLAREPTR( Primitive );
 
 } // namespace IECoreGL
-
-#include "IECoreGL/Primitive.inl"
 
 #endif // IECOREGL_PRIMITIVE_H

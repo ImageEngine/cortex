@@ -133,11 +133,6 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 void MeshPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	unsigned vertexCount = m_vertIds->readable().size();
-	if( style==Primitive::DrawSolid::staticTypeId() )
-	{
-		setVertexAttributes( vertexCount );
-	}
-
 	glDrawArrays( GL_TRIANGLES, 0, vertexCount );
 }
 

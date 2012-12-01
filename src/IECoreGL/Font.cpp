@@ -93,7 +93,7 @@ ConstAlphaTexturePtr Font::texture() const
 
 void Font::renderSprites( const std::string &text ) const
 {
-	Box2f charBound = m_font->bound();
+	/*Box2f charBound = m_font->bound();
 	V2f origin( 0 );
 
 	float sStep = 1.0f / 16.0f;
@@ -125,12 +125,12 @@ void Font::renderSprites( const std::string &text ) const
 			origin += m_font->advance( c, text[i+1] );
 		}
 	}
-
+	*/
 }
 
 void Font::renderMeshes( const std::string &text, const State *state, IECore::TypeId style ) const
 {
-	Shader *shader = state->get<ShaderStateComponent>()->shader();
+	/*Shader *shader = state->get<ShaderStateComponent>()->shader();
 	glPushMatrix();
 
 		for( unsigned i=0; i<text.size(); i++ )
@@ -144,5 +144,5 @@ void Font::renderMeshes( const std::string &text, const State *state, IECore::Ty
 			}
 		}
 
-	glPopMatrix();
+	glPopMatrix();*/
 }

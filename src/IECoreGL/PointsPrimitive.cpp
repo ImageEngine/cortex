@@ -204,7 +204,7 @@ const T *PointsPrimitive::dataAndStride( const IECore::Data *data, T *defaultVal
 
 void PointsPrimitive::renderPoints( const State * state, IECore::TypeId style ) const
 {
-	const std::vector<V3f> &p = m_points->readable();
+	/*const std::vector<V3f> &p = m_points->readable();
 
 	glPointSize( state->get<GLPointWidth>()->value() );
 
@@ -212,12 +212,12 @@ void PointsPrimitive::renderPoints( const State * state, IECore::TypeId style ) 
 	{
 		setVertexAttributes( p.size() );
 	}
-	glDrawArrays( GL_POINTS, 0, p.size() );
+	glDrawArrays( GL_POINTS, 0, p.size() );*/
 }
 
 void PointsPrimitive::renderDisks( const State * state, IECore::TypeId style ) const
 {
-	DiskPrimitivePtr disk = new DiskPrimitive();
+	/*DiskPrimitivePtr disk = new DiskPrimitive();
 
 	V3f cameraCentre = Camera::positionInObjectSpace();
 	V3f cameraUp = Camera::upInObjectSpace();
@@ -253,12 +253,12 @@ void PointsPrimitive::renderDisks( const State * state, IECore::TypeId style ) c
 			}
 			disk->render( state, style );
 		glPopMatrix();
-	}
+	}*/
 }
 
 void PointsPrimitive::renderQuads( const State * state, IECore::TypeId style ) const
 {
-	QuadPrimitivePtr quad = new QuadPrimitive();
+	/*QuadPrimitivePtr quad = new QuadPrimitive();
 	
 	V3f cameraCentre = Camera::positionInObjectSpace();
 	V3f cameraUp = Camera::upInObjectSpace();
@@ -311,12 +311,12 @@ void PointsPrimitive::renderQuads( const State * state, IECore::TypeId style ) c
 			quad->render( state, style );
 		glPopMatrix();
 	}
-
+	*/
 }
 
 void PointsPrimitive::renderSpheres( const State * state, IECore::TypeId style ) const
 {
-	SpherePrimitivePtr sphere = new SpherePrimitive();
+	/*SpherePrimitivePtr sphere = new SpherePrimitive();
 	const std::vector<V3f> &p = m_points->readable();
 
 	unsigned int wStep = 0;
@@ -345,7 +345,7 @@ void PointsPrimitive::renderSpheres( const State * state, IECore::TypeId style )
 			sphere->render( state, style );
 		glPopMatrix();
 	}
-
+	*/
 }
 
 struct SortFn

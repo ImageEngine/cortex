@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -94,13 +94,10 @@ void bindShader()
 		.def( "setUniformParameterFromVector", (void (Shader::*)( GLint, const IECore::Data*, unsigned int ))&Shader::setUniformParameterFromVector )
 		.def( "setUniformParameterFromVector", (void (Shader::*)( const std::string &, const IECore::Data*, unsigned int ))&Shader::setUniformParameterFromVector )
 		.def( "vertexParameterNames", &vertexParameterNames )
-		.def( "vertexParameterIndex", &Shader::vertexParameterIndex )
-		.def( "hasVertexParameter", &Shader::hasVertexParameter )
-		.def( "vertexValueValid", (bool (Shader::*)( GLint, const IECore::Data* ) const)&Shader::vertexValueValid )
-		.def( "vertexValueValid", (bool (Shader::*)( const std::string &, const IECore::Data*) const)&Shader::vertexValueValid )
-		.def( "setVertexParameter", (void (Shader::*)( GLint, const IECore::Data*, bool) )&Shader::setVertexParameter, (arg_("parameterIndex"),arg_("value"),arg_("normalize")=false) )
-		.def( "setVertexParameter", (void (Shader::*)( const std::string &, const IECore::Data*, bool) )&Shader::setVertexParameter, (arg_("parameterName"),arg_("value"),arg_("normalize")=false) )
-		.def( "unsetVertexParameters", &Shader::unsetVertexParameters )
+		//.def( "vertexParameterIndex", &Shader::vertexParameterIndex )
+		//.def( "hasVertexParameter", &Shader::hasVertexParameter )
+		//.def( "vertexValueValid", (bool (Shader::*)( GLint, const IECore::Data* ) const)&Shader::vertexValueValid )
+		//.def( "vertexValueValid", (bool (Shader::*)( const std::string &, const IECore::Data*) const)&Shader::vertexValueValid )
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
 		.def( "facingRatio", &Shader::facingRatio ).staticmethod( "facingRatio" )
 		.def( self==self )

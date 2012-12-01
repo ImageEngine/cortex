@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 //  its affiliates and/or its licensors.
@@ -50,7 +50,6 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Shader );
-IE_CORE_FORWARDDECLARE( Primitive );
 
 /// A class to represent GLSL shaders.
 class Shader : public Bindable
@@ -200,42 +199,86 @@ class Shader : public Bindable
 		/// Returns a numeric index for the named vertex parameter. This can be
 		/// used in the calls below to avoid more expensive lookups by name.
 		/// Throws an Exception if parameter does not exist.
-		GLint vertexParameterIndex( const std::string &parameterName ) const;
+		//GLint vertexParameterIndex( const std::string &parameterName ) const;
 		/// Returns true if the Shader has a vertex parameter of the given name.
-		bool hasVertexParameter( const std::string &parameterName ) const;
+		//bool hasVertexParameter( const std::string &parameterName ) const;
 		/// Returns true if the specified vertex data object is valid for setting the
 		/// specified vertex parameter, and false if not.
-		bool vertexValueValid( GLint parameterIndex, const IECore::Data *value ) const;
+		//bool vertexValueValid( GLint parameterIndex, const IECore::Data *value ) const;
 		/// As above, but specifying the vertex parameter by name.
-		bool vertexValueValid( const std::string &parameterName, const IECore::Data *value ) const;
+		//bool vertexValueValid( const std::string &parameterName, const IECore::Data *value ) const;
 		/// Sets the specified vertex parameter to the value specified. value must
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case.
 		/// Derived classes can set normalize to true when they know a integer typed
 		/// vector should be normalized to [-1,1] or [0,1] when passed to the shader.
-		void setVertexParameter( GLint parameterIndex, const IECore::Data *value, bool normalize = false );
+		//void setVertexParameter( GLint parameterIndex, const IECore::Data *value, bool normalize = false );
 		/// As above, but specifying the vertex parameter by name.
-		void setVertexParameter( const std::string &parameterName, const IECore::Data *value, bool normalize = false );
-		/// Unsets all vertex parameters from the shader.
-		void unsetVertexParameters();
-
+		//void setVertexParameter( const std::string &parameterName, const IECore::Data *value, bool normalize = false );
+		
+		GLint vertexAttribute( const std::string &name, GLenum &type, GLint &size ) const; 
+		
+		/// Shaders are only useful when associated with a set of values for
+		/// their uniform parameters and vertex attributes, and to render
+		/// different objects in different forms different sets of values
+		/// will be a necessary. The Setup class encapsulates a set of such
+		/// values and provides a means of cleanly binding and unbinding the
+		/// Shader using them.
+		class Setup : public IECore::RefCounted
+		{
+		
+			public :
+		
+				Setup( ShaderPtr shader );
+				
+				const Shader *shader() const;
+		
+				void addVertexAttribute( const std::string &name, const IECore::ConstDataPtr &data );
+		
+				/// The ScopedBinding class cleanly binds and unbinds the shader
+				/// Setup, making the shader current and setting the uniform
+				/// and vertex values as necessary.
+				class ScopedBinding
+				{
+				
+					public :
+					
+						/// Binds the setup. It is the responsibility of the
+						/// caller to ensure the setup remains alive for
+						/// the lifetime of the ScopedBinding.
+						ScopedBinding( const Setup &setup );
+						/// Unbinds the setup, reverting to the previous state.
+						~ScopedBinding();
+				
+					private :
+					
+						GLint m_previousProgram;
+						const Setup &m_setup;
+				
+				};
+		
+			private :
+		
+				IE_CORE_FORWARDDECLARE( MemberData );
+				
+				MemberDataPtr m_memberData;
+					
+		};
+		
+		IE_CORE_DECLAREPTR( Setup );
+		
 		//! @name Built in shaders
 		/// These functions provide access to static instances of
 		/// various simple but useful shaders.
 		///////////////////////////////////////////////////////////
 		//@{
-		/// Returns a shader which shades as a constant flat color
-		/// using the current gl color.
+		/// Returns a shader which shades as a constant flat color.
 		static ShaderPtr constant();
 		/// Returns a shader which shades as a facing ratio.
 		static ShaderPtr facingRatio();
 		//@}
 
 	private :
-
-		/// default constructor creates an empty Shader, which simply disables OpenGL shaders and
-		/// only accepts old gl vertex and uniform parameters.
-		Shader();
 
 		struct VectorValueValid;
 		struct VectorSetValue;

@@ -32,6 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/format.hpp"
+
+#include "IECore/DespatchTypedData.h"
+#include "IECore/VectorTypedData.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/MessageHandler.h"
+
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/Exception.h"
@@ -41,16 +48,17 @@
 #include "IECoreGL/TextureUnits.h"
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/UniformFunctions.h"
-
-#include "IECore/DespatchTypedData.h"
-#include "IECore/VectorTypedData.h"
-
-#include "boost/format.hpp"
+#include "IECoreGL/CachedConverter.h"
+#include "IECoreGL/Buffer.h"
 
 using namespace IECoreGL;
 using namespace std;
 using namespace boost;
 using namespace Imath;
+
+//////////////////////////////////////////////////////////////////////////
+// StateComponents
+//////////////////////////////////////////////////////////////////////////
 
 namespace IECoreGL
 {
@@ -67,11 +75,14 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySo
 
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Primitive implementation
+//////////////////////////////////////////////////////////////////////////
+
 IE_CORE_DEFINERUNTIMETYPED( Primitive );
 
 Primitive::Primitive()
 {
-	m_shaderSetup = 0;
 }
 
 Primitive::~Primitive()
@@ -97,7 +108,29 @@ void Primitive::render( State *state ) const
 		throw Exception( "Primitive::render called with incomplete state object." );
 	}
 
-	Shader *shader = 0;
+	/// \todo Figure out how we'll do selection properly.
+	GLint renderMode = 0;
+	glGetIntegerv(GL_RENDER_MODE, &renderMode);
+	if( renderMode == GL_SELECT )
+	{
+		return;
+	}
+	
+	if( state->get<Primitive::DrawSolid>()->value() )
+	{
+		Shader *shader = state->get<ShaderStateComponent>()->shader();
+		const Shader::Setup *setup = shaderSetup( shader );
+		Shader::Setup::ScopedBinding scopedBinding( *setup );
+		render( state, Primitive::DrawSolid::staticTypeId() );
+	}
+	
+	/*if(	state->get<Primitive::DrawOutline>()->value() || state->get<Primitive::DrawWireframe>()->value() ||
+		state->get<Primitive::DrawPoints>()->value() || state->get<Primitive::DrawBound>()->value() )
+	{
+		Shader *shader = Shader::constant();
+	}*/
+	
+/*	Shader *shader = 0;
 
 	GLint renderMode = 0;
 	glGetIntegerv(GL_RENDER_MODE, &renderMode);
@@ -241,7 +274,7 @@ void Primitive::render( State *state ) const
 	{
 		// disable all vertex shader parameters
 		shader->unsetVertexParameters();
-	}
+	}*/
 }
 
 void Primitive::addUniformAttribute( const std::string &name, IECore::ConstDataPtr data )
@@ -254,98 +287,28 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	m_vertexAttributes[name] = data->copy();
 }
 
-void Primitive::setVertexAttributes( unsigned length ) const
-{
-	if( !m_shaderSetup || !length )
-	{
-		return;
-	}
-
-	VertexDataMap::const_iterator it;
-	for( it=m_vertexMap.begin(); it!=m_vertexMap.end(); it++ )
-	{
-		if ( boost::get<2>(*it) == length )
-		{
-			m_shaderSetup->setVertexParameter( boost::get<0>(*it), boost::get<1>(*it) );
-		}
-	}
-}
-
-void Primitive::setVertexAttributesAsUniforms( unsigned length, unsigned int vertexIndex ) const
-{
-	if( !m_shaderSetup || !length )
-	{
-		return;
-	}
-	UniformDataMap::const_iterator it;
-	for( it=m_uniformMap.begin(); it!=m_uniformMap.end(); it++ )
-	{
-		if ( boost::get<1>(*it) == length )
-		{
-			boost::get<0>(*it)(vertexIndex);
-		}
-	}
-}
-
-void Primitive::setupVertexAttributes( Shader *s ) const
-{
-	if( !s )
-	{
-		m_shaderSetup = 0;
-		return;
-	}
-
-	if( m_shaderSetup && (*s)==(*m_shaderSetup) )
-	{
-		return;
-	}
-
-	m_uniformMap.clear();
-	m_vertexMap.clear();
-	IECore::TypedDataSize size;
-
-	for( AttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
-	{
-		size_t length = 0;
-		IECore::DataPtr data = IECore::constPointerCast<IECore::Data>( it->second );
-		if ( IECore::despatchTraitsTest< IECore::TypeTraits::IsVectorTypedData >( data ) )
-		{
-			length = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsVectorTypedData >( data, size );
-
-			if ( s->hasVertexParameter( it->first ) )
-			{
-				// vertex shader variable
-				GLint parameterIndex = s->vertexParameterIndex( it->first );
-				if ( s->vertexValueValid( parameterIndex, it->second ) )
-				{
-					m_vertexMap.push_back( boost::tuple< GLint, IECore::ConstDataPtr, size_t >( parameterIndex, it->second, length ) );
-				}
-			}
-			if ( s->hasUniformParameter( it->first ) )
-			{
-				// uniform shader variable
-				GLint parameterIndex = s->uniformParameterIndex( it->first );
-				if ( s->uniformVectorValueValid( parameterIndex, it->second ) )
-				{
-					boost::tuple< Shader::VertexToUniform, size_t > u;
-					try
-					{
-						u = boost::tuple< Shader::VertexToUniform, size_t >( s->uniformParameterFromVectorSetup( parameterIndex, it->second ), length );
-					}
-					catch(...)
-					{
-						continue;
-					}
-					m_uniformMap.push_back( u );
-				}
-			}
-		}
-	}
-	m_shaderSetup = s;
-}
-
 bool Primitive::depthSortRequested( const State * state ) const
 {
 	return state->get<Primitive::TransparencySort>()->value() &&
 		state->get<TransparentShadingStateComponent>()->value();
+}
+
+const Shader::Setup *Primitive::shaderSetup( Shader *shader ) const
+{
+	for( ShaderSetupVector::const_iterator it = m_shaderSetups.begin(), eIt = m_shaderSetups.end(); it != eIt; it++ )
+	{
+		if( (*it)->shader() == shader )
+		{
+			return it->get();
+		}
+	}
+
+	Shader::SetupPtr setup = new Shader::Setup( shader );
+	for( AttributeMap::const_iterator it = m_vertexAttributes.begin(), eIt = m_vertexAttributes.end(); it != eIt; it++ )
+	{
+		setup->addVertexAttribute( it->first, it->second );
+	}
+	
+	m_shaderSetups.push_back( setup );
+	return setup.get();
 }
