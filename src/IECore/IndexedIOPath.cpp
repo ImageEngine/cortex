@@ -312,9 +312,53 @@ void IndexedIOPath::buildRelativePath() const
 
 bool IndexedIOPath::validFilename(const std::string &n)
 {
-	static const std::string validChars( "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-:" );
-
-	return (n.size() != 0) && (n.find_first_not_of( validChars ) == std::string::npos);
+	if( n.size() == 0 )
+	{
+		// empty string, so it's invalid!
+		return false;
+	}
+	
+	std::string::const_iterator it = n.begin();
+	std::string::const_iterator end = n.end();
+	
+	for( ; it < end; ++it )
+	{
+		char c = *it;
+		if( c >= 'a' && c <= 'z' )
+		{
+			// lower case letter - sorted
+			continue;
+		}
+		else if( c >= 'A' && c <= 'Z' )
+		{
+			// upper case letter - sorted
+			continue;
+		}
+		else if( c >= '0' && c <= '9' )
+		{
+			// number - sorted
+			continue;
+		}
+		switch( c )
+		{
+			case '.':
+			case '_':
+			case '-':
+			case ':':
+			{
+				// these characters are ok
+				continue;
+			}
+			default:
+			{
+				// uh oh!!!
+				return false;
+			}
+		}
+	}
+	
+	// passed all tests, so it's valid innit
+	return true;
 }
 
 const std::string &IndexedIOPath::rootPath() const
