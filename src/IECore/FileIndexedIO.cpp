@@ -39,7 +39,6 @@
 #include <map>
 #include <set>
 
-#include "boost/tokenizer.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/optional.hpp"
 #include "boost/format.hpp"
@@ -117,6 +116,78 @@ void readLittleEndian( std::istream &f, T &n )
 		/// Already little endian
 	}
 }
+
+class StringRange
+{
+	public:
+		
+		StringRange( const char* start, const char* end ) :
+			m_start( start ),
+			m_end( end )
+		{
+		}
+		
+		bool operator == ( const char* otherChar )
+		{
+			for( const char* thisChar = m_start; thisChar < m_end; ++thisChar, ++otherChar )
+			{
+				if( *thisChar != *otherChar )
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		bool operator == ( const std::string& other )
+		{
+			return *this == other.c_str();
+		}
+		
+		std::string str()
+		{
+			return std::string( m_start, m_end );
+		}
+		
+	private:
+		
+		const char* m_start;
+		const char* m_end;
+		
+};
+
+typedef std::vector<StringRange> NodePath;
+
+static void splitPath( const std::string& path, NodePath& tokens )
+{
+	const char* it = &path[0];
+	
+	while( *it == '/' )
+	{
+		++it;
+	}
+	
+	const char* rangeStart = it;
+	for( ; ; ++it )
+	{
+		char current = *it;
+		if( current == 0 )
+		{
+			if( it > rangeStart )
+			{
+				tokens.push_back( StringRange( rangeStart, it ) );
+			}
+			break;
+		}
+		
+		if( current == '/' )
+		{
+			tokens.push_back( StringRange( rangeStart, it ) );
+			rangeStart = it + 1;
+		}
+	}
+}
+
 
 /// \todo We could add a minimum length for strings, below which we don't bother caching them?
 class StringCache
@@ -249,8 +320,6 @@ class FileIndexedIO::Index : public RefCounted
 
 		friend class Node;
 
-		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-
 		/// Construct an empty index
 		Index();
 
@@ -349,7 +418,6 @@ class FileIndexedIO::Node : public RefCounted
 {
 	public:
 
-		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
 		typedef std::vector<std::string> PathParts;
 
 		/// A unique numeric ID for this node
@@ -387,12 +455,12 @@ class FileIndexedIO::Node : public RefCounted
 
 		/// Traverse through this node and down its children, removing the front
 		/// of the list of 'parts' every time we descend through a match.
-		bool find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const;
+		bool find( NodePath::iterator &parts, NodePath::iterator end, NodePtr &nearest, NodePtr topNode ) const;
 
 		/// As above, but just traverse through the children.
-		bool findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const;
+		bool findInChildren( NodePath::iterator &parts, NodePath::iterator end, NodePtr &nearest, NodePtr topNode ) const;
 
-		NodePtr insert( Tokenizer::iterator &parts, Tokenizer::iterator end );
+		NodePtr insert( NodePath::iterator &parts, NodePath::iterator end );
 
 	protected:
 
@@ -444,8 +512,9 @@ Imf::Int64 FileIndexedIO::Index::makeId()
 
 bool FileIndexedIO::Index::find( const IndexedIOPath &p, NodePtr &nearest, NodePtr topNode) const
 {
-	Tokenizer tokens(p.fullPath(), boost::char_separator<char>("/"));
-	Tokenizer::iterator t = tokens.begin();
+	NodePath tokens;
+	splitPath( p.fullPath(), tokens );
+	NodePath::iterator t = tokens.begin();
 	nearest = m_root;
 
 	return m_root->findInChildren( t, tokens.end(), nearest, topNode );
@@ -498,14 +567,14 @@ FileIndexedIO::NodePtr FileIndexedIO::Index::insert( NodePtr parent, IndexedIO::
 }
 
 
-FileIndexedIO::NodePtr FileIndexedIO::Node::insert( Tokenizer::iterator &parts, Tokenizer::iterator end )
+FileIndexedIO::NodePtr FileIndexedIO::Node::insert( NodePath::iterator &parts, NodePath::iterator end )
 {
 	if (parts == end)
 	{
 		return this;
 	}
 
-	NodePtr child = m_idx->insert( this, IndexedIO::Entry(*parts, IndexedIO::Directory, IndexedIO::Invalid, 0) );
+	NodePtr child = m_idx->insert( this, IndexedIO::Entry( parts->str(), IndexedIO::Directory, IndexedIO::Invalid, 0 ) );
 
 	return child->insert( ++parts, end );
 }
@@ -1072,10 +1141,10 @@ void FileIndexedIO::Node::read( std::istream &f )
 	}
 }
 
-bool FileIndexedIO::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const
+bool FileIndexedIO::Node::find( NodePath::iterator &parts, NodePath::iterator end, NodePtr &nearest, NodePtr topNode ) const
 {
 	assert( nearest );
-
+	
 	if (parts == end)
 	{
 		return true;
@@ -1109,7 +1178,7 @@ bool FileIndexedIO::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator 
 	}
 }
 
-bool FileIndexedIO::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const
+bool FileIndexedIO::Node::findInChildren( NodePath::iterator &parts, NodePath::iterator end, NodePtr &nearest, NodePtr topNode ) const
 {
 	assert( nearest );
 
@@ -1117,7 +1186,7 @@ bool FileIndexedIO::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer:
 	{
 		return true;
 	}
-
+	
 	if (*parts == ".")
 	{
 		return findInChildren( ++parts, end, nearest, topNode );
@@ -1132,7 +1201,7 @@ bool FileIndexedIO::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer:
 		return findInChildren( ++parts, end, nearest, topNode );
 	}
 
-	ChildMap::const_iterator cit = m_children.find( *parts );
+	ChildMap::const_iterator cit = m_children.find( parts->str() );
 
 	if (cit != m_children.end())
 	{
@@ -1581,10 +1650,10 @@ FileIndexedIO::NodePtr FileIndexedIO::insert( const IndexedIO::EntryID &name  )
 	assert( m_currentDirectoryNode );
 	assert( m_rootDirectoryNode );
 
-	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	Tokenizer tokens(name, boost::char_separator<char>("/"));
+	NodePath tokens;
+	splitPath( name, tokens );
 
-	Tokenizer::iterator t = tokens.begin();
+	NodePath::iterator t = tokens.begin();
 
 	NodePtr start = m_currentDirectoryNode;
 
@@ -1612,10 +1681,10 @@ bool FileIndexedIO::find( const IndexedIO::EntryID &name, NodePtr &node ) const
 	assert( m_currentDirectoryNode );
 	assert( m_rootDirectoryNode );
 
-	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	Tokenizer tokens(name, boost::char_separator<char>("/"));
+	NodePath tokens;
+	splitPath( name, tokens );
 
-	Tokenizer::iterator t = tokens.begin();
+	NodePath::iterator t = tokens.begin();
 
 	NodePtr start = m_currentDirectoryNode;
 
