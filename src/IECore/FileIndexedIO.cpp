@@ -1120,16 +1120,16 @@ bool FileIndexedIO::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer:
 
 	if (*parts == ".")
 	{
-		return find( ++parts, end, nearest, topNode );
+		return findInChildren( ++parts, end, nearest, topNode );
 	}
 	else if (*parts == "..")
 	{
 		if (m_parent && this != topNode.get() )
 		{
 			nearest = m_parent;
-			return m_parent->find( ++parts, end, nearest, topNode );
+			return m_parent->findInChildren( ++parts, end, nearest, topNode );
 		}
-		return find( ++parts, end, nearest, topNode );
+		return findInChildren( ++parts, end, nearest, topNode );
 	}
 
 	ChildMap::const_iterator cit = m_children.find( *parts );
