@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,7 +45,7 @@ IE_CORE_DEFINERUNTIMETYPED( DepthTexture );
 DepthTexture::DepthTexture( unsigned int width, unsigned height, IECore::ConstDataPtr z )
 {
 	glGenTextures( 1, &m_texture );
-	glBindTexture( GL_TEXTURE_2D, m_texture );
+	ScopedBinding binding( *this );
 
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
