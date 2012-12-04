@@ -82,5 +82,52 @@ class ToGLConverterTest( unittest.TestCase ) :
 		c = IECoreGL.ToGLConverter.create( cv, IECoreGL.Texture.staticTypeId() )
 		self.assertEqual( c, None )
 
+		# splines
+		
+		spline = IECore.SplinefColor3fData(
+			IECore.SplinefColor3f(
+				IECore.CubicBasisf.catmullRom(),
+				(
+					( 0, IECore.Color3f( 1 ) ),
+					( 0, IECore.Color3f( 1 ) ),
+					( 1, IECore.Color3f( 0 ) ),
+					( 1, IECore.Color3f( 0 ) ),
+				),
+			),
+		)
+		
+		c = IECoreGL.ToGLConverter.create( spline )
+		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
+		
+		spline = IECore.SplinefColor4fData(
+			IECore.SplinefColor4f(
+				IECore.CubicBasisf.catmullRom(),
+				(
+					( 0, IECore.Color4f( 1 ) ),
+					( 0, IECore.Color4f( 1 ) ),
+					( 1, IECore.Color4f( 0 ) ),
+					( 1, IECore.Color4f( 0 ) ),
+				),
+			),
+		)
+		
+		c = IECoreGL.ToGLConverter.create( spline )
+		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
+		
+		spline = IECore.SplineffData(
+			IECore.Splineff(
+				IECore.CubicBasisf.catmullRom(),
+				(
+					( 0, 1 ),
+					( 0, 1 ),
+					( 1, 0 ),
+					( 1, 0 ),
+				),
+			),
+		)
+		
+		c = IECoreGL.ToGLConverter.create( spline )
+		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )	
+
 if __name__ == "__main__":
     unittest.main()

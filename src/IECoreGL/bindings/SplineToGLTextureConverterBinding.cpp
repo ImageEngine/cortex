@@ -32,36 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCONVERTER_INL
-#define IECOREGL_TOGLCONVERTER_INL
+#include "boost/python.hpp"
+
+#include "IECoreGL/SplineToGLTextureConverter.h"
+#include "IECoreGL/bindings/SplineToGLTextureConverterBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
+using namespace boost::python;
+using namespace std;
 
 namespace IECoreGL
 {
 
-template<class T>
-ToGLConverter::ConverterDescription<T>::ConverterDescription()
+void bindSplineToGLTextureConverter()
 {
-	Registration r;
-	r.resultType = T::ResultType::staticTypeId();
-	r.creator = creator;
-	registrations().insert( Registrations::value_type( T::InputType::staticTypeId(), r ) );
-};
-
-template<class T>
-ToGLConverter::ConverterDescription<T>::ConverterDescription( IECore::TypeId inputType, IECore::TypeId resultType )
-{
-	Registration r;
-	r.resultType = resultType;
-	r.creator = creator;
-	registrations().insert( Registrations::value_type( inputType, r ) );
-};
-
-template<class T>
-ToGLConverterPtr ToGLConverter::ConverterDescription<T>::creator( IECore::ConstObjectPtr object )
-{
-	return new T( IECore::staticPointerCast<const typename T::InputType>( object ) );
+	IECorePython::RunTimeTypedClass<SplineToGLTextureConverter>()
+		.def( init< IECore::ConstObjectPtr >() )
+	;
 }
 
-} // namespace IECoreGL
-
-#endif // IECOREGL_TOGLCONVERTER_INL
+}

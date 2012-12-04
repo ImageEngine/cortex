@@ -32,36 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCONVERTER_INL
-#define IECOREGL_TOGLCONVERTER_INL
+#ifndef IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H
+#define IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H
 
 namespace IECoreGL
 {
 
-template<class T>
-ToGLConverter::ConverterDescription<T>::ConverterDescription()
-{
-	Registration r;
-	r.resultType = T::ResultType::staticTypeId();
-	r.creator = creator;
-	registrations().insert( Registrations::value_type( T::InputType::staticTypeId(), r ) );
-};
+void bindSplineToGLTextureConverter();
 
-template<class T>
-ToGLConverter::ConverterDescription<T>::ConverterDescription( IECore::TypeId inputType, IECore::TypeId resultType )
-{
-	Registration r;
-	r.resultType = resultType;
-	r.creator = creator;
-	registrations().insert( Registrations::value_type( inputType, r ) );
-};
-
-template<class T>
-ToGLConverterPtr ToGLConverter::ConverterDescription<T>::creator( IECore::ConstObjectPtr object )
-{
-	return new T( IECore::staticPointerCast<const typename T::InputType>( object ) );
 }
 
-} // namespace IECoreGL
-
-#endif // IECOREGL_TOGLCONVERTER_INL
+#endif // IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H
