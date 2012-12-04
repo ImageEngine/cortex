@@ -50,11 +50,12 @@
 #include "IECoreGL/ColorTexture.h"
 #include "IECoreGL/LuminanceTexture.h"
 
-
-
 using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( ToGLTextureConverter );
+
+ToGLTextureConverter::ConverterDescription<ToGLTextureConverter> ToGLTextureConverter::g_description;
+ToGLTextureConverter::ConverterDescription<ToGLTextureConverter> ToGLTextureConverter::g_compoundDataDescription( IECore::CompoundData::staticTypeId(), IECoreGL::Texture::staticTypeId() );
 
 ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert )
 	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId )

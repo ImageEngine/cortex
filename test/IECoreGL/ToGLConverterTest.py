@@ -127,7 +127,28 @@ class ToGLConverterTest( unittest.TestCase ) :
 		)
 		
 		c = IECoreGL.ToGLConverter.create( spline )
-		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )	
+		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
+		
+		# images
+		
+		image = IECore.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0, 0 ), IECore.Box2i( IECore.V2i( 256 ), ), IECore.Box2i( IECore.V2i( 256 ) ) )
+		c = IECoreGL.ToGLConverter.create( image )
+		self.failUnless( isinstance( c, IECoreGL.ToGLTextureConverter ) )
+
+		# compound data
+		
+		compoundData = IECore.CompoundData( {
+			"dataWindow" : IECore.Box2iData( image.dataWindow ),
+			"displayWindow" : IECore.Box2iData( image.displayWindow ),
+			"channels" : {
+				"R" : image["R"].data,
+				"G" : image["G"].data,
+				"B" : image["B"].data,
+			}
+		} )
+		
+		c = IECoreGL.ToGLConverter.create( compoundData )
+		self.failUnless( isinstance( c, IECoreGL.ToGLTextureConverter ) )
 
 if __name__ == "__main__":
     unittest.main()
