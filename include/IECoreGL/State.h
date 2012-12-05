@@ -93,11 +93,11 @@ class State : public Bindable
 		
 		void add( StateComponentPtr s );
 		template<typename T>
-		typename T::Ptr get();
+		T *get();
 		template<typename T>
-		typename T::ConstPtr get() const;
-		StateComponentPtr get( IECore::TypeId componentType );
-		ConstStateComponentPtr get( IECore::TypeId componentType ) const;
+		const T *get() const;
+		StateComponent *get( IECore::TypeId componentType );
+		const StateComponent *get( IECore::TypeId componentType ) const;
 		template<typename T> void remove();
 		void remove( IECore::TypeId componentType );
 

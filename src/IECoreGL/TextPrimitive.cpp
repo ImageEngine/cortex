@@ -98,8 +98,7 @@ void TextPrimitive::render( const State * state, IECore::TypeId style ) const
 		return;
 	}
 
-	ConstTypePtr t = state->get<Type>();
-	switch( t->value() )
+	switch( state->get<Type>()->value() )
 	{
 		case Mesh :
 			renderMeshes( state, style );

@@ -231,7 +231,7 @@ StateComponent *DeferredRendererImplementation::getState( IECore::TypeId type )
 			return c;
 		}
 	}
-	return IECore::constPointerCast<StateComponent>( State::defaultState()->get( type ) );
+	return const_cast<StateComponent *>( State::defaultState()->get( type ) );
 }
 
 void DeferredRendererImplementation::addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value )

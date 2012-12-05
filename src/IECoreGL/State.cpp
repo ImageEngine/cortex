@@ -119,24 +119,24 @@ void State::add( StateComponentPtr s )
 	m_components[s->typeId()] = s;
 }
 
-StateComponentPtr State::get( IECore::TypeId componentType )
+StateComponent *State::get( IECore::TypeId componentType )
 {
 	ComponentMap::const_iterator it = m_components.find( componentType );
 	if( it==m_components.end() )
 	{
 		return 0;
 	}
-	return it->second;
+	return it->second.get();
 }
 
-ConstStateComponentPtr State::get( IECore::TypeId componentType ) const
+const StateComponent *State::get( IECore::TypeId componentType ) const
 {
 	ComponentMap::const_iterator it = m_components.find( componentType );
 	if( it==m_components.end() )
 	{
 		return 0;
 	}
-	return it->second;
+	return it->second.get();
 }
 
 void State::remove( IECore::TypeId componentType )

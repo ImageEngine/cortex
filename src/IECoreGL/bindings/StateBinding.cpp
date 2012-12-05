@@ -56,6 +56,11 @@ static StatePtr defaultState()
 	return IECore::constPointerCast< State >( State::defaultState() );
 }
 
+static StateComponentPtr get( State &s, IECore::TypeId typeId )
+{
+	return s.get( typeId );
+}
+
 void bindState()
 {
 	scope s = IECorePython::RunTimeTypedClass<State>()
@@ -63,7 +68,7 @@ void bindState()
 		.def( init<const State &>() )
 		.def( "add", (void (State::*)( StatePtr ) )&State::add )
 		.def( "add", (void (State::*)( StateComponentPtr ) )&State::add )
-		.def( "get", ( StateComponentPtr (State::*)( IECore::TypeId) )&State::get )
+		.def( "get", &get )
 		.def( "remove", (void (State::*)( IECore::TypeId) )&State::remove )
 		.def( "isComplete", &State::isComplete )
 		.def( "userAttributes", &userAttributes )

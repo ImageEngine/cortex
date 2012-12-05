@@ -1836,7 +1836,7 @@ typedef std::map<string, Command> CommandMap;
 
 bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, const std::string &objectName, IECoreGL::Renderer::MemberData *memberData )
 {
-	ConstNameStateComponentPtr stateName = child->getState()->get<NameStateComponent>();
+	const NameStateComponent *stateName = child->getState()->get<NameStateComponent>();
 	if( stateName && stateName->name()==objectName )
 	{
 		if( parent )
