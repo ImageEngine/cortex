@@ -467,7 +467,62 @@ class ShadingTest( unittest.TestCase ) :
 				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
 			]
 		)	
+	
+	def testWireframe( self ) :
+	
+		g = IECore.Group()
+		g.addChild( self.mesh() )
 		
+		g.addState(
+			IECore.AttributeState(
+				{
+					"gl:primitive:solid" : IECore.BoolData( False ),
+					"gl:primitive:wireframe" : IECore.BoolData( True ),
+					"gl:primitive:wireframeColor" : IECore.Color4f( 1, 0, 0, 1 ),
+					"gl:primitive:wireframeWidth" : 6.0,
+				}
+			)
+		)
+
+		image = self.renderImage( g )
+		
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.55, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+			]
+		)
+
+	def testSameMeshTwoShaders( self ) :
+	
+		c1 = IECore.Group()
+		c1.addChild( self.mesh() )
+		c1.addState( self.colorShader() )
+		c1.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 0, 1, 1 ) )		
+		
+		c2 = IECore.Group()
+		c2.addChild( self.mesh() )
+		c2.addState( self.textureShader() )
+		c2.state()[0].parameters["sampler"] = IECore.StringData( os.path.dirname( __file__ ) + "/images/yellow.exr" )
+		
+		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		
+		g = IECore.Group()
+		g.addChild( c1 )
+		g.addChild( c2 )
+		
+		image = self.renderImage( g )
+		
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 1, 1 ) ), 
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
+			]
+		)
+
 	def tearDown( self ) :
 
 		for f in [ self.__imageFileName ] :

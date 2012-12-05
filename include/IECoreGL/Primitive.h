@@ -140,6 +140,9 @@ class Primitive : public Renderable
 		mutable ShaderSetupVector m_shaderSetups;
 		const Shader::Setup *shaderSetup( const Shader *shader ) const;
 		
+		mutable Shader::SetupPtr m_boundSetup;
+		const Shader::Setup *boundSetup() const;
+		
 		typedef std::map<std::string, IECore::ConstDataPtr> AttributeMap;
 		AttributeMap m_vertexAttributes;
 		AttributeMap m_uniformAttributes;

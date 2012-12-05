@@ -1103,7 +1103,6 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 // definitions for useful simple shaders
 ///////////////////////////////////////////////////////////////////////////////
 
-/// \todo This needs a parameter for the colour to be passed in
 ShaderPtr Shader::constant()
 {
 	static const char *vertexSource =
@@ -1116,9 +1115,11 @@ ShaderPtr Shader::constant()
 	"}";
 
 	static const char *fragmentSource =
+	"uniform vec3 Cs;"
+	""
 	"void main()"
 	"{"
-	"	gl_FragColor = vec4( 1, 1, 1, 1 );"
+	"	gl_FragColor = vec4( Cs, 1 );"
 	"}";
 
 
