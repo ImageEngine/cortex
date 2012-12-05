@@ -192,13 +192,5 @@ State::CreatorMap *State::creators()
 void State::bindBaseState()
 {
 	glEnable( GL_BLEND );
-	glEnable( GL_COLOR_MATERIAL );
-	glColorMaterial( GL_FRONT_AND_BACK, GL_DIFFUSE );
-	float black[4] = { 0, 0, 0, 0 };
-	glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, black );
-	glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, black );
-	glMaterialfv( GL_FRONT_AND_BACK, GL_EMISSION, black );
-	glShadeModel( GL_SMOOTH );
-	glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
 	glCullFace( GL_BACK );
 }
