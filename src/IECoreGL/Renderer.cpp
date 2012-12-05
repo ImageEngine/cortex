@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -62,9 +62,6 @@
 #include "IECoreGL/FontLoader.h"
 #include "IECoreGL/TextPrimitive.h"
 #include "IECoreGL/DiskPrimitive.h"
-#include "IECoreGL/ToGLCurvesConverter.h"
-#include "IECoreGL/ToGLTextureConverter.h"
-#include "IECoreGL/ToGLPointsConverter.h"
 #include "IECoreGL/CachedConverter.h"
 
 #include "IECore/MessageHandler.h"
@@ -1514,11 +1511,6 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 
 	if( type=="surface" || type=="gl:surface" )
 	{
-		if ( !m_data->shaderManager )
-		{
-			msg( Msg::Warning, "Renderer::shader", "Shader specification before world begin ignored. No ShaderManager defined yet." );
-			return;
-		}
 		string vertexSource = parameterValue<string>( "gl:vertexSource", parameters, "" );
 		string fragmentSource = parameterValue<string>( "gl:fragmentSource", parameters, "" );
 
@@ -1527,15 +1519,16 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 			m_data->shaderManager->loadShaderCode( name, vertexSource, fragmentSource );
 		}
 
-		// validate the parameter types and load any texture parameters.
-		ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderManager, m_data->textureLoader, vertexSource, fragmentSource );
+		CompoundObjectPtr parametersData = new CompoundObject;
 		for( CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 		{
 			if( it->first!="gl:fragmentSource" && it->first!="gl:vertexSource" )
 			{
-				shaderState->addShaderParameterValue( it->first.value(), it->second );
+				parametersData->members()[it->first] = it->second;
 			}
 		}
+
+		ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderManager, m_data->textureLoader, vertexSource, fragmentSource, parametersData );
 		m_data->implementation->addState( shaderState );
 	}
 	else

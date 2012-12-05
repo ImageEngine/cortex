@@ -65,6 +65,7 @@ from ToGLConverterTest import ToGLConverterTest
 from CachedConverterTest import CachedConverterTest
 from InstancingTest import InstancingTest
 from BufferTest import BufferTest
+from ShadingTest import ShadingTest
 
 if IECore.withFreeType() :
 

@@ -138,7 +138,7 @@ class Primitive : public Renderable
 
 		typedef std::vector<Shader::SetupPtr> ShaderSetupVector;
 		mutable ShaderSetupVector m_shaderSetups;
-		const Shader::Setup *shaderSetup( Shader *shader ) const;
+		const Shader::Setup *shaderSetup( const Shader *shader ) const;
 		
 		typedef std::map<std::string, IECore::ConstDataPtr> AttributeMap;
 		AttributeMap m_vertexAttributes;

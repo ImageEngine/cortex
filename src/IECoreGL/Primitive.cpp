@@ -118,9 +118,16 @@ void Primitive::render( State *state ) const
 	
 	if( state->get<Primitive::DrawSolid>()->value() )
 	{
-		Shader *shader = state->get<ShaderStateComponent>()->shader();
-		const Shader::Setup *setup = shaderSetup( shader );
-		Shader::Setup::ScopedBinding scopedBinding( *setup );
+		// the state itself will have a shader with some nice uniform parameter
+		// values. we are responsible for binding this setup.
+		Shader::Setup *uniformSetup = state->get<ShaderStateComponent>()->shaderSetup();
+		Shader::Setup::ScopedBinding uniformBinding( *uniformSetup );
+		// we then bind our own setup on top, adding in the parameters
+		// stored on the primitive itself.
+		const Shader *shader = uniformSetup->shader();
+		const Shader::Setup *primitiveSetup = shaderSetup( shader );
+		Shader::Setup::ScopedBinding primitiveBinding( *primitiveSetup );
+		// then we defer to the derived class to perform the draw call.
 		render( state, Primitive::DrawSolid::staticTypeId() );
 	}
 	
@@ -160,7 +167,6 @@ void Primitive::render( State *state ) const
 
 	// \todo: consider binding at the end the whole original state. Check if that is enough to eliminate these push/pop calls.
 	glPushAttrib( GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
-	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
 
 		if( depthSortRequested( state ) )
 		{
@@ -264,16 +270,7 @@ void Primitive::render( State *state ) const
 			}
 		}
 
-	glPopClientAttrib();
 	glPopAttrib();
-
-	// revert to the original shader state.
-	state->get<ShaderStateComponent>()->bind();
-
-	if ( shader )
-	{
-		// disable all vertex shader parameters
-		shader->unsetVertexParameters();
 	}*/
 }
 
@@ -293,7 +290,7 @@ bool Primitive::depthSortRequested( const State * state ) const
 		state->get<TransparentShadingStateComponent>()->value();
 }
 
-const Shader::Setup *Primitive::shaderSetup( Shader *shader ) const
+const Shader::Setup *Primitive::shaderSetup( const Shader *shader ) const
 {
 	for( ShaderSetupVector::const_iterator it = m_shaderSetups.begin(), eIt = m_shaderSetups.end(); it != eIt; it++ )
 	{
@@ -307,6 +304,10 @@ const Shader::Setup *Primitive::shaderSetup( Shader *shader ) const
 	for( AttributeMap::const_iterator it = m_vertexAttributes.begin(), eIt = m_vertexAttributes.end(); it != eIt; it++ )
 	{
 		setup->addVertexAttribute( it->first, it->second );
+	}
+	for( AttributeMap::const_iterator it = m_uniformAttributes.begin(), eIt = m_uniformAttributes.end(); it != eIt; it++ )
+	{
+		setup->addUniformParameter( it->first, it->second );
 	}
 	
 	m_shaderSetups.push_back( setup );
