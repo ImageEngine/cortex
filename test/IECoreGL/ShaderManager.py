@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,18 +35,17 @@
 import unittest
 import os.path
 
-from IECore import *
+import IECore
+import IECoreGL
 
-from IECoreGL import *
-init( False )
+IECoreGL.init( False )
 
 class TestShaderManager( unittest.TestCase ) :
 
 	def test( self ) :
 
-		sp = SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
-
-		l = ShaderManager( sp )
+		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
+		l = IECoreGL.ShaderManager( sp )
 
 		s = l.load( "3dLabs/Toon" )
 		self.assert_( s.typeName()=="IECoreGL::Shader" )
@@ -58,20 +57,36 @@ class TestShaderManager( unittest.TestCase ) :
 		s = l.load( "3dLabs/Mandel" )
 		self.assert_( s.typeName()=="IECoreGL::Shader" )
 
-		self.assert_( ShaderManager.defaultShaderManager().isSame( ShaderManager.defaultShaderManager() ) )
+		self.assert_( IECoreGL.ShaderManager.defaultShaderManager().isSame( IECoreGL.ShaderManager.defaultShaderManager() ) )
 
 	def testPreprocessing( self ) :
 
-		sp = SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
-		psp = SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
+		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
+		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
 
 		# this should work
-		l = ShaderManager( sp, psp )
+		l = IECoreGL.ShaderManager( sp, psp )
 		s = l.load( "failWithoutPreprocessing" )
 
 		# but turning off preprocessing should cause a throw
-		l = ShaderManager( sp )
+		l = IECoreGL.ShaderManager( sp )
 		self.assertRaises( RuntimeError, l.load, "failWithoutPreprocessing" )
 
+	def testPreprocessingAllowsVersionAndExtension( self ) :
+	
+		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
+		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
+		l = IECoreGL.ShaderManager( sp, psp )
+
+		l.load( "versionAndExtension" )
+		
+	def testPreprocessingThrowsOnBadDirective( self ) :
+	
+		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
+		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
+		l = IECoreGL.ShaderManager( sp, psp )
+
+		self.assertRaises( RuntimeError, l.load, "badPreprocessingDirective" )	
+				
 if __name__ == "__main__":
     unittest.main()

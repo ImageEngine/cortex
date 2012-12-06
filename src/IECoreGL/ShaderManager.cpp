@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,23 +32,74 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/ShaderManager.h"
-#include "IECoreGL/Shader.h"
-
-#include "IECore/MessageHandler.h"
+#include <fstream>
+#include <iostream>
 
 #include "boost/wave.hpp"
 #include "boost/wave/cpplexer/cpp_lex_token.hpp"
 #include "boost/wave/cpplexer/cpp_lex_iterator.hpp"
 #include "boost/format.hpp"
 
-#include <fstream>
-#include <iostream>
+#include "IECore/MessageHandler.h"
+
+#include "IECoreGL/ShaderManager.h"
+#include "IECoreGL/Shader.h"
 
 using namespace IECoreGL;
 using namespace IECore;
 using namespace boost::filesystem;
 using namespace std;
+
+//////////////////////////////////////////////////////////////////////////
+// GLSLPreprocessingHooks implementation
+//////////////////////////////////////////////////////////////////////////
+
+namespace IECoreGL
+{
+
+namespace Detail
+{
+
+// The GLSLPreprocessingHooks class is used to modify the boost::wave preprocessor to work
+// with GLSL source code. Although GLSL has its own preprocessor, it is limited in functionality
+// and in particular doesn't allow #include directives, which is why we want to use boost::wave.
+// However, GLSL also defines additional directives (version and extension) which would trip up
+// the wave preprocessor if we didn't give a helping hand, which is what this class is all about.
+class GLSLPreprocessingHooks : public boost::wave::context_policies::default_preprocessing_hooks
+{
+	
+	public :
+	
+		// Pass through "#version" and "#extension" directives unmodified so that they can
+		// be processed by the GL preprocessor itself.
+		template<typename ContextT, typename ContainerT>
+		bool found_unknown_directive( const ContextT &ctx, const ContainerT &line, ContainerT &pending )
+		{
+			typename ContainerT::const_iterator it = line.begin();
+			if( *it != boost::wave::T_POUND )
+			{
+				return false;
+			}
+			
+			it++;
+			if( it->get_value() == "version" || it->get_value() == "extension" )
+			{
+				std::copy( line.begin(), line.end(), std::back_inserter( pending ) );
+				return true;
+			}
+			
+			return false;
+		}
+
+};
+
+} // namespace Detail
+
+} // namespace IECoreGL
+
+//////////////////////////////////////////////////////////////////////////
+// ShaderManager implementation
+//////////////////////////////////////////////////////////////////////////
 
 ShaderManager::ShaderManager( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
 	:	m_searchPaths( searchPaths ), m_preprocess( preprocessorSearchPaths ), m_preprocessorSearchPaths( preprocessorSearchPaths ? *preprocessorSearchPaths : SearchPath() )
@@ -153,7 +204,12 @@ std::string ShaderManager::preprocessShader( const std::string &fileName, const 
 		{
 			typedef boost::wave::cpplexer::lex_token<> Token;
 			typedef boost::wave::cpplexer::lex_iterator<Token> LexIterator;
-			typedef boost::wave::context<std::string::iterator, LexIterator> Context;
+			typedef boost::wave::context<
+				std::string::iterator,
+				LexIterator,
+				boost::wave::iteration_context_policies::load_file_to_string,
+				Detail::GLSLPreprocessingHooks
+			> Context;
 
 			Context ctx( result.begin(), result.end(), fileName.c_str() );
 			// set the language so that #line directives aren't inserted (they make the ati shader compiler barf)
