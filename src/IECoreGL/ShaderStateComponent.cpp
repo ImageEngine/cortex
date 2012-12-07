@@ -39,7 +39,7 @@
 
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/Shader.h"
-#include "IECoreGL/ShaderManager.h"
+#include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/Texture.h"
 #include "IECoreGL/TextureLoader.h"
 #include "IECoreGL/CachedConverter.h"
@@ -50,13 +50,13 @@ using namespace IECoreGL;
 StateComponent::Description<ShaderStateComponent> ShaderStateComponent::g_description;
 
 ShaderStateComponent::ShaderStateComponent()
-	:	m_shaderManager( 0 ), m_textureLoader( 0 ), m_fragmentShader( "" ), m_vertexShader( "" ), 
+	:	m_shaderLoader( 0 ), m_textureLoader( 0 ), m_fragmentShader( "" ), m_vertexShader( "" ), 
 		m_parameterMap( 0 ), m_shaderSetup( 0 )
 {
 }
 
-ShaderStateComponent::ShaderStateComponent( ShaderManagerPtr shaderManager, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues ) :
-	m_shaderManager( shaderManager ), m_textureLoader( textureLoader ), m_fragmentShader( fragmentShader ), 
+ShaderStateComponent::ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues ) :
+	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentShader( fragmentShader ), 
 	m_vertexShader( vertexShader ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( 0 )
 {
 }
@@ -84,7 +84,7 @@ void ShaderStateComponent::ensureShaderSetup() const
 		return;
 	}
 
-	if( !m_shaderManager )
+	if( !m_shaderLoader )
 	{
 		// we were default constructed, so we're just a facing ratio shader.
 		m_shaderSetup = new Shader::Setup( Shader::facingRatio() );
@@ -92,7 +92,7 @@ void ShaderStateComponent::ensureShaderSetup() const
 	}
 
 	// load a shader, create a setup, and add our parameters to it.
-	ShaderPtr shader = m_shaderManager->create( m_vertexShader, m_fragmentShader );
+	ShaderPtr shader = m_shaderLoader->create( m_vertexShader, m_fragmentShader );
 	m_shaderSetup = new Shader::Setup( shader );
 
 	const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();

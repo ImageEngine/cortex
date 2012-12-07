@@ -40,12 +40,12 @@ import IECoreGL
 
 IECoreGL.init( False )
 
-class TestShaderManager( unittest.TestCase ) :
+class ShaderLoaderTest( unittest.TestCase ) :
 
 	def test( self ) :
 
 		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
-		l = IECoreGL.ShaderManager( sp )
+		l = IECoreGL.ShaderLoader( sp )
 
 		s = l.load( "3dLabs/Toon" )
 		self.assert_( s.typeName()=="IECoreGL::Shader" )
@@ -57,7 +57,7 @@ class TestShaderManager( unittest.TestCase ) :
 		s = l.load( "3dLabs/Mandel" )
 		self.assert_( s.typeName()=="IECoreGL::Shader" )
 
-		self.assert_( IECoreGL.ShaderManager.defaultShaderManager().isSame( IECoreGL.ShaderManager.defaultShaderManager() ) )
+		self.assert_( IECoreGL.ShaderLoader.defaultShaderLoader().isSame( IECoreGL.ShaderLoader.defaultShaderLoader() ) )
 
 	def testPreprocessing( self ) :
 
@@ -65,18 +65,18 @@ class TestShaderManager( unittest.TestCase ) :
 		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
 
 		# this should work
-		l = IECoreGL.ShaderManager( sp, psp )
+		l = IECoreGL.ShaderLoader( sp, psp )
 		s = l.load( "failWithoutPreprocessing" )
 
 		# but turning off preprocessing should cause a throw
-		l = IECoreGL.ShaderManager( sp )
+		l = IECoreGL.ShaderLoader( sp )
 		self.assertRaises( RuntimeError, l.load, "failWithoutPreprocessing" )
 
 	def testPreprocessingAllowsVersionAndExtension( self ) :
 	
 		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
 		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
-		l = IECoreGL.ShaderManager( sp, psp )
+		l = IECoreGL.ShaderLoader( sp, psp )
 
 		l.load( "versionAndExtension" )
 		
@@ -84,7 +84,7 @@ class TestShaderManager( unittest.TestCase ) :
 	
 		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
 		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
-		l = IECoreGL.ShaderManager( sp, psp )
+		l = IECoreGL.ShaderLoader( sp, psp )
 
 		self.assertRaises( RuntimeError, l.load, "badPreprocessingDirective" )	
 	
@@ -92,7 +92,7 @@ class TestShaderManager( unittest.TestCase ) :
 	
 		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
 		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
-		l = IECoreGL.ShaderManager( sp, psp )
+		l = IECoreGL.ShaderLoader( sp, psp )
 		
 		with IECore.CapturingMessageHandler() as mh :
 		

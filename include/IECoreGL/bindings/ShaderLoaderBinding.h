@@ -32,36 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "IECorePython/RefCountedBinding.h"
-
-#include "IECoreGL/ShaderManager.h"
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/bindings/ShaderManagerBinding.h"
-
-using namespace boost::python;
+#ifndef IECOREGL_SHADERLOADERBINDING_H
+#define IECOREGL_SHADERLOADERBINDING_H
 
 namespace IECoreGL
 {
 
-static tuple loadShaderCode( ShaderManager &s, const std::string &name )
-{
-	std::string vertShader, fragShader;
-	s.loadShaderCode( name, vertShader, fragShader );
-	return make_tuple( vertShader, fragShader );
-}
-
-void bindShaderManager()
-{
-	IECorePython::RefCountedClass<ShaderManager, IECore::RefCounted>( "ShaderManager" )
-		.def( init<const IECore::SearchPath &>() )
-		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
-		.def( "loadShaderCode", &loadShaderCode )
-		.def( "create", &ShaderManager::create )
-		.def( "load", &ShaderManager::load )
-		.def( "defaultShaderManager", &ShaderManager::defaultShaderManager ).staticmethod( "defaultShaderManager" )
-	;
-}
+void bindShaderLoader();
 
 }
+
+#endif // IECOREGL_SHADERLOADERBINDING_H

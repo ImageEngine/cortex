@@ -43,7 +43,7 @@
 namespace IECoreGL
 {
 
-IE_CORE_FORWARDDECLARE( ShaderManager )
+IE_CORE_FORWARDDECLARE( ShaderLoader )
 IE_CORE_FORWARDDECLARE( TextureLoader )
 
 /// The ShaderStateComponent class represents a Shader
@@ -64,7 +64,7 @@ class ShaderStateComponent : public StateComponent
 		/// allow the creation of GL resources to be deferred until shaderSetup() is called - this makes
 		/// it possible to create ShaderStateComponents concurrently in multiple threads, with the actual
 		/// GL resource creation deferred until the drawing thread uses shaderSetup().
-		ShaderStateComponent( ShaderManagerPtr shaderManager, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues );
+		ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues );
 
 		/// Implemented to do nothing - it is the responsibility of the Primitive
 		/// to actually bind the shader() at an appropriate time.
@@ -81,7 +81,7 @@ class ShaderStateComponent : public StateComponent
 
 		void ensureShaderSetup() const;
 
-		ShaderManagerPtr m_shaderManager;
+		ShaderLoaderPtr m_shaderLoader;
 		TextureLoaderPtr m_textureLoader;
 		std::string m_fragmentShader;
 		std::string m_vertexShader;

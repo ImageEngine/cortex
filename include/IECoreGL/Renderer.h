@@ -45,7 +45,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Scene );
 IE_CORE_FORWARDDECLARE( TextureLoader );
-IE_CORE_FORWARDDECLARE( ShaderManager );
+IE_CORE_FORWARDDECLARE( ShaderLoader );
 
 /// \addtogroup environmentGroup
 ///
@@ -483,9 +483,9 @@ class Renderer : public IECore::Renderer
 		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
-		/// Returns the internal ShaderManager object used to manage the shaders from this renderer.
+		/// Returns the internal ShaderLoader object used to load the shaders for this renderer.
 		/// If called before worldBegin it returns 0.
-		ShaderManager *shaderManager();
+		ShaderLoader *shaderLoader();
 
 		/// Returns the internal TextureLoader object.
 		/// If called before worldBegin it returns 0.

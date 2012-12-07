@@ -36,7 +36,6 @@ import IECore
 
 from Shader import *
 from State import *
-from ShaderManager import *
 from Renderer import *
 from Group import *
 from Texture import *
@@ -66,6 +65,7 @@ from CachedConverterTest import CachedConverterTest
 from InstancingTest import InstancingTest
 from BufferTest import BufferTest
 from ShadingTest import ShadingTest
+from ShaderLoaderTest import ShaderLoaderTest
 
 if IECore.withFreeType() :
 

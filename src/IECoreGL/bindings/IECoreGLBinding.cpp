@@ -46,7 +46,7 @@
 #include "IECoreGL/bindings/RenderableBinding.h"
 #include "IECoreGL/bindings/SceneBinding.h"
 #include "IECoreGL/bindings/SceneViewerBinding.h"
-#include "IECoreGL/bindings/ShaderManagerBinding.h"
+#include "IECoreGL/bindings/ShaderLoaderBinding.h"
 #include "IECoreGL/bindings/TextureLoaderBinding.h"
 #include "IECoreGL/bindings/GroupBinding.h"
 #include "IECoreGL/bindings/FrameBufferBinding.h"
@@ -91,7 +91,7 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindRenderable();
 	bindScene();
 	bindSceneViewer();
-	bindShaderManager();
+	bindShaderLoader();
 	bindTextureLoader();
 	bindGroup();
 	bindFrameBuffer();

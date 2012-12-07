@@ -40,7 +40,7 @@
 
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
-#include "IECoreGL/ShaderManager.h"
+#include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/TextureLoader.h"
 #include "IECoreGL/bindings/RendererBinding.h"
 
@@ -50,9 +50,9 @@ using namespace IECore;
 namespace IECoreGL
 {
 
-static ShaderManagerPtr shaderManager( Renderer &r )
+static ShaderLoaderPtr shaderLoader( Renderer &r )
 {
-	return r.shaderManager();
+	return r.shaderLoader();
 }
 
 static TextureLoaderPtr textureLoader( Renderer &r )
@@ -80,7 +80,7 @@ void bindRenderer()
 		.def( init<>() )
 		.def( "worldBegin", &worldBegin )
 		.def( "scene", &Renderer::scene )
-		.def( "shaderManager", &shaderManager )
+		.def( "shaderLoader", &shaderLoader )
 		.def( "textureLoader", &textureLoader )
 	;
 }

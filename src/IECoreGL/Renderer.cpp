@@ -48,7 +48,7 @@
 #include "IECoreGL/private/ImmediateRendererImplementation.h"
 #include "IECoreGL/private/Display.h"
 #include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/ShaderManager.h"
+#include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/TextureLoader.h"
@@ -160,7 +160,7 @@ struct IECoreGL::Renderer::MemberData
 	bool inWorld;
 	bool inEdit;
 	RendererImplementationPtr implementation;
-	ShaderManagerPtr shaderManager;
+	ShaderLoaderPtr shaderLoader;
 	TextureLoaderPtr textureLoader;
 #ifdef IECORE_WITH_FREETYPE
 	FontLoaderPtr fontLoader;
@@ -274,7 +274,7 @@ IECoreGL::Renderer::Renderer()
 	m_data->inEdit = false;
 	m_data->currentInstance = 0;
 	m_data->implementation = 0;
-	m_data->shaderManager = 0;
+	m_data->shaderLoader = 0;
 	
 	m_data->cachedConverter = CachedConverter::defaultCachedConverter();
 }
@@ -576,12 +576,12 @@ void IECoreGL::Renderer::worldBegin()
 	if( m_data->options.shaderSearchPath==m_data->options.shaderSearchPathDefault && m_data->options.shaderIncludePath==m_data->options.shaderIncludePathDefault )
 	{
 		// use the shared default cache if we can
-		m_data->shaderManager = ShaderManager::defaultShaderManager();
+		m_data->shaderLoader = ShaderLoader::defaultShaderLoader();
 	}
 	else
 	{
 		IECore::SearchPath includePaths( m_data->options.shaderIncludePath, ":" );
-		m_data->shaderManager = new ShaderManager( IECore::SearchPath( m_data->options.shaderSearchPath, ":" ), &includePaths );
+		m_data->shaderLoader = new ShaderLoader( IECore::SearchPath( m_data->options.shaderSearchPath, ":" ), &includePaths );
 	}
 
 	if( m_data->options.textureSearchPath==m_data->options.textureSearchPathDefault )
@@ -1516,7 +1516,7 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 
 		if ( vertexSource == "" && fragmentSource == "" )
 		{
-			m_data->shaderManager->loadShaderCode( name, vertexSource, fragmentSource );
+			m_data->shaderLoader->loadShaderCode( name, vertexSource, fragmentSource );
 		}
 
 		CompoundObjectPtr parametersData = new CompoundObject;
@@ -1528,7 +1528,7 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 			}
 		}
 
-		ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderManager, m_data->textureLoader, vertexSource, fragmentSource, parametersData );
+		ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, vertexSource, fragmentSource, parametersData );
 		m_data->implementation->addState( shaderState );
 	}
 	else
@@ -1683,7 +1683,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 	IECore::CompoundObjectPtr params = new IECore::CompoundObject();
 	params->members()[ "texture" ] = image;
 
-	ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderManager, m_data->textureLoader, "", imageFragmentShader(), params );
+	ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, "", imageFragmentShader(), params );
 
 	m_data->implementation->transformBegin();
 
@@ -1999,9 +1999,9 @@ IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECo
 	return 0;
 }
 
-IECoreGL::ShaderManager *IECoreGL::Renderer::shaderManager()
+IECoreGL::ShaderLoader *IECoreGL::Renderer::shaderLoader()
 {
-	return m_data->shaderManager;
+	return m_data->shaderLoader;
 }
 
 IECoreGL::TextureLoader *IECoreGL::Renderer::textureLoader()

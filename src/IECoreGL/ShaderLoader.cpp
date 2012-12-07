@@ -42,7 +42,7 @@
 
 #include "IECore/MessageHandler.h"
 
-#include "IECoreGL/ShaderManager.h"
+#include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/Shader.h"
 
 using namespace IECoreGL;
@@ -98,10 +98,10 @@ class GLSLPreprocessingHooks : public boost::wave::context_policies::default_pre
 } // namespace IECoreGL
 
 //////////////////////////////////////////////////////////////////////////
-// ShaderManager::Implementation
+// ShaderLoader::Implementation
 //////////////////////////////////////////////////////////////////////////
 
-class ShaderManager::Implementation : public IECore::RefCounted
+class ShaderLoader::Implementation : public IECore::RefCounted
 {
 
 	public :
@@ -124,7 +124,7 @@ class ShaderManager::Implementation : public IECore::RefCounted
 				path fragmentPath = m_searchPaths.find( name + ".frag" );
 				if( vertexPath.empty() && fragmentPath.empty() )
 				{
-					IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderManager::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
+					IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderLoader::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
 				}
 
 				if( !vertexPath.empty() )
@@ -278,47 +278,47 @@ class ShaderManager::Implementation : public IECore::RefCounted
 };
 
 //////////////////////////////////////////////////////////////////////////
-// ShaderManager
+// ShaderLoader
 //////////////////////////////////////////////////////////////////////////
 
-ShaderManager::ShaderManager( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
+ShaderLoader::ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
 	:	m_implementation( new Implementation( searchPaths, preprocessorSearchPaths ) )
 {
 }
 
-ShaderManager::~ShaderManager()
+ShaderLoader::~ShaderLoader()
 {
 }
 
-void ShaderManager::loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader )
+void ShaderLoader::loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader )
 {
 	m_implementation->loadShaderCode( name, vertexShader, fragmentShader );
 }
 
-ShaderPtr ShaderManager::create( const std::string &vertexShader, const std::string &fragmentShader )
+ShaderPtr ShaderLoader::create( const std::string &vertexShader, const std::string &fragmentShader )
 {
 	return m_implementation->create( vertexShader, fragmentShader );
 }
 
-void ShaderManager::clearUnused( )
+void ShaderLoader::clearUnused( )
 {
 	m_implementation->clearUnused();
 }
 
-ShaderPtr ShaderManager::load( const std::string &name )
+ShaderPtr ShaderLoader::load( const std::string &name )
 {
 	return m_implementation->load( name );
 }
 
-ShaderManagerPtr ShaderManager::defaultShaderManager()
+ShaderLoaderPtr ShaderLoader::defaultShaderLoader()
 {
-	static ShaderManagerPtr t = 0;
+	static ShaderLoaderPtr t = 0;
 	if( !t )
 	{
 		const char *e = getenv( "IECOREGL_SHADER_PATHS" );
 		const char *p = getenv( "IECOREGL_SHADER_INCLUDE_PATHS" );
 		IECore::SearchPath pp( p ? p : "", ":" );
-		t = new ShaderManager( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : 0 );
+		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : 0 );
 	}
 	return t;
 }

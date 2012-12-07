@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_SHADERLOADERBINDING_H
-#define IE_COREGL_SHADERLOADERBINDING_H
+#include <boost/python.hpp>
+
+#include "IECorePython/RefCountedBinding.h"
+
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/Shader.h"
+#include "IECoreGL/bindings/ShaderLoaderBinding.h"
+
+using namespace boost::python;
 
 namespace IECoreGL
 {
 
-void bindShaderManager();
-
+static tuple loadShaderCode( ShaderLoader &s, const std::string &name )
+{
+	std::string vertShader, fragShader;
+	s.loadShaderCode( name, vertShader, fragShader );
+	return make_tuple( vertShader, fragShader );
 }
 
-#endif // IE_COREGL_SHADERLOADERBINDING_H
+void bindShaderLoader()
+{
+	IECorePython::RefCountedClass<ShaderLoader, IECore::RefCounted>( "ShaderLoader" )
+		.def( init<const IECore::SearchPath &>() )
+		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
+		.def( "loadShaderCode", &loadShaderCode )
+		.def( "create", &ShaderLoader::create )
+		.def( "load", &ShaderLoader::load )
+		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )
+	;
+}
+
+} // namespace IECoreGL
