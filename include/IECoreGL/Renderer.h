@@ -125,7 +125,7 @@ class Renderer : public IECore::Renderer
 		/// procedurals concurrently in separate threads (GL wants only one threading talking to a context). When the scene is rendered for the first
 		/// time it will instantiate various OpenGL resources (textures and shaders and the like) in the current GL context. It is therefore important that
 		/// the scene is destroyed from the same thread that renders it, so that the resources are released in the correct context. As the resources are
-		/// also shared by caches (TextureLoaders and ShaderManagers) in the Renderer, it is also important that the renderer is destroyed from this same
+		/// also shared by caches (TextureLoaders and ShaderLoaders) in the Renderer, it is also important that the renderer is destroyed from this same
 		/// thread.
 		ScenePtr scene();
 
