@@ -39,7 +39,9 @@
 
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/Shader.h"
+#include "IECoreGL/ShaderManager.h"
 #include "IECoreGL/Texture.h"
+#include "IECoreGL/TextureLoader.h"
 #include "IECoreGL/CachedConverter.h"
 
 using namespace std;

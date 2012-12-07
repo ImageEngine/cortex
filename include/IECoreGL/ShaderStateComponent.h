@@ -38,12 +38,13 @@
 #include "IECore/CompoundObject.h"
 
 #include "IECoreGL/StateComponent.h"
-#include "IECoreGL/ShaderManager.h"
 #include "IECoreGL/Shader.h"
-#include "IECoreGL/TextureLoader.h"
 
 namespace IECoreGL
 {
+
+IE_CORE_FORWARDDECLARE( ShaderManager )
+IE_CORE_FORWARDDECLARE( TextureLoader )
 
 /// The ShaderStateComponent class represents a Shader
 /// object and a set of associated parameter values. It derives
