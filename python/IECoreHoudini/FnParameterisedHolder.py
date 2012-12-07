@@ -77,7 +77,7 @@ class FnParameterisedHolder():
 	#		If empty or not in UI mode, will create a top level OBJ to house the new holder
 	def _doCreate( nodeType, name, className, version=None, envVarName=None, parent=None, contextArgs={} ) :
 		
-		if hou.isUIAvailable() and contextArgs.get( "toolname", "" ) == nodeType :
+		if hou.isUIAvailable() and contextArgs.get( "toolname", "" ) :
 			holder = toolutils.genericTool( contextArgs, nodeType, nodename = name )
 		else :
 			parent = parent if parent else hou.node( "/obj" ).createNode( "geo", node_name=name, run_init_scripts=False )
