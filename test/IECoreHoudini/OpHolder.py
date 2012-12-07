@@ -76,6 +76,42 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assert_( op )
 		self.assertEqual( op.typeName(), "noiseDeformer" )
 		
+	# tests creation within contexts (simulating from UIs)
+	def testContextCreator( self ) :
+		# test generic creation
+		n = IECoreHoudini.FnOpHolder.create( "vectorMaker", "vectors/V3fVectorCreator" )
+		self.assertEqual( n.path(), "/obj/vectorMaker/vectorMaker" )
+		
+		# test contextArgs outside UI mode fallback to generic behaviour
+		contextArgs = { "toolname" : "ieOpHolder" }
+		n2 = IECoreHoudini.FnOpHolder.create( "vectorMaker", "vectors/V3fVectorCreator", contextArgs=contextArgs )
+		self.assertEqual( n2.path(), "/obj/vectorMaker1/vectorMaker" )
+		
+		# test parent arg
+		geo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		n3 = IECoreHoudini.FnOpHolder.create( "vectorMaker", "vectors/V3fVectorCreator", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n3.path(), "/obj/geo1/vectorMaker" )
+		
+		# test automatic conversion
+		contextArgs["shiftclick"] = True
+		n4 = IECoreHoudini.FnOpHolder.create( "noise", "noiseDeformer", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n4.path(), "/obj/geo1/noise" )
+		self.assertEqual( len(n4.outputConnectors()[0]), 1 )
+		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieToHoudiniConverter" )
+		
+		# test automatic conversion and output connections
+		mountain = geo.createNode( "mountain" )
+		contextArgs["outputnodename"] = mountain.path()
+		n5 = IECoreHoudini.FnOpHolder.create( "noise", "noiseDeformer", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n5.path(), "/obj/geo1/noise1" )
+		self.assertEqual( len(n5.outputConnectors()[0]), 1 )
+		converter = n5.outputConnectors()[0][0].outputNode()
+		self.assertEqual( converter.type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( len(converter.outputConnectors()[0]), 1 )
+		outputNode = converter.outputConnectors()[0][0].outputNode()
+		self.assertEqual( outputNode.type().name(), "mountain" )
+		self.assertEqual( outputNode, mountain )
+	
 	# test that a C++ op can be assigned using the function set
 	def testCppOp(self):
 		(op,fn) = self.testOpHolder()

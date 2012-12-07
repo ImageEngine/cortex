@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-11, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -61,6 +61,42 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( fn.getParameterised(), cl )
 		return fn
 
+	# tests creation within contexts (simulating from UIs)
+	def testContextCreator( self ) :
+		# test generic creation
+		n = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes" )
+		self.assertEqual( n.path(), "/obj/test/test" )
+		
+		# test contextArgs outside UI mode fallback to generic behaviour
+		contextArgs = { "toolname" : "ieProceduralHolder" }
+		n2 = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes", contextArgs=contextArgs )
+		self.assertEqual( n2.path(), "/obj/test1/test" )
+		
+		# test parent arg
+		geo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		n3 = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n3.path(), "/obj/geo1/test" )
+		
+		# test automatic conversion
+		contextArgs["shiftclick"] = True
+		n4 = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n4.path(), "/obj/geo1/test1" )
+		self.assertEqual( len(n4.outputConnectors()[0]), 1 )
+		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieToHoudiniConverter" )
+		
+		# test automatic conversion and output connections
+		mountain = geo.createNode( "mountain" )
+		contextArgs["outputnodename"] = mountain.path()
+		n5 = IECoreHoudini.FnOpHolder.create( "test", "parameterTypes", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n5.path(), "/obj/geo1/test2" )
+		self.assertEqual( len(n5.outputConnectors()[0]), 1 )
+		converter = n5.outputConnectors()[0][0].outputNode()
+		self.assertEqual( converter.type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( len(converter.outputConnectors()[0]), 1 )
+		outputNode = converter.outputConnectors()[0][0].outputNode()
+		self.assertEqual( outputNode.type().name(), "mountain" )
+		self.assertEqual( outputNode, mountain )
+	
 	def testProceduralParameters(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)

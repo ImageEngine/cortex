@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -36,23 +36,19 @@
 ##########################################################################
 
 import hou
+
 import IECore
 import IECoreHoudini
-from IECoreHoudini.FnParameterisedHolder import FnParameterisedHolder
 
-class FnOpHolder(FnParameterisedHolder):
-
-	# create our function set and stash which node we're looking at
-	def __init__(self, node=None):
-		FnParameterisedHolder.__init__(self, node)
-
-	@classmethod
-	def create(cls, name, type, version, path="IECORE_OP_PATHS"):
-		obj = hou.node("/obj")
-		geo = obj.createNode("geo", node_name=name, run_init_scripts=False)
-		proc = geo.createNode( "ieOpHolder", node_name=name )
-		IECoreHoudini.FnOpHolder( proc ).setParameterised( type, version, path )
-		return proc
+class FnOpHolder( IECoreHoudini.FnParameterisedHolder ) :
+	
+	_nodeType = "ieOpHolder"
+	
+	@staticmethod
+	# see FnParameterisedHolder for a description of the parameters
+	def create( name, type, version=None, path="IECORE_OP_PATHS", parent=None, contextArgs={} ) :
+		
+		return IECoreHoudini.FnParameterisedHolder._doCreate( FnOpHolder._nodeType, name, type, version, path, parent, contextArgs )
 	
 	## Convenience method to call setParameterised with the environment variable
 	# for the searchpaths set to "IECORE_OP_PATHS".

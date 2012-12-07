@@ -38,11 +38,15 @@
 import warnings
 
 import hou
+import toolutils
+
 import IECore
 import IECoreHoudini
 
 class FnParameterisedHolder():
-
+	
+	_nodeType = None
+	
 	# create our function set and stash which node we're looking at
 	def __init__(self, node=None):
 		self.__node = node
@@ -61,7 +65,35 @@ class FnParameterisedHolder():
 	def node(self):
 
 		return self.__node if self.nodeValid() else None
-
+	
+	@staticmethod
+	# nodeType: type of node to create (str)
+	# name: desired node name (str)
+	# className: class path to op stub (str)
+	# version: op version, or None for latest (int)
+	# envVarName: environment variable to use as a search path for ops (str)
+	# parent: parent node, or None to create a new /obj geo. Ignored if contextArgs is used in UI mode (hou.Node)
+	# contextArgs:	args related to the creation context, as would come from UI menu interactions (dict)
+	#		If empty or not in UI mode, will create a top level OBJ to house the new holder
+	def _doCreate( nodeType, name, className, version=None, envVarName=None, parent=None, contextArgs={} ) :
+		
+		if hou.isUIAvailable() and contextArgs.get( "toolname", "" ) == nodeType :
+			holder = toolutils.genericTool( contextArgs, nodeType, nodename = name )
+		else :
+			parent = parent if parent else hou.node( "/obj" ).createNode( "geo", node_name=name, run_init_scripts=False )
+			holder = parent.createNode( nodeType, node_name=name )
+		
+		IECoreHoudini.FnParameterisedHolder( holder ).setParameterised( className, version, envVarName )
+		
+		if contextArgs.get( "shiftclick", False ) :
+			converter = holder.parent().createNode( "ieToHoudiniConverter", node_name = holder.name()+"Converter" )
+			outputNode = hou.node( contextArgs.get( "outputnodename", "" ) )
+			toolutils.connectInputsAndOutputs( converter, False, holder, outputNode, 0, 0 )
+			x, y = holder.position()
+			converter.setPosition( [x,y-1] )
+		
+		return holder
+	
 	# do we have a valid parameterised instance?
 	def hasParameterised( self ) :
 
@@ -90,7 +122,7 @@ class FnParameterisedHolder():
 	def getParameterised( self ) :
 		
 		return IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).getParameterised() if self.hasParameterised() else None
-
+	
 	# get our list of class names based on matchString
 	def classNames( self ) :
 		
