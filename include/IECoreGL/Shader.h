@@ -60,10 +60,9 @@ class Shader : public IECore::RunTimeTyped
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Shader, ShaderTypeId, IECore::RunTimeTyped );
 
-		/// Either vertexSource or fragmentSource may be empty to use the fixed
-		/// functionality for that shader component.
-		/// Throws an Exception if the shader fails to compile, or if the OpenGL
-		/// version isn't sufficient to support shaders.
+		/// Either vertexSource or fragmentSource may be empty to use a simple default
+		/// shader for that shader component. Throws an Exception if the shader fails
+		/// to compile, or if the OpenGL version isn't sufficient to support shaders.
 		Shader( const std::string &vertexSource, const std::string &fragmentSource );
 		virtual ~Shader();
 
@@ -130,6 +129,15 @@ class Shader : public IECore::RunTimeTyped
 		};
 		
 		IE_CORE_DECLAREPTR( Setup );
+		
+		//! @name Default shader source.
+		/// These functions return the default shader source used
+		/// when source isn't provided to the constructor.
+		///////////////////////////////////////////////////////////
+		//@{
+		static const std::string &defaultVertexSource();
+		static const std::string &defaultFragmentSource();
+		//@}
 		
 		//! @name Built in shaders
 		/// These functions provide access to static instances of

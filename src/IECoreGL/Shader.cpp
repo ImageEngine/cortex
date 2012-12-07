@@ -66,8 +66,19 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 		throw Exception( "OpenGL version < 2" );
 	}
 
-	compile( vertexSource, GL_VERTEX_SHADER, m_vertexShader );
-	compile( fragmentSource, GL_FRAGMENT_SHADER, m_fragmentShader );
+	string actualVertexSource = vertexSource;
+	string actualFragmentSource = fragmentSource;
+	if( vertexSource == "" )
+	{
+		actualVertexSource = defaultVertexSource();
+	}
+	if( fragmentSource == "" )
+	{
+		actualFragmentSource = defaultFragmentSource();
+	}
+
+	compile( actualVertexSource, GL_VERTEX_SHADER, m_vertexShader );
+	compile( actualFragmentSource, GL_FRAGMENT_SHADER, m_fragmentShader );
 
 	m_program = glCreateProgram();
 	if( m_vertexShader )
@@ -1100,69 +1111,75 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// default shader source
+///////////////////////////////////////////////////////////////////////////////
+
+const std::string &Shader::defaultVertexSource()
+{
+	static string s =
+		
+		"in vec3 P;"
+		"in vec3 N;"
+		""
+		"varying out vec3 fragmentI;"
+		"varying out vec3 fragmentN;"
+		""
+		"void main()"
+		"{"
+		"	vec4 pCam = gl_ModelViewMatrix * vec4( P, 1 );"
+		"	gl_Position = gl_ProjectionMatrix * pCam;"
+		"	fragmentN = normalize( gl_NormalMatrix * N );"
+		"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
+		"	{"
+		"		fragmentI = normalize( -pCam.xyz );"
+		"	}"
+		"	else"
+		"	{"
+		"		fragmentI = vec3( 0, 0, -1 );"
+		"	}"
+		"}";
+		
+	return s;
+}
+
+const std::string &Shader::defaultFragmentSource()
+{
+	static string s = 
+	
+		"varying vec3 fragmentI;"
+		"varying vec3 fragmentN;"
+		""
+		"void main()"
+		"{"
+		"	vec3 Nf = faceforward( fragmentN, -fragmentI, fragmentN );"
+		"	float f = dot( normalize( fragmentI ), normalize(Nf) );"
+		"	gl_FragColor = vec4( f, f, f, 1 );"
+		"}";
+		
+	return s;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // definitions for useful simple shaders
 ///////////////////////////////////////////////////////////////////////////////
 
 ShaderPtr Shader::constant()
 {
-	static const char *vertexSource =
-	"in vec3 P;"
-	""
-	"void main()"
-	"{"
-	"	vec4 pCam = gl_ModelViewMatrix * vec4( P, 1 );"
-	"	gl_Position = gl_ProjectionMatrix * pCam;"
-	"}";
-
 	static const char *fragmentSource =
-	"uniform vec3 Cs;"
-	""
-	"void main()"
-	"{"
-	"	gl_FragColor = vec4( Cs, 1 );"
-	"}";
+	
+		"uniform vec3 Cs;"
+		""
+		"void main()"
+		"{"
+		"	gl_FragColor = vec4( Cs, 1 );"
+		"}";
 
-
-	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
+	static ShaderPtr s = new Shader( defaultVertexSource(), fragmentSource );
 	return s;
 }
 
 ShaderPtr Shader::facingRatio()
 {
-	static const char *vertexSource =
-	"in vec3 P;"
-	"in vec3 N;"
-	""
-	"varying out vec3 fI;"
-	"varying out vec3 fN;"
-	""
-	"void main()"
-	"{"
-	"	vec4 pCam = gl_ModelViewMatrix * vec4( P, 1 );"
-	"	gl_Position = gl_ProjectionMatrix * pCam;"
-	"	fN = normalize( gl_NormalMatrix * N );"
-	"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
-	"	{"
-	"		fI = normalize( -pCam.xyz );"
-	"	}"
-	"	else"
-	"	{"
-	"		fI = vec3( 0, 0, -1 );"
-	"	}"
-	"}";
-
-	static const char *fragmentSource =
-	"varying vec3 fI;"
-	"varying vec3 fN;"
-	""
-	"void main()"
-	"{"
-	"	vec3 Nf = faceforward( fN, -fI, fN );"
-	"	float f = dot( normalize(fI), normalize(Nf) );"
-	"	gl_FragColor = vec4( f, f, f, 1 );"
-	"}";
-
-
-	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
+	static ShaderPtr s = new Shader( defaultVertexSource(), defaultFragmentSource() );
 	return s;
 }
