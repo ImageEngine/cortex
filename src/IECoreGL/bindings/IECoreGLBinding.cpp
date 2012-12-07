@@ -41,11 +41,9 @@
 #include "IECoreGL/bindings/BindableBinding.h"
 #include "IECoreGL/bindings/ShaderBinding.h"
 #include "IECoreGL/bindings/TextureBinding.h"
-#include "IECoreGL/bindings/WindowBinding.h"
 #include "IECoreGL/bindings/StateBinding.h"
 #include "IECoreGL/bindings/RenderableBinding.h"
 #include "IECoreGL/bindings/SceneBinding.h"
-#include "IECoreGL/bindings/SceneViewerBinding.h"
 #include "IECoreGL/bindings/ShaderLoaderBinding.h"
 #include "IECoreGL/bindings/TextureLoaderBinding.h"
 #include "IECoreGL/bindings/GroupBinding.h"
@@ -55,7 +53,6 @@
 #include "IECoreGL/bindings/CameraBinding.h"
 #include "IECoreGL/bindings/OrthographicCameraBinding.h"
 #include "IECoreGL/bindings/PerspectiveCameraBinding.h"
-#include "IECoreGL/bindings/CameraControllerBinding.h"
 #include "IECoreGL/bindings/StateComponentBinding.h"
 #include "IECoreGL/bindings/TypedStateComponentBinding.h"
 #include "IECoreGL/bindings/NameStateComponentBinding.h"
@@ -86,11 +83,9 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindBindable();
 	bindShader();
 	bindTexture();
-	bindWindow();
 	bindState();
 	bindRenderable();
 	bindScene();
-	bindSceneViewer();
 	bindShaderLoader();
 	bindTextureLoader();
 	bindGroup();
@@ -100,7 +95,6 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindCamera();
 	bindOrthographicCamera();
 	bindPerspectiveCamera();
-	bindCameraController();
 	bindStateComponent();
 	bindTypedStateComponents();
 	bindNameStateComponent();

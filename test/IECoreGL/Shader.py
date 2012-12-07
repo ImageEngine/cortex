@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -422,65 +422,6 @@ class TestShader( unittest.TestCase ) :
 		s.setVertexParameter( "vec4Parm", Color4fVectorData( [ Color4f( 1 ) ] ) )
 
 		s.unsetVertexParameters()
-
-	def testRendererCall( self ) :
-
-		## \todo We need image output from the renderer so we don't have to look at
-		# it in a window.
-
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:texture", StringData( os.path.dirname( __file__ ) + "/images" ) )
-		r.worldBegin()
-
-		# we have to make this here so that the shaders that get made are made in the
-		# correct GL context. My understanding is that all shaders should work in all
-		# GL contexts in the address space, but that doesn't seem to be the case.
-		#w = SceneViewer( "scene", r.scene() )
-
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
-
-		r.attributeBegin()
-		r.setAttribute( "color", Color3fData( Color3f( 1, 0, 1 ) ) )
-		r.shader( "surface", "grey", { "greyValue" : FloatData( 0.5 ) } )
-		r.geometry( "sphere", {}, {} )
-		r.attributeEnd()
-
-		r.attributeBegin()
-		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0.5, 0.25 ) ) } )
-		r.geometry( "sphere", {}, {} )
-		r.attributeEnd()
-
-		r.attributeBegin()
-		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
-		r.shader( "surface", "image", { "texture" : StringData( "colorBarsH512x512.exr" ) } )
-		r.geometry( "sphere", {}, {} )
-		r.attributeEnd()
-
-		r.attributeBegin()
-		vertexSource = """
-		void main()
-		{
-			gl_Position = ftransform() + vec4( 0, 1, 0, 0 );
-		}
-		"""
-
-		fragmentSource = """
-		void main()
-		{
-			gl_FragColor = vec4( 1, 0, 0, 1 );
-		}
-		"""
-
-		r.shader( "surface", "redTranslated", { "gl:vertexSource" : StringData( vertexSource ), "gl:fragmentSource" : StringData( fragmentSource ) } )
-		r.geometry( "sphere", {}, {} )
-		r.attributeEnd()
-
-		r.worldEnd()
-
-		#w.start()
 		
 	def testVertexValueValid( self ) :
 	

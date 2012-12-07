@@ -249,35 +249,6 @@ class TestRenderer( unittest.TestCase ) :
 
 		self.assertEqual( len( handler.messages ), 0 )
 
-	## \todo Make this test assert something
-	def testStacks( self ) :
-
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.worldBegin()
-
-		# we have to make this here so that the shaders that get made are made in the
-		# correct GL context. My understanding is that all shaders should work in all
-		# GL contexts in the address space, but that doesn't seem to be the case.
-		#w = SceneViewer( "scene", r.scene() )
-
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		r.geometry( "sphere", {}, {} )
-
-		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 1, 0 ) ) } )
-		r.geometry( "sphere", {}, {} )
-
-		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 0, 1 ) ) } )
-		r.geometry( "sphere", {}, {} )
-
-		r.worldEnd()
-
-		#w.start()
-
 	def testStackBug( self ) :
 
 		# This should produce a yellow sphere in between two red spheres. It does in the DeferredRenderer but
@@ -418,7 +389,6 @@ class TestRenderer( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
 		r.worldBegin()
-		#w = SceneViewer( "scene", r.scene() )
 
 		r.setAttribute( "gl:blend:srcFactor", StringData( "one" ) )
 		r.setAttribute( "gl:blend:dstFactor", StringData( "one" ) )
@@ -435,8 +405,6 @@ class TestRenderer( unittest.TestCase ) :
 		i.render( r )
 
 		r.worldEnd()
-
-		#w.start()
 
 	def testProcedural( self ) :
 
