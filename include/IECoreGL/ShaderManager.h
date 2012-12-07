@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,11 +35,11 @@
 #ifndef IECOREGL_SHADERMANAGER_H
 #define IECOREGL_SHADERMANAGER_H
 
-#include "IECore/RefCounted.h"
-#include "IECore/SearchPath.h"
-
 #include <map>
 #include <string>
+
+#include "IECore/RefCounted.h"
+#include "IECore/SearchPath.h"
 
 namespace IECoreGL
 {
@@ -64,7 +64,8 @@ class ShaderManager : public IECore::RefCounted
 		/// source files on the given search paths. If preprocessorSearchPaths is
 		/// specified, then source preprocessing will be performed using boost::wave.
 		ShaderManager( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
-
+		virtual ~ShaderManager();
+		
 		/// Loads the Shader code of the specified name.
 		/// It will attempt to locate and load source from the files 
 		/// "name.vert" and "name.frag". If either file
@@ -96,15 +97,8 @@ class ShaderManager : public IECore::RefCounted
 
 	private :
 
-		typedef std::map<std::string, ShaderPtr> ShaderMap;
-		ShaderMap m_loadedShaders;
-
-		IECore::SearchPath m_searchPaths;
-		bool m_preprocess;
-		IECore::SearchPath m_preprocessorSearchPaths;
-
-		std::string readFile( const std::string &fileName ) const;
-		std::string preprocessShader( const std::string &fileName, const std::string &source ) const;
+		IE_CORE_FORWARDDECLARE( Implementation );
+		ImplementationPtr m_implementation;
 
 };
 

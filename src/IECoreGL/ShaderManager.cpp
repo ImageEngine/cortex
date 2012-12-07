@@ -98,148 +98,199 @@ class GLSLPreprocessingHooks : public boost::wave::context_policies::default_pre
 } // namespace IECoreGL
 
 //////////////////////////////////////////////////////////////////////////
-// ShaderManager implementation
+// ShaderManager::Implementation
+//////////////////////////////////////////////////////////////////////////
+
+class ShaderManager::Implementation : public IECore::RefCounted
+{
+
+	public :
+	
+		Implementation( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
+			:	m_searchPaths( searchPaths ),
+				m_preprocess( preprocessorSearchPaths ),
+				m_preprocessorSearchPaths( preprocessorSearchPaths ? *preprocessorSearchPaths : SearchPath() )
+		{
+		}
+
+		void loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const
+		{
+			path vertexPath = m_searchPaths.find( name + ".vert" );
+			path fragmentPath = m_searchPaths.find( name + ".frag" );
+
+			vertexShader = "";
+			fragmentShader = "";
+
+			if( vertexPath.empty() && fragmentPath.empty() )
+			{
+				IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderManager::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
+			}
+
+			if( !vertexPath.empty() )
+			{
+				vertexShader = readFile( vertexPath.string() );
+			}
+
+			if( !fragmentPath.empty() )
+			{
+				fragmentShader = readFile( fragmentPath.string() );
+			}
+		}
+
+		ShaderPtr create( const std::string &vertexShader, const std::string &fragmentShader )
+		{
+			std::string uniqueName = vertexShader + "\n## Fragment ##\n" + fragmentShader;
+
+			ShaderMap::iterator it = m_loadedShaders.find( uniqueName );
+			if( it!=m_loadedShaders.end() )
+			{
+				return it->second;
+			}
+
+			clearUnused();
+
+			ShaderPtr s = new Shader( preprocessShader( "<Vertex Shader>", vertexShader), preprocessShader( "<Fragment Shader>", fragmentShader) );
+			m_loadedShaders[ uniqueName ] = s;
+
+			return s;
+		}
+
+		ShaderPtr load( const std::string &name )
+		{
+			std::string vertShader, fragShader;
+			loadShaderCode( name, vertShader, fragShader );
+			return create( vertShader, fragShader );
+		}
+
+		void clearUnused()
+		{
+			ShaderMap::iterator it = m_loadedShaders.begin();
+			while( it != m_loadedShaders.end() )
+			{
+				if ( it->second->refCount() == 1 )
+				{
+					m_loadedShaders.erase( it++ );
+				}
+				else
+					++it;
+			}
+		}
+
+	private :
+	
+		typedef std::map<std::string, ShaderPtr> ShaderMap;
+		ShaderMap m_loadedShaders;
+
+		IECore::SearchPath m_searchPaths;
+		bool m_preprocess;
+		IECore::SearchPath m_preprocessorSearchPaths;
+
+		std::string readFile( const std::string &fileName ) const
+		{
+			ifstream f( fileName.c_str() );
+
+			if( !f.is_open() )
+			{
+				return "";
+			}
+
+			string result = "";
+			while( f.good() )
+			{
+				string line;
+				getline( f, line );
+				result += line + "\n";
+			}
+
+			return result;
+		}
+
+		std::string preprocessShader( const std::string &fileName, const std::string &source ) const
+		{
+			if ( source == "" )
+			{
+				return source;
+			}
+
+			string result = source + "\n";
+
+			if( m_preprocess )
+			{
+				try
+				{
+					typedef boost::wave::cpplexer::lex_token<> Token;
+					typedef boost::wave::cpplexer::lex_iterator<Token> LexIterator;
+					typedef boost::wave::context<
+						std::string::iterator,
+						LexIterator,
+						boost::wave::iteration_context_policies::load_file_to_string,
+						Detail::GLSLPreprocessingHooks
+					> Context;
+
+					Context ctx( result.begin(), result.end(), fileName.c_str() );
+					// set the language so that #line directives aren't inserted (they make the ati shader compiler barf)
+					ctx.set_language( boost::wave::support_normal );
+
+					for( list<path>::const_iterator it=m_preprocessorSearchPaths.paths.begin(); it!=m_preprocessorSearchPaths.paths.end(); it++ )
+					{
+						string p = (*it).string();
+						ctx.add_include_path( p.c_str() );
+					}
+
+					Context::iterator_type b = ctx.begin();
+					Context::iterator_type e = ctx.end();
+
+					string processed = "";
+					while( b != e )
+					{
+						processed += (*b).get_value().c_str();
+						b++;
+					}
+
+					result = processed;
+				}
+				catch( boost::wave::cpp_exception &e )
+				{
+					// rethrow but in a nicely formatted form
+					throw Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % fileName % e.line_no() % e.description() ) );
+				}
+			}
+			return result;
+		}
+		
+};
+
+//////////////////////////////////////////////////////////////////////////
+// ShaderManager
 //////////////////////////////////////////////////////////////////////////
 
 ShaderManager::ShaderManager( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
-	:	m_searchPaths( searchPaths ), m_preprocess( preprocessorSearchPaths ), m_preprocessorSearchPaths( preprocessorSearchPaths ? *preprocessorSearchPaths : SearchPath() )
+	:	m_implementation( new Implementation( searchPaths, preprocessorSearchPaths ) )
+{
+}
+
+ShaderManager::~ShaderManager()
 {
 }
 
 void ShaderManager::loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const
 {
-	path vertexPath = m_searchPaths.find( name + ".vert" );
-	path fragmentPath = m_searchPaths.find( name + ".frag" );
-
-	vertexShader = "";
-	fragmentShader = "";
-
-	if( vertexPath.empty() && fragmentPath.empty() )
-	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderManager::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
-	}
-
-	if( !vertexPath.empty() )
-	{
-		vertexShader = readFile( vertexPath.string() );
-	}
-
-	if( !fragmentPath.empty() )
-	{
-		fragmentShader = readFile( fragmentPath.string() );
-	}
+	m_implementation->loadShaderCode( name, vertexShader, fragmentShader );
 }
 
 ShaderPtr ShaderManager::create( const std::string &vertexShader, const std::string &fragmentShader )
 {
-	std::string uniqueName = vertexShader + "\n## Fragment ##\n" + fragmentShader;
-
-	ShaderMap::iterator it = m_loadedShaders.find( uniqueName );
-	if( it!=m_loadedShaders.end() )
-	{
-		return it->second;
-	}
-
-	clearUnused();
-
-	ShaderPtr s = new Shader( preprocessShader( "<Vertex Shader>", vertexShader), preprocessShader( "<Fragment Shader>", fragmentShader) );
-	m_loadedShaders[ uniqueName ] = s;
-
-	return s;
+	return m_implementation->create( vertexShader, fragmentShader );
 }
 
 void ShaderManager::clearUnused( )
 {
-	ShaderMap::iterator it = m_loadedShaders.begin();
-	while( it != m_loadedShaders.end() )
-	{
-		if ( it->second->refCount() == 1 )
-		{
-			m_loadedShaders.erase( it++ );
-		}
-		else
-			++it;
-	}
+	m_implementation->clearUnused();
 }
 
 ShaderPtr ShaderManager::load( const std::string &name )
 {
-	std::string vertShader, fragShader;
-	loadShaderCode( name, vertShader, fragShader );
-	return create( vertShader, fragShader );
-}
-
-std::string ShaderManager::readFile( const std::string &fileName ) const
-{
-	ifstream f( fileName.c_str() );
-
-	if( !f.is_open() )
-	{
-		return "";
-	}
-
-	string result = "";
-	while( f.good() )
-	{
-		string line;
-		getline( f, line );
-		result += line + "\n";
-	}
-
-	return result;
-}
-
-std::string ShaderManager::preprocessShader( const std::string &fileName, const std::string &source ) const
-{
-	if ( source == "" )
-	{
-		return source;
-	}
-
-	string result = source + "\n";
-
-	if( m_preprocess )
-	{
-		try
-		{
-			typedef boost::wave::cpplexer::lex_token<> Token;
-			typedef boost::wave::cpplexer::lex_iterator<Token> LexIterator;
-			typedef boost::wave::context<
-				std::string::iterator,
-				LexIterator,
-				boost::wave::iteration_context_policies::load_file_to_string,
-				Detail::GLSLPreprocessingHooks
-			> Context;
-
-			Context ctx( result.begin(), result.end(), fileName.c_str() );
-			// set the language so that #line directives aren't inserted (they make the ati shader compiler barf)
-			ctx.set_language( boost::wave::support_normal );
-
-			for( list<path>::const_iterator it=m_preprocessorSearchPaths.paths.begin(); it!=m_preprocessorSearchPaths.paths.end(); it++ )
-			{
-				string p = (*it).string();
-				ctx.add_include_path( p.c_str() );
-			}
-
-			Context::iterator_type b = ctx.begin();
-			Context::iterator_type e = ctx.end();
-
-			string processed = "";
-			while( b != e )
-			{
-				processed += (*b).get_value().c_str();
-				b++;
-			}
-
-			result = processed;
-		}
-		catch( boost::wave::cpp_exception &e )
-		{
-			// rethrow but in a nicely formatted form
-			throw Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % fileName % e.line_no() % e.description() ) );
-		}
-	}
-	return result;
+	return m_implementation->load( name );
 }
 
 ShaderManagerPtr ShaderManager::defaultShaderManager()
