@@ -36,16 +36,16 @@
 #ifndef IECOREGL_RENDERER_H
 #define IECOREGL_RENDERER_H
 
-#include "IECoreGL/TypeIds.h"
-
 #include "IECore/Renderer.h"
-#include "IECoreGL/TextureLoader.h"
-#include "IECoreGL/ShaderManager.h"
+
+#include "IECoreGL/TypeIds.h"
 
 namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Scene );
+IE_CORE_FORWARDDECLARE( TextureLoader );
+IE_CORE_FORWARDDECLARE( ShaderManager );
 
 /// \addtogroup environmentGroup
 ///
