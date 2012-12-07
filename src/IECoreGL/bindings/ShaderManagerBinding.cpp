@@ -45,7 +45,7 @@ using namespace boost::python;
 namespace IECoreGL
 {
 
-static tuple loadShaderCode( const ShaderManager &s, const std::string &name )
+static tuple loadShaderCode( ShaderManager &s, const std::string &name )
 {
 	std::string vertShader, fragShader;
 	s.loadShaderCode( name, vertShader, fragShader );

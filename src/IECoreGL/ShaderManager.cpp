@@ -113,28 +113,35 @@ class ShaderManager::Implementation : public IECore::RefCounted
 		{
 		}
 
-		void loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const
+		void loadShaderCode( const std::string &name, std::string &vertexSource, std::string &fragmentSource )
 		{
-			path vertexPath = m_searchPaths.find( name + ".vert" );
-			path fragmentPath = m_searchPaths.find( name + ".frag" );
-
-			vertexShader = "";
-			fragmentShader = "";
-
-			if( vertexPath.empty() && fragmentPath.empty() )
+			SourceMap::const_iterator it = m_loadedSource.find( name );
+			if( it == m_loadedSource.end() )
 			{
-				IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderManager::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
-			}
+				Source source;
+			
+				path vertexPath = m_searchPaths.find( name + ".vert" );
+				path fragmentPath = m_searchPaths.find( name + ".frag" );
+				if( vertexPath.empty() && fragmentPath.empty() )
+				{
+					IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderManager::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
+				}
 
-			if( !vertexPath.empty() )
-			{
-				vertexShader = readFile( vertexPath.string() );
-			}
+				if( !vertexPath.empty() )
+				{
+					source.vertex = readFile( vertexPath.string() );
+				}
 
-			if( !fragmentPath.empty() )
-			{
-				fragmentShader = readFile( fragmentPath.string() );
+				if( !fragmentPath.empty() )
+				{
+					source.fragment = readFile( fragmentPath.string() );
+				}
+			
+				it = m_loadedSource.insert( SourceMap::value_type( name, source ) ).first;
 			}
+			
+			vertexSource = it->second.vertex;
+			fragmentSource = it->second.fragment;
 		}
 
 		ShaderPtr create( const std::string &vertexShader, const std::string &fragmentShader )
@@ -172,11 +179,21 @@ class ShaderManager::Implementation : public IECore::RefCounted
 					m_loadedShaders.erase( it++ );
 				}
 				else
+				{
 					++it;
+				}
 			}
 		}
 
 	private :
+	
+		struct Source
+		{
+			std::string vertex;
+			std::string fragment;
+		};
+		typedef std::map<std::string, Source> SourceMap;
+		SourceMap m_loadedSource; // maps from shader name to shader source
 	
 		typedef std::map<std::string, ShaderPtr> ShaderMap;
 		ShaderMap m_loadedShaders;
@@ -273,7 +290,7 @@ ShaderManager::~ShaderManager()
 {
 }
 
-void ShaderManager::loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const
+void ShaderManager::loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader )
 {
 	m_implementation->loadShaderCode( name, vertexShader, fragmentShader );
 }

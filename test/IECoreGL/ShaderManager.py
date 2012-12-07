@@ -87,6 +87,26 @@ class TestShaderManager( unittest.TestCase ) :
 		l = IECoreGL.ShaderManager( sp, psp )
 
 		self.assertRaises( RuntimeError, l.load, "badPreprocessingDirective" )	
-				
+	
+	def testLoadSourceMessagesAndCaching( self ) :
+	
+		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
+		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
+		l = IECoreGL.ShaderManager( sp, psp )
+		
+		with IECore.CapturingMessageHandler() as mh :
+		
+			source = l.loadShaderCode( "thisShaderDoesntExist" )
+			self.assertEqual( source, ( "", "" ) )
+			
+			source = l.loadShaderCode( "thisShaderDoesntExist" )
+			self.assertEqual( source, ( "", "" ) )
+			
+		# we don't want messages over and over for repeated failures to
+		# load.
+		self.assertEqual( len( mh.messages ), 1 )
+		# but we do want a nice sensible message the first time.
+		self.failUnless( "thisShaderDoesntExist" in mh.messages[0].message )
+		
 if __name__ == "__main__":
     unittest.main()

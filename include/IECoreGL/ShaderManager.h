@@ -70,14 +70,14 @@ class ShaderManager : public IECore::RefCounted
 		/// It will attempt to locate and load source from the files 
 		/// "name.vert" and "name.frag". If either file
 		/// is not found then return empty strings representing that
-		/// the standard OpenGL fixed functionality should be used instead.
-		void loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const;
+		/// the default source code provided by the Shader class should be used instead.
+		void loadShaderCode( const std::string &name, std::string &vertexSource, std::string &fragmentSource );
 
 		/// Creates a new Shader if necessary or returns a previously compiled shader from the cache.
 		/// In case the given shader was not in the cache it will do preprocessing (adding include files)
 		/// and then return a new instance os Shader object.
 		/// This function will also eliminate any shader from the cache that is not being used.
-		ShaderPtr create( const std::string &vertexShader, const std::string &fragmentShader );
+		ShaderPtr create( const std::string &vertexSource, const std::string &fragmentSource );
 
 		/// Loads the shader code and creates the Shader object.
 		/// This function can only be called when the OpenGL context is defined.
