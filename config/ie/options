@@ -102,7 +102,7 @@ else :
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
-	
+		
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
@@ -177,7 +177,11 @@ if compilerVersionInt < 350 :
 TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
-GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
+
+## \todo Remove version override and rejig as necessary when we merge and bump major version to 8.
+glewVersion = "1.7.0"
+GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion + "/GL"
+GLEW_LIB_SUFFIX = "-" + glewVersion
 
 if platform == "cent6.x86_64" :
 	# use the /usr/lib versions of tiff, png, freetype and jpeg

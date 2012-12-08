@@ -340,6 +340,13 @@ o.Add(
 )
 
 o.Add(
+	"GLEW_LIB_SUFFIX",
+	"The suffix appended to the names of the GLEW library. You can modify this "
+	"to link against libraries installed with non-defalt names.",
+	"",
+)
+
+o.Add(
 	"GLUT_INCLUDE_PATH",
 	"The path to the directory with glut.h in it.",
 	"$GLEW_INCLUDE_PATH",
@@ -1811,7 +1818,7 @@ if env["WITH_GL"] and doConfigure :
 	c = Configure( glEnv )
 	
 	## \todo We need to check for GLUT here too
-	if not c.CheckLibWithHeader( "GLEW", "glew.h", "CXX" ) :
+	if not c.CheckLibWithHeader( "GLEW$GLEW_LIB_SUFFIX", "glew.h", "CXX" ) :
 	
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
 		c.Finish()
@@ -2157,7 +2164,7 @@ nukeEnvAppends = {
 	],
 
 	"LIBS" : [
-		"GLEW",
+		"GLEW$GLEW_LIB_SUFFIX",
 	]
 
 }
@@ -2386,7 +2393,7 @@ houdiniEnvAppends = {
 		"HoudiniUT",
 		"HoudiniRAY",
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
-		"GLEW"
+		"GLEW$GLEW_LIB_SUFFIX"
 	]
 }
 
