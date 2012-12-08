@@ -845,6 +845,14 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_COREHOUDINI_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreHoudini library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
 	"INSTALL_CORETRUELIGHT_POST_COMMAND",
 	"A command which is run following a successful installation of "
 	"the CoreTruelight library. This could be used to customise installation "
@@ -2657,6 +2665,11 @@ if doConfigure :
 		houdiniToolbarInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINITOOLBAR_DIR", source=houdiniToolbars )
 		houdiniPluginEnv.Alias( "install", houdiniToolbarInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniToolbarInstall )
+		
+		if coreEnv["INSTALL_COREHOUDINI_POST_COMMAND"] != "" :
+			# this is the only way we could find to get a post action to run for an alias
+			houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
+			houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
 		
 		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
 
