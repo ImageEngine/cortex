@@ -66,8 +66,6 @@ class Shader : public IECore::RunTimeTyped
 		Shader( const std::string &vertexSource, const std::string &fragmentSource );
 		virtual ~Shader();
 
-		bool operator==( const Shader &other ) const;
-
 		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
@@ -152,32 +150,9 @@ class Shader : public IECore::RunTimeTyped
 
 	private :
 
-		struct VectorValueValid;
-		struct VectorSetValue;
-		struct VectorSetup;
+		IE_CORE_FORWARDDECLARE( Implementation )
+		ImplementationPtr m_implementation;
 
-		void compile( const std::string &source, GLenum type, GLuint &shader );
-		void release();
-
-		GLuint m_vertexShader;
-		GLuint m_fragmentShader;
-		GLuint m_program;
-
-		struct ParameterDescription
-		{
-			std::string name;
-			GLenum type;
-			GLint size;
-			size_t textureUnit; // only used for uniform parameters
-		};
-		/// Maps from the uniform location to the parameter details.
-		typedef std::map<GLint, ParameterDescription> ParameterMap;
-		ParameterMap m_uniformParameters;
-		ParameterMap m_vertexParameters;
-		/// Throws an Exception if the parameter doesn't exist.
-		const ParameterDescription &uniformParameterDescription( GLint parameterIndex ) const;
-		/// Throws an Exception if the parameter doesn't exist.
-		//const ParameterDescription &vertexParameterDescription( GLint parameterIndex ) const;
 };
 
 } // namespace IECoreGL
