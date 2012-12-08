@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,12 @@
 #ifndef IECOREGL_FRAMEBUFFER_H
 #define IECOREGL_FRAMEBUFFER_H
 
-#include "IECoreGL/GL.h"
-#include "IECoreGL/Bindable.h"
-
 #include <vector>
+
+#include "IECore/RunTimeTyped.h"
+
+#include "IECoreGL/GL.h"
+#include "IECoreGL/TypeIds.h"
 
 namespace IECoreGL
 {
@@ -49,16 +51,15 @@ IE_CORE_FORWARDDECLARE( DepthTexture );
 /// The FrameBuffer object provides a nice reference counted wrapper
 /// around the OpenGL framebuffer object extension. It uses the Texture
 /// classes to set the components of the framebuffer.
-class FrameBuffer : public Bindable
+class FrameBuffer : public IECore::RunTimeTyped
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::FrameBuffer, FrameBufferTypeId, Bindable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::FrameBuffer, FrameBufferTypeId, IECore::RunTimeTyped );
 
 		/// Makes a new framebuffer. At this point the buffer is empty - you must use
 		/// the set*() functions below to provide locations to draw to before using
-		/// it. Throws an Exception if framebuffers are not supported by the OpenGL
-		/// implementation.
+		/// it.
 		FrameBuffer();
 		virtual ~FrameBuffer();
 
@@ -87,18 +88,32 @@ class FrameBuffer : public Bindable
 		/// framebuffer.
 		void validate() const;
 
-		/// Binds the framebuffer as the current GL buffer.
-		virtual void bind() const;
+		/// The ScopedBinding class allows the FrameBuffer to be bound to a target
+		/// for a specific duration, without worrying about remembering to
+		/// unbind it.
+		class ScopedBinding
+		{
+			
+			public :
+			
+				/// Binds the specified FrameBuffer to the specified target.
+				ScopedBinding( const FrameBuffer &frameBuffer, GLenum target = GL_FRAMEBUFFER  );
+				/// Rebinds the previously bound FrameBuffer.
+				~ScopedBinding();
+				
+			private :
+			
+				GLenum m_target;
+				GLint m_prevDrawBuffer;
+				GLint m_prevReadBuffer;
+			
+		};
 
 	private :
 
 		GLuint m_frameBuffer;
 		std::vector<ColorTexturePtr> m_colorAttachments;
 		DepthTexturePtr m_depthAttachment;
-
-		void saveAndBind() const;
-		void restore() const;
-		mutable GLint m_savedFrameBuffer;
 
 };
 

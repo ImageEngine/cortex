@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,21 +42,59 @@
 
 using namespace IECoreGL;
 
+//////////////////////////////////////////////////////////////////////////
+// ScopedBinding implementation
+//////////////////////////////////////////////////////////////////////////
+
+FrameBuffer::ScopedBinding::ScopedBinding( const FrameBuffer &frameBuffer, GLenum target )
+	:	m_target( target ), m_prevDrawBuffer( -1 ), m_prevReadBuffer( -1 )
+{
+	switch( target )
+	{
+		case GL_DRAW_FRAMEBUFFER :
+			glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &m_prevDrawBuffer );
+			break;
+		case GL_READ_FRAMEBUFFER :
+			glGetIntegerv( GL_READ_FRAMEBUFFER_BINDING, &m_prevReadBuffer );
+			break;
+		case GL_FRAMEBUFFER :
+			glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &m_prevDrawBuffer );
+			glGetIntegerv( GL_READ_FRAMEBUFFER_BINDING, &m_prevReadBuffer );
+			break;
+		default :
+			throw IECore::Exception( "IECoreGL::FrameBuffer::ScopedBinding : Unknown target type" );
+	}
+	
+	glBindFramebuffer( m_target, frameBuffer.m_frameBuffer );
+}
+
+FrameBuffer::ScopedBinding::~ScopedBinding()
+{
+	if( m_prevDrawBuffer >= 0 )
+	{
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_prevDrawBuffer );
+	}
+	if( m_prevReadBuffer >= 0 )
+	{
+		glBindFramebuffer( GL_READ_FRAMEBUFFER, m_prevReadBuffer );
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// FrameBuffer implementation
+//////////////////////////////////////////////////////////////////////////
+
 IE_CORE_DEFINERUNTIMETYPED( FrameBuffer );
 
 FrameBuffer::FrameBuffer()
-	:	m_depthAttachment( 0 ), m_savedFrameBuffer( 0 )
+	:	m_depthAttachment( 0 )
 {
-	if( !GLEW_EXT_framebuffer_object )
-	{
-		throw Exception( "FrameBuffers not supported by this OpenGL implementation.");
-	}
-	glGenFramebuffersEXT( 1, &m_frameBuffer );
+	glGenFramebuffers( 1, &m_frameBuffer );
 }
 
 FrameBuffer::~FrameBuffer()
 {
-	glDeleteFramebuffersEXT( 1, &m_frameBuffer );
+	glDeleteFramebuffers( 1, &m_frameBuffer );
 }
 
 unsigned int FrameBuffer::maxColors()
@@ -68,17 +106,15 @@ unsigned int FrameBuffer::maxColors()
 
 void FrameBuffer::setColor( ColorTexturePtr texture, unsigned int index )
 {
-	saveAndBind();
+	ScopedBinding binding( *this );
 
-		if( index )
-		{
-			IECore::msg( IECore::Msg::Warning, "FrameBuffer::setColor", "Attachment points other than 0 not implemented yet." );
-		}
-		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture->m_texture, 0 );
-		m_colorAttachments.resize( std::max( (unsigned int)m_colorAttachments.size(), (unsigned int)index + 1 ) );
-		m_colorAttachments[index] = texture;
-
-	restore();
+	if( index )
+	{
+		IECore::msg( IECore::Msg::Warning, "FrameBuffer::setColor", "Attachment points other than 0 not implemented yet." );
+	}
+	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->m_texture, 0 );
+	m_colorAttachments.resize( std::max( (unsigned int)m_colorAttachments.size(), (unsigned int)index + 1 ) );
+	m_colorAttachments[index] = texture;
 }
 
 ColorTexturePtr FrameBuffer::getColor( unsigned int index )
@@ -101,12 +137,10 @@ ConstColorTexturePtr FrameBuffer::getColor( unsigned int index ) const
 
 void FrameBuffer::setDepth( DepthTexturePtr depthTexture )
 {
-	saveAndBind();
+	ScopedBinding binding( *this );
 
-		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthTexture->m_texture, 0 );
-		m_depthAttachment = depthTexture;
-
-	restore();
+	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture->m_texture, 0 );
+	m_depthAttachment = depthTexture;
 }
 
 DepthTexturePtr FrameBuffer::getDepth()
@@ -121,43 +155,26 @@ ConstDepthTexturePtr FrameBuffer::getDepth() const
 
 void FrameBuffer::validate() const
 {
-	saveAndBind();
-		GLenum status;
-		status = glCheckFramebufferStatusEXT( GL_FRAMEBUFFER_EXT );
-	restore();
+	ScopedBinding binding( *this );
+	
+	GLenum status;
+	status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
 
     switch( status )
 	{
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+		case GL_FRAMEBUFFER_COMPLETE :
+			return;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT :
 			throw Exception( "Framebuffer incomplete - incomplete attachment." );
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT :
 			throw Exception( "Framebuffer incomplete - missing attachment." );
-		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-			throw Exception( "Framebuffer incomplete - attachments don't have same dimensions." );
-		case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-			throw Exception( "Framebuffer incomplete - color attachments must have same format." );
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER :
 			throw Exception( "Framebuffer incomplete - missing draw buffer." );
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER :
 			throw Exception( "Framebuffer incomplete - missing read buffer." );
-		case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+		case GL_FRAMEBUFFER_UNSUPPORTED :
 			throw Exception( "Unsupported framebuffer format." );
+		default :
+			throw Exception( "Unknown framebuffer error." );
     }
-}
-
-void FrameBuffer::bind() const
-{
-	glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, m_frameBuffer );
-	/// \todo do the drawbuffers thing.
-}
-
-void FrameBuffer::saveAndBind() const
-{
-	glGetIntegerv( GL_FRAMEBUFFER_BINDING_EXT, &m_savedFrameBuffer );
-	glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, m_frameBuffer );
-}
-
-void FrameBuffer::restore() const
-{
-	glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, m_savedFrameBuffer );
 }

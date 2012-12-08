@@ -35,17 +35,17 @@
 #ifndef IECOREGL_IMMEDIATERENDERERIMPLEMENTATION_H
 #define IECOREGL_IMMEDIATERENDERERIMPLEMENTATION_H
 
-#include "IECoreGL/private/RendererImplementation.h"
-
 #include <stack>
 #include <vector>
+
+#include "IECoreGL/private/RendererImplementation.h"
+#include "IECoreGL/FrameBuffer.h"
 
 namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( State );
 IE_CORE_FORWARDDECLARE( Camera );
-IE_CORE_FORWARDDECLARE( FrameBuffer );
 IE_CORE_FORWARDDECLARE( Display );
 
 class ImmediateRendererImplementation : public RendererImplementation
@@ -89,6 +89,7 @@ class ImmediateRendererImplementation : public RendererImplementation
 
 		CameraPtr m_camera;
 		FrameBufferPtr m_frameBuffer;
+		FrameBuffer::ScopedBinding *m_frameBufferBinding;
 
 		std::vector<ConstDisplayPtr> m_displays;
 
