@@ -64,10 +64,10 @@ class ShaderStateComponent : public StateComponent
 		/// allow the creation of GL resources to be deferred until shaderSetup() is called - this makes
 		/// it possible to create ShaderStateComponents concurrently in multiple threads, with the actual
 		/// GL resource creation deferred until the drawing thread uses shaderSetup().
-		ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues );
+		ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexSource, const std::string fragmentSource, IECore::ConstCompoundObjectPtr parameterValues );
 
 		/// Implemented to do nothing - it is the responsibility of the Primitive
-		/// to actually bind the shader() at an appropriate time.
+		/// to actually bind the shaderSetup() at an appropriate time.
 		virtual void bind() const;
 
 		/// Returns the shader object.
@@ -77,16 +77,10 @@ class ShaderStateComponent : public StateComponent
 		const Shader::Setup *shaderSetup() const;
 		//@}
 
-	protected :
+	private :
 
-		void ensureShaderSetup() const;
-
-		ShaderLoaderPtr m_shaderLoader;
-		TextureLoaderPtr m_textureLoader;
-		std::string m_fragmentShader;
-		std::string m_vertexShader;
-		IECore::CompoundObjectPtr m_parameterMap;		
-		mutable Shader::SetupPtr m_shaderSetup;
+		IE_CORE_FORWARDDECLARE( Implementation );
+		ImplementationPtr m_implementation;
 
 		static Description<ShaderStateComponent> g_description;
 		

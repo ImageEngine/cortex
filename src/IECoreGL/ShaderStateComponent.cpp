@@ -47,17 +47,123 @@
 using namespace std;
 using namespace IECoreGL;
 
+//////////////////////////////////////////////////////////////////////////
+// ShaderStateComponent::Implementation
+//////////////////////////////////////////////////////////////////////////
+
+class ShaderStateComponent::Implementation : public IECore::RefCounted
+{
+
+	public :
+	
+		Implementation()
+			:	m_shaderLoader( 0 ), m_textureLoader( 0 ), m_fragmentSource( "" ), m_vertexSource( "" ), 
+				m_parameterMap( 0 ), m_shaderSetup( 0 )
+		{
+		}
+
+		Implementation( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexSource, const std::string fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
+			:	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentSource( fragmentSource ), 
+				m_vertexSource( vertexSource ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( 0 )
+		{
+		}
+
+		Shader::Setup *shaderSetup()
+		{
+			ensureShaderSetup();
+			return m_shaderSetup;
+		}
+		
+		const Shader::Setup *shaderSetup() const
+		{
+			ensureShaderSetup();
+			return m_shaderSetup;
+		}
+
+	private :
+
+		ShaderLoaderPtr m_shaderLoader;
+		TextureLoaderPtr m_textureLoader;
+		std::string m_fragmentSource;
+		std::string m_vertexSource;
+		IECore::CompoundObjectPtr m_parameterMap;		
+		mutable Shader::SetupPtr m_shaderSetup;
+
+		void ensureShaderSetup() const
+		{
+			if( m_shaderSetup )
+			{
+				return;
+			}
+
+			if( !m_shaderLoader )
+			{
+				// we were default constructed, so we're just a facing ratio shader.
+				m_shaderSetup = new Shader::Setup( Shader::facingRatio() );
+				return;
+			}
+
+			// load a shader, create a setup, and add our parameters to it.
+			ShaderPtr shader = m_shaderLoader->create( m_vertexSource, m_fragmentSource );
+			m_shaderSetup = new Shader::Setup( shader );
+
+			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
+			for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(), eIt = d.end(); it != eIt; it++ )
+			{
+				GLenum type;
+				GLint size;
+				size_t textureUnit;
+				if( shader->uniformParameter( it->first, type, size, textureUnit ) == -1 )
+				{
+					// parameter doesn't exist
+					continue;
+				}
+
+				if( type == GL_SAMPLER_2D )
+				{
+					ConstTexturePtr texture = 0;
+					if(
+						it->second->typeId() == IECore::ImagePrimitiveTypeId ||
+						it->second->typeId() == IECore::CompoundDataTypeId ||
+						it->second->typeId() == IECore::SplineffData::staticTypeId() ||
+						it->second->typeId() == IECore::SplinefColor3fData::staticTypeId()
+					)
+					{
+						texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second ) );
+					}
+					else if( it->second->typeId() == IECore::StringData::staticTypeId() )
+					{
+						const std::string &fileName = static_cast<const IECore::StringData *>( it->second.get() )->readable();
+						if( fileName!="" )
+						{
+							texture = m_textureLoader->load( fileName );
+						}
+					}
+
+					m_shaderSetup->addUniformParameter( it->first.value(), texture );
+				}
+				else if( it->second->isInstanceOf( IECore::DataTypeId ) )
+				{
+					m_shaderSetup->addUniformParameter( it->first.value(), IECore::staticPointerCast<const IECore::Data>( it->second ) );
+				}
+			}
+		}
+
+};
+
+//////////////////////////////////////////////////////////////////////////
+// ShaderStateComponent
+//////////////////////////////////////////////////////////////////////////
+
 StateComponent::Description<ShaderStateComponent> ShaderStateComponent::g_description;
 
 ShaderStateComponent::ShaderStateComponent()
-	:	m_shaderLoader( 0 ), m_textureLoader( 0 ), m_fragmentShader( "" ), m_vertexShader( "" ), 
-		m_parameterMap( 0 ), m_shaderSetup( 0 )
+	:	m_implementation( new Implementation() )
 {
 }
 
-ShaderStateComponent::ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues ) :
-	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentShader( fragmentShader ), 
-	m_vertexShader( vertexShader ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( 0 )
+ShaderStateComponent::ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexSource, const std::string fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
+	:	m_implementation( new Implementation( shaderLoader, textureLoader, vertexSource, fragmentSource, parameterValues ) )
 {
 }
 
@@ -67,72 +173,10 @@ void ShaderStateComponent::bind() const
 
 Shader::Setup *ShaderStateComponent::shaderSetup()
 {
-	ensureShaderSetup();
-	return m_shaderSetup;
+	return m_implementation->shaderSetup();
 }
 
 const Shader::Setup *ShaderStateComponent::shaderSetup() const
 {
-	ensureShaderSetup();
-	return m_shaderSetup;
-}
-
-void ShaderStateComponent::ensureShaderSetup() const
-{
-	if( m_shaderSetup )
-	{
-		return;
-	}
-
-	if( !m_shaderLoader )
-	{
-		// we were default constructed, so we're just a facing ratio shader.
-		m_shaderSetup = new Shader::Setup( Shader::facingRatio() );
-		return;
-	}
-
-	// load a shader, create a setup, and add our parameters to it.
-	ShaderPtr shader = m_shaderLoader->create( m_vertexShader, m_fragmentShader );
-	m_shaderSetup = new Shader::Setup( shader );
-
-	const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
-	for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(), eIt = d.end(); it != eIt; it++ )
-	{
-		GLenum type;
-		GLint size;
-		size_t textureUnit;
-		if( shader->uniformParameter( it->first, type, size, textureUnit ) == -1 )
-		{
-			// parameter doesn't exist
-			continue;
-		}
-		
-		if( type == GL_SAMPLER_2D )
-		{
-			ConstTexturePtr texture = 0;
-			if(
-				it->second->typeId() == IECore::ImagePrimitiveTypeId ||
-				it->second->typeId() == IECore::CompoundDataTypeId ||
-				it->second->typeId() == IECore::SplineffData::staticTypeId() ||
-				it->second->typeId() == IECore::SplinefColor3fData::staticTypeId()
-			)
-			{
-				texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second ) );
-			}
-			else if( it->second->typeId() == IECore::StringData::staticTypeId() )
-			{
-				const std::string &fileName = static_cast<const IECore::StringData *>( it->second.get() )->readable();
-				if( fileName!="" )
-				{
-					texture = m_textureLoader->load( fileName );
-				}
-			}
-			
-			m_shaderSetup->addUniformParameter( it->first.value(), texture );
-		}
-		else if( it->second->isInstanceOf( IECore::DataTypeId ) )
-		{
-			m_shaderSetup->addUniformParameter( it->first.value(), IECore::staticPointerCast<const IECore::Data>( it->second ) );
-		}
-	}
+	return m_implementation->shaderSetup();
 }
