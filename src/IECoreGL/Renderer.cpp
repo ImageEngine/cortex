@@ -1512,23 +1512,24 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 	if( type=="surface" || type=="gl:surface" )
 	{
 		string vertexSource = parameterValue<string>( "gl:vertexSource", parameters, "" );
+		string geometrySource = parameterValue<string>( "gl:geometrySource", parameters, "" );
 		string fragmentSource = parameterValue<string>( "gl:fragmentSource", parameters, "" );
 
-		if ( vertexSource == "" && fragmentSource == "" )
+		if( vertexSource == "" && geometrySource == "" && fragmentSource == "" )
 		{
-			m_data->shaderLoader->loadShaderCode( name, vertexSource, fragmentSource );
+			m_data->shaderLoader->loadSource( name, vertexSource, geometrySource, fragmentSource );
 		}
 
 		CompoundObjectPtr parametersData = new CompoundObject;
 		for( CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 		{
-			if( it->first!="gl:fragmentSource" && it->first!="gl:vertexSource" )
+			if( it->first!="gl:fragmentSource" && it->first!="gl:geometrySource" && it->first!="gl:vertexSource" )
 			{
 				parametersData->members()[it->first] = it->second;
 			}
 		}
 
-		ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, vertexSource, fragmentSource, parametersData );
+		ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, vertexSource, geometrySource, fragmentSource, parametersData );
 		m_data->implementation->addState( shaderState );
 	}
 	else
@@ -1683,7 +1684,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 	IECore::CompoundObjectPtr params = new IECore::CompoundObject();
 	params->members()[ "texture" ] = image;
 
-	ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, "", imageFragmentShader(), params );
+	ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, "", "", imageFragmentShader(), params );
 
 	m_data->implementation->transformBegin();
 

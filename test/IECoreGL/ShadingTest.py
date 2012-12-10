@@ -120,6 +120,44 @@ class ShadingTest( unittest.TestCase ) :
 		
 		return s
 		
+	def geometryShader( self ) :
+	
+		s = IECore.Shader( "test", "gl:surface" )
+		s.parameters["gl:vertexSource"] = """
+			in vec3 P;
+			void main()
+			{
+				vec4 pCam = gl_ModelViewMatrix * vec4( P, 1.0 );
+				gl_Position = gl_ProjectionMatrix * pCam;
+				
+			}
+		"""
+		
+		s.parameters["gl:geometrySource"] = """
+#version 150
+			
+			layout( points ) in;
+			layout( points, max_vertices=3 ) out;
+			
+			void main()
+			{
+				for( int i = -1; i<2; i++ )
+				{
+					gl_Position = gl_in[0].gl_Position + vec4( 0.5 * i, 0, 0, 0 );
+					EmitVertex();
+				}
+			}
+		"""
+		
+		s.parameters["gl:fragmentSource"] = """
+			void main()
+			{
+				gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+			}
+		"""
+		
+		return s
+		
 	def renderImage( self, group ) :
 	
 		r = IECoreGL.Renderer()
@@ -135,6 +173,7 @@ class ShadingTest( unittest.TestCase ) :
 		)
 		r.display( self.__imageFileName, "tif", "rgba", {} )
 		r.setOption( "gl:searchPath:texture", IECore.StringData( "./" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( "./test/IECoreGL/shaders" ) )
 		
 		with IECore.WorldBlock( r ) :
 		
@@ -522,6 +561,58 @@ class ShadingTest( unittest.TestCase ) :
 				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
 			]
 		)
+
+	def testGeometryShaderViaParameters( self ) :
+	
+		g = IECore.Group()
+		
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+		g.addChild( p )
+		
+		g.addState( IECore.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
+		g.addState( self.geometryShader() )
+		
+		image = self.renderImage( g )
+
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.125, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.25, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
+				( IECore.V2f( 0.375, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
+				( IECore.V2f( 0.625, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.75, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
+				( IECore.V2f( 0.875, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+			]
+		)
+		
+	def testGeometryShaderViaFile( self ) :
+	
+		g = IECore.Group()
+		
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+		g.addChild( p )
+		
+		g.addState( IECore.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
+		g.addState( IECore.Shader( "pointTripler", "gl:surface" ) )
+		
+		image = self.renderImage( g )
+
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.125, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.25, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
+				( IECore.V2f( 0.375, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
+				( IECore.V2f( 0.625, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.75, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
+				( IECore.V2f( 0.875, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+			]
+		)	
 
 	def tearDown( self ) :
 

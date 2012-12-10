@@ -113,7 +113,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 		{
 		}
 
-		void loadShaderCode( const std::string &name, std::string &vertexSource, std::string &fragmentSource )
+		void loadSource( const std::string &name, std::string &vertexSource, std::string &geometrySource, std::string &fragmentSource )
 		{
 			SourceMap::const_iterator it = m_loadedSource.find( name );
 			if( it == m_loadedSource.end() )
@@ -121,15 +121,21 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 				Source source;
 			
 				path vertexPath = m_searchPaths.find( name + ".vert" );
+				path geometryPath = m_searchPaths.find( name + ".geom" );
 				path fragmentPath = m_searchPaths.find( name + ".frag" );
-				if( vertexPath.empty() && fragmentPath.empty() )
+				if( vertexPath.empty() && geometryPath.empty() && fragmentPath.empty() )
 				{
-					IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderLoader::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
+					IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderLoader::loadSource", boost::format( "Couldn't find \"%s\"." ) % name );
 				}
 
 				if( !vertexPath.empty() )
 				{
 					source.vertex = readFile( vertexPath.string() );
+				}
+				
+				if( !geometryPath.empty() )
+				{
+					source.geometry = readFile( geometryPath.string() );
 				}
 
 				if( !fragmentPath.empty() )
@@ -141,12 +147,13 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 			}
 			
 			vertexSource = it->second.vertex;
+			geometrySource = it->second.geometry;
 			fragmentSource = it->second.fragment;
 		}
 
-		ShaderPtr create( const std::string &vertexShader, const std::string &fragmentShader )
+		ShaderPtr create( const std::string &vertexShader, const std::string &geometryShader, const std::string &fragmentShader )
 		{
-			std::string uniqueName = vertexShader + "\n## Fragment ##\n" + fragmentShader;
+			std::string uniqueName = vertexShader + "\n## Geometry ##\n" + geometryShader + "## Fragment ##\n" + fragmentShader;
 
 			ShaderMap::iterator it = m_loadedShaders.find( uniqueName );
 			if( it!=m_loadedShaders.end() )
@@ -156,17 +163,21 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 
 			clearUnused();
 
-			ShaderPtr s = new Shader( preprocessShader( "<Vertex Shader>", vertexShader), preprocessShader( "<Fragment Shader>", fragmentShader) );
-			m_loadedShaders[ uniqueName ] = s;
+			ShaderPtr s = new Shader(
+				preprocessShader( "<Vertex Shader>", vertexShader ),
+				preprocessShader( "<Geometry Shader>", geometryShader ),
+				preprocessShader( "<Fragment Shader>", fragmentShader )
+			);
+			m_loadedShaders[uniqueName] = s;
 
 			return s;
 		}
 
 		ShaderPtr load( const std::string &name )
 		{
-			std::string vertShader, fragShader;
-			loadShaderCode( name, vertShader, fragShader );
-			return create( vertShader, fragShader );
+			std::string vertexSource, geometrySource, fragmentSource;
+			loadSource( name, vertexSource, geometrySource, fragmentSource );
+			return create( vertexSource, geometrySource, fragmentSource );
 		}
 
 		void clearUnused()
@@ -190,6 +201,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 		struct Source
 		{
 			std::string vertex;
+			std::string geometry;
 			std::string fragment;
 		};
 		typedef std::map<std::string, Source> SourceMap;
@@ -290,14 +302,14 @@ ShaderLoader::~ShaderLoader()
 {
 }
 
-void ShaderLoader::loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader )
+void ShaderLoader::loadSource( const std::string &name, std::string &vertexShader, std::string &geometryShader, std::string &fragmentShader )
 {
-	m_implementation->loadShaderCode( name, vertexShader, fragmentShader );
+	m_implementation->loadSource( name, vertexShader, geometryShader, fragmentShader );
 }
 
-ShaderPtr ShaderLoader::create( const std::string &vertexShader, const std::string &fragmentShader )
+ShaderPtr ShaderLoader::create( const std::string &vertexShader, const std::string &geometryShader, const std::string &fragmentShader )
 {
-	return m_implementation->create( vertexShader, fragmentShader );
+	return m_implementation->create( vertexShader, geometryShader, fragmentShader );
 }
 
 void ShaderLoader::clearUnused( )

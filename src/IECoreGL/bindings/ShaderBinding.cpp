@@ -74,11 +74,14 @@ void bindShader()
 {
 	IECorePython::RunTimeTypedClass<Shader>()
 		.def( init<const std::string &, const std::string &>() )
+		.def( init<const std::string &, const std::string &, const std::string &>() )
 		.def( "uniformParameterNames", &uniformParameterNames )
 		.def( "vertexParameterNames", &vertexParameterNames )
+		.def( "defaultVertexSource", &Shader::defaultVertexSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultVertexSource" )
+		.def( "defaultFragmentSource", &Shader::defaultFragmentSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultFragmentSource" )
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
 		.def( "facingRatio", &Shader::facingRatio ).staticmethod( "facingRatio" )
 	;
 }
 
-}
+} // namespace IECoreGL

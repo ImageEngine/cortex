@@ -61,9 +61,13 @@ class Shader : public IECore::RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Shader, ShaderTypeId, IECore::RunTimeTyped );
 
 		/// Either vertexSource or fragmentSource may be empty to use a simple default
-		/// shader for that shader component. Throws an Exception if the shader fails
-		/// to compile, or if the OpenGL version isn't sufficient to support shaders.
+		/// shader for that shader component. Throws a descriptive Exception if the shader
+		/// fails to compile.
 		Shader( const std::string &vertexSource, const std::string &fragmentSource );
+		/// Either vertexSource or fragmentSource may be empty to use a simple default
+		/// shader for that shader component. If geometrySource is empty then no geometry shader
+		/// will be used. Throws a descriptive Exception if the shader fails to compile.
+		Shader( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource );
 		virtual ~Shader();
 
 		/// Fills the passed vector with the names of all uniform shader parameters.

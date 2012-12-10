@@ -65,8 +65,8 @@ class Shader::Implementation : public IECore::RefCounted
 
 	public :
 
-		Implementation( const std::string &vertexSource, const std::string &fragmentSource )
-			:	m_vertexShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
+		Implementation( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource )
+			:	m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
 		{
 			string actualVertexSource = vertexSource;
 			string actualFragmentSource = fragmentSource;
@@ -80,17 +80,17 @@ class Shader::Implementation : public IECore::RefCounted
 			}
 
 			compile( actualVertexSource, GL_VERTEX_SHADER, m_vertexShader );
+			compile( geometrySource, GL_GEOMETRY_SHADER, m_geometryShader );
 			compile( actualFragmentSource, GL_FRAGMENT_SHADER, m_fragmentShader );
 
+
 			m_program = glCreateProgram();
-			if( m_vertexShader )
+			glAttachShader( m_program, m_vertexShader );
+			if( m_geometryShader )
 			{
-				glAttachShader( m_program, m_vertexShader );
+				glAttachShader( m_program, m_geometryShader );
 			}
-			if( m_fragmentShader )
-			{
-				glAttachShader( m_program, m_fragmentShader );
-			}
+			glAttachShader( m_program, m_fragmentShader );
 
 			glLinkProgram( m_program );
 			GLint linkStatus = 0;
@@ -269,6 +269,7 @@ class Shader::Implementation : public IECore::RefCounted
 		friend class Shader::Setup;
 
 		GLuint m_vertexShader;
+		GLuint m_geometryShader;
 		GLuint m_fragmentShader;
 		GLuint m_program;
 
@@ -327,6 +328,7 @@ class Shader::Implementation : public IECore::RefCounted
 		void release()
 		{
 			glDeleteShader( m_vertexShader );
+			glDeleteShader( m_geometryShader );
 			glDeleteShader( m_fragmentShader );
 			glDeleteProgram( m_program );
 		}
@@ -340,10 +342,14 @@ class Shader::Implementation : public IECore::RefCounted
 IE_CORE_DEFINERUNTIMETYPED( Shader );
 
 Shader::Shader( const std::string &vertexSource, const std::string &fragmentSource )
-	:	m_implementation( new Implementation( vertexSource, fragmentSource ) )
+	:	m_implementation( new Implementation( vertexSource, "", fragmentSource ) )
 {
 }
 
+Shader::Shader( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource )
+	:	m_implementation( new Implementation( vertexSource, geometrySource, fragmentSource ) )
+{
+}
 Shader::~Shader()
 {
 }

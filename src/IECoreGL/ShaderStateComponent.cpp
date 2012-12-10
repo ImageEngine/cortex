@@ -57,13 +57,13 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 	public :
 	
 		Implementation()
-			:	m_shaderLoader( 0 ), m_textureLoader( 0 ), m_fragmentSource( "" ), m_vertexSource( "" ), 
+			:	m_shaderLoader( 0 ), m_textureLoader( 0 ), m_fragmentSource( "" ), m_geometrySource( "" ), m_vertexSource( "" ), 
 				m_parameterMap( 0 ), m_shaderSetup( 0 )
 		{
 		}
 
-		Implementation( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexSource, const std::string fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
-			:	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentSource( fragmentSource ), 
+		Implementation( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
+			:	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentSource( fragmentSource ), m_geometrySource( geometrySource ),
 				m_vertexSource( vertexSource ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( 0 )
 		{
 		}
@@ -85,6 +85,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 		ShaderLoaderPtr m_shaderLoader;
 		TextureLoaderPtr m_textureLoader;
 		std::string m_fragmentSource;
+		std::string m_geometrySource;
 		std::string m_vertexSource;
 		IECore::CompoundObjectPtr m_parameterMap;		
 		mutable Shader::SetupPtr m_shaderSetup;
@@ -104,7 +105,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 			}
 
 			// load a shader, create a setup, and add our parameters to it.
-			ShaderPtr shader = m_shaderLoader->create( m_vertexSource, m_fragmentSource );
+			ShaderPtr shader = m_shaderLoader->create( m_vertexSource, m_geometrySource, m_fragmentSource );
 			m_shaderSetup = new Shader::Setup( shader );
 
 			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
@@ -162,8 +163,8 @@ ShaderStateComponent::ShaderStateComponent()
 {
 }
 
-ShaderStateComponent::ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string vertexSource, const std::string fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
-	:	m_implementation( new Implementation( shaderLoader, textureLoader, vertexSource, fragmentSource, parameterValues ) )
+ShaderStateComponent::ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
+	:	m_implementation( new Implementation( shaderLoader, textureLoader, vertexSource, geometrySource, fragmentSource, parameterValues ) )
 {
 }
 

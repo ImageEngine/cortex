@@ -96,11 +96,11 @@ class ShaderLoaderTest( unittest.TestCase ) :
 		
 		with IECore.CapturingMessageHandler() as mh :
 		
-			source = l.loadShaderCode( "thisShaderDoesntExist" )
-			self.assertEqual( source, ( "", "" ) )
+			source = l.loadSource( "thisShaderDoesntExist" )
+			self.assertEqual( source, ( "", "", "" ) )
 			
-			source = l.loadShaderCode( "thisShaderDoesntExist" )
-			self.assertEqual( source, ( "", "" ) )
+			source = l.loadSource( "thisShaderDoesntExist" )
+			self.assertEqual( source, ( "", "", "" ) )
 			
 		# we don't want messages over and over for repeated failures to
 		# load.

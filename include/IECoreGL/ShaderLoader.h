@@ -63,16 +63,16 @@ class ShaderLoader : public IECore::RefCounted
 		virtual ~ShaderLoader();
 		
 		/// Loads the GLSL source code for a shader of the specified name, by
-		/// locating and loading files named "name.vert" and "name.frag". If either file
-		/// is not found then returns empty strings representing that the default source
-		/// code provided by the Shader class should be used instead.
-		void loadShaderCode( const std::string &name, std::string &vertexSource, std::string &fragmentSource );
+		/// locating and loading files named "name.vert". "name.geom" and "name.frag". If any
+		/// file is missing then the empty string will be returned, signifying that the default
+		/// shader source for that component should be used.
+		void loadSource( const std::string &name, std::string &vertexSource, std::string &geometrySource, std::string &fragmentSource );
 
 		/// Creates a new Shader if necessary or returns a previously compiled shader from the cache.
 		/// In case the given shader was not in the cache it will do preprocessing (adding include files)
-		/// and then return a new instance os Shader object.
-		/// This function will also eliminate any shader from the cache that is not being used.
-		ShaderPtr create( const std::string &vertexSource, const std::string &fragmentSource );
+		/// and then return a new instance of the Shader class. This function will also eliminate any shader
+		/// from the cache that is not being used.
+		ShaderPtr create( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource );
 
 		/// Loads the shader code and creates the Shader object.
 		/// This function can only be called when the OpenGL context is defined.

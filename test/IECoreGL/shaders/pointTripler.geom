@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#version 150
+			
+layout( points ) in;
+layout( points, max_vertices=3 ) out;
 
-#include "IECorePython/RefCountedBinding.h"
-
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/bindings/ShaderLoaderBinding.h"
-
-using namespace boost::python;
-
-namespace IECoreGL
+void main()
 {
-
-static tuple loadSource( ShaderLoader &s, const std::string &name )
-{
-	std::string vertexSource, geometrySource, fragmentSource;
-	s.loadSource( name, vertexSource, geometrySource, fragmentSource );
-	return make_tuple( vertexSource, geometrySource, fragmentSource );
+	for( int i = -1; i<2; i++ )
+	{
+		gl_Position = gl_in[0].gl_Position + vec4( 0.5 * i, 0, 0, 0 );
+		EmitVertex();
+	}
 }
-
-void bindShaderLoader()
-{
-	IECorePython::RefCountedClass<ShaderLoader, IECore::RefCounted>( "ShaderLoader" )
-		.def( init<const IECore::SearchPath &>() )
-		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
-		.def( "loadSource", &loadSource )
-		.def( "create", &ShaderLoader::create )
-		.def( "load", &ShaderLoader::load )
-		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )
-	;
-}
-
-} // namespace IECoreGL
