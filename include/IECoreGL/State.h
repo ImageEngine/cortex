@@ -38,11 +38,7 @@
 #include "IECore/CompoundData.h"
 
 #include "IECoreGL/Bindable.h"
-
 #include "IECoreGL/TypeIds.h"
-
-#include <vector>
-#include <map>
 
 namespace IECoreGL
 {
@@ -101,11 +97,11 @@ class State : public Bindable
 		template<typename T> void remove();
 		void remove( IECore::TypeId componentType );
 
+		bool isComplete() const;
+		
 		/// Arbitrary state attributes for user manipulation.
 		IECore::CompoundData *userAttributes();
 		const IECore::CompoundData *userAttributes() const;
-
-		bool isComplete() const;
 
 		typedef StateComponentPtr (*CreatorFn)();
 		static void registerComponent( IECore::TypeId, CreatorFn );
@@ -132,14 +128,12 @@ class State : public Bindable
 
 	private :
 
+		IE_CORE_FORWARDDECLARE( Implementation )
+		ImplementationPtr m_implementation;
+
 		typedef std::map<IECore::TypeId, CreatorFn> CreatorMap;
 		static CreatorMap *creators();
 
-	protected :
-
-		typedef std::map<IECore::TypeId, StateComponentPtr> ComponentMap;
-		ComponentMap m_components;
-		mutable IECore::CompoundDataPtr m_userAttributes;
 };
 
 } // namespace IECoreGL

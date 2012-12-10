@@ -36,19 +36,144 @@
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/StateComponent.h"
 
-#include <iostream>
-
 using namespace IECoreGL;
 using namespace std;
 
-IE_CORE_DEFINERUNTIMETYPED( State );
+//////////////////////////////////////////////////////////////////////////
+// Implementation
+//////////////////////////////////////////////////////////////////////////
+
+class State::Implementation : public IECore::RefCounted
+{
+
+	public :
+	
+		Implementation( bool complete )
+			:	m_userAttributes( 0 )
+		{
+			if( complete )
+			{
+				State::CreatorMap &c = *State::creators();
+				for( State::CreatorMap::const_iterator it = c.begin(); it!=c.end(); it++ )
+				{
+					add( it->second() );
+				}
+			}
+		}
+
+		Implementation( const Implementation &other )
+			:	m_components( other.m_components ), m_userAttributes( other.m_userAttributes ? other.m_userAttributes->copy() : 0 )
+		{
+		}
+		
+		virtual ~Implementation()
+		{
+		}
+	
+		void bind() const
+		{
+			for( ComponentMap::const_iterator it=m_components.begin(); it!=m_components.end(); it++ )
+			{
+				it->second->bind();
+			}
+		}
+		
+		void add( Implementation *s )
+		{
+			for( ComponentMap::iterator it=s->m_components.begin(); it!=s->m_components.end(); it++ )
+			{
+				add( it->second );
+			}
+			if( s->m_userAttributes )
+			{
+				/// \todo Is it not a bit questionable that we don't take a copy here?
+				IECore::CompoundDataMap &a = userAttributes()->writable();
+				IECore::CompoundDataMap &ao = s->m_userAttributes->writable();
+				for( IECore::CompoundDataMap::iterator it=ao.begin(); it!=ao.end(); it++ )
+				{
+					a.insert( *it );
+				}
+			}
+		}
+
+		void add( StateComponentPtr s )
+		{
+			m_components[s->typeId()] = s;
+		}
+
+		StateComponent *get( IECore::TypeId componentType )
+		{
+			ComponentMap::const_iterator it = m_components.find( componentType );
+			if( it==m_components.end() )
+			{
+				return 0;
+			}
+			return it->second.get();
+		}
+			
+		const StateComponent *get( IECore::TypeId componentType ) const
+		{
+			ComponentMap::const_iterator it = m_components.find( componentType );
+			if( it==m_components.end() )
+			{
+				return 0;
+			}
+			return it->second.get();
+		}
+
+		void remove( IECore::TypeId componentType )
+		{
+			ComponentMap::iterator it = m_components.find( componentType );
+			if( it==m_components.end() )
+			{
+				return;
+			}
+			m_components.erase( it );
+		}
+		
+		bool isComplete() const
+		{
+			return m_components.size()==creators()->size();
+		}
+
+		IECore::CompoundData *userAttributes()
+		{
+			if( !m_userAttributes )
+			{
+				m_userAttributes = new IECore::CompoundData;
+			}
+			return m_userAttributes.get();
+		}
+
+		const IECore::CompoundData *userAttributes() const
+		{
+			if( !m_userAttributes )
+			{
+				m_userAttributes = new IECore::CompoundData;
+			}
+			return m_userAttributes.get();
+		}
+
+	private :
+	
+		friend class ScopedBinding;
+	
+		typedef std::map<IECore::TypeId, StateComponentPtr> ComponentMap;
+		ComponentMap m_components;
+		mutable IECore::CompoundDataPtr m_userAttributes;
+
+};
+
+//////////////////////////////////////////////////////////////////////////
+// ScopedBinding
+//////////////////////////////////////////////////////////////////////////
 
 State::ScopedBinding::ScopedBinding( const State &s, State &currentState )
 	:	m_currentState( currentState )
 {
-	m_savedComponents.reserve( s.m_components.size() );
+	m_savedComponents.reserve( s.m_implementation->m_components.size() );
 
-	for( ComponentMap::const_iterator it=s.m_components.begin(); it!=s.m_components.end(); it++ )
+	for( Implementation::ComponentMap::const_iterator it=s.m_implementation->m_components.begin(); it!=s.m_implementation->m_components.end(); it++ )
 	{
 		m_savedComponents.push_back( currentState.get( it->first ) );
 		m_currentState.add( it->second );
@@ -65,23 +190,20 @@ State::ScopedBinding::~ScopedBinding()
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// State
+//////////////////////////////////////////////////////////////////////////
+
+IE_CORE_DEFINERUNTIMETYPED( State );
+
 State::State( bool complete )
-	:	m_userAttributes( 0 )
+	:	m_implementation( new Implementation( complete ) )
 {
-	if( complete )
-	{
-		CreatorMap &c = *creators();
-		for( CreatorMap::const_iterator it = c.begin(); it!=c.end(); it++ )
-		{
-			add( it->second() );
-		}
-	}
 }
 
 State::State( const State &other )
-	:	m_userAttributes( other.m_userAttributes ? other.m_userAttributes->copy() : 0 )
+	:	m_implementation( new Implementation( *(other.m_implementation) ) )
 {
-	m_components = other.m_components;
 }
 
 State::~State()
@@ -90,86 +212,47 @@ State::~State()
 
 void State::bind() const
 {
-	for( ComponentMap::const_iterator it=m_components.begin(); it!=m_components.end(); it++ )
-	{
-		it->second->bind();
-	}
+	m_implementation->bind();
 }
 
 void State::add( StatePtr s )
 {
-	for( ComponentMap::iterator it=s->m_components.begin(); it!=s->m_components.end(); it++ )
-	{
-		add( it->second );
-	}
-	if( s->m_userAttributes )
-	{
-		/// \todo Is it not a bit questionable that we don't take a copy here?
-		IECore::CompoundDataMap &a = userAttributes()->writable();
-		IECore::CompoundDataMap &ao = s->m_userAttributes->writable();
-		for( IECore::CompoundDataMap::iterator it=ao.begin(); it!=ao.end(); it++ )
-		{
-			a.insert( *it );
-		}
-	}
+	m_implementation->add( s->m_implementation.get() );
 }
 
 void State::add( StateComponentPtr s )
 {
-	m_components[s->typeId()] = s;
+	m_implementation->add( s );
 }
 
 StateComponent *State::get( IECore::TypeId componentType )
 {
-	ComponentMap::const_iterator it = m_components.find( componentType );
-	if( it==m_components.end() )
-	{
-		return 0;
-	}
-	return it->second.get();
+	return m_implementation->get( componentType );
 }
 
 const StateComponent *State::get( IECore::TypeId componentType ) const
 {
-	ComponentMap::const_iterator it = m_components.find( componentType );
-	if( it==m_components.end() )
-	{
-		return 0;
-	}
-	return it->second.get();
+	return m_implementation->get( componentType );
 }
 
 void State::remove( IECore::TypeId componentType )
 {
-	ComponentMap::iterator it = m_components.find( componentType );
-	if( it==m_components.end() )
-	{
-		return;
-	}
-	m_components.erase( it );
+	return m_implementation->remove( componentType );
 }
 
 IECore::CompoundData *State::userAttributes()
 {
-	if( !m_userAttributes )
-	{
-		m_userAttributes = new IECore::CompoundData;
-	}
-	return m_userAttributes.get();
+	return m_implementation->userAttributes();
 }
 
 const IECore::CompoundData *State::userAttributes() const
 {
-	if( !m_userAttributes )
-	{
-		m_userAttributes = new IECore::CompoundData;
-	}
-	return m_userAttributes.get();
+	return m_implementation->userAttributes();
 }
 
 bool State::isComplete() const
 {
-	return m_components.size()==creators()->size();
+	return m_implementation->isComplete();
 }
 
 ConstStatePtr State::defaultState()
