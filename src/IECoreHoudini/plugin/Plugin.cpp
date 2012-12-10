@@ -68,38 +68,42 @@ extern "C"
 /// Declare our new SOPs
 void newSopOperator(OP_OperatorTable *table)
 {
-	table->addOperator(
-		new OP_Operator(
-			"ieProceduralHolder", "Cortex Procedural",
-			SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
-    			SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
-		)
+	OP_Operator *opHolder = new OP_Operator(
+		"ieOpHolder", "Cortex Op",
+		SOP_OpHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
+		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	table->addOperator(
-		new OP_Operator(
-			"ieOpHolder", "Cortex Op",
-			SOP_OpHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
-			SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
-		)
+	opHolder->setIconName( "SOP_ieOpHolder" );
+	
+	OP_Operator *proceduralHolder = new OP_Operator(
+		"ieProceduralHolder", "Cortex Procedural",
+		SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
+    		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	table->addOperator(
-		new OP_Operator(
-			"ieToHoudiniConverter", "Cortex To Houdini",
-			SOP_ToHoudiniConverter::create, SOP_ToHoudiniConverter::parameters, 1,	1,
-			SOP_ToHoudiniConverter::variables, OP_FLAG_GENERATOR
-		)
+	proceduralHolder->setIconName( "SOP_ieProceduralHolder" );
+	
+	OP_Operator *converter = new OP_Operator(
+		"ieToHoudiniConverter", "Cortex To Houdini",
+		SOP_ToHoudiniConverter::create, SOP_ToHoudiniConverter::parameters, 1,	1,
+		SOP_ToHoudiniConverter::variables, OP_FLAG_GENERATOR
 	);
-	table->addOperator(
-		new OP_Operator(
-			"ieInterpolatedCacheReader", "Interpolated Cache Reader",
-			SOP_InterpolatedCacheReader::create, SOP_InterpolatedCacheReader::parameters, 1, 1, 0
-		)
+	converter->setIconName( "SOP_ieToHoudiniConverter" );
+	
+	OP_Operator *cacheReader = new OP_Operator(
+		"ieInterpolatedCacheReader", "Interpolated Cache Reader",
+		SOP_InterpolatedCacheReader::create, SOP_InterpolatedCacheReader::parameters, 1, 1, 0
 	);
-
-	table->addOpHidden( "ieOpHolder" );
-	table->addOpHidden( "ieProceduralHolder" );
-	table->addOpHidden( "ieToHoudiniConverter" );
-	table->addOpHidden( "ieInterpolatedCacheReader" );
+	cacheReader->setIconName( "SOP_ieInterpolatedCacheReader" );
+	
+	table->addOperator( proceduralHolder );
+	table->addOperator( opHolder );
+	table->addOperator( converter );
+	table->addOperator( cacheReader );
+	
+	table->addOpHidden( opHolder->getName() );
+	table->addOpHidden( proceduralHolder->getName() );
+	table->addOpHidden( converter->getName() );
+	table->addOpHidden( cacheReader->getName() );
 }
 
 /// Declare our new Render Hooks
