@@ -204,15 +204,8 @@ const T *PointsPrimitive::dataAndStride( const IECore::Data *data, T *defaultVal
 
 void PointsPrimitive::renderPoints( const State * state, IECore::TypeId style ) const
 {
-	/*const std::vector<V3f> &p = m_points->readable();
-
 	glPointSize( state->get<GLPointWidth>()->value() );
-
-	if( style==Primitive::DrawSolid::staticTypeId() )
-	{
-		setVertexAttributes( p.size() );
-	}
-	glDrawArrays( GL_POINTS, 0, p.size() );*/
+	glDrawArrays( GL_POINTS, 0, m_points->readable().size() );
 }
 
 void PointsPrimitive::renderDisks( const State * state, IECore::TypeId style ) const
