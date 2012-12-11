@@ -88,6 +88,67 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 			elif r2[i] < 0.5 :
 				self.assertEqual( a[i], 0 )
 
+	def testWindingOrder( self ) :
+	
+		# camera facing single sided - should be visible
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
+			
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.disk( 1, 0, 360, {} )
+			
+		image = IECore.Reader.create( self.outputFileName ).read()
+		evaluator = IECore.ImagePrimitiveEvaluator( image )
+		result = evaluator.createResult()
+		evaluator.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( evaluator.A() ), 1 )
+		
+		# back facing single sided - should be invisible
+		
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
+			r.setAttribute( "rightHandedOrientation", IECore.BoolData( False ) )
+			
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.disk( 1, 0, 360, {} )
+			
+		image = IECore.Reader.create( self.outputFileName ).read()
+		evaluator = IECore.ImagePrimitiveEvaluator( image )
+		result = evaluator.createResult()
+		evaluator.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( evaluator.A() ), 0 )	
+
 	def tearDown( self ) :
 
 		if os.path.exists( self.outputFileName ) :
