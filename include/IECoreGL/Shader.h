@@ -70,6 +70,10 @@ class Shader : public IECore::RunTimeTyped
 		Shader( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource );
 		virtual ~Shader();
 
+		/// Returns the GL program this shader represents. Note that this is owned by the Shader,
+		/// and will be destroyed upon destruction of the Shader - you must not call glDeleteProgram() yourself.
+		GLuint program() const;
+
 		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],

@@ -200,6 +200,16 @@ class Shader::Implementation : public IECore::RefCounted
 			}
 		}
 		
+		virtual ~Implementation()
+		{
+			release();
+		}
+		
+		GLuint program() const
+		{
+			return m_program;
+		}
+		
 		void uniformParameterNames( std::vector<std::string> &names ) const
 		{
 			for( ParameterMap::const_iterator it = m_uniformParameters.begin(); it != m_uniformParameters.end(); it++ )
@@ -257,11 +267,6 @@ class Shader::Implementation : public IECore::RefCounted
 			type = it->second.type;
 			size = it->second.size;
 			return it->first;
-		}
-			
-		virtual ~Implementation()
-		{
-			release();
 		}
 	
 	private :
@@ -350,8 +355,14 @@ Shader::Shader( const std::string &vertexSource, const std::string &geometrySour
 	:	m_implementation( new Implementation( vertexSource, geometrySource, fragmentSource ) )
 {
 }
+
 Shader::~Shader()
 {
+}
+
+GLuint Shader::program() const
+{
+	return m_implementation->program();
 }
 
 void Shader::uniformParameterNames( std::vector<std::string> &names ) const
