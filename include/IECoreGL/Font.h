@@ -55,16 +55,16 @@ class Font : public IECore::RunTimeTyped
 		Font( IECore::FontPtr font );
 		virtual ~Font();
 
-		IECore::FontPtr coreFont();
+		IECore::Font *coreFont();
 
-		ConstMeshPrimitivePtr mesh( char c ) const;
-		ConstAlphaTexturePtr texture() const;
+		const MeshPrimitive *mesh( char c ) const;
+		const AlphaTexture *texture() const;
 		
 		/// Emits a series of quads with appropriate texture coordinates,
 		/// such that if you have bound texture() you can render text.
 		void renderSprites( const std::string &text ) const;
-		/// Renders text as a series of meshes with the specified state and style.
-		void renderMeshes( const std::string &text, const State *state, IECore::TypeId style ) const;
+		/// Renders text as a series of meshes with the specified state.
+		void renderMeshes( const std::string &text, State *state ) const;
 
 	private :
 
