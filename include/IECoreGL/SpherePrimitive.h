@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,8 @@
 namespace IECoreGL
 {
 
+IE_CORE_FORWARDDECLARE( Buffer )
+
 class SpherePrimitive : public Primitive
 {
 
@@ -51,18 +53,6 @@ class SpherePrimitive : public Primitive
 		/// of radius and not absolutely as in the Renderman spec.
 		SpherePrimitive( float radius = 1, float zMin = -1, float zMax = 1, float thetaMax = 360 );
 		virtual ~SpherePrimitive();
-
-		void setRadius( float radius );
-		float getRadius() const;
-
-		void setZMin( float zMin );
-		float getZMin() const;
-
-		void setZMax( float zMin );
-		float getZMax() const;
-
-		void setThetaMax( float zMin );
-		float getThetaMax() const;
 
 		virtual Imath::Box3f bound() const;
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
@@ -77,10 +67,9 @@ class SpherePrimitive : public Primitive
 		float m_zMin;
 		float m_zMax;
 		float m_thetaMax;
-
-		// So PointsPrimitive can use the protected render() method to
-		// render particle spheres.
-		friend class PointsPrimitive;
+		Imath::Box3f m_bound;
+		IECore::UIntVectorDataPtr m_vertIds;
+		mutable IECoreGL::ConstBufferPtr m_vertIdsBuffer;
 
 };
 

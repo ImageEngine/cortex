@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/SpherePrimitive.h"
-#include "IECoreGL/GL.h"
-
 #include "OpenEXR/ImathMath.h"
 #include "OpenEXR/ImathFun.h"
 
-#include <algorithm>
+#include "IECore/MessageHandler.h"
+
+#include "IECoreGL/SpherePrimitive.h"
+#include "IECoreGL/Buffer.h"
+#include "IECoreGL/CachedConverter.h"
+#include "IECoreGL/GL.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -47,11 +49,69 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( SpherePrimitive );
 
 SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float thetaMax )
+	:	m_radius( radius ), m_zMin( zMin ), m_zMax( zMax ), m_thetaMax( thetaMax ), m_vertIdsBuffer( 0 )
 {
-	setRadius( radius );
-	setZMin( zMin );
-	setZMax( zMax );
-	setThetaMax( thetaMax );
+	// figure out bounding box
+	
+	thetaMax = m_thetaMax/180.0f * M_PI;
+	float minX = m_radius * ( thetaMax < M_PI ? Math<float>::cos( thetaMax ) : -1.0f );
+	float maxY = m_radius * ( thetaMax < M_PI/2 ? Math<float>::sin( thetaMax ) : 1.0f );
+	float minY = m_radius * ( thetaMax > 3 * M_PI/2 ? -1.0f : min( 0.0f, Math<float>::sin( thetaMax ) ) );
+	m_bound = Imath::Box3f( V3f( minX, minY, m_zMin * m_radius ), V3f( m_radius, maxY, m_zMax * m_radius ) );
+	
+	// build vertex attributes for P, N and st, and indexes for triangles.
+	
+	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
+	IECore::V2fVectorDataPtr stData = new IECore::V2fVectorData;
+	m_vertIds = new IECore::UIntVectorData;
+	
+	vector<V3f> &pVector = pData->writable();
+	vector<V3f> &nVector = nData->writable();
+	vector<V2f> &stVector = stData->writable();
+	vector<unsigned int> &vertIdsVector = m_vertIds->writable();
+	
+	float oMin = Math<float>::asin( m_zMin );
+	float oMax = Math<float>::asin( m_zMax );
+	const unsigned int nO = max( 4u, (unsigned int)( 20.0f * m_radius * (oMax - oMin) / M_PI ) );
+
+	thetaMax = m_thetaMax/180.0f * M_PI;
+	const unsigned int nT = max( 7u, (unsigned int)( m_radius * 40.0f * thetaMax / (M_PI*2) ) );
+
+	for( unsigned int i=0; i<nO; i++ )
+	{
+		float v = (float)i/(float)(nO-1);
+		float o = lerp( oMin, oMax, v );
+		float z = m_radius * Math<float>::sin( o );
+		float r = m_radius * Math<float>::cos( o );
+
+		for( unsigned int j=0; j<nT; j++ )
+		{
+			float u = (float)j/(float)(nT-1);
+			float theta = thetaMax * u;
+			V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
+			stVector.push_back( V2f( u, v ) );
+			pVector.push_back( p );
+			nVector.push_back( p );
+			if( i < nO - 1 && j < nT - 1 )
+			{
+				unsigned int i0 = i * nT + j;
+				unsigned int i1 = i0 + 1;
+				unsigned int i2 = i0 + nT;
+				unsigned int i3 = i2 + 1;
+				vertIdsVector.push_back( i0 );
+				vertIdsVector.push_back( i1 );
+				vertIdsVector.push_back( i2 );
+				vertIdsVector.push_back( i1 );
+				vertIdsVector.push_back( i3 );
+				vertIdsVector.push_back( i2 );
+			}
+		}
+	}
+	
+	addVertexAttribute( "P", pData );
+	addVertexAttribute( "N", nData );
+	addVertexAttribute( "st", stData );
 }
 
 SpherePrimitive::~SpherePrimitive()
@@ -59,100 +119,34 @@ SpherePrimitive::~SpherePrimitive()
 
 }
 
-void SpherePrimitive::setRadius( float radius )
-{
-	m_radius = radius;
-}
-
-float SpherePrimitive::getRadius() const
-{
-	return m_radius;
-}
-
-void SpherePrimitive::setZMin( float zMin )
-{
-	m_zMin = zMin;
-}
-
-float SpherePrimitive::getZMin() const
-{
-	return m_zMin;
-}
-
-void SpherePrimitive::setZMax( float zMax )
-{
-	m_zMax = zMax;
-}
-
-float SpherePrimitive::getZMax() const
-{
-	return m_zMax;
-}
-
-void SpherePrimitive::setThetaMax( float thetaMax )
-{
-	m_thetaMax = thetaMax;
-}
-
-float SpherePrimitive::getThetaMax() const
-{
-	return m_thetaMax;
-}
-
 void SpherePrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
 {
-	if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
+	switch( primVar.interpolation )
 	{
-		addUniformAttribute( name, primVar.data );
+		case IECore::PrimitiveVariable::Constant :
+		case IECore::PrimitiveVariable::Uniform :
+			addUniformAttribute( name, primVar.data );
+			break;
+		default :
+			IECore::msg( IECore::Msg::Warning, "SpherePrimitive::addPrimitiveVariable", boost::format( "Primitive variable \"%s\" has unsupported interpolation." ) % name );
 	}
 }
 
 void SpherePrimitive::render( const State * state, IECore::TypeId style ) const
 {
-	float oMin = Math<float>::asin( m_zMin );
-	float oMax = Math<float>::asin( m_zMax );
-	const unsigned int nO = max( 4u, (unsigned int)( 20.0f * m_radius * (oMax - oMin) / M_PI ) );
-
-	float thetaMax = m_thetaMax/180.0f * M_PI;
-	const unsigned int nT = max( 7u, (unsigned int)( m_radius * 40.0f * thetaMax / (M_PI*2) ) );
-
-	for( unsigned int i=0; i<nO-1; i++ )
+	if( !m_vertIdsBuffer )
 	{
-		float v0 = (float)i/(float)(nO-1);
-		float v1 = (float)(i+1)/(float)(nO-1);
-		float o0 = lerp( oMin, oMax, v0 );
-		float o1 = lerp( oMin, oMax, v1 );
-		float z0 = m_radius * Math<float>::sin( o0 );
-		float z1 = m_radius * Math<float>::sin( o1 );
-		float r0 = m_radius * Math<float>::cos( o0 );
-		float r1 = m_radius * Math<float>::cos( o1 );
-		glBegin( GL_TRIANGLE_STRIP );
-			for( unsigned int j=0; j<nT; j++ )
-			{
-				float u = (float)j/(float)(nT-1);
-				float t = thetaMax * u;
-				float st = Math<float>::sin( t );
-				float ct = Math<float>::cos( t );
-				V3f p0( r0 * ct, r0 * st, z0 );
-				V3f p1( r1 * ct, r1 * st, z1 );
-				glTexCoord2f( u, v1 );
-				glNormal3f( p1.x, p1.y, p1.z );
-				glVertex3f( p1.x, p1.y, p1.z );
-				glTexCoord2f( u, v0 );
-				glNormal3f( p0.x, p0.y, p0.z );
-				glVertex3f( p0.x, p0.y, p0.z );
-			}
-		glEnd();
+		// we don't build the actual buffer until now, because in the constructor we're not guaranteed
+		// a valid GL context.
+		CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+		m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( m_vertIds ) );
 	}
-
+	
+	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
+	glDrawElements( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0 );
 }
 
 Imath::Box3f SpherePrimitive::bound() const
 {
-	float thetaMax = m_thetaMax/180.0f * M_PI;
-	float minX = m_radius * ( thetaMax < M_PI ? Math<float>::cos( thetaMax ) : -1.0f );
-	float maxY = m_radius * ( thetaMax < M_PI/2 ? Math<float>::sin( thetaMax ) : 1.0f );
-	float minY = m_radius * ( thetaMax > 3 * M_PI/2 ? -1.0f : min( 0.0f, Math<float>::sin( thetaMax ) ) );
-
-	return Imath::Box3f( V3f( minX, minY, m_zMin * m_radius ), V3f( m_radius, maxY, m_zMax * m_radius ) );
+	return m_bound;
 }
