@@ -74,6 +74,18 @@ class Shader : public IECore::RunTimeTyped
 		/// and will be destroyed upon destruction of the Shader - you must not call glDeleteProgram() yourself.
 		GLuint program() const;
 
+		//! @name Source accessors.
+		/// These functions return the shader source as passed to
+		/// the constructor. In the case of an empty string being
+		/// returned, you can determine the effective source by
+		/// calling defaultVertexSource() or defaultFragmentSource().
+		///////////////////////////////////////////////////////////
+		//@{
+		const std::string &vertexSource() const;
+		const std::string &geometrySource() const;
+		const std::string &fragmentSource() const;
+		//@}
+		
 		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
@@ -96,13 +108,17 @@ class Shader : public IECore::RunTimeTyped
 		
 			public :
 		
+				IE_CORE_DECLAREMEMBERPTR( Setup )
+				
 				Setup( ConstShaderPtr shader );
 				
 				const Shader *shader() const;
 		
 				void addUniformParameter( const std::string &name, ConstTexturePtr value );
 				void addUniformParameter( const std::string &name, IECore::ConstDataPtr value );
-				void addVertexAttribute( const std::string &name, IECore::ConstDataPtr value );
+				/// Binds the specified value to the named vertex attribute. The divisor will be passed to
+				/// glVertexAttribDivisor(). 
+				void addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor = 0 );
 		
 				/// The ScopedBinding class cleanly binds and unbinds the shader
 				/// Setup, making the shader current and setting the uniform

@@ -57,7 +57,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 	public :
 	
 		Implementation()
-			:	m_shaderLoader( 0 ), m_textureLoader( 0 ), m_fragmentSource( "" ), m_geometrySource( "" ), m_vertexSource( "" ), 
+			:	m_shaderLoader( ShaderLoader::defaultShaderLoader() ), m_textureLoader( TextureLoader::defaultTextureLoader() ), m_fragmentSource( "" ), m_geometrySource( "" ), m_vertexSource( "" ), 
 				m_parameterMap( 0 ), m_shaderSetup( 0 )
 		{
 		}
@@ -68,6 +68,16 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 		{
 		}
 
+		ShaderLoader *shaderLoader()
+		{
+			return m_shaderLoader.get();
+		}
+
+		TextureLoader *textureLoader()
+		{
+			return m_textureLoader.get();
+		}
+		
 		Shader::Setup *shaderSetup()
 		{
 			ensureShaderSetup();
@@ -97,7 +107,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 				return;
 			}
 
-			if( !m_shaderLoader )
+			if( !m_parameterMap )
 			{
 				// we were default constructed, so we're just a facing ratio shader.
 				m_shaderSetup = new Shader::Setup( Shader::facingRatio() );
@@ -172,6 +182,16 @@ void ShaderStateComponent::bind() const
 {
 }
 
+ShaderLoader *ShaderStateComponent::shaderLoader()
+{
+	return m_implementation->shaderLoader();
+}
+
+TextureLoader *ShaderStateComponent::textureLoader()
+{
+	return m_implementation->textureLoader();
+}
+		
 Shader::Setup *ShaderStateComponent::shaderSetup()
 {
 	return m_implementation->shaderSetup();

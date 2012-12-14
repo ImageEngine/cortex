@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,40 +32,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DISKPRIMITIVE_H
-#define IECOREGL_DISKPRIMITIVE_H
+#include "boost/python.hpp"
 
-#include "IECoreGL/Primitive.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/TextureLoader.h"
+#include "IECoreGL/bindings/ShaderStateComponentBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
+using namespace boost::python;
 
 namespace IECoreGL
 {
 
-class DiskPrimitive : public Primitive
+static ShaderLoaderPtr shaderLoader( ShaderStateComponent &s )
 {
+	return s.shaderLoader();
+}
 
-	public :
+static TextureLoaderPtr textureLoader( ShaderStateComponent &s )
+{
+	return s.textureLoader();
+}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::DiskPrimitive, DiskPrimitiveTypeId, Primitive );
+static Shader::SetupPtr shaderSetup( ShaderStateComponent &s )
+{
+	return s.shaderSetup();
+}
 
-		DiskPrimitive( float radius = 1, float z = 0, float thetaMax = 360 );
-		virtual ~DiskPrimitive();
-
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-
-		virtual void renderInstances( size_t numInstances = 1 ) const;
-
-	private :
-
-		float m_radius;
-		float m_z;
-		float m_thetaMax;
-		GLuint m_nPoints;
-		
-};
-
-IE_CORE_DECLAREPTR( DiskPrimitive );
+void bindShaderStateComponent()
+{
+	IECorePython::RunTimeTypedClass<ShaderStateComponent>()
+		.def( init<>() )
+		.def( init<ShaderLoaderPtr, TextureLoaderPtr, const std::string &, const std::string &, const std::string &, IECore::ConstCompoundObjectPtr>() )
+		.def( "shaderLoader", &shaderLoader )
+		.def( "textureLoader", &textureLoader )
+		.def( "shaderSetup", &shaderSetup )
+	;
+}
 
 } // namespace IECoreGL
-
-#endif // IECOREGL_DISKPRIMITIVE_H

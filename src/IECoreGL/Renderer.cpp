@@ -627,6 +627,9 @@ void IECoreGL::Renderer::worldBegin()
 		m_data->implementation->addDisplay( m_data->options.displays[i] );
 	}
 	m_data->implementation->worldBegin();
+	
+	ShaderStateComponentPtr defaultShaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, "", "", "", new CompoundObject );
+	m_data->implementation->addState( defaultShaderState );
 }
 
 void IECoreGL::Renderer::worldEnd()

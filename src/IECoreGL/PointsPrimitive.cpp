@@ -32,6 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "OpenEXR/ImathFun.h"
+#include "OpenEXR/ImathMatrixAlgo.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
+
 #include "IECoreGL/PointsPrimitive.h"
 #include "IECoreGL/DiskPrimitive.h"
 #include "IECoreGL/QuadPrimitive.h"
@@ -39,21 +46,19 @@
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/State.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/TextureLoader.h"
 #include "IECoreGL/GL.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-
-#include "OpenEXR/ImathFun.h"
-#include "OpenEXR/ImathMatrixAlgo.h"
-
-#include <algorithm>
 
 using namespace IECoreGL;
 using namespace IECore;
 using namespace Imath;
 using namespace std;
+
+//////////////////////////////////////////////////////////////////////////
+// StateComponents
+//////////////////////////////////////////////////////////////////////////
 
 namespace IECoreGL
 {
@@ -61,17 +66,67 @@ namespace IECoreGL
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitive::UseGLPoints, PointsPrimitiveUseGLPointsTypeId, GLPointsUsage, ForPointsOnly );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitive::GLPointWidth, PointsPrimitiveGLPointWidthTypeId, float, 1.0f );
 
-}
+} // namespace IECoreGL
 
+//////////////////////////////////////////////////////////////////////////
+// MemberData
+//////////////////////////////////////////////////////////////////////////
+
+struct PointsPrimitive::MemberData : public IECore::RefCounted
+{
+
+	IECore::V3fVectorDataPtr points;
+
+	Type type;
+	static const float g_defaultWidth;
+	IECore::ConstDataPtr widths;
+	static const float g_defaultHeight;
+	IECore::ConstDataPtr heights;
+	static const float g_defaultRotation;
+	IECore::ConstDataPtr rotations;
+
+	mutable Imath::Box3f bound;
+	mutable bool recomputeBound;
+
+	mutable bool renderSorted;
+	mutable std::vector<unsigned int> depthOrder;
+	mutable std::vector<float> depths;
+	mutable Imath::V3f depthCameraDirection;
+	
+	struct InstancingSetup
+	{
+		InstancingSetup( ConstShaderPtr os, Type t, Shader::SetupPtr ss )
+			:	originalShader( os ), type( t ), shaderSetup( ss )
+		{
+		}
+		ConstShaderPtr originalShader;
+		Type type;
+		Shader::SetupPtr shaderSetup;
+	};
+	typedef std::vector<InstancingSetup> InstancingSetupVector;
+	mutable InstancingSetupVector instancingSetups;
+
+	SpherePrimitivePtr spherePrimitive;
+	DiskPrimitivePtr diskPrimitive;
+	QuadPrimitivePtr quadPrimitive;
+
+};
+
+const float PointsPrimitive::MemberData::g_defaultWidth = 1;
+const float PointsPrimitive::MemberData::g_defaultHeight = 1;
+const float PointsPrimitive::MemberData::g_defaultRotation = 0;
+
+//////////////////////////////////////////////////////////////////////////
+// PointsPrimitive
+//////////////////////////////////////////////////////////////////////////
+		
 IE_CORE_DEFINERUNTIMETYPED( PointsPrimitive );
 
-float PointsPrimitive::g_defaultWidth = 1;
-float PointsPrimitive::g_defaultHeight = 1;
-float PointsPrimitive::g_defaultRotation = 0;
-
 PointsPrimitive::PointsPrimitive( Type type )
-	:	m_type( type ), m_recomputeBound( true )
+	:	m_memberData( new MemberData )
 {
+	m_memberData->type = type;
+	m_memberData->recomputeBound = true;
 }
 
 PointsPrimitive::~PointsPrimitive()
@@ -80,21 +135,23 @@ PointsPrimitive::~PointsPrimitive()
 
 void PointsPrimitive::updateBounds() const
 {
-	if ( !m_recomputeBound )
+	if( !m_memberData->recomputeBound )
+	{
 		return;
-
-	m_recomputeBound = false;
+	}
+	
+	m_memberData->recomputeBound = false;
 
 	unsigned int wStep = 0;
-	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
+	const float *w = dataAndStride( m_memberData->widths, &MemberData::g_defaultWidth, wStep );
 	unsigned int hStep = 0;
-	const float *h = dataAndStride( m_heights, &g_defaultHeight, hStep );
-	if( !m_heights )
+	const float *h = dataAndStride( m_memberData->heights, &MemberData::g_defaultHeight, hStep );
+	if( !m_memberData->heights )
 	{
 		h = 0;
 	}
-	m_bound.makeEmpty();
-	const vector<V3f> &pd = m_points->readable();
+	m_memberData->bound.makeEmpty();
+	const vector<V3f> &pd = m_memberData->points->readable();
 	for( unsigned int i=0; i<pd.size(); i++ )
 	{
 		float r = *w; w += wStep;
@@ -102,7 +159,7 @@ void PointsPrimitive::updateBounds() const
 		{
 			r = max( r, *h ); h += hStep;
 		}
-		m_bound.extendBy( Box3f( pd[i] - V3f( r ), pd[i] + V3f( r ) ) );
+		m_memberData->bound.extendBy( Box3f( pd[i] - V3f( r ), pd[i] + V3f( r ) ) );
 	}
 }
 
@@ -110,78 +167,144 @@ void PointsPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 {
 	if ( name == "P" )
 	{
-		m_recomputeBound = true;
-		m_points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data->copy() );
+		m_memberData->recomputeBound = true;
+		m_memberData->points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data->copy() );
 	}
 	else if ( name == "width" )
 	{
-		m_recomputeBound = true;
-		m_widths = primVar.data->copy();
+		m_memberData->recomputeBound = true;
+		m_memberData->widths = primVar.data->copy();
 	}
 	else if ( name == "height" )
 	{
-		m_recomputeBound = true;
-		m_heights = primVar.data->copy();
+		m_memberData->recomputeBound = true;
+		m_memberData->heights = primVar.data->copy();
 	}
 	else if ( name == "patchrotation" )
 	{
-		m_rotations = primVar.data->copy();
+		m_memberData->rotations = primVar.data->copy();
 	}
 	Primitive::addPrimitiveVariable( name, primVar );
 }
 
-void PointsPrimitive::render( const State * state, IECore::TypeId style ) const
+const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *state ) const
 {
-	if( depthSortRequested( state ) )
+	Type type = effectiveType( state );
+	if( type == Point )
 	{
-		depthSort();
-		m_renderSorted = true;
+		// rendering as gl points goes through the normal process
+		return Primitive::shaderSetup( shader, state );
 	}
 	else
 	{
-		m_renderSorted = false;
-	}
-
-	Type type = m_type;
-	switch( state->get<UseGLPoints>()->value() )
-	{
-		case ForPointsOnly :
-			break;
-		case ForPointsAndDisks :
-			if( type==Disk )
+		// for rendering as disks, quads or spheres, we build a custom setup which we use
+		// for instancing primitives onto our points.
+		for( MemberData::InstancingSetupVector::const_iterator it = m_memberData->instancingSetups.begin(), eIt = m_memberData->instancingSetups.end(); it != eIt; it++ )
+		{
+			if( it->originalShader == shader && it->type == type )
 			{
-				type = Point;
+				return it->shaderSetup.get();
 			}
-			break;
-		case ForAll :
-			type = Point;
-			break;
-	}
+		}
+				
+		ConstShaderPtr instancingShader = shader;
+		if( instancingShader->vertexSource() == "" )
+		{
+			// if the current shader has specific vertex source, then we assume the user has provided
+			// a shader capable of performing the instancing, but if not then we substitute in our own
+			// instancing vertex shader.
+			ShaderLoader *shaderLoader = state->get<ShaderStateComponent>()->shaderLoader();
+			instancingShader = shaderLoader->create( instancingVertexSource(), "", shader->fragmentSource() );
+		}
+		
+		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
+		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "", 1 );
+		
+		if( m_memberData->widths && m_memberData->widths->isInstanceOf( IECore::FloatDataTypeId ) )
+		{
+			instancingShaderSetup->addUniformParameter( "constantWidth", m_memberData->widths );
+		}
+		else
+		{
+			instancingShaderSetup->addUniformParameter( "constantWidth", new FloatData( 1.0f ) );
+		}
+		
+		switch( type )
+		{
+			case Disk :
+				if( !m_memberData->diskPrimitive )
+				{
+					m_memberData->diskPrimitive = new DiskPrimitive( 0.5f );
+				}
+				m_memberData->diskPrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "instance" );
+				break;
+			case Sphere :
+				if( !m_memberData->spherePrimitive )
+				{
+					m_memberData->spherePrimitive = new SpherePrimitive();
+				}
+				m_memberData->spherePrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "instance" );
+				break;
+			case Quad :
+				if( !m_memberData->quadPrimitive )
+				{
+					m_memberData->quadPrimitive = new QuadPrimitive();
+				}
+				m_memberData->quadPrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "instance" );
+				break;
+			default :
+				break;
+		}
+				
+		m_memberData->instancingSetups.push_back( MemberData::InstancingSetup( shader, type, instancingShaderSetup ) );
 
-	switch( type )
+		return instancingShaderSetup.get();
+	}
+}
+
+void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) const
+{
+	/*if( depthSortRequested( state ) )
+	{
+		depthSort();
+		m_memberData->renderSorted = true;
+	}
+	else
+	{
+		m_memberData->renderSorted = false;
+	}*/
+
+	switch( effectiveType( currentState ) )
 	{
 		case Point :
-			renderPoints( state, style );
+			glPointSize( currentState->get<GLPointWidth>()->value() );
+			renderInstances( 1 );
 			break;
 		case Disk :
-			renderDisks( state, style );
+			m_memberData->diskPrimitive->renderInstances( m_memberData->points->readable().size() );
 			break;
 		case Quad :
-			renderQuads( state, style );
+			m_memberData->quadPrimitive->renderInstances( m_memberData->points->readable().size() );
 			break;
 		case Sphere :
-			renderSpheres( state, style );
+			m_memberData->spherePrimitive->renderInstances( m_memberData->points->readable().size() );
+			break;
 	}
+}
+
+void PointsPrimitive::renderInstances( size_t numInstances ) const
+{
+	glDrawArraysInstanced( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );
 }
 
 Imath::Box3f PointsPrimitive::bound() const
 {
 	updateBounds();
-	return m_bound;
+	return m_memberData->bound;
 }
 
 template<typename T>
-const T *PointsPrimitive::dataAndStride( const IECore::Data *data, T *defaultValue, unsigned int &stride )
+const T *PointsPrimitive::dataAndStride( const IECore::Data *data, const T *defaultValue, unsigned int &stride )
 {
 	stride = 0;
 	if( !data )
@@ -202,143 +325,60 @@ const T *PointsPrimitive::dataAndStride( const IECore::Data *data, T *defaultVal
 	return defaultValue;
 }
 
-void PointsPrimitive::renderPoints( const State * state, IECore::TypeId style ) const
+PointsPrimitive::Type PointsPrimitive::effectiveType( const State *state ) const
 {
-	glPointSize( state->get<GLPointWidth>()->value() );
-	glDrawArrays( GL_POINTS, 0, m_points->readable().size() );
+	Type result = m_memberData->type;
+	switch( state->get<UseGLPoints>()->value() )
+	{
+		case ForPointsOnly :
+			break;
+		case ForPointsAndDisks :
+			if( result==Disk )
+			{
+				result = Point;
+			}
+			break;
+		case ForAll :
+			result = Point;
+			break;
+	}
+	return result;
 }
 
-void PointsPrimitive::renderDisks( const State * state, IECore::TypeId style ) const
+std::string &PointsPrimitive::instancingVertexSource()
 {
-	/*DiskPrimitivePtr disk = new DiskPrimitive();
-
-	V3f cameraCentre = Camera::positionInObjectSpace();
-	V3f cameraUp = Camera::upInObjectSpace();
-	V3f cameraView = -Camera::viewDirectionInObjectSpace();
-	bool perspective = Camera::perspectiveProjection();
+	static std::string s = 
 	
-	const std::vector<V3f> &p = m_points->readable();
-
-	unsigned int wStep = 0;
-	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
-	if( !wStep )
-	{
-		disk->setRadius( *w / 2.0f );
-		w = 0;
-	}
-
-	for( unsigned int j=0; j<p.size(); j++ )
-	{
-		unsigned int i = m_renderSorted ? m_depthOrder[j] : j;
-
-		if( style==Primitive::DrawSolid::staticTypeId() )
-		{
-			setVertexAttributesAsUniforms( p.size(), i );
-		}
-
-		M44f aim = alignZAxisWithTargetDir( perspective ? cameraCentre - p[i] : cameraView, cameraUp );
-		glPushMatrix();
-			glTranslatef( p[i][0], p[i][1], p[i][2] );
-			glMultMatrixf( aim.getValue() );
-			if( w )
-			{
-				disk->setRadius( w[i] / 2.0f );
-			}
-			disk->render( state, style );
-		glPopMatrix();
-	}*/
-}
-
-void PointsPrimitive::renderQuads( const State * state, IECore::TypeId style ) const
-{
-	/*QuadPrimitivePtr quad = new QuadPrimitive();
-	
-	V3f cameraCentre = Camera::positionInObjectSpace();
-	V3f cameraUp = Camera::upInObjectSpace();
-	V3f cameraView = -Camera::viewDirectionInObjectSpace();
-	bool perspective = Camera::perspectiveProjection();
-
-	const std::vector<V3f> &p = m_points->readable();
-
-	unsigned int wStep = 0;
-	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
-	if( !wStep )
-	{
-		quad->setWidth( *w );
-		w = 0;
-	}
-
-	unsigned int hStep = 0;
-	const float *h = dataAndStride( m_heights, &g_defaultHeight, hStep );
-	if( !hStep )
-	{
-		quad->setHeight( *h );
-		h = 0;
-	}
-
-	unsigned int rStep = 0;
-	const float *r = dataAndStride( m_rotations, &g_defaultRotation, rStep );
-	for( unsigned int j=0; j<p.size(); j++ )
-	{
-		unsigned int i = m_renderSorted ? m_depthOrder[j] : j;
-
-		if( style==Primitive::DrawSolid::staticTypeId() )
-		{
-			setVertexAttributesAsUniforms( p.size(), i );
-		}
-
-		M44f aim = alignZAxisWithTargetDir( perspective ? cameraCentre - p[i] : cameraView, cameraUp );
-
-		glPushMatrix();
-			glTranslatef( p[i][0], p[i][1], p[i][2] );
-			glMultMatrixf( aim.getValue() );
-			glRotatef( -r[i*rStep], 0, 0, 1 );
-			if( w )
-			{
-				quad->setWidth( w[i] );
-			}
-			if( h )
-			{
-				quad->setHeight( h[i] );
-			}
-			quad->render( state, style );
-		glPopMatrix();
-	}
-	*/
-}
-
-void PointsPrimitive::renderSpheres( const State * state, IECore::TypeId style ) const
-{
-	/*SpherePrimitivePtr sphere = new SpherePrimitive();
-	const std::vector<V3f> &p = m_points->readable();
-
-	unsigned int wStep = 0;
-	const float *w = dataAndStride( m_widths, &g_defaultWidth, wStep );
-	if( !wStep )
-	{
-		sphere->setRadius( *w / 2.0f );
-		w = 0;
-	}
-
-	for( unsigned int j=0; j<p.size(); j++ )
-	{
-		unsigned int i = m_renderSorted ? m_depthOrder[j] : j;
-
-		if( style==Primitive::DrawSolid::staticTypeId() )
-		{
-			setVertexAttributesAsUniforms( p.size(), i );
-		}
-
-		glPushMatrix();
-			glTranslatef( p[i][0], p[i][1], p[i][2] );
-			if( w )
-			{
-				sphere->setRadius( w[i] / 2.0f );
-			}
-			sphere->render( state, style );
-		glPopMatrix();
-	}
-	*/
+		"#include \"IECoreGL/PointsPrimitive.h\"\n"
+		""
+		"IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS\n"
+		""
+		"in vec3 instanceP;"
+		"in vec3 instanceN;"
+		""
+		"varying out vec3 fragmentI;"
+		"varying out vec3 fragmentN;"
+		""
+		"void main()"
+		"{"
+		"	mat4 instanceMatrix = IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX;"
+		""
+		"	vec4 pCam = instanceMatrix * vec4( instanceP, 1 );"
+		"	gl_Position = gl_ProjectionMatrix * pCam;"
+		""
+		"	fragmentN = normalize( instanceMatrix * vec4( instanceN, 0.0 ) ).xyz;"
+		""
+		"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
+		"	{"
+		"		fragmentI = normalize( -pCam.xyz );"
+		"	}"
+		"	else"
+		"	{"
+		"		fragmentI = vec3( 0.0, 0.0, -1.0 );"
+		"	}"
+		"}";
+		
+	return s;
 }
 
 struct SortFn
@@ -354,36 +394,36 @@ void PointsPrimitive::depthSort() const
 	V3f cameraDirection = Camera::viewDirectionInObjectSpace();
 	cameraDirection.normalize();
 
-	const vector<V3f> &points = m_points->readable();
-	if( !m_depthOrder.size() )
+	const vector<V3f> &points = m_memberData->points->readable();
+	if( !m_memberData->depthOrder.size() )
 	{
 		// never sorted before. initialize space.
-		m_depthOrder.resize( points.size() );
-		for( unsigned int i=0; i<m_depthOrder.size(); i++ )
+		m_memberData->depthOrder.resize( points.size() );
+		for( unsigned int i=0; i<m_memberData->depthOrder.size(); i++ )
 		{
-			m_depthOrder[i] = i;
+			m_memberData->depthOrder[i] = i;
 		}
-		m_depths.resize( points.size() );
+		m_memberData->depths.resize( points.size() );
 	}
 	else
 	{
 		// sorted before. see if the camera direction has changed enough
 		// to warrant resorting.
-		if( cameraDirection.dot( m_depthCameraDirection ) > 0.95 )
+		if( cameraDirection.dot( m_memberData->depthCameraDirection ) > 0.95 )
 		{
 			return;
 		}
 	}
 
-	m_depthCameraDirection = cameraDirection;
+	m_memberData->depthCameraDirection = cameraDirection;
 
 	// calculate all distances
-	for( unsigned int i=0; i<m_depths.size(); i++ )
+	for( unsigned int i=0; i<m_memberData->depths.size(); i++ )
 	{
-		m_depths[i] = points[i].dot( m_depthCameraDirection );
+		m_memberData->depths[i] = points[i].dot( m_memberData->depthCameraDirection );
 	}
 
 	// sort based on those distances
-	SortFn sorter( m_depths );
-	sort( m_depthOrder.begin(), m_depthOrder.end(), sorter );
+	SortFn sorter( m_memberData->depths );
+	sort( m_memberData->depthOrder.begin(), m_memberData->depthOrder.end(), sorter );
 }

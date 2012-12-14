@@ -110,7 +110,7 @@ void TextPrimitive::render( State *currentState ) const
 	}
 }
 
-void TextPrimitive::render( const State *state, IECore::TypeId style ) const
+void TextPrimitive::renderInstances( size_t numInstances ) const
 {
 	// should never get here, because we override the master render()
 	// method above.

@@ -73,10 +73,7 @@ class TextPrimitive : public Primitive
 		//@}
 
 		virtual void render( State *currentState ) const;
-
-	protected :
-
-		virtual void render( const State *state, IECore::TypeId style ) const;
+		virtual void renderInstances( size_t numInstances ) const;
 
 	private :
 

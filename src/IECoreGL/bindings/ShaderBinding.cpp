@@ -36,6 +36,7 @@
 #include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECoreGL/Shader.h"
+#include "IECoreGL/Texture.h"
 #include "IECoreGL/bindings/ShaderBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -46,7 +47,7 @@ using namespace std;
 namespace IECoreGL
 {
 
-boost::python::list uniformParameterNames( const Shader &s )
+static boost::python::list uniformParameterNames( const Shader &s )
 {
 	vector<string> n;
 	s.uniformParameterNames( n );
@@ -58,7 +59,7 @@ boost::python::list uniformParameterNames( const Shader &s )
 	return result;
 }
 
-boost::python::list vertexParameterNames( const Shader &s )
+static boost::python::list vertexParameterNames( const Shader &s )
 {
 	vector<string> n;
 	s.vertexParameterNames( n );
@@ -70,18 +71,34 @@ boost::python::list vertexParameterNames( const Shader &s )
 	return result;
 }
 
+static ShaderPtr shader( Shader::Setup &s )
+{
+	return const_cast<Shader *>( s.shader() );
+}
+
 void bindShader()
 {
-	IECorePython::RunTimeTypedClass<Shader>()
+	scope s = IECorePython::RunTimeTypedClass<Shader>()
 		.def( init<const std::string &, const std::string &>() )
 		.def( init<const std::string &, const std::string &, const std::string &>() )
 		.def( "program", &Shader::program )
+		.def( "vertexSource", &Shader::vertexSource, return_value_policy<copy_const_reference>() )
+		.def( "geometrySource", &Shader::geometrySource, return_value_policy<copy_const_reference>() )
+		.def( "fragmentSource", &Shader::fragmentSource, return_value_policy<copy_const_reference>() )
 		.def( "uniformParameterNames", &uniformParameterNames )
 		.def( "vertexParameterNames", &vertexParameterNames )
 		.def( "defaultVertexSource", &Shader::defaultVertexSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultVertexSource" )
 		.def( "defaultFragmentSource", &Shader::defaultFragmentSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultFragmentSource" )
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
 		.def( "facingRatio", &Shader::facingRatio ).staticmethod( "facingRatio" )
+	;
+	
+	IECorePython::RefCountedClass<Shader::Setup, IECore::RefCounted>( "Setup" )
+		.def( init<ConstShaderPtr>() )
+		.def( "shader", &shader )
+		.def( "addUniformParameter", (void (Shader::Setup::*)( const std::string &, ConstTexturePtr ))&Shader::Setup::addUniformParameter )
+		.def( "addUniformParameter", (void (Shader::Setup::*)( const std::string &, IECore::ConstDataPtr ))&Shader::Setup::addUniformParameter )
+		.def( "addVertexAttribute", &Shader::Setup::addVertexAttribute )
 	;
 }
 

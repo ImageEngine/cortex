@@ -66,8 +66,9 @@ class Shader::Implementation : public IECore::RefCounted
 	public :
 
 		Implementation( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource )
-			:	m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
-		{
+			:	m_vertexSource( vertexSource ), m_geometrySource( geometrySource ), m_fragmentSource( fragmentSource ),
+				m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
+		{		
 			string actualVertexSource = vertexSource;
 			string actualFragmentSource = fragmentSource;
 			if( vertexSource == "" )
@@ -210,6 +211,21 @@ class Shader::Implementation : public IECore::RefCounted
 			return m_program;
 		}
 		
+		const std::string &vertexSource() const
+		{
+			return m_vertexSource;
+		}
+		
+		const std::string &geometrySource() const
+		{
+			return m_geometrySource;
+		}
+		
+		const std::string &fragmentSource() const
+		{
+			return m_fragmentSource;
+		}
+		
 		void uniformParameterNames( std::vector<std::string> &names ) const
 		{
 			for( ParameterMap::const_iterator it = m_uniformParameters.begin(); it != m_uniformParameters.end(); it++ )
@@ -272,6 +288,10 @@ class Shader::Implementation : public IECore::RefCounted
 	private :
 	
 		friend class Shader::Setup;
+		
+		std::string m_vertexSource;
+		std::string m_geometrySource;
+		std::string m_fragmentSource;
 
 		GLuint m_vertexShader;
 		GLuint m_geometryShader;
@@ -365,6 +385,21 @@ GLuint Shader::program() const
 	return m_implementation->program();
 }
 
+const std::string &Shader::vertexSource() const
+{
+	return m_implementation->vertexSource();
+}
+
+const std::string &Shader::geometrySource() const
+{
+	return m_implementation->geometrySource();
+}
+
+const std::string &Shader::fragmentSource() const
+{
+	return m_implementation->fragmentSource();
+}
+		
 void Shader::uniformParameterNames( std::vector<std::string> &names ) const
 {
 	m_implementation->uniformParameterNames( names );
@@ -400,6 +435,7 @@ struct Shader::Setup::MemberData : public IECore::RefCounted
 		GLenum type;
 		GLint size;
 		ConstBufferPtr buffer;
+		GLuint divisor;
 	};
 	
 	struct UniformParameter
@@ -546,8 +582,8 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 	m_memberData->uniformParameters.push_back( p );
 }
 				
-void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDataPtr value )
-{
+void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor )
+{	
 	GLenum attributeType = 0;
 	GLint attributeSize = 0;
 	GLint attributeIndex = m_memberData->shader->vertexAttribute( name, attributeType, attributeSize );
@@ -560,14 +596,17 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	GLint size = 0;
 	switch( attributeType )
 	{
+		case GL_INT :
 		case GL_FLOAT :
 			dataTypeOK = IECore::despatchTraitsTest<IECore::TypeTraits::IsNumericVectorTypedData>( value );
 			size = 1;
 			break;
+		case GL_INT_VEC2 :
 		case GL_FLOAT_VEC2 :
 			dataTypeOK = IECore::despatchTraitsTest<IECore::TypeTraits::IsVec2VectorTypedData>( value );
 			size = 2;
 			break;
+		case GL_INT_VEC3 :
 		case GL_FLOAT_VEC3 :
 			dataTypeOK = IECore::despatchTraitsTest<IECore::TypeTraits::IsVec3VectorTypedData>( value );
 			size = 3;
@@ -586,13 +625,14 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
 		return;
 	}
-
+		
 	MemberData::VertexAttribute b;
 	b.attributeIndex = attributeIndex;
 	b.type = dataGLType;
 	b.size = size;
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
 	b.buffer = IECore::runTimeCast<const Buffer>( converter->convert( value  ) );
+	b.divisor = divisor;
 
 	m_memberData->vertexAttributes.push_back( b );
 }
@@ -609,6 +649,10 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 		Buffer::ScopedBinding binding( *(it->buffer) );
 		glEnableVertexAttribArray( it->attributeIndex );
 		glVertexAttribPointer( it->attributeIndex, it->size, it->type, false, 0, 0 );
+		if( it->divisor )
+		{
+			glVertexAttribDivisor( it->attributeIndex, it->divisor );
+		}
 	}
 	
 	const vector<MemberData::UniformParameter> &uniformParameters = m_setup.m_memberData->uniformParameters;
@@ -674,6 +718,10 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 	const vector<MemberData::VertexAttribute> &vertexAttributes = m_setup.m_memberData->vertexAttributes;
 	for( vector<MemberData::VertexAttribute>::const_iterator it = vertexAttributes.begin(), eIt = vertexAttributes.end(); it != eIt; it++ )
 	{
+		if( it->divisor )
+		{
+			glVertexAttribDivisor( it->attributeIndex, 0 );
+		}
 		glDisableVertexAttribArray( it->attributeIndex );
 	}
 	glUseProgram( m_previousProgram );
@@ -743,12 +791,17 @@ ShaderPtr Shader::constant()
 		"	gl_FragColor = vec4( Cs, 1 );"
 		"}";
 
-	static ShaderPtr s = new Shader( defaultVertexSource(), fragmentSource );
+	static ShaderPtr s = new Shader( "", fragmentSource );
 	return s;
 }
 
 ShaderPtr Shader::facingRatio()
 {
-	static ShaderPtr s = new Shader( defaultVertexSource(), defaultFragmentSource() );
+	// the empty strings will be replaced with defaultVertexSource() and
+	// defaultFragmentSource() in the constructor. it's important that we
+	// pass the empty string here, so that Shader::vertexSource() will return
+	// the empty string too, signifying to the funkier primitives (PointsPrimitive
+	// being a good example) that it's ok to replace the vertex shader.
+	static ShaderPtr s = new Shader( "", "" );
 	return s;
 }

@@ -63,30 +63,52 @@ class Primitive : public Renderable
 		Primitive();
 		virtual ~Primitive();
 
-		/// Renders the Primitive in the current
-		/// OpenGL context. The Primitive will draw itself
-		/// using the style represented by state, allowing
-		/// representations such as wireframe over shaded etc.
-		/// It temporarily changes the shader parameters that 
-		/// match the primitive's uniform variables.
-		/// An exception is thrown if state->isComplete() is not
-		/// true.
-		///
-		/// The default implementation for this function calls
-		/// the protected render() method several times
-		/// in different OpenGL states, once for each style
-		/// present in state.
-		virtual void render( State *currentState ) const;
-
-		/// Adds a primitive variable on this primitive.
-		/// Derived classes should implement any customized filtering and/or conversions or call the base class implementation.
-		/// Default implementation sets Constant variables as uniform shader parameters and all the
-		/// others as vertex shader parameters.
-		/// \todo MAYBE JUST HAVE ADDVERTEXATTRIBUTE AND ADDUNIFORMATTRIBUTE AND LET THE CONVERTERS DO IT?
+		/// Adds a primitive variable to this primitive. Derived classes should implement any filtering
+		/// or conversions that are necessary and then call addVertexAttribute() or addUniformAttribute().
+		/// The default implementation calls addUniformAttribute() for uniform primitive variables and
+		/// addVertexAttribute() for all others.
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) = 0;
 
+		/// Returns the bounding box for the primitive.
 		virtual Imath::Box3f bound() const = 0;
+		
+		/// High level rendering function which renders in the styles represented by
+		/// currentState, allowing representations such as wireframe over shaded etc to
+		/// be achieved with a single call. The currentState must be complete and
+		/// already have been bound. Finer grained control over rendering can be achieved
+		/// by using the shaderSetup() and renderInstances() methods - in fact those methods
+		/// are used to implement this one.  
+		virtual void render( State *currentState ) const;
 
+		//! @name Lower level rendering methods
+		/// These methods are used to implement the higher level render() method - they
+		/// may also be called directly to implement custom rendering.
+		//////////////////////////////////////////////////////////////////////////////
+		/// This method returns a Shader::Setup binding the primitive to a shader for
+		/// rendering in a particular state. It may be used in conjunction with renderInstances()
+		/// to provide finer grained control over rendering.
+		///
+		/// Most classes will not need to override this method - reasons for overriding would be
+		/// to substitute in custom geometry or vertex shaders and/or to bind in attributes
+		/// not already specified with addUniformAttribute() or addVertexAttribute().
+		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
+		/// Adds the primitive variables held by this Primitive to the specified Shader::Setup,
+		/// optionally prefixing their names.
+		void addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &namePrefix = "", GLuint vertexDivisor = 0 ) const;
+		/// Renders the primitive using the specified state and with a particular style.
+		/// The style is specified using the TypeId of the StateComponent representing that style
+		/// (e.g. PrimitiveWireframeTypeId is passed for wireframe rendering).
+		///
+		/// The default implementation calls renderInstances() but derived classes may override it
+		/// to modify their drawing based on the state. A Shader::Setup
+		/// created for this primitive must be bound before calling this method.
+		virtual void render( const State *currentState, IECore::TypeId style ) const;
+		/// Renders a number of instances of the primitive by issuing a single call to
+		/// glDrawElementsInstanced() or glDrawArraysInstanced(). A Shader::Setup created for this
+		/// primitive must be bound before calling this method.
+		virtual void renderInstances( size_t numInstances = 1 ) const = 0;
+		///@}
+		
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
 		/// Primitive objects.
@@ -115,19 +137,10 @@ class Primitive : public Renderable
 
 	protected :
 
-		/// Must be implemented by subclasses. This function is called several
-		/// times by the standard render() call, once for each style of rendering
-		/// requested in state (wireframe, solid etc). The TypeId of the StateComponent
-		/// representing that style is passed so that the drawing can be optimised
-		/// for the particular style (e.g. PrimitiveWireframeTypeId is passed for
-		/// wireframe rendering).
-		virtual void render( const State *state, IECore::TypeId style ) const = 0;
-
-		/// Called by derived classes to register a vertex attribute. There are no type or length checks on this call.
-		void addVertexAttribute( const std::string &name, IECore::ConstDataPtr data );
-
 		/// Called by derived classes to register a uniform attribute. There are no type or length checks on this call.
 		void addUniformAttribute( const std::string &name, IECore::ConstDataPtr data );
+		/// Called by derived classes to register a vertex attribute. There are no type or length checks on this call.
+		void addVertexAttribute( const std::string &name, IECore::ConstDataPtr data );
 
 		/// Convenience function for use in render() implementations. Returns
 		/// true if TransparentShadingStateComponent is true and
@@ -138,7 +151,6 @@ class Primitive : public Renderable
 
 		typedef std::vector<Shader::SetupPtr> ShaderSetupVector;
 		mutable ShaderSetupVector m_shaderSetups;
-		const Shader::Setup *shaderSetup( const Shader *shader ) const;
 		
 		mutable Shader::SetupPtr m_boundSetup;
 		const Shader::Setup *boundSetup() const;

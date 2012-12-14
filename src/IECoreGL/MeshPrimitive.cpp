@@ -130,10 +130,10 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 	}
 }
 
-void MeshPrimitive::render( const State * state, IECore::TypeId style ) const
+void MeshPrimitive::renderInstances( size_t numInstances ) const
 {
 	unsigned vertexCount = m_vertIds->readable().size();
-	glDrawArrays( GL_TRIANGLES, 0, vertexCount );
+	glDrawArraysInstanced( GL_TRIANGLES, 0, vertexCount, numInstances );
 }
 
 Imath::Box3f MeshPrimitive::bound() const

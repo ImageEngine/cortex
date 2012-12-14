@@ -88,16 +88,16 @@ void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	Primitive::addPrimitiveVariable( name, primVar );
 }
 
-void CurvesPrimitive::render( const State * state, IECore::TypeId style ) const
+void CurvesPrimitive::renderInstances( size_t numInstances ) const
 {
-	if( state->get<UseGLLines>()->value() )
+	/*if( state->get<UseGLLines>()->value() )
 	{
 		renderLines( state, style );
 	}
 	else
 	{
 		renderRibbons( state, style );
-	}
+	}*/
 }
 
 void CurvesPrimitive::renderLines( const State * state, IECore::TypeId style ) const

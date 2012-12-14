@@ -132,7 +132,7 @@ void SpherePrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	}
 }
 
-void SpherePrimitive::render( const State * state, IECore::TypeId style ) const
+void SpherePrimitive::renderInstances( size_t numInstances ) const
 {
 	if( !m_vertIdsBuffer )
 	{
@@ -143,7 +143,7 @@ void SpherePrimitive::render( const State * state, IECore::TypeId style ) const
 	}
 	
 	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
-	glDrawElements( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0 );
+	glDrawElementsInstanced( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0, numInstances );
 }
 
 Imath::Box3f SpherePrimitive::bound() const

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,6 +54,7 @@ class CurvesPrimitive : public Primitive
 
 		virtual Imath::Box3f bound() const;
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		virtual void renderInstances( size_t numInstances = 1 ) const;
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -74,10 +75,6 @@ class CurvesPrimitive : public Primitive
 		typedef TypedStateComponent<float, CurvesPrimitiveGLLineWidthTypeId> GLLineWidth;
 		IE_CORE_DECLAREPTR( GLLineWidth );
 		//@}
-
-	protected :
-
-		virtual void render( const State *state, IECore::TypeId style ) const;
 
 	private :
 

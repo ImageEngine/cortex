@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -58,16 +58,36 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		g.getState().add( IECoreGL.PointsPrimitive.UseGLPoints( IECoreGL.GLPointsUsage.ForPointsAndDisks ) )
 		g.getState().add( IECoreGL.PointsPrimitive.GLPointWidth( 2.3 ) )
 
-
 	def testVertexAttributes( self ) :
 
+		# if rendering points and requiring custom vertex attributes to be passed
+		# to the fragment shader, you are now required to provide your own vertex shader.
+		# however, handy macros exist to make the instancing and aiming easy.
+		vertexSource = """
+		#include \"IECoreGL/PointsPrimitive.h\"
+		
+		IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS
+		
+		in vec3 instanceP;
+		in float greyTo255;
+		
+		varying out float fragmentGrey;
+		
+		void main()
+		{
+			mat4 instanceMatrix = IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX;
+			vec4 pCam = instanceMatrix * vec4( instanceP, 1 );
+			gl_Position = gl_ProjectionMatrix * pCam;
+			fragmentGrey = float( greyTo255 ) / 255.0;
+		}
+		"""
+
 		fragmentSource = """
-		uniform int greyTo255;
+		varying float fragmentGrey;
 
 		void main()
 		{
-			float g = float( greyTo255 ) / 255.0;
-			gl_FragColor = vec4( g, g, g, 1 );
+			gl_FragColor = vec4( fragmentGrey, fragmentGrey, fragmentGrey, 1 );
 		}
 		"""
 
@@ -83,7 +103,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -96,7 +117,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 		
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
-			r.shader( "surface", "grey", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
+			r.shader( "surface", "grey", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( numPoints, { "P" : p, "greyTo255" : g } )
 
 		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/pointVertexAttributes.tif" )
@@ -121,6 +142,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		g = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData() )
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -149,6 +171,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( projection ),
@@ -175,7 +198,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/" + expectedImage ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
-		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
 
 	def testPerspectiveAimedPoints( self ) :
 	
@@ -204,6 +227,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),

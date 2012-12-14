@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,40 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DISKPRIMITIVE_H
-#define IECOREGL_DISKPRIMITIVE_H
-
-#include "IECoreGL/Primitive.h"
+#ifndef IECOREGL_SHADERSTATECOMPONENTBINDING_H
+#define IECOREGL_SHADERSTATECOMPONENTBINDING_H
 
 namespace IECoreGL
 {
 
-class DiskPrimitive : public Primitive
-{
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::DiskPrimitive, DiskPrimitiveTypeId, Primitive );
-
-		DiskPrimitive( float radius = 1, float z = 0, float thetaMax = 360 );
-		virtual ~DiskPrimitive();
-
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-
-		virtual void renderInstances( size_t numInstances = 1 ) const;
-
-	private :
-
-		float m_radius;
-		float m_z;
-		float m_thetaMax;
-		GLuint m_nPoints;
-		
-};
-
-IE_CORE_DECLAREPTR( DiskPrimitive );
+void bindShaderStateComponent();
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_DISKPRIMITIVE_H
+#endif // IECOREGL_SHADERSTATECOMPONENTBINDING_H

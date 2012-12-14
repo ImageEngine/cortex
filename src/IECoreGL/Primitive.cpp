@@ -105,10 +105,6 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 
 void Primitive::render( State *state ) const
 {
-	if( !state->isComplete() )
-	{
-		throw Exception( "Primitive::render called with incomplete state object." );
-	}
 
 	/// \todo Figure out how we'll do selection properly.
 	GLint renderMode = 0;
@@ -134,7 +130,7 @@ void Primitive::render( State *state ) const
 		// we then bind our own setup on top, adding in the parameters
 		// stored on the primitive itself.
 		const Shader *shader = uniformSetup->shader();
-		const Shader::Setup *primitiveSetup = shaderSetup( shader );
+		const Shader::Setup *primitiveSetup = shaderSetup( shader, state );
 		Shader::Setup::ScopedBinding primitiveBinding( *primitiveSetup );
 		// then we defer to the derived class to perform the draw call.
 		render( state, Primitive::DrawSolid::staticTypeId() );
@@ -153,7 +149,7 @@ void Primitive::render( State *state ) const
 	}
 	
 	const Shader *constantShader = Shader::constant();
-	const Shader::Setup *constantSetup = shaderSetup( constantShader );
+	const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
 	Shader::Setup::ScopedBinding constantBinding( *constantSetup );
 	const GLint csIndex = 0;
 		
@@ -208,6 +204,40 @@ void Primitive::render( State *state ) const
 	
 }
 
+const Shader::Setup *Primitive::shaderSetup( const Shader *shader, State *state ) const
+{
+	for( ShaderSetupVector::const_iterator it = m_shaderSetups.begin(), eIt = m_shaderSetups.end(); it != eIt; it++ )
+	{
+		if( (*it)->shader() == shader )
+		{
+			return it->get();
+		}
+	}
+	
+	Shader::SetupPtr setup = new Shader::Setup( shader );
+	addPrimitiveVariablesToShaderSetup( setup.get()  );
+		
+	m_shaderSetups.push_back( setup );
+	return setup.get();
+}
+
+void Primitive::addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &namePrefix, GLuint vertexDivisor ) const
+{
+	for( AttributeMap::const_iterator it = m_vertexAttributes.begin(), eIt = m_vertexAttributes.end(); it != eIt; it++ )
+	{
+		shaderSetup->addVertexAttribute( namePrefix + it->first, it->second, vertexDivisor );
+	}
+	for( AttributeMap::const_iterator it = m_uniformAttributes.begin(), eIt = m_uniformAttributes.end(); it != eIt; it++ )
+	{
+		shaderSetup->addUniformParameter( it->first, it->second );
+	}
+}
+
+void Primitive::render( const State *currentState, IECore::TypeId style ) const
+{
+	renderInstances( 1 );
+}
+
 void Primitive::addUniformAttribute( const std::string &name, IECore::ConstDataPtr data )
 {
 	m_uniformAttributes[name] = data->copy();
@@ -217,35 +247,11 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 {
 	m_vertexAttributes[name] = data->copy();
 }
-
+		
 bool Primitive::depthSortRequested( const State * state ) const
 {
 	return state->get<Primitive::TransparencySort>()->value() &&
 		state->get<TransparentShadingStateComponent>()->value();
-}
-
-const Shader::Setup *Primitive::shaderSetup( const Shader *shader ) const
-{
-	for( ShaderSetupVector::const_iterator it = m_shaderSetups.begin(), eIt = m_shaderSetups.end(); it != eIt; it++ )
-	{
-		if( (*it)->shader() == shader )
-		{
-			return it->get();
-		}
-	}
-
-	Shader::SetupPtr setup = new Shader::Setup( shader );
-	for( AttributeMap::const_iterator it = m_vertexAttributes.begin(), eIt = m_vertexAttributes.end(); it != eIt; it++ )
-	{
-		setup->addVertexAttribute( it->first, it->second );
-	}
-	for( AttributeMap::const_iterator it = m_uniformAttributes.begin(), eIt = m_uniformAttributes.end(); it != eIt; it++ )
-	{
-		setup->addUniformParameter( it->first, it->second );
-	}
-	
-	m_shaderSetups.push_back( setup );
-	return setup.get();
 }
 
 const Shader::Setup *Primitive::boundSetup() const

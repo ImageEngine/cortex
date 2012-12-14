@@ -73,6 +73,7 @@
 #include "IECoreGL/bindings/CachedConverterBinding.h"
 #include "IECoreGL/bindings/BufferBinding.h"
 #include "IECoreGL/bindings/SplineToGLTextureConverterBinding.h"
+#include "IECoreGL/bindings/ShaderStateComponentBinding.h"
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -113,6 +114,7 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindCachedConverter();
 	bindBuffer();
 	bindSplineToGLTextureConverter();
+	bindShaderStateComponent();
 
 #ifdef IECORE_WITH_FREETYPE
 

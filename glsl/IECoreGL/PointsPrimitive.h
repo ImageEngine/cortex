@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,40 +32,46 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DISKPRIMITIVE_H
-#define IECOREGL_DISKPRIMITIVE_H
+#ifndef IECOREGL_POINTSPRIMITIVE_H
+#define IECOREGL_POINTSPRIMITIVE_H
 
-#include "IECoreGL/Primitive.h"
+#include "IECoreGL/MatrixAlgo.h"
 
-namespace IECoreGL
+#define IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS \
+	\
+	in vec3 P;\
+	\
+	uniform float constantWidth;
+
+#define IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX \
+	iePointsPrimitiveInstanceMatrix(\
+		P,\
+		constantWidth\
+	)
+	
+mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float constantWidth )
 {
+	vec3 pCam = (gl_ModelViewMatrix * vec4( P, 1.0 )).xyz;
 
-class DiskPrimitive : public Primitive
-{
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::DiskPrimitive, DiskPrimitiveTypeId, Primitive );
-
-		DiskPrimitive( float radius = 1, float z = 0, float thetaMax = 360 );
-		virtual ~DiskPrimitive();
-
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-
-		virtual void renderInstances( size_t numInstances = 1 ) const;
-
-	private :
-
-		float m_radius;
-		float m_z;
-		float m_thetaMax;
-		GLuint m_nPoints;
+	vec3 Az;
+	if( gl_ProjectionMatrix[2][3] != 0.0 )
+	{
+		// perspective
+		Az = normalize( -pCam.xyz );
+	}
+	else
+	{
+		// orthographic
+		Az = vec3( 0, 0, 1 );
 		
-};
+	}
 
-IE_CORE_DECLAREPTR( DiskPrimitive );
+	vec3 Ax = normalize( cross( Az, vec3( 0, 1, 0 ) ) );
+	vec3 Ay = normalize( cross( Az, Ax ) );
 
-} // namespace IECoreGL
+	mat4 placementMatrix = ieMatrixFromBasis( Ax * constantWidth, Ay * constantWidth, Az * constantWidth, pCam );
+	
+	return placementMatrix;
+}
 
-#endif // IECOREGL_DISKPRIMITIVE_H
+#endif // IECOREGL_POINTSPRIMITIVE_H

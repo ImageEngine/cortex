@@ -57,9 +57,7 @@ class SpherePrimitive : public Primitive
 		virtual Imath::Box3f bound() const;
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
 
-	protected :
-
-		virtual void render( const State *state, IECore::TypeId style ) const;
+		virtual void renderInstances( size_t numInstances = 1 ) const;
 
 	private :
 

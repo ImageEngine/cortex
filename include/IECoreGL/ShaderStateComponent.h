@@ -70,6 +70,9 @@ class ShaderStateComponent : public StateComponent
 		/// to actually bind the shaderSetup() at an appropriate time.
 		virtual void bind() const;
 
+		ShaderLoader *shaderLoader();
+		TextureLoader *textureLoader();
+
 		/// Returns the shader object.
 		/// This function can only be called from a thread 
 		/// with a valid GL context.

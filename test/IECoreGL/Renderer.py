@@ -1036,6 +1036,7 @@ class TestRenderer( unittest.TestCase ) :
 	
 			r = Renderer()
 			r.setOption( "gl:mode", IECore.StringData( mode ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 		
 			r.camera( "main", {
 					"projection" : IECore.StringData( "perspective" ),

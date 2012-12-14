@@ -60,7 +60,20 @@ class TestShader( unittest.TestCase ) :
 		}
 		"""
 
-		IECoreGL.Shader( vertexSource, fragmentSource )
+		s1 = IECoreGL.Shader( vertexSource, fragmentSource )
+		
+		self.assertNotEqual( s1.program(), 0 )
+		self.assertEqual( s1.vertexSource(), vertexSource )
+		self.assertEqual( s1.geometrySource(), "" )
+		self.assertEqual( s1.fragmentSource(), fragmentSource )
+
+		s2 = IECoreGL.Shader( "", "", fragmentSource )
+		
+		self.assertNotEqual( s2.program(), 0 )
+		self.assertNotEqual( s1.program(), s2.program() )
+		self.assertEqual( s2.vertexSource(), "" )
+		self.assertEqual( s2.geometrySource(), "" )
+		self.assertEqual( s2.fragmentSource(), fragmentSource )
 
 	def testUniformParameters( self ) :
 
