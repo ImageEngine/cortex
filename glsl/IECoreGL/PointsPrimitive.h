@@ -66,7 +66,7 @@ mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float constantWidth )
 		
 	}
 
-	vec3 Ax = normalize( cross( Az, vec3( 0, 1, 0 ) ) );
+	vec3 Ax = normalize( cross( vec3( 0, 1, 0 ), Az ) );
 	vec3 Ay = normalize( cross( Az, Ax ) );
 
 	mat4 placementMatrix = ieMatrixFromBasis( Ax * constantWidth, Ay * constantWidth, Az * constantWidth, pCam );

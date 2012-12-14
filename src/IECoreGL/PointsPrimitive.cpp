@@ -355,9 +355,11 @@ std::string &PointsPrimitive::instancingVertexSource()
 		""
 		"in vec3 instanceP;"
 		"in vec3 instanceN;"
+		"in vec2 instancest;"
 		""
 		"varying out vec3 fragmentI;"
 		"varying out vec3 fragmentN;"
+		"varying out vec2 fragmentst;"
 		""
 		"void main()"
 		"{"
@@ -376,6 +378,8 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"	{"
 		"		fragmentI = vec3( 0.0, 0.0, -1.0 );"
 		"	}"
+		""
+		"	fragmentst = instancest;"
 		"}";
 		
 	return s;

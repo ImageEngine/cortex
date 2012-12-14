@@ -45,7 +45,7 @@ IECoreGL.init( False )
 
 class TestPointsPrimitive( unittest.TestCase ) :
 
-	outputFileName = os.path.dirname( __file__ ) + "/output/testPoints.tif"
+	outputFileName = os.path.dirname( __file__ ) + "/output/testPoints.exr"
 
 	def testStateComponentsInstantiation( self ):
 
@@ -112,7 +112,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
 			}
 		)
-		r.display( self.outputFileName, "tif", "rgba", {} )
+		r.display( self.outputFileName, "exr", "rgba", {} )
 		
 		with IECore.WorldBlock( r ) :
 		
@@ -150,7 +150,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
 			}
 		)
-		r.display( self.outputFileName, "tif", "rgba", {} )
+		r.display( self.outputFileName, "exr", "rgba", {} )
 		with IECore.WorldBlock( r ) :
 			r.shader( "surface", "grey", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( 0, { "P" : p, "greyTo255" : g } )		# it should not crash rendering 0 points.
@@ -181,7 +181,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
 			}
 		)
-		r.display( self.outputFileName, "tif", "rgba", {} )
+		r.display( self.outputFileName, "exr", "rgba", {} )
 		
 		with IECore.WorldBlock( r ) :
 		
@@ -270,6 +270,84 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		
 		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 	
+	def testTexturing( self ) :
+	
+		fragmentSource = """
+		uniform sampler2D texture;
+		varying vec2 fragmentst;
+
+		void main()
+		{
+			gl_FragColor = texture2D( texture, fragmentst );
+		}
+		"""
+
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:texture", IECore.StringData( "./" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "exr", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			
+			r.shader(
+				"surface", "test",
+				{
+					"gl:fragmentSource" : IECore.StringData( fragmentSource ),
+					"texture" : "test/IECoreGL/images/numbers.exr",
+				}
+			)
+			
+			r.points( 1, {
+				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) )
+			} )
+
+		expectedImage = IECore.Reader.create( "test/IECoreGL/images/numbers.exr" ).read()
+		actualImage = IECore.Reader.create( self.outputFileName ).read()
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+	
+	def testWindingOrder( self ) :
+
+		def performTest( rightHandedOrientation, expectedAlpha ) :
+
+			r = IECoreGL.Renderer()
+			r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+			r.camera( "main", {
+					"projection" : IECore.StringData( "orthographic" ),
+					"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
+					"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+					"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+				}
+			)
+			r.display( self.outputFileName, "exr", "rgba", {} )
+
+			with IECore.WorldBlock( r ) :
+
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+				r.setAttribute( "doubleSided", IECore.BoolData( False ) )
+				r.setAttribute( "rightHandedOrientation", IECore.BoolData( rightHandedOrientation ) )
+
+				r.points( 1, {
+					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				} )
+
+			e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
+			result = e.createResult()
+			e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+			self.assertEqual( result.floatPrimVar( e.A() ), expectedAlpha )
+		
+		performTest( True, 1 )
+		performTest( False, 0 )
+		
 	def tearDown( self ) :
 		
 		if os.path.exists( self.outputFileName ) :
