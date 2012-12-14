@@ -737,9 +737,11 @@ const std::string &Shader::defaultVertexSource()
 		
 		"in vec3 P;"
 		"in vec3 N;"
+		"in vec2 st;"
 		""
 		"varying out vec3 fragmentI;"
 		"varying out vec3 fragmentN;"
+		"varying out vec2 fragmentst;"
 		""
 		"void main()"
 		"{"
@@ -754,6 +756,8 @@ const std::string &Shader::defaultVertexSource()
 		"	{"
 		"		fragmentI = vec3( 0, 0, -1 );"
 		"	}"
+		""
+		"	fragmentst = st;"
 		"}";
 		
 	return s;

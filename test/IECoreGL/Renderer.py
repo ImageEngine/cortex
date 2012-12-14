@@ -361,25 +361,39 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( g ), 0 )
 		self.assertEqual( result.floatPrimVar( b ), 1 )
 
-	## \todo Make this assert something
 	def testImagePrimitive( self ) :
 
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/testImage.tif", "tiff", "rgba", {} )
+		r.display( os.path.dirname( __file__ ) + "/output/testImage.exr", "exr", "rgba", {} )
 
-		r.worldBegin()
-
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
-		r.concatTransform( M44f.createScaled( V3f( 0.005 ) ) )
-
+		r.camera(
+			"main",
+			{
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			}
+		)
+			
 		i = Reader.create( os.path.dirname( __file__ ) + "/images/numbers.exr" ).read()
-		i.render( r )
+		
+		with IECore.WorldBlock( r ) :
 
-		r.worldEnd()
+			# the shader should be ignored.
+			r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+			
+			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+			r.concatTransform( M44f.createScaled( V3f( 2. / i.bound().size().x ) ) )
+
+			i.render( r )
+
+		i2 = Reader.create( os.path.dirname( __file__ ) + "/output/testImage.exr" ).read()
+		
+		self.assertEqual( ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.05 ).value, False )
+		
 
 	## \todo Make this assert something
 	def testAlphaBlending( self ) :
@@ -1080,7 +1094,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		files = [
 			os.path.dirname( __file__ ) + "/output/testPrimVars.tif",
-			os.path.dirname( __file__ ) + "/output/testImage.tif",
+			os.path.dirname( __file__ ) + "/output/testImage.exr",
 			os.path.dirname( __file__ ) + "/output/testStackBug.tif",
 			os.path.dirname( __file__ ) + "/output/proceduralTest.tif",
 			os.path.dirname( __file__ ) + "/output/depthTest.tif",
