@@ -570,13 +570,27 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 	
 	if( integer )
 	{
-		UniformDataConverter<vector<GLint> > converter( p.ints );
-		IECore::despatchTypedData< UniformDataConverter<vector<GLint> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );
+		if( value->isInstanceOf( IECore::BoolDataTypeId ) )
+		{
+			p.ints.push_back( static_cast<const IECore::BoolData *>( value.get() )->readable() );
+			p.ints.push_back( 0 ); // make enough extra room to store pushed values in ScopedBinding
+		}
+		else
+		{
+			UniformDataConverter<vector<GLint> > converter( p.ints );
+			IECore::despatchTypedData< UniformDataConverter<vector<GLint> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );
+		}
 	}
 	else
 	{
 		UniformDataConverter<vector<GLfloat> > converter( p.floats );
 		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );	
+	}
+	
+	if( !p.ints.size() && !p.floats.size() )
+	{
+		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
+		return;
 	}
 	
 	m_memberData->uniformParameters.push_back( p );

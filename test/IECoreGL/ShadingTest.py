@@ -65,6 +65,8 @@ class ShadingTest( unittest.TestCase ) :
 		
 		s.parameters["gl:fragmentSource"] = """
 			
+			uniform bool rB;
+			
 			uniform float rF;
 			uniform int gI;
 			
@@ -77,7 +79,7 @@ class ShadingTest( unittest.TestCase ) :
 			void main()
 			{
 				gl_FragColor = vec4(
-					rF + rgF.r + float( rgI.r ) + rgbF.r + float( rgbI.r ),
+					float( rB ) + rF + rgF.r + float( rgI.r ) + rgbF.r + float( rgbI.r ),
 					float( gI ) + rgF.g + float( rgI.g ) + rgbF.g + float( rgbI.g ),
 					rgbF.b + float( rgbI.b ),
 					1.0
@@ -229,6 +231,32 @@ class ShadingTest( unittest.TestCase ) :
 			]
 		)
 	
+	def testUniformBoolParameters( self ) :
+	
+		c1 = IECore.Group()
+		c1.addChild( self.mesh() )
+		c1.addState( self.colorShader() )
+		
+		c2 = c1.copy()
+		c1.state()[0].parameters["rB"] = IECore.BoolData( 1 )
+		
+		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		
+		g = IECore.Group()
+		g.addChild( c1 )
+		g.addChild( c2 )
+		
+		image = self.renderImage( g )
+		
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+			]
+		)
+		
 	def testUniformFloatParameters( self ) :
 	
 		c1 = IECore.Group()
