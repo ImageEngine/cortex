@@ -58,13 +58,7 @@ class PointsPrimitive : public Primitive
 			Sphere,	// spheres
 		};
 
-		/// Other than points, each argument can have size() equal to the size of
-		/// points, or a size of 1.
-		/// widths are used by all types.
-		/// heights and rotations are used only by the Quad type.
-		/// Copies of all data are taken.
 		PointsPrimitive( Type type );
-
 		virtual ~PointsPrimitive();
 
 		virtual Imath::Box3f bound() const;

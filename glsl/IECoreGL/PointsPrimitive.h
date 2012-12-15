@@ -40,16 +40,24 @@
 #define IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS \
 	\
 	in vec3 P;\
+	in float width;\
+	in float patchaspectratio;\
+	in float patchrotation;\
 	\
-	uniform float constantWidth;
+	uniform bool useWidth;\
+	uniform bool useAspectRatio;\
+	uniform bool useRotation;\
+	uniform float constantwidth;
 
 #define IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX \
 	iePointsPrimitiveInstanceMatrix(\
 		P,\
-		constantWidth\
+		useWidth ? width * constantwidth : constantwidth,\
+		useAspectRatio ? patchaspectratio : 1.0,\
+		useRotation ? patchrotation : 0.0\
 	)
 	
-mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float constantWidth )
+mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float width, in float aspectRatio, in float rotation )
 {
 	vec3 pCam = (gl_ModelViewMatrix * vec4( P, 1.0 )).xyz;
 
@@ -66,10 +74,12 @@ mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float constantWidth )
 		
 	}
 
-	vec3 Ax = normalize( cross( vec3( 0, 1, 0 ), Az ) );
+	vec3 up = vec3( sin( radians( rotation ) ), cos( radians( rotation ) ), 0 );
+	
+	vec3 Ax = normalize( cross( up, Az ) );
 	vec3 Ay = normalize( cross( Az, Ax ) );
 
-	mat4 placementMatrix = ieMatrixFromBasis( Ax * constantWidth, Ay * constantWidth, Az * constantWidth, pCam );
+	mat4 placementMatrix = ieMatrixFromBasis( Ax * width, Ay * width / aspectRatio, Az * width, pCam );
 	
 	return placementMatrix;
 }

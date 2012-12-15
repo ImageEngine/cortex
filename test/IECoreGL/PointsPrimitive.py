@@ -321,6 +321,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 			r = IECoreGL.Renderer()
 			r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 			r.camera( "main", {
 					"projection" : IECore.StringData( "orthographic" ),
 					"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
@@ -347,7 +348,107 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		
 		performTest( True, 1 )
 		performTest( False, 0 )
+	
+	def testAspectAndRotation( self ) :
+	
+		fragmentSource = """
+		void main()
+		{
+			gl_FragColor = vec4( 1, 1, 1, 1 );
+		}
+		"""
+
+		random = IECore.Rand48()
+
+		p = IECore.V3fVectorData()
+		r = IECore.FloatVectorData()
+		w = IECore.FloatVectorData()
+		a = IECore.FloatVectorData()
+		for x in range( -2, 3 ) :
+			for y in range( -2, 3 ) :
+				p.append( IECore.V3f( x, y, 0 ) )
+				r.append( random.nextf( 0, 360 ) )
+				w.append( random.nextf( 0.25, 0.5 ) )
+				a.append( random.nextf( 0.5, 2 ) )
+
+		renderer = IECoreGL.Renderer()
+		renderer.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		renderer.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+
+		renderer.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 512 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+			}
+		)
+		renderer.display( self.outputFileName, "exr", "rgba", { "quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ) } )
+
+		with IECore.WorldBlock( renderer ) :
+
+			renderer.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+
+			renderer.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
+			renderer.points( p.size(), {
+					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p ),
+					"patchrotation" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, r ),
+					"width" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, w ),
+					"patchaspectratio" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, a ),
+					"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) ),
+				}
+			)
+
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/rotatedPointPatches.exr" ).read()
+		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
+	
+	def testBound( self ) :
+
+		p = IECoreGL.PointsPrimitive( IECoreGL.PointsPrimitive.Type.Point )
+		
+		self.assertEqual( p.bound(), IECore.Box3f() )
+		
+		p.addPrimitiveVariable(
+			"P",
+			IECore.PrimitiveVariable(
+				IECore.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData( [ IECore.V3f( -1 ), IECore.V3f( 10 ) ] )
+			)
+		)
+
+		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -1.5 ), IECore.V3f( 10.5 ) ) )
+		
+		p.addPrimitiveVariable(
+			"constantwidth",
+			IECore.PrimitiveVariable(
+				IECore.PrimitiveVariable.Interpolation.Constant,
+				IECore.FloatData( 2 )
+			)
+		)
+		
+		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -2 ), IECore.V3f( 11 ) ) )
+
+		p.addPrimitiveVariable(
+			"width",
+			IECore.PrimitiveVariable(
+				IECore.PrimitiveVariable.Interpolation.Vertex,
+				IECore.FloatVectorData( [ .5, 2 ] )
+			)
+		)
+		
+		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -1.5 ), IECore.V3f( 12 ) ) )
+	
+		p.addPrimitiveVariable(
+			"patchaspectratio",
+			IECore.PrimitiveVariable(
+				IECore.PrimitiveVariable.Interpolation.Vertex,
+				IECore.FloatVectorData( [ .5, 4 ] )
+			)
+		)
+
+		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -2 ), IECore.V3f( 12 ) ) )
+	
 	def tearDown( self ) :
 		
 		if os.path.exists( self.outputFileName ) :

@@ -79,9 +79,10 @@ struct PointsPrimitive::MemberData : public IECore::RefCounted
 
 	Type type;
 	static const float g_defaultWidth;
+	IECore::ConstDataPtr constantWidth;
 	IECore::ConstDataPtr widths;
-	static const float g_defaultHeight;
-	IECore::ConstDataPtr heights;
+	static const float g_defaultAspectRatio;
+	IECore::ConstDataPtr patchAspectRatio;
 	static const float g_defaultRotation;
 	IECore::ConstDataPtr rotations;
 
@@ -113,7 +114,7 @@ struct PointsPrimitive::MemberData : public IECore::RefCounted
 };
 
 const float PointsPrimitive::MemberData::g_defaultWidth = 1;
-const float PointsPrimitive::MemberData::g_defaultHeight = 1;
+const float PointsPrimitive::MemberData::g_defaultAspectRatio = 1;
 const float PointsPrimitive::MemberData::g_defaultRotation = 0;
 
 //////////////////////////////////////////////////////////////////////////
@@ -142,23 +143,27 @@ void PointsPrimitive::updateBounds() const
 	
 	m_memberData->recomputeBound = false;
 
-	unsigned int wStep = 0;
-	const float *w = dataAndStride( m_memberData->widths, &MemberData::g_defaultWidth, wStep );
-	unsigned int hStep = 0;
-	const float *h = dataAndStride( m_memberData->heights, &MemberData::g_defaultHeight, hStep );
-	if( !m_memberData->heights )
+	if( !m_memberData->points )
 	{
-		h = 0;
+		m_memberData->bound = Box3f();
+		return;
 	}
+
+	unsigned int cwStep = 0, wStep = 0, aStep = 0;
+	const float *cw = dataAndStride( m_memberData->constantWidth, &MemberData::g_defaultWidth, cwStep );
+	const float *w = dataAndStride( m_memberData->widths, &MemberData::g_defaultWidth, wStep );
+	const float *a = dataAndStride( m_memberData->patchAspectRatio, &MemberData::g_defaultAspectRatio, aStep );
+	
 	m_memberData->bound.makeEmpty();
 	const vector<V3f> &pd = m_memberData->points->readable();
 	for( unsigned int i=0; i<pd.size(); i++ )
-	{
-		float r = *w; w += wStep;
-		if( h )
+	{	
+		float r = *cw * *w / 2.0f; cw += cwStep; w += wStep;
+		if( *a < 1.0f && *a > 0.0f )
 		{
-			r = max( r, *h ); h += hStep;
+			r /= *a;
 		}
+		a += aStep;
 		m_memberData->bound.extendBy( Box3f( pd[i] - V3f( r ), pd[i] + V3f( r ) ) );
 	}
 }
@@ -170,15 +175,20 @@ void PointsPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 		m_memberData->recomputeBound = true;
 		m_memberData->points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data->copy() );
 	}
+	else if( name == "constantwidth" )
+	{
+		m_memberData->recomputeBound = true;
+		m_memberData->constantWidth = primVar.data->copy();
+	}
 	else if ( name == "width" )
 	{
 		m_memberData->recomputeBound = true;
 		m_memberData->widths = primVar.data->copy();
 	}
-	else if ( name == "height" )
+	else if ( name == "patchaspectratio" )
 	{
 		m_memberData->recomputeBound = true;
-		m_memberData->heights = primVar.data->copy();
+		m_memberData->patchAspectRatio = primVar.data->copy();
 	}
 	else if ( name == "patchrotation" )
 	{
@@ -220,15 +230,14 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
 		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "", 1 );
 		
-		if( m_memberData->widths && m_memberData->widths->isInstanceOf( IECore::FloatDataTypeId ) )
+		instancingShaderSetup->addUniformParameter( "useWidth", new BoolData( m_memberData->widths ) );
+		if( !m_memberData->constantWidth )
 		{
-			instancingShaderSetup->addUniformParameter( "constantWidth", m_memberData->widths );
+			instancingShaderSetup->addUniformParameter( "constantwidth", new FloatData( 1.0f ) );
 		}
-		else
-		{
-			instancingShaderSetup->addUniformParameter( "constantWidth", new FloatData( 1.0f ) );
-		}
-		
+		instancingShaderSetup->addUniformParameter( "useAspectRatio", new BoolData( m_memberData->patchAspectRatio ) );
+		instancingShaderSetup->addUniformParameter( "useRotation", new BoolData( m_memberData->rotations ) );
+				
 		switch( type )
 		{
 			case Disk :
