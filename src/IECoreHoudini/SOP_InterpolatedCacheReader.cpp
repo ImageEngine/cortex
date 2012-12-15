@@ -35,6 +35,7 @@
 #include "boost/format.hpp"
 
 #include "OP/OP_Director.h" 
+#include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
 #include "PRM/PRM_Template.h"
 
@@ -55,9 +56,18 @@ static PRM_Name parameterNames[] = {
 	PRM_Name( "attributeFixes", "Attribute Prefix/Suffix" ),
 	PRM_Name( "transformAttribute", "Transform Attribute" ),
 	PRM_Name( "frameMultiplier", "Frame Multiplier" ),
+	PRM_Name( "groupingMode", "Grouping Mode" ),
 };
 
 static PRM_Default frameMultiplierDefault( 1 );
+static PRM_Default groupingModeDefault( SOP_InterpolatedCacheReader::PointGroup );
+
+static PRM_Name groupingModeNames[] = {
+	PRM_Name( "0", "PrimitiveGroup" ),
+	PRM_Name( "1", "PointGroup" ),
+};
+
+PRM_ChoiceList SOP_InterpolatedCacheReader::groupingModeList( PRM_CHOICELIST_SINGLE, &groupingModeNames[0] );
 
 PRM_Template SOP_InterpolatedCacheReader::parameters[] = {
 	PRM_Template( PRM_FILE, 1, &parameterNames[0] ),
@@ -65,6 +75,7 @@ PRM_Template SOP_InterpolatedCacheReader::parameters[] = {
 	PRM_Template( PRM_STRING, 2, &parameterNames[2] ),
 	PRM_Template( PRM_STRING, 1, &parameterNames[3] ),
 	PRM_Template( PRM_INT, 1, &parameterNames[4], &frameMultiplierDefault ),
+	PRM_Template( PRM_INT, 1, &parameterNames[5], &groupingModeDefault, &groupingModeList ),
 	PRM_Template(),
 };
 
@@ -116,6 +127,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 	std::string transformAttribute = paramVal.toStdString();
 	
 	int frameMultiplier = evalInt( "frameMultiplier", 0, time );
+	GroupingMode groupingMode = (GroupingMode)evalInt( "groupingMode", 0, time );
 	
 	// create the InterpolatedCache
 	if ( cacheFileName.compare( m_cacheFileName ) != 0 || frameMultiplier != m_frameMultiplier )
@@ -162,15 +174,25 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 	
 	duplicatePointSource( 0, context );
 	
-	for ( GA_GroupTable::iterator<GA_ElementGroup> it=gdp->pointGroups().beginTraverse(); !it.atEnd(); ++it )
+	GA_ElementGroupTable *groups = 0;
+	if ( groupingMode == PointGroup )
 	{
-		GA_PointGroup *group = (GA_PointGroup*)it.group();
+		groups = &gdp->pointGroups();
+	}
+	else if ( groupingMode == PrimitiveGroup )
+	{
+		groups = &gdp->primitiveGroups();
+	}
+	
+	for ( GA_GroupTable::iterator<GA_ElementGroup> it=groups->beginTraverse(); !it.atEnd(); ++it )
+	{
+		GA_ElementGroup *group = it.group();
 		if ( group->getInternal() || group->isEmpty() )
 		{
 			continue;
 		}
 		
-		// match GA_PointGroup name to InterpolatedCache::ObjectHandle
+		// match GA_ElementGroup name to InterpolatedCache::ObjectHandle
 		std::string searchName = objectPrefix + group->getName().toStdString() + objectSuffix;
 		std::vector<InterpolatedCache::ObjectHandle>::iterator oIt = find( objects.begin(), objects.end(), searchName );
 		if ( oIt == objects.end() )
@@ -194,9 +216,31 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 		
 		const CompoundObject::ObjectMap &attributeMap = attributes->members();
 		
-		GA_Range pointRange = gdp->getPointRange( group );
+		GA_Range pointRange;
+		if ( groupingMode == PointGroup )
+		{
+			pointRange = gdp->getPointRange( (GA_PointGroup*)it.group() );
+		}
+		else if ( groupingMode == PrimitiveGroup )
+		{
+			GA_Range primRange = gdp->getPrimitiveRange( (GA_PrimitiveGroup*)it.group() );
+			const GA_PrimitiveList &primitives = gdp->getPrimitiveList();
+			
+			GA_OffsetList offsets;
+			for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
+			{
+				GA_Range primPointRange = primitives.get( it.getOffset() )->getPointRange();
+				for ( GA_Iterator pIt=primPointRange.begin(); !pIt.atEnd(); ++pIt )
+				{
+					offsets.append( pIt.getOffset() );
+				}
+			}
+			
+			offsets.sortAndRemoveDuplicates();
+			pointRange = GA_Range( gdp->getPointMap(), offsets );
+		}
 		
-		// transfer the InterpolatedCache::Attributes onto the GA_PointGroup
+		// transfer the InterpolatedCache::Attributes onto the GA_ElementGroup
 		/// \todo: this does not account for detail, prim, or vertex attribs...
 		for ( CompoundObject::ObjectMap::const_iterator aIt=attributeMap.begin(); aIt != attributeMap.end(); aIt++ )
 		{
@@ -272,7 +316,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 			if ( transform )
 			{
 				UT_Matrix4 matrix( IECore::convert<UT_Matrix4T<double> >( transform->readable().transform() ) );
-				gdp->transformPoints( matrix, group );
+				gdp->transformGroup( matrix, *group );
 			}
 			else
 			{
@@ -280,7 +324,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 				if ( transform )
 				{
 					UT_Matrix4 matrix = IECore::convert<UT_Matrix4>( transform->readable().transform() );
-					gdp->transformPoints( matrix, group );
+					gdp->transformGroup( matrix, *group );
 				}
 			}
 		}

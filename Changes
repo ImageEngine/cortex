@@ -6,6 +6,7 @@ Improvements :
 * Added setAttribute()/getAttribute() methods to IECore::Group. The latter traverses the group's parents
 * IECoreGL::Renderer now ignores shader types with a prefix other than gl: (apart from "surface"), rather than complaining about them.
 * IECoreHoudini FnOpHolder and FnProceduralHolder.create() now accept optional parent node and contextArgs parameters. The later should be a kwargs dict from a Houdini UI callback
+* IECoreHoudini SOP_InterpolatedCacheReader has a new parameter, GroupingMode, which defaults to the original behaviour. By using PrimitiveGroup mode instead, transform cached objects also transform non-Point attribs (face varying normals for example)
 
 Bug Fixes :
 

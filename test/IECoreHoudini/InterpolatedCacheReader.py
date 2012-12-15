@@ -43,11 +43,11 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 	
 	__torusTestFile = "test/IECoreHoudini/data/torus.cob"
 	
-	def cacheSop( self ) :
+	def cacheSop( self, file=__torusTestFile ) :
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
 		torus = geo.createNode( "file" )
-		torus.parm( "file" ).set( TestInterpolatedCacheReader.__torusTestFile )
+		torus.parm( "file" ).set( file )
 		group = torus.createOutputNode( "group" )
 		group.parm( "crname" ).set( "torus" )
 		group.parm( "entity" ).set( 1 )
@@ -312,6 +312,62 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		for i in range( 0, origP.size() ) :
 			self.assertNotEqual( resultP[i], origP[i] )
 			self.assertEqual( resultP[i], matrix.multVecMatrix( origP[i] ) )
+	
+	def testPrimitiveGroupModeWithTransformAttribute( self ) :
+		cache = self.cacheSop( file="test/IECoreHoudini/data/torusWithVertexNormals.bgeo" )
+		cache.parm( "groupingMode" ).set( 0 )
+		hou.parm( "/obj/geo1/group1/entity" ).set( 0 )
+		hou.setFrame( 2 )
+		orig = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		cache.parm( "transformAttribute" ).set( "transform" )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.assertNotEqual( orig, result )
+		self.assertNotEqual( orig['P'], result['P'] )
+		self.assertNotEqual( orig['N'], result['N'] )
+		self.assertEqual( orig['P'].data.size(), result['P'].data.size() )
+		self.assertEqual( orig['N'].data.size(), result['N'].data.size() )
+		self.assertEqual( orig['Cd'], result['Cd'] )
+		self.assertEqual( orig['pointId'], result['pointId'] )
+		
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
+		matrix = i.read( 2, "torus", "transform" ).value.transform
+		origP = orig["P"].data
+		origN = orig["N"].data
+		resultP = result["P"].data
+		resultN = result["N"].data
+		for i in range( 0, origP.size() ) :
+			self.assertNotEqual( resultP[i], origP[i] )
+			self.assertNotEqual( resultN[i], origN[i] )
+			self.assertEqual( resultP[i], matrix.multVecMatrix( origP[i] ) )
+			self.failUnless( resultN[i].equalWithAbsError( matrix.multDirMatrix( origN[i] ), 1e-6 ) )
+	
+	def testPrimitiveGroupModeWithMultipleObjects( self ) :
+		hou.setFrame( 3 )
+		cache = self.cacheSop( file="test/IECoreHoudini/data/torusWithVertexNormals.bgeo" )
+		cache.parm( "groupingMode" ).set( 0 )
+		hou.parm( "/obj/geo1/group1/entity" ).set( 0 )
+		torus = cache.parent().createNode( "file" )
+		torus.parm( "file" ).set( "test/IECoreHoudini/data/torusWithVertexNormals.bgeo" )
+		group = torus.createOutputNode( "group" )
+		group.parm( "crname" ).set( "torus2" )
+		merge = cache.inputs()[0].createOutputNode( "merge" )
+		merge.setInput( 1, group )
+		cache.setInput( 0, merge )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		numTorusPoints = len(torus.geometry().points())
+		for key in [ "P", "Cd" ] :
+			self.assert_( key in result )
+			self.assertEqual( result[key].data.size(), 2 * numTorusPoints )
+		
+		for i in range( 0, numTorusPoints ) :
+			self.assertNotEqual( result['P'].data[i], result['P'].data[numTorusPoints+i] )
+			self.assertEqual( result['Cd'].data[i], result['Cd'].data[numTorusPoints+i] )
+		
+		numTorusVerts = sum( [ len(x.vertices()) for x in torus.geometry().prims() ] )
+		self.assert_( "N" in result )
+		self.assertEqual( result["N"].data.size(), 2 * numTorusVerts )
+		for i in range( 0, numTorusVerts ) :
+			self.assertNotEqual( result['N'].data[i], result['N'].data[numTorusPoints+i] )
 
 if __name__ == "__main__":
 	unittest.main()
