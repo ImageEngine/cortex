@@ -43,6 +43,8 @@
 namespace IECoreGL
 {
 
+IE_CORE_FORWARDDECLARE( Buffer )
+
 class CurvesPrimitive : public Primitive
 {
 	public :
@@ -54,6 +56,8 @@ class CurvesPrimitive : public Primitive
 
 		virtual Imath::Box3f bound() const;
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		virtual void render( const State *currentState, IECore::TypeId style ) const;
+		/// Just renders each segment as linear with GL_LINES.
 		virtual void renderInstances( size_t numInstances = 1 ) const;
 
 		//! @name StateComponents
@@ -78,15 +82,18 @@ class CurvesPrimitive : public Primitive
 
 	private :
 
-		void renderLines( const State * state, IECore::TypeId style ) const;
-		void renderRibbons( const State * state, IECore::TypeId style ) const;
-
+		void ensureVertIds() const;
+		void renderLines( const State *currentState, IECore::TypeId style ) const;
+		void renderRibbons( const State *currentState, IECore::TypeId style ) const;
+		
 		Imath::Box3f m_bound;
 		IECore::CubicBasisf m_basis;
 		bool m_periodic;
 		IECore::IntVectorDataPtr m_vertsPerCurve;
 		float m_width;
 		IECore::V3fVectorData::ConstPtr m_points;
+		mutable IECoreGL::ConstBufferPtr m_vertIdsBuffer;
+		mutable GLuint m_numVertIds;
 
 };
 

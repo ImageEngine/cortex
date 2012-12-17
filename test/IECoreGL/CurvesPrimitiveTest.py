@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -83,21 +83,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
-		r.worldBegin()
+		with IECore.WorldBlock( r ) :
 
-		for a in attributes :
-			r.setAttribute( a[0], a[1] )
+			for a in attributes :
+				r.setAttribute( a[0], a[1] )
 
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-		if shader :
-			shader.render( r )
-		else :
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			if shader :
+				shader.render( r )
+			else :
+				r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 
-		curvesPrimitive.render( r )
-
-		r.worldEnd()
+			curvesPrimitive.render( r )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
 		e = IECore.PrimitiveEvaluator.create( i )

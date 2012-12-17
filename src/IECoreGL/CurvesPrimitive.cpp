@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/CurvesPrimitive.h"
-#include "IECoreGL/Camera.h"
+#include "OpenEXR/ImathMatrixAlgo.h"
+#include "OpenEXR/ImathVecAlgo.h"
+#include "OpenEXR/ImathFun.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/CurvesPrimitive.h"
 
-#include "OpenEXR/ImathMatrixAlgo.h"
-#include "OpenEXR/ImathVecAlgo.h"
-#include "OpenEXR/ImathFun.h"
+#include "IECoreGL/CurvesPrimitive.h"
+#include "IECoreGL/Buffer.h"
+#include "IECoreGL/CachedConverter.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -88,20 +89,68 @@ void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	Primitive::addPrimitiveVariable( name, primVar );
 }
 
-void CurvesPrimitive::renderInstances( size_t numInstances ) const
+void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) const
 {
-	/*if( state->get<UseGLLines>()->value() )
+	if( currentState->get<UseGLLines>()->value() )
 	{
-		renderLines( state, style );
+		renderLines( currentState, style );
 	}
 	else
 	{
-		renderRibbons( state, style );
-	}*/
+		renderRibbons( currentState, style );
+	}
 }
 
-void CurvesPrimitive::renderLines( const State * state, IECore::TypeId style ) const
+void CurvesPrimitive::renderInstances( size_t numInstances ) const
 {
+	ensureVertIds();
+	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
+	glDrawElementsInstanced( GL_LINES, m_numVertIds, GL_UNSIGNED_INT, 0, numInstances );
+}
+
+void CurvesPrimitive::ensureVertIds() const
+{
+	if( m_vertIdsBuffer )
+	{
+		return;
+	}
+	
+	IECore::UIntVectorDataPtr vertIdsData = new IECore::UIntVectorData;
+	vector<unsigned int> &vertIds = vertIdsData->writable();
+	
+	unsigned vertIndex = 0;
+	const vector<int> &vertsPerCurve = m_vertsPerCurve->readable();
+	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
+	{
+		const int numSegments = *it - 1;
+		for( int i = 0; i < numSegments; i++ )
+		{
+			vertIds.push_back( vertIndex );
+			vertIds.push_back( ++vertIndex );			
+		}
+		if( m_periodic )
+		{
+			vertIds.push_back( vertIndex );
+			vertIds.push_back( vertIndex - numSegments );
+		}
+		vertIndex++;
+	}
+	
+	m_numVertIds = vertIds.size();
+	
+	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+	m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
+}
+
+void CurvesPrimitive::renderLines( const State *currentState, IECore::TypeId style ) const
+{
+	if( m_basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value() )
+	{
+		glLineWidth( currentState->get<GLLineWidth>()->value() );
+		renderInstances( 1 );
+	}
+	
+
 /*	const V3f *p = &(m_points->readable()[0]);
 	const std::vector<int> &v = m_vertsPerCurve->readable();
 
@@ -174,21 +223,7 @@ void CurvesPrimitive::renderLines( const State * state, IECore::TypeId style ) c
 	}*/
 }
 
-static inline V3f toCamera( const V3f &p, const V3f &cameraCentre, const V3f &cameraView, bool perspective )
-{
-	return perspective ? cameraCentre - p : cameraView;
-}
-
-static inline V3f uTangentAndNormal( const V3f &p, const V3d &cameraCentre, const V3f &cameraView, bool perspective, const V3f &vTangent, V3f &normal )
-{
-	V3f aimDirection = toCamera( p, cameraCentre, cameraView, perspective );
-	M44f aim = Imath::alignZAxisWithTargetDir( aimDirection, vTangent );
-	V3f uTangent( 1.0f, 0, 0 ); aim.multDirMatrix( uTangent, uTangent ); /// \todo x axis can be extracted much faster
-	normal = normal = uTangent.cross( vTangent ).normalized();
-	return uTangent;
-}
-
-void CurvesPrimitive::renderRibbons( const State * state, IECore::TypeId style ) const
+void CurvesPrimitive::renderRibbons( const State *currentState, IECore::TypeId style ) const
 {
 /*	float halfWidth = m_width/2.0f;
 	const V3f *points = &(m_points->readable()[0]);
