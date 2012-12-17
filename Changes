@@ -7,6 +7,9 @@ Improvements :
 * IECoreGL::Renderer now ignores shader types with a prefix other than gl: (apart from "surface"), rather than complaining about them.
 * IECoreHoudini FnOpHolder and FnProceduralHolder.create() now accept optional parent node and contextArgs parameters. The later should be a kwargs dict from a Houdini UI callback
 * IECoreHoudini SOP_InterpolatedCacheReader has a new parameter, GroupingMode, which defaults to the original behaviour. By using PrimitiveGroup mode instead, transform cached objects also transform non-Point attribs (face varying normals for example)
+* DeepImageReaders have new worldToCameraMatrix() and worldToNDCMatrix() methods which return the respective matrices.
+* DeepImageWriters have new parameters to set the worldToCamera and worldToNDC matrices, and DeepImageConverter reads/writes them appropriately.
+* SHW, DTEX, and RAT DeepImageReaders/Writers all support reading/writing worldToCamera and reading worldToNDC. SHW and DTEX support writing worldToNDC. RAT writing worldToNDC is still a todo.
 
 Bug Fixes :
 

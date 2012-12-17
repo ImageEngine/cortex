@@ -51,6 +51,9 @@ void bindDTEXDeepImageReader()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &DTEXDeepImageReader::canRead ).staticmethod( "canRead" )
+		/// \todo: move these to the base class for Cortex 8
+		.def( "worldToCameraMatrix", &DTEXDeepImageReader::worldToCameraMatrix )
+		.def( "worldToNDCMatrix", &DTEXDeepImageReader::worldToNDCMatrix )
 	;
 
 }

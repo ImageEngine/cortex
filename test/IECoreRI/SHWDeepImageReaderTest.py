@@ -75,6 +75,8 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, reader.channelNames )
 		self.assertRaises( RuntimeError, reader.dataWindow )
 		self.assertRaises( RuntimeError, reader.displayWindow )
+		self.assertRaises( RuntimeError, reader.worldToCameraMatrix )
+		self.assertRaises( RuntimeError, reader.worldToNDCMatrix )
 	
 	def testBasics( self ) :
 	
@@ -84,6 +86,8 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 		self.assertEqual( reader.channelNames(), IECore.StringVectorData( [ "A" ] ) )
 		self.assertEqual( reader.dataWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 383, 383 ) ) )
 		self.assertEqual( reader.displayWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 383, 383 ) ) )
+		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( IECore.M44f( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ), 1e-4 ) )
+		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( IECore.M44f( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ), 1e-4 ) )
 		
 	def testHeader( self ) :
 	
@@ -93,6 +97,8 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 		self.assertEqual( header["dataWindow"].value, reader.dataWindow() )
 		self.assertEqual( header["displayWindow"].value, reader.displayWindow() )
 		self.assertEqual( header["channelNames"], reader.channelNames() )
+		self.failUnless( header["worldToCameraMatrix"].value.equalWithAbsError( reader.worldToCameraMatrix(), 1e-6 ) )
+		self.failUnless( header["worldToNDCMatrix"].value.equalWithAbsError( reader.worldToNDCMatrix(), 1e-6 ) )
 	
 	def testReadPixel( self ) :
 	

@@ -84,6 +84,8 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		self.assertEqual( writer.parameters()['channelNames'].getValue(), IECore.StringVectorData( [ "A" ] ) )
 		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), IECore.V2i( 2048, 1556 ) )
 		self.assertEqual( writer.parameters()['tileSize'].getTypedValue(), IECore.V2i( 32, 32 ) )
+		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), IECore.M44f() )
+		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), IECore.M44f() )
 	
 	def testStrictChannels( self ) :
 		
@@ -143,6 +145,13 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), IECore.V2i( 2, 2 ) )
 		writer.parameters()['tileSize'].setTypedValue( IECore.V2i( 2, 2 ) )
 		
+		wToC = IECore.M44f( 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11, 12.12, 13.13, 14.14, 15.15, 16.16 )
+		cToS = IECore.M44f( 10.1, 20.2, 30.3, 40.4, 50.5, 60.6, 7.7, 80.8, 90.9, 100.1, 110.11, 120.12, 130.13, 140.14, 150.15, 160.16 )
+		writer.parameters()['worldToCameraMatrix'].setTypedValue( wToC )
+		writer.parameters()['worldToNDCMatrix'].setTypedValue( cToS )
+		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), wToC )
+		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), cToS )
+		
 		p = reader.readPixel( 192, 179 )
 		self.assertEqual( p.channelNames(), ( "A", ) )
 		self.assertEqual( p.numSamples(), 1 )
@@ -181,6 +190,8 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		reader = IECoreRI.SHWDeepImageReader( TestSHWDeepImageWriter.__output )
 		self.assertEqual( reader.dataWindow().size() + IECore.V2i( 1 ), IECore.V2i( 2, 2 ) )
 		self.assertEqual( reader.channelNames(), IECore.StringVectorData( [ "A" ] ) )
+		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( wToC, 1e-6 ) )
+		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( cToS, 1e-6 ) )
 		
 		rp = reader.readPixel( 0, 0 )
 		self.assertEqual( rp.channelNames(), tuple(reader.channelNames()) )

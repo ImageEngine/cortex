@@ -75,6 +75,8 @@ class TestDTEXDeepImageReader( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, reader.channelNames )
 		self.assertRaises( RuntimeError, reader.dataWindow )
 		self.assertRaises( RuntimeError, reader.displayWindow )
+		self.assertRaises( RuntimeError, reader.worldToCameraMatrix )
+		self.assertRaises( RuntimeError, reader.worldToNDCMatrix )
 	
 	def testBasics( self ) :
 	
@@ -84,7 +86,9 @@ class TestDTEXDeepImageReader( unittest.TestCase ) :
 		self.assertEqual( reader.channelNames(), IECore.StringVectorData( [ "R", "G", "B", "A" ] ) )
 		self.assertEqual( reader.dataWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 383, 383 ) ) )
 		self.assertEqual( reader.displayWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 383, 383 ) ) )
-		
+		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( IECore.M44f( 0.590606, 0.591501, 0.548919, 0, 0, 0.68023, -0.732998, 0, 0.80696, -0.432913, -0.401748, 0, 0.903436, 2.90732, 5.13921, 1 ), 1e-6 ) )
+		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( IECore.M44f( 1.41078, 1.41291, 0.554464, 0.548919, 0, 1.62486, -0.740402, -0.732998, 1.92758, -1.0341, -0.405806, -0.401748, 2.15803, 6.94469, 5.09011, 5.13921 ), 1e-5 ) )
+	
 	def testHeader( self ) :
 	
 		reader = IECoreRI.DTEXDeepImageReader( TestDTEXDeepImageReader.__dtex )
@@ -93,6 +97,8 @@ class TestDTEXDeepImageReader( unittest.TestCase ) :
 		self.assertEqual( header["dataWindow"].value, reader.dataWindow() )
 		self.assertEqual( header["displayWindow"].value, reader.displayWindow() )
 		self.assertEqual( header["channelNames"], reader.channelNames() )
+		self.failUnless( header["worldToCameraMatrix"].value.equalWithAbsError( reader.worldToCameraMatrix(), 1e-6 ) )
+		self.failUnless( header["worldToNDCMatrix"].value.equalWithAbsError( reader.worldToNDCMatrix(), 1e-6 ) )
 	
 	def testReadPixel( self ) :
 	

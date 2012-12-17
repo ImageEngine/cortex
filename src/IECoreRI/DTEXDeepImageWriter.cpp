@@ -154,10 +154,9 @@ void DTEXDeepImageWriter::open()
 	}
 	
 	m_outputFileName = fileName();
-
-	/// \todo: what are these used for? should they come from a parameter?
-	float NP[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 };
-	float NL[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 };
+	
+	float *NL = worldToCameraParameter()->getTypedValue().getValue();
+	float *NP = worldToNDCParameter()->getTypedValue().getValue();
 	
 	/// \todo: should compression style be a parameter?
 	int status = m_outputFile->AddImage(

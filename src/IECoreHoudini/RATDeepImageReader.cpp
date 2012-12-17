@@ -34,8 +34,12 @@
 
 #include "boost/format.hpp"
 
+#include "UT/UT_Matrix.h"
+#include "UT/UT_Options.h"
+
 #include "IECore/FileNameParameter.h"
 
+#include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/RATDeepImageReader.h"
 
 using namespace IECore;
@@ -81,6 +85,16 @@ bool RATDeepImageReader::canRead( const std::string &fileName )
 	return false;
 }
 
+CompoundObjectPtr RATDeepImageReader::readHeader()
+{
+	CompoundObjectPtr header = DeepImageReader::readHeader();
+	/// \todo: move this to the base class for Cortex 8
+	header->members()["worldToCameraMatrix"] = new M44fData( worldToCameraMatrix() );
+	header->members()["worldToNDCMatrix"] = new M44fData( worldToNDCMatrix() );
+	
+	return header;
+}
+
 void RATDeepImageReader::channelNames( std::vector<std::string> &names )
 {
 	open( true );
@@ -108,6 +122,20 @@ Imath::Box2i RATDeepImageReader::dataWindow()
 Imath::Box2i RATDeepImageReader::displayWindow()
 {
 	return dataWindow();
+}
+
+Imath::M44f RATDeepImageReader::worldToCameraMatrix()
+{
+	open( true );
+	
+	return m_worldToCamera;
+}
+
+Imath::M44f RATDeepImageReader::worldToNDCMatrix()
+{
+	open( true );
+	
+	return	m_worldToNDC;
 }
 
 DeepPixelPtr RATDeepImageReader::doReadPixel( int x, int y )
@@ -166,6 +194,8 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 	m_colorChannel = 0;
 	m_dataWindow.max.x = 0;
 	m_dataWindow.max.y = 0;
+	m_worldToCamera = Imath::M44f();
+	m_worldToNDC = Imath::M44f();
 	
 	bool success = true;
 	if ( m_inputFile->open( fileName().c_str() ) && m_inputFile->depthInterp() == IMG_COMPRESS_DISCRETE )
@@ -212,6 +242,27 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 		m_inputFile->resolution( m_dataWindow.max.x, m_dataWindow.max.y );
 		m_dataWindow.max.x -= 1;
 		m_dataWindow.max.y -= 1;
+		
+		UT_Matrix4 wToC( 1 );
+		m_inputFile->getWorldToCamera( wToC );
+		m_worldToCamera = IECore::convert<Imath::M44f>( wToC );
+		
+		UT_Matrix4 wToNDC( 1 );
+		m_inputFile->getWorldToNDC( wToNDC, true );
+		
+		// wToNDC has flipped values and a scaling issue related to the far clipping plane
+		// applying a matrix that seems to fix the issues in several examples
+		Imath::M44f fix;
+		fix.makeIdentity();
+		UT_Options *options = m_inputFile->getTBFOptions();
+		if ( options->hasOption( "camera:clip" ) )
+		{
+			const UT_Vector2D clip = options->getOptionV2( "camera:clip" );
+			fix[2][2] = clip[1];
+			fix[3][3] = -1;
+		}
+		
+		m_worldToNDC = IECore::convert<Imath::M44f>( wToNDC ) * fix;
 	}
 	else
 	{
@@ -231,6 +282,8 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 		m_colorChannel = 0;
 		m_dataWindow.max.x = 0;
 		m_dataWindow.max.y = 0;
+		m_worldToCamera = Imath::M44f();
+		m_worldToNDC = Imath::M44f();
 		
 		if ( !throwOnFailure )
 		{

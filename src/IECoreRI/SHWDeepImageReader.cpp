@@ -81,6 +81,16 @@ bool SHWDeepImageReader::canRead( const std::string &fileName )
 	return ( status == DTEX_NOERR );
 }
 
+CompoundObjectPtr SHWDeepImageReader::readHeader()
+{
+	CompoundObjectPtr header = DeepImageReader::readHeader();
+	/// \todo: move this to the base class for Cortex 8
+	header->members()["worldToCameraMatrix"] = new M44fData( worldToCameraMatrix() );
+	header->members()["worldToNDCMatrix"] = new M44fData( worldToNDCMatrix() );
+	
+	return header;
+}
+
 void SHWDeepImageReader::channelNames( std::vector<std::string> &names )
 {
 	open( true );
@@ -108,6 +118,20 @@ Imath::Box2i SHWDeepImageReader::dataWindow()
 Imath::Box2i SHWDeepImageReader::displayWindow()
 {
 	return dataWindow();
+}
+
+Imath::M44f SHWDeepImageReader::worldToCameraMatrix()
+{
+	open( true );
+	
+	return m_worldToCamera;
+}
+
+Imath::M44f SHWDeepImageReader::worldToNDCMatrix()
+{
+	open( true );
+	
+	return  m_worldToNDC;
 }
 
 DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
@@ -165,6 +189,9 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 	m_channelNames = "";
 	m_dataWindow.max.x = 0;
 	m_dataWindow.max.y = 0;
+	m_worldToCamera = Imath::M44f();
+	m_worldToNDC = Imath::M44f();
+	
 	clean();
 	
 	m_dtexCache = DtexCreateCache( 10000, NULL );
@@ -185,6 +212,9 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		
 		m_dataWindow.max.x = DtexWidth( m_dtexImage ) - 1;
 		m_dataWindow.max.y = DtexHeight( m_dtexImage ) - 1;
+		
+		DtexNl( m_dtexImage, m_worldToCamera.getValue() );
+		DtexNP( m_dtexImage, m_worldToNDC.getValue() );
 	}
 	else
 	{
@@ -192,6 +222,8 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		m_channelNames = "";
 		m_dataWindow.max.x = 0;
 		m_dataWindow.max.y = 0;
+		m_worldToCamera = Imath::M44f();
+		m_worldToNDC = Imath::M44f();
 		clean();
 		
 		if ( !throwOnFailure )
