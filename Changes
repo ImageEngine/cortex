@@ -1,3 +1,5 @@
+7.10.0 :
+
 Improvements :
 
 * ParameterParser.serialise accepts an alternate "values" argument, which can be used to avoid parameter validation or to serialise values that aren't held by the parameter.
