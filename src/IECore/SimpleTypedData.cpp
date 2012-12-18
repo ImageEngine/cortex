@@ -50,7 +50,7 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 	{ \
 		Data::save( context ); \
 		assert( baseSize() == N ); \
-		IndexedIOInterfacePtr container = context->rawContainer(); \
+		IndexedIOPtr container = context->rawContainer(); \
 		container->write( "value", TNAME::baseReadable(), TNAME::baseSize() ); \
 	} \
 	\
@@ -59,7 +59,7 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 	{ \
 		Data::load( context ); \
 		assert( ( sizeof( TNAME::ValueType ) / sizeof( TNAME::BaseType ) ) == N ); \
-		IndexedIOInterfacePtr container; \
+		IndexedIOPtr container; \
 		TNAME::BaseType *p = TNAME::baseWritable(); \
 		try \
 		{ \
@@ -142,7 +142,7 @@ template<>
 void TypedData<bool>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 	unsigned char c = readable();
 	container->write( "value", c );
 }
@@ -155,14 +155,14 @@ void TypedData<bool>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
+		IndexedIOPtr container = context->rawContainer();
 		container->read( "value", c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		IndexedIOPtr container = context->container( staticTypeName(), v );
 		container->read( "value", c );
 	}
 
@@ -173,7 +173,7 @@ template<>
 void TypedData<short>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 	int c = readable();
 	container->write( "value", c );
 }
@@ -186,14 +186,14 @@ void TypedData<short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
+		IndexedIOPtr container = context->rawContainer();
 		container->read( "value", c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		IndexedIOPtr container = context->container( staticTypeName(), v );
 		container->read( "value", c );
 	}
 
@@ -204,7 +204,7 @@ template<>
 void TypedData<unsigned short>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 	unsigned int c = readable();
 	container->write( "value", c );
 }
@@ -217,14 +217,14 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
+		IndexedIOPtr container = context->rawContainer();
 		container->read( "value", c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		IndexedIOPtr container = context->container( staticTypeName(), v );
 		container->read( "value", c );
 	}
 

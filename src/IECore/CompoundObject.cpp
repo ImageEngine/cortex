@@ -76,8 +76,8 @@ void CompoundObject::copyFrom( const Object *other, CopyContext *context )
 void CompoundObject::save( SaveContext *context ) const
 {
 	Object::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container = container->subdirectory( "members", IndexedIOInterface::CreateIfMissing );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
+	container = container->subdirectory( "members", IndexedIO::CreateIfMissing );
 	ObjectMap::const_iterator it;
 	for( it=m_members.begin(); it!=m_members.end(); it++ )
 	{
@@ -90,7 +90,7 @@ void CompoundObject::load( LoadContextPtr context )
 	Object::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	m_members.clear();
 	container = container->subdirectory( "members" );
 

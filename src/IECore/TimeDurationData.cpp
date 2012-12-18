@@ -46,7 +46,7 @@ template<>
 void TimeDurationData::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 
 	/// This is cross-platform and handles special values cleanly. It's also going to be smaller than
 	/// creating a proper container, and storing the day/month/year/time_of_day components individually.
@@ -60,7 +60,7 @@ template<>
 void TimeDurationData::load( LoadContextPtr context )
 {
 	Data::load( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 
 	std::string t;
 	container->read( "value", t );

@@ -53,7 +53,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.interpolation, "linear" )
 		self.assertEqual( m, m.copy() )
 
-		iface = IndexedIOInterface.create( "test/IECore/mesh.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/IECore/mesh.fio", "/", IndexedIOOpenMode.Write )
 		m.save( iface, "test" )
 		mm = Object.load( iface, "test" )
 		self.assertEqual( m, mm )

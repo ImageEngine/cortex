@@ -72,7 +72,7 @@ void PointsPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext
 void PointsPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "numPoints", static_cast<unsigned int>(m_numPoints) );
 }
 
@@ -80,7 +80,7 @@ void PointsPrimitive::load( IECore::Object::LoadContextPtr context )
 {
 	Primitive::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	unsigned int numPoints;
 	container->read( "numPoints", numPoints );
 	m_numPoints = static_cast<size_t>(numPoints);

@@ -268,12 +268,12 @@ void Group::copyFrom( const Object *other, CopyContext *context )
 void Group::save( SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	if( m_transform )
 	{
 		context->save( m_transform, container, "transform" );
 	}
-	IndexedIOInterfacePtr stateContainer = container->subdirectory( "state", IndexedIOInterface::CreateIfMissing );
+	IndexedIOPtr stateContainer = container->subdirectory( "state", IndexedIO::CreateIfMissing );
 	int i = 0;
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
@@ -281,7 +281,7 @@ void Group::save( SaveContext *context ) const
 		context->save( *it, stateContainer, name );
 		i++;
 	}
-	IndexedIOInterfacePtr childrenContainer = container->subdirectory( "children", IndexedIOInterface::CreateIfMissing );
+	IndexedIOPtr childrenContainer = container->subdirectory( "children", IndexedIO::CreateIfMissing );
 	i = 0;
 	for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
 	{
@@ -319,7 +319,7 @@ void Group::load( LoadContextPtr context )
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	m_transform = 0;
 	try
 	{
@@ -330,7 +330,7 @@ void Group::load( LoadContextPtr context )
 	}
 	clearState();
 	
-	IndexedIOInterfacePtr stateContainer = container->subdirectory( "state" );
+	IndexedIOPtr stateContainer = container->subdirectory( "state" );
 	IndexedIO::EntryIDList l;
 	stateContainer->entryIds( l );
 	sort( l.begin(), l.end(), entryListCompare );
@@ -339,7 +339,7 @@ void Group::load( LoadContextPtr context )
 		addState( context->load<StateRenderable>( stateContainer, *it ) );
 	}
 	clearChildren();
-	IndexedIOInterfacePtr childrenContainer = container->subdirectory( "children" );
+	IndexedIOPtr childrenContainer = container->subdirectory( "children" );
 	childrenContainer->entryIds( l );
 	sort( l.begin(), l.end(), entryListCompare );
 	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )

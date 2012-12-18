@@ -166,7 +166,7 @@ void SpherePrimitive::copyFrom( const Object *other, IECore::Object::CopyContext
 void SpherePrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	container->write( "radius", m_radius );
 	container->write( "zMin", m_zMin );
@@ -179,7 +179,7 @@ void SpherePrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	container->read( "radius", m_radius );
 	container->read( "zMin", m_zMin );

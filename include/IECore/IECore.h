@@ -213,14 +213,14 @@ bool withPNG();
 /// \section mainPageIOSection IO
 ///
 /// As we saw above, Objects have a built in serialisation mechanism. This makes use of
-/// the \link IECore::IndexedIOInterface IndexedIOInterface \endlink, which defines a mechanism for the creation of random access
+/// the \link IECore::IndexedIO IndexedIO \endlink, which defines a mechanism for the creation of random access
 /// files containing a hierarchy of named data items. Currently the main implementation
 /// of this interface is \link IECore::FileIndexedIO FileIndexedIO \endlink, with
 /// \link IECore::FileSystemIndexedIO FileSystemIndexedIO \endlink implementing a reference
 /// solution of use for debugging and the like.
 ///
 /// The \link IECore::AttributeCache AttributeCache \endlink and \link IECore::InterpolatedCache
-/// InterpolatedCache \endlink sit on top of IndexedIOInterface and provide
+/// InterpolatedCache \endlink sit on top of IndexedIO and provide
 /// a simple framework useable for vertex caching, transform caching and more - in fact any
 /// Object subclass can be stored as an element of a cache - this is one of the benefits
 /// of combining the object serialisation and random access caching code.

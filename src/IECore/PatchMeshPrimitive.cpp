@@ -168,7 +168,7 @@ void PatchMeshPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save( context );
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	container->write( "uPoints", m_uPoints );
 	container->write( "vPoints", m_vPoints );
@@ -185,7 +185,7 @@ void PatchMeshPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	container->read( "uPoints", m_uPoints );
 	container->read( "vPoints", m_vPoints );

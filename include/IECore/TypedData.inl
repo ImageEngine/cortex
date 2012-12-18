@@ -109,7 +109,7 @@ template <class T>
 void TypedData<T>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 	container->write( "value", readable() );
 }
 
@@ -120,14 +120,14 @@ void TypedData<T>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
+		IndexedIOPtr container = context->rawContainer();
 		container->read( "value", writable() );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		IndexedIOPtr container = context->container( staticTypeName(), v );
 		container->read( "value", writable() );
 	}
 }

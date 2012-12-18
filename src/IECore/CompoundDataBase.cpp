@@ -111,8 +111,8 @@ template<>
 void CompoundDataBase::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
-	container = container->subdirectory( "members", IndexedIOInterface::CreateIfMissing );
+	IndexedIOPtr container = context->container( staticTypeName(), 0 );
+	container = container->subdirectory( "members", IndexedIO::CreateIfMissing );
 	const CompoundDataMap &m = readable();
 	CompoundDataMap::const_iterator it;
 	for( it=m.begin(); it!=m.end(); it++ )
@@ -126,7 +126,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 {
 	Data::load( context );
 	unsigned int v = 0;
-	IndexedIOInterfacePtr container = 0;
+	IndexedIOPtr container = 0;
 
 	try
 	{

@@ -104,7 +104,7 @@ void Options::copyFrom( const Object *other, CopyContext *context )
 void Options::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	context->save( m_options, container, "options" );
 }
 
@@ -112,7 +112,7 @@ void Options::load( LoadContextPtr context )
 {
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	m_options = context->load<CompoundData>( container, "options" );
 }
 

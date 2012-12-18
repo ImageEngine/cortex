@@ -107,7 +107,7 @@ void CurvesPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "basisMatrix", m_basis.matrix.getValue(), 16 );
 	container->write( "basisStep", m_basis.step );
 	int p = m_periodic;
@@ -124,7 +124,7 @@ void CurvesPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	float *f = m_basis.matrix.getValue();
 	container->read( "basisMatrix", f, 16 );
 	container->read( "basisStep", m_basis.step );

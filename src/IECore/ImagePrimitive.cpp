@@ -148,7 +148,7 @@ void ImagePrimitive::save(IECore::Object::SaveContext *context) const
 	assert( context );
 
 	Primitive::save(context);
-	IndexedIOInterfacePtr container = context->container(staticTypeName(), m_ioVersion);
+	IndexedIOPtr container = context->container(staticTypeName(), m_ioVersion);
 
 	container->write("displayWindowMinX", m_displayWindow.min.x);
 	container->write("displayWindowMinY", m_displayWindow.min.y);
@@ -168,7 +168,7 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container(staticTypeName(), v);
+	IndexedIOPtr container = context->container(staticTypeName(), v);
 
 	container->read("displayWindowMinX", m_displayWindow.min.x);
 	container->read("displayWindowMinY", m_displayWindow.min.y);

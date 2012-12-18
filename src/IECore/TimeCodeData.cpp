@@ -45,7 +45,7 @@ template<>
 void TimeCodeData::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 	
 	const Imf::TimeCode &timeCode = readable();
 	/// \todo: should we be using FILM24_PACKING rather than the default? 
@@ -57,7 +57,7 @@ template<>
 void TimeCodeData::load( LoadContextPtr context )
 {
 	Data::load( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIOPtr container = context->rawContainer();
 	
 	unsigned data[2];
 	unsigned *dataPtr = &data[0];

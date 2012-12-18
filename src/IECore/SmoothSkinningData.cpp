@@ -272,7 +272,7 @@ void SmoothSkinningData::copyFrom( const IECore::Object *other, IECore::Object::
 void SmoothSkinningData::save( IECore::Object::SaveContext *context ) const
 {
 	Data::save(context);
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	context->save( m_influenceNames, container, "influenceNames" );
 	context->save( m_influencePose, container, "influencePose" );
 	context->save( m_pointIndexOffsets, container, "pointIndexOffsets" );
@@ -286,7 +286,7 @@ void SmoothSkinningData::load( IECore::Object::LoadContextPtr context )
 	Data::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	m_influenceNames = context->load<StringVectorData>( container, "influenceNames" );
 	m_influencePose = context->load<M44fVectorData>( container, "influencePose" );

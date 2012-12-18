@@ -66,7 +66,7 @@ void Display::copyFrom( const Object *other, CopyContext *context )
 void Display::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "name", m_name );
 	container->write( "type", m_type );
 	container->write( "data", m_data );
@@ -77,7 +77,7 @@ void Display::load( LoadContextPtr context )
 {
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( "name", m_name );
 	container->read( "type", m_type );
 	container->read( "data", m_data );

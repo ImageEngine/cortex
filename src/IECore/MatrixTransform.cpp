@@ -71,7 +71,7 @@ void MatrixTransform::copyFrom( const Object *other, CopyContext *context )
 void MatrixTransform::save( SaveContext *context ) const
 {
 	Transform::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "matrix", matrix.getValue(), 16 );
 }
 
@@ -79,7 +79,7 @@ void MatrixTransform::load( LoadContextPtr context )
 {
 	Transform::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	float *f = matrix.getValue();
 	container->read( "matrix", f, 16 );
 }

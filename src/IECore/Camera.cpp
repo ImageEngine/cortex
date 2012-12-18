@@ -74,7 +74,7 @@ void Camera::copyFrom( const Object *other, CopyContext *context )
 void Camera::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "name", m_name );
 	if( m_transform )
 	{
@@ -87,7 +87,7 @@ void Camera::load( LoadContextPtr context )
 {
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	container->read( "name", m_name );
 	m_transform = 0;

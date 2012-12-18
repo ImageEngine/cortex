@@ -68,7 +68,7 @@ bool ObjectReader::canRead( const std::string &fileName )
 	// see if that succeeds. We could possibly query the structure of the database and
 	// check that it matches the signature of a one-object cache without needing to
 	// actually read the data.
-	IndexedIOInterfacePtr io = 0;
+	IndexedIOPtr io = 0;
 
 	try
 	{
@@ -90,7 +90,7 @@ bool ObjectReader::canRead( const std::string &fileName )
 
 ObjectPtr ObjectReader::doOperation( const CompoundObject * operands )
 {
-	IndexedIOInterfacePtr io = open(fileName());
+	IndexedIOPtr io = open(fileName());
 	return Object::load( io, "object" );
 }
 
@@ -98,7 +98,7 @@ CompoundObjectPtr ObjectReader::readHeader()
 {
 	CompoundObjectPtr header = Reader::readHeader();
 
-	IndexedIOInterfacePtr io = open(fileName());
+	IndexedIOPtr io = open(fileName());
 	CompoundDataPtr objectHeader = runTimeCast<CompoundData>( Object::load( io, "header" ) );
 
 	for ( CompoundData::ValueType::const_iterator it = objectHeader->readable().begin(); it != objectHeader->readable().end(); ++it )
@@ -109,7 +109,7 @@ CompoundObjectPtr ObjectReader::readHeader()
 	return header;
 }
 
-IndexedIOInterfacePtr ObjectReader::open( const std::string &fileName )
+IndexedIOPtr ObjectReader::open( const std::string &fileName )
 {
 	return new FileIndexedIO( fileName, "/", IndexedIO::Shared | IndexedIO::Read );
 }

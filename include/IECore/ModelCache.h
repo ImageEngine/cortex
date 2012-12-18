@@ -65,10 +65,10 @@ class ModelCache : public RefCounted
 		/// when the open mode is Write, the non-const methods
 		/// may be used in addition. Append mode is currently not supported.
 		ModelCache( const std::string &fileName, IndexedIO::OpenMode mode );
-		/// Constructor which uses an already-opened IndexedIOInterface, this
-		/// can be used if you wish to use an alternative IndexedIOInterface
+		/// Constructor which uses an already-opened IndexedIO, this
+		/// can be used if you wish to use an alternative IndexedIO
 		/// implementation for the backend.
-		ModelCache( IECore::IndexedIOInterfacePtr indexedIO );
+		ModelCache( IECore::IndexedIOPtr indexedIO );
 		
 		virtual ~ModelCache();
 

@@ -69,7 +69,7 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		"""Test BlindDataHolder load/save"""
 
-		iface = IndexedIOInterface.create( "test/BlindDataHolder.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/BlindDataHolder.fio", "/", IndexedIOOpenMode.Write )
 
 		b1 = BlindDataHolder()
 

@@ -180,7 +180,7 @@ void MeshPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *
 void MeshPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	context->save( m_verticesPerFace, container, "verticesPerFace" );
 	context->save( m_vertexIds, container, "vertexIds" );
 
@@ -197,7 +197,7 @@ void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	m_verticesPerFace = context->load<IntVectorData>( container, "verticesPerFace" );
 	m_vertexIds = context->load<IntVectorData>( container, "vertexIds" );

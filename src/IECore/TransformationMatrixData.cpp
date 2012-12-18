@@ -57,7 +57,7 @@ namespace IECore {
 			base.translate.x, base.translate.y, base.translate.z 																	\
 		};																							\
 		Data::save( context );																		\
-		IndexedIOInterfacePtr container = context->rawContainer();									\
+		IndexedIOPtr container = context->rawContainer();									\
 		container->write( "value", values, TRANSFORMATIONMATRIX_SIZE );								\
 	}																								\
 																									\
@@ -65,7 +65,7 @@ namespace IECore {
 	void TNAME::load( LoadContextPtr context )														\
 	{																								\
 		Data::load( context );																		\
-		IndexedIOInterfacePtr container;															\
+		IndexedIOPtr container;															\
 		TNAME::BaseType values[ TRANSFORMATIONMATRIX_SIZE ];										\
 		TNAME::BaseType *p = &values[0];															\
 		try																							\

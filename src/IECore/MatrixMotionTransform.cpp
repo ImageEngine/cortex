@@ -122,13 +122,13 @@ void MatrixMotionTransform::copyFrom( const Object *other, CopyContext *context 
 void MatrixMotionTransform::save( SaveContext *context ) const
 {
 	Transform::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container = container->subdirectory( "snapshots", IndexedIOInterface::CreateIfMissing );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
+	container = container->subdirectory( "snapshots", IndexedIO::CreateIfMissing );
 	int i = 0;
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
 		string is = str( boost::format( "%d" ) % i );
-		IndexedIOInterfacePtr snapshotContainer = container->subdirectory( is, IndexedIOInterface::CreateIfMissing );
+		IndexedIOPtr snapshotContainer = container->subdirectory( is, IndexedIO::CreateIfMissing );
 		snapshotContainer->write( "time", it->first );
 		snapshotContainer->write( "matrix", it->second.getValue(), 16 );
 		i++;
@@ -140,7 +140,7 @@ void MatrixMotionTransform::load( LoadContextPtr context )
 	Transform::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	container = container->subdirectory( "snapshots" );
 	m_snapshots.clear();
 	IndexedIO::EntryIDList names;
@@ -148,7 +148,7 @@ void MatrixMotionTransform::load( LoadContextPtr context )
 	IndexedIO::EntryIDList::const_iterator it;
 	for( it=names.begin(); it!=names.end(); it++ )
 	{
-		IndexedIOInterfacePtr snapshotContainer = container->subdirectory( *it );
+		IndexedIOPtr snapshotContainer = container->subdirectory( *it );
 		float t; snapshotContainer->read( "time", t );
 		M44f m;
 		float *f = m.getValue();

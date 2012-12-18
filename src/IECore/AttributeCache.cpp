@@ -47,12 +47,12 @@ using namespace IECore;
 
 AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode mode )
 {
-	IndexedIOInterfacePtr io = IndexedIOInterface::create(filename, "/", mode );
+	IndexedIOPtr io = IndexedIO::create(filename, "/", mode );
 
 	if ( mode == IndexedIO::Write || mode == IndexedIO::Append )
 	{
-		m_headersIO = io->subdirectory("headers", IndexedIOInterface::CreateIfMissing );
-		m_objectsIO = io->subdirectory("objects", IndexedIOInterface::CreateIfMissing );
+		m_headersIO = io->subdirectory("headers", IndexedIO::CreateIfMissing );
+		m_objectsIO = io->subdirectory("objects", IndexedIO::CreateIfMissing );
 
 		CompoundObjectPtr header = HeaderGenerator::header();
 		for ( CompoundObject::ObjectMap::const_iterator it = header->members().begin(); it != header->members().end(); it++ )
@@ -76,7 +76,7 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 
 void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr, const Object *data)
 {
-	data->save( m_objectsIO->subdirectory(obj, IndexedIOInterface::CreateIfMissing), attr );
+	data->save( m_objectsIO->subdirectory(obj, IndexedIO::CreateIfMissing), attr );
 }
 
 void AttributeCache::writeHeader( const HeaderHandle &hdr, const Object *data)
@@ -95,7 +95,7 @@ CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 	CompoundObjectPtr dict = new CompoundObject();
 
 	IndexedIO::EntryIDList directories;
-	IndexedIOInterfacePtr object = m_objectsIO->subdirectory( obj );
+	IndexedIOPtr object = m_objectsIO->subdirectory( obj );
 	object->entryIds( directories, IndexedIO::Directory );
 
 	for (IndexedIO::EntryIDList::const_iterator it = directories.begin(); it != directories.end(); ++it)
@@ -146,7 +146,7 @@ bool AttributeCache::contains( const ObjectHandle &obj )
 
 bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	IndexedIOInterfacePtr object = m_objectsIO->subdirectory( obj, IndexedIOInterface::NullIfMissing );
+	IndexedIOPtr object = m_objectsIO->subdirectory( obj, IndexedIO::NullIfMissing );
 	if ( !object )
 	{
 		return false;
@@ -185,7 +185,7 @@ void AttributeCache::remove( const ObjectHandle &obj )
 
 void AttributeCache::remove( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	IndexedIOInterfacePtr object = m_objectsIO->subdirectory(obj);
+	IndexedIOPtr object = m_objectsIO->subdirectory(obj);
 	object->remove(attr);
 }
 

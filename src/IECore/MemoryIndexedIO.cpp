@@ -108,7 +108,7 @@ ConstCharVectorDataPtr MemoryIndexedIO::buffer()
 	return new CharVectorData( d );
 }
 
-IndexedIOInterfacePtr MemoryIndexedIO::duplicate(Node *rootNode) const
+IndexedIOPtr MemoryIndexedIO::duplicate(Node *rootNode) const
 {
 	return new MemoryIndexedIO( this, rootNode );
 }

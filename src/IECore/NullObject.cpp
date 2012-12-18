@@ -56,14 +56,14 @@ void NullObject::copyFrom( const Object *other, CopyContext *context )
 void NullObject::save( SaveContext *context ) const
 {
 	Object::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 }
 
 void NullObject::load( LoadContextPtr context )
 {
 	Object::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 }
 
 bool NullObject::isEqualTo( const Object *other ) const

@@ -41,24 +41,24 @@
 
 #include "boost/optional.hpp"
 
-#include "IndexedIOInterface.h"
+#include "IndexedIO.h"
 #include "Exception.h"
 #include "VectorTypedData.h"
 
 namespace IECore
 {
-/// An implementation of IndexedIOInterface which operates within a single file on disk.
+/// An implementation of IndexedIO which operates within a single file on disk.
 /// \todo Most of the implementation of this class would be better of in a "StreamIndexedIO" class which
 /// FileIndexedIO and MemoryIndexedIO derive from. MemoryIndexedIO wasn't implemented that cleanly in the first
 /// place due to the necessity to maintain binary compatibility.
 /// \ingroup ioGroup
-class FileIndexedIO : public IndexedIOInterface
+class FileIndexedIO : public IndexedIO
 {
 	public:
 
 		IE_CORE_DECLAREMEMBERPTR( FileIndexedIO );
 
-		static IndexedIOInterfacePtr create(const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
+		static IndexedIOPtr create(const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
 
 		static bool canRead( const std::string &path );
 
@@ -77,9 +77,9 @@ class FileIndexedIO : public IndexedIOInterface
 
 		void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const;
 
-		IndexedIOInterfacePtr subdirectory( const IndexedIO::EntryID &name, IndexedIOInterface::MissingBehavior missingBehavior = IndexedIOInterface::ThrowIfMissing );
+		IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing );
 
-		ConstIndexedIOInterfacePtr subdirectory( const IndexedIO::EntryID &name, IndexedIOInterface::MissingBehavior missingBehavior = IndexedIOInterface::ThrowIfMissing ) const;
+		ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing ) const;
 
 		IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const;
 
@@ -87,9 +87,9 @@ class FileIndexedIO : public IndexedIOInterface
 
 		void removeAll();
 
-		IndexedIOInterfacePtr parentDirectory();
+		IndexedIOPtr parentDirectory();
 
-		ConstIndexedIOInterfacePtr parentDirectory() const;
+		ConstIndexedIOPtr parentDirectory() const;
 
 		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);
@@ -195,7 +195,7 @@ class FileIndexedIO : public IndexedIOInterface
 		FileIndexedIO( const FileIndexedIO *other, Node *newRoot );
 
 		// duplicates this object by mapping it to a different root node.
-		virtual IndexedIOInterfacePtr duplicate(Node *rootNode) const;
+		virtual IndexedIOPtr duplicate(Node *rootNode) const;
 
 	private :
 

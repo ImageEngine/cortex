@@ -79,7 +79,7 @@ void BlindDataHolder::copyFrom( const Object *other, CopyContext *context )
 void BlindDataHolder::save( SaveContext *context ) const
 {
 	Object::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	assert(m_data);
 	context->save( m_data, container, "blindData");
@@ -89,7 +89,7 @@ void BlindDataHolder::load( LoadContextPtr context )
 {
 	Object::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	m_data = context->load<CompoundData>( container, "blindData");
 	assert(m_data);
 }

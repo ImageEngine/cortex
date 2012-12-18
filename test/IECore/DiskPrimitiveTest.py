@@ -68,7 +68,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 	
 		p = IECore.DiskPrimitive( 2, 1, 180 )
 		
-		io = IECore.IndexedIOInterface.create( "test/IECore/disk.fio", "/", IECore.IndexedIOOpenMode.Write )
+		io = IECore.IndexedIO.create( "test/IECore/disk.fio", "/", IECore.IndexedIOOpenMode.Write )
 		p.save( io, "test" )
 		pp = IECore.Object.load( io, "test" )
 		

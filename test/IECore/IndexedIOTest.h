@@ -44,7 +44,7 @@
 #include "boost/test/floating_point_comparison.hpp"
 
 #include "IECore/IECore.h"
-#include "IECore/IndexedIOInterface.h"
+#include "IECore/IndexedIO.h"
 
 namespace IECore
 {
@@ -109,7 +109,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
+			IndexedIOPtr io = new T(*it, "/", IndexedIO::Read );
 
 			bool exists = true;
 			try
@@ -135,7 +135,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
+			IndexedIOPtr io = new T(*it, "/", IndexedIO::Read );
 
 			bool exists = true;
 			try
@@ -159,7 +159,7 @@ struct IndexedIOTest
 	}
 
 	template<typename D>
-	void write( IndexedIOInterfacePtr io)
+	void write( IndexedIOPtr io)
 	{
 		assert(io);
 
@@ -168,7 +168,7 @@ struct IndexedIOTest
 	}
 
 	template<typename D>
-	void writeArray( IndexedIOInterfacePtr io)
+	void writeArray( IndexedIOPtr io)
 	{
 		assert(io);
 
@@ -178,7 +178,7 @@ struct IndexedIOTest
 
 	void write(const std::string &filename)
 	{
-		IndexedIOInterfacePtr io = new T(filename, "/", IndexedIO::Write );
+		IndexedIOPtr io = new T(filename, "/", IndexedIO::Write );
 
 		write<float>(io);
 		write<double>(io);

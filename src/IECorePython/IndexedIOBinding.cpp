@@ -39,7 +39,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "IECore/IndexedIOInterface.h"
+#include "IECore/IndexedIO.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/VectorTypedData.h"
@@ -52,7 +52,7 @@ using namespace IECore;
 
 void bindIndexedIOEntry(const char *bindName);
 
-void bindIndexedIOInterface(const char *bindName);
+void bindIndexedIO(const char *bindName);
 void bindFileIndexedIO(const char *bindName);
 void bindMemoryIndexedIO(const char *bindName);
 
@@ -60,26 +60,26 @@ void bindIndexedIO()
 {
 	bindIndexedIOEntry("IndexedIOEntry");
 
-	bindIndexedIOInterface("IndexedIOInterface");
+	bindIndexedIO("IndexedIO");
 	bindFileIndexedIO("FileIndexedIO");
 	bindMemoryIndexedIO("MemoryIndexedIO");
 }
 
-struct IndexedIOInterfaceHelper
+struct IndexedIOHelper
 {
-	static IndexedIO::Entry entry(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name)
+	static IndexedIO::Entry entry(IndexedIOPtr p, const IndexedIO::EntryID &name)
 	{
 		assert(p);
 
 		return p->entry(name);
 	}
 
-	static IndexedIOInterfacePtr subdirectory(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name)
+	static IndexedIOPtr subdirectory(IndexedIOPtr p, const IndexedIO::EntryID &name)
 	{
 		return p->subdirectory(name);
 	}
 
-	static list entryIds(IndexedIOInterfacePtr p)
+	static list entryIds(IndexedIOPtr p)
 	{
 		assert(p);
 
@@ -93,7 +93,7 @@ struct IndexedIOInterfaceHelper
 		return result;
 	}
 
-	static list typedEntryIds(IndexedIOInterfacePtr p, IndexedIO::EntryType type )
+	static list typedEntryIds(IndexedIOPtr p, IndexedIO::EntryType type )
 	{
 		assert(p);
 
@@ -107,7 +107,7 @@ struct IndexedIOInterfaceHelper
 		return result;
 	}
 
-	static list path(IndexedIOInterfacePtr p)
+	static list path(IndexedIOPtr p)
 	{
 		assert(p);
 		
@@ -122,7 +122,7 @@ struct IndexedIOInterfaceHelper
 	}
 
 	template<typename T>
-	static void writeVector(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name,
+	static void writeVector(IndexedIOPtr p, const IndexedIO::EntryID &name,
 		const typename TypedData < T >::Ptr &x)
 	{
 		assert(p);
@@ -132,7 +132,7 @@ struct IndexedIOInterfaceHelper
 	}
 
 	template<typename T>
-	static typename TypedData<T>::Ptr readSingle(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
+	static typename TypedData<T>::Ptr readSingle(IndexedIOPtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
 	{
 		T data;
 		p->read(name, data);
@@ -140,7 +140,7 @@ struct IndexedIOInterfaceHelper
 	}
 
 	template<typename T>
-	static typename TypedData< std::vector<T> >::Ptr readArray(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
+	static typename TypedData< std::vector<T> >::Ptr readArray(IndexedIOPtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
 	{
 		unsigned long count = entry.arrayLength();
 		typename TypedData<std::vector<T> >::Ptr x = new TypedData<std::vector<T> > ();
@@ -151,7 +151,7 @@ struct IndexedIOInterfaceHelper
 		return x;
 	}
 
-	static DataPtr read(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name)
+	static DataPtr read(IndexedIOPtr p, const IndexedIO::EntryID &name)
 	{
 		assert(p);
 
@@ -204,7 +204,7 @@ struct IndexedIOInterfaceHelper
 		}
 	}
 
-	static std::string readString(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name)
+	static std::string readString(IndexedIOPtr p, const IndexedIO::EntryID &name)
 	{
 		assert(p);
 
@@ -217,7 +217,7 @@ struct IndexedIOInterfaceHelper
 	{
 		list result;
 		std::vector<std::string> e;
-		IndexedIOInterface::supportedExtensions( e );
+		IndexedIO::supportedExtensions( e );
 		for( unsigned int i=0; i<e.size(); i++ )
 		{
 			result.append( e[i] );
@@ -227,20 +227,20 @@ struct IndexedIOInterfaceHelper
 
 };
 
-void bindIndexedIOInterface(const char *bindName)
+void bindIndexedIO(const char *bindName)
 {
-	IndexedIOInterfacePtr (IndexedIOInterface::*nonConstParentDirectory)() = &IndexedIOInterface::parentDirectory;
-	IndexedIOInterfacePtr (IndexedIOInterface::*nonConstSubdirectory)(const IndexedIO::EntryID &, IndexedIOInterface::MissingBehavior) = &IndexedIOInterface::subdirectory;
-	void (IndexedIOInterface::*writeFloat)(const IndexedIO::EntryID &, const float &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeDouble)(const IndexedIO::EntryID &, const double &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeInt)(const IndexedIO::EntryID &, const int &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeString)(const IndexedIO::EntryID &, const std::string &) = &IndexedIOInterface::write;
+	IndexedIOPtr (IndexedIO::*nonConstParentDirectory)() = &IndexedIO::parentDirectory;
+	IndexedIOPtr (IndexedIO::*nonConstSubdirectory)(const IndexedIO::EntryID &, IndexedIO::MissingBehavior) = &IndexedIO::subdirectory;
+	void (IndexedIO::*writeFloat)(const IndexedIO::EntryID &, const float &) = &IndexedIO::write;
+	void (IndexedIO::*writeDouble)(const IndexedIO::EntryID &, const double &) = &IndexedIO::write;
+	void (IndexedIO::*writeInt)(const IndexedIO::EntryID &, const int &) = &IndexedIO::write;
+	void (IndexedIO::*writeString)(const IndexedIO::EntryID &, const std::string &) = &IndexedIO::write;
 #if 0
-	void (IndexedIOInterface::*writeUInt)(const IndexedIO::EntryID &, const unsigned int &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeChar)(const IndexedIO::EntryID &, const char &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeUChar)(const IndexedIO::EntryID &, const unsigned char &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeShort)(const IndexedIO::EntryID &, const short &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeUShort)(const IndexedIO::EntryID &, const unsigned short &) = &IndexedIOInterface::write;
+	void (IndexedIO::*writeUInt)(const IndexedIO::EntryID &, const unsigned int &) = &IndexedIO::write;
+	void (IndexedIO::*writeChar)(const IndexedIO::EntryID &, const char &) = &IndexedIO::write;
+	void (IndexedIO::*writeUChar)(const IndexedIO::EntryID &, const unsigned char &) = &IndexedIO::write;
+	void (IndexedIO::*writeShort)(const IndexedIO::EntryID &, const short &) = &IndexedIO::write;
+	void (IndexedIO::*writeUShort)(const IndexedIO::EntryID &, const unsigned short &) = &IndexedIO::write;
 #endif
 
 
@@ -282,21 +282,21 @@ void bindIndexedIOInterface(const char *bindName)
 		.export_values()
 	;
 
-	scope varScope = IECorePython::RefCountedClass<IndexedIOInterface, RefCounted>( bindName )
-		.def("openMode", &IndexedIOInterface::openMode)
+	scope varScope = IECorePython::RefCountedClass<IndexedIO, RefCounted>( bindName )
+		.def("openMode", &IndexedIO::openMode)
 		.def("parentDirectory", nonConstParentDirectory)
-		.def("subdirectory",  &IndexedIOInterfaceHelper::subdirectory )
+		.def("subdirectory",  &IndexedIOHelper::subdirectory )
 		.def("subdirectory", nonConstSubdirectory )
-		.def("path", &IndexedIOInterfaceHelper::path)
-		.def("remove", &IndexedIOInterface::remove)
-		.def("removeAll", &IndexedIOInterface::removeAll)
-		.def("entryIds", &IndexedIOInterfaceHelper::entryIds)
-		.def("entryIds", &IndexedIOInterfaceHelper::typedEntryIds)
-		.def("entry", &IndexedIOInterface::entry )
-		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<float> >)
-		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<double> >)
-		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<int> >)
-		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<std::string> >)
+		.def("path", &IndexedIOHelper::path)
+		.def("remove", &IndexedIO::remove)
+		.def("removeAll", &IndexedIO::removeAll)
+		.def("entryIds", &IndexedIOHelper::entryIds)
+		.def("entryIds", &IndexedIOHelper::typedEntryIds)
+		.def("entry", &IndexedIO::entry )
+		.def("write", &IndexedIOHelper::writeVector<std::vector<float> >)
+		.def("write", &IndexedIOHelper::writeVector<std::vector<double> >)
+		.def("write", &IndexedIOHelper::writeVector<std::vector<int> >)
+		.def("write", &IndexedIOHelper::writeVector<std::vector<std::string> >)
 		.def("write", writeFloat)
 		.def("write", writeDouble)
 		.def("write", writeInt)
@@ -309,23 +309,23 @@ void bindIndexedIOInterface(const char *bindName)
 		.def("write", writeShort)
 		.def("write", writeUShort)
 #endif
-		.def("read", &IndexedIOInterfaceHelper::read)
-		.def("create", &IndexedIOInterface::create ).staticmethod("create")
-		.def("supportedExtensions", &IndexedIOInterfaceHelper::supportedExtensions ).staticmethod("supportedExtensions")
+		.def("read", &IndexedIOHelper::read)
+		.def("create", &IndexedIO::create ).staticmethod("create")
+		.def("supportedExtensions", &IndexedIOHelper::supportedExtensions ).staticmethod("supportedExtensions")
 
 	;
 
-	enum_< IndexedIOInterface::MissingBehavior > ("MissingBehavior")
-		.value("ThrowIfMissing", IndexedIOInterface::ThrowIfMissing)
-		.value("NullIfMissing", IndexedIOInterface::NullIfMissing)
-		.value("CreateIfMissing", IndexedIOInterface::CreateIfMissing)
+	enum_< IndexedIO::MissingBehavior > ("MissingBehavior")
+		.value("ThrowIfMissing", IndexedIO::ThrowIfMissing)
+		.value("NullIfMissing", IndexedIO::NullIfMissing)
+		.value("CreateIfMissing", IndexedIO::CreateIfMissing)
 		.export_values()
 	;
 }
 
 void bindFileIndexedIO(const char *bindName)
 {
-	IECorePython::RefCountedClass<FileIndexedIO, IndexedIOInterface>( bindName )
+	IECorePython::RefCountedClass<FileIndexedIO, IndexedIO>( bindName )
 		.def(init<const std::string &, const std::string &, IndexedIO::OpenMode >())
 	;
 }
@@ -338,7 +338,7 @@ CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
 
 void bindMemoryIndexedIO(const char *bindName)
 {
-	IECorePython::RefCountedClass<MemoryIndexedIO, IndexedIOInterface>( bindName )
+	IECorePython::RefCountedClass<MemoryIndexedIO, IndexedIO>( bindName )
 		.def(init<ConstCharVectorDataPtr, const std::string &, IndexedIO::OpenMode >())
 		.def( "buffer", memoryIndexedIOBufferWrapper )
 	;

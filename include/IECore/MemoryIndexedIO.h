@@ -57,7 +57,7 @@ class MemoryIndexedIO : public FileIndexedIO
 
 		MemoryIndexedIO( const MemoryIndexedIO *other, FileIndexedIO::Node *newRoot );
 
-		IndexedIOInterfacePtr duplicate(FileIndexedIO::Node *rootNode) const;
+		IndexedIOPtr duplicate(FileIndexedIO::Node *rootNode) const;
 };
 
 IE_CORE_DECLAREPTR( MemoryIndexedIO )

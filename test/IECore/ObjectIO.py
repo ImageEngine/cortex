@@ -41,7 +41,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -58,7 +58,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleArrayIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 
 		o = IntVectorData()
 		for i in range( 0, 1000 ) :
@@ -76,7 +76,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testStringArrayIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 
 		words = [ "hello", "there", "young", "fellah" ]
 		s = StringVectorData( words )
@@ -95,7 +95,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testImathArrayIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 
 		o = V3fVectorData()
 		for i in range( 0, 1000 ) :
@@ -113,7 +113,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testOverwrite( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -134,7 +134,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testCompoundData( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 
 		d = CompoundData()
 		d["A"] = IntData( 10 )
@@ -147,7 +147,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testMultipleRef( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 
 		d = CompoundData()
 		i = IntData( 100 )
@@ -171,7 +171,7 @@ class TestObjectIO( unittest.TestCase ) :
 		o["oneAgain"] = one
 
 		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Write )
-		fio = fio.subdirectory( "a", IndexedIOInterface.MissingBehavior.CreateIfMissing )
+		fio = fio.subdirectory( "a", IndexedIO.MissingBehavior.CreateIfMissing )
 		d = fio.path()
 		o.save( fio, "test" )
 		self.assertEqual( fio.path(), d )
@@ -218,8 +218,7 @@ class TestEmptyContainerOptimisation( unittest.TestCase ) :
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/emptyContainerOptimisation.cob" ) :
-		#	os.remove( "test/emptyContainerOptimisation.cob" )
-			pass
+			os.remove( "test/emptyContainerOptimisation.cob" )
 
 if __name__ == "__main__":
     unittest.main()

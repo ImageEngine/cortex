@@ -52,7 +52,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupdData, CubeColo
 	void TNAME::save( SaveContext *context ) const\
 	{\
 		Data::save( context );\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );\
+		IndexedIOPtr container = context->container( staticTypeName(), 0 );\
 		const ValueType &s = readable();\
 \
 		container->write( "interpolation", (short)s.m_interpolation ); \
@@ -73,7 +73,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupdData, CubeColo
 	{\
 		Data::load( context );\
 		unsigned int v = 0;\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );\
+		IndexedIOPtr container = context->container( staticTypeName(), v );\
 		ValueType &s = writable();\
 		\
 		short interp; \

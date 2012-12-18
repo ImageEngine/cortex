@@ -145,7 +145,7 @@ void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 void CoordinateSystem::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "name", m_name );
 	if( m_transform )
 	{
@@ -157,7 +157,7 @@ void CoordinateSystem::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( "name", m_name );
 	m_transform = 0;
 	try

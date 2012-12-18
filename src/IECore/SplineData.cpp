@@ -54,7 +54,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 	void TNAME::save( SaveContext *context ) const												\
 	{																							\
 		Data::save( context );																	\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );			\
+		IndexedIOPtr container = context->container( staticTypeName(), 0 );			\
 		const ValueType &s = readable();														\
 																								\
 		container->write( "basis", s.basis.matrix.getValue(), 16 );								\
@@ -77,7 +77,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 	{																							\
 		Data::load( context );																	\
 		unsigned int v = 0;																		\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );			\
+		IndexedIOPtr container = context->container( staticTypeName(), v );			\
 		ValueType &s = writable();																\
 																								\
 		ValueType::XType *bp = s.basis.matrix.getValue();										\

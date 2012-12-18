@@ -104,7 +104,7 @@ void AttributeState::copyFrom( const Object *other, CopyContext *context )
 void AttributeState::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	context->save( m_attributes, container, "attributes" );
 }
 
@@ -112,7 +112,7 @@ void AttributeState::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	m_attributes = context->load<CompoundData>( container, "attributes" );
 }
 

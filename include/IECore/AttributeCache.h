@@ -120,13 +120,13 @@ class AttributeCache : public RefCounted
 
 	protected:
 
-		IndexedIOInterfacePtr m_objectsIO;
-		IndexedIOInterfacePtr m_headersIO;
+		IndexedIOPtr m_objectsIO;
+		IndexedIOPtr m_headersIO;
 
-		IndexedIOInterfacePtr writableHeadersIO();
-		IndexedIOInterfacePtr writableObjectsIO();
-		ConstIndexedIOInterfacePtr readableHeadersIO();
-		ConstIndexedIOInterfacePtr readableObjectsIO();
+		IndexedIOPtr writableHeadersIO();
+		IndexedIOPtr writableObjectsIO();
+		ConstIndexedIOPtr readableHeadersIO();
+		ConstIndexedIOPtr readableObjectsIO();
 };
 
 IE_CORE_DECLAREPTR( AttributeCache );

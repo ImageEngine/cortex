@@ -48,7 +48,7 @@ template<>
 void TypedData< TimePeriod >::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
+	IndexedIOPtr container = context->container( staticTypeName(), 0 );
 
 	container->write( "begin", boost::posix_time::to_iso_string( readable().begin() ) );
 	container->write( "end", boost::posix_time::to_iso_string( readable().end() ) );
@@ -61,7 +61,7 @@ void TypedData< TimePeriod >::load( LoadContextPtr context )
 
 	unsigned int v = 0;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	std::string beginStr;
 	container->read( "begin", beginStr );

@@ -93,11 +93,11 @@ void Primitive::copyFrom( const Object *other, IECore::Object::CopyContext *cont
 void Primitive::save( IECore::Object::SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	IndexedIOInterfacePtr ioVariables = container->subdirectory( "variables", IndexedIOInterface::CreateIfMissing );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr ioVariables = container->subdirectory( "variables", IndexedIO::CreateIfMissing );
 	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
 	{
-		IndexedIOInterfacePtr ioPrimVar = ioVariables->subdirectory( it->first, IndexedIOInterface::CreateIfMissing );
+		IndexedIOPtr ioPrimVar = ioVariables->subdirectory( it->first, IndexedIO::CreateIfMissing );
 		const int i = it->second.interpolation;
 		ioPrimVar->write( "interpolation", i );
 		context->save( it->second.data, ioPrimVar, "data" );
@@ -107,7 +107,7 @@ void Primitive::save( IECore::Object::SaveContext *context ) const
 void Primitive::load( IECore::Object::LoadContextPtr context )
 {
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	// we changed the inheritance hierarchy at io version 1
 	if( v==0 )
@@ -119,7 +119,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 		VisibleRenderable::load( context );
 	}
 
-	IndexedIOInterfacePtr ioVariables = container->subdirectory( "variables" );
+	IndexedIOPtr ioVariables = container->subdirectory( "variables" );
 
 	variables.clear();
 	IndexedIO::EntryIDList names;
@@ -127,7 +127,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	IndexedIO::EntryIDList::const_iterator it;
 	for( it=names.begin(); it!=names.end(); it++ )
 	{
-		IndexedIOInterfacePtr ioPrimVar = ioVariables->subdirectory( *it );
+		IndexedIOPtr ioPrimVar = ioVariables->subdirectory( *it );
 		int i; 
 		ioPrimVar->read( "interpolation", i );
 		variables.insert( 

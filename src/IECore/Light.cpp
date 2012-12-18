@@ -135,7 +135,7 @@ void Light::copyFrom( const Object *other, CopyContext *context )
 void Light::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( "name", m_name );
 	container->write( "handle", m_handle );
 	context->save( m_parameters, container, "parameters" );
@@ -145,7 +145,7 @@ void Light::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( "name", m_name );
 	container->read( "handle", m_handle );
 	m_parameters = context->load<CompoundData>( container, "parameters" );

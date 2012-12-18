@@ -32,29 +32,80 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INDEXEDIOINTERFACE_H
-#define IE_CORE_INDEXEDIOINTERFACE_H
+#ifndef IE_CORE_INDEXEDIO_H
+#define IE_CORE_INDEXEDIO_H
 
 #include <string>
+#include <vector>
 #include <map>
 #include <stdint.h>
 
 #include "OpenEXR/half.h"
 
 #include "IECore/RefCounted.h"
-#include "IECore/IndexedIO.h"
 
 namespace IECore
 {
 
-IE_CORE_FORWARDDECLARE( IndexedIOInterface );
+IE_CORE_FORWARDDECLARE( IndexedIO );
 
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
 /// or one of its subclasses, if an error is encountered.
 /// \ingroup ioGroup
-class IndexedIOInterface : public RefCounted
+class IndexedIO : public RefCounted
 {
 	public:
+		
+		/// General enums and low level structures
+		enum OpenModeFlags
+		{
+			Read      = 1L << 0,
+			Write     = 1L << 1,
+			Append    = 1L << 2,
+
+			Shared    = 1L << 3,
+			Exclusive = 1L << 4,
+		} ;
+
+		typedef unsigned OpenMode;
+
+		typedef enum
+		{
+			Directory=0,
+			File
+		} EntryType;
+
+
+		typedef enum
+		{
+			Invalid=0,
+			Float,
+			FloatArray,
+			Double,
+			DoubleArray,
+			Int,
+			IntArray,
+			Long, /// Obsolete
+			LongArray, /// Obsolete
+			String,
+			StringArray,
+			UInt,
+			UIntArray,
+			Char,
+			CharArray,
+			UChar,
+			UCharArray,
+			Half,
+			HalfArray,
+			Short,
+			ShortArray,
+			UShort,
+			UShortArray,
+			Int64,
+			Int64Array,
+			UInt64,
+			UInt64Array
+		} DataType;
 
 		/// Enum used to specify behavior when querying child directories.
 		typedef enum {
@@ -63,9 +114,13 @@ class IndexedIOInterface : public RefCounted
 			CreateIfMissing
 		} MissingBehavior;
 
-		IE_CORE_DECLAREMEMBERPTR( IndexedIOInterface );
+		typedef std::string EntryID;
+		typedef std::vector< EntryID > EntryIDList;
+		class Entry;
 
-		typedef IndexedIOInterfacePtr (*CreatorFn)(const std::string &, const std::string &, IndexedIO::OpenMode );
+		IE_CORE_DECLAREMEMBERPTR( IndexedIO );
+
+		typedef IndexedIOPtr (*CreatorFn)(const std::string &, const std::string &, IndexedIO::OpenMode );
 
 		/// Create an instance of a subclass which is able to open the IndexedIO structure found at "path".
 		/// Files can be opened for Read, Overwrite, or Append.
@@ -75,42 +130,45 @@ class IndexedIOInterface : public RefCounted
 		/// \param path A file or directory on disk. The appropriate reader for reading/writing is determined by the path's extension.
 		/// \param root The root point to 'mount' the structure.
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
-		static IndexedIOInterfacePtr create( const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
+		static IndexedIOPtr create( const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
 
-		/// Fills the passed vector with all the extensions for which an IndexedIOInterface implementation is
+		/// Fills the passed vector with all the extensions for which an IndexedIO implementation is
 		/// available. Extensions are of the form "fio" - ie without a preceding '.'.
 		static void supportedExtensions( std::vector<std::string> &extensions );
 
 		/// Static instantation of one of these (with a supported file extension) using a subclass as the template parameter  will register it
-		/// as a supported IndexedIOInterface. This allows read and write operations to be performed generically, with the correct interface to
+		/// as a supported IndexedIO. This allows read and write operations to be performed generically, with the correct interface to
 		/// use being automatically determined by the system.
 		template<class T>
 		struct Description
 		{
-			Description(const std::string &extension) { IndexedIOInterface::registerCreator( extension, &T::create ); }
+			Description(const std::string &extension) { IndexedIO::registerCreator( extension, &T::create ); }
 		};
 
-		virtual ~IndexedIOInterface();
+		virtual ~IndexedIO();
 
 		/// Returns the mode with which the interface was created.
 		virtual IndexedIO::OpenMode openMode() const = 0;
 
-		/// Retrieve the current directorys. The root path '/' returns empty list.
+		/// Retrieve the current directory. Returns empty list at the root location.
 		virtual void path( IndexedIO::EntryIDList & ) const = 0;
 
+		/// Returns whether the given entry exists in the file.
 		virtual bool hasEntry( const IndexedIO::EntryID &name ) const = 0;
 
-		// Stores in the given array all the IDs of all files and directories
+		/// Stores in the given array all the ids of all files and directories
 		virtual void entryIds( IndexedIO::EntryIDList &names ) const = 0;
 
-		// Stores in the given array all the IDs for the given entry type
+		// Stores in the given array all the ids for the given entry type
 		virtual void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const = 0;
 
-		/// Returns a new interface for the child or if missing then consults missingBehavior and throws exception if ThrowIfMissing, returns Null pointer if NullIfMissing or creates the child directory if CreateIfMissing.
-		virtual IndexedIOInterfacePtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) = 0;
+		/// Returns a new interface for the child or if missing then consults missingBehavior and throws exception if ThrowIfMissing, 
+		//returns Null pointer if NullIfMissing or creates the child directory if CreateIfMissing.
+		virtual IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) = 0;
 
-		/// Returns read-only interface for the child directory or if missing then consults missingBehavior and throws exception if ThrowIfMissing or CreateIfMissing, returns Null pointer if NullIfMissing.
-		virtual ConstIndexedIOInterfacePtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) const = 0;
+		/// Returns read-only interface for the child directory or if missing then consults missingBehavior and throws exception if 
+		// ThrowIfMissing or CreateIfMissing, returns Null pointer if NullIfMissing.
+		virtual ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) const = 0;
 
 		/// Return details of a specific child entry or raises an exception if it doesn exist.
 		virtual IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const = 0;
@@ -122,10 +180,10 @@ class IndexedIOInterface : public RefCounted
 		virtual void removeAll() = 0;
 
 		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
-		virtual IndexedIOInterfacePtr parentDirectory() = 0;
+		virtual IndexedIOPtr parentDirectory() = 0;
 
 		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
-		virtual ConstIndexedIOInterfacePtr parentDirectory() const = 0;
+		virtual ConstIndexedIOPtr parentDirectory() const = 0;
 
 		/// Create a new file containing the specified float array contents
 		/// \param name The name of the file to be written
@@ -391,6 +449,52 @@ class IndexedIOInterface : public RefCounted
 		/// \param x Returns the data read.
 		virtual void read(const IndexedIO::EntryID &name, unsigned short &x) const  = 0;
 
+		/// A representation of a single file/directory
+		class Entry
+		{
+			public:
+				Entry();
+		
+				Entry( const EntryID &id, EntryType eType, DataType dType, unsigned long arrayLength);
+
+				/// ID, or name, of the file/directory
+				const EntryID &id() const;
+
+				/// Returns either Directory or File.
+				EntryType entryType() const;
+
+				/// Should only be called on instances which represent files. Returns the type of data held by in the file. If this entry does not represent a file
+				/// an IOException is thrown.
+				DataType dataType() const;
+
+				/// Convenience method to return if entry respresents an array. If Entry's datatype is not an array then an IOException is thrown.
+				bool isArray() const;
+	
+				/// Convenience method to return size of array. If Entry's datatype is not an array then an IOException is thrown.
+				unsigned long arrayLength() const;
+	
+				/// Convenience method to return if a data is an array or not
+				static bool isArray( DataType dType );
+	
+			protected:
+
+				EntryID m_ID;
+				EntryType m_entryType;
+				DataType m_dataType;
+				unsigned long m_arrayLength;
+		};
+
+		// Method for establishing flattened size of a data object
+		template<typename T>
+		struct DataSizeTraits;
+	
+		// Method for flatting/unflattening data objects
+		template<typename T>
+		struct DataFlattenTraits;
+	
+		template<typename T>
+		struct DataTypeTraits;
+
 	protected:
 
 		// Throw an exception if the entry is not readable
@@ -412,4 +516,6 @@ class IndexedIOInterface : public RefCounted
 
 } // namespace IECore
 
-#endif // IE_CORE_INDEXEDIOINTERFACE_H
+#include "IndexedIO.inl"
+
+#endif // IE_CORE_INDEXEDIO_H

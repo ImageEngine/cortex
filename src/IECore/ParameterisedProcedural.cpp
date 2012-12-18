@@ -69,7 +69,7 @@ void ParameterisedProcedural::copyFrom( const Object *other, CopyContext *contex
 void ParameterisedProcedural::save( SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	context->save( m_parameters->getValue(), container, "parameters" );
 }
 
@@ -77,7 +77,7 @@ void ParameterisedProcedural::load( LoadContextPtr context )
 {
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 	m_parameters->setValue( context->load<Object>( container, "parameters" ) );
 }
 

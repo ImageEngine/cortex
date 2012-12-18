@@ -83,12 +83,12 @@ void ObjectVector::copyFrom( const Object *other, CopyContext *context )
 void ObjectVector::save( SaveContext *context ) const
 {
 	Object::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	unsigned int size = m_members.size();
 	container->write( "size", size );
 
-	IndexedIOInterfacePtr ioMembers = container->subdirectory( "members", IndexedIOInterface::CreateIfMissing );
+	IndexedIOPtr ioMembers = container->subdirectory( "members", IndexedIO::CreateIfMissing );
 
 	unsigned i=0;
 	for( MemberContainer::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
@@ -106,7 +106,7 @@ void ObjectVector::load( LoadContextPtr context )
 {
 	Object::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	unsigned int size = 0;
 	container->read( "size", size );
@@ -114,7 +114,7 @@ void ObjectVector::load( LoadContextPtr context )
 	m_members.resize( size );
 	std::fill( m_members.begin(), m_members.end(), (IECore::Object*)0 );
 
-	IndexedIOInterfacePtr ioMembers = container->subdirectory( "members" );
+	IndexedIOPtr ioMembers = container->subdirectory( "members" );
 
 	IndexedIO::EntryIDList l;
 	ioMembers->entryIds(l);

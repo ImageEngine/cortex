@@ -46,7 +46,7 @@
 #include "IECorePython/ExceptionBinding.h"
 #include "IECorePython/ImathBinding.h"
 #include "IECorePython/KDTreeBinding.h"
-#include "IECorePython/IndexedIOInterfaceBinding.h"
+#include "IECorePython/IndexedIOBinding.h"
 #include "IECorePython/DataBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
 #include "IECorePython/VectorTypedDataBinding.h"

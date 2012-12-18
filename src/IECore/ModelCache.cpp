@@ -49,14 +49,14 @@ using namespace Imath;
 // Register FileIndexedIO as the handler for .mdc files so that people
 // can use the filename constructor as a convenience over the IndexedIO
 // constructor.
-static IndexedIOInterface::Description<FileIndexedIO> extensionDescription( ".mdc" );
+static IndexedIO::Description<FileIndexedIO> extensionDescription( ".mdc" );
 
 class ModelCache::Implementation : public RefCounted
 {
 
 	public :
 	
-		Implementation( IndexedIOInterfacePtr indexedIO )
+		Implementation( IndexedIOPtr indexedIO )
 			:	m_indexedIO( indexedIO ), m_path( "/" ), m_explicitBound( false )
 		{
 			if( m_indexedIO->openMode() & IndexedIO::Append )
@@ -68,7 +68,7 @@ class ModelCache::Implementation : public RefCounted
 			{
 				ObjectPtr header = HeaderGenerator::header();
 				header->save( m_indexedIO, "header" );
-				m_indexedIO->subdirectory( "root", IndexedIOInterface::CreateIfMissing )->removeAll();
+				m_indexedIO->subdirectory( "root", IndexedIO::CreateIfMissing )->removeAll();
 			}
 			m_indexedIO = m_indexedIO->subdirectory( "root" );
 		}
@@ -165,7 +165,7 @@ class ModelCache::Implementation : public RefCounted
 	
 		void childNames( std::vector<std::string> &childNames ) const
 		{
-			ConstIndexedIOInterfacePtr children = m_indexedIO->subdirectory( "children", IndexedIOInterface::NullIfMissing );
+			ConstIndexedIOPtr children = m_indexedIO->subdirectory( "children", IndexedIO::NullIfMissing );
 			if ( !children )
 			{
 				// it's ok for an entry to not have children
@@ -183,8 +183,8 @@ class ModelCache::Implementation : public RefCounted
 			}
 			childPath += childName;
 			
-			IndexedIOInterfacePtr child = m_indexedIO->subdirectory( "children", IndexedIOInterface::CreateIfMissing );
-			child = child->subdirectory( childName, IndexedIOInterface::CreateIfMissing );
+			IndexedIOPtr child = m_indexedIO->subdirectory( "children", IndexedIO::CreateIfMissing );
+			child = child->subdirectory( childName, IndexedIO::CreateIfMissing );
 			
 			ModelCachePtr result = new ModelCache(
 				new Implementation(
@@ -205,7 +205,7 @@ class ModelCache::Implementation : public RefCounted
 			}
 			childPath += childName;
 
-			IndexedIOInterfacePtr child = m_indexedIO->subdirectory( "children" );
+			IndexedIOPtr child = m_indexedIO->subdirectory( "children" );
 			child = child->subdirectory( childName );
 
 			ModelCachePtr result = new ModelCache(
@@ -220,12 +220,12 @@ class ModelCache::Implementation : public RefCounted
 
 	private :
 	
-		Implementation( IndexedIOInterfacePtr indexedIO, const std::string &path, ImplementationPtr parent )
+		Implementation( IndexedIOPtr indexedIO, const std::string &path, ImplementationPtr parent )
 			:	m_indexedIO( indexedIO ), m_path( path ), m_explicitBound( false ), m_parent( parent )
 		{
 		}
 	
-		IndexedIOInterfacePtr m_indexedIO;
+		IndexedIOPtr m_indexedIO;
 		std::string m_path;
 		// accumulated into during writing, and written out in the destructor
 		Box3d m_bound;
@@ -242,11 +242,11 @@ class ModelCache::Implementation : public RefCounted
 
 ModelCache::ModelCache( const std::string &fileName, IndexedIO::OpenMode mode )
 {
-	IndexedIOInterfacePtr indexedIO = IndexedIOInterface::create( fileName, "/", mode );
+	IndexedIOPtr indexedIO = IndexedIO::create( fileName, "/", mode );
 	m_implementation = new Implementation( indexedIO );
 }
 
-ModelCache::ModelCache( IECore::IndexedIOInterfacePtr indexedIO )
+ModelCache::ModelCache( IECore::IndexedIOPtr indexedIO )
 {
 	m_implementation = new Implementation( indexedIO );
 }

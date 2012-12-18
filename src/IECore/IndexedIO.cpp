@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,15 +38,15 @@
 #include "boost/filesystem/convenience.hpp"
 
 #include "IECore/Exception.h"
-#include "IECore/IndexedIOInterface.h"
+#include "IECore/IndexedIO.h"
 
 using namespace IECore;
 
 namespace fs = boost::filesystem;
 
-IndexedIOInterfacePtr IndexedIOInterface::create( const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode )
+IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode )
 {
-	IndexedIOInterfacePtr result = 0;
+	IndexedIOPtr result = 0;
 
 	std::string extension = fs::extension(path);
 
@@ -61,7 +61,7 @@ IndexedIOInterfacePtr IndexedIOInterface::create( const std::string &path, const
 	return (it->second)(path, root, mode);
 }
 
-void IndexedIOInterface::supportedExtensions( std::vector<std::string> &extensions )
+void IndexedIO::supportedExtensions( std::vector<std::string> &extensions )
 {
 	CreatorMap &m = getCreateFns();
 	for( CreatorMap::const_iterator it=m.begin(); it!=m.end(); it++ )
@@ -70,7 +70,7 @@ void IndexedIOInterface::supportedExtensions( std::vector<std::string> &extensio
 	}
 }
 
-void IndexedIOInterface::registerCreator( const std::string &extension, CreatorFn f )
+void IndexedIO::registerCreator( const std::string &extension, CreatorFn f )
 {
 	CreatorMap &createFns = getCreateFns();
 
@@ -79,15 +79,15 @@ void IndexedIOInterface::registerCreator( const std::string &extension, CreatorF
 	createFns.insert( CreatorMap::value_type(extension, f) );
 }
 
-IndexedIOInterface::~IndexedIOInterface()
+IndexedIO::~IndexedIO()
 {
 }
 
-void IndexedIOInterface::readable(const IndexedIO::EntryID &name) const
+void IndexedIO::readable(const IndexedIO::EntryID &name) const
 {
 }
 
-void IndexedIOInterface::writable(const IndexedIO::EntryID &name) const
+void IndexedIO::writable(const IndexedIO::EntryID &name) const
 {
 	if ( ( openMode() & (IndexedIO::Write | IndexedIO::Append) ) == 0)
 	{
@@ -95,7 +95,7 @@ void IndexedIOInterface::writable(const IndexedIO::EntryID &name) const
 	}
 }
 
-void IndexedIOInterface::validateOpenMode(IndexedIO::OpenMode &mode)
+void IndexedIO::validateOpenMode(IndexedIO::OpenMode &mode)
 {
 	// Clear 'other' bits
 	mode &= IndexedIO::Read | IndexedIO::Write | IndexedIO::Append
@@ -132,3 +132,73 @@ void IndexedIOInterface::validateOpenMode(IndexedIO::OpenMode &mode)
 
 }
 
+//
+// Entry
+//
+
+IndexedIO::Entry::Entry() : m_ID(""), m_entryType( IndexedIO::Directory), m_dataType( IndexedIO::Invalid), m_arrayLength(0)
+{
+}
+
+IndexedIO::Entry::Entry( const IndexedIO::EntryID &id, IndexedIO::EntryType eType, IndexedIO::DataType dType, unsigned long arrayLength)
+: m_ID(id), m_entryType(eType), m_dataType(dType), m_arrayLength(arrayLength)
+{
+}
+
+const IndexedIO::EntryID &IndexedIO::Entry::id() const
+{
+	return m_ID;
+}
+
+IndexedIO::EntryType IndexedIO::Entry::entryType() const
+{
+	return m_entryType;
+}
+
+IndexedIO::DataType IndexedIO::Entry::dataType() const
+{
+	if (m_entryType == IndexedIO::Directory)
+	{
+		throw IOException( "IndexedIO Entry '" + m_ID + "' has no data type - it is a directory" );
+	}
+
+	return m_dataType;
+}
+
+bool IndexedIO::Entry::isArray() const
+{
+	return isArray( m_dataType );
+}
+
+bool IndexedIO::Entry::isArray( IndexedIO::DataType dType )
+{
+	switch( dType )
+	{
+		case IndexedIO::FloatArray:
+		case IndexedIO::DoubleArray:
+		case IndexedIO::HalfArray:
+		case IndexedIO::IntArray:
+		case IndexedIO::LongArray:
+		case IndexedIO::StringArray:
+		case IndexedIO::UIntArray:
+		case IndexedIO::CharArray:
+		case IndexedIO::UCharArray:
+		case IndexedIO::ShortArray:
+		case IndexedIO::UShortArray:
+		case IndexedIO::Int64Array:
+		case IndexedIO::UInt64Array:
+			return true;
+		default:
+			return false;
+	}
+}
+
+unsigned long IndexedIO::Entry::arrayLength() const
+{
+	if ( !isArray() )
+	{
+		throw IOException( "IndexedIO Entry '" + m_ID + "' is not an array" );
+	}
+
+	return m_arrayLength;
+}

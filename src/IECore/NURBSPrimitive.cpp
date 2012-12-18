@@ -262,7 +262,7 @@ void NURBSPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext 
 void NURBSPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	container->write( "uOrder", m_uOrder );
 	context->save( m_uKnot, container, "uKnot" );
@@ -280,7 +280,7 @@ void NURBSPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	container->read( "uOrder", m_uOrder );
 	m_uKnot = context->load<FloatVectorData>( container, "uKnot" );
