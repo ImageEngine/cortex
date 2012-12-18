@@ -64,6 +64,7 @@ class PointsPrimitive : public Primitive
 		virtual Imath::Box3f bound() const;
 
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
 		virtual void render( const State *currentState, IECore::TypeId style ) const;
 		virtual void renderInstances( size_t numInstances = 1 ) const;
 
@@ -80,10 +81,6 @@ class PointsPrimitive : public Primitive
 		typedef TypedStateComponent<float, PointsPrimitiveGLPointWidthTypeId> GLPointWidth;
 		IE_CORE_DECLAREPTR( GLPointWidth );
 		//@}
-
-	protected :
-
-		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
 
 	private :
 
