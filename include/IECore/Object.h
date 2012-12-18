@@ -39,6 +39,7 @@
 #include <map>
 #include <string>
 
+#include "boost/shared_ptr.hpp"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/IndexedIOInterface.h"
 
@@ -270,16 +271,12 @@ class Object : public RunTimeTyped
 				IndexedIOInterfacePtr rawContainer();
 			private :
 
-				typedef std::map<const Object *, IndexedIO::EntryID> SavedObjectMap;
-				typedef std::map<IndexedIOInterfacePtr, IndexedIO::EntryID> ContainerRootsMap;
+				typedef std::map<const Object *, std::string > SavedObjectMap;
 
-				SaveContext( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &root,
-					boost::shared_ptr<SavedObjectMap> savedObjects, boost::shared_ptr<ContainerRootsMap> containerRoots );
+				SaveContext( IndexedIOInterfacePtr ioInterface, boost::shared_ptr<SavedObjectMap> savedObjects );
 
 				IndexedIOInterfacePtr m_ioInterface;
-				IndexedIO::EntryID m_root;
 				boost::shared_ptr<SavedObjectMap> m_savedObjects;
-				boost::shared_ptr<ContainerRootsMap> m_containerRoots;
 
 		};
 
@@ -303,19 +300,15 @@ class Object : public RunTimeTyped
 				IndexedIOInterfacePtr rawContainer();
 
 			private :
-				typedef std::map< IndexedIO::EntryID, ObjectPtr> LoadedObjectMap;
-				typedef std::map<IndexedIOInterfacePtr, IndexedIO::EntryID> ContainerRootsMap;
+				typedef std::map< std::string, ObjectPtr> LoadedObjectMap;
 
-				LoadContext( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &root,
-					boost::shared_ptr<LoadedObjectMap> loadedObjects, boost::shared_ptr<ContainerRootsMap> containerRoots );
+				LoadContext( IndexedIOInterfacePtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects );
 
 				ObjectPtr loadObjectOrReference( IndexedIOInterfacePtr container, const IndexedIO::EntryID &name );
-				ObjectPtr loadObject( const IndexedIO::EntryID &path );
+				ObjectPtr loadObject( IndexedIOInterfacePtr container );
 
 				IndexedIOInterfacePtr m_ioInterface;
-				IndexedIO::EntryID m_root;
 				boost::shared_ptr<LoadedObjectMap> m_loadedObjects;
-				boost::shared_ptr<ContainerRootsMap> m_containerRoots;
 		};
 		IE_CORE_DECLAREPTR( LoadContext );
 

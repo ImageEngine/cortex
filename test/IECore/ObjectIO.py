@@ -171,18 +171,16 @@ class TestObjectIO( unittest.TestCase ) :
 		o["oneAgain"] = one
 
 		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Write )
-		fio.mkdir( "a" )
-		fio.chdir( "a" )
-		d = fio.pwd()
+		fio = fio.subdirectory( "a", IndexedIOInterface.MissingBehavior.CreateIfMissing )
+		d = fio.path()
 		o.save( fio, "test" )
-		self.assertEqual( fio.pwd(), d )
+		self.assertEqual( fio.path(), d )
 		del fio
 
-		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Read )
-		fio.chdir( "a" )
-		d = fio.pwd()
+		fio = FileIndexedIO( "test/o.fio", "/a", IndexedIOOpenMode.Read )
+		d = fio.path()
 		oo = o.load( fio, "test" )
-		self.assertEqual( fio.pwd(), d )
+		self.assertEqual( fio.path(), d )
 
 		self.assertEqual( o, oo )
 
@@ -220,7 +218,8 @@ class TestEmptyContainerOptimisation( unittest.TestCase ) :
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/emptyContainerOptimisation.cob" ) :
-			os.remove( "test/emptyContainerOptimisation.cob" )
+		#	os.remove( "test/emptyContainerOptimisation.cob" )
+			pass
 
 if __name__ == "__main__":
     unittest.main()

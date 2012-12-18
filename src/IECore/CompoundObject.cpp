@@ -77,30 +77,31 @@ void CompoundObject::save( SaveContext *context ) const
 {
 	Object::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container->mkdir( "members" );
-	container->chdir( "members" );
-		ObjectMap::const_iterator it;
-		for( it=m_members.begin(); it!=m_members.end(); it++ )
-		{
-			context->save( it->second, container, it->first );
-		}
-	container->chdir( ".." );
+	container = container->subdirectory( "members", IndexedIOInterface::CreateIfMissing );
+	ObjectMap::const_iterator it;
+	for( it=m_members.begin(); it!=m_members.end(); it++ )
+	{
+		context->save( it->second, container, it->first );
+	}
 }
 
 void CompoundObject::load( LoadContextPtr context )
 {
 	Object::load( context );
 	unsigned int v = m_ioVersion;
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	m_members.clear();
-	container->chdir( "members" );
-		IndexedIO::EntryList l = container->ls();
-		IndexedIO::EntryList::const_iterator it;
-		for( it=l.begin(); it!=l.end(); it++ )
-		{
-			m_members[it->id()] = context->load<Object>( container, it->id() );
-		}
-	container->chdir( ".." );
+	container = container->subdirectory( "members" );
+
+	IndexedIO::EntryIDList memberNames;
+	container->entryIds( memberNames );
+	IndexedIO::EntryIDList::const_iterator it;
+
+	for( it=memberNames.begin(); it!=memberNames.end(); it++ )
+	{
+		m_members[*it] = context->load<Object>( container, *it );
+	}
 }
 
 bool CompoundObject::isEqualTo( const Object *other ) const

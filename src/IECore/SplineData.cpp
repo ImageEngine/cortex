@@ -86,7 +86,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 																								\
 		vector<ValueType::XType> x; 															\
 		vector<ValueType::YType> y; 															\
-		IndexedIO::Entry e = container->ls( "x" );												\
+		IndexedIO::Entry e = container->entry( "x" );											\
 		x.resize( e.arrayLength() );															\
 		y.resize( e.arrayLength() );															\
 		ValueType::XType *xp = &(x[0]);															\

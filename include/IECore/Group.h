@@ -139,7 +139,7 @@ class Group : public VisibleRenderable
 
 	private:
 		
-		static bool entryListCompare( const IECore::IndexedIO::Entry& a, const IECore::IndexedIO::Entry& b );
+		static bool entryListCompare( const IECore::IndexedIO::EntryID& a, const IECore::IndexedIO::EntryID& b );
 		
 		static const unsigned int m_ioVersion;
 

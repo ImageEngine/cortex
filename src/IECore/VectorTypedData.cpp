@@ -95,7 +95,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		try																							\
 		{																							\
 			IndexedIOInterfacePtr container = context->rawContainer();								\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			IndexedIO::Entry e = container->entry( "value" );										\
 			writable().resize( e.arrayLength() );													\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
@@ -108,7 +108,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		{																							\
 			unsigned int v = 0;																		\
 			IndexedIOInterfacePtr container = context->container( staticTypeName(), v );			\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			IndexedIO::Entry e = container->entry( "value" );										\
 			writable().resize( e.arrayLength() );													\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
@@ -135,7 +135,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		try																							\
 		{																							\
 			IndexedIOInterfacePtr container = context->rawContainer();								\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			IndexedIO::Entry e = container->entry( "value" );										\
 			writable().resize( e.arrayLength() / N );												\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
@@ -148,7 +148,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		{																							\
 			unsigned int v = 0;																		\
 			IndexedIOInterfacePtr container = context->container( staticTypeName(), v );			\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			IndexedIO::Entry e = container->entry( "value" );										\
 			writable().resize( e.arrayLength() / N );												\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
@@ -348,9 +348,9 @@ void ShortVectorData::load( LoadContextPtr context )
 	else
 	{
 		/// Version 1 stores the shorts natively
-		IndexedIO::Entry e = container->ls( "value" );												\
-		writable().resize( e.arrayLength() );													\
-		short *p = baseWritable();														\
+		IndexedIO::Entry e = container->entry( "value" );
+		writable().resize( e.arrayLength() );
+		short *p = baseWritable();
 		container->read( "value", p, e.arrayLength() );
 	}
 }
@@ -390,9 +390,9 @@ void UShortVectorData::load( LoadContextPtr context )
 	else
 	{
 		/// Version 1 stores the unsigned shorts natively
-		IndexedIO::Entry e = container->ls( "value" );												\
-		writable().resize( e.arrayLength() );													\
-		unsigned short *p = baseWritable();														\
+		IndexedIO::Entry e = container->entry( "value" );
+		writable().resize( e.arrayLength() );
+		unsigned short *p = baseWritable();
 		container->read( "value", p, e.arrayLength() );
 	}
 }

@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include "IECore/Group.h"
 #include "IECore/Renderer.h"
 #include "IECore/AttributeBlock.h"
@@ -272,43 +273,39 @@ void Group::save( SaveContext *context ) const
 	{
 		context->save( m_transform, container, "transform" );
 	}
-	container->mkdir( "state" );
-	container->chdir( "state" );
-		int i = 0;
-		for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
-		{
-			string name = str( boost::format( "%d" ) % i );
-			context->save( *it, container, name );
-			i++;
-		}
-	container->chdir( ".." );
-	container->mkdir( "children" );
-	container->chdir( "children" );
-		i = 0;
-		for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
-		{
-			string name = str( boost::format( "%d" ) % i );
-			context->save( *it, container, name );
-			i++;
-		}
-	container->chdir( ".." );
+	IndexedIOInterfacePtr stateContainer = container->subdirectory( "state", IndexedIOInterface::CreateIfMissing );
+	int i = 0;
+	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
+	{
+		string name = str( boost::format( "%d" ) % i );
+		context->save( *it, stateContainer, name );
+		i++;
+	}
+	IndexedIOInterfacePtr childrenContainer = container->subdirectory( "children", IndexedIOInterface::CreateIfMissing );
+	i = 0;
+	for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
+	{
+		string name = str( boost::format( "%d" ) % i );
+		context->save( *it, childrenContainer, name );
+		i++;
+	}
 }
 
-bool Group::entryListCompare( const IndexedIO::Entry& a, const IndexedIO::Entry& b )
+bool Group::entryListCompare( const IndexedIO::EntryID& a, const IndexedIO::EntryID& b )
 {
 	int a_idx( 0 );
 	int b_idx( 0 );
 	
 	try
 	{
-		a_idx = boost::lexical_cast<int>( a.id() );
+		a_idx = boost::lexical_cast<int>( a );
 	}
 	catch (...)
 	{
 	}
 	try
 	{
-		b_idx = boost::lexical_cast<int>( b.id() );
+		b_idx = boost::lexical_cast<int>( b );
 	}
 	catch (...)
 	{
@@ -321,6 +318,7 @@ void Group::load( LoadContextPtr context )
 {
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	m_transform = 0;
 	try
@@ -331,23 +329,23 @@ void Group::load( LoadContextPtr context )
 	{
 	}
 	clearState();
-	container->chdir( "state" );
-		IndexedIO::EntryList l = container->ls();
-		l.sort( entryListCompare );
-		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
-		{
-			addState( context->load<StateRenderable>( container, it->id() ) );
-		}
-	container->chdir( ".." );
+	
+	IndexedIOInterfacePtr stateContainer = container->subdirectory( "state" );
+	IndexedIO::EntryIDList l;
+	stateContainer->entryIds( l );
+	sort( l.begin(), l.end(), entryListCompare );
+	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
+	{
+		addState( context->load<StateRenderable>( stateContainer, *it ) );
+	}
 	clearChildren();
-	container->chdir( "children" );
-		l = container->ls();
-		l.sort( entryListCompare );
-		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
-		{
-			addChild( context->load<VisibleRenderable>( container, it->id() ) );
-		}
-	container->chdir( ".." );
+	IndexedIOInterfacePtr childrenContainer = container->subdirectory( "children" );
+	childrenContainer->entryIds( l );
+	sort( l.begin(), l.end(), entryListCompare );
+	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
+	{
+		addChild( context->load<VisibleRenderable>( childrenContainer, *it ) );
+	}
 }
 
 bool Group::isEqualTo( const Object *other ) const

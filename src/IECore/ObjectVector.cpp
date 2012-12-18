@@ -88,21 +88,18 @@ void ObjectVector::save( SaveContext *context ) const
 	unsigned int size = m_members.size();
 	container->write( "size", size );
 
-	container->mkdir( "members" );
-	container->chdir( "members" );
+	IndexedIOInterfacePtr ioMembers = container->subdirectory( "members", IndexedIOInterface::CreateIfMissing );
 
-		unsigned i=0;
-		for( MemberContainer::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
+	unsigned i=0;
+	for( MemberContainer::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
+	{
+		if( *it )
 		{
-			if( *it )
-			{
-				std::string name = str( boost::format( "%d" ) % i );
-				context->save( *it, container, name );
-			}
-			i++;
+			std::string name = str( boost::format( "%d" ) % i );
+			context->save( *it, ioMembers, name );
 		}
-
-	container->chdir( ".." );
+		i++;
+	}
 }
 
 void ObjectVector::load( LoadContextPtr context )
@@ -117,17 +114,15 @@ void ObjectVector::load( LoadContextPtr context )
 	m_members.resize( size );
 	std::fill( m_members.begin(), m_members.end(), (IECore::Object*)0 );
 
-	container->chdir( "members" );
+	IndexedIOInterfacePtr ioMembers = container->subdirectory( "members" );
 
-		IndexedIO::EntryList l = container->ls();
-		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
-		{
-			MemberContainer::size_type i = boost::lexical_cast<MemberContainer::size_type>( it->id() );
-			m_members[i] = context->load<Object>( container, it->id() );
-		}
-
-	container->chdir( ".." );
-
+	IndexedIO::EntryIDList l;
+	ioMembers->entryIds(l);
+	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
+	{
+		MemberContainer::size_type i = boost::lexical_cast<MemberContainer::size_type>( *it );
+		m_members[i] = context->load<Object>( ioMembers, *it );
+	}
 }
 
 bool ObjectVector::isEqualTo( const Object *other ) const

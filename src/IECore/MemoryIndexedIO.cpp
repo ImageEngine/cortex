@@ -76,6 +76,10 @@ MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::E
 	}
 }
 
+MemoryIndexedIO::MemoryIndexedIO( const MemoryIndexedIO *other, FileIndexedIO::Node *newRoot ) : FileIndexedIO( other, newRoot )
+{
+}
+
 MemoryIndexedIO::~MemoryIndexedIO()
 {
 }
@@ -102,4 +106,9 @@ ConstCharVectorDataPtr MemoryIndexedIO::buffer()
 	}
 
 	return new CharVectorData( d );
+}
+
+IndexedIOInterfacePtr MemoryIndexedIO::duplicate(Node *rootNode) const
+{
+	return new MemoryIndexedIO( this, rootNode );
 }

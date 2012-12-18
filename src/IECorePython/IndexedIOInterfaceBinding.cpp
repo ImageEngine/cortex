@@ -40,7 +40,6 @@
 #include <iostream>
 
 #include "IECore/IndexedIOInterface.h"
-#include "IECore/FileSystemIndexedIO.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/VectorTypedData.h"
@@ -52,55 +51,74 @@ using namespace boost::python;
 using namespace IECore;
 
 void bindIndexedIOEntry(const char *bindName);
-void bindIndexedIOEntryList(const char *bindName);
-
-void bindIndexedIOFilter(const char *bindName);
-void bindIndexedIONullFilter(const char *bindName);
-void bindIndexedIOEntryTypeFilter(const char *bindName);
-void bindIndexedIORegexFilter(const char *bindName);
 
 void bindIndexedIOInterface(const char *bindName);
-void bindFileSystemIndexedIO(const char *bindName);
 void bindFileIndexedIO(const char *bindName);
 void bindMemoryIndexedIO(const char *bindName);
 
 void bindIndexedIO()
 {
 	bindIndexedIOEntry("IndexedIOEntry");
-	bindIndexedIOEntryList("IndexedIOEntryList");
-
-	bindIndexedIOFilter("IndexedIOFilter");
-	bindIndexedIONullFilter("IndexedIONullFilter");
-	bindIndexedIOEntryTypeFilter("IndexedIOEntryTypeFilter");
-	bindIndexedIORegexFilter("IndexedIORegexFilter");
 
 	bindIndexedIOInterface("IndexedIOInterface");
-	bindFileSystemIndexedIO("FileSystemIndexedIO");
 	bindFileIndexedIO("FileIndexedIO");
 	bindMemoryIndexedIO("MemoryIndexedIO");
 }
 
 struct IndexedIOInterfaceHelper
 {
-	static IndexedIO::Entry ls(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name)
+	static IndexedIO::Entry entry(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name)
 	{
 		assert(p);
 
-		return p->ls(name);
+		return p->entry(name);
 	}
 
-	static IndexedIO::EntryList ls(IndexedIOInterfacePtr p)
+	static IndexedIOInterfacePtr subdirectory(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name)
 	{
-		assert(p);
-
-		return p->ls();
+		return p->subdirectory(name);
 	}
 
-	static IndexedIO::EntryList ls(IndexedIOInterfacePtr p, IndexedIOFilterPtr f)
+	static list entryIds(IndexedIOInterfacePtr p)
 	{
 		assert(p);
 
-		return p->ls(f);
+		list result;
+		IndexedIO::EntryIDList l;
+		p->entryIds(l);
+		for( IndexedIO::EntryIDList::const_iterator it = l.begin(); it != l.end(); it++ )
+		{
+			result.append( *it );
+		}
+		return result;
+	}
+
+	static list typedEntryIds(IndexedIOInterfacePtr p, IndexedIO::EntryType type )
+	{
+		assert(p);
+
+		list result;
+		IndexedIO::EntryIDList l;
+		p->entryIds(l, type);
+		for( IndexedIO::EntryIDList::const_iterator it = l.begin(); it != l.end(); it++ )
+		{
+			result.append( *it );
+		}
+		return result;
+	}
+
+	static list path(IndexedIOInterfacePtr p)
+	{
+		assert(p);
+		
+		list result;
+		IndexedIO::EntryIDList l;
+		p->path(l);
+		for( IndexedIO::EntryIDList::const_iterator it = l.begin(); it != l.end(); it++ )
+		{
+			result.append( *it );
+		}
+		return result;
 	}
 
 	template<typename T>
@@ -137,7 +155,7 @@ struct IndexedIOInterfaceHelper
 	{
 		assert(p);
 
-		IndexedIO::Entry entry = p->ls(name);
+		IndexedIO::Entry entry = p->entry(name);
 
 		switch( entry.dataType() )
 		{
@@ -211,10 +229,8 @@ struct IndexedIOInterfaceHelper
 
 void bindIndexedIOInterface(const char *bindName)
 {
-	IndexedIO::EntryList (*lsNoFilter)(IndexedIOInterfacePtr) = &IndexedIOInterfaceHelper::ls;
-	IndexedIO::EntryList (*lsFilter)(IndexedIOInterfacePtr, IndexedIOFilterPtr) = &IndexedIOInterfaceHelper::ls;
-	IndexedIO::Entry (*lsEntry)(IndexedIOInterfacePtr, const IndexedIO::EntryID &) = &IndexedIOInterfaceHelper::ls;
-
+	IndexedIOInterfacePtr (IndexedIOInterface::*nonConstParentDirectory)() = &IndexedIOInterface::parentDirectory;
+	IndexedIOInterfacePtr (IndexedIOInterface::*nonConstSubdirectory)(const IndexedIO::EntryID &, IndexedIOInterface::MissingBehavior) = &IndexedIOInterface::subdirectory;
 	void (IndexedIOInterface::*writeFloat)(const IndexedIO::EntryID &, const float &) = &IndexedIOInterface::write;
 	void (IndexedIOInterface::*writeDouble)(const IndexedIO::EntryID &, const double &) = &IndexedIOInterface::write;
 	void (IndexedIOInterface::*writeInt)(const IndexedIO::EntryID &, const int &) = &IndexedIOInterface::write;
@@ -266,16 +282,17 @@ void bindIndexedIOInterface(const char *bindName)
 		.export_values()
 	;
 
-	IECorePython::RefCountedClass<IndexedIOInterface, RefCounted>( bindName )
+	scope varScope = IECorePython::RefCountedClass<IndexedIOInterface, RefCounted>( bindName )
 		.def("openMode", &IndexedIOInterface::openMode)
-		.def("resetRoot", &IndexedIOInterface::resetRoot)
-		.def("chdir", &IndexedIOInterface::chdir)
-		.def("mkdir", &IndexedIOInterface::mkdir)
-		.def("pwd", &IndexedIOInterface::pwd)
-		.def("rm", &IndexedIOInterface::rm)
-		.def("ls", lsFilter)
-		.def("ls", lsNoFilter)
-		.def("ls", lsEntry)
+		.def("parentDirectory", nonConstParentDirectory)
+		.def("subdirectory",  &IndexedIOInterfaceHelper::subdirectory )
+		.def("subdirectory", nonConstSubdirectory )
+		.def("path", &IndexedIOInterfaceHelper::path)
+		.def("remove", &IndexedIOInterface::remove)
+		.def("removeAll", &IndexedIOInterface::removeAll)
+		.def("entryIds", &IndexedIOInterfaceHelper::entryIds)
+		.def("entryIds", &IndexedIOInterfaceHelper::typedEntryIds)
+		.def("entry", &IndexedIOInterface::entry )
 		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<float> >)
 		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<double> >)
 		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<int> >)
@@ -298,12 +315,11 @@ void bindIndexedIOInterface(const char *bindName)
 
 	;
 
-}
-
-void bindFileSystemIndexedIO(const char *bindName)
-{
-	IECorePython::RefCountedClass<FileSystemIndexedIO, IndexedIOInterface>( bindName )
-		.def(init<const std::string &, const std::string &, IndexedIO::OpenMode >())
+	enum_< IndexedIOInterface::MissingBehavior > ("MissingBehavior")
+		.value("ThrowIfMissing", IndexedIOInterface::ThrowIfMissing)
+		.value("NullIfMissing", IndexedIOInterface::NullIfMissing)
+		.value("CreateIfMissing", IndexedIOInterface::CreateIfMissing)
+		.export_values()
 	;
 }
 
@@ -336,74 +352,4 @@ void bindIndexedIOEntry(const char *bindName)
 		.def("dataType", &IndexedIO::Entry::dataType)
 		.def("arrayLength", &IndexedIO::Entry::arrayLength)
 		;
-}
-
-struct EntryListAccessor
-{
-	static IndexedIO::Entry get(const IndexedIO::EntryList &x, int i)
-	{
-		if (i < 0)
-			i += x.size();
-
-		if (i >= 0 && i < static_cast<int>(x.size()))
-		{
-			int idx = 0;
-
-			IndexedIO::EntryList::const_iterator it = x.begin();
-			while (idx != i)
-				it++, idx++;
-
-			assert(it != x.end());
-
-			return *it;
-		}
-		else
-		{
-			throw std::out_of_range("");
-		}
-	}
-
-	static int len(const IndexedIO::EntryList &x)
-	{
-		return static_cast<int>(x.size());
-	}
-};
-
-void bindIndexedIOEntryList(const char *bindName)
-{
-	class_< IndexedIO::EntryList>(bindName, no_init)
-		.def("__getitem__", &EntryListAccessor::get)
-		.def("__len__", &EntryListAccessor::len)
-	;
-}
-
-void bindIndexedIOFilter(const char *bindName)
-{
-	IECorePython::RefCountedClass<IndexedIOFilter, RefCounted>( bindName )
-		.def("add", &IndexedIOFilter::add )
-		.def("apply", &IndexedIOFilter::apply )
-		.def("filter", &IndexedIOFilter::filter )
-	;
-}
-
-void bindIndexedIONullFilter(const char *bindName)
-{
-	IECorePython::RefCountedClass<IndexedIONullFilter, IndexedIOFilter>( bindName )
-		.def(init<>())
-	;
-}
-
-
-void bindIndexedIOEntryTypeFilter(const char *bindName)
-{
-	IECorePython::RefCountedClass<IndexedIOEntryTypeFilter, IndexedIOFilter>( bindName )
-		.def(init<IndexedIO::EntryType>())
-	;
-}
-
-void bindIndexedIORegexFilter(const char *bindName)
-{
-	IECorePython::RefCountedClass<IndexedIORegexFilter, IndexedIOFilter>( bindName )
-		.def(init<const std::string &>())
-	;
 }

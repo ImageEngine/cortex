@@ -94,18 +94,14 @@ void Primitive::save( IECore::Object::SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container->mkdir( "variables" );
-	container->chdir( "variables" );
-		for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
-		{
-			container->mkdir( it->first );
-			container->chdir( it->first );
-				const int i = it->second.interpolation;
-				container->write( "interpolation", i );
-				context->save( it->second.data, container, "data" );
-			container->chdir( ".." );
-		}
-	container->chdir( ".." );
+	IndexedIOInterfacePtr ioVariables = container->subdirectory( "variables", IndexedIOInterface::CreateIfMissing );
+	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
+	{
+		IndexedIOInterfacePtr ioPrimVar = ioVariables->subdirectory( it->first, IndexedIOInterface::CreateIfMissing );
+		const int i = it->second.interpolation;
+		ioPrimVar->write( "interpolation", i );
+		context->save( it->second.data, ioPrimVar, "data" );
+	}
 }
 
 void Primitive::load( IECore::Object::LoadContextPtr context )
@@ -123,18 +119,21 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 		VisibleRenderable::load( context );
 	}
 
-	container->chdir( "variables" );
-		variables.clear();
-		IndexedIO::EntryList names = container->ls();
-		IndexedIO::EntryList::const_iterator it;
-		for( it=names.begin(); it!=names.end(); it++ )
-		{
-			container->chdir( it->id() );
-				int i; container->read( "interpolation", i );
-				variables.insert( PrimitiveVariableMap::value_type( it->id(), PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( container, "data" ) ) ) );
-			container->chdir( ".." );
-		}
-	container->chdir( ".." );
+	IndexedIOInterfacePtr ioVariables = container->subdirectory( "variables" );
+
+	variables.clear();
+	IndexedIO::EntryIDList names;
+	ioVariables->entryIds( names, IndexedIO::Directory );
+	IndexedIO::EntryIDList::const_iterator it;
+	for( it=names.begin(); it!=names.end(); it++ )
+	{
+		IndexedIOInterfacePtr ioPrimVar = ioVariables->subdirectory( *it );
+		int i; 
+		ioPrimVar->read( "interpolation", i );
+		variables.insert( 
+			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, "data" ) ) ) 
+		);
+	}
 }
 
 bool Primitive::isEqualTo( const Object *other ) const

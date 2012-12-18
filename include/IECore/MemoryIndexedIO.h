@@ -54,6 +54,10 @@ class MemoryIndexedIO : public FileIndexedIO
 		ConstCharVectorDataPtr buffer();
 
 	protected:
+
+		MemoryIndexedIO( const MemoryIndexedIO *other, FileIndexedIO::Node *newRoot );
+
+		IndexedIOInterfacePtr duplicate(FileIndexedIO::Node *rootNode) const;
 };
 
 IE_CORE_DECLAREPTR( MemoryIndexedIO )

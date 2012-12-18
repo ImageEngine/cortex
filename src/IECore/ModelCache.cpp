@@ -68,10 +68,9 @@ class ModelCache::Implementation : public RefCounted
 			{
 				ObjectPtr header = HeaderGenerator::header();
 				header->save( m_indexedIO, "header" );
-				m_indexedIO->mkdir( "root" );
+				m_indexedIO->subdirectory( "root", IndexedIOInterface::CreateIfMissing )->removeAll();
 			}
-			m_indexedIO->chdir( "root" );
-			m_indexedIO = m_indexedIO->resetRoot();
+			m_indexedIO = m_indexedIO->subdirectory( "root" );
 		}
 		
 		virtual ~Implementation()
@@ -166,24 +165,13 @@ class ModelCache::Implementation : public RefCounted
 	
 		void childNames( std::vector<std::string> &childNames ) const
 		{
-			try
-			{
-				m_indexedIO->chdir( "children" );
-			}
-			catch( const IOException &e  )
+			ConstIndexedIOInterfacePtr children = m_indexedIO->subdirectory( "children", IndexedIOInterface::NullIfMissing );
+			if ( !children )
 			{
 				// it's ok for an entry to not have children
 				return;
 			}
-			
-			IndexedIO::EntryList entries;
-			entries = m_indexedIO->ls();
-			m_indexedIO->chdir( ".." );
-			
-			for( IndexedIO::EntryList::const_iterator it = entries.begin(); it!=entries.end(); it++ )
-			{
-				childNames.push_back( it->id() );
-			}
+			children->entryIds( childNames, IndexedIO::Directory );
 		}
 		
 		ModelCachePtr writableChild( const std::string &childName )
@@ -195,18 +183,16 @@ class ModelCache::Implementation : public RefCounted
 			}
 			childPath += childName;
 			
-			std::string dirName = "children/" + childName;
-			m_indexedIO->mkdir( dirName );
-			m_indexedIO->chdir( dirName );
+			IndexedIOInterfacePtr child = m_indexedIO->subdirectory( "children", IndexedIOInterface::CreateIfMissing );
+			child = child->subdirectory( childName, IndexedIOInterface::CreateIfMissing );
+			
 			ModelCachePtr result = new ModelCache(
 				new Implementation(
-					m_indexedIO->resetRoot(),
+					child,
 					childPath,
 					this
 				)
 			);
-			m_indexedIO->chdir( "../.." );
-		
 			return result;
 		}
 		
@@ -218,18 +204,17 @@ class ModelCache::Implementation : public RefCounted
 				childPath += "/";
 			}
 			childPath += childName;
-			
-			std::string dirName = "children/" + childName;
-			m_indexedIO->chdir( dirName );
+
+			IndexedIOInterfacePtr child = m_indexedIO->subdirectory( "children" );
+			child = child->subdirectory( childName );
+
 			ModelCachePtr result = new ModelCache(
 				new Implementation(
-					m_indexedIO->resetRoot(),
+					child,
 					childPath,
 					0 // read only so no need for parent for bounds propagation
 				)
 			);
-			m_indexedIO->chdir( "../.." );
-		
 			return result;
 		}
 

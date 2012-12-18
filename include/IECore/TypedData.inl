@@ -39,7 +39,7 @@
 /// files.
 
 #include <cassert>
-
+#include <boost/type_traits/is_void.hpp>
 #include "IECore/MurmurHash.h"
 
 namespace IECore {

@@ -123,42 +123,38 @@ void MatrixMotionTransform::save( SaveContext *context ) const
 {
 	Transform::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container->mkdir( "snapshots" );
-	container->chdir( "snapshots" );
-		int i = 0;
-		for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
-		{
-			string is = str( boost::format( "%d" ) % i );
-			container->mkdir( is );
-			container->chdir( is );
-				container->write( "time", it->first );
-				container->write( "matrix", it->second.getValue(), 16 );
-			container->chdir( ".." );
-			i++;
-		}
-	container->chdir( ".." );
+	container = container->subdirectory( "snapshots", IndexedIOInterface::CreateIfMissing );
+	int i = 0;
+	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
+	{
+		string is = str( boost::format( "%d" ) % i );
+		IndexedIOInterfacePtr snapshotContainer = container->subdirectory( is, IndexedIOInterface::CreateIfMissing );
+		snapshotContainer->write( "time", it->first );
+		snapshotContainer->write( "matrix", it->second.getValue(), 16 );
+		i++;
+	}
 }
 
 void MatrixMotionTransform::load( LoadContextPtr context )
 {
 	Transform::load( context );
 	unsigned int v = m_ioVersion;
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	container->chdir( "snapshots" );
-		m_snapshots.clear();
-		IndexedIO::EntryList names = container->ls();
-		IndexedIO::EntryList::const_iterator it;
-		for( it=names.begin(); it!=names.end(); it++ )
-		{
-			container->chdir( it->id() );
-				float t; container->read( "time", t );
-				M44f m;
-				float *f = m.getValue();
-				container->read( "matrix", f, 16 );
-				m_snapshots[t] = m;
-			container->chdir( ".." );
-		}
-	container->chdir( ".." );
+	container = container->subdirectory( "snapshots" );
+	m_snapshots.clear();
+	IndexedIO::EntryIDList names;
+	container->entryIds( names, IndexedIO::Directory );
+	IndexedIO::EntryIDList::const_iterator it;
+	for( it=names.begin(); it!=names.end(); it++ )
+	{
+		IndexedIOInterfacePtr snapshotContainer = container->subdirectory( *it );
+		float t; snapshotContainer->read( "time", t );
+		M44f m;
+		float *f = m.getValue();
+		snapshotContainer->read( "matrix", f, 16 );
+		m_snapshots[t] = m;
+	}
 }
 
 bool MatrixMotionTransform::isEqualTo( const Object *other ) const

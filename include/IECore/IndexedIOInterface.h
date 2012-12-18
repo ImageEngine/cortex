@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,14 +39,10 @@
 #include <map>
 #include <stdint.h>
 
-#include "boost/filesystem/path.hpp"
-
 #include "OpenEXR/half.h"
 
 #include "IECore/RefCounted.h"
 #include "IECore/IndexedIO.h"
-#include "IECore/IndexedIOFilter.h"
-#include "IECore/IndexedIOPath.h"
 
 namespace IECore
 {
@@ -60,9 +56,16 @@ class IndexedIOInterface : public RefCounted
 {
 	public:
 
+		/// Enum used to specify behavior when querying child directories.
+		typedef enum {
+			ThrowIfMissing = 0,
+			NullIfMissing,
+			CreateIfMissing
+		} MissingBehavior;
+
 		IE_CORE_DECLAREMEMBERPTR( IndexedIOInterface );
 
-		typedef IndexedIOInterfacePtr (*CreatorFn)(const std::string &, const IndexedIO::EntryID &, IndexedIO::OpenMode );
+		typedef IndexedIOInterfacePtr (*CreatorFn)(const std::string &, const std::string &, IndexedIO::OpenMode );
 
 		/// Create an instance of a subclass which is able to open the IndexedIO structure found at "path".
 		/// Files can be opened for Read, Overwrite, or Append.
@@ -70,9 +73,9 @@ class IndexedIOInterface : public RefCounted
 		/// When opening a device in "Write" mode its contents below the root directory are removed.
 		/// For "Append" operations it is possible to write new files, or overwrite existing ones. It is not possible to overwrite entire directories, however.
 		/// \param path A file or directory on disk. The appropriate reader for reading/writing is determined by the path's extension.
-		/// \param root The root point to 'mount' the structure. Paths above the root in the hierarchy are inaccessible.
+		/// \param root The root point to 'mount' the structure.
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
-		static IndexedIOInterfacePtr create( const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		static IndexedIOInterfacePtr create( const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
 
 		/// Fills the passed vector with all the extensions for which an IndexedIOInterface implementation is
 		/// available. Extensions are of the form "fio" - ie without a preceding '.'.
@@ -92,30 +95,37 @@ class IndexedIOInterface : public RefCounted
 		/// Returns the mode with which the interface was created.
 		virtual IndexedIO::OpenMode openMode() const = 0;
 
-		/// Returns a new interface with the root set to the current directory.
-		virtual IndexedIOInterfacePtr resetRoot() const = 0;
+		/// Retrieve the current directorys. The root path '/' returns empty list.
+		virtual void path( IndexedIO::EntryIDList & ) const = 0;
 
-		/// Relocate to a different directory within the current device.  Attempting to navigate above the current root directory will throw an exception.
-		/// \param name The directory to relocate to. Can be an absolute or relative path. Special directory names such as ".", "..", and "/" are supported.
-		virtual void chdir(const IndexedIO::EntryID &name) = 0;
+		virtual bool hasEntry( const IndexedIO::EntryID &name ) const = 0;
 
-		/// Create a new directory. Automatically creates parent directories if needed.
-		/// \param name The directory to create.
-		virtual void mkdir(const IndexedIO::EntryID &name) = 0;
+		// Stores in the given array all the IDs of all files and directories
+		virtual void entryIds( IndexedIO::EntryIDList &names ) const = 0;
 
-		/// Retrieve the current directorys, relative to the root.
-		virtual IndexedIO::EntryID pwd() = 0;
+		// Stores in the given array all the IDs for the given entry type
+		virtual void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const = 0;
 
-		/// Find file and/or directory names contained within the current index. Short names to the files/directories are always returned.
-		/// \param f A subclass of IndexedIOFilter to allow removal of entries which are of no conern.
-		virtual IndexedIO::EntryList ls(IndexedIOFilterPtr f=0) = 0;
+		/// Returns a new interface for the child or if missing then consults missingBehavior and throws exception if ThrowIfMissing, returns Null pointer if NullIfMissing or creates the child directory if CreateIfMissing.
+		virtual IndexedIOInterfacePtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) = 0;
 
-		/// Return details of a specific entry.
-		virtual IndexedIO::Entry ls(const IndexedIO::EntryID &name) = 0;
+		/// Returns read-only interface for the child directory or if missing then consults missingBehavior and throws exception if ThrowIfMissing or CreateIfMissing, returns Null pointer if NullIfMissing.
+		virtual ConstIndexedIOInterfacePtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) const = 0;
 
-		/// Remove a specified file or directory. If an attempt is made to delete the current directory, the operation
-		/// is permitted but the current directory is then undefined and must be reset using chdir with an absolute path.
-		virtual unsigned long rm(const IndexedIO::EntryID &name) = 0;
+		/// Return details of a specific child entry or raises an exception if it doesn exist.
+		virtual IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const = 0;
+
+		/// Remove a specified child file or directory.
+		virtual void remove( const IndexedIO::EntryID &name ) = 0;
+
+		/// Remove all entries.
+		virtual void removeAll() = 0;
+
+		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
+		virtual IndexedIOInterfacePtr parentDirectory() = 0;
+
+		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
+		virtual ConstIndexedIOInterfacePtr parentDirectory() const = 0;
 
 		/// Create a new file containing the specified float array contents
 		/// \param name The name of the file to be written
@@ -253,133 +263,133 @@ class IndexedIOInterface : public RefCounted
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const = 0;
 
 		/// Read a double array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read a half array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read an int array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read a long array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read a long array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read an unsigned int array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read a char array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read an unsigned char array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read a short array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read an unsigned short array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read a string array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const  = 0;
 
 		/// Read a float from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, float &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, float &x) const  = 0;
 
 		/// Read a double from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, double &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, double &x) const  = 0;
 
 		/// Read a half from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, half &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, half &x) const  = 0;
 
 		/// Read an int from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, int &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, int &x) const  = 0;
 
 		/// Read a long from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, int64_t &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, int64_t &x) const  = 0;
 
 		/// Read a long from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, uint64_t &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, uint64_t &x) const  = 0;
 
 		/// Read a string from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, std::string &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, std::string &x) const  = 0;
 
 		/// Read an unsigned int from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, unsigned int &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned int &x) const  = 0;
 
 		/// Read a char from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, char &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, char &x) const  = 0;
 
 		/// Read an unsigned char from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, unsigned char &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned char &x) const  = 0;
 
 		/// Read a short from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, short &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, short &x) const  = 0;
 
 		/// Read an unsigned char from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, unsigned short &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned short &x) const  = 0;
 
 	protected:
 

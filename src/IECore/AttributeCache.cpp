@@ -35,22 +35,25 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include "boost/regex.hpp"
 
 #include "IECore/AttributeCache.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/HeaderGenerator.h"
+#include "IECore/IndexedIO.h"
 
 using namespace IECore;
 
 AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode mode )
 {
-	m_io = IndexedIOInterface::create(filename, "/", mode );
+	IndexedIOInterfacePtr io = IndexedIOInterface::create(filename, "/", mode );
 
 	if ( mode == IndexedIO::Write || mode == IndexedIO::Append )
 	{
-		m_io->mkdir("/headers");
-		m_io->mkdir("/objects");
+		m_headersIO = io->subdirectory("headers", IndexedIOInterface::CreateIfMissing );
+		m_objectsIO = io->subdirectory("objects", IndexedIOInterface::CreateIfMissing );
+
 		CompoundObjectPtr header = HeaderGenerator::header();
 		for ( CompoundObject::ObjectMap::const_iterator it = header->members().begin(); it != header->members().end(); it++ )
 		{
@@ -61,8 +64,8 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 	{
 		try
 		{
-			m_io->chdir("/headers");
-			m_io->chdir("/objects");
+			m_headersIO = io->subdirectory("headers");
+			m_objectsIO = io->subdirectory("objects");
 		}
 		catch (IECore::Exception &e)
 		{
@@ -71,58 +74,34 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 	}
 }
 
-void AttributeCache::checkName( const std::string &name )
-{
-	if ( name.find( '/' ) != std::string::npos )
-	{
-		throw InvalidArgumentException( name );
-	}
-}
-
 void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr, const Object *data)
 {
-	checkName( obj );
-	checkName( attr );
-	m_io->chdir("/objects");
-	m_io->mkdir(obj);
-	m_io->chdir(obj);
-	data->save( m_io, attr );
+	data->save( m_objectsIO->subdirectory(obj, IndexedIOInterface::CreateIfMissing), attr );
 }
 
 void AttributeCache::writeHeader( const HeaderHandle &hdr, const Object *data)
 {
-	checkName( hdr );
-	m_io->chdir("/headers");
-	data->save( m_io, hdr );
+	data->save( m_headersIO, hdr );
 }
 
 ObjectPtr AttributeCache::read( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	checkName( obj );
-	checkName( attr );
-	m_io->chdir("/objects");
-	m_io->chdir(obj);
-	ObjectPtr data = Object::load( m_io, attr );
+	ObjectPtr data = Object::load( m_objectsIO->subdirectory(obj), attr );
 	return data;
 }
 
 CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 {
-	checkName( obj );
-	
 	CompoundObjectPtr dict = new CompoundObject();
 
-	m_io->chdir("/objects");
-	m_io->chdir(obj);
+	IndexedIO::EntryIDList directories;
+	IndexedIOInterfacePtr object = m_objectsIO->subdirectory( obj );
+	object->entryIds( directories, IndexedIO::Directory );
 
-	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-
-	IndexedIO::EntryList directories = m_io->ls(filter);
-
-	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
+	for (IndexedIO::EntryIDList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		ObjectPtr data = Object::load( m_io, it->id() );
-		dict->members()[ it->id() ] = data;
+		ObjectPtr data = Object::load( object, *it );
+		dict->members()[ *it ] = data;
 	}
 
 	return dict;
@@ -130,9 +109,7 @@ CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 
 ObjectPtr AttributeCache::readHeader( const HeaderHandle &hdr )
 {
-	checkName( hdr );
-	m_io->chdir("/headers");
-	ObjectPtr data = Object::load( m_io, hdr );
+	ObjectPtr data = Object::load( m_headersIO, hdr );
 	return data;
 }
 
@@ -140,16 +117,13 @@ CompoundObjectPtr AttributeCache::readHeader( )
 {
 	CompoundObjectPtr dict = new CompoundObject();
 
-	m_io->chdir("/headers");
+	IndexedIO::EntryIDList directories;
+	m_headersIO->entryIds( directories, IndexedIO::Directory );
 
-	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-
-	IndexedIO::EntryList directories = m_io->ls(filter);
-
-	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
+	for (IndexedIO::EntryIDList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		ObjectPtr data = Object::load( m_io, it->id() );
-		dict->members()[ it->id() ] = data;
+		ObjectPtr data = Object::load( m_headersIO, *it );
+		dict->members()[ *it ] = data;
 	}
 
 	return dict;
@@ -157,137 +131,65 @@ CompoundObjectPtr AttributeCache::readHeader( )
 
 void AttributeCache::headers(std::vector<AttributeCache::HeaderHandle> &hds)
 {
-	hds.clear();
-
-	m_io->chdir("/headers");
-
-	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-
-	IndexedIO::EntryList directories = m_io->ls(filter);
-
-	hds.reserve( directories.size() );
-	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
-	{
-		hds.push_back( it->id() );
-	}
+	m_headersIO->entryIds( hds, IndexedIO::Directory );
 }
 
 void AttributeCache::objects(std::vector<AttributeCache::ObjectHandle> &objs)
 {
-	objs.clear();
-
-	m_io->chdir("/objects");
-
-	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-
-	IndexedIO::EntryList directories = m_io->ls(filter);
-
-	objs.reserve( directories.size() );
-	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
-	{
-		objs.push_back( it->id() );
-	}
+	m_objectsIO->entryIds( objs, IndexedIO::Directory );
 }
 
 bool AttributeCache::contains( const ObjectHandle &obj )
 {
-	checkName( obj );
-	m_io->chdir("/objects");
-	try
-	{
-		m_io->chdir( obj );
-	}
-	catch (IECore::Exception &e)
-	{
-		return false;
-	}
-	return true;
+	return m_objectsIO->hasEntry( obj );
 }
 
 bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	checkName( obj );
-	checkName( attr );
-	
-	m_io->chdir("/objects");
-	try
-	{
-		m_io->chdir( obj );
-		m_io->chdir( attr );
-	}
-	catch (IECore::Exception &e)
+	IndexedIOInterfacePtr object = m_objectsIO->subdirectory( obj, IndexedIOInterface::NullIfMissing );
+	if ( !object )
 	{
 		return false;
 	}
-	return true;
+	return object->hasEntry(attr);
 }
 
 void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs)
 {
-	checkName( obj );
-
-	attrs.clear();
-
-	m_io->chdir("/objects");
-	m_io->chdir(obj);
-
-	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-
-	IndexedIO::EntryList directories = m_io->ls(filter);
-
-	attrs.reserve( directories.size() );
-	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
-	{
-		attrs.push_back( it->id() );
-	}
+	m_objectsIO->subdirectory(obj)->entryIds( attrs );
 }
 
 void AttributeCache::attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs)
 {
-	checkName( obj );
-	
+	IndexedIO::EntryIDList directories;
+	attributes( obj, directories );
+
+	boost::regex regexTest(regex);
+	boost::cmatch what;
+
 	attrs.clear();
-
-	m_io->chdir("/objects");
-	m_io->chdir(obj);
-
-	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	filter->add( new IndexedIORegexFilter(  regex ) );
-
-	IndexedIO::EntryList directories = m_io->ls(filter);
-
 	attrs.reserve( directories.size() );
-	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
+	for (IndexedIO::EntryIDList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		attrs.push_back( it->id() );
+		if ( regex_match( (*it).c_str(), what, regexTest) )
+		{
+			attrs.push_back( *it );
+		}
 	}
 }
 
 void AttributeCache::remove( const ObjectHandle &obj )
 {
-	checkName( obj );
-	
-	m_io->chdir("/objects");
-
-	m_io->rm( obj );
+	m_objectsIO->remove( obj );
 }
 
 void AttributeCache::remove( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	checkName( obj );
-	checkName( attr );
-	
-	m_io->chdir("/objects");
-
-	m_io->chdir( obj );
-	m_io->rm( attr );
+	IndexedIOInterfacePtr object = m_objectsIO->subdirectory(obj);
+	object->remove(attr);
 }
 
 void AttributeCache::removeHeader( const HeaderHandle &hdr )
 {
-	checkName( hdr );
-	
-	m_io->chdir("/headers");
-
-	m_io->rm( hdr );
+	m_headersIO->remove( hdr );
 }

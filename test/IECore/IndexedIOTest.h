@@ -114,7 +114,7 @@ struct IndexedIOTest
 			bool exists = true;
 			try
 			{
-				io->ls( IndexedIOTestDataTraits<D>::name() );
+				io->entry( IndexedIOTestDataTraits<D>::name() );
 			}
 			catch (...)
 			{
@@ -140,7 +140,7 @@ struct IndexedIOTest
 			bool exists = true;
 			try
 			{
-				io->ls( IndexedIOTestDataTraits<D>::name() );
+				io->entry( IndexedIOTestDataTraits<D>::name() );
 			}
 			catch (...)
 			{
@@ -164,7 +164,7 @@ struct IndexedIOTest
 		assert(io);
 
 		io->write( IndexedIOTestDataTraits<D>::name(), IndexedIOTestDataTraits<D>::value() );
-		io->ls( IndexedIOTestDataTraits<D>::name() );
+		io->entry( IndexedIOTestDataTraits<D>::name() );
 	}
 
 	template<typename D>
@@ -173,7 +173,7 @@ struct IndexedIOTest
 		assert(io);
 
 		io->write( IndexedIOTestDataTraits<D*>::name(), IndexedIOTestDataTraits<D*>::value(), 10 );
-		io->ls( IndexedIOTestDataTraits<D*>::name() );
+		io->entry( IndexedIOTestDataTraits<D*>::name() );
 	}
 
 	void write(const std::string &filename)

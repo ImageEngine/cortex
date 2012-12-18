@@ -112,15 +112,13 @@ void CompoundDataBase::save( SaveContext *context ) const
 {
 	Data::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
-	container->mkdir( "members" );
-	container->chdir( "members" );
-		const CompoundDataMap &m = readable();
-		CompoundDataMap::const_iterator it;
-		for( it=m.begin(); it!=m.end(); it++ )
-		{
-			context->save( it->second, container, it->first );
-		}
-	container->chdir( ".." );
+	container = container->subdirectory( "members", IndexedIOInterface::CreateIfMissing );
+	const CompoundDataMap &m = readable();
+	CompoundDataMap::const_iterator it;
+	for( it=m.begin(); it!=m.end(); it++ )
+	{
+		context->save( it->second, container, it->first );
+	}
 }
 
 template<>
@@ -129,6 +127,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 	Data::load( context );
 	unsigned int v = 0;
 	IndexedIOInterfacePtr container = 0;
+
 	try
 	{
 		container = context->container( staticTypeName(), v );
@@ -142,14 +141,15 @@ void CompoundDataBase::load( LoadContextPtr context )
 	
 	CompoundDataMap &m = writable();
 	m.clear();
-	container->chdir( "members" );
-		IndexedIO::EntryList members = container->ls();
-		IndexedIO::EntryList::const_iterator it;
-		for( it=members.begin(); it!=members.end(); it++ )
-		{
-			m[it->id()] = context->load<Data>( container, it->id() );
-		}
-	container->chdir( ".." );
+	container = container->subdirectory( "members" );
+
+	IndexedIO::EntryIDList memberNames;
+	container->entryIds( memberNames );
+	IndexedIO::EntryIDList::const_iterator it;
+	for( it=memberNames.begin(); it!=memberNames.end(); it++ )
+	{
+		m[*it] = context->load<Data>( container, *it );
+	}
 }
 
 static inline bool comp( CompoundDataMap::const_iterator a, CompoundDataMap::const_iterator b )

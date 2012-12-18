@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -163,20 +163,17 @@ void MotionPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container->mkdir( "snapshots" );
-	container->chdir( "snapshots" );
-		int i = 0;
-		for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
-		{
-			string is = str( boost::format( "%d" ) % i );
-			container->mkdir( is );
-			container->chdir( is );
-				container->write( "time", it->first );
-				context->save( it->second, container, "primitive" );
-			container->chdir( ".." );
-			i++;
-		}
-	container->chdir( ".." );
+	IndexedIOInterfacePtr snapshots = container->subdirectory( "snapshots", IndexedIOInterface::CreateIfMissing );
+
+	int i = 0;
+	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
+	{
+		string is = str( boost::format( "%d" ) % i );
+		IndexedIOInterfacePtr snapshot = snapshots->subdirectory( is, IndexedIOInterface::CreateIfMissing );
+		snapshot->write( "time", it->first );
+		context->save( it->second, snapshot, "primitive" );
+		i++;
+	}
 }
 
 void MotionPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -184,18 +181,18 @@ void MotionPrimitive::load( IECore::Object::LoadContextPtr context )
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	container->chdir( "snapshots" );
-		m_snapshots.clear();
-		IndexedIO::EntryList names = container->ls();
-		IndexedIO::EntryList::const_iterator it;
-		for( it=names.begin(); it!=names.end(); it++ )
-		{
-			container->chdir( it->id() );
-				float t; container->read( "time", t );
-				m_snapshots[t] = context->load<Primitive>( container, "primitive" );
-			container->chdir( ".." );
-		}
-	container->chdir( ".." );
+	IndexedIOInterfacePtr snapshots = container->subdirectory( "snapshots" );
+	m_snapshots.clear();
+	IndexedIO::EntryIDList names;
+	snapshots->entryIds( names, IndexedIO::Directory );
+	IndexedIO::EntryIDList::const_iterator it;
+	for( it=names.begin(); it!=names.end(); it++ )
+	{
+		IndexedIOInterfacePtr snapshot = snapshots->subdirectory( *it );
+		float t; 
+		snapshot->read( "time", t );
+		m_snapshots[t] = context->load<Primitive>( snapshot, "primitive" );
+	}
 }
 
 bool MotionPrimitive::isEqualTo( const Object *other ) const

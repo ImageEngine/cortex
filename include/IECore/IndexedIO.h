@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,7 @@
 #define IE_CORE_INDEXEDIO_H
 
 #include <string>
-#include <list>
+#include <vector>
 
 namespace IECore
 {
@@ -96,6 +96,7 @@ namespace IndexedIO
 	} DataType;
 
 	typedef std::string EntryID;
+	typedef std::vector< EntryID > EntryIDList;
 
 	/// A representation of a single file/directory
 	class Entry
@@ -131,8 +132,6 @@ namespace IndexedIO
 			DataType m_dataType;
 			unsigned long m_arrayLength;
 	};
-
-	typedef std::list< Entry > EntryList;
 
 	// Method for establishing flattened size of a data object
 	template<typename T>
