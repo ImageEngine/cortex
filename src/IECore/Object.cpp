@@ -33,7 +33,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Object.h"
-#include "IECore/IndexedIOPath.h"
 #include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"
