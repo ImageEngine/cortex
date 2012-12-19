@@ -186,37 +186,49 @@ class TestObjectIO( unittest.TestCase ) :
 		self.assertEqual( o, oo )
 
 	def testSlashesInRepeatedData(self):
-		"""Explores a problem in the Object representation: the same object is represented as a string path, which is ambiguous when object names have slashes..."""
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		"""Make sure slashes can be used and do not break the symlinks on the Object representation for repeated data."""
+		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIOOpenMode.Write)
 
-		v = IntData(10)
+		v1 = IntData(10)
+		v2 = IntData(11)
+		v3 = IntData(12)
+
 		d = CompoundData()
 		d['a'] = CompoundData()
-		d['a']['b'] = v
-		d['a/b'] = v
+		d['a']['b'] = v1
+		d['a/b'] = v2
 		d['c'] = CompoundData()
-		d['c']['d'] = v
-		d['c/d'] = v.copy()
+		d['c']['d'] = v3
+		d['c/d'] = v3
+		d['links'] = CompoundData()
+		d['links']['v1'] = v1
+		d['links']['v2'] = v2
+		d['links']['v3'] = v3
 
 		# sanity check
-		self.assert_( d['a/b'].isSame( d['a']['b'] ) )
-		self.assert_( not d['c/d'].isSame( d['c']['d'] ) )
+		self.assert_( d['a']['b'].isSame( d['links']['v1'] ) )
+		self.assert_( d['a/b'].isSame( d['links']['v2'] ) )
+		self.assert_( d['c']['d'].isSame( d['links']['v3'] ) )
+		self.assert_( d['c/d'].isSame( d['links']['v3'] ) )
 
 		d.save( f, "test" )
 
 		f = None
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Append)
+		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIOOpenMode.Read)
 		dd = Object.load( f, "test" )
 
 		self.assertEqual( d, dd )
-		self.assert_( dd['a/b'].isSame( dd['a']['b'] ) )
-		self.assert_( not dd['c/d'].isSame( dd['c']['d'] ) )
+		self.assert_( dd['a']['b'].isSame( dd['links']['v1'] ) )
+		self.assert_( dd['a/b'].isSame( dd['links']['v2'] ) )
+		self.assert_( dd['c']['d'].isSame( dd['links']['v3'] ) )
+		self.assert_( dd['c/d'].isSame( dd['links']['v3'] ) )
 
 	def tearDown( self ) :
 
 		for f in [ "test/o.fio" ] :
 			if os.path.isfile( f ) :
-				os.remove( f )
+				#os.remove( f )
+				pass
 
 
 class TestEmptyContainerOptimisation( unittest.TestCase ) :
