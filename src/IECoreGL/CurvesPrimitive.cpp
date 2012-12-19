@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,10 +38,13 @@
 
 #include "IECore/MessageHandler.h"
 #include "IECore/CurvesPrimitive.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "IECoreGL/CurvesPrimitive.h"
 #include "IECoreGL/Buffer.h"
 #include "IECoreGL/CachedConverter.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderStateComponent.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -89,15 +92,69 @@ void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 	Primitive::addPrimitiveVariable( name, primVar );
 }
 
+const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *state ) const
+{
+	if( state->get<UseGLLines>()->value() )
+	{
+		if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
+		{
+			return Primitive::shaderSetup( shader, state );
+		}
+		else
+		{
+			for( GeometrySetupVector::const_iterator it = m_geometrySetups.begin(), eIt = m_geometrySetups.end(); it != eIt; it++ )
+			{
+				if( it->originalShader == shader )
+				{
+					return it->shaderSetup.get();
+				}
+			}
+		
+			ConstShaderPtr geometryShader = shader;
+			if( geometryShader->geometrySource() == "" )
+			{
+				// if the current shader has a specific geometry shader component,
+				// then we assume the user has provided one capable of doing the tesselation,
+				// but if not then we substitute in our own geometry shader.
+				ShaderLoader *shaderLoader = state->get<ShaderStateComponent>()->shaderLoader();
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), geometrySource(), geometryShader->fragmentSource() );
+			}
+			
+			static Shader::SetupPtr geometryShaderSetup = new Shader::Setup( geometryShader );
+			addPrimitiveVariablesToShaderSetup( geometryShaderSetup );
+			geometryShaderSetup->addUniformParameter( "basis", new IECore::M44fData( m_basis.matrix ) );
+			
+			m_geometrySetups.push_back( GeometrySetup( shader, geometryShaderSetup ) );
+			
+			return geometryShaderSetup;
+		}
+	}
+	else
+	{
+		/// \todo Implement ribbon rendering properly
+		return Primitive::shaderSetup( shader, state );
+	}
+}
+
 void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) const
 {
 	if( currentState->get<UseGLLines>()->value() )
 	{
-		renderLines( currentState, style );
+		glLineWidth( currentState->get<GLLineWidth>()->value() );
+		if( (m_basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value()) )
+		{
+			renderInstances( 1 );
+		}
+		else
+		{
+			ensureAdjacencyVertIds();
+			Buffer::ScopedBinding indexBinding( *m_adjacencyVertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
+			glDrawElements( GL_LINES_ADJACENCY, m_numAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
+		}
 	}
 	else
 	{
-		renderRibbons( currentState, style );
+		//renderRibbons( currentState, style );
 	}
 }
 
@@ -106,6 +163,45 @@ void CurvesPrimitive::renderInstances( size_t numInstances ) const
 	ensureVertIds();
 	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
 	glDrawElementsInstanced( GL_LINES, m_numVertIds, GL_UNSIGNED_INT, 0, numInstances );
+}
+
+const std::string &CurvesPrimitive::geometrySource()
+{
+	static std::string s = 
+	
+		"#version 150\n"
+		""
+		"layout( lines_adjacency ) in;"
+		"layout( line_strip, max_vertices = 10 ) out;"
+		""
+		"uniform mat4x4 basis;"
+		""
+		"void main()"
+		"{"
+		""
+		"	for( int i = 0; i < 10; i++ )"
+		"	{"
+		"		float t = float( i ) / 9.0;"
+		"		float t2 = t * t;"
+		"		float t3 = t2 * t;"
+		""
+		"		float c0 = basis[0][0] * t3 + basis[1][0] * t2 + basis[2][0] * t + basis[3][0];"
+		"		float c1 = basis[0][1] * t3 + basis[1][1] * t2 + basis[2][1] * t + basis[3][1];"
+		"		float c2 = basis[0][2] * t3 + basis[1][2] * t2 + basis[2][2] * t + basis[3][2];"
+		"		float c3 = basis[0][3] * t3 + basis[1][3] * t2 + basis[2][3] * t + basis[3][3];"
+		""
+		"		gl_Position ="
+		""
+		"			gl_in[0].gl_Position * c0 +"
+		"			gl_in[1].gl_Position * c1 +"
+		"			gl_in[2].gl_Position * c2 +"
+		"			gl_in[3].gl_Position * c3;"
+		""
+		"		EmitVertex();"
+		"	}"
+		"}";
+		
+	return s;
 }
 
 void CurvesPrimitive::ensureVertIds() const
@@ -142,13 +238,48 @@ void CurvesPrimitive::ensureVertIds() const
 	m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
 }
 
-void CurvesPrimitive::renderLines( const State *currentState, IECore::TypeId style ) const
+void CurvesPrimitive::ensureAdjacencyVertIds() const
 {
-	if( m_basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value() )
+	if( m_adjacencyVertIdsBuffer )
 	{
-		glLineWidth( currentState->get<GLLineWidth>()->value() );
-		renderInstances( 1 );
+		return;
 	}
+	
+	IECore::UIntVectorDataPtr vertIdsData = new IECore::UIntVectorData;
+	vector<unsigned int> &vertIds = vertIdsData->writable();
+	
+	int baseIndex = 0;
+	const vector<int> &vertsPerCurve = m_vertsPerCurve->readable();
+	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
+	{
+		int numPoints = *it;
+		int numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
+		unsigned pi = 0;
+		for( int i=0; i<numSegments; i++ )
+		{
+			vertIds.push_back( baseIndex + ( pi % numPoints ) );
+			vertIds.push_back( baseIndex + ( (pi+1) % numPoints ) );
+			vertIds.push_back( baseIndex + ( (pi+2) % numPoints ) );
+			vertIds.push_back( baseIndex + ( (pi+3) % numPoints ) );
+			pi += m_basis.step;
+		}
+
+		baseIndex += numPoints;
+	
+	}
+	
+	m_numAdjacencyVertIds = vertIds.size();
+	
+	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+	m_adjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
+}
+
+//void CurvesPrimitive::renderLines( const State *currentState, IECore::TypeId style ) const
+//{
+	/*if( m_basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value() )
+	{
+		
+	}*/
 	
 
 /*	const V3f *p = &(m_points->readable()[0]);
@@ -221,11 +352,11 @@ void CurvesPrimitive::renderLines( const State *currentState, IECore::TypeId sty
 		}
 
 	}*/
-}
+//}
 
-void CurvesPrimitive::renderRibbons( const State *currentState, IECore::TypeId style ) const
+/*void CurvesPrimitive::renderRibbons( const State *currentState, IECore::TypeId style ) const
 {
-/*	float halfWidth = m_width/2.0f;
+	float halfWidth = m_width/2.0f;
 	const V3f *points = &(m_points->readable()[0]);
 	const std::vector<int> &vertsPerCurve = m_vertsPerCurve->readable();
 
@@ -444,5 +575,6 @@ void CurvesPrimitive::renderRibbons( const State *currentState, IECore::TypeId s
 		}
 
 	}
-	*/
+	
 }
+*/

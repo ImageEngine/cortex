@@ -429,39 +429,180 @@ struct Shader::Setup::MemberData : public IECore::RefCounted
 	
 	ConstShaderPtr shader;
 	
-	struct VertexAttribute
+	// base class for objects which can bind a value of some sort
+	// to a shader, and later unbind it.
+	struct Value : public IECore::RefCounted
 	{
-		GLuint attributeIndex;
-		GLenum type;
-		GLint size;
-		ConstBufferPtr buffer;
-		GLuint divisor;
+		virtual void bind() = 0;
+		virtual void unbind() = 0;
+	};
+	IE_CORE_DECLAREPTR( Value );
+	
+	// value class for specifying vertex attributes
+	struct VertexValue : public Value
+	{
+	
+		VertexValue( GLuint attributeIndex, GLenum type, GLint size, ConstBufferPtr buffer, GLuint divisor )
+			:	m_attributeIndex( attributeIndex ), m_type( type ), m_size( size ), m_buffer( buffer ), m_divisor( divisor )
+		{
+		}
+		
+		virtual void bind()
+		{
+			Buffer::ScopedBinding binding( *m_buffer );
+			glEnableVertexAttribArray( m_attributeIndex );
+			glVertexAttribPointer( m_attributeIndex, m_size, m_type, false, 0, 0 );
+			glVertexAttribDivisor( m_attributeIndex, m_divisor );
+		}
+		
+		virtual void unbind()
+		{
+			glVertexAttribDivisor( m_attributeIndex, 0 );
+			glDisableVertexAttribArray( m_attributeIndex );
+		}
+		
+		private :
+		
+			GLuint m_attributeIndex;
+			GLenum m_type;
+			GLint m_size;
+			ConstBufferPtr m_buffer;
+			GLuint m_divisor;
+			
 	};
 	
-	struct UniformParameter
+	// value class for specifying textures
+	struct TextureValue : public Value
 	{
-		GLuint uniformIndex;
-		unsigned char dimensions;
-		GLint size;
-		// we only use one of these two vectors, depending on the type
-		// of the parameter. the first half of the vector is used to store
-		// the shader values, and the second half is used to store the previous
-		// shader values in a ScopedBinding.
-		mutable std::vector<GLfloat> floats;
-		mutable std::vector<GLint> ints;
+	
+		TextureValue( GLuint uniformIndex, GLuint textureUnit, ConstTexturePtr texture )
+			:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_texture( texture )
+		{
+		}
+		
+		virtual void bind()
+		{
+			glActiveTexture( textureUnits()[m_textureUnit] );
+			glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
+			if( m_texture )
+			{
+				m_texture->bind();
+			}
+			else
+			{
+				glBindTexture( GL_TEXTURE_2D, 0 );
+			}
+			glUniform1i( m_uniformIndex, m_textureUnit );
+		}
+		
+		virtual void unbind()
+		{
+			glActiveTexture( textureUnits()[m_textureUnit] );
+			glBindTexture( GL_TEXTURE_2D, m_previousTexture );
+		}
+		
+		private :
+		
+			GLuint m_uniformIndex;
+			size_t m_textureUnit;
+			ConstTexturePtr m_texture;
+			GLint m_previousTexture;
+	
 	};
 	
-	struct TextureParameter
+	// value class for specifying uniform values
+	struct UniformFloatValue : public Value
 	{
-		GLuint uniformIndex;
-		size_t textureUnit;
-		ConstTexturePtr texture;
-		GLint previousTexture;
+	
+		UniformFloatValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLfloat> &values )
+			:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
+		{
+			m_previousValues.resize( m_values.size() );
+		}
+	
+		virtual void bind()
+		{
+			glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
+			uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
+		}
+		
+		virtual void unbind()
+		{
+			uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
+		}
+	
+		private :
+		
+			GLuint m_program;
+			GLuint m_uniformIndex;
+			unsigned char m_dimensions;
+			std::vector<GLfloat> m_values;
+			std::vector<GLfloat> m_previousValues;
+			
 	};
 	
-	vector<VertexAttribute> vertexAttributes;
-	vector<UniformParameter> uniformParameters;
-	vector<TextureParameter> textureParameters;
+	// value class for specifying uniform values
+	struct UniformIntegerValue : public Value
+	{
+	
+		UniformIntegerValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLint> &values )
+			:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
+		{
+			m_previousValues.resize( m_values.size() );
+		}
+	
+		virtual void bind()
+		{
+			glGetUniformiv( m_program, m_uniformIndex, &(m_previousValues[0]) );
+			uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
+		}
+		
+		virtual void unbind()
+		{
+			uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
+		}
+	
+		private :
+		
+			GLuint m_program;
+			GLuint m_uniformIndex;
+			unsigned char m_dimensions;
+			std::vector<GLint> m_values;
+			std::vector<GLint> m_previousValues;
+			
+	};
+	
+	struct UniformMatrixValue : public Value
+	{
+		UniformMatrixValue( GLuint program, GLuint uniformIndex, unsigned char dimensions0, unsigned char dimensions1, std::vector<GLfloat> &values )
+			:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions0( dimensions0 ), m_dimensions1( dimensions1 ), m_values( values )
+		{
+			m_previousValues.resize( m_values.size(), 0 );
+		}
+		
+		virtual void bind()
+		{
+			glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
+			uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_values[0]) );
+		}
+		
+		virtual void unbind()
+		{
+			uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_previousValues[0]) );
+		}
+		
+		private :
+		
+			GLuint m_program;
+			GLuint m_uniformIndex;
+			unsigned char m_dimensions0;
+			unsigned char m_dimensions1;
+			std::vector<GLfloat> m_values;
+			std::vector<GLfloat> m_previousValues;
+				
+	};
+	
+	vector<ValuePtr> values;
 	
 };
 
@@ -487,11 +628,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, ConstTexturePt
 		return;
 	}
 	
-	MemberData::TextureParameter p;
-	p.uniformIndex = uniformIndex;
-	p.textureUnit = textureUnit;
-	p.texture = value;
-	m_memberData->textureParameters.push_back( p );
+	m_memberData->values.push_back( new MemberData::TextureValue( uniformIndex, textureUnit, value ) );
 }
 
 template<typename Container>
@@ -513,7 +650,6 @@ struct UniformDataConverter
 		{
 			m_container.push_back( (typename Container::value_type)*begin );
 		}
-		m_container.resize( m_container.size() * 2 ); // make enough extra room to store pushed values in ScopedBinding
 		return true;
 	}
 
@@ -529,71 +665,112 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 	GLint uniformSize = 0;
 	size_t textureUnit = 0;
 	GLint uniformIndex = m_memberData->shader->uniformParameter( name, uniformType, uniformSize, textureUnit );
-	if( uniformIndex < 0 || uniformSize > 1 )
+	if( uniformIndex < 0 )
 	{
 		return;
 	}
 	
-	GLint dimensions = 0;
-	switch( uniformType )
+	if( uniformSize > 1 )
 	{
-		case GL_BOOL :
-		case GL_INT :
-		case GL_FLOAT :
-			dimensions = 1;
-			break;
-		case GL_BOOL_VEC2 :
-		case GL_INT_VEC2 :
-		case GL_FLOAT_VEC2 :
-			dimensions = 2;
-			break;
-		case GL_BOOL_VEC3 :
-		case GL_INT_VEC3 :
-		case GL_FLOAT_VEC3 :
-			dimensions = 3;
-			break;
-		default :
-			dimensions = 0;
-	}
-	
-	if( !dimensions )
-	{
+		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Array parameter \"%s\" is currently unsupported." ) % name );
 		return;
 	}
 	
-	bool integer = uniformType != GL_FLOAT && uniformType != GL_FLOAT_VEC2 && uniformType != GL_FLOAT_VEC3;
-	
-	MemberData::UniformParameter p;
-	p.uniformIndex = uniformIndex;
-	p.dimensions = dimensions;
-	p.size = uniformSize;
-	
-	if( integer )
+	if( uniformType == GL_BOOL || uniformType == GL_INT || uniformType == GL_INT_VEC2 || uniformType == GL_INT_VEC3 )
 	{
+		// integer value
+		
+		vector<GLint> integers;
 		if( value->isInstanceOf( IECore::BoolDataTypeId ) )
 		{
-			p.ints.push_back( static_cast<const IECore::BoolData *>( value.get() )->readable() );
-			p.ints.push_back( 0 ); // make enough extra room to store pushed values in ScopedBinding
+			integers.push_back( static_cast<const IECore::BoolData *>( value.get() )->readable() );
 		}
 		else
 		{
-			UniformDataConverter<vector<GLint> > converter( p.ints );
+			UniformDataConverter<vector<GLint> > converter( integers );
 			IECore::despatchTypedData< UniformDataConverter<vector<GLint> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );
 		}
+		if( !integers.size() )
+		{
+			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
+		}
+		else
+		{
+			unsigned char dimensions = 0;
+			switch( uniformType )
+			{
+				case GL_BOOL :
+				case GL_INT :
+					dimensions = 1;
+					break;
+				case GL_INT_VEC2 :
+					dimensions = 2;
+					break;
+				case GL_INT_VEC3 :
+					dimensions = 3;	
+			}
+			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), uniformIndex, dimensions, integers ) );
+		}
+	}
+	else if( uniformType == GL_FLOAT || uniformType == GL_FLOAT_VEC2 || uniformType == GL_FLOAT_VEC3 )
+	{
+		// float value
+		
+		vector<GLfloat> floats;
+		UniformDataConverter<vector<GLfloat> > converter( floats );
+		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );	
+		if( !floats.size() )
+		{
+			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
+			return;
+		}
+		else
+		{
+			unsigned char dimensions = 0;
+			switch( uniformType )
+			{
+				case GL_FLOAT :
+					dimensions = 1;
+					break;
+				case GL_FLOAT_VEC2 :
+					dimensions = 2;
+					break;
+				case GL_FLOAT_VEC3 :
+					dimensions = 3;	
+			}
+			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), uniformIndex, dimensions, floats ) );
+		}
+	}
+	else if( uniformType == GL_FLOAT_MAT3 || uniformType == GL_FLOAT_MAT4 )
+	{
+		// matrix value
+		unsigned char dimensions0 = 0;
+		unsigned char dimensions1 = 0;
+		switch( uniformType )
+		{
+			case GL_FLOAT_MAT3 :
+				dimensions0 = dimensions1 = 3;
+				break;
+			case GL_FLOAT_MAT4 :
+				dimensions0 = dimensions1 = 4;
+				break;
+		};
+				
+		vector<GLfloat> floats;
+		UniformDataConverter<vector<GLfloat> > converter( floats );
+		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );	
+		if( floats.size() != dimensions0 * dimensions1 )
+		{
+			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Matrix parameter \"%s\" requires %d values but value of type \%s\" provided %d" ) % name % (dimensions0 * dimensions1) % value->typeName() % floats.size() );
+			return;
+		}
+		
+		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), uniformIndex, dimensions0, dimensions1, floats ) );
 	}
 	else
 	{
-		UniformDataConverter<vector<GLfloat> > converter( p.floats );
-		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );	
+		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsupported OpenGL type \%d\"" ) % name % uniformType );
 	}
-	
-	if( !p.ints.size() && !p.floats.size() )
-	{
-		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
-		return;
-	}
-	
-	m_memberData->uniformParameters.push_back( p );
 }
 				
 void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor )
@@ -601,9 +778,14 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	GLenum attributeType = 0;
 	GLint attributeSize = 0;
 	GLint attributeIndex = m_memberData->shader->vertexAttribute( name, attributeType, attributeSize );
-	if( attributeIndex < 0 || attributeSize > 1 )
+	if( attributeIndex < 0 )
 	{
 		return;
+	}
+
+	if( attributeSize > 1 )
+	{
+		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Array attribute \"%s\" is currently unsupported." ) % name );
 	}
 
 	bool dataTypeOK = false;
@@ -639,16 +821,11 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
 		return;
 	}
-		
-	MemberData::VertexAttribute b;
-	b.attributeIndex = attributeIndex;
-	b.type = dataGLType;
-	b.size = size;
+	
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
-	b.buffer = IECore::runTimeCast<const Buffer>( converter->convert( value  ) );
-	b.divisor = divisor;
-
-	m_memberData->vertexAttributes.push_back( b );
+	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value  ) );
+	
+	m_memberData->values.push_back( new MemberData::VertexValue( attributeIndex, dataGLType, size, buffer, divisor ) );
 }
 
 Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
@@ -657,87 +834,21 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	glGetIntegerv( GL_CURRENT_PROGRAM, &m_previousProgram );
 	glUseProgram( m_setup.shader()->m_implementation->m_program );
 
-	const vector<MemberData::VertexAttribute> &vertexAttributes = m_setup.m_memberData->vertexAttributes;
-	for( vector<MemberData::VertexAttribute>::const_iterator it = vertexAttributes.begin(), eIt = vertexAttributes.end(); it != eIt; it++ )
+	const vector<MemberData::ValuePtr> &values = m_setup.m_memberData->values;
+	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
 	{
-		Buffer::ScopedBinding binding( *(it->buffer) );
-		glEnableVertexAttribArray( it->attributeIndex );
-		glVertexAttribPointer( it->attributeIndex, it->size, it->type, false, 0, 0 );
-		if( it->divisor )
-		{
-			glVertexAttribDivisor( it->attributeIndex, it->divisor );
-		}
-	}
-	
-	const vector<MemberData::UniformParameter> &uniformParameters = m_setup.m_memberData->uniformParameters;
-	for( vector<MemberData::UniformParameter>::const_iterator it = uniformParameters.begin(), eIt = uniformParameters.end(); it != eIt; it++ )
-	{
-		if( it->floats.size() )
-		{
-			// save the current value into the back half of our storage
-			glGetUniformfv( m_setup.shader()->m_implementation->m_program, it->uniformIndex, &(it->floats[it->floats.size()/2]) );
-			// load the new value from the front half of our storage.
-			uniformFloatFunctions()[it->dimensions]( it->uniformIndex, it->size, &(it->floats[0]) );
-		}
-		else
-		{
-			// save the current value into the back half of our storage
-			glGetUniformiv( m_setup.shader()->m_implementation->m_program, it->uniformIndex, &(it->ints[it->ints.size()/2]) );
-			// load the new value from the front half of our storage.
-			uniformIntFunctions()[it->dimensions]( it->uniformIndex, it->size, &(it->ints[0]) );
-		}
-	}
-	
-	vector<MemberData::TextureParameter> &textureParameters = m_setup.m_memberData->textureParameters;
-	for( vector<MemberData::TextureParameter>::iterator it = textureParameters.begin(), eIt = textureParameters.end(); it != eIt; it++ )
-	{
-		glActiveTexture( textureUnits()[it->textureUnit] );
-		glGetIntegerv( GL_TEXTURE_BINDING_2D, &(it->previousTexture) );
-		if( it->texture )
-		{
-			it->texture->bind();
-		}
-		else
-		{
-			glBindTexture( GL_TEXTURE_2D, 0 );
-		}
-		glUniform1i( it->uniformIndex, it->textureUnit );
+		(*it)->bind();
 	}
 }
 
 Shader::Setup::ScopedBinding::~ScopedBinding()
 {
-	const vector<MemberData::TextureParameter> &textureParameters = m_setup.m_memberData->textureParameters;
-	for( vector<MemberData::TextureParameter>::const_iterator it = textureParameters.begin(), eIt = textureParameters.end(); it != eIt; it++ )
+	const vector<MemberData::ValuePtr> &values = m_setup.m_memberData->values;
+	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
 	{
-		glActiveTexture( textureUnits()[it->textureUnit] );
-		glBindTexture( GL_TEXTURE_2D, it->previousTexture );
+		(*it)->unbind();
 	}
 	
-	const vector<MemberData::UniformParameter> &uniformParameters = m_setup.m_memberData->uniformParameters;
-	for( vector<MemberData::UniformParameter>::const_iterator it = uniformParameters.begin(), eIt = uniformParameters.end(); it != eIt; it++ )
-	{
-		if( it->floats.size() )
-		{
-			// load the previously saved value from the back half of our storage.
-			uniformFloatFunctions()[it->dimensions]( it->uniformIndex, it->size, &(it->floats[it->floats.size()/2]) );
-		}
-		else
-		{
-			// load the previously saved value from the back half of our storage.
-			uniformIntFunctions()[it->dimensions]( it->uniformIndex, it->size, &(it->ints[it->ints.size()/2]) );
-		}
-	}
-	
-	const vector<MemberData::VertexAttribute> &vertexAttributes = m_setup.m_memberData->vertexAttributes;
-	for( vector<MemberData::VertexAttribute>::const_iterator it = vertexAttributes.begin(), eIt = vertexAttributes.end(); it != eIt; it++ )
-	{
-		if( it->divisor )
-		{
-			glVertexAttribDivisor( it->attributeIndex, 0 );
-		}
-		glDisableVertexAttribArray( it->attributeIndex );
-	}
 	glUseProgram( m_previousProgram );
 }
 

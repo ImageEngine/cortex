@@ -500,7 +500,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/twoBSplineCirclesAsLines.tif"
+			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/twoBSplineCirclesAsLines.tif"
 		)
 
 	def testRibbonWindingOrder( self ) :

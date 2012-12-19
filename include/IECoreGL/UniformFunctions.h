@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,18 +43,26 @@ namespace IECoreGL
 {
 
 /// The type of the glUniformNfv functions.
-typedef void (*UniformFloatFunction)( GLint, GLsizei count, const GLfloat * );
-/// Returns a vector containing functions pointers to glUniform1fv, glUniform2fv ... glUniform4fv.
+typedef void (*UniformFloatFunction)( GLint, GLsizei, const GLfloat * );
+/// Returns a vector containing function pointers to glUniform1fv, glUniform2fv ... glUniform4fv.
 /// This can be useful to avoid switching on your datasize when setting shader parameters - you
 /// can instead index straight into this vector to retrieve the appropriate function to call.
 const std::vector<UniformFloatFunction> &uniformFloatFunctions();
 
 /// The type of the glUniformNiv functions.
-typedef void (*UniformIntFunction)( GLint, GLsizei count, const GLint * );
-/// Returns a vector containing functions pointers to glUniform1iv, glUniform2iv ... glUniform4iv.
+typedef void (*UniformIntFunction)( GLint, GLsizei, const GLint * );
+/// Returns a vector containing function pointers to glUniform1iv, glUniform2iv ... glUniform4iv.
 /// This can be useful to avoid switching on your datasize when setting shader parameters - you
 /// can instead index straight into this vector to retrieve the appropriate function to call.
-const std::vector<void (*)( GLint, GLsizei count, const GLint * )> &uniformIntFunctions();
+const std::vector<UniformIntFunction> &uniformIntFunctions();
+
+/// The type of the glUniformMatrix*fv functions.
+typedef void (*UniformMatrixFunction)( GLint, GLsizei, GLboolean, const GLfloat * );
+/// Returns a vector of vectors containing function pointers to the glUniformMatrix*fv functions.
+/// This can be useful to avoid switching on your matrix dimensions when setting shader parameters - you
+/// can instead index straight into the vectors using the matrix dimensions to retrieve the
+/// appropriate function to call.
+const std::vector<std::vector<UniformMatrixFunction> > &uniformMatrixFunctions();
 
 } // namespace IECoreGL
 

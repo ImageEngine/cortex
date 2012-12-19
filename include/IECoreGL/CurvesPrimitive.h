@@ -35,10 +35,10 @@
 #ifndef IECOREGL_CURVESPRIMITIVE_H
 #define IECOREGL_CURVESPRIMITIVE_H
 
-#include "IECoreGL/Primitive.h"
-
 #include "IECore/VectorTypedData.h"
 #include "IECore/CubicBasis.h"
+
+#include "IECoreGL/Primitive.h"
 
 namespace IECoreGL
 {
@@ -56,6 +56,7 @@ class CurvesPrimitive : public Primitive
 
 		virtual Imath::Box3f bound() const;
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
 		virtual void render( const State *currentState, IECore::TypeId style ) const;
 		/// Just renders each segment as linear with GL_LINES.
 		virtual void renderInstances( size_t numInstances = 1 ) const;
@@ -82,19 +83,38 @@ class CurvesPrimitive : public Primitive
 
 	private :
 
+		static const std::string &geometrySource();
+
 		void ensureVertIds() const;
-		void renderLines( const State *currentState, IECore::TypeId style ) const;
-		void renderRibbons( const State *currentState, IECore::TypeId style ) const;
-		
+		void ensureAdjacencyVertIds() const;
+			
 		Imath::Box3f m_bound;
 		IECore::CubicBasisf m_basis;
 		bool m_periodic;
 		IECore::IntVectorDataPtr m_vertsPerCurve;
 		float m_width;
 		IECore::V3fVectorData::ConstPtr m_points;
+		
 		mutable IECoreGL::ConstBufferPtr m_vertIdsBuffer;
 		mutable GLuint m_numVertIds;
 
+		mutable IECoreGL::ConstBufferPtr m_adjacencyVertIdsBuffer;
+		mutable GLuint m_numAdjacencyVertIds;
+
+
+		struct GeometrySetup
+		{
+			GeometrySetup( ConstShaderPtr os, Shader::SetupPtr ss )
+				:	originalShader( os ), shaderSetup( ss )
+			{
+			}
+			ConstShaderPtr originalShader;
+			Shader::SetupPtr shaderSetup;
+		};
+
+		typedef std::vector<GeometrySetup> GeometrySetupVector;
+		mutable GeometrySetupVector m_geometrySetups;
+	
 };
 
 IE_CORE_DECLAREPTR( CurvesPrimitive );
