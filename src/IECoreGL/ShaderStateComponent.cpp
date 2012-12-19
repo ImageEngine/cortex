@@ -90,6 +90,51 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 			return m_shaderSetup;
 		}
 
+		void addParametersToShaderSetup( Shader::Setup *shaderSetup ) const
+		{
+			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
+			for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(), eIt = d.end(); it != eIt; it++ )
+			{
+				GLenum type;
+				GLint size;
+				size_t textureUnit;
+				if( shaderSetup->shader()->uniformParameter( it->first, type, size, textureUnit ) == -1 )
+				{
+					// parameter doesn't exist
+					continue;
+				}
+
+				if( type == GL_SAMPLER_2D )
+				{
+					ConstTexturePtr texture = 0;
+					if(
+						it->second->typeId() == IECore::ImagePrimitiveTypeId ||
+						it->second->typeId() == IECore::CompoundDataTypeId ||
+						it->second->typeId() == IECore::SplineffData::staticTypeId() ||
+						it->second->typeId() == IECore::SplinefColor3fData::staticTypeId()
+					)
+					{
+						texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second ) );
+					}
+					else if( it->second->typeId() == IECore::StringData::staticTypeId() )
+					{
+						const std::string &fileName = static_cast<const IECore::StringData *>( it->second.get() )->readable();
+						if( fileName!="" )
+						{
+							texture = m_textureLoader->load( fileName );
+						}
+					}
+
+					shaderSetup->addUniformParameter( it->first.value(), texture );
+				}
+				else if( it->second->isInstanceOf( IECore::DataTypeId ) )
+				{
+					shaderSetup->addUniformParameter( it->first.value(), IECore::staticPointerCast<const IECore::Data>( it->second ) );
+				}
+			}
+		
+		}
+
 	private :
 
 		ShaderLoaderPtr m_shaderLoader;
@@ -118,46 +163,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 			ShaderPtr shader = m_shaderLoader->create( m_vertexSource, m_geometrySource, m_fragmentSource );
 			m_shaderSetup = new Shader::Setup( shader );
 
-			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
-			for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(), eIt = d.end(); it != eIt; it++ )
-			{
-				GLenum type;
-				GLint size;
-				size_t textureUnit;
-				if( shader->uniformParameter( it->first, type, size, textureUnit ) == -1 )
-				{
-					// parameter doesn't exist
-					continue;
-				}
-
-				if( type == GL_SAMPLER_2D )
-				{
-					ConstTexturePtr texture = 0;
-					if(
-						it->second->typeId() == IECore::ImagePrimitiveTypeId ||
-						it->second->typeId() == IECore::CompoundDataTypeId ||
-						it->second->typeId() == IECore::SplineffData::staticTypeId() ||
-						it->second->typeId() == IECore::SplinefColor3fData::staticTypeId()
-					)
-					{
-						texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second ) );
-					}
-					else if( it->second->typeId() == IECore::StringData::staticTypeId() )
-					{
-						const std::string &fileName = static_cast<const IECore::StringData *>( it->second.get() )->readable();
-						if( fileName!="" )
-						{
-							texture = m_textureLoader->load( fileName );
-						}
-					}
-
-					m_shaderSetup->addUniformParameter( it->first.value(), texture );
-				}
-				else if( it->second->isInstanceOf( IECore::DataTypeId ) )
-				{
-					m_shaderSetup->addUniformParameter( it->first.value(), IECore::staticPointerCast<const IECore::Data>( it->second ) );
-				}
-			}
+			addParametersToShaderSetup( m_shaderSetup.get() );
 		}
 
 };
@@ -200,4 +206,9 @@ Shader::Setup *ShaderStateComponent::shaderSetup()
 const Shader::Setup *ShaderStateComponent::shaderSetup() const
 {
 	return m_implementation->shaderSetup();
+}
+
+void ShaderStateComponent::addParametersToShaderSetup( Shader::Setup *shaderSetup ) const
+{
+	m_implementation->addParametersToShaderSetup( shaderSetup );
 }

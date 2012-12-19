@@ -78,7 +78,13 @@ class ShaderStateComponent : public StateComponent
 		/// with a valid GL context.
 		Shader::Setup *shaderSetup();
 		const Shader::Setup *shaderSetup() const;
-		//@}
+
+		/// Adds the parameters this StateComponent holds to the specified
+		/// setup - this can be of use when Primitives wish to use a modified
+		/// shader to take advantage of custom vertex or geometry shaders.
+		/// There is no need to call this for setups retrieved using the shaderSetup()
+		/// method above - that will have been done automatically.
+		void addParametersToShaderSetup( Shader::Setup *shaderSetup ) const;
 
 	private :
 

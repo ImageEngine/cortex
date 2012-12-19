@@ -448,7 +448,47 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -2 ), IECore.V3f( 12 ) ) )
+
+	def testUniformShaderParameters( self ) :
+
+		fragmentSource = """
+		uniform vec3 myColor;
+		void main()
+		{
+			gl_FragColor = vec4( myColor, 1 );
+		}
+		"""
 	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "exr", "rgba", {} )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			
+			r.shader( "surface", "test", { "gl:fragmentSource" : fragmentSource, "myColor" : IECore.Color3f( 1, 0, 0 ) } )
+			
+			r.points( 1, {
+				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+			} )
+
+		e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
+		result = e.createResult()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+		
 	def tearDown( self ) :
 		
 		if os.path.exists( self.outputFileName ) :

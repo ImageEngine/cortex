@@ -218,16 +218,18 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 		}
 				
 		ConstShaderPtr instancingShader = shader;
+		ShaderStateComponent *shaderStateComponent = state->get<ShaderStateComponent>();
 		if( instancingShader->vertexSource() == "" )
 		{
 			// if the current shader has specific vertex source, then we assume the user has provided
 			// a shader capable of performing the instancing, but if not then we substitute in our own
 			// instancing vertex shader.
-			ShaderLoader *shaderLoader = state->get<ShaderStateComponent>()->shaderLoader();
+			ShaderLoader *shaderLoader = shaderStateComponent->shaderLoader();
 			instancingShader = shaderLoader->create( instancingVertexSource(), "", shader->fragmentSource() );
 		}
 		
 		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
+		shaderStateComponent->addParametersToShaderSetup( instancingShaderSetup );
 		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "", 1 );
 		
 		instancingShaderSetup->addUniformParameter( "useWidth", new BoolData( m_memberData->widths ) );
