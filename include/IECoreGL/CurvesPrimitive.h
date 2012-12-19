@@ -87,33 +87,9 @@ class CurvesPrimitive : public Primitive
 
 		void ensureVertIds() const;
 		void ensureAdjacencyVertIds() const;
-			
-		Imath::Box3f m_bound;
-		IECore::CubicBasisf m_basis;
-		bool m_periodic;
-		IECore::IntVectorDataPtr m_vertsPerCurve;
-		float m_width;
-		IECore::V3fVectorData::ConstPtr m_points;
 		
-		mutable IECoreGL::ConstBufferPtr m_vertIdsBuffer;
-		mutable GLuint m_numVertIds;
-
-		mutable IECoreGL::ConstBufferPtr m_adjacencyVertIdsBuffer;
-		mutable GLuint m_numAdjacencyVertIds;
-
-
-		struct GeometrySetup
-		{
-			GeometrySetup( ConstShaderPtr os, Shader::SetupPtr ss )
-				:	originalShader( os ), shaderSetup( ss )
-			{
-			}
-			ConstShaderPtr originalShader;
-			Shader::SetupPtr shaderSetup;
-		};
-
-		typedef std::vector<GeometrySetup> GeometrySetupVector;
-		mutable GeometrySetupVector m_geometrySetups;
+		IE_CORE_FORWARDDECLARE( MemberData );
+		MemberDataPtr m_memberData;
 	
 };
 
