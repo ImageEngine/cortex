@@ -242,7 +242,7 @@ class ModelCache::Implementation : public RefCounted
 
 ModelCache::ModelCache( const std::string &fileName, IndexedIO::OpenMode mode )
 {
-	IndexedIOPtr indexedIO = IndexedIO::create( fileName, "/", mode );
+	IndexedIOPtr indexedIO = IndexedIO::create( fileName, IndexedIO::rootPath, mode );
 	m_implementation = new Implementation( indexedIO );
 }
 

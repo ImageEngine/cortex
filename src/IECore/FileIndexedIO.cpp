@@ -1418,7 +1418,7 @@ std::iostream *FileIndexedIO::IndexedFile::device()
 
 static IndexedIO::Description<FileIndexedIO> registrar(".fio");
 
-IndexedIOPtr FileIndexedIO::create(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)
+IndexedIOPtr FileIndexedIO::create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
 {
 	return new FileIndexedIO(path, root, mode);
 }
@@ -1428,7 +1428,7 @@ bool FileIndexedIO::canRead( const std::string &path )
 	return Index::canRead( path );
 }
 
-FileIndexedIO::FileIndexedIO(const std::string &path, const std::string &root, IndexedIO::OpenMode mode)
+FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
 {
 	validateOpenMode(mode);
 	m_mode = mode;
@@ -1442,10 +1442,7 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const std::string &root, I
 
 	m_indexedFile = new IndexedFile( filename, mode );
 	m_node = m_indexedFile->index()->m_root;
-	if ( !setRoot( root ) )
-	{
-		throw IOException( "FileIndexedIO: Cannot find entry '" + root + "' in '" + path + "'" );
-	}
+	setRoot( root );
 	assert( m_node );
 }
 
@@ -1453,17 +1450,14 @@ FileIndexedIO::FileIndexedIO()
 {
 }
 
-void FileIndexedIO::open( std::iostream *device, const std::string &root, IndexedIO::OpenMode mode, bool newStream)
+void FileIndexedIO::open( std::iostream *device, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, bool newStream)
 {
 	validateOpenMode(mode);
 	m_mode = mode;
 
 	m_indexedFile = new IndexedFile( device, newStream );
 	m_node = m_indexedFile->index()->m_root;
-	if ( !setRoot( root ) )
-	{
-		throw IOException( "FileIndexedIO: Cannot find entry '" + root + "'" );
-	}
+	setRoot( root );
 	assert( m_node );
 }
 
@@ -1471,36 +1465,25 @@ FileIndexedIO::~FileIndexedIO()
 {
 }
 
-bool FileIndexedIO::setRoot( const std::string &root )
+void FileIndexedIO::setRoot( const IndexedIO::EntryIDList &root )
 {
-	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	Tokenizer tokens(root, boost::char_separator<char>("/"));
-	Tokenizer::iterator t = tokens.begin();
-	bool found;
-
-	if ( root == "/" )
+	IndexedIO::EntryIDList::const_iterator t = root.begin();
+	for ( ; t != root.end(); t++ )
 	{
-		found = true;
-	}
-	else
-	{
-		for ( ; t != tokens.end(); t++ )
+		NodePtr childNode = m_node->child( *t );
+		if ( !childNode )
 		{
-			NodePtr childNode = m_node->child( *t );
-			if ( !childNode )
-			{
-				break;
-			}
-			m_node = childNode;
+			break;
 		}
-		found = ( t == tokens.end() );
+		m_node = childNode;
 	}
+	bool found = ( t == root.end() );
 
 	if (openMode() & IndexedIO::Read)
 	{
 		if (!found)
 		{
-			return false;
+			throw IOException( "FileIndexedIO: Cannot find entry '" + *t + "'" );
 		}
 	}
 	else
@@ -1512,19 +1495,18 @@ bool FileIndexedIO::setRoot( const std::string &root )
 		}
 		else
 		{
-			for ( ; t != tokens.end(); t++ )
+			for ( ; t != root.end(); t++ )
 			{
 				NodePtr childNode = m_node->addChild( *t );
 				if ( !childNode )
 				{
-					return false;
+					throw IOException( "FileIndexedIO: Cannot create entry '" + *t + "'" );
 				}
 				m_node = childNode;
 			}
 		}
 	}
 	assert( m_node );
-	return true;
 }
 
 boost::optional<Imf::Int64> FileIndexedIO::flush()

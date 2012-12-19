@@ -58,12 +58,12 @@ class FileIndexedIO : public IndexedIO
 
 		IE_CORE_DECLAREMEMBERPTR( FileIndexedIO );
 
-		static IndexedIOPtr create(const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
+		static IndexedIOPtr create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
 		static bool canRead( const std::string &path );
 
 		/// Open an existing device or create a new one
-		FileIndexedIO(const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
+		FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
 		virtual ~FileIndexedIO();
 
@@ -188,7 +188,7 @@ class FileIndexedIO : public IndexedIO
 
 		std::iostream *device();
 
-		void open( std::iostream *device, const std::string &root, IndexedIO::OpenMode mode, bool newStream = false );
+		void open( std::iostream *device, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, bool newStream = false );
 
 		FileIndexedIO();
 
@@ -199,7 +199,7 @@ class FileIndexedIO : public IndexedIO
 
 	private :
 
-		bool setRoot( const std::string &root );
+		void setRoot( const IndexedIO::EntryIDList &root );
 
 };
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -58,7 +58,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleArrayIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = IntVectorData()
 		for i in range( 0, 1000 ) :
@@ -76,7 +76,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testStringArrayIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		words = [ "hello", "there", "young", "fellah" ]
 		s = StringVectorData( words )
@@ -95,7 +95,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testImathArrayIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = V3fVectorData()
 		for i in range( 0, 1000 ) :
@@ -113,7 +113,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testOverwrite( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -134,7 +134,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testCompoundData( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		d = CompoundData()
 		d["A"] = IntData( 10 )
@@ -147,7 +147,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testMultipleRef( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		d = CompoundData()
 		i = IntData( 100 )
@@ -170,19 +170,47 @@ class TestObjectIO( unittest.TestCase ) :
 		o["two"] = IntData( 2 )
 		o["oneAgain"] = one
 
-		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		fio = FileIndexedIO( "test/o.fio", [], IndexedIOOpenMode.Write )
 		fio = fio.subdirectory( "a", IndexedIO.MissingBehavior.CreateIfMissing )
 		d = fio.path()
 		o.save( fio, "test" )
 		self.assertEqual( fio.path(), d )
 		del fio
 
-		fio = FileIndexedIO( "test/o.fio", "/a", IndexedIOOpenMode.Read )
+		fio = FileIndexedIO( "test/o.fio", ["a"], IndexedIOOpenMode.Read )
 		d = fio.path()
+		self.assertEqual( fio.path(), ["a"] )
 		oo = o.load( fio, "test" )
 		self.assertEqual( fio.path(), d )
 
 		self.assertEqual( o, oo )
+
+	def testSlashesInRepeatedData(self):
+		"""Explores a problem in the Object representation: the same object is represented as a string path, which is ambiguous when object names have slashes..."""
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+
+		v = IntData(10)
+		d = CompoundData()
+		d['a'] = CompoundData()
+		d['a']['b'] = v
+		d['a/b'] = v
+		d['c'] = CompoundData()
+		d['c']['d'] = v
+		d['c/d'] = v.copy()
+
+		# sanity check
+		self.assert_( d['a/b'].isSame( d['a']['b'] ) )
+		self.assert_( not d['c/d'].isSame( d['c']['d'] ) )
+
+		d.save( f, "test" )
+
+		f = None
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Append)
+		dd = Object.load( f, "test" )
+
+		self.assertEqual( d, dd )
+		self.assert_( dd['a/b'].isSame( dd['a']['b'] ) )
+		self.assert_( not dd['c/d'].isSame( dd['c']['d'] ) )
 
 	def tearDown( self ) :
 

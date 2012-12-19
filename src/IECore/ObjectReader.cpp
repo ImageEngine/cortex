@@ -111,5 +111,5 @@ CompoundObjectPtr ObjectReader::readHeader()
 
 IndexedIOPtr ObjectReader::open( const std::string &fileName )
 {
-	return new FileIndexedIO( fileName, "/", IndexedIO::Shared | IndexedIO::Read );
+	return new FileIndexedIO( fileName, IndexedIO::rootPath, IndexedIO::Shared | IndexedIO::Read );
 }

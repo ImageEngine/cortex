@@ -109,7 +109,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			IndexedIOPtr io = new T(*it, "/", IndexedIO::Read );
+			IndexedIOPtr io = new T(*it, IndexedIO::rootPath, IndexedIO::Read );
 
 			bool exists = true;
 			try
@@ -135,7 +135,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			IndexedIOPtr io = new T(*it, "/", IndexedIO::Read );
+			IndexedIOPtr io = new T(*it, IndexedIO::rootPath, IndexedIO::Read );
 
 			bool exists = true;
 			try
@@ -178,7 +178,7 @@ struct IndexedIOTest
 
 	void write(const std::string &filename)
 	{
-		IndexedIOPtr io = new T(filename, "/", IndexedIO::Write );
+		IndexedIOPtr io = new T(filename, IndexedIO::rootPath, IndexedIO::Write );
 
 		write<float>(io);
 		write<double>(io);

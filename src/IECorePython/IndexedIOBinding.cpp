@@ -46,6 +46,7 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/IECoreBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -67,6 +68,46 @@ void bindIndexedIO()
 
 struct IndexedIOHelper
 {
+	static void listToEntryIds( const list &path, IndexedIO::EntryIDList &entries )
+	{
+		int rootLen = IECorePython::len( path );
+		for (int i = 0; i < rootLen; i++ )
+		{
+			extract< std::string > ex( path[i++] );
+			if ( !ex.check() )
+			{
+				throw InvalidArgumentException( std::string( "Invalid root! Should be a list of strings!" ) );
+			}
+			entries.push_back( ex() );
+		}
+	}
+
+	template< typename T, typename P >
+	static typename T::Ptr constructorAtRoot( P firstParam, IndexedIO::OpenMode mode )
+	{
+		return new T( firstParam, IndexedIO::rootPath, mode );
+	}
+
+	template< typename T, typename P >
+	static typename T::Ptr constructor( P firstParam, list root, IndexedIO::OpenMode mode )
+	{
+		IndexedIO::EntryIDList rootPath;
+		IndexedIOHelper::listToEntryIds( root, rootPath );
+		return new T( firstParam, rootPath, mode );
+	}
+
+	static IndexedIOPtr createAtRoot( const std::string &path, IndexedIO::OpenMode mode)
+	{
+		return IndexedIO::create( path, IndexedIO::rootPath, mode );
+	}
+
+	static IndexedIOPtr create( const std::string &path, list root, IndexedIO::OpenMode mode)
+	{
+		IndexedIO::EntryIDList rootPath;
+		IndexedIOHelper::listToEntryIds( root, rootPath );
+		return IndexedIO::create( path, rootPath, mode );
+	}
+
 	static IndexedIO::Entry entry(IndexedIOPtr p, const IndexedIO::EntryID &name)
 	{
 		assert(p);
@@ -310,7 +351,8 @@ void bindIndexedIO(const char *bindName)
 		.def("write", writeUShort)
 #endif
 		.def("read", &IndexedIOHelper::read)
-		.def("create", &IndexedIO::create ).staticmethod("create")
+		.def("create", &IndexedIOHelper::create )
+		.def("create", &IndexedIOHelper::createAtRoot ).staticmethod("create")
 		.def("supportedExtensions", &IndexedIOHelper::supportedExtensions ).staticmethod("supportedExtensions")
 
 	;
@@ -326,7 +368,8 @@ void bindIndexedIO(const char *bindName)
 void bindFileIndexedIO(const char *bindName)
 {
 	IECorePython::RefCountedClass<FileIndexedIO, IndexedIO>( bindName )
-		.def(init<const std::string &, const std::string &, IndexedIO::OpenMode >())
+		.def("__init__", make_constructor( &IndexedIOHelper::constructorAtRoot<FileIndexedIO, const std::string &> ) )
+		.def("__init__", make_constructor( &IndexedIOHelper::constructor<FileIndexedIO, const std::string &> ) )
 	;
 }
 
@@ -339,7 +382,8 @@ CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
 void bindMemoryIndexedIO(const char *bindName)
 {
 	IECorePython::RefCountedClass<MemoryIndexedIO, IndexedIO>( bindName )
-		.def(init<ConstCharVectorDataPtr, const std::string &, IndexedIO::OpenMode >())
+		.def("__init__", make_constructor( &IndexedIOHelper::constructorAtRoot<MemoryIndexedIO, ConstCharVectorDataPtr> ) )
+		.def("__init__", make_constructor( &IndexedIOHelper::constructor<MemoryIndexedIO, ConstCharVectorDataPtr> ) )
 		.def( "buffer", memoryIndexedIOBufferWrapper )
 	;
 }
@@ -353,3 +397,4 @@ void bindIndexedIOEntry(const char *bindName)
 		.def("arrayLength", &IndexedIO::Entry::arrayLength)
 		;
 }
+

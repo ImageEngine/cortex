@@ -61,7 +61,7 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [ 0, 1 ] )
 		self.assertEqual( m.values(), [ PointsPrimitive( 1 ), PointsPrimitive( 1 ) ] )
 
-		iface = IndexedIO.create( "test/motionPrimitive.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/motionPrimitive.fio", IndexedIOOpenMode.Write )
 		m.save( iface, "test" )
 
 		mm = Object.load( iface, "test" )

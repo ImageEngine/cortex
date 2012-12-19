@@ -473,7 +473,7 @@ def __parseObject( args, parameter ) :
 
 	v = args[0]
 	v = IECore.hexToDecCharVector( v )
-	mio = IECore.MemoryIndexedIO( v, "/", IECore.IndexedIOOpenMode.Read )
+	mio = IECore.MemoryIndexedIO( v, IECore.IndexedIOOpenMode.Read )
 	v = IECore.Object.load( mio, "v" )
 	parameter.setValidatedValue( v )
 	del args[0]
@@ -516,7 +516,7 @@ def __serialiseTransformationMatrix( parameter, value ) :
 
 def __serialiseObject( parameter, value ) :
 
-	mio = IECore.MemoryIndexedIO( IECore.CharVectorData(), "/", IECore.IndexedIOOpenMode.Write )
+	mio = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIOOpenMode.Write )
 	value.save( mio, "v" )
 	buf = mio.buffer()
 	return [ IECore.decToHexCharVector( buf ) ]

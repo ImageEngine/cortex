@@ -73,7 +73,7 @@ bool ObjectWriter::canWrite( ConstObjectPtr object, const std::string &fileName 
 
 void ObjectWriter::doWrite( const CompoundObject *operands )
 {
-	IndexedIOPtr io = new FileIndexedIO( fileName(), "/", IndexedIO::Exclusive | IndexedIO::Write);
+	IndexedIOPtr io = new FileIndexedIO( fileName(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write);
 
 	/// \todo Establish why we only accept CompoundData / Data here when HeaderGenerator::header(), for example,
 	/// returns a CompoundObject

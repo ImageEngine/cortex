@@ -44,7 +44,9 @@ using namespace IECore;
 
 namespace fs = boost::filesystem;
 
-IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode )
+IndexedIO::EntryIDList IndexedIO::rootPath;
+
+IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode )
 {
 	IndexedIOPtr result = 0;
 

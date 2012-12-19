@@ -117,10 +117,12 @@ class IndexedIO : public RefCounted
 		typedef std::string EntryID;
 		typedef std::vector< EntryID > EntryIDList;
 		class Entry;
+		// singleton representing the root location (to be passed in the factory function)
+		static EntryIDList rootPath;
 
 		IE_CORE_DECLAREMEMBERPTR( IndexedIO );
 
-		typedef IndexedIOPtr (*CreatorFn)(const std::string &, const std::string &, IndexedIO::OpenMode );
+		typedef IndexedIOPtr (*CreatorFn)(const std::string &, const EntryIDList &, IndexedIO::OpenMode );
 
 		/// Create an instance of a subclass which is able to open the IndexedIO structure found at "path".
 		/// Files can be opened for Read, Overwrite, or Append.
@@ -130,7 +132,7 @@ class IndexedIO : public RefCounted
 		/// \param path A file or directory on disk. The appropriate reader for reading/writing is determined by the path's extension.
 		/// \param root The root point to 'mount' the structure.
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
-		static IndexedIOPtr create( const std::string &path, const std::string &root, IndexedIO::OpenMode mode);
+		static IndexedIOPtr create( const std::string &path, const EntryIDList &root, IndexedIO::OpenMode mode);
 
 		/// Fills the passed vector with all the extensions for which an IndexedIO implementation is
 		/// available. Extensions are of the form "fio" - ie without a preceding '.'.
