@@ -35,12 +35,21 @@
 #ifndef IECOREGL_CURVESPRIMITIVE_H
 #define IECOREGL_CURVESPRIMITIVE_H
 
+#include "IECoreGL/VecAlgo.h"
+
 #define IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS \
 	\
 	layout( lines_adjacency ) in;\
 	layout( line_strip, max_vertices = 10 ) out;\
 	\
 	uniform mat4x4 basis;
+
+#define IECOREGL_CURVESPRIMITIVE_DECLARE_LINEAR_RIBBONS_PARAMETERS \
+	\
+	layout( lines_adjacency ) in;\
+	layout( triangle_strip, max_vertices = 4 ) out;\
+	\
+	uniform float width;
 
 #define IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_RIBBONS_PARAMETERS \
 	\
@@ -58,9 +67,12 @@
 #define IECOREGL_CURVESPRIMITIVE_POSITION( t )\
 	ieCurvesPrimitivePosition( basis, t )
 
-#define IECOREGL_CURVESPRIMITIVE_FRAME( t, p, normal, uTangent, vTangent ) \
-	ieCurvesPrimitiveFrame( basis, t, p, normal, uTangent, vTangent )
+#define IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, normal, uTangent, vTangent ) \
+	ieCurvesPrimitiveLinearFrame( i, p, normal, uTangent, vTangent )
 
+#define IECOREGL_CURVESPRIMITIVE_CUBICFRAME( t, p, normal, uTangent, vTangent ) \
+	ieCurvesPrimitiveCubicFrame( basis, t, p, normal, uTangent, vTangent )
+	
 void ieCurvesPrimitiveCoefficients( in mat4x4 basis, in float t, out float c0, out float c1, out float c2, out float c3 )
 {
 	float t2 = t * t;
@@ -113,7 +125,42 @@ vec4 ieCurvesPrimitivePosition( in mat4x4 basis, in float t )
 	return ieCurvesPrimitivePosition( c0, c1, c2, c3 );	
 }
 
-void ieCurvesPrimitiveFrame(
+void ieCurvesPrimitiveUTangentAndNormal( in vec4 p, in vec4 vTangent, out vec4 uTangent, out vec4 normal )
+{
+	vec3 view;
+	if( gl_ProjectionMatrix[2][3] != 0.0 )
+	{
+		view = normalize( -p.xyz );
+	}
+	else
+	{
+		view = vec3( 0, 0, 1 );
+	}
+	
+	uTangent = normalize( vec4( cross( view.xyz, vTangent.xyz ), 0 ) );
+	normal = vec4( cross( uTangent.xyz, vTangent.xyz ), 0 );
+}
+
+void ieCurvesPrimitiveLinearFrame(
+	in int i,
+	out vec4 p, out vec4 n,
+	out vec4 uTangent, out vec4 vTangent
+)
+{
+	vec4 vBefore = ieNormalize( gl_in[i+1].gl_Position - gl_in[i].gl_Position );
+	vec4 vAfter = ieNormalize( gl_in[i+2].gl_Position - gl_in[i+1].gl_Position );
+	vTangent = normalize( vBefore + vAfter );
+
+	ieCurvesPrimitiveUTangentAndNormal( gl_in[i+1].gl_Position, vTangent, uTangent, n );
+
+	p = gl_in[i+1].gl_Position;
+
+	float sinTheta = dot( uTangent, vBefore );
+	float cosTheta = sqrt( 1.0 - sinTheta * sinTheta );
+	uTangent /= cosTheta;
+}
+
+void ieCurvesPrimitiveCubicFrame(
 	in mat4x4 basis, in float t,
 	out vec4 p, out vec4 n,
 	out vec4 uTangent, out vec4 vTangent
@@ -138,20 +185,7 @@ void ieCurvesPrimitiveFrame(
 		
 	vTangent = normalize( vTangent );
 	
-	vec3 view;
-	if( gl_ProjectionMatrix[2][3] != 0.0 )
-	{
-		view = normalize( -p.xyz );
-	}
-	else
-	{
-		view = vec3( 0, 0, 1 );
-	}
-	
-	uTangent = normalize( vec4( cross( view.xyz, vTangent.xyz ), 0 ) );
-	n = vec4( cross( uTangent.xyz, vTangent.xyz ), 0 );
+	ieCurvesPrimitiveUTangentAndNormal( p, vTangent, uTangent, n );
 }
-
-
 
 #endif // IECOREGL_CURVESPRIMITIVE_H

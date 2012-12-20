@@ -87,6 +87,9 @@ struct CurvesPrimitive::MemberData : public IECore::RefCounted
 
 	mutable IECoreGL::ConstBufferPtr adjacencyVertIdsBuffer;
 	mutable GLuint numAdjacencyVertIds;
+	
+	mutable IECoreGL::ConstBufferPtr linearAdjacencyVertIdsBuffer;
+	mutable GLuint numLinearAdjacencyVertIds;
 
 	struct GeometrySetup
 	{
@@ -174,7 +177,14 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 		ShaderLoader *shaderLoader = shaderStateComponent->shaderLoader();
 		if( ribbons )
 		{
-			geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicRibbonsGeometrySource(), geometryShader->fragmentSource() );		
+			if( linear )
+			{
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), linearRibbonsGeometrySource(), geometryShader->fragmentSource() );		
+			}
+			else
+			{
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicRibbonsGeometrySource(), geometryShader->fragmentSource() );		
+			}
 		}
 		else
 		{
@@ -195,19 +205,31 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 
 void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) const
 {
-	if( currentState->get<UseGLLines>()->value() )
+	bool linear = m_memberData->basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value();
+	bool ribbons = !currentState->get<UseGLLines>()->value();
+
+	if( !ribbons )
 	{
 		glLineWidth( currentState->get<GLLineWidth>()->value() );
-		if( m_memberData->basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value() )
+		if( linear )
 		{
 			renderInstances( 1 );
 			return;
 		}
 	}
-	
-	ensureAdjacencyVertIds();
-	Buffer::ScopedBinding indexBinding( *(m_memberData->adjacencyVertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
-	glDrawElements( GL_LINES_ADJACENCY, m_memberData->numAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
+
+	if( linear )
+	{
+		ensureLinearAdjacencyVertIds();
+		Buffer::ScopedBinding indexBinding( *(m_memberData->linearAdjacencyVertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
+		glDrawElements( GL_LINES_ADJACENCY, m_memberData->numLinearAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
+	}
+	else
+	{
+		ensureAdjacencyVertIds();
+		Buffer::ScopedBinding indexBinding( *(m_memberData->adjacencyVertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
+		glDrawElements( GL_LINES_ADJACENCY, m_memberData->numAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
+	}
 }
 
 void CurvesPrimitive::renderInstances( size_t numInstances ) const
@@ -264,7 +286,7 @@ const std::string &CurvesPrimitive::cubicRibbonsGeometrySource()
 		""
 		"		float t = float( i ) / 9.0;"
 		"		vec4 p, n, uTangent, vTangent;"
-		"		IECOREGL_CURVESPRIMITIVE_FRAME( t, p, n, uTangent, vTangent );"
+		"		IECOREGL_CURVESPRIMITIVE_CUBICFRAME( t, p, n, uTangent, vTangent );"
 		""
 		"		fragmentN = n.xyz;"
 		"		fragmentI = -n.xyz;"
@@ -275,6 +297,44 @@ const std::string &CurvesPrimitive::cubicRibbonsGeometrySource()
 		"		fragmentN = n.xyz;"
 		"		fragmentI = -n.xyz;"
 		"		fragmentst = vec2( 1, t );"
+		"		gl_Position = p - width * uTangent;"
+		"		EmitVertex();"
+		""
+		"	}"
+		"}";
+		
+	return s;
+}
+
+const std::string &CurvesPrimitive::linearRibbonsGeometrySource()
+{
+	static std::string s = 
+	
+		"#version 150 compatibility\n"
+		""
+		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
+		""
+		"IECOREGL_CURVESPRIMITIVE_DECLARE_LINEAR_RIBBONS_PARAMETERS\n"
+		""
+		"out vec3 fragmentI;"
+		"out vec3 fragmentN;"
+		""
+		"void main()"
+		"{"
+		
+		"	for( int i = 0; i < 2; i++ )"
+		"	{"
+
+		"		vec4 p, n, uTangent, vTangent;"
+		"		IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, n, uTangent, vTangent );"
+				
+		"		fragmentN = n.xyz;"
+		"		fragmentI = -n.xyz;"
+		"		gl_Position = p + width * uTangent;"
+		"		EmitVertex();"
+
+		"		fragmentN = n.xyz;"
+		"		fragmentI = -n.xyz;"
 		"		gl_Position = p - width * uTangent;"
 		"		EmitVertex();"
 		""
@@ -352,4 +412,50 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 	
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
 	m_memberData->adjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
+}
+
+void CurvesPrimitive::ensureLinearAdjacencyVertIds() const
+{	
+	if( m_memberData->linearAdjacencyVertIdsBuffer )
+	{
+		return;
+	}
+	
+	IECore::UIntVectorDataPtr vertIdsData = new IECore::UIntVectorData;
+	vector<unsigned int> &vertIds = vertIdsData->writable();
+	
+	int baseIndex = 0;
+	const vector<int> &vertsPerCurve = m_memberData->vertsPerCurve->readable();
+	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
+	{
+		unsigned int numPoints = *it;
+		int numSegments = IECore::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->periodic, numPoints );
+		int pi = 0;
+		for( int i=0; i<numSegments; i++ )
+		{
+			if( m_memberData->periodic )
+			{
+				vertIds.push_back( baseIndex + ( (pi-1) % numPoints ) );
+				vertIds.push_back( baseIndex + ( (pi) % numPoints ) );
+				vertIds.push_back( baseIndex + ( (pi+1) % numPoints ) );
+				vertIds.push_back( baseIndex + ( (pi+2) % numPoints ) );
+			}
+			else
+			{
+				vertIds.push_back( baseIndex + max( pi-1, 0 ) );
+				vertIds.push_back( baseIndex + pi );
+				vertIds.push_back( baseIndex + pi + 1 );
+				vertIds.push_back( baseIndex + min( pi+2, (int)numPoints-1 ) );
+			}
+			pi += m_memberData->basis.step;
+		}
+
+		baseIndex += numPoints;
+	
+	}
+	
+	m_memberData->numLinearAdjacencyVertIds = vertIds.size();
+	
+	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+	m_memberData->linearAdjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
 }

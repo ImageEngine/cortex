@@ -85,9 +85,11 @@ class CurvesPrimitive : public Primitive
 
 		static const std::string &cubicLinesGeometrySource();
 		static const std::string &cubicRibbonsGeometrySource();
+		static const std::string &linearRibbonsGeometrySource();
 
 		void ensureVertIds() const;
 		void ensureAdjacencyVertIds() const;
+		void ensureLinearAdjacencyVertIds() const;
 		
 		IE_CORE_FORWARDDECLARE( MemberData );
 		MemberDataPtr m_memberData;
