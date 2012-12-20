@@ -57,7 +57,16 @@ BlindDataHolder::~BlindDataHolder()
 {
 }
 
-CompoundData *BlindDataHolder::blindData() const
+CompoundData *BlindDataHolder::blindData()
+{
+	if ( !m_data )
+	{
+		m_data = new CompoundData();
+	}
+	return m_data;
+}
+
+const CompoundData *BlindDataHolder::blindData() const
 {
 	if ( !m_data )
 	{

@@ -46,7 +46,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static CompoundDataPtr blindData( const BlindDataHolder &o )
+static CompoundDataPtr blindData( BlindDataHolder &o )
 {
 	return o.blindData();
 }

@@ -54,7 +54,9 @@ class BlindDataHolder : public Object
 		IE_CORE_DECLAREOBJECT( BlindDataHolder, Object );
 
 		/// Return the blind data for modification.
-		CompoundData *blindData() const;
+		CompoundData *blindData();
+
+		const CompoundData *blindData() const;
 
 	private :
 
