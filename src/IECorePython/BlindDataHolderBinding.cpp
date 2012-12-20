@@ -46,12 +46,17 @@ using namespace IECore;
 namespace IECorePython
 {
 
+static CompoundDataPtr blindData( const BlindDataHolder &o )
+{
+	return o.blindData();
+}
+
 void bindBlindDataHolder()
 {
 	RunTimeTypedClass<BlindDataHolder>( "A class which represents an object with some blind data attached." )
 		.def(init<>())
 		.def(init<CompoundDataPtr>())
-		.def("blindData", &BlindDataHolder::blindData)
+		.def("blindData", blindData)
 	;
 }
 

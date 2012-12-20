@@ -291,7 +291,8 @@ class Object : public RunTimeTyped
 				/// for your class. On exit it will contain the file format version of the file being
 				/// read. If the latter is greater than the former an exception is thrown (the file is
 				/// newer than the library) - this should not be caught.
-				IndexedIOPtr container( const std::string &typeName, unsigned int &ioVersion );
+				/// @param throwIfMissing If false will and the container does not carry the entry for the type name, returns a null pointer.
+				IndexedIOPtr container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing = true );
 				template<class T>
 				/// Load an Object instance previously saved by SaveContext::save().
 				typename T::Ptr load( IndexedIOPtr container, const IndexedIO::EntryID &name );

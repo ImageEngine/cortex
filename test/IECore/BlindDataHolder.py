@@ -65,21 +65,64 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		self.assertEqual( len(b.blindData()), 2 )
 
+	def testComparison(self):
+
+		# test the empty case (where it doesn't allocate the compound data)
+		a = BlindDataHolder( )
+		b = BlindDataHolder( CompoundData() )
+		c = BlindDataHolder( )
+		c.blindData()
+
+		self.assertEqual( a, a )
+		self.assertEqual( a, a )
+		self.assertEqual( a, b )
+		self.assertEqual( b, a )
+		self.assertEqual( a, c )
+		self.assertEqual( c, a )
+		self.assertEqual( b, c )
+		self.assertEqual( c, b )
+		
+		c.blindData()['a'] = IntData(10)
+		self.assertNotEqual( a, c )
+		self.assertNotEqual( c, a )
+		self.assertNotEqual( b, c )
+		self.assertNotEqual( c, b )
+
 	def testLoadSave(self):
 
 		"""Test BlindDataHolder load/save"""
 
 		iface = IndexedIO.create( "test/BlindDataHolder.fio", IndexedIOOpenMode.Write )
 
+		# first simple test: saving with some blind data
 		b1 = BlindDataHolder()
-
 		b1.blindData()["floatData"] = FloatData(1.0)
 		b1.blindData()["intData"] = IntData(-5)
-
 		b1.save( iface, "test" )
 
 		b2 = Object.load( iface, "test" )
 		self.assertEqual( b1, b2 )
+
+		# second test: overriding with no blind data
+		b1 = BlindDataHolder()
+		b1.save( iface, "test" )
+		b1 = Object.load( iface, "test" )
+		self.assertEqual( b1, BlindDataHolder() )
+
+		# thirt test: saving a derived class with some blind data
+		g1 = Group()
+		g1.blindData()["floatData"] = FloatData(1.0)
+		g1.blindData()["intData"] = IntData(-5)
+		g1.save( iface, "test" )
+		g2 = Object.load( iface, "test" )
+		self.assertEqual( g1, g2 )
+		
+		# fourth test: overriding with no blind data
+		g1 = Group()
+		g1.blindData()
+		g1.save( iface, "test" )
+		g2 = Object.load( iface, "test" )
+		self.assertEqual( g1, g2 )
 		
 	def testHash( self ) :
 	

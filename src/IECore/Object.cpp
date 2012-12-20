@@ -155,6 +155,7 @@ void Object::SaveContext::save( const Object *toSave, IndexedIOPtr container, co
 		nameIO->write( "type", toSave->typeName() );
 
 		IndexedIOPtr dataIO = nameIO->subdirectory( "data", IndexedIO::CreateIfMissing );
+		dataIO->removeAll();
 
 		SaveContext context( dataIO, m_savedObjects );
 		toSave->save( &context );
@@ -175,9 +176,13 @@ Object::LoadContext::LoadContext( IndexedIOPtr ioInterface, boost::shared_ptr<Lo
 {
 }
 
-IndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion )
+IndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing )
 {
-	IndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName );
+	IndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
+	if ( !typeIO )
+	{
+		return 0;
+	}
 	unsigned int v;
 	typeIO->read( "ioVersion", v );
 	if( v > ioVersion )
@@ -185,8 +190,7 @@ IndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsign
 		throw( IOException( "File version greater than library version." ) );
 	}
 	ioVersion = v;
-	IndexedIOPtr dataIO = typeIO->subdirectory( "data" );
-	return dataIO;
+	return typeIO->subdirectory( "data", throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
 }
 
 IndexedIOPtr Object::LoadContext::rawContainer()

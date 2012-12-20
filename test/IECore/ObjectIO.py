@@ -132,6 +132,20 @@ class TestObjectIO( unittest.TestCase ) :
 
 		self.assertEqual( o, oo );
 
+		d = CompoundData()
+		d["A"] = IntData( 10 )
+		d["B"] = StringData( "hithere" )
+
+		d.save( iface, "test2" )		
+		dd = Object.load( iface, "test2" )
+		self.assertEqual( d, dd );
+
+		# override CompoundData with less data
+		d = CompoundData()
+		d.save( iface, "test2" )		
+		dd = Object.load( iface, "test2" )
+		self.assertEqual( d, dd );
+
 	def testCompoundData( self ) :
 
 		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
@@ -227,8 +241,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 		for f in [ "test/o.fio" ] :
 			if os.path.isfile( f ) :
-				#os.remove( f )
-				pass
+				os.remove( f )
 
 
 class TestEmptyContainerOptimisation( unittest.TestCase ) :
