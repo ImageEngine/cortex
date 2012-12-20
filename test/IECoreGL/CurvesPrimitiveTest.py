@@ -73,6 +73,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -464,7 +465,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.performTest(
 			c,
 			[
-				#( "gl:primitive:wireframe", IECore.BoolData( True ) ),
+				( "gl:primitive:wireframe", IECore.BoolData( True ) ),
 			],
 			[
 			],

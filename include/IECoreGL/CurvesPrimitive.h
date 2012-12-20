@@ -83,7 +83,8 @@ class CurvesPrimitive : public Primitive
 
 	private :
 
-		static const std::string &geometrySource();
+		static const std::string &cubicLinesGeometrySource();
+		static const std::string &cubicRibbonsGeometrySource();
 
 		void ensureVertIds() const;
 		void ensureAdjacencyVertIds() const;

@@ -90,12 +90,14 @@ struct CurvesPrimitive::MemberData : public IECore::RefCounted
 
 	struct GeometrySetup
 	{
-		GeometrySetup( ConstShaderPtr os, Shader::SetupPtr ss )
-			:	originalShader( os ), shaderSetup( ss )
+		GeometrySetup( ConstShaderPtr os, Shader::SetupPtr ss, bool l, bool r )
+			:	originalShader( os ), shaderSetup( ss ), linear( l ), ribbons( r )
 		{
 		}
 		ConstShaderPtr originalShader;
 		Shader::SetupPtr shaderSetup;
+		bool linear;
+		bool ribbons;
 	};
 
 	typedef std::vector<GeometrySetup> GeometrySetupVector;
@@ -142,46 +144,53 @@ void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 
 const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *state ) const
 {
-	if( state->get<UseGLLines>()->value() )
+	bool linear = m_memberData->basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value();
+	bool ribbons = !state->get<UseGLLines>()->value();
+
+	if( linear && !ribbons  )
 	{
-		if( m_memberData->basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
+		// we just render in the standard way.
+		return Primitive::shaderSetup( shader, state );
+	}
+		
+	// we're rendering with ribbons and/or cubic interpolation. we need
+	// to substitute in a geometry shader to do the work.
+	
+	for( MemberData::GeometrySetupVector::const_iterator it = m_memberData->geometrySetups.begin(), eIt = m_memberData->geometrySetups.end(); it != eIt; it++ )
+	{
+		if( it->originalShader == shader && it->linear == linear && it->ribbons == ribbons )
 		{
-			return Primitive::shaderSetup( shader, state );
+			return it->shaderSetup.get();
+		}
+	}
+
+	ConstShaderPtr geometryShader = shader;
+	ShaderStateComponent *shaderStateComponent = state->get<ShaderStateComponent>();
+	if( geometryShader->geometrySource() == "" )
+	{
+		// if the current shader has a specific geometry shader component,
+		// then we assume the user has provided one capable of doing the tesselation,
+		// but if not then we substitute in our own geometry shader.
+		ShaderLoader *shaderLoader = shaderStateComponent->shaderLoader();
+		if( ribbons )
+		{
+			geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicRibbonsGeometrySource(), geometryShader->fragmentSource() );		
 		}
 		else
 		{
-			for( MemberData::GeometrySetupVector::const_iterator it = m_memberData->geometrySetups.begin(), eIt = m_memberData->geometrySetups.end(); it != eIt; it++ )
-			{
-				if( it->originalShader == shader )
-				{
-					return it->shaderSetup.get();
-				}
-			}
-		
-			ConstShaderPtr geometryShader = shader;
-			if( geometryShader->geometrySource() == "" )
-			{
-				// if the current shader has a specific geometry shader component,
-				// then we assume the user has provided one capable of doing the tesselation,
-				// but if not then we substitute in our own geometry shader.
-				ShaderLoader *shaderLoader = state->get<ShaderStateComponent>()->shaderLoader();
-				geometryShader = shaderLoader->create( geometryShader->vertexSource(), geometrySource(), geometryShader->fragmentSource() );
-			}
-			
-			static Shader::SetupPtr geometryShaderSetup = new Shader::Setup( geometryShader );
-			addPrimitiveVariablesToShaderSetup( geometryShaderSetup );
-			geometryShaderSetup->addUniformParameter( "basis", new IECore::M44fData( m_memberData->basis.matrix ) );
-			
-			m_memberData->geometrySetups.push_back( MemberData::GeometrySetup( shader, geometryShaderSetup ) );
-			
-			return geometryShaderSetup;
+			geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicLinesGeometrySource(), geometryShader->fragmentSource() );
 		}
 	}
-	else
-	{
-		/// \todo Implement ribbon rendering properly
-		return Primitive::shaderSetup( shader, state );
-	}
+
+	Shader::SetupPtr geometryShaderSetup = new Shader::Setup( geometryShader );
+	shaderStateComponent->addParametersToShaderSetup( geometryShaderSetup );
+	addPrimitiveVariablesToShaderSetup( geometryShaderSetup );
+	geometryShaderSetup->addUniformParameter( "basis", new IECore::M44fData( m_memberData->basis.matrix ) );
+	geometryShaderSetup->addUniformParameter( "width", new IECore::M44fData( m_memberData->width ) );
+
+	m_memberData->geometrySetups.push_back( MemberData::GeometrySetup( shader, geometryShaderSetup, linear, ribbons ) );
+	
+	return geometryShaderSetup.get();
 }
 
 void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) const
@@ -189,21 +198,16 @@ void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) 
 	if( currentState->get<UseGLLines>()->value() )
 	{
 		glLineWidth( currentState->get<GLLineWidth>()->value() );
-		if( (m_memberData->basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value()) )
+		if( m_memberData->basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value() )
 		{
 			renderInstances( 1 );
-		}
-		else
-		{
-			ensureAdjacencyVertIds();
-			Buffer::ScopedBinding indexBinding( *(m_memberData->adjacencyVertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
-			glDrawElements( GL_LINES_ADJACENCY, m_memberData->numAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
+			return;
 		}
 	}
-	else
-	{
-		//renderRibbons( currentState, style );
-	}
+	
+	ensureAdjacencyVertIds();
+	Buffer::ScopedBinding indexBinding( *(m_memberData->adjacencyVertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
+	glDrawElements( GL_LINES_ADJACENCY, m_memberData->numAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
 }
 
 void CurvesPrimitive::renderInstances( size_t numInstances ) const
@@ -213,16 +217,15 @@ void CurvesPrimitive::renderInstances( size_t numInstances ) const
 	glDrawElementsInstanced( GL_LINES, m_memberData->numVertIds, GL_UNSIGNED_INT, 0, numInstances );
 }
 
-const std::string &CurvesPrimitive::geometrySource()
+const std::string &CurvesPrimitive::cubicLinesGeometrySource()
 {
 	static std::string s = 
 	
-		"#version 150\n"
+		"#version 150 compatibility\n"
 		""
-		"layout( lines_adjacency ) in;"
-		"layout( line_strip, max_vertices = 10 ) out;"
+		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
 		""
-		"uniform mat4x4 basis;"
+		"IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS\n"
 		""
 		"void main()"
 		"{"
@@ -230,22 +233,51 @@ const std::string &CurvesPrimitive::geometrySource()
 		"	for( int i = 0; i < 10; i++ )"
 		"	{"
 		"		float t = float( i ) / 9.0;"
-		"		float t2 = t * t;"
-		"		float t3 = t2 * t;"
-		""
-		"		float c0 = basis[0][0] * t3 + basis[1][0] * t2 + basis[2][0] * t + basis[3][0];"
-		"		float c1 = basis[0][1] * t3 + basis[1][1] * t2 + basis[2][1] * t + basis[3][1];"
-		"		float c2 = basis[0][2] * t3 + basis[1][2] * t2 + basis[2][2] * t + basis[3][2];"
-		"		float c3 = basis[0][3] * t3 + basis[1][3] * t2 + basis[2][3] * t + basis[3][3];"
-		""
-		"		gl_Position ="
-		""
-		"			gl_in[0].gl_Position * c0 +"
-		"			gl_in[1].gl_Position * c1 +"
-		"			gl_in[2].gl_Position * c2 +"
-		"			gl_in[3].gl_Position * c3;"
-		""
+		"		gl_Position = IECOREGL_CURVESPRIMITIVE_POSITION( t );"
 		"		EmitVertex();"
+		""
+		"	}"
+		"}";
+		
+	return s;
+}
+
+const std::string &CurvesPrimitive::cubicRibbonsGeometrySource()
+{
+	static std::string s = 
+	
+		"#version 150 compatibility\n"
+		""
+		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
+		""
+		"IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_RIBBONS_PARAMETERS\n"
+		""
+		"out vec3 fragmentI;"
+		"out vec3 fragmentN;"
+		"out vec2 fragmentst;"
+		""
+		"void main()"
+		"{"
+		""
+		"	for( int i = 0; i < 10; i++ )"
+		"	{"
+		""
+		"		float t = float( i ) / 9.0;"
+		"		vec4 p, n, uTangent, vTangent;"
+		"		IECOREGL_CURVESPRIMITIVE_FRAME( t, p, n, uTangent, vTangent );"
+		""
+		"		fragmentN = n.xyz;"
+		"		fragmentI = -n.xyz;"
+		"		fragmentst = vec2( 0, t );"
+		"		gl_Position = p + width * uTangent;"
+		"		EmitVertex();"
+		""
+		"		fragmentN = n.xyz;"
+		"		fragmentI = -n.xyz;"
+		"		fragmentst = vec2( 1, t );"
+		"		gl_Position = p - width * uTangent;"
+		"		EmitVertex();"
+		""
 		"	}"
 		"}";
 		
@@ -321,308 +353,3 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
 	m_memberData->adjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
 }
-
-//void CurvesPrimitive::renderLines( const State *currentState, IECore::TypeId style ) const
-//{
-	/*if( m_basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value() )
-	{
-		
-	}*/
-	
-
-/*	const V3f *p = &(m_points->readable()[0]);
-	const std::vector<int> &v = m_vertsPerCurve->readable();
-
-	unsigned vertexCount = m_points->readable().size();
-	glLineWidth( state->get<GLLineWidth>()->value() );
-
-	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
-	{
-
-		if ( style == Primitive::DrawSolid::staticTypeId() )
-		{
-			setVertexAttributes( vertexCount );
-		}
-
-		int c = 0;
-		int offset = 0;
-		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++, c++ )
-		{
-			if( style==Primitive::DrawSolid::staticTypeId() )
-			{
-				setVertexAttributesAsUniforms( v.size(), c );
-			}
-
-			glDrawArrays( m_periodic ? GL_LINE_LOOP : GL_LINE_STRIP, offset, *vIt );
-			offset += *vIt;
-		}
-
-	}
-	else
-	{
-
-		unsigned baseIndex = 0;
-		int c = 0;
-		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++, c++ )
-		{
-
-			if( style==Primitive::DrawSolid::staticTypeId() )
-			{
-				setVertexAttributesAsUniforms( v.size(), c );
-			}
-
-			unsigned numPoints = *vIt;
-			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
-			unsigned pi = 0;
-			for( unsigned i=0; i<numSegments; i++ )
-			{
-				const V3f &p0 = p[baseIndex+(pi%numPoints)];
-				const V3f &p1 = p[baseIndex+((pi+1)%numPoints)];
-				const V3f &p2 = p[baseIndex+((pi+2)%numPoints)];
-				const V3f &p3 = p[baseIndex+((pi+3)%numPoints)];
-
-				glBegin( GL_LINE_STRIP );
-
-					unsigned steps = 10; /// \todo Calculate this based on projected size on the screen
-					for( unsigned ti=0; ti<=steps; ti++ )
-					{
-						float t = (float)ti/(float)steps;
-						V3f pp = m_basis( t, p0, p1, p2, p3 );
-						glVertex3f( pp[0], pp[1], pp[2] );
-					}
-
-				glEnd();
-				pi += m_basis.step;
-			}
-
-			baseIndex += numPoints;
-
-		}
-
-	}*/
-//}
-
-/*void CurvesPrimitive::renderRibbons( const State *currentState, IECore::TypeId style ) const
-{
-	float halfWidth = m_width/2.0f;
-	const V3f *points = &(m_points->readable()[0]);
-	const std::vector<int> &vertsPerCurve = m_vertsPerCurve->readable();
-
-	V3f cameraCentre = Camera::positionInObjectSpace();
-	V3f cameraView = -Camera::viewDirectionInObjectSpace();
-	bool perspective = Camera::perspectiveProjection();
-
-	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
-	{
-
-		// linear. implemented separately because for this we don't have to worry about
-		// subdividing etc.
-
-		int c = 0;
-		unsigned basePointIndex = 0;
-		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++, c++ )
-		{
-
-			if( style==Primitive::DrawSolid::staticTypeId() )
-			{
-				setVertexAttributesAsUniforms( vertsPerCurve.size(), c );
-			}
-
-			unsigned numPoints = *vIt;
-			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
-
-			glBegin( GL_QUAD_STRIP );
-
-				for( unsigned i=0; i<=numSegments; i++ )
-				{
-					int pi0 = i-1;
-					int pi1 = i;
-					int pi2 = i+1;
-					if( m_periodic )
-					{
-						pi0 = pi0 % numPoints;
-						pi1 = pi1 % numPoints;
-						pi2 = pi2 % numPoints;
-					}
-					else
-					{
-						pi0 = clamp( pi0, 0, (int)numPoints-1 );
-						pi1 = clamp( pi1, 0, (int)numPoints-1 );
-						pi2 = clamp( pi2, 0, (int)numPoints-1 );
-					}
-
-					const V3f &p0 = points[basePointIndex+pi0];
-					const V3f &p1 = points[basePointIndex+pi1];
-					const V3f &p2 = points[basePointIndex+pi2];
-
-					V3f vBefore = (p1-p0).normalized();
-					V3f vAfter = (p2-p1).normalized();
-
-					V3f normal;
-					V3f uTangent = uTangentAndNormal( p1, cameraCentre, cameraView, perspective, vBefore + vAfter, normal );
-
-					float sinTheta = uTangent.dot( vBefore );
-					float cosTheta = sqrt( 1.0f - sinTheta * sinTheta );
-					uTangent *= halfWidth / cosTheta;
-					glNormal( normal );
-					glTexCoord2f( 0.0f, 0.0f );
-					glVertex( p1 - uTangent );
-					glTexCoord2f( 1.0f, 0.0f );
-					glVertex( p1 + uTangent );
-				}
-
-			glEnd();
-
-			basePointIndex += numPoints;
-		}
-
-	}
-	else
-	{
-		int c = 0;
-		unsigned basePointIndex = 0;
-		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++, c++ )
-		{
-
-			if( style==Primitive::DrawSolid::staticTypeId() )
-			{
-				setVertexAttributesAsUniforms( vertsPerCurve.size(), c );
-			}
-
-			unsigned numPoints = *vIt;
-			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
-			unsigned pi = 0;
-
-			glBegin( GL_QUAD_STRIP );
-
-				V3f lastP( 0 );
-				V3f lastV( 0 );
-				V3f firstP( 0 );
-				V3f firstV( 0 );
-				V3f firstUTangent( 0 );
-				V3f firstNormal( 0 );
-				for( unsigned i=0; i<numSegments; i++ )
-				{
-					const V3f &p0 = points[basePointIndex+(pi%numPoints)];
-					const V3f &p1 = points[basePointIndex+((pi+1)%numPoints)];
-					const V3f &p2 = points[basePointIndex+((pi+2)%numPoints)];
-					const V3f &p3 = points[basePointIndex+((pi+3)%numPoints)];
-
-					unsigned steps = 10; /// \todo Calculate this based on projected size on the screen
-					bool lastSegment = i==(numSegments-1);
-					unsigned tiLimit = steps - 1;
-					if( lastSegment )
-					{
-						// we only evaluate the last point for the last segment, as otherwise
-						// it would be repeated by the first point of the next segment.
-						tiLimit = steps;
-					}
-					for( unsigned ti=0; ti<=tiLimit; ti++ )
-					{
-
-						float t = (float)ti/(float)steps;
-						V3f p = m_basis( t, p0, p1, p2, p3 );
-						V3f v = p - lastP;
-
-						if( i==0 && ti<2 )
-						{
-							// we're doing the awkward first few points.
-							if( ti==0 )
-							{
-								// first point of all, we don't have enough information to
-								// do anything yet.
-							}
-							else if( ti==1 )
-							{
-								// second point ever. we've got enough to emit the first point,
-								// but only if we're not periodic.
-								if( !m_periodic )
-								{
-									V3f normal;
-									V3f uTangent = uTangentAndNormal( lastP, cameraCentre, cameraView, perspective, v, normal );
-									uTangent *= halfWidth;
-									glTexCoord2f( 0.0f, 0.0f );
-									glVertex( lastP - uTangent );
-									glTexCoord2f( 1.0f, 0.0f );
-									glVertex( lastP + uTangent );
-								}
-								else
-								{
-									// save for use with the last point of all.
-									firstV = v;
-								}
-							}
-						}
-						else
-						{
-
-							V3f vAvg = (v + lastV) / 2.0f;
-							V3f normal;
-							V3f uTangent = uTangentAndNormal( lastP, cameraCentre, cameraView, perspective, vAvg, normal );
-							uTangent *= halfWidth;
-
-							glNormal( normal );
-							glTexCoord2f( 0.0f, 0.0f );
-							glVertex( lastP - uTangent );
-							glTexCoord2f( 1.0f, 0.0f );
-							glVertex( lastP + uTangent );
-
-							if( i==0 && ti==2 )
-							{
-								// save for joining up periodic curves at the end
-								firstP = lastP;
-								firstUTangent = uTangent;
-								firstNormal = normal;
-							}
-
-							if( lastSegment && ti==tiLimit )
-							{
-								// the last point of all.
-								if( !m_periodic )
-								{
-									V3f normal;
-									V3f uTangent = uTangentAndNormal( p, cameraCentre, cameraView, perspective, v, normal );
-									uTangent *= halfWidth;
-									glNormal( normal );
-									glTexCoord2f( 0.0f, 0.0f );
-									glVertex( p - uTangent );
-									glTexCoord2f( 1.0f, 0.0f );
-									glVertex( p + uTangent );
-								}
-								else
-								{
-									V3f vAvg = (v + firstV) / 2.0f;
-									V3f normal;
-									V3f uTangent = uTangentAndNormal( p, cameraCentre, cameraView, perspective, vAvg, normal );
-									uTangent *= halfWidth;
-									glNormal( normal );
-									glTexCoord2f( 0.0f, 0.0f );
-									glVertex( p - uTangent );
-									glTexCoord2f( 1.0f, 0.0f );
-									glVertex( p + uTangent );
-									glNormal( firstNormal );
-									glTexCoord2f( 0.0f, 0.0f );
-									glVertex( firstP - firstUTangent );
-									glTexCoord2f( 1.0f, 0.0f );
-									glVertex( firstP + firstUTangent );
-								}
-							}
-
-						}
-
-						lastP = p;
-						lastV = v;
-					}
-
-					pi += m_basis.step;
-				}
-
-			glEnd();
-			basePointIndex += numPoints;
-
-		}
-
-	}
-	
-}
-*/
