@@ -39,8 +39,8 @@ import IECoreRI
 
 class TestSHWDeepImageReader( unittest.TestCase ) :
 	
-	__shw = "test/IECoreRI/data/shw/coneAndSphere.shw"
-	__exr = "test/IECoreRI/data/dtex/coneAndSphere.exr"
+	__shw = "test/IECoreRI/data/shw/translucentBoxes.shw"
+	__exr = "test/IECoreRI/data/shw/groundPlane.exr"
 	
 	def testConstructor( self ) :
 	
@@ -84,11 +84,11 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 		self.assertEqual( reader.parameters()['fileName'].getTypedValue(), TestSHWDeepImageReader.__shw )
 		self.failUnless( reader.isComplete() )
 		self.assertEqual( reader.channelNames(), IECore.StringVectorData( [ "A" ] ) )
-		self.assertEqual( reader.dataWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 383, 383 ) ) )
-		self.assertEqual( reader.displayWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 383, 383 ) ) )
-		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( IECore.M44f( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ), 1e-4 ) )
-		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( IECore.M44f( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ), 1e-4 ) )
-		
+		self.assertEqual( reader.dataWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 511, 511 ) ) )
+		self.assertEqual( reader.displayWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 511, 511 ) ) )
+		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( IECore.M44f( -0.422618, -0.694272, -0.582563, 0, -2.42861e-17, 0.642788, -0.766044, 0, -0.906308, 0.323744, 0.271654, 0, 3.00476, -0.592705, 84.3541, 1 ), 1e-4 ) )
+		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( IECore.M44f( -1.02029, -1.67612, -0.582578, -0.582563, 0, 1.55183, -0.766064, -0.766044, -2.18802, 0.781588, 0.271661, 0.271654, 7.25413, -1.43092, 83.5416, 84.3541 ), 1e-4 ) )
+	
 	def testHeader( self ) :
 	
 		reader = IECoreRI.SHWDeepImageReader( TestSHWDeepImageReader.__shw )
@@ -104,42 +104,45 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 	
 		reader = IECoreRI.SHWDeepImageReader( TestSHWDeepImageReader.__shw )
 
-		self.failUnless( isinstance( reader.readPixel( 80, 50 ), IECore.DeepPixel ) )
+		self.failUnless( isinstance( reader.readPixel( 80, 112 ), IECore.DeepPixel ) )
 		self.failUnless( reader.readPixel( 0, 0 ) is None )
-		self.assertRaises( RuntimeError, IECore.curry( reader.readPixel, 384, 383 ) )
-		self.assertRaises( RuntimeError, IECore.curry( reader.readPixel, 383, 384 ) )
+		self.assertRaises( RuntimeError, IECore.curry( reader.readPixel, 512, 511 ) )
+		self.assertRaises( RuntimeError, IECore.curry( reader.readPixel, 511, 512 ) )
 		
-		p = reader.readPixel( 192, 179 )
+		# hits ground plane only
+		p = reader.readPixel( 100, 100 )
 		self.assertEqual( p.channelNames(), ( "A", ) )
 		self.assertEqual( p.numSamples(), 1 )
-		self.assertAlmostEqual( p.getDepth( 0 ), 5.297642, 6 )
-		self.assertAlmostEqual( p[0][0], 0.083333, 6 )
+		self.assertAlmostEqual( p.getDepth( 0 ), 107.5978927, 6 )
+		self.assertAlmostEqual( p[0][0], 1.0, 6 )
 		
-		p2 = reader.readPixel( 192, 183 )
+		# hits one box then ground plane
+		p2 = reader.readPixel( 256, 256 )
 		self.assertEqual( p2.channelNames(), tuple(reader.channelNames()) )
-		self.assertEqual( p2.numSamples(), 6 )
-		self.assertAlmostEqual( p2.getDepth( 0 ), 4.893305, 6 )
-		self.assertAlmostEqual( p2.getDepth( 1 ), 4.912039, 6 )
-		self.assertAlmostEqual( p2.getDepth( 2 ), 4.926313, 6 )
-		self.assertAlmostEqual( p2.getDepth( 3 ), 5.272715, 6 )
-		self.assertAlmostEqual( p2.getDepth( 4 ), 5.284764, 6 )
-		self.assertAlmostEqual( p2.getDepth( 5 ), 5.305941, 6 )
+		self.assertEqual( p2.numSamples(), 3 )
+		self.assertAlmostEqual( p2.getDepth( 0 ), 71.7940826, 6 )
+		self.assertAlmostEqual( p2.getDepth( 1 ), 76.9240646, 6 )
+		self.assertAlmostEqual( p2.getDepth( 2 ), 84.8475646, 6 )
 		
-		expected = ( 0.133333, 0.205128, 0.129032, 0.088889, 0.195122, 0.181818 )
+		expected = ( 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
-			self.assertAlmostEqual( p2[i][0], expected[i], 6 )
+			self.assertEqual( p2[i][0], expected[i] )
 		
+		# hits 2 boxes then ground plane
 		p3 = reader.readPixel( 195, 225 )
 		self.assertEqual( p3.channelNames(), tuple(reader.channelNames()) )
-		self.assertEqual( p3.numSamples(), 2 )
-		self.assertAlmostEqual( p3.getDepth( 0 ), 4.296060, 6 )
-		self.assertAlmostEqual( p3.getDepth( 1 ), 6.008639, 6 )
+		self.assertEqual( p3.numSamples(), 5 )
+		self.assertAlmostEqual( p3.getDepth( 0 ), 68.2118148, 6 )
+		self.assertAlmostEqual( p3.getDepth( 1 ), 74.9367370, 6 )
+		self.assertAlmostEqual( p3.getDepth( 2 ), 77.0554046, 6 )
+		self.assertAlmostEqual( p3.getDepth( 3 ), 79.7311859, 6 )
+		self.assertAlmostEqual( p3.getDepth( 4 ), 88.5616073, 6 )
 		
-		expected = ( 0.400000, 0.400000 )
+		expected = ( 0.5, 0.75, 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
-			self.assertAlmostEqual( p3[i][0], expected[i], 6 )
+			self.assertEqual( p3[i][0], expected[i] )
 		
-		self.failUnless( reader.readPixel( 193, 179 ) is None )
+		self.failUnless( reader.readPixel( 440, 30 ) is None )
 	
 	def testComposite( self ) :
 	
@@ -153,10 +156,10 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 		
 		a = image["A"].data
 		
-		i = 179 * 384 + 192
-		self.assertAlmostEqual( a[i], 0.083333, 6 )
+		i = 11 * 512 + 153
+		self.assertEqual( a[i], 1.0 )
 		
-		i = 179 * 384 + 193
+		i = 11 * 512 + 154
 		self.assertEqual( a[i], 0 )
 		
 		realImage = IECore.EXRImageReader( TestSHWDeepImageReader.__exr ).read()

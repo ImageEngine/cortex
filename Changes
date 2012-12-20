@@ -2,6 +2,10 @@ Improvements :
 
 * Using IECoreHoudini SOP_InterpolatedCacheReader in PrimitiveGroup mode will now load Prim and Vertex attribs as well as Point attribs
 
+Bug Fixes :
+
+* In SHWDeepImageReader/Writer, we now composite on write and uncomposite on read. This fixes an issue where deep images converted from mantra were seemingly losing samples.
+
 7.10.0 :
 
 Improvements :

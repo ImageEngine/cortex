@@ -106,16 +106,23 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	
 	float adjustedData[numChannels];
 	
+	float previous = 0.0;
 	unsigned numSamples = pixel->numSamples();
 	for ( unsigned i=0; i < numSamples; ++i )
 	{
-		float alpha = pixel->channelData( i )[m_alphaOffset];
+		// SHW files require composited values, accumulated over depth, but we have uncomposited values
+		float current = pixel->channelData( i )[m_alphaOffset];
+		float value = current * ( 1 - previous ) + previous;
+		previous = value;
+		
+		// SHW files represent occlusion, but we really want transparency,
+		// so we invert the data upon reading it.
+		/// \todo: consider a parameter to opt out of this behaviour
+		value = 1.0 - value;
+		
 		for ( unsigned c=0; c < 3; ++c )
 		{
-			// SHW files represent occlusion, but we really want transparency,
-			// so we invert the data upon reading it.
-			/// \todo: consider a parameter to opt out of this behaviour
-			adjustedData[c] = 1.0 - alpha;
+			adjustedData[c] = value;
 		}
 		
 		DtexAppendPixel( m_dtexPixel, pixel->getDepth( i ), numChannels, adjustedData, 0 );

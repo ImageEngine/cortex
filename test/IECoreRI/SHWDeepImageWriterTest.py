@@ -40,8 +40,8 @@ import IECoreRI
 
 class TestSHWDeepImageWriter( unittest.TestCase ) :
 	
-	__shw = "test/IECoreRI/data/shw/coneAndSphere.shw"
-	__exr = "test/IECoreRI/data/dtex/coneAndSphere.exr"
+	__shw = "test/IECoreRI/data/shw/translucentBoxes.shw"
+	__exr = "test/IECoreRI/data/dtex/groundPlane.exr"
 	__output = "test/IECoreRI/data/shw/written.shw"
 	
 	def testConstructor( self ) :
@@ -138,7 +138,7 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		reader = IECoreRI.SHWDeepImageReader( TestSHWDeepImageWriter.__shw )
 		writer = IECoreRI.SHWDeepImageWriter( TestSHWDeepImageWriter.__output )
 		writer.parameters()['resolution'].setTypedValue( reader.dataWindow().size() + IECore.V2i( 1 ) )
-		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), IECore.V2i( 384, 384 ) )
+		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), IECore.V2i( 512, 512 ) )
 		self.assertEqual( writer.parameters()['channelNames'].getValue(), IECore.StringVectorData( [ "A" ] ) )
 		
 		writer.parameters()['resolution'].setTypedValue( IECore.V2i( 2, 2 ) )
@@ -152,35 +152,38 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), wToC )
 		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), cToS )
 		
-		p = reader.readPixel( 192, 179 )
+		# hits ground plane only
+		p = reader.readPixel( 100, 100 )
 		self.assertEqual( p.channelNames(), ( "A", ) )
 		self.assertEqual( p.numSamples(), 1 )
-		self.assertAlmostEqual( p.getDepth( 0 ), 5.297642, 6 )
-		self.assertAlmostEqual( p[0][0], 0.083333, 6 )
+		self.assertAlmostEqual( p.getDepth( 0 ), 107.5978927, 6 )
+		self.assertAlmostEqual( p[0][0], 1.0, 6 )
 		
-		p2 = reader.readPixel( 192, 183 )
+		# hits one box then ground plane
+		p2 = reader.readPixel( 256, 256 )
 		self.assertEqual( p2.channelNames(), tuple(reader.channelNames()) )
-		self.assertEqual( p2.numSamples(), 6 )
-		self.assertAlmostEqual( p2.getDepth( 0 ), 4.893305, 6 )
-		self.assertAlmostEqual( p2.getDepth( 1 ), 4.912039, 6 )
-		self.assertAlmostEqual( p2.getDepth( 2 ), 4.926313, 6 )
-		self.assertAlmostEqual( p2.getDepth( 3 ), 5.272715, 6 )
-		self.assertAlmostEqual( p2.getDepth( 4 ), 5.284764, 6 )
-		self.assertAlmostEqual( p2.getDepth( 5 ), 5.305941, 6 )
+		self.assertEqual( p2.numSamples(), 3 )
+		self.assertAlmostEqual( p2.getDepth( 0 ), 71.7940826, 6 )
+		self.assertAlmostEqual( p2.getDepth( 1 ), 76.9240646, 6 )
+		self.assertAlmostEqual( p2.getDepth( 2 ), 84.8475646, 6 )
 		
-		expected = ( 0.133333, 0.205128, 0.129032, 0.088889, 0.195122, 0.181818 )
+		expected = ( 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
-			self.assertAlmostEqual( p2[i][0], expected[i], 6 )
+			self.assertEqual( p2[i][0], expected[i] )
 		
+		# hits 2 boxes then ground plane
 		p3 = reader.readPixel( 195, 225 )
 		self.assertEqual( p3.channelNames(), tuple(reader.channelNames()) )
-		self.assertEqual( p3.numSamples(), 2 )
-		self.assertAlmostEqual( p3.getDepth( 0 ), 4.296060, 6 )
-		self.assertAlmostEqual( p3.getDepth( 1 ), 6.008639, 6 )
+		self.assertEqual( p3.numSamples(), 5 )
+		self.assertAlmostEqual( p3.getDepth( 0 ), 68.2118148, 6 )
+		self.assertAlmostEqual( p3.getDepth( 1 ), 74.9367370, 6 )
+		self.assertAlmostEqual( p3.getDepth( 2 ), 77.0554046, 6 )
+		self.assertAlmostEqual( p3.getDepth( 3 ), 79.7311859, 6 )
+		self.assertAlmostEqual( p3.getDepth( 4 ), 88.5616073, 6 )
 		
-		expected = ( 0.400000, 0.400000 )
+		expected = ( 0.5, 0.75, 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
-			self.assertAlmostEqual( p3[i][0], expected[i], 6 )
+			self.assertEqual( p3[i][0], expected[i] )
 		
 		writer.writePixel( 0, 0, p )
 		writer.writePixel( 0, 1, p2 )
@@ -193,35 +196,38 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( wToC, 1e-6 ) )
 		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( cToS, 1e-6 ) )
 		
+		# hits ground plane only
 		rp = reader.readPixel( 0, 0 )
-		self.assertEqual( rp.channelNames(), tuple(reader.channelNames()) )
+		self.assertEqual( rp.channelNames(), ( "A", ) )
 		self.assertEqual( rp.numSamples(), 1 )
-		self.assertAlmostEqual( rp.getDepth( 0 ), 5.297642, 6 )
-		self.assertAlmostEqual( p[0][0], 0.083333, 6 )
+		self.assertAlmostEqual( rp.getDepth( 0 ), 107.5978927, 6 )
+		self.assertAlmostEqual( rp[0][0], 1.0, 6 )
 		
+		# hits one box then ground plane
 		rp2 = reader.readPixel( 0, 1 )
 		self.assertEqual( rp2.channelNames(), tuple(reader.channelNames()) )
-		self.assertEqual( rp2.numSamples(), 6 )
-		self.assertAlmostEqual( rp2.getDepth( 0 ), 4.893305, 6 )
-		self.assertAlmostEqual( rp2.getDepth( 1 ), 4.912039, 6 )
-		self.assertAlmostEqual( rp2.getDepth( 2 ), 4.926313, 6 )
-		self.assertAlmostEqual( rp2.getDepth( 3 ), 5.272715, 6 )
-		self.assertAlmostEqual( rp2.getDepth( 4 ), 5.284764, 6 )
-		self.assertAlmostEqual( rp2.getDepth( 5 ), 5.305941, 6 )
+		self.assertEqual( rp2.numSamples(), 3 )
+		self.assertAlmostEqual( rp2.getDepth( 0 ), 71.7940826, 6 )
+		self.assertAlmostEqual( rp2.getDepth( 1 ), 76.9240646, 6 )
+		self.assertAlmostEqual( rp2.getDepth( 2 ), 84.8475646, 6 )
 		
-		expected = ( 0.133333, 0.205128, 0.129032, 0.088889, 0.195122, 0.181818 )
+		expected = ( 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
-			self.assertAlmostEqual( p2[i][0], expected[i], 6 )
+			self.assertEqual( rp2[i][0], expected[i] )
 		
+		# hits 2 boxes then ground plane
 		rp3 = reader.readPixel( 1, 1 )
 		self.assertEqual( rp3.channelNames(), tuple(reader.channelNames()) )
-		self.assertEqual( rp3.numSamples(), 2 )
-		self.assertAlmostEqual( rp3.getDepth( 0 ), 4.296060, 6 )
-		self.assertAlmostEqual( rp3.getDepth( 1 ), 6.008639, 6 )
+		self.assertEqual( rp3.numSamples(), 5 )
+		self.assertAlmostEqual( rp3.getDepth( 0 ), 68.2118148, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 1 ), 74.9367370, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 2 ), 77.0554046, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 3 ), 79.7311859, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 4 ), 88.5616073, 6 )
 		
-		expected = ( 0.400000, 0.400000 )
+		expected = ( 0.5, 0.75, 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
-			self.assertAlmostEqual( p3[i][0], expected[i], 6 )
+			self.assertEqual( rp3[i][0], expected[i] )
 		
 		self.failUnless( reader.readPixel( 1, 0 ) is None )
 	

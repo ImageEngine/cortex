@@ -158,17 +158,26 @@ DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 	
 	float depth = 0;
 	float channelData[numRealChannels];
+	float previous[numRealChannels];
+	for ( unsigned j=0; j < numRealChannels; ++j )
+	{
+		previous[j] = 0.0;
+	}
 	
 	for ( int i=0; i < numSamples; ++i )
 	{
 		DtexPixelGetPoint( m_dtexPixel, i, &depth, channelData );
 		
-		// SHW files represent occlusion, but we really want transparency,
-		// so we invert the data upon reading it.
-		/// \todo: consider a parameter to opt out of this behaviour
 		for ( unsigned j=0; j < numRealChannels; ++j )
 		{
-			channelData[j] = 1.0 - channelData[j];
+			// SHW files represent occlusion, but we really want transparency,
+			// so we invert the data upon reading it.
+			/// \todo: consider a parameter to opt out of this behaviour
+			float current = 1.0 - channelData[j];
+			
+			// SHW files store composited values, accumulated over depth, but we want uncomposited values
+			channelData[j] = ( previous[j] == 1.0 ) ? 1.0 : ( current - previous[j] ) / ( 1 - previous[j] );
+			previous[j] = current;
 		}
 		
 		pixel->addSample( depth, channelData );
