@@ -55,14 +55,11 @@ void Transform::copyFrom( const Object *other, CopyContext *context )
 void Transform::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
-	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 }
 
 void Transform::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
-	unsigned int v = m_ioVersion;
-	IndexedIOPtr container = context->container( staticTypeName(), v );
 }
 
 bool Transform::isEqualTo( const Object *other ) const
