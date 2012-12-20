@@ -99,7 +99,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 	def testNoFileForFrame( self ) :
 		cache = self.cacheSop()
 		cache.parm( "cacheSequence" ).set( "test/IECoreHoudini/data/torusVertCache.####.fio" )
-		hou.setFrame( 4 )
+		hou.setFrame( 5 )
 		cache.cook( force=True )
 		self.failUnless( cache.warnings() )
 		self.assertEqual( len(cache.geometry().points()), 0 )
@@ -368,6 +368,74 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.assertEqual( result["N"].data.size(), 2 * numTorusVerts )
 		for i in range( 0, numTorusVerts ) :
 			self.assertNotEqual( result['N'].data[i], result['N'].data[numTorusPoints+i] )
+	
+	def testPrimitiveGroupModeWithPrimAttribs( self ) :
+		
+		# Cd defaults to a Point attrib
+		cache = self.cacheSop()
+		self.failUnless( isinstance( cache.geometry().findPointAttrib( "Cd" ), hou.Attrib ) )
+		self.failUnless( cache.geometry().findPrimAttrib( "Cd" ) is None )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "Cd" in result.keys() )
+		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		
+		# Since the point and prim count match, Cd becomes a Primitive attrib if we use PrimitiveGroup mode
+		group = hou.node( "/obj/geo1/group1" )
+		group.parm( "entity" ).set( 0 )
+		cache.parm( "groupingMode" ).set( 0 )
+		self.failUnless( cache.geometry().findPointAttrib( "Cd" ) is None )
+		self.failUnless( isinstance( cache.geometry().findPrimAttrib( "Cd" ), hou.Attrib ) )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "Cd" in result.keys() )
+		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# By creating Cd as a Point attrib before the cache, we can force it's type
+		color = group.createOutputNode( "color" )
+		cache.setInput( 0, color )
+		self.failUnless( isinstance( cache.geometry().findPointAttrib( "Cd" ), hou.Attrib ) )
+		self.failUnless( cache.geometry().findPrimAttrib( "Cd" ) is None )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "Cd" in result.keys() )
+		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+	
+	def testPrimitiveGroupModeWithVertexAttribs( self ) :
+		
+		# N defaults to a Point attrib
+		hou.setFrame( 4 )
+		cache = self.cacheSop()
+		self.failUnless( isinstance( cache.geometry().findPointAttrib( "N" ), hou.Attrib ) )
+		self.failUnless( cache.geometry().findVertexAttrib( "N" ) is None )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "N" in result.keys() )
+		self.assertEqual( result["N"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["N"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		
+		# Since N actually has more values than points should, N becomes a Vertex attrib if we use PrimitiveGroup mode
+		group = hou.node( "/obj/geo1/group1" )
+		group.parm( "entity" ).set( 0 )
+		cache.parm( "groupingMode" ).set( 0 )
+		self.failUnless( cache.geometry().findPointAttrib( "N" ) is None )
+		self.failUnless( isinstance( cache.geometry().findVertexAttrib( "N" ), hou.Attrib ) )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "N" in result.keys() )
+		self.assertEqual( result["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len(result["N"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ) )
+		
+		# Even if we create N as a Point attrib before the cache, it remains a Vertex attrib since the sizes do not match
+		facet = group.createOutputNode( "facet" )
+		facet.parm( "postnml" ).set( True )
+		cache.setInput( 0, facet )
+		self.failUnless( isinstance( facet.geometry().findPointAttrib( "N" ), hou.Attrib ) )
+		self.failUnless( facet.geometry().findVertexAttrib( "N" ) is None )
+		self.failUnless( cache.geometry().findPointAttrib( "N" ) is None )
+		self.failUnless( isinstance( cache.geometry().findVertexAttrib( "N" ), hou.Attrib ) )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "N" in result.keys() )
+		self.assertEqual( result["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len(result["N"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ) )
 
 if __name__ == "__main__":
 	unittest.main()

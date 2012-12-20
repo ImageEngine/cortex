@@ -40,6 +40,7 @@
 #include "PRM/PRM_Template.h"
 
 #include "IECore/CompoundObject.h"
+#include "IECore/DespatchTypedData.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/VectorTypedData.h"
 
@@ -217,34 +218,52 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 		const CompoundObject::ObjectMap &attributeMap = attributes->members();
 		
 		GA_Range pointRange;
+		GA_Range primRange;
+		GA_Range vertexRange;
+		
 		if ( groupingMode == PointGroup )
 		{
 			pointRange = gdp->getPointRange( (GA_PointGroup*)it.group() );
 		}
 		else if ( groupingMode == PrimitiveGroup )
 		{
-			GA_Range primRange = gdp->getPrimitiveRange( (GA_PrimitiveGroup*)it.group() );
+			primRange = gdp->getPrimitiveRange( (GA_PrimitiveGroup*)it.group() );
 			const GA_PrimitiveList &primitives = gdp->getPrimitiveList();
 			
-			GA_OffsetList offsets;
+			GA_OffsetList pointOffsets;
+			GA_OffsetList vertOffsets;
 			for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
 			{
-				GA_Range primPointRange = primitives.get( it.getOffset() )->getPointRange();
+				const GA_Primitive *prim = primitives.get( it.getOffset() );
+				GA_Range primPointRange = prim->getPointRange();
 				for ( GA_Iterator pIt=primPointRange.begin(); !pIt.atEnd(); ++pIt )
 				{
-					offsets.append( pIt.getOffset() );
+					pointOffsets.append( pIt.getOffset() );
+				}
+				
+				size_t numPrimVerts = prim->getVertexCount();
+				for ( size_t v=0; v < numPrimVerts; v++ )
+				{
+					if ( prim->getTypeId() == GEO_PRIMPOLY )
+					{
+						vertOffsets.append( prim->getVertexOffset( numPrimVerts - 1 - v ) );
+					}
+					else
+					{
+						vertOffsets.append( prim->getVertexOffset( v ) );
+					}
 				}
 			}
 			
-			offsets.sortAndRemoveDuplicates();
-			pointRange = GA_Range( gdp->getPointMap(), offsets );
+			pointOffsets.sortAndRemoveDuplicates();
+			pointRange = GA_Range( gdp->getPointMap(), pointOffsets );
+			vertexRange = GA_Range( gdp->getVertexMap(), vertOffsets );
 		}
 		
 		// transfer the InterpolatedCache::Attributes onto the GA_ElementGroup
-		/// \todo: this does not account for detail, prim, or vertex attribs...
 		for ( CompoundObject::ObjectMap::const_iterator aIt=attributeMap.begin(); aIt != attributeMap.end(); aIt++ )
 		{
-			const Data *data = IECore::runTimeCast<const Data>( aIt->second );
+			Data *data = IECore::runTimeCast<Data>( aIt->second );
 			if ( !data )
 			{
 				continue;
@@ -292,7 +311,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 				}
 				else if ( pos.size() != entries )
 				{
-					addWarning( SOP_ATTRIBUTE_INVALID, ( boost::format( "Geometry/Cache mismatch: %s contains %d points, while cache expects %d." ) % group->getName().toStdString() % entries % pos.size() ).str().c_str() );
+					addWarning( SOP_ATTRIBUTE_INVALID, ( boost::format( "Geometry/Cache mismatch: %s contains %d points, while cache expects %d values for P." ) % group->getName().toStdString() % entries % pos.size() ).str().c_str() );
 					continue;
 				}
 				
@@ -302,6 +321,45 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 					gdp->setPos3( it.getOffset(), IECore::convert<UT_Vector3>( pos[index] ) );
 				}
 
+			}
+			else if ( groupingMode == PrimitiveGroup )
+			{
+				GA_Range currentRange;
+				size_t size = despatchTypedData<TypedDataSize, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( data );
+				
+				// check for existing attributes
+				if ( gdp->findPrimitiveAttribute( attrName.c_str() ).isValid() && size == primRange.getEntries() )
+				{
+					currentRange = primRange;
+				}
+				else if ( gdp->findPointAttribute( attrName.c_str() ).isValid() && size == pointRange.getEntries() )
+				{
+					currentRange = pointRange;
+				}
+				else if ( gdp->findVertexAttribute( attrName.c_str() ).isValid() && size == vertexRange.getEntries() )
+				{
+					currentRange = vertexRange;
+				}
+				// fall back to Cortex standard inferred order
+				else if ( size == primRange.getEntries() )
+				{
+					currentRange = primRange;
+				}
+				else if ( size == pointRange.getEntries() )
+				{
+					currentRange = pointRange;
+				}
+				else if ( size == vertexRange.getEntries() )
+				{
+					currentRange = vertexRange;
+				}
+				else
+				{
+					addWarning( SOP_ATTRIBUTE_INVALID, ( boost::format( "Geometry/Cache mismatch: %s: cache expects %d values for %s." ) % group->getName().toStdString() % size % attrName ).str().c_str() );
+					continue;
+				}
+				
+				converter->convert( attrName, gdp, currentRange );
 			}
 			else
 			{
