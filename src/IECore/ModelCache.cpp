@@ -111,15 +111,10 @@ class ModelCache::Implementation : public RefCounted
 		Imath::M44d readTransform() const
 		{
 			M44d result;
-			double *resultAddress = result.getValue();
-			try
+			if ( m_indexedIO->hasEntry( "transform" ) )
 			{
+				double *resultAddress = result.getValue();
 				m_indexedIO->read( "transform", resultAddress, 16 );
-			}
-			catch( const IOException &e )
-			{
-				// we only write non-identity transforms, so it's fine
-				// if we don't find one.
 			}
 			return result;
 		}
@@ -136,14 +131,9 @@ class ModelCache::Implementation : public RefCounted
 		ObjectPtr readObject() const
 		{
 			ObjectPtr result = 0;
-			try
+			if ( m_indexedIO->hasEntry( "object" ) )
 			{
 				result = Object::load( m_indexedIO, "object" );
-			}
-			catch( const IOException &e )
-			{
-				// we only write non-null objects, so it's fine
-				// if we don't find one.
 			}
 			return result;
 		}
