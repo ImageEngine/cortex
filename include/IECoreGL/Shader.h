@@ -157,7 +157,14 @@ class Shader : public IECore::RunTimeTyped
 		/// when source isn't provided to the constructor.
 		///////////////////////////////////////////////////////////
 		//@{
+		/// Default vertex shader source. This takes vertexP, vertexN,
+		/// vertexst, vertexCs and Cs inputs and sets fragmentI, fragmentN,
+		/// fragmentst and fragmentCs outputs. It also sets equivalent geometry*
+		/// outputs which may be used by geometry shaders in calculating new
+		/// values for the corresponding fragment* outputs.
 		static const std::string &defaultVertexSource();
+		/// Default fragment shader source. This uses fragmentI, fragmentN
+		/// and fragmentCs to compute a simple facing ratio.
 		static const std::string &defaultFragmentSource();
 		//@}
 		

@@ -37,19 +37,28 @@
 
 #include "IECoreGL/VecAlgo.h"
 
+#define IECOREGL_CURVESPRIMITIVE_DECLARE_VERTEX_PASS_THROUGH_PARAMETERS \
+	in vec3 geometryCs[];\
+	\
+	out vec3 fragmentCs;
+	
 #define IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS \
 	\
 	layout( lines_adjacency ) in;\
 	layout( line_strip, max_vertices = 10 ) out;\
 	\
-	uniform mat4x4 basis;
+	uniform mat4x4 basis;\
+	\
+	IECOREGL_CURVESPRIMITIVE_DECLARE_VERTEX_PASS_THROUGH_PARAMETERS
 
 #define IECOREGL_CURVESPRIMITIVE_DECLARE_LINEAR_RIBBONS_PARAMETERS \
 	\
 	layout( lines_adjacency ) in;\
 	layout( triangle_strip, max_vertices = 4 ) out;\
 	\
-	uniform float width;
+	uniform float width;\
+	\
+	IECOREGL_CURVESPRIMITIVE_DECLARE_VERTEX_PASS_THROUGH_PARAMETERS
 
 #define IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_RIBBONS_PARAMETERS \
 	\
@@ -57,7 +66,9 @@
 	layout( triangle_strip, max_vertices = 20 ) out;\
 	\
 	uniform mat4x4 basis;\
-	uniform float width;
+	uniform float width;\
+	\
+	IECOREGL_CURVESPRIMITIVE_DECLARE_VERTEX_PASS_THROUGH_PARAMETERS
 
 #define IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t, c0, c1, c2, c3 ) \
 	ieCurvesPrimitiveCoefficients(\
@@ -72,6 +83,9 @@
 
 #define IECOREGL_CURVESPRIMITIVE_CUBICFRAME( t, p, normal, uTangent, vTangent ) \
 	ieCurvesPrimitiveCubicFrame( basis, t, p, normal, uTangent, vTangent )
+
+# define IECOREGL_ASSIGN_VERTEX_PASS_THROUGH \
+	fragmentCs = geometryCs[1];
 	
 void ieCurvesPrimitiveCoefficients( in mat4x4 basis, in float t, out float c0, out float c1, out float c2, out float c3 )
 {

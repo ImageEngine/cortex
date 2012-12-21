@@ -86,15 +86,21 @@ class Primitive : public Renderable
 		//////////////////////////////////////////////////////////////////////////////
 		/// This method returns a Shader::Setup binding the primitive to a shader for
 		/// rendering in a particular state. It may be used in conjunction with renderInstances()
-		/// to provide finer grained control over rendering.
+		/// to provide finer grained control over rendering. All vertex attributes are
+		/// mapped to shader parameters prefixed with "vertex" so for instance "P" will be
+		/// mapped to "vertexP". Uniform attributes are mapped directly to shader uniforms with
+		/// no prefix. This naming convention corresponds to the inputs defined by the default
+		/// source defined in the Shader class, and should be adopted when writing custom shaders.
 		///
 		/// Most classes will not need to override this method - reasons for overriding would be
 		/// to substitute in custom geometry or vertex shaders and/or to bind in attributes
 		/// not already specified with addUniformAttribute() or addVertexAttribute().
 		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
-		/// Adds the primitive variables held by this Primitive to the specified Shader::Setup,
-		/// optionally prefixing their names.
-		void addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &namePrefix = "", GLuint vertexDivisor = 0 ) const;
+		/// Adds the primitive variables held by this Primitive to the specified Shader::Setup.
+		/// Vertex attributes will be prefixed as specified, and for each vertex attribute
+		/// a boolean uniform parameter called "${prefix}${attributeName}Active" will also be
+		/// added so the shader can determine whether or not the values for that input are useful.
+		void addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &vertexPrefix = "vertex", GLuint vertexDivisor = 0 ) const;
 		/// Renders the primitive using the specified state and with a particular style.
 		/// The style is specified using the TypeId of the StateComponent representing that style
 		/// (e.g. PrimitiveWireframeTypeId is passed for wireframe rendering).

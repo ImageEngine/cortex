@@ -49,16 +49,16 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 	def testVertexAttributes( self ) :
 
 		vertexSource = """
-		in vec3 P;
-		attribute vec2 st;
+		in vec3 vertexP;
+		attribute vec2 vertexst;
 		varying out vec4 stColor;
 
 		void main()
 		{
-			vec4 pCam = gl_ModelViewMatrix * vec4( P, 1 );
+			vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );
 			gl_Position = gl_ProjectionMatrix * pCam;
 
-			stColor = vec4(st.x, st.y, 0.0, 1.0);
+			stColor = vec4(vertexst.x, vertexst.y, 0.0, 1.0);
 		}
 		"""
 

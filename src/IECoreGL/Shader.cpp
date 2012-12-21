@@ -84,7 +84,6 @@ class Shader::Implementation : public IECore::RefCounted
 			compile( geometrySource, GL_GEOMETRY_SHADER, m_geometryShader );
 			compile( actualFragmentSource, GL_FRAGMENT_SHADER, m_fragmentShader );
 
-
 			m_program = glCreateProgram();
 			glAttachShader( m_program, m_vertexShader );
 			if( m_geometryShader )
@@ -788,40 +787,35 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Array attribute \"%s\" is currently unsupported." ) % name );
 	}
 
-	bool dataTypeOK = false;
+	GLenum dataGLType = glType( value );
+	if( !dataGLType )
+	{
+		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
+	}
+
 	GLint size = 0;
 	switch( attributeType )
 	{
 		case GL_INT :
 		case GL_FLOAT :
-			dataTypeOK = IECore::despatchTraitsTest<IECore::TypeTraits::IsNumericVectorTypedData>( value );
 			size = 1;
 			break;
 		case GL_INT_VEC2 :
 		case GL_FLOAT_VEC2 :
-			dataTypeOK = IECore::despatchTraitsTest<IECore::TypeTraits::IsVec2VectorTypedData>( value );
 			size = 2;
 			break;
 		case GL_INT_VEC3 :
 		case GL_FLOAT_VEC3 :
-			dataTypeOK = IECore::despatchTraitsTest<IECore::TypeTraits::IsVec3VectorTypedData>( value );
 			size = 3;
 			break;
 		case GL_FLOAT_VEC4 :
-			dataTypeOK = value->isInstanceOf( IECore::Color4fVectorDataTypeId ) || value->isInstanceOf( IECore::Color4dVectorDataTypeId );
 			size = 4;
 			break;
 		default :
-			dataTypeOK = false;
+			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsupported OpenGL type \%d\"" ) % name % attributeType );
+			return;
 	}
 
-	GLenum dataGLType = glType( value );
-	if( !dataTypeOK || !dataGLType || !size )
-	{
-		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
-		return;
-	}
-	
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
 	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value  ) );
 	
@@ -860,29 +854,54 @@ const std::string &Shader::defaultVertexSource()
 {
 	static string s =
 		
-		"in vec3 P;"
-		"in vec3 N;"
-		"in vec2 st;"
+		"#version 150 compatibility\n"
 		""
-		"varying out vec3 fragmentI;"
-		"varying out vec3 fragmentN;"
-		"varying out vec2 fragmentst;"
+		"uniform vec3 Cs = vec3( 1, 1, 1 );"
+		"uniform bool vertexCsActive = false;"
+		""
+		"in vec3 vertexP;"
+		"in vec3 vertexN;"
+		"in vec2 vertexst;"
+		"in vec3 vertexCs;"
+		""
+		"out vec3 geometryI;"
+		"out vec3 geometryN;"
+		"out vec2 geometryst;"
+		"out vec3 geometryCs;"
+		""
+		"out vec3 fragmentI;"
+		"out vec3 fragmentN;"
+		"out vec2 fragmentst;"
+		"out vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
-		"	vec4 pCam = gl_ModelViewMatrix * vec4( P, 1 );"
+		"	vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );"
 		"	gl_Position = gl_ProjectionMatrix * pCam;"
-		"	fragmentN = normalize( gl_NormalMatrix * N );"
+		"	geometryN = normalize( gl_NormalMatrix * vertexN );"
 		"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
 		"	{"
-		"		fragmentI = normalize( -pCam.xyz );"
+		"		geometryI = normalize( -pCam.xyz );"
 		"	}"
 		"	else"
 		"	{"
-		"		fragmentI = vec3( 0, 0, -1 );"
+		"		geometryI = vec3( 0, 0, -1 );"
 		"	}"
 		""
-		"	fragmentst = st;"
+		"	geometryst = vertexst;"
+		"	if( vertexCsActive )"
+		"	{"
+		"		geometryCs = Cs * vertexCs;"
+		"	}"
+		"	else"
+		"	{"
+		"		geometryCs = Cs;"
+		"	}"
+		""
+		"	fragmentI = geometryI;"
+		"	fragmentN = geometryN;"
+		"	fragmentst = geometryst;"
+		"	fragmentCs = geometryCs;"
 		"}";
 		
 	return s;
@@ -892,14 +911,17 @@ const std::string &Shader::defaultFragmentSource()
 {
 	static string s = 
 	
-		"varying vec3 fragmentI;"
-		"varying vec3 fragmentN;"
+		"#version 150 compatibility\n"
+		""
+		"in vec3 fragmentI;"
+		"in vec3 fragmentN;"
+		"in vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
 		"	vec3 Nf = faceforward( fragmentN, -fragmentI, fragmentN );"
 		"	float f = dot( normalize( fragmentI ), normalize(Nf) );"
-		"	gl_FragColor = vec4( f, f, f, 1 );"
+		"	gl_FragColor = vec4( f * fragmentCs, 1 );"
 		"}";
 		
 	return s;
@@ -913,11 +935,11 @@ ShaderPtr Shader::constant()
 {
 	static const char *fragmentSource =
 	
-		"uniform vec3 Cs;"
+		"in vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
-		"	gl_FragColor = vec4( Cs, 1 );"
+		"	gl_FragColor = vec4( fragmentCs, 1 );"
 		"}";
 
 	static ShaderPtr s = new Shader( "", fragmentSource );

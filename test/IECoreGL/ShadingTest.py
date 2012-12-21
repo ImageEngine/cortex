@@ -53,15 +53,6 @@ class ShadingTest( unittest.TestCase ) :
 	def colorShader( self ) :
 	
 		s = IECore.Shader( "test", "gl:surface" )
-		s.parameters["gl:vertexSource"] = """
-			in vec3 P;
-			
-			void main()
-			{
-				vec4 pCam = gl_ModelViewMatrix * vec4( P, 1.0 );
-				gl_Position = gl_ProjectionMatrix * pCam;
-			}
-		"""
 		
 		s.parameters["gl:fragmentSource"] = """
 			
@@ -92,31 +83,16 @@ class ShadingTest( unittest.TestCase ) :
 	def textureShader( self ) :
 	
 		s = IECore.Shader( "test", "gl:surface" )
-		s.parameters["gl:vertexSource"] = """
-			in vec3 P;
-			in float s;
-			in float t;
-			
-			varying out vec2 st;
-			
-			void main()
-			{
-				vec4 pCam = gl_ModelViewMatrix * vec4( P, 1.0 );
-				gl_Position = gl_ProjectionMatrix * pCam;
-				st = vec2( s, t );
-				
-			}
-		"""
 		
 		s.parameters["gl:fragmentSource"] = """
 			
 			uniform sampler2D sampler;
 			
-			varying vec2 st;
+			varying vec2 fragmentst;
 						
 			void main()
 			{
-				gl_FragColor = vec4( texture2D( sampler, st ).rgb, 1 );
+				gl_FragColor = vec4( texture2D( sampler, fragmentst ).rgb, 1 );
 			}
 		"""
 		
@@ -125,15 +101,6 @@ class ShadingTest( unittest.TestCase ) :
 	def geometryShader( self ) :
 	
 		s = IECore.Shader( "test", "gl:surface" )
-		s.parameters["gl:vertexSource"] = """
-			in vec3 P;
-			void main()
-			{
-				vec4 pCam = gl_ModelViewMatrix * vec4( P, 1.0 );
-				gl_Position = gl_ProjectionMatrix * pCam;
-				
-			}
-		"""
 		
 		s.parameters["gl:geometrySource"] = """
 #version 150

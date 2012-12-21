@@ -221,11 +221,12 @@ const Shader::Setup *Primitive::shaderSetup( const Shader *shader, State *state 
 	return setup.get();
 }
 
-void Primitive::addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &namePrefix, GLuint vertexDivisor ) const
+void Primitive::addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &vertexPrefix, GLuint vertexDivisor ) const
 {
 	for( AttributeMap::const_iterator it = m_vertexAttributes.begin(), eIt = m_vertexAttributes.end(); it != eIt; it++ )
 	{
-		shaderSetup->addVertexAttribute( namePrefix + it->first, it->second, vertexDivisor );
+		shaderSetup->addVertexAttribute( vertexPrefix + it->first, it->second, vertexDivisor );
+		shaderSetup->addUniformParameter( vertexPrefix + it->first + "Active", new IECore::BoolData( true ) );
 	}
 	for( AttributeMap::const_iterator it = m_uniformAttributes.begin(), eIt = m_uniformAttributes.end(); it != eIt; it++ )
 	{
