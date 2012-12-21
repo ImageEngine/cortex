@@ -201,6 +201,11 @@ class FileIndexedIO : public IndexedIO
 
 		void setRoot( const IndexedIO::EntryIDList &root );
 
+		char *ioBuffer( unsigned long size ) const;
+
+		mutable unsigned long m_ioBufferLen;
+		mutable char *m_ioBuffer;
+
 };
 
 IE_CORE_DECLAREPTR( FileIndexedIO )

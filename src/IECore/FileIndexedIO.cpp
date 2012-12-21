@@ -121,20 +121,18 @@ class StringCache
 {
 	public:
 
-		StringCache()
+		StringCache() : m_prevId(0), m_ioBuffer(0), m_ioBufferLen(0)
 		{
-			m_prevId = 0;
 		}
 
-		StringCache( std::istream &f ) : m_prevId(0)
+		StringCache( std::istream &f ) : m_prevId(0), m_ioBuffer(0), m_ioBufferLen(0)
 		{
 			Imf::Int64 sz;
 			readLittleEndian(f, sz);
 
 			for (Imf::Int64 i = 0; i < sz; ++i)
 			{
-				std::string s;
-				read(f, s);
+				const char *s = read(f);
 
 				Imf::Int64 id;
 				readLittleEndian<Imf::Int64>( f, id );
@@ -217,17 +215,23 @@ class StringCache
 			f.write( s.c_str(), sz * sizeof(char) );
 		}
 
-		void read( std::istream &f, std::string &s ) const
+		const char *read( std::istream &f ) const
 		{
 			Imf::Int64 sz;
 			readLittleEndian<Imf::Int64>( f, sz );
 
-			char *buf = new char[sz + 1];
-			f.read( buf, sz*sizeof(char));
-
-			buf[sz] = '\0';
-			s = buf;
-			delete[] buf;
+			if ( m_ioBufferLen < sz + 1 )
+			{
+				if ( m_ioBuffer )
+				{
+					delete [] m_ioBuffer;
+				}
+				m_ioBufferLen = sz+1;
+				m_ioBuffer = new char[m_ioBufferLen];
+			}
+			f.read( m_ioBuffer, sz*sizeof(char));
+			m_ioBuffer[sz] = '\0';
+			return m_ioBuffer;
 		}
 
 		Imf::Int64 m_prevId;
@@ -238,6 +242,8 @@ class StringCache
 		StringToIdMap m_stringToIdMap;
 		IdToStringMap m_idToStringMap;
 
+		mutable char *m_ioBuffer;
+		mutable unsigned long m_ioBufferLen;
 };
 
 /// A single node within an index
@@ -388,7 +394,6 @@ class FileIndexedIO::Index : public RefCounted
 		void readNode( std::istream &f );
 
 		Imf::Int64 nodeCount( Node* n );
-
 };
 
 ///////////////////////////////////////////////
@@ -1118,7 +1123,7 @@ FileIndexedIO::Node* FileIndexedIO::Index::insert( Node* parent, IndexedIO::Entr
 
 ///////////////////////////////////////////////
 //
-// FileIndexedIO::Node (end)
+// FileIndexedIO::Index (end)
 //
 ///////////////////////////////////////////////
 
@@ -1428,7 +1433,7 @@ bool FileIndexedIO::canRead( const std::string &path )
 	return Index::canRead( path );
 }
 
-FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
+FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode) : m_ioBufferLen(0), m_ioBuffer(0)
 {
 	validateOpenMode(mode);
 	m_mode = mode;
@@ -1446,7 +1451,7 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDLi
 	assert( m_node );
 }
 
-FileIndexedIO::FileIndexedIO()
+FileIndexedIO::FileIndexedIO() : m_ioBufferLen(0), m_ioBuffer(0)
 {
 }
 
@@ -1463,6 +1468,10 @@ void FileIndexedIO::open( std::iostream *device, const IndexedIO::EntryIDList &r
 
 FileIndexedIO::~FileIndexedIO()
 {
+	if ( m_ioBuffer )
+	{
+		delete [] m_ioBuffer;
+	}
 }
 
 void FileIndexedIO::setRoot( const IndexedIO::EntryIDList &root )
@@ -1545,7 +1554,7 @@ bool FileIndexedIO::hasEntry( const IndexedIO::EntryID &name ) const
 	return m_node->child( name );
 }
 
-FileIndexedIO::FileIndexedIO( const FileIndexedIO *other, Node *newRoot )
+FileIndexedIO::FileIndexedIO( const FileIndexedIO *other, Node *newRoot ) : m_ioBufferLen(0), m_ioBuffer(0)
 {
 	m_mode = other->m_mode;
 	m_indexedFile = other->m_indexedFile;
@@ -1680,6 +1689,22 @@ ConstIndexedIOPtr FileIndexedIO::parentDirectory() const
 	return duplicate(parentNode);
 }
 
+char *FileIndexedIO::ioBuffer( unsigned long size ) const
+{
+	if ( !m_ioBuffer )
+	{
+		m_ioBuffer = new char[size];
+		m_ioBufferLen = size;
+	}
+	else if ( size > m_ioBufferLen )
+	{
+		delete [] m_ioBuffer;
+		m_ioBuffer = new char[size];
+		m_ioBufferLen = size;
+	}
+	return m_ioBuffer;
+}
+
 template<typename T>
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength)
 {
@@ -1692,14 +1717,13 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned l
 		unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
 		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 
-		const char *data = IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength);
+		char *data = ioBuffer(size);
 		assert(data);
+		IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength, data);
 
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
 
 		m_indexedFile->write( node, data, size );
-
-		IndexedIO::DataFlattenTraits<T*>::free(data);
 	}
 	else
 	{
@@ -1719,14 +1743,13 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
 		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 
-		const char *data = IndexedIO::DataFlattenTraits<T>::flatten(x);
+		char *data = ioBuffer(size);
 		assert(data);
+		IndexedIO::DataFlattenTraits<T>::flatten(x, data);
 
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, 0) ;
 
 		m_indexedFile->write( node, data, size );
-
-		IndexedIO::DataFlattenTraits<T>::free(data);
 	}
 	else
 	{
@@ -1750,11 +1773,10 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long ar
 	m_indexedFile->seekg( node );
 
 	Imf::Int64 size = node->m_size;
-	char *data = new char[size];
+	char *data = ioBuffer(size);
 	m_indexedFile->m_stream->read( data, size );
 
 	IndexedIO::DataFlattenTraits<T*>::unflatten( data, x, arrayLength );
-	delete[]data;
 }
 
 template<typename T>
@@ -1773,11 +1795,10 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 	m_indexedFile->seekg( node );
 
 	Imf::Int64 size = node->m_size;
-	char *data = new char[size];
+	char *data = ioBuffer(size);
 	m_indexedFile->m_stream->read( data, size );
 
 	IndexedIO::DataFlattenTraits<T>::unflatten( data, x );
-	delete[]data;
 }
 
 // Write

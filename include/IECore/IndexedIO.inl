@@ -445,14 +445,10 @@ struct IndexedIO::DataSizeTraits
 template<typename T>
 struct IndexedIO::DataFlattenTraits
 {
-	static const char* flatten(const T& x)
+	static void flatten(const T& x, char *dst)
 	{
-		unsigned long size = DataSizeTraits<T>::size(x);
-
-		IndexedIODetail::OutputMemoryStream mstream(new char[size]);
+		IndexedIODetail::OutputMemoryStream mstream(dst);
 		IndexedIODetail::Writer<IndexedIODetail::MemoryStreamIO, IndexedIODetail::OutputMemoryStream, T>::write(mstream, x);
-
-		return mstream.head();
 	}
 
 	static void unflatten(const char *src, T &dst)
@@ -462,29 +458,20 @@ struct IndexedIO::DataFlattenTraits
 		IndexedIODetail::Reader<IndexedIODetail::MemoryStreamIO, IndexedIODetail::InputMemoryStream, T>::read( mstream, dst );
 	}
 
-	static void free(const char *x)
-	{
-		assert(x);
-		delete[] x;
-	}
 };
 
 
 template<typename T>
 struct IndexedIO::DataFlattenTraits<T*>
 {
-	static const char* flatten(const T* &x, unsigned long arrayLength)
+	static void flatten(const T* &x, unsigned long arrayLength, char *dst )
 	{
-		unsigned long size = DataSizeTraits<T*>::size(x, arrayLength);
-
-		IndexedIODetail::OutputMemoryStream mstream(new char[size]);
+		IndexedIODetail::OutputMemoryStream mstream(dst);
 
 		for (unsigned long i = 0; i < arrayLength; i++)
 		{
 			IndexedIODetail::Writer<IndexedIODetail::MemoryStreamIO, IndexedIODetail::OutputMemoryStream, T>::write (mstream, x[i]);
 		}
-
-		return mstream.head();
 	}
 
 	static void unflatten(const char *src, T *&dst, unsigned long arrayLength)
@@ -501,22 +488,14 @@ struct IndexedIO::DataFlattenTraits<T*>
 			IndexedIODetail::Reader<IndexedIODetail::MemoryStreamIO, IndexedIODetail::InputMemoryStream, T>::read( mstream, dst[i] );
 		}
 	}
-
-	static void free(const char *x)
-	{
-		if (x)
-		{
-			delete[] x;
-		}
-	}
 };
 
 template<>
 struct IndexedIO::DataFlattenTraits<std::string>
 {
-	static const char* flatten(const std::string &x)
+	static void flatten(const std::string &x, char *dst)
 	{
-		return x.c_str();
+		strcpy( dst, x.c_str() );
 	}
 
 	static void unflatten(const char *x, std::string &dst)
@@ -525,20 +504,14 @@ struct IndexedIO::DataFlattenTraits<std::string>
 		dst = std::string(x);
 	}
 
-	static void free(const char *x)
-	{
-		// Nothing to free
-	}
 };
 
 template<>
 struct IndexedIO::DataFlattenTraits<std::string*>
 {
-	static const char* flatten(const std::string *&x, unsigned long arrayLength)
+	static void flatten(const std::string *&x, unsigned long arrayLength, char *dst)
 	{
-		unsigned long size = DataSizeTraits<std::string*>::size(x, arrayLength);
-
-		IndexedIODetail::OutputMemoryStream mstream(new char[size]);
+		IndexedIODetail::OutputMemoryStream mstream(dst);
 
 		for (unsigned i = 0; i < arrayLength; i++)
 		{
@@ -550,8 +523,6 @@ struct IndexedIO::DataFlattenTraits<std::string*>
 
 			mstream.skip(stringLength);
 		}
-
-		return mstream.head();
 	}
 
 	static void unflatten(const char *src, std::string* &dst, unsigned long arrayLength)
@@ -572,15 +543,6 @@ struct IndexedIO::DataFlattenTraits<std::string*>
 			assert(dst[i].size() == stringLength);
 
 			mstream.skip(stringLength);
-		}
-	}
-
-	static void free(const char *x)
-	{
-		if (x)
-		{
-			// Delete the data we allocated in ::flatten
-			delete[] x;
 		}
 	}
 };
