@@ -123,6 +123,7 @@ class StringCache
 
 		StringCache() : m_prevId(0), m_ioBuffer(0), m_ioBufferLen(0)
 		{
+			m_idToStringMap.reserve(100);
 		}
 
 		StringCache( std::istream &f ) : m_prevId(0), m_ioBuffer(0), m_ioBufferLen(0)
@@ -130,16 +131,22 @@ class StringCache
 			Imf::Int64 sz;
 			readLittleEndian(f, sz);
 
+			m_idToStringMap.reserve(sz + 100);
+
 			for (Imf::Int64 i = 0; i < sz; ++i)
 			{
 				const char *s = read(f);
 
 				Imf::Int64 id;
 				readLittleEndian<Imf::Int64>( f, id );
-
+				assert( id < sz );
 				m_prevId = std::max( id, m_prevId );
 
 				m_stringToIdMap[s] = id;
+				if ( id >= m_idToStringMap.size() )
+				{
+					m_idToStringMap.resize(id+1);
+				}
 				m_idToStringMap[id] = s;
 			}
 		}
@@ -172,7 +179,10 @@ class StringCache
 				Imf::Int64 id = ++m_prevId;
 
 				m_stringToIdMap[s] = id;
-				assert( m_stringToIdMap.find(s) != m_stringToIdMap.end() );
+				if ( id >= m_idToStringMap.size() )
+				{
+					m_idToStringMap.resize(id+1);
+				}
 				m_idToStringMap[id] = s;
 
 				return id;
@@ -185,10 +195,11 @@ class StringCache
 
 		const std::string &find( const Imf::Int64 &id ) const
 		{
-			IdToStringMap::const_iterator it = m_idToStringMap.find( id );
-			assert( it != m_idToStringMap.end() );
-
-			return it->second;
+			if ( id >= m_idToStringMap.size() )
+			{
+				throw IOException( (boost::format ( "StringCache: invalid string ID %d!" ) % id ).str() );
+			}
+			return m_idToStringMap[id];
 		}
 
 		void add( const std::string &s )
@@ -237,7 +248,7 @@ class StringCache
 		Imf::Int64 m_prevId;
 
 		typedef std::map< std::string, Imf::Int64 > StringToIdMap;
-		typedef std::map< Imf::Int64, std::string > IdToStringMap;
+		typedef std::vector< std::string > IdToStringMap;
 
 		StringToIdMap m_stringToIdMap;
 		IdToStringMap m_idToStringMap;
@@ -526,7 +537,10 @@ void FileIndexedIO::Node::read( std::istream &f )
 
 	readLittleEndian<Imf::Int64>(f, m_id );
 
-	m_idx->m_indexToNodeMap.resize(m_id+1, NULL);
+	if ( m_id >= m_idx->m_indexToNodeMap.size() )
+	{
+		m_idx->m_indexToNodeMap.resize(m_id+1, NULL);
+	}
 	m_idx->m_indexToNodeMap[m_id] = this;
 
 	// we only need to keep the map node=>index if we intend to save the file...
@@ -713,6 +727,9 @@ FileIndexedIO::Index::Index( FilteredStream &f, bool readOnly ) : m_prevId(0), m
 
 	Imf::Int64 numNodes;
 	readLittleEndian<Imf::Int64>( *inputStream, numNodes );
+
+	m_indexToNodeMap.reserve( numNodes );
+
 	for (Imf::Int64 i = 0; i < numNodes; i++)
 	{
 		readNode( *inputStream );
@@ -1113,7 +1130,10 @@ FileIndexedIO::Node* FileIndexedIO::Index::insert( Node* parent, IndexedIO::Entr
 	Imf::Int64 newId = makeId();
 	Node* child = new Node(this, newId);
 
-	m_indexToNodeMap.resize(newId+1, NULL );
+	if ( newId >= m_indexToNodeMap.size() )
+	{
+		m_indexToNodeMap.resize(newId+1, NULL );
+	}
 	m_indexToNodeMap[newId] = child;
 	m_nodeToIndexMap[child] = newId;
 
