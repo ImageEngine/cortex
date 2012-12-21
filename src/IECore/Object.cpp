@@ -208,10 +208,13 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 		string path;
 		container->read( name, path );
 
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<std::string, ObjectPtr>( path, NULL ) );
+
 		LoadedObjectMap::iterator it = m_loadedObjects->find( path );
-		if( it!=m_loadedObjects->end() )
+		if ( !ret.second )
 		{
-			return it->second;
+			// a symlink found this object first and already loaded it...
+			return ret.first->second;
 		}
 
 		// find the root node
@@ -235,11 +238,12 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 			ioObject = ioObject->subdirectory( *t );
 		}
 		result = loadObject( ioObject );
-		(*m_loadedObjects)[path] = result;
+
+		// add the loaded object to the map.
+		ret.first->second = result;
 	}
 	else
 	{
-
 		IndexedIOPtr ioObject = container->subdirectory( name );
 
 		IndexedIO::EntryIDList pathParts;
@@ -247,16 +251,17 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 		string path;
 		stringPath( pathParts, path );
 
-		LoadedObjectMap::const_iterator objIt = m_loadedObjects->find(path);
-		if ( objIt == m_loadedObjects->end() )
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<std::string, ObjectPtr>( path, NULL ) );
+		if ( !ret.second )
 		{
-			result = loadObject( ioObject );
-			(*m_loadedObjects)[path] = result;
+			// a symlink found this object first and already loaded it...
+			result = ret.first->second;
 		}
 		else
 		{
-			// a symlink found this object first and already loaded it...
-			result = objIt->second;
+			result = loadObject( ioObject );
+			// add the loaded object to the map.
+			ret.first->second = result;
 		}
 	}
 	return result;
