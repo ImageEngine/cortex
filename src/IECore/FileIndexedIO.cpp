@@ -309,12 +309,12 @@ class FileIndexedIO::Index : public RefCounted
 		friend class Node;
 
 		/// Construct an empty index
-		Index();
+		Index( bool readOnly );
 
 		static bool canRead( const std::string &path );
 
 		/// Construct an index from reading a file stream.
-		Index( FilteredStream &f );
+		Index( FilteredStream &f, bool readOnly );
 		virtual ~Index();
 
 		NodePtr m_root;
@@ -358,9 +358,10 @@ class FileIndexedIO::Index : public RefCounted
 
 		Imf::Int64 makeId();
 
-		typedef std::map< unsigned long, Node* > IndexToNodeMap;
+		typedef std::vector< Node* > IndexToNodeMap;
 		typedef std::map< Node*, unsigned long > NodeToIndexMap;
 
+		bool m_readOnly;
 		IndexToNodeMap m_indexToNodeMap;
 		NodeToIndexMap m_nodeToIndexMap;
 
@@ -410,7 +411,7 @@ FileIndexedIO::Node::Node(Index* idx, Imf::Int64 id) : RefCounted()
 
 	if (id != 0)
 	{
-		assert(idx->m_indexToNodeMap.find(id) == idx->m_indexToNodeMap.end());
+		assert(id >= idx->m_indexToNodeMap.size() || !idx->m_indexToNodeMap[id] );
 	}
 
 	m_id = id;
@@ -525,8 +526,14 @@ void FileIndexedIO::Node::read( std::istream &f )
 
 	readLittleEndian<Imf::Int64>(f, m_id );
 
+	m_idx->m_indexToNodeMap.resize(m_id+1, NULL);
 	m_idx->m_indexToNodeMap[m_id] = this;
-	m_idx->m_nodeToIndexMap[this] = m_id;
+
+	// we only need to keep the map node=>index if we intend to save the file...
+	if ( !m_idx->m_readOnly )
+	{
+		m_idx->m_nodeToIndexMap[this] = m_id;
+	}
 
 	Imf::Int64 parentId;
 	readLittleEndian<Imf::Int64>(f, parentId );
@@ -534,13 +541,12 @@ void FileIndexedIO::Node::read( std::istream &f )
 	m_idx->m_prevId = std::max( m_idx->m_prevId, parentId );
 	m_idx->m_prevId = std::max( m_idx->m_prevId, m_id );
 
-	Index::IndexToNodeMap::iterator it = m_idx->m_indexToNodeMap.find( parentId );
-	if (it == m_idx->m_indexToNodeMap.end())
+	if ( parentId >= m_idx->m_indexToNodeMap.size() || !m_idx->m_indexToNodeMap[parentId] )
 	{
 		throw IOException("FileIndexedIO: parentId not found");
 	}
 
-	Node* parent = it->second ;
+	Node* parent = m_idx->m_indexToNodeMap[parentId] ;
 	if (m_id && parent)
 	{
 		parent->registerChild(this);
@@ -623,13 +629,13 @@ void FileIndexedIO::Node::childNames( IndexedIO::EntryIDList &names, IndexedIO::
 //
 ///////////////////////////////////////////////
 
-FileIndexedIO::Index::Index() : m_root(0), m_prevId(0)
+FileIndexedIO::Index::Index( bool readOnly ) : m_root(0), m_prevId(0), m_readOnly(readOnly)
 {
 	m_version = g_currentVersion;
 
 	m_root = new Node( this, 0 );
 
-	m_indexToNodeMap[0] = m_root.get();
+	m_indexToNodeMap.push_back(m_root.get());
 	m_nodeToIndexMap[m_root.get()] = 0;
 
 	m_stringCache.add("/");
@@ -652,7 +658,7 @@ FileIndexedIO::Index::~Index()
 	}
 }
 
-FileIndexedIO::Index::Index( FilteredStream &f ) : m_prevId(0)
+FileIndexedIO::Index::Index( FilteredStream &f, bool readOnly ) : m_prevId(0), m_readOnly(readOnly)
 {
 	m_hasChanged = false;
 
@@ -1000,7 +1006,7 @@ void FileIndexedIO::Index::write( std::ostream &f, Node* n )
 
 void FileIndexedIO::Index::readNode( std::istream &f )
 {
-	NodePtr n = new Node( this, 0 );
+	Node *n = new Node( this, 0 );
 
 	assert(n);
 
@@ -1107,6 +1113,7 @@ FileIndexedIO::Node* FileIndexedIO::Index::insert( Node* parent, IndexedIO::Entr
 	Imf::Int64 newId = makeId();
 	Node* child = new Node(this, newId);
 
+	m_indexToNodeMap.resize(newId+1, NULL );
 	m_indexToNodeMap[newId] = child;
 	m_nodeToIndexMap[child] = newId;
 
@@ -1182,7 +1189,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		m_stream->push<>( *m_device );
 		assert( m_stream->is_complete() );
 
-		m_index = new Index();
+		m_index = new Index( false );
 	}
 	else if (mode & IndexedIO::Append)
 	{
@@ -1202,7 +1209,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 			m_stream->push<>( *m_device );
 			assert( m_stream->is_complete() );
 
-			m_index = new Index();
+			m_index = new Index( false );
 		}
 		else
 		{
@@ -1223,7 +1230,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 			/// Read index
 			try
 			{
-				m_index = new Index( *m_stream );
+				m_index = new Index( *m_stream, false );
 			}
 			catch ( Exception &e )
 			{
@@ -1255,7 +1262,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		/// Read index
 		try
 		{
-			m_index = new Index( *m_stream );
+			m_index = new Index( *m_stream, true );
 		}
 		catch ( Exception &e )
 		{
@@ -1279,21 +1286,20 @@ FileIndexedIO::IndexedFile::IndexedFile( std::iostream *device, bool newStream )
 {
 	assert( device );
 	m_device = device;
-
 	m_stream = new FilteredStream();
 	m_stream->push<>( *m_device );
 	assert( m_stream->is_complete() );
 
 	if ( newStream )
 	{
-		m_index = new Index();
+		m_index = new Index( false );
 	}
 	else
 	{
 		/// Read index
 		try
 		{
-			m_index = new Index( *m_stream );
+			m_index = new Index( *m_stream, false );
 		}
 		catch ( Exception &e )
 		{
@@ -1562,7 +1568,7 @@ FileIndexedIO::FileIndexedIO( const FileIndexedIO *other, Node *newRoot ) : m_io
 	assert( m_node );
 }
 
-IndexedIOPtr FileIndexedIO::duplicate(Node *rootNode) const
+IndexedIO * FileIndexedIO::duplicate(Node *rootNode) const
 {
 	return new FileIndexedIO( this, rootNode );
 }

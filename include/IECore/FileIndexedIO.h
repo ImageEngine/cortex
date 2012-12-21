@@ -179,7 +179,7 @@ class FileIndexedIO : public IndexedIO
 
 		IndexedFilePtr m_indexedFile;
 
-		NodePtr m_node;
+		Node * m_node;
 
 		/// \todo Should be virtual
 		boost::optional<Imf::Int64> flush();
@@ -195,7 +195,7 @@ class FileIndexedIO : public IndexedIO
 		FileIndexedIO( const FileIndexedIO *other, Node *newRoot );
 
 		// duplicates this object by mapping it to a different root node.
-		virtual IndexedIOPtr duplicate(Node *rootNode) const;
+		virtual IndexedIO *duplicate(Node *rootNode) const;
 
 	private :
 
