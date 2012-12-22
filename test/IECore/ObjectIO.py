@@ -159,6 +159,28 @@ class TestObjectIO( unittest.TestCase ) :
 		dd = Object.load( iface, "test" )
 		self.assertEqual( d, dd )
 
+	def testDataTypes( self ):
+
+		d = CompoundData()
+		d['a'] = IntData(1)
+		d['c'] = FloatData(3)
+		d['e'] = HalfData(4)
+		d['f'] = V2iData( V2i(1,10) )
+		d['g'] = V2fData( V2f(2,31) )
+		d['h'] = V2dData( V2d(3,551) )
+		d['i'] = V3fData( V3f(1,3,5) )
+		d['k'] = M44fData( M44f(2) )
+		d['l'] = HalfVectorData( [ 1,2,3,100,9,10,11] )
+		d['m'] = V2fVectorData( [ V2f(1,2), V2f(3,4), V2f(5,6) ] )
+		d['x'] = StringData( "testttt" )
+		d['z'] = StringVectorData( [ "a", 'b', 'adffs' ] )
+
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )		
+		d.save( iface, "test" )
+
+		dd = Object.load( iface, "test" )
+		self.assertEqual( d, dd )
+
 	def testMultipleRef( self ) :
 
 		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )

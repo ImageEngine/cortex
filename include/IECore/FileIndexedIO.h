@@ -169,6 +169,10 @@ class FileIndexedIO : public IndexedIO
 		template<typename T>
 		void read(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const;
 
+		// Read an array of POD types
+		template<typename T>
+		void rawRead(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const;
+
 		// Write an instance of a type which is able to flatten itself.
 		template<typename T>
 		void write(const IndexedIO::EntryID &name, const T &x);
@@ -176,6 +180,10 @@ class FileIndexedIO : public IndexedIO
 		// Read an instance of a type which is able to unflatten itself.
 		template<typename T>
 		void read(const IndexedIO::EntryID &name, T &x) const;
+
+		// Read an instance of a type which is able to unflatten itself.
+		template<typename T>
+		void rawRead(const IndexedIO::EntryID &name, T &x) const;
 
 		IndexedFilePtr m_indexedFile;
 

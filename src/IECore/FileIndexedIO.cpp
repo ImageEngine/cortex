@@ -48,6 +48,7 @@
 #include "boost/iostreams/filtering_stream.hpp"
 #include "boost/iostreams/stream.hpp"
 #include "boost/iostreams/filter/gzip.hpp"
+#include "boost/detail/endian.hpp"
 
 #include "IECore/ByteOrder.h"
 #include "IECore/MemoryStream.h"
@@ -1806,6 +1807,25 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long ar
 }
 
 template<typename T>
+void FileIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const
+{
+	assert( m_node );
+	readable(name);
+
+	Node* node = m_node->child( name );
+
+	if (!node || node->m_entry.entryType() != IndexedIO::File)
+	{
+		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+	}
+
+	m_indexedFile->seekg( node );
+
+	Imf::Int64 size = node->m_size;
+	m_indexedFile->m_stream->read( (char*)x, size );
+}
+
+template<typename T>
 void FileIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 {
 	assert( m_node );
@@ -1825,6 +1845,25 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 	m_indexedFile->m_stream->read( data, size );
 
 	IndexedIO::DataFlattenTraits<T>::unflatten( data, x );
+}
+
+template<typename T>
+void FileIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
+{
+	assert( m_node );
+	readable(name);
+
+	Node* node = m_node->child( name );
+
+	if (!node || node->m_entry.entryType() != IndexedIO::File)
+	{
+		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+	}
+
+	m_indexedFile->seekg( node );
+
+	Imf::Int64 size = node->m_size;
+	m_indexedFile->m_stream->read( (char*)&x, size );
 }
 
 // Write
@@ -1950,49 +1989,55 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short &
 }
 // Read
 
+#ifdef BOOST_LITTLE_ENDIAN
+#define READ	rawRead
+#else
+#define READ	read
+#endif
+
 void FileIndexedIO::read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const
 {
-	read<float>(name, x, arrayLength);
+	READ<float>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const
 {
-	read<double>(name, x, arrayLength);
+	READ<double>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) const
 {
-	read<half>(name, x, arrayLength);
+	READ<half>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) const
 {
-	read<int>(name, x, arrayLength);
+	READ<int>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) const
 {
-	read<int64_t>(name, x, arrayLength);
+	READ<int64_t>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) const
 {
-	read<uint64_t>(name, x, arrayLength);
+	READ<uint64_t>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) const
 {
-	read<unsigned int>(name, x, arrayLength);
+	READ<unsigned int>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) const
 {
-	read<char>(name, x, arrayLength);
+	READ<char>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) const
 {
-	read<unsigned char>(name, x, arrayLength);
+	READ<unsigned char>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const
@@ -2002,42 +2047,42 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, std::string *&x, unsign
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const
 {
-	read<short>(name, x, arrayLength);
+	READ<short>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const
 {
-	read<unsigned short>(name, x, arrayLength);
+	READ<unsigned short>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, float &x) const
 {
-	read<float>(name, x);
+	READ<float>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, double &x) const
 {
-	read<double>(name, x);
+	READ<double>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, half &x) const
 {
-	read<half>(name, x);
+	READ<half>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, int &x) const
 {
-	read<int>(name, x);
+	READ<int>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, int64_t &x) const
 {
-	read<int64_t>(name, x);
+	READ<int64_t>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, uint64_t &x) const
 {
-	read<uint64_t>(name, x);
+	READ<uint64_t>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, std::string &x) const
@@ -2047,25 +2092,25 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, std::string &x) const
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, unsigned int &x) const
 {
-	read<unsigned int>(name, x);
+	READ<unsigned int>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, char &x) const
 {
-	read<char>(name, x);
+	READ<char>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, unsigned char &x) const
 {
-	read<unsigned char>(name, x);
+	READ<unsigned char>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, short &x) const
 {
-	read<short>(name, x);
+	READ<short>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, unsigned short &x) const
 {
-	read<unsigned short>(name, x);
+	READ<unsigned short>(name, x);
 }
