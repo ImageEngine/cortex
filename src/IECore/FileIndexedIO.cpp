@@ -146,7 +146,7 @@ class StringCache
 				m_stringToIdMap[s] = id;
 				if ( id >= m_idToStringMap.size() )
 				{
-					m_idToStringMap.resize(id+1);
+					m_idToStringMap.resize(id+1, (const char *)"");
 				}
 				m_idToStringMap[id] = s;
 			}
@@ -166,7 +166,7 @@ class StringCache
 			}
 		}
 
-		Imf::Int64 find( const std::string &s, bool errIfNotFound = true )
+		Imf::Int64 find( const IndexedIO::EntryID &s, bool errIfNotFound = true )
 		{
 			StringToIdMap::const_iterator it = m_stringToIdMap.find( s );
 
@@ -182,7 +182,7 @@ class StringCache
 				m_stringToIdMap[s] = id;
 				if ( id >= m_idToStringMap.size() )
 				{
-					m_idToStringMap.resize(id+1);
+					m_idToStringMap.resize(id+1, (const char *)"");
 				}
 				m_idToStringMap[id] = s;
 
@@ -194,7 +194,7 @@ class StringCache
 			}
 		}
 
-		const std::string &find( const Imf::Int64 &id ) const
+		const IndexedIO::EntryID &findById( const Imf::Int64 &id ) const
 		{
 			if ( id >= m_idToStringMap.size() )
 			{
@@ -203,7 +203,7 @@ class StringCache
 			return m_idToStringMap[id];
 		}
 
-		void add( const std::string &s )
+		void add( const IndexedIO::EntryID &s )
 		{
 			(void)find(s, false);
 
@@ -248,8 +248,8 @@ class StringCache
 
 		Imf::Int64 m_prevId;
 
-		typedef std::map< std::string, Imf::Int64 > StringToIdMap;
-		typedef std::vector< std::string > IdToStringMap;
+		typedef std::map< IndexedIO::EntryID, Imf::Int64 > StringToIdMap;
+		typedef std::vector< IndexedIO::EntryID > IdToStringMap;
 
 		StringToIdMap m_stringToIdMap;
 		IdToStringMap m_idToStringMap;
@@ -509,7 +509,7 @@ void FileIndexedIO::Node::read( std::istream &f )
 	{
 		Imf::Int64 stringId;
 		readLittleEndian<Imf::Int64>(f, stringId);
-		id = m_idx->m_stringCache.find( stringId );
+		id = m_idx->m_stringCache.findById( stringId );
 	}
 	else
 	{
@@ -1519,7 +1519,7 @@ void FileIndexedIO::setRoot( const IndexedIO::EntryIDList &root )
 	{
 		if (!found)
 		{
-			throw IOException( "FileIndexedIO: Cannot find entry '" + *t + "'" );
+			throw IOException( "FileIndexedIO: Cannot find entry '" + (*t).value() + "'" );
 		}
 	}
 	else
@@ -1536,7 +1536,7 @@ void FileIndexedIO::setRoot( const IndexedIO::EntryIDList &root )
 				Node* childNode = m_node->addChild( *t );
 				if ( !childNode )
 				{
-					throw IOException( "FileIndexedIO: Cannot create entry '" + *t + "'" );
+					throw IOException( "FileIndexedIO: Cannot create entry '" + (*t).value() + "'" );
 				}
 				m_node = childNode;
 			}
@@ -1606,7 +1606,7 @@ IndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, Indexe
 			childNode = m_node->addChild( name );
 			if ( !childNode )
 			{
-				throw IOException( "FileIndexedIO: Could not insert child '" + name + "'" );
+				throw IOException( "FileIndexedIO: Could not insert child '" + name.value() + "'" );
 			}
 		}
 		else if ( missingBehavior == IndexedIO::NullIfMissing )
@@ -1615,7 +1615,7 @@ IndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, Indexe
 		}
 		else
 		{
-			throw IOException( "FileIndexedIO: Could not find child '" + name + "'" );
+			throw IOException( "FileIndexedIO: Could not find child '" + name.value() + "'" );
 		}
 	}
 	return duplicate(childNode);
@@ -1636,7 +1636,7 @@ ConstIndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, I
 		{
 			throw IOException( "FileIndexedIO: No write access!" );
 		}
-		throw IOException( "FileIndexedIO: Could not find child '" + name + "'" );
+		throw IOException( "FileIndexedIO: Could not find child '" + name.value() + "'" );
 	}
 	return duplicate(childNode);
 }
@@ -1669,7 +1669,7 @@ void FileIndexedIO::remove( const IndexedIO::EntryID &name, bool throwIfNonExist
 	{
 		if (throwIfNonExistent)
 		{
-			throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+			throw IOException( "FileIndexedIO: Entry not found '" + name.value() + "'" );
 		}
 		else
 		{
@@ -1688,7 +1688,7 @@ IndexedIO::Entry FileIndexedIO::entry(const IndexedIO::EntryID &name) const
 
 	if (!node)
 	{
-		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+		throw IOException( "FileIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
 	return node->m_entry;
@@ -1754,7 +1754,7 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned l
 	}
 	else
 	{
-		throw IOException( "FileIndexedIO: Could not insert node '" + name + "' into index" );
+		throw IOException( "FileIndexedIO: Could not insert node '" + name.value() + "' into index" );
 	}
 }
 
@@ -1780,7 +1780,7 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	}
 	else
 	{
-		throw IOException( "FileIndexedIO: Could not insert node '" + name + "' into index" );
+		throw IOException( "FileIndexedIO: Could not insert node '" + name.value() + "' into index" );
 	}
 }
 
@@ -1794,7 +1794,7 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long ar
 
 	if (!node || node->m_entry.entryType() != IndexedIO::File)
 	{
-		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+		throw IOException( "FileIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
 	m_indexedFile->seekg( node );
@@ -1816,7 +1816,7 @@ void FileIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned long
 
 	if (!node || node->m_entry.entryType() != IndexedIO::File)
 	{
-		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+		throw IOException( "FileIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
 	m_indexedFile->seekg( node );
@@ -1835,7 +1835,7 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 
 	if (!node || node->m_entry.entryType() != IndexedIO::File)
 	{
-		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+		throw IOException( "FileIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
 	m_indexedFile->seekg( node );
@@ -1857,7 +1857,7 @@ void FileIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 
 	if (!node || node->m_entry.entryType() != IndexedIO::File)
 	{
-		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
+		throw IOException( "FileIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
 	m_indexedFile->seekg( node );

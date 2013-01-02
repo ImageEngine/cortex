@@ -43,6 +43,7 @@
 #include "OpenEXR/half.h"
 
 #include "IECore/RefCounted.h"
+#include "IECore/Interned.h"
 
 namespace IECore
 {
@@ -114,7 +115,7 @@ class IndexedIO : public RefCounted
 			CreateIfMissing
 		} MissingBehavior;
 
-		typedef std::string EntryID;
+		typedef InternedString EntryID;
 		typedef std::vector< EntryID > EntryIDList;
 		class Entry;
 		// singleton representing the root location (to be passed in the factory function)

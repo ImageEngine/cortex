@@ -161,7 +161,7 @@ IndexedIO::DataType IndexedIO::Entry::dataType() const
 {
 	if (m_entryType == IndexedIO::Directory)
 	{
-		throw IOException( "IndexedIO Entry '" + m_ID + "' has no data type - it is a directory" );
+		throw IOException( "IndexedIO Entry '" + m_ID.value() + "' has no data type - it is a directory" );
 	}
 
 	return m_dataType;
@@ -199,7 +199,7 @@ unsigned long IndexedIO::Entry::arrayLength() const
 {
 	if ( !isArray() )
 	{
-		throw IOException( "IndexedIO Entry '" + m_ID + "' is not an array" );
+		throw IOException( "IndexedIO Entry '" + m_ID.value() + "' is not an array" );
 	}
 
 	return m_arrayLength;

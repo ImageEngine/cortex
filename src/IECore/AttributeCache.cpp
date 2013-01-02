@@ -171,7 +171,7 @@ void AttributeCache::attributes(const ObjectHandle &obj, const std::string regex
 	attrs.reserve( directories.size() );
 	for (IndexedIO::EntryIDList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		if ( regex_match( (*it).c_str(), what, regexTest) )
+		if ( regex_match( (*it).value().c_str(), what, regexTest) )
 		{
 			attrs.push_back( *it );
 		}

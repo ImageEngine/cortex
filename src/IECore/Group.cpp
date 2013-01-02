@@ -51,6 +51,10 @@ using namespace Imath;
 const unsigned int Group::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Group );
 
+static IndexedIO::EntryID transformEntry("transform");
+static IndexedIO::EntryID stateEntry("state");
+static IndexedIO::EntryID childrenEntry("children");
+
 Group::Group()
 	:	m_transform( 0 ), m_parent( 0 )
 {
@@ -271,9 +275,9 @@ void Group::save( SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	if( m_transform )
 	{
-		context->save( m_transform, container, "transform" );
+		context->save( m_transform, container, transformEntry );
 	}
-	IndexedIOPtr stateContainer = container->subdirectory( "state", IndexedIO::CreateIfMissing );
+	IndexedIOPtr stateContainer = container->subdirectory( stateEntry, IndexedIO::CreateIfMissing );
 	int i = 0;
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
@@ -281,7 +285,7 @@ void Group::save( SaveContext *context ) const
 		context->save( *it, stateContainer, name );
 		i++;
 	}
-	IndexedIOPtr childrenContainer = container->subdirectory( "children", IndexedIO::CreateIfMissing );
+	IndexedIOPtr childrenContainer = container->subdirectory( childrenEntry, IndexedIO::CreateIfMissing );
 	i = 0;
 	for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
 	{
@@ -298,14 +302,14 @@ bool Group::entryListCompare( const IndexedIO::EntryID& a, const IndexedIO::Entr
 	
 	try
 	{
-		a_idx = boost::lexical_cast<int>( a );
+		a_idx = boost::lexical_cast<int>( a.value() );
 	}
 	catch (...)
 	{
 	}
 	try
 	{
-		b_idx = boost::lexical_cast<int>( b );
+		b_idx = boost::lexical_cast<int>( b.value() );
 	}
 	catch (...)
 	{
@@ -323,14 +327,14 @@ void Group::load( LoadContextPtr context )
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, "transform" );
+		m_transform = context->load<Transform>( container, transformEntry );
 	}
 	catch( ... )
 	{
 	}
 	clearState();
 	
-	IndexedIOPtr stateContainer = container->subdirectory( "state" );
+	IndexedIOPtr stateContainer = container->subdirectory( stateEntry );
 	IndexedIO::EntryIDList l;
 	stateContainer->entryIds( l );
 	sort( l.begin(), l.end(), entryListCompare );
@@ -339,7 +343,7 @@ void Group::load( LoadContextPtr context )
 		addState( context->load<StateRenderable>( stateContainer, *it ) );
 	}
 	clearChildren();
-	IndexedIOPtr childrenContainer = container->subdirectory( "children" );
+	IndexedIOPtr childrenContainer = container->subdirectory( childrenEntry );
 	childrenContainer->entryIds( l );
 	sort( l.begin(), l.end(), entryListCompare );
 	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )

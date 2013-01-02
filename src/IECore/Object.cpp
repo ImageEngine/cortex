@@ -62,10 +62,14 @@ static void stringPath( const IndexedIO::EntryIDList &pathParts, std::string &pa
 		for ( IndexedIO::EntryIDList::const_iterator it = pathParts.begin(); it != pathParts.end(); it++ )
 		{
 			path += "/";
-			path += *it;
+			path += (*it).value();
 		}
 	}
 }
+
+static IndexedIO::EntryID ioVersionEntry("ioVersion");
+static IndexedIO::EntryID dataEntry("data");
+static IndexedIO::EntryID typeEntry("type");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // structors
@@ -124,8 +128,8 @@ Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<Sa
 IndexedIOPtr Object::SaveContext::container( const std::string &typeName, unsigned int ioVersion )
 {
 	IndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, IndexedIO::CreateIfMissing );
-	typeIO->write( "ioVersion", ioVersion );
-	IndexedIOPtr dataIO = typeIO->subdirectory( "data", IndexedIO::CreateIfMissing );
+	typeIO->write( ioVersionEntry, ioVersion );
+	IndexedIOPtr dataIO = typeIO->subdirectory( dataEntry, IndexedIO::CreateIfMissing );
 	dataIO->removeAll();
 	return dataIO;
 }
@@ -152,9 +156,9 @@ void Object::SaveContext::save( const Object *toSave, IndexedIOPtr container, co
 		stringPath( pathParts, path );
 		(*m_savedObjects)[toSave] = path;
 
-		nameIO->write( "type", toSave->typeName() );
+		nameIO->write( typeEntry, toSave->typeName() );
 
-		IndexedIOPtr dataIO = nameIO->subdirectory( "data", IndexedIO::CreateIfMissing );
+		IndexedIOPtr dataIO = nameIO->subdirectory( dataEntry, IndexedIO::CreateIfMissing );
 		dataIO->removeAll();
 
 		SaveContext context( dataIO, m_savedObjects );
@@ -184,13 +188,13 @@ IndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsign
 		return 0;
 	}
 	unsigned int v;
-	typeIO->read( "ioVersion", v );
+	typeIO->read( ioVersionEntry, v );
 	if( v > ioVersion )
 	{
 		throw( IOException( "File version greater than library version." ) );
 	}
 	ioVersion = v;
-	return typeIO->subdirectory( "data", throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
+	return typeIO->subdirectory( dataEntry, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
 }
 
 IndexedIOPtr Object::LoadContext::rawContainer()
@@ -273,8 +277,8 @@ ObjectPtr Object::LoadContext::loadObject( IndexedIOPtr container )
 {
 	ObjectPtr result = 0;
 	string type = "";
-	container->read( "type", type );
-	IndexedIOPtr dataIO = container->subdirectory( "data" );
+	container->read( typeEntry, type );
+	IndexedIOPtr dataIO = container->subdirectory( dataEntry );
 	result = create( type );
 	LoadContextPtr context = new LoadContext( dataIO, m_loadedObjects );
 	result->load( context );

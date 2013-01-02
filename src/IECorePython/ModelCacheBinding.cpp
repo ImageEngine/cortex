@@ -47,13 +47,13 @@ namespace IECorePython
 
 static list childNames( const ModelCache &m )
 {
-	std::vector<std::string> n;
+	std::vector< IndexedIO::EntryID > n;
 	m.childNames( n );
 	
 	list result;
-	for( std::vector<std::string>::const_iterator it = n.begin(); it!=n.end(); it++ )
+	for( std::vector<IndexedIO::EntryID>::const_iterator it = n.begin(); it!=n.end(); it++ )
 	{
-		result.append( *it );
+		result.append( (*it).value() );
 	}
 	
 	return result;

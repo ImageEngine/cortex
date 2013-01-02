@@ -42,6 +42,8 @@ using namespace boost;
 const unsigned int MatrixTransform::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MatrixTransform);
 
+static IndexedIO::EntryID matrixEntry("matrix");
+
 MatrixTransform::MatrixTransform( const Imath::M44f &m )
 	:	matrix( m )
 {
@@ -72,7 +74,7 @@ void MatrixTransform::save( SaveContext *context ) const
 {
 	Transform::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( "matrix", matrix.getValue(), 16 );
+	container->write( matrixEntry, matrix.getValue(), 16 );
 }
 
 void MatrixTransform::load( LoadContextPtr context )
@@ -81,7 +83,7 @@ void MatrixTransform::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	IndexedIOPtr container = context->container( staticTypeName(), v );
 	float *f = matrix.getValue();
-	container->read( "matrix", f, 16 );
+	container->read( matrixEntry, f, 16 );
 }
 
 bool MatrixTransform::isEqualTo( const Object *other ) const

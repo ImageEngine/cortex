@@ -106,15 +106,15 @@ class ModelCache : public RefCounted
 
 		/// Queries the names of any existing children of path() within
 		/// the model.
-		void childNames( std::vector<std::string> &childNames ) const;
+		void childNames( std::vector<IndexedIO::EntryID> &childNames ) const;
 		/// Returns an object for writing to the specified child, throwing
 		/// an Exception if the child already exists. Bounding boxes will
 		/// automatically be propagated up from the children to the parent
 		/// as it is written.
-		ModelCachePtr writableChild( const std::string &childName );
+		ModelCachePtr writableChild( const IndexedIO::EntryID &childName );
 		/// Returns an object for querying the existing child, throwing an
 		/// Exception if no such child exists.
-		ConstModelCachePtr readableChild( const std::string &childName ) const;
+		ConstModelCachePtr readableChild( const IndexedIO::EntryID &childName ) const;
 
 	private :
 

@@ -51,6 +51,14 @@ using namespace Imath;
 // constructor.
 static IndexedIO::Description<FileIndexedIO> extensionDescription( ".mdc" );
 
+static InternedString headerEntry("header");
+static InternedString rootEntry("root");
+static InternedString boundEntry("bound");
+static InternedString transformEntry("transform");
+static InternedString objectEntry("object");
+static InternedString childrenEntry("children");
+
+
 class ModelCache::Implementation : public RefCounted
 {
 
@@ -67,8 +75,8 @@ class ModelCache::Implementation : public RefCounted
 			if( m_indexedIO->openMode() & IndexedIO::Write )
 			{
 				ObjectPtr header = HeaderGenerator::header();
-				header->save( m_indexedIO, "header" );
-				m_indexedIO->subdirectory( "root", IndexedIO::CreateIfMissing )->removeAll();
+				header->save( m_indexedIO, headerEntry );
+				m_indexedIO->subdirectory( rootEntry, IndexedIO::CreateIfMissing )->removeAll();
 			}
 			m_indexedIO = m_indexedIO->subdirectory( "root" );
 		}
@@ -78,7 +86,7 @@ class ModelCache::Implementation : public RefCounted
 			// write out the bound if necessary.
 			if( m_indexedIO->openMode() & ( IndexedIO::Write | IndexedIO::Append ) )
 			{
-				m_indexedIO->write( "bound", m_bound.min.getValue(), 6 );			
+				m_indexedIO->write( boundEntry, m_bound.min.getValue(), 6 );			
 				// propagate the bound to our parent.
 				if( m_parent && !m_parent->m_explicitBound )
 				{
@@ -98,7 +106,7 @@ class ModelCache::Implementation : public RefCounted
 		{
 			Box3d result;
 			double *resultAddress = result.min.getValue();
-			m_indexedIO->read( "bound", resultAddress, 6 );
+			m_indexedIO->read( boundEntry, resultAddress, 6 );
 			return result;
 		}
 		
@@ -111,10 +119,10 @@ class ModelCache::Implementation : public RefCounted
 		Imath::M44d readTransform() const
 		{
 			M44d result;
-			if ( m_indexedIO->hasEntry( "transform" ) )
+			if ( m_indexedIO->hasEntry( transformEntry ) )
 			{
 				double *resultAddress = result.getValue();
-				m_indexedIO->read( "transform", resultAddress, 16 );
+				m_indexedIO->read( transformEntry, resultAddress, 16 );
 			}
 			return result;
 		}
@@ -124,23 +132,23 @@ class ModelCache::Implementation : public RefCounted
 			m_transform = transform;
 			if( transform != M44d() )
 			{
-				m_indexedIO->write( "transform", transform.getValue(), 16 );
+				m_indexedIO->write( transformEntry, transform.getValue(), 16 );
 			}
 		}
 		
 		ObjectPtr readObject() const
 		{
 			ObjectPtr result = 0;
-			if ( m_indexedIO->hasEntry( "object" ) )
+			if ( m_indexedIO->hasEntry( objectEntry ) )
 			{
-				result = Object::load( m_indexedIO, "object" );
+				result = Object::load( m_indexedIO, objectEntry );
 			}
 			return result;
 		}
 		
 		void writeObject( const IECore::Object *object )
 		{
-			object->save( m_indexedIO, "object" );
+			object->save( m_indexedIO, objectEntry );
 			const VisibleRenderable *renderable = runTimeCast<const VisibleRenderable>( object );
 			if( renderable && !m_explicitBound )
 			{
@@ -153,9 +161,9 @@ class ModelCache::Implementation : public RefCounted
 			}
 		}
 	
-		void childNames( std::vector<std::string> &childNames ) const
+		void childNames( std::vector<IndexedIO::EntryID> &childNames ) const
 		{
-			ConstIndexedIOPtr children = m_indexedIO->subdirectory( "children", IndexedIO::NullIfMissing );
+			ConstIndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, IndexedIO::NullIfMissing );
 			if ( !children )
 			{
 				// it's ok for an entry to not have children
@@ -173,7 +181,7 @@ class ModelCache::Implementation : public RefCounted
 			}
 			childPath += childName;
 			
-			IndexedIOPtr child = m_indexedIO->subdirectory( "children", IndexedIO::CreateIfMissing );
+			IndexedIOPtr child = m_indexedIO->subdirectory( childrenEntry, IndexedIO::CreateIfMissing );
 			child = child->subdirectory( childName, IndexedIO::CreateIfMissing );
 			
 			ModelCachePtr result = new ModelCache(
@@ -195,7 +203,7 @@ class ModelCache::Implementation : public RefCounted
 			}
 			childPath += childName;
 
-			IndexedIOPtr child = m_indexedIO->subdirectory( "children" );
+			IndexedIOPtr child = m_indexedIO->subdirectory( childrenEntry );
 			child = child->subdirectory( childName );
 
 			ModelCachePtr result = new ModelCache(
@@ -285,17 +293,17 @@ void ModelCache::writeObject( const IECore::Object *object )
 	m_implementation->writeObject( object );
 }
 
-void ModelCache::childNames( std::vector<std::string> &childNames ) const
+void ModelCache::childNames( std::vector<IndexedIO::EntryID> &childNames ) const
 {
 	m_implementation->childNames( childNames );
 }
 
-ModelCachePtr ModelCache::writableChild( const std::string &childName )
+ModelCachePtr ModelCache::writableChild( const IndexedIO::EntryID &childName )
 {
 	return m_implementation->writableChild( childName );
 }
 
-ConstModelCachePtr ModelCache::readableChild( const std::string &childName ) const
+ConstModelCachePtr ModelCache::readableChild( const IndexedIO::EntryID &childName ) const
 {
 	return m_implementation->readableChild( childName );
 }

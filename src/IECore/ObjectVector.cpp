@@ -41,6 +41,8 @@
 using namespace IECore;
 
 const unsigned int ObjectVector::m_ioVersion = 1;
+static IndexedIO::EntryID sizeEntry("size");
+static IndexedIO::EntryID membersEntry("members");
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( ObjectVector );
 
@@ -86,9 +88,9 @@ void ObjectVector::save( SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	unsigned int size = m_members.size();
-	container->write( "size", size );
+	container->write( sizeEntry, size );
 
-	IndexedIOPtr ioMembers = container->subdirectory( "members", IndexedIO::CreateIfMissing );
+	IndexedIOPtr ioMembers = container->subdirectory( membersEntry, IndexedIO::CreateIfMissing );
 
 	unsigned i=0;
 	for( MemberContainer::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
@@ -109,18 +111,18 @@ void ObjectVector::load( LoadContextPtr context )
 	IndexedIOPtr container = context->container( staticTypeName(), v );
 
 	unsigned int size = 0;
-	container->read( "size", size );
+	container->read( sizeEntry, size );
 
 	m_members.resize( size );
 	std::fill( m_members.begin(), m_members.end(), (IECore::Object*)0 );
 
-	IndexedIOPtr ioMembers = container->subdirectory( "members" );
+	IndexedIOPtr ioMembers = container->subdirectory( membersEntry );
 
 	IndexedIO::EntryIDList l;
 	ioMembers->entryIds(l);
 	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
 	{
-		MemberContainer::size_type i = boost::lexical_cast<MemberContainer::size_type>( *it );
+		MemberContainer::size_type i = boost::lexical_cast<MemberContainer::size_type>( (*it).value() );
 		m_members[i] = context->load<Object>( ioMembers, *it );
 	}
 }
