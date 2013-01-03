@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -147,7 +147,12 @@ struct IndexedIOHelper
 		}
 		return result;
 	}
-
+	
+	static std::string currentEntryId( IndexedIOPtr p )
+	{
+		return p->currentEntryId().value();
+	}
+	
 	static list path(IndexedIOPtr p)
 	{
 		assert(p);
@@ -331,6 +336,7 @@ void bindIndexedIO(const char *bindName)
 		.def("path", &IndexedIOHelper::path)
 		.def("remove", &IndexedIO::remove)
 		.def("removeAll", &IndexedIO::removeAll)
+		.def("currentEntryId", &IndexedIOHelper::currentEntryId)
 		.def("entryIds", &IndexedIOHelper::entryIds)
 		.def("entryIds", &IndexedIOHelper::typedEntryIds)
 		.def("entry", &IndexedIO::entry )

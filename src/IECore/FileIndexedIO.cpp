@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -296,6 +296,7 @@ class FileIndexedIO::Node : public RefCounted
 		void childNames( IndexedIO::EntryIDList &names ) const;
 		void childNames( IndexedIO::EntryIDList &names, IndexedIO::EntryType ) const;
 
+		const IndexedIO::EntryID &name() const;
 		void path( IndexedIO::EntryIDList &result ) const;
 
 		// Returns the named child node or NULL if not existent.
@@ -606,6 +607,11 @@ void FileIndexedIO::Node::path( IndexedIO::EntryIDList &result ) const
 		m_parent->path( result );
 		result.push_back( m_entry.id() );
 	}
+}
+
+const IndexedIO::EntryID &FileIndexedIO::Node::name() const
+{
+	return m_entry.id();
 }
 
 void FileIndexedIO::Node::childNames( IndexedIO::EntryIDList &names ) const
@@ -1558,6 +1564,11 @@ std::iostream *FileIndexedIO::device()
 IndexedIO::OpenMode FileIndexedIO::openMode() const
 {
 	return m_mode;
+}
+
+const IndexedIO::EntryID &FileIndexedIO::currentEntryId() const
+{
+	return m_node->name();
 }
 
 void FileIndexedIO::path( IndexedIO::EntryIDList &result ) const

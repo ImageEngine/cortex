@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -81,6 +81,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 		"""Test MemoryIndexedIO read/write operations."""
 		f = MemoryIndexedIO( CharVectorData(), [], IndexedIOOpenMode.Write)
 		self.assertEqual( f.path() , [] )
+		self.assertEqual( f.currentEntryId() , "/" )
 		txt = StringData("test1")
 		txt.save( f, "obj1" )
 		size1 = len( f.buffer() )
@@ -97,7 +98,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 
 	def testRmStress(self) :
 		"""Test MemoryIndexedIO rm (stress test)"""
-
+		
 		random.seed( 19 )
 
 		dataPresent = set()
@@ -161,6 +162,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		"""Test FileIndexedIO constuctors"""
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
 		self.assertEqual( f.path() , [] )
+		self.assertEqual( f.currentEntryId() , "/" )
 
 		self.assertRaises( RuntimeError, FileIndexedIO, "./test/FileIndexedIO.fio", ["nonexistantentrypoint"], IndexedIOOpenMode.Read)
 		f = None
@@ -194,11 +196,14 @@ class TestFileIndexedIO(unittest.TestCase):
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
 		g = f.subdirectory("sub1", IndexedIO.MissingBehavior.CreateIfMissing )
 		self.assertEqual( f.path() , [] )
+		self.assertEqual( f.currentEntryId() , "/" )
 		self.assertEqual( g.path() , [ 'sub1' ] )
+		self.assertEqual( g.currentEntryId() , "sub1" )
 
 		g = f.subdirectory("sub2", IndexedIO.MissingBehavior.CreateIfMissing )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( g.path() , [ 'sub2' ] )
+		self.assertEqual( g.currentEntryId() , "sub2" )
 
 	def testChdir(self):
 		"""Test FileIndexedIO chdir"""
@@ -208,20 +213,27 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		g = f.subdirectory("sub1")
 		self.assertEqual( g.path(), ["sub1"] )
+		self.assertEqual( g.currentEntryId() , "sub1" )
 		self.assertEqual( f.path(), [] )
 		g = f.subdirectory("sub2")
 		self.assertEqual( g.path(), ["sub2"] )
-
+		self.assertEqual( g.currentEntryId() , "sub2" )
+		
 		e = g.subdirectory("sub2.1", IndexedIO.MissingBehavior.CreateIfMissing )
 		self.assertEqual( e.path(), ["sub2","sub2.1"] )
+		self.assertEqual( e.currentEntryId() , "sub2.1" )
 		g = e.parentDirectory()
 		self.assertEqual( g.path(), ["sub2"] )
+		self.assertEqual( g.currentEntryId() , "sub2" )
 		f = g.parentDirectory()
 		self.assertEqual( f.path(), [] )
+		self.assertEqual( f.currentEntryId() , "/" )
 		g = f.subdirectory("sub2")
 		self.assertEqual( g.path(), ["sub2"] )
+		self.assertEqual( g.currentEntryId() , "sub2" )
 		e = g.subdirectory("sub2.1")
 		self.assertEqual( e.path(), ["sub2","sub2.1"] )
+		self.assertEqual( e.currentEntryId() , "sub2.1" )
 
 	def testLs(self):
 		"""Test FileIndexedIO ls"""
@@ -268,7 +280,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testRmStress(self) :
 		"""Test FileIndexedIO rm (stress test)"""
-
+		
 		random.seed( 19 )
 
 		dataPresent = set()

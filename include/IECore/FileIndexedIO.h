@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -73,6 +73,8 @@ class FileIndexedIO : public IndexedIO
 
 		bool hasEntry( const IndexedIO::EntryID &name ) const;
 
+		const IndexedIO::EntryID &currentEntryId() const;
+		
 		void entryIds( IndexedIO::EntryIDList &names ) const;
 
 		void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -158,6 +158,9 @@ class IndexedIO : public RefCounted
 
 		/// Returns whether the given entry exists in the file.
 		virtual bool hasEntry( const IndexedIO::EntryID &name ) const = 0;
+
+		/// Returns the current EntryID
+		virtual const IndexedIO::EntryID &currentEntryId() const = 0;
 
 		/// Stores in the given array all the ids of all files and directories
 		virtual void entryIds( IndexedIO::EntryIDList &names ) const = 0;
