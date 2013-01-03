@@ -73,13 +73,23 @@ struct IndexedIOHelper
 		int rootLen = IECorePython::len( path );
 		for (int i = 0; i < rootLen; i++ )
 		{
-			extract< std::string > ex( path[i++] );
+			extract< std::string > ex( path[i] );
 			if ( !ex.check() )
 			{
 				throw InvalidArgumentException( std::string( "Invalid root! Should be a list of strings!" ) );
 			}
 			entries.push_back( ex() );
 		}
+	}
+
+	static list entryIDsToList( const IndexedIO::EntryIDList &l )
+	{
+		list result;
+		for( IndexedIO::EntryIDList::const_iterator it = l.begin(); it != l.end(); it++ )
+		{
+			result.append( *it );
+		}
+		return result;
 	}
 
 	template< typename T, typename P >
@@ -123,29 +133,17 @@ struct IndexedIOHelper
 	static list entryIds(IndexedIOPtr p)
 	{
 		assert(p);
-
-		list result;
 		IndexedIO::EntryIDList l;
 		p->entryIds(l);
-		for( IndexedIO::EntryIDList::const_iterator it = l.begin(); it != l.end(); it++ )
-		{
-			result.append( *it );
-		}
-		return result;
+		return IndexedIOHelper::entryIDsToList( l );
 	}
 
 	static list typedEntryIds(IndexedIOPtr p, IndexedIO::EntryType type )
 	{
 		assert(p);
-
-		list result;
 		IndexedIO::EntryIDList l;
 		p->entryIds(l, type);
-		for( IndexedIO::EntryIDList::const_iterator it = l.begin(); it != l.end(); it++ )
-		{
-			result.append( *it );
-		}
-		return result;
+		return IndexedIOHelper::entryIDsToList( l );
 	}
 	
 	static std::string currentEntryId( IndexedIOPtr p )
@@ -156,15 +154,9 @@ struct IndexedIOHelper
 	static list path(IndexedIOPtr p)
 	{
 		assert(p);
-		
-		list result;
 		IndexedIO::EntryIDList l;
 		p->path(l);
-		for( IndexedIO::EntryIDList::const_iterator it = l.begin(); it != l.end(); it++ )
-		{
-			result.append( *it );
-		}
-		return result;
+		return IndexedIOHelper::entryIDsToList( l );
 	}
 
 	template<typename T>
@@ -197,7 +189,7 @@ struct IndexedIOHelper
 		return x;
 	}
 
-	static DataPtr read(IndexedIOPtr p, const IndexedIO::EntryID &name)
+	static object read(IndexedIOPtr p, const IndexedIO::EntryID &name)
 	{
 		assert(p);
 
@@ -206,48 +198,61 @@ struct IndexedIOHelper
 		switch( entry.dataType() )
 		{
 			case IndexedIO::Float:
-				return readSingle<float>(p, name, entry);
+				return object( readSingle<float>(p, name, entry) );
 			case IndexedIO::Double:
-				return readSingle<double>(p, name, entry);
+				return object( readSingle<double>(p, name, entry) );
 			case IndexedIO::Int:
-				return readSingle<int>(p, name, entry);
+				return object( readSingle<int>(p, name, entry) );
 			case IndexedIO::Long:
-				return readSingle<int>(p, name, entry);
+				return object( readSingle<int>(p, name, entry) );
 			case IndexedIO::String:
-				return readSingle<std::string>(p, name, entry);
+				return object( readSingle<std::string>(p, name, entry) );
 			case IndexedIO::StringArray:
-				return readArray<std::string>(p, name, entry);
+				return object( readArray<std::string>(p, name, entry) );
 			case IndexedIO::FloatArray:
-				return readArray<float>(p, name, entry);
+				return object( readArray<float>(p, name, entry) );
 			case IndexedIO::DoubleArray:
-				return readArray<double>(p, name, entry);
+				return object( readArray<double>(p, name, entry) );
 			case IndexedIO::IntArray:
-				return readArray<int>(p, name, entry);
+				return object( readArray<int>(p, name, entry) );
 			case IndexedIO::LongArray:
-				return readArray<int>(p, name, entry);
+				return object( readArray<int>(p, name, entry) );
 			case IndexedIO::UInt:
-				return readSingle<unsigned int>(p, name, entry);
+				return object( readSingle<unsigned int>(p, name, entry) );
 			case IndexedIO::UIntArray:
-				return readArray<unsigned int>(p, name, entry);
+				return object( readArray<unsigned int>(p, name, entry) );
 			case IndexedIO::Char:
-				return readSingle<char>(p, name, entry);
+				return object( readSingle<char>(p, name, entry) );
 			case IndexedIO::CharArray:
-				return readArray<char>(p, name, entry);
+				return object( readArray<char>(p, name, entry) );
 			case IndexedIO::UChar:
-				return readSingle<unsigned char>(p, name, entry);
+				return object( readSingle<unsigned char>(p, name, entry) );
 			case IndexedIO::UCharArray:
-				return readArray<unsigned char>(p, name, entry);
+				return object( readArray<unsigned char>(p, name, entry) );
 			case IndexedIO::Short:
-				return readSingle<short>(p, name, entry);
+				return object( readSingle<short>(p, name, entry) );
 			case IndexedIO::ShortArray:
-				return readArray<short>(p, name, entry);
+				return object( readArray<short>(p, name, entry) );
 			case IndexedIO::UShort:
-				return readSingle<unsigned short>(p, name, entry);
+				return object( readSingle<unsigned short>(p, name, entry) );
 			case IndexedIO::UShortArray:
-				return readArray<unsigned short>(p, name, entry);
+				return object( readArray<unsigned short>(p, name, entry) );
+			case IndexedIO::SymbolicLink:
+				{
+					IndexedIO::EntryIDList path;
+					p->read(name, path);
+					return IndexedIOHelper::entryIDsToList( path );
+				}
 			default:
 				throw IOException(name);
 		}
+	}
+
+	static void writeSymlink(IndexedIOPtr p, const IndexedIO::EntryID &name, list l)
+	{
+		IndexedIO::EntryIDList symLink;
+		IndexedIOHelper::listToEntryIds( l, symLink );
+		p->write( name, symLink );
 	}
 
 	static std::string readString(IndexedIOPtr p, const IndexedIO::EntryID &name)
@@ -281,6 +286,7 @@ void bindIndexedIO(const char *bindName)
 	void (IndexedIO::*writeDouble)(const IndexedIO::EntryID &, const double &) = &IndexedIO::write;
 	void (IndexedIO::*writeInt)(const IndexedIO::EntryID &, const int &) = &IndexedIO::write;
 	void (IndexedIO::*writeString)(const IndexedIO::EntryID &, const std::string &) = &IndexedIO::write;
+
 #if 0
 	void (IndexedIO::*writeUInt)(const IndexedIO::EntryID &, const unsigned int &) = &IndexedIO::write;
 	void (IndexedIO::*writeChar)(const IndexedIO::EntryID &, const char &) = &IndexedIO::write;
@@ -315,16 +321,24 @@ void bindIndexedIO(const char *bindName)
 		.value("Long", IndexedIO::Long)
 		.value("LongArray", IndexedIO::LongArray)
 		.value("String", IndexedIO::String)
+		.value("StringArray", IndexedIO::StringArray)
 		.value("UInt", IndexedIO::UInt)
 		.value("UIntArray", IndexedIO::UIntArray)
 		.value("Char", IndexedIO::Char)
 		.value("CharArray", IndexedIO::CharArray)
 		.value("UChar", IndexedIO::UChar)
 		.value("UCharArray", IndexedIO::UCharArray)
+		.value("Half", IndexedIO::Half)
+		.value("HalfArray", IndexedIO::HalfArray)
 		.value("Short", IndexedIO::Long)
 		.value("ShortArray", IndexedIO::ShortArray)
 		.value("UShort", IndexedIO::Long)
 		.value("UShortArray", IndexedIO::UShortArray)
+		.value("Int64", IndexedIO::Int64)
+		.value("Int64Array", IndexedIO::Int64Array)
+		.value("UInt64", IndexedIO::UInt64)
+		.value("UInt64Array", IndexedIO::UInt64Array)
+		.value("SymbolicLink", IndexedIO::SymbolicLink)
 		.export_values()
 	;
 
@@ -348,6 +362,7 @@ void bindIndexedIO(const char *bindName)
 		.def("write", writeDouble)
 		.def("write", writeInt)
 		.def("write", writeString)
+		.def("write", &IndexedIOHelper::writeSymlink)
 #if 0
 		// We dont really want to bind these because they don't represent natural Python datatypes
 		.def("write", writeUInt)

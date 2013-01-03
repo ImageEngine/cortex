@@ -271,7 +271,7 @@ class Object : public RunTimeTyped
 				IndexedIOPtr rawContainer();
 			private :
 
-				typedef std::map<const Object *, std::string > SavedObjectMap;
+				typedef std::map<const Object *, IndexedIO::EntryIDList > SavedObjectMap;
 
 				SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<SavedObjectMap> savedObjects );
 
@@ -301,7 +301,7 @@ class Object : public RunTimeTyped
 				IndexedIOPtr rawContainer();
 
 			private :
-				typedef std::map< std::string, ObjectPtr> LoadedObjectMap;
+				typedef std::map< IndexedIO::EntryIDList, ObjectPtr> LoadedObjectMap;
 
 				LoadContext( IndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects );
 

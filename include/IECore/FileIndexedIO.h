@@ -117,6 +117,7 @@ class FileIndexedIO : public IndexedIO
 		void write(const IndexedIO::EntryID &name, const unsigned char &x);
 		void write(const IndexedIO::EntryID &name, const short &x);
 		void write(const IndexedIO::EntryID &name, const unsigned short &x);
+		void write(const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &x);
 
 		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const;
@@ -142,6 +143,7 @@ class FileIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, unsigned char &x) const;
 		void read(const IndexedIO::EntryID &name, short &x) const;
 		void read(const IndexedIO::EntryID &name, unsigned short &x) const;
+		void read(const IndexedIO::EntryID &name, IndexedIO::EntryIDList &x) const;
 
 		ConstCharVectorDataPtr buf();
 

@@ -480,6 +480,23 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.failIf(fv is gv)
 		self.assertEqual(fv, gv)
 
+	def testReadWriteSymbolicLink(self):
+		"""Test FileIndexedIO read/write(SymbolicLink)"""
+
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		g = f.subdirectory("sub1", IndexedIO.MissingBehavior.CreateIfMissing )
+		h = g.subdirectory("sub2", IndexedIO.MissingBehavior.CreateIfMissing )
+		
+		fv = h.path()
+
+		name = "myLink"
+		f.write(name, fv)
+
+		gv = f.read(name)
+
+		self.failIf(fv is gv)
+		self.assertEqual(fv, gv)
+
 	def setUp( self ):
 
 		if os.path.isfile("./test/FileIndexedIO.fio") :

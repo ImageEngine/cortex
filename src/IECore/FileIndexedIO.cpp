@@ -166,6 +166,16 @@ class StringCache
 			}
 		}
 
+		Imf::Int64 find( const IndexedIO::EntryID &s ) const
+		{
+			StringToIdMap::const_iterator it = m_stringToIdMap.find( s );
+			if ( it == m_stringToIdMap.end() )
+			{
+				throw IOException( (boost::format ( "StringCache: could not find string %s!" ) % s.value() ).str() );
+			}
+			return it->second;
+		}
+
 		Imf::Int64 find( const IndexedIO::EntryID &s, bool errIfNotFound = true )
 		{
 			StringToIdMap::const_iterator it = m_stringToIdMap.find( s );
@@ -174,7 +184,7 @@ class StringCache
 			{
 				if (errIfNotFound)
 				{
-					assert(false);
+					throw IOException( (boost::format ( "StringCache: could not find string %s!" ) % s.value() ).str() );
 				}
 
 				Imf::Int64 id = ++m_prevId;
@@ -353,6 +363,9 @@ class FileIndexedIO::Index : public RefCounted
 		/// Return the total number of nodes in the index.
 		Imf::Int64 nodeCount();
 
+		/// Queries the string cache
+		const StringCache &stringCache() const;
+
 	protected:
 
 		static const Imf::Int64 g_unversionedMagicNumber = 0x0B00B1E5;
@@ -501,7 +514,7 @@ void FileIndexedIO::Node::read( std::istream &f )
 	char t;
 	f.read( &t, sizeof(char) );
 
-	std::string id;
+	const IndexedIO::EntryID *id;
 	IndexedIO::EntryType entryType = (IndexedIO::EntryType)t;
 	IndexedIO::DataType dataType = IndexedIO::Invalid;
 	Imf::Int64 arrayLength = 0;
@@ -510,7 +523,7 @@ void FileIndexedIO::Node::read( std::istream &f )
 	{
 		Imf::Int64 stringId;
 		readLittleEndian<Imf::Int64>(f, stringId);
-		id = m_idx->m_stringCache.findById( stringId );
+		id = &m_idx->m_stringCache.findById( stringId );
 	}
 	else
 	{
@@ -519,8 +532,7 @@ void FileIndexedIO::Node::read( std::istream &f )
 		char *s = new char[entrySize+1];
 		f.read( s, entrySize );
 		s[entrySize] = '\0';
-
-		id = s;
+		id = new IndexedIO::EntryID(s);
 		delete[] s;
 	}
 
@@ -535,7 +547,12 @@ void FileIndexedIO::Node::read( std::istream &f )
 		}
 	}
 
-	m_entry = IndexedIO::Entry( id, entryType, dataType, static_cast<unsigned long>( arrayLength ) );
+	m_entry = IndexedIO::Entry( *id, entryType, dataType, static_cast<unsigned long>( arrayLength ) );
+
+	if ( m_idx->m_version < 1 )
+	{
+		delete id;
+	}
 
 	readLittleEndian<Imf::Int64>(f, m_id );
 
@@ -677,6 +694,11 @@ FileIndexedIO::Index::~Index()
 		assert(it->second);
 		delete it->second;
 	}
+}
+
+const StringCache &FileIndexedIO::Index::stringCache() const
+{
+	return m_stringCache;
 }
 
 FileIndexedIO::Index::Index( FilteredStream &f, bool readOnly ) : m_prevId(0), m_readOnly(readOnly)
@@ -1743,6 +1765,79 @@ char *FileIndexedIO::ioBuffer( unsigned long size ) const
 	return m_ioBuffer;
 }
 
+void FileIndexedIO::write(const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &x)
+{
+	writable(name);
+	remove(name, false);
+
+	Node* node = m_node->addChild( name );
+	if (!node)
+	{
+		throw IOException( "FileIndexedIO: Could not insert node '" + name.value() + "' into index" );
+	}
+
+	unsigned long arrayLength = x.size();
+	Imf::Int64 *ids = new Imf::Int64[arrayLength];
+	const Imf::Int64 *constIds = ids;
+	unsigned long size = IndexedIO::DataSizeTraits<Imf::Int64 *>::size(constIds, arrayLength);
+	IndexedIO::DataType dataType = IndexedIO::SymbolicLink;
+
+	char *data = ioBuffer(size);
+	assert(data);
+
+	const StringCache &stringCache = m_indexedFile->index()->stringCache();
+
+	for ( unsigned long i = 0; i < arrayLength; i++ )
+	{
+		ids[i] = stringCache.find( x[i] );
+	}
+
+	IndexedIO::DataFlattenTraits<Imf::Int64*>::flatten(constIds, arrayLength, data);
+
+	node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
+
+	m_indexedFile->write( node, data, size );
+
+	delete [] ids;
+}
+
+void FileIndexedIO::read(const IndexedIO::EntryID &name, IndexedIO::EntryIDList &x) const
+{
+	assert( m_node );
+	readable(name);
+
+	Node* node = m_node->child( name );
+
+	if (!node || node->m_entry.entryType() != IndexedIO::File)
+	{
+		throw IOException( "FileIndexedIO: Entry not found '" + name.value() + "'" );
+	}
+
+	unsigned long arrayLength = node->m_entry.arrayLength();
+	m_indexedFile->seekg( node );
+
+	Imf::Int64 *ids = new Imf::Int64[arrayLength];
+	Imf::Int64 size = node->m_size;
+
+#ifdef BOOST_LITTLE_ENDIAN
+	// raw read
+	m_indexedFile->m_stream->read( (char*)ids, size );
+#else
+	char *data = ioBuffer(size);
+	m_indexedFile->m_stream->read( data, size );
+	IndexedIO::DataFlattenTraits<Imf::Int64*>::unflatten( data, ids, arrayLength );
+#endif
+
+	const StringCache &stringCache = m_indexedFile->index()->stringCache();
+	x.clear();
+
+	for ( unsigned long i = 0; i < arrayLength; i++ )
+	{
+		x.push_back( stringCache.findById( ids[i] ) );
+	}
+	delete [] ids;
+}
+
 template<typename T>
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength)
 {
@@ -1833,6 +1928,10 @@ void FileIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned long
 	m_indexedFile->seekg( node );
 
 	Imf::Int64 size = node->m_size;
+	if (!x)
+	{
+		x = new T[arrayLength];
+	}
 	m_indexedFile->m_stream->read( (char*)x, size );
 }
 

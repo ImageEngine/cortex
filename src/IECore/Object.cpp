@@ -49,24 +49,6 @@ IE_CORE_DEFINERUNTIMETYPED( Object );
 const Object::AbstractTypeDescription<Object> Object::m_typeDescription;
 const unsigned int Object::m_ioVersion = 0;
 
-/// Returns a friendly string path for the given EntryIDList
-static void stringPath( const IndexedIO::EntryIDList &pathParts, std::string &path )
-{
-	if ( pathParts.size() == 0 )
-	{
-		path = "/";
-	}
-	else
-	{
-		path.clear();
-		for ( IndexedIO::EntryIDList::const_iterator it = pathParts.begin(); it != pathParts.end(); it++ )
-		{
-			path += "/";
-			path += (*it).value();
-		}
-	}
-}
-
 static IndexedIO::EntryID ioVersionEntry("ioVersion");
 static IndexedIO::EntryID dataEntry("data");
 static IndexedIO::EntryID typeEntry("type");
@@ -152,9 +134,7 @@ void Object::SaveContext::save( const Object *toSave, IndexedIOPtr container, co
 
 		IndexedIO::EntryIDList pathParts;
 		nameIO->path( pathParts );
-		string path;
-		stringPath( pathParts, path );
-		(*m_savedObjects)[toSave] = path;
+		(*m_savedObjects)[toSave] = pathParts;
 
 		nameIO->write( typeEntry, toSave->typeName() );
 
@@ -209,12 +189,27 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 	IndexedIO::Entry e = container->entry( name );
 	if( e.entryType()==IndexedIO::File )
 	{
-		string path;
-		container->read( name, path );
+		IndexedIO::EntryIDList pathParts;
+		if ( e.dataType() == IndexedIO::SymbolicLink )
+		{
+			container->read( name, pathParts );
+		}
+		else 
+		{
+			// for backward compatibility...
+			string path;
+			container->read( name, path );
+			typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+			// \todo: this would have trouble if the name of the object contains slashes...
+			Tokenizer tokens(path, boost::char_separator<char>("/"));
+			Tokenizer::iterator t = tokens.begin();
 
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<std::string, ObjectPtr>( path, NULL ) );
-
-		LoadedObjectMap::iterator it = m_loadedObjects->find( path );
+			for ( ; t != tokens.end(); t++ )
+			{
+				pathParts.push_back( *t );
+			}
+		}
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
 		if ( !ret.second )
 		{
 			// a symlink found this object first and already loaded it...
@@ -231,15 +226,10 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 		}
 		// from the root go to the path
 		// \todo we could find if there's anything in common and not navigate that long all the time....
-		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-		// \todo: this would have trouble if the name of the object contains slashes...
-		Tokenizer tokens(path, boost::char_separator<char>("/"));
-		Tokenizer::iterator t = tokens.begin();
-
 		IndexedIOPtr ioObject = ioRoot;
-		for ( ; t != tokens.end(); t++ )
+		for ( IndexedIO::EntryIDList::const_iterator pIt = pathParts.begin(); pIt != pathParts.end(); pIt++ )
 		{
-			ioObject = ioObject->subdirectory( *t );
+			ioObject = ioObject->subdirectory( *pIt );
 		}
 		result = loadObject( ioObject );
 
@@ -252,10 +242,8 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 
 		IndexedIO::EntryIDList pathParts;
 		ioObject->path( pathParts );
-		string path;
-		stringPath( pathParts, path );
 
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<std::string, ObjectPtr>( path, NULL ) );
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
 		if ( !ret.second )
 		{
 			// a symlink found this object first and already loaded it...
