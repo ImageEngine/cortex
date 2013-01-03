@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -261,7 +261,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		for f in [ "test/o.fio" ] :
+		for f in [ "test/o.fio", "test/FileIndexedIOSlashes.fio" ] :
 			if os.path.isfile( f ) :
 				os.remove( f )
 
