@@ -130,6 +130,13 @@ struct IndexedIOHelper
 		return p->subdirectory(name);
 	}
 
+	static IndexedIOPtr directory(IndexedIOPtr p, list l, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing )
+	{
+		IndexedIO::EntryIDList path;
+		IndexedIOHelper::listToEntryIds( l, path );
+		return p->directory(path, missingBehavior);
+	}
+
 	static list entryIds(IndexedIOPtr p)
 	{
 		assert(p);
@@ -345,6 +352,7 @@ void bindIndexedIO(const char *bindName)
 	scope varScope = IECorePython::RefCountedClass<IndexedIO, RefCounted>( bindName )
 		.def("openMode", &IndexedIO::openMode)
 		.def("parentDirectory", nonConstParentDirectory)
+		.def("directory",  &IndexedIOHelper::directory )
 		.def("subdirectory",  &IndexedIOHelper::subdirectory )
 		.def("subdirectory", nonConstSubdirectory )
 		.def("path", &IndexedIOHelper::path)

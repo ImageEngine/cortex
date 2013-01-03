@@ -93,6 +93,10 @@ class FileIndexedIO : public IndexedIO
 
 		ConstIndexedIOPtr parentDirectory() const;
 
+		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing );
+
+		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing ) const;
+
 		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength);

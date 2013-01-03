@@ -216,21 +216,8 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 			return ret.first->second;
 		}
 
-		// find the root node
-		IndexedIOPtr ioRoot = m_ioInterface;
-		IndexedIOPtr parent = ioRoot->parentDirectory();
-		while (parent)
-		{
-			ioRoot = parent;
-			parent = ioRoot->parentDirectory();
-		}
-		// from the root go to the path
-		// \todo we could find if there's anything in common and not navigate that long all the time....
-		IndexedIOPtr ioObject = ioRoot;
-		for ( IndexedIO::EntryIDList::const_iterator pIt = pathParts.begin(); pIt != pathParts.end(); pIt++ )
-		{
-			ioObject = ioObject->subdirectory( *pIt );
-		}
+		// jump to the path..
+		IndexedIOPtr ioObject = m_ioInterface->directory( pathParts );
 		result = loadObject( ioObject );
 
 		// add the loaded object to the map.

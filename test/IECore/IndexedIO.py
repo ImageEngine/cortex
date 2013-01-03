@@ -205,6 +205,18 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( g.path() , [ 'sub2' ] )
 		self.assertEqual( g.currentEntryId() , "sub2" )
 
+		# test directory
+		h = f.directory(["sub2"], IndexedIO.MissingBehavior.CreateIfMissing )
+		self.assertEqual( h.path() , ["sub2"] )
+		i = f.directory(["sub2","sub2.1"], IndexedIO.MissingBehavior.CreateIfMissing )
+		self.assertEqual( i.path() , ["sub2","sub2.1"] )
+		j = h.directory(["sub2","sub2.1"], IndexedIO.MissingBehavior.CreateIfMissing )
+		self.assertEqual( j.path() , ["sub2","sub2.1"] )
+		k = j.directory(["sub3"], IndexedIO.MissingBehavior.CreateIfMissing )
+		self.assertEqual( k.path() , ["sub3"] )
+		l = f.directory(["sub4","sub4.1"], IndexedIO.MissingBehavior.CreateIfMissing )
+		self.assertEqual( l.path() , ["sub4","sub4.1"] )
+
 	def testChdir(self):
 		"""Test FileIndexedIO chdir"""
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
@@ -234,6 +246,14 @@ class TestFileIndexedIO(unittest.TestCase):
 		e = g.subdirectory("sub2.1")
 		self.assertEqual( e.path(), ["sub2","sub2.1"] )
 		self.assertEqual( e.currentEntryId() , "sub2.1" )
+
+		# test directory function
+		h = f.directory( ["sub2","sub2.1"], IndexedIO.MissingBehavior.ThrowIfMissing )
+		self.assertEqual( h.path(), ["sub2","sub2.1"], IndexedIO.MissingBehavior.ThrowIfMissing )
+		h = g.directory( ["sub2","sub2.1"], IndexedIO.MissingBehavior.ThrowIfMissing )
+		self.assertEqual( h.path(), ["sub2","sub2.1"], IndexedIO.MissingBehavior.ThrowIfMissing )
+		h = e.directory( ["sub2","sub2.1"], IndexedIO.MissingBehavior.ThrowIfMissing )
+		self.assertEqual( h.path(), ["sub2","sub2.1"], IndexedIO.MissingBehavior.ThrowIfMissing )
 
 	def testLs(self):
 		"""Test FileIndexedIO ls"""

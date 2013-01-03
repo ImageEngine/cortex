@@ -160,7 +160,7 @@ class IndexedIO : public RefCounted
 		/// Returns whether the given entry exists in the file.
 		virtual bool hasEntry( const IndexedIO::EntryID &name ) const = 0;
 
-		/// Returns the current EntryID
+		/// Returns the EntryID for the current directory in the file. The root location has a special name "/".
 		virtual const IndexedIO::EntryID &currentEntryId() const = 0;
 
 		/// Stores in the given array all the ids of all files and directories
@@ -186,11 +186,17 @@ class IndexedIO : public RefCounted
 		/// Remove all entries.
 		virtual void removeAll() = 0;
 
-		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
+		/// Returns a read-only interface for the parent of this node in the file or a NULL pointer if it's the root.
 		virtual IndexedIOPtr parentDirectory() = 0;
 
 		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
 		virtual ConstIndexedIOPtr parentDirectory() const = 0;
+
+		/// Returns a read-only interface for the given path in the file.
+		virtual IndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehavior missingBehavior = ThrowIfMissing ) = 0;
+
+		/// Returns a new interface for the given path in the file.
+		virtual ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehavior missingBehavior = ThrowIfMissing ) const = 0;
 
 		/// Create a new file containing the specified float array contents
 		/// \param name The name of the file to be written

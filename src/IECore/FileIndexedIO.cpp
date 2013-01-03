@@ -1749,6 +1749,52 @@ ConstIndexedIOPtr FileIndexedIO::parentDirectory() const
 	return duplicate(parentNode);
 }
 
+IndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior )
+{
+	// from the root go to the path
+	Node* root = m_node;
+	Node* parentNode = root->m_parent;
+	while (parentNode)
+	{
+		root = parentNode;
+		parentNode = root->m_parent;
+	}
+	Node* node = root;
+	for ( IndexedIO::EntryIDList::const_iterator pIt = path.begin(); pIt != path.end(); pIt++ )
+	{
+		const IndexedIO::EntryID &name = *pIt;
+
+		Node* childNode = node->child( name );
+		if ( !childNode )
+		{
+			if ( missingBehavior == IndexedIO::CreateIfMissing )
+			{
+				writable( name );
+				childNode = node->addChild( name );
+				if ( !childNode )	
+				{
+					throw IOException( "FileIndexedIO: Could not insert child '" + name.value() + "'" );
+				}
+			}
+			else if ( missingBehavior == IndexedIO::NullIfMissing )
+			{
+				return NULL;
+			}
+			else
+			{
+				throw IOException( "FileIndexedIO: Could not find child '" + name.value() + "'" );
+			}
+		}
+		node = childNode;
+	}
+	return duplicate(node);
+}
+
+ConstIndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior ) const
+{
+	return const_cast< FileIndexedIO * >(this)->directory( path, missingBehavior == IndexedIO::CreateIfMissing ? IndexedIO::ThrowIfMissing : missingBehavior );
+}
+
 char *FileIndexedIO::ioBuffer( unsigned long size ) const
 {
 	if ( !m_ioBuffer )
