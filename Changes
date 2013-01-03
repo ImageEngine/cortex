@@ -1,3 +1,5 @@
+7.10.1 :
+
 Improvements :
 
 * Using IECoreHoudini SOP_InterpolatedCacheReader in PrimitiveGroup mode will now load Prim and Vertex attribs as well as Point attribs
