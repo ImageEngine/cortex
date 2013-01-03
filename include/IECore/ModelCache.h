@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,6 +77,8 @@ class ModelCache : public RefCounted
 		/// this will be "/". Use the childNames() and child() methods
 		/// to traverse to other parts of the model.
 		const std::string &path() const;
+		/// Returns the name of the current directory in the path
+		const std::string &name() const;
 		
 		/// Returns the bounding box for the entire scene contents from
 		/// path() down, inclusive of the object at this path, but
@@ -103,10 +105,12 @@ class ModelCache : public RefCounted
 		ObjectPtr readObject() const;
 		/// Writes an object to this path in the model.	
 		void writeObject( const IECore::Object *object );
-
+		/// Convenience method to determine if an object exists without reading it
+		bool hasObject() const;
+		
 		/// Queries the names of any existing children of path() within
 		/// the model.
-		void childNames( std::vector<IndexedIO::EntryID> &childNames ) const;
+		void childNames( IndexedIO::EntryIDList &childNames ) const;
 		/// Returns an object for writing to the specified child, throwing
 		/// an Exception if the child already exists. Bounding boxes will
 		/// automatically be propagated up from the children to the parent

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,7 +58,6 @@ static InternedString transformEntry("transform");
 static InternedString objectEntry("object");
 static InternedString childrenEntry("children");
 
-
 class ModelCache::Implementation : public RefCounted
 {
 
@@ -78,7 +77,7 @@ class ModelCache::Implementation : public RefCounted
 				header->save( m_indexedIO, headerEntry );
 				m_indexedIO->subdirectory( rootEntry, IndexedIO::CreateIfMissing )->removeAll();
 			}
-			m_indexedIO = m_indexedIO->subdirectory( "root" );
+			m_indexedIO = m_indexedIO->subdirectory( rootEntry );
 		}
 		
 		virtual ~Implementation()
@@ -96,10 +95,15 @@ class ModelCache::Implementation : public RefCounted
 			}
 			
 		}
-	
+		
 		const std::string &path() const
 		{
 			return m_path;
+		}
+		
+		const std::string &name() const
+		{
+			return m_indexedIO->currentEntryId();
 		}
 		
 		Imath::Box3d readBound() const
@@ -138,12 +142,7 @@ class ModelCache::Implementation : public RefCounted
 		
 		ObjectPtr readObject() const
 		{
-			ObjectPtr result = 0;
-			if ( m_indexedIO->hasEntry( objectEntry ) )
-			{
-				result = Object::load( m_indexedIO, objectEntry );
-			}
-			return result;
+			return ( hasObject() ) ? Object::load( m_indexedIO, objectEntry ) : 0;
 		}
 		
 		void writeObject( const IECore::Object *object )
@@ -160,8 +159,13 @@ class ModelCache::Implementation : public RefCounted
 				m_bound.extendBy( bd );
 			}
 		}
-	
-		void childNames( std::vector<IndexedIO::EntryID> &childNames ) const
+		
+		bool hasObject() const
+		{
+			return m_indexedIO->hasEntry( objectEntry );
+		}
+		
+		void childNames( IndexedIO::EntryIDList &childNames ) const
 		{
 			ConstIndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, IndexedIO::NullIfMissing );
 			if ( !children )
@@ -263,6 +267,11 @@ const std::string &ModelCache::path() const
 	return m_implementation->path();
 }
 
+const std::string &ModelCache::name() const
+{
+	return m_implementation->name();
+}
+
 Imath::Box3d ModelCache::readBound() const
 {
 	return m_implementation->readBound();
@@ -293,7 +302,12 @@ void ModelCache::writeObject( const IECore::Object *object )
 	m_implementation->writeObject( object );
 }
 
-void ModelCache::childNames( std::vector<IndexedIO::EntryID> &childNames ) const
+bool ModelCache::hasObject() const
+{
+	return m_implementation->hasObject();
+}
+
+void ModelCache::childNames( IndexedIO::EntryIDList &childNames ) const
 {
 	m_implementation->childNames( childNames );
 }

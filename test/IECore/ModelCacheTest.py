@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -50,23 +50,35 @@ class ModelCacheTest( unittest.TestCase ) :
 	
 		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Write )
 		self.assertEqual( m.path(), "/" )
+		self.assertEqual( m.name(), "root" )
+		self.assertEqual( m.hasObject(), False )
 		
 		t = m.writableChild( "t" )
 		self.assertEqual( t.path(), "/t" )
+		self.assertEqual( t.name(), "t" )
+		self.assertEqual( t.hasObject(), False )
 		self.assertEqual( m.childNames(), [ "t" ] )
 		
 		t.writeTransform( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) )
+		self.assertEqual( t.hasObject(), False )
 		
 		s = t.writableChild( "s" )
+		self.assertEqual( s.path(), "/t/s" )
+		self.assertEqual( s.name(), "s" )
+		self.assertEqual( s.hasObject(), False )
 		self.assertEqual( t.childNames(), [ "s" ] )
-
+		
 		s.writeObject( IECore.SpherePrimitive( 1 ) )
+		self.assertEqual( s.hasObject(), True )
 		
 		# need to delete all ModelCache references to finalise the file
 		del m, t, s
 
 		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Read )
 		
+		self.assertEqual( m.path(), "/" )
+		self.assertEqual( m.name(), "root" )
+		self.assertEqual( m.hasObject(), False )
 		self.assertEqual( m.childNames(), [ "t" ] )
 		self.assertEqual( m.readBound(), IECore.Box3d( IECore.V3d( 0, -1, -1 ), IECore.V3d( 2, 1, 1 ) ) )
 		self.assertEqual( m.readTransform(), IECore.M44d() )
@@ -74,6 +86,9 @@ class ModelCacheTest( unittest.TestCase ) :
 		
 		t = m.readableChild( "t" )
 		
+		self.assertEqual( t.path(), "/t" )
+		self.assertEqual( t.name(), "t" )
+		self.assertEqual( t.hasObject(), False )
 		self.assertEqual( t.childNames(), [ "s" ] )
 		self.assertEqual( t.readBound(), IECore.Box3d( IECore.V3d( -1, -1, -1 ), IECore.V3d( 1, 1, 1 ) ) )
 		self.assertEqual( t.readTransform(), IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) )
@@ -81,6 +96,9 @@ class ModelCacheTest( unittest.TestCase ) :
 
 		s = t.readableChild( "s" )
 		
+		self.assertEqual( s.path(), "/t/s" )
+		self.assertEqual( s.name(), "s" )
+		self.assertEqual( s.hasObject(), True )
 		self.assertEqual( s.childNames(), [] )
 		self.assertEqual( s.readBound(), IECore.Box3d( IECore.V3d( -1, -1, -1 ), IECore.V3d( 1, 1, 1 ) ) )
 		self.assertEqual( s.readTransform(), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
@@ -180,7 +198,7 @@ class ModelCacheTest( unittest.TestCase ) :
 		
 		b = a.readableChild( "b" )
 		self.assertEqual( b.readBound(), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
-		
+
 if __name__ == "__main__":
 	unittest.main()
 
