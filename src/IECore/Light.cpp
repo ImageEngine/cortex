@@ -41,6 +41,11 @@
 using namespace IECore;
 using namespace boost;
 
+static IndexedIO::EntryID nameEntry("name");
+static IndexedIO::EntryID handleEntry("handle");
+static IndexedIO::EntryID parametersEntry("parameters");
+
+
 const unsigned int Light::m_ioVersion = 0;
 Object::TypeDescription<Light> Light::m_description;
 
@@ -136,9 +141,9 @@ void Light::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( "name", m_name );
-	container->write( "handle", m_handle );
-	context->save( m_parameters, container, "parameters" );
+	container->write( nameEntry, m_name );
+	container->write( handleEntry, m_handle );
+	context->save( m_parameters, container, parametersEntry );
 }
 
 void Light::load( LoadContextPtr context )
@@ -146,9 +151,9 @@ void Light::load( LoadContextPtr context )
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	IndexedIOPtr container = context->container( staticTypeName(), v );
-	container->read( "name", m_name );
-	container->read( "handle", m_handle );
-	m_parameters = context->load<CompoundData>( container, "parameters" );
+	container->read( nameEntry, m_name );
+	container->read( handleEntry, m_handle );
+	m_parameters = context->load<CompoundData>( container, parametersEntry );
 }
 
 void Light::hash( MurmurHash &h ) const

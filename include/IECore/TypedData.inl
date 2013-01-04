@@ -109,7 +109,7 @@ template <class T>
 void TypedData<T>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOPtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	container->write( "value", readable() );
 }
 
@@ -120,7 +120,7 @@ void TypedData<T>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOPtr container = context->rawContainer();
+		IndexedIO *container = context->rawContainer();
 		container->read( "value", writable() );
 	}
 	catch( ... )

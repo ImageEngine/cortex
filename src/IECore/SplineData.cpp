@@ -43,6 +43,11 @@ using namespace IECore;
 namespace IECore
 {
 
+static IndexedIO::EntryID basisEntry("basis");
+static IndexedIO::EntryID stepEntry("step");
+static IndexedIO::EntryID xEntry("x");
+static IndexedIO::EntryID yEntry("y");
+
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplineffData, SplineffDataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplineddData, SplineddDataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor3fData, SplinefColor3fDataTypeId )
@@ -57,8 +62,8 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 		IndexedIOPtr container = context->container( staticTypeName(), 0 );			\
 		const ValueType &s = readable();														\
 																								\
-		container->write( "basis", s.basis.matrix.getValue(), 16 );								\
-		container->write( "step", s.basis.step );												\
+		container->write( basisEntry, s.basis.matrix.getValue(), 16 );								\
+		container->write( stepEntry, s.basis.step );												\
 																								\
 		vector<ValueType::XType> x; 															\
 		vector<ValueType::YType> y; 															\
@@ -68,8 +73,8 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 			x.push_back( it->first );															\
 			y.push_back( it->second );															\
 		}																						\
-		container->write( "x", &(x[0]), x.size() );												\
-		container->write( "y", (const YBASETYPE*)&(y[0]), y.size() * YBASESIZE );				\
+		container->write( xEntry, &(x[0]), x.size() );												\
+		container->write( yEntry, (const YBASETYPE*)&(y[0]), y.size() * YBASESIZE );				\
 	}																							\
 																								\
 	template<>																					\
@@ -81,8 +86,8 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 		ValueType &s = writable();																\
 																								\
 		ValueType::XType *bp = s.basis.matrix.getValue();										\
-		container->read( "basis", bp, 16 );														\
-		container->read( "step", s.basis.step );												\
+		container->read( basisEntry, bp, 16 );														\
+		container->read( stepEntry, s.basis.step );												\
 																								\
 		vector<ValueType::XType> x; 															\
 		vector<ValueType::YType> y; 															\
@@ -90,9 +95,9 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 		x.resize( e.arrayLength() );															\
 		y.resize( e.arrayLength() );															\
 		ValueType::XType *xp = &(x[0]);															\
-		container->read( "x", xp, e.arrayLength() );											\
+		container->read( xEntry, xp, e.arrayLength() );											\
 		YBASETYPE *yp = (YBASETYPE *)&(y[0]);													\
-		container->read( "y", yp, e.arrayLength() * YBASESIZE );								\
+		container->read( yEntry, yp, e.arrayLength() * YBASESIZE );								\
 																								\
 		s.points.clear();																		\
 		for( unsigned i=0; i<x.size(); i++ )													\

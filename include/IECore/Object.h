@@ -258,7 +258,7 @@ class Object : public RunTimeTyped
 				IndexedIOPtr container( const std::string &typeName, unsigned int ioVersion );
 				/// Saves an Object instance, saving only a reference in the case that the object has
 				/// already been saved.
-				void save( const Object *toSave, IndexedIOPtr o, const IndexedIO::EntryID &name );
+				void save( const Object *toSave, IndexedIO *o, const IndexedIO::EntryID &name );
 				/// Returns an interface to an alternative container in which to save class data. This container
 				/// is provided for optimisation reasons and should be used only in extreme cases. The container
 				/// provides no protection from overwriting of your class data by base or derived classes, and
@@ -268,7 +268,7 @@ class Object : public RunTimeTyped
 				/// very small amounts of unstructured data where the metadata associated with the standard
 				/// container becomes relatively expensive in both disk space and time. Think carefully before
 				/// using this container, it provides performance benefits only in extreme cases!
-				IndexedIOPtr rawContainer();
+				IndexedIO *rawContainer();
 			private :
 
 				typedef std::map<const Object *, IndexedIO::EntryIDList > SavedObjectMap;
@@ -295,18 +295,18 @@ class Object : public RunTimeTyped
 				IndexedIOPtr container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing = true );
 				template<class T>
 				/// Load an Object instance previously saved by SaveContext::save().
-				typename T::Ptr load( IndexedIOPtr container, const IndexedIO::EntryID &name );
+				typename T::Ptr load( IndexedIO *container, const IndexedIO::EntryID &name );
 				/// Returns an interface to a raw container created by SaveContext::rawContainer() - please see
 				/// documentation and cautionary notes for that function.
-				IndexedIOPtr rawContainer();
+				IndexedIO *rawContainer();
 
 			private :
 				typedef std::map< IndexedIO::EntryIDList, ObjectPtr> LoadedObjectMap;
 
 				LoadContext( IndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects );
 
-				ObjectPtr loadObjectOrReference( IndexedIOPtr container, const IndexedIO::EntryID &name );
-				ObjectPtr loadObject( IndexedIOPtr container );
+				ObjectPtr loadObjectOrReference( IndexedIO *container, const IndexedIO::EntryID &name );
+				ObjectPtr loadObject( IndexedIO *container );
 
 				IndexedIOPtr m_ioInterface;
 				boost::shared_ptr<LoadedObjectMap> m_loadedObjects;

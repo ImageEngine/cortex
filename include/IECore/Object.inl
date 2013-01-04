@@ -81,7 +81,7 @@ Object::AbstractTypeDescription<T>::AbstractTypeDescription() : RunTimeTyped::Ty
 }
 
 template<class T>
-typename T::Ptr Object::LoadContext::load( IndexedIOPtr i, const IndexedIO::EntryID &name )
+typename T::Ptr Object::LoadContext::load( IndexedIO *i, const IndexedIO::EntryID &name )
 {
 	return runTimeCast<T>( loadObjectOrReference( i, name ) );
 }

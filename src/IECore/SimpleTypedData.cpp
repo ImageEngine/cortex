@@ -40,6 +40,8 @@
 namespace IECore
 {
 
+static IndexedIO::EntryID valueEntry("value");
+
 LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDataTypeId, "LongData" );
 
 #define IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( TNAME, TID, N )	\
@@ -50,8 +52,8 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 	{ \
 		Data::save( context ); \
 		assert( baseSize() == N ); \
-		IndexedIOPtr container = context->rawContainer(); \
-		container->write( "value", TNAME::baseReadable(), TNAME::baseSize() ); \
+		IndexedIO *container = context->rawContainer(); \
+		container->write( valueEntry, TNAME::baseReadable(), TNAME::baseSize() ); \
 	} \
 	\
 	template<> \
@@ -59,18 +61,17 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 	{ \
 		Data::load( context ); \
 		assert( ( sizeof( TNAME::ValueType ) / sizeof( TNAME::BaseType ) ) == N ); \
-		IndexedIOPtr container; \
 		TNAME::BaseType *p = TNAME::baseWritable(); \
 		try \
 		{ \
-			container = context->rawContainer(); \
-			container->read( "value", p, N ); \
+			IndexedIO *container = context->rawContainer(); \
+			container->read( valueEntry, p, N ); \
 		} \
 		catch( ... ) \
 		{ \
 			unsigned int v = 0;	\
-			container = context->container( staticTypeName(), v ); \
-			container->read( "value", p, N ); \
+			IndexedIOPtr container = context->container( staticTypeName(), v ); \
+			container->read( valueEntry, p, N ); \
 		} \
 	}
 
@@ -142,9 +143,9 @@ template<>
 void TypedData<bool>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOPtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	unsigned char c = readable();
-	container->write( "value", c );
+	container->write( valueEntry, c );
 }
 
 template<>
@@ -155,15 +156,15 @@ void TypedData<bool>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOPtr container = context->rawContainer();
-		container->read( "value", c );
+		IndexedIO *container = context->rawContainer();
+		container->read( valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
 		IndexedIOPtr container = context->container( staticTypeName(), v );
-		container->read( "value", c );
+		container->read( valueEntry, c );
 	}
 
 	writable() = c;
@@ -173,9 +174,9 @@ template<>
 void TypedData<short>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOPtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	int c = readable();
-	container->write( "value", c );
+	container->write( valueEntry, c );
 }
 
 template<>
@@ -186,15 +187,15 @@ void TypedData<short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOPtr container = context->rawContainer();
-		container->read( "value", c );
+		IndexedIO *container = context->rawContainer();
+		container->read( valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
 		IndexedIOPtr container = context->container( staticTypeName(), v );
-		container->read( "value", c );
+		container->read( valueEntry, c );
 	}
 
 	writable() = static_cast<short>( c );
@@ -204,9 +205,9 @@ template<>
 void TypedData<unsigned short>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOPtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	unsigned int c = readable();
-	container->write( "value", c );
+	container->write( valueEntry, c );
 }
 
 template<>
@@ -217,15 +218,15 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOPtr container = context->rawContainer();
-		container->read( "value", c );
+		IndexedIO *container = context->rawContainer();
+		container->read( valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
 		IndexedIOPtr container = context->container( staticTypeName(), v );
-		container->read( "value", c );
+		container->read( valueEntry, c );
 	}
 
 	writable() = static_cast<unsigned short>( c );

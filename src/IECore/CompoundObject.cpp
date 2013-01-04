@@ -40,6 +40,8 @@
 using namespace IECore;
 using namespace std;
 
+static IndexedIO::EntryID membersEntry("members");
+
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CompoundObject );
 
 const unsigned int CompoundObject::m_ioVersion = 0;
@@ -77,7 +79,7 @@ void CompoundObject::save( SaveContext *context ) const
 {
 	Object::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container = container->subdirectory( "members", IndexedIO::CreateIfMissing );
+	container = container->subdirectory( membersEntry, IndexedIO::CreateIfMissing );
 	ObjectMap::const_iterator it;
 	for( it=m_members.begin(); it!=m_members.end(); it++ )
 	{
@@ -92,7 +94,7 @@ void CompoundObject::load( LoadContextPtr context )
 
 	IndexedIOPtr container = context->container( staticTypeName(), v );
 	m_members.clear();
-	container = container->subdirectory( "members" );
+	container = container->subdirectory( membersEntry );
 
 	IndexedIO::EntryIDList memberNames;
 	container->entryIds( memberNames );

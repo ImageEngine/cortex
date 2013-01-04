@@ -45,6 +45,10 @@ using namespace boost;
 using namespace std;
 using namespace Imath;
 
+static IndexedIO::EntryID variablesEntry("variables");
+static IndexedIO::EntryID interpolationEntry("interpolation");
+static IndexedIO::EntryID dataEntry("data");
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Primitive
 /////////////////////////////////////////////////////////////////////////////////////
@@ -94,13 +98,13 @@ void Primitive::save( IECore::Object::SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	IndexedIOPtr ioVariables = container->subdirectory( "variables", IndexedIO::CreateIfMissing );
+	IndexedIOPtr ioVariables = container->subdirectory( variablesEntry, IndexedIO::CreateIfMissing );
 	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
 	{
 		IndexedIOPtr ioPrimVar = ioVariables->subdirectory( it->first, IndexedIO::CreateIfMissing );
 		const int i = it->second.interpolation;
-		ioPrimVar->write( "interpolation", i );
-		context->save( it->second.data, ioPrimVar, "data" );
+		ioPrimVar->write( interpolationEntry, i );
+		context->save( it->second.data, ioPrimVar, dataEntry );
 	}
 }
 
@@ -119,7 +123,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 		VisibleRenderable::load( context );
 	}
 
-	IndexedIOPtr ioVariables = container->subdirectory( "variables" );
+	IndexedIOPtr ioVariables = container->subdirectory( variablesEntry );
 
 	variables.clear();
 	IndexedIO::EntryIDList names;
@@ -129,9 +133,9 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	{
 		IndexedIOPtr ioPrimVar = ioVariables->subdirectory( *it );
 		int i; 
-		ioPrimVar->read( "interpolation", i );
+		ioPrimVar->read( interpolationEntry, i );
 		variables.insert( 
-			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, "data" ) ) ) 
+			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, dataEntry ) ) ) 
 		);
 	}
 }

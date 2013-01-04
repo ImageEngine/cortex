@@ -42,6 +42,10 @@ using namespace IECore;
 using namespace Imath;
 using namespace boost;
 
+static IndexedIO::EntryID radiusEntry("radius");
+static IndexedIO::EntryID zEntry("z");
+static IndexedIO::EntryID thetaMaxEntry("thetaMax");
+
 const unsigned int DiskPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(DiskPrimitive);
 
@@ -139,9 +143,9 @@ void DiskPrimitive::save( IECore::Object::SaveContext *context ) const
 	Primitive::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
-	container->write( "radius", m_radius );
-	container->write( "z", m_z );
-	container->write( "thetaMax", m_thetaMax );
+	container->write( radiusEntry, m_radius );
+	container->write( zEntry, m_z );
+	container->write( thetaMaxEntry, m_thetaMax );
 }
 
 void DiskPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -151,9 +155,9 @@ void DiskPrimitive::load( IECore::Object::LoadContextPtr context )
 
 	IndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( "radius", m_radius );
-	container->read( "z", m_z );
-	container->read( "thetaMax", m_thetaMax );
+	container->read( radiusEntry, m_radius );
+	container->read( zEntry, m_z );
+	container->read( thetaMaxEntry, m_thetaMax );
 }
 
 bool DiskPrimitive::isEqualTo( const Object *other ) const

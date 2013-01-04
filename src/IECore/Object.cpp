@@ -116,12 +116,12 @@ IndexedIOPtr Object::SaveContext::container( const std::string &typeName, unsign
 	return dataIO;
 }
 
-IndexedIOPtr Object::SaveContext::rawContainer()
+IndexedIO *Object::SaveContext::rawContainer()
 {
 	return m_ioInterface;
 }
 
-void Object::SaveContext::save( const Object *toSave, IndexedIOPtr container, const IndexedIO::EntryID &name )
+void Object::SaveContext::save( const Object *toSave, IndexedIO *container, const IndexedIO::EntryID &name )
 {
 	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
@@ -177,15 +177,13 @@ IndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsign
 	return typeIO->subdirectory( dataEntry, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
 }
 
-IndexedIOPtr Object::LoadContext::rawContainer()
+IndexedIO *Object::LoadContext::rawContainer()
 {
 	return m_ioInterface;
 }
 
-ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, const IndexedIO::EntryID &name )
+ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIO *container, const IndexedIO::EntryID &name )
 {
-	ObjectPtr result;
-
 	IndexedIO::Entry e = container->entry( name );
 	if( e.entryType()==IndexedIO::File )
 	{
@@ -210,18 +208,14 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 			}
 		}
 		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
-		if ( !ret.second )
+		if ( ret.second )
 		{
-			// a symlink found this object first and already loaded it...
-			return ret.first->second;
+			// jump to the path..
+			IndexedIOPtr ioObject = m_ioInterface->directory( pathParts );
+			// add the loaded object to the map.
+			ret.first->second = loadObject( ioObject );
 		}
-
-		// jump to the path..
-		IndexedIOPtr ioObject = m_ioInterface->directory( pathParts );
-		result = loadObject( ioObject );
-
-		// add the loaded object to the map.
-		ret.first->second = result;
+		return ret.first->second;
 	}
 	else
 	{
@@ -231,24 +225,18 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOPtr container, co
 		ioObject->path( pathParts );
 
 		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
-		if ( !ret.second )
+		if ( ret.second )
 		{
-			// a symlink found this object first and already loaded it...
-			result = ret.first->second;
-		}
-		else
-		{
-			result = loadObject( ioObject );
 			// add the loaded object to the map.
-			ret.first->second = result;
+			ret.first->second = loadObject( ioObject );
 		}
+		return ret.first->second;
 	}
-	return result;
 }
 
 // this function can only load concrete objects. it can't load references to
 // objects. path is relative to the root of m_ioInterface
-ObjectPtr Object::LoadContext::loadObject( IndexedIOPtr container )
+ObjectPtr Object::LoadContext::loadObject( IndexedIO *container )
 {
 	ObjectPtr result = 0;
 	string type = "";
@@ -310,10 +298,6 @@ ObjectPtr Object::copy() const
 
 void Object::save( IndexedIOPtr ioInterface, const IndexedIO::EntryID &name ) const
 {
-	// we get a copy of the ioInterface here so the SaveContext can be freed
-	// from always having to balance chdirs() to return to the original
-	// directory after an operation. this results in fewer chdir calls and faster
-	// saving.
 	boost::shared_ptr<SaveContext> context( new SaveContext( ioInterface ) );
 	context->save( this, ioInterface, name );
 }

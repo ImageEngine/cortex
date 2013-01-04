@@ -39,6 +39,15 @@
 
 using namespace IECore;
 
+static IndexedIO::EntryID uPointsEntry("uPoints");
+static IndexedIO::EntryID vPointsEntry("vPoints");
+static IndexedIO::EntryID uBasisMatrixEntry("uBasisMatrix");
+static IndexedIO::EntryID uBasisStepEntry("uBasisStep");
+static IndexedIO::EntryID vBasisMatrixEntry("vBasisMatrix");
+static IndexedIO::EntryID vBasisStepEntry("vBasisStep");
+static IndexedIO::EntryID uPeriodicEntry("uPeriodic");
+static IndexedIO::EntryID vPeriodicEntry("vPeriodic");
+
 const unsigned int PatchMeshPrimitive::m_ioVersion = 1;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PatchMeshPrimitive );
 
@@ -170,14 +179,14 @@ void PatchMeshPrimitive::save( IECore::Object::SaveContext *context ) const
 
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
-	container->write( "uPoints", m_uPoints );
-	container->write( "vPoints", m_vPoints );
-	container->write( "uBasisMatrix", m_uBasis.matrix.getValue(), 16 );
-	container->write( "uBasisStep", m_uBasis.step );
-	container->write( "vBasisMatrix", m_vBasis.matrix.getValue(), 16 );
-	container->write( "vBasisStep", m_vBasis.step );
-	container->write( "uPeriodic", (char)(m_uPeriodic) );
-	container->write( "vPeriodic", (char)(m_vPeriodic) );
+	container->write( uPointsEntry, m_uPoints );
+	container->write( vPointsEntry, m_vPoints );
+	container->write( uBasisMatrixEntry, m_uBasis.matrix.getValue(), 16 );
+	container->write( uBasisStepEntry, m_uBasis.step );
+	container->write( vBasisMatrixEntry, m_vBasis.matrix.getValue(), 16 );
+	container->write( vBasisStepEntry, m_vBasis.step );
+	container->write( uPeriodicEntry, (char)(m_uPeriodic) );
+	container->write( vPeriodicEntry, (char)(m_vPeriodic) );
 }
 
 void PatchMeshPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -187,21 +196,21 @@ void PatchMeshPrimitive::load( IECore::Object::LoadContextPtr context )
 
 	IndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( "uPoints", m_uPoints );
-	container->read( "vPoints", m_vPoints );
+	container->read( uPointsEntry, m_uPoints );
+	container->read( vPointsEntry, m_vPoints );
 
 	float *f = m_uBasis.matrix.getValue();
-	container->read( "uBasisMatrix", f, 16 );
-	container->read( "uBasisStep", m_uBasis.step );
+	container->read( uBasisMatrixEntry, f, 16 );
+	container->read( uBasisStepEntry, m_uBasis.step );
 
 	f = m_vBasis.matrix.getValue();
-	container->read( "vBasisMatrix", f, 16 );
-	container->read( "vBasisStep", m_vBasis.step );
+	container->read( vBasisMatrixEntry, f, 16 );
+	container->read( vBasisStepEntry, m_vBasis.step );
 
 	char p = 0;
-	container->read( "uPeriodic", p );
+	container->read( uPeriodicEntry, p );
 	m_uPeriodic = p;
-	container->read( "vPeriodic", p );
+	container->read( vPeriodicEntry, p );
 	m_vPeriodic = p;
 
 	m_uLinear = m_uBasis==CubicBasisf::linear();

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,11 @@ using namespace std;
 using namespace IECore;
 using namespace Imath;
 using namespace boost;
+
+static IndexedIO::EntryID verticesPerFaceEntry("verticesPerFace");
+static IndexedIO::EntryID vertexIdsEntry("vertexIds");
+static IndexedIO::EntryID numVerticesEntry("numVertices");
+static IndexedIO::EntryID interpolationEntry("interpolation");
 
 const unsigned int MeshPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MeshPrimitive);
@@ -181,15 +186,15 @@ void MeshPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_verticesPerFace, container, "verticesPerFace" );
-	context->save( m_vertexIds, container, "vertexIds" );
+	context->save( m_verticesPerFace, container, verticesPerFaceEntry );
+	context->save( m_vertexIds, container, vertexIdsEntry );
 
 	/// \todo: mac has problems with the size_t type, resulting in the write() call being
 	/// ambiguous to the compiler
 	unsigned int numVertices = m_numVertices;
-	container->write( "numVertices", numVertices );
+	container->write( numVerticesEntry, numVertices );
 
-	container->write( "interpolation", m_interpolation );
+	container->write( interpolationEntry, m_interpolation );
 }
 
 void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -199,14 +204,14 @@ void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
 
 	IndexedIOPtr container = context->container( staticTypeName(), v );
 
-	m_verticesPerFace = context->load<IntVectorData>( container, "verticesPerFace" );
-	m_vertexIds = context->load<IntVectorData>( container, "vertexIds" );
+	m_verticesPerFace = context->load<IntVectorData>( container, verticesPerFaceEntry );
+	m_vertexIds = context->load<IntVectorData>( container, vertexIdsEntry );
 
 	unsigned int numVertices;
-	container->read( "numVertices", numVertices );
+	container->read( numVerticesEntry, numVertices );
 	m_numVertices = numVertices;
 
-	container->read( "interpolation", m_interpolation );
+	container->read( interpolationEntry, m_interpolation );
 }
 
 bool MeshPrimitive::isEqualTo( const Object *other ) const

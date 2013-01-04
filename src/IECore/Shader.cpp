@@ -39,6 +39,10 @@
 using namespace IECore;
 using namespace boost;
 
+static IndexedIO::EntryID nameEntry("name");
+static IndexedIO::EntryID typeEntry("type");
+static IndexedIO::EntryID parametersEntry("parameters");
+
 const unsigned int Shader::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Shader );
 
@@ -130,9 +134,9 @@ void Shader::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( "name", m_name );
-	container->write( "type", m_type );
-	context->save( m_parameters, container, "parameters" );
+	container->write( nameEntry, m_name );
+	container->write( typeEntry, m_type );
+	context->save( m_parameters, container, parametersEntry );
 }
 
 void Shader::load( LoadContextPtr context )
@@ -140,9 +144,9 @@ void Shader::load( LoadContextPtr context )
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	IndexedIOPtr container = context->container( staticTypeName(), v );
-	container->read( "name", m_name );
-	container->read( "type", m_type );
-	m_parameters = context->load<CompoundData>( container, "parameters" );
+	container->read( nameEntry, m_name );
+	container->read( typeEntry, m_type );
+	m_parameters = context->load<CompoundData>( container, parametersEntry );
 }
 
 void Shader::hash( MurmurHash &h ) const

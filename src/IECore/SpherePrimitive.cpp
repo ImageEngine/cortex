@@ -43,6 +43,11 @@ using namespace IECore;
 using namespace Imath;
 using namespace boost;
 
+static IndexedIO::EntryID radiusEntry("radius" );
+static IndexedIO::EntryID zMinEntry("zMin" );
+static IndexedIO::EntryID zMaxEntry("zMax" );
+static IndexedIO::EntryID thetaMaxEntry("thetaMax" );
+
 const unsigned int SpherePrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(SpherePrimitive);
 
@@ -168,10 +173,10 @@ void SpherePrimitive::save( IECore::Object::SaveContext *context ) const
 	Primitive::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
-	container->write( "radius", m_radius );
-	container->write( "zMin", m_zMin );
-	container->write( "zMax", m_zMax );
-	container->write( "thetaMax", m_thetaMax );
+	container->write( radiusEntry, m_radius );
+	container->write( zMinEntry, m_zMin );
+	container->write( zMaxEntry, m_zMax );
+	container->write( thetaMaxEntry, m_thetaMax );
 }
 
 void SpherePrimitive::load( IECore::Object::LoadContextPtr context )
@@ -181,10 +186,10 @@ void SpherePrimitive::load( IECore::Object::LoadContextPtr context )
 
 	IndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( "radius", m_radius );
-	container->read( "zMin", m_zMin );
-	container->read( "zMax", m_zMax );
-	container->read( "thetaMax", m_thetaMax );
+	container->read( radiusEntry, m_radius );
+	container->read( zMinEntry, m_zMin );
+	container->read( zMaxEntry, m_zMax );
+	container->read( thetaMaxEntry, m_thetaMax );
 }
 
 bool SpherePrimitive::isEqualTo( const Object *other ) const

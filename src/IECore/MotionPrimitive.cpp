@@ -43,6 +43,9 @@
 using namespace IECore;
 using namespace std;
 
+static IndexedIO::EntryID snapshotsEntry("snapshots");
+static IndexedIO::EntryID primitiveEntry("primitive");
+
 const unsigned int MotionPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( MotionPrimitive );
 
@@ -163,7 +166,7 @@ void MotionPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	IndexedIOPtr snapshots = container->subdirectory( "snapshots", IndexedIO::CreateIfMissing );
+	IndexedIOPtr snapshots = container->subdirectory( snapshotsEntry, IndexedIO::CreateIfMissing );
 
 	int i = 0;
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
@@ -171,7 +174,7 @@ void MotionPrimitive::save( IECore::Object::SaveContext *context ) const
 		string is = str( boost::format( "%d" ) % i );
 		IndexedIOPtr snapshot = snapshots->subdirectory( is, IndexedIO::CreateIfMissing );
 		snapshot->write( "time", it->first );
-		context->save( it->second, snapshot, "primitive" );
+		context->save( it->second, snapshot, primitiveEntry );
 		i++;
 	}
 }
@@ -181,7 +184,7 @@ void MotionPrimitive::load( IECore::Object::LoadContextPtr context )
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	IndexedIOPtr container = context->container( staticTypeName(), v );
-	IndexedIOPtr snapshots = container->subdirectory( "snapshots" );
+	IndexedIOPtr snapshots = container->subdirectory( snapshotsEntry );
 	m_snapshots.clear();
 	IndexedIO::EntryIDList names;
 	snapshots->entryIds( names, IndexedIO::Directory );
@@ -191,7 +194,7 @@ void MotionPrimitive::load( IECore::Object::LoadContextPtr context )
 		IndexedIOPtr snapshot = snapshots->subdirectory( *it );
 		float t; 
 		snapshot->read( "time", t );
-		m_snapshots[t] = context->load<Primitive>( snapshot, "primitive" );
+		m_snapshots[t] = context->load<Primitive>( snapshot, primitiveEntry );
 	}
 }
 

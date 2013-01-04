@@ -44,6 +44,8 @@ using namespace IECore;
 namespace IECore
 {
 
+static IndexedIO::EntryID membersEntry("members");
+
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundDataBase, CompoundDataBaseTypeId )
 
 template<>
@@ -112,7 +114,7 @@ void CompoundDataBase::save( SaveContext *context ) const
 {
 	Data::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), 0 );
-	container = container->subdirectory( "members", IndexedIO::CreateIfMissing );
+	container = container->subdirectory( membersEntry, IndexedIO::CreateIfMissing );
 	const CompoundDataMap &m = readable();
 	CompoundDataMap::const_iterator it;
 	for( it=m.begin(); it!=m.end(); it++ )
@@ -141,7 +143,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 	
 	CompoundDataMap &m = writable();
 	m.clear();
-	container = container->subdirectory( "members" );
+	container = container->subdirectory( membersEntry );
 
 	IndexedIO::EntryIDList memberNames;
 	container->entryIds( memberNames );

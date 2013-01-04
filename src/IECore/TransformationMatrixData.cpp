@@ -37,6 +37,8 @@
 
 namespace IECore {
 
+static IndexedIO::EntryID valueEntry("value");
+
 #define TRANSFORMATIONMATRIX_SIZE	(8 * 3) + 4 + 1		// 8 3D vectors, 1 quaternion and one rotation order.
 
 // define save/load methods backward compatible with the old structure that represented rotate as Quat<T> instead of Euler<T>
@@ -57,27 +59,26 @@ namespace IECore {
 			base.translate.x, base.translate.y, base.translate.z 																	\
 		};																							\
 		Data::save( context );																		\
-		IndexedIOPtr container = context->rawContainer();									\
-		container->write( "value", values, TRANSFORMATIONMATRIX_SIZE );								\
+		IndexedIO *container = context->rawContainer();												\
+		container->write( valueEntry, values, TRANSFORMATIONMATRIX_SIZE );								\
 	}																								\
 																									\
 	template<>																						\
 	void TNAME::load( LoadContextPtr context )														\
 	{																								\
 		Data::load( context );																		\
-		IndexedIOPtr container;															\
 		TNAME::BaseType values[ TRANSFORMATIONMATRIX_SIZE ];										\
 		TNAME::BaseType *p = &values[0];															\
 		try																							\
 		{																							\
-			container = context->rawContainer();													\
-			container->read( "value", p, TRANSFORMATIONMATRIX_SIZE );								\
+			IndexedIO *container = context->rawContainer();											\
+			container->read( valueEntry, p, TRANSFORMATIONMATRIX_SIZE );								\
 		}																							\
 		catch( ... )																				\
 		{																							\
 			unsigned int v = 0;																		\
-			container = context->container( staticTypeName(), v );									\
-			container->read( "value", p, TRANSFORMATIONMATRIX_SIZE );								\
+			IndexedIOPtr container = context->container( staticTypeName(), v );						\
+			container->read( valueEntry, p, TRANSFORMATIONMATRIX_SIZE );								\
 		}																							\
 		TNAME::ValueType &base = TNAME::writable();													\
 		base.scalePivot.x = *p++;																	\

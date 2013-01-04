@@ -43,6 +43,13 @@ using namespace IECore;
 namespace IECore
 {
 
+static IndexedIO::EntryID interpolationEntry("interpolation");
+static IndexedIO::EntryID dimensionEntry("dimension");
+static IndexedIO::EntryID domainMinEntry("domainMin");
+static IndexedIO::EntryID domainMaxEntry("domainMax");
+static IndexedIO::EntryID dataSizeEntry("dataSize");
+static IndexedIO::EntryID dataEntry("data");
+
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupfData, CubeColorLookupfDataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupdData, CubeColorLookupdDataTypeId )
 
@@ -55,16 +62,16 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupdData, CubeColo
 		IndexedIOPtr container = context->container( staticTypeName(), 0 );\
 		const ValueType &s = readable();\
 \
-		container->write( "interpolation", (short)s.m_interpolation ); \
-		container->write( "dimension", s.m_dimension.getValue(), 3 ); \
-		container->write( "domainMin", s.m_domain.min.getValue(), 3 ); \
-		container->write( "domainMax", s.m_domain.max.getValue(), 3 ); \
+		container->write( interpolationEntry, (short)s.m_interpolation ); \
+		container->write( dimensionEntry, s.m_dimension.getValue(), 3 ); \
+		container->write( domainMinEntry, s.m_domain.min.getValue(), 3 ); \
+		container->write( domainMaxEntry, s.m_domain.max.getValue(), 3 ); \
 		int dataSize = s.data().size() ; \
-		container->write( "dataSize", dataSize ); \
+		container->write( dataSizeEntry, dataSize ); \
 		if ( s.data().size() ) \
 		{ \
 			ValueType::ColorType::BaseType *c = ( ValueType::ColorType::BaseType * )( s.data()[0].getValue() ); \
-			container->write( "data", c, dataSize * 3 ); \
+			container->write( dataEntry, c, dataSize * 3 ); \
 		} \
 	}\
 \
@@ -77,24 +84,24 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupdData, CubeColo
 		ValueType &s = writable();\
 		\
 		short interp; \
-		container->read( "interpolation", interp ); \
+		container->read( interpolationEntry, interp ); \
 		s.m_interpolation = ( ValueType::Interpolation ) interp; \
 		Imath::V3i dimension; \
 		int *dim = dimension.getValue(); \
-		container->read( "dimension", dim, 3 ); \
+		container->read( dimensionEntry, dim, 3 ); \
 		ValueType::BoxType domain; \
 		ValueType::VecType::BaseType *f = domain.min.getValue(); \
-		container->read( "domainMin", f, 3 ); \
+		container->read( domainMinEntry, f, 3 ); \
 		f = domain.max.getValue();\
-		container->read( "domainMax", f, 3 ); \
+		container->read( domainMaxEntry, f, 3 ); \
 		int dataSize; \
-		container->read( "dataSize", dataSize ); \
+		container->read( dataSizeEntry, dataSize ); \
 		ValueType::DataType data; \
 		data.resize( dataSize ); \
 		if ( dataSize > 0 ) \
 		{ \
 			ValueType::ColorType::BaseType *c = ( ValueType::ColorType::BaseType * )( data[0].getValue() ); \
-			container->read( "data", c, dataSize * 3 ); \
+			container->read( dataEntry, c, dataSize * 3 ); \
 		} \
 		s.setCube( dimension, data, domain ); \
 	}\
