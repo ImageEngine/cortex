@@ -46,7 +46,7 @@
 #include "IECorePython/ExceptionBinding.h"
 #include "IECorePython/ImathBinding.h"
 #include "IECorePython/KDTreeBinding.h"
-#include "IECorePython/IndexedIOInterfaceBinding.h"
+#include "IECorePython/IndexedIOBinding.h"
 #include "IECorePython/DataBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
 #include "IECorePython/VectorTypedDataBinding.h"
@@ -128,7 +128,6 @@
 #include "IECorePython/InterpolatedCacheBinding.h"
 #include "IECorePython/TransformationMatrixBinding.h"
 #include "IECorePython/TransformationMatrixDataBinding.h"
-#include "IECorePython/HierarchicalCacheBinding.h"
 #include "IECorePython/BoundedKDTreeBinding.h"
 #include "IECorePython/VectorDataFilterOpBinding.h"
 #include "IECorePython/TypedObjectParameterBinding.h"
@@ -418,7 +417,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindInterpolatedCache();
 	bindTransformationMatrix();
 	bindTransformationMatrixData();
-	bindHierarchicalCache();
 	bindBoundedKDTree();
 	bindVectorDataFilterOp();
 	bindTypedObjectParameter();

@@ -111,7 +111,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	tmpParameters->writable()[ "clientPID" ] = new IntData( getpid() );
 
 	// build the data block
-	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), "/", IndexedIO::Exclusive | IndexedIO::Write );
+	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
 	displayWindowData->Object::save( io, "displayWindow" );
 	dataWindowData->Object::save( io, "dataWindow" );
 	channelNamesData->Object::save( io, "channelNames" );
@@ -190,7 +190,7 @@ void ClientDisplayDriver::imageData( const Box2i &box, const float *data, size_t
 	Box2iDataPtr boxData = new Box2iData( box );
 	FloatVectorDataPtr dataData = new FloatVectorData( std::vector<float>( data, data+dataSize ) );
 
-	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), "/", IndexedIO::Exclusive | IndexedIO::Write );
+	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
 	staticPointerCast<Object>(boxData)->save( io, "box" );
 	staticPointerCast<Object>(dataData)->save( io, "data" );
 	buf = io->buffer();

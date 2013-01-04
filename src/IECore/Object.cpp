@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,12 +33,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Object.h"
-#include "IECore/IndexedIOPath.h"
 #include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"
+#include "boost/tokenizer.hpp"
 
 #include <iostream>
+
 
 using namespace IECore;
 using namespace std;
@@ -46,6 +47,10 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( Object );
 
 const Object::AbstractTypeDescription<Object> Object::m_typeDescription;
+
+static IndexedIO::EntryID g_ioVersionEntry("ioVersion");
+static IndexedIO::EntryID g_dataEntry("data");
+static IndexedIO::EntryID g_typeEntry("type");
 const unsigned int Object::m_ioVersion = 0;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -92,40 +97,31 @@ Object::TypeInformation *Object::typeInformation()
 // save context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
-Object::SaveContext::SaveContext( IndexedIOInterfacePtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_root( ioInterface->pwd() ), m_savedObjects( new SavedObjectMap ), m_containerRoots( new ContainerRootsMap )
+Object::SaveContext::SaveContext( IndexedIOPtr ioInterface )
+	:	m_ioInterface( ioInterface ), m_savedObjects( new SavedObjectMap )
 {
 }
 
-Object::SaveContext::SaveContext( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &root,
-	boost::shared_ptr<SavedObjectMap> savedObjects, boost::shared_ptr<ContainerRootsMap> containerRoots )
-	:	m_ioInterface( ioInterface ), m_root( root ), m_savedObjects( savedObjects ), m_containerRoots( containerRoots )
+Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<SavedObjectMap> savedObjects )
+	:	m_ioInterface( ioInterface ), m_savedObjects( savedObjects )
 {
 }
 
-IndexedIOInterfacePtr Object::SaveContext::container( const std::string &typeName, unsigned int ioVersion )
+IndexedIOPtr Object::SaveContext::container( const std::string &typeName, unsigned int ioVersion )
 {
-
-	m_ioInterface->chdir( m_root );
-
-		m_ioInterface->mkdir( typeName );
-		m_ioInterface->chdir( typeName );
-			m_ioInterface->write( "ioVersion", ioVersion );
-			m_ioInterface->mkdir( "data" );
-			m_ioInterface->chdir( "data" );
-				IndexedIOInterfacePtr container = m_ioInterface->resetRoot();
-				(*m_containerRoots)[container] = m_ioInterface->pwd();
-
-	return container;
+	IndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, IndexedIO::CreateIfMissing );
+	typeIO->write( g_ioVersionEntry, ioVersion );
+	IndexedIOPtr dataIO = typeIO->subdirectory( g_dataEntry, IndexedIO::CreateIfMissing );
+	dataIO->removeAll();
+	return dataIO;
 }
 
-IndexedIOInterfacePtr Object::SaveContext::rawContainer()
+IndexedIO *Object::SaveContext::rawContainer()
 {
-	m_ioInterface->chdir( m_root );
-	return m_ioInterface->resetRoot();
+	return m_ioInterface;
 }
 
-void Object::SaveContext::save( const Object *toSave, IndexedIOInterfacePtr container, const IndexedIO::EntryID &name )
+void Object::SaveContext::save( const Object *toSave, IndexedIO *container, const IndexedIO::EntryID &name )
 {
 	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
@@ -134,26 +130,19 @@ void Object::SaveContext::save( const Object *toSave, IndexedIOInterfacePtr cont
 	}
 	else
 	{
+		IndexedIOPtr nameIO = container->subdirectory( name, IndexedIO::CreateIfMissing );
 
-		IndexedIO::EntryID d = container->pwd();
+		IndexedIO::EntryIDList pathParts;
+		nameIO->path( pathParts );
+		(*m_savedObjects)[toSave] = pathParts;
 
-		container->mkdir( name );
-		container->chdir( name );
+		nameIO->write( g_typeEntry, toSave->typeName() );
 
-			(*m_savedObjects)[toSave] = (*m_containerRoots)[container] + container->pwd();
+		IndexedIOPtr dataIO = nameIO->subdirectory( g_dataEntry, IndexedIO::CreateIfMissing );
+		dataIO->removeAll();
 
-			container->write( "type", toSave->typeName() );
-			container->mkdir( "data" );
-			container->chdir( "data" );
-
-				IndexedIO::EntryID newRoot = (*m_containerRoots)[container] + container->pwd();
-				SaveContext context( m_ioInterface, newRoot, m_savedObjects, m_containerRoots );
-				toSave->save( &context );
-
-		container->chdir( d );
-
-		assert( container->pwd()==d );
-
+		SaveContext context( dataIO, m_savedObjects );
+		toSave->save( &context );
 	}
 }
 
@@ -161,84 +150,101 @@ void Object::SaveContext::save( const Object *toSave, IndexedIOInterfacePtr cont
 // load context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
-Object::LoadContext::LoadContext( IndexedIOInterfacePtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_root( "/" ), m_loadedObjects( new LoadedObjectMap ), m_containerRoots( new ContainerRootsMap )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface )
+	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjectMap )
 {
 }
 
-Object::LoadContext::LoadContext( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &root, boost::shared_ptr<LoadedObjectMap> loadedObjects, boost::shared_ptr<ContainerRootsMap> containerRoots )
-	:	m_ioInterface( ioInterface ), m_root( root ), m_loadedObjects( loadedObjects ), m_containerRoots( containerRoots )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects )
+	:	m_ioInterface( ioInterface ), m_loadedObjects( loadedObjects )
 {
 }
 
-IndexedIOInterfacePtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion )
+ConstIndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing )
 {
-	m_ioInterface->chdir( m_root );
-
-		m_ioInterface->chdir( typeName );
-			unsigned int v;
-			m_ioInterface->read( "ioVersion", v );
-			if( v > ioVersion )
-			{
-				throw( IOException( "File version greater than library version." ) );
-			}
-			ioVersion = v;
-			m_ioInterface->chdir( "data" );
-				IndexedIOInterfacePtr container = m_ioInterface->resetRoot();
-				(*m_containerRoots)[container] = m_ioInterface->pwd();
-
-	return container;
+	ConstIndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
+	if ( !typeIO )
+	{
+		return 0;
+	}
+	unsigned int v;
+	typeIO->read( g_ioVersionEntry, v );
+	if( v > ioVersion )
+	{
+		throw( IOException( "File version greater than library version." ) );
+	}
+	ioVersion = v;
+	return typeIO->subdirectory( g_dataEntry, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
 }
 
-IndexedIOInterfacePtr Object::LoadContext::rawContainer()
+const IndexedIO *Object::LoadContext::rawContainer()
 {
-	m_ioInterface->chdir( m_root );
-	return m_ioInterface->resetRoot();
+	return m_ioInterface;
 }
 
-ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOInterfacePtr container, const IndexedIO::EntryID &name )
+ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name )
 {
-	IndexedIO::Entry e = container->ls( name );
+	IndexedIO::Entry e = container->entry( name );
 	if( e.entryType()==IndexedIO::File )
 	{
-		string path;
-		container->read( name, path );
-		return loadObject( path );
+		IndexedIO::EntryIDList pathParts;
+		if ( e.dataType() == IndexedIO::SymbolicLink )
+		{
+			container->read( name, pathParts );
+		}
+		else 
+		{
+			// for backward compatibility...
+			string path;
+			container->read( name, path );
+			typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+			// \todo: this would have trouble if the name of the object contains slashes...
+			Tokenizer tokens(path, boost::char_separator<char>("/"));
+			Tokenizer::iterator t = tokens.begin();
+
+			for ( ; t != tokens.end(); t++ )
+			{
+				pathParts.push_back( *t );
+			}
+		}
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
+		if ( ret.second )
+		{
+			// jump to the path..
+			ConstIndexedIOPtr ioObject = m_ioInterface->directory( pathParts );
+			// add the loaded object to the map.
+			ret.first->second = loadObject( ioObject );
+		}
+		return ret.first->second;
 	}
 	else
 	{
-		IndexedIOPath path( (*m_containerRoots)[container] );
-		path.append( container->pwd() );
-		path.append( name );
-		return loadObject( path.fullPath() );
+		ConstIndexedIOPtr ioObject = container->subdirectory( name );
+
+		IndexedIO::EntryIDList pathParts;
+		ioObject->path( pathParts );
+
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
+		if ( ret.second )
+		{
+			// add the loaded object to the map.
+			ret.first->second = loadObject( ioObject );
+		}
+		return ret.first->second;
 	}
 }
 
 // this function can only load concrete objects. it can't load references to
 // objects. path is relative to the root of m_ioInterface
-ObjectPtr Object::LoadContext::loadObject( const IndexedIO::EntryID &path )
+ObjectPtr Object::LoadContext::loadObject( const IndexedIO *container )
 {
-	LoadedObjectMap::iterator it = m_loadedObjects->find( path );
-	if( it!=m_loadedObjects->end() )
-	{
-		return it->second;
-	}
-
 	ObjectPtr result = 0;
-
-	m_ioInterface->chdir( m_root );
-
-		m_ioInterface->chdir( path );
-			string type = "";
-			m_ioInterface->read( "type", type );
-			m_ioInterface->chdir( "data" );
-
-				result = create( type );
-				LoadContextPtr context = new LoadContext( m_ioInterface, m_ioInterface->pwd(), m_loadedObjects, m_containerRoots );
-				result->load( context );
-
-			(*m_loadedObjects)[path] = result;
-
+	string type = "";
+	container->read( g_typeEntry, type );
+	ConstIndexedIOPtr dataIO = container->subdirectory( g_dataEntry );
+	result = create( type );
+	LoadContextPtr context = new LoadContext( dataIO, m_loadedObjects );
+	result->load( context );
 	return result;
 }
 
@@ -290,15 +296,10 @@ ObjectPtr Object::copy() const
 	return result;
 }
 
-void Object::save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name ) const
+void Object::save( IndexedIOPtr ioInterface, const IndexedIO::EntryID &name ) const
 {
-	// we get a copy of the ioInterface here so the SaveContext can be freed
-	// from always having to balance chdirs() to return to the original
-	// directory after an operation. this results in fewer chdir calls and faster
-	// saving.
-	IndexedIOInterfacePtr i = ioInterface->resetRoot();
-	boost::shared_ptr<SaveContext> context( new SaveContext( i ) );
-	context->save( this, i, name );
+	boost::shared_ptr<SaveContext> context( new SaveContext( ioInterface ) );
+	context->save( this, ioInterface, name );
 }
 
 void Object::copyFrom( const Object *toCopy )
@@ -456,15 +457,9 @@ ObjectPtr Object::create( const std::string &typeName )
 	return creatorAndData.first( creatorAndData.second );
 }
 
-ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name )
+ObjectPtr Object::load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name )
 {
-	// we get a copy of the ioInterface here so the LoadContext can be freed
-	// from always having to balance chdirs() to return to the original
-	// directory after an operation. this results in fewer chdir calls and faster
-	// loading.
-
-	IndexedIOInterfacePtr i = ioInterface->resetRoot();
-	LoadContextPtr context( new LoadContext( i ) );
-	ObjectPtr result = context->load<Object>( i, name );
+	LoadContextPtr context( new LoadContext( ioInterface ) );
+	ObjectPtr result = context->load<Object>( ioInterface, name );
 	return result;
 }

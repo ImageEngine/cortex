@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -58,7 +58,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleArrayIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = IntVectorData()
 		for i in range( 0, 1000 ) :
@@ -76,7 +76,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testStringArrayIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		words = [ "hello", "there", "young", "fellah" ]
 		s = StringVectorData( words )
@@ -95,7 +95,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testImathArrayIO( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = V3fVectorData()
 		for i in range( 0, 1000 ) :
@@ -113,7 +113,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testOverwrite( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -132,9 +132,23 @@ class TestObjectIO( unittest.TestCase ) :
 
 		self.assertEqual( o, oo );
 
+		d = CompoundData()
+		d["A"] = IntData( 10 )
+		d["B"] = StringData( "hithere" )
+
+		d.save( iface, "test2" )		
+		dd = Object.load( iface, "test2" )
+		self.assertEqual( d, dd );
+
+		# override CompoundData with less data
+		d = CompoundData()
+		d.save( iface, "test2" )		
+		dd = Object.load( iface, "test2" )
+		self.assertEqual( d, dd );
+
 	def testCompoundData( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		d = CompoundData()
 		d["A"] = IntData( 10 )
@@ -145,9 +159,31 @@ class TestObjectIO( unittest.TestCase ) :
 		dd = Object.load( iface, "test" )
 		self.assertEqual( d, dd )
 
+	def testDataTypes( self ):
+
+		d = CompoundData()
+		d['a'] = IntData(1)
+		d['c'] = FloatData(3)
+		d['e'] = HalfData(4)
+		d['f'] = V2iData( V2i(1,10) )
+		d['g'] = V2fData( V2f(2,31) )
+		d['h'] = V2dData( V2d(3,551) )
+		d['i'] = V3fData( V3f(1,3,5) )
+		d['k'] = M44fData( M44f(2) )
+		d['l'] = HalfVectorData( [ 1,2,3,100,9,10,11] )
+		d['m'] = V2fVectorData( [ V2f(1,2), V2f(3,4), V2f(5,6) ] )
+		d['x'] = StringData( "testttt" )
+		d['z'] = StringVectorData( [ "a", 'b', 'adffs' ] )
+
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )		
+		d.save( iface, "test" )
+
+		dd = Object.load( iface, "test" )
+		self.assertEqual( d, dd )
+
 	def testMultipleRef( self ) :
 
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
 
 		d = CompoundData()
 		i = IntData( 100 )
@@ -170,25 +206,62 @@ class TestObjectIO( unittest.TestCase ) :
 		o["two"] = IntData( 2 )
 		o["oneAgain"] = one
 
-		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Write )
-		fio.mkdir( "a" )
-		fio.chdir( "a" )
-		d = fio.pwd()
+		fio = FileIndexedIO( "test/o.fio", [], IndexedIOOpenMode.Write )
+		fio = fio.subdirectory( "a", IndexedIO.MissingBehavior.CreateIfMissing )
+		d = fio.path()
 		o.save( fio, "test" )
-		self.assertEqual( fio.pwd(), d )
+		self.assertEqual( fio.path(), d )
 		del fio
 
-		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Read )
-		fio.chdir( "a" )
-		d = fio.pwd()
+		fio = FileIndexedIO( "test/o.fio", ["a"], IndexedIOOpenMode.Read )
+		d = fio.path()
+		self.assertEqual( fio.path(), ["a"] )
 		oo = o.load( fio, "test" )
-		self.assertEqual( fio.pwd(), d )
+		self.assertEqual( fio.path(), d )
 
 		self.assertEqual( o, oo )
 
+	def testSlashesInRepeatedData(self):
+		"""Make sure slashes can be used and do not break the symlinks on the Object representation for repeated data."""
+		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIOOpenMode.Write)
+
+		v1 = IntData(10)
+		v2 = IntData(11)
+		v3 = IntData(12)
+
+		d = CompoundData()
+		d['a'] = CompoundData()
+		d['a']['b'] = v1
+		d['a/b'] = v2
+		d['c'] = CompoundData()
+		d['c']['d'] = v3
+		d['c/d'] = v3
+		d['links'] = CompoundData()
+		d['links']['v1'] = v1
+		d['links']['v2'] = v2
+		d['links']['v3'] = v3
+
+		# sanity check
+		self.assert_( d['a']['b'].isSame( d['links']['v1'] ) )
+		self.assert_( d['a/b'].isSame( d['links']['v2'] ) )
+		self.assert_( d['c']['d'].isSame( d['links']['v3'] ) )
+		self.assert_( d['c/d'].isSame( d['links']['v3'] ) )
+
+		d.save( f, "test" )
+
+		f = None
+		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIOOpenMode.Read)
+		dd = Object.load( f, "test" )
+
+		self.assertEqual( d, dd )
+		self.assert_( dd['a']['b'].isSame( dd['links']['v1'] ) )
+		self.assert_( dd['a/b'].isSame( dd['links']['v2'] ) )
+		self.assert_( dd['c']['d'].isSame( dd['links']['v3'] ) )
+		self.assert_( dd['c/d'].isSame( dd['links']['v3'] ) )
+
 	def tearDown( self ) :
 
-		for f in [ "test/o.fio" ] :
+		for f in [ "test/o.fio", "test/FileIndexedIOSlashes.fio" ] :
 			if os.path.isfile( f ) :
 				os.remove( f )
 

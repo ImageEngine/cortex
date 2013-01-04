@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 
 using namespace IECore;
 
-MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)
+MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
 : FileIndexedIO()
 {
 	if (mode & IndexedIO::Write)
@@ -76,6 +76,10 @@ MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::E
 	}
 }
 
+MemoryIndexedIO::MemoryIndexedIO( const MemoryIndexedIO *other, FileIndexedIO::Node *newRoot ) : FileIndexedIO( other, newRoot )
+{
+}
+
 MemoryIndexedIO::~MemoryIndexedIO()
 {
 }
@@ -102,4 +106,9 @@ ConstCharVectorDataPtr MemoryIndexedIO::buffer()
 	}
 
 	return new CharVectorData( d );
+}
+
+IndexedIO * MemoryIndexedIO::duplicate(Node *rootNode) const
+{
+	return new MemoryIndexedIO( this, rootNode );
 }

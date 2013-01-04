@@ -50,9 +50,9 @@ import subprocess
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=7
-ieCoreMinorVersion=10
-ieCorePatchVersion=1
+ieCoreMajorVersion=8
+ieCoreMinorVersion=0
+ieCorePatchVersion=0
 
 ###########################################################################################
 # Command line options

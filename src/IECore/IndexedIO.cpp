@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,75 +32,175 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include <math.h>
+#include <iostream>
+
+#include "boost/filesystem/convenience.hpp"
 
 #include "IECore/Exception.h"
 #include "IECore/IndexedIO.h"
 
-using namespace IECore::IndexedIO;
+using namespace IECore;
 
-Entry::Entry() : m_ID(""), m_entryType( IndexedIO::Directory), m_dataType( IndexedIO::Invalid), m_arrayLength(0)
+namespace fs = boost::filesystem;
+
+IndexedIO::EntryIDList IndexedIO::rootPath;
+
+IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode )
+{
+	IndexedIOPtr result = 0;
+
+	std::string extension = fs::extension(path);
+
+	const CreatorMap &createFns = getCreateFns();
+
+	CreatorMap::const_iterator it = createFns.find(extension);
+	if (it == createFns.end())
+	{
+		throw IOException(path);
+	}
+
+	return (it->second)(path, root, mode);
+}
+
+void IndexedIO::supportedExtensions( std::vector<std::string> &extensions )
+{
+	CreatorMap &m = getCreateFns();
+	for( CreatorMap::const_iterator it=m.begin(); it!=m.end(); it++ )
+	{
+		extensions.push_back( it->first.substr( 1 ) );
+	}
+}
+
+void IndexedIO::registerCreator( const std::string &extension, CreatorFn f )
+{
+	CreatorMap &createFns = getCreateFns();
+
+	assert( createFns.find(extension) == createFns.end() );
+
+	createFns.insert( CreatorMap::value_type(extension, f) );
+}
+
+IndexedIO::~IndexedIO()
 {
 }
 
-Entry::Entry( const EntryID &id, EntryType eType, DataType dType, unsigned long arrayLength)
+void IndexedIO::readable(const IndexedIO::EntryID &name) const
+{
+}
+
+void IndexedIO::writable(const IndexedIO::EntryID &name) const
+{
+	if ( ( openMode() & (IndexedIO::Write | IndexedIO::Append) ) == 0)
+	{
+		throw PermissionDeniedIOException(name);
+	}
+}
+
+void IndexedIO::validateOpenMode(IndexedIO::OpenMode &mode)
+{
+	// Clear 'other' bits
+	mode &= IndexedIO::Read | IndexedIO::Write | IndexedIO::Append
+			| IndexedIO::Shared | IndexedIO::Exclusive;
+
+	// Check for mutual exclusivity
+	if ((mode & IndexedIO::Shared)
+		&& (mode & IndexedIO::Exclusive))
+	{
+		throw InvalidArgumentException("Incorrect IndexedIO open mode specified");
+	}
+
+	if ((mode & IndexedIO::Write)
+		&& (mode & IndexedIO::Append))
+	{
+		throw InvalidArgumentException("Incorrect IndexedIO open mode specified");
+	}
+
+	// Set up default as 'read'
+	if (!(mode & IndexedIO::Read
+		|| mode & IndexedIO::Write
+		|| mode & IndexedIO::Append)
+	)
+	{
+		mode |= IndexedIO::Read;
+	}
+
+	// Set up default as 'shared'
+	if (!(mode & IndexedIO::Shared
+		|| mode & IndexedIO::Exclusive))
+	{
+		mode |= IndexedIO::Shared;
+	}
+
+}
+
+//
+// Entry
+//
+
+IndexedIO::Entry::Entry() : m_ID(""), m_entryType( IndexedIO::Directory), m_dataType( IndexedIO::Invalid), m_arrayLength(0)
+{
+}
+
+IndexedIO::Entry::Entry( const IndexedIO::EntryID &id, IndexedIO::EntryType eType, IndexedIO::DataType dType, unsigned long arrayLength)
 : m_ID(id), m_entryType(eType), m_dataType(dType), m_arrayLength(arrayLength)
 {
 }
 
-const EntryID &Entry::id() const
+const IndexedIO::EntryID &IndexedIO::Entry::id() const
 {
 	return m_ID;
 }
 
-EntryType Entry::entryType() const
+IndexedIO::EntryType IndexedIO::Entry::entryType() const
 {
 	return m_entryType;
 }
 
-DataType Entry::dataType() const
+IndexedIO::DataType IndexedIO::Entry::dataType() const
 {
-	if (m_entryType == Directory)
+	if (m_entryType == IndexedIO::Directory)
 	{
-		throw IOException( "IndexedIO Entry '" + m_ID + "' has no data type - it is a directory" );
+		throw IOException( "IndexedIO Entry '" + m_ID.value() + "' has no data type - it is a directory" );
 	}
 
 	return m_dataType;
 }
 
-bool Entry::isArray() const
+bool IndexedIO::Entry::isArray() const
 {
 	return isArray( m_dataType );
 }
 
-bool Entry::isArray( DataType dType )
+bool IndexedIO::Entry::isArray( IndexedIO::DataType dType )
 {
 	switch( dType )
 	{
-		case FloatArray:
-		case DoubleArray:
-		case HalfArray:
-		case IntArray:
-		case LongArray:
-		case StringArray:
-		case UIntArray:
-		case CharArray:
-		case UCharArray:
-		case ShortArray:
-		case UShortArray:
-		case Int64Array:
-		case UInt64Array:
+		case IndexedIO::FloatArray:
+		case IndexedIO::DoubleArray:
+		case IndexedIO::HalfArray:
+		case IndexedIO::IntArray:
+		case IndexedIO::LongArray:
+		case IndexedIO::StringArray:
+		case IndexedIO::UIntArray:
+		case IndexedIO::CharArray:
+		case IndexedIO::UCharArray:
+		case IndexedIO::ShortArray:
+		case IndexedIO::UShortArray:
+		case IndexedIO::Int64Array:
+		case IndexedIO::UInt64Array:
+		case IndexedIO::SymbolicLink:
 			return true;
 		default:
 			return false;
 	}
 }
 
-unsigned long Entry::arrayLength() const
+unsigned long IndexedIO::Entry::arrayLength() const
 {
 	if ( !isArray() )
 	{
-		throw IOException( "IndexedIO Entry '" + m_ID + "' is not an array" );
+		throw IOException( "IndexedIO Entry '" + m_ID.value() + "' is not an array" );
 	}
 
 	return m_arrayLength;

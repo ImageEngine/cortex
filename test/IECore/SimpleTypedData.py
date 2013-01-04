@@ -330,7 +330,7 @@ class BoolDataTest( unittest.TestCase ) :
 		o = BoolData( True )
 		self.assertEqual( o.value, True )
 
-		iface = IndexedIOInterface.create( "test/IECore/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/IECore/o.fio", IndexedIOOpenMode.Write )
 
 		o.save( iface, "test" )
 		oo = Object.load( iface, "test" )

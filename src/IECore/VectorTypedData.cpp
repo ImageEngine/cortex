@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,9 @@ using namespace Imath;
 using namespace std;
 using namespace IECore;
 
+static IndexedIO::EntryID g_valueEntry("value");
+static IndexedIO::EntryID g_sizeEntry("size");
+
 LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeDescription( LongVectorDataTypeId, "LongVectorData" );
 
 #define IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )										\
@@ -66,7 +69,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	{																											\
 		if ( !TNAME::hasBase() )																				\
 		{																										\
-			throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );									\
+			throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );					\
 		}																										\
 		return reinterpret_cast< const TNAME::BaseType * >( &(this->readable()[0]) );							\
 	}																											\
@@ -75,7 +78,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	{																											\
 		if ( !TNAME::hasBase() )																				\
 		{																										\
-			throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );									\
+			throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );					\
 		}																										\
 		return reinterpret_cast< TNAME::BaseType * >( &(this->writable()[0]) );									\
 	}																											\
@@ -85,8 +88,8 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	void TNAME::save( Object::SaveContext *context ) const											\
 	{																								\
 		Data::save( context );																		\
-		IndexedIOInterfacePtr container = context->rawContainer();									\
-		container->write( "value", &(readable()[0]), readable().size() );							\
+		IndexedIO *container = context->rawContainer();												\
+		container->write( g_valueEntry, &(readable()[0]), readable().size() );						\
 	}																								\
 	template<>																						\
 	void TNAME::load( LoadContextPtr context )														\
@@ -94,27 +97,27 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		Data::load( context );																		\
 		try																							\
 		{																							\
-			IndexedIOInterfacePtr container = context->rawContainer();								\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			const IndexedIO *container = context->rawContainer();									\
+			IndexedIO::Entry e = container->entry( g_valueEntry );									\
 			writable().resize( e.arrayLength() );													\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
 				TNAME::ValueType::value_type *p = &(writable()[0]); 								\
 				assert( p ); 																		\
-				container->read( "value", p, e.arrayLength() ); 									\
+				container->read( g_valueEntry, p, e.arrayLength() ); 								\
 			} 																						\
 		}																							\
 		catch( ... )																				\
 		{																							\
 			unsigned int v = 0;																		\
-			IndexedIOInterfacePtr container = context->container( staticTypeName(), v );			\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			ConstIndexedIOPtr container = context->container( staticTypeName(), v );				\
+			IndexedIO::Entry e = container->entry( g_valueEntry );									\
 			writable().resize( e.arrayLength() );													\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
 				TNAME::ValueType::value_type *p = &(writable()[0]); 								\
 				assert( p ); 																		\
-				container->read( "value", p, e.arrayLength() ); 									\
+				container->read( g_valueEntry, p, e.arrayLength() ); 								\
 			} 																						\
 		}																							\
 	}																								\
@@ -124,9 +127,9 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	void TNAME::save( SaveContext *context ) const													\
 	{																								\
 		Data::save( context );																		\
-		IndexedIOInterfacePtr container = context->rawContainer();									\
+		IndexedIO *container = context->rawContainer();												\
 		assert( ( sizeof( TNAME::ValueType::value_type ) / sizeof( TNAME::BaseType ) ) == N );		\
-		container->write( "value", baseReadable(), baseSize() );									\
+		container->write( g_valueEntry, baseReadable(), baseSize() );								\
 	}																								\
 	template<>																						\
 	void TNAME::load( LoadContextPtr context )														\
@@ -134,27 +137,27 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		Data::load( context );																		\
 		try																							\
 		{																							\
-			IndexedIOInterfacePtr container = context->rawContainer();								\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			const IndexedIO *container = context->rawContainer();									\
+			IndexedIO::Entry e = container->entry( g_valueEntry );									\
 			writable().resize( e.arrayLength() / N );												\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
 				TNAME::BaseType *p = baseWritable(); 												\
 				assert( p ) ; 																		\
-				container->read( "value", p, e.arrayLength() ); 									\
+				container->read( g_valueEntry, p, e.arrayLength() ); 								\
 			} 																						\
 		}																							\
 		catch( ... )																				\
 		{																							\
 			unsigned int v = 0;																		\
-			IndexedIOInterfacePtr container = context->container( staticTypeName(), v );			\
-			IndexedIO::Entry e = container->ls( "value" );											\
+			ConstIndexedIOPtr container = context->container( staticTypeName(), v );				\
+			IndexedIO::Entry e = container->entry( g_valueEntry );									\
 			writable().resize( e.arrayLength() / N );												\
 			if ( e.arrayLength() ) 																	\
 			{ 																						\
 				TNAME::BaseType *p = baseWritable(); 												\
 				assert( p ) ; 																		\
-				container->read( "value", p, e.arrayLength() ); 									\
+				container->read( g_valueEntry, p, e.arrayLength() ); 								\
 			} 																						\
 		}																							\
 	}
@@ -269,7 +272,7 @@ template<>
 void BoolVectorData::save( Object::SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
+	IndexedIOPtr container = context->container( staticTypeName(), 0 );
 	// we can't write out the raw data from inside the vector 'cos it's specialised
 	// to optimise for space, and that means the only access to the data is through
 	// a funny proxy class. so we repack the data into something we can deal with
@@ -288,8 +291,8 @@ void BoolVectorData::save( Object::SaveContext *context ) const
 		}
 	}
 
-	container->write( "size", s );
-	container->write( "value", &(p[0]), p.size() );
+	container->write( g_sizeEntry, s );
+	container->write( g_valueEntry, &(p[0]), p.size() );
 }
 
 template<>
@@ -297,14 +300,14 @@ void BoolVectorData::load( LoadContextPtr context )
 {
 	Data::load( context );
 	unsigned int v = 0;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	unsigned int s = 0;
-	container->read( "size", s );
+	container->read( g_sizeEntry, s );
 	std::vector<unsigned char> p;
 	p.resize( s / 8 + 1 );
 	unsigned char *value = &(p[0]);
-	container->read( "value", value, p.size() );
+	container->read( g_valueEntry, value, p.size() );
 	std::vector<bool> &b = writable();
 	b.resize( s, false );
 	for( unsigned int i=0; i<s; i++ )
@@ -317,8 +320,8 @@ template<>
 void ShortVectorData::save( Object::SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 1 );
-	container->write( "value", baseReadable(), baseSize() );
+	IndexedIOPtr container = context->container( staticTypeName(), 1 );
+	container->write( g_valueEntry, baseReadable(), baseSize() );
 }
 
 template<>
@@ -326,7 +329,7 @@ void ShortVectorData::load( LoadContextPtr context )
 {
 	Data::load( context );
 	unsigned int v = 0;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	std::vector<short> &b = writable();
 
@@ -334,11 +337,11 @@ void ShortVectorData::load( LoadContextPtr context )
 	{
 		/// Version 0 stored the array of shorts as ints
 		unsigned int s = 0;
-		container->read( "size", s );
+		container->read( g_sizeEntry, s );
 		std::vector<int> p;
 		p.resize( s );
 		int *value = &(p[0]);
-		container->read( "value", value, p.size() );
+		container->read( g_valueEntry, value, p.size() );
 		b.resize( s, false );
 		for( unsigned int i=0; i<s; i++ )
 		{
@@ -348,10 +351,10 @@ void ShortVectorData::load( LoadContextPtr context )
 	else
 	{
 		/// Version 1 stores the shorts natively
-		IndexedIO::Entry e = container->ls( "value" );												\
-		writable().resize( e.arrayLength() );													\
-		short *p = baseWritable();														\
-		container->read( "value", p, e.arrayLength() );
+		IndexedIO::Entry e = container->entry( g_valueEntry );
+		writable().resize( e.arrayLength() );
+		short *p = baseWritable();
+		container->read( g_valueEntry, p, e.arrayLength() );
 	}
 }
 
@@ -359,8 +362,8 @@ template<>
 void UShortVectorData::save( Object::SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 1 );
-	container->write( "value", baseReadable(), baseSize() );
+	IndexedIOPtr container = context->container( staticTypeName(), 1 );
+	container->write( g_valueEntry, baseReadable(), baseSize() );
 }
 
 template<>
@@ -368,7 +371,7 @@ void UShortVectorData::load( LoadContextPtr context )
 {
 	Data::load( context );
 	unsigned int v = 0;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	std::vector<unsigned short> &b = writable();
 
@@ -376,11 +379,11 @@ void UShortVectorData::load( LoadContextPtr context )
 	{
 		/// Version 0 stored the array unsigned shorts as unsigned ints
 		unsigned int s = 0;
-		container->read( "size", s );
+		container->read( g_sizeEntry, s );
 		std::vector<unsigned int> p;
 		p.resize( s );
 		unsigned int *value = &(p[0]);
-		container->read( "value", value, p.size() );
+		container->read( g_valueEntry, value, p.size() );
 		b.resize( s, false );
 		for( unsigned int i=0; i<s; i++ )
 		{
@@ -390,10 +393,10 @@ void UShortVectorData::load( LoadContextPtr context )
 	else
 	{
 		/// Version 1 stores the unsigned shorts natively
-		IndexedIO::Entry e = container->ls( "value" );												\
-		writable().resize( e.arrayLength() );													\
-		unsigned short *p = baseWritable();														\
-		container->read( "value", p, e.arrayLength() );
+		IndexedIO::Entry e = container->entry( g_valueEntry );
+		writable().resize( e.arrayLength() );
+		unsigned short *p = baseWritable();
+		container->read( g_valueEntry, p, e.arrayLength() );
 	}
 }
 

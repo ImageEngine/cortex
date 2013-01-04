@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,16 +42,19 @@
 namespace IECore
 {
 
+static IndexedIO::EntryID g_beginEntry("begin");
+static IndexedIO::EntryID g_endEntry("end");
+
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TimePeriodData, TimePeriodDataTypeId )
 
 template<>
 void TypedData< TimePeriod >::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
+	IndexedIOPtr container = context->container( staticTypeName(), 0 );
 
-	container->write( "begin", boost::posix_time::to_iso_string( readable().begin() ) );
-	container->write( "end", boost::posix_time::to_iso_string( readable().end() ) );
+	container->write( g_beginEntry, boost::posix_time::to_iso_string( readable().begin() ) );
+	container->write( g_endEntry, boost::posix_time::to_iso_string( readable().end() ) );
 }
 
 template<>
@@ -61,10 +64,10 @@ void TypedData< TimePeriod >::load( LoadContextPtr context )
 
 	unsigned int v = 0;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	std::string beginStr;
-	container->read( "begin", beginStr );
+	container->read( g_beginEntry, beginStr );
 	boost::posix_time::ptime begin;
 	try
 	{
@@ -92,7 +95,7 @@ void TypedData< TimePeriod >::load( LoadContextPtr context )
 	}
 
 	std::string endStr;
-	container->read( "end", endStr );
+	container->read( g_endEntry, endStr );
 	boost::posix_time::ptime end;
 	try
 	{

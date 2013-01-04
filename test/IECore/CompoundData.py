@@ -212,7 +212,7 @@ class CompoundDataTest(unittest.TestCase):
 	def testLoadSave(self):
 		"""Test load/save"""
 
-		iface = IECore.IndexedIOInterface.create( "test/CompoundData.fio", "/", IECore.IndexedIOOpenMode.Write )
+		iface = IECore.IndexedIO.create( "test/CompoundData.fio", IECore.IndexedIOOpenMode.Write )
 
 		v1 = IECore.CompoundData()
 		v1["0"] = IECore.FloatData(1.2)

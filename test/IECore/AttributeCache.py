@@ -120,14 +120,6 @@ class TestAttributeCache(unittest.TestCase):
 		self.assertEqual( len( cache.attributes( self.cachedObjectNames[0], "attrib[12]" )), 2 )
 		self.assertEqual( len( cache.attributes( self.cachedObjectNames[0], "other" )), 1 )
 
-	def testInvalidNames(self):
-
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
-		self.assertRaises( RuntimeError, cache.write, "/invalidName", "attrib1", V3fData( V3f( 1 ) ) )
-		self.assertRaises( RuntimeError, cache.write, "test/invalidName", "attrib1", V3fData( V3f( 1 ) ) )
-		self.assertRaises( RuntimeError, cache.write, "objName", "/attrib1", V3fData( V3f( 1 ) ) )
-		self.assertRaises( RuntimeError, cache.write, "objName", "test/attrib1", V3fData( V3f( 1 ) ) )
-
 	def testRemove(self):
 		"""Test AttributeCache remove"""
 

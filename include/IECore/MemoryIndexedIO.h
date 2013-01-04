@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,12 +48,16 @@ class MemoryIndexedIO : public FileIndexedIO
 
 		IE_CORE_DECLAREMEMBERPTR( MemoryIndexedIO );
 
-		MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
 		virtual ~MemoryIndexedIO();
 		ConstCharVectorDataPtr buffer();
 
 	protected:
+
+		MemoryIndexedIO( const MemoryIndexedIO *other, FileIndexedIO::Node *newRoot );
+
+		IndexedIO *duplicate(FileIndexedIO::Node *rootNode) const;
 };
 
 IE_CORE_DECLAREPTR( MemoryIndexedIO )

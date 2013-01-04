@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,13 +39,14 @@
 
 using namespace IECore;
 
+static IndexedIO::EntryID g_blindDataEntry("blindData");
 const unsigned int BlindDataHolder::m_ioVersion = 1;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(BlindDataHolder);
 
 BlindDataHolder::BlindDataHolder()
 {
-	m_data = new CompoundData();
+	m_data = 0;
 }
 
 BlindDataHolder::BlindDataHolder(CompoundDataPtr data) : m_data(data)
@@ -53,19 +54,25 @@ BlindDataHolder::BlindDataHolder(CompoundDataPtr data) : m_data(data)
 	assert(m_data);
 }
 
-BlindDataHolder::BlindDataHolder( const BlindDataHolder &other )
-{
-	m_data = other.m_data;
-
-	assert(m_data);
-}
-
 BlindDataHolder::~BlindDataHolder()
 {
 }
 
-CompoundDataPtr BlindDataHolder::blindData() const
+CompoundData *BlindDataHolder::blindData()
 {
+	if ( !m_data )
+	{
+		m_data = new CompoundData();
+	}
+	return m_data;
+}
+
+const CompoundData *BlindDataHolder::blindData() const
+{
+	if ( !m_data )
+	{
+		m_data = new CompoundData();
+	}
 	return m_data;
 }
 
@@ -73,25 +80,45 @@ void BlindDataHolder::copyFrom( const Object *other, CopyContext *context )
 {
 	Object::copyFrom( other, context );
 	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other );
-	m_data = context->copy<CompoundData>( tOther->m_data );
+	if ( tOther->m_data )
+	{
+		m_data = context->copy<CompoundData>( tOther->m_data );
+	}
+	else 
+	{
+		m_data = 0;
+	}
 }
 
 void BlindDataHolder::save( SaveContext *context ) const
 {
 	Object::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
 
-	assert(m_data);
-	context->save( m_data, container, "blindData");
+	bool haveData = ( m_data && m_data->readable().size() );
+
+	if ( haveData )
+	{
+		IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
+		context->save( m_data, container, g_blindDataEntry);
+	}
 }
 
 void BlindDataHolder::load( LoadContextPtr context )
 {
 	Object::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	m_data = context->load<CompoundData>( container, "blindData");
-	assert(m_data);
+	IndexedIO::EntryID typeName = staticTypeName();
+
+	ConstIndexedIOPtr container = context->container( typeName, v, false );
+	if ( container )
+	{
+		m_data = context->load<CompoundData>( container, g_blindDataEntry );
+		assert(m_data);	
+	}
+	else
+	{
+		m_data = 0;
+	}
 }
 
 bool BlindDataHolder::isEqualTo( const Object *other ) const
@@ -101,18 +128,40 @@ bool BlindDataHolder::isEqualTo( const Object *other ) const
 		return false;
 	}
 	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other );
-
-	return m_data->isEqualTo( tOther->m_data );
+	if ( m_data )
+	{
+		if ( tOther->m_data )
+		{
+			return m_data->isEqualTo( tOther->m_data );
+		}
+		else 
+		{
+			return ( m_data->readable().size() == 0 );
+		}
+	}
+	if ( tOther->m_data )
+	{
+		return ( tOther->m_data->readable().size() == 0 );
+	}
+	return true;
 }
 
 void BlindDataHolder::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Object::memoryUsage( a );
-	a.accumulate( m_data );
+	if ( m_data )
+	{
+		a.accumulate( m_data );
+	}
 }
 
 void BlindDataHolder::hash( MurmurHash &h ) const
 {
 	Object::hash( h );
-	m_data->hash( h );
+	// Our hash when blindData is empty or when m_data is unnitialized is the same.
+	// This is currently garanteed by CompoundData but we are safer this way.
+	if ( m_data && m_data->readable().size() )
+	{
+		m_data->hash( h );
+	}
 }

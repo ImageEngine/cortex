@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,13 +47,13 @@ namespace IECorePython
 
 static list childNames( const ModelCache &m )
 {
-	std::vector<std::string> n;
+	std::vector< IndexedIO::EntryID > n;
 	m.childNames( n );
 	
 	list result;
-	for( std::vector<std::string>::const_iterator it = n.begin(); it!=n.end(); it++ )
+	for( std::vector<IndexedIO::EntryID>::const_iterator it = n.begin(); it!=n.end(); it++ )
 	{
-		result.append( *it );
+		result.append( (*it).value() );
 	}
 	
 	return result;
@@ -70,12 +70,14 @@ void bindModelCache()
 	RefCountedClass<ModelCache, RefCounted>( "ModelCache" )
 		.def( init<const std::string &, IndexedIO::OpenMode>() )
 		.def( "path", &ModelCache::path, return_value_policy<copy_const_reference>() )
+		.def( "name", &ModelCache::name, return_value_policy<copy_const_reference>() )
 		.def( "readBound", &ModelCache::readBound )
 		.def( "writeBound", &ModelCache::writeBound )
 		.def( "readTransform", &ModelCache::readTransform )
 		.def( "writeTransform", &ModelCache::writeTransform )
 		.def( "readObject", &ModelCache::readObject )
 		.def( "writeObject", &ModelCache::writeObject )
+		.def( "hasObject", &ModelCache::hasObject )
 		.def( "childNames", &childNames )
 		.def( "writableChild", &ModelCache::writableChild )
 		.def( "readableChild", &readableChild )
