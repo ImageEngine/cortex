@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,10 +43,10 @@ using namespace IECore;
 using namespace Imath;
 using namespace boost;
 
-static IndexedIO::EntryID radiusEntry("radius" );
-static IndexedIO::EntryID zMinEntry("zMin" );
-static IndexedIO::EntryID zMaxEntry("zMax" );
-static IndexedIO::EntryID thetaMaxEntry("thetaMax" );
+static IndexedIO::EntryID g_radiusEntry("radius" );
+static IndexedIO::EntryID g_zMinEntry("zMin" );
+static IndexedIO::EntryID g_zMaxEntry("zMax" );
+static IndexedIO::EntryID g_thetaMaxEntry("thetaMax" );
 
 const unsigned int SpherePrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(SpherePrimitive);
@@ -173,10 +173,10 @@ void SpherePrimitive::save( IECore::Object::SaveContext *context ) const
 	Primitive::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
-	container->write( radiusEntry, m_radius );
-	container->write( zMinEntry, m_zMin );
-	container->write( zMaxEntry, m_zMax );
-	container->write( thetaMaxEntry, m_thetaMax );
+	container->write( g_radiusEntry, m_radius );
+	container->write( g_zMinEntry, m_zMin );
+	container->write( g_zMaxEntry, m_zMax );
+	container->write( g_thetaMaxEntry, m_thetaMax );
 }
 
 void SpherePrimitive::load( IECore::Object::LoadContextPtr context )
@@ -184,12 +184,12 @@ void SpherePrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( radiusEntry, m_radius );
-	container->read( zMinEntry, m_zMin );
-	container->read( zMaxEntry, m_zMax );
-	container->read( thetaMaxEntry, m_thetaMax );
+	container->read( g_radiusEntry, m_radius );
+	container->read( g_zMinEntry, m_zMin );
+	container->read( g_zMaxEntry, m_zMax );
+	container->read( g_thetaMaxEntry, m_thetaMax );
 }
 
 bool SpherePrimitive::isEqualTo( const Object *other ) const

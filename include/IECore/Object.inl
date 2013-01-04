@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -81,7 +81,7 @@ Object::AbstractTypeDescription<T>::AbstractTypeDescription() : RunTimeTyped::Ty
 }
 
 template<class T>
-typename T::Ptr Object::LoadContext::load( IndexedIO *i, const IndexedIO::EntryID &name )
+typename T::Ptr Object::LoadContext::load( const IndexedIO *i, const IndexedIO::EntryID &name )
 {
 	return runTimeCast<T>( loadObjectOrReference( i, name ) );
 }

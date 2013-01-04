@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -181,7 +181,7 @@ class Object : public RunTimeTyped
 		static ObjectPtr create( const std::string &typeName );
 		/// Loads an object previously saved with the given name in the current directory
 		/// of ioInterface.
-		static ObjectPtr load( IndexedIOPtr ioInterface, const IndexedIO::EntryID &name );
+		static ObjectPtr load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name );
 		//@}
 
 		typedef ObjectPtr (*CreatorFn)( void *data );
@@ -284,7 +284,7 @@ class Object : public RunTimeTyped
 		class LoadContext : public RefCounted
 		{
 			public :
-				LoadContext( IndexedIOPtr ioInterface );
+				LoadContext( ConstIndexedIOPtr ioInterface );
 				/// Returns an interface to the container created by SaveContext::container().
 				/// @param typeName The typename of your class.
 				/// @param ioVersion On entry this should contain the current file format version
@@ -292,23 +292,23 @@ class Object : public RunTimeTyped
 				/// read. If the latter is greater than the former an exception is thrown (the file is
 				/// newer than the library) - this should not be caught.
 				/// @param throwIfMissing If false will and the container does not carry the entry for the type name, returns a null pointer.
-				IndexedIOPtr container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing = true );
+				ConstIndexedIOPtr container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing = true );
 				template<class T>
 				/// Load an Object instance previously saved by SaveContext::save().
-				typename T::Ptr load( IndexedIO *container, const IndexedIO::EntryID &name );
+				typename T::Ptr load( const IndexedIO *container, const IndexedIO::EntryID &name );
 				/// Returns an interface to a raw container created by SaveContext::rawContainer() - please see
 				/// documentation and cautionary notes for that function.
-				IndexedIO *rawContainer();
+				const IndexedIO *rawContainer();
 
 			private :
 				typedef std::map< IndexedIO::EntryIDList, ObjectPtr> LoadedObjectMap;
 
-				LoadContext( IndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects );
+				LoadContext( ConstIndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects );
 
-				ObjectPtr loadObjectOrReference( IndexedIO *container, const IndexedIO::EntryID &name );
-				ObjectPtr loadObject( IndexedIO *container );
+				ObjectPtr loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name );
+				ObjectPtr loadObject( const IndexedIO *container );
 
-				IndexedIOPtr m_ioInterface;
+				ConstIndexedIOPtr m_ioInterface;
 				boost::shared_ptr<LoadedObjectMap> m_loadedObjects;
 		};
 		IE_CORE_DECLAREPTR( LoadContext );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,10 @@ using namespace std;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Display );
 
+static IndexedIO::EntryID g_nameEntry("name");
+static IndexedIO::EntryID g_typeEntry("type");
+static IndexedIO::EntryID g_dataEntry("data");
+static IndexedIO::EntryID g_parametersEntry("parameters");
 const unsigned int Display::m_ioVersion = 0;
 
 Display::Display( const std::string &name, const std::string &type, const std::string &data, CompoundDataPtr parameters )
@@ -67,21 +71,21 @@ void Display::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( "name", m_name );
-	container->write( "type", m_type );
-	container->write( "data", m_data );
-	context->save( m_parameters, container, "parameters" );
+	container->write( g_nameEntry, m_name );
+	container->write( g_typeEntry, m_type );
+	container->write( g_dataEntry, m_data );
+	context->save( m_parameters, container, g_parametersEntry );
 }
 
 void Display::load( LoadContextPtr context )
 {
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOPtr container = context->container( staticTypeName(), v );
-	container->read( "name", m_name );
-	container->read( "type", m_type );
-	container->read( "data", m_data );
-	m_parameters = context->load<CompoundData>( container, "parameters" );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+	container->read( g_nameEntry, m_name );
+	container->read( g_typeEntry, m_type );
+	container->read( g_dataEntry, m_data );
+	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
 }
 
 bool Display::isEqualTo( const Object *other ) const

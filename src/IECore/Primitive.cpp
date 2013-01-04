@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,14 +45,13 @@ using namespace boost;
 using namespace std;
 using namespace Imath;
 
-static IndexedIO::EntryID variablesEntry("variables");
-static IndexedIO::EntryID interpolationEntry("interpolation");
-static IndexedIO::EntryID dataEntry("data");
-
 /////////////////////////////////////////////////////////////////////////////////////
 // Primitive
 /////////////////////////////////////////////////////////////////////////////////////
 
+static IndexedIO::EntryID g_variablesEntry("variables");
+static IndexedIO::EntryID g_interpolationEntry("interpolation");
+static IndexedIO::EntryID g_dataEntry("data");
 const unsigned int Primitive::m_ioVersion = 1;
 IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( Primitive );
 
@@ -98,20 +97,20 @@ void Primitive::save( IECore::Object::SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	IndexedIOPtr ioVariables = container->subdirectory( variablesEntry, IndexedIO::CreateIfMissing );
+	IndexedIOPtr ioVariables = container->subdirectory( g_variablesEntry, IndexedIO::CreateIfMissing );
 	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
 	{
 		IndexedIOPtr ioPrimVar = ioVariables->subdirectory( it->first, IndexedIO::CreateIfMissing );
 		const int i = it->second.interpolation;
-		ioPrimVar->write( interpolationEntry, i );
-		context->save( it->second.data, ioPrimVar, dataEntry );
+		ioPrimVar->write( g_interpolationEntry, i );
+		context->save( it->second.data, ioPrimVar, g_dataEntry );
 	}
 }
 
 void Primitive::load( IECore::Object::LoadContextPtr context )
 {
 	unsigned int v = m_ioVersion;
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	// we changed the inheritance hierarchy at io version 1
 	if( v==0 )
@@ -123,7 +122,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 		VisibleRenderable::load( context );
 	}
 
-	IndexedIOPtr ioVariables = container->subdirectory( variablesEntry );
+	ConstIndexedIOPtr ioVariables = container->subdirectory( g_variablesEntry );
 
 	variables.clear();
 	IndexedIO::EntryIDList names;
@@ -131,11 +130,11 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	IndexedIO::EntryIDList::const_iterator it;
 	for( it=names.begin(); it!=names.end(); it++ )
 	{
-		IndexedIOPtr ioPrimVar = ioVariables->subdirectory( *it );
+		ConstIndexedIOPtr ioPrimVar = ioVariables->subdirectory( *it );
 		int i; 
-		ioPrimVar->read( interpolationEntry, i );
+		ioPrimVar->read( g_interpolationEntry, i );
 		variables.insert( 
-			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, dataEntry ) ) ) 
+			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, g_dataEntry ) ) ) 
 		);
 	}
 }

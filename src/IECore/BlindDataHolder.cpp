@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 
 using namespace IECore;
 
+static IndexedIO::EntryID g_blindDataEntry("blindData");
 const unsigned int BlindDataHolder::m_ioVersion = 1;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(BlindDataHolder);
@@ -98,7 +99,7 @@ void BlindDataHolder::save( SaveContext *context ) const
 	if ( haveData )
 	{
 		IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-		context->save( m_data, container, "blindData");
+		context->save( m_data, container, g_blindDataEntry);
 	}
 }
 
@@ -108,10 +109,10 @@ void BlindDataHolder::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	IndexedIO::EntryID typeName = staticTypeName();
 
-	IndexedIOPtr container = context->container( typeName, v, false );
+	ConstIndexedIOPtr container = context->container( typeName, v, false );
 	if ( container )
 	{
-		m_data = context->load<CompoundData>( container, "blindData" );
+		m_data = context->load<CompoundData>( container, g_blindDataEntry );
 		assert(m_data);	
 	}
 	else

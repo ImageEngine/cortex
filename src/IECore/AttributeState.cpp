@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@
 using namespace IECore;
 using namespace boost;
 
+static IndexedIO::EntryID g_attributesEntry("attributes");
 const unsigned int AttributeState::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( AttributeState );
 
@@ -105,15 +106,15 @@ void AttributeState::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_attributes, container, "attributes" );
+	context->save( m_attributes, container, g_attributesEntry );
 }
 
 void AttributeState::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOPtr container = context->container( staticTypeName(), v );
-	m_attributes = context->load<CompoundData>( container, "attributes" );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+	m_attributes = context->load<CompoundData>( container, g_attributesEntry );
 }
 
 void AttributeState::hash( MurmurHash &h ) const

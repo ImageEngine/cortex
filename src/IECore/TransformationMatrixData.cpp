@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 
 namespace IECore {
 
-static IndexedIO::EntryID valueEntry("value");
+static IndexedIO::EntryID g_valueEntry("value");
 
 #define TRANSFORMATIONMATRIX_SIZE	(8 * 3) + 4 + 1		// 8 3D vectors, 1 quaternion and one rotation order.
 
@@ -60,7 +60,7 @@ static IndexedIO::EntryID valueEntry("value");
 		};																							\
 		Data::save( context );																		\
 		IndexedIO *container = context->rawContainer();												\
-		container->write( valueEntry, values, TRANSFORMATIONMATRIX_SIZE );								\
+		container->write( g_valueEntry, values, TRANSFORMATIONMATRIX_SIZE );						\
 	}																								\
 																									\
 	template<>																						\
@@ -71,14 +71,14 @@ static IndexedIO::EntryID valueEntry("value");
 		TNAME::BaseType *p = &values[0];															\
 		try																							\
 		{																							\
-			IndexedIO *container = context->rawContainer();											\
-			container->read( valueEntry, p, TRANSFORMATIONMATRIX_SIZE );								\
+			const IndexedIO *container = context->rawContainer();									\
+			container->read( g_valueEntry, p, TRANSFORMATIONMATRIX_SIZE );							\
 		}																							\
 		catch( ... )																				\
 		{																							\
 			unsigned int v = 0;																		\
-			IndexedIOPtr container = context->container( staticTypeName(), v );						\
-			container->read( valueEntry, p, TRANSFORMATIONMATRIX_SIZE );								\
+			ConstIndexedIOPtr container = context->container( staticTypeName(), v );				\
+			container->read( g_valueEntry, p, TRANSFORMATIONMATRIX_SIZE );							\
 		}																							\
 		TNAME::ValueType &base = TNAME::writable();													\
 		base.scalePivot.x = *p++;																	\

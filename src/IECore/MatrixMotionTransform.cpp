@@ -45,9 +45,9 @@ using namespace boost;
 using namespace std;
 using namespace Imath;
 
-static IndexedIO::EntryID snapshotsEntry("snapshots");
-static IndexedIO::EntryID timeEntry("time");
-static IndexedIO::EntryID matrixEntry("matrix");
+static IndexedIO::EntryID g_snapshotsEntry("snapshots");
+static IndexedIO::EntryID g_timeEntry("time");
+static IndexedIO::EntryID g_matrixEntry("matrix");
 
 const unsigned int MatrixMotionTransform::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MatrixMotionTransform);
@@ -127,14 +127,14 @@ void MatrixMotionTransform::save( SaveContext *context ) const
 {
 	Transform::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container = container->subdirectory( snapshotsEntry, IndexedIO::CreateIfMissing );
+	container = container->subdirectory( g_snapshotsEntry, IndexedIO::CreateIfMissing );
 	int i = 0;
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
 		string is = str( boost::format( "%d" ) % i );
 		IndexedIOPtr snapshotContainer = container->subdirectory( is, IndexedIO::CreateIfMissing );
-		snapshotContainer->write( timeEntry, it->first );
-		snapshotContainer->write( matrixEntry, it->second.getValue(), 16 );
+		snapshotContainer->write( g_timeEntry, it->first );
+		snapshotContainer->write( g_matrixEntry, it->second.getValue(), 16 );
 		i++;
 	}
 }
@@ -144,19 +144,19 @@ void MatrixMotionTransform::load( LoadContextPtr context )
 	Transform::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOPtr container = context->container( staticTypeName(), v );
-	container = container->subdirectory( snapshotsEntry );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+	container = container->subdirectory( g_snapshotsEntry );
 	m_snapshots.clear();
 	IndexedIO::EntryIDList names;
 	container->entryIds( names, IndexedIO::Directory );
 	IndexedIO::EntryIDList::const_iterator it;
 	for( it=names.begin(); it!=names.end(); it++ )
 	{
-		IndexedIOPtr snapshotContainer = container->subdirectory( *it );
-		float t; snapshotContainer->read( timeEntry, t );
+		ConstIndexedIOPtr snapshotContainer = container->subdirectory( *it );
+		float t; snapshotContainer->read( g_timeEntry, t );
 		M44f m;
 		float *f = m.getValue();
-		snapshotContainer->read( matrixEntry, f, 16 );
+		snapshotContainer->read( g_matrixEntry, f, 16 );
 		m_snapshots[t] = m;
 	}
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,9 +42,9 @@ using namespace IECore;
 using namespace Imath;
 using namespace boost;
 
-static IndexedIO::EntryID radiusEntry("radius");
-static IndexedIO::EntryID zEntry("z");
-static IndexedIO::EntryID thetaMaxEntry("thetaMax");
+static IndexedIO::EntryID g_radiusEntry("radius");
+static IndexedIO::EntryID g_zEntry("z");
+static IndexedIO::EntryID g_thetaMaxEntry("thetaMax");
 
 const unsigned int DiskPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(DiskPrimitive);
@@ -143,9 +143,9 @@ void DiskPrimitive::save( IECore::Object::SaveContext *context ) const
 	Primitive::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
-	container->write( radiusEntry, m_radius );
-	container->write( zEntry, m_z );
-	container->write( thetaMaxEntry, m_thetaMax );
+	container->write( g_radiusEntry, m_radius );
+	container->write( g_zEntry, m_z );
+	container->write( g_thetaMaxEntry, m_thetaMax );
 }
 
 void DiskPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -153,11 +153,11 @@ void DiskPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( radiusEntry, m_radius );
-	container->read( zEntry, m_z );
-	container->read( thetaMaxEntry, m_thetaMax );
+	container->read( g_radiusEntry, m_radius );
+	container->read( g_zEntry, m_z );
+	container->read( g_thetaMaxEntry, m_thetaMax );
 }
 
 bool DiskPrimitive::isEqualTo( const Object *other ) const

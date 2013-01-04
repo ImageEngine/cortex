@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,7 +44,7 @@ using namespace IECore;
 namespace IECore
 {
 
-static IndexedIO::EntryID membersEntry("members");
+static IndexedIO::EntryID g_membersEntry("members");
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundDataBase, CompoundDataBaseTypeId )
 
@@ -114,7 +114,7 @@ void CompoundDataBase::save( SaveContext *context ) const
 {
 	Data::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), 0 );
-	container = container->subdirectory( membersEntry, IndexedIO::CreateIfMissing );
+	container = container->subdirectory( g_membersEntry, IndexedIO::CreateIfMissing );
 	const CompoundDataMap &m = readable();
 	CompoundDataMap::const_iterator it;
 	for( it=m.begin(); it!=m.end(); it++ )
@@ -128,7 +128,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 {
 	Data::load( context );
 	unsigned int v = 0;
-	IndexedIOPtr container = 0;
+	ConstIndexedIOPtr container = 0;
 
 	try
 	{
@@ -143,7 +143,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 	
 	CompoundDataMap &m = writable();
 	m.clear();
-	container = container->subdirectory( membersEntry );
+	container = container->subdirectory( g_membersEntry );
 
 	IndexedIO::EntryIDList memberNames;
 	container->entryIds( memberNames );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,12 +48,12 @@ using namespace IECore;
 using namespace std;
 using namespace Imath;
 
+static IndexedIO::EntryID g_transformEntry("transform");
+static IndexedIO::EntryID g_stateEntry("state");
+static IndexedIO::EntryID g_childrenEntry("children");
 const unsigned int Group::m_ioVersion = 0;
-IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Group );
 
-static IndexedIO::EntryID transformEntry("transform");
-static IndexedIO::EntryID stateEntry("state");
-static IndexedIO::EntryID childrenEntry("children");
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Group );
 
 Group::Group()
 	:	m_transform( 0 ), m_parent( 0 )
@@ -275,9 +275,9 @@ void Group::save( SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	if( m_transform )
 	{
-		context->save( m_transform, container, transformEntry );
+		context->save( m_transform, container, g_transformEntry );
 	}
-	IndexedIOPtr stateContainer = container->subdirectory( stateEntry, IndexedIO::CreateIfMissing );
+	IndexedIOPtr stateContainer = container->subdirectory( g_stateEntry, IndexedIO::CreateIfMissing );
 	int i = 0;
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
@@ -285,7 +285,7 @@ void Group::save( SaveContext *context ) const
 		context->save( *it, stateContainer, name );
 		i++;
 	}
-	IndexedIOPtr childrenContainer = container->subdirectory( childrenEntry, IndexedIO::CreateIfMissing );
+	IndexedIOPtr childrenContainer = container->subdirectory( g_childrenEntry, IndexedIO::CreateIfMissing );
 	i = 0;
 	for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
 	{
@@ -323,18 +323,18 @@ void Group::load( LoadContextPtr context )
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, transformEntry );
+		m_transform = context->load<Transform>( container, g_transformEntry );
 	}
 	catch( ... )
 	{
 	}
 	clearState();
 	
-	IndexedIOPtr stateContainer = container->subdirectory( stateEntry );
+	ConstIndexedIOPtr stateContainer = container->subdirectory( g_stateEntry );
 	IndexedIO::EntryIDList l;
 	stateContainer->entryIds( l );
 	sort( l.begin(), l.end(), entryListCompare );
@@ -343,7 +343,7 @@ void Group::load( LoadContextPtr context )
 		addState( context->load<StateRenderable>( stateContainer, *it ) );
 	}
 	clearChildren();
-	IndexedIOPtr childrenContainer = container->subdirectory( childrenEntry );
+	ConstIndexedIOPtr childrenContainer = container->subdirectory( g_childrenEntry );
 	childrenContainer->entryIds( l );
 	sort( l.begin(), l.end(), entryListCompare );
 	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )

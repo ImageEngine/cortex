@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -120,14 +120,14 @@ void TypedData<T>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIO *container = context->rawContainer();
+		const IndexedIO *container = context->rawContainer();
 		container->read( "value", writable() );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOPtr container = context->container( staticTypeName(), v );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 		container->read( "value", writable() );
 	}
 }

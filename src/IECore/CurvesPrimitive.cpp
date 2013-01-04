@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,12 +39,12 @@
 using namespace IECore;
 using namespace Imath;
 
-static IndexedIO::EntryID basisMatrixEntry("basisMatrix");
-static IndexedIO::EntryID basisStepEntry("basisStep");
-static IndexedIO::EntryID periodicEntry("periodic");
-static IndexedIO::EntryID verticesPerCurveEntry("verticesPerCurve");
-static IndexedIO::EntryID numVertsEntry("numVerts");
-static IndexedIO::EntryID numFaceVaryingEntry("numFaceVarying");
+static IndexedIO::EntryID g_basisMatrixEntry("basisMatrix");
+static IndexedIO::EntryID g_basisStepEntry("basisStep");
+static IndexedIO::EntryID g_periodicEntry("periodic");
+static IndexedIO::EntryID g_verticesPerCurveEntry("verticesPerCurve");
+static IndexedIO::EntryID g_numVertsEntry("numVerts");
+static IndexedIO::EntryID g_numFaceVaryingEntry("numFaceVarying");
 
 const unsigned int CurvesPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CurvesPrimitive );
@@ -115,15 +115,15 @@ void CurvesPrimitive::save( IECore::Object::SaveContext *context ) const
 	Primitive::save(context);
 
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( basisMatrixEntry, m_basis.matrix.getValue(), 16 );
-	container->write( basisStepEntry, m_basis.step );
+	container->write( g_basisMatrixEntry, m_basis.matrix.getValue(), 16 );
+	container->write( g_basisStepEntry, m_basis.step );
 	int p = m_periodic;
-	container->write( periodicEntry, p );
-	context->save( m_vertsPerCurve, container, verticesPerCurveEntry );
+	container->write( g_periodicEntry, p );
+	context->save( m_vertsPerCurve, container, g_verticesPerCurveEntry );
 	// we could recompute these on loading, but it'd take a while and the overhead
 	// of storing them isn't great.
-	container->write( numVertsEntry, m_numVerts );
-	container->write( numFaceVaryingEntry, m_numFaceVarying );
+	container->write( g_numVertsEntry, m_numVerts );
+	container->write( g_numFaceVaryingEntry, m_numFaceVarying );
 }
 
 void CurvesPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -131,17 +131,17 @@ void CurvesPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	float *f = m_basis.matrix.getValue();
-	container->read( basisMatrixEntry, f, 16 );
-	container->read( basisStepEntry, m_basis.step );
+	container->read( g_basisMatrixEntry, f, 16 );
+	container->read( g_basisStepEntry, m_basis.step );
 	m_linear = m_basis==CubicBasisf::linear();
 	int p = 0;
-	container->read( periodicEntry, p );
+	container->read( g_periodicEntry, p );
 	m_periodic = p;
-	m_vertsPerCurve = context->load<IntVectorData>( container, verticesPerCurveEntry );
-	container->read( numVertsEntry, m_numVerts );
-	container->read( numFaceVaryingEntry, m_numFaceVarying );
+	m_vertsPerCurve = context->load<IntVectorData>( container, g_verticesPerCurveEntry );
+	container->read( g_numVertsEntry, m_numVerts );
+	container->read( g_numFaceVaryingEntry, m_numFaceVarying );
 }
 
 void CurvesPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const

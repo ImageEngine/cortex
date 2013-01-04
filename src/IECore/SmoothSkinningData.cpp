@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -42,6 +42,13 @@
 using namespace IECore;
 using namespace std;
 using namespace boost;
+
+static IndexedIO::EntryID g_influenceNamesEntry("influenceNames");
+static IndexedIO::EntryID g_influencePoseEntry("influencePose");
+static IndexedIO::EntryID g_pointIndexOffsetsEntry("pointIndexOffsets");
+static IndexedIO::EntryID g_pointInfluenceCountsEntry("pointInfluenceCounts");
+static IndexedIO::EntryID g_pointInfluenceIndicesEntry("pointInfluenceIndices");
+static IndexedIO::EntryID g_pointInfluenceWeightsEntry("pointInfluenceWeights");
 
 const unsigned int SmoothSkinningData::m_ioVersion = 1;
 
@@ -273,12 +280,12 @@ void SmoothSkinningData::save( IECore::Object::SaveContext *context ) const
 {
 	Data::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_influenceNames, container, "influenceNames" );
-	context->save( m_influencePose, container, "influencePose" );
-	context->save( m_pointIndexOffsets, container, "pointIndexOffsets" );
-	context->save( m_pointInfluenceCounts, container, "pointInfluenceCounts" );
-	context->save( m_pointInfluenceIndices, container, "pointInfluenceIndices" );
-	context->save( m_pointInfluenceWeights, container, "pointInfluenceWeights" );
+	context->save( m_influenceNames, container, g_influenceNamesEntry );
+	context->save( m_influencePose, container, g_influencePoseEntry );
+	context->save( m_pointIndexOffsets, container, g_pointIndexOffsetsEntry );
+	context->save( m_pointInfluenceCounts, container, g_pointInfluenceCountsEntry );
+	context->save( m_pointInfluenceIndices, container, g_pointInfluenceIndicesEntry );
+	context->save( m_pointInfluenceWeights, container, g_pointInfluenceWeightsEntry );
 }
 
 void SmoothSkinningData::load( IECore::Object::LoadContextPtr context )
@@ -286,14 +293,14 @@ void SmoothSkinningData::load( IECore::Object::LoadContextPtr context )
 	Data::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	m_influenceNames = context->load<StringVectorData>( container, "influenceNames" );
-	m_influencePose = context->load<M44fVectorData>( container, "influencePose" );
-	m_pointIndexOffsets = context->load<IntVectorData>( container, "pointIndexOffsets" );
-	m_pointInfluenceCounts = context->load<IntVectorData>( container, "pointInfluenceCounts" );
-	m_pointInfluenceIndices = context->load<IntVectorData>( container, "pointInfluenceIndices" );
-	m_pointInfluenceWeights = context->load<FloatVectorData>( container, "pointInfluenceWeights" );
+	m_influenceNames = context->load<StringVectorData>( container, g_influenceNamesEntry );
+	m_influencePose = context->load<M44fVectorData>( container, g_influencePoseEntry );
+	m_pointIndexOffsets = context->load<IntVectorData>( container, g_pointIndexOffsetsEntry );
+	m_pointInfluenceCounts = context->load<IntVectorData>( container, g_pointInfluenceCountsEntry );
+	m_pointInfluenceIndices = context->load<IntVectorData>( container, g_pointInfluenceIndicesEntry );
+	m_pointInfluenceWeights = context->load<FloatVectorData>( container, g_pointInfluenceWeightsEntry );
 
 }
 

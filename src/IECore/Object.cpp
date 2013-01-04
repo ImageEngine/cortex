@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,11 +47,11 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( Object );
 
 const Object::AbstractTypeDescription<Object> Object::m_typeDescription;
-const unsigned int Object::m_ioVersion = 0;
 
-static IndexedIO::EntryID ioVersionEntry("ioVersion");
-static IndexedIO::EntryID dataEntry("data");
-static IndexedIO::EntryID typeEntry("type");
+static IndexedIO::EntryID g_ioVersionEntry("ioVersion");
+static IndexedIO::EntryID g_dataEntry("data");
+static IndexedIO::EntryID g_typeEntry("type");
+const unsigned int Object::m_ioVersion = 0;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // structors
@@ -110,8 +110,8 @@ Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<Sa
 IndexedIOPtr Object::SaveContext::container( const std::string &typeName, unsigned int ioVersion )
 {
 	IndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, IndexedIO::CreateIfMissing );
-	typeIO->write( ioVersionEntry, ioVersion );
-	IndexedIOPtr dataIO = typeIO->subdirectory( dataEntry, IndexedIO::CreateIfMissing );
+	typeIO->write( g_ioVersionEntry, ioVersion );
+	IndexedIOPtr dataIO = typeIO->subdirectory( g_dataEntry, IndexedIO::CreateIfMissing );
 	dataIO->removeAll();
 	return dataIO;
 }
@@ -136,9 +136,9 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 		nameIO->path( pathParts );
 		(*m_savedObjects)[toSave] = pathParts;
 
-		nameIO->write( typeEntry, toSave->typeName() );
+		nameIO->write( g_typeEntry, toSave->typeName() );
 
-		IndexedIOPtr dataIO = nameIO->subdirectory( dataEntry, IndexedIO::CreateIfMissing );
+		IndexedIOPtr dataIO = nameIO->subdirectory( g_dataEntry, IndexedIO::CreateIfMissing );
 		dataIO->removeAll();
 
 		SaveContext context( dataIO, m_savedObjects );
@@ -150,39 +150,39 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 // load context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
-Object::LoadContext::LoadContext( IndexedIOPtr ioInterface )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface )
 	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjectMap )
 {
 }
 
-Object::LoadContext::LoadContext( IndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects )
 	:	m_ioInterface( ioInterface ), m_loadedObjects( loadedObjects )
 {
 }
 
-IndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing )
+ConstIndexedIOPtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing )
 {
-	IndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
+	ConstIndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
 	if ( !typeIO )
 	{
 		return 0;
 	}
 	unsigned int v;
-	typeIO->read( ioVersionEntry, v );
+	typeIO->read( g_ioVersionEntry, v );
 	if( v > ioVersion )
 	{
 		throw( IOException( "File version greater than library version." ) );
 	}
 	ioVersion = v;
-	return typeIO->subdirectory( dataEntry, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
+	return typeIO->subdirectory( g_dataEntry, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
 }
 
-IndexedIO *Object::LoadContext::rawContainer()
+const IndexedIO *Object::LoadContext::rawContainer()
 {
 	return m_ioInterface;
 }
 
-ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIO *container, const IndexedIO::EntryID &name )
+ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name )
 {
 	IndexedIO::Entry e = container->entry( name );
 	if( e.entryType()==IndexedIO::File )
@@ -211,7 +211,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIO *container, cons
 		if ( ret.second )
 		{
 			// jump to the path..
-			IndexedIOPtr ioObject = m_ioInterface->directory( pathParts );
+			ConstIndexedIOPtr ioObject = m_ioInterface->directory( pathParts );
 			// add the loaded object to the map.
 			ret.first->second = loadObject( ioObject );
 		}
@@ -219,7 +219,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIO *container, cons
 	}
 	else
 	{
-		IndexedIOPtr ioObject = container->subdirectory( name );
+		ConstIndexedIOPtr ioObject = container->subdirectory( name );
 
 		IndexedIO::EntryIDList pathParts;
 		ioObject->path( pathParts );
@@ -236,12 +236,12 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIO *container, cons
 
 // this function can only load concrete objects. it can't load references to
 // objects. path is relative to the root of m_ioInterface
-ObjectPtr Object::LoadContext::loadObject( IndexedIO *container )
+ObjectPtr Object::LoadContext::loadObject( const IndexedIO *container )
 {
 	ObjectPtr result = 0;
 	string type = "";
-	container->read( typeEntry, type );
-	IndexedIOPtr dataIO = container->subdirectory( dataEntry );
+	container->read( g_typeEntry, type );
+	ConstIndexedIOPtr dataIO = container->subdirectory( g_dataEntry );
 	result = create( type );
 	LoadContextPtr context = new LoadContext( dataIO, m_loadedObjects );
 	result->load( context );
@@ -457,7 +457,7 @@ ObjectPtr Object::create( const std::string &typeName )
 	return creatorAndData.first( creatorAndData.second );
 }
 
-ObjectPtr Object::load( IndexedIOPtr ioInterface, const IndexedIO::EntryID &name )
+ObjectPtr Object::load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name )
 {
 	LoadContextPtr context( new LoadContext( ioInterface ) );
 	ObjectPtr result = context->load<Object>( ioInterface, name );

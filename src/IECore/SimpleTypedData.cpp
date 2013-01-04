@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 namespace IECore
 {
 
-static IndexedIO::EntryID valueEntry("value");
+static IndexedIO::EntryID g_valueEntry("value");
 
 LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDataTypeId, "LongData" );
 
@@ -53,7 +53,7 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 		Data::save( context ); \
 		assert( baseSize() == N ); \
 		IndexedIO *container = context->rawContainer(); \
-		container->write( valueEntry, TNAME::baseReadable(), TNAME::baseSize() ); \
+		container->write( g_valueEntry, TNAME::baseReadable(), TNAME::baseSize() ); \
 	} \
 	\
 	template<> \
@@ -64,14 +64,14 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 		TNAME::BaseType *p = TNAME::baseWritable(); \
 		try \
 		{ \
-			IndexedIO *container = context->rawContainer(); \
-			container->read( valueEntry, p, N ); \
+			const IndexedIO *container = context->rawContainer(); \
+			container->read( g_valueEntry, p, N ); \
 		} \
 		catch( ... ) \
 		{ \
 			unsigned int v = 0;	\
-			IndexedIOPtr container = context->container( staticTypeName(), v ); \
-			container->read( valueEntry, p, N ); \
+			ConstIndexedIOPtr container = context->container( staticTypeName(), v ); \
+			container->read( g_valueEntry, p, N ); \
 		} \
 	}
 
@@ -145,7 +145,7 @@ void TypedData<bool>::save( SaveContext *context ) const
 	Data::save( context );
 	IndexedIO *container = context->rawContainer();
 	unsigned char c = readable();
-	container->write( valueEntry, c );
+	container->write( g_valueEntry, c );
 }
 
 template<>
@@ -156,15 +156,15 @@ void TypedData<bool>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIO *container = context->rawContainer();
-		container->read( valueEntry, c );
+		const IndexedIO *container = context->rawContainer();
+		container->read( g_valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOPtr container = context->container( staticTypeName(), v );
-		container->read( valueEntry, c );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+		container->read( g_valueEntry, c );
 	}
 
 	writable() = c;
@@ -176,7 +176,7 @@ void TypedData<short>::save( SaveContext *context ) const
 	Data::save( context );
 	IndexedIO *container = context->rawContainer();
 	int c = readable();
-	container->write( valueEntry, c );
+	container->write( g_valueEntry, c );
 }
 
 template<>
@@ -187,15 +187,15 @@ void TypedData<short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIO *container = context->rawContainer();
-		container->read( valueEntry, c );
+		const IndexedIO *container = context->rawContainer();
+		container->read( g_valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOPtr container = context->container( staticTypeName(), v );
-		container->read( valueEntry, c );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+		container->read( g_valueEntry, c );
 	}
 
 	writable() = static_cast<short>( c );
@@ -207,7 +207,7 @@ void TypedData<unsigned short>::save( SaveContext *context ) const
 	Data::save( context );
 	IndexedIO *container = context->rawContainer();
 	unsigned int c = readable();
-	container->write( valueEntry, c );
+	container->write( g_valueEntry, c );
 }
 
 template<>
@@ -218,15 +218,15 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIO *container = context->rawContainer();
-		container->read( valueEntry, c );
+		const IndexedIO *container = context->rawContainer();
+		container->read( g_valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOPtr container = context->container( staticTypeName(), v );
-		container->read( valueEntry, c );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+		container->read( g_valueEntry, c );
 	}
 
 	writable() = static_cast<unsigned short>( c );

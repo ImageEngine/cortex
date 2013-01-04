@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,9 +41,9 @@
 using namespace IECore;
 using namespace boost;
 
-static IndexedIO::EntryID nameEntry("name");
-static IndexedIO::EntryID handleEntry("handle");
-static IndexedIO::EntryID parametersEntry("parameters");
+static IndexedIO::EntryID g_nameEntry("name");
+static IndexedIO::EntryID g_handleEntry("handle");
+static IndexedIO::EntryID g_parametersEntry("parameters");
 
 
 const unsigned int Light::m_ioVersion = 0;
@@ -141,19 +141,19 @@ void Light::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( nameEntry, m_name );
-	container->write( handleEntry, m_handle );
-	context->save( m_parameters, container, parametersEntry );
+	container->write( g_nameEntry, m_name );
+	container->write( g_handleEntry, m_handle );
+	context->save( m_parameters, container, g_parametersEntry );
 }
 
 void Light::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOPtr container = context->container( staticTypeName(), v );
-	container->read( nameEntry, m_name );
-	container->read( handleEntry, m_handle );
-	m_parameters = context->load<CompoundData>( container, parametersEntry );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+	container->read( g_nameEntry, m_name );
+	container->read( g_handleEntry, m_handle );
+	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
 }
 
 void Light::hash( MurmurHash &h ) const

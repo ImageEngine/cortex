@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 using namespace IECore;
 using namespace std;
 
-static IndexedIO::EntryID membersEntry("members");
+static IndexedIO::EntryID g_membersEntry("members");
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CompoundObject );
 
@@ -79,7 +79,7 @@ void CompoundObject::save( SaveContext *context ) const
 {
 	Object::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container = container->subdirectory( membersEntry, IndexedIO::CreateIfMissing );
+	container = container->subdirectory( g_membersEntry, IndexedIO::CreateIfMissing );
 	ObjectMap::const_iterator it;
 	for( it=m_members.begin(); it!=m_members.end(); it++ )
 	{
@@ -92,9 +92,9 @@ void CompoundObject::load( LoadContextPtr context )
 	Object::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	m_members.clear();
-	container = container->subdirectory( membersEntry );
+	container = container->subdirectory( g_membersEntry );
 
 	IndexedIO::EntryIDList memberNames;
 	container->entryIds( memberNames );

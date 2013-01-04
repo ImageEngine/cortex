@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +39,7 @@
 using namespace IECore;
 using namespace boost;
 
+static IndexedIO::EntryID g_optionsEntry("options");
 const unsigned int Options::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Options );
 
@@ -105,15 +107,15 @@ void Options::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_options, container, "options" );
+	context->save( m_options, container, g_optionsEntry );
 }
 
 void Options::load( LoadContextPtr context )
 {
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOPtr container = context->container( staticTypeName(), v );
-	m_options = context->load<CompoundData>( container, "options" );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+	m_options = context->load<CompoundData>( container, g_optionsEntry );
 }
 
 void Options::hash( MurmurHash &h ) const

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,9 +40,9 @@
 
 using namespace IECore;
 
+static IndexedIO::EntryID g_sizeEntry("size");
+static IndexedIO::EntryID g_membersEntry("members");
 const unsigned int ObjectVector::m_ioVersion = 1;
-static IndexedIO::EntryID sizeEntry("size");
-static IndexedIO::EntryID membersEntry("members");
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( ObjectVector );
 
@@ -88,9 +88,9 @@ void ObjectVector::save( SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	unsigned int size = m_members.size();
-	container->write( sizeEntry, size );
+	container->write( g_sizeEntry, size );
 
-	IndexedIOPtr ioMembers = container->subdirectory( membersEntry, IndexedIO::CreateIfMissing );
+	IndexedIOPtr ioMembers = container->subdirectory( g_membersEntry, IndexedIO::CreateIfMissing );
 
 	unsigned i=0;
 	for( MemberContainer::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
@@ -108,15 +108,15 @@ void ObjectVector::load( LoadContextPtr context )
 {
 	Object::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOPtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	unsigned int size = 0;
-	container->read( sizeEntry, size );
+	container->read( g_sizeEntry, size );
 
 	m_members.resize( size );
 	std::fill( m_members.begin(), m_members.end(), (IECore::Object*)0 );
 
-	IndexedIOPtr ioMembers = container->subdirectory( membersEntry );
+	ConstIndexedIOPtr ioMembers = container->subdirectory( g_membersEntry );
 
 	IndexedIO::EntryIDList l;
 	ioMembers->entryIds(l);
