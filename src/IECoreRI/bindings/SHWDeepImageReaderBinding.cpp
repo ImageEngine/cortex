@@ -51,6 +51,9 @@ void bindSHWDeepImageReader()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &SHWDeepImageReader::canRead ).staticmethod( "canRead" )
+		/// \todo: move these to the base class for Cortex 8
+		.def( "worldToCameraMatrix", &SHWDeepImageReader::worldToCameraMatrix )
+		.def( "worldToNDCMatrix", &SHWDeepImageReader::worldToNDCMatrix )
 	;
 
 }

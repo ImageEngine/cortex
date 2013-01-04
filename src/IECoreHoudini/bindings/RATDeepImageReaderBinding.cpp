@@ -52,6 +52,9 @@ void bindRATDeepImageReader()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &RATDeepImageReader::canRead ).staticmethod( "canRead" )
+		/// \todo: move these to the base class for Cortex 8
+		.def( "worldToCameraMatrix", &RATDeepImageReader::worldToCameraMatrix )
+		.def( "worldToNDCMatrix", &RATDeepImageReader::worldToNDCMatrix )
 	;
 
 }

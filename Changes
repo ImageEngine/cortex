@@ -1,3 +1,19 @@
+Bug Fixes :
+
+* Fixed crashes caused by calling PrimitiveEvaluator.create( None ) in Python, replacing them with ValueError exceptions.
+
+7.10.1 :
+
+Improvements :
+
+* Using IECoreHoudini SOP_InterpolatedCacheReader in PrimitiveGroup mode will now load Prim and Vertex attribs as well as Point attribs
+
+Bug Fixes :
+
+* In SHWDeepImageReader/Writer, we now composite on write and uncomposite on read. This fixes an issue where deep images converted from mantra were seemingly losing samples.
+
+7.10.0 :
+
 Improvements :
 
 * ParameterParser.serialise accepts an alternate "values" argument, which can be used to avoid parameter validation or to serialise values that aren't held by the parameter.
@@ -6,6 +22,10 @@ Improvements :
 * Added setAttribute()/getAttribute() methods to IECore::Group. The latter traverses the group's parents
 * IECoreGL::Renderer now ignores shader types with a prefix other than gl: (apart from "surface"), rather than complaining about them.
 * IECoreHoudini FnOpHolder and FnProceduralHolder.create() now accept optional parent node and contextArgs parameters. The later should be a kwargs dict from a Houdini UI callback
+* IECoreHoudini SOP_InterpolatedCacheReader has a new parameter, GroupingMode, which defaults to the original behaviour. By using PrimitiveGroup mode instead, transform cached objects also transform non-Point attribs (face varying normals for example)
+* DeepImageReaders have new worldToCameraMatrix() and worldToNDCMatrix() methods which return the respective matrices.
+* DeepImageWriters have new parameters to set the worldToCamera and worldToNDC matrices, and DeepImageConverter reads/writes them appropriately.
+* SHW, DTEX, and RAT DeepImageReaders/Writers all support reading/writing worldToCamera and reading worldToNDC. SHW and DTEX support writing worldToNDC. RAT writing worldToNDC is still a todo.
 
 Bug Fixes :
 

@@ -61,7 +61,15 @@ class SOP_InterpolatedCacheReader : public SOP_Node
 
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static PRM_Template parameters[];
-
+		
+		enum GroupingMode
+		{
+			PrimitiveGroup,
+			PointGroup,
+		};
+		
+		static PRM_ChoiceList groupingModeList;
+	
 	protected :
 	
 		virtual OP_ERROR cookMySop( OP_Context &context );

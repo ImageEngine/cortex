@@ -37,6 +37,7 @@
 
 #include "IMG/IMG_DeepShadow.h"
 
+#include "IECore/CompoundObject.h"
 #include "IECore/DeepImageReader.h"
 
 #include "IECoreHoudini/TypeIds.h"
@@ -62,13 +63,19 @@ class RATDeepImageReader : public IECore::DeepImageReader
 		RATDeepImageReader( const std::string &filename );
 
 		virtual ~RATDeepImageReader();
-
+		
+		/// \todo: remove this in Cortex 8
+		virtual IECore::CompoundObjectPtr readHeader();
+		
 		static bool canRead( const std::string &filename );
 
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
+		/// \todo: these will become virtual in Cortex 8
+		Imath::M44f worldToCameraMatrix();
+		Imath::M44f worldToNDCMatrix();
 
 	protected :
 
@@ -91,6 +98,8 @@ class RATDeepImageReader : public IECore::DeepImageReader
 		std::string m_inputFileName;
 		std::string m_channelNames;
 		Imath::Box2i m_dataWindow;
+		Imath::M44f m_worldToCamera;
+		Imath::M44f m_worldToNDC;
 
 };
 

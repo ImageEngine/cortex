@@ -57,13 +57,19 @@ class SHWDeepImageReader : public IECore::DeepImageReader
 		SHWDeepImageReader( const std::string &filename );
 
 		virtual ~SHWDeepImageReader();
-
+		
+		/// \todo: remove this in Cortex 8
+		virtual IECore::CompoundObjectPtr readHeader();
+		
 		static bool canRead( const std::string &filename );
 
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
+		/// \todo: these will become virtual in Cortex 8
+		Imath::M44f worldToCameraMatrix();
+		Imath::M44f worldToNDCMatrix();
 
 	protected :
 
@@ -85,6 +91,8 @@ class SHWDeepImageReader : public IECore::DeepImageReader
 		DtexPixel *m_dtexPixel;
 		
 		Imath::Box2i m_dataWindow;
+		Imath::M44f m_worldToCamera;
+		Imath::M44f m_worldToNDC;
 		std::string m_inputFileName;
 		std::string m_channelNames;
 

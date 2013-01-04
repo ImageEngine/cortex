@@ -86,6 +86,16 @@ bool DTEXDeepImageReader::canRead( const std::string &fileName )
 	return ( status == RixDeepTexture::k_ErrNOERR );
 }
 
+CompoundObjectPtr DTEXDeepImageReader::readHeader()
+{
+	CompoundObjectPtr header = DeepImageReader::readHeader();
+	/// \todo: move this to the base class for Cortex 8
+	header->members()["worldToCameraMatrix"] = new M44fData( worldToCameraMatrix() );
+	header->members()["worldToNDCMatrix"] = new M44fData( worldToNDCMatrix() );
+	
+	return header;
+}
+
 void DTEXDeepImageReader::channelNames( std::vector<std::string> &names )
 {
 	open( true );
@@ -113,6 +123,20 @@ Imath::Box2i DTEXDeepImageReader::dataWindow()
 Imath::Box2i DTEXDeepImageReader::displayWindow()
 {
 	return dataWindow();
+}
+
+Imath::M44f DTEXDeepImageReader::worldToCameraMatrix()
+{
+	open( true );
+	
+	return m_worldToCamera;
+}
+
+Imath::M44f DTEXDeepImageReader::worldToNDCMatrix()
+{
+	open( true );
+	
+	return  m_worldToNDC;
 }
 
 DeepPixelPtr DTEXDeepImageReader::doReadPixel( int x, int y )
@@ -160,6 +184,8 @@ bool DTEXDeepImageReader::open( bool throwOnFailure )
 	m_channelNames = "";
 	m_dataWindow.max.x = 0;
 	m_dataWindow.max.y = 0;
+	m_worldToCamera = Imath::M44f();
+	m_worldToNDC = Imath::M44f();
 	
 	RixDeepTexture *dtexInterface = (RixDeepTexture *)RixGetContext()->GetRixInterface( k_RixDeepTexture );
 	/// \todo: what should numTiles be? we don't know the resolution yet because we haven't opened the file...
@@ -178,6 +204,9 @@ bool DTEXDeepImageReader::open( bool throwOnFailure )
 		
 		m_dataWindow.max.x = m_dtexImage->GetWidth() - 1;
 		m_dataWindow.max.y = m_dtexImage->GetHeight() - 1;
+		
+		m_dtexImage->GetNl( m_worldToCamera.getValue() );
+		m_dtexImage->GetNP( m_worldToNDC.getValue() );
 	}
 	else
 	{
@@ -186,6 +215,8 @@ bool DTEXDeepImageReader::open( bool throwOnFailure )
 		m_channelNames = "";
 		m_dataWindow.max.x = 0;
 		m_dataWindow.max.y = 0;
+		m_worldToCamera = Imath::M44f();
+		m_worldToNDC = Imath::M44f();
 		
 		if ( !throwOnFailure )
 		{
