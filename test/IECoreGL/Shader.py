@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -152,8 +152,8 @@ class TestShader( unittest.TestCase ) :
 		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndTypes ) )
 		for n in expectedParameterNamesAndTypes.keys() :
 			self.assert_( n in parameterNames )
-			self.assert_( s.hasUniformParameter( n ) )
-			self.assert_( not s.hasUniformParameter( n + "VeryUnlikelySuffix" ) )
+			self.assertTrue( s.uniformParameter( n ) is not None )
+			self.assertTrue( s.uniformParameter( n + "VeryUnlikelySuffix" ) is None )
 			self.assertEqual( s.uniformParameterType( n ), expectedParameterNamesAndTypes[n] )
 
 		expectedNamesAndValues = {
@@ -328,9 +328,9 @@ class TestShader( unittest.TestCase ) :
 		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndTypes ) )
 		
 		for n in expectedParameterNamesAndTypes.keys() :
-			self.assert_( n in parameterNames )
-			self.assert_( s.hasUniformParameter( n ) )
-			self.assert_( not s.hasUniformParameter( n + "VeryUnlikelySuffix" ) )
+			self.assertTrue( n in parameterNames )
+			self.assertTrue( s.uniformParameter( n ) is not None )
+			self.assertTrue( s.uniformParameter( n + "VeryUnlikelySuffix" ) is None )
 			
 			self.assertEqual( s.uniformParameterType( n ), expectedParameterNamesAndTypes[n] )
 
@@ -421,13 +421,12 @@ class TestShader( unittest.TestCase ) :
 			"vec4Parm" : IECore.Color4fVectorData(),
 		}
 
-		parameterNames = s.vertexParameterNames()
+		parameterNames = s.vertexAttributeNames()
 		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndValues ) )
 		for n in expectedParameterNamesAndValues.keys() :
 			self.assert_( n in parameterNames )
-			self.assert_( s.hasVertexParameter( n ) )
-			self.assert_( not s.hasVertexParameter( n + "VeryUnlikelySuffix" ) )
-			self.assert_( s.vertexValueValid( n, expectedParameterNamesAndValues[n] ) )
+			self.assertTrue( s.vertexAttribute( n ) is not None )
+			self.assertTrue( s.vertexAttribute( n + "VeryUnlikelySuffix" ) is None )
 
 		s.setVertexParameter( "floatParm", IECore.FloatVectorData( [ 1 ] ), False )
 		s.setVertexParameter( "vec2Parm", IECore.V2fVectorData( [ IECore.V2f( 1, 2 ) ] ), False )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -123,44 +123,45 @@ class Shader::Implementation : public IECore::RefCounted
 				glGetProgramiv( m_program, GL_ACTIVE_UNIFORMS, &numUniforms );
 				GLint maxUniformNameLength = 0;
 				glGetProgramiv( m_program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength );
-				vector<char> name( maxUniformNameLength );
-				int textureUnit = 0;
+				vector<char> nameChars( maxUniformNameLength );
+				GLuint textureUnit = 0;
 				for( int i=0; i<numUniforms; i++ )
 				{
-					ParameterDescription d;
-					glGetActiveUniform( m_program, i, maxUniformNameLength, 0, &d.size, &d.type, &name[0] );
-					d.name = &name[0];
-					GLint location = glGetUniformLocation( m_program, &name[0] );
+					Parameter p;
+					glGetActiveUniform( m_program, i, maxUniformNameLength, 0, &p.size, &p.type, &nameChars[0] );
+					p.location = glGetUniformLocation( m_program, &nameChars[0] );
+					
+					std::string name = &nameChars[0];
 
 					// ignore native parameters
-					if( 0 == d.name.compare( 0, 3, "gl_" ) )
+					if( 0 == name.compare( 0, 3, "gl_" ) )
 					{
 						continue;
 					}
 
-					if( d.size > 1 )
+					if( p.size > 1 )
 					{
 						// remove the "[0]" from the end of the string
-						size_t bracketPos = d.name.rfind( "[" );
+						size_t bracketPos = name.rfind( "[" );
 						if( bracketPos != std::string::npos )
 						{
-							d.name = d.name.substr( 0, bracketPos );
+							name = name.substr( 0, bracketPos );
 						}
 					}
 
-					if( d.type == GL_SAMPLER_2D )
+					if( p.type == GL_SAMPLER_2D )
 					{
 						// we assign a specific texture unit to each individual
 						// sampler parameter - this makes it much easier to save
 						// and restore state when applying nested Setups.
-						d.textureUnit = textureUnit++;
+						p.textureUnit = textureUnit++;
 					}
 					else
 					{
-						d.textureUnit = -1;
+						p.textureUnit = 0;
 					}
 
-					m_uniformParameters[location] = d;
+					m_uniformParameters[name] = p;
 				}
 			}
 
@@ -176,25 +177,28 @@ class Shader::Implementation : public IECore::RefCounted
 				// bother retrieving anything in this case, as we skip built in parameters anyway.
 				if( numVertexs && maxVertexNameLength )
 				{
-					vector<char> name( maxVertexNameLength );
+					vector<char> nameChars( maxVertexNameLength );
 					for( int i=0; i<numVertexs; i++ )
 					{
-						ParameterDescription d;
-						glGetActiveAttrib( m_program, i, maxVertexNameLength, 0, &d.size, &d.type, &name[0] );
-						d.name = &name[0];
-						GLint location = glGetAttribLocation( m_program, &name[0] );
+						Parameter p;
+						glGetActiveAttrib( m_program, i, maxVertexNameLength, 0, &p.size, &p.type, &nameChars[0] );
+						p.location = glGetAttribLocation( m_program, &nameChars[0] );
+						
+						std::string name = &nameChars[0];
 
 						// ignore native parameters
-						if( 0 == d.name.compare( 0, 3, "gl_" ) )
+						if( 0 == name.compare( 0, 3, "gl_" ) )
 						{
 							continue;
 						}
 
-						// \todo: implement arrays
-						if ( d.size != 1 )
+						/// \todo implement arrays
+						if( p.size != 1 )
+						{
 							continue;
-
-						m_vertexParameters[location] = d;
+						}
+						
+						m_vertexAttributes[name] = p;
 					}
 				}
 			}
@@ -229,59 +233,36 @@ class Shader::Implementation : public IECore::RefCounted
 		{
 			for( ParameterMap::const_iterator it = m_uniformParameters.begin(); it != m_uniformParameters.end(); it++ )
 			{
-				names.push_back( it->second.name );
+				names.push_back( it->first );
 			}
 		}
 		
-		GLint uniformParameter( const std::string &name, GLenum &type, GLint &size, size_t &textureUnit ) const
+		const Shader::Parameter *uniformParameter( const std::string &name ) const
 		{
-			ParameterMap::const_iterator it;
-			for( it = m_uniformParameters.begin(); it != m_uniformParameters.end(); it++ )
+			ParameterMap::const_iterator it = m_uniformParameters.find( name );
+			if( it != m_uniformParameters.end() )
 			{
-				if( !strcmp( name.c_str(), it->second.name.c_str() ) )
-				{
-					break;
-				}
+				return &(it->second);
 			}
-
-			if( it == m_uniformParameters.end() )
-			{
-				return -1;
-			}
-
-			type = it->second.type;
-			size = it->second.size;
-			textureUnit = it->second.textureUnit;
-			return it->first;
+			return 0;
 		}
 
-		void vertexParameterNames( std::vector<std::string> &names ) const
+		void vertexAttributeNames( std::vector<std::string> &names ) const
 		{	
-			for( ParameterMap::const_iterator it = m_vertexParameters.begin(); it != m_vertexParameters.end(); it++ )
+			for( ParameterMap::const_iterator it = m_vertexAttributes.begin(); it != m_vertexAttributes.end(); it++ )
 			{
-				names.push_back( it->second.name );
+				names.push_back( it->first );
 			}
 		}
 		
-		GLint vertexAttribute( const std::string &name, GLenum &type, GLint &size ) const
+		const Shader::Parameter *vertexAttribute( const std::string &name ) const
 		{
-			ParameterMap::const_iterator it;
-			for( it = m_vertexParameters.begin(); it != m_vertexParameters.end(); it++ )
+			ParameterMap::const_iterator it = m_vertexAttributes.find( name );
+			if( it != m_vertexAttributes.end() )
 			{
-				if( !strcmp( name.c_str(), it->second.name.c_str() ) )
-				{
-					break;
-				}
+				return &(it->second);
 			}
-	
-			if( it == m_vertexParameters.end() )
-			{
-				return -1;
-			}
-
-			type = it->second.type;
-			size = it->second.size;
-			return it->first;
+			return 0;
 		}
 	
 	private :
@@ -297,17 +278,10 @@ class Shader::Implementation : public IECore::RefCounted
 		GLuint m_fragmentShader;
 		GLuint m_program;
 
-		struct ParameterDescription
-		{
-			std::string name;
-			GLenum type;
-			GLint size;
-			size_t textureUnit; // only used for uniform parameters
-		};
 		/// Maps from the uniform location to the parameter details.
-		typedef std::map<GLint, ParameterDescription> ParameterMap;
+		typedef std::map<std::string, Shader::Parameter> ParameterMap;
 		ParameterMap m_uniformParameters;
-		ParameterMap m_vertexParameters;
+		ParameterMap m_vertexAttributes;
 		
 		void compile( const std::string &source, GLenum type, GLuint &shader )
 		{
@@ -404,19 +378,19 @@ void Shader::uniformParameterNames( std::vector<std::string> &names ) const
 	m_implementation->uniformParameterNames( names );
 }
 
-void Shader::vertexParameterNames( std::vector<std::string> &names ) const
+void Shader::vertexAttributeNames( std::vector<std::string> &names ) const
 {
-	m_implementation->vertexParameterNames( names );
+	m_implementation->vertexAttributeNames( names );
 }
 
-GLint Shader::uniformParameter( const std::string &name, GLenum &type, GLint &size, size_t &textureUnit ) const
+const Shader::Parameter *Shader::uniformParameter( const std::string &name ) const
 {
-	return m_implementation->uniformParameter( name, type, size, textureUnit );
+	return m_implementation->uniformParameter( name );
 }
 
-GLint Shader::vertexAttribute( const std::string &name, GLenum &type, GLint &size ) const
+const Shader::Parameter *Shader::vertexAttribute( const std::string &name ) const
 {
-	return m_implementation->vertexAttribute( name, type, size );
+	return m_implementation->vertexAttribute( name );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -503,7 +477,7 @@ struct Shader::Setup::MemberData : public IECore::RefCounted
 		private :
 		
 			GLuint m_uniformIndex;
-			size_t m_textureUnit;
+			GLuint m_textureUnit;
 			ConstTexturePtr m_texture;
 			GLint m_previousTexture;
 	
@@ -618,16 +592,13 @@ const Shader *Shader::Setup::shader() const
 
 void Shader::Setup::addUniformParameter( const std::string &name, ConstTexturePtr value )
 {
-	GLenum uniformType = 0;
-	GLint uniformSize = 0;
-	size_t textureUnit = 0;
-	GLint uniformIndex = m_memberData->shader->uniformParameter( name, uniformType, uniformSize, textureUnit );
-	if( uniformIndex < 0 || uniformType != GL_SAMPLER_2D )
+	const Parameter *p = m_memberData->shader->uniformParameter( name );
+	if( !p || p->type != GL_SAMPLER_2D )
 	{
 		return;
 	}
 	
-	m_memberData->values.push_back( new MemberData::TextureValue( uniformIndex, textureUnit, value ) );
+	m_memberData->values.push_back( new MemberData::TextureValue( p->location, p->textureUnit, value ) );
 }
 
 template<typename Container>
@@ -660,22 +631,19 @@ struct UniformDataConverter
 
 void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstDataPtr value )
 {
-	GLenum uniformType = 0;
-	GLint uniformSize = 0;
-	size_t textureUnit = 0;
-	GLint uniformIndex = m_memberData->shader->uniformParameter( name, uniformType, uniformSize, textureUnit );
-	if( uniformIndex < 0 )
+	const Parameter *p = m_memberData->shader->uniformParameter( name );
+	if( !p )
 	{
 		return;
 	}
 	
-	if( uniformSize > 1 )
+	if( p->size > 1 )
 	{
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Array parameter \"%s\" is currently unsupported." ) % name );
 		return;
 	}
 	
-	if( uniformType == GL_BOOL || uniformType == GL_INT || uniformType == GL_INT_VEC2 || uniformType == GL_INT_VEC3 )
+	if( p->type == GL_BOOL || p->type == GL_INT || p->type == GL_INT_VEC2 || p->type == GL_INT_VEC3 )
 	{
 		// integer value
 		
@@ -696,7 +664,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		else
 		{
 			unsigned char dimensions = 0;
-			switch( uniformType )
+			switch( p->type )
 			{
 				case GL_BOOL :
 				case GL_INT :
@@ -708,10 +676,10 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 				case GL_INT_VEC3 :
 					dimensions = 3;	
 			}
-			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), uniformIndex, dimensions, integers ) );
+			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, integers ) );
 		}
 	}
-	else if( uniformType == GL_FLOAT || uniformType == GL_FLOAT_VEC2 || uniformType == GL_FLOAT_VEC3 )
+	else if( p->type == GL_FLOAT || p->type == GL_FLOAT_VEC2 || p->type == GL_FLOAT_VEC3 )
 	{
 		// float value
 		
@@ -726,7 +694,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		else
 		{
 			unsigned char dimensions = 0;
-			switch( uniformType )
+			switch( p->type )
 			{
 				case GL_FLOAT :
 					dimensions = 1;
@@ -737,15 +705,15 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 				case GL_FLOAT_VEC3 :
 					dimensions = 3;	
 			}
-			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), uniformIndex, dimensions, floats ) );
+			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, floats ) );
 		}
 	}
-	else if( uniformType == GL_FLOAT_MAT3 || uniformType == GL_FLOAT_MAT4 )
+	else if( p->type == GL_FLOAT_MAT3 || p->type == GL_FLOAT_MAT4 )
 	{
 		// matrix value
 		unsigned char dimensions0 = 0;
 		unsigned char dimensions1 = 0;
-		switch( uniformType )
+		switch( p->type )
 		{
 			case GL_FLOAT_MAT3 :
 				dimensions0 = dimensions1 = 3;
@@ -764,25 +732,23 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 			return;
 		}
 		
-		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), uniformIndex, dimensions0, dimensions1, floats ) );
+		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, floats ) );
 	}
 	else
 	{
-		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsupported OpenGL type \%d\"" ) % name % uniformType );
+		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsupported OpenGL type \%d\"" ) % name % p->type );
 	}
 }
 				
 void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor )
 {	
-	GLenum attributeType = 0;
-	GLint attributeSize = 0;
-	GLint attributeIndex = m_memberData->shader->vertexAttribute( name, attributeType, attributeSize );
-	if( attributeIndex < 0 )
+	const Parameter *p = m_memberData->shader->vertexAttribute( name );
+	if( !p )
 	{
 		return;
 	}
 
-	if( attributeSize > 1 )
+	if( p->size > 1 )
 	{
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Array attribute \"%s\" is currently unsupported." ) % name );
 	}
@@ -794,7 +760,7 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	}
 
 	GLint size = 0;
-	switch( attributeType )
+	switch( p->type )
 	{
 		case GL_INT :
 		case GL_FLOAT :
@@ -812,14 +778,14 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 			size = 4;
 			break;
 		default :
-			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsupported OpenGL type \%d\"" ) % name % attributeType );
+			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsupported OpenGL type \%d\"" ) % name % p->type );
 			return;
 	}
 
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
 	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value  ) );
 	
-	m_memberData->values.push_back( new MemberData::VertexValue( attributeIndex, dataGLType, size, buffer, divisor ) );
+	m_memberData->values.push_back( new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor ) );
 }
 
 Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )

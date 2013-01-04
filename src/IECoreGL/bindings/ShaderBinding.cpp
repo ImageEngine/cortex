@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,16 +59,42 @@ static boost::python::list uniformParameterNames( const Shader &s )
 	return result;
 }
 
-static boost::python::list vertexParameterNames( const Shader &s )
+static object uniformParameter( const Shader &s, const std::string &n )
+{
+	const Shader::Parameter *p = s.uniformParameter( n );
+	if( !p )
+	{
+		return object();
+	}
+	else
+	{
+		return object( Shader::Parameter( *p ) );
+	}
+}
+
+static boost::python::list vertexAttributeNames( const Shader &s )
 {
 	vector<string> n;
-	s.vertexParameterNames( n );
+	s.vertexAttributeNames( n );
 	boost::python::list result;
 	for( unsigned int i=0; i<n.size(); i++ )
 	{
 		result.append( n[i] );
 	}
 	return result;
+}
+
+static object vertexAttribute( const Shader &s, const std::string &n )
+{
+	const Shader::Parameter *p = s.vertexAttribute( n );
+	if( !p )
+	{
+		return object();
+	}
+	else
+	{
+		return object( Shader::Parameter( *p ) );
+	}
 }
 
 static ShaderPtr shader( Shader::Setup &s )
@@ -86,7 +112,9 @@ void bindShader()
 		.def( "geometrySource", &Shader::geometrySource, return_value_policy<copy_const_reference>() )
 		.def( "fragmentSource", &Shader::fragmentSource, return_value_policy<copy_const_reference>() )
 		.def( "uniformParameterNames", &uniformParameterNames )
-		.def( "vertexParameterNames", &vertexParameterNames )
+		.def( "uniformParameter", &uniformParameter )
+		.def( "vertexAttributeNames", &vertexAttributeNames )
+		.def( "vertexAttribute", &vertexAttribute )
 		.def( "defaultVertexSource", &Shader::defaultVertexSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultVertexSource" )
 		.def( "defaultFragmentSource", &Shader::defaultFragmentSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultFragmentSource" )
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
@@ -99,6 +127,13 @@ void bindShader()
 		.def( "addUniformParameter", (void (Shader::Setup::*)( const std::string &, ConstTexturePtr ))&Shader::Setup::addUniformParameter )
 		.def( "addUniformParameter", (void (Shader::Setup::*)( const std::string &, IECore::ConstDataPtr ))&Shader::Setup::addUniformParameter )
 		.def( "addVertexAttribute", &Shader::Setup::addVertexAttribute )
+	;
+	
+	class_<Shader::Parameter>( "Parameter", no_init )
+		.def_readonly( "type", &Shader::Parameter::type )
+		.def_readonly( "size", &Shader::Parameter::size )
+		.def_readonly( "location", &Shader::Parameter::location )
+		.def_readonly( "textureUnit", &Shader::Parameter::textureUnit )
 	;
 }
 

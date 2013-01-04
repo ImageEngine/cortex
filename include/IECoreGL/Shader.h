@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 //  its affiliates and/or its licensors.
@@ -86,16 +86,40 @@ class Shader : public IECore::RunTimeTyped
 		const std::string &fragmentSource() const;
 		//@}
 		
+		struct Parameter
+		{
+			/// Type as reported by glGetActiveUnifom() or
+			/// glGetActiveAttrib().
+			GLenum type;
+			/// Size as reported by glGetActiveUniform() or
+			/// glGetActiveAttrib().
+			GLint size;
+			/// Location as reported by glGetUniformLocation()
+			/// or glGetAttribLocation().
+			GLint location;
+			/// Texture unit assigned for this parameter - only
+			/// valid for uniform parameters of sampler type.
+			/// This does not store an enum but instead an index
+			/// (so 0 represents GL_TEXTURE0).
+			GLuint textureUnit;
+		};
+		
 		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
 		/// array[n] names used internally in OpenGL.
 		void uniformParameterNames( std::vector<std::string> &names ) const;
-		GLint uniformParameter( const std::string &name, GLenum &type, GLint &size, size_t &textureUnit ) const; 
+		/// Returns the details of the named uniform parameter, or 0 if no such
+		/// parameter exists. The return value directly references data held within
+		/// the Shader, and will die when the Shader dies.
+		const Parameter *uniformParameter( const std::string &name ) const; 
 				
 		/// Fills the passed vector with the names of all vertex shader parameters.
-		void vertexParameterNames( std::vector<std::string> &names ) const;		
-		GLint vertexAttribute( const std::string &name, GLenum &type, GLint &size ) const; 
+		void vertexAttributeNames( std::vector<std::string> &names ) const;		
+		/// Returns the details of the named vertex attribute, or 0 if no such
+		/// parameter exists. The return value directly references data held within
+		/// the Shader, and will die when the Shader dies.
+		const Parameter *vertexAttribute( const std::string &name ) const; 
 		
 		/// Shaders are only useful when associated with a set of values for
 		/// their uniform parameters and vertex attributes, and to render
