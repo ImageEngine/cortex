@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,7 +59,7 @@ class State : public Bindable
 			public :
 			
 				/// Binds the state s, updating currentState to reflect the
-				/// new bindings. It is the caller's responsibilty to keep both arguments
+				/// new bindings. It is the caller's responsibility to keep both arguments
 				/// alive until after destruction of the ScopedBinding.
 				ScopedBinding( const State &s, State &currentState );
 				/// Reverts the state changes and modifications to currentState
