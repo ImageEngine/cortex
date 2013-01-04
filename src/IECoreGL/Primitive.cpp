@@ -115,7 +115,7 @@ void Primitive::render( State *state ) const
 	}
 
 	/// \todo Really we want to remove use of this deprecated push/pop functionality.
-	Imath::GLPushAttrib( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
+	Imath::GLPushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
 	
 	// render the shaded primitive if requested
 	///////////////////////////////////////////
