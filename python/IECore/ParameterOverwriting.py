@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -74,18 +74,9 @@ def __compoundParameterSetItem( self, itemName, itemValue ):
 	"""
 	self[ itemName ].smartSetValue( itemValue )
 
-## \todo Remove this function entirely when we're done testing everything against cortex 5.
-def __compoundParameterSetAttr( self, attrName, attrValue ) :
-
-	if attrName in self :
-		raise RuntimeError( "Can no longer set child parameter values using attribute syntax." )
-	
-	IECore.Parameter.__setattr__( self, attrName, attrValue )
-
 # expand class definitions
 IECore.Parameter.smartSetValue = __parameterSmartSetValue
 IECore.CompoundParameter.smartSetValue = __compoundParameterSmartSetValue
-IECore.CompoundParameter.__setattr__ = __compoundParameterSetAttr
 IECore.CompoundParameter.__setitem__ = __compoundParameterSetItem
 
 __all__ = []
