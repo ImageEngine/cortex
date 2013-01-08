@@ -385,11 +385,13 @@ class FileIndexedIO::Index : public RefCounted
 		Imf::Int64 makeId();
 
 		typedef std::vector< Node* > IndexToNodeMap;
-		typedef std::map< Node*, unsigned long > NodeToIndexMap;
 
 		bool m_readOnly;
 		IndexToNodeMap m_indexToNodeMap;
+#ifndef NDEBUG
+		typedef std::map< Node*, unsigned long > NodeToIndexMap;
 		NodeToIndexMap m_nodeToIndexMap;
+#endif
 
 		StringCache m_stringCache;
 
@@ -493,7 +495,8 @@ void FileIndexedIO::Node::write( std::ostream &f )
 	if (m_parent)
 	{
 		assert( m_idx->m_nodeToIndexMap.find( m_parent ) != m_idx->m_nodeToIndexMap.end() );
-		writeLittleEndian<Imf::Int64>(f, m_idx->m_nodeToIndexMap[m_parent]);
+		assert( m_idx->m_nodeToIndexMap.find( m_parent )->second == m_parent->m_id );
+		writeLittleEndian<Imf::Int64>(f, m_parent->m_id);
 	}
 	else
 	{
@@ -563,10 +566,12 @@ void FileIndexedIO::Node::read( std::istream &f )
 	m_idx->m_indexToNodeMap[m_id] = this;
 
 	// we only need to keep the map node=>index if we intend to save the file...
+#ifndef NDEBUG
 	if ( !m_idx->m_readOnly )
 	{
 		m_idx->m_nodeToIndexMap[this] = m_id;
 	}
+#endif
 
 	Imf::Int64 parentId;
 	readLittleEndian<Imf::Int64>(f, parentId );
@@ -674,7 +679,10 @@ FileIndexedIO::Index::Index( bool readOnly ) : m_root(0), m_prevId(0), m_readOnl
 	m_root = new Node( this, 0 );
 
 	m_indexToNodeMap.push_back(m_root.get());
+
+#ifndef NDEBUG
 	m_nodeToIndexMap[m_root.get()] = 0;
+#endif
 
 	m_stringCache.add("/");
 	m_root->m_entry = IndexedIO::Entry("/", IndexedIO::Directory, IndexedIO::Invalid, 0);
@@ -1164,8 +1172,9 @@ FileIndexedIO::Node* FileIndexedIO::Index::insert( Node* parent, IndexedIO::Entr
 		m_indexToNodeMap.resize(newId+1, NULL );
 	}
 	m_indexToNodeMap[newId] = child;
+#ifndef NDEBUG
 	m_nodeToIndexMap[child] = newId;
-
+#endif
 	child->m_entry = e;
 
 	m_stringCache.add( e.id() );
