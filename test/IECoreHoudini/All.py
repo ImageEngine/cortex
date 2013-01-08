@@ -63,6 +63,7 @@ from RATDeepImageReaderTest import *
 from RATDeepImageWriterTest import *
 from DeepImageConverter import *
 from UpdateMode import *
+from ModelCacheTest import *
 
 IECoreHoudini.TestProgram(
 	testRunner = unittest.TextTestRunner(

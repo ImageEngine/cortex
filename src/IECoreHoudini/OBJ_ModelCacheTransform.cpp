@@ -1,0 +1,140 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
+
+using namespace IECore;
+using namespace IECoreHoudini;
+
+OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op )
+	: ModelCacheNode<OBJ_SubNet>( net, name, op ), m_dirty( true )
+{
+}
+
+OBJ_ModelCacheTransform::~OBJ_ModelCacheTransform()
+{
+}
+
+static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
+{
+	PRM_Name *name = new PRM_Name( src.getToken(), src.getLabel(), src.getExpressionFlag() );
+	name->harden();
+	
+	dest.initialize(
+		(PRM_Type) (src.getType() | PRM_TYPE_INVISIBLE),
+		src.getTypeExtended(),
+		src.exportLevel(),
+		src.getVectorSize(),
+		name,
+		src.getFactoryDefaults(),
+		src.getChoiceListPtr(),
+		src.getRangePtr(),
+		src.getCallback(),
+		src.getSparePtr(),
+		src.getParmGroup(),
+		(const char *)src.getHelpText(),
+		src.getConditionalBasePtr()
+	);
+}
+
+OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
+{
+	static PRM_Template *thisTemplate = 0;
+	if ( !thisTemplate )
+	{
+		PRM_Template *objTemplate = OBJ_SubNet::getTemplateList( OBJ_PARMS_PLAIN );
+		unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
+		unsigned numMDCParms = PRM_Template::countTemplates( ModelCacheNode<OBJ_SubNet>::parameters );
+		thisTemplate = new PRM_Template[ numObjParms + numMDCParms + 1 ];
+		
+		for ( unsigned i = 0; i < numObjParms; ++i )
+		{
+			thisTemplate[i] = objTemplate[i];
+			copyAndHideParm( objTemplate[i], thisTemplate[i] );
+		}
+		
+		for ( unsigned i = 0; i < numMDCParms; ++i )
+		{
+			thisTemplate[numObjParms+i] = ModelCacheNode<OBJ_SubNet>::parameters[i];
+		}
+	}
+	
+	static OP_TemplatePair *templatePair = 0;
+	if ( !templatePair )
+	{
+		templatePair = new OP_TemplatePair( thisTemplate );
+	}
+	
+	return templatePair;
+}
+
+OP_Node *OBJ_ModelCacheTransform::create( OP_Network *net, const char *name, OP_Operator *op )
+{
+	return new OBJ_ModelCacheTransform( net, name, op );
+}
+
+OP_ERROR OBJ_ModelCacheTransform::cookMyObj( OP_Context &context )
+{
+	std::string file;
+	if ( !ensureFile( file ) )
+	{
+		addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .mdc" ).c_str() );
+		return error();
+	}
+	
+	std::string path = getPath();
+	Space space = (Space)evalInt( pSpace.getToken(), 0, 0 );
+	
+	/// \todo: detect when we need to re-dirty
+	if ( true || m_dirty )
+	{
+		Imath::M44d transform;
+		if ( space == World )
+		{
+			transform = cache().worldTransform( file, path );
+		}
+		else if ( space == Leaf )
+		{
+			transform = cache().entry( file, path )->modelCache()->readTransform();
+		}
+		
+		m_matrix = IECore::convert<UT_Matrix4D>( transform );
+		m_dirty = false;
+	}
+	
+	setParmTransform( context, m_matrix );
+	
+	return error();
+}

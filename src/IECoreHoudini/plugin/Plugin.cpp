@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,11 +46,13 @@
 #include <GR/GR_RenderTable.h>
 
 // IECoreHoudini
+#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
 #include "IECoreHoudini/SOP_ToHoudiniConverter.h"
 #include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
+#include "IECoreHoudini/SOP_ModelCacheSource.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
 
@@ -95,15 +97,39 @@ void newSopOperator(OP_OperatorTable *table)
 	);
 	cacheReader->setIconName( "SOP_ieInterpolatedCacheReader" );
 	
+	OP_Operator *modelCacheSource = new OP_Operator(
+		"ieModelCacheSource", "ModelCacheSource",
+		SOP_ModelCacheSource::create, SOP_ModelCacheSource::buildParameters(), 0, 0,
+		NULL, OP_FLAG_GENERATOR
+	);
+	/// \todo: get a new icon
+	modelCacheSource->setIconName( "SOP_ieToHoudiniConverter" );
+	
 	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
 	table->addOperator( converter );
 	table->addOperator( cacheReader );
+	table->addOperator( modelCacheSource );
 	
 	table->addOpHidden( opHolder->getName() );
 	table->addOpHidden( proceduralHolder->getName() );
 	table->addOpHidden( converter->getName() );
 	table->addOpHidden( cacheReader->getName() );
+	table->addOpHidden( modelCacheSource->getName() );
+}
+
+void newObjectOperator( OP_OperatorTable *table )
+{
+	OP_Operator *modelCacheTransform = new OP_Operator(
+		"ieModelCacheTransform", "ModelCacheTransform",
+		OBJ_ModelCacheTransform::create, OBJ_ModelCacheTransform::buildParameters(), 0, 1
+	);
+	/// \todo: get a new icon
+	modelCacheTransform->setIconName( "SOP_ieToHoudiniConverter" );
+	
+	table->addOperator( modelCacheTransform );
+	
+	table->addOpHidden( modelCacheTransform->getName() );
 }
 
 /// Declare our new Render Hooks
