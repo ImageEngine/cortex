@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,6 +60,8 @@ class ShaderStateComponent : public StateComponent
 
 		/// Default constructor creates a facing ratio shader.
 		ShaderStateComponent();
+		/// Creates a ShaderStateComponent referencing a previously created shading setup.
+		ShaderStateComponent( Shader::SetupPtr shaderSetup );
 		/// Creates a ShaderStateComponent with the given source and parameters. The loaders are passed to
 		/// allow the creation of GL resources to be deferred until shaderSetup() is called - this makes
 		/// it possible to create ShaderStateComponents concurrently in multiple threads, with the actual
@@ -73,9 +75,8 @@ class ShaderStateComponent : public StateComponent
 		ShaderLoader *shaderLoader();
 		TextureLoader *textureLoader();
 
-		/// Returns the shader object.
-		/// This function can only be called from a thread 
-		/// with a valid GL context.
+		/// Returns a Shader::Setup object for binding the shader. This function can
+		/// only be called from a thread with a valid GL context.
 		Shader::Setup *shaderSetup();
 		const Shader::Setup *shaderSetup() const;
 
