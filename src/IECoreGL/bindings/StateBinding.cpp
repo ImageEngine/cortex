@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,12 +34,12 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/MessageHandler.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
 #include "IECoreGL/State.h"
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/bindings/StateBinding.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
@@ -67,7 +67,14 @@ void bindState()
 		.def( init<bool>() )
 		.def( init<const State &>() )
 		.def( "add", (void (State::*)( StatePtr ) )&State::add )
-		.def( "add", (void (State::*)( StateComponentPtr ) )&State::add )
+		.def(
+			"add",
+			(void (State::*)( StateComponentPtr, bool ) )&State::add,
+			(
+				boost::python::arg_( "component" ),
+				boost::python::arg_( "override" ) = false
+			)
+		)
 		.def( "get", &get )
 		.def( "remove", (void (State::*)( IECore::TypeId) )&State::remove )
 		.def( "isComplete", &State::isComplete )

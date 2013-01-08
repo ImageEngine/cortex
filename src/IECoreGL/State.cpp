@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,7 +74,7 @@ class State::Implementation : public IECore::RefCounted
 		{
 			for( ComponentMap::const_iterator it=m_components.begin(); it!=m_components.end(); it++ )
 			{
-				it->second->bind();
+				it->second.component->bind();
 			}
 		}
 		
@@ -82,7 +82,7 @@ class State::Implementation : public IECore::RefCounted
 		{
 			for( ComponentMap::iterator it=s->m_components.begin(); it!=s->m_components.end(); it++ )
 			{
-				add( it->second );
+				add( it->second.component );
 			}
 			if( s->m_userAttributes )
 			{
@@ -96,9 +96,9 @@ class State::Implementation : public IECore::RefCounted
 			}
 		}
 
-		void add( StateComponentPtr s )
+		void add( StateComponentPtr s, bool override = false )
 		{
-			m_components[s->typeId()] = s;
+			m_components[s->typeId()] = Component( s, override );
 		}
 
 		StateComponent *get( IECore::TypeId componentType )
@@ -108,7 +108,7 @@ class State::Implementation : public IECore::RefCounted
 			{
 				return 0;
 			}
-			return it->second.get();
+			return it->second.component.get();
 		}
 			
 		const StateComponent *get( IECore::TypeId componentType ) const
@@ -118,7 +118,7 @@ class State::Implementation : public IECore::RefCounted
 			{
 				return 0;
 			}
-			return it->second.get();
+			return it->second.component.get();
 		}
 
 		void remove( IECore::TypeId componentType )
@@ -158,7 +158,22 @@ class State::Implementation : public IECore::RefCounted
 	
 		friend class ScopedBinding;
 	
-		typedef std::map<IECore::TypeId, StateComponentPtr> ComponentMap;
+		struct Component
+		{
+			Component()
+				: component( 0 ), override( false )
+			{
+			}
+			
+			Component( StateComponentPtr c, bool o )
+				:	component( c ), override( o )
+			{
+			}
+			StateComponentPtr component;
+			bool override;
+		};
+	
+		typedef std::map<IECore::TypeId, Component> ComponentMap;
 		ComponentMap m_components;
 		mutable IECore::CompoundDataPtr m_userAttributes;
 
@@ -175,10 +190,14 @@ State::ScopedBinding::ScopedBinding( const State &s, State &currentState )
 
 	for( Implementation::ComponentMap::const_iterator it=s.m_implementation->m_components.begin(); it!=s.m_implementation->m_components.end(); it++ )
 	{
-		m_savedComponents.push_back( currentState.get( it->first ) );
-		m_currentState.add( it->second );
+		Implementation::ComponentMap::iterator cIt = m_currentState.m_implementation->m_components.find( it->first );
+		if( !cIt->second.override )
+		{
+			m_savedComponents.push_back( cIt->second.component );
+			it->second.component->bind();
+			cIt->second = it->second;
+		}		
 	}
-	s.bind();
 }
 
 State::ScopedBinding::~ScopedBinding()
@@ -220,9 +239,9 @@ void State::add( StatePtr s )
 	m_implementation->add( s->m_implementation.get() );
 }
 
-void State::add( StateComponentPtr s )
+void State::add( StateComponentPtr s, bool override )
 {
-	m_implementation->add( s );
+	m_implementation->add( s, override );
 }
 
 StateComponent *State::get( IECore::TypeId componentType )

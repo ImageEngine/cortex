@@ -80,14 +80,19 @@ class State : public Bindable
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::State, StateTypeId, Bindable );
 
-		// binds this state
+		// Binds this state
 		virtual void bind() const;
 		
 		/// Adds all the StateComponents and user attributes from s
 		/// into this State.
 		void add( StatePtr s );
 		
-		void add( StateComponentPtr s );
+		/// Adds a component to this state. If override is true,
+		/// then the component will not be replaced by ScopedBinding
+		/// when this state is used as the currentState - this feature
+		/// allows state specified at the top of the draw hierarchy to
+		/// override state specified at the lower levels.
+		void add( StateComponentPtr s, bool override = false );
 		template<typename T>
 		T *get();
 		template<typename T>

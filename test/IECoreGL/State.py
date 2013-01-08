@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -85,6 +85,41 @@ class TestState( unittest.TestCase ) :
 
 		self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "billy" )
 		self.assertEqual( state2.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )	
+	
+	def testOverrides( self ) :
+	
+		state1 = IECoreGL.State( True )
+		state1.add( IECoreGL.NameStateComponent( "billy" ) )
+		
+		state2 = IECoreGL.State( False )
+		state2.add( IECoreGL.NameStateComponent( "bob" ), override = True )
+		
+		state3 = IECoreGL.State( False )
+		state3.add( IECoreGL.NameStateComponent( "jane" ), override = False )
+		
+		with IECoreGL.State.ScopedBinding( state2, state1 ) :
+		
+			self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )			
+		
+			with IECoreGL.State.ScopedBinding( state3, state1 ) :
 			
+				self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )			
+
+			self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )			
+
+		self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "billy" )			
+		
+		with IECoreGL.State.ScopedBinding( state3, state1 ) :
+		
+			self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "jane" )			
+		
+			with IECoreGL.State.ScopedBinding( state2, state1 ) :
+			
+				self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )	
+
+			self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "jane" )			
+
+		self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "billy" )			
+				
 if __name__ == "__main__":
     unittest.main()
