@@ -61,11 +61,6 @@ class OBJ_ModelCacheTransform : public ModelCacheNode<OBJ_SubNet>
 	protected :
 		
 		virtual OP_ERROR cookMyObj( OP_Context &context );
-	
-	private :
-		
-		bool m_dirty;
-		UT_Matrix4D m_matrix;
 
 };
 

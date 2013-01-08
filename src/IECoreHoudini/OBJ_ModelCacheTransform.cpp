@@ -38,8 +38,7 @@
 using namespace IECore;
 using namespace IECoreHoudini;
 
-OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op )
-	: ModelCacheNode<OBJ_SubNet>( net, name, op ), m_dirty( true )
+OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : ModelCacheNode<OBJ_SubNet>( net, name, op )
 {
 }
 
@@ -117,24 +116,17 @@ OP_ERROR OBJ_ModelCacheTransform::cookMyObj( OP_Context &context )
 	std::string path = getPath();
 	Space space = (Space)evalInt( pSpace.getToken(), 0, 0 );
 	
-	/// \todo: detect when we need to re-dirty
-	if ( true || m_dirty )
+	Imath::M44d transform;
+	if ( space == World )
 	{
-		Imath::M44d transform;
-		if ( space == World )
-		{
-			transform = cache().worldTransform( file, path );
-		}
-		else if ( space == Leaf )
-		{
-			transform = cache().entry( file, path )->modelCache()->readTransform();
-		}
-		
-		m_matrix = IECore::convert<UT_Matrix4D>( transform );
-		m_dirty = false;
+		transform = cache().worldTransform( file, path );
+	}
+	else if ( space == Leaf )
+	{
+		transform = cache().entry( file, path )->modelCache()->readTransform();
 	}
 	
-	setParmTransform( context, m_matrix );
+	setParmTransform( context, IECore::convert<UT_Matrix4D>( transform ) );
 	
 	return error();
 }
