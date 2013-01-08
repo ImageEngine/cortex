@@ -32,29 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
+#include "IECoreHoudini/OBJ_ModelCacheGeometry.h"
 
 using namespace IECoreHoudini;
 
-OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_SubNet>( net, name, op )
+OBJ_ModelCacheGeometry::OBJ_ModelCacheGeometry( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_Geometry>( net, name, op )
 {
 }
 
-OBJ_ModelCacheTransform::~OBJ_ModelCacheTransform()
+OBJ_ModelCacheGeometry::~OBJ_ModelCacheGeometry()
 {
 }
 
-OP_Node *OBJ_ModelCacheTransform::create( OP_Network *net, const char *name, OP_Operator *op )
+OP_Node *OBJ_ModelCacheGeometry::create( OP_Network *net, const char *name, OP_Operator *op )
 {
-	return new OBJ_ModelCacheTransform( net, name, op );
+	return new OBJ_ModelCacheGeometry( net, name, op );
 }
 
-OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
+OP_TemplatePair *OBJ_ModelCacheGeometry::buildParameters()
 {
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( *OBJ_ModelCacheNode<OBJ_SubNet>::buildParameters() );
+		templatePair = new OP_TemplatePair( *OBJ_ModelCacheNode<OBJ_Geometry>::buildParameters() );
 	}
 	
 	return templatePair;

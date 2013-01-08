@@ -36,19 +36,18 @@
 #define IECOREHOUDINI_OBJMODELCACHETRANSFORM_H
 
 #include "OBJ/OBJ_SubNet.h"
-#include "UT/UT_Matrix.h"
 
-#include "IECore/ModelCache.h"
-
-#include "IECoreHoudini/ModelCacheNode.h"
+#include "IECoreHoudini/OBJ_ModelCacheNode.h"
 
 namespace IECoreHoudini
 {
 
-/// OBJ for loading a single transform from an IECore::ModelCache
+/// OBJ for loading a transform or building a hierarchy from an IECore::ModelCache
 /// \todo: add option to build underlying hierarchy by nesting OBJ_ModelCacheTransforms
-/// \todo: add option to build underlying hierarchy by chaining OBJ_ModelCacheSources (once they exist)
-class OBJ_ModelCacheTransform : public ModelCacheNode<OBJ_SubNet>
+/// \todo: add option to build underlying hierarchy by chaining OBJ_ModelCacheGeometrys
+/// \todo: add option to build underlying hierarchy from a single OBJ_ModelCacheGeometry and SOP_ModelCacheSource
+/// \todo: add virtual method used to do the actual hierarchy construction
+class OBJ_ModelCacheTransform : public OBJ_ModelCacheNode<OBJ_SubNet>
 {
 	public :
 		
@@ -57,10 +56,6 @@ class OBJ_ModelCacheTransform : public ModelCacheNode<OBJ_SubNet>
 		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
-	
-	protected :
-		
-		virtual OP_ERROR cookMyObj( OP_Context &context );
 
 };
 

@@ -56,6 +56,13 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		xform.parm( "fileName" ).set( TestModelCache.__testFile )
 		return xform
 	
+	def geometry( self, parent=None ) :
+		if not parent :
+			parent = hou.node( "/obj" )
+		geometry = parent.createNode( "ieModelCacheGeometry" )
+		geometry.parm( "fileName" ).set( TestModelCache.__testFile )
+		return geometry
+	
 	def writeMDC( self, rotation=IECore.V3d( 0, 0, 0 ) ) :
 		
 		m = IECore.ModelCache( TestModelCache.__testFile, IECore.IndexedIOOpenMode.Write )
@@ -104,82 +111,109 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		testNode( self.sop() )
 		os.remove( TestModelCache.__testFile )
 		testNode( self.xform() )
+		os.remove( TestModelCache.__testFile )
+		testNode( self.geometry() )
 	
-	def testXformSubPaths( self ) :
+	def testObjSubPaths( self ) :
 		
 		self.writeMDC()
-		node = self.xform()
-		node.parm( "reload" ).pressButton()
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
-		node.parm( "objectPath" ).set( "/1" )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 1, 0, 0 ) )
-		node.parm( "objectPath" ).set( "/1/2" )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 3, 0, 0 ) )
-		node.parm( "objectPath" ).set( "/1/2/3" )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 6, 0, 0 ) )
+		
+		def testSimple( node ) :
+			
+			node.parm( "reload" ).pressButton()
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
+			node.parm( "objectPath" ).set( "/1" )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 1, 0, 0 ) )
+			node.parm( "objectPath" ).set( "/1/2" )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 3, 0, 0 ) )
+			node.parm( "objectPath" ).set( "/1/2/3" )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 6, 0, 0 ) )
+
+		xform = self.xform()
+		geo = self.geometry()
+		testSimple( xform )
+		testSimple( geo )
 		
 		self.writeMDC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
-		node.parm( "reload" ).pressButton()
-		node.parm( "objectPath" ).set( "/" )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
-		self.assertEqual( node.parmTransform().extractRotates(), hou.Vector3( 0, 0, 0 ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
-		node.parm( "objectPath" ).set( "/1" )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 1, 0, 0 ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -30 ) ) )
-		node.parm( "objectPath" ).set( "/1/2" )
-		node.cook()
-		self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 2.73205, -1, 0 ) ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -60 ) ) )
-		node.parm( "objectPath" ).set( "/1/2/3" )
-		node.cook()
-		self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 4.23205, -3.59808, 0 ) ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -90 ) ) )
+		
+		def testRotated( node ) :
+			
+			node.parm( "reload" ).pressButton()
+			node.parm( "objectPath" ).set( "/" )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
+			self.assertEqual( node.parmTransform().extractRotates(), hou.Vector3( 0, 0, 0 ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
+			node.parm( "objectPath" ).set( "/1" )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 1, 0, 0 ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -30 ) ) )
+			node.parm( "objectPath" ).set( "/1/2" )
+			node.cook()
+			self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 2.73205, -1, 0 ) ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -60 ) ) )
+			node.parm( "objectPath" ).set( "/1/2/3" )
+			node.cook()
+			self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 4.23205, -3.59808, 0 ) ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -90 ) ) )
+		
+		testRotated( xform )
+		testRotated( geo )
 	
-	def testXformSpaceModes( self ) :
+	def testObjSpaceModes( self ) :
 		
 		self.writeMDC()
-		node = self.xform()
-		node.parm( "reload" ).pressButton()
-		node.parm( "objectPath" ).set( "/1/2" )
-		self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.ModelCacheNode.Space.World )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 3, 0, 0 ) )
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Leaf )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 2, 0, 0 ) )
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
+		
+		def testSimple( node ) :
+			
+			node.parm( "reload" ).pressButton()
+			node.parm( "objectPath" ).set( "/1/2" )
+			self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.ModelCacheNode.Space.World )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 3, 0, 0 ) )
+			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
+			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Leaf )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 2, 0, 0 ) )
+			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
+		
+		xform = self.xform()
+		geo = self.geometry()
+		testSimple( xform )
+		testSimple( geo )
 		
 		self.writeMDC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
-		node.parm( "reload" ).pressButton()
-		node.cook()
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.World )
-		node.cook()
-		self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 2.73205, -1, 0 ) ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -60 ) ) )
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Leaf )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 2, 0, 0 ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -30 ) ) )
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
-		node.cook()
-		self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
-		self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
+		
+		def testRotated( node ) :
+			
+			node.parm( "reload" ).pressButton()
+			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.World )
+			node.cook()
+			self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 2.73205, -1, 0 ) ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -60 ) ) )
+			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
+			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Leaf )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 2, 0, 0 ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -30 ) ) )
+			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
+			node.cook()
+			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
+			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
+		
+		testRotated( xform )
+		testRotated( geo )
 	
 	def testSopSubPaths( self ) :
 		
@@ -429,6 +463,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.writeMDC()
 		testNode( self.sop() )
 		testNode( self.xform() )
+		testNode( self.geometry() )
 	
 	def tearDown( self ) :
 		if os.path.exists( TestModelCache.__testFile ) :

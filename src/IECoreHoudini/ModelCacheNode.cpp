@@ -36,6 +36,7 @@
 #include "boost/filesystem/path.hpp"
 #include "boost/tokenizer.hpp"
 
+#include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "SOP/SOP_Node.h"
@@ -303,5 +304,6 @@ const ModelCache *ModelCacheUtil::Cache::Entry::modelCache()
 
 template class ModelCacheNode<OP_Node>;
 template class ModelCacheNode<OBJ_Node>;
+template class ModelCacheNode<OBJ_Geometry>;
 template class ModelCacheNode<OBJ_SubNet>;
 template class ModelCacheNode<SOP_Node>;

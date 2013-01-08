@@ -32,30 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
+#ifndef IECOREHOUDINI_OBJMODELCACHENODE_H
+#define IECOREHOUDINI_OBJMODELCACHENODE_H
 
-using namespace IECoreHoudini;
+#include "OBJ/OBJ_Node.h"
 
-OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_SubNet>( net, name, op )
+#include "IECore/ModelCache.h"
+
+#include "IECoreHoudini/ModelCacheNode.h"
+
+namespace IECoreHoudini
 {
-}
 
-OBJ_ModelCacheTransform::~OBJ_ModelCacheTransform()
+/// Abstract base class for all OBJ ModelCacheNodes.
+/// See OBJ_ModelCacheGeometry or OBJ_ModelCacheTransform for specific implementations.
+template<typename BaseType>
+class OBJ_ModelCacheNode : public ModelCacheNode<BaseType>
 {
-}
-
-OP_Node *OBJ_ModelCacheTransform::create( OP_Network *net, const char *name, OP_Operator *op )
-{
-	return new OBJ_ModelCacheTransform( net, name, op );
-}
-
-OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
-{
-	static OP_TemplatePair *templatePair = 0;
-	if ( !templatePair )
-	{
-		templatePair = new OP_TemplatePair( *OBJ_ModelCacheNode<OBJ_SubNet>::buildParameters() );
-	}
+	public :
+		
+		OBJ_ModelCacheNode( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~OBJ_ModelCacheNode();
+		
+		static OP_TemplatePair *buildParameters();
 	
-	return templatePair;
-}
+	protected :
+		
+		virtual OP_ERROR cookMyObj( OP_Context &context );
+
+};
+
+} // namespace IECoreHoudini
+
+#endif // IECOREHOUDINI_OBJMODELCACHENODE_H

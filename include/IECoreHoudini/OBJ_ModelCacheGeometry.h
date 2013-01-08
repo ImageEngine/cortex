@@ -32,30 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
+#ifndef IECOREHOUDINI_OBJMODELCACHEGEOMETRY_H
+#define IECOREHOUDINI_OBJMODELCACHEGEOMETRY_H
 
-using namespace IECoreHoudini;
+#include "OBJ/OBJ_Geometry.h"
 
-OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_SubNet>( net, name, op )
+#include "IECoreHoudini/OBJ_ModelCacheNode.h"
+
+namespace IECoreHoudini
 {
-}
 
-OBJ_ModelCacheTransform::~OBJ_ModelCacheTransform()
+/// OBJ for loading a single transform and leaf Objects from an IECore::ModelCache
+/// \todo: add virtual method used to create the actual SOPs
+class OBJ_ModelCacheGeometry : public OBJ_ModelCacheNode<OBJ_Geometry>
 {
-}
+	public :
+		
+		OBJ_ModelCacheGeometry( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~OBJ_ModelCacheGeometry();
+		
+		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
+		static OP_TemplatePair *buildParameters();
 
-OP_Node *OBJ_ModelCacheTransform::create( OP_Network *net, const char *name, OP_Operator *op )
-{
-	return new OBJ_ModelCacheTransform( net, name, op );
-}
+};
 
-OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
-{
-	static OP_TemplatePair *templatePair = 0;
-	if ( !templatePair )
-	{
-		templatePair = new OP_TemplatePair( *OBJ_ModelCacheNode<OBJ_SubNet>::buildParameters() );
-	}
-	
-	return templatePair;
-}
+} // namespace IECoreHoudini
+
+#endif // IECOREHOUDINI_OBJMODELCACHEGEOMETRY_H

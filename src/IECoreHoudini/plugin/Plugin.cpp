@@ -46,6 +46,7 @@
 #include <GR/GR_RenderTable.h>
 
 // IECoreHoudini
+#include "IECoreHoudini/OBJ_ModelCacheGeometry.h"
 #include "IECoreHoudini/OBJ_ModelCacheTransform.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
@@ -121,15 +122,24 @@ void newSopOperator(OP_OperatorTable *table)
 void newObjectOperator( OP_OperatorTable *table )
 {
 	OP_Operator *modelCacheTransform = new OP_Operator(
-		"ieModelCacheTransform", "ModelCacheTransform",
+		"ieModelCacheTransform", "ModelCache Xform",
 		OBJ_ModelCacheTransform::create, OBJ_ModelCacheTransform::buildParameters(), 0, 1
 	);
 	/// \todo: get a new icon
 	modelCacheTransform->setIconName( "SOP_ieToHoudiniConverter" );
 	
+	OP_Operator *modelCacheGeometry = new OP_Operator(
+		"ieModelCacheGeometry", "ModelCache GEO",
+		OBJ_ModelCacheGeometry::create, OBJ_ModelCacheGeometry::buildParameters(), 0, 1
+	);
+	/// \todo: get a new icon
+	modelCacheGeometry->setIconName( "SOP_ieToHoudiniConverter" );
+	
 	table->addOperator( modelCacheTransform );
+	table->addOperator( modelCacheGeometry );
 	
 	table->addOpHidden( modelCacheTransform->getName() );
+	table->addOpHidden( modelCacheGeometry->getName() );
 }
 
 /// Declare our new Render Hooks

@@ -49,6 +49,15 @@ soptoolutils.genericTool(kwargs, 'ieToHoudiniConverter')]]></script>
     <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieModelCacheTransform')]]></script>
   </tool>
   
+  <!-- ModelCacheGeometry OBJ -->
+  <tool name="cortexModelCacheGeometry" label="ModelCache GEO" icon="SOP_ieToHoudiniConverter">
+    <toolMenuContext name="network">
+      <contextNetType>OBJ</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieModelCacheGeometry')]]></script>
+  </tool>
+  
   <!-- Interpolated Cache Reader -->
   <tool name="cortex_interpolated_cache_reader" label="Interpolated Cache Reader" icon="SOP_ieInterpolatedCacheReader">
     <toolMenuContext name="network">
