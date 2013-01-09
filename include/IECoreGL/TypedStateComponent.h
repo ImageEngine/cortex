@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -247,6 +247,7 @@ IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
 IE_CORE_DECLAREPTR( PointSmoothingStateComponent );
 IE_CORE_DECLAREPTR( DepthTestStateComponent );
+IE_CORE_DECLAREPTR( DepthMaskStateComponent );
 IE_CORE_DECLAREPTR( CullingSpaceStateComponent );
 IE_CORE_DECLAREPTR( CullingBoxStateComponent );
 IE_CORE_DECLAREPTR( ProceduralThreadingStateComponent );
