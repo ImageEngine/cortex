@@ -239,8 +239,7 @@ arnoldVersion = getOption( "ARNOLD_VERSION", os.environ["ARNOLD_VERSION"] )
 try :
 	arnoldReg = IEEnv.registry["apps"]["arnold"][arnoldVersion][platform]
 	if arnoldReg["compiler"]==compiler and arnoldReg["compilerVersion"]==compilerVersion :
-		pass
-		#ARNOLD_ROOT = arnoldReg["location"]
+		ARNOLD_ROOT = arnoldReg["location"]
 except :
 	pass
 
