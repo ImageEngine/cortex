@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/format.hpp"
+
+#include "IECore/DespatchTypedData.h"
+#include "IECore/VectorTypedData.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/MessageHandler.h"
+
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/Exception.h"
@@ -41,16 +48,19 @@
 #include "IECoreGL/TextureUnits.h"
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/UniformFunctions.h"
+#include "IECoreGL/CachedConverter.h"
+#include "IECoreGL/Buffer.h"
 
-#include "IECore/DespatchTypedData.h"
-#include "IECore/VectorTypedData.h"
-
-#include "boost/format.hpp"
+#include "OpenEXR/ImathGL.h"
 
 using namespace IECoreGL;
 using namespace std;
 using namespace boost;
 using namespace Imath;
+
+//////////////////////////////////////////////////////////////////////////
+// StateComponents
+//////////////////////////////////////////////////////////////////////////
 
 namespace IECoreGL
 {
@@ -67,11 +77,14 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySo
 
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Primitive implementation
+//////////////////////////////////////////////////////////////////////////
+
 IE_CORE_DEFINERUNTIMETYPED( Primitive );
 
 Primitive::Primitive()
 {
-	m_shaderSetup = 0;
 }
 
 Primitive::~Primitive()
@@ -90,158 +103,168 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 	}
 }
 
-void Primitive::render( const State * state ) const
+static ShaderPtr constant2()
 {
-	if( !state->isComplete() )
-	{
-		throw Exception( "Primitive::render called with incomplete state object." );
-	}
 
-	Shader *shader = 0;
+	static const char *vertexSource =
+		
+		"in vec3 vertexP;"
+		""
+		"void main()"
+		"{"
+		"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * vec4( vertexP, 1 );"
+		"}";
+		
+	static const char *fragmentSource =
+	
+		"void main()"
+		"{"
+			"gl_FragColor = vec4( 1, 1, 1, 1 );"
+		"}";
 
+	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
+	return s;
+}
+
+void Primitive::render( State *state ) const
+{
+
+	/// \todo Really we want to remove use of this deprecated push/pop functionality.
+	Imath::GLPushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
+
+	// if we're in GL_SELECT render mode then just render solid
+	// with a simple shader and early out.
 	GLint renderMode = 0;
 	glGetIntegerv(GL_RENDER_MODE, &renderMode);
-	// if GL is in select mode we don't draw the geometry with the 
-	// regular shader. We use the constant shader native from GL for fast drawing.
-	bool selectMode = ( renderMode == GL_SELECT );
-
-	if( !selectMode && state->get<Primitive::DrawSolid>()->value() )
+	if( renderMode == GL_SELECT )
 	{
-		shader = state->get<ShaderStateComponent>()->shader();
+		const Shader *constantShader = constant2();
+		const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
+		Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+		render( state, Primitive::DrawSolid::staticTypeId() );
+		return;
+	}
+	
+	// render the shaded primitive if requested
+	///////////////////////////////////////////
+	
+	if( state->get<Primitive::DrawSolid>()->value() )
+	{
+		glDepthMask( !depthSortRequested( state ) );
+		// the state itself will have a shader with some nice uniform parameter
+		// values. we are responsible for binding this setup.
+		Shader::Setup *uniformSetup = state->get<ShaderStateComponent>()->shaderSetup();
+		Shader::Setup::ScopedBinding uniformBinding( *uniformSetup );
+		// we then bind our own setup on top, adding in the parameters
+		// stored on the primitive itself.
+		const Shader *shader = uniformSetup->shader();
+		const Shader::Setup *primitiveSetup = shaderSetup( shader, state );
+		Shader::Setup::ScopedBinding primitiveBinding( *primitiveSetup );
+		// then we defer to the derived class to perform the draw call.
+		render( state, Primitive::DrawSolid::staticTypeId() );
+	}
+	
+	// then perform wireframe shading etc as requested
+	//////////////////////////////////////////////////
+	
+	bool drawOutline = state->get<Primitive::DrawOutline>()->value();
+	bool drawWireframe = state->get<Primitive::DrawWireframe>()->value();
+	bool drawPoints = state->get<Primitive::DrawPoints>()->value();
+	bool drawBound = state->get<Primitive::DrawBound>()->value();
+	if( !(drawOutline || drawWireframe || drawPoints || drawBound) )
+	{
+		return;
+	}
+	
+	const Shader *constantShader = Shader::constant();
+	const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
+	Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+	const GLint csIndex = 0;
+		
+	// wireframe
+	
+	if( drawWireframe )
+	{
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		float width = state->get<Primitive::WireframeWidth>()->value();
+		glEnable( GL_POLYGON_OFFSET_LINE );
+		glPolygonOffset( -1 * width, -1 );
+		glLineWidth( width );
+		glUniform3fv( csIndex, 1, state->get<WireframeColorStateComponent>()->value().getValue() );
+		render( state, Primitive::DrawWireframe::staticTypeId() );
+	}
+	
+	// points
+	
+	if( drawPoints )
+	{
+		glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
+		float width = state->get<Primitive::PointWidth>()->value();
+		glEnable( GL_POLYGON_OFFSET_POINT );
+		glPolygonOffset( -2 * width, -1 );
+		glPointSize( width );
+		glUniform3fv( csIndex, 1, state->get<PointColorStateComponent>()->value().getValue() );
+		render( state, Primitive::DrawPoints::staticTypeId() );
+	}
+	
+	// outline
+	
+	if( drawOutline )
+	{
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		glEnable( GL_POLYGON_OFFSET_LINE );
+		float width = 2 * state->get<Primitive::OutlineWidth>()->value();
+		glPolygonOffset( 2 * width, 1 );
+		glLineWidth( width );
+		glUniform3fv( csIndex, 1, state->get<OutlineColorStateComponent>()->value().getValue() );
+		render( state, Primitive::DrawOutline::staticTypeId() );
+	}
+	
+	// bound
+	
+	if( drawBound )
+	{
+		Shader::Setup::ScopedBinding boundSetupBinding( *boundSetup() );
+		glLineWidth( 1 );
+		glUniform3fv( csIndex, 1, state->get<BoundColorStateComponent>()->value().getValue() );
+		glDrawArrays( GL_LINES, 0, 24 );
+	}
+	
+}
 
-		// get ready in case the derived class calls setVertexAttributesAsUniforms or setVertexAttributes.
-		setupVertexAttributes( shader );
-
-		// set constant primVars on the uniform shader parameters
-		for ( AttributeMap::const_iterator it = m_uniformAttributes.begin(); it != m_uniformAttributes.end(); it++ )
+const Shader::Setup *Primitive::shaderSetup( const Shader *shader, State *state ) const
+{
+	for( ShaderSetupVector::const_iterator it = m_shaderSetups.begin(), eIt = m_shaderSetups.end(); it != eIt; it++ )
+	{
+		if( (*it)->shader() == shader )
 		{
-			try
-			{
-				shader->setUniformParameter( it->first, it->second );
-			}
-			catch( ... )
-			{
-			}
+			return it->get();
 		}
 	}
-
-	// \todo: consider binding at the end the whole original state. Check if that is enough to eliminate these push/pop calls.
-	glPushAttrib( GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
-	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
-
-		if( depthSortRequested( state ) )
-		{
-			glDepthMask( false );
-		}
-		if( !selectMode && state->get<Primitive::DrawSolid>()->value() )
-		{
-			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-			glEnable( GL_LIGHTING );
-			glDisable( GL_POLYGON_OFFSET_FILL );
-			render( state, Primitive::DrawSolid::staticTypeId() );
-		}
-
-		glDisable( GL_LIGHTING );
-		glActiveTexture( textureUnits()[0] );
-		glDisable( GL_TEXTURE_2D );
-
-		if( selectMode || state->get<Primitive::DrawOutline>()->value() || state->get<Primitive::DrawWireframe>()->value() ||
-			state->get<Primitive::DrawPoints>()->value() || state->get<Primitive::DrawBound>()->value() )
-		{
-			// turn off current shader and use constant shader.
-			Shader *constantShader = Shader::constant();
-			constantShader->bind();
-			GLint CsIndex = constantShader->uniformParameterIndex( "Cs" );
-
-			AttributeMap::const_iterator itP = m_vertexAttributes.find( "P" );
-			if ( itP != m_vertexAttributes.end() )
-			{
-				constantShader->setVertexParameter( "P", itP->second );
-			}
-
-			if ( selectMode )
-			{
-				// we use wireframe draw mode because we are not interested on binding
-				// additional vertex buffers from the primitive
-				render( state, Primitive::DrawWireframe::staticTypeId() );
-			}
-			else
-			{
-				if( state->get<Primitive::DrawOutline>()->value() )
-				{
-					glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-					glEnable( GL_POLYGON_OFFSET_LINE );
-					float width = 2 * state->get<Primitive::OutlineWidth>()->value();
-					glPolygonOffset( 2 * width, 1 );
-					glLineWidth( width );
-					constantShader->setUniformParameter( CsIndex, state->get<OutlineColorStateComponent>()->value() );
-					render( state, Primitive::DrawOutline::staticTypeId() );
-				}
 	
-				if( state->get<Primitive::DrawWireframe>()->value() )
-				{
-					glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-					float width = state->get<Primitive::WireframeWidth>()->value();
-					glEnable( GL_POLYGON_OFFSET_LINE );
-					glPolygonOffset( -1 * width, -1 );
-					constantShader->setUniformParameter( CsIndex, state->get<WireframeColorStateComponent>()->value() );
-					glLineWidth( width );
-					render( state, Primitive::DrawWireframe::staticTypeId() );
-				}
-	
-				if( state->get<Primitive::DrawPoints>()->value() )
-				{
-					glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-					float width = state->get<Primitive::PointWidth>()->value();
-					glEnable( GL_POLYGON_OFFSET_POINT );
-					glPolygonOffset( -2 * width, -1 );
-						glPointSize( width );
-					constantShader->setUniformParameter( CsIndex, state->get<PointColorStateComponent>()->value() );
-					render( state, Primitive::DrawPoints::staticTypeId() );
-				}
-	
-				if( state->get<Primitive::DrawBound>()->value() )
-				{
-					Box3f b = bound();
-					constantShader->setUniformParameter( CsIndex, state->get<BoundColorStateComponent>()->value() );
-					glLineWidth( 1 );
-					glBegin( GL_LINE_LOOP );
-						glVertex3f( b.min.x, b.min.y, b.min.z );
-						glVertex3f( b.max.x, b.min.y, b.min.z );
-						glVertex3f( b.max.x, b.max.y, b.min.z );
-						glVertex3f( b.min.x, b.max.y, b.min.z );
-						glEnd();
-					glBegin( GL_LINE_LOOP );
-						glVertex3f( b.min.x, b.min.y, b.max.z );
-						glVertex3f( b.max.x, b.min.y, b.max.z );
-						glVertex3f( b.max.x, b.max.y, b.max.z );
-						glVertex3f( b.min.x, b.max.y, b.max.z );
-					glEnd();
-						glBegin( GL_LINES );
-						glVertex3f( b.min.x, b.min.y, b.min.z );
-						glVertex3f( b.min.x, b.min.y, b.max.z );
-						glVertex3f( b.max.x, b.min.y, b.min.z );
-						glVertex3f( b.max.x, b.min.y, b.max.z );
-						glVertex3f( b.max.x, b.max.y, b.min.z );
-						glVertex3f( b.max.x, b.max.y, b.max.z );
-						glVertex3f( b.min.x, b.max.y, b.min.z );
-						glVertex3f( b.min.x, b.max.y, b.max.z );
-					glEnd();
-				}	
-			}
-		}
+	Shader::SetupPtr setup = new Shader::Setup( shader );
+	addPrimitiveVariablesToShaderSetup( setup.get()  );
+		
+	m_shaderSetups.push_back( setup );
+	return setup.get();
+}
 
-	glPopClientAttrib();
-	glPopAttrib();
-
-	// revert to the original shader state.
-	state->get<ShaderStateComponent>()->bind();
-
-	if ( shader )
+void Primitive::addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &vertexPrefix, GLuint vertexDivisor ) const
+{
+	for( AttributeMap::const_iterator it = m_vertexAttributes.begin(), eIt = m_vertexAttributes.end(); it != eIt; it++ )
 	{
-		// disable all vertex shader parameters
-		shader->unsetVertexParameters();
+		shaderSetup->addVertexAttribute( vertexPrefix + it->first, it->second, vertexDivisor );
+		shaderSetup->addUniformParameter( vertexPrefix + it->first + "Active", new IECore::BoolData( true ) );
 	}
+	for( AttributeMap::const_iterator it = m_uniformAttributes.begin(), eIt = m_uniformAttributes.end(); it != eIt; it++ )
+	{
+		shaderSetup->addUniformParameter( it->first, it->second );
+	}
+}
+
+void Primitive::render( const State *currentState, IECore::TypeId style ) const
+{
+	renderInstances( 1 );
 }
 
 void Primitive::addUniformAttribute( const std::string &name, IECore::ConstDataPtr data )
@@ -253,99 +276,62 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 {
 	m_vertexAttributes[name] = data->copy();
 }
-
-void Primitive::setVertexAttributes( unsigned length ) const
-{
-	if( !m_shaderSetup || !length )
-	{
-		return;
-	}
-
-	VertexDataMap::const_iterator it;
-	for( it=m_vertexMap.begin(); it!=m_vertexMap.end(); it++ )
-	{
-		if ( boost::get<2>(*it) == length )
-		{
-			m_shaderSetup->setVertexParameter( boost::get<0>(*it), boost::get<1>(*it) );
-		}
-	}
-}
-
-void Primitive::setVertexAttributesAsUniforms( unsigned length, unsigned int vertexIndex ) const
-{
-	if( !m_shaderSetup || !length )
-	{
-		return;
-	}
-	UniformDataMap::const_iterator it;
-	for( it=m_uniformMap.begin(); it!=m_uniformMap.end(); it++ )
-	{
-		if ( boost::get<1>(*it) == length )
-		{
-			boost::get<0>(*it)(vertexIndex);
-		}
-	}
-}
-
-void Primitive::setupVertexAttributes( Shader *s ) const
-{
-	if( !s )
-	{
-		m_shaderSetup = 0;
-		return;
-	}
-
-	if( m_shaderSetup && (*s)==(*m_shaderSetup) )
-	{
-		return;
-	}
-
-	m_uniformMap.clear();
-	m_vertexMap.clear();
-	IECore::TypedDataSize size;
-
-	for( AttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
-	{
-		size_t length = 0;
-		IECore::DataPtr data = IECore::constPointerCast<IECore::Data>( it->second );
-		if ( IECore::despatchTraitsTest< IECore::TypeTraits::IsVectorTypedData >( data ) )
-		{
-			length = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsVectorTypedData >( data, size );
-
-			if ( s->hasVertexParameter( it->first ) )
-			{
-				// vertex shader variable
-				GLint parameterIndex = s->vertexParameterIndex( it->first );
-				if ( s->vertexValueValid( parameterIndex, it->second ) )
-				{
-					m_vertexMap.push_back( boost::tuple< GLint, IECore::ConstDataPtr, size_t >( parameterIndex, it->second, length ) );
-				}
-			}
-			if ( s->hasUniformParameter( it->first ) )
-			{
-				// uniform shader variable
-				GLint parameterIndex = s->uniformParameterIndex( it->first );
-				if ( s->uniformVectorValueValid( parameterIndex, it->second ) )
-				{
-					boost::tuple< Shader::VertexToUniform, size_t > u;
-					try
-					{
-						u = boost::tuple< Shader::VertexToUniform, size_t >( s->uniformParameterFromVectorSetup( parameterIndex, it->second ), length );
-					}
-					catch(...)
-					{
-						continue;
-					}
-					m_uniformMap.push_back( u );
-				}
-			}
-		}
-	}
-	m_shaderSetup = s;
-}
-
+		
 bool Primitive::depthSortRequested( const State * state ) const
 {
 	return state->get<Primitive::TransparencySort>()->value() &&
 		state->get<TransparentShadingStateComponent>()->value();
+}
+
+const Shader::Setup *Primitive::boundSetup() const
+{
+	if( m_boundSetup )
+	{
+		return m_boundSetup.get();
+	}
+	
+	Box3f b = bound();
+	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData();
+	std::vector<V3f> &p = pData->writable();
+	
+	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
+	
+	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.max.y, b.min.z	) );
+	
+	p.push_back( V3f( b.max.x, b.max.y, b.min.z	) );
+	p.push_back( V3f( b.min.x, b.max.y, b.min.z	) );
+	
+	p.push_back( V3f( b.min.x, b.max.y, b.min.z	) );
+	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );
+	
+	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
+	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
+	
+	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
+	p.push_back( V3f( b.max.x, b.max.y, b.max.z	) );
+	
+	p.push_back( V3f( b.max.x, b.max.y, b.max.z	) );
+	p.push_back( V3f( b.min.x, b.max.y, b.max.z	) );
+	
+	p.push_back( V3f( b.min.x, b.max.y, b.max.z	) );
+	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
+	
+	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );
+	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
+
+	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
+	
+	p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
+	
+	p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
+	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
+
+	m_boundSetup = new Shader::Setup( Shader::constant() );
+	m_boundSetup->addVertexAttribute( "P", pData );
+	
+	return m_boundSetup.get();
 }

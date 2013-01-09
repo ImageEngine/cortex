@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,9 +72,8 @@ class GR_Cortex : public GR_RenderHook
 		virtual void renderShaded( GU_Detail *gdp, RE_Render &ren, const GR_AttribOffset &ptinfo, const GR_DisplayOption *dopt, float lod, const GU_PrimGroupClosure *hidden_geometry );
 
 		/// Methods to render stuff in openGL
-		void render( GU_Detail *gdp, IECoreGL::ConstStatePtr displayState );
-		void renderObject( const IECore::Object *object, IECoreGL::ConstStatePtr displayState );
-		void renderScene( IECoreGL::ConstScenePtr scene, IECoreGL::ConstStatePtr displayState );
+		void render( GU_Detail *gdp, const IECoreGL::State *displayState );
+		void renderObject( const IECore::Object *object, const IECoreGL::State *displayState );
 
 		/// Tells Houdini what our render hook is called.
 		virtual const char *getName() const

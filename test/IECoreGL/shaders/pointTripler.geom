@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_WINDOWBINDING_H
-#define IE_COREGL_WINDOWBINDING_H
+#version 150
+			
+layout( points ) in;
+layout( points, max_vertices=3 ) out;
 
-namespace IECoreGL
+void main()
 {
-
-void bindWindow();
-
+	for( int i = -1; i<2; i++ )
+	{
+		gl_Position = gl_in[0].gl_Position + vec4( 0.5 * i, 0, 0, 0 );
+		EmitVertex();
+	}
 }
-
-#endif // IE_COREGL_WINDOWBINDING_H

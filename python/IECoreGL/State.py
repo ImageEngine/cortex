@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,46 +32,26 @@
 #
 ##########################################################################
 
-import unittest
-import os.path
+import IECoreGL
 
-from IECore import *
+class __ScopedBinding :
 
-from IECoreGL import *
-init( False )
+	def __init__( self, state, currentState ) :
+	
+		assert( isinstance( state, IECoreGL.State ) )
+		assert( isinstance( currentState, IECoreGL.State ) )
+		
+		self.__state = state
+		self.__currentState = currentState
 
-class TestShaderManager( unittest.TestCase ) :
+	def __enter__( self ) :
 
-	def test( self ) :
-
-		sp = SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
-
-		l = ShaderManager( sp )
-
-		s = l.load( "3dLabs/Toon" )
-		self.assert_( s.typeName()=="IECoreGL::Shader" )
-
-		ss = l.load( "3dLabs/Toon" )
-		self.assert_( s.isSame( ss ) )
-
-		# shader is too complicated for my graphics card
-		s = l.load( "3dLabs/Mandel" )
-		self.assert_( s.typeName()=="IECoreGL::Shader" )
-
-		self.assert_( ShaderManager.defaultShaderManager().isSame( ShaderManager.defaultShaderManager() ) )
-
-	def testPreprocessing( self ) :
-
-		sp = SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
-		psp = SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
-
-		# this should work
-		l = ShaderManager( sp, psp )
-		s = l.load( "failWithoutPreprocessing" )
-
-		# but turning off preprocessing should cause a throw
-		l = ShaderManager( sp )
-		self.assertRaises( RuntimeError, l.load, "failWithoutPreprocessing" )
-
-if __name__ == "__main__":
-    unittest.main()
+		self.__scopedBinding = IECoreGL.State._ScopedBinding( self.__state, self.__currentState )
+		return self
+		
+	def __exit__( self, type, value, traceBack ) :
+	
+		del self.__scopedBinding
+		
+IECoreGL.State.ScopedBinding = __ScopedBinding
+State = IECoreGL.State

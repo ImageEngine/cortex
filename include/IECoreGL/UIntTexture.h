@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREGL_UINTTEXTURE_H
+#define IECOREGL_UINTTEXTURE_H
 
-#include "IECoreGL/SceneViewer.h"
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/bindings/SceneViewerBinding.h"
-
-#include "IECorePython/RefCountedBinding.h"
-
-using namespace boost::python;
+#include "IECoreGL/Texture.h"
 
 namespace IECoreGL
 {
 
-void bindSceneViewer()
+class UIntTexture : public Texture
 {
-	IECorePython::RefCountedClass<SceneViewer, Window>( "SceneViewer" )
-		.def( init<std::string, ScenePtr>() )
-	;
-}
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::UIntTexture, UIntTextureTypeId, Texture );
+
+		/// Constructs an empty texture of the specified dimensions.
+		UIntTexture( unsigned int width, unsigned int height );
+		virtual ~UIntTexture();
+
+		/// Creates an ImagePrimitive using the texture contents.
+		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
+
+};
+
+IE_CORE_DECLAREPTR( UIntTexture );
 
 } // namespace IECoreGL
+
+#endif // IECOREGL_UINTTEXTURE_H

@@ -63,7 +63,7 @@ targetApp = getOption( "APP", None )
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
 # fall back to the generic settings for this major version.
-cortexReg = IEEnv.registry["libraries"]["cortex"]["7"].get( platform, IEEnv.registry["libraries"]["cortex"]["7"] )
+cortexReg = IEEnv.registry["libraries"]["cortex"]["8"].get( platform, IEEnv.registry["libraries"]["cortex"]["8"] )
 
 tbbVersion = cortexReg["tbbVersion"]
 if targetApp :
@@ -102,7 +102,7 @@ else :
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
-	
+		
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
@@ -177,7 +177,8 @@ if compilerVersionInt < 350 :
 TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
-GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
+GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion + "/GL"
+GLEW_LIB_SUFFIX = "-" + glewVersion
 
 if platform == "cent6.x86_64" :
 	# use the /usr/lib versions of tiff, png, freetype and jpeg

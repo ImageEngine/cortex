@@ -56,12 +56,12 @@ Font::~Font()
 {
 }
 
-IECore::FontPtr Font::coreFont()
+IECore::Font *Font::coreFont()
 {
 	return m_font;
 }
 
-ConstMeshPrimitivePtr Font::mesh( char c ) const
+const MeshPrimitive *Font::mesh( char c ) const
 {
 	MeshMap::const_iterator it = m_meshes.find( c );
 	if( it!=m_meshes.end() )
@@ -76,7 +76,7 @@ ConstMeshPrimitivePtr Font::mesh( char c ) const
 	return mesh;
 }
 
-ConstAlphaTexturePtr Font::texture() const
+const AlphaTexture *Font::texture() const
 {
 	if( m_texture )
 	{
@@ -125,19 +125,16 @@ void Font::renderSprites( const std::string &text ) const
 			origin += m_font->advance( c, text[i+1] );
 		}
 	}
-
 }
 
-void Font::renderMeshes( const std::string &text, const State *state, IECore::TypeId style ) const
+void Font::renderMeshes( const std::string &text, State *state ) const
 {
-	Shader *shader = state->get<ShaderStateComponent>()->shader();
 	glPushMatrix();
 
 		for( unsigned i=0; i<text.size(); i++ )
 		{
-			ConstMeshPrimitivePtr m = mesh( text[i] );
-			m->setupVertexAttributes( shader );
-			m->render( state, style );
+			const Primitive *m = mesh( text[i] );
+			m->render( state );
 			if( i < text.size() - 1 )
 			{
 				glTranslate( m_font->advance( text[i], text[i+1] ) );

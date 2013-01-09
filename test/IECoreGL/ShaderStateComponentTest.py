@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,42 +34,24 @@
 
 import unittest
 
-from IECore import *
+import IECore
+import IECoreGL
 
-from IECoreGL import *
-init( False )
+IECoreGL.init( False )
 
-class TestCameraControl( unittest.TestCase ) :
+class ShaderStateComponentTest( unittest.TestCase ) :
 
-	def test( self ) :
-
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
-
-		r.worldBegin()
-		c = PerspectiveCamera( horizontalFOV = 90 )
-		#c = OrthographicCamera()
-		s = r.scene()
-		s.setCamera( c )
-		w = SceneViewer( "scene", s )
-
-		r.setAttribute( "gl:blend:srcFactor", StringData( "one" ) )
-		r.setAttribute( "gl:blend:dstFactor", StringData( "one" ) )
-		r.setAttribute( "gl:blend:equation", StringData( "add" ) )
-
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
-		r.concatTransform( M44f.createScaled( V3f( 0.004 ) ) )
-
-		r.concatTransform( M44f.createTranslated( V3f( -150, -200, 0 ) ) )
-		i = Reader.create( "test/images/numberWithAlpha.exr" ).read()
-		i.render( r )
-
-		r.concatTransform( M44f.createTranslated( V3f( 300, 300, 1 ) ) )
-		i.render( r )
-
-		r.worldEnd()
-		w.start()
+	def testDefaultConstructor( self ) :
+	
+		s = IECoreGL.ShaderStateComponent()
+		
+		self.failUnless( s.textureLoader().isSame( IECoreGL.TextureLoader.defaultTextureLoader() ) )
+		self.failUnless( s.shaderLoader().isSame( IECoreGL.ShaderLoader.defaultShaderLoader() ) )
+		
+		ss = s.shaderSetup().shader()
+		self.failUnless( ss.vertexSource() == "" )
+		self.failUnless( ss.geometrySource() == "" )
+		self.failUnless( ss.fragmentSource() == "" )
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -124,17 +124,17 @@ class ReadProcedural( ParameterisedProcedural ) :
 				if type( fileName ) is str :
 
 					o = self.__readFile( fileName )
-					if o :
+					if o is not None :
 						bound.extendBy( o.bound() )
 
 				else :
 
 					o = self.__readFile( fileName[0] )
-					if o :
+					if o is not None :
 						bound.extendBy( o.bound() )
 
 					o = self.__readFile( fileName[1] )
-					if o :
+					if o is not None :
 						bound.extendBy( o.bound() )
 
 			return bound
@@ -153,21 +153,21 @@ class ReadProcedural( ParameterisedProcedural ) :
 			if type( fileName ) is str :
 
 				o = self.__readFile( fileName )
-				if o :
+				if o is not None :
 					o.render( renderer )
 
 			else :
 
 				if shutter[0]==shutter[1] :
 					o = self.__readFile( fileName[0] )
-					if o :
+					if o is not None :
 						o.render( renderer )
 				else :
 
 					o0 = self.__readFile( fileName[0] )
 					o1 = self.__readFile( fileName[1] )
 
-					if o0 and o1 :
+					if o0 is not None and o1 is not None :
 
 						m = MotionPrimitive()
 						m[shutter[0]] = o0
@@ -222,7 +222,7 @@ class ReadProcedural( ParameterisedProcedural ) :
 			return None
 
 		o = reader.read()
-		if not o or not o.isInstanceOf( "VisibleRenderable" ) :
+		if o is None or not o.isInstanceOf( "VisibleRenderable" ) :
 			msg( Msg.Level.Error, "Read procedural", "Failed to load an object of type VisibleRenderable for '%s'." % fileName )
 			return None
 

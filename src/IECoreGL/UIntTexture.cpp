@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,77 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/SceneViewer.h"
-#include "IECoreGL/PerspectiveCamera.h"
-#include "IECoreGL/CameraController.h"
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/GL.h"
-#include "IECoreGL/GLUT.h"
+#include "IECoreGL/UIntTexture.h"
+#include "IECoreGL/Exception.h"
 
 using namespace IECoreGL;
-using namespace Imath;
-using namespace std;
+using namespace IECore;
 
-SceneViewer::SceneViewer( const std::string &title, ScenePtr scene )
-	:	Window( title ), m_scene( scene )
+IE_CORE_DEFINERUNTIMETYPED( UIntTexture );
+
+UIntTexture::UIntTexture( unsigned int width, unsigned int height )
 {
-	if( !m_scene->getCamera() )
-	{
-		m_scene->setCamera( new PerspectiveCamera );
-	}
-	m_cameraController = new CameraController( m_scene->getCamera() );
+	glGenTextures( 1, &m_texture );
+	ScopedBinding binding( *this );
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_R32UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0 );
 }
 
-SceneViewer::~SceneViewer()
+UIntTexture::~UIntTexture()
 {
 }
 
-void SceneViewer::reshape( int width, int height )
+IECore::ImagePrimitivePtr UIntTexture::imagePrimitive() const
 {
-	glViewport( 0, 0, width, height );
-	m_cameraController->reshape( width, height );
-}
-
-void SceneViewer::display()
-{
-	glClearColor( 0.0, 0.0, 0.0, 0.0 );
-	glClearDepth( 1.0 );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-	m_scene->render();
-	glutSwapBuffers();
-}
-
-void SceneViewer::motion( int x, int y )
-{
-	if( mouseDown( GLUT_LEFT_BUTTON ) && mouseDown( GLUT_MIDDLE_BUTTON ) )
+	ScopedBinding binding( *this );
+	GLint width = 0;
+	GLint height = 0;
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height );
+	
+	std::vector<unsigned int> data( width * height );
+	glGetTexImage( GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, &data[0] );
+		
+	UIntVectorDataPtr uiData = new UIntVectorData();
+	std::vector<unsigned int> &ui = uiData->writable();
+	ui.resize( width * height );
+	
+	unsigned int i = 0;
+	for( int y=height-1; y>=0; y-- )
 	{
-		V2i lastDrag = lastMouseDragPosition();
-		m_cameraController->dolly( x - lastDrag.x, y - lastDrag.y );
-		postRedisplay();
+		unsigned int *ry = &ui[y*width];
+		for( int x=0; x<width; x++ )
+		{
+			ry[x] = data[i++];
+		}
 	}
-	else if( mouseDown( GLUT_MIDDLE_BUTTON ) )
-	{
-		V2i lastDrag = lastMouseDragPosition();
-		m_cameraController->track( x - lastDrag.x, y - lastDrag.y );
-		postRedisplay();
-	}
-	else if( mouseDown( GLUT_LEFT_BUTTON ) )
-	{
-		V2i lastDrag = lastMouseDragPosition();
-		m_cameraController->tumble( x - lastDrag.x, y - lastDrag.y );
-		postRedisplay();
-	}
+	
+	Imath::Box2i imageExtents( Imath::V2i( 0, 0 ), Imath::V2i( width-1, height-1 ) );
+	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
+	image->variables["Y"] = PrimitiveVariable( PrimitiveVariable::Vertex, uiData );
 
-	Window::motion( x, y );
-}
-
-void SceneViewer::keyboard( unsigned char key, int x, int y )
-{
-	if( key=='f' || key=='F' )
-	{
-		m_cameraController->frame( m_scene->bound() );
-		postRedisplay();
-	}
+	IECoreGL::Exception::throwIfError();
+	return image;
 }

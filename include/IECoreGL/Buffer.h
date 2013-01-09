@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,67 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_SCENEVIEWERBINDING_H
-#define IE_COREGL_SCENEVIEWERBINDING_H
+#ifndef IECOREGL_BUFFER_H
+#define IECOREGL_BUFFER_H
+
+#include "IECore/RunTimeTyped.h"
+
+#include "IECoreGL/GL.h"
+#include "IECoreGL/TypeIds.h"
 
 namespace IECoreGL
 {
 
-void bindSceneViewer();
+/// The Buffer class provides a simple reference counted wrapper
+/// around an OpenGL buffer object, making the lifetime management
+/// of shared buffers straightforward.
+class Buffer : public IECore::RunTimeTyped
+{
 
-}
+	public :
 
-#endif // IE_COREGL_SCENEVIEWERBINDING_H
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Buffer, BufferTypeId, IECore::RunTimeTyped );
+
+		/// Wraps an existing buffer. Ownership of the buffer is taken,
+		/// and it will be deleted with glDeleteBuffers() in the destructor.
+		Buffer( GLuint buffer );
+		/// Creates a buffer from the specified data.
+		Buffer( const void *data, size_t sizeInBytes, GLenum target = GL_ARRAY_BUFFER, GLenum usage = GL_STATIC_DRAW );
+		/// Deletes the buffer with glDeleteBuffers().
+		virtual ~Buffer();
+		
+		/// Returns the size of the buffer in bytes.
+		size_t size() const;
+		
+		/// The ScopedBinding class allows the buffer to be bound to a target
+		/// for a specific duration, without worrying about remembering to
+		/// unbind it.
+		class ScopedBinding
+		{
+			
+			public :
+			
+				/// Binds the specified buffer to the specified target.
+				ScopedBinding( const Buffer &buffer, GLenum target = GL_ARRAY_BUFFER  );
+				/// Rebinds the previously bound buffer.
+				~ScopedBinding();
+				
+			private :
+			
+				GLenum m_target;
+				GLuint m_buffer;
+				GLint m_prevBuffer;
+			
+		};
+	
+	private :
+	
+		GLuint m_buffer;
+		
+};
+
+IE_CORE_DECLAREPTR( Buffer );
+
+} // namespace IECoreGL
+
+#endif // IECOREGL_BUFFER_H

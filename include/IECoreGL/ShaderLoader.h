@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,51 +32,47 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SHADERMANAGER_H
-#define IECOREGL_SHADERMANAGER_H
-
-#include "IECore/RefCounted.h"
-#include "IECore/SearchPath.h"
+#ifndef IECOREGL_SHADERLOADER_H
+#define IECOREGL_SHADERLOADER_H
 
 #include <map>
 #include <string>
+
+#include "IECore/RefCounted.h"
+#include "IECore/SearchPath.h"
 
 namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Shader );
-IE_CORE_FORWARDDECLARE( ShaderManager );
+IE_CORE_FORWARDDECLARE( ShaderLoader );
 
-/// This class manages shaders by keeping track of their
-/// reference counters and also provides read methods,
-/// preprocessing and shader creation. 
-/// The ShaderManager keeps a cache of created shaders based on 
-/// their source code, so repeatedly asking for the same code 
-/// will always return the same Shader instance.
-class ShaderManager : public IECore::RefCounted
+/// This class provides loading and preprocessing of GLSL shaders, and manages
+/// a cache of Shader objects compiled from that source.
+class ShaderLoader : public IECore::RefCounted
 {
 
 	public :
 
-		IE_CORE_DECLAREMEMBERPTR( ShaderManager );
+		IE_CORE_DECLAREMEMBERPTR( ShaderLoader );
 
-		/// Creates a ShaderManager which will search for
+		/// Creates a ShaderLoader which will search for
 		/// source files on the given search paths. If preprocessorSearchPaths is
 		/// specified, then source preprocessing will be performed using boost::wave.
-		ShaderManager( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
-
-		/// Loads the Shader code of the specified name.
-		/// It will attempt to locate and load source from the files 
-		/// "name.vert" and "name.frag". If either file
-		/// is not found then return empty strings representing that
-		/// the standard OpenGL fixed functionality should be used instead.
-		void loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const;
+		ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
+		virtual ~ShaderLoader();
+		
+		/// Loads the GLSL source code for a shader of the specified name, by
+		/// locating and loading files named "name.vert". "name.geom" and "name.frag". If any
+		/// file is missing then the empty string will be returned, signifying that the default
+		/// shader source for that component should be used.
+		void loadSource( const std::string &name, std::string &vertexSource, std::string &geometrySource, std::string &fragmentSource );
 
 		/// Creates a new Shader if necessary or returns a previously compiled shader from the cache.
 		/// In case the given shader was not in the cache it will do preprocessing (adding include files)
-		/// and then return a new instance os Shader object.
-		/// This function will also eliminate any shader from the cache that is not being used.
-		ShaderPtr create( const std::string &vertexShader, const std::string &fragmentShader );
+		/// and then return a new instance of the Shader class. This function will also eliminate any shader
+		/// from the cache that is not being used.
+		ShaderPtr create( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource );
 
 		/// Loads the shader code and creates the Shader object.
 		/// This function can only be called when the OpenGL context is defined.
@@ -86,28 +82,21 @@ class ShaderManager : public IECore::RefCounted
 		/// Automatically called by create() function.
 		void clearUnused();
 
-		/// Returns a static ShaderManager instance that everyone
+		/// Returns a static ShaderLoader instance that everyone
 		/// can use. This has searchpaths set using the
 		/// IECOREGL_SHADER_PATHS environment variable,
 		/// and preprocessor searchpaths set using the
 		/// IECOREGL_SHADER_INCLUDE_PATHS environment
 		/// variable.
-		static ShaderManagerPtr defaultShaderManager();
+		static ShaderLoaderPtr defaultShaderLoader();
 
 	private :
 
-		typedef std::map<std::string, ShaderPtr> ShaderMap;
-		ShaderMap m_loadedShaders;
-
-		IECore::SearchPath m_searchPaths;
-		bool m_preprocess;
-		IECore::SearchPath m_preprocessorSearchPaths;
-
-		std::string readFile( const std::string &fileName ) const;
-		std::string preprocessShader( const std::string &fileName, const std::string &source ) const;
+		IE_CORE_FORWARDDECLARE( Implementation );
+		ImplementationPtr m_implementation;
 
 };
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SHADERMANAGER_H
+#endif // IECOREGL_SHADERLOADER_H

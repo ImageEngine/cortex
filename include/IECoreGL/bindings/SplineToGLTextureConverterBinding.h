@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,52 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SCENEVIEWER_H
-#define IECOREGL_SCENEVIEWER_H
-
-#include "IECoreGL/Window.h"
+#ifndef IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H
+#define IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H
 
 namespace IECoreGL
 {
 
-IE_CORE_FORWARDDECLARE( Scene );
-IE_CORE_FORWARDDECLARE( Camera );
-IE_CORE_FORWARDDECLARE( CameraController );
+void bindSplineToGLTextureConverter();
 
-/// A simple utility Window class to allow
-/// the viewing of Scene instances.
-class SceneViewer : public Window
-{
+}
 
-	public :
-
-		IE_CORE_DECLAREMEMBERPTR( SceneViewer );
-
-		/// Creates a new window with a view onto the
-		/// specified scene.
-		SceneViewer( const std::string &title, ScenePtr scene );
-		virtual ~SceneViewer();
-
-	protected :
-
-		//! @name Callbacks
-		////////////////////////////////////////////////
-		//@{
-		virtual void reshape( int width, int height );
-		virtual void display();
-		virtual void motion( int x, int y );
-		virtual void keyboard( unsigned char key, int x, int y );
-		//@}
-
-	private :
-
-		ScenePtr m_scene;
-		CameraControllerPtr m_cameraController;
-
-};
-
-IE_CORE_DECLAREPTR( SceneViewer );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_SCENEVIEWER_H
+#endif // IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H

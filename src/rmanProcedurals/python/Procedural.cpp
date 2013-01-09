@@ -52,6 +52,8 @@ struct PythonInitialiser
 {
 	PythonInitialiser()
 	{
+		std::cerr << "INITIALISING PYTHON" << std::endl;
+	
 		// start python
 		Py_Initialize();
 		PyEval_InitThreads();
@@ -108,6 +110,8 @@ extern "C"
 
 RtPointer DLLEXPORT ConvertParameters( RtString paramstr )
 {
+	std::cerr << "CONVERT PARAMETERS!!!!" << std::endl;
+
 	return new string( paramstr );
 }
 

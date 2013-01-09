@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,25 @@ using namespace IECore;
 using namespace boost;
 using namespace std;
 using namespace Imath;
+
+//////////////////////////////////////////////////////////////////////////
+// ScopedBinding implementation
+//////////////////////////////////////////////////////////////////////////
+
+Texture::ScopedBinding::ScopedBinding( const Texture &texture )
+{
+	glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_prevTexture );
+	glBindTexture( GL_TEXTURE_2D, texture.m_texture );
+}
+
+Texture::ScopedBinding::~ScopedBinding()
+{
+	glBindTexture( GL_TEXTURE_2D, m_prevTexture );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Texture implementation
+//////////////////////////////////////////////////////////////////////////
 
 IE_CORE_DEFINERUNTIMETYPED( Texture );
 

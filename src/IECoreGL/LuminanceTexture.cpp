@@ -75,7 +75,7 @@ LuminanceTexture::~LuminanceTexture()
 
 struct LuminanceTexture::Constructor
 {
-	typedef GLuint ReturnType;
+	typedef bool ReturnType;
 
 	template<typename T>
 	GLuint operator()( typename T::ConstPtr y )
@@ -109,10 +109,6 @@ struct LuminanceTexture::Constructor
 			}
 		}
 
-		GLuint result = 0;
-		glGenTextures( 1, &result );
-		glBindTexture( GL_TEXTURE_2D, result );
-
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
 		if( mipMap )
@@ -128,7 +124,7 @@ struct LuminanceTexture::Constructor
 
 		IECoreGL::Exception::throwIfError();
 
-		return result;
+		return true;
 	}
 
 	unsigned width;
@@ -144,70 +140,68 @@ void LuminanceTexture::construct( unsigned int width, unsigned int height, IECor
 		throw Exception( "Channel types do not match." );
 	}
 
+	glGenTextures( 1, &m_texture );
+	ScopedBinding binding( *this );
+	
 	Constructor c;
 	c.alpha = a;
 	c.width = width;
 	c.height = height;
 	c.mipMap = mipMap;
-	m_texture = IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( constPointerCast<Data>( y ), c );
+	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( constPointerCast<Data>( y ), c );
 }
-
 
 ImagePrimitivePtr LuminanceTexture::imagePrimitive() const
 {
-	glPushAttrib( GL_TEXTURE_BIT );
+	ScopedBinding binding( *this );
 
-		bind();
+	GLint width = 0;
+	GLint height = 0;
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height );
 
-		GLint width = 0;
-		GLint height = 0;
-		glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
-		glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height );
+	GLint aSize = 0;
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_ALPHA_SIZE, &aSize );
 
-		GLint aSize = 0;
-		glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_ALPHA_SIZE, &aSize );
+	unsigned int numChannels = aSize ? 2 : 1;
 
-		unsigned int numChannels = aSize ? 2 : 1;
+	vector<float> data( width * height * numChannels );
 
-		vector<float> data( width * height * numChannels );
+	glGetTexImage( GL_TEXTURE_2D, 0, numChannels==2 ? GL_LUMINANCE_ALPHA : GL_LUMINANCE, GL_FLOAT, &data[0] );
 
-		glGetTexImage( GL_TEXTURE_2D, 0, numChannels==2 ? GL_LUMINANCE_ALPHA : GL_LUMINANCE, GL_FLOAT, &data[0] );
+	FloatVectorDataPtr yd = new FloatVectorData();
+	vector<float> &y = yd->writable(); y.resize( width * height );
 
-		FloatVectorDataPtr yd = new FloatVectorData();
-		vector<float> &y = yd->writable(); y.resize( width * height );
+	FloatVectorDataPtr ad = 0;
+	vector<float> *a = 0;
+	if( aSize )
+	{
+		ad = new FloatVectorData();
+		a = &ad->writable(); a->resize( width * height );
+	}
 
-		FloatVectorDataPtr ad = 0;
-		vector<float> *a = 0;
-		if( aSize )
+	unsigned int i = 0;
+	for( int yy=height-1; yy>=0; yy-- )
+	{
+		float *ry = &y[yy*width];
+		float *ra = a ? &(*a)[yy*width] : 0;
+		for( int x=0; x<width; x++ )
 		{
-			ad = new FloatVectorData();
-			a = &ad->writable(); a->resize( width * height );
-		}
-
-		unsigned int i = 0;
-		for( int yy=height-1; yy>=0; yy-- )
-		{
-			float *ry = &y[yy*width];
-			float *ra = a ? &(*a)[yy*width] : 0;
-			for( int x=0; x<width; x++ )
+			ry[x] = data[i++];
+			if( ra )
 			{
-				ry[x] = data[i++];
-				if( ra )
-				{
-					ra[x] = data[i++];
-				}
+				ra[x] = data[i++];
 			}
 		}
+	}
 
-		Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
-		ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
-		image->variables["Y"] = PrimitiveVariable( PrimitiveVariable::Vertex, yd );
-		if( a )
-		{
-			image->variables["A"] = PrimitiveVariable( PrimitiveVariable::Vertex, ad );
-		}
-
-	glPopAttrib();
+	Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
+	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
+	image->variables["Y"] = PrimitiveVariable( PrimitiveVariable::Vertex, yd );
+	if( a )
+	{
+		image->variables["A"] = PrimitiveVariable( PrimitiveVariable::Vertex, ad );
+	}
 
 	IECoreGL::Exception::throwIfError();
 

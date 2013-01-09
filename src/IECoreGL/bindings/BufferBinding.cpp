@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,32 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_PRIMITIVE_INL
-#define IECOREGL_PRIMITIVE_INL
+#include "boost/python.hpp"
+
+#include "IECoreGL/Buffer.h"
+#include "IECoreGL/bindings/BufferBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
+using namespace boost::python;
+using namespace std;
 
 namespace IECoreGL
 {
 
-template<typename T>
-typename IECore::TypedData<T>::ConstPtr Primitive::getUniformAttribute( const std::string &name )
+void bindBuffer()
 {
-	AttributeMap::const_iterator it = m_uniformAttributes.find( name );
-	if ( it == m_uniformAttributes.end() )
-		return 0;
-
-	return IECore::runTimeCast< IECore::TypedData<T> >(it->second);
-}
-
-template<typename T>
-typename IECore::TypedData< std::vector<T> >::ConstPtr Primitive::getVertexAttribute( const std::string &name )
-{
-	AttributeMap::const_iterator it = m_vertexAttributes.find( name );
-	if ( it == m_vertexAttributes.end() )
-		return 0;
-
-	return IECore::runTimeCast< const IECore::TypedData< std::vector<T> > >(it->second);
+	IECorePython::RunTimeTypedClass<Buffer>()
+		.def( init<GLuint>() )
+		.def( "size", &Buffer::size )
+	;
 }
 
 } // namespace IECoreGL
-
-#endif // IECOREGL_PRIMITIVE_INL

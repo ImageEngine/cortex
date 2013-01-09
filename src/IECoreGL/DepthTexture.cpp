@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,20 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/MessageHandler.h"
+#include "IECore/ImagePrimitive.h"
+
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/Exception.h"
 
-#include "IECore/MessageHandler.h"
-
-using namespace IECoreGL;
 using namespace std;
+using namespace Imath;
+using namespace IECore;
+using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( DepthTexture );
 
 DepthTexture::DepthTexture( unsigned int width, unsigned height, IECore::ConstDataPtr z )
 {
 	glGenTextures( 1, &m_texture );
-	glBindTexture( GL_TEXTURE_2D, m_texture );
+	ScopedBinding binding( *this );
 
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -72,6 +75,34 @@ DepthTexture::~DepthTexture()
 
 IECore::ImagePrimitivePtr DepthTexture::imagePrimitive() const
 {
-	/// \todo implement
-	return 0;
+	ScopedBinding binding( *this );
+	
+	GLint width = 0;
+	GLint height = 0;
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height );
+
+	vector<float> data( width * height );
+
+	glGetTexImage( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &data[0] );
+
+	FloatVectorDataPtr zd = new FloatVectorData();
+	vector<float> &z = zd->writable();
+	z.resize( width * height );
+
+	unsigned int i = 0;
+	for( int y=height-1; y>=0; y-- )
+	{
+		float *rz = &z[y*width];
+		for( int x=0; x<width; x++ )
+		{
+			rz[x] = data[i++];
+		}
+	}
+
+	Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
+	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
+	image->variables["Z"] = PrimitiveVariable( PrimitiveVariable::Vertex, zd );
+
+	return image;
 }

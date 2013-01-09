@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,9 +42,9 @@
 namespace IECoreGL
 {
 
-/// \todo Camera facing seems to fail in orthographic mode.
 class PointsPrimitive : public Primitive
 {
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::PointsPrimitive, PointsPrimitiveTypeId, Primitive );
@@ -58,18 +58,15 @@ class PointsPrimitive : public Primitive
 			Sphere,	// spheres
 		};
 
-		/// Other than points, each argument can have size() equal to the size of
-		/// points, or a size of 1.
-		/// widths are used by all types.
-		/// heights and rotations are used only by the Quad type.
-		/// Copies of all data are taken.
 		PointsPrimitive( Type type );
-
 		virtual ~PointsPrimitive();
 
 		virtual Imath::Box3f bound() const;
 
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
+		virtual void render( const State *currentState, IECore::TypeId style ) const;
+		virtual void renderInstances( size_t numInstances = 1 ) const;
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -85,39 +82,21 @@ class PointsPrimitive : public Primitive
 		IE_CORE_DECLAREPTR( GLPointWidth );
 		//@}
 
-	protected :
-
-		virtual void render( const State *state, IECore::TypeId style ) const;
-
 	private :
 
 		template<typename T>
-		static const T *dataAndStride( const IECore::Data *data, T *defaultValue, unsigned int &stride );
+		static const T *dataAndStride( const IECore::Data *data, const T *defaultValue, unsigned int &stride );
 		void updateBounds() const;
 
-		void renderPoints( const State *state, IECore::TypeId style ) const;
-		void renderDisks( const State *state, IECore::TypeId style ) const;
-		void renderQuads( const State *state, IECore::TypeId style ) const;
-		void renderSpheres( const State *state, IECore::TypeId style ) const;
+		Type effectiveType( const State *state ) const;
 
-		IECore::V3fVectorDataPtr m_points;
-
-		Type m_type;
-		static float g_defaultWidth;
-		IECore::DataPtr m_widths;
-		static float g_defaultHeight;
-		IECore::DataPtr m_heights;
-		static float g_defaultRotation;
-		IECore::DataPtr m_rotations;
-
-		mutable Imath::Box3f m_bound;
-		mutable bool m_recomputeBound;
-
+		static std::string &instancingVertexSource();
+		
 		void depthSort() const;
-		mutable bool m_renderSorted;
-		mutable std::vector<unsigned int> m_depthOrder;
-		mutable std::vector<float> m_depths;
-		mutable Imath::V3f m_depthCameraDirection;
+
+		IE_CORE_FORWARDDECLARE( MemberData );
+
+		MemberDataPtr m_memberData;
 
 };
 

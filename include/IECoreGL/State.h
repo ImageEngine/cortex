@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,14 +35,10 @@
 #ifndef IECOREGL_STATE_H
 #define IECOREGL_STATE_H
 
-#include "IECore/CompoundDataBase.h"
+#include "IECore/CompoundData.h"
 
 #include "IECoreGL/Bindable.h"
-
 #include "IECoreGL/TypeIds.h"
-
-#include <vector>
-#include <map>
 
 namespace IECoreGL
 {
@@ -52,29 +48,29 @@ IE_CORE_FORWARDDECLARE( StateComponent );
 
 class State : public Bindable
 {
+
 	public :
 
-		typedef IECore::CompoundDataMap UserAttributesMap;
-
-		// class that binds a state on the constructor and revert the changes on the destructor.
-		/// \todo This is way too slow. We need to rewrite it to avoid all memory allocation, meaning
-		/// we should modify currentState in place, and then restore the previous values to it in
-		/// the destructor. We could also make State::userAttributes() lazily created.
+		/// This class binds a State upon construction, and on destruction makes
+		/// sure that the previous state is reverted to.
 		struct ScopedBinding : private boost::noncopyable
 		{
+		
 			public :
-				// binds the given state s and saving the modified values from current state.
-				ScopedBinding( State &s, const State &currentState );
-
-				ConstStatePtr boundState() const;
-	
-				// reverts the state changes.
+			
+				/// Binds the state s, updating currentState to reflect the
+				/// new bindings. It is the caller's responsibility to keep both arguments
+				/// alive until after destruction of the ScopedBinding.
+				ScopedBinding( const State &s, State &currentState );
+				/// Reverts the state changes and modifications to currentState
+				/// made by the constructor.
 				~ScopedBinding();
 
 			private :
 
-				std::vector< ConstStateComponentPtr > m_savedComponents;
-				StatePtr m_boundState;
+				State &m_currentState;
+				std::vector<StateComponentPtr> m_savedComponents;
+
 		};
 
 		State( bool complete );
@@ -84,28 +80,33 @@ class State : public Bindable
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::State, StateTypeId, Bindable );
 
-		// binds this state
+		// Binds this state
 		virtual void bind() const;
 		
 		/// Adds all the StateComponents and user attributes from s
 		/// into this State.
 		void add( StatePtr s );
 		
-		void add( StateComponentPtr s );
+		/// Adds a component to this state. If override is true,
+		/// then the component will not be replaced by ScopedBinding
+		/// when this state is used as the currentState - this feature
+		/// allows state specified at the top of the draw hierarchy to
+		/// override state specified at the lower levels.
+		void add( StateComponentPtr s, bool override = false );
 		template<typename T>
-		typename T::Ptr get();
+		T *get();
 		template<typename T>
-		typename T::ConstPtr get() const;
-		StateComponentPtr get( IECore::TypeId componentType );
-		ConstStateComponentPtr get( IECore::TypeId componentType ) const;
+		const T *get() const;
+		StateComponent *get( IECore::TypeId componentType );
+		const StateComponent *get( IECore::TypeId componentType ) const;
 		template<typename T> void remove();
 		void remove( IECore::TypeId componentType );
 
-		/// Arbitrary state attributes for user manipulation.
-		UserAttributesMap &userAttributes();
-		const UserAttributesMap &userAttributes() const;
-
 		bool isComplete() const;
+		
+		/// Arbitrary state attributes for user manipulation.
+		IECore::CompoundData *userAttributes();
+		const IECore::CompoundData *userAttributes() const;
 
 		typedef StateComponentPtr (*CreatorFn)();
 		static void registerComponent( IECore::TypeId, CreatorFn );
@@ -132,14 +133,12 @@ class State : public Bindable
 
 	private :
 
+		IE_CORE_FORWARDDECLARE( Implementation )
+		ImplementationPtr m_implementation;
+
 		typedef std::map<IECore::TypeId, CreatorFn> CreatorMap;
 		static CreatorMap *creators();
 
-	protected :
-
-		typedef std::map<IECore::TypeId, StateComponentPtr> ComponentMap;
-		ComponentMap m_components;
-		UserAttributesMap m_userAttributes;
 };
 
 } // namespace IECoreGL

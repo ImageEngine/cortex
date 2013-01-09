@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -89,28 +89,14 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		virtual void componentToPlugs( MObject &component, MSelectionList &selectionList ) const;
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
 
-
-		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p );
-		virtual MStatus updateParameterised();
-		virtual IECore::RunTimeTypedPtr getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut = 0 );
-
-
 		/// Calls setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" ).
 		MStatus setProcedural( const std::string &className, int classVersion );
 		/// Returns runTimeCast<ParameterisedProcedural>( getProcedural( className, classVersion ) ).
 		IECore::ParameterisedProceduralPtr getProcedural( std::string *className = 0, int *classVersion = 0 );
-		/// creates a user attribute called "useDisplayLists" if requested
-		MStatus createDisplaylistAttribute();
-		
+
 		/// Returns an up to date scene from the procedural
 		IECoreGL::ConstScenePtr scene();
-		
-		/// Returns the number of times the opengl scene has been regenerated
-		int getSceneUpdateCount();
-		
-		/// Returns whether or not to draw using display lists
-		bool useDisplayLists();
-		
+
 		static MObject aGLPreview;
 		static MObject aCulling;
 		static MObject aTransparent;
@@ -165,9 +151,7 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 
 		void buildComponents();
 		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, const Imath::M44f &parentTransform );
-		
-		int m_sceneUpdateCount;
-		
+
 		ComponentsMap m_componentsMap;
 		ComponentToGroupMap m_componentToGroupMap;
 		ComponentTransformsMap m_componentTransforms;

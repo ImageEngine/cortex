@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,21 +34,30 @@
 
 import unittest
 
-from IECore import *
+import IECore
+import IECoreGL
 
-from IECoreGL import *
-init( False )
+IECoreGL.init( False )
 
-class TestWindow( unittest.TestCase ) :
+class BufferTest( unittest.TestCase ) :
 
-	def testConstructor( self ) :
-
-		w = Window( "title" )
-		self.assertEqual( w.getTitle(), "title" )
-		w.setTitle( "new title" )
-		self.assertEqual( w.getTitle(), "new title" )
-
-		w.start()
-
+	def test( self ) :
+	
+		d = IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 100 ) ] )
+		
+		b = IECoreGL.CachedConverter.defaultCachedConverter().convert( d )
+		self.failUnless( isinstance( b, IECoreGL.Buffer ) )
+		
+		self.assertEqual( b.size(), 100 * 3 * 4 )
+		
+		b2 = IECoreGL.CachedConverter.defaultCachedConverter().convert( d )
+		self.failUnless( b2.isSame( b ) )
+		
+		d2 = IECore.V3fVectorData( [ IECore.V3f( x * 2 ) for x in range( 0, 50 ) ] )
+		
+		b3 = IECoreGL.CachedConverter.defaultCachedConverter().convert( d2 )
+		self.failUnless( isinstance( b, IECoreGL.Buffer ) )
+		self.failIf( b3.isSame( b ) )
+		
 if __name__ == "__main__":
     unittest.main()

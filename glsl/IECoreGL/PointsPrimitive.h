@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,32 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREGL_POINTSPRIMITIVE_H
+#define IECOREGL_POINTSPRIMITIVE_H
 
-#include "IECoreGL/CameraController.h"
-#include "IECoreGL/bindings/CameraControllerBinding.h"
-#include "IECoreGL/Camera.h"
+#include "IECoreGL/MatrixAlgo.h"
 
-#include "IECorePython/RefCountedBinding.h"
+#define IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS \
+	\
+	in vec3 P;\
+	in float width;\
+	in float patchaspectratio;\
+	in float patchrotation;\
+	\
+	uniform bool useWidth;\
+	uniform bool useAspectRatio;\
+	uniform bool useRotation;\
+	uniform float constantwidth;
 
-using namespace boost::python;
-
-namespace IECoreGL
+#define IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX \
+	iePointsPrimitiveInstanceMatrix(\
+		P,\
+		useWidth ? width * constantwidth : constantwidth,\
+		useAspectRatio ? patchaspectratio : 1.0,\
+		useRotation ? patchrotation : 0.0\
+	)
+	
+mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float width, in float aspectRatio, in float rotation )
 {
+	vec3 pCam = (gl_ModelViewMatrix * vec4( P, 1.0 )).xyz;
 
-void bindCameraController()
-{
-	IECorePython::RefCountedClass<CameraController, IECore::RefCounted>( "CameraController" )
-		.def( init<CameraPtr, float>( ( arg( "camera" ), arg( "centreOfInterest" ) = 5.0f ) ) )
-		.def( "setCamera", &CameraController::setCamera )
-		.def( "getCamera", &CameraController::getCamera )
-		.def( "reshape", &CameraController::reshape )
-		.def( "frame", (void (CameraController::*)( const Imath::Box3f &))&CameraController::frame )
-		.def( "frame", (void (CameraController::*)( const Imath::Box3f &, const Imath::V3f &, const Imath::V3f &))&CameraController::frame )
-		.def( "track", &CameraController::track )
-		.def( "tumble", &CameraController::tumble )
-		.def( "dolly", &CameraController::dolly )
-	;
+	vec3 Az;
+	if( gl_ProjectionMatrix[2][3] != 0.0 )
+	{
+		// perspective
+		Az = normalize( -pCam.xyz );
+	}
+	else
+	{
+		// orthographic
+		Az = vec3( 0, 0, 1 );
+		
+	}
+
+	vec3 up = vec3( sin( radians( rotation ) ), cos( radians( rotation ) ), 0 );
+	
+	vec3 Ax = normalize( cross( up, Az ) );
+	vec3 Ay = normalize( cross( Az, Ax ) );
+
+	mat4 placementMatrix = ieMatrixFromBasis( Ax * width, Ay * width / aspectRatio, Az * width, pCam );
+	
+	return placementMatrix;
 }
 
-}
+#endif // IECOREGL_POINTSPRIMITIVE_H

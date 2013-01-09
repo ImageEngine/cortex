@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,38 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "IECoreGL/ShaderManager.h"
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/bindings/ShaderManagerBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-
-using namespace boost::python;
-
-namespace IECoreGL
+void main()
 {
-
-static tuple loadShaderCode( const ShaderManager &s, const std::string &name )
-{
-	boost::python::list p;
-	std::string vertShader, fragShader;
-	s.loadShaderCode( name, vertShader, fragShader );
-	p.append( vertShader );
-	p.append( fragShader );
-	return tuple( p );
-}
-
-void bindShaderManager()
-{
-	IECorePython::RefCountedClass<ShaderManager, IECore::RefCounted>( "ShaderManager" )
-		.def( init<const IECore::SearchPath &>() )
-		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
-		.def( "loadShaderCode", &loadShaderCode )
-		.def( "create", &ShaderManager::create )
-		.def( "load", &ShaderManager::load )
-		.def( "defaultShaderManager", &ShaderManager::defaultShaderManager ).staticmethod( "defaultShaderManager" )
-	;
-}
-
+	gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
 }

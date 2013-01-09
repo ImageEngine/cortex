@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,7 +74,7 @@ class Group : public Renderable
 		void setState( StatePtr state );
 
 		// render method ( assumes there's no threads modifying the group ).
-		virtual void render( const State *state ) const;
+		virtual void render( State *currentState ) const;
 		virtual Imath::Box3f bound() const;
 
 		void addChild( RenderablePtr child );
@@ -83,7 +83,8 @@ class Group : public Renderable
 		const ChildContainer &children() const;
 
 		// Returns a mutex for this group object.
-		// It should be used if the group is manipulated from different threads. 
+		// It should be used if the group is manipulated from different threads.
+		/// \todo Can we remove this?
 		Mutex &mutex() const;
 
 	private :
