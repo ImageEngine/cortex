@@ -101,13 +101,14 @@ class Selector : boost::noncopyable
 		/// a call to begin() and before a call to end().
 		State *baseState();
 		
-	private :
-	
-		friend class NameStateComponent;
-		/// Returns the currently active Selector. This is used by
-		/// the NameStateComponent to automatically call loadName().
+		/// Returns the currently active Selector - this may be used
+		/// in drawing code to retrieve a selector to call loadName()
+		/// on. The NameStateComponent is an example of a class which
+		/// does this.
 		static Selector *currentSelector();
-	
+		
+	private :
+		
 		IE_CORE_FORWARDDECLARE( Implementation )
 		ImplementationPtr m_implementation;
 						
