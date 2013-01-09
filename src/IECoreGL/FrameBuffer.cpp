@@ -104,7 +104,7 @@ unsigned int FrameBuffer::maxColors()
 	return m;
 }
 
-void FrameBuffer::setColor( ColorTexturePtr texture, unsigned int index )
+void FrameBuffer::setColor( TexturePtr texture, unsigned int index )
 {
 	ScopedBinding binding( *this );
 
@@ -117,7 +117,7 @@ void FrameBuffer::setColor( ColorTexturePtr texture, unsigned int index )
 	m_colorAttachments[index] = texture;
 }
 
-ColorTexturePtr FrameBuffer::getColor( unsigned int index )
+TexturePtr FrameBuffer::getColor( unsigned int index )
 {
 	if( index >= m_colorAttachments.size() )
 	{
@@ -126,7 +126,7 @@ ColorTexturePtr FrameBuffer::getColor( unsigned int index )
 	return m_colorAttachments[index];
 }
 
-ConstColorTexturePtr FrameBuffer::getColor( unsigned int index ) const
+ConstTexturePtr FrameBuffer::getColor( unsigned int index ) const
 {
 	if( index >= m_colorAttachments.size() )
 	{

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,98 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/Selector.h"
-#include "IECoreGL/ShaderStateComponent.h"
+#ifndef IECOREGL_UINTTEXTURE_H
+#define IECOREGL_UINTTEXTURE_H
 
-using namespace IECoreGL;
-using namespace Imath;
-using namespace std;
+#include "IECoreGL/Texture.h"
 
-IE_CORE_DEFINERUNTIMETYPED( Scene );
-
-Scene::Scene()
-	:	m_root( new Group ), m_camera( 0 )
+namespace IECoreGL
 {
-}
 
-Scene::~Scene()
+class UIntTexture : public Texture
 {
-}
+	public :
 
-void Scene::render( State *state ) const
-{
-	if( m_camera )
-	{
-		m_camera->render( state );
-	}
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::UIntTexture, UIntTextureTypeId, Texture );
 
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-	glPushAttrib( GL_ALL_ATTRIB_BITS );
+		/// Constructs an empty texture of the specified dimensions.
+		UIntTexture( unsigned int width, unsigned int height );
+		virtual ~UIntTexture();
 
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
+		/// Creates an ImagePrimitive using the texture contents.
+		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
 
-	glPopAttrib();
-	glUseProgram( prevProgram );
-}
+};
 
-void Scene::render() const
-{
-	/// \todo Can we avoid this cast?
-	render( const_cast<State *>( State::defaultState().get() ) );
-}
+IE_CORE_DECLAREPTR( UIntTexture );
 
-Imath::Box3f Scene::bound() const
-{
-	return root()->bound();
-}
+} // namespace IECoreGL
 
-size_t Scene::select( Selector::Mode mode, const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
-{
-	if( m_camera )
-	{
-		m_camera->render( const_cast<State *>( State::defaultState().get() ) );
-	}
-
-	Selector selector;
-	selector.begin( region, mode );
-	
-		State::bindBaseState();
-		selector.baseState()->bind();
-		root()->render( selector.baseState() );
-
-	size_t result = selector.end( hits );
-		
-	return result;
-}
-
-void Scene::setCamera( CameraPtr camera )
-{
-	m_camera = camera;
-}
-
-CameraPtr Scene::getCamera()
-{
-	return m_camera;
-}
-
-ConstCameraPtr Scene::getCamera() const
-{
-	return m_camera;
-}
-
-GroupPtr Scene::root()
-{
-	return m_root;
-}
-
-ConstGroupPtr Scene::root() const
-{
-	return m_root;
-}
+#endif // IECOREGL_UINTTEXTURE_H

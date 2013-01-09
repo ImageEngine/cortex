@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,98 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/Selector.h"
-#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/UIntTexture.h"
+#include "IECoreGL/Exception.h"
 
 using namespace IECoreGL;
-using namespace Imath;
-using namespace std;
+using namespace IECore;
 
-IE_CORE_DEFINERUNTIMETYPED( Scene );
+IE_CORE_DEFINERUNTIMETYPED( UIntTexture );
 
-Scene::Scene()
-	:	m_root( new Group ), m_camera( 0 )
+UIntTexture::UIntTexture( unsigned int width, unsigned int height )
+{
+	glGenTextures( 1, &m_texture );
+	ScopedBinding binding( *this );
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_R32UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0 );
+}
+
+UIntTexture::~UIntTexture()
 {
 }
 
-Scene::~Scene()
+IECore::ImagePrimitivePtr UIntTexture::imagePrimitive() const
 {
-}
-
-void Scene::render( State *state ) const
-{
-	if( m_camera )
-	{
-		m_camera->render( state );
-	}
-
-	GLint prevProgram;
-	glGetIntegerv( GL_CURRENT_PROGRAM, &prevProgram );
-	glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-		State::bindBaseState();
-		state->bind();
-		root()->render( state );
-
-	glPopAttrib();
-	glUseProgram( prevProgram );
-}
-
-void Scene::render() const
-{
-	/// \todo Can we avoid this cast?
-	render( const_cast<State *>( State::defaultState().get() ) );
-}
-
-Imath::Box3f Scene::bound() const
-{
-	return root()->bound();
-}
-
-size_t Scene::select( Selector::Mode mode, const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
-{
-	if( m_camera )
-	{
-		m_camera->render( const_cast<State *>( State::defaultState().get() ) );
-	}
-
-	Selector selector;
-	selector.begin( region, mode );
+	ScopedBinding binding( *this );
+	GLint width = 0;
+	GLint height = 0;
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
+	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height );
 	
-		State::bindBaseState();
-		selector.baseState()->bind();
-		root()->render( selector.baseState() );
-
-	size_t result = selector.end( hits );
+	std::vector<unsigned int> data( width * height );
+	glGetTexImage( GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, &data[0] );
 		
-	return result;
-}
+	UIntVectorDataPtr uiData = new UIntVectorData();
+	std::vector<unsigned int> &ui = uiData->writable();
+	ui.resize( width * height );
+	
+	unsigned int i = 0;
+	for( int y=height-1; y>=0; y-- )
+	{
+		unsigned int *ry = &ui[y*width];
+		for( int x=0; x<width; x++ )
+		{
+			ry[x] = data[i++];
+		}
+	}
+	
+	Imath::Box2i imageExtents( Imath::V2i( 0, 0 ), Imath::V2i( width-1, height-1 ) );
+	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
+	image->variables["Y"] = PrimitiveVariable( PrimitiveVariable::Vertex, uiData );
 
-void Scene::setCamera( CameraPtr camera )
-{
-	m_camera = camera;
-}
-
-CameraPtr Scene::getCamera()
-{
-	return m_camera;
-}
-
-ConstCameraPtr Scene::getCamera() const
-{
-	return m_camera;
-}
-
-GroupPtr Scene::root()
-{
-	return m_root;
-}
-
-ConstGroupPtr Scene::root() const
-{
-	return m_root;
+	IECoreGL::Exception::throwIfError();
+	return image;
 }

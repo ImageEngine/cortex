@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,41 +35,39 @@
 import unittest
 import os.path
 
-from IECore import *
+import IECore
 
-from IECoreGL import *
-init( False )
+import IECoreGL
+IECoreGL.init( False )
 
 class TestSelection( unittest.TestCase ) :
 
 	def testSelect( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		r.worldBegin()
+		with IECore.WorldBlock( r ) :
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-		r.setAttribute( "name", StringData( "one" ) )
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		r.geometry( "sphere", {}, {} )
+			r.setAttribute( "name", IECore.StringData( "one" ) )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+			r.geometry( "sphere", {}, {} )
 
-		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
-		r.setAttribute( "name", StringData( "two" ) )
-		r.geometry( "sphere", {}, {} )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "two" ) )
+			r.geometry( "sphere", {}, {} )
 
-		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
-		r.setAttribute( "name", StringData( "three" ) )
-		r.geometry( "sphere", {}, {} )
-
-		r.worldEnd()
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "three" ) )
+			r.geometry( "sphere", {}, {} )
 
 		s = r.scene()
-		s.setCamera( PerspectiveCamera() )
+		s.setCamera( IECoreGL.PerspectiveCamera() )
 
-		ss = s.select( Box2f( V2f( 0 ), V2f( 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		names = [ x.name.value() for x in ss ]
 		self.assertEqual( len( names ), 3 )
 		self.assert_( "one" in names )
@@ -78,54 +76,149 @@ class TestSelection( unittest.TestCase ) :
 
 	def testRegionSelect( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		r.worldBegin()
+		with IECore.WorldBlock( r ) :
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		r.concatTransform( M44f.createTranslated( V3f( -2, -2, 0 ) ) )
-		r.setAttribute( "name", StringData( "red" ) )
-		r.geometry( "sphere", {}, {} )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "red" ) )
+			r.geometry( "sphere", {}, {} )
 
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 1, 0 ) ) } )
-		r.concatTransform( M44f.createTranslated( V3f( 0, 4, 0 ) ) )
-		r.setAttribute( "name", StringData( "green" ) )
-		r.geometry( "sphere", {}, {} )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) } )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 4, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "green" ) )
+			r.geometry( "sphere", {}, {} )
 
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 0, 1 ) ) } )
-		r.concatTransform( M44f.createTranslated( V3f( 4, 0, 0 ) ) )
-		r.setAttribute( "name", StringData( "blue" ) )
-		r.geometry( "sphere", {}, {} )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 4, 0, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "blue" ) )
+			r.geometry( "sphere", {}, {} )
 
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 1, 1 ) ) } )
-		r.concatTransform( M44f.createTranslated( V3f( 0, -4, 0 ) ) )
-		r.setAttribute( "name", StringData( "white" ) )
-		r.geometry( "sphere", {}, {} )
-
-		r.worldEnd()
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 1, 1 ) ) } )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, -4, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "white" ) )
+			r.geometry( "sphere", {}, {} )
 
 		s = r.scene()
-		s.setCamera( PerspectiveCamera() )
+		s.setCamera( IECoreGL.PerspectiveCamera() )
 
-		ss = s.select( Box2f( V2f( 0, 0.5 ), V2f( 0.5, 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0, 0.5 ), IECore.V2f( 0.5, 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( ss[0].name.value(), "red" )
 
-		ss = s.select( Box2f( V2f( 0 ), V2f( 0.5 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 0.5 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( ss[0].name.value(), "green" )
 
-		ss = s.select( Box2f( V2f( 0.5, 0 ), V2f( 1, 0.5 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0.5, 0 ), IECore.V2f( 1, 0.5 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( ss[0].name.value(), "blue" )
 
-		ss = s.select( Box2f( V2f( 0.5 ), V2f( 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0.5 ), IECore.V2f( 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( ss[0].name.value(), "white" )
 
+	def testIDSelect( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+			
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "backRight" ) )
+			r.geometry( "sphere", {}, {} )
+			
+		s = r.scene()
+		s.setCamera( IECoreGL.OrthographicCamera() )
+
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
+		self.assertEqual( len( ss ), 1 )
+		self.assertEqual( ss[0].name.value(), "frontLeft" )
+
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
+		self.assertEqual( len( ss ), 1 )
+		self.assertEqual( ss[0].name.value(), "frontRight" )
+
+	def testIDSelectDepths( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+			
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.setAttribute( "name", IECore.StringData( "ball" ) )
+			r.geometry( "sphere", {}, {} )
+			
+		scene = r.scene()
+		scene.setCamera( IECoreGL.OrthographicCamera() )
+
+		s1 = scene.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		self.assertEqual( len( s1 ), 1 )
+		self.assertEqual( s1[0].name.value(), "ball" )
+
+		s2 = scene.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		self.assertEqual( len( s2 ), 1 )
+		self.assertEqual( s2[0].name.value(), "ball" )
+		
+		self.assertAlmostEqual( s1[0].depthMin, s2[0].depthMin, 5 )
+	
+	def testOcclusionQuerySelect( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+			
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "backRight" ) )
+			r.geometry( "sphere", {}, {} )
+			
+		s = r.scene()
+		s.setCamera( IECoreGL.OrthographicCamera() )
+
+		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 0.25, 1 ) ) )
+		self.assertEqual( len( ss ), 2 )
+		self.assertEqual( set( [ x.name.value() for x in ss ] ), set( ( "frontLeft", "backLeft" ) ) )
+
+		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, IECore.Box2f( IECore.V2f( 0.75, 0 ), IECore.V2f( 1, 1 ) ) )
+		self.assertEqual( len( ss ), 2 )
+		self.assertEqual( set( [ x.name.value() for x in ss ] ), set( ( "frontRight", "backRight" ) ) )
+	
 if __name__ == "__main__":
     unittest.main()

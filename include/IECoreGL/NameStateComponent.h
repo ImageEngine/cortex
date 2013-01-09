@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,23 +35,23 @@
 #ifndef IECOREGL_NAMESTATECOMPONENT_H
 #define IECOREGL_NAMESTATECOMPONENT_H
 
-#include "IECoreGL/StateComponent.h"
-#include "IECore/Interned.h"
+#include <set>
+
+#include "tbb/spin_rw_mutex.h"
 
 #include "boost/multi_index_container.hpp"
 #include "boost/multi_index/member.hpp"
 #include "boost/multi_index/ordered_index.hpp"
-#include "tbb/spin_rw_mutex.h"
 
-#include <set>
+#include "IECoreGL/StateComponent.h"
+#include "IECore/Interned.h"
 
 namespace IECoreGL
 {
 
 /// The NameStateComponent class is used to specify the names of objects being rendered.
-/// It maps from a public name stored as a string to a private integer name which is specified
-/// to OpenGL through glLoadName(). It then provides a means of examining an OpenGL selection buffer
-/// and returning the integer names in their string form.
+/// It maps from a public name stored as a string to an integer name which is used
+/// with the Selector::loadName() method to perform selection of rendered objects.
 class NameStateComponent : public StateComponent
 {
 	public :
@@ -61,10 +61,13 @@ class NameStateComponent : public StateComponent
 		NameStateComponent( const std::string &name="unnamed" );
 		virtual ~NameStateComponent();
 
+		/// The name in string form.
 		const std::string &name() const;
+		/// The name in integer form. The value 0 is reserved to represent an invalid
+		/// name, and will never be returned here.
 		GLuint glName() const;
 
-		/// Calls glLoadName().
+		/// Calls Selector::currentSelector()->loadName() as necessary.
 		virtual void bind() const;
 
 		/// Returns the public (string) name from the internal OpenGL name value, which
@@ -73,7 +76,8 @@ class NameStateComponent : public StateComponent
 		static const std::string &nameFromGLName( GLuint glName );
 		/// Returns the internal GL name used for the given public (string) name. If no
 		//// internal name has been created yet then throws an Exception, unless createIfMissing
-		/// is true in which case an appropriate GL name is created.
+		/// is true in which case an appropriate GL name is created. The value 0 represents an
+		/// invalid name and will never be returned.
 		static GLuint glNameFromName( const std::string &name, bool createIfMissing=false );
 
 	private :

@@ -103,19 +103,47 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 	}
 }
 
+static ShaderPtr constant2()
+{
+
+	static const char *vertexSource =
+		
+		"in vec3 vertexP;"
+		""
+		"void main()"
+		"{"
+		"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * vec4( vertexP, 1 );"
+		"}";
+		
+	static const char *fragmentSource =
+	
+		"void main()"
+		"{"
+			"gl_FragColor = vec4( 1, 1, 1, 1 );"
+		"}";
+
+	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
+	return s;
+}
+
 void Primitive::render( State *state ) const
 {
 
-	/// \todo Figure out how we'll do selection properly.
+	/// \todo Really we want to remove use of this deprecated push/pop functionality.
+	Imath::GLPushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
+
+	// if we're in GL_SELECT render mode then just render solid
+	// with a simple shader and early out.
 	GLint renderMode = 0;
 	glGetIntegerv(GL_RENDER_MODE, &renderMode);
 	if( renderMode == GL_SELECT )
 	{
+		const Shader *constantShader = constant2();
+		const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
+		Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+		render( state, Primitive::DrawSolid::staticTypeId() );
 		return;
 	}
-
-	/// \todo Really we want to remove use of this deprecated push/pop functionality.
-	Imath::GLPushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
 	
 	// render the shaded primitive if requested
 	///////////////////////////////////////////

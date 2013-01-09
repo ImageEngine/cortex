@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,20 +35,7 @@
 #include <cassert>
 #include <limits>
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/StateComponent.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/NameStateComponent.h"
-#include "IECoreGL/BoxPrimitive.h"
-#include "IECoreGL/Exception.h"
-#include "IECoreGL/Group.h"
-
-#include "IECoreMaya/ProceduralHolderUI.h"
-#include "IECoreMaya/ProceduralHolder.h"
-#include "IECoreMaya/Convert.h"
-
-#include "IECore/MessageHandler.h"
+#include "IECoreGL/GL.h" // must come first so glew.h is included before gl.h
 
 #include "maya/MGlobal.h"
 #include "maya/MDrawData.h"
@@ -62,6 +49,21 @@
 #include "maya/MPointArray.h"
 #include "maya/MDoubleArray.h"
 #include "maya/MFnCamera.h"
+
+#include "IECore/MessageHandler.h"
+
+#include "IECoreGL/Scene.h"
+#include "IECoreGL/State.h"
+#include "IECoreGL/StateComponent.h"
+#include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/NameStateComponent.h"
+#include "IECoreGL/BoxPrimitive.h"
+#include "IECoreGL/Exception.h"
+#include "IECoreGL/Group.h"
+
+#include "IECoreMaya/ProceduralHolderUI.h"
+#include "IECoreMaya/ProceduralHolder.h"
+#include "IECoreMaya/Convert.h"
 
 using namespace IECoreMaya;
 using namespace std;
@@ -334,15 +336,36 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 	{
 		return false;
 	}
-		
-	// draw the scene in select mode, and early out if we have no hits
-	static const GLsizei selectBufferSize = 20000; // enough to select 5000 distinct objects
-	static GLuint selectBuffer[selectBufferSize];
-
+	
+	// we want to perform the selection using an IECoreGL::Selector, so we
+	// can avoid the performance penalty associated with using GL_SELECT mode.
+	// that means we don't really want to call view.beginSelect(), but we have to
+	// call it just to get the projection matrix for our own selection, because as far
+	// as i can tell, there is no other way of getting it reliably.
+	
 	M3dView view = selectInfo.view();
-	view.beginSelect( &selectBuffer[0], selectBufferSize );	
-		glInitNames();
-		glPushName( 0 );
+	view.beginSelect();
+	Imath::M44d projectionMatrix;
+	glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix.getValue() );
+	view.endSelect();
+	
+	view.beginGL();
+	
+		glMatrixMode( GL_PROJECTION );
+		glLoadMatrixd( projectionMatrix.getValue() );
+		
+		IECoreGL::Selector::Mode selectionMode = IECoreGL::Selector::IDRender;
+		if( selectInfo.displayStatus() == M3dView::kHilite && !selectInfo.singleSelection() )
+		{
+			selectionMode = IECoreGL::Selector::OcclusionQuery;
+		}
+		
+		IECoreGL::Selector selector;
+		selector.begin( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode );
+				
+			IECoreGL::State::bindBaseState();
+			selector.baseState()->bind();
+			scene->render( selector.baseState() );
 		
 			if( selectInfo.displayStatus() != M3dView::kHilite )
 			{
@@ -356,12 +379,13 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 					IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
 				}
 			}
+			
+		std::vector<IECoreGL::HitRecord> hits;
+		selector.end( hits );
 				
-			scene->render( m_displayStyle.baseState( selectInfo.displayStyle() ) );
-		
-	int numHits = view.endSelect();
-
-	if( !numHits )
+	view.endGL();
+	
+	if( !hits.size() )
 	{
 		return false;
 	}
@@ -371,23 +395,17 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 	MIntArray componentIndices;
 	float depthMin = std::numeric_limits<float>::max();
 	int depthMinIndex = -1;
-	
-	GLuint *hitRecords = selectBuffer;
-	for( int i=0; i<numHits; i++ )
-	{
-		IECoreGL::HitRecord hitRecord( hitRecords );
-		
-		if( hitRecord.depthMin < depthMin )
+	for( int i=0, e = hits.size(); i < e; i++ )
+	{		
+		if( hits[i].depthMin < depthMin )
 		{
-			depthMin = hitRecord.depthMin;
+			depthMin = hits[i].depthMin;
 			depthMinIndex = componentIndices.length();
 		}
 		
-		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->m_componentsMap.find( hitRecord.name.value() );
+		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->m_componentsMap.find( hits[i].name.value() );
 		assert( compIt != proceduralHolder->m_componentsMap.end() );
 		componentIndices.append( compIt->second.first );		
-
-		hitRecords += hitRecord.offsetToNext();
 	}
 	
 	assert( depthMinIndex >= 0 );

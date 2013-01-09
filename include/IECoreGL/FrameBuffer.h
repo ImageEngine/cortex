@@ -45,7 +45,7 @@
 namespace IECoreGL
 {
 
-IE_CORE_FORWARDDECLARE( ColorTexture );
+IE_CORE_FORWARDDECLARE( Texture );
 IE_CORE_FORWARDDECLARE( DepthTexture );
 
 /// The FrameBuffer object provides a nice reference counted wrapper
@@ -68,13 +68,13 @@ class FrameBuffer : public IECore::RunTimeTyped
 		static unsigned int maxColors();
 		/// Sets the texture to render colour output to. Multiple color outputs
 		/// may be specified by specifying several indices
-		void setColor( ColorTexturePtr texture, unsigned int index = 0 );
+		void setColor( TexturePtr texture, unsigned int index = 0 );
 		/// Returns the texture being used for the specified color channel, or
 		/// 0 if no such texture has been specified.
-		ColorTexturePtr getColor( unsigned int index = 0 );
+		TexturePtr getColor( unsigned int index = 0 );
 		/// Returns the texture being used for the specified color channel, or
 		/// 0 if no such texture has been specified.
-		ConstColorTexturePtr getColor( unsigned int index = 0 ) const;
+		ConstTexturePtr getColor( unsigned int index = 0 ) const;
 		/// Sets the texture to be used as the depth buffer.
 		void setDepth( DepthTexturePtr depthTexture );
 		/// Returns the texture being used for the depth buffer, or 0 if
@@ -112,7 +112,7 @@ class FrameBuffer : public IECore::RunTimeTyped
 	private :
 
 		GLuint m_frameBuffer;
-		std::vector<ColorTexturePtr> m_colorAttachments;
+		std::vector<TexturePtr> m_colorAttachments;
 		DepthTexturePtr m_depthAttachment;
 
 };
