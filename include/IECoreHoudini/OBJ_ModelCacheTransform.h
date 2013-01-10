@@ -43,9 +43,6 @@ namespace IECoreHoudini
 {
 
 /// OBJ for loading a transform or building a hierarchy from an IECore::ModelCache
-/// \todo: add option to build underlying hierarchy by nesting OBJ_ModelCacheTransforms
-/// \todo: add option to build underlying hierarchy by chaining OBJ_ModelCacheGeometrys
-/// \todo: add option to build underlying hierarchy from a single OBJ_ModelCacheGeometry and SOP_ModelCacheSource
 /// \todo: add virtual method used to do the actual hierarchy construction
 class OBJ_ModelCacheTransform : public OBJ_ModelCacheNode<OBJ_SubNet>
 {
@@ -56,6 +53,28 @@ class OBJ_ModelCacheTransform : public OBJ_ModelCacheNode<OBJ_SubNet>
 		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
+		
+		static PRM_Name pHierarchy;
+		static PRM_Name pDepth;
+		
+		static PRM_Default hierarchyDefault;
+		static PRM_Default depthDefault;
+		
+		static PRM_ChoiceList hierarchyList;
+		static PRM_ChoiceList depthList;
+		
+		enum Hierarchy
+		{
+			Parenting,
+			SubNetworks,
+			FlatGeometry
+		};
+		
+		enum Depth
+		{
+			AllDescendants,
+			Children
+		};
 
 };
 

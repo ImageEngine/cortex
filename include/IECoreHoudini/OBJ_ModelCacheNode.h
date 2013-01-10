@@ -55,6 +55,10 @@ class OBJ_ModelCacheNode : public ModelCacheNode<BaseType>
 		virtual ~OBJ_ModelCacheNode();
 		
 		static OP_TemplatePair *buildParameters();
+		
+		static PRM_Name pBuild;
+		
+		static int buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 	
 	protected :
 		

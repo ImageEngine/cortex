@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "PRM/PRM_ChoiceList.h"
+
 #include "IECoreHoudini/OBJ_ModelCacheTransform.h"
 
 using namespace IECoreHoudini;
@@ -49,12 +51,65 @@ OP_Node *OBJ_ModelCacheTransform::create( OP_Network *net, const char *name, OP_
 	return new OBJ_ModelCacheTransform( net, name, op );
 }
 
+PRM_Name OBJ_ModelCacheTransform::pHierarchy( "hierarchy", "Hierarchy" );
+PRM_Name OBJ_ModelCacheTransform::pDepth( "depth", "Depth" );
+
+PRM_Default OBJ_ModelCacheTransform::hierarchyDefault( Parenting );
+PRM_Default OBJ_ModelCacheTransform::depthDefault( AllDescendants );
+
+static PRM_Name hierarchyNames[] = {
+	PRM_Name( "0", "Parenting" ),
+	PRM_Name( "1", "SubNetworks" ),
+	PRM_Name( "2", "Flat Geometry" ),
+	PRM_Name( 0 ) // sentinal
+};
+
+static PRM_Name depthNames[] = {
+	PRM_Name( "0", "All Descendants" ),
+	PRM_Name( "1", "Children" ),
+	PRM_Name( 0 ) // sentinal
+};
+
+PRM_ChoiceList OBJ_ModelCacheTransform::hierarchyList( PRM_CHOICELIST_SINGLE, &hierarchyNames[0] );
+PRM_ChoiceList OBJ_ModelCacheTransform::depthList( PRM_CHOICELIST_SINGLE, &depthNames[0] );
+
 OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
 {
+	static PRM_Template *thisTemplate = 0;
+	if ( !thisTemplate )
+	{
+		PRM_Template *parentTemplate = OBJ_ModelCacheNode<OBJ_SubNet>::buildParameters()->myTemplate;
+		unsigned numParentParms = PRM_Template::countTemplates( parentTemplate );
+		thisTemplate = new PRM_Template[ numParentParms + 3 ];
+		
+		// add the common OBJ parms
+		for ( unsigned i = 0; i < numParentParms - 1; ++i )
+		{
+			thisTemplate[i] = parentTemplate[i];
+		}
+		
+		// then the build options
+		thisTemplate[numParentParms-1] = PRM_Template(
+			PRM_INT, 1, &pHierarchy, &hierarchyDefault, &hierarchyList, 0, 0, 0, 0,
+			"Choose the node network style used when building. Parenting will create a graph using "
+			"node connections, SubNetworks will create a deep hierarchy, and Flat Geometry will "
+			"create a single OBJ and SOP."
+		);
+		thisTemplate[numParentParms] = PRM_Template(
+			PRM_INT, 1, &pDepth, &depthDefault, &depthList, 0, 0, 0, 0,
+			"Choose how deep to build. All Descendants will build everything below the specified root "
+			"path and Children will only build the immediate children of the root path, which may "
+			"or may not contain geometry."
+		);
+		
+		// then the build button
+		thisTemplate[numParentParms+1] = parentTemplate[numParentParms-1];
+	}
+	
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( *OBJ_ModelCacheNode<OBJ_SubNet>::buildParameters() );
+		templatePair = new OP_TemplatePair( thisTemplate );
 	}
 	
 	return templatePair;

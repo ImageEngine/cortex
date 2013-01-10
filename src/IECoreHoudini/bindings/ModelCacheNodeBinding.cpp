@@ -39,6 +39,7 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECoreHoudini/ModelCacheNode.h"
+#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
 #include "IECoreHoudini/bindings/ModelCacheNodeBinding.h"
 
 using namespace boost::python;
@@ -57,5 +58,16 @@ void IECoreHoudini::bindModelCacheNode()
 		.value( "Path", ModelCacheNode<OP_Node>::Path )
 		.value( "Leaf", ModelCacheNode<OP_Node>::Leaf )
 		.value( "Object", ModelCacheNode<OP_Node>::Object )
+	;
+	
+	enum_<OBJ_ModelCacheTransform::Hierarchy>( "Hierarchy" )
+		.value( "Parenting", OBJ_ModelCacheTransform::Parenting )
+		.value( "SubNetworks", OBJ_ModelCacheTransform::SubNetworks )
+		.value( "FlatGeometry", OBJ_ModelCacheTransform::FlatGeometry )
+	;
+	
+	enum_<OBJ_ModelCacheTransform::Depth>( "Depth" )
+		.value( "AllDescendants", OBJ_ModelCacheTransform::AllDescendants )
+		.value( "Children", OBJ_ModelCacheTransform::Children )
 	;
 }

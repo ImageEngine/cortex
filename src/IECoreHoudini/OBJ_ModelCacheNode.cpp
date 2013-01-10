@@ -51,6 +51,9 @@ OBJ_ModelCacheNode<BaseType>::~OBJ_ModelCacheNode()
 {
 }
 
+template<typename BaseType>
+PRM_Name OBJ_ModelCacheNode<BaseType>::pBuild( "build", "Build" );
+
 static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 {
 	PRM_Name *name = new PRM_Name( src.getToken(), src.getLabel(), src.getExpressionFlag() );
@@ -82,7 +85,7 @@ OP_TemplatePair *OBJ_ModelCacheNode<BaseType>::buildParameters()
 		PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
 		unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
 		unsigned numMDCParms = PRM_Template::countTemplates( ModelCacheNode<BaseType>::parameters );
-		thisTemplate = new PRM_Template[ numObjParms + numMDCParms + 1 ];
+		thisTemplate = new PRM_Template[ numObjParms + numMDCParms + 2 ];
 		
 		for ( unsigned i = 0; i < numObjParms; ++i )
 		{
@@ -94,6 +97,12 @@ OP_TemplatePair *OBJ_ModelCacheNode<BaseType>::buildParameters()
 		{
 			thisTemplate[numObjParms+i] = ModelCacheNode<BaseType>::parameters[i];
 		}
+		
+		thisTemplate[numObjParms + numMDCParms] = PRM_Template(
+			PRM_CALLBACK, 1, &pBuild, 0, 0, 0, &OBJ_ModelCacheNode<BaseType>::buildButtonCallback, 0, 0,
+			"Build the hierarchy below the specified root path.\n"
+			"Some nodes may define additional options that are used during the build process."
+		);
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
@@ -103,6 +112,19 @@ OP_TemplatePair *OBJ_ModelCacheNode<BaseType>::buildParameters()
 	}
 	
 	return templatePair;
+}
+
+template<typename BaseType>
+int OBJ_ModelCacheNode<BaseType>::buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
+{
+	std::string file;
+	OBJ_ModelCacheNode<BaseType> *node = reinterpret_cast<OBJ_ModelCacheNode<BaseType>*>( data );
+	if ( !node || !node->ensureFile( file ) )
+	{
+		return 0;
+	}
+	
+	return 1;
 }
 
 template<typename BaseType>
