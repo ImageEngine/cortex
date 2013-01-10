@@ -47,7 +47,7 @@
 
 namespace IECore
 {
-/// An implementation of IndexedIO which operates within a single file on disk.
+/// An implementation of IndexedIO which operates within a single file on disk. It handles data instancing transparently for compact file sizes.
 /// \todo Most of the implementation of this class would be better of in a "StreamIndexedIO" class which
 /// FileIndexedIO and MemoryIndexedIO derive from. MemoryIndexedIO wasn't implemented that cleanly in the first
 /// place due to the necessity to maintain binary compatibility.

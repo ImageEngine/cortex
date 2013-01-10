@@ -55,8 +55,9 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/MurmurHash.h"
 
-/// \todo Describe what each item actually means!
+#define HARDLINK				127
 
 /// FileFormat ::= Data Index Version MagicNumber
 /// Data ::= DataEntry*
@@ -69,15 +70,19 @@
 
 /// Nodes ::= NumNodes Node*
 /// NumNodes ::= int64
-/// Node ::= EntryType EntryStringCacheID DataType ArrayLength NodeID ParentNodeID DataOffset DataSize
-/// EntryType ::= char
-/// EntryStringCacheID ::= int64
-/// DataType ::= char
-/// ArrayLength ::= int64
-/// NodeID ::= int64
-/// ParentNodeID ::= ParentNodeID
-/// DataOffset ::= int64
-/// DataSize ::= int64
+/// Node ::= EntryType EntryStringCacheID NodeID ParentNodeID ( if EntryType == Directory )
+///          EntryType EntryStringCacheID DataType ArrayLength NodeID ParentNodeID DataOffset DataSize LinkCount ( if EntryType == File )
+///          EntryType EntryStringCacheID NodeID ParentNodeID TargetNodeID ( If EntryType == HARDLINK ) -- added in version 4 --
+/// EntryType ::= char ( value from IndexedIO::EntryType or HARDLINK )
+/// EntryStringCacheID ::= int64 ( index in StringCache )
+/// DataType ::= char ( value from IndexedIO::DataType )
+/// ArrayLength ::= int64 ( if DataType is array, then this tells how long they are )
+/// NodeID ::= int64 ( unique Id of this node in the file )
+/// ParentNodeID ::= int64 ( Id for the parent node )
+/// DataOffset ::= int64 ( this is offset where the data is located )
+/// DataSize ::= int64 ( number of bytes stored in the data section )
+/// TargetNodeID ::= int64 ( it's the NodeID containing the data - used for hardlinks )
+/// LinkCount :: = int16 ( counts the number of references to this node's Data by hardlinks, only valid if EntryType is File ) -- added in version 4 -- 
 
 /// FreePages ::= NumFreePages FreePage*
 /// NumFreePages ::= int64
@@ -86,7 +91,7 @@
 /// FreePageSize ::= int64
 /// IndexOffset ::= int64
 
-/// Version ::= int64
+/// Version ::= int64 (file format version)
 /// MagicNumber ::= int64
 
 using namespace IECore;
@@ -117,7 +122,6 @@ void readLittleEndian( std::istream &f, T &n )
 	}
 }
 
-/// \todo We could add a minimum length for strings, below which we don't bother caching them?
 class StringCache
 {
 	public:
@@ -276,7 +280,7 @@ class FileIndexedIO::Node : public RefCounted
 		/// A unique numeric ID for this node
 		Imf::Int64 m_id;
 
-		/// The offset in the file to this node
+		/// The offset in the file to this node (or this is the ID of the target node if m_isLink is true)
 		Imf::Int64 m_offset;
 
 		/// The size of this node's data chunk within the file
@@ -284,6 +288,13 @@ class FileIndexedIO::Node : public RefCounted
 
 		/// A brief description of the node
 		IndexedIO::Entry m_entry;
+
+		typedef unsigned short LinkCount;
+		/// The number of times this node has been linked on other locations.
+		LinkCount m_linkCount;
+
+		/// Hardlink flag: If this is true, than this node uses m_offset to refer to the NodeID it links to.
+		bool m_isLink;
 
 		/// A pointer to the parent node in the tree - will be NULL for the root node
 		Node* m_parent;
@@ -314,6 +325,14 @@ class FileIndexedIO::Node : public RefCounted
 
 		Node* addChild( const IndexedIO::EntryID & childName );
 
+		bool increaseLinkCount();
+
+		// decreases the link count and returns true if it reached zero.
+		bool decreaseLinkCount();
+
+		// Returns the location for the data (returns good location even if this node is a hardlink)
+		Imf::Int64 offset() const;
+
 	protected:
 
 		friend class FileIndexedIO::Index;
@@ -341,6 +360,8 @@ class FileIndexedIO::Index : public RefCounted
 		virtual ~Index();
 
 		NodePtr m_root;
+		/// Keep a list of nodes that have been removed but are still refered by other nodes (hardlinks).
+		std::vector< NodePtr > m_orphanNodes;
 
 		/// Returns where or not the index has changed since the last time it was written
 		bool hasChanged() const;
@@ -366,12 +387,18 @@ class FileIndexedIO::Index : public RefCounted
 		/// Queries the string cache
 		const StringCache &stringCache() const;
 
+		/// Used for creating hardlinks. The given node is about to store the given data, but if 
+		/// this index finds that data stored in other node, than it modifies the given node into a hardlink
+		/// and returns True. Otherwise it stores the hash of the given data and associates with the given node
+		/// and returns False.
+		bool findRepeatedData(Node* node, const char *data, Imf::Int64 size);
+
 	protected:
 
 		static const Imf::Int64 g_unversionedMagicNumber = 0x0B00B1E5;
 		static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 
-		static const Imf::Int64 g_currentVersion = 3;
+		static const Imf::Int64 g_currentVersion = 4;
 
 		Imf::Int64 m_version;
 
@@ -388,10 +415,13 @@ class FileIndexedIO::Index : public RefCounted
 
 		bool m_readOnly;
 		IndexToNodeMap m_indexToNodeMap;
+
 #ifndef NDEBUG
 		typedef std::map< Node*, unsigned long > NodeToIndexMap;
 		NodeToIndexMap m_nodeToIndexMap;
 #endif
+		typedef std::map< MurmurHash, Node * > HashToNodeMap;
+		HashToNodeMap m_hashToNodeMap;
 
 		StringCache m_stringCache;
 
@@ -423,6 +453,8 @@ class FileIndexedIO::Index : public RefCounted
 		void readNode( std::istream &f );
 
 		Imf::Int64 nodeCount( Node* n );
+
+		void forgetAboutNode( Node* n );
 };
 
 ///////////////////////////////////////////////
@@ -436,6 +468,8 @@ class FileIndexedIO::Index : public RefCounted
 FileIndexedIO::Node::Node(Index* idx, Imf::Int64 id) : RefCounted()
 {
 	m_parent = 0;
+	m_isLink = false;
+	m_linkCount = 0;
 
 	if (id != 0)
 	{
@@ -455,6 +489,15 @@ FileIndexedIO::Node::~Node()
 {
 }
 
+Imf::Int64 FileIndexedIO::Node::offset() const
+{
+	if ( m_isLink )
+	{
+		return m_idx->m_indexToNodeMap[ m_offset ]->m_offset;
+	}
+	return m_offset;
+}
+
 void FileIndexedIO::Node::registerChild( Node* c )
 {
 	if (c->m_parent)
@@ -472,14 +515,33 @@ void FileIndexedIO::Node::registerChild( Node* c )
 	m_children.insert( std::map< IndexedIO::EntryID, NodePtr >::value_type( c->m_entry.id(), c) );
 }
 
+bool FileIndexedIO::Node::increaseLinkCount()
+{
+	if ( m_linkCount == Imath::limits<LinkCount>::max() )
+	{
+		return false;
+	}
+
+	m_linkCount++;
+	m_idx->m_hasChanged = true;
+	return true;
+}
+
+bool FileIndexedIO::Node::decreaseLinkCount()
+{
+	m_linkCount--;
+	m_idx->m_hasChanged = true;
+	return !m_linkCount;
+}
+
 void FileIndexedIO::Node::write( std::ostream &f )
 {
-	char t = m_entry.entryType();
+	char t = ( m_isLink ? HARDLINK : m_entry.entryType() );
 	f.write( &t, sizeof(char) );
 
 	Imf::Int64 id = m_idx->m_stringCache.find( m_entry.id() );
 	writeLittleEndian<Imf::Int64>( f, id );
-	if ( m_entry.entryType() == IndexedIO::File )
+	if ( !m_isLink && m_entry.entryType() == IndexedIO::File )
 	{
 		t = m_entry.dataType();
 		f.write( &t, sizeof(char) );
@@ -500,13 +562,19 @@ void FileIndexedIO::Node::write( std::ostream &f )
 	}
 	else
 	{
-		writeLittleEndian<Imf::Int64>(f, (Imf::Int64)0);
+		writeLittleEndian<Imf::Int64>(f, Imath::limits<Imf::Int64>::max() );
 	}
 
-	if ( m_entry.entryType() == IndexedIO::File )
+	if ( m_isLink )
+	{
+		// m_offset holds the target node ID...
+		writeLittleEndian<Imf::Int64>(f, m_offset);
+	}
+	else if ( m_entry.entryType() == IndexedIO::File )
 	{
 		writeLittleEndian<Imf::Int64>(f, m_offset);
 		writeLittleEndian<Imf::Int64>(f, m_size);
+		writeLittleEndian<LinkCount>(f, m_linkCount);
 	}
 }
 
@@ -519,6 +587,11 @@ void FileIndexedIO::Node::read( std::istream &f )
 
 	const IndexedIO::EntryID *id;
 	IndexedIO::EntryType entryType = (IndexedIO::EntryType)t;
+	if ( t == HARDLINK )
+	{
+		entryType = IndexedIO::File;
+		m_isLink = true;
+	}
 	IndexedIO::DataType dataType = IndexedIO::Invalid;
 	Imf::Int64 arrayLength = 0;
 
@@ -539,14 +612,17 @@ void FileIndexedIO::Node::read( std::istream &f )
 		delete[] s;
 	}
 
-	if ( entryType == IndexedIO::File || m_idx->m_version < 2 )
+	if ( !m_isLink )
 	{
-		f.read( &t, sizeof(char) );
-		dataType = (IndexedIO::DataType)t;
-
-		if ( IndexedIO::Entry::isArray( dataType ) || m_idx->m_version < 3 )
+		if ( entryType == IndexedIO::File || m_idx->m_version < 2 )
 		{
-			readLittleEndian<Imf::Int64>( f, arrayLength );
+			f.read( &t, sizeof(char) );
+			dataType = (IndexedIO::DataType)t;
+	
+			if ( IndexedIO::Entry::isArray( dataType ) || m_idx->m_version < 3 )
+			{
+				readLittleEndian<Imf::Int64>( f, arrayLength );
+			}
 		}
 	}
 
@@ -573,47 +649,62 @@ void FileIndexedIO::Node::read( std::istream &f )
 	}
 #endif
 
+	m_idx->m_prevId = std::max( m_idx->m_prevId, m_id );
+
 	Imf::Int64 parentId;
 	readLittleEndian<Imf::Int64>(f, parentId );
 
-	m_idx->m_prevId = std::max( m_idx->m_prevId, parentId );
-	m_idx->m_prevId = std::max( m_idx->m_prevId, m_id );
-
-	if ( parentId >= m_idx->m_indexToNodeMap.size() || !m_idx->m_indexToNodeMap[parentId] )
+	if ( parentId != Imath::limits<Imf::Int64>::max() )
 	{
-		throw IOException("FileIndexedIO: parentId not found");
-	}
+		m_idx->m_prevId = std::max( m_idx->m_prevId, parentId );
 
-	Node* parent = m_idx->m_indexToNodeMap[parentId] ;
-	if (m_id && parent)
-	{
-		parent->registerChild(this);
-	}
-	else if (m_id != 0)
-	{
-		throw IOException("FileIndexedIO: Non-root node has no parent");
-	}
+		if ( parentId >= m_idx->m_indexToNodeMap.size() || !m_idx->m_indexToNodeMap[parentId] )
+		{
+			throw IOException("FileIndexedIO: parentId not found");
+		}
 
-	if ( m_entry.entryType() == IndexedIO::File || m_idx->m_version < 2 )
+		Node* parent = m_idx->m_indexToNodeMap[parentId] ;
+		if (m_id && parent)
+		{
+			parent->registerChild(this);
+		}
+	}
+	
+	if ( m_isLink )
+	{
+		Imf::Int64 targetNodeId;
+		// load Target Node ID in m_offset
+		readLittleEndian<Imf::Int64>(f, targetNodeId );
+		m_offset = targetNodeId;
+		m_size = 0;	// we cannot assure that the target node is already loaded, so we set size to zero and we do lazy load.
+	}
+	else if ( entryType == IndexedIO::File || m_idx->m_version < 2 )
 	{
 		readLittleEndian<Imf::Int64>(f, m_offset );
 		readLittleEndian<Imf::Int64>(f, m_size );
+
+		if ( m_idx->m_version >= 4 )
+		{
+			readLittleEndian<LinkCount>(f, m_linkCount);
+		}
 	}
 	else
 	{
 		m_offset = 0;
 		m_size = 0;
 	}
+
 }
 
 FileIndexedIO::Node* FileIndexedIO::Node::child( const IndexedIO::EntryID &name ) const
 {
 	ChildMap::const_iterator cit = m_children.find( name );
-	if (cit != m_children.end())
+	if (cit == m_children.end())
 	{
-		return cit->second.get();
+		return 0;
 	}
-	return 0;
+	Node *n = cit->second.get();
+	return n;
 }
 
 FileIndexedIO::Node* FileIndexedIO::Node::addChild( const IndexedIO::EntryID &childName )
@@ -772,6 +863,32 @@ FileIndexedIO::Index::Index( FilteredStream &f, bool readOnly ) : m_prevId(0), m
 		readNode( *inputStream );
 	}
 
+	// symlinks have to get the Entry information from their target nodes.
+	for (IndexToNodeMap::const_iterator it = m_indexToNodeMap.begin(); it != m_indexToNodeMap.end(); it++ )
+	{
+		Node *n = *it;
+		if ( !n )
+			continue;
+
+		if ( n->m_isLink && !n->m_size )
+		{
+			Imf::Int64 targetNodeId = n->m_offset;
+			if ( targetNodeId >= m_indexToNodeMap.size() || !m_indexToNodeMap[targetNodeId] )
+			{
+				throw IOException("FileIndexedIO: targetNodeId not found");
+			}
+			Node* targetNode = m_indexToNodeMap[targetNodeId];
+			unsigned long arrayLength = 0;
+			IndexedIO::DataType dataType = targetNode->m_entry.dataType();
+			if ( targetNode->m_entry.isArray() )
+			{
+				arrayLength = targetNode->m_entry.arrayLength();
+			}
+			n->m_entry = IndexedIO::Entry( n->m_entry.id(), IndexedIO::File, dataType, arrayLength );
+			n->m_size = targetNode->m_size;
+		}
+	}
+
 	Imf::Int64 numFreePages;
 	readLittleEndian<Imf::Int64>( *inputStream, numFreePages );
 
@@ -809,6 +926,11 @@ Imf::Int64 FileIndexedIO::Index::write( std::ostream & f )
 	writeLittleEndian<Imf::Int64>( compressingStream, numNodes);
 
 	write( compressingStream, m_root.get() );
+	// we write all the orphan nodes too
+	for ( std::vector<NodePtr>::const_iterator it = m_orphanNodes.begin(); it != m_orphanNodes.end(); it++ )
+	{
+		write( compressingStream, it->get() );
+	}
 
 	assert( m_freePagesOffset.size() == m_freePagesSize.size() );
 	Imf::Int64 numFreePages = m_freePagesSize.size();
@@ -1040,7 +1162,9 @@ void FileIndexedIO::Index::addFreePage(  Imf::Int64 offset, Imf::Int64 sz )
 
 Imf::Int64 FileIndexedIO::Index::nodeCount()
 {
-	return nodeCount(m_root.get());
+	Imf::Int64 c = nodeCount(m_root.get());
+	c += m_orphanNodes.size();
+	return c;
 }
 
 void FileIndexedIO::Index::write( std::ostream &f, Node* n )
@@ -1070,6 +1194,17 @@ void FileIndexedIO::Index::readNode( std::istream &f )
 	{
 		m_root = n;
 		m_stringCache.add("/");
+	}
+	else if ( !n->m_parent )
+	{
+		if ( n->m_linkCount )
+		{
+			m_orphanNodes.push_back( n );
+		}
+		else
+		{
+			throw IOException("FileIndexedIO: Non-root node has no parent.");
+		}
 	}
 }
 
@@ -1126,8 +1261,20 @@ bool FileIndexedIO::Index::hasChanged() const
 
 Imf::Int64 FileIndexedIO::Index::makeId()
 {
-	/// \todo maybe hash the name, check for uniqueness in the tree, then use that?
 	return ++m_prevId;
+}
+
+void FileIndexedIO::Index::forgetAboutNode( Node *n )
+{
+	// unregisters this node in the hash map in the index, so nobody can use this data
+	for( HashToNodeMap::iterator it = m_hashToNodeMap.begin(); it != m_hashToNodeMap.end(); it++ )
+	{
+		if ( it->second == n )
+		{
+			m_hashToNodeMap.erase( it );
+			break;
+		}
+	}
 }
 
 void FileIndexedIO::Index::deallocateWalk( Node* n )
@@ -1136,24 +1283,61 @@ void FileIndexedIO::Index::deallocateWalk( Node* n )
 
 	if (n->m_entry.entryType() == IndexedIO::File)
 	{
-		deallocate(n);
+		if ( n->m_isLink )
+		{
+			// follow the hardlink
+			Node *trgNode = m_indexToNodeMap[ n->m_offset ];
+			// decrement link count and if reaches zero then remove the target node (if that node is orphan)
+			if ( trgNode->decreaseLinkCount() && !trgNode->m_parent )
+			{
+				// the target node was already an orphan
+				deallocate( trgNode );
+				// remove the target node from the orphan list and also from the hash list, so it won't be referred again.
+				for ( std::vector< NodePtr >::iterator it = m_orphanNodes.begin(); it != m_orphanNodes.end(); it++ )
+				{
+					if ( it->get() == trgNode )
+					{
+						m_orphanNodes.erase( it );
+						break;
+					}
+				}
+				// remove the node from the hash map too.
+				forgetAboutNode( trgNode );
+			}
+		}
+		else if ( n->m_linkCount )
+		{
+			// The node is referred somewhere else, so we must prevent being deallocated
+			// by storing it in the orphan list
+			m_orphanNodes.push_back( n );
+			n->m_parent = 0;
+		}
+		else 
+		{
+			// Since we are deallocating the node, we should remove the node from the hash map too.
+			forgetAboutNode( n );
+			deallocate(n);
+		}
 	}
 
 	for (Node::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it)
 	{
 		deallocateWalk( it->second.get() );
 	}
+	n->m_children.clear();
 }
 
 void FileIndexedIO::Index::remove( Node* n )
 {
 	assert(n);
 
+	Node *parent = n->m_parent;
+
 	deallocateWalk(n);
 
-	if (n->m_parent)
+	if (parent)
 	{
-		n->m_parent->m_children.erase( n->m_entry.id() );
+		parent->m_children.erase( n->m_entry.id() );
 	}
 }
 
@@ -1184,6 +1368,40 @@ FileIndexedIO::Node* FileIndexedIO::Index::insert( Node* parent, IndexedIO::Entr
 	m_hasChanged = true;
 
 	return child;
+}
+
+bool FileIndexedIO::Index::findRepeatedData(Node* node, const char *data, Imf::Int64 size)
+{
+	// compute hash for the data
+	MurmurHash hash;
+	hash.append( data, size );
+
+	// see if it's already stored by another node..
+	std::pair< HashToNodeMap::iterator,bool > ret = m_hashToNodeMap.insert( std::pair<MurmurHash, Node *>( hash, node ) );
+	if ( !ret.second )
+	{
+		// check if the target node has the same data type stored (hashes could be the same even if data is not...)
+		Node *trgNode = ret.first->second;
+		if ( node->m_entry.dataType() == trgNode->m_entry.dataType() && size == trgNode->m_size )
+		{
+			// we already saved this data, so we changed the node into a hard link and not save any additional data for this node.
+			// but we first must make sure we can increment the linkCount in the target node...
+			if ( trgNode->increaseLinkCount() )
+			{
+				node->m_isLink = true;
+				node->m_offset = trgNode->m_id;
+				node->m_size = size;
+				return true;
+			}
+			else
+			{
+				// the target node cannot increase it's link count (too many repetitions), so we point the map to this new node, that
+				// has linkCount = 0.
+				ret.first->second = node;
+			}
+		}
+	}
+	return false;
 }
 
 ///////////////////////////////////////////////
@@ -1218,7 +1436,8 @@ class FileIndexedIO::IndexedFile : public RefCounted
 		void seekg( Node* node );
 
 		/// Write some data to the file. Its position is automatically allocated within the file, and the node
-		/// is updated to record this offset along with its size.
+		/// is updated to record this offset along with its size (or it's turned into a hardlink if the data is already stored by other node).
+		/// The hardlinks will only be created for nodes that have been saved on the same session. So edit mode will not be that great.
 		void write(Node* node, const char *data, Imf::Int64 size);
 
 		boost::optional<Imf::Int64> flush();
@@ -1228,6 +1447,7 @@ class FileIndexedIO::IndexedFile : public RefCounted
 	protected:
 
 		IndexPtr m_index;
+
 };
 
 FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO::OpenMode mode ) : m_filename( filename )
@@ -1381,7 +1601,7 @@ void FileIndexedIO::IndexedFile::seekg( Node* node )
 	assert( node->m_entry.entryType() == IndexedIO::File );
 	assert( m_stream );
 
-	m_stream->seekg( node->m_offset, std::ios::beg );
+	m_stream->seekg( node->offset(), std::ios::beg );
 }
 
 FileIndexedIO::Index* FileIndexedIO::IndexedFile::index() const
@@ -1436,6 +1656,10 @@ FileIndexedIO::IndexedFile::~IndexedFile()
 
 void FileIndexedIO::IndexedFile::write(Node* node, const char *data, Imf::Int64 size)
 {
+	// do not store data in the file if we have that data already store...
+	if ( m_index->findRepeatedData( node, data, size ) )
+		return;
+
 	/// Find next writable location
 	Imf::Int64 loc = m_index->allocate( size );
 
