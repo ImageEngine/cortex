@@ -207,7 +207,7 @@ class TestObjectIO( unittest.TestCase ) :
 		o["oneAgain"] = one
 
 		fio = FileIndexedIO( "test/o.fio", [], IndexedIOOpenMode.Write )
-		fio = fio.subdirectory( "a", IndexedIO.MissingBehavior.CreateIfMissing )
+		fio = fio.subdirectory( "a", IndexedIO.MissingBehaviour.CreateIfMissing )
 		d = fio.path()
 		o.save( fio, "test" )
 		self.assertEqual( fio.path(), d )

@@ -79,9 +79,9 @@ class FileIndexedIO : public IndexedIO
 
 		void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const;
 
-		IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing );
+		IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing );
 
-		ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing ) const;
+		ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const;
 
 		IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const;
 
@@ -93,9 +93,9 @@ class FileIndexedIO : public IndexedIO
 
 		ConstIndexedIOPtr parentDirectory() const;
 
-		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing );
+		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing );
 
-		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing ) const;
+		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const;
 
 		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);

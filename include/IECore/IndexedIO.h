@@ -114,7 +114,7 @@ class IndexedIO : public RefCounted
 			ThrowIfMissing = 0,
 			NullIfMissing,
 			CreateIfMissing
-		} MissingBehavior;
+		} MissingBehaviour;
 
 		typedef InternedString EntryID;
 		typedef std::vector< EntryID > EntryIDList;
@@ -169,13 +169,13 @@ class IndexedIO : public RefCounted
 		// Stores in the given array all the ids for the given entry type
 		virtual void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const = 0;
 
-		/// Returns a new interface for the child or if missing then consults missingBehavior and throws exception if ThrowIfMissing, 
+		/// Returns a new interface for the child or if missing then consults missingBehaviour and throws exception if ThrowIfMissing, 
 		//returns Null pointer if NullIfMissing or creates the child directory if CreateIfMissing.
-		virtual IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) = 0;
+		virtual IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehaviour missingBehaviour = ThrowIfMissing ) = 0;
 
-		/// Returns read-only interface for the child directory or if missing then consults missingBehavior and throws exception if 
+		/// Returns read-only interface for the child directory or if missing then consults missingBehaviour and throws exception if 
 		// ThrowIfMissing or CreateIfMissing, returns Null pointer if NullIfMissing.
-		virtual ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehavior missingBehavior = ThrowIfMissing ) const = 0;
+		virtual ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
 
 		/// Return details of a specific child entry or raises an exception if it doesn exist.
 		virtual IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const = 0;
@@ -193,10 +193,10 @@ class IndexedIO : public RefCounted
 		virtual ConstIndexedIOPtr parentDirectory() const = 0;
 
 		/// Returns a read-only interface for the given path in the file.
-		virtual IndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehavior missingBehavior = ThrowIfMissing ) = 0;
+		virtual IndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) = 0;
 
 		/// Returns a new interface for the given path in the file.
-		virtual ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehavior missingBehavior = ThrowIfMissing ) const = 0;
+		virtual ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
 
 		/// Create a new file containing the specified float array contents
 		/// \param name The name of the file to be written

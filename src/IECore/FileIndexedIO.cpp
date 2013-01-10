@@ -1860,13 +1860,13 @@ IndexedIO * FileIndexedIO::duplicate(Node *rootNode) const
 	return new FileIndexedIO( this, rootNode );
 }
 
-IndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehavior missingBehavior )
+IndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour )
 {
 	assert( m_node );
 	Node* childNode = m_node->child( name );
 	if ( !childNode )
 	{
-		if ( missingBehavior == IndexedIO::CreateIfMissing )
+		if ( missingBehaviour == IndexedIO::CreateIfMissing )
 		{
 			writable( name );
 			childNode = m_node->addChild( name );
@@ -1875,7 +1875,7 @@ IndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, Indexe
 				throw IOException( "FileIndexedIO: Could not insert child '" + name.value() + "'" );
 			}
 		}
-		else if ( missingBehavior == IndexedIO::NullIfMissing )
+		else if ( missingBehaviour == IndexedIO::NullIfMissing )
 		{
 			return NULL;
 		}
@@ -1887,18 +1887,18 @@ IndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, Indexe
 	return duplicate(childNode);
 }
 
-ConstIndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehavior missingBehavior ) const
+ConstIndexedIOPtr FileIndexedIO::subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour ) const
 {
 	readable(name);
 	assert( m_node );
 	Node* childNode = m_node->child( name );
 	if ( !childNode )
 	{
-		if ( missingBehavior == IndexedIO::NullIfMissing )
+		if ( missingBehaviour == IndexedIO::NullIfMissing )
 		{
 			return NULL;
 		}
-		if ( missingBehavior == IndexedIO::CreateIfMissing )
+		if ( missingBehaviour == IndexedIO::CreateIfMissing )
 		{
 			throw IOException( "FileIndexedIO: No write access!" );
 		}
@@ -1982,7 +1982,7 @@ ConstIndexedIOPtr FileIndexedIO::parentDirectory() const
 	return duplicate(parentNode);
 }
 
-IndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior )
+IndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour )
 {
 	// from the root go to the path
 	Node* root = m_node;
@@ -2000,7 +2000,7 @@ IndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, Index
 		Node* childNode = node->child( name );
 		if ( !childNode )
 		{
-			if ( missingBehavior == IndexedIO::CreateIfMissing )
+			if ( missingBehaviour == IndexedIO::CreateIfMissing )
 			{
 				writable( name );
 				childNode = node->addChild( name );
@@ -2009,7 +2009,7 @@ IndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, Index
 					throw IOException( "FileIndexedIO: Could not insert child '" + name.value() + "'" );
 				}
 			}
-			else if ( missingBehavior == IndexedIO::NullIfMissing )
+			else if ( missingBehaviour == IndexedIO::NullIfMissing )
 			{
 				return NULL;
 			}
@@ -2023,9 +2023,9 @@ IndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, Index
 	return duplicate(node);
 }
 
-ConstIndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehavior missingBehavior ) const
+ConstIndexedIOPtr FileIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour ) const
 {
-	return const_cast< FileIndexedIO * >(this)->directory( path, missingBehavior == IndexedIO::CreateIfMissing ? IndexedIO::ThrowIfMissing : missingBehavior );
+	return const_cast< FileIndexedIO * >(this)->directory( path, missingBehaviour == IndexedIO::CreateIfMissing ? IndexedIO::ThrowIfMissing : missingBehaviour );
 }
 
 char *FileIndexedIO::ioBuffer( unsigned long size ) const

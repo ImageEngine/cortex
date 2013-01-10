@@ -130,11 +130,11 @@ struct IndexedIOHelper
 		return p->subdirectory(name);
 	}
 
-	static IndexedIOPtr directory(IndexedIOPtr p, list l, IndexedIO::MissingBehavior missingBehavior = IndexedIO::ThrowIfMissing )
+	static IndexedIOPtr directory(IndexedIOPtr p, list l, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing )
 	{
 		IndexedIO::EntryIDList path;
 		IndexedIOHelper::listToEntryIds( l, path );
-		return p->directory(path, missingBehavior);
+		return p->directory(path, missingBehaviour);
 	}
 
 	static list entryIds(IndexedIOPtr p)
@@ -288,7 +288,7 @@ struct IndexedIOHelper
 void bindIndexedIO(const char *bindName)
 {
 	IndexedIOPtr (IndexedIO::*nonConstParentDirectory)() = &IndexedIO::parentDirectory;
-	IndexedIOPtr (IndexedIO::*nonConstSubdirectory)(const IndexedIO::EntryID &, IndexedIO::MissingBehavior) = &IndexedIO::subdirectory;
+	IndexedIOPtr (IndexedIO::*nonConstSubdirectory)(const IndexedIO::EntryID &, IndexedIO::MissingBehaviour) = &IndexedIO::subdirectory;
 	void (IndexedIO::*writeFloat)(const IndexedIO::EntryID &, const float &) = &IndexedIO::write;
 	void (IndexedIO::*writeDouble)(const IndexedIO::EntryID &, const double &) = &IndexedIO::write;
 	void (IndexedIO::*writeInt)(const IndexedIO::EntryID &, const int &) = &IndexedIO::write;
@@ -386,7 +386,7 @@ void bindIndexedIO(const char *bindName)
 
 	;
 
-	enum_< IndexedIO::MissingBehavior > ("MissingBehavior")
+	enum_< IndexedIO::MissingBehaviour > ("MissingBehaviour")
 		.value("ThrowIfMissing", IndexedIO::ThrowIfMissing)
 		.value("NullIfMissing", IndexedIO::NullIfMissing)
 		.value("CreateIfMissing", IndexedIO::CreateIfMissing)
