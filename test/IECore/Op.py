@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -45,6 +45,8 @@ class PythonOp( Op ) :
 	def doOperation( self, operands ) :
 
 		return StringData( operands['name'].value )
+
+registerRunTimeTyped( PythonOp )
 
 class TestPythonOp( unittest.TestCase ) :
 
@@ -125,6 +127,18 @@ class TestPythonOp( unittest.TestCase ) :
 		op()
 		op['second'] = 2
 		self.assertRaises( Exception, op )
+
+	def testRunTimeTyped( self ) :
+	
+		op = PythonOp()
+
+		self.assertEqual( op.typeName(), "PythonOp" )
+
+		self.failUnless( op.isInstanceOf( TypeId.Op ), True )
+		self.failUnless( op.isInstanceOf( "Op" ), True )
+
+		self.failUnless( op.isInstanceOf( "PythonOp" ), True )
+		self.failUnless( op.isInstanceOf( PythonOp.staticTypeId() ), True )
 
 if __name__ == "__main__":
 	unittest.main()
