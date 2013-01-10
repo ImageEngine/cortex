@@ -62,18 +62,26 @@ OP_TemplatePair *SOP_ModelCacheSource::buildParameters()
 	{
 		unsigned numMDCParms = PRM_Template::countTemplates( ModelCacheNode<SOP_Node>::parameters );
 		thisTemplate = new PRM_Template[ numMDCParms + 3 ];
-		thisTemplate[0] = ModelCacheNode<SOP_Node>::parameters[0];
-		thisTemplate[1] = ModelCacheNode<SOP_Node>::parameters[1];
-		thisTemplate[2] = PRM_Template(
+		
+		// add the file parms
+		for ( unsigned i = 0; i < 3; ++i )
+		{
+			thisTemplate[i] = ModelCacheNode<SOP_Node>::parameters[i];
+		}
+		
+		// then the filters
+		thisTemplate[3] = PRM_Template(
 			PRM_STRING, 1, &pShapeFilter, &shapeFilterDefault, &shapeFilterMenu, 0, 0, 0, 0,
 			"A list of filters to decide which shapes to load. Uses Houdini matching syntax"
 		);
-		thisTemplate[3] = PRM_Template(
+		thisTemplate[4] = PRM_Template(
 			PRM_STRING, 1, &pAttributeFilter, &attributeFilterDefault, 0, 0, 0, 0, 0,
 			"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
 			"P will always be loaded."
 		);
-		for ( unsigned i = 2; i < numMDCParms; ++i )
+		
+		// then the rest
+		for ( unsigned i = 3; i < numMDCParms; ++i )
 		{
 			thisTemplate[2+i] = ModelCacheNode<SOP_Node>::parameters[i];
 		}

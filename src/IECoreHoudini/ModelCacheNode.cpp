@@ -61,19 +61,19 @@ ModelCacheNode<BaseType>::~ModelCacheNode()
 }
 
 template<typename BaseType>
-PRM_Name ModelCacheNode<BaseType>::pFileName( "fileName", "File Name" );
-
-template<typename BaseType>
-PRM_Name ModelCacheNode<BaseType>::pObjectPath( "objectPath", "Object Path" );
-
-template<typename BaseType>
-PRM_Name ModelCacheNode<BaseType>::pSpace( "space", "Space" );
+PRM_Name ModelCacheNode<BaseType>::pFile( "file", "File" );
 
 template<typename BaseType>
 PRM_Name ModelCacheNode<BaseType>::pReload( "reload", "Reload" );
 
 template<typename BaseType>
-PRM_Default ModelCacheNode<BaseType>::objectPathDefault( 0, "/" );
+PRM_Name ModelCacheNode<BaseType>::pRoot( "root", "Root" );
+
+template<typename BaseType>
+PRM_Name ModelCacheNode<BaseType>::pSpace( "space", "Space" );
+
+template<typename BaseType>
+PRM_Default ModelCacheNode<BaseType>::rootDefault( 0, "/" );
 
 template<typename BaseType>
 PRM_Default ModelCacheNode<BaseType>::spaceDefault( World );
@@ -87,30 +87,34 @@ static PRM_Name spaceNames[] = {
 };
 
 template<typename BaseType>
-PRM_ChoiceList ModelCacheNode<BaseType>::objectPathMenu( PRM_CHOICELIST_REPLACE, &ModelCacheNode<BaseType>::buildObjectPathMenu );
+PRM_ChoiceList ModelCacheNode<BaseType>::rootMenu( PRM_CHOICELIST_REPLACE, &ModelCacheNode<BaseType>::buildRootMenu );
 
 template<typename BaseType>
 PRM_ChoiceList ModelCacheNode<BaseType>::spaceList( PRM_CHOICELIST_SINGLE, &spaceNames[0] );
 
 template<typename BaseType>
 PRM_Template ModelCacheNode<BaseType>::parameters[] = {
-	PRM_Template( PRM_FILE, 1, &pFileName ),
+	PRM_Template( PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile ),
 	PRM_Template(
-		PRM_STRING, 1, &pObjectPath, &objectPathDefault, &objectPathMenu, 0, 0, 0, 0,
-		"Path inside the MDC for the hierarchy to load"
+		PRM_CALLBACK, 1, &pReload, 0, 0, 0, &ModelCacheNode<BaseType>::reloadButtonCallback, 0, 0,
+		"Removes the current MDC file from the cache. This will force a recook on this node, and "
+		"cause all other nodes using this MDC file to require a recook as well."
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, 0, 0, 0,
+		"Root path inside the MDC of the hierarchy to load"
 	),
 	PRM_Template(
 		PRM_INT, 1, &pSpace, &spaceDefault, &spaceList, 0, 0, 0, 0,
-		"Re-orient the objects by choosing a space. World transforms from the root on down the hierarchy, "
-		"Path re-roots the transformation starting at the specified path, Leaf uses the leaf level "
+		"Re-orient the objects by choosing a space. World transforms from \"/\" on down the hierarchy, "
+		"Path re-roots the transformation starting at the specified root path, Leaf uses the leaf level "
 		"transformations only, and Object is an identity transform"
 	),
-	PRM_Template( PRM_CALLBACK, 1, &pReload, 0, 0, 0, &ModelCacheNode<BaseType>::reloadButtonCallback ),
 	PRM_Template()
 };
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::buildObjectPathMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
+void ModelCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
 {
 	ModelCacheNode<BaseType> *node = reinterpret_cast<ModelCacheNode<BaseType>*>( data );
 	if ( !node )
@@ -155,7 +159,7 @@ template<typename BaseType>
 bool ModelCacheNode<BaseType>::ensureFile( std::string &file )
 {
 	UT_String value;
-	this->evalString( value, pFileName.getToken(), 0, 0 );
+	this->evalString( value, pFile.getToken(), 0, 0 );
 	file = value.toStdString();
 	
 	boost::filesystem::path filePath = boost::filesystem::path( file );
@@ -171,7 +175,7 @@ template<typename BaseType>
 std::string ModelCacheNode<BaseType>::getPath()
 {
 	UT_String value;
-	this->evalString( value, pObjectPath.getToken(), 0, 0 );
+	this->evalString( value, pRoot.getToken(), 0, 0 );
 	return ( value == "" ) ? "/" : value.toStdString();
 }
 

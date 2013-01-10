@@ -62,19 +62,19 @@ class ModelCacheNode : public BaseType
 		
 		static PRM_Template parameters[];
 		
-		static PRM_Name pFileName;
-		static PRM_Name pObjectPath;
+		static PRM_Name pFile;
+		static PRM_Name pRoot;
 		static PRM_Name pSpace;
 		static PRM_Name pReload;
 		
-		static PRM_Default objectPathDefault;
+		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
 		
-		static PRM_ChoiceList objectPathMenu;
+		static PRM_ChoiceList rootMenu;
 		static PRM_ChoiceList spaceList;
 		
 		static int reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
-		static void buildObjectPathMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
+		static void buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
 		enum Space
 		{

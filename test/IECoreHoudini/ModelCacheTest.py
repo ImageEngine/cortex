@@ -46,21 +46,21 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		if not parent :
 			parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
 		sop = parent.createNode( "ieModelCacheSource" )
-		sop.parm( "fileName" ).set( TestModelCache.__testFile )
+		sop.parm( "file" ).set( TestModelCache.__testFile )
 		return sop
 	
 	def xform( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" )
 		xform = parent.createNode( "ieModelCacheTransform" )
-		xform.parm( "fileName" ).set( TestModelCache.__testFile )
+		xform.parm( "file" ).set( TestModelCache.__testFile )
 		return xform
 	
 	def geometry( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" )
 		geometry = parent.createNode( "ieModelCacheGeometry" )
-		geometry.parm( "fileName" ).set( TestModelCache.__testFile )
+		geometry.parm( "file" ).set( TestModelCache.__testFile )
 		return geometry
 	
 	def writeMDC( self, rotation=IECore.V3d( 0, 0, 0 ) ) :
@@ -95,13 +95,13 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		
 		def testNode( node ) :
 			
-			node.parm( "fileName" ).set( "" )
+			node.parm( "file" ).set( "" )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )		
-			node.parm( "fileName" ).set( "/tmp/fake" )
+			node.parm( "file" ).set( "/tmp/fake" )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
-			node.parm( "fileName" ).set( TestModelCache.__testFile )
+			node.parm( "file" ).set( TestModelCache.__testFile )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
 			self.writeMDC()
@@ -123,13 +123,13 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 			node.parm( "reload" ).pressButton()
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
-			node.parm( "objectPath" ).set( "/1" )
+			node.parm( "root" ).set( "/1" )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 1, 0, 0 ) )
-			node.parm( "objectPath" ).set( "/1/2" )
+			node.parm( "root" ).set( "/1/2" )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 3, 0, 0 ) )
-			node.parm( "objectPath" ).set( "/1/2/3" )
+			node.parm( "root" ).set( "/1/2/3" )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 6, 0, 0 ) )
 
@@ -143,20 +143,20 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		def testRotated( node ) :
 			
 			node.parm( "reload" ).pressButton()
-			node.parm( "objectPath" ).set( "/" )
+			node.parm( "root" ).set( "/" )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
 			self.assertEqual( node.parmTransform().extractRotates(), hou.Vector3( 0, 0, 0 ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
-			node.parm( "objectPath" ).set( "/1" )
+			node.parm( "root" ).set( "/1" )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 1, 0, 0 ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -30 ) ) )
-			node.parm( "objectPath" ).set( "/1/2" )
+			node.parm( "root" ).set( "/1/2" )
 			node.cook()
 			self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 2.73205, -1, 0 ) ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -60 ) ) )
-			node.parm( "objectPath" ).set( "/1/2/3" )
+			node.parm( "root" ).set( "/1/2/3" )
 			node.cook()
 			self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 4.23205, -3.59808, 0 ) ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -90 ) ) )
@@ -171,7 +171,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		def testSimple( node ) :
 			
 			node.parm( "reload" ).pressButton()
-			node.parm( "objectPath" ).set( "/1/2" )
+			node.parm( "root" ).set( "/1/2" )
 			self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.ModelCacheNode.Space.World )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 3, 0, 0 ) )
@@ -230,7 +230,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
-		node.parm( "objectPath" ).set( "/1" )
+		node.parm( "root" ).set( "/1" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -242,7 +242,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
-		node.parm( "objectPath" ).set( "/1/2" )
+		node.parm( "root" ).set( "/1/2" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 12 )
@@ -253,7 +253,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
-		node.parm( "objectPath" ).set( "/1/2/3" )
+		node.parm( "root" ).set( "/1/2/3" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
@@ -315,7 +315,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		
-		node.parm( "objectPath" ).set( "/1" )
+		node.parm( "root" ).set( "/1" )
 		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.World )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
