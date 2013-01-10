@@ -173,11 +173,15 @@ class FileIndexedIO : public IndexedIO
 		template<typename T>
 		void write(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength);
 
+		// Write an array of POD types (without temporary buffers - used on little endian platforms)
+		template<typename T>
+		void rawWrite(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength);
+
 		// Read an array of POD types
 		template<typename T>
 		void read(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const;
 
-		// Read an array of POD types
+		// Read an array of POD types (without temporary buffers - used on little endian platforms)
 		template<typename T>
 		void rawRead(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const;
 
@@ -185,11 +189,15 @@ class FileIndexedIO : public IndexedIO
 		template<typename T>
 		void write(const IndexedIO::EntryID &name, const T &x);
 
+		// Write an instance of a type which is able to flatten itself (without temporary buffers - used on little endian platforms).
+		template<typename T>
+		void rawWrite(const IndexedIO::EntryID &name, const T &x);
+
 		// Read an instance of a type which is able to unflatten itself.
 		template<typename T>
 		void read(const IndexedIO::EntryID &name, T &x) const;
 
-		// Read an instance of a type which is able to unflatten itself.
+		// Read an instance of a type which is able to unflatten itself (without temporary buffers - used on little endian platforms).
 		template<typename T>
 		void rawRead(const IndexedIO::EntryID &name, T &x) const;
 

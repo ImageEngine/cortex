@@ -2144,6 +2144,28 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned l
 }
 
 template<typename T>
+void FileIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength)
+{
+	writable(name);
+	remove(name, false);
+
+	Node* node = m_node->addChild( name );
+	if (node)
+	{
+		unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
+		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
+
+		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
+
+		m_indexedFile->write( node, (char*)x, size );
+	}
+	else
+	{
+		throw IOException( "FileIndexedIO: Could not insert node '" + name.value() + "' into index" );
+	}
+}
+
+template<typename T>
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 {
 	writable(name);
@@ -2162,6 +2184,28 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, 0) ;
 
 		m_indexedFile->write( node, data, size );
+	}
+	else
+	{
+		throw IOException( "FileIndexedIO: Could not insert node '" + name.value() + "' into index" );
+	}
+}
+
+template<typename T>
+void FileIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T &x)
+{
+	writable(name);
+	remove(name, false);
+
+	Node* node = m_node->addChild( name );
+	if (node)
+	{
+		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
+		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
+
+		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, 0) ;
+
+		m_indexedFile->write( node, (char*)&x, size );
 	}
 	else
 	{
@@ -2255,51 +2299,59 @@ void FileIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 	m_indexedFile->m_stream->read( (char*)&x, size );
 }
 
+#ifdef BOOST_LITTLE_ENDIAN
+#define READ	rawRead
+#define WRITE	rawWrite
+#else
+#define READ	read
+#define WRITE	write
+#endif
+
 // Write
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength)
 {
-	write<float>(name, x, arrayLength);
+	WRITE<float>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength)
 {
-	write<double>(name, x, arrayLength);
+	WRITE<double>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength)
 {
-	write<half>(name, x, arrayLength);
+	WRITE<half>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength)
 {
-	write<int>(name, x, arrayLength);
+	WRITE<int>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength)
 {
-	write<int64_t>(name, x, arrayLength);
+	WRITE<int64_t>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength)
 {
-	write<uint64_t>(name, x, arrayLength);
+	WRITE<uint64_t>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength)
 {
-	write<unsigned int>(name, x, arrayLength);
+	WRITE<unsigned int>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength)
 {
-	write<char>(name, x, arrayLength);
+	WRITE<char>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength)
 {
-	write<unsigned char>(name, x, arrayLength);
+	WRITE<unsigned char>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength)
@@ -2309,42 +2361,42 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const std::string *x, 
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength)
 {
-	write<short>(name, x, arrayLength);
+	WRITE<short>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength)
 {
-	write<unsigned short>(name, x, arrayLength);
+	WRITE<unsigned short>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const float &x)
 {
-	write<float>(name, x);
+	WRITE<float>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const double &x)
 {
-	write<double>(name, x);
+	WRITE<double>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const half &x)
 {
-	write<half>(name, x);
+	WRITE<half>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const int &x)
 {
-	write<int>(name, x);
+	WRITE<int>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const int64_t &x)
 {
-	write<int64_t>(name, x);
+	WRITE<int64_t>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const uint64_t &x)
 {
-	write<uint64_t>(name, x);
+	WRITE<uint64_t>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const std::string &x)
@@ -2354,35 +2406,29 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const std::string &x)
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned int &x)
 {
-	write<unsigned int>(name, x);
+	WRITE<unsigned int>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const char &x)
 {
-	write<char>(name, x);
+	WRITE<char>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned char &x)
 {
-	write<unsigned char>(name, x);
+	WRITE<unsigned char>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const short &x)
 {
-	write<short>(name, x);
+	WRITE<short>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short &x)
 {
-	write<unsigned short>(name, x);
+	WRITE<unsigned short>(name, x);
 }
 // Read
-
-#ifdef BOOST_LITTLE_ENDIAN
-#define READ	rawRead
-#else
-#define READ	read
-#endif
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const
 {
