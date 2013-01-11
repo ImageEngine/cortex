@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,13 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/MeshPrimitive.h"
 
 #include "IECoreGL/Font.h"
 #include "IECoreGL/ToGLMeshConverter.h"
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/ShaderStateComponent.h"
-
-#include "IECore/MeshPrimitive.h"
 
 using namespace IECoreGL;
 using namespace std;
@@ -50,6 +49,7 @@ IE_CORE_DEFINERUNTIMETYPED( Font );
 Font::Font( IECore::FontPtr font )
 	:	m_font( font ), m_texture( 0 )
 {
+	m_meshes.resize( 128 );
 }
 
 Font::~Font()
@@ -63,10 +63,9 @@ IECore::Font *Font::coreFont()
 
 const MeshPrimitive *Font::mesh( char c ) const
 {
-	MeshMap::const_iterator it = m_meshes.find( c );
-	if( it!=m_meshes.end() )
+	if( m_meshes[c] )
 	{
-		return it->second;
+		return m_meshes[c].get();
 	}
 
 	ToGLMeshConverter converter( m_font->mesh( c ) );

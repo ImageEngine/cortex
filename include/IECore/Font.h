@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,18 +35,10 @@
 #ifndef IECORE_FONT_H
 #define IECORE_FONT_H
 
-#include "IECore/RunTimeTyped.h"
-
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathBox.h"
 
-#include "boost/shared_ptr.hpp"
-
-#include <map>
-
-/// Forward declarations for freetype types
-typedef struct FT_LibraryRec_ *FT_Library;
-typedef struct FT_FaceRec_ *FT_Face;
+#include "IECore/RunTimeTyped.h"
 
 namespace IECore
 {
@@ -92,7 +84,7 @@ class Font : public RunTimeTyped
 		/// the current curve tolerance. This returns a reference
 		/// into an internal cache and hence the resulting mesh
 		/// is const.
-		ConstMeshPrimitivePtr mesh( char c ) const;
+		const MeshPrimitive *mesh( char c ) const;
 		/// Returns a mesh representing the specified string,
 		/// using the current curve tolerance and kerning.
 		MeshPrimitivePtr mesh( const std::string &text ) const;
@@ -123,7 +115,7 @@ class Font : public RunTimeTyped
 		/// origin of the character on the baseline - bear in mind that image coordinates
 		/// increase from top to bottom, so the top of the character will typically
 		/// have a negative y coordinate in pixel space.
-		ConstImagePrimitivePtr image( char c ) const;
+		const ImagePrimitive *image( char c ) const;
 		/// Returns an image containing a grid of 16x8 characters containing
 		/// all the chars from 0-127 inclusive. This too has a single "Y" channel.
 		/// \todo These images currently return a straight conversion of the data
@@ -133,31 +125,11 @@ class Font : public RunTimeTyped
 
 	private :
 
-		Imath::Box2i boundingWindow() const;
+		IE_CORE_FORWARDDECLARE( Implementation );
+		ImplementationPtr m_implementation;
 
 		class Mesher;
-
-		static FT_Library library();
-
-		std::string m_fileName;
-
-		FT_Face m_face;
-		float m_kerning;
-		float m_curveTolerance;
-		float m_pixelsPerEm;
-
-		struct Mesh;
-		typedef boost::shared_ptr<Mesh> MeshPtr;
-		typedef boost::shared_ptr<const Mesh> ConstMeshPtr;
-		typedef std::map<char, ConstMeshPtr> MeshMap;
-		mutable MeshMap m_meshes;
-
-		typedef std::map<char, ConstImagePrimitivePtr> ImageMap;
-		mutable ImageMap m_images;
-
-		ConstMeshPtr cachedMesh( char c ) const;
-		ConstImagePrimitivePtr cachedImage( char c ) const;
-
+		
 };
 
 IE_CORE_DECLAREPTR( Font );

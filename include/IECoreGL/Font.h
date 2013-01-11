@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,10 @@
 #ifndef IECOREGL_FONT_H
 #define IECOREGL_FONT_H
 
+#include "IECore/Font.h"
+
 #include "IECoreGL/TypeIds.h"
 #include "IECoreGL/AlphaTexture.h"
-
-#include "IECore/Font.h"
 
 namespace IECoreGL
 {
@@ -70,8 +70,8 @@ class Font : public IECore::RunTimeTyped
 
 		IECore::FontPtr m_font;
 
-		typedef std::map<char, ConstMeshPrimitivePtr> MeshMap;
-		mutable MeshMap m_meshes;
+		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
+		mutable MeshVector m_meshes;
 
 		mutable ConstAlphaTexturePtr m_texture;
 
