@@ -158,9 +158,7 @@ int ModelCacheNode<BaseType>::reloadButtonCallback( void *data, int index, float
 template<typename BaseType>
 bool ModelCacheNode<BaseType>::ensureFile( std::string &file )
 {
-	UT_String value;
-	this->evalString( value, pFile.getToken(), 0, 0 );
-	file = value.toStdString();
+	file = getFile();
 	
 	boost::filesystem::path filePath = boost::filesystem::path( file );
 	if ( filePath.extension() == ".mdc" && boost::filesystem::exists( filePath ) )
@@ -172,11 +170,43 @@ bool ModelCacheNode<BaseType>::ensureFile( std::string &file )
 }
 
 template<typename BaseType>
+std::string ModelCacheNode<BaseType>::getFile()
+{
+	UT_String value;
+	this->evalString( value, pFile.getToken(), 0, 0 );
+	return ( value == "" ) ? "/" : value.toStdString();
+}
+
+template<typename BaseType>
+void ModelCacheNode<BaseType>::setFile( std::string file )
+{
+	this->setString( UT_String( file ), CH_STRING_LITERAL, pFile.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
 std::string ModelCacheNode<BaseType>::getPath()
 {
 	UT_String value;
 	this->evalString( value, pRoot.getToken(), 0, 0 );
 	return ( value == "" ) ? "/" : value.toStdString();
+}
+
+template<typename BaseType>
+void ModelCacheNode<BaseType>::setPath( std::string path )
+{
+	this->setString( UT_String( path ), CH_STRING_LITERAL, pRoot.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+typename ModelCacheNode<BaseType>::Space ModelCacheNode<BaseType>::getSpace()
+{
+	return (Space)this->evalInt( pSpace.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void ModelCacheNode<BaseType>::setSpace( ModelCacheNode<BaseType>::Space space )
+{
+	this->setInt( pSpace.getToken(), 0, 0, space );
 }
 
 template<typename BaseType>

@@ -80,19 +80,35 @@ class ModelCacheNode : public BaseType
 		{
 			World,
 			Path,
+			/// \todo: rename to Local
 			Leaf,
+			/// \todo: rename to Identity?
 			Object
 		};
+		
+		/// convienence methods for the common parameters;
+		std::string getFile();
+		void setFile( std::string file );
+		std::string getPath();
+		void setPath( std::string path );
+		Space getSpace();
+		void setSpace( Space space );
 	
 	protected :
 		
-		std::string getPath();
-		bool ensureFile( std::string &file );
-		void descendantNames( const IECore::ModelCache *cache, std::vector<std::string> &descendants );
-		void objectNames( const IECore::ModelCache *cache, std::vector<std::string> &objects );
-		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
-		
+		/// Access point to the actual ModelCache. All derived classes should only access the cache
+		/// using this method, and must hold onto an EntryPtr retrieved from this utility while
+		/// reading the ModelCache.
 		static ModelCacheUtil::Cache &cache();
+		
+		/// get the file and ensure it is a valid MDC
+		bool ensureFile( std::string &file );
+		/// get a breadth first list of all descendant paths
+		void descendantNames( const IECore::ModelCache *cache, std::vector<std::string> &descendants );
+		/// get a depth first list of all object names
+		void objectNames( const IECore::ModelCache *cache, std::vector<std::string> &objects );
+		/// utility method to build a UI menu from one of the previous lists
+		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
 
 };
 

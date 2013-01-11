@@ -52,7 +52,9 @@ class SOP_ModelCacheSource : public ModelCacheNode<SOP_Node>
 
 		SOP_ModelCacheSource( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SOP_ModelCacheSource();
-
+		
+		static const char *typeName;
+		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
 		

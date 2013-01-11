@@ -47,6 +47,8 @@
 using namespace IECore;
 using namespace IECoreHoudini;
 
+const char *SOP_ModelCacheSource::typeName = "ieModelCacheSource";
+
 PRM_Name SOP_ModelCacheSource::pShapeFilter( "shapeFilter", "Shape Filter" );
 PRM_Name SOP_ModelCacheSource::pAttributeFilter( "attributeFilter", "Attribute Filter" );
 
@@ -164,7 +166,7 @@ OP_ERROR SOP_ModelCacheSource::cookMySop( OP_Context &context )
 	}
 	attributeFilter.compile( value );
 	
-	Space space = (Space)evalInt( pSpace.getToken(), 0, 0 );
+	Space space = getSpace();
 	Imath::M44d transform = ( space == World ) ? cache().worldTransform( file, path ) : Imath::M44d();
 	
 	ModelCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
