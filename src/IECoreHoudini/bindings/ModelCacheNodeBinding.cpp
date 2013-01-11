@@ -56,7 +56,7 @@ void IECoreHoudini::bindModelCacheNode()
 	enum_<ModelCacheNode<OP_Node>::Space>( "Space" )
 		.value( "World", ModelCacheNode<OP_Node>::World )
 		.value( "Path", ModelCacheNode<OP_Node>::Path )
-		.value( "Leaf", ModelCacheNode<OP_Node>::Leaf )
+		.value( "Local", ModelCacheNode<OP_Node>::Local )
 		.value( "Object", ModelCacheNode<OP_Node>::Object )
 	;
 	

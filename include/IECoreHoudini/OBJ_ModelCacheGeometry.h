@@ -64,7 +64,7 @@ class OBJ_ModelCacheGeometry : public OBJ_ModelCacheNode<OBJ_Geometry>
 		
 		/// Called by buildHierarchy() to load the ModelCache. The Space parameter will
 		/// determine what settings are used. World and Path will load all descedants,
-		/// while Leaf and Object will load the immediate child object only.
+		/// while Local and Object will load the immediate child object only.
 		virtual void doBuildGeometry( const IECore::ModelCache *cache );
 
 };

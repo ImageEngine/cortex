@@ -151,7 +151,7 @@ void OBJ_ModelCacheTransform::doBuildObject( const ModelCache *cache, bool allDe
 	
 	geo->setFile( getFile() );
 	geo->setPath( cache->path() );
-	/// \todo: use Hierarchy to set to Leaf in Parenting mode
+	/// \todo: use Hierarchy to set to Local in Parenting mode
 	Space space = ( allDescendants ) ? Path : Object;
 	geo->setSpace( (OBJ_ModelCacheGeometry::Space)space );
 	
@@ -166,7 +166,7 @@ void OBJ_ModelCacheTransform::doBuildChild( const ModelCache *cache, bool allDes
 	
 	xform->setFile( getFile() );
 	xform->setPath( cache->path() );
-	xform->setSpace( Leaf );
+	xform->setSpace( Local );
 	xform->setInt( pHierarchy.getToken(), 0, 0, evalInt( pHierarchy.getToken(), 0, 0 ) );
 	xform->setInt( pDepth.getToken(), 0, 0, evalInt( pDepth.getToken(), 0, 0 ) );
 	

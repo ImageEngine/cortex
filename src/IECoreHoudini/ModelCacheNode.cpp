@@ -81,7 +81,7 @@ PRM_Default ModelCacheNode<BaseType>::spaceDefault( World );
 static PRM_Name spaceNames[] = {
 	PRM_Name( "0", "World" ),
 	PRM_Name( "1", "Path" ),
-	PRM_Name( "2", "Leaf" ),
+	PRM_Name( "2", "Local" ),
 	PRM_Name( "3", "Object" ),
 	PRM_Name( 0 ) // sentinal
 };
@@ -107,7 +107,7 @@ PRM_Template ModelCacheNode<BaseType>::parameters[] = {
 	PRM_Template(
 		PRM_INT, 1, &pSpace, &spaceDefault, &spaceList, 0, 0, 0, 0,
 		"Re-orient the objects by choosing a space. World transforms from \"/\" on down the hierarchy, "
-		"Path re-roots the transformation starting at the specified root path, Leaf uses the leaf level "
+		"Path re-roots the transformation starting at the specified root path, Local uses the current level "
 		"transformations only, and Object is an identity transform"
 	),
 	PRM_Template()

@@ -191,7 +191,7 @@ void SOP_ModelCacheSource::loadObjects( const IECore::ModelCache *cache, Imath::
 		modifyObject( object, fullName, attributeFilter );
 		
 		Imath::M44d currentTransform;
-		if ( space == Leaf )
+		if ( space == Local )
 		{
 			currentTransform = cache->readTransform();
 		}

@@ -80,9 +80,7 @@ class ModelCacheNode : public BaseType
 		{
 			World,
 			Path,
-			/// \todo: rename to Local
-			Leaf,
-			/// \todo: rename to Identity?
+			Local,
 			Object
 		};
 		

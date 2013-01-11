@@ -162,7 +162,7 @@ OP_ERROR OBJ_ModelCacheNode<BaseType>::cookMyObj( OP_Context &context )
 	{
 		transform = ModelCacheNode<BaseType>::cache().worldTransform( file, path );
 	}
-	else if ( space == ModelCacheNode<OP_Node>::Leaf )
+	else if ( space == ModelCacheNode<OP_Node>::Local )
 	{
 		transform = ModelCacheNode<BaseType>::cache().entry( file, path )->modelCache()->readTransform();
 	}
