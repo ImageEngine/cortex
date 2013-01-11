@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -100,19 +100,20 @@ FrameBuffer::~FrameBuffer()
 unsigned int FrameBuffer::maxColors()
 {
 	GLint m;
-	glGetIntegerv( GL_MAX_DRAW_BUFFERS, &m );
+	glGetIntegerv( GL_MAX_COLOR_ATTACHMENTS, &m );
 	return m;
 }
 
 void FrameBuffer::setColor( TexturePtr texture, unsigned int index )
-{
+{	
+	if( index >= maxColors() )
+	{
+		throw IECore::Exception( "Attachment index exceeds GL_MAX_COLOR_ATTACHMENTS." );
+	}
+	
 	ScopedBinding binding( *this );
 
-	if( index )
-	{
-		IECore::msg( IECore::Msg::Warning, "FrameBuffer::setColor", "Attachment points other than 0 not implemented yet." );
-	}
-	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->m_texture, 0 );
+	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, texture->m_texture, 0 );
 	m_colorAttachments.resize( std::max( (unsigned int)m_colorAttachments.size(), (unsigned int)index + 1 ) );
 	m_colorAttachments[index] = texture;
 }
