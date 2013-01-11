@@ -43,13 +43,14 @@ namespace IECoreHoudini
 {
 
 /// OBJ for loading a transform or building a hierarchy from an IECore::ModelCache
-/// \todo: add virtual method used to do the actual hierarchy construction
 class OBJ_ModelCacheTransform : public OBJ_ModelCacheNode<OBJ_SubNet>
 {
 	public :
 		
 		OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~OBJ_ModelCacheTransform();
+		
+		static const char *typeName;
 		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
@@ -75,6 +76,23 @@ class OBJ_ModelCacheTransform : public OBJ_ModelCacheNode<OBJ_SubNet>
 			AllDescendants,
 			Children
 		};
+		
+		/// Implemented to build the ModelCache using a combination of OBJ_ModelCacheTransform
+		/// and/or OBJ_ModelCacheGeometry nodes depending on the settings for pHierarchy and pDepth.
+		/// Derived classes should re-implement doBuildObject() and doBuildChild() if specialized
+		/// behaviour is necessary.
+		virtual void buildHierarchy( const IECore::ModelCache *cache );
+	
+	protected :
+		
+		/// Called by buildHierarchy() when the ModelCache contains an object.
+		/// Implemented to build the specific object using an OBJ_ModelCacheGeometry node.
+		virtual void doBuildObject( const IECore::ModelCache *cache, bool allDescendants = false );
+		
+		/// Called by buildHierarchy() for each child of the ModelCache it was given.
+		/// Implemented to build the current cache path using an OBJ_ModelCacheTransform or
+		/// OBJ_ModelCacheGeometry node depending on the settings for pHierarchy and pDepth.
+		virtual void doBuildChild( const IECore::ModelCache *cache, bool allDescendants = false );
 
 };
 

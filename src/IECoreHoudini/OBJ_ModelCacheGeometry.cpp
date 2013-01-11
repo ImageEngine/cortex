@@ -33,8 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreHoudini/OBJ_ModelCacheGeometry.h"
+#include "IECoreHoudini/SOP_ModelCacheSource.h"
 
+using namespace IECore;
 using namespace IECoreHoudini;
+
+const char *OBJ_ModelCacheGeometry::typeName = "ieModelCacheGeometry";
 
 OBJ_ModelCacheGeometry::OBJ_ModelCacheGeometry( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_Geometry>( net, name, op )
 {
@@ -58,4 +62,31 @@ OP_TemplatePair *OBJ_ModelCacheGeometry::buildParameters()
 	}
 	
 	return templatePair;
+}
+
+void OBJ_ModelCacheGeometry::buildHierarchy( const ModelCache *cache )
+{
+	doBuildGeometry( cache );
+}
+
+void OBJ_ModelCacheGeometry::doBuildGeometry( const ModelCache *cache )
+{
+	const char *name = cache->name().c_str();
+	OP_Node *opNode = createNode( SOP_ModelCacheSource::typeName, name );
+	SOP_ModelCacheSource *sop = reinterpret_cast<SOP_ModelCacheSource*>( opNode );
+	
+	sop->setFile( getFile() );
+	sop->setPath( cache->path() );
+	
+	Space space = getSpace();
+	UT_String shapes( name );
+	SOP_ModelCacheSource::Space sopSpace = SOP_ModelCacheSource::Object;
+	if ( space == World || space == Path )
+	{
+		shapes = "*";
+		sopSpace = SOP_ModelCacheSource::Path;
+	}
+	
+	sop->setSpace( sopSpace );
+	sop->setString( shapes, CH_STRING_LITERAL, SOP_ModelCacheSource::pShapeFilter.getToken(), 0, 0 );
 }

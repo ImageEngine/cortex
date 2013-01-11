@@ -52,7 +52,7 @@ OBJ_ModelCacheNode<BaseType>::~OBJ_ModelCacheNode()
 }
 
 template<typename BaseType>
-PRM_Name OBJ_ModelCacheNode<BaseType>::pBuild( "build", "Build" );
+PRM_Name OBJ_ModelCacheNode<BaseType>::pBuild( "build", "Build Hierarchy" );
 
 static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 {
@@ -124,7 +124,24 @@ int OBJ_ModelCacheNode<BaseType>::buildButtonCallback( void *data, int index, fl
 		return 0;
 	}
 	
+	ModelCacheUtil::Cache::EntryPtr entry = node->cache().entry( file, node->getPath() );
+	
+	node->cleanHierarchy();
+	node->buildHierarchy( entry->modelCache() );
+	
 	return 1;
+}
+
+template<typename BaseType>
+void OBJ_ModelCacheNode<BaseType>::cleanHierarchy()
+{
+	OP_NodeList childNodes;
+	for ( size_t i=0; i < this->getNchildren(); ++i )
+	{
+		childNodes.append( this->getChild( i ) );
+	}
+	
+	this->destroyNodes( childNodes );
 }
 
 template<typename BaseType>
@@ -137,8 +154,8 @@ OP_ERROR OBJ_ModelCacheNode<BaseType>::cookMyObj( OP_Context &context )
 		return ModelCacheNode<BaseType>::error();
 	}
 	
-	std::string path = ModelCacheNode<BaseType>::getPath();
-	ModelCacheNode<OP_Node>::Space space = (ModelCacheNode<OP_Node>::Space)evalInt( ModelCacheNode<BaseType>::pSpace.getToken(), 0, 0 );
+	std::string path = this->getPath();
+	OBJ_ModelCacheNode<OP_Node>::Space space = (OBJ_ModelCacheNode<OP_Node>::Space)this->getSpace();
 	
 	Imath::M44d transform;
 	if ( space == ModelCacheNode<OP_Node>::World )

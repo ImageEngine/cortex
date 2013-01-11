@@ -34,9 +34,13 @@
 
 #include "PRM/PRM_ChoiceList.h"
 
+#include "IECoreHoudini/OBJ_ModelCacheGeometry.h"
 #include "IECoreHoudini/OBJ_ModelCacheTransform.h"
 
+using namespace IECore;
 using namespace IECoreHoudini;
+
+const char *OBJ_ModelCacheTransform::typeName = "ieModelCacheTransform";
 
 OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_SubNet>( net, name, op )
 {
@@ -113,4 +117,61 @@ OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
 	}
 	
 	return templatePair;
+}
+
+void OBJ_ModelCacheTransform::buildHierarchy( const ModelCache *cache )
+{
+	bool allDescedants = ( evalInt( pDepth.getToken(), 0, 0 ) == AllDescendants );
+	Hierarchy hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
+	
+	if ( hierarchy == FlatGeometry )
+	{
+		doBuildObject( cache, allDescedants );
+		return;
+	}
+	
+	if ( cache->hasObject() )
+	{
+		doBuildObject( cache );
+	}
+	
+	IndexedIO::EntryIDList children;
+	cache->childNames( children );
+	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	{
+		/// \todo: use Hierarchy to make connections in Parenting mode
+		doBuildChild( cache->readableChild( *it ), allDescedants );
+	}
+}
+
+void OBJ_ModelCacheTransform::doBuildObject( const ModelCache *cache, bool allDescendants )
+{
+	OP_Node *opNode = createNode( OBJ_ModelCacheGeometry::typeName, "geo" );
+	OBJ_ModelCacheGeometry *geo = reinterpret_cast<OBJ_ModelCacheGeometry*>( opNode );
+	
+	geo->setFile( getFile() );
+	geo->setPath( cache->path() );
+	/// \todo: use Hierarchy to set to Leaf in Parenting mode
+	Space space = ( allDescendants ) ? Path : Object;
+	geo->setSpace( (OBJ_ModelCacheGeometry::Space)space );
+	
+	geo->buildHierarchy( cache );
+}
+
+void OBJ_ModelCacheTransform::doBuildChild( const ModelCache *cache, bool allDescendants )
+{
+	/// \todo: if Parenting style, create GEO instead
+	OP_Node *opNode = createNode( OBJ_ModelCacheTransform::typeName, cache->name().c_str() );
+	OBJ_ModelCacheTransform *xform = reinterpret_cast<OBJ_ModelCacheTransform*>( opNode );
+	
+	xform->setFile( getFile() );
+	xform->setPath( cache->path() );
+	xform->setSpace( Leaf );
+	xform->setInt( pHierarchy.getToken(), 0, 0, evalInt( pHierarchy.getToken(), 0, 0 ) );
+	xform->setInt( pDepth.getToken(), 0, 0, evalInt( pDepth.getToken(), 0, 0 ) );
+	
+	if ( allDescendants )
+	{
+		xform->buildHierarchy( cache );
+	}
 }

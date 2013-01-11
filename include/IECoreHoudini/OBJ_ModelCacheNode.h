@@ -60,6 +60,12 @@ class OBJ_ModelCacheNode : public ModelCacheNode<BaseType>
 		
 		static int buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 	
+		/// Derived classes should define this function to build the hierarchy contained in the ModelCache.
+		/// \todo: should this return the list of new nodes?
+		virtual void buildHierarchy( const IECore::ModelCache *cache ) = 0;
+		/// Implemented to destroy all child nodes
+		virtual void cleanHierarchy();
+	
 	protected :
 		
 		virtual OP_ERROR cookMyObj( OP_Context &context );

@@ -43,7 +43,6 @@ namespace IECoreHoudini
 {
 
 /// OBJ for loading a single transform and leaf Objects from an IECore::ModelCache
-/// \todo: add virtual method used to create the actual SOPs
 class OBJ_ModelCacheGeometry : public OBJ_ModelCacheNode<OBJ_Geometry>
 {
 	public :
@@ -51,8 +50,22 @@ class OBJ_ModelCacheGeometry : public OBJ_ModelCacheNode<OBJ_Geometry>
 		OBJ_ModelCacheGeometry( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~OBJ_ModelCacheGeometry();
 		
+		static const char *typeName;
+		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
+		
+		/// Implemented to build the ModelCache using a SOP_ModelCacheSource. Derived classes
+		/// should re-implement doBuildGeometry() if specialized behaviour is necessary.
+		/// \todo: do we need this extra abstraction?
+		virtual void buildHierarchy( const IECore::ModelCache *cache );
+	
+	protected :
+		
+		/// Called by buildHierarchy() to load the ModelCache. The Space parameter will
+		/// determine what settings are used. World and Path will load all descedants,
+		/// while Leaf and Object will load the immediate child object only.
+		virtual void doBuildGeometry( const IECore::ModelCache *cache );
 
 };
 
