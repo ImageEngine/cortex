@@ -58,12 +58,12 @@ OP_Node *OBJ_ModelCacheTransform::create( OP_Network *net, const char *name, OP_
 PRM_Name OBJ_ModelCacheTransform::pHierarchy( "hierarchy", "Hierarchy" );
 PRM_Name OBJ_ModelCacheTransform::pDepth( "depth", "Depth" );
 
-PRM_Default OBJ_ModelCacheTransform::hierarchyDefault( Parenting );
+PRM_Default OBJ_ModelCacheTransform::hierarchyDefault( SubNetworks );
 PRM_Default OBJ_ModelCacheTransform::depthDefault( AllDescendants );
 
 static PRM_Name hierarchyNames[] = {
-	PRM_Name( "0", "Parenting" ),
-	PRM_Name( "1", "SubNetworks" ),
+	PRM_Name( "0", "SubNetworks" ),
+	PRM_Name( "1", "Parenting" ),
 	PRM_Name( "2", "Flat Geometry" ),
 	PRM_Name( 0 ) // sentinal
 };

@@ -66,8 +66,8 @@ class OBJ_ModelCacheTransform : public OBJ_ModelCacheNode<OBJ_SubNet>
 		
 		enum Hierarchy
 		{
-			Parenting,
 			SubNetworks,
+			Parenting,
 			FlatGeometry
 		};
 		

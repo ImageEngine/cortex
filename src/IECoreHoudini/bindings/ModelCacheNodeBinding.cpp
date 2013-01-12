@@ -61,8 +61,8 @@ void IECoreHoudini::bindModelCacheNode()
 	;
 	
 	enum_<OBJ_ModelCacheTransform::Hierarchy>( "Hierarchy" )
-		.value( "Parenting", OBJ_ModelCacheTransform::Parenting )
 		.value( "SubNetworks", OBJ_ModelCacheTransform::SubNetworks )
+		.value( "Parenting", OBJ_ModelCacheTransform::Parenting )
 		.value( "FlatGeometry", OBJ_ModelCacheTransform::FlatGeometry )
 	;
 	
