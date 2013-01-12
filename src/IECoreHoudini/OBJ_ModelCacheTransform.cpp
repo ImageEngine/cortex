@@ -121,57 +121,110 @@ OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
 
 void OBJ_ModelCacheTransform::buildHierarchy( const ModelCache *cache )
 {
-	bool allDescedants = ( evalInt( pDepth.getToken(), 0, 0 ) == AllDescendants );
+	Depth depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
 	Hierarchy hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
 	
 	if ( hierarchy == FlatGeometry )
 	{
-		doBuildObject( cache, allDescedants );
-		return;
+		doBuildObject( cache, this, hierarchy, depth );
 	}
-	
-	if ( cache->hasObject() )
+	/// \todo: can we combine the two cases below by fixing up doBuildChildren?
+	else if ( hierarchy == SubNetworks )
 	{
-		doBuildObject( cache );
+		/// \todo: this doesn't work. should build the child's geo, not just this one...
+		if ( cache->hasObject() )
+		{
+			doBuildObject( cache, this, hierarchy, Children );
+		}
+		
+		IndexedIO::EntryIDList children;
+		cache->childNames( children );
+		for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+		{
+			doBuildChild( cache->readableChild( *it ), this, hierarchy, depth );
+		}
 	}
-	
-	IndexedIO::EntryIDList children;
-	cache->childNames( children );
-	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	else
 	{
-		/// \todo: use Hierarchy to make connections in Parenting mode
-		doBuildChild( cache->readableChild( *it ), allDescedants );
+		OBJ_Node *objNode = 0;
+		if ( cache->hasObject() )
+		{
+			objNode = doBuildObject( cache, this, SubNetworks, Children );
+		}
+		else
+		{
+			/// \todo: this is terrible. can we use the subnet input instead?
+			objNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
+		}
+		
+		doBuildChildren( cache, objNode, hierarchy, depth );
+		
+		if ( !cache->hasObject() )
+		{
+			destroyNode( objNode );
+		}
 	}
 }
 
-void OBJ_ModelCacheTransform::doBuildObject( const ModelCache *cache, bool allDescendants )
+OBJ_Node *OBJ_ModelCacheTransform::doBuildObject( const ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
-	OP_Node *opNode = createNode( OBJ_ModelCacheGeometry::typeName, "geo" );
+	const char *name = ( hierarchy == Parenting ) ? cache->name().c_str() : "geo";
+	OP_Node *opNode = parent->createNode( OBJ_ModelCacheGeometry::typeName, name );
 	OBJ_ModelCacheGeometry *geo = reinterpret_cast<OBJ_ModelCacheGeometry*>( opNode );
 	
 	geo->setFile( getFile() );
 	geo->setPath( cache->path() );
-	/// \todo: use Hierarchy to set to Local in Parenting mode
-	Space space = ( allDescendants ) ? Path : Object;
+	
+	Space space = ( depth == AllDescendants ) ? Path : ( hierarchy == Parenting ) ? Local : Object;
 	geo->setSpace( (OBJ_ModelCacheGeometry::Space)space );
 	
 	geo->buildHierarchy( cache );
+	
+	return geo;
 }
 
-void OBJ_ModelCacheTransform::doBuildChild( const ModelCache *cache, bool allDescendants )
+OBJ_Node *OBJ_ModelCacheTransform::doBuildChild( const ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
-	/// \todo: if Parenting style, create GEO instead
-	OP_Node *opNode = createNode( OBJ_ModelCacheTransform::typeName, cache->name().c_str() );
+	OP_Node *opNode = parent->createNode( OBJ_ModelCacheTransform::typeName, cache->name().c_str() );
 	OBJ_ModelCacheTransform *xform = reinterpret_cast<OBJ_ModelCacheTransform*>( opNode );
 	
 	xform->setFile( getFile() );
 	xform->setPath( cache->path() );
 	xform->setSpace( Local );
-	xform->setInt( pHierarchy.getToken(), 0, 0, evalInt( pHierarchy.getToken(), 0, 0 ) );
-	xform->setInt( pDepth.getToken(), 0, 0, evalInt( pDepth.getToken(), 0, 0 ) );
+	xform->setInt( pHierarchy.getToken(), 0, 0, hierarchy );
+	xform->setInt( pDepth.getToken(), 0, 0, depth );
 	
-	if ( allDescendants )
+	if ( hierarchy == SubNetworks && depth == AllDescendants )
 	{
 		xform->buildHierarchy( cache );
+	}
+	
+	return xform;
+}
+
+void OBJ_ModelCacheTransform::doBuildChildren( const ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+{
+	IndexedIO::EntryIDList children;
+	cache->childNames( children );
+	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	{
+		ConstModelCachePtr child = cache->readableChild( *it );
+		
+		OBJ_Node *objNode = 0;
+		if ( child->hasObject() )
+		{
+			objNode = doBuildObject( child, parent->getParent(), hierarchy, Children );
+		}
+		else
+		{
+			objNode = doBuildChild( child, parent->getParent(), hierarchy, depth );
+		}
+		
+		objNode->setInput( 0, parent );
+		
+		if ( depth == AllDescendants )
+		{
+			doBuildChildren( child, objNode, hierarchy, depth );
+		}
 	}
 }

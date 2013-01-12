@@ -87,12 +87,14 @@ class OBJ_ModelCacheTransform : public OBJ_ModelCacheNode<OBJ_SubNet>
 		
 		/// Called by buildHierarchy() when the ModelCache contains an object.
 		/// Implemented to build the specific object using an OBJ_ModelCacheGeometry node.
-		virtual void doBuildObject( const IECore::ModelCache *cache, bool allDescendants = false );
+		virtual OBJ_Node *doBuildObject( const IECore::ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth );
 		
 		/// Called by buildHierarchy() for each child of the ModelCache it was given.
 		/// Implemented to build the current cache path using an OBJ_ModelCacheTransform or
-		/// OBJ_ModelCacheGeometry node depending on the settings for pHierarchy and pDepth.
-		virtual void doBuildChild( const IECore::ModelCache *cache, bool allDescendants = false );
+		/// OBJ_ModelCacheGeometry node depending on the settings for hierarchy and depth.
+		virtual OBJ_Node *doBuildChild( const IECore::ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		
+		virtual void doBuildChildren( const IECore::ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth );
 
 };
 
