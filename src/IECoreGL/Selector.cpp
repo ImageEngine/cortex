@@ -157,6 +157,30 @@ class Selector::Implementation : public IECore::RefCounted
 			return m_baseState;
 		}
 
+		void loadIDShader( const IECoreGL::Shader *shader )
+		{
+			const IECoreGL::Shader::Parameter *nameParameter = shader->uniformParameter( "ieCoreGLNameIn" );
+			if( !nameParameter )
+			{
+				throw IECore::Exception( "ID shader does not have an ieCoreGLNameIn parameter" );
+			}
+			
+			GLint fragDataLocation = glGetFragDataLocation( shader->program(), "ieCoreGLNameOut" );
+			if( fragDataLocation < 0 )
+			{
+				throw IECore::Exception( "ID shader does not have an ieCoreGLNameOut output" );			
+			}
+			
+			m_nameUniformLocation = nameParameter->location;
+			
+			glUseProgram( shader->program() );
+					
+			std::vector<GLenum> buffers;
+			buffers.resize( fragDataLocation + 1, GL_NONE );
+			buffers[buffers.size()-1] = GL_COLOR_ATTACHMENT0;
+			glDrawBuffers( buffers.size(), &buffers[0] );
+		}
+
 		static Selector *currentSelector()
 		{
 			return g_currentSelector;
@@ -219,6 +243,7 @@ class Selector::Implementation : public IECore::RefCounted
 		boost::shared_ptr<FrameBuffer::ScopedBinding> m_frameBufferBinding;
 		GLint m_prevProgram;
 		GLint m_prevViewport[4];
+		GLint m_nameUniformLocation;
 		
 		static Shader *idShader()
 		{
@@ -226,13 +251,13 @@ class Selector::Implementation : public IECore::RefCounted
 
 				"#version 330\n"
 				""
-				"uniform uint name;"
+				"uniform uint ieCoreGLNameIn;"
 				""
-				"layout( location=0 ) out uint id;"
+				"layout( location=0 ) out uint ieCoreGLNameOut;"
 				""
 				"void main()"
 				"{"
-				"	id = name;"
+				"	ieCoreGLNameOut = ieCoreGLNameIn;"
 				"}";
 
 			static ShaderPtr s = new Shader( "", fragmentSource );
@@ -261,14 +286,14 @@ class Selector::Implementation : public IECore::RefCounted
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 			
 			m_baseState->add( idShaderStateComponent(), true /* override */ );
-			
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
-			glUseProgram( idShader()->program() );
+			loadIDShader( idShader() );	
 		}
 
 		void loadNameIDRender( GLuint name )
 		{
-			glUniform1ui( 0, name );
+			Exception::throwIfError();
+			glUniform1ui( m_nameUniformLocation, name );
 		}
 
 		size_t endIDRender( std::vector<HitRecord> &hits )
@@ -405,6 +430,11 @@ size_t Selector::end( std::vector<HitRecord> &hits )
 State *Selector::baseState()
 {
 	return m_implementation->baseState();
+}
+
+void Selector::loadIDShader( const IECoreGL::Shader *idShader )
+{
+	m_implementation->loadIDShader( idShader );
 }
 
 Selector *Selector::currentSelector()

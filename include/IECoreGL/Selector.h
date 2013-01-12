@@ -47,6 +47,7 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( State );
+IE_CORE_FORWARDDECLARE( Shader );
 
 /// The Selector class simplifies the process of selecting objects
 /// rendered with OpenGL.
@@ -100,6 +101,15 @@ class Selector : boost::noncopyable
 		/// selection drawing. This is only valid if retrieved after
 		/// a call to begin() and before a call to end().
 		State *baseState();
+		
+		/// The IDRender mode requires a shader which takes a name
+		/// via a "uniform uint ieCoreGLName" parameter and outputs it
+		/// via an "out uint ieCoreGLNameOut" fragment output.
+		/// Typically one is set up automatically in baseState(), but
+		/// if rendering must be performed with an alternative shader
+		/// then it may be passed via this function following a call
+		/// to begin().
+		void loadIDShader( const IECoreGL::Shader *idShader );
 		
 		/// Returns the currently active Selector - this may be used
 		/// in drawing code to retrieve a selector to call loadName()
