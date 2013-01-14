@@ -283,6 +283,7 @@ ModelCacheUtil::Cache::EntryPtr ModelCacheUtil::Cache::entry( const std::string 
 	Tokenizer tokens( path, boost::char_separator<char>( "/" ) );
 	for ( Tokenizer::iterator tIt=tokens.begin(); tIt!=tokens.end(); ++tIt )
 	{
+		/// \todo: this will throw if the path is bad. how should we handle it?
 		result->m_entry = result->m_entry->readableChild( *tIt );	
 	}
 
