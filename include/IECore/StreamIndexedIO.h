@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FILEINDEXEDIO_H
-#define IE_CORE_FILEINDEXEDIO_H
+#ifndef IE_CORE_STREAMINDEXEDIO_H
+#define IE_CORE_STREAMINDEXEDIO_H
 
 #include <map>
 #include <iostream>
 #include <fstream>
 
 #include "boost/optional.hpp"
+#include "boost/iostreams/filtering_stream.hpp"
 
 #include "IndexedIO.h"
 #include "Exception.h"
@@ -47,25 +48,16 @@
 
 namespace IECore
 {
-/// An implementation of IndexedIO which operates within a single file on disk. It handles data instancing transparently for compact file sizes.
-/// \todo Most of the implementation of this class would be better of in a "StreamIndexedIO" class which
-/// FileIndexedIO and MemoryIndexedIO derive from. MemoryIndexedIO wasn't implemented that cleanly in the first
-/// place due to the necessity to maintain binary compatibility.
+/// Abstract base class implementation of IndexedIO which operates with a stream file handle.
+/// It handles data instancing transparently for compact file sizes.
 /// \ingroup ioGroup
-class FileIndexedIO : public IndexedIO
+class StreamIndexedIO : public IndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( FileIndexedIO );
+		IE_CORE_DECLAREMEMBERPTR( StreamIndexedIO );
 
-		static IndexedIOPtr create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
-
-		static bool canRead( const std::string &path );
-
-		/// Open an existing device or create a new one
-		FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
-
-		virtual ~FileIndexedIO();
+		virtual ~StreamIndexedIO();
 
 		virtual IndexedIO::OpenMode openMode() const;
 
@@ -149,21 +141,66 @@ class FileIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, unsigned short &x) const;
 		void read(const IndexedIO::EntryID &name, IndexedIO::EntryIDList &x) const;
 
-		ConstCharVectorDataPtr buf();
-
 	protected:
 
 		class Index;
 		IE_CORE_DECLAREPTR( Index );
 
-		class IndexedFile;
-		IE_CORE_DECLAREPTR( IndexedFile );
-
 		class Node;
 		IE_CORE_DECLAREPTR( Node );
 
-		/// The mode this device was opened with
-		IndexedIO::OpenMode m_mode;
+		/// Class that provides access to the stream file
+		class StreamFile : public RefCounted
+		{
+			public:
+
+				typedef boost::iostreams::filtering_stream< boost::iostreams::bidirectional_seekable > FilteredStream;
+
+				FilteredStream *m_stream;
+				std::iostream *m_device;
+				IndexedIO::OpenMode m_openmode;
+
+				virtual ~StreamFile();
+
+				/// Obtain the index for this file
+				Index* index() const;
+
+				/// Seek to a particular node within the file for reading
+				void seekg( Node* node );
+
+				/// Write some data to the file. Its position is automatically allocated within the file, and the node
+				/// is updated to record this offset along with its size (or it's turned into a hardlink if the data is already stored by other node).
+				/// The hardlinks will only be created for nodes that have been saved on the same session. So edit mode will not be that great.
+				void write(Node* node, const char *data, Imf::Int64 size);
+
+				/// Saves to the file changes to the index. This function is used by the destructor.
+				/// If the index has changed, than it returns the offset where the file ends.
+				boost::optional<Imf::Int64> flush();
+
+				std::iostream *device();
+
+				static bool canRead( FilteredStream &stream );
+
+			protected:
+
+				StreamFile( IndexedIO::OpenMode mode, Index *index );
+				void setDevice( std::iostream *device );
+				void newIndex();
+				void readIndex();
+
+				IndexPtr m_index;
+
+		};
+		IE_CORE_DECLAREPTR( StreamFile );
+
+		/// Create an instance with unnitialized state. Must call open() method.
+		StreamIndexedIO();
+
+		/// Copy constructor used when duplicating the file
+		StreamIndexedIO( const StreamIndexedIO *other );
+
+		/// Opens a file using the given IndexedFile accessor
+		void open( StreamFilePtr file, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode );
 
 		/// Variant of "removeChild" which allows exceptions to be optionally thrown
 		/// if the entry to remove does not exist.
@@ -201,25 +238,18 @@ class FileIndexedIO : public IndexedIO
 		template<typename T>
 		void rawRead(const IndexedIO::EntryID &name, T &x) const;
 
-		IndexedFilePtr m_indexedFile;
-
-		Node * m_node;
-
-		/// \todo Should be virtual
 		boost::optional<Imf::Int64> flush();
 
-		/// \todo Add virtual method to obtain device name ( e.g filename, "memory", etc )
-
-		std::iostream *device();
-
-		void open( std::iostream *device, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, bool newStream = false );
-
-		FileIndexedIO();
-
-		FileIndexedIO( const FileIndexedIO *other, Node *newRoot );
-
 		// duplicates this object by mapping it to a different root node.
-		virtual IndexedIO *duplicate(Node *rootNode) const;
+		virtual IndexedIO *duplicate(Node *rootNode) const = 0;
+
+
+		/// The mode this device was opened with
+		IndexedIO::OpenMode m_mode;
+
+		StreamFilePtr m_streamFile;
+
+		Node * m_node;
 
 	private :
 
@@ -232,8 +262,8 @@ class FileIndexedIO : public IndexedIO
 
 };
 
-IE_CORE_DECLAREPTR( FileIndexedIO )
+IE_CORE_DECLAREPTR( StreamIndexedIO )
 
 }
 
-#endif // IE_CORE_FILEINDEXEDIO_H
+#endif // IE_CORE_STREAMINDEXEDIO_H
