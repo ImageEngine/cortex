@@ -127,42 +127,29 @@ void OBJ_ModelCacheTransform::buildHierarchy( const ModelCache *cache )
 	if ( hierarchy == FlatGeometry )
 	{
 		doBuildObject( cache, this, hierarchy, depth );
+		return;
 	}
-	/// \todo: can we combine the two cases below by fixing up doBuildChildren?
-	else if ( hierarchy == SubNetworks )
+	
+	OBJ_Node *rootNode = this;
+	if ( cache->hasObject() )
 	{
-		/// \todo: this doesn't work. should build the child's geo, not just this one...
-		if ( cache->hasObject() )
+		OBJ_Node *objNode = doBuildObject( cache, this, SubNetworks, Children );
+		if ( hierarchy == Parenting )
 		{
-			doBuildObject( cache, this, hierarchy, Children );
-		}
-		
-		IndexedIO::EntryIDList children;
-		cache->childNames( children );
-		for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
-		{
-			doBuildChild( cache->readableChild( *it ), this, hierarchy, depth );
+			rootNode = objNode;
 		}
 	}
-	else
+	else if ( hierarchy == Parenting )
 	{
-		OBJ_Node *objNode = 0;
-		if ( cache->hasObject() )
-		{
-			objNode = doBuildObject( cache, this, SubNetworks, Children );
-		}
-		else
-		{
-			/// \todo: this is terrible. can we use the subnet input instead?
-			objNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
-		}
-		
-		doBuildChildren( cache, objNode, hierarchy, depth );
-		
-		if ( !cache->hasObject() )
-		{
-			destroyNode( objNode );
-		}
+		/// \todo: this is terrible. can we use the subnet input instead?
+		rootNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
+	}
+	
+	doBuildChildren( cache, rootNode, hierarchy, depth );
+	
+	if ( hierarchy == Parenting && !cache->hasObject() )
+	{
+		destroyNode( rootNode );
 	}
 }
 
@@ -194,37 +181,49 @@ OBJ_Node *OBJ_ModelCacheTransform::doBuildChild( const ModelCache *cache, OP_Net
 	xform->setInt( pHierarchy.getToken(), 0, 0, hierarchy );
 	xform->setInt( pDepth.getToken(), 0, 0, depth );
 	
-	if ( hierarchy == SubNetworks && depth == AllDescendants )
-	{
-		xform->buildHierarchy( cache );
-	}
-	
 	return xform;
 }
 
 void OBJ_ModelCacheTransform::doBuildChildren( const ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
+	OP_Network *inputNode = parent;
+	if ( hierarchy == Parenting )
+	{
+		parent = parent->getParent();
+	}
+	
 	IndexedIO::EntryIDList children;
 	cache->childNames( children );
 	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstModelCachePtr child = cache->readableChild( *it );
 		
-		OBJ_Node *objNode = 0;
-		if ( child->hasObject() )
+		OBJ_Node *childNode = 0;
+		if ( hierarchy == SubNetworks )
 		{
-			objNode = doBuildObject( child, parent->getParent(), hierarchy, Children );
+			childNode = doBuildChild( child, parent, hierarchy, depth );
+			if ( child->hasObject() )
+			{
+				doBuildObject( child, childNode, hierarchy, Children );
+			}
 		}
-		else
+		else if ( hierarchy == Parenting )
 		{
-			objNode = doBuildChild( child, parent->getParent(), hierarchy, depth );
+			if ( child->hasObject() )
+			{
+				childNode = doBuildObject( child, parent, hierarchy, Children );
+			}
+			else
+			{
+				childNode = doBuildChild( child, parent, hierarchy, depth );
+			}
+			
+			childNode->setInput( 0, inputNode );
 		}
-		
-		objNode->setInput( 0, parent );
 		
 		if ( depth == AllDescendants )
 		{
-			doBuildChildren( child, objNode, hierarchy, depth );
+			doBuildChildren( child, childNode, hierarchy, depth );
 		}
 	}
 }
