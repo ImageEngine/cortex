@@ -47,7 +47,6 @@
 #include "boost/iostreams/filtering_stream.hpp"
 #include "boost/iostreams/stream.hpp"
 #include "boost/iostreams/filter/gzip.hpp"
-#include "boost/detail/endian.hpp"
 
 #include "IECore/ByteOrder.h"
 #include "IECore/MemoryStream.h"
@@ -56,13 +55,10 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/MurmurHash.h"
 
-
 #define HARDLINK				127
-
 static const Imf::Int64 g_unversionedMagicNumber = 0x0B00B1E5;
 static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 static const Imf::Int64 g_currentVersion = 4;
-
 
 /// FileFormat ::= Data Index Version MagicNumber
 /// Data ::= DataEntry*
@@ -102,15 +98,17 @@ static const Imf::Int64 g_currentVersion = 4;
 using namespace IECore;
 namespace io = boost::iostreams;
 
-template<typename T>
-void writeLittleEndian( std::ostream &f, T n )
+//// Templated functions for stream files //////
+
+template<typename F, typename T>
+void writeLittleEndian( F &f, T n )
 {
 	const T nl = asLittleEndian<>(n);
 	f.write( (const char*) &nl, sizeof(T) );
 }
 
-template<typename T>
-void readLittleEndian( std::istream &f, T &n )
+template<typename F, typename T>
+void readLittleEndian( F &f, T &n )
 {
 	f.read( (char*) &n, sizeof(T) );
 
@@ -124,7 +122,7 @@ void readLittleEndian( std::istream &f, T &n )
 	}
 }
 
-class StringCache
+class StreamIndexedIO::StringCache
 {
 	public:
 
@@ -133,10 +131,11 @@ class StringCache
 			m_idToStringMap.reserve(100);
 		}
 
-		StringCache( std::istream &f ) : m_prevId(0), m_ioBuffer(0), m_ioBufferLen(0)
+		template < typename F >
+		StringCache( F &f ) : m_prevId(0), m_ioBuffer(0), m_ioBufferLen(0)
 		{
 			Imf::Int64 sz;
-			readLittleEndian(f, sz);
+			readLittleEndian(f,sz);
 
 			m_idToStringMap.reserve(sz + 100);
 
@@ -145,7 +144,7 @@ class StringCache
 				const char *s = read(f);
 
 				Imf::Int64 id;
-				readLittleEndian<Imf::Int64>( f, id );
+				readLittleEndian( f,id );
 				assert( id < sz );
 				m_prevId = std::max( id, m_prevId );
 
@@ -158,17 +157,18 @@ class StringCache
 			}
 		}
 
-		void write( std::ostream &f ) const
+		template < typename F >
+		void write( F &f ) const
 		{
 			Imf::Int64 sz = m_stringToIdMap.size();
-			writeLittleEndian<Imf::Int64>(f, sz );
+			writeLittleEndian( f,sz );
 
 			for (StringToIdMap::const_iterator it = m_stringToIdMap.begin();
 				it != m_stringToIdMap.end(); ++it)
 			{
 				write(f, it->first);
 
-				writeLittleEndian<Imf::Int64>(f, it->second);
+				writeLittleEndian(f,it->second);
 			}
 		}
 
@@ -234,19 +234,21 @@ class StringCache
 
 	protected:
 
-		void write( std::ostream &f, const std::string &s ) const
+		template < typename F >
+		void write( F &f, const std::string &s ) const
 		{
 			Imf::Int64 sz = s.size();
-			writeLittleEndian<Imf::Int64>( f, sz );
+			writeLittleEndian( f, sz );
 
 			/// Does not include null terminator
 			f.write( s.c_str(), sz * sizeof(char) );
 		}
 
-		const char *read( std::istream &f ) const
+		template < typename F >
+		const char *read( F &f ) const
 		{
 			Imf::Int64 sz;
-			readLittleEndian<Imf::Int64>( f, sz );
+			readLittleEndian( f, sz );
 
 			if ( m_ioBufferLen < sz + 1 )
 			{
@@ -311,10 +313,12 @@ class StreamIndexedIO::Node : public RefCounted
 		virtual ~Node();
 
 		/// Write this node to a stream
-		void write( std::ostream &f );
+		template < typename F >
+		void write( F &f );
 
 		/// Replace the contents of this node with data read from a stream
-		void read( std::istream &f );
+		template < typename F >
+		void read( F &f );
 
 		void childNames( IndexedIO::EntryIDList &names ) const;
 		void childNames( IndexedIO::EntryIDList &names, IndexedIO::EntryType ) const;
@@ -356,7 +360,8 @@ class StreamIndexedIO::Index : public RefCounted
 		Index( bool readOnly );
 
 		/// Construct an index from reading a file stream.
-		Index( std::iostream &f, bool readOnly );
+		template < typename F >
+		Index( F &f, bool readOnly );
 		virtual ~Index();
 
 		NodePtr m_root;
@@ -373,7 +378,8 @@ class StreamIndexedIO::Index : public RefCounted
 		Node* insert( Node* parentNode, IndexedIO::Entry e );
 
 		/// Write the index to a file stream
-		Imf::Int64 write( std::ostream &f );
+		template < typename F >
+		Imf::Int64 write( F &f );
 
 		/// Allocate a new chunk of data of the requested size, returning its offset within the file
 		Imf::Int64 allocate( Imf::Int64 sz );
@@ -387,11 +393,11 @@ class StreamIndexedIO::Index : public RefCounted
 		/// Queries the string cache
 		const StringCache &stringCache() const;
 
-		/// Used for creating hardlinks. The given node is about to store the given data, but if 
-		/// this index finds that data stored in other node, than it modifies the given node into a hardlink
-		/// and returns True. Otherwise it stores the hash of the given data and associates with the given node
-		/// and returns False.
-		bool findRepeatedData(Node* node, const char *data, Imf::Int64 size);
+		/// Write node data to the file. Its position is automatically allocated within the file, and the node
+		/// is updated to record this offset along with its size (or it's turned into a hardlink if the data is already stored by other node).
+		/// The hardlinks will only be created for nodes that have been saved on the same session. So edit mode will not be that great.
+		template < typename F >
+		void writeNodeData( Node *node, const char *data, Imf::Int64 size, F &stream );
 
 	protected:
 
@@ -443,13 +449,25 @@ class StreamIndexedIO::Index : public RefCounted
 
 		void deallocateWalk( Node* n );
 
-		void write( std::ostream &f, Node* n );
+		template < typename F >
+		void write( F &f, Node* n );
 
-		void readNode( std::istream &f );
+		template < typename F >
+		void read( F &f );
+
+		template < typename F >
+		void readNode( F &f );
 
 		Imf::Int64 nodeCount( Node* n );
 
 		void forgetAboutNode( Node* n );
+
+		/// Used for creating hardlinks. The given node is about to store the given data, but if 
+		/// this index finds that data stored in other node, than it modifies the given node into a hardlink
+		/// and returns True. Otherwise it stores the hash of the given data and associates with the given node
+		/// and returns False.
+		bool findRepeatedData(Node* node, const char *data, Imf::Int64 size);
+
 };
 
 ///////////////////////////////////////////////
@@ -529,13 +547,14 @@ bool StreamIndexedIO::Node::decreaseLinkCount()
 	return !m_linkCount;
 }
 
-void StreamIndexedIO::Node::write( std::ostream &f )
+template < typename F >
+void StreamIndexedIO::Node::write( F &f )
 {
 	char t = ( m_isLink ? HARDLINK : m_entry.entryType() );
 	f.write( &t, sizeof(char) );
 
 	Imf::Int64 id = m_idx->m_stringCache.find( m_entry.id() );
-	writeLittleEndian<Imf::Int64>( f, id );
+	writeLittleEndian( f, id );
 	if ( !m_isLink && m_entry.entryType() == IndexedIO::File )
 	{
 		t = m_entry.dataType();
@@ -543,37 +562,38 @@ void StreamIndexedIO::Node::write( std::ostream &f )
 
 		if ( m_entry.isArray() )
 		{
-			writeLittleEndian<Imf::Int64>( f, m_entry.arrayLength() );
+			writeLittleEndian<F,Imf::Int64>( f, m_entry.arrayLength() );
 		}
 	}
 
-	writeLittleEndian<Imf::Int64>(f, m_id);
+	writeLittleEndian(f, m_id);
 
 	if (m_parent)
 	{
 		assert( m_idx->m_nodeToIndexMap.find( m_parent ) != m_idx->m_nodeToIndexMap.end() );
 		assert( m_idx->m_nodeToIndexMap.find( m_parent )->second == m_parent->m_id );
-		writeLittleEndian<Imf::Int64>(f, m_parent->m_id);
+		writeLittleEndian(f, m_parent->m_id);
 	}
 	else
 	{
-		writeLittleEndian<Imf::Int64>(f, Imath::limits<Imf::Int64>::max() );
+		writeLittleEndian<F,Imf::Int64>(f, Imath::limits<Imf::Int64>::max() );
 	}
 
 	if ( m_isLink )
 	{
 		// m_offset holds the target node ID...
-		writeLittleEndian<Imf::Int64>(f, m_offset);
+		writeLittleEndian(f, m_offset);
 	}
 	else if ( m_entry.entryType() == IndexedIO::File )
 	{
-		writeLittleEndian<Imf::Int64>(f, m_offset);
-		writeLittleEndian<Imf::Int64>(f, m_size);
-		writeLittleEndian<LinkCount>(f, m_linkCount);
+		writeLittleEndian(f, m_offset);
+		writeLittleEndian(f, m_size);
+		writeLittleEndian(f, m_linkCount);
 	}
 }
 
-void StreamIndexedIO::Node::read( std::istream &f )
+template < typename F >
+void StreamIndexedIO::Node::read( F &f )
 {
 	assert( m_idx );
 
@@ -593,13 +613,13 @@ void StreamIndexedIO::Node::read( std::istream &f )
 	if (m_idx->m_version >= 1)
 	{
 		Imf::Int64 stringId;
-		readLittleEndian<Imf::Int64>(f, stringId);
+		readLittleEndian(f,stringId);
 		id = &m_idx->m_stringCache.findById( stringId );
 	}
 	else
 	{
 		Imf::Int64 entrySize;
-		readLittleEndian<Imf::Int64>( f, entrySize );
+		readLittleEndian( f,entrySize );
 		char *s = new char[entrySize+1];
 		f.read( s, entrySize );
 		s[entrySize] = '\0';
@@ -616,7 +636,7 @@ void StreamIndexedIO::Node::read( std::istream &f )
 	
 			if ( IndexedIO::Entry::isArray( dataType ) || m_idx->m_version < 3 )
 			{
-				readLittleEndian<Imf::Int64>( f, arrayLength );
+				readLittleEndian( f,arrayLength );
 			}
 		}
 	}
@@ -628,7 +648,7 @@ void StreamIndexedIO::Node::read( std::istream &f )
 		delete id;
 	}
 
-	readLittleEndian<Imf::Int64>(f, m_id );
+	readLittleEndian( f,m_id );
 
 	if ( m_id >= m_idx->m_indexToNodeMap.size() )
 	{
@@ -647,7 +667,7 @@ void StreamIndexedIO::Node::read( std::istream &f )
 	m_idx->m_prevId = std::max( m_idx->m_prevId, m_id );
 
 	Imf::Int64 parentId;
-	readLittleEndian<Imf::Int64>(f, parentId );
+	readLittleEndian( f,parentId );
 
 	if ( parentId != Imath::limits<Imf::Int64>::max() )
 	{
@@ -669,18 +689,18 @@ void StreamIndexedIO::Node::read( std::istream &f )
 	{
 		Imf::Int64 targetNodeId;
 		// load Target Node ID in m_offset
-		readLittleEndian<Imf::Int64>(f, targetNodeId );
+		readLittleEndian( f,targetNodeId );
 		m_offset = targetNodeId;
 		m_size = 0;	// we cannot assure that the target node is already loaded, so we set size to zero and we do lazy load.
 	}
 	else if ( entryType == IndexedIO::File || m_idx->m_version < 2 )
 	{
-		readLittleEndian<Imf::Int64>(f, m_offset );
-		readLittleEndian<Imf::Int64>(f, m_size );
+		readLittleEndian( f,m_offset );
+		readLittleEndian( f,m_size );
 
 		if ( m_idx->m_version >= 4 )
 		{
-			readLittleEndian<LinkCount>(f, m_linkCount);
+			readLittleEndian(f,m_linkCount);
 		}
 	}
 	else
@@ -790,72 +810,27 @@ StreamIndexedIO::Index::~Index()
 	}
 }
 
-const StringCache &StreamIndexedIO::Index::stringCache() const
+const StreamIndexedIO::StringCache &StreamIndexedIO::Index::stringCache() const
 {
 	return m_stringCache;
 }
 
-StreamIndexedIO::Index::Index( std::iostream &f, bool readOnly ) : m_prevId(0), m_readOnly(readOnly)
+template < typename F >
+void StreamIndexedIO::Index::read( F &f )
 {
-	m_hasChanged = false;
-
-	f.seekg( 0, std::ios::end );
-	Imf::Int64 end = f.tellg();
-
-	f.seekg( end-1*sizeof(Imf::Int64), std::ios::beg );
-
-	Imf::Int64 magicNumber = 0;
-	readLittleEndian<Imf::Int64>( f, magicNumber );
-
-	if ( magicNumber == g_versionedMagicNumber )
-	{
-		end -= 3*sizeof(Imf::Int64);
-		f.seekg( end, std::ios::beg );
-		readLittleEndian<Imf::Int64>( f, m_offset );
-		readLittleEndian<Imf::Int64>( f, m_version );
-	}
-	else if (magicNumber == g_unversionedMagicNumber )
-	{
-		m_version = 0;
-		end -= 2*sizeof(Imf::Int64);
-		f.seekg( end, std::ios::beg );
-		readLittleEndian<Imf::Int64>( f, m_offset );
-	}
-	else
-	{
-		throw IOException("Not a StreamIndexedIO file");
-	}
-
-	f.seekg( m_offset, std::ios::beg );
-
-	io::filtering_istream decompressingStream;
-	std::istream *inputStream = &f;
-
-	if (m_version >= 2 )
-	{
-		char *compressedIndex = new char[ end - m_offset ];
-		f.read( compressedIndex, end - m_offset );
-		MemoryStreamSource source( compressedIndex, end - m_offset, true );
-		decompressingStream.push( io::gzip_decompressor() );
-		decompressingStream.push( source );
-		assert( decompressingStream.is_complete() );
-
-		inputStream = &decompressingStream;
-	}
-
 	if (m_version >= 1)
 	{
-		m_stringCache = StringCache( *inputStream );
+		m_stringCache = StringCache( f );
 	}
 
 	Imf::Int64 numNodes;
-	readLittleEndian<Imf::Int64>( *inputStream, numNodes );
+	readLittleEndian( f, numNodes );
 
 	m_indexToNodeMap.reserve( numNodes );
 
 	for (Imf::Int64 i = 0; i < numNodes; i++)
 	{
-		readNode( *inputStream );
+		readNode( f );
 	}
 
 	// symlinks have to get the Entry information from their target nodes.
@@ -885,21 +860,73 @@ StreamIndexedIO::Index::Index( std::iostream &f, bool readOnly ) : m_prevId(0), 
 	}
 
 	Imf::Int64 numFreePages;
-	readLittleEndian<Imf::Int64>( *inputStream, numFreePages );
+	readLittleEndian( f, numFreePages );
 
 	m_next = m_offset;
 
 	for (Imf::Int64 i = 0; i < numFreePages; i++)
 	{
 		Imf::Int64 offset, sz;
-		readLittleEndian<Imf::Int64>( *inputStream, offset );
-		readLittleEndian<Imf::Int64>( *inputStream, sz );
+		readLittleEndian( f, offset );
+		readLittleEndian( f, sz );
 
 		addFreePage( offset, sz );
 	}
 }
 
-Imf::Int64 StreamIndexedIO::Index::write( std::ostream & f )
+template < typename F >
+StreamIndexedIO::Index::Index( F &f, bool readOnly ) : m_prevId(0), m_readOnly(readOnly)
+{
+	m_hasChanged = false;
+
+	f.seekg( 0, std::ios::end );
+	Imf::Int64 end = f.tellg();
+
+	f.seekg( end-1*sizeof(Imf::Int64), std::ios::beg );
+
+	Imf::Int64 magicNumber = 0;
+	readLittleEndian( f,magicNumber );
+
+	if ( magicNumber == g_versionedMagicNumber )
+	{
+		end -= 3*sizeof(Imf::Int64);
+		f.seekg( end, std::ios::beg );
+		readLittleEndian( f,m_offset );
+		readLittleEndian( f,m_version );
+	}
+	else if (magicNumber == g_unversionedMagicNumber )
+	{
+		m_version = 0;
+		end -= 2*sizeof(Imf::Int64);
+		f.seekg( end, std::ios::beg );
+		readLittleEndian( f,m_offset );
+	}
+	else
+	{
+		throw IOException("Not a StreamIndexedIO file");
+	}
+
+	f.seekg( m_offset, std::ios::beg );
+
+	if (m_version >= 2 )
+	{
+		io::filtering_istream decompressingStream;
+		char *compressedIndex = new char[ end - m_offset ];
+		f.read( compressedIndex, end - m_offset );
+		MemoryStreamSource source( compressedIndex, end - m_offset, true );
+		decompressingStream.push( io::gzip_decompressor() );
+		decompressingStream.push( source );
+		assert( decompressingStream.is_complete() );
+		read( decompressingStream );
+	}
+	else
+	{
+		read( f );
+	}
+}
+
+template< typename F >
+Imf::Int64 StreamIndexedIO::Index::write( F & f )
 {
 	/// Write index at end
 	std::streampos indexStart = m_next;
@@ -918,7 +945,7 @@ Imf::Int64 StreamIndexedIO::Index::write( std::ostream & f )
 
 	Imf::Int64 numNodes = nodeCount();
 
-	writeLittleEndian<Imf::Int64>( compressingStream, numNodes);
+	writeLittleEndian( compressingStream, numNodes);
 
 	write( compressingStream, m_root.get() );
 	// we write all the orphan nodes too
@@ -931,13 +958,13 @@ Imf::Int64 StreamIndexedIO::Index::write( std::ostream & f )
 	Imf::Int64 numFreePages = m_freePagesSize.size();
 
 	// Write out number of free "pages"
-	writeLittleEndian<Imf::Int64>( compressingStream, numFreePages);
+	writeLittleEndian( compressingStream, numFreePages);
 
 	/// Write out each free page
 	for ( FreePagesSizeMap::const_iterator it = m_freePagesSize.begin(); it != m_freePagesSize.end(); ++it)
 	{
-		writeLittleEndian<Imf::Int64>( compressingStream, it->second->m_offset );
-		writeLittleEndian<Imf::Int64>( compressingStream, it->second->m_size );
+		writeLittleEndian( compressingStream, it->second->m_offset );
+		writeLittleEndian( compressingStream, it->second->m_size );
 	}
 
 	/// To synchronize/close, etc.
@@ -952,9 +979,9 @@ Imf::Int64 StreamIndexedIO::Index::write( std::ostream & f )
 
 	f.write( data, sz );
 
-	writeLittleEndian<Imf::Int64>( f, m_offset );
-	writeLittleEndian<Imf::Int64>( f, g_currentVersion );
-	writeLittleEndian<Imf::Int64>( f, g_versionedMagicNumber );
+	writeLittleEndian( f, m_offset );
+	writeLittleEndian( f, g_currentVersion );
+	writeLittleEndian( f, g_versionedMagicNumber );
 
 
 	m_hasChanged = false;
@@ -1162,7 +1189,8 @@ Imf::Int64 StreamIndexedIO::Index::nodeCount()
 	return c;
 }
 
-void StreamIndexedIO::Index::write( std::ostream &f, Node* n )
+template < typename F >
+void StreamIndexedIO::Index::write( F &f, Node* n )
 {
 	n->write( f );
 
@@ -1177,7 +1205,29 @@ void StreamIndexedIO::Index::write( std::ostream &f, Node* n )
 	}
 }
 
-void StreamIndexedIO::Index::readNode( std::istream &f )
+template < typename F >
+void StreamIndexedIO::Index::writeNodeData( Node *node, const char *data, Imf::Int64 size, F &stream )
+{
+	// do not store data in the file if we have that data already store...
+	if ( findRepeatedData( node, data, size ) )
+		return;
+
+	/// Find next writable location
+	Imf::Int64 loc = allocate( size );
+
+	/// Seek 'write' pointer to writable location
+	stream.seekp( loc, std::ios::beg );
+
+	/// Update node with positional information within file
+	node->m_offset = loc;
+	node->m_size = size;
+
+	/// Write data
+	stream.write( data, size );
+}
+
+template < typename F >
+void StreamIndexedIO::Index::readNode( F &f )
 {
 	Node *n = new Node( this, 0 );
 
@@ -1379,39 +1429,8 @@ bool StreamIndexedIO::Index::findRepeatedData(Node* node, const char *data, Imf:
 //
 ///////////////////////////////////////////////
 
-StreamIndexedIO::StreamFile::StreamFile( IndexedIO::OpenMode mode, Index *index ) : m_stream(0), m_openmode(mode), m_index(index)
+StreamIndexedIO::StreamFile::StreamFile( IndexedIO::OpenMode mode ) : m_openmode(mode), m_stream(0), m_ioBufferLen(0), m_ioBuffer(0)
 {
-}
-
-void StreamIndexedIO::StreamFile::setStream( std::iostream *stream )
-{
-	m_stream = stream;
-	assert( m_stream->is_complete() );
-}
-
-void StreamIndexedIO::StreamFile::newIndex()
-{
-	m_index = new Index( false );
-}
-
-void StreamIndexedIO::StreamFile::readIndex()
-{
-	m_index = new Index( *m_stream, true );
-}
-
-void StreamIndexedIO::StreamFile::seekg( Node* node )
-{
-	assert( node->m_entry.entryType() == IndexedIO::File );
-	assert( m_stream );
-
-	m_stream->seekg( node->offset(), std::ios::beg );
-}
-
-StreamIndexedIO::Index* StreamIndexedIO::StreamFile::index() const
-{
-	assert(m_index);
-
-	return m_index.get();
 }
 
 StreamIndexedIO::StreamFile::~StreamFile()
@@ -1422,33 +1441,52 @@ StreamIndexedIO::StreamFile::~StreamFile()
 	{
 		delete m_stream;
 	}
+	if ( m_ioBuffer )
+	{
+		delete [] m_ioBuffer;
+	}
 }
 
-void StreamIndexedIO::StreamFile::write(Node* node, const char *data, Imf::Int64 size)
+void StreamIndexedIO::StreamFile::setStream( std::iostream *stream, bool emptyFile )
 {
-	assert( m_index );
-	assert( m_stream );
+	m_stream = stream;
+	assert( m_stream->is_complete() );
+	IndexPtr index = 0;
+	if ( (m_openmode & IndexedIO::Append || m_openmode & IndexedIO::Read) && !emptyFile )
+	{
+		index = new Index( *this, true );
+	}
+	else 
+	{
+		index = new Index( false );
+	}
+	m_index = index;
+}
 
-	// do not store data in the file if we have that data already store...
-	if ( m_index->findRepeatedData( node, data, size ) )
-		return;
+StreamIndexedIO::Index* StreamIndexedIO::StreamFile::index() const
+{
+	return m_index.get();
+}
 
-	/// Find next writable location
-	Imf::Int64 loc = m_index->allocate( size );
+char *StreamIndexedIO::StreamFile::ioBuffer( unsigned long size )
+{
+	if ( !m_ioBuffer )
+	{
+		m_ioBuffer = new char[size];
+		m_ioBufferLen = size;
+	}
+	else if ( size > m_ioBufferLen )
+	{
+		delete [] m_ioBuffer;
+		m_ioBuffer = new char[size];
+		m_ioBufferLen = size;
+	}
+	return m_ioBuffer;
+}
 
-	/// Seek 'write' pointer to writable location
-	m_stream->seekp( loc, std::ios::beg );
-
-	/// Clear error flags because problem on GCC 3.3.4:
-	/// When the file is a std::stringstream then the first seekp(0) will fail and inhibit following operations on the file.
-	m_stream->clear();
-
-	/// Update node with positional information within file
-	node->m_offset = loc;
-	node->m_size = size;
-
-	/// Write data
-	m_stream->write( data, size );
+tbb::mutex & StreamIndexedIO::StreamFile::mutex()
+{
+	return m_mutex;
 }
 
 boost::optional<Imf::Int64> StreamIndexedIO::StreamFile::flush()
@@ -1458,7 +1496,7 @@ boost::optional<Imf::Int64> StreamIndexedIO::StreamFile::flush()
 
 	if (m_index->hasChanged())
 	{
-		Imf::Int64 end = m_index->write( *m_stream );
+		Imf::Int64 end = m_index->write( *this );
 		assert( m_index->hasChanged() == false );
 		return boost::optional<Imf::Int64>( end );
 	}
@@ -1466,11 +1504,6 @@ boost::optional<Imf::Int64> StreamIndexedIO::StreamFile::flush()
 	assert( m_stream );
 	m_stream->flush();
 	return boost::optional<Imf::Int64>();
-}
-
-std::iostream *StreamIndexedIO::StreamFile::stream()
-{
-	return m_stream;
 }
 
 bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
@@ -1483,7 +1516,7 @@ bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
 	f.seekg( end-1*sizeof(Imf::Int64), std::ios::beg );
 
 	Imf::Int64 magicNumber;
-	readLittleEndian<Imf::Int64>( f, magicNumber );
+	readLittleEndian( f,magicNumber );
 
 	if ( magicNumber == g_versionedMagicNumber || magicNumber == g_unversionedMagicNumber )
 	{
@@ -1493,6 +1526,41 @@ bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
 	{
 		return false;
 	}
+}
+
+void StreamIndexedIO::StreamFile::seekg( size_t pos, std::ios_base::seekdir dir )
+{
+	m_stream->seekg( pos, dir );
+}
+
+void StreamIndexedIO::StreamFile::seekp( size_t pos, std::ios_base::seekdir dir )
+{
+	/// Seek 'write' pointer to writable location
+	m_stream->seekp( pos, dir );
+
+	/// Clear error flags because problem on GCC 3.3.4:
+	/// When the file is a std::stringstream then the first seekp(0) will fail and inhibit following operations on the file.
+	m_stream->clear();
+}
+
+Imf::Int64 StreamIndexedIO::StreamFile::tellg()
+{
+	return m_stream->tellg();
+}
+
+Imf::Int64 StreamIndexedIO::StreamFile::tellp()
+{
+	return m_stream->tellp();
+}
+
+void StreamIndexedIO::StreamFile::read( char *buffer, size_t size )
+{
+	m_stream->read( buffer, size );
+}
+
+void StreamIndexedIO::StreamFile::write( const char *buffer, size_t size )
+{
+	m_stream->write( buffer, size );
 }
 
 ///////////////////////////////////////////////
@@ -1507,11 +1575,11 @@ bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
 //
 ///////////////////////////////////////////////
 
-StreamIndexedIO::StreamIndexedIO() : m_mode(0), m_streamFile(0), m_node(0), m_ioBufferLen(0), m_ioBuffer(0)
+StreamIndexedIO::StreamIndexedIO() : m_mode(0), m_streamFile(0), m_node(0)
 {
 }
 
-StreamIndexedIO::StreamIndexedIO( const StreamIndexedIO *other ) : m_ioBufferLen(0), m_ioBuffer(0)
+StreamIndexedIO::StreamIndexedIO( const StreamIndexedIO *other )
 {
 	m_mode = other->m_mode;
 	m_streamFile = other->m_streamFile;
@@ -1574,11 +1642,6 @@ void StreamIndexedIO::setRoot( const IndexedIO::EntryIDList &root )
 		}
 	}
 	assert( m_node );
-}
-
-boost::optional<Imf::Int64> StreamIndexedIO::flush()
-{
-	return m_streamFile->flush();
 }
 
 IndexedIO::OpenMode StreamIndexedIO::openMode() const
@@ -1780,22 +1843,6 @@ ConstIndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path
 	return const_cast< StreamIndexedIO * >(this)->directory( path, missingBehaviour == IndexedIO::CreateIfMissing ? IndexedIO::ThrowIfMissing : missingBehaviour );
 }
 
-char *StreamIndexedIO::ioBuffer( unsigned long size ) const
-{
-	if ( !m_ioBuffer )
-	{
-		m_ioBuffer = new char[size];
-		m_ioBufferLen = size;
-	}
-	else if ( size > m_ioBufferLen )
-	{
-		delete [] m_ioBuffer;
-		m_ioBuffer = new char[size];
-		m_ioBufferLen = size;
-	}
-	return m_ioBuffer;
-}
-
 void StreamIndexedIO::write(const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &x)
 {
 	writable(name);
@@ -1813,7 +1860,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const IndexedIO::Ent
 	unsigned long size = IndexedIO::DataSizeTraits<Imf::Int64 *>::size(constIds, arrayLength);
 	IndexedIO::DataType dataType = IndexedIO::SymbolicLink;
 
-	char *data = ioBuffer(size);
+	char *data = m_streamFile->ioBuffer(size);
 	assert(data);
 
 	const StringCache &stringCache = m_streamFile->index()->stringCache();
@@ -1827,7 +1874,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const IndexedIO::Ent
 
 	node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
 
-	m_streamFile->write( node, data, size );
+	m_streamFile->index()->writeNodeData( node, data, size, *m_streamFile );
 
 	delete [] ids;
 }
@@ -1845,17 +1892,22 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, IndexedIO::EntryIDLis
 	}
 
 	unsigned long arrayLength = node->m_entry.arrayLength();
-	m_streamFile->seekg( node );
 
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
 	Imf::Int64 size = node->m_size;
 
-#ifdef BOOST_LITTLE_ENDIAN
-	// raw read
-	m_streamFile->m_stream->read( (char*)ids, size );
+	{
+		StreamFile::MutexLock lock( m_streamFile->mutex() );
+		m_streamFile->seekg( node->offset(), std::ios::beg );
+
+#ifdef IE_CORE_LITTLE_ENDIAN
+		// raw read
+		m_streamFile->read( (char*)ids, size );
+	}
 #else
-	char *data = ioBuffer(size);
-	m_streamFile->m_stream->read( data, size );
+		char *data = m_streamFile->ioBuffer(size);
+		m_streamFile->read( data, size );
+	}
 	IndexedIO::DataFlattenTraits<Imf::Int64*>::unflatten( data, ids, arrayLength );
 #endif
 
@@ -1881,13 +1933,13 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned
 		unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
 		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 
-		char *data = ioBuffer(size);
+		char *data = m_streamFile->ioBuffer(size);
 		assert(data);
 		IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength, data);
 
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
 
-		m_streamFile->write( node, data, size );
+		m_streamFile->index()->writeNodeData( node, data, size, *m_streamFile );
 	}
 	else
 	{
@@ -1909,7 +1961,7 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T *x, unsig
 
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
 
-		m_streamFile->write( node, (char*)x, size );
+		m_streamFile->index()->writeNodeData( node, (char*)x, size, *m_streamFile );
 	}
 	else
 	{
@@ -1929,13 +1981,13 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
 		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 
-		char *data = ioBuffer(size);
+		char *data = m_streamFile->ioBuffer(size);
 		assert(data);
 		IndexedIO::DataFlattenTraits<T>::flatten(x, data);
 
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, 0) ;
 
-		m_streamFile->write( node, data, size );
+		m_streamFile->index()->writeNodeData( node, data, size, *m_streamFile );
 	}
 	else
 	{
@@ -1957,7 +2009,7 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T &x)
 
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, 0) ;
 
-		m_streamFile->write( node, (char*)&x, size );
+		m_streamFile->index()->writeNodeData( node, (char*)&x, size, *m_streamFile );
 	}
 	else
 	{
@@ -1978,13 +2030,14 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long 
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
-	m_streamFile->seekg( node );
-
 	Imf::Int64 size = node->m_size;
-	char *data = ioBuffer(size);
-	m_streamFile->m_stream->read( data, size );
-
-	IndexedIO::DataFlattenTraits<T*>::unflatten( data, x, arrayLength );
+	{
+		StreamFile::MutexLock lock( m_streamFile->mutex() );
+		char *data = m_streamFile->ioBuffer(size);
+		m_streamFile->seekg( node->offset(), std::ios::beg );
+		m_streamFile->read( data, size );
+		IndexedIO::DataFlattenTraits<T*>::unflatten( data, x, arrayLength );
+	}
 }
 
 template<typename T>
@@ -2000,14 +2053,17 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned lo
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
-	m_streamFile->seekg( node );
-
 	Imf::Int64 size = node->m_size;
 	if (!x)
 	{
 		x = new T[arrayLength];
 	}
-	m_streamFile->m_stream->read( (char*)x, size );
+
+	{
+		StreamFile::MutexLock lock( m_streamFile->mutex() );
+		m_streamFile->seekg( node->offset(), std::ios::beg );
+		m_streamFile->read( (char*)x, size );
+	}
 }
 
 template<typename T>
@@ -2023,13 +2079,14 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
-	m_streamFile->seekg( node );
-
 	Imf::Int64 size = node->m_size;
-	char *data = ioBuffer(size);
-	m_streamFile->m_stream->read( data, size );
-
-	IndexedIO::DataFlattenTraits<T>::unflatten( data, x );
+	{
+		StreamFile::MutexLock lock( m_streamFile->mutex() );
+		char *data = m_streamFile->ioBuffer(size);
+		m_streamFile->seekg( node->offset(), std::ios::beg );
+		m_streamFile->read( data, size );
+		IndexedIO::DataFlattenTraits<T>::unflatten( data, x );
+	}
 }
 
 template<typename T>
@@ -2045,13 +2102,15 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
-	m_streamFile->seekg( node );
-
 	Imf::Int64 size = node->m_size;
-	m_streamFile->m_stream->read( (char*)&x, size );
+	{
+		StreamFile::MutexLock lock( m_streamFile->mutex() );
+		m_streamFile->seekg( node->offset(), std::ios::beg );
+		m_streamFile->read( (char*)&x, size );
+	}
 }
 
-#ifdef BOOST_LITTLE_ENDIAN
+#ifdef IE_CORE_LITTLE_ENDIAN
 #define READ	rawRead
 #define WRITE	rawWrite
 #else

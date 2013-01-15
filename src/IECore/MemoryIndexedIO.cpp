@@ -47,18 +47,19 @@ using namespace IECore;
 class MemoryIndexedIO::StreamFile : public StreamIndexedIO::StreamFile
 {
 	public:
-		StreamFile( const char *buf, size_t size, IndexedIO::OpenMode mode, StreamIndexedIO::Index *index = 0 );
+		StreamFile( const char *buf, size_t size, IndexedIO::OpenMode mode );
+
+		CharVectorDataPtr buffer();
 
 		virtual ~StreamFile();
 };
 
-MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO::OpenMode mode, StreamIndexedIO::Index *index ) : StreamIndexedIO::StreamFile(mode,index)
+MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO::OpenMode mode ) : StreamIndexedIO::StreamFile(mode)
 {
 	if (mode & IndexedIO::Write)
 	{
 		std::stringstream *f = new std::stringstream( std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-		setStream( f );
-		newIndex();
+		setStream( f, true );
 	}
 	else if (mode & IndexedIO::Append)
 	{
@@ -66,8 +67,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 		{
 			/// Create new file
 			std::stringstream *f = new std::stringstream(  std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-			setStream( f );
-			newIndex();
+			setStream( f, true );
 		}
 		else
 		{
@@ -76,13 +76,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 
 			/// Read existing file
 			std::stringstream *f = new std::stringstream( std::string(buf, size), std::ios::binary | std::ios::in | std::ios::out );
-			setStream( f );
-
-			if ( !index )
-			{
-				/// Read index
-				readIndex();
-			}
+			setStream( f, false );
 		}
 	}
 	else
@@ -90,17 +84,35 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 		assert( buf );
 		assert( mode & IndexedIO::Read );
 		std::stringstream *f = new std::stringstream( std::string(buf, size), std::ios::binary | std::ios::in | std::ios::out );
-		setStream( f );
-
-		if ( !index )
-		{
-			/// Read index
-			readIndex();
-		}
+		setStream( f, false );
 	}
 	assert( m_stream );
 	assert( m_stream->is_complete() );
 	assert( m_index );
+}
+
+CharVectorDataPtr MemoryIndexedIO::StreamFile::buffer()
+{
+	boost::optional<Imf::Int64> indexEnd = flush();
+
+	std::stringstream *s = static_cast< std::stringstream *>( m_stream );
+	assert( s );
+
+	CharVectorData::ValueType d;
+	const std::string &str = s->str();
+
+	if ( indexEnd )
+	{
+		d.assign( str.begin(), str.end() );
+		d.resize( *indexEnd );
+		assert( d.size() ==  *indexEnd );
+	}
+	else
+	{
+		d.assign( str.begin(), str.end() );
+	}
+
+	return new CharVectorData( d );
 }
 
 MemoryIndexedIO::StreamFile::~StreamFile()
@@ -136,26 +148,8 @@ MemoryIndexedIO::~MemoryIndexedIO()
 
 CharVectorDataPtr MemoryIndexedIO::buffer()
 {
-	boost::optional<Imf::Int64> indexEnd = flush();
-
-	std::stringstream *s = static_cast< std::stringstream *>( m_streamFile->stream() ) ;
-	assert( s );
-
-	CharVectorData::ValueType d;
-	const std::string &str = s->str();
-
-	if ( indexEnd )
-	{
-		d.assign( str.begin(), str.end() );
-		d.resize( *indexEnd );
-		assert( d.size() ==  *indexEnd );
-	}
-	else
-	{
-		d.assign( str.begin(), str.end() );
-	}
-
-	return new CharVectorData( d );
+	StreamFile *stream = static_cast<StreamFile*>( m_streamFile.get() );
+	return stream->buffer();
 }
 
 IndexedIO * MemoryIndexedIO::duplicate(Node *rootNode) const

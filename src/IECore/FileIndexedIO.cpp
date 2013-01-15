@@ -53,14 +53,14 @@ class FileIndexedIO::StreamFile : public StreamIndexedIO::StreamFile
 
 		std::string m_filename;
 
-		StreamFile( const std::string &filename, IndexedIO::OpenMode mode, StreamIndexedIO::Index *index = 0 );
+		StreamFile( const std::string &filename, IndexedIO::OpenMode mode );
 
 		virtual ~StreamFile();
 
 		static bool canRead( const std::string &path );
 };
 
-FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::OpenMode mode, StreamIndexedIO::Index *index ) : StreamIndexedIO::StreamFile(mode,index), m_filename( filename )
+FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::OpenMode mode ) : StreamIndexedIO::StreamFile(mode), m_filename( filename )
 {
 	if (mode & IndexedIO::Write)
 	{
@@ -70,9 +70,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 		{
 			throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for writing" );
 		}
-		setStream( f );
-		
-		newIndex();
+		setStream( f, true );
 	}
 	else if (mode & IndexedIO::Append)
 	{
@@ -85,8 +83,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 			{
 				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for append" );
 			}
-			setStream( f );
-			newIndex();
+			setStream( f, true );
 		}
 		else
 		{
@@ -97,25 +94,21 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 			{
 				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for read " );
 			}
-			setStream( f );
 
-			if ( !index )
+			try
 			{
-				/// Read index
-				try
-				{
-					readIndex();
-				}
-				catch ( Exception &e )
-				{
-					e.prepend( "Opening file \"" + filename + "\" : " );
-					throw;
-				}
-				catch (...)
-				{
-					throw IOException( "FileIndexedIO: Caught error reading index in file '" + filename + "'" );
-				}
+				setStream( f, false );
 			}
+			catch ( Exception &e )
+			{
+				e.prepend( "Opening file \"" + filename + "\" : " );
+				throw;
+			}
+			catch (...)
+			{
+				throw IOException( "FileIndexedIO: Caught error reading file '" + filename + "'" );
+			}
+
 		}
 	}
 	else
@@ -128,25 +121,20 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 			throw IOException( "FileIndexedIO: Cannot open file '" + filename + "' for read" );
 		}
 
-		setStream( f );
-
-		if ( !index )
+		try
 		{
-			/// Read index
-			try
-			{
-				readIndex();
-			}
-			catch ( Exception &e )
-			{
-				e.prepend( "Opening file \"" + filename + "\" : " );
-				throw;
-			}
-			catch (...)
-			{
-				throw IOException( "FileIndexedIO: Caught error while reading index in '" + filename + "'");
-			}
+			setStream( f, false );
 		}
+		catch ( Exception &e )
+		{
+			e.prepend( "Opening file \"" + filename + "\" : " );
+			throw;
+		}
+		catch (...)
+		{
+			throw IOException( "FileIndexedIO: Caught error reading file '" + filename + "'" );
+		}
+
 	}
 
 	assert( m_stream );
@@ -231,7 +219,6 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDLi
 	{
 		throw FileNotFoundIOException(filename);
 	}
-
 	open( new StreamFile( filename, mode ), root, mode );
 }
 

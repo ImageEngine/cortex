@@ -38,7 +38,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
-
+#include "tbb/mutex.h"
 #include "boost/optional.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
 
@@ -50,6 +50,7 @@ namespace IECore
 {
 /// Abstract base class implementation of IndexedIO which operates with a stream file handle.
 /// It handles data instancing transparently for compact file sizes.
+/// Read operations are thread safe on read-only opened files.
 /// \ingroup ioGroup
 class StreamIndexedIO : public IndexedIO
 {
@@ -149,44 +150,50 @@ class StreamIndexedIO : public IndexedIO
 		class Node;
 		IE_CORE_DECLAREPTR( Node );
 
-		/// Class that provides access to the stream file
+		class StringCache;
+
+		/// Class that provides access to the stream file and also keep a reference to the index of the file.
 		class StreamFile : public RefCounted
 		{
 			public:
-
-				std::iostream *m_stream;
-				IndexedIO::OpenMode m_openmode;
-
 				virtual ~StreamFile();
 
-				/// Obtain the index for this file
+				void seekg( size_t pos, std::ios_base::seekdir dir );
+				void seekp( size_t pos, std::ios_base::seekdir dir );
+				void read( char *buffer, size_t size );
+				void write( const char *buffer, size_t size );
+				Imf::Int64 tellg();
+				Imf::Int64 tellp();
+
 				Index* index() const;
 
-				/// Seek to a particular node within the file for reading
-				void seekg( Node* node );
+				// returns a read lock, when thread-safety is required.
+				typedef tbb::mutex::scoped_lock MutexLock;
+				tbb::mutex & mutex();
 
-				/// Write some data to the file. Its position is automatically allocated within the file, and the node
-				/// is updated to record this offset along with its size (or it's turned into a hardlink if the data is already stored by other node).
-				/// The hardlinks will only be created for nodes that have been saved on the same session. So edit mode will not be that great.
-				void write(Node* node, const char *data, Imf::Int64 size);
-
-				/// Saves to the file changes to the index. This function is used by the destructor.
-				/// If the index has changed, than it returns the offset where the file ends.
-				boost::optional<Imf::Int64> flush();
-
-				std::iostream *stream();
+				// utility function that returns a temporary buffer for io operations (not thread safe).
+				char *ioBuffer( unsigned long size );
 
 				static bool canRead( std::iostream &stream );
 
 			protected:
 
-				StreamFile( IndexedIO::OpenMode mode, Index *index );
-				void setStream( std::iostream *stream );
-				void newIndex();
-				void readIndex();
+				StreamFile( IndexedIO::OpenMode mode );
+				/// called once after construction. Assigns a stream and tells if the stream is empty.
+				// This function allocates and if in read-mode also reads the Index of the file.
+				void setStream( std::iostream *stream, bool emptyFile );
 
+				/// Saves to the file changes to the index. This function is used by the destructor.
+				/// If the index has changed, than it returns the offset where the file ends.
+				boost::optional<Imf::Int64> flush();
+
+				IndexedIO::OpenMode m_openmode;
 				IndexPtr m_index;
+				std::iostream *m_stream;
+				tbb::mutex m_mutex;
 
+				unsigned long m_ioBufferLen;
+				char *m_ioBuffer;
 		};
 		IE_CORE_DECLAREPTR( StreamFile );
 
@@ -235,8 +242,6 @@ class StreamIndexedIO : public IndexedIO
 		template<typename T>
 		void rawRead(const IndexedIO::EntryID &name, T &x) const;
 
-		boost::optional<Imf::Int64> flush();
-
 		// Duplicates this object by mapping it to a different root node. Used when the subdirectory functions are called.
 		// This function does not duplicate the file handle like the public duplicate does. It works with any openMode.
 		virtual IndexedIO *duplicate(Node *rootNode) const = 0;
@@ -251,11 +256,6 @@ class StreamIndexedIO : public IndexedIO
 	private :
 
 		void setRoot( const IndexedIO::EntryIDList &root );
-
-		char *ioBuffer( unsigned long size ) const;
-
-		mutable unsigned long m_ioBufferLen;
-		mutable char *m_ioBuffer;
 
 };
 
