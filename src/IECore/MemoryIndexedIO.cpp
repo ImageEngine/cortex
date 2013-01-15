@@ -57,7 +57,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 	if (mode & IndexedIO::Write)
 	{
 		std::stringstream *f = new std::stringstream( std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-		setDevice( f );
+		setStream( f );
 		newIndex();
 	}
 	else if (mode & IndexedIO::Append)
@@ -66,7 +66,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 		{
 			/// Create new file
 			std::stringstream *f = new std::stringstream(  std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-			setDevice( f );
+			setStream( f );
 			newIndex();
 		}
 		else
@@ -76,7 +76,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 
 			/// Read existing file
 			std::stringstream *f = new std::stringstream( std::string(buf, size), std::ios::binary | std::ios::in | std::ios::out );
-			setDevice( f );
+			setStream( f );
 
 			if ( !index )
 			{
@@ -90,7 +90,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 		assert( buf );
 		assert( mode & IndexedIO::Read );
 		std::stringstream *f = new std::stringstream( std::string(buf, size), std::ios::binary | std::ios::in | std::ios::out );
-		setDevice( f );
+		setStream( f );
 
 		if ( !index )
 		{
@@ -98,7 +98,6 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 			readIndex();
 		}
 	}
-	assert( m_device );
 	assert( m_stream );
 	assert( m_stream->is_complete() );
 	assert( m_index );
@@ -139,7 +138,7 @@ CharVectorDataPtr MemoryIndexedIO::buffer()
 {
 	boost::optional<Imf::Int64> indexEnd = flush();
 
-	std::stringstream *s = static_cast< std::stringstream *>( m_streamFile->device() ) ;
+	std::stringstream *s = static_cast< std::stringstream *>( m_streamFile->stream() ) ;
 	assert( s );
 
 	CharVectorData::ValueType d;

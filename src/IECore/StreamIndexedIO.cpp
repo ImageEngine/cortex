@@ -356,7 +356,7 @@ class StreamIndexedIO::Index : public RefCounted
 		Index( bool readOnly );
 
 		/// Construct an index from reading a file stream.
-		Index( StreamFile::FilteredStream &f, bool readOnly );
+		Index( std::iostream &f, bool readOnly );
 		virtual ~Index();
 
 		NodePtr m_root;
@@ -795,7 +795,7 @@ const StringCache &StreamIndexedIO::Index::stringCache() const
 	return m_stringCache;
 }
 
-StreamIndexedIO::Index::Index( StreamFile::FilteredStream &f, bool readOnly ) : m_prevId(0), m_readOnly(readOnly)
+StreamIndexedIO::Index::Index( std::iostream &f, bool readOnly ) : m_prevId(0), m_readOnly(readOnly)
 {
 	m_hasChanged = false;
 
@@ -1379,14 +1379,13 @@ bool StreamIndexedIO::Index::findRepeatedData(Node* node, const char *data, Imf:
 //
 ///////////////////////////////////////////////
 
-StreamIndexedIO::StreamFile::StreamFile( IndexedIO::OpenMode mode, Index *index ) : m_stream( new StreamFile::FilteredStream() ), m_device(0), m_openmode(mode), m_index(index)
+StreamIndexedIO::StreamFile::StreamFile( IndexedIO::OpenMode mode, Index *index ) : m_stream(0), m_openmode(mode), m_index(index)
 {
 }
 
-void StreamIndexedIO::StreamFile::setDevice( std::iostream *device )
+void StreamIndexedIO::StreamFile::setStream( std::iostream *stream )
 {
-	m_device = device;
-	m_stream->push<>( *m_device );
+	m_stream = stream;
 	assert( m_stream->is_complete() );
 }
 
@@ -1423,10 +1422,6 @@ StreamIndexedIO::StreamFile::~StreamFile()
 	{
 		delete m_stream;
 	}
-	if ( m_device )
-	{
-		delete m_device;
-	}
 }
 
 void StreamIndexedIO::StreamFile::write(Node* node, const char *data, Imf::Int64 size)
@@ -1458,7 +1453,7 @@ void StreamIndexedIO::StreamFile::write(Node* node, const char *data, Imf::Int64
 
 boost::optional<Imf::Int64> StreamIndexedIO::StreamFile::flush()
 {
-	if (!m_index || !m_device)
+	if (!m_index || !m_stream)
 		return boost::optional<Imf::Int64>();
 
 	if (m_index->hasChanged())
@@ -1468,17 +1463,17 @@ boost::optional<Imf::Int64> StreamIndexedIO::StreamFile::flush()
 		return boost::optional<Imf::Int64>( end );
 	}
 
-	assert( m_device );
-	m_device->flush();
+	assert( m_stream );
+	m_stream->flush();
 	return boost::optional<Imf::Int64>();
 }
 
-std::iostream *StreamIndexedIO::StreamFile::device()
+std::iostream *StreamIndexedIO::StreamFile::stream()
 {
-	return m_device;
+	return m_stream;
 }
 
-bool StreamIndexedIO::StreamFile::canRead( FilteredStream &f )
+bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
 {
 	assert( f.is_complete() );
 

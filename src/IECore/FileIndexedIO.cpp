@@ -70,7 +70,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 		{
 			throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for writing" );
 		}
-		setDevice( f );
+		setStream( f );
 		
 		newIndex();
 	}
@@ -85,7 +85,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 			{
 				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for append" );
 			}
-			setDevice( f );
+			setStream( f );
 			newIndex();
 		}
 		else
@@ -97,7 +97,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 			{
 				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for read " );
 			}
-			setDevice( f );
+			setStream( f );
 
 			if ( !index )
 			{
@@ -128,7 +128,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 			throw IOException( "FileIndexedIO: Cannot open file '" + filename + "' for read" );
 		}
 
-		setDevice( f );
+		setStream( f );
 
 		if ( !index )
 		{
@@ -149,7 +149,6 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 		}
 	}
 
-	assert( m_device );
 	assert( m_stream );
 	assert( m_stream->is_complete() );
 	assert( m_index );
@@ -161,7 +160,7 @@ FileIndexedIO::StreamFile::~StreamFile()
 
 	if ( indexEnd && ( m_openmode == IndexedIO::Write || m_openmode == IndexedIO::Append ) )
 	{
-		std::fstream *f = static_cast< std::fstream * >( m_device );
+		std::fstream *f = static_cast< std::fstream * >( m_stream );
 
 		f->seekg( 0, std::ios::end );
 		Imf::Int64 fileEnd = f->tellg();
@@ -171,9 +170,7 @@ FileIndexedIO::StreamFile::~StreamFile()
 		{
 			/// Close the file before truncation
 			delete m_stream;
-			delete m_device;
 			m_stream = 0;
-			m_device = 0;
 
 			/// Truncate the file at the end of the index
 			int err = truncate( m_filename.c_str(), *indexEnd );
@@ -194,10 +191,7 @@ bool FileIndexedIO::StreamFile::canRead( const std::string &path )
 		return false;
 	}
 
-	FilteredStream f;
-	f.push<>( d );
-
-	return StreamIndexedIO::StreamFile::canRead( f );
+	return StreamIndexedIO::StreamFile::canRead( d );
 }
 
 ///////////////////////////////////////////////

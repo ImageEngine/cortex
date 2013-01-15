@@ -154,10 +154,7 @@ class StreamIndexedIO : public IndexedIO
 		{
 			public:
 
-				typedef boost::iostreams::filtering_stream< boost::iostreams::bidirectional_seekable > FilteredStream;
-
-				FilteredStream *m_stream;
-				std::iostream *m_device;
+				std::iostream *m_stream;
 				IndexedIO::OpenMode m_openmode;
 
 				virtual ~StreamFile();
@@ -177,14 +174,14 @@ class StreamIndexedIO : public IndexedIO
 				/// If the index has changed, than it returns the offset where the file ends.
 				boost::optional<Imf::Int64> flush();
 
-				std::iostream *device();
+				std::iostream *stream();
 
-				static bool canRead( FilteredStream &stream );
+				static bool canRead( std::iostream &stream );
 
 			protected:
 
 				StreamFile( IndexedIO::OpenMode mode, Index *index );
-				void setDevice( std::iostream *device );
+				void setStream( std::iostream *stream );
 				void newIndex();
 				void readIndex();
 
@@ -240,9 +237,9 @@ class StreamIndexedIO : public IndexedIO
 
 		boost::optional<Imf::Int64> flush();
 
-		// duplicates this object by mapping it to a different root node.
+		// Duplicates this object by mapping it to a different root node. Used when the subdirectory functions are called.
+		// This function does not duplicate the file handle like the public duplicate does. It works with any openMode.
 		virtual IndexedIO *duplicate(Node *rootNode) const = 0;
-
 
 		/// The mode this device was opened with
 		IndexedIO::OpenMode m_mode;
