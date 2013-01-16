@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,33 +35,26 @@
 import IECore
 import unittest
 
-class CapturingMessageHandler( unittest.TestCase ) :
-
-	def setUp( self ) :
-
-		self.handler = IECore.CapturingMessageHandler()
-		IECore.Msg.pushHandler( self.handler )
+class CapturingMessageHandlerTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		IECore.msg( IECore.Msg.Level.Error, "A", "AAA" )
-		IECore.msg( IECore.Msg.Level.Error, "B", "BBB" )
-		IECore.msg( IECore.Msg.Level.Error, "C", "CCC" )
+		with IECore.CapturingMessageHandler() as mh :
+		
+			IECore.msg( IECore.Msg.Level.Error, "A", "AAA" )
+			IECore.msg( IECore.Msg.Level.Error, "B", "BBB" )
+			IECore.msg( IECore.Msg.Level.Error, "C", "CCC" )
 
-		self.assertEqual( len( self.handler.messages ), 3 )
-		self.assertEqual( self.handler.messages[0].level, IECore.Msg.Level.Error )
-		self.assertEqual( self.handler.messages[1].level, IECore.Msg.Level.Error )
-		self.assertEqual( self.handler.messages[2].level, IECore.Msg.Level.Error )
-		self.assertEqual( self.handler.messages[0].context, "A" )
-		self.assertEqual( self.handler.messages[1].context, "B" )
-		self.assertEqual( self.handler.messages[2].context, "C" )
-		self.assertEqual( self.handler.messages[0].message, "AAA" )
-		self.assertEqual( self.handler.messages[1].message, "BBB" )
-		self.assertEqual( self.handler.messages[2].message, "CCC" )
-
-	def tearDown( self ) :
-
-		IECore.Msg.popHandler()
+		self.assertEqual( len( mh.messages ), 3 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[1].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[2].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[0].context, "A" )
+		self.assertEqual( mh.messages[1].context, "B" )
+		self.assertEqual( mh.messages[2].context, "C" )
+		self.assertEqual( mh.messages[0].message, "AAA" )
+		self.assertEqual( mh.messages[1].message, "BBB" )
+		self.assertEqual( mh.messages[2].message, "CCC" )
 
 if __name__ == "__main__":
 	unittest.main()

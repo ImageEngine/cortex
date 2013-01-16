@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -125,8 +125,8 @@ class SOP_ParameterisedHolder : public SOP_Node
 		/// \todo: this signature is deprecated. remove for next major version
 		void setInputParameterValues();
 		
-		/// returns an IECoreHoudini::MessageHandler setup to use the standard SOP_Node messaging methods
-		IECore::MessageHandlerPtr messageHandler();
+		/// Returns an IECoreHoudini::MessageHandler setup to use the standard SOP_Node messaging methods
+		IECore::MessageHandler *messageHandler();
 		
 		/// A vector of IECore::Parameters which are passed through SOP inputs rather than PRM_Templates
 		IECore::CompoundParameter::ParameterVector m_inputParameters;
@@ -163,6 +163,8 @@ class SOP_ParameterisedHolder : public SOP_Node
 
 		// stores the className of the currently loaded parameterised object (if any)
 		std::string m_loadedClassName;
+		
+		IECore::MessageHandlerPtr m_messageHandler;
 
 };
 

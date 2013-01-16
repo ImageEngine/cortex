@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -222,7 +222,7 @@ MStatus initialize(MFnPlugin &plugin)
 		{
 			IECore::MessageHandlerPtr h = new IECoreMaya::MessageHandler;
 			h = new IECore::LevelFilteredMessageHandler( h, IECore::LevelFilteredMessageHandler::defaultLevel() );
-			IECore::MessageHandler::pushHandler( h );
+			IECore::MessageHandler::setDefaultHandler( h );
 		}
 		
 		if( MGlobal::mayaState() == MGlobal::kInteractive )
@@ -286,13 +286,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterData( ObjectData::id );
 
 		s = plugin.deregisterImageFile( "ieImageFile" );
-
-		// \todo Should we also pop our message handler here if we pushed one in initialize?
-		// We're not doing that for now as IECore.Log.setLogLevel messes with the balancing of the
-		// stack so i'm not sure popping is a good idea. Also even if we fix that then there's no real
-		// guarantee that we're popping the one we pushed (other people could have pushed their own
-		// handlers since ours, and not popped 'em). Not sure - maybe we need some guidelines as to
-		// the nesting of handlers?
 		
 		if( MGlobal::mayaState() == MGlobal::kInteractive )
 		{

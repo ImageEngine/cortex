@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -167,7 +167,6 @@
 #include "IECorePython/ImageCropOpBinding.h"
 #include "IECorePython/MeshPrimitiveShrinkWrapOpBinding.h"
 #include "IECorePython/ImagePrimitiveEvaluatorBinding.h"
-#include "IECorePython/ScopedMessageHandlerBinding.h"
 #include "IECorePython/MathBinding.h"
 #include "IECorePython/CameraControllerBinding.h"
 #include "IECorePython/PathVectorParameterBinding.h"
@@ -456,7 +455,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageCropOp();
 	bindMeshPrimitiveShrinkWrapOp();
 	bindImagePrimitiveEvaluator();
-	bindScopedMessageHandler();
 	bindMath();
 	bindCameraController();
 	bindPathVectorParameter();

@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,6 @@
 #include "UT/UT_Interrupt.h"
 
 #include "IECore/Op.h"
-#include "IECore/ScopedMessageHandler.h"
 #include "IECore/VisibleRenderable.h"
 
 #include "IECorePython/ScopedGILLock.h" 
@@ -68,7 +67,7 @@ SOP_OpHolder::~SOP_OpHolder()
 /// Cook the SOP! This method does all the work
 OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 {
-	IECore::ScopedMessageHandler handler( messageHandler() );
+	IECore::MessageHandler::Scope handlerScope( messageHandler() );
 	
 	// some defaults and useful variables
 	Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );

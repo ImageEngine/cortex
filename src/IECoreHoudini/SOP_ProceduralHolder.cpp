@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,6 @@
 #include "PRM/PRM_Parm.h"
 
 #include "IECore/ParameterisedProcedural.h"
-#include "IECore/ScopedMessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
 #include "IECorePython/ScopedGILLock.h"
@@ -108,7 +107,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 /// Cook the SOP! This method does all the work
 OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 {
-	IECore::ScopedMessageHandler handler( messageHandler() );
+	IECore::MessageHandler::Scope handlerScope( messageHandler() );
 	
 	// some defaults and useful variables
 	float now = context.getTime();

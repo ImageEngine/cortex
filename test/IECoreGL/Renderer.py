@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2011, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -234,18 +234,15 @@ class TestRenderer( unittest.TestCase ) :
 		immediate = Renderer()
 		immediate.setOption( "gl:mode", StringData( "immediate" ) )
 
-		handler = CapturingMessageHandler()
-		Msg.pushHandler( handler )
+		with CapturingMessageHandler() as handler :
 
-		for r in [ deferred, immediate ] :
+			for r in [ deferred, immediate ] :
 
-			r.worldBegin()
+				r.worldBegin()
 
-			r.setAttribute( "ri:visibility:diffuse", IntData( 0 ) )
+				r.setAttribute( "ri:visibility:diffuse", IntData( 0 ) )
 
-			r.worldEnd()
-
-		Msg.popHandler()
+				r.worldEnd()
 
 		self.assertEqual( len( handler.messages ), 0 )
 
@@ -480,26 +477,22 @@ class TestRenderer( unittest.TestCase ) :
 		r.worldBegin()
 		r.worldEnd()
 		
-		handler = CapturingMessageHandler()
-		Msg.pushHandler( handler )
+		with CapturingMessageHandler() as handler :
 		
-		r.attributeBegin()
-		r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
-		r.attributeEnd()
+			r.attributeBegin()
+			r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+			r.attributeEnd()
 		
-		Msg.popHandler()
 		self.assertEqual( len( handler.messages ), 3 )
 		
-		handler = CapturingMessageHandler()
-		Msg.pushHandler( handler )
+		with CapturingMessageHandler() as handler :
 		
-		r.command( "editBegin", {} )
-		r.attributeBegin()
-		r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
-		r.attributeEnd()
-		r.command( "editEnd", {} )
+			r.command( "editBegin", {} )
+			r.attributeBegin()
+			r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+			r.attributeEnd()
+			r.command( "editEnd", {} )
 		
-		Msg.popHandler()
 		self.assertEqual( len( handler.messages ), 0 )
 			
 	def testRemoveObject( self ) :
