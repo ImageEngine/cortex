@@ -1656,6 +1656,7 @@ const IndexedIO::EntryID &StreamIndexedIO::currentEntryId() const
 
 void StreamIndexedIO::path( IndexedIO::EntryIDList &result ) const
 {
+	result.clear();
 	m_node->path(result);
 }
 
