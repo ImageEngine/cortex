@@ -374,7 +374,7 @@ if targetApp :
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
 	# boost version an app needs, whereas the other libraries are linking to the correct boost version for
 	# 3delight, so we just install the procedurals into /tmp where they can't do any harm.
-	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION"
+	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME"
 	INSTALL_RMANDISPLAY_NAME = "/tmp/unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 	INSTALL_ARNOLDPROCEDURAL_NAME = "/tmp/unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
@@ -384,7 +384,7 @@ else :
 	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion )
 	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "$IECORE_NAME" )
 	INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", "$IECORE_NAME" )
 	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )
