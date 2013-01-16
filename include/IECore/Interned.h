@@ -68,7 +68,7 @@ class Interned
 
 		inline operator const T & () const;
 
-		const T &value() const;
+		inline const T &value() const;
 
 		static size_t size();
 

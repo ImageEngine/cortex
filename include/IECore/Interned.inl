@@ -127,7 +127,7 @@ inline Interned<T, Hash>::operator const T & () const
 }
 
 template<typename T, typename Hash>
-const T &Interned<T, Hash>::value() const
+inline const T &Interned<T, Hash>::value() const
 {
 	return *m_value;
 }
