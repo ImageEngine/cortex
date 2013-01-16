@@ -177,7 +177,7 @@ class IndexedIO : public RefCounted
 		// ThrowIfMissing or CreateIfMissing, returns Null pointer if NullIfMissing.
 		virtual ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
 
-		/// Return details of a specific child entry or raises an exception if it doesn exist.
+		/// Return details of a specific child entry or raises an exception if it doesn't exist.
 		virtual IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const = 0;
 
 		/// Remove a specified child file or directory.
