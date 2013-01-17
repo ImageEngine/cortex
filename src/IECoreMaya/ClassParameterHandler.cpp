@@ -245,44 +245,8 @@ MPlug ClassParameterHandler::doCreate( IECore::ConstParameterPtr parameter, cons
 		return MPlug();
 	}
 	
-	/// \todo: Remove this userData for Cortex 8. Find all notes labelled "compatibility for the deprecated compound plug behaviour"
-	/// and remove the unnecessary code at that time.
-	bool compact = false;
-	IECore::ConstCompoundObjectPtr mayaUserData = parameter->userData()->member<IECore::CompoundObject>( "maya" );
-	if( mayaUserData )
-	{
-		IECore::ConstBoolDataPtr compactClassPlugs = mayaUserData->member<IECore::BoolData>( "compactClassPlugs" );
-		if ( compactClassPlugs )
-		{
-			compact = compactClassPlugs->readable();
-		}
-	}
-	
-	MObject attribute;
-	
-	if ( compact )
-	{
-		MFnTypedAttribute fnTAttr;
-		attribute = fnTAttr.create( plugName, plugName, MFnData::kStringArray );
-	}
-	else
-	{
-		// compatibility for the deprecated compound plug behaviour
-		MFnCompoundAttribute fnCAttr;
-		attribute = fnCAttr.create( plugName, plugName );
-		
-		MFnTypedAttribute fnTAttr;
-		MObject classNameAttr = fnTAttr.create( plugName + "__className", plugName + "__className", MFnData::kString );
-		fnCAttr.addChild( classNameAttr );
-		
-		MFnNumericAttribute fnNAttr;
-		MObject classVersionAttr = fnNAttr.create( plugName + "__classVersion", plugName + "__classVersion", MFnNumericData::kInt );
-		fnCAttr.addChild( classVersionAttr );
-		
-		MObject searchPathEnvVarAttr = fnTAttr.create( plugName + "__searchPathEnvVar", plugName + "__searchPathEnvVar", MFnData::kString );
-		fnCAttr.addChild( searchPathEnvVarAttr );
-	}
-	
+	MFnTypedAttribute fnTAttr;
+	MObject attribute = fnTAttr.create( plugName, plugName, MFnData::kStringArray );
 	MPlug result = finishCreating( parameter, attribute, node );
 	
 	if( !storeClass( parameter, result ) )
@@ -354,7 +318,9 @@ MStatus ClassParameterHandler::storeClass( IECore::ConstParameterPtr parameter, 
 			}
 			else
 			{
-				// compatibility for the deprecated compound plug behaviour
+				// compatibility for the deprecated compound plug behaviour. keeping this code
+				// so we can still read old scenes. creation of these plugs has been removed.
+				/// \todo: find all such notes and remove the unnecessary code for Cortex 9.
 				plug.child( 0 ).setString( className.c_str() );
 				plug.child( 1 ).setInt( classVersion );
 				plug.child( 2 ).setString( searchPathEnvVar.c_str() );

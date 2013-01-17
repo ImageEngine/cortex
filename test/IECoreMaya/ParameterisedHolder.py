@@ -1113,19 +1113,6 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		bPlugPath = fnOH.parameterPlugPath( op["cp"]["b"] )
 		cpPlugPath = fnOH.parameterPlugPath( op["cp"] )
 		
-		self.assertEqual( cmds.getAttr( cpPlugPath, type=True ), "TdataCompound" )
-		self.assertEqual( cmds.getAttr( cpPlugPath + "__className" ), "maths/multiply" )
-		self.assertEqual( cmds.getAttr( cpPlugPath + "__classVersion" ), 1 )
-		self.assertEqual( cmds.getAttr( cpPlugPath + "__searchPathEnvVar" ), "IECORE_OP_PATHS" )
-		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
-		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
-		
-		op["cp"].userData().update( { "maya" : { "compactClassPlugs" : IECore.BoolData( True ) } } )
-		node2 = cmds.createNode( "ieOpHolderNode" )
-		fnOH2 = IECoreMaya.FnParameterisedHolder( str( node2 ) )
-		fnOH2.setParameterised( op )
-		cpPlugPath = fnOH2.parameterPlugPath( op["cp"] )
-		
 		self.assertEqual( cmds.getAttr( cpPlugPath ), [ "maths/multiply", "1", "IECORE_OP_PATHS" ] )
 		self.failUnless( not cmds.objExists( cpPlugPath + "__className" ) )
 		self.failUnless( not cmds.objExists( cpPlugPath + "__classVersion" ) )
@@ -1712,17 +1699,6 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			] )
 		
 		cPlugPath = fnOH.parameterPlugPath( c )
-		self.assertEqual( cmds.getAttr( cPlugPath, type=True ), "TdataCompound" )
-		self.assertEqual( cmds.getAttr( cPlugPath + "__parameterNames" ), [ "mult", "coIO" ] )
-		self.assertEqual( cmds.getAttr( cPlugPath + "__classNames" ), [ "maths/multiply", "compoundObjectInOut" ] )
-		self.assertEqual( cmds.getAttr( cPlugPath + "__classVersions" ), [ 1, 1 ] )
-		
-		op["cv"].userData().update( { "maya" : { "compactClassPlugs" : IECore.BoolData( True ) } } )
-		node2 = cmds.createNode( "ieOpHolderNode" )
-		fnOH2 = IECoreMaya.FnOpHolder( str( node2 ) )
-		fnOH2.setParameterised( op )
-		cPlugPath = fnOH2.parameterPlugPath( c )
-		
 		self.assertEqual( cmds.getAttr( cPlugPath ), [ "mult", "maths/multiply", "1", "coIO", "compoundObjectInOut", "1" ] )
 		self.failUnless( not cmds.objExists( cPlugPath + "__parameterNames" ) )
 		self.failUnless( not cmds.objExists( cPlugPath + "__classNames" ) )

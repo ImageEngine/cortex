@@ -2,6 +2,10 @@ Additions :
 
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::ModelCache files
 
+Improvements :
+
+* IECoreMaya::ClassParameterHandler and ClassVectorParameterHandler will only create attributes using 1-plug mode. 4-plug mode is still readable, but will be removed in the future. The ['maya']['compactClassPlugs'] userData is no longer accepted.
+
 Bug Fixes :
 
 * Fixed crashes caused by calling PrimitiveEvaluator.create( None ) in Python, replacing them with ValueError exceptions.
