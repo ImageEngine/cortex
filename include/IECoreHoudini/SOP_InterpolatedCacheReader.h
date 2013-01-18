@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,7 +51,6 @@ namespace IECoreHoudini
 /// be transfered for the GA_Range definied by the GA_PointGroup. The GA_Attribute name will be the
 /// difference between the AttributeHandle and the Attribute Prefix/Suffix parameters. If transformAttribute
 /// is specified, and the associated data is a TransformationMatrix, it will be used to transform the GA_Range.
-/// \todo: allow PrimitiveAttribs to be created based on GA_PrimGroups
 class SOP_InterpolatedCacheReader : public SOP_Node
 {
 	public :
@@ -68,6 +67,7 @@ class SOP_InterpolatedCacheReader : public SOP_Node
 			PointGroup,
 		};
 		
+		static PRM_ChoiceList interpolationList;
 		static PRM_ChoiceList groupingModeList;
 	
 	protected :
@@ -77,8 +77,10 @@ class SOP_InterpolatedCacheReader : public SOP_Node
 	private :
 		
 		IECore::InterpolatedCachePtr m_cache;
+		IECore::InterpolatedCache::Interpolation m_interpolation;
+		int m_samplesPerFrame;
 		std::string m_cacheFileName;
-		int m_frameMultiplier;
+
 };
 
 } // namespace IECoreHoudini

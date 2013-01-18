@@ -5,6 +5,7 @@ Additions :
 Improvements :
 
 * IECoreMaya::ClassParameterHandler and ClassVectorParameterHandler will only create attributes using 1-plug mode. 4-plug mode is still readable, but will be removed in the future. The ['maya']['compactClassPlugs'] userData is no longer accepted.
+* IECoreHoudini SOP_InterpolatedCacheReader now exposes samplesPerFrame and interpolation as parameters, instead of the frameMultiplier hack. fps is stil hidden, though may be exposed in the future.
 
 Bug Fixes :
 
