@@ -424,11 +424,6 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 	setXY( getX()-.0001, getY()-.0001 );
 }
 
-void SOP_ParameterisedHolder::setInputParameterValues()
-{
-	setInputParameterValues( 0 );
-}
-
 void SOP_ParameterisedHolder::setInputParameterValues( float now )
 {
 	for ( unsigned int i=0; i < m_inputParameters.size(); i++ )

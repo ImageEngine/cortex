@@ -122,8 +122,6 @@ class SOP_ParameterisedHolder : public SOP_Node
 		/// it's Cortex output will be passed through. If it is a native Houdini node, it will be converted
 		/// using the appropriate FromHoudiniGeometryConverter.
 		void setInputParameterValues( float now );
-		/// \todo: this signature is deprecated. remove for next major version
-		void setInputParameterValues();
 		
 		/// Returns an IECoreHoudini::MessageHandler setup to use the standard SOP_Node messaging methods
 		IECore::MessageHandler *messageHandler();
