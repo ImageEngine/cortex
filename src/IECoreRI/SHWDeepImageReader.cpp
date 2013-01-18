@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -79,16 +79,6 @@ bool SHWDeepImageReader::canRead( const std::string &fileName )
 	DtexDestroyCache( dtexCache );
 	
 	return ( status == DTEX_NOERR );
-}
-
-CompoundObjectPtr SHWDeepImageReader::readHeader()
-{
-	CompoundObjectPtr header = DeepImageReader::readHeader();
-	/// \todo: move this to the base class for Cortex 8
-	header->members()["worldToCameraMatrix"] = new M44fData( worldToCameraMatrix() );
-	header->members()["worldToNDCMatrix"] = new M44fData( worldToNDCMatrix() );
-	
-	return header;
 }
 
 void SHWDeepImageReader::channelNames( std::vector<std::string> &names )

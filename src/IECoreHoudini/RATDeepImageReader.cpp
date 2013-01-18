@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,16 +83,6 @@ bool RATDeepImageReader::canRead( const std::string &fileName )
 	}
 	
 	return false;
-}
-
-CompoundObjectPtr RATDeepImageReader::readHeader()
-{
-	CompoundObjectPtr header = DeepImageReader::readHeader();
-	/// \todo: move this to the base class for Cortex 8
-	header->members()["worldToCameraMatrix"] = new M44fData( worldToCameraMatrix() );
-	header->members()["worldToNDCMatrix"] = new M44fData( worldToNDCMatrix() );
-	
-	return header;
 }
 
 void RATDeepImageReader::channelNames( std::vector<std::string> &names )

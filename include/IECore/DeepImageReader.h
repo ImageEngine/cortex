@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,11 +74,10 @@ class DeepImageReader : public Reader
 		/// Returns the displayWindow contained in the file.
 		virtual Imath::Box2i displayWindow() = 0;
 		
-		/// \todo: uncomment for Cortex 8, when it will be okay to break compatibility
 		/// Returns the world to camera space transformation matrix contained in the file.
-		//virtual Imath::M44f worldToCameraMatrix() = 0;
+		virtual Imath::M44f worldToCameraMatrix() = 0;
 		/// Returns the world to screen space projection matrix contained in the file.
-		//virtual Imath::M44f worldToNDCMatrix() = 0;
+		virtual Imath::M44f worldToNDCMatrix() = 0;
 		
 		/// Reads the specified pixel. Note that regardless of image format, x and y should
 		/// be specified as if the origin is in the upper left corner of the displayWindow.

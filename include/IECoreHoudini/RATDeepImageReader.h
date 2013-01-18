@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,18 +64,14 @@ class RATDeepImageReader : public IECore::DeepImageReader
 
 		virtual ~RATDeepImageReader();
 		
-		/// \todo: remove this in Cortex 8
-		virtual IECore::CompoundObjectPtr readHeader();
-		
 		static bool canRead( const std::string &filename );
 
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
-		/// \todo: these will become virtual in Cortex 8
-		Imath::M44f worldToCameraMatrix();
-		Imath::M44f worldToNDCMatrix();
+		virtual Imath::M44f worldToCameraMatrix();
+		virtual Imath::M44f worldToNDCMatrix();
 
 	protected :
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,9 +52,6 @@ void bindRATDeepImageReader()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &RATDeepImageReader::canRead ).staticmethod( "canRead" )
-		/// \todo: move these to the base class for Cortex 8
-		.def( "worldToCameraMatrix", &RATDeepImageReader::worldToCameraMatrix )
-		.def( "worldToNDCMatrix", &RATDeepImageReader::worldToNDCMatrix )
 	;
 
 }

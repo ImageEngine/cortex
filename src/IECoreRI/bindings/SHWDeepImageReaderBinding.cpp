@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,9 +51,6 @@ void bindSHWDeepImageReader()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &SHWDeepImageReader::canRead ).staticmethod( "canRead" )
-		/// \todo: move these to the base class for Cortex 8
-		.def( "worldToCameraMatrix", &SHWDeepImageReader::worldToCameraMatrix )
-		.def( "worldToNDCMatrix", &SHWDeepImageReader::worldToNDCMatrix )
 	;
 
 }
