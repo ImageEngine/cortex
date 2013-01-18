@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -175,12 +175,6 @@ class FnParameterisedHolder():
 				result.append( p.tuple() if tuples else p )
 		
 		return result
-	
-	## \todo: remove this method for the next major version
-	def countSpareParameters( self ) :
-		
-		warnings.warn( "FnParameterisedHolder.countSpareParameters() is deprecated.", DeprecationWarning, 2 )
-		return len(self.spareParameters( tuples=False ))
 	
 	# this method removes all spare parameters from the "Parameters" folder
 	def removeParameters( self ) :
