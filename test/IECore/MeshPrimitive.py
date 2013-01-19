@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -53,7 +53,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.interpolation, "linear" )
 		self.assertEqual( m, m.copy() )
 
-		iface = IndexedIO.create( "test/IECore/mesh.fio", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/IECore/mesh.fio", IndexedIO.OpenMode.Write )
 		m.save( iface, "test" )
 		mm = Object.load( iface, "test" )
 		self.assertEqual( m, mm )

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -51,12 +51,12 @@ class TestAttributeCache(unittest.TestCase):
 	def testConstructors(self):
 		"""Test AttributeCache constructors"""
 
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Write)
 
 	def testReadWrite(self):
 		"""Test AttributeCache read/write"""
 
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Write)
 
 		for obj in self.cachedObjectNames:
 			# Make some random vertex data
@@ -84,7 +84,7 @@ class TestAttributeCache(unittest.TestCase):
 	def testReadWriteHeaders(self):
 		"""Test AttributeCache read/write headers"""
 
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Write)
 
 		for obj in self.cachedHeaderNames:
 			# Make some random data
@@ -111,7 +111,7 @@ class TestAttributeCache(unittest.TestCase):
 
 	def testAttributes(self):
 		"""Test AttributeCache attributes"""
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Write)
 		cache.write( self.cachedObjectNames[0], "attrib1", V3fData( V3f( 1 ) ) )
 		cache.write( self.cachedObjectNames[0], "attrib2", IntData( 1 ) )
 		cache.write( self.cachedObjectNames[0], "other", IntData(0) )
@@ -123,7 +123,7 @@ class TestAttributeCache(unittest.TestCase):
 	def testRemove(self):
 		"""Test AttributeCache remove"""
 
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Write)
 		cache.write( self.cachedObjectNames[0], "attrib1", V3fData( V3f( 1 ) ) )
 		cache.write( self.cachedObjectNames[0], "attrib2", IntData( 1 ) )
 		cache.write( self.cachedObjectNames[1], "attrib3", IntData(0) )
@@ -142,7 +142,7 @@ class TestAttributeCache(unittest.TestCase):
 
 	def testContains(self):
 		"""Test AttributeCache contains"""
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Write)
 
 		for obj in self.cachedObjectNames:
 			# Create some dummy data (contents not important for this test)
@@ -162,18 +162,18 @@ class TestAttributeCache(unittest.TestCase):
 	def testOverwriting( self ):
 		"""Test AttributeCache overwriting"""
 		cache = None
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Write)
 		cache.write("Object1", "Attribute1", IntData(1) )
 		cache.write("Object2", "Attribute1", IntData(1) )
 		cache.write("Object3", "Attribute1", IntData(1) )
 
 
 		cache = None
-		cache = AttributeCache( "./test/AttributeCache.fio", IndexedIOOpenMode.Read)
+		cache = AttributeCache( "./test/AttributeCache.fio", IndexedIO.OpenMode.Read)
 		self.assertEqual( len( cache.attributes( "Object1" ) ), 1 )
 
 		cache = None
-		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Append)
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIO.OpenMode.Append)
 		cache.write("Object1", "Attribute1", IntData(1) )
 		cache.write("Object2", "Attribute1", IntData(1) )
 		cache.write("Object3", "Attribute1", IntData(1) )
@@ -182,7 +182,7 @@ class TestAttributeCache(unittest.TestCase):
 		cache.write("Object3", "Attribute2", IntData(2) )
 
 		cache = None
-		cache = AttributeCache( "./test/AttributeCache.fio", IndexedIOOpenMode.Read)
+		cache = AttributeCache( "./test/AttributeCache.fio", IndexedIO.OpenMode.Read)
 		self.assertEqual( len( cache.attributes( "Object1" ) ), 2 )
 
 	def tearDown(self):

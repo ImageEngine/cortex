@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -68,7 +68,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         ok_piw = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
 
         s = SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
-        iface = IndexedIO.create( "test/IECore/ssd.fio", IndexedIOOpenMode.Write )
+        iface = IndexedIO.create( "test/IECore/ssd.fio", IndexedIO.OpenMode.Write )
 
         s.save( iface, "test" )
         ss = Object.load( iface, "test" )
@@ -95,7 +95,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         self.assertEqual( s, s.copy() )
         self.assertRaises( Exception, s.validate() )
 
-        iface = IndexedIO.create( "test/IECore/ssd.fio", IndexedIOOpenMode.Write )
+        iface = IndexedIO.create( "test/IECore/ssd.fio", IndexedIO.OpenMode.Write )
         s.save( iface, "test" )
         ss = Object.load( iface, "test" )
         self.assertEqual( s, ss )

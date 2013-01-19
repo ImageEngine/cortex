@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -212,7 +212,7 @@ class CompoundDataTest(unittest.TestCase):
 	def testLoadSave(self):
 		"""Test load/save"""
 
-		iface = IECore.IndexedIO.create( "test/CompoundData.fio", IECore.IndexedIOOpenMode.Write )
+		iface = IECore.IndexedIO.create( "test/CompoundData.fio", IECore.IndexedIO.OpenMode.Write )
 
 		v1 = IECore.CompoundData()
 		v1["0"] = IECore.FloatData(1.2)

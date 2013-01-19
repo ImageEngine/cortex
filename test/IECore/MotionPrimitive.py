@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [ 0, 1 ] )
 		self.assertEqual( m.values(), [ PointsPrimitive( 1 ), PointsPrimitive( 1 ) ] )
 
-		iface = IndexedIO.create( "test/motionPrimitive.fio", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/motionPrimitive.fio", IndexedIO.OpenMode.Write )
 		m.save( iface, "test" )
 
 		mm = Object.load( iface, "test" )

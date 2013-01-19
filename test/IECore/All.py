@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
 #
@@ -264,6 +264,7 @@ from TimeCodeDataTest import TimeCodeDataTest
 from TimeCodeParameterTest import TimeCodeParameterTest
 from OptionsTest import OptionsTest
 from NullObjectTest import NullObjectTest
+from ModelCacheTest import ModelCacheTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

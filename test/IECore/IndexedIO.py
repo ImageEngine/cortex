@@ -50,9 +50,9 @@ class TestIndexedIO(unittest.TestCase):
 	def testCreate(self):
 		"""Test IndexedIO create"""
 
-		io2 = IndexedIO.create( "test/myFile.fio", [], IndexedIOOpenMode.Write )
-		io2 = IndexedIO.create( "test/myFile.fio", IndexedIOOpenMode.Write )
-		self.assertRaises(RuntimeError, IndexedIO.create, "myFileWith.invalidExtension", [], IndexedIOOpenMode.Write )
+		io2 = IndexedIO.create( "test/myFile.fio", [], IndexedIO.OpenMode.Write )
+		io2 = IndexedIO.create( "test/myFile.fio", IndexedIO.OpenMode.Write )
+		self.assertRaises(RuntimeError, IndexedIO.create, "myFileWith.invalidExtension", [], IndexedIO.OpenMode.Write )
 
 	def testSupportedExtensions( self ) :
 
@@ -63,11 +63,11 @@ class TestIndexedIO(unittest.TestCase):
 
 		for f in [ "test/myFile.fio" ] :
 
-			io = IndexedIO.create( f, [], IndexedIOOpenMode.Write | IndexedIOOpenMode.Exclusive )
-			self.assertEqual( io.openMode(), IndexedIOOpenMode.Write | IndexedIOOpenMode.Exclusive )
+			io = IndexedIO.create( f, [], IndexedIO.OpenMode.Write | IndexedIO.OpenMode.Exclusive )
+			self.assertEqual( io.openMode(), IndexedIO.OpenMode.Write | IndexedIO.OpenMode.Exclusive )
 			del io
-			io = IndexedIO.create( f, [], IndexedIOOpenMode.Read | IndexedIOOpenMode.Exclusive )
-			self.assertEqual( io.openMode(), IndexedIOOpenMode.Read | IndexedIOOpenMode.Exclusive )
+			io = IndexedIO.create( f, [], IndexedIO.OpenMode.Read | IndexedIO.OpenMode.Exclusive )
+			self.assertEqual( io.openMode(), IndexedIO.OpenMode.Read | IndexedIO.OpenMode.Exclusive )
 			del io
 
 	def tearDown(self):
@@ -79,7 +79,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 
 	def test(self):
 		"""Test MemoryIndexedIO read/write operations."""
-		f = MemoryIndexedIO( CharVectorData(), [], IndexedIOOpenMode.Write)
+		f = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
 		txt = StringData("test1")
@@ -92,22 +92,22 @@ class TestMemoryIndexedIO(unittest.TestCase):
 
 		buf = f.buffer()
 
-		f2 = MemoryIndexedIO( buf, [], IndexedIOOpenMode.Read)
+		f2 = MemoryIndexedIO( buf, [], IndexedIO.OpenMode.Read)
 		self.assertEqual( txt, Object.load( f2, "obj1" ) )
 		self.assertEqual( txt, Object.load( f2, "obj2" ) )
 
 	def testRmStress(self) :
 		"""Test MemoryIndexedIO rm (stress test)"""
-		
+
 		random.seed( 19 )
 
 		dataPresent = set()
 
-		f = MemoryIndexedIO( CharVectorData(), [], IndexedIOOpenMode.Write)
+		f = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("data", IndexedIO.MissingBehaviour.CreateIfMissing )
 		buf = f.buffer() # Fails under gcc 3.3.4 when no data has been written, as a result of the way in which std::ostringstream::seekp(0) works when the stream is currently empty. Fixed in gcc 3.4.x and later.
 		f = None
-		f = MemoryIndexedIO(buf, [], IndexedIOOpenMode.Append)
+		f = MemoryIndexedIO(buf, [], IndexedIO.OpenMode.Append)
 		f = f.subdirectory( "data" )
 
 		numLoops = 500
@@ -135,7 +135,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 
 				buf = f.buffer()
 				f = None
-				f = MemoryIndexedIO(buf, ["data"], IndexedIOOpenMode.Append)
+				f = MemoryIndexedIO(buf, ["data"], IndexedIO.OpenMode.Append)
 
 			entryNames = f.entryIds()
 
@@ -160,20 +160,20 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testConstructors(self):
 		"""Test FileIndexedIO constuctors"""
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
 
-		self.assertRaises( RuntimeError, FileIndexedIO, "./test/FileIndexedIO.fio", ["nonexistantentrypoint"], IndexedIOOpenMode.Read)
+		self.assertRaises( RuntimeError, FileIndexedIO, "./test/FileIndexedIO.fio", ["nonexistantentrypoint"], IndexedIO.OpenMode.Read)
 		f = None
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Read)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Read)
 		self.assertEqual( f.path() , [] )
-		f = FileIndexedIO("./test/FileIndexedIO.fio", IndexedIOOpenMode.Read)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", IndexedIO.OpenMode.Read)
 		self.assertEqual( f.path() , [] )
 
 	def testEmptyWrite(self):
 		"""Test FileIndexedIO empty file writing"""
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
 		f = None
 		self.assert_( os.path.exists( "./test/FileIndexedIO.fio" ) )
@@ -181,7 +181,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testResetRoot(self):
 		"""Test FileIndexedIO resetRoot"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		g.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
 
@@ -189,11 +189,11 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( len(e), 1 )
 
 		self.assertEqual( e, ["sub2"])
-		self.assert_( g.entry('sub2').entryType() == Directory )
+		self.assert_( g.entry('sub2').entryType() == IndexedIO.EntryType.Directory )
 
 	def testMkdir(self):
 		"""Test FileIndexedIO mkdir"""
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
@@ -219,7 +219,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testChdir(self):
 		"""Test FileIndexedIO chdir"""
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		f.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
 
@@ -255,30 +255,35 @@ class TestFileIndexedIO(unittest.TestCase):
 		h = e.directory( ["sub2","sub2.1"], IndexedIO.MissingBehaviour.ThrowIfMissing )
 		self.assertEqual( h.path(), ["sub2","sub2.1"], IndexedIO.MissingBehaviour.ThrowIfMissing )
 
+		# missingBehaviour should default to throw if missing
+		h = e.directory( ["sub2","sub2.1"] )
+		self.assertEqual( h.path(), ["sub2","sub2.1"] )
+		self.assertRaises( RuntimeError, e.directory, [ "i", "dont", "exist" ] )
+
 	def testLs(self):
 		"""Test FileIndexedIO ls"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 
 		f.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
 		f = f.subdirectory("sub2")
 		f.subdirectory("sub2.1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
-		# Filer for files
-		e = f.entryIds( File )
+		# Filter for files
+		e = f.entryIds( IndexedIO.EntryType.File )
 		self.assertEqual( len(e), 0 )
 
 		# Filter for directories
-		e = f.entryIds( Directory )
+		e = f.entryIds( IndexedIO.EntryType.Directory )
 		self.assertEqual( len(e), 1 )
 
 		self.assertEqual( e[0], "sub2.1")
-		self.assert_( f.entry(e[0]).entryType() == Directory)
+		self.assert_( f.entry(e[0]).entryType() == IndexedIO.EntryType.Directory)
 
 	def testRm(self):
 		"""Test FileIndexedIO rm"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		g.subdirectory("sub2.1", IndexedIO.MissingBehaviour.CreateIfMissing )
@@ -305,11 +310,11 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		dataPresent = set()
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("data", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		f = None
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Append)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Append)
 		f = f.subdirectory( "data" )
 
 		numLoops = 500
@@ -336,7 +341,7 @@ class TestFileIndexedIO(unittest.TestCase):
 			if random.random() > 0.8 :
 
 				f = None
-				f = FileIndexedIO("./test/FileIndexedIO.fio", ["data"], IndexedIOOpenMode.Append)
+				f = FileIndexedIO("./test/FileIndexedIO.fio", ["data"], IndexedIO.OpenMode.Append)
 
 			entryNames = f.entryIds()
 
@@ -358,7 +363,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWrite(self):
 		"""Test FileIndexedIO read/write(generic)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		self.assertRaises( RuntimeError, f.read, "DOESNOTEXIST")
 
 		# Name check
@@ -368,7 +373,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteFloatVector(self):
 		"""Test FileIndexedIO read/write(FloatVector)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = FloatVectorData()
@@ -390,7 +395,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteDoubleVector(self):
 		"""Test FileIndexedIO read/write(DoubleVector)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = DoubleVectorData()
@@ -412,7 +417,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteIntVector(self):
 		"""Test FileIndexedIO read/write(IntVector)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = IntVectorData()
@@ -434,7 +439,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteStringVector(self):
 		"""Test FileIndexedIO read/write(StringVector)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = StringVectorData()
@@ -456,7 +461,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteFloat(self):
 		"""Test FileIndexedIO read/write(Float/Double)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = 2.0
@@ -472,7 +477,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteInt(self):
 		"""Test FileIndexedIO read/write(Int/Long)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = 200
@@ -487,7 +492,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteString(self):
 		"""Test FileIndexedIO read/write(String)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = "StringLiteral"
@@ -503,7 +508,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteSymbolicLink(self):
 		"""Test FileIndexedIO read/write(SymbolicLink)"""
 
-		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		h = g.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
 		

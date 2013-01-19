@@ -40,15 +40,15 @@ class ModelCacheTest( unittest.TestCase ) :
 
 	def testAppendRaises( self ) :
 	
-		self.assertRaises( RuntimeError, IECore.ModelCache, "/tmp/test.mdc", IECore.IndexedIOOpenMode.Append )
+		self.assertRaises( RuntimeError, IECore.ModelCache, "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Append )
 
 	def testReadNonExistentRaises( self ) :
 	
-		self.assertRaises( RuntimeError, IECore.ModelCache, "iDontExist.mdc", IECore.IndexedIOOpenMode.Read )
+		self.assertRaises( RuntimeError, IECore.ModelCache, "iDontExist.mdc", IECore.IndexedIO.OpenMode.Read )
 		
 	def testKnownHierarchy( self ) :
 	
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Write )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Write )
 		self.assertEqual( m.path(), "/" )
 		self.assertEqual( m.name(), "root" )
 		self.assertEqual( m.hasObject(), False )
@@ -74,7 +74,7 @@ class ModelCacheTest( unittest.TestCase ) :
 		# need to delete all ModelCache references to finalise the file
 		del m, t, s
 
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Read )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Read )
 		
 		self.assertEqual( m.path(), "/" )
 		self.assertEqual( m.name(), "root" )
@@ -123,7 +123,7 @@ class ModelCacheTest( unittest.TestCase ) :
 					mc = m.writableChild( str( i ) )
 					writeWalk( mc )
 		
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Write )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Write )
 		writeWalk( m )
 		del m
 		
@@ -144,22 +144,22 @@ class ModelCacheTest( unittest.TestCase ) :
 			transformedBound = localSpaceBound.transform( m.readTransform() )
 			parentSpaceBound.extendBy( transformedBound )
 
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Read )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Read )
 		readWalk( m, IECore.Box3d() )
 								
 	def testMissingReadableChildRaises( self ) :
 	
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Write )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Write )
 		m.writableChild( "a" )
 		del m
 		
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Read )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Read )
 		m.readableChild( "a" )
 		self.assertRaises( RuntimeError, m.readableChild, "b" )
 		
 	def testExplicitBoundOverridesImplicitBound( self ) :
 			
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Write )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Write )
 
 		a = m.writableChild( "a" )
 		a.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 10 ) ) )
@@ -170,7 +170,7 @@ class ModelCacheTest( unittest.TestCase ) :
 		
 		del m, a, b
 		
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Read )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Read )
 		
 		a = m.readableChild( "a" )
 		self.assertEqual( a.readBound(), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 10 ) ) )
@@ -180,7 +180,7 @@ class ModelCacheTest( unittest.TestCase ) :
 	
 	def testExplicitBoundPropagatesToImplicitBound( self ) :
 			
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Write )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Write )
 		
 		a = m.writableChild( "a" )
 				
@@ -190,7 +190,7 @@ class ModelCacheTest( unittest.TestCase ) :
 		
 		del m, a, b
 		
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Read )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( m.readBound(), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
 		
 		a = m.readableChild( "a" )

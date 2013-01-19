@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -330,7 +330,7 @@ class BoolDataTest( unittest.TestCase ) :
 		o = BoolData( True )
 		self.assertEqual( o.value, True )
 
-		iface = IndexedIO.create( "test/IECore/o.fio", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/IECore/o.fio", IndexedIO.OpenMode.Write )
 
 		o.save( iface, "test" )
 		oo = Object.load( iface, "test" )

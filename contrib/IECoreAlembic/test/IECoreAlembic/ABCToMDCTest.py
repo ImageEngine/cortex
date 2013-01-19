@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.  
+#  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.  
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,7 +47,7 @@ class ABCToMDCTest( unittest.TestCase ) :
 			outputFile = "/tmp/test.mdc"
 		)
 		
-		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIOOpenMode.Read )
+		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( m.childNames(), [ "group1" ] )
 		self.assertEqual( m.readBound(), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
 		self.assertEqual( m.readObject(), None )

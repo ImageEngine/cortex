@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -275,7 +275,7 @@ class ThreadingTest( unittest.TestCase ) :
 		def createCache( fileName ) :
 		
 			data = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 50000 )
-			cache = IECore.AttributeCache( fileName, IECore.IndexedIOOpenMode.Write )
+			cache = IECore.AttributeCache( fileName, IECore.IndexedIO.OpenMode.Write )
 			for i in range( 0, numObjects ) :
 				for j in range( 0, numAttrs ) :
 					cache.write( "object%d" % i, "attr%d" % j, data )

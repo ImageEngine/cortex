@@ -51,16 +51,12 @@
 using namespace boost::python;
 using namespace IECore;
 
-void bindIndexedIOEntry(const char *bindName);
-
 void bindIndexedIO(const char *bindName);
 void bindFileIndexedIO(const char *bindName);
 void bindMemoryIndexedIO(const char *bindName);
 
 void bindIndexedIO()
 {
-	bindIndexedIOEntry("IndexedIOEntry");
-
 	bindIndexedIO("IndexedIO");
 	bindFileIndexedIO("FileIndexedIO");
 	bindMemoryIndexedIO("MemoryIndexedIO");
@@ -130,7 +126,7 @@ struct IndexedIOHelper
 		return p->subdirectory(name);
 	}
 
-	static IndexedIOPtr directory(IndexedIOPtr p, list l, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing )
+	static IndexedIOPtr directory(IndexedIOPtr p, list l, IndexedIO::MissingBehaviour missingBehaviour )
 	{
 		IndexedIO::EntryIDList path;
 		IndexedIOHelper::listToEntryIds( l, path );
@@ -302,57 +298,83 @@ void bindIndexedIO(const char *bindName)
 	void (IndexedIO::*writeUShort)(const IndexedIO::EntryID &, const unsigned short &) = &IndexedIO::write;
 #endif
 
+	// make the indexed io class first
+	IECorePython::RefCountedClass<IndexedIO, RefCounted> indexedIOClass( bindName );
+	
+	{
+		// then define all the nested types
+		
+		scope s( indexedIOClass );
+		
+		enum_< IndexedIO::OpenModeFlags>("OpenMode")
+			.value("Read", IndexedIO::Read)
+			.value("Write", IndexedIO::Write)
+			.value("Append", IndexedIO::Append)
+			.value("Shared", IndexedIO::Shared)
+			.value("Exclusive", IndexedIO::Exclusive)
+			.export_values()
+		;
 
-	enum_< IndexedIO::OpenModeFlags> ("IndexedIOOpenMode")
-		.value("Read", IndexedIO::Read)
-		.value("Write", IndexedIO::Write)
-		.value("Append", IndexedIO::Append)
-		.value("Shared", IndexedIO::Shared)
-		.value("Exclusive", IndexedIO::Exclusive)
-		.export_values()
-	;
+		enum_< IndexedIO::EntryType >("EntryType")
+			.value("Directory", IndexedIO::Directory)
+			.value("File", IndexedIO::File)
+			.export_values()
+		;
 
-	enum_< IndexedIO::EntryType > ("IndexedIOEntryType")
-		.value("Directory", IndexedIO::Directory)
-		.value("File", IndexedIO::File)
-		.export_values()
-	;
+		enum_< IndexedIO::DataType >("DataType")
+			.value("Float", IndexedIO::Float)
+			.value("FloatArray", IndexedIO::FloatArray)
+			.value("Double", IndexedIO::Double)
+			.value("DoubleArray", IndexedIO::DoubleArray)
+			.value("Int", IndexedIO::Int)
+			.value("IntArray", IndexedIO::IntArray)
+			.value("Long", IndexedIO::Long)
+			.value("LongArray", IndexedIO::LongArray)
+			.value("String", IndexedIO::String)
+			.value("StringArray", IndexedIO::StringArray)
+			.value("UInt", IndexedIO::UInt)
+			.value("UIntArray", IndexedIO::UIntArray)
+			.value("Char", IndexedIO::Char)
+			.value("CharArray", IndexedIO::CharArray)
+			.value("UChar", IndexedIO::UChar)
+			.value("UCharArray", IndexedIO::UCharArray)
+			.value("Half", IndexedIO::Half)
+			.value("HalfArray", IndexedIO::HalfArray)
+			.value("Short", IndexedIO::Long)
+			.value("ShortArray", IndexedIO::ShortArray)
+			.value("UShort", IndexedIO::Long)
+			.value("UShortArray", IndexedIO::UShortArray)
+			.value("Int64", IndexedIO::Int64)
+			.value("Int64Array", IndexedIO::Int64Array)
+			.value("UInt64", IndexedIO::UInt64)
+			.value("UInt64Array", IndexedIO::UInt64Array)
+			.value("SymbolicLink", IndexedIO::SymbolicLink)
+			.export_values()
+		;
+	
+		enum_< IndexedIO::MissingBehaviour > ("MissingBehaviour")
+			.value("ThrowIfMissing", IndexedIO::ThrowIfMissing)
+			.value("NullIfMissing", IndexedIO::NullIfMissing)
+			.value("CreateIfMissing", IndexedIO::CreateIfMissing)
+			.export_values()
+		;
+		
+		class_< IndexedIO::Entry>( "Entry", no_init)
+			.def("id", &IndexedIO::Entry::id, return_value_policy<copy_const_reference>())
+			.def("entryType", &IndexedIO::Entry::entryType)
+			.def("dataType", &IndexedIO::Entry::dataType)
+			.def("arrayLength", &IndexedIO::Entry::arrayLength)
+		;
+	
+	}
 
-	enum_< IndexedIO::DataType > ("IndexedIODataType")
-		.value("Float", IndexedIO::Float)
-		.value("FloatArray", IndexedIO::FloatArray)
-		.value("Double", IndexedIO::Double)
-		.value("DoubleArray", IndexedIO::DoubleArray)
-		.value("Int", IndexedIO::Int)
-		.value("IntArray", IndexedIO::IntArray)
-		.value("Long", IndexedIO::Long)
-		.value("LongArray", IndexedIO::LongArray)
-		.value("String", IndexedIO::String)
-		.value("StringArray", IndexedIO::StringArray)
-		.value("UInt", IndexedIO::UInt)
-		.value("UIntArray", IndexedIO::UIntArray)
-		.value("Char", IndexedIO::Char)
-		.value("CharArray", IndexedIO::CharArray)
-		.value("UChar", IndexedIO::UChar)
-		.value("UCharArray", IndexedIO::UCharArray)
-		.value("Half", IndexedIO::Half)
-		.value("HalfArray", IndexedIO::HalfArray)
-		.value("Short", IndexedIO::Long)
-		.value("ShortArray", IndexedIO::ShortArray)
-		.value("UShort", IndexedIO::Long)
-		.value("UShortArray", IndexedIO::UShortArray)
-		.value("Int64", IndexedIO::Int64)
-		.value("Int64Array", IndexedIO::Int64Array)
-		.value("UInt64", IndexedIO::UInt64)
-		.value("UInt64Array", IndexedIO::UInt64Array)
-		.value("SymbolicLink", IndexedIO::SymbolicLink)
-		.export_values()
-	;
-
-	scope varScope = IECorePython::RefCountedClass<IndexedIO, RefCounted>( bindName )
-		.def("openMode", &IndexedIO::openMode)
+	// now we've defined the nested types, we're able to define the methods for
+	// the IndexedIO class itself (we need the definitions for the nested types 
+	// to exist for defining default values).
+	
+	indexedIOClass.def("openMode", &IndexedIO::openMode)
 		.def("parentDirectory", nonConstParentDirectory)
-		.def("directory",  &IndexedIOHelper::directory )
+		.def("directory",  &IndexedIOHelper::directory, ( arg( "path" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )
 		.def("subdirectory",  &IndexedIOHelper::subdirectory )
 		.def("subdirectory", nonConstSubdirectory )
 		.def("path", &IndexedIOHelper::path)
@@ -386,12 +408,6 @@ void bindIndexedIO(const char *bindName)
 
 	;
 
-	enum_< IndexedIO::MissingBehaviour > ("MissingBehaviour")
-		.value("ThrowIfMissing", IndexedIO::ThrowIfMissing)
-		.value("NullIfMissing", IndexedIO::NullIfMissing)
-		.value("CreateIfMissing", IndexedIO::CreateIfMissing)
-		.export_values()
-	;
 }
 
 void bindFileIndexedIO(const char *bindName)
@@ -416,14 +432,3 @@ void bindMemoryIndexedIO(const char *bindName)
 		.def( "buffer", memoryIndexedIOBufferWrapper )
 	;
 }
-
-void bindIndexedIOEntry(const char *bindName)
-{
-	class_< IndexedIO::Entry>(bindName, no_init)
-		.def("id", &IndexedIO::Entry::id, return_value_policy<copy_const_reference>())
-		.def("entryType", &IndexedIO::Entry::entryType)
-		.def("dataType", &IndexedIO::Entry::dataType)
-		.def("arrayLength", &IndexedIO::Entry::arrayLength)
-		;
-}
-

@@ -41,7 +41,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -58,7 +58,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleArrayIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		o = IntVectorData()
 		for i in range( 0, 1000 ) :
@@ -76,7 +76,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testStringArrayIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		words = [ "hello", "there", "young", "fellah" ]
 		s = StringVectorData( words )
@@ -95,7 +95,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testImathArrayIO( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		o = V3fVectorData()
 		for i in range( 0, 1000 ) :
@@ -113,7 +113,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testOverwrite( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -148,7 +148,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testCompoundData( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		d = CompoundData()
 		d["A"] = IntData( 10 )
@@ -175,7 +175,7 @@ class TestObjectIO( unittest.TestCase ) :
 		d['x'] = StringData( "testttt" )
 		d['z'] = StringVectorData( [ "a", 'b', 'adffs' ] )
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )		
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )		
 		d.save( iface, "test" )
 
 		dd = Object.load( iface, "test" )
@@ -183,7 +183,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testMultipleRef( self ) :
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		d = CompoundData()
 		i = IntData( 100 )
@@ -206,14 +206,14 @@ class TestObjectIO( unittest.TestCase ) :
 		o["two"] = IntData( 2 )
 		o["oneAgain"] = one
 
-		fio = FileIndexedIO( "test/o.fio", [], IndexedIOOpenMode.Write )
+		fio = FileIndexedIO( "test/o.fio", [], IndexedIO.OpenMode.Write )
 		fio = fio.subdirectory( "a", IndexedIO.MissingBehaviour.CreateIfMissing )
 		d = fio.path()
 		o.save( fio, "test" )
 		self.assertEqual( fio.path(), d )
 		del fio
 
-		fio = FileIndexedIO( "test/o.fio", ["a"], IndexedIOOpenMode.Read )
+		fio = FileIndexedIO( "test/o.fio", ["a"], IndexedIO.OpenMode.Read )
 		d = fio.path()
 		self.assertEqual( fio.path(), ["a"] )
 		oo = o.load( fio, "test" )
@@ -223,7 +223,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSlashesInRepeatedData(self):
 		"""Make sure slashes can be used and do not break the symlinks on the Object representation for repeated data."""
-		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIOOpenMode.Write)
+		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIO.OpenMode.Write)
 
 		v1 = IntData(10)
 		v2 = IntData(11)
@@ -250,7 +250,7 @@ class TestObjectIO( unittest.TestCase ) :
 		d.save( f, "test" )
 
 		f = None
-		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIOOpenMode.Read)
+		f = FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IndexedIO.OpenMode.Read)
 		dd = Object.load( f, "test" )
 
 		self.assertEqual( d, dd )

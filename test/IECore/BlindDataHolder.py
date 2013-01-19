@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -92,7 +92,7 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		"""Test BlindDataHolder load/save"""
 
-		iface = IndexedIO.create( "test/BlindDataHolder.fio", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/BlindDataHolder.fio", IndexedIO.OpenMode.Write )
 
 		# first simple test: saving with some blind data
 		b1 = BlindDataHolder()

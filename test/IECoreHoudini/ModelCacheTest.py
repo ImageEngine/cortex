@@ -65,7 +65,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 	
 	def writeMDC( self, rotation=IECore.V3d( 0, 0, 0 ) ) :
 		
-		m = IECore.ModelCache( TestModelCache.__testFile, IECore.IndexedIOOpenMode.Write )
+		m = IECore.ModelCache( TestModelCache.__testFile, IECore.IndexedIO.OpenMode.Write )
 		
 		mc = m.writableChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
