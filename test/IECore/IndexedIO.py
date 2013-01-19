@@ -70,6 +70,12 @@ class TestIndexedIO(unittest.TestCase):
 			self.assertEqual( io.openMode(), IndexedIO.OpenMode.Read | IndexedIO.OpenMode.Exclusive )
 			del io
 
+	def testEntryConstructor( self ) :
+	
+		e = IndexedIO.Entry( "n", IndexedIO.EntryType.Directory, IndexedIO.DataType.Invalid, 0 )
+		self.assertEqual( e.id(), "n" )
+		self.assertEqual( e.entryType(), IndexedIO.EntryType.Directory )
+
 	def tearDown(self):
 
 		if os.path.isfile("test/myFile.fio"):

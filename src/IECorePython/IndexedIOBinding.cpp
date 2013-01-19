@@ -322,6 +322,7 @@ void bindIndexedIO(const char *bindName)
 		;
 
 		enum_< IndexedIO::DataType >("DataType")
+			.value("Invalid", IndexedIO::Invalid)
 			.value("Float", IndexedIO::Float)
 			.value("FloatArray", IndexedIO::FloatArray)
 			.value("Double", IndexedIO::Double)
@@ -360,6 +361,7 @@ void bindIndexedIO(const char *bindName)
 		;
 		
 		class_< IndexedIO::Entry>( "Entry", no_init)
+			.def( init<const IndexedIO::EntryID &, IndexedIO::EntryType, IndexedIO::DataType, unsigned long>() )
 			.def("id", &IndexedIO::Entry::id, return_value_policy<copy_const_reference>())
 			.def("entryType", &IndexedIO::Entry::entryType)
 			.def("dataType", &IndexedIO::Entry::dataType)
