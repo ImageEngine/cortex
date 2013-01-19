@@ -56,6 +56,22 @@ inline void glNormal( const Imath::V3f &n );
 inline void glTranslate( const Imath::V2f &t );
 inline void glTranslate( const Imath::V3f &t );
 
+class PushAttrib
+{
+	public :
+	
+		PushAttrib( GLbitfield mask )
+		{
+			glPushAttrib( mask );
+		}
+
+		~PushAttrib()
+		{
+			glPopAttrib();
+		}
+		
+};
+
 } // namespace IECoreGL
 
 #include "IECoreGL/GL.inl"

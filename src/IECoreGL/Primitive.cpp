@@ -51,8 +51,6 @@
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/Buffer.h"
 
-#include "OpenEXR/ImathGL.h"
-
 using namespace IECoreGL;
 using namespace std;
 using namespace boost;
@@ -130,7 +128,7 @@ void Primitive::render( State *state ) const
 {
 
 	/// \todo Really we want to remove use of this deprecated push/pop functionality.
-	Imath::GLPushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
+	PushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
 
 	// if we're in GL_SELECT render mode then just render solid
 	// with a simple shader and early out.
