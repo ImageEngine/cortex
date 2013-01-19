@@ -186,16 +186,16 @@ class IndexedIO : public RefCounted
 		/// Remove all entries.
 		virtual void removeAll() = 0;
 
-		/// Returns a read-only interface for the parent of this node in the file or a NULL pointer if it's the root.
+		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
 		virtual IndexedIOPtr parentDirectory() = 0;
 
-		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
+		/// Returns a read-only interface for the parent of this node in the file or a NULL pointer if it's the root.
 		virtual ConstIndexedIOPtr parentDirectory() const = 0;
 
-		/// Returns a read-only interface for the given path in the file.
+		/// Returns a new interface for the given path in the file.
 		virtual IndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) = 0;
 
-		/// Returns a new interface for the given path in the file.
+		/// Returns a read-only interface for the given path in the file.
 		virtual ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
 
 		/// Create a new file containing the specified float array contents
