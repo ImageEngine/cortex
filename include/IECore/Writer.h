@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,6 +62,12 @@ class Writer : public Op
 		/// used to determine format).
 		/// Throws an Exception if no suitable writer can be found.
 		static WriterPtr create( ObjectPtr object, const std::string &fileName );
+		/// Creates and returns a Writer appropriate for writing the specified
+		/// file (the file extension is used to determine format). It is the
+		/// responsibility of the caller to subsequently set the object to be
+		/// written via the object parameter.
+		/// Throws an Exception if no suitable writer can be found.
+		static WriterPtr create( const std::string &fileName );
 
 		/// Returns the name of the file this Writer
 		/// is set to create. This is just a convenience returning the equivalent of
@@ -96,9 +102,8 @@ class Writer : public Op
 		/// should throw an Exception on failure.
 		virtual void doWrite( const CompoundObject *operands ) = 0;
 
-		/// Definition of a function which can create a Writer when
-		/// given an object and fileName.
-		typedef WriterPtr (*CreatorFn)( ObjectPtr object, const std::string &fileName );
+		/// Definition of a function which can create a Writer.
+		typedef WriterPtr (*CreatorFn)();
 		/// Definition of a function  to answer the
 		/// question can this object be written to this file?
 		typedef bool (*CanWriteFn)( ConstObjectPtr object, const std::string &fileName );
@@ -121,7 +126,7 @@ class Writer : public Op
 			public :
 				WriterDescription( const std::string &extensions );
 			private :
-				static WriterPtr creator( ObjectPtr object, const std::string &fileName );
+				static WriterPtr creator();
 		};
 
 		ParameterPtr m_objectParameter;

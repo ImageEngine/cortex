@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -132,12 +132,32 @@ WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 		{
 			if( it->second.canWrite( object, fileName ) )
 			{
-				return it->second.creator( object, fileName );
+				WriterPtr result = it->second.creator();
+				result->parameters()->parameter<Parameter>( "object" )->setValue( object );
+				result->parameters()->parameter<FileNameParameter>( "fileName" )->setTypedValue( fileName );
+				return result;
 			}
 		}
 	}
 
 	throw Exception( string( "Unable to find writer able to write given object to file of type '") + ext + "'!" );
+}
+
+WriterPtr Writer::create( const std::string &fileName )
+{
+	string ext = extension(boost::filesystem::path(fileName));
+
+	ExtensionsToFnsMap *m = extensionsToFns();
+	ExtensionsToFnsMap::const_iterator it = m->find( ext );
+
+	if( it == m->end() )
+	{
+		throw Exception( string( "Unrecognized output file format '") + ext + "'!" );
+	}
+
+	WriterPtr result = it->second.creator();
+	result->parameters()->parameter<FileNameParameter>( "fileName" )->setTypedValue( fileName );
+	return result;
 }
 
 void Writer::supportedExtensions( std::vector<std::string> &extensions )
