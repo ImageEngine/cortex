@@ -71,8 +71,8 @@ struct LinearInterpolator< std::vector<T> >
 template<typename T>
 struct LinearInterpolator< TypedData< T > >
 {
-	void operator()(const typename TypedData< T >::Ptr &y0,
-			const typename TypedData< T >::Ptr &y1,
+	void operator()(const TypedData< T > *y0,
+			const TypedData< T > *y1,
 			double x,
 			typename TypedData< T >::Ptr &result) const
 	{
@@ -127,11 +127,10 @@ struct CubicInterpolator< std::vector<T> >
 template<typename T>
 struct CubicInterpolator< TypedData<T > >
 {
-	void operator()(const typename TypedData< T >::Ptr &y0,
-			const typename TypedData< T >::Ptr &y1,
-			const typename TypedData< T >::Ptr &y2,
-			const typename TypedData< T >::Ptr &y3,
-
+	void operator()(const TypedData< T > *y0,
+			const TypedData< T > *y1,
+			const TypedData< T > *y2,
+			const TypedData< T > *y3,
 			double x,
 			typename TypedData< T >::Ptr &result) const
 	{
