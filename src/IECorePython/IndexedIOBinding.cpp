@@ -121,11 +121,6 @@ struct IndexedIOHelper
 		return p->entry(name);
 	}
 
-	static IndexedIOPtr subdirectory(IndexedIOPtr p, const IndexedIO::EntryID &name)
-	{
-		return p->subdirectory(name);
-	}
-
 	static IndexedIOPtr directory(IndexedIOPtr p, list l, IndexedIO::MissingBehaviour missingBehaviour )
 	{
 		IndexedIO::EntryIDList path;
@@ -377,8 +372,7 @@ void bindIndexedIO(const char *bindName)
 	indexedIOClass.def("openMode", &IndexedIO::openMode)
 		.def("parentDirectory", nonConstParentDirectory)
 		.def("directory",  &IndexedIOHelper::directory, ( arg( "path" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )
-		.def("subdirectory",  &IndexedIOHelper::subdirectory )
-		.def("subdirectory", nonConstSubdirectory )
+		.def("subdirectory", nonConstSubdirectory, ( arg( "name" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )
 		.def("path", &IndexedIOHelper::path)
 		.def("remove", &IndexedIO::remove)
 		.def("removeAll", &IndexedIO::removeAll)
