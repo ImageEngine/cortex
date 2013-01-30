@@ -83,7 +83,7 @@ MStatus ObjectData::readASCII( const MArgList &argList, unsigned int &endOfTheLa
 				
 		try
 		{
-			MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Read );
+			MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, IndexedIO::g_rootPath, IndexedIO::Exclusive | IndexedIO::Read );
 			setObject( Object::load( io, "object" ) );
 			return MS::kSuccess;
 		}
@@ -114,7 +114,7 @@ MStatus ObjectData::readBinary( istream& in, unsigned length )
 
 	try
 	{
-		MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Read );
+		MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, IndexedIO::g_rootPath, IndexedIO::Exclusive | IndexedIO::Read );
 		setObject( Object::load( io, "object" ) );
 		return MS::kSuccess;
 	}
@@ -131,7 +131,7 @@ MStatus ObjectData::writeASCII( ostream& out )
 	{
 		try
 		{
-			MemoryIndexedIOPtr io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
+			MemoryIndexedIOPtr io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::g_rootPath, IndexedIO::Exclusive | IndexedIO::Write );
 
 			getObject()->save( io, "object" );
 
@@ -174,7 +174,7 @@ MStatus ObjectData::writeBinary( ostream& out )
 	{
 		try
 		{
-			MemoryIndexedIOPtr io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
+			MemoryIndexedIOPtr io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::g_rootPath, IndexedIO::Exclusive | IndexedIO::Write );
 
 			getObject()->save( io, "object" );
 

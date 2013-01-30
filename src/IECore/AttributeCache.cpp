@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,7 +47,7 @@ using namespace IECore;
 
 AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode mode )
 {
-	IndexedIOPtr io = IndexedIO::create(filename, IndexedIO::rootPath, mode );
+	IndexedIOPtr io = IndexedIO::create(filename, IndexedIO::g_rootPath, mode );
 
 	if ( mode == IndexedIO::Write || mode == IndexedIO::Append )
 	{

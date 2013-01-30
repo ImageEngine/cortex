@@ -112,7 +112,7 @@ void ObjectKnob::to_script( std::ostream &os, const DD::Image::OutputContext *co
 	
 		if( m_value )
 		{
-			IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( IECore::ConstCharVectorDataPtr(), IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Write );
+			IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( IECore::ConstCharVectorDataPtr(), IECore::IndexedIO::g_rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Write );
 			m_value->save( io, "object" );
 			IECore::ConstCharVectorDataPtr buffer = io->buffer();
 			os << IECore::decToHex( buffer->readable().begin(), buffer->readable().end() );
@@ -137,7 +137,7 @@ bool ObjectKnob::from_script( const char *value )
 
 		try
 		{
-			IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( buffer, IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Read );
+			IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( buffer, IECore::IndexedIO::g_rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Read );
 			object = IECore::Object::load( io, "object" );
 		}
 		catch( std::exception &e )

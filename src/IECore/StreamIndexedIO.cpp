@@ -790,8 +790,8 @@ StreamIndexedIO::Index::Index( bool readOnly ) : m_root(0), m_prevId(0), m_readO
 	m_nodeToIndexMap[m_root.get()] = 0;
 #endif
 
-	m_stringCache.add("/");
-	m_root->m_entry = IndexedIO::Entry("/", IndexedIO::Directory, IndexedIO::Invalid, 0);
+	m_stringCache.add(IndexedIO::g_rootName);
+	m_root->m_entry = IndexedIO::Entry(IndexedIO::g_rootName, IndexedIO::Directory, IndexedIO::Invalid, 0);
 	m_hasChanged = true;
 
 	m_offset = 0;
@@ -1238,7 +1238,7 @@ void StreamIndexedIO::Index::readNode( F &f )
 	if (n->m_id == 0)
 	{
 		m_root = n;
-		m_stringCache.add("/");
+		m_stringCache.add(IndexedIO::g_rootName);
 	}
 	else if ( !n->m_parent )
 	{

@@ -119,8 +119,10 @@ class IndexedIO : public RefCounted
 		typedef InternedString EntryID;
 		typedef std::vector< EntryID > EntryIDList;
 		class Entry;
+		// singleton representing the root name
+		static const EntryID g_rootName;
 		// singleton representing the root location (to be passed in the factory function)
-		static EntryIDList rootPath;
+		static const EntryIDList g_rootPath;
 
 		IE_CORE_DECLAREMEMBERPTR( IndexedIO );
 

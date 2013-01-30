@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,7 +44,8 @@ using namespace IECore;
 
 namespace fs = boost::filesystem;
 
-IndexedIO::EntryIDList IndexedIO::rootPath;
+const IndexedIO::EntryID IndexedIO::g_rootName("/");
+const IndexedIO::EntryIDList IndexedIO::g_rootPath;
 
 IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode )
 {

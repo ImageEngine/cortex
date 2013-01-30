@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -109,7 +109,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			IndexedIOPtr io = new T(*it, IndexedIO::rootPath, IndexedIO::Read );
+			IndexedIOPtr io = new T(*it, IndexedIO::g_rootPath, IndexedIO::Read );
 
 			bool exists = true;
 			try
@@ -135,7 +135,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			IndexedIOPtr io = new T(*it, IndexedIO::rootPath, IndexedIO::Read );
+			IndexedIOPtr io = new T(*it, IndexedIO::g_rootPath, IndexedIO::Read );
 
 			bool exists = true;
 			try
@@ -178,7 +178,7 @@ struct IndexedIOTest
 
 	void write(const std::string &filename)
 	{
-		IndexedIOPtr io = new T(filename, IndexedIO::rootPath, IndexedIO::Write );
+		IndexedIOPtr io = new T(filename, IndexedIO::g_rootPath, IndexedIO::Write );
 
 		write<float>(io);
 		write<double>(io);
