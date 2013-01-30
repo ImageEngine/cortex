@@ -310,6 +310,9 @@
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
 #include "IECorePython/ModelCacheBinding.h"
+#include "IECorePython/SceneInterfaceBinding.h"
+#include "IECorePython/SampledSceneInterfaceBinding.h"
+#include "IECorePython/SceneCacheBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -623,6 +626,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindOptions();
 	bindMPlayDisplayDriver();
 	bindModelCache();
+	bindSceneInterface();
+	bindSampledSceneInterface();
+	bindSceneCache();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

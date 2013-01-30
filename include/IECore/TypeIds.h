@@ -410,6 +410,9 @@ enum TypeId
 	TimeCodeParameterTypeId = 362,
 	OptionsTypeId = 363,
 	MPlayDisplayDriverTypeId = 364,
+	SceneInterfaceTypeId = 365,
+	SampledSceneInterfaceTypeId = 366,
+	SceneCacheTypeId = 367,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 

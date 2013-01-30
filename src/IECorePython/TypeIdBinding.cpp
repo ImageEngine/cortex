@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -413,6 +413,9 @@ void bindTypeId()
 		.value( "TimeCodeParameter", TimeCodeParameterTypeId )
 		.value( "Options", OptionsTypeId )
 		.value( "MPlayDisplayDriver", MPlayDisplayDriverTypeId )
+		.value( "SceneInterface", SceneInterfaceTypeId )
+		.value( "SampledSceneInterface", SampledSceneInterfaceTypeId )
+		.value( "SceneCache", SceneCacheTypeId )
 	;
 }
 

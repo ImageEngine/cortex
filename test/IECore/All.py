@@ -265,6 +265,7 @@ from TimeCodeParameterTest import TimeCodeParameterTest
 from OptionsTest import OptionsTest
 from NullObjectTest import NullObjectTest
 from ModelCacheTest import ModelCacheTest
+from SceneCacheTest import SceneCacheTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
