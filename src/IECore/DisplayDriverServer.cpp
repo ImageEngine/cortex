@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -287,7 +287,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 	// handle imageOpen parameters.
 	try
 	{
-		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, IndexedIO::g_rootPath, IndexedIO::Exclusive | IndexedIO::Read );
+		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Read );
 		displayWindow = staticPointerCast<Box2iData>( Object::load( io, "displayWindow" ) );
 		dataWindow = staticPointerCast<Box2iData>( Object::load( io, "dataWindow" ) );
 		channelNames = staticPointerCast<StringVectorData>( Object::load( io, "channelNames" ) );
@@ -354,7 +354,7 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 
 	try
 	{
-		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, IndexedIO::g_rootPath, IndexedIO::Exclusive | IndexedIO::Read );
+		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Read );
 		box = staticPointerCast<Box2iData>( Object::load( io, "box" ) );
 		data = staticPointerCast<FloatVectorData>( Object::load( io, "data" ) );
 

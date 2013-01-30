@@ -91,7 +91,7 @@ struct IndexedIOHelper
 	template< typename T, typename P >
 	static typename T::Ptr constructorAtRoot( P firstParam, IndexedIO::OpenMode mode )
 	{
-		return new T( firstParam, IndexedIO::g_rootPath, mode );
+		return new T( firstParam, IndexedIO::rootPath, mode );
 	}
 
 	template< typename T, typename P >
@@ -104,7 +104,7 @@ struct IndexedIOHelper
 
 	static IndexedIOPtr createAtRoot( const std::string &path, IndexedIO::OpenMode mode)
 	{
-		return IndexedIO::create( path, IndexedIO::g_rootPath, mode );
+		return IndexedIO::create( path, IndexedIO::rootPath, mode );
 	}
 
 	static IndexedIOPtr create( const std::string &path, list root, IndexedIO::OpenMode mode)
