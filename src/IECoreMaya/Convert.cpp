@@ -218,6 +218,22 @@ Imath::Box3f convert( const MBoundingBox &from )
 }
 
 template<>
+MBoundingBox convert( const Imath::Box3d &from )
+{
+	if( from.isEmpty() )
+	{
+		return MBoundingBox();
+	}
+	return MBoundingBox( convert<MPoint>( from.min ), convert<MPoint>( from.max ) );
+}
+
+template<>
+Imath::Box3d convert( const MBoundingBox &from )
+{
+	return Imath::Box3d( convert<V3d>( from.min() ), convert<V3d>( from.max() ) );
+}
+
+template<>
 Imath::Quatf convert( const MQuaternion &from )
 {
 	return Imath::Quatf( static_cast<float>(from[3]), static_cast<float>(from[0]), static_cast<float>(from[1]), static_cast<float>(from[2]) );
