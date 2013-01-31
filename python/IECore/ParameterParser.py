@@ -257,12 +257,19 @@ def __parseBool( args, parameter ) :
 		"off" : False,
 	}
 
-	if not len( args ) :
-		raise SyntaxError( "Expected a boolean value." )
-
-	if not args[0] in validValues :
-		raise SyntaxError( "Expected one of %s" % ", ".join( validValues.keys() ) )
-
+	if not len( args ) or args[0] not in validValues :
+		if parameter.defaultValue.value :
+			if not len( args ) :
+				raise SyntaxError( "Expected a boolean value." )
+			else :
+				raise SyntaxError( "Expected one of %s" % ", ".join( validValues.keys() ) )
+		else :
+			# if the default value of a parameter is False,
+			# and no value has been provided after the "-parameterName"
+			# flag, then we turn it on.
+			parameter.setValidatedValue( IECore.BoolData( True ) )
+			return
+			
 	parameter.setValidatedValue( IECore.BoolData( validValues[args[0]] ) )
 	del args[0]
 

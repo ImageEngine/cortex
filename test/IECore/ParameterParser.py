@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -486,11 +486,6 @@ class testParameterParser( unittest.TestCase ) :
 					description = "d",
 					defaultValue = 0.0,
 				),
-				IECore.BoolParameter(
-					name = "bool",
-					description = "d",
-					defaultValue = False,
-				),
 				IECore.V2iParameter(
 					name = "v2i",
 					description = "d",
@@ -514,7 +509,6 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertRaises( SyntaxError, parser.parse, ["-string"], p )
 		self.assertRaises( SyntaxError, parser.parse, ["-int"], p )
 		self.assertRaises( SyntaxError, parser.parse, ["-float"], p )
-		self.assertRaises( SyntaxError, parser.parse, ["-bool"], p )
 		self.assertRaises( SyntaxError, parser.parse, ["-v21"], p )
 		self.assertRaises( SyntaxError, parser.parse, ["-box3f"], p )
 		self.assertRaises( SyntaxError, parser.parse, ["-spline"], p )
@@ -565,6 +559,92 @@ class testParameterParser( unittest.TestCase ) :
 
 		self.assertEqual( p["s"].getValue(), IECore.StringVectorData( [ "something", "-flagsAreFine" ] ) )
 
+	def testBooleanParsingWithoutValues( self ) :
+	
+		p = IECore.CompoundParameter(
+			members = [
+				IECore.BoolParameter(
+					"b",
+					"",
+					False
+				),
+				IECore.StringParameter(
+					"s",
+					"",
+					""
+				),
+			],
+		)
+		
+		IECore.ParameterParser().parse( [ "-b", "-s", "stringValue" ], p )
+		
+		self.assertEqual( p["b"].getTypedValue(), True )
+		self.assertEqual( p["s"].getTypedValue(), "stringValue" )
+
+	def testBooleanParsingWithoutValuesAndWithFlaglessArgs( self ) :
+
+		parameters = IECore.CompoundParameter(
+
+			members = [
+
+				IECore.BoolParameter(
+					name = "a",
+					description = "",
+					defaultValue = False
+				),
+				IECore.StringParameter(
+					name = "b",
+					description = "",
+					defaultValue = "2"
+				),
+				IECore.IntParameter(
+					name = "c",
+					description = "",
+					defaultValue = 3
+				),
+
+			],
+
+			userData = {
+
+				"parser" : {
+
+					"flagless" : IECore.StringVectorData( [ "b", "c" ] )
+
+				}
+
+			}
+
+		)
+
+		# check that parsing with a specific value works
+
+		IECore.ParameterParser().parse( [
+				"-a", "True",
+				"goodbye", "20"
+			],
+			parameters
+		)
+
+		self.assertEqual( parameters["a"].getTypedValue(), True )
+		self.assertEqual( parameters["b"].getTypedValue(), "goodbye" )
+		self.assertEqual( parameters["c"].getNumericValue(), 20 )
+
+		# check that parsing without a value works too
+
+		parameters["a"].setTypedValue( False )
+		
+		IECore.ParameterParser().parse( [
+				"-a",
+				"hello", "22"
+			],
+			parameters
+		)
+		
+		self.assertEqual( parameters["a"].getTypedValue(), True )
+		self.assertEqual( parameters["b"].getTypedValue(), "hello" )
+		self.assertEqual( parameters["c"].getNumericValue(), 22 )
+		
 if __name__ == "__main__":
         unittest.main()
 

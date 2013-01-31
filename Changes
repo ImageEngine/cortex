@@ -9,6 +9,7 @@ Improvements :
 * IECore::Writer::create() now provides an overload which takes just a filename, allowing a Writer to be created before the object to be written is available.
 * The RenderMan display driver is now called "ieDisplay" rather than just "ie", meaning it has the same name as the Arnold display driver, allowing scenes to described in a single manner compatible with both renderers.
 * Reworked InternedString to no longer be based on templates - the templating never got used and it just complicated the implementation.
+* The ParameterParser now parses -boolParameter flags without additional arguments as True, provided that the parameter default is False.
 
 Bug Fixes :
 
