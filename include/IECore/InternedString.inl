@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,74 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_INTERNED_H
-#define IECORE_INTERNED_H
-
-#include "IECore/HashTable.h"
-
-#include "boost/multi_index_container.hpp"
-
-#include "tbb/spin_rw_mutex.h"
+#ifndef IECORE_INTERNEDSTRING_INL
+#define IECORE_INTERNEDSTRING_INL
 
 namespace IECore
 {
 
-/// The Interned class provides a means of efficiently storing
-/// multiple different objects with the same value. It does this
-/// by keeping a static table with the actual values in it, with
-/// the object instances just referencing the values in the table.
-/// \ingroup utilityGroup
-template<typename T, typename Hash=Hash<T> >
-class Interned
+inline InternedString::InternedString( const std::string &value )
+	:	m_value( internedString( value.c_str() ) )
 {
-	public :
+}
 
-		Interned( const T &value );
-		Interned( const Interned<T, Hash> &other );
-		Interned( const char *value );
-		template<typename S>
-		Interned( const S &value );
+inline InternedString::InternedString( const InternedString &other )
+	:	m_value( other.m_value )
+{
+}
 
-		~Interned();
+inline InternedString::InternedString( const char *value )
+	:	m_value( internedString( value ) )
+{
+}
 
-		inline bool operator != ( const Interned<T, Hash> &other ) const;
-		inline bool operator == ( const Interned<T, Hash> &other ) const;
-		inline bool operator < ( const Interned<T, Hash> &other ) const;
+inline InternedString::~InternedString()
+{
+}
 
-		inline operator const T & () const;
+inline bool InternedString::operator != ( const InternedString &other ) const
+{
+	return m_value!=other.m_value;
+}
 
-		inline const T &value() const;
+inline bool InternedString::operator == ( const InternedString &other ) const
+{
+	return m_value==other.m_value;
+}
 
-		static size_t size();
+inline bool InternedString::operator < ( const InternedString &other ) const
+{
+	return m_value < other.m_value;
+}
 
-	private :
+inline InternedString::operator const std::string & () const
+{
+	return *m_value;
+}
 
-		typedef boost::multi_index::multi_index_container<
-			T,
-			boost::multi_index::indexed_by<
-				boost::multi_index::hashed_unique<
-					boost::multi_index::identity<T>,
-					Hash
-				>
-			>
-		> HashSet;
+inline const std::string &InternedString::value() const
+{
+	return *m_value;
+}
 
-		typedef typename HashSet::template nth_index<0>::type Index;
-		typedef typename HashSet::template nth_index_const_iterator<0>::type ConstIterator;
-
-		const T *m_value;
-
-		static HashSet *hashSet();
-		
-		typedef tbb::spin_rw_mutex Mutex;
-		static Mutex *mutex();
-
-};
-
-typedef Interned<std::string> InternedString;
+/*size_t InternedString::::size()
+{
+	return hashSet()->size();
+};*/
 
 } // namespace IECore
 
-#include "IECore/Interned.inl"
-
-#endif // IECORE_INTERNED_H
+#endif // IECORE_INTERNEDSTRING_INL

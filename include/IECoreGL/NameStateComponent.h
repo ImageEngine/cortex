@@ -44,7 +44,7 @@
 #include "boost/multi_index/ordered_index.hpp"
 
 #include "IECoreGL/StateComponent.h"
-#include "IECore/Interned.h"
+#include "IECore/InternedString.h"
 
 namespace IECoreGL
 {

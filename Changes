@@ -8,6 +8,7 @@ Improvements :
 * IECoreHoudini SOP_InterpolatedCacheReader now exposes samplesPerFrame and interpolation as parameters, instead of the frameMultiplier hack. fps is stil hidden, though may be exposed in the future.
 * IECore::Writer::create() now provides an overload which takes just a filename, allowing a Writer to be created before the object to be written is available.
 * The RenderMan display driver is now called "ieDisplay" rather than just "ie", meaning it has the same name as the Arnold display driver, allowing scenes to described in a single manner compatible with both renderers.
+* Reworked InternedString to no longer be based on templates - the templating never got used and it just complicated the implementation.
 
 Bug Fixes :
 

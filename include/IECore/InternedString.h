@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_INTERNEDBINDING_H
-#define IECOREPYTHON_INTERNEDBINDING_H
+#ifndef IECORE_INTERNEDSTRING_H
+#define IECORE_INTERNEDSTRING_H
 
-namespace IECorePython
+#include <string>
+
+namespace IECore
 {
 
-void bindInterned();
+/// The InternedString class provides a means of efficiently storing
+/// multiple different objects with the same string value. It does this
+/// by keeping a static table with the actual values in it, with
+/// the object instances just referencing the values in the table.
+/// \ingroup utilityGroup
+class InternedString
+{
+	public :
 
-}
+		inline InternedString( const std::string &value );
+		inline InternedString( const InternedString &other );
+		inline InternedString( const char *value );
 
-#endif // IECOREPYTHON_INTERNEDBINDING_H
+		inline ~InternedString();
+
+		// The equality operators are extremely fast because they
+		// need only compare the address of the internal string,
+		// because it was made unique upon construction.
+		inline bool operator != ( const InternedString &other ) const;
+		inline bool operator == ( const InternedString &other ) const;
+		/// Note that this compares the addresses of the internal
+		/// unique strings, rather than performing an actual string
+		/// comparison.
+		inline bool operator < ( const InternedString &other ) const;
+
+		inline operator const std::string & () const;
+
+		inline const std::string &value() const;
+
+		static size_t numUniqueStrings();
+
+	private :
+
+		static const std::string *internedString( const char *value );
+
+		const std::string *m_value;
+
+};
+
+} // namespace IECore
+
+#include "IECore/InternedString.inl"
+
+#endif // IECORE_INTERNEDSTRING_H

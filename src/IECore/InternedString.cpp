@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,71 +32,81 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include "tbb/spin_rw_mutex.h"
 
-#include "tbb/tbb.h"
+#include "boost/multi_index_container.hpp"
 
-#include "OpenEXR/ImathRandom.h"
-
-#include "boost/lexical_cast.hpp"
-
+#include "IECore/HashTable.h"
 #include "IECore/InternedString.h"
-
-#include "InternedStringTest.h"
-
-using namespace boost;
-using namespace boost::unit_test;
-using namespace tbb;
 
 namespace IECore
 {
 
-struct InternedStringTest
+namespace Detail
 {
-	
-	struct Constructor
-	{
-		public :
-		
-			Constructor()
-			{
-			}
-			
-			void operator()( const blocked_range<size_t> &r ) const
-			{
-				Imath::Rand32 rand;
-				for( size_t i=r.begin(); i!=r.end(); ++i )
-				{
-					std::string s = lexical_cast<std::string>( rand.nexti() % 1000 );
-					InternedString ss( s );
-				}
-			}
-			
-	};
 
-	void testConcurrentConstruction()
+typedef boost::multi_index::multi_index_container<
+	std::string,
+	boost::multi_index::indexed_by<
+		boost::multi_index::hashed_unique<
+			boost::multi_index::identity<std::string>,
+			Hash<std::string>
+		>
+	>
+> HashSet;
+
+typedef HashSet::nth_index<0>::type Index;
+typedef HashSet::nth_index_const_iterator<0>::type ConstIterator;
+typedef tbb::spin_rw_mutex Mutex;
+
+static HashSet *hashSet()
+{
+	static HashSet g_hashSet;
+	return &g_hashSet;
+}
+
+static Mutex *mutex()
+{
+	static Detail::Mutex g_mutex;
+	return &g_mutex;
+}
+
+struct StringCStringEqual
+{
+	bool operator()( const char *c, const std::string &s ) const
 	{
-		size_t numIterations = 10000000;
-		parallel_for( blocked_range<size_t>( 0, numIterations ), Constructor() );
+		return strcmp( c, s.c_str() )==0;
+	}
+	bool operator()( const std::string &s, const char *c ) const
+	{
+		return strcmp( c, s.c_str() )==0;
 	}
 };
 
+} // namespace Detail
 
-struct InternedStringTestSuite : public boost::unit_test::test_suite
+const std::string *InternedString::internedString( const char *value )
 {
-
-	InternedStringTestSuite() : boost::unit_test::test_suite( "InternedStringTestSuite" )
+	Detail::HashSet *hashSet = Detail::hashSet();
+	Detail::Index &hashIndex = hashSet->get<0>();
+	Detail::Mutex::scoped_lock lock( *Detail::mutex(), false ); // read-only lock
+	Detail::HashSet::const_iterator it = hashIndex.find( value, Hash<const char *>(), Detail::StringCStringEqual() );
+	if( it!=hashIndex.end() )
 	{
-		boost::shared_ptr<InternedStringTest> instance( new InternedStringTest() );
-
-		add( BOOST_CLASS_TEST_CASE( &InternedStringTest::testConcurrentConstruction, instance ) );
-
+		return &(*it);
 	}
-};
+	else
+	{
+		lock.upgrade_to_writer();
+		return &(*(hashSet->insert( std::string( value ) ).first ) );
+	}
+}
 
-void addInternedStringTest(boost::unit_test::test_suite* test)
+size_t InternedString::numUniqueStrings()
 {
-	test->add( new InternedStringTestSuite( ) );
+	Detail::Mutex::scoped_lock lock( *Detail::mutex(), false ); // read-only lock
+	Detail::HashSet *hashSet = Detail::hashSet();
+	return hashSet->size();
 }
 
 } // namespace IECore

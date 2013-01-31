@@ -43,7 +43,7 @@
 #include "OpenEXR/half.h"
 
 #include "IECore/RefCounted.h"
-#include "IECore/Interned.h"
+#include "IECore/InternedString.h"
 
 namespace IECore
 {

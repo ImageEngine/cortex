@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,62 +32,67 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
+#include "boost/python.hpp"
 
-#include "IECore/Interned.h"
+#include "IECore/InternedString.h"
+#include "IECorePython/InternedStringBinding.h"
 
-namespace IECore
+using namespace std;
+using namespace boost;
+using namespace boost::python;
+using namespace IECore;
+
+namespace IECorePython
 {
 
-// It's essential that this implementation isn't visible from the headers.
-// If it is then other libraries/modules linking IECore can end up with
-// their own copy of the function, and therefore of the HashSet itself.
-// This causes lookups to fail and bad things to happen.
-template<typename T, typename Hash>
-typename Interned<T, Hash>::HashSet *Interned<T, Hash>::hashSet()
+struct InternedStringFromPython
 {
-	static HashSet *h = new HashSet;
-	return h;
-}
-
-template<typename T, typename Hash>
-typename Interned<T, Hash>::Mutex *Interned<T, Hash>::mutex()
-{
-	static Mutex *m = new Mutex;
-	return m;
-}
-
-struct StringCStringEqual
-{
-	bool operator()( const char *c, const std::string &s ) const
+	InternedStringFromPython()
 	{
-		return strcmp( c, s.c_str() )==0;
+		converter::registry::push_back(
+			&convertible,
+			&construct,
+			type_id<InternedString> ()
+		);
 	}
-	bool operator()( const std::string &s, const char *c ) const
+
+	static void *convertible( PyObject *obj_ptr )
 	{
-		return strcmp( c, s.c_str() )==0;
+		if ( !PyString_Check( obj_ptr ) )
+		{
+			return 0;
+		}
+		return obj_ptr;
+	}
+
+	static void construct(
+	        PyObject *obj_ptr,
+	        converter::rvalue_from_python_stage1_data *data )
+	{
+		assert( obj_ptr );
+		assert( PyString_Check( obj_ptr ) );
+
+		void* storage = (( converter::rvalue_from_python_storage<InternedString>* ) data )->storage.bytes;
+		new( storage ) InternedString( PyString_AsString( obj_ptr ) );
+		data->convertible = storage;
 	}
 };
 
-template<>
-InternedString::Interned( const char *value )
+void bindInternedString()
 {
-	HashSet *h = hashSet();
-	Index &hashIndex = h->get<0>();
-	Mutex::scoped_lock lock( *mutex(), false ); // read-only lock
-	HashSet::const_iterator it = hashIndex.find( value, Hash<const char *>(), StringCStringEqual() );
-	if( it!=hashIndex.end() )
-	{
-		m_value = &(*it);
-	}
-	else
-	{
-		lock.upgrade_to_writer();
-		m_value = &(*(h->insert( std::string( value ) ).first ) );
-	}
+
+	class_<InternedString>( "InternedString", init<const char *>() )
+		.def( init<InternedString>() )
+		.def( "__str__", &InternedString::value, return_value_policy<copy_const_reference>() )
+		.def( "value", &InternedString::value, return_value_policy<copy_const_reference>() )
+		.def( self == self )
+		.def( self != self )
+		.def( "numUniqueStrings", &InternedString::numUniqueStrings ).staticmethod( "numUniqueStrings" )
+	;
+	implicitly_convertible<InternedString, string>();
+
+	InternedStringFromPython();
+
 }
 
-// explicit instantiation
-template class Interned<std::string>;
-
-} // namespace IECore
+} // namespace IECorePython

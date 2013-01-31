@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,7 +44,6 @@
 #include "IECoreMaya/ParameterisedHolder.h"
 
 #include "IECore/ParameterisedProcedural.h"
-#include "IECore/Interned.h"
 
 #include "maya/MPxComponentShape.h"
 #include "maya/MArrayDataBuilder.h"
