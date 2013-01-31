@@ -54,6 +54,9 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.name(), "/" )
 		self.assertEqual( m.hasObject(), False )
 		
+		m.writeAttribute( "w", IECore.BoolData( True ), 1.0 )
+		
+		
 		t = m.createChild( "t" )
 		self.assertEqual( t.path(), ["t"] )
 		self.assertEqual( t.pathAsString(), "/t" )
@@ -64,6 +67,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		t.writeTransform( IECore.M44dData(IECore.M44d.createTranslated(IECore.V3d( 1, 0, 0 ))), 1.0 )
 		self.assertEqual( t.hasObject(), False )
 		
+		t.writeAttribute( "wuh", IECore.BoolData( True ), 1.0 )
+		
 		s = t.createChild( "s" )
 		self.assertEqual( s.path(), ["t","s"] )
 		self.assertEqual( s.pathAsString(), "/t/s" )
@@ -73,6 +78,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		
 		s.writeObject( IECore.SpherePrimitive( 1 ), 1.0 )
 		self.assertEqual( s.hasObject(), True )
+		
+		s.writeAttribute( "glah", IECore.BoolData( True ), 1.0 )
 		
 		# need to delete all the SceneCache references to finalise the file
 		del m, t, s
@@ -87,6 +94,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.readTransform(0.0), IECore.M44dData(IECore.M44d()) )
 		self.assertEqual( m.hasObject(), False )
 		
+		self.assertEqual( m.readAttribute( "w", 0 ), IECore.BoolData( True ) )
+		
 		t = m.child( "t" )
 		
 		self.assertEqual( t.pathAsString(), "/t" )
@@ -97,6 +106,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( t.readTransform(0.0), IECore.M44dData(IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )) )
 		self.assertEqual( t.hasObject(), False )
 
+		self.assertEqual( t.readAttribute( "wuh", 0 ), IECore.BoolData( True ) )
+		
 		s = t.child( "s" )
 		
 		self.assertEqual( s.pathAsString(), "/t/s" )
@@ -108,6 +119,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( s.hasObject(), True )
 		self.assertEqual( s.readObject(0.0), IECore.SpherePrimitive( 1 ) )
 	
+		self.assertEqual( t.readAttribute( "glah", 0 ), IECore.BoolData( True ) )
+		
 	def testRandomStaticHierarchy( self ) :
 	
 		r = IECore.Rand48()
