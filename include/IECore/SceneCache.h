@@ -35,7 +35,6 @@
 #ifndef IECORE_SCENECACHE_H
 #define IECORE_SCENECACHE_H
 
-#include "boost/shared_ptr.hpp"
 #include "IECore/SampledSceneInterface.h"
 
 namespace IECore

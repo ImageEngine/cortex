@@ -119,7 +119,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( s.hasObject(), True )
 		self.assertEqual( s.readObject(0.0), IECore.SpherePrimitive( 1 ) )
 	
-		self.assertEqual( t.readAttribute( "glah", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( s.readAttribute( "glah", 0 ), IECore.BoolData( True ) )
 		
 	def testRandomStaticHierarchy( self ) :
 	
@@ -127,11 +127,12 @@ class SceneCacheTest( unittest.TestCase ) :
 				
 		def writeWalk( m ) :
 					
-			if r.nextf( 0.0, 1.0 ) < 0.5 :
-				m.writeObject( IECore.SpherePrimitive( r.nextf( 1.0, 4.0 ) ), 0.0 )
+			if m.name() != "/" :
+				if r.nextf( 0.0, 1.0 ) < 0.5 :
+					m.writeObject( IECore.SpherePrimitive( r.nextf( 1.0, 4.0 ) ), 0.0 )
 		
-			if r.nextf( 0.0, 1.0 ) < 0.5 :
-				m.writeTransform( IECore.M44dData(IECore.M44d.createTranslated( r.nextV3d() )), 0.0 )
+				if r.nextf( 0.0, 1.0 ) < 0.5 :
+					m.writeTransform( IECore.M44dData(IECore.M44d.createTranslated( r.nextV3d() )), 0.0 )
 		
 			thisDepth = int( r.nextf( 1, 4 ) )
 			if thisDepth > len(m.path()) :

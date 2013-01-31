@@ -120,7 +120,6 @@ class SceneCache::Implementation : public RefCounted
 		}
 
 		// This function converts an integer to a IndexedIO::EntryID object (InternedString)
-		// It keeps an internal dictionary that should be quicker than creating an InternedString all the time.
 		// \todo Remove this when InternedString nativelly supports a constructor with integers.
 		static IndexedIO::EntryID sampleEntry( size_t sample )
 		{
@@ -276,7 +275,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			{
 				return readBoundAtSample( sample1 );
 			} 
-			else if ( x == 1 )
+			if ( x == 1 )
 			{
 				return readBoundAtSample( sample2 );
 			}
@@ -345,11 +344,21 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		{
 			size_t sample1, sample2;
 			double x = transformSampleInterval( time, sample1, sample2 );
-			DataPtr transformData = readTransformAtSample( sample1 );
-			if ( x != 0 )
+			if ( x == 0 )
 			{
-				DataPtr transformData2 = readTransformAtSample( sample2 );
-				transformData = runTimeCast< Data >( linearObjectInterpolation( transformData, transformData2, x ) );
+				return readTransformAtSample( sample1 );
+			}
+			if ( x == 1 )
+			{
+				return readTransformAtSample( sample2 );
+			}
+			DataPtr transformData1 = readTransformAtSample( sample1 );
+			DataPtr transformData2 = readTransformAtSample( sample2 );
+			DataPtr transformData = runTimeCast< Data >( linearObjectInterpolation( transformData1, transformData2, x ) );
+			if ( !transformData )
+			{
+				// failed to interpolate, return the closest one
+				return ( x >= 0.5 ? transformData2 : transformData1 );
 			}
 			return transformData;
 		}
@@ -398,18 +407,29 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		ObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex )
 		{
-			return Object::load( m_indexedIO->subdirectory( attributesEntry )->subdirectory(name), sampleEntry(sampleIndex) );
+			return Object::load( m_indexedIO->subdirectory(attributesEntry)->subdirectory(name), sampleEntry(sampleIndex) );
 		}
 
 		ObjectPtr readAttribute( const SceneCache::Name &name, double time )
 		{
 			size_t sample1, sample2;
 			double x = attributeSampleInterval( name, time, sample1, sample2 );
-			ObjectPtr attributeObj = readAttributeAtSample( name, sample1 );
-			if ( x != 0 )
+			if ( x == 0 )
 			{
-				ObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
-				attributeObj = linearObjectInterpolation( attributeObj, attributeObj2, x );
+				return readAttributeAtSample( name, sample1 );
+			}
+			if ( x == 1 )
+			{
+				return readAttributeAtSample( name, sample2 );
+			}
+
+			ObjectPtr attributeObj1 = readAttributeAtSample( name, sample1 );
+			ObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
+			ObjectPtr attributeObj = linearObjectInterpolation( attributeObj1, attributeObj2, x );
+			if ( !attributeObj )
+			{
+				// failed to interpolate, return the closest one
+				return ( x >= 0.5 ? attributeObj2 : attributeObj1 );
 			}
 			return attributeObj;
 		}
@@ -454,11 +474,22 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		{
 			size_t sample1, sample2;
 			double x = objectSampleInterval( time, sample1, sample2 );
-			ObjectPtr object = readObjectAtSample( sample1 );
-			if ( x != 0 )
+			if ( x == 0 )
 			{
-				ObjectPtr object2 = readObjectAtSample( sample2 );
-				object = linearObjectInterpolation( object, object2, x );
+				return readObjectAtSample( sample1 );
+			}
+			if ( x == 1 )
+			{
+				return readObjectAtSample( sample2 );
+			}
+
+			ObjectPtr object1 = readObjectAtSample( sample1 );
+			ObjectPtr object2 = readObjectAtSample( sample2 );
+			ObjectPtr object = linearObjectInterpolation( object1, object2, x );
+			if ( !object )
+			{
+				// failed to interpolate, return the closest one
+				return ( x >= 0.5 ? object2 : object1 );
 			}
 			return object;
 		}
@@ -673,6 +704,10 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		void writeTransform( const Data *transform, double time )
 		{
+			if ( !m_parent )
+			{
+				throw Exception( "Call to writeTransform at the root scene is not allowed!" );
+			}
 			switch (transform->typeId())
 			{
 				case M44dDataTypeId:
@@ -709,12 +744,16 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			size_t sampleIndex = sampleTimes.size();
 			sampleTimes.push_back( time );
 			IndexedIOPtr io = m_indexedIO->subdirectory( attributesEntry, IndexedIO::CreateIfMissing );
-			io = m_indexedIO->subdirectory( name, IndexedIO::CreateIfMissing );
+			io = io->subdirectory( name, IndexedIO::CreateIfMissing );
 			attribute->save( io, sampleEntry(sampleIndex) );
 		}
 
 		void writeObject( const Object *object, double time )
 		{
+			if ( !m_parent )
+			{
+				throw Exception( "Call to writeObject at the root scene is not allowed!" );
+			}
 			if ( m_objectSampleTimes.size() )
 			{
 				if ( *(m_objectSampleTimes.rbegin()) >= time )

@@ -45,7 +45,7 @@ IE_CORE_FORWARDDECLARE( SampledSceneInterface );
 
 /// A pure virtual base class for navigating a hierarchical sampled-animated 3D scene.
 /// The calls to the base class functions readFoo() will return interpolated values from
-/// the stored sampled data.
+/// the stored sampled data. They may return the closest sample if the object cannot be interpolated.
 /// The functions numFooSamples() can be used in combination with fooSampleTime() and 
 /// readFooAtSample() to read the exact stored samples without interpolation.
 /// The functions fooSampleInterval should be used when the interpolation provided
