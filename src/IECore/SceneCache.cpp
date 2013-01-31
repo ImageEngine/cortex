@@ -113,6 +113,16 @@ class SceneCache::Implementation : public RefCounted
 			children->entryIds( childNames, IndexedIO::Directory );
 		}
 
+		bool hasChild( const Name &name ) const
+		{
+			ConstIndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, IndexedIO::NullIfMissing );
+			if ( !children )
+			{
+				return false;
+			}
+			return children->hasEntry( name );
+		}
+
 	protected :
 
 		Implementation( IndexedIOPtr io ) : m_indexedIO(io)
@@ -1539,6 +1549,11 @@ ConstSceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingB
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return new SceneCache( ImplementationPtr( reader->child( name, missingBehaviour ) ) );
+}
+
+bool SceneCache::hasChild( const Name &name ) const
+{
+	return m_implementation->hasChild(name);	
 }
 
 SceneInterfacePtr SceneCache::createChild( const Name &name )

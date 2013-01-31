@@ -148,6 +148,8 @@ class SceneInterface : public RunTimeTyped
 		 * Hierarchy
 		 */
 
+		/// Convenience method to determine if a child exists
+		virtual bool hasChild( const Name &name ) const = 0;
 		/// Queries the names of any existing children of path() within
 		/// the scene.
 		virtual void childNames( NameList &childNames ) const = 0;

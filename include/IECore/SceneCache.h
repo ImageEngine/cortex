@@ -116,6 +116,7 @@ class SceneCache : public SampledSceneInterface
 		ObjectPtr readObject( double time ) const;
 		void writeObject( const Object *object, double time );
 
+		bool hasChild( const Name &name ) const;
 		void childNames( NameList &childNames ) const;
 		SceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour );
 		ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const;
