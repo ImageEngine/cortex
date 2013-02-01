@@ -78,6 +78,8 @@ class StreamIndexedIO : public IndexedIO
 
 		IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const;
 
+		IndexedIOPtr createSubdirectory( const IndexedIO::EntryID &name );
+
 		void remove( const IndexedIO::EntryID &name );
 
 		void removeAll();

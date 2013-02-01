@@ -206,10 +206,11 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( g.path() , [ 'sub1' ] )
 		self.assertEqual( g.currentEntryId() , "sub1" )
 
-		g = f.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
+		g = f.createSubdirectory("sub2" )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( g.path() , [ 'sub2' ] )
 		self.assertEqual( g.currentEntryId() , "sub2" )
+		self.assertRaises( RuntimeError, f.createSubdirectory, "sub2" )
 
 		# test directory
 		h = f.directory(["sub2"], IndexedIO.MissingBehaviour.CreateIfMissing )

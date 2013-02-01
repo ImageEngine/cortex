@@ -1723,6 +1723,23 @@ ConstIndexedIOPtr StreamIndexedIO::subdirectory( const IndexedIO::EntryID &name,
 	return duplicate(childNode);
 }
 
+IndexedIOPtr StreamIndexedIO::createSubdirectory( const IndexedIO::EntryID &name )
+{
+	assert( m_node );
+	Node* childNode = m_node->child( name );
+	if ( childNode )
+	{
+		throw IOException( "Child '" + name.value() + "' already exists!" );
+	}
+	writable( name );
+	childNode = m_node->addChild( name );
+	if ( !childNode )
+	{
+		throw IOException( "StreamIndexedIO: Could not insert child '" + name.value() + "'" );
+	}
+	return duplicate(childNode);
+}
+
 void StreamIndexedIO::remove( const IndexedIO::EntryID &name )
 {
 	assert( m_node );

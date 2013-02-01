@@ -182,6 +182,9 @@ class IndexedIO : public RefCounted
 		/// Return details of a specific child entry or raises an exception if it doesn't exist.
 		virtual IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const = 0;
 
+		/// Creates a subdirectory and returns a writable interface for it or Throws an exception if the subdirectory already exists.
+		virtual IndexedIOPtr createSubdirectory( const IndexedIO::EntryID &name ) = 0;
+
 		/// Remove a specified child file or directory.
 		virtual void remove( const IndexedIO::EntryID &name ) = 0;
 
