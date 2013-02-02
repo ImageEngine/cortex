@@ -98,6 +98,8 @@ static const Imf::Int64 g_currentVersion = 4;
 using namespace IECore;
 namespace io = boost::iostreams;
 
+IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( StreamIndexedIO )
+
 //// Templated functions for stream files //////
 
 template<typename F, typename T>

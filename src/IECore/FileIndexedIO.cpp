@@ -41,6 +41,9 @@ using namespace IECore;
 
 namespace fs = boost::filesystem;
 
+IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( FileIndexedIO )
+
+
 ///////////////////////////////////////////////
 //
 // FileIndexedIO::StreamFile (begin)

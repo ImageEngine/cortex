@@ -413,6 +413,10 @@ enum TypeId
 	SceneInterfaceTypeId = 365,
 	SampledSceneInterfaceTypeId = 366,
 	SceneCacheTypeId = 367,
+	IndexedIOTypeId = 368,
+	StreamIndexedIOTypeId = 369,
+	FileIndexedIOTypeId = 370,
+	MemoryIndexedIOTypeId = 371,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 

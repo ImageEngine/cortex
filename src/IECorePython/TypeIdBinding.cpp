@@ -416,6 +416,10 @@ void bindTypeId()
 		.value( "SceneInterface", SceneInterfaceTypeId )
 		.value( "SampledSceneInterface", SampledSceneInterfaceTypeId )
 		.value( "SceneCache", SceneCacheTypeId )
+		.value( "IndexedIO", IndexedIOTypeId )
+		.value( "StreamIndexedIO", StreamIndexedIOTypeId )
+		.value( "FileIndexedIO", FileIndexedIOTypeId )
+		.value( "MemoryIndexedIO", MemoryIndexedIOTypeId )
 	;
 }
 

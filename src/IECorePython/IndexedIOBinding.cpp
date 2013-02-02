@@ -45,21 +45,23 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
 
-void bindIndexedIO(const char *bindName);
-void bindFileIndexedIO(const char *bindName);
-void bindMemoryIndexedIO(const char *bindName);
+void bindIndexedIOBase();
+void bindStreamIndexedIO();
+void bindFileIndexedIO();
+void bindMemoryIndexedIO();
 
 void bindIndexedIO()
 {
-	bindIndexedIO("IndexedIO");
-	bindFileIndexedIO("FileIndexedIO");
-	bindMemoryIndexedIO("MemoryIndexedIO");
+	bindIndexedIOBase();
+	bindStreamIndexedIO();
+	bindFileIndexedIO();
+	bindMemoryIndexedIO();
 }
 
 struct IndexedIOHelper
@@ -276,7 +278,7 @@ struct IndexedIOHelper
 
 };
 
-void bindIndexedIO(const char *bindName)
+void bindIndexedIOBase()
 {
 	IndexedIOPtr (IndexedIO::*nonConstParentDirectory)() = &IndexedIO::parentDirectory;
 	IndexedIOPtr (IndexedIO::*nonConstSubdirectory)(const IndexedIO::EntryID &, IndexedIO::MissingBehaviour) = &IndexedIO::subdirectory;
@@ -294,8 +296,7 @@ void bindIndexedIO(const char *bindName)
 #endif
 
 	// make the indexed io class first
-	IECorePython::RefCountedClass<IndexedIO, RefCounted> indexedIOClass( bindName );
-	
+	IECorePython::RunTimeTypedClass<IndexedIO> indexedIOClass;	
 	{
 		// then define all the nested types
 		
@@ -407,9 +408,14 @@ void bindIndexedIO(const char *bindName)
 
 }
 
-void bindFileIndexedIO(const char *bindName)
+void bindStreamIndexedIO()
 {
-	IECorePython::RefCountedClass<FileIndexedIO, IndexedIO>( bindName )
+	IECorePython::RunTimeTypedClass<StreamIndexedIO>();
+}
+
+void bindFileIndexedIO()
+{
+	IECorePython::RunTimeTypedClass<FileIndexedIO>()
 		.def("__init__", make_constructor( &IndexedIOHelper::constructorAtRoot<FileIndexedIO, const std::string &> ) )
 		.def("__init__", make_constructor( &IndexedIOHelper::constructor<FileIndexedIO, const std::string &> ) )
 		.def( "fileName", make_function( &FileIndexedIO::fileName, return_value_policy<copy_const_reference>() ) )
@@ -422,9 +428,9 @@ CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
 	return io->buffer()->copy();
 }
 
-void bindMemoryIndexedIO(const char *bindName)
+void bindMemoryIndexedIO()
 {
-	IECorePython::RefCountedClass<MemoryIndexedIO, IndexedIO>( bindName )
+	IECorePython::RunTimeTypedClass<MemoryIndexedIO>()
 		.def("__init__", make_constructor( &IndexedIOHelper::constructorAtRoot<MemoryIndexedIO, ConstCharVectorDataPtr> ) )
 		.def("__init__", make_constructor( &IndexedIOHelper::constructor<MemoryIndexedIO, ConstCharVectorDataPtr> ) )
 		.def( "buffer", memoryIndexedIOBufferWrapper )

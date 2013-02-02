@@ -42,6 +42,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( IndexedIO )
+
 namespace fs = boost::filesystem;
 
 const IndexedIO::EntryID IndexedIO::rootName("/");

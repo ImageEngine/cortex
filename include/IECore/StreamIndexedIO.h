@@ -56,7 +56,7 @@ class StreamIndexedIO : public IndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( StreamIndexedIO );
+		IE_CORE_DECLARERUNTIMETYPED( StreamIndexedIO, IndexedIO );
 
 		virtual ~StreamIndexedIO();
 

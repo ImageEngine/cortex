@@ -42,7 +42,7 @@
 
 #include "OpenEXR/half.h"
 
-#include "IECore/RefCounted.h"
+#include "IECore/RunTimeTyped.h"
 #include "IECore/InternedString.h"
 
 namespace IECore
@@ -53,10 +53,12 @@ IE_CORE_FORWARDDECLARE( IndexedIO );
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
 /// or one of its subclasses, if an error is encountered.
 /// \ingroup ioGroup
-class IndexedIO : public RefCounted
+class IndexedIO : public RunTimeTyped
 {
 	public:
 		
+		IE_CORE_DECLARERUNTIMETYPED( IndexedIO, RunTimeTyped );
+
 		/// General enums and low level structures
 		enum OpenModeFlags
 		{
@@ -123,8 +125,6 @@ class IndexedIO : public RefCounted
 		static const EntryID rootName;
 		// singleton representing the root location (to be passed in the factory function)
 		static const EntryIDList rootPath;
-
-		IE_CORE_DECLAREMEMBERPTR( IndexedIO );
 
 		typedef IndexedIOPtr (*CreatorFn)(const std::string &, const EntryIDList &, IndexedIO::OpenMode );
 

@@ -46,7 +46,7 @@ class FileIndexedIO : public StreamIndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( FileIndexedIO );
+		IE_CORE_DECLARERUNTIMETYPED( FileIndexedIO, StreamIndexedIO );
 
 		static IndexedIOPtr create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 

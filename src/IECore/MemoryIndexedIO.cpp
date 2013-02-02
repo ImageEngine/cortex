@@ -38,6 +38,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( MemoryIndexedIO )
+
 ///////////////////////////////////////////////
 //
 // FileIndexedIO::StreamFile (begin)

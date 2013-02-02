@@ -48,7 +48,7 @@ class MemoryIndexedIO : public StreamIndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( MemoryIndexedIO );
+		IE_CORE_DECLARERUNTIMETYPED( MemoryIndexedIO, StreamIndexedIO );
 
 		MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
