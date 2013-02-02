@@ -238,3 +238,10 @@ IndexedIO * FileIndexedIO::duplicate(Node *rootNode) const
 	other->m_node = rootNode;
 	return other;
 }
+
+const std::string &FileIndexedIO::fileName() const
+{
+	StreamFile *stream = static_cast<StreamFile*>( m_streamFile.get() );
+	return stream->m_filename;
+}
+

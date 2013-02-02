@@ -412,6 +412,7 @@ void bindFileIndexedIO(const char *bindName)
 	IECorePython::RefCountedClass<FileIndexedIO, IndexedIO>( bindName )
 		.def("__init__", make_constructor( &IndexedIOHelper::constructorAtRoot<FileIndexedIO, const std::string &> ) )
 		.def("__init__", make_constructor( &IndexedIOHelper::constructor<FileIndexedIO, const std::string &> ) )
+		.def( "fileName", make_function( &FileIndexedIO::fileName, return_value_policy<copy_const_reference>() ) )
 	;
 }
 

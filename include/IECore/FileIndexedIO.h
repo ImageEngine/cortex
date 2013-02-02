@@ -57,6 +57,9 @@ class FileIndexedIO : public StreamIndexedIO
 
 		virtual ~FileIndexedIO();
 
+		/// Returns the full file name accessed by this object.
+		const std::string &fileName() const;
+
 	protected:
 
 		FileIndexedIO();

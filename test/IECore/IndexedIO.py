@@ -167,6 +167,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testConstructors(self):
 		"""Test FileIndexedIO constuctors"""
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
+		self.assertEqual( f.fileName() , "./test/FileIndexedIO.fio" )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
 
