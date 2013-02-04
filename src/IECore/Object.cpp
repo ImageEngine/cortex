@@ -126,7 +126,7 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
 	{
-		container->write( name, it->second );
+		container->write( name, &(it->second[0]), it->second.size() );
 	}
 	else
 	{
@@ -188,9 +188,11 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 	if( e.entryType()==IndexedIO::File )
 	{
 		IndexedIO::EntryIDList pathParts;
-		if ( e.dataType() == IndexedIO::SymbolicLink )
+		if ( e.dataType() == IndexedIO::InternedStringArray )
 		{
-			container->read( name, pathParts );
+			pathParts.resize( e.arrayLength() );
+			InternedString *p = &(pathParts[0]); 
+			container->read( name, p, e.arrayLength() );
 		}
 		else 
 		{

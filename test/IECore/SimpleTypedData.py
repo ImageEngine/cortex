@@ -310,6 +310,20 @@ class SimpleTypedDataTest(unittest.TestCase):
 				v.value = b2
 				self.assertEqual( v.value, b2 )
 
+	def testInternedStringData( self ) :
+	
+		s = InternedStringData( "i" )
+		self.assertEqual( str( s ), "i" )
+		self.assertEqual( repr(s ), 'IECore.InternedStringData( "i" )' )
+
+		m = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Append )
+		s.save( m, "o" )
+		
+		s2 = Object.load( m, "o" )
+		
+		self.assertEqual( s2.value.value(), "i" )
+		self.assertEqual( s, s2 )
+		
 class BoolDataTest( unittest.TestCase ) :
 
 	def test( self ) :

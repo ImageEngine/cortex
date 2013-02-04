@@ -49,6 +49,7 @@ class InternedString
 {
 	public :
 
+		inline InternedString();
 		inline InternedString( const std::string &value );
 		inline InternedString( const InternedString &other );
 		inline InternedString( const char *value );
@@ -68,6 +69,8 @@ class InternedString
 		inline operator const std::string & () const;
 
 		inline const std::string &value() const;
+		inline const std::string &string() const;
+		inline const char *c_str() const;
 
 		static size_t numUniqueStrings();
 

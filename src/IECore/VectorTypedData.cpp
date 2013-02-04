@@ -186,6 +186,7 @@ IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( CharVectorData, CharVectorDat
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UCharVectorData, UCharVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( Int64VectorData, Int64VectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UInt64VectorData, UInt64VectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( InternedStringVectorData, InternedStringVectorDataTypeId )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2fVectorData, V2fVectorDataTypeId, 2 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2dVectorData, V2dVectorDataTypeId, 2 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2iVectorData, V2iVectorDataTypeId, 2 )
@@ -436,5 +437,6 @@ template class TypedData<vector<M44d> >;
 template class TypedData<vector<Quatf> >;
 template class TypedData<vector<Quatd> >;
 template class TypedData<vector<string> >;
+template class TypedData<vector<InternedString> >;
 
 } // namespace IECore

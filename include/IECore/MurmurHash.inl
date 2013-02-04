@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -113,6 +113,12 @@ inline MurmurHash &MurmurHash::append( const char *data )
 inline MurmurHash &MurmurHash::append( const std::string &data )
 {
 	append( data.c_str(), data.size(), sizeof( char ) );
+	return *this;
+}
+
+inline MurmurHash &MurmurHash::append( const InternedString &data )
+{
+	append( data.value() );
 	return *this;
 }
 
@@ -325,6 +331,16 @@ inline MurmurHash &MurmurHash::append( const std::string *data, size_t numElemen
 	for( size_t i=0; i<numElements; i++ )
 	{
 		append( *data++ );
+	}
+	return *this;
+}
+
+inline MurmurHash &MurmurHash::append( const InternedString *data, size_t numElements )
+{
+	for( size_t i=0; i<numElements; i++ )
+	{
+		append( data->value() );
+		data++;
 	}
 	return *this;
 }

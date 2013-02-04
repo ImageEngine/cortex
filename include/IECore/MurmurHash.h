@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,8 @@
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathQuat.h"
 
+#include "IECore/InternedString.h"
+
 namespace IECore
 {
 
@@ -79,6 +81,7 @@ class MurmurHash
 		inline MurmurHash &append( double data );
 		inline MurmurHash &append( const char *data );
 		inline MurmurHash &append( const std::string &data );
+		inline MurmurHash &append( const InternedString &data );
 		inline MurmurHash &append( const Imath::V2i &data );
 		inline MurmurHash &append( const Imath::V2f &data );
 		inline MurmurHash &append( const Imath::V2d &data );
@@ -115,6 +118,7 @@ class MurmurHash
 		inline MurmurHash &append( const float *data, size_t numElements );
 		inline MurmurHash &append( const double *data, size_t numElements );
 		inline MurmurHash &append( const std::string *data, size_t numElements );
+		inline MurmurHash &append( const InternedString *data, size_t numElements );
 		inline MurmurHash &append( const Imath::V2i *data, size_t numElements );
 		inline MurmurHash &append( const Imath::V2f *data, size_t numElements );
 		inline MurmurHash &append( const Imath::V2d *data, size_t numElements );

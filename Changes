@@ -1,6 +1,7 @@
 Additions :
 
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::ModelCache files
+* Added InternedStringData and InternedStringVectorDataTypes.
 
 Improvements :
 
@@ -10,6 +11,7 @@ Improvements :
 * The RenderMan display driver is now called "ieDisplay" rather than just "ie", meaning it has the same name as the Arnold display driver, allowing scenes to described in a single manner compatible with both renderers.
 * Reworked InternedString to no longer be based on templates - the templating never got used and it just complicated the implementation.
 * The ParameterParser now parses -boolParameter flags without additional arguments as True, provided that the parameter default is False.
+* MurmurHash now supports the hashing of InternedStrings.
 
 Bug Fixes :
 

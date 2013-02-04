@@ -104,7 +104,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 
 	def testRmStress(self) :
 		"""Test MemoryIndexedIO rm (stress test)"""
-
+		
 		random.seed( 19 )
 
 		dataPresent = set()
@@ -465,6 +465,28 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		for n in range(0, 1000):
 			self.assertEqual(str(fv[n]), str(gv[n]))
+			
+	def testReadWriteStringVector(self):
+		"""Test FileIndexedIO read/write(InternedStringVector)"""
+
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
+		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
+
+		fv = InternedStringVectorData()
+
+		for n in range(0, 1000):
+			fv.append(str(n))
+
+		name = "myInternedStringVector"
+		f.write(name, fv)
+
+		gv = f.read(name)
+
+		self.failIf(fv is gv)
+		self.assertEqual(len(fv), len(gv))
+
+		for n in range(0, 1000):
+			self.assertEqual(str(fv[n]), str(gv[n]))		
 
 	def testReadWriteFloat(self):
 		"""Test FileIndexedIO read/write(Float/Double)"""
@@ -516,14 +538,18 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteSymbolicLink(self):
 		"""Test FileIndexedIO read/write(SymbolicLink)"""
 
+		# There isn't actually an explicit symbolic link capability in IndexedIO,
+		# but it's pretty straightforward to emulate it by writing paths
+		# into a file.
+
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		h = g.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
 		
-		fv = h.path()
+		fv = InternedStringVectorData( h.path() )
 
 		name = "myLink"
-		f.write(name, fv)
+		f.write( name, fv )
 
 		gv = f.read(name)
 

@@ -108,7 +108,7 @@ class IndexedIO : public RunTimeTyped
 			Int64Array,
 			UInt64,
 			UInt64Array,
-			SymbolicLink	// refers to a EntryIDList
+			InternedStringArray
 		} DataType;
 
 		/// Enum used to specify behavior when querying child directories.
@@ -275,6 +275,12 @@ class IndexedIO : public RunTimeTyped
 		/// \param arrayLength The number of elements in the array
 		virtual void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength) = 0;
 
+		/// Create a new file containing the specified InternedString array contents
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		/// \param arrayLength The number of elements in the array
+		virtual void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength) = 0;
+
 		/// Create a new file containing the specified float
 		/// \param name The name of the file to be written
 		/// \param x The data to write
@@ -334,11 +340,6 @@ class IndexedIO : public RunTimeTyped
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		virtual void write(const IndexedIO::EntryID &name, const unsigned short &x) = 0;
-
-		/// Create a new file containing the specified symbolic link (EntryIDList)
-		/// \param name The name of the file to be written
-		/// \param x The data to write
-		virtual void write(const IndexedIO::EntryID &name, const EntryIDList &x) = 0;
 
 		/// Read a float array from an existing file.
 		/// \param name The name of the file to be read
@@ -412,6 +413,12 @@ class IndexedIO : public RunTimeTyped
 		/// \param arrayLength The number of elements in the array
 		virtual void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const  = 0;
 
+		/// Read an InternedString array from an existing file
+		/// \param name The name of the file to be read
+		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
+		/// \param arrayLength The number of elements in the array
+		virtual void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const  = 0;
+
 		/// Read a float from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
@@ -471,11 +478,6 @@ class IndexedIO : public RunTimeTyped
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
 		virtual void read(const IndexedIO::EntryID &name, unsigned short &x) const  = 0;
-
-		/// Read the symbolic link as a EntryIDList from an existing file
-		/// \param name The name of the file to be read
-		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, EntryIDList &x) const  = 0;
 
 		/// A representation of a single file/directory
 		class Entry

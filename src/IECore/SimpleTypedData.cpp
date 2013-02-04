@@ -95,6 +95,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( UShortData, UShortDataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( Int64Data, Int64DataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( UInt64Data, UInt64DataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( StringData, StringDataTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( InternedStringData, InternedStringDataTypeId )
 
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V2iData, V2iDataTypeId, 2 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V3iData, V3iDataTypeId, 3 )
@@ -137,6 +138,24 @@ void StringData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
 	Data::memoryUsage( accumulator );
 	accumulator.accumulate( &readable(), readable().capacity() );
+}
+
+template<>
+void TypedData<InternedString>::save( SaveContext *context ) const
+{
+	Data::save( context );
+	IndexedIO *container = context->rawContainer();
+	container->write( g_valueEntry, readable().value() );
+}
+
+template<>
+void TypedData<InternedString>::load( LoadContextPtr context )
+{
+	Data::load( context );
+	std::string v;
+	const IndexedIO *container = context->rawContainer();
+	container->read( g_valueEntry, v );
+	writable() = v;
 }
 
 template<>
@@ -270,6 +289,7 @@ template class TypedData<unsigned short>;
 template class TypedData<int64_t>;
 template class TypedData<uint64_t>;
 template class TypedData<std::string>;
+template class TypedData<InternedString>;
 template class TypedData<half>;
 template class TypedData<Imath::V2i>;
 template class TypedData<Imath::V3i>;

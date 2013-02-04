@@ -81,7 +81,8 @@ struct InternedStringFromPython
 void bindInternedString()
 {
 
-	class_<InternedString>( "InternedString", init<const char *>() )
+	class_<InternedString>( "InternedString" )
+		.def( init<const char *>() )
 		.def( init<InternedString>() )
 		.def( "__str__", &InternedString::value, return_value_policy<copy_const_reference>() )
 		.def( "value", &InternedString::value, return_value_policy<copy_const_reference>() )

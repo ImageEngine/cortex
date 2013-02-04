@@ -192,7 +192,7 @@ bool IndexedIO::Entry::isArray( IndexedIO::DataType dType )
 		case IndexedIO::UShortArray:
 		case IndexedIO::Int64Array:
 		case IndexedIO::UInt64Array:
-		case IndexedIO::SymbolicLink:
+		case IndexedIO::InternedStringArray:
 			return true;
 		default:
 			return false;

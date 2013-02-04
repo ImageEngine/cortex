@@ -237,22 +237,11 @@ struct IndexedIOHelper
 				return object( readSingle<unsigned short>(p, name, entry) );
 			case IndexedIO::UShortArray:
 				return object( readArray<unsigned short>(p, name, entry) );
-			case IndexedIO::SymbolicLink:
-				{
-					IndexedIO::EntryIDList path;
-					p->read(name, path);
-					return IndexedIOHelper::entryIDsToList( path );
-				}
+			case IndexedIO::InternedStringArray:
+				return object( readArray<InternedString>(p, name, entry) );
 			default:
 				throw IOException(name);
 		}
-	}
-
-	static void writeSymlink(IndexedIOPtr p, const IndexedIO::EntryID &name, list l)
-	{
-		IndexedIO::EntryIDList symLink;
-		IndexedIOHelper::listToEntryIds( l, symLink );
-		p->write( name, symLink );
 	}
 
 	static std::string readString(IndexedIOPtr p, const IndexedIO::EntryID &name)
@@ -345,7 +334,7 @@ void bindIndexedIOBase()
 			.value("Int64Array", IndexedIO::Int64Array)
 			.value("UInt64", IndexedIO::UInt64)
 			.value("UInt64Array", IndexedIO::UInt64Array)
-			.value("SymbolicLink", IndexedIO::SymbolicLink)
+			.value("InternedStringArray", IndexedIO::InternedStringArray)
 			.export_values()
 		;
 	
@@ -386,11 +375,11 @@ void bindIndexedIOBase()
 		.def("write", &IndexedIOHelper::writeVector<std::vector<double> >)
 		.def("write", &IndexedIOHelper::writeVector<std::vector<int> >)
 		.def("write", &IndexedIOHelper::writeVector<std::vector<std::string> >)
+		.def("write", &IndexedIOHelper::writeVector<std::vector<InternedString> >)
 		.def("write", writeFloat)
 		.def("write", writeDouble)
 		.def("write", writeInt)
 		.def("write", writeString)
-		.def("write", &IndexedIOHelper::writeSymlink)
 #if 0
 		// We dont really want to bind these because they don't represent natural Python datatypes
 		.def("write", writeUInt)

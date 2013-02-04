@@ -104,6 +104,7 @@ class StreamIndexedIO : public IndexedIO
 		void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength);
+		void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const float &x);
 		void write(const IndexedIO::EntryID &name, const double &x);
 		void write(const IndexedIO::EntryID &name, const half &x);
@@ -116,7 +117,6 @@ class StreamIndexedIO : public IndexedIO
 		void write(const IndexedIO::EntryID &name, const unsigned char &x);
 		void write(const IndexedIO::EntryID &name, const short &x);
 		void write(const IndexedIO::EntryID &name, const unsigned short &x);
-		void write(const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &x);
 
 		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const;
@@ -130,6 +130,7 @@ class StreamIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const;
+		void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, float &x) const;
 		void read(const IndexedIO::EntryID &name, double &x) const;
 		void read(const IndexedIO::EntryID &name, half &x) const;
@@ -142,7 +143,6 @@ class StreamIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, unsigned char &x) const;
 		void read(const IndexedIO::EntryID &name, short &x) const;
 		void read(const IndexedIO::EntryID &name, unsigned short &x) const;
-		void read(const IndexedIO::EntryID &name, IndexedIO::EntryIDList &x) const;
 
 	protected:
 

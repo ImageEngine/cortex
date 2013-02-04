@@ -61,6 +61,10 @@ class InternedStringTest( unittest.TestCase ) :
 		self.assertNotEqual( s3, s4 )
 		self.assertEqual( InternedString.numUniqueStrings(), originalSize + 2 )
 
+	def testDefaultConstructor( self ) :
+	
+		self.assertEqual( InternedString(), InternedString( "" ) )
+
 if __name__ == "__main__":
 	unittest.main()
 

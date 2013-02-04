@@ -393,7 +393,7 @@ class StreamIndexedIO::Index : public RefCounted
 		Imf::Int64 nodeCount();
 
 		/// Queries the string cache
-		const StringCache &stringCache() const;
+		StringCache &stringCache();
 
 		/// Write node data to the file. Its position is automatically allocated within the file, and the node
 		/// is updated to record this offset along with its size (or it's turned into a hardlink if the data is already stored by other node).
@@ -812,7 +812,7 @@ StreamIndexedIO::Index::~Index()
 	}
 }
 
-const StreamIndexedIO::StringCache &StreamIndexedIO::Index::stringCache() const
+StreamIndexedIO::StringCache &StreamIndexedIO::Index::stringCache()
 {
 	return m_stringCache;
 }
@@ -1863,7 +1863,7 @@ ConstIndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path
 	return const_cast< StreamIndexedIO * >(this)->directory( path, missingBehaviour == IndexedIO::CreateIfMissing ? IndexedIO::ThrowIfMissing : missingBehaviour );
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &x)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength)
 {
 	writable(name);
 	remove(name, false);
@@ -1874,20 +1874,19 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const IndexedIO::Ent
 		throw IOException( "StreamIndexedIO: Could not insert node '" + name.value() + "' into index" );
 	}
 
-	unsigned long arrayLength = x.size();
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
 	const Imf::Int64 *constIds = ids;
 	unsigned long size = IndexedIO::DataSizeTraits<Imf::Int64 *>::size(constIds, arrayLength);
-	IndexedIO::DataType dataType = IndexedIO::SymbolicLink;
+	IndexedIO::DataType dataType = IndexedIO::InternedStringArray;
 
 	char *data = m_streamFile->ioBuffer(size);
 	assert(data);
 
-	const StringCache &stringCache = m_streamFile->index()->stringCache();
+	StringCache &stringCache = m_streamFile->index()->stringCache();
 
 	for ( unsigned long i = 0; i < arrayLength; i++ )
 	{
-		ids[i] = stringCache.find( x[i] );
+		ids[i] = stringCache.find( x[i], false /* create entry if missing */ );
 	}
 
 	IndexedIO::DataFlattenTraits<Imf::Int64*>::flatten(constIds, arrayLength, data);
@@ -1899,7 +1898,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const IndexedIO::Ent
 	delete [] ids;
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, IndexedIO::EntryIDList &x) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const
 {
 	assert( m_node );
 	readable(name);
@@ -1910,8 +1909,6 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, IndexedIO::EntryIDLis
 	{
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
-
-	unsigned long arrayLength = node->m_entry.arrayLength();
 
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
 	Imf::Int64 size = node->m_size;
@@ -1932,11 +1929,14 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, IndexedIO::EntryIDLis
 #endif
 
 	const StringCache &stringCache = m_streamFile->index()->stringCache();
-	x.clear();
-
+	if (!x)
+	{
+		x = new InternedString[arrayLength];
+	}
+	
 	for ( unsigned long i = 0; i < arrayLength; i++ )
 	{
-		x.push_back( stringCache.findById( ids[i] ) );
+		x[i] = stringCache.findById( ids[i] );
 	}
 	delete [] ids;
 }

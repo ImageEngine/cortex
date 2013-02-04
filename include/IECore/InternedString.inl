@@ -38,6 +38,11 @@
 namespace IECore
 {
 
+inline InternedString::InternedString()
+	:	m_value( internedString( "" ) )
+{
+}
+
 inline InternedString::InternedString( const std::string &value )
 	:	m_value( internedString( value.c_str() ) )
 {
@@ -82,10 +87,15 @@ inline const std::string &InternedString::value() const
 	return *m_value;
 }
 
-/*size_t InternedString::::size()
+inline const std::string &InternedString::string() const
 {
-	return hashSet()->size();
-};*/
+	return *m_value;
+}
+
+inline const char *InternedString::c_str() const
+{
+	return m_value->c_str();
+}
 
 } // namespace IECore
 
