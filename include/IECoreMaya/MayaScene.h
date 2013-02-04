@@ -67,11 +67,20 @@ class MayaScene : public IECore::SceneInterface
 		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MayaScene, MayaSceneTypeId, IECore::SceneInterface );
 		
+		
+		// default constructor
 		MayaScene();
 		
+		// constructor for the factory mechanism
+		MayaScene( const std::string&, IECore::IndexedIO::OpenMode );
+		
+		// constructor for a specific dag path:
 		MayaScene( const MDagPath& p );
 		
 		virtual ~MayaScene();
+		
+		static FileFormatDescription< MayaScene > s_description;
+		
 		
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
 		virtual const Name& name() const;
@@ -139,6 +148,8 @@ class MayaScene : public IECore::SceneInterface
 		/// Queries the names of any existing children of path() within
 		/// the scene.
 		virtual void childNames( NameList &childNames ) const;
+		/// Queries weather the named child exists.
+		virtual bool hasChild( const Name &name ) const;
 		/// Returns an object for the specified child location in the scene.
 		/// If the child does not exist then it will behave according to the 
 		/// missingBehavior parameter. May throw and exception, may return a NULL pointer,

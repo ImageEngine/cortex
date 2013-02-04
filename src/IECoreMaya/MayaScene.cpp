@@ -30,7 +30,17 @@
 using namespace IECore;
 using namespace IECoreMaya;
 
+
+SceneInterface::FileFormatDescription< MayaScene > MayaScene::s_description( ".ma", IndexedIO::Read );
+
 MayaScene::MayaScene() : m_isRoot( true ), m_name( "/" )
+{
+	// initialize to the root path:
+	MItDag it;
+	it.getPath( m_dagPath );
+}
+
+MayaScene::MayaScene( const std::string&, IndexedIO::OpenMode ) : m_isRoot( true ), m_name( "/" )
 {
 	// initialize to the root path:
 	MItDag it;
@@ -191,16 +201,10 @@ bool MayaScene::hasAttribute( const Name &name ) const
 
 void MayaScene::readAttributeNames( NameList &attrs ) const
 {
-	attrs.push_back( "renderer:immediate" );
 }
 
 ObjectPtr MayaScene::readAttribute( const Name &name, double time )
 {
-	if( name == "renderer:immediate" )
-	{
-		return new IECore::BoolData( true );
-	}
-	
 	return 0;
 }
 
@@ -286,6 +290,31 @@ void MayaScene::childNames( NameList &childNames ) const
 
 		childNames.push_back( Name( childName ) );
 	}
+}
+
+bool MayaScene::hasChild( const Name &name ) const
+{
+	if( m_dagPath.length() == 0 && !m_isRoot )
+	{
+		throw Exception( "MayaScene::childNames: Dag path no longer exists!" );
+	}
+	
+	unsigned currentPathLength = m_dagPath.fullPathName().length();
+
+	for( unsigned i=0; i < m_dagPath.childCount(); ++i )
+	{
+		MDagPath childPath = m_dagPath;
+		childPath.push( m_dagPath.child( i ) );
+
+		std::string childName = childPath.fullPathName().asChar();
+
+		childName = std::string( childName.begin() + currentPathLength + 1, childName.end() );
+		if( Name( childName ) == name )
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const

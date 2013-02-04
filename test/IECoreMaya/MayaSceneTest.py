@@ -38,7 +38,12 @@ import IECore
 import IECoreMaya
 
 class MayaSceneTest( IECoreMaya.TestCase ) :
-
+	
+	def testCreateMethod( self ) :
+		m = IECore.SceneInterface.create( "x.ma", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( isinstance( m, IECoreMaya.MayaScene ), True )
+		
+	
 	def testChildNames( self ) :
 		
 		sphere = maya.cmds.polySphere( name="pSphere1" )
@@ -53,6 +58,30 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( set( child.childNames() ), set( [ "pSphere2", "pSphere3", "pSphere1Shape" ] ) )
+
+	def testHasChild( self ) :
+		
+		sphere = maya.cmds.polySphere( name="pSphere1" )
+		
+		sphere2 = maya.cmds.polySphere( name="pSphere2" )
+		sphere3 = maya.cmds.polySphere( name="pSphere3" )
+		
+		maya.cmds.parent( "pSphere2", "pSphere1" )
+		maya.cmds.parent( "pSphere3", "pSphere1" )
+		
+		scene = IECoreMaya.MayaScene()
+		child = scene.child( "pSphere1" )
+		
+		self.assertEqual( scene.hasChild("pSphere1"), True )
+		self.assertEqual( scene.hasChild("pSphere1Shape"), False )
+		
+		self.assertEqual( child.hasChild("pSphere2"), True )
+		self.assertEqual( child.hasChild("pSphere3"), True )
+		self.assertEqual( child.hasChild("pSphere3Shape"), False )
+		self.assertEqual( child.hasChild("pSphere2Shape"), False )
+		
+		self.assertEqual( child.hasChild("asdfasdf"), False )
+
 	
 	def testNames( self ) :
 	
@@ -249,6 +278,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		self.assertRaises( RuntimeError, IECore.curry( child.child, "pSphereShape1" ) )
 		self.assertRaises( RuntimeError, child.childNames )
+		self.assertRaises( RuntimeError, IECore.curry( child.hasChild, "asdd" ) )
 		self.assertRaises( RuntimeError, child.name )
 		self.assertRaises( RuntimeError, child.path )
 		self.assertRaises( RuntimeError, child.hasObject )
