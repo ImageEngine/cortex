@@ -83,6 +83,32 @@ class SceneInterface : public RunTimeTyped
 		/// Utility variable that can be used anytime you want to refer to the root path in the Scene.
 		static const Path &rootPath;
 
+		/// Create an instance of a subclass which is able to open the file found at "path".
+		/// Files can be opened for Read, Write, or Append depending on the derived classes.
+		/// During "Read" operations it is not permitted to make any modifications to the underlying files.
+		/// When opening a scene file in "Write" mode its contents below the root directory are removed.
+		/// For "Append" operations (if supported) it is possible to write new files, or overwrite existing ones.
+		/// \param path A file on disk. The appropriate scene interface for reading/writing is determined by the path's extension.
+		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
+		static SceneInterfacePtr create(const std::string &path, IndexedIO::OpenMode mode);
+
+		/// Returns all the file extensions for which a SceneInterface implementation is
+		/// available for the given access mode(s). Extensions do not include the preceding dot character ('.').
+		static std::vector<std::string> supportedExtensions( IndexedIO::OpenMode modes = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append );
+
+		/// Static instantation of one of these (with a supported file extension) using a subclass as the template parameter  will register it
+		/// as a supported SceneInterface file format. This allows read and write operations to be performed generically, with the correct interface to
+		/// use being automatically determined by the system.
+		template< class T >
+		struct FileFormatDescription
+		{
+			public :
+				FileFormatDescription(const std::string &extension, IndexedIO::OpenMode modes);
+
+			private :
+				static SceneInterfacePtr creator( const std::string &fileName, IndexedIO::OpenMode mode );
+		};
+
 		virtual ~SceneInterface() = 0;
 
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
@@ -183,8 +209,16 @@ class SceneInterface : public RunTimeTyped
 		/// to traverse to other parts of the scene.
 		static void stringToPath( const std::string &path, Path &p );
 
+	protected:
+
+		typedef SceneInterfacePtr (*CreatorFn)(const std::string &, IndexedIO::OpenMode );
+		class CreatorMap;
+		static CreatorMap &fileCreators();
+		static void registerCreator( const std::string &extension, IndexedIO::OpenMode modes, CreatorFn f );
 };
 
 } // namespace IECore
+
+#include "IECore/SceneInterface.inl"
 
 #endif // IECORE_SCENEINTERFACE_H

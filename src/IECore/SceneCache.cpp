@@ -51,10 +51,12 @@ IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( SceneCache )
 // Implementation
 //////////////////////////////////////////////////////////////////////////
 
-// Register FileIndexedIO as the handler for .mdc files so that people
+// Register FileIndexedIO as the handler for .scc files so that people
 // can use the filename constructor as a convenience over the IndexedIO
 // constructor.
 static IndexedIO::Description<FileIndexedIO> extensionDescription( ".scc" );
+// Register the .scc extension in the factory function for SceneCache on Read and Write modes
+static SceneInterface::FileFormatDescription<SceneCache> registrar(".scc", IndexedIO::Read | IndexedIO::Write);
 
 static InternedString headerEntry("header");
 static InternedString rootEntry("root");
@@ -823,13 +825,12 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		SceneCache::ImplementationPtr createChild( const SceneCache::Name &name )
 		{
-			// \todo use createSubdirectory method from IndexedIO when it's available.
 			IndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, IndexedIO::CreateIfMissing );
 			if ( children->hasEntry( name ) )
 			{
 				throw Exception( "Child already exists!" );
 			}
-			IndexedIOPtr childIO = children->subdirectory( name, IndexedIO::CreateIfMissing );
+			IndexedIOPtr childIO = children->createSubdirectory( name );
 			WriterImplementationPtr result = new WriterImplementation( childIO, this );
 			this->m_children[ name ] = result;
 			return result;

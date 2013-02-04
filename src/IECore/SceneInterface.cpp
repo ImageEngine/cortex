@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/filesystem/convenience.hpp"
 #include "boost/tokenizer.hpp"
 #include "IECore/SceneInterface.h"
 
@@ -41,6 +42,77 @@ IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( SceneInterface )
 
 const SceneInterface::Name &SceneInterface::rootName = IndexedIO::rootName;
 const SceneInterface::Path &SceneInterface::rootPath = IndexedIO::rootPath;
+
+class SceneInterface::CreatorMap : public std::map< std::pair< std::string, IndexedIO::OpenModeFlags >, CreatorFn>
+{
+};
+
+SceneInterface::CreatorMap &SceneInterface::fileCreators() 
+{
+	static CreatorMap *g_createFns = new CreatorMap(); 
+	return *g_createFns;
+}
+
+void SceneInterface::registerCreator( const std::string &extension, IndexedIO::OpenMode modes, CreatorFn f )
+{
+	CreatorMap &createFns = fileCreators();
+
+	if ( modes & IndexedIO::Read )
+	{
+		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, IndexedIO::Read );
+		assert( createFns.find(key) == createFns.end() );
+		createFns.insert( CreatorMap::value_type(key, f) );
+	}
+	if ( modes & IndexedIO::Write )
+	{
+		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, IndexedIO::Write );
+		assert( createFns.find(key) == createFns.end() );
+		createFns.insert( CreatorMap::value_type(key, f) );
+	}
+	if ( modes & IndexedIO::Append )
+	{
+		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, IndexedIO::Append );
+		assert( createFns.find(key) == createFns.end() );
+		createFns.insert( CreatorMap::value_type(key, f) );
+	}
+}
+
+std::vector<std::string> SceneInterface::supportedExtensions( IndexedIO::OpenMode modes )
+{
+	std::vector<std::string> extensions;
+	CreatorMap &m = fileCreators();
+	for( CreatorMap::const_iterator it=m.begin(); it!=m.end(); it++ )
+	{
+		if ( it->first.second & modes )
+		{
+			std::string ext = it->first.first.substr( 1 );
+			if ( std::find(extensions.begin(), extensions.end(), ext) == extensions.end() )
+			{
+				extensions.push_back( ext );
+			}
+		}
+	}
+	return extensions;
+}
+
+SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::OpenMode mode )
+{
+	SceneInterfacePtr result = 0;
+
+	std::string extension = boost::filesystem::extension(path);
+	IndexedIO::OpenModeFlags openMode = IndexedIO::OpenModeFlags( mode & (IndexedIO::Read|IndexedIO::Write|IndexedIO::Append) );
+	std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, openMode );
+
+	const CreatorMap &createFns = fileCreators();
+
+	CreatorMap::const_iterator it = createFns.find(key);
+	if (it == createFns.end())
+	{
+		throw IOException(path);
+	}
+
+	return (it->second)(path, mode);
+}
 
 SceneInterface::~SceneInterface()
 {

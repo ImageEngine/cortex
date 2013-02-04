@@ -109,6 +109,17 @@ static list stringToPath( std::string str )
 	return arrayToList( p );
 }
 
+static list supportedExtensions( IndexedIO::OpenMode modes )
+{
+	std::vector<std::string> e = SceneInterface::supportedExtensions( modes );
+	list result;
+	for( unsigned int i=0; i<e.size(); i++ )
+	{
+		result.append( e[i] );
+	}
+	return result;
+}
+
 void bindSceneInterface()
 {
 	SceneInterfacePtr (SceneInterface::*nonConstChild)(const SceneInterface::Name &, SceneInterface::MissingBehaviour) = &SceneInterface::child;
@@ -154,10 +165,10 @@ void bindSceneInterface()
 		.def( "createChild", &SceneInterface::createChild )
 		.def( "scene", nonConstScene, ( arg( "path" ), arg( "missingBehaviour" ) = SceneInterface::ThrowIfMissing ) )
 
-		.def( "pathToString", pathToString )
-		.staticmethod("pathToString")
-		.def( "stringToPath", stringToPath )
-		.staticmethod("stringToPath")
+		.def( "pathToString", pathToString ).staticmethod("pathToString")
+		.def( "stringToPath", stringToPath ).staticmethod("stringToPath")
+		.def( "create", SceneInterface::create ).staticmethod( "create" )
+		.def( "supportedExtensions", supportedExtensions, ( arg("modes") = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append ) ).staticmethod( "supportedExtensions" )
 	;
 }
 

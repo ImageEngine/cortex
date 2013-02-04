@@ -38,64 +38,16 @@
 namespace IECore
 {
 
-template< typename T > typename T::Ptr SceneInterface::parent()
+template<class T>
+SceneInterface::FileFormatDescription<T>::FileFormatDescription(const std::string &extension, IndexedIO::OpenMode modes)
 {
-	return dynamicPointerCast< T >( parentImpl() );
-}
+	registerCreator(extension, modes, &FileFormatDescription<T>::creator);
+};
 
-template< typename T > typename T::ConstPtr SceneInterface::parent() const
+template<class T>
+SceneInterfacePtr SceneInterface::FileFormatDescription<T>::creator( const std::string &fileName, IndexedIO::OpenMode mode )
 {
-	return dynamicPointerCast< T >( parentImpl() );
-}
-
-template< typename T > typename T::Ptr SceneInterface::child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour )
-{
-	return dynamicPointerCast< T >( childImpl( name, missingBehavior ) );
-}
-
-template< typename T > typename T::ConstPtr SceneInterface::child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const
-{
-	return dynamicPointerCast< T >( childImpl( name, missingBehavior ) );
-}
-
-template< typename T > typename T::Ptr SceneInterface::createChild( const Name &name )
-{
-	return dynamicPointerCast< T >( createChildImpl( name, missingBehavior ) );
-}
-
-template< typename T > typename T::ConstPtr SceneInterface::scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour ) const
-{
-	return dynamicPointerCast< T >( sceneImpl( name, missingBehavior ) );
-}
-
-template<> SceneInterfacePtr SceneInterface::parent()
-{
-	return parentImpl();
-}
-
-template<> ConstSceneInterfacePtr SceneInterface::parent() const
-{
-	return parentImpl();
-}
-
-template<> SceneInterfacePtr SceneInterface::child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour )
-{
-	return childImpl( name, missingBehavior );
-}
-
-template<> ConstSceneInterfacePtr SceneInterface::child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const
-{
-	return childImpl( name, missingBehavior );
-}
-
-template<> SceneInterfacePtr SceneInterface::createChild( const Name &name )
-{
-	return createChildImpl( name, missingBehavior );
-}
-
-template<> ConstSceneInterfacePtr SceneInterface::scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour ) const
-{
-	return sceneImpl( name, missingBehavior );
+	return new T( fileName, mode );
 }
 
 } // namespace IECore

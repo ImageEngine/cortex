@@ -40,6 +40,24 @@ import IECore
 
 class SceneCacheTest( unittest.TestCase ) :
 
+	def testSupportedExtension( self ) :
+		self.assertTrue( "scc" in IECore.SceneInterface.supportedExtensions() )
+		self.assertTrue( "scc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Read ) )
+		self.assertTrue( "scc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Write ) )
+		self.assertTrue( "scc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Write + IECore.IndexedIO.OpenMode.Read ) )
+		self.assertFalse( "scc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Append ) )
+
+	def testFactoryFunction( self ) :
+		# test Write factory function 
+		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		self.assertTrue( isinstance( m, IECore.SceneCache ) )
+		self.assertRaises( RuntimeError, m.readBound, 0.0 )
+		del m
+		# test Read factory function
+		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertTrue( isinstance( m, IECore.SceneCache ) )
+		m.readBound( 0.0 )
+
 	def testAppendRaises( self ) :
 		self.assertRaises( RuntimeError, IECore.SceneCache, "/tmp/test.scc", IECore.IndexedIO.OpenMode.Append )
 
