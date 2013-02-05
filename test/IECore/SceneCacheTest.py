@@ -243,6 +243,21 @@ class SceneCacheTest( unittest.TestCase ) :
 		b = a.child( "b" )
 		self.assertEqual( b.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
 
+	def testWritingOnFlushedFiles( self ) :
+
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		a = m.createChild( "a" )
+		b = a.createChild( "b" )
+		b.writeObject( IECore.SpherePrimitive( 100 ), 0.0 )
+		# removes root scene handle, which flushes samples to disk and computes bounding box.
+		del m
+		# after this, no modification on children should be allowed.
+		self.assertRaises( RuntimeError, b.writeObject, IECore.SpherePrimitive( 100 ), 0.0 )
+		self.assertRaises( RuntimeError, b.writeAttribute, "test", IECore.IntData( 100 ), 0.0 )
+		self.assertRaises( RuntimeError, b.writeBound, IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
+		self.assertRaises( RuntimeError, b.createChild, "c" )
+		self.assertRaises( RuntimeError, b.child, "c", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+
 if __name__ == "__main__":
 	unittest.main()
 

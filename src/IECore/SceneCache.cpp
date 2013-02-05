@@ -664,10 +664,6 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		virtual ~WriterImplementation()
 		{
-				std::string pathString;
-				IndexedIO::EntryIDList p;
-				m_indexedIO->path(p);
-				SceneInterface::pathToString( p, pathString );
 			// the root location destruction triggers the flush on the file.
 			if ( !m_parent )
 			{
@@ -700,6 +696,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		void writeBound( const Imath::Box3d &bound, double time )
 		{
+			writable();
+
 			if ( m_boundSampleTimes.size() )
 			{
 				if ( *(m_boundSampleTimes.rbegin()) >= time )
@@ -716,6 +714,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		void writeTransform( const Data *transform, double time )
 		{
+			writable();
+
 			if ( !m_parent )
 			{
 				throw Exception( "Call to writeTransform at the root scene is not allowed!" );
@@ -744,6 +744,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		void writeAttribute( const SceneCache::Name &name, const Object *attribute, double time )
 		{
+			writable();
+
 			std::pair< AttributeSamplesMap::iterator, bool > it = m_attributeSampleTimes.insert( std::pair< SceneCache::Name, SampleTimes >( name, SampleTimes() ) );
 			SampleTimes &sampleTimes = it.first->second;
 			if ( !it.second )
@@ -762,6 +764,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		void writeObject( const Object *object, double time )
 		{
+			writable();
+
 			if ( !m_parent )
 			{
 				throw Exception( "Call to writeObject at the root scene is not allowed!" );
@@ -802,6 +806,11 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		WriterImplementationPtr child( const Name &name, MissingBehaviour missingBehaviour )
 		{
+			if ( missingBehaviour == SceneInterface::CreateIfMissing )
+			{
+				writable();
+			}
+
 			std::map< SceneCache::Name, WriterImplementationPtr >::const_iterator it = m_children.find( name );
 			if ( it != m_children.end() )
 			{
@@ -825,6 +834,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		SceneCache::ImplementationPtr createChild( const SceneCache::Name &name )
 		{
+			writable();
 			IndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, IndexedIO::CreateIfMissing );
 			if ( children->hasEntry( name ) )
 			{
@@ -859,10 +869,19 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			return m_indexedIO->parentDirectory()->subdirectory( sampleTimesEntry );
 		}
 
+		void writable() const
+		{
+			if ( !m_sampleTimesMap )
+			{
+				throw Exception( "This scene has already been flushed to disk. You can't make further changes to it." );
+			}
+		}
+
 		// Function to store intelligently the given sample times in the file location.
 		// It actually saves the index there, and stores the unique sample times in a global shared location.
 		void storeSampleTimes( const SampleTimes &sampleTimes, IndexedIOPtr location )
 		{
+			assert( m_sampleTimesMap );
 			uint64_t sampleTimesIndex = 0;
 			std::pair< SampleTimesMap::iterator, bool > it = m_sampleTimesMap->insert( std::pair< SampleTimes, uint64_t >( sampleTimes, 0 ) );
 			if ( it.second )
@@ -1019,6 +1038,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		// Called from the destructor of the root location. 
 		// It triggers flush recursivelly on all the child locations.
+		// It also sets m_sampleTimesMap to NULL which prevents further modification on this and all child scene interface objects through their call to writable().
 		// Responsible for writing missing data such as all the sample 
 		// times from object,transform,attributes and bounds. And also computes the 
 		// animated bounding boxes in case they were not explicitly writen.
@@ -1241,6 +1261,13 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 			// deallocate children since we now computed everything from them anyways...
 			m_children.clear();
+
+			if ( !m_parent && m_sampleTimesMap )
+			{
+				// deallocate samples map stored in the root object.
+				delete m_sampleTimesMap;
+			}
+			m_sampleTimesMap = 0;
 		}
 
 		typedef std::map< SampleTimes, uint64_t > SampleTimesMap;
