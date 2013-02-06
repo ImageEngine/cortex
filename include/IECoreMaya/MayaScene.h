@@ -35,6 +35,8 @@
 #ifndef IECOREMAYA_MAYASCENE_H
 #define IECOREMAYA_MAYASCENE_H
 
+#include "tbb/mutex.h"
+
 #include "IECore/SceneInterface.h"
 #include "IECoreMaya/TypeIds.h"
 
@@ -73,9 +75,6 @@ class MayaScene : public IECore::SceneInterface
 		
 		// constructor for the factory mechanism
 		MayaScene( const std::string&, IECore::IndexedIO::OpenMode );
-		
-		// constructor for a specific dag path:
-		MayaScene( const MDagPath& p );
 		
 		virtual ~MayaScene();
 		
@@ -173,6 +172,9 @@ class MayaScene : public IECore::SceneInterface
 
 	private :
 		
+		// constructor for a specific dag path:
+		MayaScene( const MDagPath& p );
+		
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveParent() const;
@@ -180,7 +182,9 @@ class MayaScene : public IECore::SceneInterface
 		MDagPath m_dagPath;
 		bool m_isRoot;
 		
-		SceneInterface::Name m_name;
+		typedef tbb::mutex Mutex;
+		static Mutex s_mutex;
+		
 };
 
 } // namespace IECoreMaya

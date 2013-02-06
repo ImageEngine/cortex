@@ -412,7 +412,20 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( transformChild.readBound( 0.5 ), IECore.Box3d( IECore.V3d( -1.0, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
 		self.assertEqual( transformChild.readBound( 1.0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
 		
+	def testCameraTransform( self ) :
 		
-
+		# camera must be output with an identity transform, because of the hierarchical
+		# nature of this class...
+		
+		scene = IECoreMaya.MayaScene()
+		cameraTransform = scene.child( "persp" )
+		camera = cameraTransform.child( "perspShape" ).readObject( 0 )
+		
+		# sanity check: camera transform is not identity?
+		self.assertNotEqual( cameraTransform.readTransformAsMatrix( 0 ), IECore.M44f() )
+		
+		# this transform must be identity...
+		self.assertEqual( camera.getTransform().transform(), IECore.M44f() )
+		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

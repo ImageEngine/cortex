@@ -6,6 +6,7 @@
 #include "IECoreMaya/MayaScene.h"
 #include "IECoreMaya/FromMayaTransformConverter.h"
 #include "IECoreMaya/FromMayaMeshConverter.h"
+#include "IECoreMaya/FromMayaCameraConverter.h"
 #include "IECoreMaya/Convert.h"
 
 #include "maya/MFnDagNode.h"
@@ -30,31 +31,34 @@
 using namespace IECore;
 using namespace IECoreMaya;
 
-
+// this stuff requires a mutex, as all them maya DG functions aint thread safe!
+MayaScene::Mutex MayaScene::s_mutex;
 SceneInterface::FileFormatDescription< MayaScene > MayaScene::s_description( ".ma", IndexedIO::Read );
 
-MayaScene::MayaScene() : m_isRoot( true ), m_name( "/" )
+MayaScene::MayaScene() : m_isRoot( true )
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	// initialize to the root path:
 	MItDag it;
 	it.getPath( m_dagPath );
 }
 
-MayaScene::MayaScene( const std::string&, IndexedIO::OpenMode ) : m_isRoot( true ), m_name( "/" )
+MayaScene::MayaScene( const std::string&, IndexedIO::OpenMode ) : m_isRoot( true )
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	// initialize to the root path:
 	MItDag it;
 	it.getPath( m_dagPath );
 }
 
-MayaScene::MayaScene( const MDagPath& p ) : m_isRoot( false ), m_name( "" )
+
+MayaScene::MayaScene( const MDagPath& p ) : m_isRoot( false )
 {
+	// this constructor is expected to be called when s_mutex is locked!
+	tbb::mutex::scoped_lock l( s_mutex );
 	m_dagPath = p;
-	
-	std::string nameStr = m_dagPath.fullPathName().asChar();
-	boost::replace_all( nameStr, "|", "/" );
-	
-	m_name = nameStr;
 }
 
 MayaScene::~MayaScene()
@@ -63,18 +67,34 @@ MayaScene::~MayaScene()
 
 const SceneInterface::Name& MayaScene::name() const
 {
-	return m_name;
+	tbb::mutex::scoped_lock l( s_mutex );
+	std::string nameStr = m_dagPath.fullPathName().asChar();
+	
+	if( nameStr.size() == 1 )
+	{
+		return SceneInterface::rootName;
+	}
+	
+	size_t pipePos = nameStr.rfind("|");
+	if( pipePos != std::string::npos )
+	{
+		return std::string( nameStr.begin() + pipePos + 1, nameStr.end() );
+	}
+	
+	return nameStr;
 }
 
 void MayaScene::path( Path &p ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "MayaScene::path: Dag path no longer exists!" );
 	}
 	
-	std::string pathStr( name() );
-	boost::tokenizer<boost::char_separator<char> > t( pathStr, boost::char_separator<char>( "/" ) );
+	std::string pathStr( m_dagPath.fullPathName().asChar() );
+	boost::tokenizer<boost::char_separator<char> > t( pathStr, boost::char_separator<char>( "|" ) );
 	
 	p.clear();
 	
@@ -91,6 +111,8 @@ void MayaScene::path( Path &p ) const
 
 Imath::Box3d MayaScene::readBound( double time ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_isRoot )
 	{
 		return Imath::Box3d( Imath::V3d( -10000000, -10000000, -10000000 ), Imath::V3d( 10000000, 10000000, 10000000 ) );
@@ -143,6 +165,9 @@ Imath::Box3d MayaScene::readBound( double time ) const
 		
 		Imath::Box3d ret( Imath::V3d( minX, minY, minZ ), Imath::V3d( maxX, maxY, maxZ ) );
 		
+		// release the lock, so we don't freeze up when we call readTransformAsMatrix!
+		l.release();
+		
 		Imath::M44d invTransform = readTransformAsMatrix( time ).inverse();
 		
 		return Imath::transform( ret, invTransform );
@@ -155,6 +180,8 @@ void MayaScene::writeBound( const Imath::Box3d &bound, double time )
 
 DataPtr MayaScene::readTransform( double time ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "MayaScene::readTransform: Dag path no longer exists!" );
@@ -214,6 +241,8 @@ void MayaScene::writeAttribute( const Name &name, const Object *attribute, doubl
 
 bool MayaScene::hasObject() const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_isRoot )
 	{
 		return false;
@@ -228,6 +257,8 @@ bool MayaScene::hasObject() const
 
 ObjectPtr MayaScene::readObject( double time ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "MayaScene::readObject: Dag path no longer exists!" );
@@ -252,15 +283,10 @@ ObjectPtr MayaScene::readObject( double time ) const
 	}
 	else if( m_dagPath.hasFn( MFn::kCamera ) )
 	{
-		MFnCamera camFn( m_dagPath );
-		IECore::Camera::Ptr result = new IECore::Camera("asss", new IECore::MatrixTransform );
-		//result->parameters()["resolution"] = new IECore::V2iData( resolutionPlug()->getValue() );
-		result->parameters()["projection"] = new IECore::StringData( camFn.isOrtho() ? "orthographic" : "perspective" );
-		//result->parameters()["projection:fov"] = new IECore::FloatData( fieldOfViewPlug()->getValue() );
-		result->parameters()["clippingPlanes"] = new IECore::V2fData( Imath::V2f( camFn.nearClippingPlane(), camFn.farClippingPlane() ) );
-		result->addStandardParameters();
-		
-		return result;
+		FromMayaCameraConverter converter( m_dagPath );
+		CameraPtr cam = runTimeCast< Camera >( converter.convert() );
+		cam->setTransform( new MatrixTransform( Imath::M44f() ) );
+		return cam;
 	}
 	
 	return 0;
@@ -272,6 +298,8 @@ void MayaScene::writeObject( const Object *object, double time )
 
 void MayaScene::childNames( NameList &childNames ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "MayaScene::childNames: Dag path no longer exists!" );
@@ -283,17 +311,31 @@ void MayaScene::childNames( NameList &childNames ) const
 	{
 		MDagPath childPath = m_dagPath;
 		childPath.push( m_dagPath.child( i ) );
-
+		
+		// bizarrely, this iterates through things like the translate manipulator and
+		// the view cube too, so lets skip them so they don't show up:
+		if( childPath.node().hasFn( MFn::kManipulator3D ) )
+		{
+			continue;
+		}
+		
 		std::string childName = childPath.fullPathName().asChar();
-
+		
+		// looks like it also gives us the ground plane, so again, lets skip that:
+		if( childName == "|groundPlane_transform" )
+		{
+			continue;
+		}
+		
 		childName = std::string( childName.begin() + currentPathLength + 1, childName.end() );
-
 		childNames.push_back( Name( childName ) );
 	}
 }
 
 bool MayaScene::hasChild( const Name &name ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "MayaScene::childNames: Dag path no longer exists!" );
@@ -319,6 +361,8 @@ bool MayaScene::hasChild( const Name &name ) const
 
 IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "MayaScene::retrieveChild: Dag path no longer exists!" );
@@ -337,6 +381,7 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 		
 		if( name == childName )
 		{
+			l.release();
 			return new MayaScene( childPath );
 		}
 	}
@@ -366,8 +411,11 @@ SceneInterfacePtr MayaScene::createChild( const Name &name )
 
 SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
+	tbb::mutex::scoped_lock l( s_mutex );
+	
 	if( path.size() == 0 )
 	{
+		l.release();
 		return new MayaScene;
 	}
 	
@@ -393,6 +441,7 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	MDagPath dagPath;
 	sel.getDagPath( 0, dagPath );
 	
+	l.release();
 	return new MayaScene( dagPath );
 	
 }
