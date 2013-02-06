@@ -1237,7 +1237,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					}
 				}
 
-				if ( m_objectSampleTimes.size() )
+				if ( m_objectSampleTimes.size() && m_objectSamples.size() )
 				{
 					// union all the bounding box samples from the child and also from the optional object stored in this location
 					accumulateBoxSamples( m_objectSampleTimes, m_objectSamples );
