@@ -48,6 +48,7 @@
 #include "IECoreGL/NameStateComponent.h"
 #include "IECoreGL/FrameBuffer.h"
 #include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/Primitive.h"
 
 using namespace IECoreGL;
 
@@ -264,10 +265,18 @@ class Selector::Implementation : public IECore::RefCounted
 			return s.get();
 		}
 
-		static ShaderStateComponent *idShaderStateComponent()
+		static std::vector<StateComponentPtr> &idStateComponents()
 		{
-			static ShaderStateComponentPtr s = new ShaderStateComponent( new Shader::Setup( idShader() ) );
-			return s.get();
+			static std::vector<StateComponentPtr> s;
+			if( !s.size() )
+			{
+				s.push_back( new ShaderStateComponent( new Shader::Setup( idShader() ) ) );
+				s.push_back( new Primitive::DrawBound( false ) );
+				s.push_back( new Primitive::DrawWireframe( false ) );
+				s.push_back( new Primitive::DrawOutline( false ) );
+				s.push_back( new Primitive::DrawPoints( false ) );
+			}
+			return s;
 		}
 
 		void beginIDRender()
@@ -285,7 +294,12 @@ class Selector::Implementation : public IECore::RefCounted
 			glClearDepth( 1.0 );
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 			
-			m_baseState->add( idShaderStateComponent(), true /* override */ );
+			const std::vector<StateComponentPtr> &stateComponents = idStateComponents();
+			for( std::vector<StateComponentPtr>::const_iterator it = stateComponents.begin(), eIt = stateComponents.end(); it != eIt; it++ )
+			{
+				m_baseState->add( *it, true /* override */ );
+			}
+			
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
 			loadIDShader( idShader() );	
 		}
@@ -334,7 +348,12 @@ class Selector::Implementation : public IECore::RefCounted
 				hits.push_back( it->second );
 			}
 
-			m_baseState->add( const_cast<ShaderStateComponent *>( State::defaultState()->get<ShaderStateComponent>() ), false /* no override */ );
+			const std::vector<StateComponentPtr> &stateComponents = idStateComponents();
+			for( std::vector<StateComponentPtr>::const_iterator it = stateComponents.begin(), eIt = stateComponents.end(); it != eIt; it++ )
+			{
+				m_baseState->add( const_cast<StateComponent *>( State::defaultState()->get( (*it)->typeId() ) ), false /* no override */ );
+			}
+
 			return hits.size();
 		}
 

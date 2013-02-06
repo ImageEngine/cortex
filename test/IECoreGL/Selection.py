@@ -220,5 +220,46 @@ class TestSelection( unittest.TestCase ) :
 		self.assertEqual( len( ss ), 2 )
 		self.assertEqual( set( [ x.name.value() for x in ss ] ), set( ( "frontRight", "backRight" ) ) )
 	
+	def testIDSelectWithAdditionalDisplayStyles( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+			
+		with IECore.WorldBlock( r ) :
+
+			r.setAttribute( "gl:primitive:wireframe", IECore.BoolData( True ) )
+			r.setAttribute( "gl:primitive:bound", IECore.BoolData( True ) )
+			r.setAttribute( "gl:primitive:outline", IECore.BoolData( True ) )
+			r.setAttribute( "gl:primitive:points", IECore.BoolData( True ) )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.setAttribute( "name", IECore.StringData( "backRight" ) )
+			r.geometry( "sphere", {}, {} )
+			
+		s = r.scene()
+		s.setCamera( IECoreGL.OrthographicCamera() )
+
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
+		self.assertEqual( len( ss ), 1 )
+		self.assertEqual( ss[0].name.value(), "frontLeft" )
+
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
+		self.assertEqual( len( ss ), 1 )
+		self.assertEqual( ss[0].name.value(), "frontRight" )
+		
 if __name__ == "__main__":
     unittest.main()
