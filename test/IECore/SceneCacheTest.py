@@ -242,7 +242,22 @@ class SceneCacheTest( unittest.TestCase ) :
 		
 		b = a.child( "b" )
 		self.assertEqual( b.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
-
+	
+	def testWriteMultiObjects( self ) :
+		
+		sc = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		
+		t = sc.createChild( "transform" )
+		t.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ), 0.0 )
+		
+		s = t.createChild( "shape" )
+		s.writeObject( IECore.SpherePrimitive( 10 ), 0.0 )
+		
+		c = t.createChild( "camera" )
+		
+		# looks like an early version crashes here:
+		c.writeObject( IECore.Camera(), 0.0 )
+	
 	def testWritingOnFlushedFiles( self ) :
 
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
