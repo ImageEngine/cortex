@@ -32,26 +32,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_SOPMODELCACHESOURCE_H
-#define IECOREHOUDINI_SOPMODELCACHESOURCE_H
+#ifndef IECOREHOUDINI_SOPSCENECACHESOURCE_H
+#define IECOREHOUDINI_SOPSCENECACHESOURCE_H
 
 #include "SOP/SOP_Node.h"
 
-#include "IECore/ModelCache.h"
+#include "IECore/SceneCache.h"
 #include "IECore/MatrixTransform.h"
 
-#include "IECoreHoudini/ModelCacheNode.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 namespace IECoreHoudini
 {
 
-/// SOP for loading an IECore::ModelCache from disk
-class SOP_ModelCacheSource : public ModelCacheNode<SOP_Node>
+/// SOP for loading an IECore::SceneCache from disk
+class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 {
 	public :
 
-		SOP_ModelCacheSource( OP_Network *net, const char *name, OP_Operator *op );
-		virtual ~SOP_ModelCacheSource();
+		SOP_SceneCacheSource( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~SOP_SceneCacheSource();
 		
 		static const char *typeName;
 		
@@ -76,11 +76,11 @@ class SOP_ModelCacheSource : public ModelCacheNode<SOP_Node>
 	
 	private :
 		
-		void loadObjects( const IECore::ModelCache *cache, Imath::M44d transform, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter );
+		void loadObjects( const IECore::SceneCache *cache, Imath::M44d transform, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
 
 };
 
 } // namespace IECoreHoudini
 
-#endif // IECOREHOUDINI_SOPMODELCACHESOURCE_H
+#endif // IECOREHOUDINI_SOPSCENECACHESOURCE_H

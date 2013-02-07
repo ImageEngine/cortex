@@ -33,14 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef IECOREHOUDINI_MODELCACHENODEBINDING_H
-#define IECOREHOUDINI_MODELCACHENODEBINDING_H
+#define IECOREHOUDINI_SCENECACHENODEBINDING_H
 
 namespace IECoreHoudini
 {
 
-void bindModelCacheNode();
+void bindSceneCacheNode();
 
 }
 
-#endif // IECOREHOUDINI_MODELCACHENODEBINDING_H
+#endif // IECOREHOUDINI_SCENECACHENODEBINDING_H
 

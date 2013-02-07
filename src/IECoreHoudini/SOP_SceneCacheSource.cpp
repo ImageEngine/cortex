@@ -41,34 +41,34 @@
 #include "IECore/TransformOp.h"
 #include "IECore/VisibleRenderable.h"
 
-#include "IECoreHoudini/SOP_ModelCacheSource.h"
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
-const char *SOP_ModelCacheSource::typeName = "ieModelCacheSource";
+const char *SOP_SceneCacheSource::typeName = "ieSceneCacheSource";
 
-PRM_Name SOP_ModelCacheSource::pShapeFilter( "shapeFilter", "Shape Filter" );
-PRM_Name SOP_ModelCacheSource::pAttributeFilter( "attributeFilter", "Attribute Filter" );
+PRM_Name SOP_SceneCacheSource::pShapeFilter( "shapeFilter", "Shape Filter" );
+PRM_Name SOP_SceneCacheSource::pAttributeFilter( "attributeFilter", "Attribute Filter" );
 
-PRM_Default SOP_ModelCacheSource::shapeFilterDefault( 0, "*" );
-PRM_Default SOP_ModelCacheSource::attributeFilterDefault( 0, "*" );
+PRM_Default SOP_SceneCacheSource::shapeFilterDefault( 0, "*" );
+PRM_Default SOP_SceneCacheSource::attributeFilterDefault( 0, "*" );
 
-PRM_ChoiceList SOP_ModelCacheSource::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SOP_ModelCacheSource::buildShapeFilterMenu );
+PRM_ChoiceList SOP_SceneCacheSource::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SOP_SceneCacheSource::buildShapeFilterMenu );
 
-OP_TemplatePair *SOP_ModelCacheSource::buildParameters()
+OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 {
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		unsigned numMDCParms = PRM_Template::countTemplates( ModelCacheNode<SOP_Node>::parameters );
+		unsigned numMDCParms = PRM_Template::countTemplates( SceneCacheNode<SOP_Node>::parameters );
 		thisTemplate = new PRM_Template[ numMDCParms + 3 ];
 		
 		// add the file parms
 		for ( unsigned i = 0; i < 3; ++i )
 		{
-			thisTemplate[i] = ModelCacheNode<SOP_Node>::parameters[i];
+			thisTemplate[i] = SceneCacheNode<SOP_Node>::parameters[i];
 		}
 		
 		// then the filters
@@ -85,7 +85,7 @@ OP_TemplatePair *SOP_ModelCacheSource::buildParameters()
 		// then the rest
 		for ( unsigned i = 3; i < numMDCParms; ++i )
 		{
-			thisTemplate[2+i] = ModelCacheNode<SOP_Node>::parameters[i];
+			thisTemplate[2+i] = SceneCacheNode<SOP_Node>::parameters[i];
 		}
 	}
 	
@@ -98,22 +98,22 @@ OP_TemplatePair *SOP_ModelCacheSource::buildParameters()
 	return templatePair;
 }
 
-SOP_ModelCacheSource::SOP_ModelCacheSource( OP_Network *net, const char *name, OP_Operator *op ) : ModelCacheNode<SOP_Node>( net, name, op )
+SOP_SceneCacheSource::SOP_SceneCacheSource( OP_Network *net, const char *name, OP_Operator *op ) : SceneCacheNode<SOP_Node>( net, name, op )
 {
 }
 
-SOP_ModelCacheSource::~SOP_ModelCacheSource()
+SOP_SceneCacheSource::~SOP_SceneCacheSource()
 {
 }
 
-OP_Node *SOP_ModelCacheSource::create( OP_Network *net, const char *name, OP_Operator *op )
+OP_Node *SOP_SceneCacheSource::create( OP_Network *net, const char *name, OP_Operator *op )
 {
-	return new SOP_ModelCacheSource( net, name, op );
+	return new SOP_SceneCacheSource( net, name, op );
 }
 
-void SOP_ModelCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
+void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
 {
-	SOP_ModelCacheSource *node = reinterpret_cast<SOP_ModelCacheSource*>( data );
+	SOP_SceneCacheSource *node = reinterpret_cast<SOP_SceneCacheSource*>( data );
 	if ( !node )
 	{
 		return;
@@ -133,12 +133,12 @@ void SOP_ModelCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int
 	std::string path = node->getPath();
 	
 	std::vector<std::string> objects;
-	ModelCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
-	node->objectNames( entry->modelCache(), objects );
+	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
+	node->objectNames( entry->sceneCache(), objects );
 	node->createMenu( menu, objects );
 }
 
-OP_ERROR SOP_ModelCacheSource::cookMySop( OP_Context &context )
+OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 {
 	gdp->stashAll();
 	
@@ -169,14 +169,14 @@ OP_ERROR SOP_ModelCacheSource::cookMySop( OP_Context &context )
 	Space space = getSpace();
 	Imath::M44d transform = ( space == World ) ? cache().worldTransform( file, path ) : Imath::M44d();
 	
-	ModelCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
-	loadObjects( entry->modelCache(), transform, space, shapeFilter, attributeFilter );
+	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
+	loadObjects( entry->sceneCache(), transform, space, shapeFilter, attributeFilter );
 	
 	gdp->destroyStashed();
 	return error();
 }
 
-void SOP_ModelCacheSource::loadObjects( const IECore::ModelCache *cache, Imath::M44d transform, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter )
+void SOP_SceneCacheSource::loadObjects( const IECore::SceneCache *cache, Imath::M44d transform, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter )
 {
 	if ( cache->hasObject() && UT_String( cache->name() ).multiMatch( shapeFilter ) )
 	{
@@ -217,12 +217,12 @@ void SOP_ModelCacheSource::loadObjects( const IECore::ModelCache *cache, Imath::
 	cache->childNames( children );
 	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		ConstModelCachePtr child = cache->readableChild( *it );
+		ConstSceneCachePtr child = cache->readableChild( *it );
 		loadObjects( child, child->readTransform() * transform, space, shapeFilter, attributeFilter );
 	}
 }
 
-IECore::ObjectPtr SOP_ModelCacheSource::modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter )
+IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( !renderable )
@@ -255,7 +255,7 @@ IECore::ObjectPtr SOP_ModelCacheSource::modifyObject( IECore::Object *object, st
 	return object;
 };
 
-IECore::ObjectPtr SOP_ModelCacheSource::transformObject( IECore::Object *object, Imath::M44d transform )
+IECore::ObjectPtr SOP_SceneCacheSource::transformObject( IECore::Object *object, Imath::M44d transform )
 {
 	Primitive *primitive = IECore::runTimeCast<Primitive>( object );
 	if ( primitive )
@@ -284,7 +284,7 @@ IECore::ObjectPtr SOP_ModelCacheSource::transformObject( IECore::Object *object,
 	return object;
 }
 
-MatrixTransformPtr SOP_ModelCacheSource::matrixTransform( Imath::M44d t )
+MatrixTransformPtr SOP_SceneCacheSource::matrixTransform( Imath::M44d t )
 {
 	return new MatrixTransform(
 		Imath::M44f(

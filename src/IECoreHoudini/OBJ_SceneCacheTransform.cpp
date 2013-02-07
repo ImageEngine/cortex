@@ -34,32 +34,32 @@
 
 #include "PRM/PRM_ChoiceList.h"
 
-#include "IECoreHoudini/OBJ_ModelCacheGeometry.h"
-#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
+#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
-const char *OBJ_ModelCacheTransform::typeName = "ieModelCacheTransform";
+const char *OBJ_SceneCacheTransform::typeName = "ieSceneCacheTransform";
 
-OBJ_ModelCacheTransform::OBJ_ModelCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_SubNet>( net, name, op )
+OBJ_SceneCacheTransform::OBJ_SceneCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_SceneCacheNode<OBJ_SubNet>( net, name, op )
 {
 }
 
-OBJ_ModelCacheTransform::~OBJ_ModelCacheTransform()
+OBJ_SceneCacheTransform::~OBJ_SceneCacheTransform()
 {
 }
 
-OP_Node *OBJ_ModelCacheTransform::create( OP_Network *net, const char *name, OP_Operator *op )
+OP_Node *OBJ_SceneCacheTransform::create( OP_Network *net, const char *name, OP_Operator *op )
 {
-	return new OBJ_ModelCacheTransform( net, name, op );
+	return new OBJ_SceneCacheTransform( net, name, op );
 }
 
-PRM_Name OBJ_ModelCacheTransform::pHierarchy( "hierarchy", "Hierarchy" );
-PRM_Name OBJ_ModelCacheTransform::pDepth( "depth", "Depth" );
+PRM_Name OBJ_SceneCacheTransform::pHierarchy( "hierarchy", "Hierarchy" );
+PRM_Name OBJ_SceneCacheTransform::pDepth( "depth", "Depth" );
 
-PRM_Default OBJ_ModelCacheTransform::hierarchyDefault( SubNetworks );
-PRM_Default OBJ_ModelCacheTransform::depthDefault( AllDescendants );
+PRM_Default OBJ_SceneCacheTransform::hierarchyDefault( SubNetworks );
+PRM_Default OBJ_SceneCacheTransform::depthDefault( AllDescendants );
 
 static PRM_Name hierarchyNames[] = {
 	PRM_Name( "0", "SubNetworks" ),
@@ -74,15 +74,15 @@ static PRM_Name depthNames[] = {
 	PRM_Name( 0 ) // sentinal
 };
 
-PRM_ChoiceList OBJ_ModelCacheTransform::hierarchyList( PRM_CHOICELIST_SINGLE, &hierarchyNames[0] );
-PRM_ChoiceList OBJ_ModelCacheTransform::depthList( PRM_CHOICELIST_SINGLE, &depthNames[0] );
+PRM_ChoiceList OBJ_SceneCacheTransform::hierarchyList( PRM_CHOICELIST_SINGLE, &hierarchyNames[0] );
+PRM_ChoiceList OBJ_SceneCacheTransform::depthList( PRM_CHOICELIST_SINGLE, &depthNames[0] );
 
-OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
+OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 {
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		PRM_Template *parentTemplate = OBJ_ModelCacheNode<OBJ_SubNet>::buildParameters()->myTemplate;
+		PRM_Template *parentTemplate = OBJ_SceneCacheNode<OBJ_SubNet>::buildParameters()->myTemplate;
 		unsigned numParentParms = PRM_Template::countTemplates( parentTemplate );
 		thisTemplate = new PRM_Template[ numParentParms + 3 ];
 		
@@ -119,7 +119,7 @@ OP_TemplatePair *OBJ_ModelCacheTransform::buildParameters()
 	return templatePair;
 }
 
-void OBJ_ModelCacheTransform::buildHierarchy( const ModelCache *cache )
+void OBJ_SceneCacheTransform::buildHierarchy( const SceneCache *cache )
 {
 	Depth depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
 	Hierarchy hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
@@ -153,27 +153,27 @@ void OBJ_ModelCacheTransform::buildHierarchy( const ModelCache *cache )
 	}
 }
 
-OBJ_Node *OBJ_ModelCacheTransform::doBuildObject( const ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+OBJ_Node *OBJ_SceneCacheTransform::doBuildObject( const SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
 	const char *name = ( hierarchy == Parenting ) ? cache->name().c_str() : "geo";
-	OP_Node *opNode = parent->createNode( OBJ_ModelCacheGeometry::typeName, name );
-	OBJ_ModelCacheGeometry *geo = reinterpret_cast<OBJ_ModelCacheGeometry*>( opNode );
+	OP_Node *opNode = parent->createNode( OBJ_SceneCacheGeometry::typeName, name );
+	OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( opNode );
 	
 	geo->setFile( getFile() );
 	geo->setPath( cache->path() );
 	
 	Space space = ( depth == AllDescendants ) ? Path : ( hierarchy == Parenting ) ? Local : Object;
-	geo->setSpace( (OBJ_ModelCacheGeometry::Space)space );
+	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
 	
 	geo->buildHierarchy( cache );
 	
 	return geo;
 }
 
-OBJ_Node *OBJ_ModelCacheTransform::doBuildChild( const ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+OBJ_Node *OBJ_SceneCacheTransform::doBuildChild( const SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
-	OP_Node *opNode = parent->createNode( OBJ_ModelCacheTransform::typeName, cache->name().c_str() );
-	OBJ_ModelCacheTransform *xform = reinterpret_cast<OBJ_ModelCacheTransform*>( opNode );
+	OP_Node *opNode = parent->createNode( OBJ_SceneCacheTransform::typeName, cache->name().c_str() );
+	OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( opNode );
 	
 	xform->setFile( getFile() );
 	xform->setPath( cache->path() );
@@ -184,7 +184,7 @@ OBJ_Node *OBJ_ModelCacheTransform::doBuildChild( const ModelCache *cache, OP_Net
 	return xform;
 }
 
-void OBJ_ModelCacheTransform::doBuildChildren( const ModelCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+void OBJ_SceneCacheTransform::doBuildChildren( const SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
 	OP_Network *inputNode = parent;
 	if ( hierarchy == Parenting )
@@ -196,7 +196,7 @@ void OBJ_ModelCacheTransform::doBuildChildren( const ModelCache *cache, OP_Netwo
 	cache->childNames( children );
 	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		ConstModelCachePtr child = cache->readableChild( *it );
+		ConstSceneCachePtr child = cache->readableChild( *it );
 		
 		OBJ_Node *childNode = 0;
 		if ( hierarchy == SubNetworks )

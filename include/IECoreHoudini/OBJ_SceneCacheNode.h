@@ -32,27 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_OBJMODELCACHENODE_H
-#define IECOREHOUDINI_OBJMODELCACHENODE_H
+#ifndef IECOREHOUDINI_OBJSCENECACHENODE_H
+#define IECOREHOUDINI_OBJSCENECACHENODE_H
 
 #include "OBJ/OBJ_Node.h"
 
-#include "IECore/ModelCache.h"
+#include "IECore/SceneCache.h"
 
-#include "IECoreHoudini/ModelCacheNode.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 namespace IECoreHoudini
 {
 
-/// Abstract base class for all OBJ ModelCacheNodes.
-/// See OBJ_ModelCacheGeometry or OBJ_ModelCacheTransform for specific implementations.
+/// Abstract base class for all OBJ SceneCacheNodes.
+/// See OBJ_SceneCacheGeometry or OBJ_SceneCacheTransform for specific implementations.
 template<typename BaseType>
-class OBJ_ModelCacheNode : public ModelCacheNode<BaseType>
+class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 {
 	public :
 		
-		OBJ_ModelCacheNode( OP_Network *net, const char *name, OP_Operator *op );
-		virtual ~OBJ_ModelCacheNode();
+		OBJ_SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~OBJ_SceneCacheNode();
 		
 		static OP_TemplatePair *buildParameters();
 		
@@ -60,8 +60,8 @@ class OBJ_ModelCacheNode : public ModelCacheNode<BaseType>
 		
 		static int buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 	
-		/// Derived classes should define this function to build the hierarchy contained in the ModelCache.
-		virtual void buildHierarchy( const IECore::ModelCache *cache ) = 0;
+		/// Derived classes should define this function to build the hierarchy contained in the SceneCache.
+		virtual void buildHierarchy( const IECore::SceneCache *cache ) = 0;
 		/// Implemented to destroy all child nodes
 		virtual void cleanHierarchy();
 	
@@ -73,4 +73,4 @@ class OBJ_ModelCacheNode : public ModelCacheNode<BaseType>
 
 } // namespace IECoreHoudini
 
-#endif // IECOREHOUDINI_OBJMODELCACHENODE_H
+#endif // IECOREHOUDINI_OBJSCENECACHENODE_H

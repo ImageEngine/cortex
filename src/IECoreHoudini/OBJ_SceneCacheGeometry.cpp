@@ -32,61 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreHoudini/OBJ_ModelCacheGeometry.h"
-#include "IECoreHoudini/SOP_ModelCacheSource.h"
+#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
-const char *OBJ_ModelCacheGeometry::typeName = "ieModelCacheGeometry";
+const char *OBJ_SceneCacheGeometry::typeName = "ieSceneCacheGeometry";
 
-OBJ_ModelCacheGeometry::OBJ_ModelCacheGeometry( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_ModelCacheNode<OBJ_Geometry>( net, name, op )
+OBJ_SceneCacheGeometry::OBJ_SceneCacheGeometry( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_SceneCacheNode<OBJ_Geometry>( net, name, op )
 {
 }
 
-OBJ_ModelCacheGeometry::~OBJ_ModelCacheGeometry()
+OBJ_SceneCacheGeometry::~OBJ_SceneCacheGeometry()
 {
 }
 
-OP_Node *OBJ_ModelCacheGeometry::create( OP_Network *net, const char *name, OP_Operator *op )
+OP_Node *OBJ_SceneCacheGeometry::create( OP_Network *net, const char *name, OP_Operator *op )
 {
-	return new OBJ_ModelCacheGeometry( net, name, op );
+	return new OBJ_SceneCacheGeometry( net, name, op );
 }
 
-OP_TemplatePair *OBJ_ModelCacheGeometry::buildParameters()
+OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 {
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( *OBJ_ModelCacheNode<OBJ_Geometry>::buildParameters() );
+		templatePair = new OP_TemplatePair( *OBJ_SceneCacheNode<OBJ_Geometry>::buildParameters() );
 	}
 	
 	return templatePair;
 }
 
-void OBJ_ModelCacheGeometry::buildHierarchy( const ModelCache *cache )
+void OBJ_SceneCacheGeometry::buildHierarchy( const SceneCache *cache )
 {
 	doBuildGeometry( cache );
 }
 
-void OBJ_ModelCacheGeometry::doBuildGeometry( const ModelCache *cache )
+void OBJ_SceneCacheGeometry::doBuildGeometry( const SceneCache *cache )
 {
 	const char *name = cache->name().c_str();
-	OP_Node *opNode = createNode( SOP_ModelCacheSource::typeName, name );
-	SOP_ModelCacheSource *sop = reinterpret_cast<SOP_ModelCacheSource*>( opNode );
+	OP_Node *opNode = createNode( SOP_SceneCacheSource::typeName, name );
+	SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( opNode );
 	
 	sop->setFile( getFile() );
 	sop->setPath( cache->path() );
 	
 	Space space = getSpace();
 	UT_String shapes( name );
-	SOP_ModelCacheSource::Space sopSpace = SOP_ModelCacheSource::Object;
+	SOP_SceneCacheSource::Space sopSpace = SOP_SceneCacheSource::Object;
 	if ( space == World || space == Path )
 	{
 		shapes = "*";
-		sopSpace = SOP_ModelCacheSource::Path;
+		sopSpace = SOP_SceneCacheSource::Path;
 	}
 	
 	sop->setSpace( sopSpace );
-	sop->setString( shapes, CH_STRING_LITERAL, SOP_ModelCacheSource::pShapeFilter.getToken(), 0, 0 );
+	sop->setString( shapes, CH_STRING_LITERAL, SOP_SceneCacheSource::pShapeFilter.getToken(), 0, 0 );
 }

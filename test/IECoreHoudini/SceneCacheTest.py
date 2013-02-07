@@ -38,34 +38,34 @@ import IECore
 import IECoreHoudini
 import unittest
 
-class TestModelCache( IECoreHoudini.TestCase ) :
+class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	__testFile = "test/test.mdc"
 	
 	def sop( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
-		sop = parent.createNode( "ieModelCacheSource" )
-		sop.parm( "file" ).set( TestModelCache.__testFile )
+		sop = parent.createNode( "ieSceneCacheSource" )
+		sop.parm( "file" ).set( TestSceneCache.__testFile )
 		return sop
 	
 	def xform( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" )
-		xform = parent.createNode( "ieModelCacheTransform" )
-		xform.parm( "file" ).set( TestModelCache.__testFile )
+		xform = parent.createNode( "ieSceneCacheTransform" )
+		xform.parm( "file" ).set( TestSceneCache.__testFile )
 		return xform
 	
 	def geometry( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" )
-		geometry = parent.createNode( "ieModelCacheGeometry" )
-		geometry.parm( "file" ).set( TestModelCache.__testFile )
+		geometry = parent.createNode( "ieSceneCacheGeometry" )
+		geometry.parm( "file" ).set( TestSceneCache.__testFile )
 		return geometry
 	
 	def writeMDC( self, rotation=IECore.V3d( 0, 0, 0 ) ) :
 		
-		m = IECore.ModelCache( TestModelCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		m = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
 		
 		mc = m.writableChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
@@ -101,7 +101,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 			node.parm( "file" ).set( "/tmp/fake" )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
-			node.parm( "file" ).set( TestModelCache.__testFile )
+			node.parm( "file" ).set( TestSceneCache.__testFile )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
 			self.writeMDC()
@@ -109,9 +109,9 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 			self.failUnless( not node.errors() )
 		
 		testNode( self.sop() )
-		os.remove( TestModelCache.__testFile )
+		os.remove( TestSceneCache.__testFile )
 		testNode( self.xform() )
-		os.remove( TestModelCache.__testFile )
+		os.remove( TestSceneCache.__testFile )
 		testNode( self.geometry() )
 	
 	def testObjSubPaths( self ) :
@@ -172,16 +172,16 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 			
 			node.parm( "reload" ).pressButton()
 			node.parm( "root" ).set( "/1/2" )
-			self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.ModelCacheNode.Space.World )
+			self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.SceneCacheNode.Space.World )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 3, 0, 0 ) )
-			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
+			node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
-			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Local )
+			node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 2, 0, 0 ) )
-			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
+			node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
 		
@@ -195,19 +195,19 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		def testRotated( node ) :
 			
 			node.parm( "reload" ).pressButton()
-			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.World )
+			node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
 			node.cook()
 			self.failUnless( node.parmTransform().extractTranslates().isAlmostEqual( hou.Vector3( 2.73205, -1, 0 ) ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -60 ) ) )
-			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
+			node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
-			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Local )
+			node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 2, 0, 0 ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, -30 ) ) )
-			node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
+			node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
 			node.cook()
 			self.assertEqual( node.parmTransform().extractTranslates(), hou.Vector3( 0, 0, 0 ) )
 			self.failUnless( node.parmTransform().extractRotates().isAlmostEqual( hou.Vector3( 0, 0, 0 ) ) )
@@ -267,7 +267,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		
 		self.writeMDC()
 		node = self.sop()
-		self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.ModelCacheNode.Space.World )
+		self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -279,7 +279,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -291,7 +291,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Local )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -303,7 +303,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -316,7 +316,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		
 		node.parm( "root" ).set( "/1" )
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.World )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -328,7 +328,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Path )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -340,7 +340,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 5, 0, 0 ) )
 		
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Local )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -352,7 +352,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		
-		node.parm( "space" ).set( IECoreHoudini.ModelCacheNode.Space.Object )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -486,8 +486,8 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.writeMDC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
-		xform.parm( "hierarchy" ).set( IECoreHoudini.ModelCacheNode.Hierarchy.SubNetworks )
-		xform.parm( "depth" ).set( IECoreHoudini.ModelCacheNode.Depth.AllDescendants )
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "build" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1" ), hou.ObjNode ) )
@@ -525,7 +525,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1" )
-		xform.parm( "depth" ).set( IECoreHoudini.ModelCacheNode.Depth.Children )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "build" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -572,8 +572,8 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.writeMDC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
-		xform.parm( "hierarchy" ).set( IECoreHoudini.ModelCacheNode.Hierarchy.Parenting )
-		xform.parm( "depth" ).set( IECoreHoudini.ModelCacheNode.Depth.AllDescendants )
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "build" ).pressButton()
 		self.assertEqual( len(xform.children()), 3 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1" ), hou.ObjNode ) )
@@ -625,7 +625,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1" )
-		xform.parm( "depth" ).set( IECoreHoudini.ModelCacheNode.Depth.Children )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "build" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -656,8 +656,8 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.writeMDC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
-		xform.parm( "hierarchy" ).set( IECoreHoudini.ModelCacheNode.Hierarchy.FlatGeometry )
-		xform.parm( "depth" ).set( IECoreHoudini.ModelCacheNode.Depth.AllDescendants )
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "build" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -695,7 +695,7 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1" )
-		xform.parm( "depth" ).set( IECoreHoudini.ModelCacheNode.Depth.Children )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "build" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -735,8 +735,8 @@ class TestModelCache( IECoreHoudini.TestCase ) :
 		testNode( self.geometry() )
 	
 	def tearDown( self ) :
-		if os.path.exists( TestModelCache.__testFile ) :
-			os.remove( TestModelCache.__testFile )
+		if os.path.exists( TestSceneCache.__testFile ) :
+			os.remove( TestSceneCache.__testFile )
 
 if __name__ == "__main__":
     unittest.main()

@@ -38,36 +38,36 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECoreHoudini/ModelCacheNode.h"
-#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
-#include "IECoreHoudini/bindings/ModelCacheNodeBinding.h"
+#include "IECoreHoudini/SceneCacheNode.h"
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
+#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
 
-class ModelCacheNodeHelper
+class SceneCacheNodeHelper
 {
 };
 
-void IECoreHoudini::bindModelCacheNode()
+void IECoreHoudini::bindSceneCacheNode()
 {
-	scope modeCacheNodeScope = class_<ModelCacheNodeHelper>( "ModelCacheNode" );
+	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
 	
-	enum_<ModelCacheNode<OP_Node>::Space>( "Space" )
-		.value( "World", ModelCacheNode<OP_Node>::World )
-		.value( "Path", ModelCacheNode<OP_Node>::Path )
-		.value( "Local", ModelCacheNode<OP_Node>::Local )
-		.value( "Object", ModelCacheNode<OP_Node>::Object )
+	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
+		.value( "World", SceneCacheNode<OP_Node>::World )
+		.value( "Path", SceneCacheNode<OP_Node>::Path )
+		.value( "Local", SceneCacheNode<OP_Node>::Local )
+		.value( "Object", SceneCacheNode<OP_Node>::Object )
 	;
 	
-	enum_<OBJ_ModelCacheTransform::Hierarchy>( "Hierarchy" )
-		.value( "SubNetworks", OBJ_ModelCacheTransform::SubNetworks )
-		.value( "Parenting", OBJ_ModelCacheTransform::Parenting )
-		.value( "FlatGeometry", OBJ_ModelCacheTransform::FlatGeometry )
+	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
+		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
+		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
+		.value( "FlatGeometry", OBJ_SceneCacheTransform::FlatGeometry )
 	;
 	
-	enum_<OBJ_ModelCacheTransform::Depth>( "Depth" )
-		.value( "AllDescendants", OBJ_ModelCacheTransform::AllDescendants )
-		.value( "Children", OBJ_ModelCacheTransform::Children )
+	enum_<OBJ_SceneCacheTransform::Depth>( "Depth" )
+		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
+		.value( "Children", OBJ_SceneCacheTransform::Children )
 	;
 }

@@ -36,23 +36,23 @@
 #include "OBJ/OBJ_SubNet.h"
 
 #include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/OBJ_ModelCacheNode.h"
+#include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
 template<typename BaseType>
-OBJ_ModelCacheNode<BaseType>::OBJ_ModelCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : ModelCacheNode<BaseType>( net, name, op )
+OBJ_SceneCacheNode<BaseType>::OBJ_SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : SceneCacheNode<BaseType>( net, name, op )
 {
 }
 
 template<typename BaseType>
-OBJ_ModelCacheNode<BaseType>::~OBJ_ModelCacheNode()
+OBJ_SceneCacheNode<BaseType>::~OBJ_SceneCacheNode()
 {
 }
 
 template<typename BaseType>
-PRM_Name OBJ_ModelCacheNode<BaseType>::pBuild( "build", "Build Hierarchy" );
+PRM_Name OBJ_SceneCacheNode<BaseType>::pBuild( "build", "Build Hierarchy" );
 
 static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 {
@@ -77,14 +77,14 @@ static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 }
 
 template<typename BaseType>
-OP_TemplatePair *OBJ_ModelCacheNode<BaseType>::buildParameters()
+OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
 {
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
 		PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
 		unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
-		unsigned numMDCParms = PRM_Template::countTemplates( ModelCacheNode<BaseType>::parameters );
+		unsigned numMDCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
 		thisTemplate = new PRM_Template[ numObjParms + numMDCParms + 2 ];
 		
 		for ( unsigned i = 0; i < numObjParms; ++i )
@@ -95,11 +95,11 @@ OP_TemplatePair *OBJ_ModelCacheNode<BaseType>::buildParameters()
 		
 		for ( unsigned i = 0; i < numMDCParms; ++i )
 		{
-			thisTemplate[numObjParms+i] = ModelCacheNode<BaseType>::parameters[i];
+			thisTemplate[numObjParms+i] = SceneCacheNode<BaseType>::parameters[i];
 		}
 		
 		thisTemplate[numObjParms + numMDCParms] = PRM_Template(
-			PRM_CALLBACK, 1, &pBuild, 0, 0, 0, &OBJ_ModelCacheNode<BaseType>::buildButtonCallback, 0, 0,
+			PRM_CALLBACK, 1, &pBuild, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::buildButtonCallback, 0, 0,
 			"Build the hierarchy below the specified root path.\n"
 			"Some nodes may define additional options that are used during the build process."
 		);
@@ -115,25 +115,25 @@ OP_TemplatePair *OBJ_ModelCacheNode<BaseType>::buildParameters()
 }
 
 template<typename BaseType>
-int OBJ_ModelCacheNode<BaseType>::buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
+int OBJ_SceneCacheNode<BaseType>::buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
 	std::string file;
-	OBJ_ModelCacheNode<BaseType> *node = reinterpret_cast<OBJ_ModelCacheNode<BaseType>*>( data );
+	OBJ_SceneCacheNode<BaseType> *node = reinterpret_cast<OBJ_SceneCacheNode<BaseType>*>( data );
 	if ( !node || !node->ensureFile( file ) )
 	{
 		return 0;
 	}
 	
-	ModelCacheUtil::Cache::EntryPtr entry = node->cache().entry( file, node->getPath() );
+	SceneCacheUtil::Cache::EntryPtr entry = node->cache().entry( file, node->getPath() );
 	
 	node->cleanHierarchy();
-	node->buildHierarchy( entry->modelCache() );
+	node->buildHierarchy( entry->sceneCache() );
 	
 	return 1;
 }
 
 template<typename BaseType>
-void OBJ_ModelCacheNode<BaseType>::cleanHierarchy()
+void OBJ_SceneCacheNode<BaseType>::cleanHierarchy()
 {
 	OP_NodeList childNodes;
 	for ( size_t i=0; i < this->getNchildren(); ++i )
@@ -145,29 +145,29 @@ void OBJ_ModelCacheNode<BaseType>::cleanHierarchy()
 }
 
 template<typename BaseType>
-OP_ERROR OBJ_ModelCacheNode<BaseType>::cookMyObj( OP_Context &context )
+OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 {
 	std::string file;
-	if ( !ModelCacheNode<BaseType>::ensureFile( file ) )
+	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
-		ModelCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .mdc" ).c_str() );
-		return ModelCacheNode<BaseType>::error();
+		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .mdc" ).c_str() );
+		return SceneCacheNode<BaseType>::error();
 	}
 	
 	std::string path = this->getPath();
-	OBJ_ModelCacheNode<OP_Node>::Space space = (OBJ_ModelCacheNode<OP_Node>::Space)this->getSpace();
+	OBJ_SceneCacheNode<OP_Node>::Space space = (OBJ_SceneCacheNode<OP_Node>::Space)this->getSpace();
 	
 	Imath::M44d transform;
-	if ( space == ModelCacheNode<OP_Node>::World )
+	if ( space == SceneCacheNode<OP_Node>::World )
 	{
-		transform = ModelCacheNode<BaseType>::cache().worldTransform( file, path );
+		transform = SceneCacheNode<BaseType>::cache().worldTransform( file, path );
 	}
-	else if ( space == ModelCacheNode<OP_Node>::Local )
+	else if ( space == SceneCacheNode<OP_Node>::Local )
 	{
-		transform = ModelCacheNode<BaseType>::cache().entry( file, path )->modelCache()->readTransform();
+		transform = SceneCacheNode<BaseType>::cache().entry( file, path )->sceneCache()->readTransform();
 	}
 	
-	ModelCacheNode<BaseType>::setParmTransform( context, IECore::convert<UT_Matrix4D>( transform ) );
+	SceneCacheNode<BaseType>::setParmTransform( context, IECore::convert<UT_Matrix4D>( transform ) );
 	
 	return BaseType::cookMyObj( context );
 }
@@ -176,5 +176,5 @@ OP_ERROR OBJ_ModelCacheNode<BaseType>::cookMyObj( OP_Context &context )
 // Known Specializations
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template class OBJ_ModelCacheNode<OBJ_Geometry>;
-template class OBJ_ModelCacheNode<OBJ_SubNet>;
+template class OBJ_SceneCacheNode<OBJ_Geometry>;
+template class OBJ_SceneCacheNode<OBJ_SubNet>;

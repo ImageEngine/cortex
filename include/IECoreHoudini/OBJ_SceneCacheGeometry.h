@@ -32,43 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_OBJMODELCACHEGEOMETRY_H
-#define IECOREHOUDINI_OBJMODELCACHEGEOMETRY_H
+#ifndef IECOREHOUDINI_OBJSCENECACHEGEOMETRY_H
+#define IECOREHOUDINI_OBJSCENECACHEGEOMETRY_H
 
 #include "OBJ/OBJ_Geometry.h"
 
-#include "IECoreHoudini/OBJ_ModelCacheNode.h"
+#include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 namespace IECoreHoudini
 {
 
-/// OBJ for loading a single transform and leaf Objects from an IECore::ModelCache
-class OBJ_ModelCacheGeometry : public OBJ_ModelCacheNode<OBJ_Geometry>
+/// OBJ for loading a single transform and leaf Objects from an IECore::SceneCache
+class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 {
 	public :
 		
-		OBJ_ModelCacheGeometry( OP_Network *net, const char *name, OP_Operator *op );
-		virtual ~OBJ_ModelCacheGeometry();
+		OBJ_SceneCacheGeometry( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~OBJ_SceneCacheGeometry();
 		
 		static const char *typeName;
 		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
 		
-		/// Implemented to build the ModelCache using a SOP_ModelCacheSource. Derived classes
+		/// Implemented to build the SceneCache using a SOP_SceneCacheSource. Derived classes
 		/// should re-implement doBuildGeometry() if specialized behaviour is necessary.
 		/// \todo: do we need this extra abstraction?
-		virtual void buildHierarchy( const IECore::ModelCache *cache );
+		virtual void buildHierarchy( const IECore::SceneCache *cache );
 	
 	protected :
 		
-		/// Called by buildHierarchy() to load the ModelCache. The Space parameter will
+		/// Called by buildHierarchy() to load the SceneCache. The Space parameter will
 		/// determine what settings are used. World and Path will load all descedants,
 		/// while Local and Object will load the immediate child object only.
-		virtual void doBuildGeometry( const IECore::ModelCache *cache );
+		virtual void doBuildGeometry( const IECore::SceneCache *cache );
 
 };
 
 } // namespace IECoreHoudini
 
-#endif // IECOREHOUDINI_OBJMODELCACHEGEOMETRY_H
+#endif // IECOREHOUDINI_OBJSCENECACHEGEOMETRY_H

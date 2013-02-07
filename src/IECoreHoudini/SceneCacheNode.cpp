@@ -41,42 +41,42 @@
 #include "PRM/PRM_ChoiceList.h"
 #include "SOP/SOP_Node.h"
 
-#include "IECoreHoudini/ModelCacheNode.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// ModelCacheNode implementation
+// SceneCacheNode implementation
 //////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename BaseType>
-ModelCacheNode<BaseType>::ModelCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : BaseType( net, name, op )
+SceneCacheNode<BaseType>::SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : BaseType( net, name, op )
 {
 }
 
 template<typename BaseType>
-ModelCacheNode<BaseType>::~ModelCacheNode()
+SceneCacheNode<BaseType>::~SceneCacheNode()
 {
 }
 
 template<typename BaseType>
-PRM_Name ModelCacheNode<BaseType>::pFile( "file", "File" );
+PRM_Name SceneCacheNode<BaseType>::pFile( "file", "File" );
 
 template<typename BaseType>
-PRM_Name ModelCacheNode<BaseType>::pReload( "reload", "Reload" );
+PRM_Name SceneCacheNode<BaseType>::pReload( "reload", "Reload" );
 
 template<typename BaseType>
-PRM_Name ModelCacheNode<BaseType>::pRoot( "root", "Root" );
+PRM_Name SceneCacheNode<BaseType>::pRoot( "root", "Root" );
 
 template<typename BaseType>
-PRM_Name ModelCacheNode<BaseType>::pSpace( "space", "Space" );
+PRM_Name SceneCacheNode<BaseType>::pSpace( "space", "Space" );
 
 template<typename BaseType>
-PRM_Default ModelCacheNode<BaseType>::rootDefault( 0, "/" );
+PRM_Default SceneCacheNode<BaseType>::rootDefault( 0, "/" );
 
 template<typename BaseType>
-PRM_Default ModelCacheNode<BaseType>::spaceDefault( World );
+PRM_Default SceneCacheNode<BaseType>::spaceDefault( World );
 
 static PRM_Name spaceNames[] = {
 	PRM_Name( "0", "World" ),
@@ -87,16 +87,16 @@ static PRM_Name spaceNames[] = {
 };
 
 template<typename BaseType>
-PRM_ChoiceList ModelCacheNode<BaseType>::rootMenu( PRM_CHOICELIST_REPLACE, &ModelCacheNode<BaseType>::buildRootMenu );
+PRM_ChoiceList SceneCacheNode<BaseType>::rootMenu( PRM_CHOICELIST_REPLACE, &SceneCacheNode<BaseType>::buildRootMenu );
 
 template<typename BaseType>
-PRM_ChoiceList ModelCacheNode<BaseType>::spaceList( PRM_CHOICELIST_SINGLE, &spaceNames[0] );
+PRM_ChoiceList SceneCacheNode<BaseType>::spaceList( PRM_CHOICELIST_SINGLE, &spaceNames[0] );
 
 template<typename BaseType>
-PRM_Template ModelCacheNode<BaseType>::parameters[] = {
+PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template( PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile ),
 	PRM_Template(
-		PRM_CALLBACK, 1, &pReload, 0, 0, 0, &ModelCacheNode<BaseType>::reloadButtonCallback, 0, 0,
+		PRM_CALLBACK, 1, &pReload, 0, 0, 0, &SceneCacheNode<BaseType>::reloadButtonCallback, 0, 0,
 		"Removes the current MDC file from the cache. This will force a recook on this node, and "
 		"cause all other nodes using this MDC file to require a recook as well."
 	),
@@ -114,9 +114,9 @@ PRM_Template ModelCacheNode<BaseType>::parameters[] = {
 };
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
+void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
 {
-	ModelCacheNode<BaseType> *node = reinterpret_cast<ModelCacheNode<BaseType>*>( data );
+	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
 	if ( !node )
 	{
 		return;
@@ -134,16 +134,16 @@ void ModelCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 	}
 	
 	std::vector<std::string> descendants;
-	ModelCacheUtil::Cache::EntryPtr entry = cache().entry( file, "/" );
-	node->descendantNames( entry->modelCache(), descendants );
+	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, "/" );
+	node->descendantNames( entry->sceneCache(), descendants );
 	node->createMenu( menu, descendants );
 }
 
 template<typename BaseType>
-int ModelCacheNode<BaseType>::reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
+int SceneCacheNode<BaseType>::reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
 	std::string file;
-	ModelCacheNode<BaseType> *node = reinterpret_cast<ModelCacheNode<BaseType>*>( data );
+	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
 	if ( !node || !node->ensureFile( file ) )
 	{
 		return 0;
@@ -156,7 +156,7 @@ int ModelCacheNode<BaseType>::reloadButtonCallback( void *data, int index, float
 }
 
 template<typename BaseType>
-bool ModelCacheNode<BaseType>::ensureFile( std::string &file )
+bool SceneCacheNode<BaseType>::ensureFile( std::string &file )
 {
 	file = getFile();
 	
@@ -170,7 +170,7 @@ bool ModelCacheNode<BaseType>::ensureFile( std::string &file )
 }
 
 template<typename BaseType>
-std::string ModelCacheNode<BaseType>::getFile()
+std::string SceneCacheNode<BaseType>::getFile()
 {
 	UT_String value;
 	this->evalString( value, pFile.getToken(), 0, 0 );
@@ -178,13 +178,13 @@ std::string ModelCacheNode<BaseType>::getFile()
 }
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::setFile( std::string file )
+void SceneCacheNode<BaseType>::setFile( std::string file )
 {
 	this->setString( UT_String( file ), CH_STRING_LITERAL, pFile.getToken(), 0, 0 );
 }
 
 template<typename BaseType>
-std::string ModelCacheNode<BaseType>::getPath()
+std::string SceneCacheNode<BaseType>::getPath()
 {
 	UT_String value;
 	this->evalString( value, pRoot.getToken(), 0, 0 );
@@ -192,25 +192,25 @@ std::string ModelCacheNode<BaseType>::getPath()
 }
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::setPath( std::string path )
+void SceneCacheNode<BaseType>::setPath( std::string path )
 {
 	this->setString( UT_String( path ), CH_STRING_LITERAL, pRoot.getToken(), 0, 0 );
 }
 
 template<typename BaseType>
-typename ModelCacheNode<BaseType>::Space ModelCacheNode<BaseType>::getSpace()
+typename SceneCacheNode<BaseType>::Space SceneCacheNode<BaseType>::getSpace()
 {
 	return (Space)this->evalInt( pSpace.getToken(), 0, 0 );
 }
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::setSpace( ModelCacheNode<BaseType>::Space space )
+void SceneCacheNode<BaseType>::setSpace( SceneCacheNode<BaseType>::Space space )
 {
 	this->setInt( pSpace.getToken(), 0, 0, space );
 }
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::descendantNames( const IECore::ModelCache *cache, std::vector<std::string> &descendants )
+void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneCache *cache, std::vector<std::string> &descendants )
 {
 	IndexedIO::EntryIDList children;
 	cache->childNames( children );
@@ -228,7 +228,7 @@ void ModelCacheNode<BaseType>::descendantNames( const IECore::ModelCache *cache,
 };
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::objectNames( const IECore::ModelCache *cache, std::vector<std::string> &objects )
+void SceneCacheNode<BaseType>::objectNames( const IECore::SceneCache *cache, std::vector<std::string> &objects )
 {
 	if ( cache->hasObject() )
 	{
@@ -244,7 +244,7 @@ void ModelCacheNode<BaseType>::objectNames( const IECore::ModelCache *cache, std
 };
 
 template<typename BaseType>
-void ModelCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std::string> &values )
+void SceneCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std::string> &values )
 {
 	unsigned pos = 1;
 	// currently menus display funny if we exceed 1500 despite the limit being 8191...
@@ -259,21 +259,21 @@ void ModelCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std
 }
 
 template<typename BaseType>
-ModelCacheUtil::Cache &ModelCacheNode<BaseType>::cache()
+SceneCacheUtil::Cache &SceneCacheNode<BaseType>::cache()
 {
-	static ModelCacheUtil::Cache c;
+	static SceneCacheUtil::Cache c;
 	return c;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// ModelCacheUtil Cache implementation
+// SceneCacheUtil Cache implementation
 //////////////////////////////////////////////////////////////////////////////////////////
 
-ModelCacheUtil::Cache::Cache() : m_fileCache( fileCacheGetter, 200 )
+SceneCacheUtil::Cache::Cache() : m_fileCache( fileCacheGetter, 200 )
 {
 };
 
-ModelCacheUtil::Cache::EntryPtr ModelCacheUtil::Cache::entry( const std::string &fileName, const std::string &path )
+SceneCacheUtil::Cache::EntryPtr SceneCacheUtil::Cache::entry( const std::string &fileName, const std::string &path )
 {
 	FileAndMutexPtr f = m_fileCache.get( fileName );
 	EntryPtr result = new Entry( f ); // this locks the mutex for us
@@ -290,10 +290,10 @@ ModelCacheUtil::Cache::EntryPtr ModelCacheUtil::Cache::entry( const std::string 
 	return result;
 }
 
-Imath::M44d ModelCacheUtil::Cache::worldTransform( const std::string &fileName, const std::string &path )
+Imath::M44d SceneCacheUtil::Cache::worldTransform( const std::string &fileName, const std::string &path )
 {
 	EntryPtr thisEntry = entry( fileName, "/" );
-	ConstModelCachePtr cache = thisEntry->modelCache();
+	ConstSceneCachePtr cache = thisEntry->sceneCache();
 	Imath::M44d result = cache->readTransform();
 	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
 	Tokenizer tokens( path, boost::char_separator<char>( "/" ) );
@@ -306,29 +306,29 @@ Imath::M44d ModelCacheUtil::Cache::worldTransform( const std::string &fileName, 
 	return result;
 }
 
-void ModelCacheUtil::Cache::erase( const std::string &fileName )
+void SceneCacheUtil::Cache::erase( const std::string &fileName )
 {
 	m_fileCache.erase( fileName );
 }
 
-ModelCacheUtil::Cache::FileAndMutexPtr ModelCacheUtil::Cache::fileCacheGetter( const std::string &fileName, size_t &cost )
+SceneCacheUtil::Cache::FileAndMutexPtr SceneCacheUtil::Cache::fileCacheGetter( const std::string &fileName, size_t &cost )
 {
 	FileAndMutexPtr result = new FileAndMutex;
-	result->file = new ModelCache( fileName, IndexedIO::Read );
+	result->file = new SceneCache( fileName, IndexedIO::Read );
 	cost = 1;
 	return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// ModelCacheUtil Entry implementation
+// SceneCacheUtil Entry implementation
 //////////////////////////////////////////////////////////////////////////////////////////
 
-ModelCacheUtil::Cache::Entry::Entry( FileAndMutexPtr fileAndMutex )
+SceneCacheUtil::Cache::Entry::Entry( FileAndMutexPtr fileAndMutex )
 	: m_fileAndMutex( fileAndMutex ), m_lock( m_fileAndMutex->mutex )
 {
 }
 
-const ModelCache *ModelCacheUtil::Cache::Entry::modelCache()
+const SceneCache *SceneCacheUtil::Cache::Entry::sceneCache()
 {
 	return m_entry;
 }
@@ -337,8 +337,8 @@ const ModelCache *ModelCacheUtil::Cache::Entry::modelCache()
 // Known Specializations
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template class ModelCacheNode<OP_Node>;
-template class ModelCacheNode<OBJ_Node>;
-template class ModelCacheNode<OBJ_Geometry>;
-template class ModelCacheNode<OBJ_SubNet>;
-template class ModelCacheNode<SOP_Node>;
+template class SceneCacheNode<OP_Node>;
+template class SceneCacheNode<OBJ_Node>;
+template class SceneCacheNode<OBJ_Geometry>;
+template class SceneCacheNode<OBJ_SubNet>;
+template class SceneCacheNode<SOP_Node>;

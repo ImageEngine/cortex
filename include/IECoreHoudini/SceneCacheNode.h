@@ -32,33 +32,33 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_MODELCACHENODE_H
-#define IECOREHOUDINI_MODELCACHENODE_H
+#ifndef IECOREHOUDINI_SCENECACHENODE_H
+#define IECOREHOUDINI_SCENECACHENODE_H
 
 #include "tbb/mutex.h"
 
 #include "PRM/PRM_Name.h"
 
 #include "IECore/LRUCache.h"
-#include "IECore/ModelCache.h"
+#include "IECore/SceneCache.h"
 
 namespace IECoreHoudini
 {
 
-namespace ModelCacheUtil
+namespace SceneCacheUtil
 {
 class Cache;
 }
 
-/// Abstract class for using an IECore::ModelCache in Houdini.
+/// Abstract class for using an IECore::SceneCache in Houdini.
 /// Derived nodes will do something useful with the data.
 template<typename BaseType>
-class ModelCacheNode : public BaseType
+class SceneCacheNode : public BaseType
 {
 	public :
 		
-		ModelCacheNode( OP_Network *net, const char *name, OP_Operator *op );
-		virtual ~ModelCacheNode();
+		SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~SceneCacheNode();
 		
 		static PRM_Template parameters[];
 		
@@ -94,25 +94,25 @@ class ModelCacheNode : public BaseType
 	
 	protected :
 		
-		/// Access point to the actual ModelCache. All derived classes should only access the cache
+		/// Access point to the actual SceneCache. All derived classes should only access the cache
 		/// using this method, and must hold onto an EntryPtr retrieved from this utility while
-		/// reading the ModelCache.
-		static ModelCacheUtil::Cache &cache();
+		/// reading the SceneCache.
+		static SceneCacheUtil::Cache &cache();
 		
 		/// get the file and ensure it is a valid MDC
 		bool ensureFile( std::string &file );
 		/// get a breadth first list of all descendant paths
-		void descendantNames( const IECore::ModelCache *cache, std::vector<std::string> &descendants );
+		void descendantNames( const IECore::SceneCache *cache, std::vector<std::string> &descendants );
 		/// get a depth first list of all object names
-		void objectNames( const IECore::ModelCache *cache, std::vector<std::string> &objects );
+		void objectNames( const IECore::SceneCache *cache, std::vector<std::string> &objects );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
 
 };
 
-namespace ModelCacheUtil
+namespace SceneCacheUtil
 {
-/// \todo: much of this is copied from GafferScene::ModelCacheSource. Can we put it somewhere common instead?
+/// \todo: much of this is copied from GafferScene::SceneReader. Can we put it somewhere common instead?
 class Cache
 {
 	
@@ -124,14 +124,14 @@ class Cache
 	
 		Cache();
 		
-		/// This class provides access to a particular location within the ModelCache,
+		/// This class provides access to a particular location within the SceneCache,
 		/// and ensures that access is threadsafe by holding a mutex on the file.
 		class Entry : public IECore::RefCounted
 		{
 		
 			public :
 			
-				const IECore::ModelCache *modelCache();				
+				const IECore::SceneCache *sceneCache();				
 			
 			private :
 			
@@ -139,7 +139,7 @@ class Cache
 				
 				FileAndMutexPtr m_fileAndMutex;
 				tbb::mutex::scoped_lock m_lock;
-				IECore::ConstModelCachePtr m_entry;
+				IECore::ConstSceneCachePtr m_entry;
 				
 				friend class Cache;
 		
@@ -158,7 +158,7 @@ class Cache
 			public :
 				
 				tbb::mutex mutex;
-				IECore::ModelCachePtr file;
+				IECore::SceneCachePtr file;
 				
 		};
 				
@@ -172,4 +172,4 @@ class Cache
 
 } // namespace IECoreHoudini
 
-#endif // IECOREHOUDINI_MODELCACHENODE_H
+#endif // IECOREHOUDINI_SCENECACHENODE_H
