@@ -46,14 +46,14 @@
 #include <GR/GR_RenderTable.h>
 
 // IECoreHoudini
-#include "IECoreHoudini/OBJ_ModelCacheGeometry.h"
-#include "IECoreHoudini/OBJ_ModelCacheTransform.h"
+#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
 #include "IECoreHoudini/SOP_ToHoudiniConverter.h"
 #include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
-#include "IECoreHoudini/SOP_ModelCacheSource.h"
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
 
@@ -98,48 +98,48 @@ void newSopOperator(OP_OperatorTable *table)
 	);
 	cacheReader->setIconName( "SOP_ieInterpolatedCacheReader" );
 	
-	OP_Operator *modelCacheSource = new OP_Operator(
-		SOP_ModelCacheSource::typeName, "ModelCache Source",
-		SOP_ModelCacheSource::create, SOP_ModelCacheSource::buildParameters(), 0, 0,
+	OP_Operator *sceneCacheSource = new OP_Operator(
+		SOP_SceneCacheSource::typeName, "SceneCache Source",
+		SOP_SceneCacheSource::create, SOP_SceneCacheSource::buildParameters(), 0, 0,
 		NULL, OP_FLAG_GENERATOR
 	);
 	/// \todo: get a new icon
-	modelCacheSource->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheSource->setIconName( "SOP_ieToHoudiniConverter" );
 	
 	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
 	table->addOperator( converter );
 	table->addOperator( cacheReader );
-	table->addOperator( modelCacheSource );
+	table->addOperator( sceneCacheSource );
 	
 	table->addOpHidden( opHolder->getName() );
 	table->addOpHidden( proceduralHolder->getName() );
 	table->addOpHidden( converter->getName() );
 	table->addOpHidden( cacheReader->getName() );
-	table->addOpHidden( modelCacheSource->getName() );
+	table->addOpHidden( sceneCacheSource->getName() );
 }
 
 void newObjectOperator( OP_OperatorTable *table )
 {
-	OP_Operator *modelCacheTransform = new OP_Operator(
-		OBJ_ModelCacheTransform::typeName, "ModelCache Xform",
-		OBJ_ModelCacheTransform::create, OBJ_ModelCacheTransform::buildParameters(), 0, 1
+	OP_Operator *sceneCacheTransform = new OP_Operator(
+		OBJ_SceneCacheTransform::typeName, "SceneCache Xform",
+		OBJ_SceneCacheTransform::create, OBJ_SceneCacheTransform::buildParameters(), 0, 1
 	);
 	/// \todo: get a new icon
-	modelCacheTransform->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheTransform->setIconName( "SOP_ieToHoudiniConverter" );
 	
-	OP_Operator *modelCacheGeometry = new OP_Operator(
-		OBJ_ModelCacheGeometry::typeName, "ModelCache GEO",
-		OBJ_ModelCacheGeometry::create, OBJ_ModelCacheGeometry::buildParameters(), 0, 1
+	OP_Operator *sceneCacheGeometry = new OP_Operator(
+		OBJ_SceneCacheGeometry::typeName, "SceneCache GEO",
+		OBJ_SceneCacheGeometry::create, OBJ_SceneCacheGeometry::buildParameters(), 0, 1
 	);
 	/// \todo: get a new icon
-	modelCacheGeometry->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheGeometry->setIconName( "SOP_ieToHoudiniConverter" );
 	
-	table->addOperator( modelCacheTransform );
-	table->addOperator( modelCacheGeometry );
+	table->addOperator( sceneCacheTransform );
+	table->addOperator( sceneCacheGeometry );
 	
-	table->addOpHidden( modelCacheTransform->getName() );
-	table->addOpHidden( modelCacheGeometry->getName() );
+	table->addOpHidden( sceneCacheTransform->getName() );
+	table->addOpHidden( sceneCacheGeometry->getName() );
 }
 
 /// Declare our new Render Hooks

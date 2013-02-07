@@ -31,31 +31,31 @@ soptoolutils.genericTool(kwargs, 'ieProceduralHolder')]]></script>
 soptoolutils.genericTool(kwargs, 'ieToHoudiniConverter')]]></script>
   </tool> 
 
-  <!-- ModelCacheSource SOP -->
-  <tool name="cortexModelCacheSource" label="ModelCache Source" icon="SOP_ieToHoudiniConverter">
+  <!-- SceneCacheSource SOP -->
+  <tool name="cortexSceneCacheSource" label="SceneCache Source" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>SOP</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
-    <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieModelCacheSource')]]></script>
+    <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieSceneCacheSource')]]></script>
   </tool>
   
-  <!-- ModelCacheTransform OBJ -->
-  <tool name="cortexModelCacheTransform" label="ModelCache Xform" icon="SOP_ieToHoudiniConverter">
+  <!-- SceneCacheTransform OBJ -->
+  <tool name="cortexSceneCacheTransform" label="SceneCache Xform" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>OBJ</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
-    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieModelCacheTransform')]]></script>
+    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieSceneCacheTransform')]]></script>
   </tool>
   
-  <!-- ModelCacheGeometry OBJ -->
-  <tool name="cortexModelCacheGeometry" label="ModelCache GEO" icon="SOP_ieToHoudiniConverter">
+  <!-- SceneCacheGeometry OBJ -->
+  <tool name="cortexSceneCacheGeometry" label="SceneCache GEO" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>OBJ</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
-    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieModelCacheGeometry')]]></script>
+    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieSceneCacheGeometry')]]></script>
   </tool>
   
   <!-- Interpolated Cache Reader -->
