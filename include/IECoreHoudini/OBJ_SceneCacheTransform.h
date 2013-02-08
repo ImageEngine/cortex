@@ -81,22 +81,22 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		/// and/or OBJ_SceneCacheGeometry nodes depending on the settings for pHierarchy and pDepth.
 		/// Derived classes should re-implement doBuildObject() and doBuildChild() if specialized
 		/// behaviour is necessary.
-		virtual void buildHierarchy( const IECore::SceneCache *cache );
+		virtual void buildHierarchy( const IECore::SceneInterface *scene );
 	
 	protected :
 		
 		/// Called by buildHierarchy() and doBuildChildren() when the SceneCache contains an object.
 		/// Implemented to build the specific object using an OBJ_SceneCacheGeometry node.
-		virtual OBJ_Node *doBuildObject( const IECore::SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		virtual OBJ_Node *doBuildObject( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth );
 		
 		/// Called by doBuildChildren() when the SceneCache contains a child.
 		/// Implemented to build the current cache path using an OBJ_SceneCacheTransform or
 		/// OBJ_SceneCacheGeometry node depending on the settings for hierarchy and depth.
-		virtual OBJ_Node *doBuildChild( const IECore::SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		virtual OBJ_Node *doBuildChild( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth );
 		
 		/// Called by buildHierarchy() to build the children of the SceneCache.
 		/// This will be called recursively for each child when Depth is AllDescenants.
-		virtual void doBuildChildren( const IECore::SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		virtual void doBuildChildren( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth );
 
 };
 

@@ -58,14 +58,14 @@ class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 		/// Implemented to build the SceneCache using a SOP_SceneCacheSource. Derived classes
 		/// should re-implement doBuildGeometry() if specialized behaviour is necessary.
 		/// \todo: do we need this extra abstraction?
-		virtual void buildHierarchy( const IECore::SceneCache *cache );
+		virtual void buildHierarchy( const IECore::SceneInterface *scene );
 	
 	protected :
 		
 		/// Called by buildHierarchy() to load the SceneCache. The Space parameter will
 		/// determine what settings are used. World and Path will load all descedants,
 		/// while Local and Object will load the immediate child object only.
-		virtual void doBuildGeometry( const IECore::SceneCache *cache );
+		virtual void doBuildGeometry( const IECore::SceneInterface *scene );
 
 };
 

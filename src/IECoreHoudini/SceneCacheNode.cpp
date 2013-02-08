@@ -34,7 +34,6 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include "boost/tokenizer.hpp"
 
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
@@ -97,12 +96,12 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template( PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile ),
 	PRM_Template(
 		PRM_CALLBACK, 1, &pReload, 0, 0, 0, &SceneCacheNode<BaseType>::reloadButtonCallback, 0, 0,
-		"Removes the current MDC file from the cache. This will force a recook on this node, and "
-		"cause all other nodes using this MDC file to require a recook as well."
+		"Removes the current SCC file from the cache. This will force a recook on this node, and "
+		"cause all other nodes using this SCC file to require a recook as well."
 	),
 	PRM_Template(
 		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, 0, 0, 0,
-		"Root path inside the MDC of the hierarchy to load"
+		"Root path inside the SCC of the hierarchy to load"
 	),
 	PRM_Template(
 		PRM_INT, 1, &pSpace, &spaceDefault, &spaceList, 0, 0, 0, 0,
@@ -122,8 +121,8 @@ void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 		return;
 	}
 	
-	menu[0].setToken( "/" );
-	menu[0].setLabel( "/" );
+	menu[0].setToken( SceneInterface::rootName.c_str() );
+	menu[0].setLabel( SceneInterface::rootName.c_str() );
 	
 	std::string file;
 	if ( !node->ensureFile( file ) )
@@ -134,7 +133,7 @@ void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 	}
 	
 	std::vector<std::string> descendants;
-	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, "/" );
+	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, SceneInterface::rootName );
 	node->descendantNames( entry->sceneCache(), descendants );
 	node->createMenu( menu, descendants );
 }
@@ -161,7 +160,7 @@ bool SceneCacheNode<BaseType>::ensureFile( std::string &file )
 	file = getFile();
 	
 	boost::filesystem::path filePath = boost::filesystem::path( file );
-	if ( filePath.extension() == ".mdc" && boost::filesystem::exists( filePath ) )
+	if ( filePath.extension() == ".scc" && boost::filesystem::exists( filePath ) )
 	{
 		return true;
 	}
@@ -192,9 +191,14 @@ std::string SceneCacheNode<BaseType>::getPath()
 }
 
 template<typename BaseType>
-void SceneCacheNode<BaseType>::setPath( std::string path )
+void SceneCacheNode<BaseType>::setPath( const IECore::SceneInterface *scene )
 {
-	this->setString( UT_String( path ), CH_STRING_LITERAL, pRoot.getToken(), 0, 0 );
+	std::string str;
+	SceneInterface::Path p;
+	scene->path( p );
+	SceneInterface::pathToString( p, str );
+	
+	this->setString( UT_String( str ), CH_STRING_LITERAL, pRoot.getToken(), 0, 0 );
 }
 
 template<typename BaseType>
@@ -210,36 +214,43 @@ void SceneCacheNode<BaseType>::setSpace( SceneCacheNode<BaseType>::Space space )
 }
 
 template<typename BaseType>
-void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneCache *cache, std::vector<std::string> &descendants )
+void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants )
 {
-	IndexedIO::EntryIDList children;
-	cache->childNames( children );
+	SceneInterface::NameList children;
+	scene->childNames( children );
 	
-	std::string current = ( cache->path() == "/" ) ? "" : cache->path();
-	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	std::string current = "";
+	if ( scene->name() != SceneInterface::rootName )
+	{
+		SceneInterface::Path p;
+		scene->path( p );
+		SceneInterface::pathToString( p, current );
+	}
+	
+	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		descendants.push_back( current + "/" + it->value() );
 	}
 	
-	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		descendantNames( cache->readableChild( *it ), descendants );
+		descendantNames( scene->child( *it ), descendants );
 	}
 };
 
 template<typename BaseType>
-void SceneCacheNode<BaseType>::objectNames( const IECore::SceneCache *cache, std::vector<std::string> &objects )
+void SceneCacheNode<BaseType>::objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects )
 {
-	if ( cache->hasObject() )
+	if ( scene->hasObject() )
 	{
-		objects.push_back( cache->name() );
+		objects.push_back( scene->name() );
 	}
 	
-	IndexedIO::EntryIDList children;
-	cache->childNames( children );
-	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	SceneInterface::NameList children;
+	scene->childNames( children );
+	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		objectNames( cache->readableChild( *it ), objects );
+		objectNames( scene->child( *it ), objects );
 	}
 };
 
@@ -278,31 +289,36 @@ SceneCacheUtil::Cache::EntryPtr SceneCacheUtil::Cache::entry( const std::string 
 	FileAndMutexPtr f = m_fileCache.get( fileName );
 	EntryPtr result = new Entry( f ); // this locks the mutex for us
 	result->m_entry = result->m_fileAndMutex->file;
-
-	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	Tokenizer tokens( path, boost::char_separator<char>( "/" ) );
-	for ( Tokenizer::iterator tIt=tokens.begin(); tIt!=tokens.end(); ++tIt )
+	
+	if ( path != SceneInterface::rootName.string() )
 	{
-		/// \todo: this will throw if the path is bad. how should we handle it?
-		result->m_entry = result->m_entry->readableChild( *tIt );	
+		SceneInterface::Path p;
+		SceneInterface::stringToPath( path, p );
+		result->m_entry = result->m_entry->scene( p, SceneInterface::NullIfMissing );
 	}
-
+	
 	return result;
 }
 
-Imath::M44d SceneCacheUtil::Cache::worldTransform( const std::string &fileName, const std::string &path )
+Imath::M44d SceneCacheUtil::Cache::worldTransform( const std::string &fileName, const std::string &path, double time )
 {
-	EntryPtr thisEntry = entry( fileName, "/" );
-	ConstSceneCachePtr cache = thisEntry->sceneCache();
-	Imath::M44d result = cache->readTransform();
-	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	Tokenizer tokens( path, boost::char_separator<char>( "/" ) );
-	for ( Tokenizer::iterator tIt=tokens.begin(); tIt!=tokens.end(); ++tIt )
+	EntryPtr thisEntry = entry( fileName, SceneInterface::rootName );
+	ConstSceneInterfacePtr scene = thisEntry->sceneCache();
+	
+	SceneInterface::Path p;
+	SceneInterface::stringToPath( path, p );
+	Imath::M44d result = scene->readTransformAsMatrix( time );
+	for ( SceneInterface::Path::const_iterator it = p.begin(); scene && it != p.end(); ++it )
 	{
-		cache = cache->readableChild( *tIt );
-		result = cache->readTransform() * result;
+		scene = scene->child( *it, SceneInterface::NullIfMissing );
+		if ( !scene )
+		{
+			break;
+		}
+		
+		result = scene->readTransformAsMatrix( time ) * result;
 	}
-
+	
 	return result;
 }
 
@@ -328,7 +344,7 @@ SceneCacheUtil::Cache::Entry::Entry( FileAndMutexPtr fileAndMutex )
 {
 }
 
-const SceneCache *SceneCacheUtil::Cache::Entry::sceneCache()
+const SceneInterface *SceneCacheUtil::Cache::Entry::sceneCache()
 {
 	return m_entry;
 }

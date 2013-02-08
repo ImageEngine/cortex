@@ -61,7 +61,7 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		static int buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 	
 		/// Derived classes should define this function to build the hierarchy contained in the SceneCache.
-		virtual void buildHierarchy( const IECore::SceneCache *cache ) = 0;
+		virtual void buildHierarchy( const IECore::SceneInterface *scene ) = 0;
 		/// Implemented to destroy all child nodes
 		virtual void cleanHierarchy();
 	

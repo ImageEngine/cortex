@@ -119,21 +119,26 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 	return templatePair;
 }
 
-void OBJ_SceneCacheTransform::buildHierarchy( const SceneCache *cache )
+void OBJ_SceneCacheTransform::buildHierarchy( const SceneInterface *scene )
 {
+	if ( !scene )
+	{
+		return;
+	}
+	
 	Depth depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
 	Hierarchy hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
 	
 	if ( hierarchy == FlatGeometry )
 	{
-		doBuildObject( cache, this, hierarchy, depth );
+		doBuildObject( scene, this, hierarchy, depth );
 		return;
 	}
 	
 	OBJ_Node *rootNode = this;
-	if ( cache->hasObject() )
+	if ( scene->hasObject() )
 	{
-		OBJ_Node *objNode = doBuildObject( cache, this, SubNetworks, Children );
+		OBJ_Node *objNode = doBuildObject( scene, this, SubNetworks, Children );
 		if ( hierarchy == Parenting )
 		{
 			rootNode = objNode;
@@ -145,38 +150,38 @@ void OBJ_SceneCacheTransform::buildHierarchy( const SceneCache *cache )
 		rootNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
 	}
 	
-	doBuildChildren( cache, rootNode, hierarchy, depth );
+	doBuildChildren( scene, rootNode, hierarchy, depth );
 	
-	if ( hierarchy == Parenting && !cache->hasObject() )
+	if ( hierarchy == Parenting && !scene->hasObject() )
 	{
 		destroyNode( rootNode );
 	}
 }
 
-OBJ_Node *OBJ_SceneCacheTransform::doBuildObject( const SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+OBJ_Node *OBJ_SceneCacheTransform::doBuildObject( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
-	const char *name = ( hierarchy == Parenting ) ? cache->name().c_str() : "geo";
+	const char *name = ( hierarchy == Parenting ) ? scene->name().c_str() : "geo";
 	OP_Node *opNode = parent->createNode( OBJ_SceneCacheGeometry::typeName, name );
 	OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( opNode );
 	
 	geo->setFile( getFile() );
-	geo->setPath( cache->path() );
+	geo->setPath( scene );
 	
 	Space space = ( depth == AllDescendants ) ? Path : ( hierarchy == Parenting ) ? Local : Object;
 	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
 	
-	geo->buildHierarchy( cache );
+	geo->buildHierarchy( scene );
 	
 	return geo;
 }
 
-OBJ_Node *OBJ_SceneCacheTransform::doBuildChild( const SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+OBJ_Node *OBJ_SceneCacheTransform::doBuildChild( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
-	OP_Node *opNode = parent->createNode( OBJ_SceneCacheTransform::typeName, cache->name().c_str() );
+	OP_Node *opNode = parent->createNode( OBJ_SceneCacheTransform::typeName, scene->name().c_str() );
 	OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( opNode );
 	
 	xform->setFile( getFile() );
-	xform->setPath( cache->path() );
+	xform->setPath( scene );
 	xform->setSpace( Local );
 	xform->setInt( pHierarchy.getToken(), 0, 0, hierarchy );
 	xform->setInt( pDepth.getToken(), 0, 0, depth );
@@ -184,7 +189,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doBuildChild( const SceneCache *cache, OP_Net
 	return xform;
 }
 
-void OBJ_SceneCacheTransform::doBuildChildren( const SceneCache *cache, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+void OBJ_SceneCacheTransform::doBuildChildren( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
 	OP_Network *inputNode = parent;
 	if ( hierarchy == Parenting )
@@ -192,11 +197,11 @@ void OBJ_SceneCacheTransform::doBuildChildren( const SceneCache *cache, OP_Netwo
 		parent = parent->getParent();
 	}
 	
-	IndexedIO::EntryIDList children;
-	cache->childNames( children );
-	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	SceneInterface::NameList children;
+	scene->childNames( children );
+	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		ConstSceneCachePtr child = cache->readableChild( *it );
+		ConstSceneInterfacePtr child = scene->child( *it );
 		
 		OBJ_Node *childNode = 0;
 		if ( hierarchy == SubNetworks )

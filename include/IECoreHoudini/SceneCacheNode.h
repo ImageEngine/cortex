@@ -88,7 +88,7 @@ class SceneCacheNode : public BaseType
 		std::string getFile();
 		void setFile( std::string file );
 		std::string getPath();
-		void setPath( std::string path );
+		void setPath( const IECore::SceneInterface *scene );
 		Space getSpace();
 		void setSpace( Space space );
 	
@@ -102,9 +102,9 @@ class SceneCacheNode : public BaseType
 		/// get the file and ensure it is a valid MDC
 		bool ensureFile( std::string &file );
 		/// get a breadth first list of all descendant paths
-		void descendantNames( const IECore::SceneCache *cache, std::vector<std::string> &descendants );
+		void descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants );
 		/// get a depth first list of all object names
-		void objectNames( const IECore::SceneCache *cache, std::vector<std::string> &objects );
+		void objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
 
@@ -131,7 +131,7 @@ class Cache
 		
 			public :
 			
-				const IECore::SceneCache *sceneCache();				
+				const IECore::SceneInterface *sceneCache();				
 			
 			private :
 			
@@ -139,7 +139,7 @@ class Cache
 				
 				FileAndMutexPtr m_fileAndMutex;
 				tbb::mutex::scoped_lock m_lock;
-				IECore::ConstSceneCachePtr m_entry;
+				IECore::ConstSceneInterfacePtr m_entry;
 				
 				friend class Cache;
 		
@@ -148,7 +148,7 @@ class Cache
 		IE_CORE_DECLAREPTR( Entry )
 		
 		EntryPtr entry( const std::string &fileName, const std::string &path );
-		Imath::M44d worldTransform( const std::string &fileName, const std::string &path );
+		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );
 		void erase( const std::string &fileName );
 	
 	private :
@@ -158,7 +158,7 @@ class Cache
 			public :
 				
 				tbb::mutex mutex;
-				IECore::SceneCachePtr file;
+				IECore::SceneInterfacePtr file;
 				
 		};
 				

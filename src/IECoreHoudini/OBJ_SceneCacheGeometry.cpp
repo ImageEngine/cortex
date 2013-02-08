@@ -64,19 +64,19 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 	return templatePair;
 }
 
-void OBJ_SceneCacheGeometry::buildHierarchy( const SceneCache *cache )
+void OBJ_SceneCacheGeometry::buildHierarchy( const SceneInterface *scene )
 {
-	doBuildGeometry( cache );
+	doBuildGeometry( scene );
 }
 
-void OBJ_SceneCacheGeometry::doBuildGeometry( const SceneCache *cache )
+void OBJ_SceneCacheGeometry::doBuildGeometry( const SceneInterface *scene )
 {
-	const char *name = cache->name().c_str();
+	const char *name = scene->name().c_str();
 	OP_Node *opNode = createNode( SOP_SceneCacheSource::typeName, name );
 	SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( opNode );
 	
 	sop->setFile( getFile() );
-	sop->setPath( cache->path() );
+	sop->setPath( scene );
 	
 	Space space = getSpace();
 	UT_String shapes( name );

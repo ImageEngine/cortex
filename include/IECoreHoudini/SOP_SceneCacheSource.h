@@ -76,7 +76,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 	
 	private :
 		
-		void loadObjects( const IECore::SceneCache *cache, Imath::M44d transform, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter );
+		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
 
 };

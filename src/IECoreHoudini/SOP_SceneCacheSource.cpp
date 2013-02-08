@@ -62,8 +62,8 @@ OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		unsigned numMDCParms = PRM_Template::countTemplates( SceneCacheNode<SOP_Node>::parameters );
-		thisTemplate = new PRM_Template[ numMDCParms + 3 ];
+		unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<SOP_Node>::parameters );
+		thisTemplate = new PRM_Template[ numSCCParms + 3 ];
 		
 		// add the file parms
 		for ( unsigned i = 0; i < 3; ++i )
@@ -83,7 +83,7 @@ OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 		);
 		
 		// then the rest
-		for ( unsigned i = 3; i < numMDCParms; ++i )
+		for ( unsigned i = 3; i < numSCCParms; ++i )
 		{
 			thisTemplate[2+i] = SceneCacheNode<SOP_Node>::parameters[i];
 		}
@@ -130,11 +130,17 @@ void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int
 		return;
 	}
 	
-	std::string path = node->getPath();
-	
 	std::vector<std::string> objects;
-	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
-	node->objectNames( entry->sceneCache(), objects );
+	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, node->getPath() );
+	const SceneInterface *scene = entry->sceneCache();
+	if ( !scene )
+	{
+		// mark the end of our menu
+		menu[1].setToken( 0 );
+		return;
+	}
+	
+	node->objectNames( scene, objects );
 	node->createMenu( menu, objects );
 }
 
@@ -145,7 +151,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	std::string file;
 	if ( !ensureFile( file ) )
 	{
-		addError( SOP_ATTRIBUTE_INVALID, ( file + " is not a valid .mdc" ).c_str() );
+		addError( SOP_ATTRIBUTE_INVALID, ( file + " is not a valid .scc" ).c_str() );
 		gdp->destroyStashed();
 		return error();
 	}
@@ -167,22 +173,33 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	attributeFilter.compile( value );
 	
 	Space space = getSpace();
-	Imath::M44d transform = ( space == World ) ? cache().worldTransform( file, path ) : Imath::M44d();
+	Imath::M44d transform = ( space == World ) ? cache().worldTransform( file, path, context.getTime() ) : Imath::M44d();
 	
 	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
-	loadObjects( entry->sceneCache(), transform, space, shapeFilter, attributeFilter );
+	const SceneInterface *scene = entry->sceneCache();
+	if ( !scene )
+	{
+		addError( SOP_ATTRIBUTE_INVALID, ( path + " is not a valid location in " + file ).c_str() );
+		gdp->destroyStashed();
+		return error();
+	}
+	
+	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter );
 	
 	gdp->destroyStashed();
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECore::SceneCache *cache, Imath::M44d transform, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter )
+void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter )
 {
-	if ( cache->hasObject() && UT_String( cache->name() ).multiMatch( shapeFilter ) )
+	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
 	{
-		ObjectPtr object = cache->readObject();
+		ObjectPtr object = scene->readObject( time );
 		
-		std::string fullName = cache->path();
+		std::string fullName;
+		SceneInterface::Path p;
+		scene->path( p );
+		SceneInterface::pathToString( p, fullName );
 		/// \todo: we either need a reserved character to reconstruct the hierarchy from group names
 		/// or we need Cortex to start using a name attribute instead of groups
 		boost::algorithm::replace_all( fullName, "/", "_" );
@@ -193,7 +210,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneCache *cache, Imath::
 		Imath::M44d currentTransform;
 		if ( space == Local )
 		{
-			currentTransform = cache->readTransform();
+			currentTransform = scene->readTransformAsMatrix( time );
 		}
 		else if ( space != Object )
 		{
@@ -208,17 +225,17 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneCache *cache, Imath::
 			ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
 			if ( !converter || !converter->convert( myGdpHandle ) )
 			{
-				addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + cache->path() + " to houdini" ).c_str() );
+				addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + fullName + " to houdini" ).c_str() );
 			}
 		}
 	}
 	
-	IndexedIO::EntryIDList children;
-	cache->childNames( children );
-	for ( IndexedIO::EntryIDList::const_iterator it=children.begin(); it != children.end(); ++it )
+	SceneInterface::NameList children;
+	scene->childNames( children );
+	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		ConstSceneCachePtr child = cache->readableChild( *it );
-		loadObjects( child, child->readTransform() * transform, space, shapeFilter, attributeFilter );
+		ConstSceneInterfacePtr child = scene->child( *it );
+		loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, shapeFilter, attributeFilter );
 	}
 }
 

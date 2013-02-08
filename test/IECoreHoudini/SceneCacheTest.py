@@ -40,7 +40,7 @@ import unittest
 
 class TestSceneCache( IECoreHoudini.TestCase ) :
 	
-	__testFile = "test/test.mdc"
+	__testFile = "test/test.scc"
 	
 	def sop( self, parent=None ) :
 		if not parent :
@@ -63,33 +63,33 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		geometry.parm( "file" ).set( TestSceneCache.__testFile )
 		return geometry
 	
-	def writeMDC( self, rotation=IECore.V3d( 0, 0, 0 ) ) :
+	def writeSCC( self, rotation=IECore.V3d( 0, 0, 0 ) ) :
 		
-		m = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
 		
-		mc = m.writableChild( str( 1 ) )
+		sc = scene.createChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
-		mc.writeObject( mesh )
+		sc.writeObject( mesh, 0 )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
-		mc.writeTransform( matrix )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 		
-		mc = mc.writableChild( str( 2 ) )
+		sc = sc.createChild( str( 2 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
-		mc.writeObject( mesh )
+		sc.writeObject( mesh, 0 )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
-		mc.writeTransform( matrix )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 		
-		mc = mc.writableChild( str( 3 ) )
+		sc = sc.createChild( str( 3 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
-		mc.writeObject( mesh )
+		sc.writeObject( mesh, 0 )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
-		mc.writeTransform( matrix )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 	
 	def testBadFile( self ) :
 		
@@ -104,7 +104,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			node.parm( "file" ).set( TestSceneCache.__testFile )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
-			self.writeMDC()
+			self.writeSCC()
 			node.cook( force=True )
 			self.failUnless( not node.errors() )
 		
@@ -116,7 +116,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testObjSubPaths( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		
 		def testSimple( node ) :
 			
@@ -138,7 +138,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testSimple( xform )
 		testSimple( geo )
 		
-		self.writeMDC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
+		self.writeSCC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
 		
 		def testRotated( node ) :
 			
@@ -166,7 +166,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testObjSpaceModes( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		
 		def testSimple( node ) :
 			
@@ -190,7 +190,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testSimple( xform )
 		testSimple( geo )
 		
-		self.writeMDC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
+		self.writeSCC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
 		
 		def testRotated( node ) :
 			
@@ -217,7 +217,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testSopSubPaths( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		node = self.sop()
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
@@ -265,7 +265,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testSopSpaceModes( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		node = self.sop()
 		self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
@@ -366,7 +366,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testSopShapeFilter( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		node = self.sop()
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
@@ -406,7 +406,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testSopAttributeFilter( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		node = self.sop()
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
@@ -444,7 +444,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testBuildGeo( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		geo = self.geometry()
 		self.assertEqual( geo.children(), tuple() )
 		geo.parm( "build" ).pressButton()
@@ -483,7 +483,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testBuildSubNetwork( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
@@ -569,7 +569,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testBuildParenting( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
@@ -653,7 +653,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testBuildFlatGeometry( self ) :
 		
-		self.writeMDC()
+		self.writeSCC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
@@ -729,7 +729,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			node.cook()
 			self.assertEqual( node.cookCount(), 3 )
 		
-		self.writeMDC()
+		self.writeSCC()
 		testNode( self.sop() )
 		testNode( self.xform() )
 		testNode( self.geometry() )

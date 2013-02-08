@@ -84,8 +84,8 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
 	{
 		PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
 		unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
-		unsigned numMDCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
-		thisTemplate = new PRM_Template[ numObjParms + numMDCParms + 2 ];
+		unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
+		thisTemplate = new PRM_Template[ numObjParms + numSCCParms + 2 ];
 		
 		for ( unsigned i = 0; i < numObjParms; ++i )
 		{
@@ -93,12 +93,12 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
 			copyAndHideParm( objTemplate[i], thisTemplate[i] );
 		}
 		
-		for ( unsigned i = 0; i < numMDCParms; ++i )
+		for ( unsigned i = 0; i < numSCCParms; ++i )
 		{
 			thisTemplate[numObjParms+i] = SceneCacheNode<BaseType>::parameters[i];
 		}
 		
-		thisTemplate[numObjParms + numMDCParms] = PRM_Template(
+		thisTemplate[numObjParms + numSCCParms] = PRM_Template(
 			PRM_CALLBACK, 1, &pBuild, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::buildButtonCallback, 0, 0,
 			"Build the hierarchy below the specified root path.\n"
 			"Some nodes may define additional options that are used during the build process."
@@ -150,21 +150,28 @@ OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 	std::string file;
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
-		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .mdc" ).c_str() );
+		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .scc" ).c_str() );
 		return SceneCacheNode<BaseType>::error();
 	}
 	
 	std::string path = this->getPath();
 	OBJ_SceneCacheNode<OP_Node>::Space space = (OBJ_SceneCacheNode<OP_Node>::Space)this->getSpace();
 	
+	const SceneInterface *scene = SceneCacheNode<BaseType>::cache().entry( file, path )->sceneCache();
+	if ( !scene )
+	{
+		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( path + " is not a valid location in " + file ).c_str() );
+		return SceneCacheNode<BaseType>::error();
+	}
+	
 	Imath::M44d transform;
 	if ( space == SceneCacheNode<OP_Node>::World )
 	{
-		transform = SceneCacheNode<BaseType>::cache().worldTransform( file, path );
+		transform = SceneCacheNode<BaseType>::cache().worldTransform( file, path, context.getTime() );
 	}
 	else if ( space == SceneCacheNode<OP_Node>::Local )
 	{
-		transform = SceneCacheNode<BaseType>::cache().entry( file, path )->sceneCache()->readTransform();
+		transform = SceneCacheNode<BaseType>::cache().entry( file, path )->sceneCache()->readTransformAsMatrix( context.getTime() );
 	}
 	
 	SceneCacheNode<BaseType>::setParmTransform( context, IECore::convert<UT_Matrix4D>( transform ) );
