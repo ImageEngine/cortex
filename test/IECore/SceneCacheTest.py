@@ -191,7 +191,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		readWalk( m, IECore.Box3d() )
 								
-	def testMissingReadableChildRaises( self ) :
+	def testMissingReadableChild( self ) :
 	
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		m.createChild( "a" )
@@ -200,7 +200,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		m.child( "a", IECore.SceneInterface.MissingBehaviour.ThrowIfMissing )
 		self.assertRaises( RuntimeError, m.child, "b" )
-		
+		self.assertEqual( None, m.child( "b", IECore.SceneInterface.MissingBehaviour.NullIfMissing ) )
+	
 	def testExplicitBoundOverridesImplicitBound( self ) :
 			
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
