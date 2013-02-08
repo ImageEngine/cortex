@@ -202,6 +202,24 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, m.child, "b" )
 		self.assertEqual( None, m.child( "b", IECore.SceneInterface.MissingBehaviour.NullIfMissing ) )
 	
+	def testMissingScene( self ) :
+	
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		a = m.createChild( "a" )
+		b = a.createChild( "b" )
+		c = b.createChild( "c" )
+		del m, a, b, c
+		
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		a = m.scene( [ "a" ] )
+		b = m.scene( [ "a", "b" ] )
+		self.assertEqual( b.path(), a.child( "b" ).path() )
+		c = m.scene( [ "a", "b", "c" ] )
+		self.assertEqual( c.path(), b.child( "c" ).path() )
+		
+		self.assertRaises( RuntimeError, m.scene, [ "a", "d" ] )
+		self.assertEqual( None, m.scene( [ "a", "d" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ) )
+	
 	def testExplicitBoundOverridesImplicitBound( self ) :
 			
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )

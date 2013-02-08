@@ -77,16 +77,8 @@ static std::string pathAsString( const SceneInterface &m )
 	return str;
 }
 
-static list readAttributeNames( const SceneInterface &m )
+static void listToPath( list l, SceneInterface::Path &p )
 {
-	SceneInterface::NameList a;
-	m.readAttributeNames( a );
-	return arrayToList( a );
-}
-
-static std::string pathToString( list l )
-{
-	SceneInterface::Path p;
 	int listLen = IECorePython::len( l );
 	for (int i = 0; i < listLen; i++ )
 	{
@@ -97,6 +89,26 @@ static std::string pathToString( list l )
 		}
 		p.push_back( ex() );	
 	}
+}
+
+static SceneInterfacePtr nonConstScene( SceneInterface &m, list l, SceneInterface::MissingBehaviour b )
+{
+	SceneInterface::Path p;
+	listToPath( l, p );
+	return m.scene( p, b );
+}
+
+static list readAttributeNames( const SceneInterface &m )
+{
+	SceneInterface::NameList a;
+	m.readAttributeNames( a );
+	return arrayToList( a );
+}
+
+static std::string pathToString( list l )
+{
+	SceneInterface::Path p;
+	listToPath( l, p );
 	std::string str;
 	SceneInterface::pathToString( p, str );
 	return str;
@@ -123,8 +135,7 @@ static list supportedExtensions( IndexedIO::OpenMode modes )
 void bindSceneInterface()
 {
 	SceneInterfacePtr (SceneInterface::*nonConstChild)(const SceneInterface::Name &, SceneInterface::MissingBehaviour) = &SceneInterface::child;
-	SceneInterfacePtr (SceneInterface::*nonConstScene)(const SceneInterface::Path &, SceneInterface::MissingBehaviour) = &SceneInterface::scene;
-
+	
 	// make the SceneInterface class first
 	IECorePython::RunTimeTypedClass<SceneInterface> sceneInterfaceClass;
 	
@@ -163,7 +174,7 @@ void bindSceneInterface()
 		.def( "childNames", &childNames )
 		.def( "child", nonConstChild, ( arg( "name" ), arg( "missingBehaviour" ) = SceneInterface::ThrowIfMissing ) )
 		.def( "createChild", &SceneInterface::createChild )
-		.def( "scene", nonConstScene, ( arg( "path" ), arg( "missingBehaviour" ) = SceneInterface::ThrowIfMissing ) )
+		.def( "scene", &nonConstScene, ( arg( "path" ), arg( "missingBehaviour" ) = SceneInterface::ThrowIfMissing ) )
 
 		.def( "pathToString", pathToString ).staticmethod("pathToString")
 		.def( "stringToPath", stringToPath ).staticmethod("stringToPath")
