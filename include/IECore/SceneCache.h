@@ -118,11 +118,11 @@ class SceneCache : public SampledSceneInterface
 
 		bool hasChild( const Name &name ) const;
 		void childNames( NameList &childNames ) const;
-		SceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour );
-		ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const;
+		SceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing );
+		ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
 		SceneInterfacePtr createChild( const Name &name );
-		SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour );
-		ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour ) const;
+		SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
+		ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
 
 	private :
 
