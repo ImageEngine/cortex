@@ -1561,22 +1561,36 @@ void SceneCache::childNames( NameList &childNames ) const
 
 SceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingBehaviour missingBehaviour )
 {
+	ImplementationPtr impl;
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get(), false );
 	if ( reader )
 	{
-		return new SceneCache( ImplementationPtr( reader->child( name, missingBehaviour ) ) );
+		impl = reader->child( name, missingBehaviour );
 	}
 	else
 	{
 		WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
-		return new SceneCache( ImplementationPtr( writer->child( name, missingBehaviour ) ) );
+		impl = writer->child( name, missingBehaviour );
 	}
+	
+	if ( !impl )
+	{
+        	return 0;
+	}
+	
+	return new SceneCache( impl );
 }
 
 ConstSceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingBehaviour missingBehaviour ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
-	return new SceneCache( ImplementationPtr( reader->child( name, missingBehaviour ) ) );
+	ImplementationPtr impl = reader->child( name, missingBehaviour );
+	if ( !impl )
+	{
+        	return 0;
+	}
+	
+	return new SceneCache( impl );
 }
 
 bool SceneCache::hasChild( const Name &name ) const
@@ -1593,11 +1607,23 @@ SceneInterfacePtr SceneCache::createChild( const Name &name )
 SceneInterfacePtr SceneCache::scene( const Path &path, MissingBehaviour missingBehaviour )
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
-	return new SceneCache(reader->scene( path, missingBehaviour ));
+	ImplementationPtr impl = reader->scene( path, missingBehaviour );
+	if ( !impl )
+	{
+        	return 0;
+	}
+	
+	return new SceneCache( impl );
 }
 
 ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingBehaviour missingBehaviour ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
-	return new SceneCache(reader->scene( path, missingBehaviour ));
+	ImplementationPtr impl = reader->scene( path, missingBehaviour );
+	if ( !impl )
+	{
+        	return 0;
+	}
+	
+	return new SceneCache( impl );
 }
