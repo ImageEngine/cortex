@@ -59,6 +59,18 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		self.assertEqual( linearObjectInterpolation( V2dVectorData( [V2d(1)] ), V2dVectorData( [V2d(2)] ), 0.5 ), V2dVectorData( [V2d(1.5)] ) )
 		self.assertEqual( linearObjectInterpolation( V3dVectorData( [V3d(1)] ), V3dVectorData( [V3d(2)] ), 0.5 ), V3dVectorData( [V3d(1.5)] ) )
 
+	def testMatrixInterpolation( self ):
+		m1 = M44d()
+		m1.translate( V3d(1,0,0) )
+		m2 = M44d()
+		m2.translate( V3d(0,1,0) )
+		m2.scale( V3d(9,9,9) )
+		mx = M44d()
+		mx.translate( V3d(0.5,0.5,0) )
+		mx.scale( V3d(5,5,5) )
+		self.assertEqual( linearObjectInterpolation( M44dData(m1), M44dData(m2), 0.5 ), M44dData(mx) )
+		self.assertEqual( cubicObjectInterpolation( M44dData(m1), M44dData(m1), M44dData(m2), M44dData(m2), 0.5 ), M44dData(mx) )
+
 	def __buildTree( self, compoundType, seed ):
 
 		def buildCompound( compoundType, seed ):

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,69 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathQuat.h"
-#include "IECore/QuatAlgo.h"
+#include "IECore/TypedData.h"
 
 namespace IECore
 {
 
-// Partially specialize for Imath::Quat. Interpolates through the shortest path.
+// Partially specialise for TypedData
 template<typename T>
-struct LinearInterpolator< Imath::Quat<T> >
+struct LinearInterpolator< TypedData< T > >
 {
-	void operator()(const Imath::Quat<T> &y0,
-			const Imath::Quat<T> &y1,
+	void operator()(const TypedData< T > *y0,
+			const TypedData< T > *y1,
 			double x,
-			Imath::Quat<T> &result) const
+			typename TypedData< T >::Ptr &result) const
 	{
-		Imath::Quat< T > y0Tmp( y0.normalized() );
-		Imath::Quat< T > y1Tmp( y1.normalized() );
-
-		if ( y0Tmp == y1Tmp )
-		{
-			result = y0Tmp;
-			return;
-		}
-
-		result = IECore::slerpShortestArc( y0Tmp, y1Tmp, static_cast< T >(x) );
+		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
 	}
 };
 
-// Partially specialize for Imath::Quat. Interpolates through the shortest path.
+// Partially specialise for TypedData
 template<typename T>
-struct CubicInterpolator< Imath::Quat< T > >
+struct CubicInterpolator< TypedData<T > >
 {
-	void operator()(const Imath::Quat< T > &y0,
-			const Imath::Quat< T > &y1,
-			const Imath::Quat< T > &y2,
-			const Imath::Quat< T > &y3,
+	void operator()(const TypedData< T > *y0,
+			const TypedData< T > *y1,
+			const TypedData< T > *y2,
+			const TypedData< T > *y3,
 			double x,
-			Imath::Quat< T > &result) const
+			typename TypedData< T >::Ptr &result) const
 	{
-		Imath::Quat< T > y0Tmp( y0.normalized() );
-		Imath::Quat< T > y1Tmp( y1.normalized() );
-		Imath::Quat< T > y2Tmp( y2.normalized() );
-		Imath::Quat< T > y3Tmp( y3.normalized() );
-
-		if ( y0Tmp == y1Tmp && y0Tmp == y2Tmp && y0Tmp == y3Tmp )
-		{
-			result = y0Tmp;
-			return;
-		}
-
-		if ( (y0Tmp ^ y1Tmp) < 0.0 )
-		{
-			y1Tmp = -y1Tmp;
-		}
-		if ( (y1Tmp ^ y2) < 0.0 )
-		{
-			y2Tmp = -y2Tmp;
-		}
-		if ( (y2Tmp ^ y3) < 0.0 )
-		{
-			y3Tmp = -y3Tmp;
-		}
-		result = Imath::spline< T >( y0Tmp, y1Tmp, y2Tmp, y3Tmp, static_cast< T >(x) );
+		CubicInterpolator<T>()( y0->readable(), y1->readable(), y2->readable(), y3->readable(), x, result->writable());
 	}
 };
 
