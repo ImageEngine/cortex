@@ -267,6 +267,9 @@ class TestFileIndexedIO(unittest.TestCase):
 		h = e.directory( ["sub2","sub2.1"] )
 		self.assertEqual( h.path(), ["sub2","sub2.1"] )
 		self.assertRaises( RuntimeError, e.directory, [ "i", "dont", "exist" ] )
+		self.assertRaises( RuntimeError, e.subdirectory, "idontexist" )
+		self.assertEqual( None, e.directory( [ "i", "dont", "exist" ], IndexedIO.MissingBehaviour.NullIfMissing ) )
+		self.assertEqual( None, e.subdirectory( "idontexist", IndexedIO.MissingBehaviour.NullIfMissing ) )
 
 	def testLs(self):
 		"""Test FileIndexedIO ls"""
