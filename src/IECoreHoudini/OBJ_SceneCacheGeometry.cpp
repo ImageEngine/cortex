@@ -66,6 +66,11 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 
 void OBJ_SceneCacheGeometry::buildHierarchy( const SceneInterface *scene )
 {
+	if ( !scene )
+	{
+		return;
+	}
+	
 	doBuildGeometry( scene );
 }
 

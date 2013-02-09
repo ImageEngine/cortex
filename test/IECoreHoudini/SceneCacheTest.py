@@ -114,6 +114,31 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		os.remove( TestSceneCache.__testFile )
 		testNode( self.geometry() )
 	
+	def testBadPath( self ) :
+		
+		def testNode( node ) :
+			
+			node.cook( force=True )
+			self.failUnless( not node.errors() )
+			node.parm( "root" ).set( "/1/fake" )
+			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.failUnless( node.errors() )
+			node.parm( "root" ).set( "/1/2" )
+			node.cook( force=True )
+			self.failUnless( not node.errors() )
+			
+			if isinstance( node, hou.ObjNode ) :
+				node.parm( "build" ).pressButton()
+				self.failUnless( node.children() )
+				node.parm( "root" ).set( "/1/fake" )
+				node.parm( "build" ).pressButton()
+				self.assertEqual( node.children(), tuple() )
+		
+		self.writeSCC()
+		testNode( self.sop() )
+		testNode( self.xform() )
+		testNode( self.geometry() )
+	
 	def testObjSubPaths( self ) :
 		
 		self.writeSCC()
