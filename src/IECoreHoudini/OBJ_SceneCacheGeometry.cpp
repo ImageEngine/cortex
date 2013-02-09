@@ -71,7 +71,7 @@ void OBJ_SceneCacheGeometry::buildHierarchy( const SceneInterface *scene )
 
 void OBJ_SceneCacheGeometry::doBuildGeometry( const SceneInterface *scene )
 {
-	const char *name = scene->name().c_str();
+	const char *name = ( scene->name() == SceneInterface::rootName ) ? "root" : scene->name().c_str();
 	OP_Node *opNode = createNode( SOP_SceneCacheSource::typeName, name );
 	SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( opNode );
 	

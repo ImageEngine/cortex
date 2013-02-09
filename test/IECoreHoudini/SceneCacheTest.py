@@ -450,6 +450,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		geo.parm( "build" ).pressButton()
 		self.assertEqual( len(geo.children()), 1 )
 		node = geo.children()[0]
+		self.assertEqual( node.name(), "root" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -465,6 +466,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		geo.parm( "build" ).pressButton()
 		self.assertEqual( len(geo.children()), 1 )
 		node = geo.children()[0]
+		self.assertEqual( node.name(), "2" )
 		node.parm( "root" ).set( "/1/2" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
@@ -665,6 +667,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( geo.children()[0], hou.SopNode ) )
 		self.cookAll( xform )
 		node = geo.children()[0]
+		self.assertEqual( node.name(), "root" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
@@ -684,6 +687,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( geo.children()[0], hou.SopNode ) )
 		self.cookAll( xform )
 		node = geo.children()[0]
+		self.assertEqual( node.name(), "2" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 12 )
@@ -703,6 +707,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( geo.children()[0], hou.SopNode ) )
 		self.cookAll( xform )
 		node = geo.children()[0]
+		self.assertEqual( node.name(), "1" )
 		prims = node.geometry().prims()
 		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
