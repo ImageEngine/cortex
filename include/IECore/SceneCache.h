@@ -80,7 +80,7 @@ class SceneCache : public SampledSceneInterface
 		 * virtual functions defined in SceneInterface.
 		 */
 
-		const Name &name() const;
+		Name name() const;
 		void path( Path &p ) const;
 
 		size_t numBoundSamples() const;

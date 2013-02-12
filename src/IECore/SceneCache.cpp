@@ -1514,7 +1514,7 @@ void SceneCache::path( SceneCache::Path &p ) const
 	}
 }
 
-const SceneCache::Name &SceneCache::name() const
+SceneCache::Name SceneCache::name() const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get(), false );
 	if ( reader )

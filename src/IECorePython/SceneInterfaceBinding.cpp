@@ -157,7 +157,7 @@ void bindSceneInterface()
 	
 	sceneInterfaceClass.def( "path", path )
 		.def( "pathAsString", pathAsString )
-		.def( "name", &SceneInterface::name, return_value_policy<copy_const_reference>() )
+		.def( "name", &SceneInterface::name )
 		.def( "readBound", &SceneInterface::readBound )
 		.def( "writeBound", &SceneInterface::writeBound )
 		.def( "readTransform", &SceneInterface::readTransform )

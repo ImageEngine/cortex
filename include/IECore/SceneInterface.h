@@ -112,7 +112,7 @@ class SceneInterface : public RunTimeTyped
 		virtual ~SceneInterface() = 0;
 
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
-		virtual const Name &name() const = 0;
+		virtual Name name() const = 0;
 		/// Returns the path scene this instance is referring to. 
 		virtual void path( Path &p ) const = 0;
 
