@@ -859,6 +859,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 	private :
 
 		typedef std::vector< Imath::Box3d > BoxSamples;
+		typedef ConstDataPtr TransformSample;
+		typedef std::vector< TransformSample > TransformSamples;
 
 		IndexedIOPtr globalSampleTimes()
 		{
@@ -942,82 +944,83 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			BoxSamples::iterator currBoxIt = m_boundSamples.begin();
 
 			size_t prependCount = (newTimeIt - sampleTimes.begin());
-			m_boundSampleTimes.insert( m_boundSampleTimes.begin(), sampleTimes.begin(), newTimeIt );
-			m_boundSamples.insert( m_boundSamples.begin(), prependCount, oldestKnownBox );
-			for ( size_t i = 0; i < prependCount; i++, newBoxIt++ )
+			if ( prependCount )
 			{
-				m_boundSamples[i].extendBy( *newBoxIt );
+				m_boundSampleTimes.insert( m_boundSampleTimes.begin(), sampleTimes.begin(), newTimeIt );
+				m_boundSamples.insert( m_boundSamples.begin(), prependCount, oldestKnownBox );
+				// refresh iterators after insertion
+				currTimeIt = m_boundSampleTimes.begin();
+				currBoxIt = m_boundSamples.begin();
+				for ( size_t i = 0; i < prependCount; i++, newBoxIt++, currBoxIt++ )
+				{
+					currBoxIt->extendBy( *newBoxIt );
+				}
+				currTimeIt += prependCount;
 			}
-			currTimeIt += prependCount;
-			currBoxIt += prependCount;
 
-			// check if there's still samples to add...
-			if ( newTimeIt == sampleTimes.end() )
-			{
-				return;
-			}
-			
 			//
 			// Mixing phase: 
 			//
 			// New samples that match the time stamp for a known sample or is defined
 			// between two known samples.
 			//
-			double prevNewSampleTime = ( newTimeIt == sampleTimes.begin() ? *newTimeIt : *(newTimeIt - 1) );
-			Imath::Box3d prevNewSampleBox = ( newBoxIt == boxSamples.begin() ? *newBoxIt : *(newBoxIt - 1) );
-			double newestKnownTime = *(m_boundSampleTimes.rbegin());
 			Imath::Box3d newestKnownBox = *(m_boundSamples.rbegin());
 
-			Imath::Box3d tmpBox;
-			LinearInterpolator<Box3d> boxInterpolator;
-
-			for( ; newTimeIt != sampleTimes.end() && *newTimeIt <= newestKnownTime; newTimeIt++, newBoxIt++ )
+			if ( newTimeIt != sampleTimes.end() )
 			{
-				while ( *newTimeIt > *currTimeIt )
+				double prevNewSampleTime = ( newTimeIt == sampleTimes.begin() ? *newTimeIt : *(newTimeIt - 1) );
+				Imath::Box3d prevNewSampleBox = ( newBoxIt == boxSamples.begin() ? *newBoxIt : *(newBoxIt - 1) );
+				double newestKnownTime = *(m_boundSampleTimes.rbegin());
+
+				Imath::Box3d tmpBox;
+				LinearInterpolator<Box3d> boxInterpolator;
+
+				for( ; newTimeIt != sampleTimes.end() && *newTimeIt <= newestKnownTime; newTimeIt++, newBoxIt++ )
 				{
-					// the new sample comes after the current known sample, so we expand the known
-					// sample's bounding box by the interpolated new sample bounding box.
-					double x = ( (*currTimeIt > prevNewSampleTime) ? (*currTimeIt-prevNewSampleTime)/(*newTimeIt-prevNewSampleTime) : 0 );
-					boxInterpolator( prevNewSampleBox, *newBoxIt, x, tmpBox );
-					currBoxIt->extendBy( tmpBox );
-					currTimeIt++;
-					currBoxIt++;
-				}
-				if ( *newTimeIt == *currTimeIt )
-				{
-					// the new sample matches perfectly with a known sample, so we just apply union on the bboxes
-					currBoxIt->extendBy( *newBoxIt );
-					currTimeIt++;
-					currBoxIt++;
-				}
-				else
-				{
-					// the new sample comes prior to the current known sample, so we must insert in the array of known samples.
-					if ( currTimeIt == m_boundSampleTimes.begin() )
+					while ( *newTimeIt > *currTimeIt )
 					{
-						// this is the first known sample so nothing to interpolate...
-						tmpBox = *currBoxIt;
+						// the new sample comes after the current known sample, so we expand the known
+						// sample's bounding box by the interpolated new sample bounding box.
+						double x = ( (*currTimeIt > prevNewSampleTime) ? (*currTimeIt-prevNewSampleTime)/(*newTimeIt-prevNewSampleTime) : 0 );
+						boxInterpolator( prevNewSampleBox, *newBoxIt, x, tmpBox );
+						currBoxIt->extendBy( tmpBox );
+						currTimeIt++;
+						currBoxIt++;
+					}
+					if ( *newTimeIt == *currTimeIt )
+					{
+						// the new sample matches perfectly with a known sample, so we just apply union on the bboxes
+						currBoxIt->extendBy( *newBoxIt );
+						currTimeIt++;
+						currBoxIt++;
 					}
 					else
 					{
-						// interpolate known samples.
-						double prevKnownTime = *(currTimeIt-1);
-						double x = (*newTimeIt -prevKnownTime) /((*currTimeIt)-prevKnownTime);
-						boxInterpolator( *(currBoxIt-1), *currBoxIt, x, tmpBox );
+						// the new sample comes prior to the current known sample, so we must insert in the array of known samples.	
+						if ( currTimeIt == m_boundSampleTimes.begin() )
+						{
+							// this is the first known sample so nothing to interpolate...
+							tmpBox = *currBoxIt;
+						}
+						else
+						{
+							// interpolate known samples.	
+							double prevKnownTime = *(currTimeIt-1);
+							double x = (*newTimeIt -prevKnownTime) /((*currTimeIt)-prevKnownTime);
+							boxInterpolator( *(currBoxIt-1), *currBoxIt, x, tmpBox );
+						}
+						tmpBox.extendBy( *newBoxIt );
+						// add the new box to the array of known samples
+						size_t index = currTimeIt - m_boundSampleTimes.begin();
+						m_boundSampleTimes.insert( currTimeIt, *newTimeIt );
+						m_boundSamples.insert( currBoxIt, tmpBox );
+						// refresh iterators after insertion
+						currTimeIt = m_boundSampleTimes.begin() + index + 1;
+						currBoxIt = m_boundSamples.begin() + index + 1;
 					}
-					tmpBox.extendBy( *newBoxIt );
-					// add the new box to the array of known samples
-					currTimeIt = m_boundSampleTimes.insert( currTimeIt, *newTimeIt ) + 1;
-					currBoxIt = m_boundSamples.insert( currBoxIt, tmpBox ) + 1;
+					prevNewSampleTime = *newTimeIt;
+					prevNewSampleBox = *newBoxIt;
 				}
-				prevNewSampleTime = *newTimeIt;
-				prevNewSampleBox = *newBoxIt;
-			}
-
-			// check if there's still samples to add...
-			if ( newTimeIt == sampleTimes.end() )
-			{
-				return;
 			}
 
 			//
@@ -1026,13 +1029,33 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			// New samples that succeeds any known sample should append to the sample list
 			// by doing the union with the most recent known bounding box.
 			//
-
-			size_t appendCount = (sampleTimes.end() - newTimeIt);
-			m_boundSampleTimes.insert( currTimeIt, newTimeIt, sampleTimes.end() );
-			m_boundSamples.insert( currBoxIt, appendCount, newestKnownBox );
-			for ( size_t i = 0; i < appendCount; i++, currBoxIt++, newBoxIt++ )
+			if ( newTimeIt != sampleTimes.end() )
 			{
-				currBoxIt->extendBy( *newBoxIt );
+				size_t appendCount = (sampleTimes.end() - newTimeIt);
+				size_t index = currTimeIt - m_boundSampleTimes.begin();
+				m_boundSampleTimes.insert( currTimeIt, newTimeIt, sampleTimes.end() );
+				m_boundSamples.insert( currBoxIt, appendCount, newestKnownBox );
+				// refresh iterators after insertion
+				currTimeIt = m_boundSampleTimes.begin() + index;
+				currBoxIt = m_boundSamples.begin() + index;
+				for ( size_t i = 0; i < appendCount; i++, currBoxIt++, newBoxIt++ )
+				{
+					currBoxIt->extendBy( *newBoxIt );
+				}
+			}
+
+			//
+			// Extrapolating phase:
+			//
+			// The latest new box sample is used to expand all the prior known box samples that come later in time.
+			//
+			if ( currBoxIt != m_boundSamples.end() )
+			{
+				Imath::Box3d prevNewSampleBox = *boxSamples.rbegin();
+				for ( ; currBoxIt != m_boundSamples.end(); currBoxIt++ )
+				{
+					currBoxIt->extendBy( prevNewSampleBox );
+				}
 			}
 		}
 
@@ -1083,7 +1106,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					const SampleTimes &childBoundTimes = cit->second->m_boundSampleTimes;
 					const BoxSamples &childBoxSamples = cit->second->m_boundSamples;
 					const SampleTimes &childTransformTimes = cit->second->m_transformSampleTimes;
-					const std::vector< TransformSample > &childTransformSamples = cit->second->m_transformSamples; 
+					const TransformSamples &childTransformSamples = cit->second->m_transformSamples; 
 
 					if ( childBoundTimes.size() == 0 )
 					{
@@ -1098,7 +1121,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					else if ( childTransformTimes.size() == 1 )
 					{
 						M44d m = dataToMatrix( childTransformSamples[0].get() );
-						// there's just one constant transform applied to the children, very simple case
+						// there's just one constant transform applied to the children, very simple case 
+						// (we can ignore it's time and just use the child box one)
 						BoxSamples transformedChildBoxes;
 						transformedChildBoxes.reserve( childBoundTimes.size() );
 						for ( BoxSamples::const_iterator cbit = childBoxSamples.begin(); cbit != childBoxSamples.end(); cbit++ )
@@ -1114,18 +1138,19 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 						if ( childBoundTimes.size() > 1 )
 						{
-							SampleTimes transformedChildSamples;
-
 							// complex case: animated transforms. 
-							// Apply transform interpolation whenever bbox changes, and apply bbox interpolation 
-							// whenever transform changes.
-							transformedChildSamples.reserve( childBoundTimes.size() + childTransformTimes.size() );
+
+							// Step 1: Apply bbox interpolation for each transform sample that doesn't have a corresponding bbox sample.
+							SampleTimes transformedChildSampleTimes;
+
+							transformedChildSampleTimes.reserve( childBoundTimes.size() + childTransformTimes.size() );
 							transformedChildBoxes.reserve( childBoundTimes.size() + childTransformTimes.size() );
+
 							SampleTimes::const_iterator transformTimeIt, childTimeIt;
 							BoxSamples::const_iterator childBoxIt;
 							transformTimeIt = childTransformTimes.begin();
 							childTimeIt = childBoundTimes.begin();
-							std::vector< TransformSample >::const_iterator transformIt = childTransformSamples.begin();
+							TransformSamples::const_iterator transformIt = childTransformSamples.begin();
 							childBoxIt = childBoxSamples.begin();
 							Imath::Box3d tmpBox;
 							LinearInterpolator<Box3d> boxInterpolator;
@@ -1134,30 +1159,15 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 							{
 								if ( *childTimeIt < *transformTimeIt )
 								{
-									// Situation: child sample comes before the transform sample: interpolate transform and apply to child bbox.
-									ConstDataPtr t;
-									if ( transformIt == childTransformSamples.begin() )
-									{
-										t = *transformIt;
-									}
-									else
-									{
-										double prevTransformTime = *(transformTimeIt-1);
-										double x = (*childTimeIt - prevTransformTime)/(*transformTimeIt - prevTransformTime);
-										ConstObjectPtr o1 = *(transformIt-1);
-										ConstObjectPtr o2 = *transformIt;
-										ObjectPtr a;
-										ObjectPtr obj = linearObjectInterpolation( a, a, x );
-										t = runTimeCast< Data >( obj );
-									}
-									transformedChildSamples.push_back( *childTimeIt );
-									transformedChildBoxes.push_back( transform( *childBoxIt, dataToMatrix( t.get() ) ) );
+									// Situation: child sample comes before the transform sample: interpolate transform.
+									transformedChildSampleTimes.push_back( *childTimeIt );
+									transformedChildBoxes.push_back( *childBoxIt );
 									childTimeIt++;
 									childBoxIt++;
 								}
 								else if ( *transformTimeIt < *childTimeIt )
 								{
-									// Situation: transform sample comes before the child sample: interpolate child bbox and apply transform.
+									// Situation: transform sample comes before the child sample: interpolate child bbox.
 									if ( childBoxIt == childBoxSamples.begin() )
 									{
 										// this is the first known sample so nothing to interpolate...
@@ -1170,16 +1180,16 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 										double x = (*transformTimeIt -prevChildTime) /((*childTimeIt)-prevChildTime);
 										boxInterpolator( *(childBoxIt-1), *childBoxIt, x, tmpBox );
 									}
-									transformedChildSamples.push_back( *transformTimeIt );
-									transformedChildBoxes.push_back( transform( tmpBox, dataToMatrix( transformIt->get() ) ) );
+									transformedChildSampleTimes.push_back( *transformTimeIt );
+									transformedChildBoxes.push_back( tmpBox );
 									transformTimeIt++;
 									transformIt++;
 								}
 								else
 								{
 									// Situation: child sample matches the time of the transform sample: transform child bbox.
-									transformedChildSamples.push_back( *childTimeIt );
-									transformedChildBoxes.push_back( transform( *childBoxIt, dataToMatrix( transformIt->get() ) ) );
+									transformedChildSampleTimes.push_back( *childTimeIt );
+									transformedChildBoxes.push_back( *childBoxIt );
 									childTimeIt++;
 									childBoxIt++;
 									transformTimeIt++;
@@ -1187,12 +1197,11 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 								}
 							}
 
-							M44d lastTransformMatrix = dataToMatrix( *childTransformSamples.rbegin() );
 							while( childTimeIt != childBoundTimes.end() )
 							{
 								// Situation: child samples exist after all the transform samples.
-								transformedChildSamples.push_back( *childTimeIt );
-								transformedChildBoxes.push_back( transform( *childBoxIt, lastTransformMatrix ) );
+								transformedChildSampleTimes.push_back( *childTimeIt );
+								transformedChildBoxes.push_back( *childBoxIt );
 								childTimeIt++;
 								childBoxIt++;
 							}
@@ -1201,36 +1210,39 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 							while( transformTimeIt != childTransformTimes.end() )
 							{
 								// Situation: transform samples exist after all the child samples
-								transformedChildSamples.push_back( *transformTimeIt );
-								transformedChildBoxes.push_back( transform( tmpBox, dataToMatrix( transformIt->get() ) ) );
+								transformedChildSampleTimes.push_back( *transformTimeIt );
+								transformedChildBoxes.push_back( tmpBox );
 								transformTimeIt++;
 								transformIt++;
 							}
 
-							// \todo We also want to add some border in the sampled bounding boxes to 
+							// We also want to add some border in the sampled bounding boxes to 
 							// guarantee that the interpolated rotations that trace curves in space
 							// would still be included in the linear interpolated bounding boxes.
+							// then we transform the child bboxes...
+							transformAndExpandBounds( childTransformTimes, childTransformSamples, transformedChildSampleTimes, transformedChildBoxes );
 
 							// accumulate the resulting transformed bounding boxes
-							accumulateBoxSamples( transformedChildSamples, transformedChildBoxes );
+							accumulateBoxSamples( transformedChildSampleTimes, transformedChildBoxes );
 						}
 						else
 						{
+							// the child object does not vary in time, so we just have to transform at each transform 
+							// sample (and we can ignore the sample time for the box - if existent)
+
 							Imath::Box3d tmpBox;
 							if ( childBoxSamples.size() )
 							{
 								tmpBox = childBoxSamples[0];
 							}
-							// the child has no animation, so we just have to transform at each transform sample.
-							transformedChildBoxes.reserve( childTransformTimes.size() );
-							for ( std::vector< TransformSample >::const_iterator tit = childTransformSamples.begin(); tit != childTransformSamples.end(); tit++ )
-							{
-								transformedChildBoxes.push_back( transform( tmpBox, dataToMatrix( tit->get() ) ) );
-							}
-							// \todo We also want to add some border in the sampled bounding boxes to 
+
+							transformedChildBoxes.resize( childTransformTimes.size(), tmpBox );
+
+							// We also want to add some border in the sampled bounding boxes to 
 							// guarantee that the interpolated rotations that trace curves in space
 							// would still be included in the linear interpolated bounding boxes.
-
+							// then we transform the child bboxes...
+							transformAndExpandBounds( childTransformTimes, childTransformSamples, childTransformTimes, transformedChildBoxes );
 							// accumulate the resulting transformed bounding boxes
 							accumulateBoxSamples( childTransformTimes, transformedChildBoxes );							
 						}
@@ -1242,8 +1254,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					// union all the bounding box samples from the child and also from the optional object stored in this location
 					accumulateBoxSamples( m_objectSampleTimes, m_objectSamples );
 				}
-
 			}
+
 			if ( m_boundSampleTimes.size() )
 			{
 				// save the bound sample times
@@ -1259,6 +1271,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					}
 				}
 			}
+
 			// deallocate children since we now computed everything from them anyways...
 			m_children.clear();
 
@@ -1270,22 +1283,154 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			m_sampleTimesMap = 0;
 		}
 
-		typedef std::map< SampleTimes, uint64_t > SampleTimesMap;
-		WriterImplementation* m_parent;
-		SampleTimesMap *m_sampleTimesMap;
+		/// This functions transforms the bounding boxes with the animated transforms and also scales the bounding boxes in a way that it
+		/// guarantees that the original bounding boxes transformed at any time (which would trace curved trajectories in space), 
+		/// would always be fully included in the linear interpolation of the resulting transformed bounding boxes. 
+		/// So we garantee parent nodes can linearly interpolate child bounding boxes.
+		static void transformAndExpandBounds( const SampleTimes &transformTimes, const TransformSamples &transformSamples, const SampleTimes &boxTimes, BoxSamples &boxSamples )
+		{
+			SampleTimes::const_iterator ttIt = transformTimes.begin();
+			SampleTimes::const_iterator btIt = boxTimes.begin();
+			TransformSamples::const_iterator tsIt = transformSamples.begin();
+			BoxSamples::iterator bsIt = boxSamples.begin();
 
-		// store the transform objects (we want to interpolate the transforms later)
-		typedef ConstDataPtr TransformSample;
-		// store the object's bounding box (we want to transform them later)
+			if ( transformTimes.size() != transformSamples.size() )
+			{
+				throw Exception( "Mismatch number of transform samples!" );
+			}
+
+			if ( boxTimes.size() != boxSamples.size() )
+			{
+				throw Exception( "Mismatch number of box samples!" );
+			}
+
+			if ( *ttIt != *btIt )
+			{
+				/// by construction in flush() they should match...
+				throw Exception( "Initial transform and bound sample time don't match!" );
+			}
+			LinearInterpolator<Box3d> boxInterpolator;
+			Imath::Box3d previousBox = *bsIt;
+			TransformSample previousTransform = *tsIt;
+			double previousTransformTime = *ttIt;
+			Imath::M44d previousTransformMatrix = dataToMatrix( previousTransform );
+			Imath::Box3d previousTransformedBox = transform(previousBox, previousTransformMatrix);
+			*bsIt = previousTransformedBox;
+			TransformSample nextTransform = 0;
+			bsIt++;
+			btIt++;
+			ttIt++;
+			tsIt++;
+
+			/// transform all box samples that come prior to the first transform as static boxes transformed by the first transform.
+			while( btIt != boxTimes.end() && *btIt < previousTransformTime )
+			{
+				previousBox = *bsIt;
+				previousTransformedBox = transform(previousBox, previousTransformMatrix);
+				*bsIt = previousTransformedBox;
+				bsIt++;
+				btIt++;
+			}
+
+			/// go on each bbox sample and increase them if necessary
+			for( ; btIt != boxTimes.end() && ttIt != transformTimes.end(); btIt++, bsIt++ )
+			{
+				double boxTime = *btIt;
+				double transformTime = *ttIt;
+
+				if ( boxTime < transformTime )
+				{
+					// interpolate transform to the next box sample
+					double x = (boxTime-previousTransformTime)/(transformTime-previousTransformTime);
+					nextTransform = runTimeCast< Data >( linearObjectInterpolation( previousTransform, *tsIt, x ) );
+					if ( !nextTransform )
+					{
+						throw Exception( "Failed to interpolate transforms while computing bounding boxes! Different types?" );
+					}
+				}
+				else if ( boxTime == transformTime )
+				{
+					nextTransform = *tsIt;
+					tsIt++;
+					ttIt++;
+				}
+				else
+				{
+					throw Exception( "Box sample without a transform sample!" );
+				}
+
+				Imath::Box3d nextBox = *bsIt;
+				Imath::Box3d nextTransformedBox = transform(nextBox, dataToMatrix( nextTransform ));
+				// we don't know how to handle empty bboxes...
+				if ( !nextBox.isEmpty() && !previousTransformedBox.isEmpty() )
+				{
+					Imath::Box3d transfomedInterpBox;
+					Imath::Box3d interpTransformedBoxes;
+					Imath::Box3d totalExpansion;
+
+					/// \todo consider making steps a parameter.
+					int steps = 4;	/// subdivide interval between samples in 4 steps
+					double xStep = 1.0 / steps;
+					for ( double x = xStep; x < 1.0; x += xStep )
+					{
+						// compute the transformed interpolation of bounding boxes
+						boxInterpolator( previousBox, nextBox, x, transfomedInterpBox );
+						ObjectPtr obj = linearObjectInterpolation( previousTransform, nextTransform, x );
+						if ( !obj )
+						{
+							throw Exception( "Failed to interpolate transforms while computing bounding boxes! Different types?" );
+						}
+						TransformSample interpTransform = runTimeCast< Data >( obj );
+						transfomedInterpBox = transform( transfomedInterpBox, dataToMatrix( interpTransform ) );
+						// compute the interpolation of the transformed bounding boxes
+						boxInterpolator( previousTransformedBox, nextTransformedBox, x, interpTransformedBoxes );
+						// compute how much the transformed boxes (on both samples) have to expand to fully include transfomedInterpBox 
+						// when they are interpolated at the same ratio.
+						Imath::Box3d extendedBBox = interpTransformedBoxes;
+						extendedBBox.extendBy( transfomedInterpBox );
+						Imath::Box3d expansion( extendedBBox.min - interpTransformedBoxes.min, extendedBBox.max - interpTransformedBoxes.max );
+						totalExpansion.extendBy( expansion );
+					}
+					previousTransformedBox = Imath::Box3d( previousTransformedBox.min + totalExpansion.min, previousTransformedBox.max + totalExpansion.max );
+					nextTransformedBox = Imath::Box3d( nextTransformedBox.min + totalExpansion.min, nextTransformedBox.max + totalExpansion.max );
+					// revisit last transformed bounding box
+					*(bsIt-1) = previousTransformedBox;
+
+					previousTransformedBox = nextTransformedBox;
+				}
+				*bsIt = nextTransformedBox;
+				previousBox = nextBox;
+				previousTransformedBox = nextTransformedBox;
+				previousTransform = nextTransform;
+				previousTransformTime = boxTime;
+			}
+
+			/// now transform all the following bound samples using the last transform available...
+			previousTransformMatrix = dataToMatrix( previousTransform );
+			while( btIt != boxTimes.end() )
+			{
+				*bsIt = transform( *bsIt, previousTransformMatrix );
+				btIt++;
+				bsIt++;
+			}
+		}
+
+		WriterImplementation* m_parent;
+		std::map< SceneCache::Name, WriterImplementationPtr > m_children;
+
+		typedef std::map< SampleTimes, uint64_t > SampleTimesMap;
 		typedef std::map< SceneCache::Name, SampleTimes > AttributeSamplesMap;
 
+		SampleTimesMap *m_sampleTimesMap;
 		SampleTimes m_boundSampleTimes;		// implicit or explicit bound sample times
 		SampleTimes m_transformSampleTimes;
 		AttributeSamplesMap m_attributeSampleTimes;
 		SampleTimes m_objectSampleTimes;
-		std::vector< TransformSample > m_transformSamples;
+		// store the transform objects (we want to interpolate the transforms later)
+		TransformSamples m_transformSamples;
+		// store the object's bounding box (we want to transform them later)
 		BoxSamples m_objectSamples;
-		std::map< SceneCache::Name, WriterImplementationPtr > m_children;
+		// overwriting bounding boxes (or used during flush to compute the final bounding boxes).
 		BoxSamples m_boundSamples;
 };
 
