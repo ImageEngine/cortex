@@ -140,6 +140,14 @@ class TestPythonOp( unittest.TestCase ) :
 		self.failUnless( op.isInstanceOf( "PythonOp" ), True )
 		self.failUnless( op.isInstanceOf( PythonOp.staticTypeId() ), True )
 
+	def testOperateWithArgs( self ) :
+
+		op = PythonOp()
+		# make sure we can call the op passing all the parameter values as a CompoundObject
+		self.assertEqual( op( CompoundObject( { "name": StringData("jim") } ) ), StringData( "jim" ) )
+		# make sure the last call did not affect the contents of the Op's parameters.
+		self.assertEqual( op.parameters()['name'].getTypedValue(), "john" )
+
 if __name__ == "__main__":
 	unittest.main()
 
