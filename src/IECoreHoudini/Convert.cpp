@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,18 @@ Imath::V3f convert( const UT_Vector3 &from )
 }
 
 template<>
+UT_Vector3 convert( const Imath::V3d &from )
+{
+	return UT_Vector3( from.x, from.y, from.z );
+}
+
+template<>
+Imath::V3d convert( const UT_Vector3 &from )
+{
+	return Imath::V3d( from[0], from[1], from[2] );
+}
+
+template<>
 UT_Vector4 convert( const Imath::V3f &from )
 {
 	return UT_Vector4( from.x, from.y, from.z );
@@ -64,6 +76,18 @@ template<>
 Imath::V3f convert( const UT_Vector4 &from )
 {
 	return Imath::V3f( from[0], from[1], from[2] );
+}
+
+template<>
+UT_Vector4 convert( const Imath::V3d &from )
+{
+	return UT_Vector4( from.x, from.y, from.z );
+}
+
+template<>
+Imath::V3d convert( const UT_Vector4 &from )
+{
+	return Imath::V3d( from[0], from[1], from[2] );
 }
 
 template<>
@@ -80,6 +104,22 @@ template<>
 Imath::Box3f convert( const UT_BoundingBox &from )
 {
 	return Imath::Box3f( convert<Imath::V3f>( from.minvec() ), convert<Imath::V3f>( from.maxvec() ) );
+}
+
+template<>
+UT_BoundingBox convert( const Imath::Box3d &from )
+{
+	if( from.isEmpty() )
+	{
+		return UT_BoundingBox();
+	}
+	return UT_BoundingBox( convert<UT_Vector3>( from.min ), convert<UT_Vector3>( from.max ) );
+}
+
+template<>
+Imath::Box3d convert( const UT_BoundingBox &from )
+{
+	return Imath::Box3d( convert<Imath::V3d>( from.minvec() ), convert<Imath::V3d>( from.maxvec() ) );
 }
 
 template<>
