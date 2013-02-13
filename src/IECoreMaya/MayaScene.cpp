@@ -14,14 +14,15 @@
 #include "maya/MFnCamera.h"
 #include "maya/MFnMatrixData.h"
 #include "maya/MFnNumericData.h"
-#include "maya/MDGContext.h"
 #include "maya/MSelectionList.h"
+#include "maya/MAnimControl.h"
 #include "maya/MString.h"
 #include "maya/MTime.h"
 #include "maya/MItDag.h"
 #include "maya/MPlug.h"
 #include "maya/MTransformationMatrix.h"
 #include "maya/MSelectionList.h"
+#include "maya/MDagPathArray.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -54,10 +55,9 @@ MayaScene::MayaScene( const std::string&, IndexedIO::OpenMode ) : m_isRoot( true
 }
 
 
-MayaScene::MayaScene( const MDagPath& p ) : m_isRoot( false )
+MayaScene::MayaScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 {
 	// this constructor is expected to be called when s_mutex is locked!
-	tbb::mutex::scoped_lock l( s_mutex );
 	m_dagPath = p;
 }
 
@@ -65,12 +65,18 @@ MayaScene::~MayaScene()
 {
 }
 
-const SceneInterface::Name& MayaScene::name() const
+SceneInterface::Name MayaScene::name() const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
+	
+	if( m_dagPath.length() == 0 && !m_isRoot )
+	{
+		throw Exception( "MayaScene::name: Dag path no longer exists!" );
+	}
+	
 	std::string nameStr = m_dagPath.fullPathName().asChar();
 	
-	if( nameStr.size() == 1 )
+	if( nameStr.size() <= 1 )
 	{
 		return SceneInterface::rootName;
 	}
@@ -80,8 +86,10 @@ const SceneInterface::Name& MayaScene::name() const
 	{
 		return std::string( nameStr.begin() + pipePos + 1, nameStr.end() );
 	}
-	
-	return nameStr;
+	else
+	{
+		return nameStr;
+	}
 }
 
 void MayaScene::path( Path &p ) const
@@ -113,9 +121,30 @@ Imath::Box3d MayaScene::readBound( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
+	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
+	{
+		throw Exception( "MayaScene::readBound: time must be the same as on the maya timeline!" );
+	}
+	
 	if( m_isRoot )
 	{
-		return Imath::Box3d( Imath::V3d( -10000000, -10000000, -10000000 ), Imath::V3d( 10000000, 10000000, 10000000 ) );
+		MDagPathArray paths;
+		getChildDags( m_dagPath, paths );
+		
+		Imath::Box3d bound;
+		
+		for( unsigned i=0; i < paths.length(); ++i )
+		{
+			MFnDagNode dagFn( paths[i] );
+			Imath::Box3d b = IECore::convert<Imath::Box3d, MBoundingBox>( dagFn.boundingBox() );
+			
+			if( b.hasVolume() )
+			{
+				bound.extendBy( b );
+			}
+		}
+		
+		return bound;
 	}
 	else if( m_dagPath.length() == 0 )
 	{
@@ -124,52 +153,8 @@ Imath::Box3d MayaScene::readBound( double time ) const
 	else
 	{
 		MFnDagNode dagFn( m_dagPath );
-		
-		MPlug plug;
-		MDGContext context( MTime( time, MTime::kSeconds ) );
-		MStatus st;
-		
-		plug = dagFn.findPlug( "boundingBoxMin", &st );
-		if( !st )
-		{
-			return Imath::Box3d();
-		}
-		
-		MObject min;
-		plug.getValue( min, context );
-		MFnNumericData fnMin( min, &st );
-		if( !st )
-		{
-			return Imath::Box3d();
-		}
-		
-		double minX, minY, minZ;
-		fnMin.getData( minX, minY, minZ );
-		
-		plug = dagFn.findPlug( "boundingBoxMax", &st );
-		if( !st )
-		{
-			return Imath::Box3d();
-		}
-		
-		MObject max;
-		plug.getValue( max, context );
-		MFnNumericData fnMax( max, &st );
-		if( !st )
-		{
-			return Imath::Box3d();
-		}
-		
-		double maxX, maxY, maxZ;
-		fnMax.getData( maxX, maxY, maxZ );
-		
-		Imath::Box3d ret( Imath::V3d( minX, minY, minZ ), Imath::V3d( maxX, maxY, maxZ ) );
-		
-		// release the lock, so we don't freeze up when we call readTransformAsMatrix!
-		l.release();
-		
-		Imath::M44d invTransform = readTransformAsMatrix( time ).inverse();
-		
+		Imath::Box3d ret = IECore::convert<Imath::Box3d, MBoundingBox>( dagFn.boundingBox() );
+		Imath::M44d invTransform = IECore::convert<Imath::M44d, MMatrix>( dagFn.transformationMatrix() ).inverse();
 		return Imath::transform( ret, invTransform );
 	}
 }
@@ -187,24 +172,15 @@ DataPtr MayaScene::readTransform( double time ) const
 		throw Exception( "MayaScene::readTransform: Dag path no longer exists!" );
 	}
 	
+	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
+	{
+		throw Exception( "MayaScene::readTransform: time must be the same as on the maya timeline!" );
+	}
+	
 	if( m_dagPath.hasFn( MFn::kTransform ) )
 	{
-		
-		MObject dagNode = m_dagPath.node();
-		MFnDependencyNode fnN( dagNode );
-		
-		MStatus st;
-		
-		MPlug plug = fnN.findPlug( "matrix", &st );
-		
-		MDGContext context( MTime( time, MTime::kSeconds ) );
-		MObject matrix;
-		plug.getValue( matrix, context );
-		
-		MFnMatrixData fnM( matrix );
-		MTransformationMatrix transform = fnM.transformation();
-		
-		return new IECore::TransformationMatrixdData( IECore::convert<IECore::TransformationMatrixd, MTransformationMatrix>( transform ) );
+		MFnDagNode dagFn( m_dagPath );
+		return new IECore::TransformationMatrixdData( IECore::convert<IECore::TransformationMatrixd, MTransformationMatrix>( dagFn.transformationMatrix() ) );
 	}
 	else
 	{
@@ -264,20 +240,15 @@ ObjectPtr MayaScene::readObject( double time ) const
 		throw Exception( "MayaScene::readObject: Dag path no longer exists!" );
 	}
 	
+	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
+	{
+		throw Exception( "MayaScene::readObject: time must be the same as on the maya timeline!" );
+	}
+	
 	if( m_dagPath.hasFn( MFn::kMesh ) )
 	{
-		MObject dagNode = m_dagPath.node();
-		MFnDependencyNode fnN( dagNode );
 		
-		MStatus st;
-		
-		MPlug plug = fnN.findPlug( "outMesh", &st );
-		
-		MDGContext context( MTime( time, MTime::kSeconds ) );
-		MObject mesh;
-		plug.getValue( mesh, context );
-		
-		FromMayaMeshConverter converter( mesh );
+		FromMayaMeshConverter converter( m_dagPath );
 		converter.spaceParameter()->setValue( new IECore::IntData( FromMayaShapeConverter::Object ) );
 		return converter.convert();
 	}
@@ -296,6 +267,33 @@ void MayaScene::writeObject( const Object *object, double time )
 {
 }
 
+void MayaScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const
+{
+	for( unsigned i=0; i < dagPath.childCount(); ++i )
+	{
+		MDagPath childPath = dagPath;
+		childPath.push( dagPath.child( i ) );
+		
+		if( dagPath.length() == 0 )
+		{
+			// bizarrely, this iterates through things like the translate manipulator and
+			// the view cube too, so lets skip them so they don't show up:
+			if( childPath.node().hasFn( MFn::kManipulator3D ) )
+			{
+				continue;
+			}
+
+			// looks like it also gives us the ground plane, so again, lets skip that:
+			if( childPath.fullPathName() == "|groundPlane_transform" )
+			{
+				continue;
+			}
+		}
+		
+		paths.append( childPath );
+	}
+}
+
 void MayaScene::childNames( NameList &childNames ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
@@ -306,28 +304,12 @@ void MayaScene::childNames( NameList &childNames ) const
 	}
 	
 	unsigned currentPathLength = m_dagPath.fullPathName().length();
-
-	for( unsigned i=0; i < m_dagPath.childCount(); ++i )
+	MDagPathArray paths;
+	getChildDags( m_dagPath, paths );
+	
+	for( unsigned i=0; i < paths.length(); ++i )
 	{
-		MDagPath childPath = m_dagPath;
-		childPath.push( m_dagPath.child( i ) );
-		
-		// bizarrely, this iterates through things like the translate manipulator and
-		// the view cube too, so lets skip them so they don't show up:
-		if( childPath.node().hasFn( MFn::kManipulator3D ) )
-		{
-			continue;
-		}
-		
-		std::string childName = childPath.fullPathName().asChar();
-		
-		// looks like it also gives us the ground plane, so again, lets skip that:
-		if( childName == "|groundPlane_transform" )
-		{
-			continue;
-		}
-		
-		childName = std::string( childName.begin() + currentPathLength + 1, childName.end() );
+		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
 		childNames.push_back( Name( childName ) );
 	}
 }
@@ -342,15 +324,12 @@ bool MayaScene::hasChild( const Name &name ) const
 	}
 	
 	unsigned currentPathLength = m_dagPath.fullPathName().length();
-
-	for( unsigned i=0; i < m_dagPath.childCount(); ++i )
+	MDagPathArray paths;
+	getChildDags( m_dagPath, paths );
+	
+	for( unsigned i=0; i < paths.length(); ++i )
 	{
-		MDagPath childPath = m_dagPath;
-		childPath.push( m_dagPath.child( i ) );
-
-		std::string childName = childPath.fullPathName().asChar();
-
-		childName = std::string( childName.begin() + currentPathLength + 1, childName.end() );
+		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
 		if( Name( childName ) == name )
 		{
 			return true;
@@ -369,20 +348,15 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 	}
 	
 	unsigned currentPathLength = m_dagPath.fullPathName().length();
+	MDagPathArray paths;
+	getChildDags( m_dagPath, paths );
 	
-	for( unsigned i=0; i < m_dagPath.childCount(); ++i )
+	for( unsigned i=0; i < paths.length(); ++i )
 	{
-		MDagPath childPath = m_dagPath;
-		childPath.push( m_dagPath.child( i ) );
-		
-		std::string childName = childPath.fullPathName().asChar();
-		
-		childName = std::string( childName.begin() + currentPathLength + 1, childName.end() );
-		
+		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
 		if( name == childName )
 		{
-			l.release();
-			return new MayaScene( childPath );
+			return new MayaScene( paths[i] );
 		}
 	}
 	
@@ -415,8 +389,10 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	
 	if( path.size() == 0 )
 	{
-		l.release();
-		return new MayaScene;
+		MItDag it;
+		MDagPath rootPath;
+		it.getPath( rootPath );
+		return new MayaScene( rootPath, true );
 	}
 	
 	MString pathName;
@@ -441,7 +417,6 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	MDagPath dagPath;
 	sel.getDagPath( 0, dagPath );
 	
-	l.release();
 	return new MayaScene( dagPath );
 	
 }

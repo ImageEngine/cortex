@@ -80,9 +80,10 @@ class MayaScene : public IECore::SceneInterface
 		
 		static FileFormatDescription< MayaScene > s_description;
 		
+		// TODO: sort the name() method out!! Should it be returning a const reference? This means I have to have that mutable m_name variable
 		
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
-		virtual const Name& name() const;
+		virtual Name name() const;
 		/// Returns the path scene this instance is referring to. 
 		virtual void path( Path &p ) const;
 		
@@ -173,11 +174,13 @@ class MayaScene : public IECore::SceneInterface
 	private :
 		
 		// constructor for a specific dag path:
-		MayaScene( const MDagPath& p );
+		MayaScene( const MDagPath& p, bool isRoot = false );
 		
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveParent() const;
+		
+		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
 		
 		MDagPath m_dagPath;
 		bool m_isRoot;
