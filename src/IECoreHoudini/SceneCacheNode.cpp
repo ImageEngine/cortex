@@ -93,7 +93,10 @@ PRM_ChoiceList SceneCacheNode<BaseType>::spaceList( PRM_CHOICELIST_SINGLE, &spac
 
 template<typename BaseType>
 PRM_Template SceneCacheNode<BaseType>::parameters[] = {
-	PRM_Template( PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile ),
+	PRM_Template(
+		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, 0, 0, 0,
+		"A static or animated SCC file to load, starting at the Root path provided."
+	),
 	PRM_Template(
 		PRM_CALLBACK, 1, &pReload, 0, 0, 0, &SceneCacheNode<BaseType>::reloadButtonCallback, 0, 0,
 		"Removes the current SCC file from the cache. This will force a recook on this node, and "
@@ -173,7 +176,7 @@ std::string SceneCacheNode<BaseType>::getFile()
 {
 	UT_String value;
 	this->evalString( value, pFile.getToken(), 0, 0 );
-	return ( value == "" ) ? "/" : value.toStdString();
+	return value.toStdString();
 }
 
 template<typename BaseType>
