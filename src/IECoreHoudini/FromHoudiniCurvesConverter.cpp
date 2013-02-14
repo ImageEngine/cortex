@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,7 +66,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	
-	size_t numPrims = geo->getNumPrimitives();
+	unsigned numPrims = geo->getNumPrimitives();
 	GA_Iterator firstPrim = geo->getPrimitiveRange().begin();
 	if ( !numPrims || !compatiblePrimitive( primitives.get( firstPrim.getOffset() )->getTypeId() ) )
 	{
@@ -218,11 +218,11 @@ FromHoudiniCurvesConverter::DuplicateEnds::ReturnType FromHoudiniCurvesConverter
 	size_t index = 0;
 	for ( size_t i=0; i < m_vertsPerCurve.size(); i++ )
 	{
-		for ( size_t j=0; j < m_vertsPerCurve[i]; j++, index++ )
+		for ( size_t j=0; j < (size_t)m_vertsPerCurve[i]; j++, index++ )
 		{
 			newValues.push_back( origValues[index] );
 			
-			if ( j == 0 || j == m_vertsPerCurve[i]-1 )
+			if ( j == 0 || j == (size_t)m_vertsPerCurve[i]-1 )
 			{
 				newValues.push_back( origValues[index] );
 				newValues.push_back( origValues[index] );

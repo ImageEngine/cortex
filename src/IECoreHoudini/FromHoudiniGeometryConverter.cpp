@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -112,7 +112,7 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 	UT_IntArray remapHandles;
 	tuple->extractStrings( remapAttr, remapStrings, remapHandles );
 	
-	for ( size_t i=0; i < remapStrings.entries(); ++i )
+	for ( size_t i=0; i < (size_t)remapStrings.entries(); ++i )
 	{
 		RemapInfo info;
 		
@@ -228,7 +228,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	}
 	
 	// add point attribs
-	if ( result->variableSize( pointInterpolation ) == geo->getNumPoints() )
+	if ( result->variableSize( pointInterpolation ) == (unsigned)geo->getNumPoints() )
 	{
 		transferElementAttribs( geo, geo->getPointRange(), geo->pointAttribs(), pointAttributeMap, result, pointInterpolation );
 	}

@@ -2,6 +2,8 @@
 //
 //  Copyright 2012 Electric Theatre Collective Limited. All rights reserved.
 //
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -147,7 +149,7 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		msg(Msg::Debug, "IECoreMantra::ProceduralPrimitive::addVisibleRenderable", "MotionBlur:Geometry" );
 		if ( !m_renderer->m_motionTimes.empty() )
 		{
-			if ( m_renderer->m_motionSize == m_renderer->m_motionTimes.size() )
+			if ( (size_t)m_renderer->m_motionSize == m_renderer->m_motionTimes.size() )
 			{
 				openGeometryObject();
 			}

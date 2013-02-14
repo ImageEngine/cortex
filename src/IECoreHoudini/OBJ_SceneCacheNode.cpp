@@ -136,7 +136,7 @@ template<typename BaseType>
 void OBJ_SceneCacheNode<BaseType>::cleanHierarchy()
 {
 	OP_NodeList childNodes;
-	for ( size_t i=0; i < this->getNchildren(); ++i )
+	for ( int i=0; i < this->getNchildren(); ++i )
 	{
 		childNodes.append( this->getChild( i ) );
 	}

@@ -338,7 +338,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 			else if ( groupingMode == PrimitiveGroup )
 			{
 				GA_Range currentRange;
-				size_t size = despatchTypedData<TypedDataSize, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( data );
+				unsigned size = despatchTypedData<TypedDataSize, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( data );
 				
 				// check for existing attributes
 				if ( gdp->findPrimitiveAttribute( attrName.c_str() ).isValid() && size == primRange.getEntries() )
