@@ -125,7 +125,7 @@ while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ '-pipe', '-Wall' ]
+CXXFLAGS = [ "-pipe", "-Wall", "-Werror" ]
 if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
 	
@@ -158,11 +158,6 @@ if not debug :
 
 	CXXFLAGS += [ "-O2" ]
 				
-PYTHONCXXFLAGS = copy.copy( CXXFLAGS )
-	
-## \todo Try to reintroduce -Werror whenever we find a boost version not riddled with warnings, or
-# when we use a compiler which properly supports the #pragma diagnostic to ignore warnings from boost.
-	
 LINKFLAGS = []	
 if compilerVersionInt < 350 :
 	##########################################################################################################
@@ -188,7 +183,7 @@ else :
 	JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
 	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
-	CPPPATH = "/software/tools/include/freetype/2.3.5"
+	CXXFLAGS += [ "-isystem", "/software/tools/include/freetype/2.3.5" ]
 	
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
@@ -313,7 +308,7 @@ if targetApp=="houdini" :
 	PNG_INCLUDE_PATH = OPENEXR_INCLUDE_PATH
 	
 	HOUDINI_ROOT = houdiniReg['location']
-	HOUDINI_CXX_FLAGS = '-DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -c  -DGCC4 -DGCC3 -Wno-deprecated -Wall -W -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wno-uninitialized -Wunused -Wno-unused-parameter -Wno-strict-aliasing -O2 -DMAKING_DSO -DNDEBUG -DBOOST_DISABLE_ASSERTS'
+	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated'
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )

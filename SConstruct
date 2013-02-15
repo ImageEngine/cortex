@@ -81,19 +81,13 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
+	[ "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 )
 
 o.Add(
 	"TESTCXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation of unit tests.",
 	[ "-pipe", "-Wall", "-O0" ]
-)
-
-o.Add(
-	"PYTHONCXXFLAGS",
-	"The extra flags to pass to the C++ compiler during compilation of Python bindings.",
-	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 )
 
 o.Add(
@@ -1018,20 +1012,24 @@ env.Append(
 )
 
 # update the include and lib paths
+dependencyIncludes = [
+	"-isystem", "$TBB_INCLUDE_PATH",
+	"-isystem", "$BOOST_INCLUDE_PATH",
+	"-isystem", "$OPENEXR_INCLUDE_PATH",
+	"-isystem", "$ILMBASE_INCLUDE_PATH",
+	# we use "OpenEXR/x.h" and they use "x.h"
+	"-isystem", os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
+	"-isystem", os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
+	"-isystem", "$PNG_INCLUDE_PATH",
+	"-isystem", "$JPEG_INCLUDE_PATH",
+	"-isystem", "$TIFF_INCLUDE_PATH",
+	"-isystem", "$FREETYPE_INCLUDE_PATH",		
+]
+
 env.Prepend(
+	CXXFLAGS = dependencyIncludes,
 	CPPPATH = [
 		"include",
-		"$TBB_INCLUDE_PATH",
-		"$OPENEXR_INCLUDE_PATH",
-		"$ILMBASE_INCLUDE_PATH",
-		# we use "OpenEXR/x.h" and they use "x.h"
-		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
-		os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
-		"$BOOST_INCLUDE_PATH",
-        "$PNG_INCLUDE_PATH",
-		"$JPEG_INCLUDE_PATH",
-		"$TIFF_INCLUDE_PATH",
-		"$FREETYPE_INCLUDE_PATH",
 	],
 	LIBPATH = [
 		"./lib",
@@ -1039,7 +1037,7 @@ env.Prepend(
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$ILMBASE_LIB_PATH",
-        "$PNG_LIB_PATH",
+		"$PNG_LIB_PATH",
 		"$JPEG_LIB_PATH",
 		"$TIFF_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
@@ -1074,7 +1072,7 @@ if doConfigure :
 	# figure out the boost version in use so we can append it to the
 	# library names	if necessary
 	boostVersion = None
-	boostVersionHeader = env.FindFile( "boost/version.hpp", env["CPPPATH"] )
+	boostVersionHeader = env.FindFile( "boost/version.hpp", env["CXXFLAGS"] )
 	if (boostVersionHeader ==None):
 		sys.stderr.write( "ERROR : unable to find the boost headers, check BOOST_INCLUDE_PATH.\n" )
 		Exit( 1 )
@@ -1148,7 +1146,6 @@ def getPythonConfig( env, flags ) :
 	return r
 
 pythonEnv = env.Clone()
-pythonEnv.Replace( CXXFLAGS = env.subst("$PYTHONCXXFLAGS") )
 
 # decide where python is
 if pythonEnv["PYTHON"]=="" :
@@ -1166,8 +1163,16 @@ except :
 if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
 	pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
 else :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = "-I$PYTHON_INCLUDE_PATH"
-pythonEnv.Append( CPPFLAGS="$PYTHON_INCLUDE_FLAGS" )
+	pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
+pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
+
+if env["PLATFORM"] == "posix" :
+	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
+	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
+	# be able to have -Werror but be missing one warning than to have no -Werror.
+	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
+	# fully work. Reenable when we encounter versions that work correctly.
+	pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
 
 # get the python link flags
 if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
@@ -1195,6 +1200,7 @@ if pythonModuleEnv["PLATFORM"]=="darwin" :
 
 testEnv = env.Clone()
 testEnv.Replace( CXXFLAGS = env.subst("$TESTCXXFLAGS") )
+testEnv.Prepend( CXXFLAGS = " ".join( dependencyIncludes ) )
 
 testEnvLibPath = ":".join( testEnv["LIBPATH"] )
 if testEnv["TEST_LIBPATH"] != "" :
@@ -1590,11 +1596,11 @@ coreTestEnv.Alias( "testCorePython", corePythonTest )
 ###########################################################################################
 
 riEnv = coreEnv.Clone( IECORE_NAME = "IECoreRI" )
-riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
+riEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
 riPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreRI" )
-riPythonModuleEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
+riPythonModuleEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
 riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
 riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython", SHLIBSUFFIX=env["SHLIBSUFFIX"] )
@@ -1802,15 +1808,13 @@ if env["WITH_GL"] and doConfigure :
 		"IECORE_NAME" : "IECoreGL",
 	}
 
-	glEnvPrepends = {
-		"CPPPATH" : [
-		],
-	}
 	glEnvAppends = {
 		
-		"CPPPATH" : [
-			"$GLEW_INCLUDE_PATH",
-			"$GLUT_INCLUDE_PATH",
+		"CXXFLAGS" : [
+			"-isystem", "$GLEW_INCLUDE_PATH",
+			"-isystem", "$GLUT_INCLUDE_PATH",
+			# This is to allow a formatting warning in boost::wave
+			"-Wno-format"
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
@@ -1819,9 +1823,7 @@ if env["WITH_GL"] and doConfigure :
 	}
 	
 	glEnv = coreEnv.Clone( **glEnvSets )
-
 	glEnv.Append( **glEnvAppends )
-	glEnv.Prepend( **glEnvPrepends )
 	
 	c = Configure( glEnv )
 	
@@ -1891,7 +1893,6 @@ if env["WITH_GL"] and doConfigure :
 
 		glPythonModuleEnv = corePythonModuleEnv.Clone( **glEnvSets )
 		glPythonModuleEnv.Append( **glEnvAppends )
-		glPythonModuleEnv.Prepend( **glEnvPrepends )
 		glPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
@@ -1936,8 +1937,8 @@ mayaEnvSets = {
 }
 
 mayaEnvAppends = {
-	"CPPPATH" : [
-		"$GLEW_INCLUDE_PATH",
+	"CXXFLAGS" : [
+		"-isystem", "$GLEW_INCLUDE_PATH",
 	],
 	"LIBS" : [
 		"OpenMaya",
@@ -1956,7 +1957,7 @@ mayaEnvAppends = {
 if env["PLATFORM"]=="posix" :
 	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
 	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
-	mayaEnvAppends["CPPPATH"] += ["$MAYA_ROOT/include"]
+	mayaEnvAppends["CXXFLAGS"] += [ "-isystem", "$MAYA_ROOT/include" ]
 	mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
 
 elif env["PLATFORM"]=="darwin" :
@@ -1982,7 +1983,7 @@ if doConfigure :
 
 	c = Configure( mayaEnv )
 
-	if not c.CheckHeader( "maya/MVectorArray.h" ) :
+	if not c.CheckCXXHeader( "maya/MVectorArray.h" ) :
 
 		sys.stderr.write( "WARNING : no maya devkit found, not building IECoreMaya - check MAYA_ROOT.\n" )
 		c.Finish()
@@ -2006,7 +2007,7 @@ if doConfigure :
 			mayaEnv.Append( LIBS = riLibs )
 			mayaEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 			mayaEnv.Append( CPPFLAGS = "-DIECOREMAYA_WITH_RI" )
-			mayaEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
+			mayaEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
 			mayaEnv.Append( CPPFLAGS = [ "-DIECORERI_RMANPROCEDURAL_NAME=" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ) ] )
 			mayaEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 			
@@ -2158,9 +2159,9 @@ if doConfigure :
 
 nukeEnvAppends = {
 
-	"CPPPATH" : [
-		"$NUKE_ROOT/include",
-		"$GLEW_INCLUDE_PATH",
+	"CXXFLAGS" : [
+		"-isystem", "$NUKE_ROOT/include",
+		"-isystem", "$GLEW_INCLUDE_PATH",
 	],
 	
 	"CPPFLAGS" : [
@@ -2211,7 +2212,7 @@ if doConfigure :
 		# figure out the nuke version from the headers
 		nukeMajorVersion = None
 		nukeMinorVersion = None
-		nukeVersionHeader = env.FindFile( "DDImage/ddImageVersionNumbers.h", nukeEnv["CPPPATH"] )
+		nukeVersionHeader = env.FindFile( "DDImage/ddImageVersionNumbers.h", nukeEnv["CXXFLAGS"] )
 		if nukeVersionHeader :
 
 			for line in open( str( nukeVersionHeader ) ) :
@@ -2371,15 +2372,15 @@ if doConfigure :
 
 houdiniEnvSets = {
 	"IECORE_NAME" : "IECoreHoudini",
-	"CXXFLAGS" : [
-		"$HOUDINI_CXX_FLAGS", "-DMAKING_DSO", "-DNEED_SPECIALIZATION_STORAGE"
-	],
+	"CXXFLAGS" : dependencyIncludes + [ "$HOUDINI_CXX_FLAGS", "-DMAKING_DSO" ]
 }
 
 houdiniEnvAppends = {
+	"CXXFLAGS" : [
+		"-isystem", "$GLEW_INCLUDE_PATH",
+		"-isystem", "$HOUDINI_INCLUDE_PATH",
+	],
 	"CPPPATH" : [
-		"$GLEW_INCLUDE_PATH",
-		"$HOUDINI_INCLUDE_PATH",
 		"contrib/IECoreMantra/include",
 	],
 	"CPPFLAGS" : [
@@ -2432,7 +2433,7 @@ if doConfigure :
 	
 	c = Configure( houdiniEnv )
 	
-	if not c.CheckHeader( "SOP/SOP_API.h" ) :
+	if not c.CheckCXXHeader( "SOP/SOP_API.h" ) :
 		
 		sys.stderr.write( "WARNING : no houdini devkit found, not building IECoreHoudini - check HOUDINI_ROOT.\n" )
 		c.Finish()
@@ -2733,7 +2734,7 @@ truelightEnv.Append( LIBS = [ "truelight" ] )
 oldTruelightLibs = list( truelightEnv["LIBS"] )
 truelightEnv["LIBS"] = [ x for x in truelightEnv["LIBS"] if ( x.find( "boost_" ) == -1 and x.find( "Ilm" ) == -1 and x.find( "Iex" ) == -1 and x.find( "Half" )==-1 and x.find( "Imath" )==-1 ) ] 
 
-truelightEnv.Append( CPPPATH = [ "$TRUELIGHT_ROOT/include" ] )
+truelightEnv.Append( CXXFLAGS = [ "-isystem", "$TRUELIGHT_ROOT/include" ] )
 truelightEnv.Prepend( LIBPATH = [
 		"$TRUELIGHT_ROOT/lib"
 	]
@@ -2819,8 +2820,10 @@ if doConfigure :
 
 arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldEnv.Append(
+	CXXFLAGS = [
+		"-isystem", "$ARNOLD_ROOT/include",
+	],
 	CPPPATH = [
-		"$ARNOLD_ROOT/include",
 		"contrib/IECoreArnold/include",
 	]
 )
@@ -2828,8 +2831,10 @@ arnoldEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
 
 arnoldPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldPythonModuleEnv.Append(
+	CXXFLAGS = [
+		"-isystem", "$ARNOLD_ROOT/include",
+	],
 	CPPPATH = [
-		"$ARNOLD_ROOT/include",
 		"contrib/IECoreArnold/include",
 		"contrib/IECoreArnold/include/bindings",
 	]
@@ -2955,8 +2960,8 @@ if doConfigure :
 
 mtoaEnv = mayaPluginEnv.Clone( IECORE_NAME = "ie" )
 ## \todo Remove MTOA_SOURCE_ROOT when it's no longer necessary
-mtoaEnv.Append( CPPPATH = [ "$MTOA_ROOT/include", "$MTOA_SOURCE_ROOT/plugins/mtoa" ] )
-mtoaEnv.Append( CPPPATH = [ "$ARNOLD_ROOT/include" ] )
+mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$MTOA_ROOT/include", "-isystem", "$MTOA_SOURCE_ROOT/plugins/mtoa" ] )
+mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$ARNOLD_ROOT/include" ] )
 mtoaEnv.Append( LIBPATH = [ "$MTOA_ROOT/bin" ] )
 mtoaEnv.Append( CXXFLAGS = [ "-D_LINUX" ] )
 mtoaEnv["SHLIBPREFIX"] = ""
@@ -2991,10 +2996,12 @@ if doConfigure and haveMaya and haveArnold :
 
 alembicEnv = coreEnv.Clone( IECORE_NAME = "IECoreAlembic" )
 alembicEnvAppends = {
+	"CXXFLAGS" : [
+		"-isystem", "$ALEMBIC_INCLUDE_PATH",
+		"-isystem", "$HDF5_INCLUDE_PATH",
+	],
 	"CPPPATH" : [
-		"$ALEMBIC_INCLUDE_PATH",
 		"contrib/IECoreAlembic/include",
-		"$HDF5_INCLUDE_PATH",
 	],
 	"LIBPATH" : [
 		"$ALEMBIC_LIB_PATH",

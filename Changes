@@ -12,6 +12,8 @@ Improvements :
 * Reworked InternedString to no longer be based on templates - the templating never got used and it just complicated the implementation.
 * The ParameterParser now parses -boolParameter flags without additional arguments as True, provided that the parameter default is False.
 * MurmurHash now supports the hashing of InternedStrings.
+* Using -isystem rather than -I for all dependency includes
+* Enabled -Werror for all libraries (and a few -Wno-* only where necessary). Removed PYTHONCXXFLAGS option.
 
 Bug Fixes :
 
