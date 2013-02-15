@@ -2,6 +2,7 @@ Additions :
 
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::SceneCache files
 * Added InternedStringData and InternedStringVectorDataTypes.
+* Added IECoreHoudini::HoudiniScene, a SceneInterface for live Houdini scenes.
 
 Improvements :
 

@@ -64,6 +64,7 @@ from RATDeepImageWriterTest import *
 from DeepImageConverter import *
 from UpdateMode import *
 from SceneCacheTest import *
+from HoudiniSceneTest import *
 
 IECoreHoudini.TestProgram(
 	testRunner = unittest.TextTestRunner(
