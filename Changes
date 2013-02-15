@@ -14,6 +14,7 @@ Improvements :
 * MurmurHash now supports the hashing of InternedStrings.
 * Using -isystem rather than -I for all dependency includes
 * Enabled -Werror for all libraries (and a few -Wno-* only where necessary). Removed PYTHONCXXFLAGS option.
+* SLOReader now creates an "ri:orderedParameterNames" blind data entry on the loaded shader, to work around the fact that the Light::parameters() data structure doesn't maintain order.
 
 Bug Fixes :
 
