@@ -1,3 +1,5 @@
+7.10.2 :
+
 Improvements :
 
 * Added setParameterisedValues() for IECoreHoudini SOPs and FnHolders to sync Houdini node values to IECore::Parameterised objects.
