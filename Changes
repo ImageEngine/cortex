@@ -17,9 +17,16 @@ Improvements :
 * Enabled -Werror for all libraries (and a few -Wno-* only where necessary). Removed PYTHONCXXFLAGS option.
 * SLOReader now creates an "ri:orderedParameterNames" blind data entry on the loaded shader, to work around the fact that the Light::parameters() data structure doesn't maintain order.
 
+7.10.2 :
+
+Improvements :
+
+* Added setParameterisedValues() for IECoreHoudini SOPs and FnHolders to sync Houdini node values to IECore::Parameterised objects.
+
 Bug Fixes :
 
 * Fixed crashes caused by calling PrimitiveEvaluator.create( None ) in Python, replacing them with ValueError exceptions.
+* Using setParameterisedValues() in the IECoreMantra inject SHOP so parameters with expressions are expanded appropriately.
 
 7.10.1 :
 
