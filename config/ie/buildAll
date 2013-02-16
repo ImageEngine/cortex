@@ -80,8 +80,8 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	build( [ "APP=nuke", "APP_VERSION=6.3v5" ] )
 	build( [ "APP=nuke", "APP_VERSION=6.3v7" ] )
 	build( [ "APP=nuke", "APP_VERSION=7.0v1" ] )
-	build( [ "APP=houdini", "APP_VERSION=12.0.694" ] )
 	build( [ "APP=houdini", "APP_VERSION=12.1.77" ] )
+	build( [ "APP=houdini", "APP_VERSION=12.1.185" ] )
 	
 	installDocs()
 
