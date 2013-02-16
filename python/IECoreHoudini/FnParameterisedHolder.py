@@ -123,6 +123,11 @@ class FnParameterisedHolder():
 		
 		return IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).getParameterised() if self.hasParameterised() else None
 	
+	def setParameterisedValues( self, time = None ) :
+		
+		time = hou.time() if time is None else time
+		IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).setParameterisedValues( time )
+	
 	# get our list of class names based on matchString
 	def classNames( self ) :
 		
@@ -175,6 +180,12 @@ class FnParameterisedHolder():
 				result.append( p.tuple() if tuples else p )
 		
 		return result
+	
+	## \todo: remove this method for the next major version
+	def countSpareParameters( self ) :
+		
+		warnings.warn( "FnParameterisedHolder.countSpareParameters() is deprecated.", DeprecationWarning, 2 )
+		return len(self.spareParameters( tuples=False ))
 	
 	# this method removes all spare parameters from the "Parameters" folder
 	def removeParameters( self ) :

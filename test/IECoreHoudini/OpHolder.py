@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -707,6 +707,22 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertRaises( hou.OperationFailed, holder2.cook )
 		self.assertNotEqual( holder2.errors(), "" )
 		self.assertEqual( holder2.warnings(), "" )
+	
+	def testAnimatedValues( self ) :
+		
+		noise = IECoreHoudini.FnOpHolder.create( "test", "noiseDeformer", 1 )
+		fn = IECoreHoudini.FnOpHolder( noise )
+		noise.parm( "parm_magnitude" ).setExpression( "$FF" )
+		hou.setFrame( 1 )
+		self.assertEqual( noise.evalParm( "parm_magnitude" ), 1 )
+		self.assertEqual( fn.getOp().parameters()["magnitude"].getTypedValue(), 1 )
+		hou.setFrame( 12.25 )
+		self.assertEqual( noise.evalParm( "parm_magnitude" ), 12.25  )
+		# values haven't been flushed yet
+		self.assertAlmostEqual( fn.getOp().parameters()["magnitude"].getTypedValue(), 1 )
+		# so we flush them
+		fn.setParameterisedValues()
+		self.assertAlmostEqual( fn.getOp().parameters()["magnitude"].getTypedValue(), 12.25 )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

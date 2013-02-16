@@ -136,11 +136,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	boss->opStart("Building ProceduralHolder Geometry...");
 	gdp->clearAndDestroy();
 	
-	// push the input geo into the associated procedural parameters
-	setInputParameterValues( now );
-	
-	// update the SOP parameters to match the procedural parameters
-	updateParameter( procedural->parameters(), now, "", true );
+	setParameterisedValues( now );
 	
 	try
 	{

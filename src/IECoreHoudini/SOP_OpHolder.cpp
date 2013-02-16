@@ -96,13 +96,9 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building OpHolder Geometry...");
 	gdp->clearAndDestroy();
-
-	// push the input geo into the associated op parameters
-	setInputParameterValues( now );
 	
-	// update the SOP parameters to match the IECore::Op parameters
-	updateParameter( op->parameters(), now, "", true );
-
+	setParameterisedValues( now );
+	
 	try
 	{
 		// make our Cortex op do it's thing...

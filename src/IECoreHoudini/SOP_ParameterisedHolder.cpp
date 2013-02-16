@@ -529,6 +529,21 @@ void SOP_ParameterisedHolder::setInputParameterValues( float now )
 	}
 }
 
+void SOP_ParameterisedHolder::setParameterisedValues( double time )
+{
+	IECore::ParameterisedInterface *parameterised = dynamic_cast<IECore::ParameterisedInterface*>( getParameterised().get() );
+	if ( !parameterised )
+	{
+		return;
+	}
+	
+	// push the input geo into the associated parameters
+	setInputParameterValues( time );
+	
+	// update the remaining parameters to match the SOP node values
+	updateParameter( parameterised->parameters(), time, "", true );
+}
+
 bool SOP_ParameterisedHolder::hasParameterised()
 {
 	return (bool)(m_parameterised.get() != 0);

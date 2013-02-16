@@ -102,7 +102,12 @@ class SOP_ParameterisedHolder : public SOP_Node
 		/// save/load - this becomes your responsibility if it's necessary.
 		void setParameterised( IECore::RunTimeTypedPtr p );
 		void setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
-
+		
+		/// Sets the values of the parameters of the held Parameterised object to reflect the values
+		// of the attributes of the node.
+		/// \todo: add setNodeValues as well
+		void setParameterisedValues( double time );
+		
 		/// Gets the parameterised object held by this SOP
 		IECore::RunTimeTypedPtr getParameterised();
 
