@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -137,11 +137,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	boss->opStart("Building ProceduralHolder Geometry...");
 	gdp->clearAndDestroy();
 	
-	// push the input geo into the associated procedural parameters
-	setInputParameterValues( now );
-	
-	// update the SOP parameters to match the procedural parameters
-	updateParameter( procedural->parameters(), now, "", true );
+	setParameterisedValues( now );
 	
 	try
 	{

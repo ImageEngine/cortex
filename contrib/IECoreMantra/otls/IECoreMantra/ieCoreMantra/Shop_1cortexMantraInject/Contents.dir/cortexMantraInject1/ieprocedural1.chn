@@ -42,6 +42,7 @@ version = int(procedural.parm(\"__classVersion\").eval())
 
 # create a function set and get our parameterised object
 fn = IECoreHoudini.FnProceduralHolder( procedural )
+fn.setParameterisedValues()
 parameterised = fn.getParameterised()
 
 # get parameters from procedural

@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -430,6 +430,22 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.numFaces(), 206 )
+	
+	def testAnimatedValues( self ) :
+		
+		sphere = IECoreHoudini.FnProceduralHolder.create( "test", "sphereProcedural", 1 )
+		fn = IECoreHoudini.FnProceduralHolder( sphere )
+		sphere.parm( "parm_radius" ).setExpression( "$FF" )
+		hou.setFrame( 1 )
+		self.assertEqual( sphere.evalParm( "parm_radius" ), 1 )
+		self.assertEqual( fn.getProcedural().parameters()["radius"].getTypedValue(), 1 )
+		hou.setFrame( 12.25 )
+		self.assertEqual( sphere.evalParm( "parm_radius" ), 12.25  )
+		# values haven't been flushed yet
+		self.assertAlmostEqual( fn.getProcedural().parameters()["radius"].getTypedValue(), 1 )
+		# so we flush them
+		fn.setParameterisedValues()
+		self.assertAlmostEqual( fn.getProcedural().parameters()["radius"].getTypedValue(), 12.25 )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

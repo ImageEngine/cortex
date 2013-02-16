@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -122,6 +122,11 @@ class FnParameterisedHolder():
 	def getParameterised( self ) :
 		
 		return IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).getParameterised() if self.hasParameterised() else None
+	
+	def setParameterisedValues( self, time = None ) :
+		
+		time = hou.time() if time is None else time
+		IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).setParameterisedValues( time )
 	
 	# get our list of class names based on matchString
 	def classNames( self ) :

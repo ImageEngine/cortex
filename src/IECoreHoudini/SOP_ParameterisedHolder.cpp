@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -526,6 +526,21 @@ void SOP_ParameterisedHolder::setInputParameterValues( float now )
 			}
 		}
 	}
+}
+
+void SOP_ParameterisedHolder::setParameterisedValues( double time )
+{
+	IECore::ParameterisedInterface *parameterised = dynamic_cast<IECore::ParameterisedInterface*>( getParameterised().get() );
+	if ( !parameterised )
+	{
+		return;
+	}
+	
+	// push the input geo into the associated parameters
+	setInputParameterValues( time );
+	
+	// update the remaining parameters to match the SOP node values
+	updateParameter( parameterised->parameters(), time, "", true );
 }
 
 bool SOP_ParameterisedHolder::hasParameterised()

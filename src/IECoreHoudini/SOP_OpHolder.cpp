@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -97,13 +97,9 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building OpHolder Geometry...");
 	gdp->clearAndDestroy();
-
-	// push the input geo into the associated op parameters
-	setInputParameterValues( now );
 	
-	// update the SOP parameters to match the IECore::Op parameters
-	updateParameter( op->parameters(), now, "", true );
-
+	setParameterisedValues( now );
+	
 	try
 	{
 		// make our Cortex op do it's thing...
