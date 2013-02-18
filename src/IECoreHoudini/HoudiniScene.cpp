@@ -90,14 +90,8 @@ SceneInterface::Name HoudiniScene::name() const
 void HoudiniScene::path( Path &p ) const
 {
 	p.clear();
-
-	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
-	OP_Node *node = motDirector->findNode( m_path );
-	if ( !node )
-	{
-		throw Exception( "IECoreHoudini::HoudiniScene::path: Path \"" + m_path.toStdString() + "\" no longer exists." );
-	}
 	
+	OP_Node *node = retrieveNode();
 	if ( node->isManager() )
 	{
 		return;
@@ -107,7 +101,7 @@ void HoudiniScene::path( Path &p ) const
 	UT_WorkArgs workArgs;
 	tmp.tokenize( workArgs, "/" );
 	
-	OP_Node *current = motDirector->getObjectManager();
+	OP_Node *current = dynamic_cast<MOT_Director *>( OPgetDirector() )->getObjectManager();
 	// skipping the token for the OBJ manager
 	for ( int i = 1; i < workArgs.getArgc(); ++i )
 	{
@@ -336,10 +330,10 @@ SceneInterfacePtr HoudiniScene::scene( const Path &path, MissingBehaviour missin
 	return retrieveScene( path, missingBehaviour );
 }
 
-OP_Node *HoudiniScene::retrieveNode() const
+OP_Node *HoudiniScene::retrieveNode( MissingBehaviour missingBehaviour ) const
 {
 	OP_Node *node = OPgetDirector()->findNode( m_path );
-	if ( !node )
+	if ( !node && missingBehaviour == ThrowIfMissing )
 	{
 		throw Exception( "IECoreHoudini::HoudiniScene: Path \"" + m_path.toStdString() + "\" no longer exists." );
 	}
@@ -349,7 +343,12 @@ OP_Node *HoudiniScene::retrieveNode() const
 
 OP_Node *HoudiniScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
 {
-	OP_Node *node = retrieveNode();
+	OP_Node *node = retrieveNode( missingBehaviour );
+	if ( !node )
+	{
+		return 0;
+	}
+	
 	OBJ_Node *objNode = node->castToOBJNode();
 	
 	// check subnet children
@@ -386,7 +385,11 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, MissingBehaviour missing
 	
 	if ( missingBehaviour == SceneInterface::ThrowIfMissing )
 	{
-		throw Exception( "IECoreHoudini::HoudiniScene::retrieveChild: Path \"" + m_path.toStdString() + "\" has no child named " + name.string() + "." );
+		Path p;
+		path( p );
+		std::string pStr;
+		pathToString( p, pStr );
+		throw Exception( "IECoreHoudini::HoudiniScene::retrieveChild: Path \"" + pStr + "\" has no child named " + name.string() + "." );
 	}
 	
 	return 0;

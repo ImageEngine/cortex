@@ -46,7 +46,7 @@ namespace IECoreHoudini
 
 IE_CORE_FORWARDDECLARE( HoudiniScene );
 
-/// A class for representing a live Houdini scene as an IECore::SceneInterface
+/// A read-only class for representing a live Houdini scene as an IECore::SceneInterface
 class HoudiniScene : public IECore::SceneInterface
 {
 	public :
@@ -93,7 +93,7 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		HoudiniScene( UT_String &path );
 		
-		OP_Node *retrieveNode() const;
+		OP_Node *retrieveNode( MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		OP_Node *retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		
