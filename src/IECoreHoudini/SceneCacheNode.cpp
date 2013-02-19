@@ -272,10 +272,11 @@ void SceneCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std
 	menu[pos].setToken( 0 );
 }
 
+static SceneCacheUtil::Cache c;
+
 template<typename BaseType>
 SceneCacheUtil::Cache &SceneCacheNode<BaseType>::cache()
 {
-	static SceneCacheUtil::Cache c;
 	return c;
 }
 
@@ -328,6 +329,11 @@ Imath::M44d SceneCacheUtil::Cache::worldTransform( const std::string &fileName, 
 void SceneCacheUtil::Cache::erase( const std::string &fileName )
 {
 	m_fileCache.erase( fileName );
+}
+
+void SceneCacheUtil::Cache::clear()
+{
+	m_fileCache.clear();
 }
 
 SceneCacheUtil::Cache::FileAndMutexPtr SceneCacheUtil::Cache::fileCacheGetter( const std::string &fileName, size_t &cost )

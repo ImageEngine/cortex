@@ -47,11 +47,20 @@ using namespace IECoreHoudini;
 
 class SceneCacheNodeHelper
 {
+	public :
+	
+		static void clearCache()
+		{
+			SceneCacheNode<OP_Node>::cache().clear();
+		}
 };
 
 void IECoreHoudini::bindSceneCacheNode()
 {
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
+	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" )
+		.def( "clearCache", &SceneCacheNodeHelper::clearCache )
+		.staticmethod( "clearCache" )
+	;
 	
 	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
 		.value( "World", SceneCacheNode<OP_Node>::World )

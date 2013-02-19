@@ -765,8 +765,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.geometry() )
 	
 	def tearDown( self ) :
+		
 		if os.path.exists( TestSceneCache.__testFile ) :
 			os.remove( TestSceneCache.__testFile )
+		
+		IECoreHoudini.SceneCacheNode.clearCache()
 
 if __name__ == "__main__":
     unittest.main()

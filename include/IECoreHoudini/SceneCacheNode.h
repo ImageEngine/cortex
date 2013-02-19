@@ -92,12 +92,12 @@ class SceneCacheNode : public BaseType
 		Space getSpace();
 		void setSpace( Space space );
 	
-	protected :
-		
 		/// Access point to the actual SceneCache. All derived classes should only access the cache
 		/// using this method, and must hold onto an EntryPtr retrieved from this utility while
 		/// reading the SceneCache.
 		static SceneCacheUtil::Cache &cache();
+	
+	protected :
 		
 		/// get the file and ensure it is a valid MDC
 		bool ensureFile( std::string &file );
@@ -131,7 +131,7 @@ class Cache
 		
 			public :
 			
-				const IECore::SceneInterface *sceneCache();				
+				const IECore::SceneInterface *sceneCache();
 			
 			private :
 			
@@ -150,6 +150,7 @@ class Cache
 		EntryPtr entry( const std::string &fileName, const std::string &path );
 		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );
 		void erase( const std::string &fileName );
+		void clear();
 	
 	private :
 	
