@@ -130,14 +130,27 @@ Imath::Box3d HoudiniScene::readBound( double time ) const
 {
 	OP_Node *node = retrieveNode();
 	
+	Imath::Box3d bounds;
 	UT_BoundingBox box;
 	OP_Context context( time );
-	node->getBoundingBox( box, context );
-	Imath::Box3d bounds = IECore::convert<Imath::Box3d>( box );
+	if ( node->getBoundingBox( box, context ) )
+	{
+		bounds = IECore::convert<Imath::Box3d>( box );
+	}
 	
-	Imath::M44d invTransform = readTransformAsMatrix( time ).inverse();
+	NameList children;
+	childNames( children );
+	for ( NameList::iterator it=children.begin(); it != children.end(); ++it )
+	{
+		ConstSceneInterfacePtr childScene = child( *it );
+		Imath::Box3d childBound = childScene->readBound( time );
+		if ( !childBound.isEmpty() )
+		{
+			bounds.extendBy( Imath::transform( childBound, childScene->readTransformAsMatrix( time ) ) );
+		}
+	}
 	
-	return Imath::transform( bounds, invTransform );
+	return bounds;
 }
 
 void HoudiniScene::writeBound( const Imath::Box3d &bound, double time )

@@ -165,6 +165,199 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		# test the node that does exist according to houdini, but is actually a grandchild in our world
 		self.assertRaises( RuntimeError, scene.scene, [ "box1" ] )
 		self.assertEqual( scene.scene( [ "box1" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+
+	def testHasObject( self ) :
+		
+		scene = self.buildScene()
+		self.assertEqual( scene.hasObject(), False )
+		self.assertEqual( scene.child( "box2" ).hasObject(), True )
+		self.assertEqual( scene.child( "sub2" ).hasObject(), False )
+		
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.hasObject(), False )
+		torus1 = sub1.child( "torus1" )
+		self.assertEqual( torus1.hasObject(), True )
+		self.assertEqual( torus1.child( "torus2" ).hasObject(), True )
+		self.assertEqual( sub1.child( "box1" ).hasObject(), True )
+	
+	def testDeletedPath( self ) :
+		
+		scene = self.buildScene()
+		sub1 = scene.child( "sub1" )
+		torus1 = sub1.child( "torus1" )
+		
+		hou.node( "/obj/sub1/torus1" ).destroy()
+		
+		self.assertRaises( RuntimeError, IECore.curry( torus1.scene, [ "sub1", "torus1" ] ) )
+		self.assertEqual( torus1.scene( [ "sub1", "torus1" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertRaises( RuntimeError, IECore.curry( torus1.child, "torus2" ) )
+		self.assertEqual( torus1.child( "torus2", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertRaises( RuntimeError, torus1.childNames )
+		self.assertRaises( RuntimeError, torus1.path )
+		self.assertRaises( RuntimeError, torus1.hasObject )
+		self.assertRaises( RuntimeError, IECore.curry( torus1.readBound, 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( torus1.readObject, 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( torus1.readTransform, 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( torus1.readTransformAsMatrix, 0.0 ) )
+	
+	def testReadMesh( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1" ).parmTuple( "t" ).set( [ 1, 2, 3 ] )
+		hou.node( "/obj/sub1" ).parmTuple( "r" ).set( [ 10, 20, 30 ] )
+		
+		box1 = scene.child( "sub1" ).child( "box1" )
+		mesh = box1.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		
+		vertList = list( mesh["P"].data )
+		self.assertEqual( len( vertList ), 8 )
+		
+		# check the verts are in local space
+		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( IECore.V3f( -0.5, 0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( IECore.V3f( 0.5, 0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( IECore.V3f( -0.5, 0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( IECore.V3f( 0.5, 0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, -0.5 ) ), 1 )
+	
+	def testAnimatedMesh( self ) :
+		
+		scene = self.buildScene()
+		shape = hou.node( "/obj/box1/actualBox" )
+		deformer = shape.createOutputNode( "twist" )
+		deformer.parm( "paxis" ).set( 1 )
+		deformer.parm( "strength" ).setExpression( "10*$T" )
+		
+		box1 = scene.child( "sub1" ).child( "box1" )
+		mesh0   = box1.readObject( 0 )
+		mesh0_5 = box1.readObject( 0.5 )
+		mesh1   = box1.readObject( 1 )
+		# the mesh hasn't moved because the deformer isn't the renderable SOP
+		self.assertEqual( mesh0, mesh0_5 )
+		self.assertEqual( mesh0, mesh1 )
+		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
+		self.assertEqual( mesh0_5["P"].data[0].x, -0.5 )
+		self.assertEqual( mesh1["P"].data[0].x, -0.5 )
+		
+		deformer.setRenderFlag( True )
+		mesh0   = box1.readObject( 0 )
+		mesh0_5 = box1.readObject( 0.5 )
+		mesh1   = box1.readObject( 1 )
+		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
+		self.assertAlmostEqual( mesh0_5["P"].data[0].x, -0.521334, 6 )
+		self.assertAlmostEqual( mesh1["P"].data[0].x, -0.541675, 6 )
+	
+	def testReadBound( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1" ).parmTuple( "t" ).set( [ 1, 1, 1 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "t" ).set( [ 2, 2, 2 ] )
+		hou.node( "/obj/sub1/torus2" ).parmTuple( "t" ).set( [ -1, 0, 2 ] )
+		hou.node( "/obj/box1" ).parmTuple( "t" ).set( [ -1, -1, -1 ] )
+		# to make the bounds nice round numbers
+		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "rows" ).set( 100 )
+		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "cols" ).set( 100 )
+		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "rows" ).set( 100 )
+		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "cols" ).set( 100 )
+		
+		self.assertEqual( scene.child( "box2" ).readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		
+		sub1 = scene.child( "sub1" )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		
+		torus1 = sub1.child( "torus1" )
+		torus2 = torus1.child( "torus2" )
+		self.assertEqual( torus2.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 0 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5 ), IECore.V3d( 3.5, 2.5, 5.5 ) ) )
+		self.assertEqual( scene.readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 4.5, 3.5, 6.5 ) ) )
+		
+	def testAnimatedBound( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1" ).parmTuple( "t" ).set( [ 1, 1, 1 ] )
+		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T" )
+		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T" )
+		hou.node( "/obj/sub1/torus2" ).parmTuple( "t" ).set( [ -1, 0, 2 ] )
+		hou.node( "/obj/box1" ).parm( "tx" ).setExpression( "-$T" )
+		hou.node( "/obj/box1" ).parm( "ty" ).setExpression( "-$T" )
+		hou.node( "/obj/box1" ).parm( "tz" ).setExpression( "-$T" )
+		# to make the bounds nice round numbers
+		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "rows" ).set( 100 )
+		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "cols" ).set( 100 )
+		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "rows" ).set( 100 )
+		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "cols" ).set( 100 )
+		
+		self.assertEqual( scene.child( "box2" ).readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		
+		sub1 = scene.child( "sub1" )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		
+		torus1 = sub1.child( "torus1" )
+		torus2 = torus1.child( "torus2" )
+		self.assertEqual( torus2.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 0 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 0 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( scene.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -0.5 ), IECore.V3d( 2.5, 1.5, 4.5 ) ) )
+		
+		# time 1
+		self.assertEqual( box1.readBound( 1 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		self.assertEqual( torus2.readBound( 1 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 1 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 1 ), IECore.Box3d( IECore.V3d( -1.5 ), IECore.V3d( 2.5, 1.5, 4.5 ) ) )
+		self.assertEqual( scene.readBound( 1 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 3.5, 2.5, 5.5 ) ) )
+		
+		# time 1.5
+		self.assertEqual( box1.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		self.assertEqual( torus2.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 3, 2, 5 ) ) )
+		self.assertEqual( scene.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 4, 3, 6 ) ) )
+	
+	def testReadTransformMethods( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "t" ).set( [ 1, 2, 3 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "r" ).set( [ 10, 20, 30 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "s" ).set( [ 4, 5, 6 ] )
+		
+		torus1 = scene.child( "sub1" ).child( "torus1" )
+		transform = torus1.readTransform( 0 ).value
+		
+		self.assertEqual( transform.translate.x, 1 )
+		self.assertEqual( transform.translate.y, 2 )
+		self.assertEqual( transform.translate.z, 3 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.x ), 10.0, 5 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.y ), 20.0, 5 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.z ), 30.0, 5 )
+		self.assertAlmostEqual( transform.scale.x, 4, 6 )
+		self.assertAlmostEqual( transform.scale.y, 5, 6 )
+		self.assertAlmostEqual( transform.scale.z, 6, 6 )
+		self.failUnless( torus1.readTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
+	
+	def testAnimatedTransform( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T" )
+		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T+1" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T+2" )
+		
+		torus1 = scene.child( "sub1" ).child( "torus1" )
+		transform0 = torus1.readTransform( 0 ).value
+		transform0_5 = torus1.readTransform( 0.5 ).value
+		transform1 = torus1.readTransform( 1 ).value
+		
+		self.assertEqual( transform0.translate, IECore.V3d( 0, 1, 2 ) )
+		self.assertAlmostEqual( transform0_5.translate.x, 0.5, 5 )
+		self.assertAlmostEqual( transform0_5.translate.y, 1.5, 5 )
+		self.assertAlmostEqual( transform0_5.translate.z, 2.5, 5 )
+		self.assertEqual( transform1.translate, IECore.V3d( 1, 2, 3 ) )
 		
 if __name__ == "__main__":
 	IECoreHoudini.TestProgram()
