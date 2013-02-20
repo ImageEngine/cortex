@@ -73,10 +73,10 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	
 	float oMin = Math<float>::asin( m_zMin );
 	float oMax = Math<float>::asin( m_zMax );
-	const unsigned int nO = max( 4u, (unsigned int)( 20.0f * m_radius * (oMax - oMin) / M_PI ) );
+	const unsigned int nO = max( 4u, (unsigned int)( 20.0f * (oMax - oMin) / M_PI ) );
 
 	thetaMax = m_thetaMax/180.0f * M_PI;
-	const unsigned int nT = max( 7u, (unsigned int)( m_radius * 40.0f * thetaMax / (M_PI*2) ) );
+	const unsigned int nT = max( 7u, (unsigned int)( 40.0f * thetaMax / (M_PI*2) ) );
 
 	for( unsigned int i=0; i<nO; i++ )
 	{
