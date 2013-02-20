@@ -1371,7 +1371,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					Imath::Box3d totalExpansion;
 
 					/// \todo consider making steps a parameter.
-					int steps = 4;	/// subdivide interval between samples in 4 steps
+					int steps = 10;	/// subdivide interval between samples in X steps
 					double xStep = 1.0 / steps;
 					for ( double x = xStep; x < 1.0; x += xStep )
 					{
@@ -1393,6 +1393,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 						Imath::Box3d expansion( extendedBBox.min - interpTransformedBoxes.min, extendedBBox.max - interpTransformedBoxes.max );
 						totalExpansion.extendBy( expansion );
 					}
+					// we know how much the interpolated box should expand at any step. If we apply that to both samples, we guarantee any linear interpolation
+					// is at least that amount bigger.
 					previousTransformedBox = Imath::Box3d( previousTransformedBox.min + totalExpansion.min, previousTransformedBox.max + totalExpansion.max );
 					nextTransformedBox = Imath::Box3d( nextTransformedBox.min + totalExpansion.min, nextTransformedBox.max + totalExpansion.max );
 					// revisit last transformed bounding box

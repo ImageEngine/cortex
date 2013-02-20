@@ -143,6 +143,17 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( s.readObject(0.0), IECore.SpherePrimitive( 1 ) )
 	
 		self.assertEqual( s.readAttribute( "glah", 0 ), IECore.BoolData( True ) )
+
+	@staticmethod
+	def compareBBox( box1, box2 ):
+		errorTolerance = IECore.V3d(1e-5, 1e-5, 1e-5)
+		boxTmp = IECore.Box3d( box1.min - errorTolerance, box1.max + errorTolerance )
+		if not boxTmp.contains( box2 ):
+			return False
+		boxTmp = IECore.Box3d( box2.min - errorTolerance, box2.max + errorTolerance )
+		if not boxTmp.contains( box1 ):
+			return False
+		return True
 		
 	def testRandomStaticHierarchy( self ) :
 	
@@ -168,8 +179,6 @@ class SceneCacheTest( unittest.TestCase ) :
 		writeWalk( m )
 		del m
 
-		errorTolerance = IECore.V3d(1e-5, 1e-5, 1e-5)
-		
 		def readWalk( m, parentSpaceBound ) :
 					
 			localSpaceBound = IECore.Box3d()
@@ -185,12 +194,7 @@ class SceneCacheTest( unittest.TestCase ) :
 			fileBound = m.readBound(0.0)
 
 			# the two bounding boxes should be pretty tightly close!
-			localSpaceBoundTmp = IECore.Box3d()
-			localSpaceBoundTmp.extendBy( IECore.Box3d( localSpaceBound.min - errorTolerance, localSpaceBound.max + errorTolerance ) )
-			self.failUnless( localSpaceBoundTmp.contains( fileBound ) )
-			
-			fileBound.extendBy( IECore.Box3d( fileBound.min - errorTolerance, fileBound.max + errorTolerance ) )
-			self.failUnless( fileBound.contains( localSpaceBound ) )
+			self.failUnless( SceneCacheTest.compareBBox( localSpaceBound, fileBound ) )
 			
 			transformedBound = localSpaceBound.transform( m.readTransformAsMatrix(0.0) )
 			parentSpaceBound.extendBy( transformedBound )
@@ -348,9 +352,9 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( A.boundSampleTime(0), 0.0 )
 		self.assertEqual( A.boundSampleTime(1), 1.0 )
 		self.assertEqual( A.boundSampleTime(2), 2.0 )
-		self.assertEqual( A.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) )
-		self.assertEqual( A.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) )
-		self.assertEqual( A.readBoundAtSample(2), IECore.Box3d(IECore.V3d( 0,-1,-1 ), IECore.V3d( 2,1,1 ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), IECore.Box3d(IECore.V3d( 0,-1,-1 ), IECore.V3d( 2,1,1 ) ) ) )
 		a = A.child("a")
 		self.assertEqual( a.numBoundSamples(), 1 )
 		self.assertEqual( a.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
@@ -360,20 +364,20 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( B.boundSampleTime(1), 1.0 )
 		self.assertEqual( B.boundSampleTime(2), 2.0 )
 		self.assertEqual( B.boundSampleTime(3), 3.0 )
-		self.assertEqual( B.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) )
-		self.assertEqual( B.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) )
-		self.assertEqual( B.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2,-1,-2 ), IECore.V3d( 2,3,2 ) ) )
-		self.assertEqual( B.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3,-2,-3 ), IECore.V3d( 3,4,3 ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2,-1,-2 ), IECore.V3d( 2,3,2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3,-2,-3 ), IECore.V3d( 3,4,3 ) ) ) )
 		b = B.child("b")
 		self.assertEqual( b.numBoundSamples(), 4 )
 		self.assertEqual( b.boundSampleTime(0), 0.0 )
 		self.assertEqual( b.boundSampleTime(1), 1.0 )
 		self.assertEqual( b.boundSampleTime(2), 2.0 )
 		self.assertEqual( b.boundSampleTime(3), 3.0 )
-		self.assertEqual( b.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( b.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( b.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
-		self.assertEqual( b.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3 ), IECore.V3d( 3 ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2 ), IECore.V3d( 2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3 ), IECore.V3d( 3 ) ) ) )
 
 	def testExpandedBoundsForAnimation( self ):
 
@@ -391,18 +395,14 @@ class SceneCacheTest( unittest.TestCase ) :
 		del m,a
 
 		cubeBound = IECore.Box3d( IECore.V3d( cube.bound().min ), IECore.V3d( cube.bound().max ) )
-		errorTolerance = IECore.V3d(1e-3, 1e-3, 1e-3)
+		errorTolerance = IECore.V3d(1e-5, 1e-5, 1e-5)
 		
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		a = m.child("a")
 		self.assertEqual( a.numBoundSamples(), 1 )
 
-		tmpBounds = a.readBoundAtSample(0)
-		tmpBounds.extendBy( IECore.Box3d( tmpBounds.min - errorTolerance, tmpBounds.max + errorTolerance ) )
-		self.failUnless( tmpBounds.contains( cubeBound ) )	# the stored qube should have same bbox as the original qube.
-		tmpBounds = cubeBound
-		tmpBounds.extendBy( IECore.Box3d( tmpBounds.min - errorTolerance, tmpBounds.max + errorTolerance ) )
-		self.failUnless( tmpBounds.contains( a.readBoundAtSample(0) ) )	# the stored qube should have same bbox as the original qube.
+		# the stored qube should have same bbox as the original qube.
+		self.failUnless( SceneCacheTest.compareBBox( a.readBoundAtSample(0), cubeBound ) )
 
 		self.assertEqual( m.numBoundSamples(), 4 )
 
