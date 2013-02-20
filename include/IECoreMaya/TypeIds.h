@@ -117,6 +117,7 @@ enum TypeId
 	V3ManipulatorTypeId = 109070,
 	ToMayaCameraConverterTypeId = 109071,
 	MayaSceneTypeId = 109072,
+	FromMayaProceduralHolderConverterTypeId = 109073,
 	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
 };

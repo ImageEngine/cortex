@@ -55,6 +55,7 @@
 #include "IECoreMaya/bindings/FromMayaShapeConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaCurveConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaParticleConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaProceduralHolderConverterBinding.h"
 #include "IECoreMaya/bindings/StandaloneBinding.h"
 #include "IECoreMaya/bindings/FromMayaDagNodeConverterBinding.h"
 #include "IECoreMaya/bindings/TypeIdBinding.h"
@@ -121,6 +122,7 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaShapeConverter();
 	bindFromMayaCurveConverter();
 	bindFromMayaParticleConverter();
+	bindFromMayaProceduralHolderConverter();
 	bindStandalone();
 	bindMPlugFromPython();
 	bindMObjectFromPython();
