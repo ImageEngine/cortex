@@ -335,10 +335,13 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
 		self.assertEqual( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) )
 		self.assertEqual( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) )
+		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
 		self.assertEqual( m.readBoundAtSample(1), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 3,3,1 ) ) )
 		self.assertEqual( m.readBoundAtSample(2), IECore.Box3d( IECore.V3d( -2,-1,-2 ), IECore.V3d( 4,5,2 ) ) )
 		self.assertEqual( m.readBoundAtSample(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
 		self.assertEqual( m.readBound(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
+		self.assertEqual( m.boundSampleInterval(3), (1.0,2,3) )
+		self.assertEqual( m.boundSampleInterval(4), (0,3,3) )
 
 		A = m.child("A")
 		self.assertEqual( A.numBoundSamples(), 3 )
