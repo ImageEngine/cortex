@@ -229,8 +229,10 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			SampleTimes::const_iterator it = sampleTimes.begin();
 			for ( ; it != sampleTimes.end(); it++ )
 			{
-				if ( time > *it )
+				if ( time <= *it )
+				{
 					break;
+				}
 			}
 			if ( it == sampleTimes.begin() )
 			{

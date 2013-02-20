@@ -334,9 +334,11 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(2), 2.0 )
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
 		self.assertEqual( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) )
+		self.assertEqual( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) )
 		self.assertEqual( m.readBoundAtSample(1), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 3,3,1 ) ) )
 		self.assertEqual( m.readBoundAtSample(2), IECore.Box3d( IECore.V3d( -2,-1,-2 ), IECore.V3d( 4,5,2 ) ) )
 		self.assertEqual( m.readBoundAtSample(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
+		self.assertEqual( m.readBound(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
 
 		A = m.child("A")
 		self.assertEqual( A.numBoundSamples(), 3 )
@@ -402,7 +404,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.numBoundSamples(), 4 )
 
 		for t in xrange( 0, 30, 2 ):
-			time = t / 10.0			
+			time = t / 10.0
 			angle = time * math.radians(90)
 			transformedBound = cubeBound.transform( IECore.M44d.createRotated( IECore.V3d( 0, angle, 0 ) ) )
 			tmpBounds = m.readBound( time )
