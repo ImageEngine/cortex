@@ -1,5 +1,6 @@
 Additions :
 
+* It's now possible to register FromMayaDagConverters for plugin maya nodes. Added the FromMayaProceduralHolderConverter.
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::SceneCache files
 * Added InternedStringData and InternedStringVectorDataTypes.
 * Added IECoreHoudini::HoudiniScene, a SceneInterface for live Houdini scenes.
