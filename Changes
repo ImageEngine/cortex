@@ -16,6 +16,7 @@ Improvements :
 * Using -isystem rather than -I for all dependency includes
 * Enabled -Werror for all libraries (and a few -Wno-* only where necessary). Removed PYTHONCXXFLAGS option.
 * SLOReader now creates an "ri:orderedParameterNames" blind data entry on the loaded shader, to work around the fact that the Light::parameters() data structure doesn't maintain order.
+* CapturingRenderer now implements the light() method, placing IECore::Light objects in the Group state.
 
 7.10.2 :
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -983,6 +983,20 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 			self.checkStructure( r.world(), expectedStructure )	
 	
+	def testLights( self ) :
+	
+		r = IECore.CapturingRenderer()
+		with IECore.WorldBlock( r ) :
+		
+			r.light( "myLight", "myLightHandle", { "intensity" : IECore.FloatData( 10 ) } )
+			
+		w = r.world()
+		
+		self.assertEqual( len( w.state() ), 1 )
+		self.assertTrue( isinstance( w.state()[0], IECore.Light ) )
+		self.assertEqual( w.state()[0].name, "myLight" )
+		self.assertEqual( w.state()[0].handle, "myLightHandle" )
+		self.assertEqual( w.state()[0].parameters, IECore.CompoundData( { "intensity" : IECore.FloatData( 10 ) } ) )
 
 if __name__ == "__main__":
 	unittest.main()
