@@ -147,6 +147,9 @@ void OBJ_SceneCacheNode<BaseType>::cleanHierarchy()
 template<typename BaseType>
 OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 {
+	/// \todo: check for multiple samples before marking time dependant
+	BaseType::flags().setTimeDep( true );
+	
 	std::string file;
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
 	{

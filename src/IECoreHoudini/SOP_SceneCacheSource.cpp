@@ -146,6 +146,8 @@ void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int
 
 OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 {
+	/// \todo: check for multiple samples before marking time dependant
+	flags().setTimeDep( true );
 	gdp->stashAll();
 	
 	std::string file;

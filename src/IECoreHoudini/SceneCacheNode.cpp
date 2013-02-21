@@ -52,6 +52,7 @@ using namespace IECoreHoudini;
 template<typename BaseType>
 SceneCacheNode<BaseType>::SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : BaseType( net, name, op )
 {
+	BaseType::flags().setTimeDep( true );
 }
 
 template<typename BaseType>

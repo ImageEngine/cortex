@@ -63,33 +63,35 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		geometry.parm( "file" ).set( TestSceneCache.__testFile )
 		return geometry
 	
-	def writeSCC( self, rotation=IECore.V3d( 0, 0, 0 ) ) :
+	def writeSCC( self, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
 		
 		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
 		
 		sc = scene.createChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
-		sc.writeObject( mesh, 0 )
+		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
-		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		sc.writeTransform( IECore.M44dData( matrix ), time )
 		
 		sc = sc.createChild( str( 2 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
-		sc.writeObject( mesh, 0 )
+		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
-		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		sc.writeTransform( IECore.M44dData( matrix ), time )
 		
 		sc = sc.createChild( str( 3 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
-		sc.writeObject( mesh, 0 )
+		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
-		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		sc.writeTransform( IECore.M44dData( matrix ), time )
+		
+		return scene
 	
 	def testBadFile( self ) :
 		
@@ -764,6 +766,63 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.xform() )
 		testNode( self.geometry() )
 	
+	def testAnimatedScene( self ) :
+		
+		scene = self.writeSCC()
+		sc1 = scene.child( str( 1 ) )
+		sc2 = sc1.child( str( 2 ) )
+		sc3 = sc2.child( str( 3 ) )
+		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		
+		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
+			
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
+			sc1.writeTransform( IECore.M44dData( matrix ), time )
+			
+			mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
+			sc2.writeObject( mesh, time )
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			sc2.writeTransform( IECore.M44dData( matrix ), time )
+			
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
+			sc3.writeTransform( IECore.M44dData( matrix ), time )
+		
+		del scene, sc1, sc2, sc3
+		
+		times = range( 0, 10 )
+		halves = [ x + 0.5 for x in times ]
+		quarters = [ x + 0.25 for x in times ]
+		times.extend( [ x + 0.75 for x in times ] )
+		times.extend( halves )
+		times.extend( quarters )
+		times.sort()
+		
+		sop = self.sop()
+		for time in times :
+			hou.setTime( time )
+			prims = sop.geometry().prims()
+			primGroups = sop.geometry().primGroups()
+			self.assertEqual( len(prims), 18 )
+			self.assertEqual( len(primGroups), 3 )
+			self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
+			for group in primGroups :
+				self.assertEqual( len(group.prims()), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, time, 0 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 2*time, 0 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 3*time, 0 ) )
+			self.assertEqual( prims[6].attribValue( "Cd" ), ( time, 1, 0 ) )
+		
+		xform = self.xform()
+		xform.parm( "build" ).pressButton()
+		a = xform.children()[0]
+		b = [ x for x in a.children() if x.name() != "geo" ][0]
+		c = [ x for x in b.children() if x.name() != "geo" ][0]
+		for time in times :
+			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time ).asTuple()) ), IECore.M44d() )
+			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+	
 	def tearDown( self ) :
 		
 		if os.path.exists( TestSceneCache.__testFile ) :
@@ -773,4 +832,3 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 if __name__ == "__main__":
     unittest.main()
-
