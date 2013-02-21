@@ -30,6 +30,7 @@ Bug Fixes :
 
 * Fixed crashes caused by calling PrimitiveEvaluator.create( None ) in Python, replacing them with ValueError exceptions.
 * Using setParameterisedValues() in the IECoreMantra inject SHOP so parameters with expressions are expanded appropriately.
+* IECoreMantra cortexMantraInject SHOP now uses explicit bounds with hscript expressions to read them from the soppath. This fixes a bug where bounds were not being updated properly in ifds made with hbatch.
 
 7.10.1 :
 
