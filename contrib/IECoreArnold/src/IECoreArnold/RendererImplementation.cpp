@@ -471,7 +471,18 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 
 void IECoreArnold::RendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "IECoreArnold::RendererImplementation::light", "Not implemented" );
+	AtNode *l = AiNode( name.c_str() );
+	if( !l )
+	{
+		msg( Msg::Warning, "IECoreArnold::RendererImplementation::light", boost::format( "Couldn't load light \"%s\"" ) % name );
+		return;
+	}
+	for( CompoundDataMap::const_iterator parmIt=parameters.begin(); parmIt!=parameters.end(); parmIt++ )
+	{
+		ToArnoldConverter::setParameter( l, parmIt->first.value().c_str(), parmIt->second );
+	}
+	applyTransformToNode( l );
+	addNode( l );
 }
 
 void IECoreArnold::RendererImplementation::illuminate( const std::string &lightHandle, bool on )

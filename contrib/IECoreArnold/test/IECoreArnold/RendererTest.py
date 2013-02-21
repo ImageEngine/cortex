@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -651,6 +651,32 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( len( m.messages ), 1 )
 		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Warning )
 		self.failUnless( "oopsWrongOne" in m.messages[0].message )
+	
+	def testLight( self ) :
+	
+		r = IECoreArnold.Renderer()
+		
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+
+		with IECore.WorldBlock( r ) :
+		
+			r.light( "point_light", "handle", { "intensity" : 1, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			
+			r.shader( "surface", "standard", {} )	
+			
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			mesh.render( r )
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		e = IECore.PrimitiveEvaluator.create( image )
+ 		result = e.createResult()
+				
+		e.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertTrue( result.floatPrimVar( e.R() ) > 0.2 )
+		self.assertAlmostEqual( result.floatPrimVar( e.R() ) * 0.5, result.floatPrimVar( e.G() ) )
+		self.assertAlmostEqual( result.floatPrimVar( e.R() ) * 0.25, result.floatPrimVar( e.B() ) )
 		
 	def tearDown( self ) :
 			
