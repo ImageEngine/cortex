@@ -1,8 +1,8 @@
 comment ""
-position 2.79991 2.32939
+position 2.15285 2.76468
 cachesize 1
 connectornextid 24
-flags =  lock off model off template off footprint off xray off bypass off display off render off highlight off unload off savedata off compress off exposed on
+flags =  lock off model off template off footprint off xray off bypass off display on render on highlight off unload off savedata off compress off exposed on
 outputsNamed3
 {
 0 "Properties"
@@ -38,9 +38,9 @@ inputs
 }
 stat
 {
-  create 1339326113
-  modify 1339326390
-  author dan@ws03
+  create 1361404604
+  modify 1361404609
+  author andrewk@wrkhpi04.ie.dom
   access 0777
 }
 color UT_Color RGB 0.8 0.8 0.8 
