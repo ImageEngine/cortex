@@ -149,6 +149,7 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 {
 	/// \todo: check for multiple samples before marking time dependant
 	BaseType::flags().setTimeDep( true );
+	BaseType::getParmList()->setCookTimeDependent( true );
 	
 	std::string file;
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
