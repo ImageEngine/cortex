@@ -231,7 +231,7 @@ void LRUCache<Key, Ptr>::limitCost( Cost cost )
 
 	assert( cost >= Cost(0) );
 
-	while( m_currentCost > cost && m_list.empty() )
+	while( m_currentCost > cost && !m_list.empty() )
 	{
 		bool erased = erase( m_list.back() );
 		assert( erased ); (void)erased;
