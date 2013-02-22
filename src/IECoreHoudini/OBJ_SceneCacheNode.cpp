@@ -145,7 +145,7 @@ void OBJ_SceneCacheNode<BaseType>::cleanHierarchy()
 }
 
 template<typename BaseType>
-OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
+bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMatrix4 &xform )
 {
 	/// \todo: check for multiple samples before marking time dependant
 	BaseType::flags().setTimeDep( true );
@@ -154,7 +154,7 @@ OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
 		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .scc" ).c_str() );
-		return SceneCacheNode<BaseType>::error();
+		return false;
 	}
 	
 	std::string path = this->getPath();
@@ -164,7 +164,7 @@ OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 	if ( !scene )
 	{
 		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( path + " is not a valid location in " + file ).c_str() );
-		return SceneCacheNode<BaseType>::error();
+		return false;
 	}
 	
 	Imath::M44d transform;
@@ -177,9 +177,9 @@ OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 		transform = SceneCacheNode<BaseType>::cache().entry( file, path )->sceneCache()->readTransformAsMatrix( context.getTime() );
 	}
 	
-	SceneCacheNode<BaseType>::setParmTransform( context, IECore::convert<UT_Matrix4D>( transform ) );
+	xform = IECore::convert<UT_Matrix4D>( transform );
 	
-	return BaseType::cookMyObj( context );
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
