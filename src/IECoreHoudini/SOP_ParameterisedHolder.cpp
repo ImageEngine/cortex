@@ -624,6 +624,8 @@ void SOP_ParameterisedHolder::load( const std::string &className, int classVersi
 		return;
 	}
 	
+	IECore::MessageHandler::Scope handlerScope( messageHandler() );
+	
 	UT_String path;
 	getFullPath( path );
 	std::string cmd = "IECoreHoudini.FnParameterisedHolder( hou.node( \"";

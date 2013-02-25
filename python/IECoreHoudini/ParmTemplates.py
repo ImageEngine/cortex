@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -182,9 +182,9 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 	if not parm and not isinstance( p, ignoredParameterTypes ) :
 		msg = "IECoreHoudini does not currently support parameters of type " + p.typeName()
 		
-		# H10 and hbatch/hython don't support ui.setStatusMessage()
-		## \todo: remove this if we can get the IECore.warning below handled by the SOP_Parameterised::messageHandler()
-		if ( hou.applicationVersion()[0]>10 and hou.isUIAvailable() ) :
+		# hbatch/hython don't support ui.setStatusMessage()
+		## \todo: remove this if the Houdini load errors stop masking the IECore warnings
+		if hou.isUIAvailable() :
 			hou.ui.setStatusMessage( msg, hou.severityType.Warning )
 		
 		IECore.warning( msg )

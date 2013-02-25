@@ -181,12 +181,6 @@ class FnParameterisedHolder():
 		
 		return result
 	
-	## \todo: remove this method for the next major version
-	def countSpareParameters( self ) :
-		
-		warnings.warn( "FnParameterisedHolder.countSpareParameters() is deprecated.", DeprecationWarning, 2 )
-		return len(self.spareParameters( tuples=False ))
-	
 	# this method removes all spare parameters from the "Parameters" folder
 	def removeParameters( self ) :
 		
