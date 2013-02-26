@@ -54,6 +54,7 @@ class HoudiniScene : public IECore::SceneInterface
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HoudiniScene, HoudiniSceneTypeId, IECore::SceneInterface );
 		
 		HoudiniScene();
+		HoudiniScene( UT_String &path );
 		/// \todo: why does this constructor exist?
 		HoudiniScene( const std::string &fileName, IECore::IndexedIO::OpenMode );
 		
@@ -90,8 +91,6 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
 	private :
-		
-		HoudiniScene( UT_String &path );
 		
 		OP_Node *retrieveNode( MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		OP_Node *retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;

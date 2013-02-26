@@ -54,6 +54,7 @@
 #include "IECoreHoudini/SOP_ToHoudiniConverter.h"
 #include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
+#include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
 
@@ -140,6 +141,21 @@ void newObjectOperator( OP_OperatorTable *table )
 	
 	table->addOpHidden( sceneCacheTransform->getName() );
 	table->addOpHidden( sceneCacheGeometry->getName() );
+}
+
+void newDriverOperator( OP_OperatorTable *table )
+{
+	OP_Operator *sceneCacheWriter = new OP_Operator(
+		ROP_SceneCacheWriter::typeName, "SceneCache Writer",
+		ROP_SceneCacheWriter::create, ROP_SceneCacheWriter::buildParameters(), 0, 999, 0,
+		OP_FLAG_GENERATOR
+	);
+	/// \todo: get a new icon
+	sceneCacheWriter->setIconName( "SOP_ieToHoudiniConverter" );
+	
+	table->addOperator( sceneCacheWriter );
+	
+	table->addOpHidden( sceneCacheWriter->getName() );
 }
 
 /// Declare our new Render Hooks

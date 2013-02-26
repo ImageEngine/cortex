@@ -68,6 +68,9 @@ HoudiniScene::HoudiniScene( UT_String &path )
 {
 	m_path = path;
 	m_path.hardenIfNeeded();
+	
+	// make sure the node exists
+	retrieveNode();
 }
 
 HoudiniScene::~HoudiniScene()

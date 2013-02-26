@@ -58,6 +58,15 @@ soptoolutils.genericTool(kwargs, 'ieToHoudiniConverter')]]></script>
     <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieSceneCacheGeometry')]]></script>
   </tool>
   
+  <!-- SceneCacheWriter Writer -->
+  <tool name="cortexSceneCacheWriter" label="SceneCache Writer" icon="SOP_ieToHoudiniConverter">
+    <toolMenuContext name="network">
+      <contextNetType>ROP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import drivertoolutils; drivertoolutils.genericTool(kwargs, 'ieSceneCacheWriter')]]></script>
+  </tool>
+  
   <!-- Interpolated Cache Reader -->
   <tool name="cortex_interpolated_cache_reader" label="Interpolated Cache Reader" icon="SOP_ieInterpolatedCacheReader">
     <toolMenuContext name="network">
