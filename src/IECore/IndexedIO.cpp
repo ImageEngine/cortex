@@ -141,7 +141,9 @@ void IndexedIO::validateOpenMode(IndexedIO::OpenMode &mode)
 // Entry
 //
 
-IndexedIO::Entry::Entry() : m_ID(""), m_entryType( IndexedIO::Directory), m_dataType( IndexedIO::Invalid), m_arrayLength(0)
+static InternedString emptyString("");
+
+IndexedIO::Entry::Entry() : m_ID(emptyString), m_entryType( IndexedIO::Directory), m_dataType( IndexedIO::Invalid), m_arrayLength(0)
 {
 }
 
