@@ -123,7 +123,7 @@ class MayaScene : public IECore::SceneInterface
 		/// Fills attrs with the names of all attributes available in the current directory
 		virtual void readAttributeNames( NameList &attrs ) const;
 		/// Returns the attribute value at the given time.
-		virtual IECore::ObjectPtr readAttribute( const Name &name, double time );
+		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
 		/// Writers the attribute to this path within the scene
 		/// Raises an exception if you try to write an attribute in the root path with a time different than 0.
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );

@@ -419,12 +419,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		ObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex )
+		ObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex ) const
 		{
 			return Object::load( m_indexedIO->subdirectory(attributesEntry)->subdirectory(name), sampleEntry(sampleIndex) );
 		}
 
-		ObjectPtr readAttribute( const SceneCache::Name &name, double time )
+		ObjectPtr readAttribute( const SceneCache::Name &name, double time ) const
 		{
 			size_t sample1, sample2;
 			double x = attributeSampleInterval( name, time, sample1, sample2 );
@@ -1644,13 +1644,13 @@ double SceneCache::attributeSampleInterval( const Name &name, double time, size_
 	return reader->attributeSampleInterval( name, time, floorIndex, ceilIndex );
 }
 
-ObjectPtr SceneCache::readAttributeAtSample( const Name &name, size_t sampleIndex )
+ObjectPtr SceneCache::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readAttributeAtSample( name, sampleIndex );
 }
 
-ObjectPtr SceneCache::readAttribute( const Name &name, double time )
+ObjectPtr SceneCache::readAttribute( const Name &name, double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readAttribute( name, time );

@@ -89,7 +89,7 @@ class SampledSceneInterface : public SceneInterface
 		/// Returns the transform applied to this path within the scene as a matrix.
 		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const = 0;
 		/// Reads the named attribute applied to this path within the scene.
-		virtual ObjectPtr readAttributeAtSample( const SceneInterface::Name &name, size_t sampleIndex ) = 0;
+		virtual ObjectPtr readAttributeAtSample( const SceneInterface::Name &name, size_t sampleIndex ) const = 0;
 		/// Reads the object stored at this path in the scene - may
 		/// return 0 when no object has been stored.
 		virtual ObjectPtr readObjectAtSample( size_t sampleIndex ) const = 0;

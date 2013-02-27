@@ -104,8 +104,8 @@ class SceneCache : public SampledSceneInterface
 		size_t numAttributeSamples( const Name &name ) const;
 		double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
 		double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		ObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex );
-		ObjectPtr readAttribute( const Name &name, double time );
+		ObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
+		ObjectPtr readAttribute( const Name &name, double time ) const;
 		void writeAttribute( const Name &name, const Object *attribute, double time );
 
 		bool hasObject() const;

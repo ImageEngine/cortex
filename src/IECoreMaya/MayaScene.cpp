@@ -206,7 +206,7 @@ void MayaScene::readAttributeNames( NameList &attrs ) const
 {
 }
 
-ObjectPtr MayaScene::readAttribute( const Name &name, double time )
+ObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 {
 	return 0;
 }
