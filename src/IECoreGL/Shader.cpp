@@ -679,7 +679,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, integers ) );
 		}
 	}
-	else if( p->type == GL_FLOAT || p->type == GL_FLOAT_VEC2 || p->type == GL_FLOAT_VEC3 )
+	else if( p->type == GL_FLOAT || p->type == GL_FLOAT_VEC2 || p->type == GL_FLOAT_VEC3 || p->type == GL_FLOAT_VEC4 )
 	{
 		// float value
 		
@@ -703,7 +703,11 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 					dimensions = 2;
 					break;
 				case GL_FLOAT_VEC3 :
-					dimensions = 3;	
+					dimensions = 3;
+					break;
+				case GL_FLOAT_VEC4 :
+					dimensions = 4;
+					break;
 			}
 			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, floats ) );
 		}
