@@ -74,7 +74,7 @@ class HoudiniScene : public IECore::SceneInterface
 
 		virtual bool hasAttribute( const Name &name ) const;
 		virtual void readAttributeNames( NameList &attrs ) const;
-		virtual IECore::ObjectPtr readAttribute( const Name &name, double time );
+		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
 
 		virtual bool hasObject() const;

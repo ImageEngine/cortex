@@ -208,7 +208,7 @@ void HoudiniScene::readAttributeNames( NameList &attrs ) const
 {
 }
 
-ObjectPtr HoudiniScene::readAttribute( const Name &name, double time )
+ObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
 {
 	return 0;
 }
