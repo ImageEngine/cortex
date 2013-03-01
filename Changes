@@ -19,6 +19,8 @@ Improvements :
 * SLOReader now creates an "ri:orderedParameterNames" blind data entry on the loaded shader, to work around the fact that the Light::parameters() data structure doesn't maintain order.
 * CapturingRenderer now implements the light() method, placing IECore::Light objects in the Group state.
 * Implemented the IECoreArnold::Renderer::light() method.
+* IECoreRI::Renderer now supports setting the hider via setOption().
+* IECoreRI::Renderer now groups options by type, outputting each group via a single RiOption call just before worldBegin(). This is necessary because 3delight requires certain options to be specified together in this way ( statistics "endofframe" and "filename" for example ). 
 
 7.10.2 :
 

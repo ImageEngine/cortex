@@ -497,7 +497,43 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 		with WorldBlock( r ) :
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : None } )
+	
+	def testErrorsReportedForUnknownRenderManOptions( self ) :
+	
+		with CapturingMessageHandler() as mh :
+		
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 			
+			r.setOption( "ri:unknownOption", StringData( "whatYouGonnaDo?" ) )
+			
+			with WorldBlock( r ) :
+				pass
+				
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertTrue( "ri:unknownOption" in mh.messages[0].message )
+		
+	def testSetHiderViaOptions( self ) :
+	
+		with CapturingMessageHandler() as mh :
+
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+			r.setOption( "ri:hider", "hidden" )
+			r.setOption( "ri:hider:jitter", True )
+			r.setOption( "ri:hider:depthfilter", "min" )
+
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+
+		self.assertTrue( "Hider" in rib )
+		self.assertTrue( "hidden" in rib )
+		self.assertTrue( "jitter" in rib )
+		self.assertTrue( "depthfilter" in rib )
+					
 	def tearDown( self ) :
 
 		files = [
