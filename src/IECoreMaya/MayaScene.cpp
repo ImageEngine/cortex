@@ -5,7 +5,8 @@
 
 #include "IECoreMaya/MayaScene.h"
 #include "IECoreMaya/FromMayaTransformConverter.h"
-#include "IECoreMaya/FromMayaMeshConverter.h"
+#include "IECoreMaya/FromMayaShapeConverter.h"
+#include "IECoreMaya/FromMayaDagNodeConverter.h"
 #include "IECoreMaya/FromMayaCameraConverter.h"
 #include "IECoreMaya/Convert.h"
 
@@ -31,6 +32,8 @@
 
 using namespace IECore;
 using namespace IECoreMaya;
+
+IE_CORE_DEFINERUNTIMETYPED( MayaScene );
 
 // this stuff requires a mutex, as all them maya DG functions aint thread safe!
 MayaScene::Mutex MayaScene::s_mutex;
@@ -63,6 +66,11 @@ MayaScene::MayaScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 
 MayaScene::~MayaScene()
 {
+}
+
+MayaScenePtr MayaScene::duplicate( const MDagPath& p, bool isRoot ) const
+{
+	return new MayaScene( p, isRoot );
 }
 
 SceneInterface::Name MayaScene::name() const
@@ -245,19 +253,24 @@ ObjectPtr MayaScene::readObject( double time ) const
 		throw Exception( "MayaScene::readObject: time must be the same as on the maya timeline!" );
 	}
 	
-	if( m_dagPath.hasFn( MFn::kMesh ) )
-	{
-		
-		FromMayaMeshConverter converter( m_dagPath );
-		converter.spaceParameter()->setValue( new IECore::IntData( FromMayaShapeConverter::Object ) );
-		return converter.convert();
-	}
-	else if( m_dagPath.hasFn( MFn::kCamera ) )
+	if( m_dagPath.hasFn( MFn::kCamera ) )
 	{
 		FromMayaCameraConverter converter( m_dagPath );
 		CameraPtr cam = runTimeCast< Camera >( converter.convert() );
 		cam->setTransform( new MatrixTransform( Imath::M44f() ) );
 		return cam;
+	}
+	
+	FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( m_dagPath );
+	if( shapeConverter )
+	{
+		return shapeConverter->convert();
+	}
+	
+	FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( m_dagPath );
+	if( dagConverter )
+	{
+		return dagConverter->convert();
 	}
 	
 	return 0;
@@ -356,7 +369,7 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
 		if( name == childName )
 		{
-			return new MayaScene( paths[i] );
+			return duplicate( paths[i] );
 		}
 	}
 	
@@ -392,7 +405,7 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 		MItDag it;
 		MDagPath rootPath;
 		it.getPath( rootPath );
-		return new MayaScene( rootPath, true );
+		return duplicate( rootPath, true );
 	}
 	
 	MString pathName;
@@ -417,7 +430,7 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	MDagPath dagPath;
 	sel.getDagPath( 0, dagPath );
 	
-	return new MayaScene( dagPath );
+	return duplicate( dagPath );
 	
 }
 

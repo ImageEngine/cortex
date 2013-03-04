@@ -69,7 +69,6 @@ class MayaScene : public IECore::SceneInterface
 		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MayaScene, MayaSceneTypeId, IECore::SceneInterface );
 		
-		
 		// default constructor
 		MayaScene();
 		
@@ -172,9 +171,7 @@ class MayaScene : public IECore::SceneInterface
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
 	private :
-		
-		// constructor for a specific dag path:
-		MayaScene( const MDagPath& p, bool isRoot = false );
+				
 		
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
@@ -182,13 +179,23 @@ class MayaScene : public IECore::SceneInterface
 		
 		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
 		
+	protected:
+		
+		// constructor for a specific dag path:
+		MayaScene( const MDagPath& p, bool isRoot = false );
+		
 		MDagPath m_dagPath;
 		bool m_isRoot;
 		
+		// constructor for a specific dag path:
+		virtual MayaScenePtr duplicate( const MDagPath& p, bool isRoot = false ) const;
+	
 		typedef tbb::mutex Mutex;
 		static Mutex s_mutex;
 		
 };
+
+IE_CORE_DECLAREPTR( MayaScene )
 
 } // namespace IECoreMaya
 
