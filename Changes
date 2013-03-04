@@ -4,6 +4,8 @@ Additions :
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::SceneCache files, and a ROP for writing them
 * Added InternedStringData and InternedStringVectorDataTypes.
 * Added IECoreHoudini::HoudiniScene, a SceneInterface for live Houdini scenes.
+* Added virtual duplicate() method to IECore::SceneCache, which is used in methods like child() etc, so derived classes can make these methods return instances of themselves
+* Same change for IECoreMaya::MayaScene
 
 Improvements :
 
