@@ -1494,7 +1494,7 @@ SceneCache::SceneCache( IECore::IndexedIOPtr indexedIO )
 	}
 }
 
-SceneCache::SceneCache( ImplementationPtr impl )
+SceneCache::SceneCache( ImplementationPtr& impl )
 	:	m_implementation( impl )
 {
 }
@@ -1727,7 +1727,7 @@ SceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingBehavi
         	return 0;
 	}
 	
-	return new SceneCache( impl );
+	return duplicate( impl );
 }
 
 ConstSceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingBehaviour missingBehaviour ) const
@@ -1739,7 +1739,7 @@ ConstSceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingB
         	return 0;
 	}
 	
-	return new SceneCache( impl );
+	return duplicate( impl );
 }
 
 bool SceneCache::hasChild( const Name &name ) const
@@ -1750,7 +1750,8 @@ bool SceneCache::hasChild( const Name &name ) const
 SceneInterfacePtr SceneCache::createChild( const Name &name )
 {
 	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
-	return new SceneCache( writer->createChild( name ) );
+	ImplementationPtr impl = writer->createChild( name );
+	return duplicate( impl );
 }
 
 SceneInterfacePtr SceneCache::scene( const Path &path, MissingBehaviour missingBehaviour )
@@ -1762,7 +1763,7 @@ SceneInterfacePtr SceneCache::scene( const Path &path, MissingBehaviour missingB
         	return 0;
 	}
 	
-	return new SceneCache( impl );
+	return duplicate( impl );
 }
 
 ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingBehaviour missingBehaviour ) const
@@ -1774,5 +1775,10 @@ ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingB
         	return 0;
 	}
 	
+	return duplicate( impl );
+}
+
+SceneCachePtr SceneCache::duplicate( ImplementationPtr& impl ) const
+{
 	return new SceneCache( impl );
 }

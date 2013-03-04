@@ -124,16 +124,19 @@ class SceneCache : public SampledSceneInterface
 		SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
 		ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
 
-	private :
-
+	protected:
+	
 		IE_CORE_FORWARDDECLARE( Implementation );
-
-		SceneCache( ImplementationPtr implementation );
+		virtual SceneCachePtr duplicate( ImplementationPtr& implementation ) const;
+		SceneCache( ImplementationPtr& implementation );
+		
+	private :
 
 		ImplementationPtr m_implementation;
 
 		class ReaderImplementation;
 		class WriterImplementation;
+	
 };
 
 } // namespace IECore
