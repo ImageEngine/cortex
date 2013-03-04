@@ -531,7 +531,7 @@ OP_Node *HoudiniScene::locateContent( OP_Node *node ) const
 
 OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &relativePath, MissingBehaviour missingBehaviour ) const
 {
-	OP_Node *node = retrieveNode( missingBehaviour );
+	OP_Node *node = retrieveNode( false, missingBehaviour );
 	OP_Node *contentBaseNode = retrieveNode( true, missingBehaviour );
 	if ( !node || !contentBaseNode )
 	{
