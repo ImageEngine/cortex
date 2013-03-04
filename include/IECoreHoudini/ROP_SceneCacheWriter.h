@@ -71,7 +71,7 @@ class ROP_SceneCacheWriter : public ROP_Node
 		
 		/// Called recursively to traverse the IECoreHoudini::HoudiniScene, starting with the Root Object,
 		/// and write the hierarchy to the output file.
-		virtual void doWrite( const IECore::SceneInterface *liveScene, IECore::SceneInterface *outScene, double time );
+		virtual ROP_RENDER_CODE doWrite( const IECore::SceneInterface *liveScene, IECore::SceneInterface *outScene, double time );
 	
 	private :
 		

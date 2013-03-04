@@ -134,7 +134,7 @@ void newObjectOperator( OP_OperatorTable *table )
 		OBJ_SceneCacheGeometry::create, OBJ_SceneCacheGeometry::buildParameters(), 0, 1
 	);
 	/// \todo: get a new icon
-	sceneCacheGeometry->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheGeometry->setIconName( "SOP_ieProceduralHolder" );
 	
 	table->addOperator( sceneCacheTransform );
 	table->addOperator( sceneCacheGeometry );

@@ -859,10 +859,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
 	
-	def compareScene( self, a, b, time = 0 ) :
+	def compareScene( self, a, b, time = 0, rootMatches=True, pathOffset=0 ) :
 		
-		self.assertEqual( a.name(), b.name() )
-		self.assertEqual( a.path(), b.path() )
+		if rootMatches :
+			self.assertEqual( a.name(), b.name() )
+		
+		self.assertEqual( a.path(), b.path()[pathOffset:] )
 		ab = a.readBound( time )
 		bb = b.readBound( time )
 		self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
@@ -872,12 +874,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		if a.hasObject() :
 			# need to remove the name added by Houdini
 			mb = b.readObject( time )
+			self.assertTrue( mb.isInstanceOf( IECore.TypeId.Renderable ) )
 			del mb.blindData()['name']
 			self.assertEqual( a.readObject( time ), mb )
 		
 		self.assertEqual( a.childNames(), b.childNames() )
 		for child in a.childNames() :
-			self.compareScene( a.child( child ), b.child( child ) )
+			self.compareScene( a.child( child ), b.child( child ), pathOffset=pathOffset )
 	
 	def testRop( self ) :
 		
@@ -911,7 +914,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "build" ).pressButton()
 		a = xform.children()[0]
 		a.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
-		a.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		a.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		a.parm( "build" ).pressButton()
 		rop.parm( "execute" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -927,20 +930,27 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output )
 		
-		# test a OBJ Geo
+		# test a mixed subnet/flat xform
 		os.remove( TestSceneCache.__testOutFile )
-		geo = self.geometry()
-		geo.parm( "build" ).pressButton()
-		rop.parm( "rootObject" ).set( geo.path() )
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "build" ).pressButton()
+		a = xform.children()[0]
+		a.parm( "build" ).pressButton()
+		b = a.children()[1]
+		b.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
+		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		b.parm( "build" ).pressButton()
 		rop.parm( "execute" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output )
 		
-		# test a SOP
+		# test a OBJ Geo
 		os.remove( TestSceneCache.__testOutFile )
-		sop = self.sop()
-		rop.parm( "rootObject" ).set( sop.path() )
+		geo = self.geometry()
+		geo.parm( "build" ).pressButton()
+		rop.parm( "rootObject" ).set( geo.path() )
 		rop.parm( "execute" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
@@ -962,6 +972,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		rop.parm( "rootObject" ).set( xform.path() )
 		xform.destroy()
+		self.assertNotEqual( rop.errors(), "" )
+		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		
+		sop = self.sop()
+		rop.parm( "rootObject" ).set( sop.path() )
+		rop.parm( "execute" ).pressButton()
 		self.assertNotEqual( rop.errors(), "" )
 		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
 		
@@ -992,6 +1008,23 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		for time in times :
 			self.compareScene( orig, output )
+	
+	def testLiveScene( self ) :
+		
+		self.writeSCC()
+		xform = self.xform()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "build" ).pressButton()
+		a = xform.children()[0]
+		a.parm( "build" ).pressButton()
+		b = a.children()[1]
+		b.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
+		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		b.parm( "build" ).pressButton()
+		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+		live = IECoreHoudini.HoudiniScene().child( xform.name() )
+		self.compareScene( orig, live, rootMatches=False, pathOffset=1 )
 	
 	def tearDown( self ) :
 		

@@ -106,7 +106,8 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	
 	try
 	{
-		m_liveScene = new IECoreHoudini::HoudiniScene( value );
+		SceneInterface::Path path;
+		m_liveScene = new IECoreHoudini::HoudiniScene( value, path );
 	}
 	catch ( IECore::Exception &e )
 	{		
@@ -132,9 +133,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *boss )
 {
-	doWrite( m_liveScene, m_outScene, time );
-	
-	return ROP_CONTINUE_RENDER;
+	return doWrite( m_liveScene, m_outScene, time );
 }
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
@@ -145,7 +144,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 	return ROP_CONTINUE_RENDER;
 }
 
-void ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterface *outScene, double time )
+ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterface *outScene, double time )
 {
 	if ( liveScene != m_liveScene )
 	{
@@ -154,8 +153,16 @@ void ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterf
 	
 	if ( liveScene->hasObject() )
 	{
-		/// \todo: does an invisible node mean there is no object?
-		outScene->writeObject( liveScene->readObject( time ), time );
+		try
+		{
+			/// \todo: does an invisible node mean there is no object?
+			outScene->writeObject( liveScene->readObject( time ), time );
+		}
+		catch ( IECore::Exception &e )
+		{
+			addError( ROP_MESSAGE, e.what() );
+			return ROP_ABORT_RENDER;
+		}
 	}
 	
 	SceneInterface::NameList children;
@@ -165,6 +172,12 @@ void ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterf
 		/// \todo: does an invisible node mean its not a child?
 		ConstSceneInterfacePtr liveChild = liveScene->child( *it );
 		SceneInterfacePtr outChild = outScene->child( *it, SceneInterface::CreateIfMissing );
-		doWrite( liveChild, outChild, time );
+		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time );
+		if ( status != ROP_CONTINUE_RENDER )
+		{
+			return status;
+		}
 	}
+	
+	return ROP_CONTINUE_RENDER;
 }

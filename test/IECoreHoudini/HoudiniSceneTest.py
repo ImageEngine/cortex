@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import unittest
+
 import hou
 
 import IECore
@@ -360,4 +362,4 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( transform1.translate, IECore.V3d( 1, 2, 3 ) )
 		
 if __name__ == "__main__":
-	IECoreHoudini.TestProgram()
+	unittest.main()
