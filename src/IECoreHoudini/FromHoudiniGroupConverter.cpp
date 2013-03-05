@@ -143,7 +143,30 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( attributeName.c_str() );
 		if ( attributeRef.isInvalid() || !attributeRef.isString() )
 		{
-			return 0;
+			GU_Detail ungroupedGeo( (GU_Detail*)geo );
+			GA_PrimitiveGroup *ungrouped = static_cast<GA_PrimitiveGroup*>( ungroupedGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__ungroupedPrimitives" ) );
+			ungrouped->toggleRange( ungroupedGeo.getPrimitiveRange() );
+			
+			VisibleRenderablePtr renderable = 0;
+			doGroupConversion( &ungroupedGeo, ungrouped, renderable );
+			if ( renderable )
+			{
+				Group *group = runTimeCast<Group>( renderable );
+				if ( group )
+				{
+					const Group::ChildContainer &children = group->children();
+					for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+					{
+						result->addChild( *it );
+					}
+				}
+				else
+				{
+					result->addChild( renderable );
+				}
+			}
+			
+			return result;
 		}
 		
 		GU_Detail groupGeo( (GU_Detail*)geo );

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -434,7 +434,13 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		converter["groupingAttribute"].setTypedValue( "notAnAttr" )
 		result = converter.convert()
-		self.assertEqual( result, None )
+		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertEqual( len(result.children()), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( result.children()[i].blindData(), IECore.CompoundData() )
+		self.assertTrue( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertTrue( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
+		self.assertTrue( result.children()[2].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 	
 	def testNonPrimitiveAttributeValue( self ) :
 		merge = self.buildScene()
@@ -446,14 +452,26 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		converter["groupingAttribute"].setTypedValue( "pointStr" )
 		result = converter.convert()
-		self.assertEqual( result, None )
+		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertEqual( len(result.children()), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( result.children()[i].blindData(), IECore.CompoundData() )
+		self.assertTrue( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertTrue( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
+		self.assertTrue( result.children()[2].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 	
 	def testNonStringAttributeValue( self ) :
 		converter = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() )
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
 		converter["groupingAttribute"].setTypedValue( "born" )
 		result = converter.convert()
-		self.assertEqual( result, None )
+		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertEqual( len(result.children()), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( result.children()[i].blindData(), IECore.CompoundData() )
+		self.assertTrue( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertTrue( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
+		self.assertTrue( result.children()[2].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 	
 	def testObjectWasDeleted( self ) :
 		torii = self.twoTorii()
