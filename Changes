@@ -6,6 +6,7 @@ Additions :
 * Added IECoreHoudini::HoudiniScene, a SceneInterface for live Houdini scenes.
 * Added virtual duplicate() method to IECore::SceneCache, which is used in methods like child() etc, so derived classes can make these methods return instances of themselves
 * Same change for IECoreMaya::MayaScene
+* Added SceneShape and base class SceneShapeInterface to IECoreMaya for reading IECore::SceneInterface files, SceneShapeUI for drawing. Includes GL preview and output objects, transforms and bounding boxes, basic template and dag menu.
 
 Improvements :
 

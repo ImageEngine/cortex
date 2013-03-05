@@ -78,6 +78,9 @@
 #include "IECoreMaya/DrawableHolder.h"
 #include "IECoreMaya/GeometryCombiner.h"
 #include "IECoreMaya/TransformationMatrixManipulator.h"
+#include "IECoreMaya/SceneShape.h"
+#include "IECoreMaya/SceneShapeUI.h"
+#include "IECoreMaya/SceneShapeInterface.h"
 
 // see ObjectParameterHandler::doUpdate() for an explanation of the necessity for dummy data
 static void *dummyDataCreator()
@@ -143,6 +146,14 @@ MStatus initialize(MFnPlugin &plugin)
 
 		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id,
 			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );
+		assert( s );
+		
+		s = plugin.registerShape( "ieSceneShapeInterface", SceneShapeInterface::id,
+			SceneShapeInterface::creator, SceneShapeInterface::initialize, SceneShapeUI::creator );
+		assert( s );
+		
+		s = plugin.registerShape( "ieSceneShape", SceneShape::id,
+			SceneShape::creator, SceneShape::initialize, SceneShapeUI::creator );
 		assert( s );
 
 		s = plugin.registerNode( "ieOpHolderNode", OpHolderNode::id,
@@ -259,6 +270,8 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ParameterisedHolderSurfaceShape::id );
 		s = plugin.deregisterNode( ParameterisedHolderComponentShape::id );
 		s = plugin.deregisterNode( ProceduralHolder::id );
+		s = plugin.deregisterNode( SceneShapeInterface::id );
+		s = plugin.deregisterNode( SceneShape::id );
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );

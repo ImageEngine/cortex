@@ -55,3 +55,4 @@ source "IECoreMaya/ieDLUserGeoTypes.mel";
 source "IECoreMaya/ieDrawableHolderUI.mel";
 source "IECoreMaya/ieGeometryCombinerUI.mel";
 source "IECoreMaya/ieCurveCombinerUI.mel";
+source "IECoreMaya/ieSceneShapeUI.mel";

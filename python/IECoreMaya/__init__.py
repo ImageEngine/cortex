@@ -96,3 +96,5 @@ from TransformationMatrixParameterUI import TransformationMatrixParameterUI
 from LineSegmentParameterUI import LineSegmentParameterUI
 from Collapsible import Collapsible
 import Menus
+import SceneShapeUI
+from FnSceneShape import FnSceneShape
