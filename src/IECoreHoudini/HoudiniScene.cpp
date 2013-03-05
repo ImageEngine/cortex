@@ -300,7 +300,7 @@ bool HoudiniScene::hasObject() const
 		for ( int i=0; i < numShapes; ++i )
 		{
 			Path childPath;
-			relativePath( geo->getUniqueStringValue( attrRef, 0 ), childPath );
+			relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
 			if ( childPath.empty() )
 			{
 				return true;
