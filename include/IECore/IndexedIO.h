@@ -186,9 +186,11 @@ class IndexedIO : public RunTimeTyped
 		virtual IndexedIOPtr createSubdirectory( const IndexedIO::EntryID &name ) = 0;
 
 		/// Remove a specified child file or directory.
+		/// Any IndexedIO instances to child directories will be in a invalid state and should not be used after remove is called.
 		virtual void remove( const IndexedIO::EntryID &name ) = 0;
 
 		/// Remove all entries.
+		/// Any IndexedIO instances to child directories will be in a invalid state and should not be used after remove is called.
 		virtual void removeAll() = 0;
 
 		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
@@ -533,7 +535,7 @@ class IndexedIO : public RunTimeTyped
 		// Throw an exception if the entry is not writable
 		virtual void writable(const IndexedIO::EntryID &name) const;
 
-		virtual void validateOpenMode(IndexedIO::OpenMode &mode);
+		static void validateOpenMode(IndexedIO::OpenMode &mode);
 
 	private:
 		/// Register a new subclass that can handle the given extension

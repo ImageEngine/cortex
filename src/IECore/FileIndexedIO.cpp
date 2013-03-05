@@ -56,14 +56,19 @@ class FileIndexedIO::StreamFile : public StreamIndexedIO::StreamFile
 
 		std::string m_filename;
 
+		size_t m_endPosition;
+
 		StreamFile( const std::string &filename, IndexedIO::OpenMode mode );
 
 		virtual ~StreamFile();
 
 		static bool canRead( const std::string &path );
+
+		void flush( size_t endPosition );
+
 };
 
-FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::OpenMode mode ) : StreamIndexedIO::StreamFile(mode), m_filename( filename )
+FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::OpenMode mode ) : StreamIndexedIO::StreamFile(mode), m_filename( filename ), m_endPosition(0)
 {
 	if (mode & IndexedIO::Write)
 	{
@@ -145,11 +150,14 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 	assert( m_index );
 }
 
+void FileIndexedIO::StreamFile::flush( size_t endPosition )
+{
+	m_endPosition = endPosition;
+}
+
 FileIndexedIO::StreamFile::~StreamFile()
 {
-	boost::optional<Imf::Int64> indexEnd = flush();
-
-	if ( indexEnd && ( m_openmode == IndexedIO::Write || m_openmode == IndexedIO::Append ) )
+	if ( m_openmode == IndexedIO::Write || m_openmode == IndexedIO::Append )
 	{
 		std::fstream *f = static_cast< std::fstream * >( m_stream );
 
@@ -157,17 +165,17 @@ FileIndexedIO::StreamFile::~StreamFile()
 		Imf::Int64 fileEnd = f->tellg();
 
 		// .. and the length of that file extends beyond the end of the index
-		if ( fileEnd > *indexEnd )
+		if ( fileEnd > m_endPosition )
 		{
 			/// Close the file before truncation
 			delete m_stream;
 			m_stream = 0;
 
 			/// Truncate the file at the end of the index
-			int err = truncate( m_filename.c_str(), *indexEnd );
+			int err = truncate( m_filename.c_str(), m_endPosition );
 			if ( err != 0 )
 			{
-				msg( Msg::Error, "FileIndexedIO::StreamFile", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % (*indexEnd) % strerror( err ) );
+				msg( Msg::Error, "FileIndexedIO::StreamFile", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % m_endPosition % strerror( err ) );
 			}
 		}
 	}
@@ -222,10 +230,10 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDLi
 	{
 		throw FileNotFoundIOException(filename);
 	}
-	open( new StreamFile( filename, mode ), root, mode );
+	open( new StreamFile( filename, mode ), root );
 }
 
-FileIndexedIO::FileIndexedIO( const FileIndexedIO *other ) : StreamIndexedIO( other )
+FileIndexedIO::FileIndexedIO( StreamIndexedIO::Node &rootNode ) : StreamIndexedIO( rootNode )
 {
 }
 
@@ -233,18 +241,14 @@ FileIndexedIO::~FileIndexedIO()
 {
 }
 
-IndexedIO * FileIndexedIO::duplicate(Node *rootNode) const
+IndexedIO * FileIndexedIO::duplicate(Node &rootNode) const
 {
 	// duplicate the IO interface changing the current node
-	FileIndexedIO *other = new FileIndexedIO( this );
-	assert( rootNode );
-	other->m_node = rootNode;
-	return other;
+	return new FileIndexedIO( rootNode );
 }
 
 const std::string &FileIndexedIO::fileName() const
 {
-	StreamFile *stream = static_cast<StreamFile*>( m_streamFile.get() );
-	return stream->m_filename;
+	StreamFile &stream = static_cast<StreamFile&>( streamFile() );
+	return stream.m_filename;
 }
-

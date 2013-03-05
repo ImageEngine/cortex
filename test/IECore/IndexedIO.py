@@ -83,7 +83,7 @@ class TestIndexedIO(unittest.TestCase):
 
 class TestMemoryIndexedIO(unittest.TestCase):
 
-	def test(self):
+	def testSaveWriteObjects(self):
 		"""Test MemoryIndexedIO read/write operations."""
 		f = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
@@ -184,6 +184,20 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( f.path() , [] )
 		f = None
 		self.assert_( os.path.exists( "./test/FileIndexedIO.fio" ) )
+
+	def testSaveWriteObjects(self):
+		"""Test FileIndexedIO read/write operations."""
+		f = FileIndexedIO( "./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
+		self.assertEqual( f.path() , [] )
+		self.assertEqual( f.currentEntryId() , "/" )
+		txt = StringData("test1")
+		txt.save( f, "obj1" )
+		txt.save( f, "obj2" )
+		del f
+
+		f2 = FileIndexedIO( "./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Read)
+		self.assertEqual( txt, Object.load( f2, "obj1" ) )
+		self.assertEqual( txt, Object.load( f2, "obj2" ) )
 
 	def testResetRoot(self):
 		"""Test FileIndexedIO resetRoot"""

@@ -54,9 +54,15 @@ class MemoryIndexedIO::StreamFile : public StreamIndexedIO::StreamFile
 		CharVectorDataPtr buffer();
 
 		virtual ~StreamFile();
+
+		void flush( size_t endPosition );
+
+	private:
+
+		size_t m_endPosition;
 };
 
-MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO::OpenMode mode ) : StreamIndexedIO::StreamFile(mode)
+MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO::OpenMode mode ) : StreamIndexedIO::StreamFile(mode), m_endPosition(0)
 {
 	if (mode & IndexedIO::Write)
 	{
@@ -93,27 +99,22 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 	assert( m_index );
 }
 
+void MemoryIndexedIO::StreamFile::flush( size_t endPosition )
+{
+	m_endPosition = endPosition;
+}
+
 CharVectorDataPtr MemoryIndexedIO::StreamFile::buffer()
 {
-	boost::optional<Imf::Int64> indexEnd = flush();
-
 	std::stringstream *s = static_cast< std::stringstream *>( m_stream );
 	assert( s );
 
 	CharVectorData::ValueType d;
 	const std::string &str = s->str();
 
-	if ( indexEnd )
-	{
-		d.assign( str.begin(), str.end() );
-		d.resize( *indexEnd );
-		assert( d.size() ==  *indexEnd );
-	}
-	else
-	{
-		d.assign( str.begin(), str.end() );
-	}
-
+	d.assign( str.begin(), str.end() );
+	d.resize( m_endPosition );
+	assert( d.size() ==  m_endPosition );
 	return new CharVectorData( d );
 }
 
@@ -137,10 +138,10 @@ MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::E
 		bufPtr = &(buf->readable()[0]);
 		size = buf->readable().size();
 	}
-	open( new StreamFile( bufPtr, size, mode ), root, mode );
+	open( new StreamFile( bufPtr, size, mode ), root );
 }
 
-MemoryIndexedIO::MemoryIndexedIO( const MemoryIndexedIO *other ) : StreamIndexedIO( other )
+MemoryIndexedIO::MemoryIndexedIO( StreamIndexedIO::Node &rootNode ) : StreamIndexedIO( rootNode )
 {
 }
 
@@ -150,15 +151,14 @@ MemoryIndexedIO::~MemoryIndexedIO()
 
 CharVectorDataPtr MemoryIndexedIO::buffer()
 {
-	StreamFile *stream = static_cast<StreamFile*>( m_streamFile.get() );
-	return stream->buffer();
+	flush();
+	StreamFile &stream = static_cast<StreamFile&>( streamFile() );
+	return stream.buffer();
 }
 
-IndexedIO * MemoryIndexedIO::duplicate(Node *rootNode) const
+IndexedIO * MemoryIndexedIO::duplicate(Node &rootNode) const
 {
 	// duplicate the IO interface changing the current node
-	MemoryIndexedIO *other = new MemoryIndexedIO( this );
-	assert( rootNode );
-	other->m_node = rootNode;
+	MemoryIndexedIO *other = new MemoryIndexedIO( rootNode );
 	return other;
 }

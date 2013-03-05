@@ -61,9 +61,9 @@ class MemoryIndexedIO : public StreamIndexedIO
 
 		MemoryIndexedIO();
 
-		MemoryIndexedIO( const MemoryIndexedIO *other );
+		MemoryIndexedIO( StreamIndexedIO::Node &rootNode );
 
-		IndexedIO *duplicate(StreamIndexedIO::Node *rootNode) const;
+		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
 
 		class StreamFile;
 };

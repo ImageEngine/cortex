@@ -64,10 +64,10 @@ class FileIndexedIO : public StreamIndexedIO
 
 		FileIndexedIO();
 
-		FileIndexedIO( const FileIndexedIO *other );
+		FileIndexedIO( StreamIndexedIO::Node &rootNode );
 
 		// duplicates this object by mapping it to a different root node.
-		IndexedIO *duplicate(StreamIndexedIO::Node *rootNode) const;
+		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
 
 		class StreamFile;
 };
