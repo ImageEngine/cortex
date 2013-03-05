@@ -1,3 +1,11 @@
+
+7.11.0 :
+
+Improvements :
+
+* Added the LensModel and StandardRadialLensModel classes to provide a framework for applying or removing lens distortion.
+* Added the LensDistortOp which distorts or undistorts an image using a parametric lens model.
+
 Bug Fixes :
 
 * IECoreMantra cortexMantraInject SHOP now uses explicit bounds with hscript expressions to read them from the soppath. This fixes a bug where bounds were not being updated properly in ifds made with hbatch.

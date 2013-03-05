@@ -312,6 +312,9 @@
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
 #include "IECorePython/ModelCacheBinding.h"
+#include "IECorePython/LensModelBinding.h"
+#include "IECorePython/StandardRadialLensModelBinding.h"
+#include "IECorePython/LensDistortOpBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -627,6 +630,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindOptions();
 	bindMPlayDisplayDriver();
 	bindModelCache();
+	bindLensModel();
+	bindStandardRadialLensModel();
+	bindLensDistortOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -410,6 +410,9 @@ enum TypeId
 	TimeCodeParameterTypeId = 362,
 	OptionsTypeId = 363,
 	MPlayDisplayDriverTypeId = 364,
+	LensModelTypeId = 365,
+	StandardRadialLensModelTypeId = 366,
+	LensDistortOpTypeId = 367,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 

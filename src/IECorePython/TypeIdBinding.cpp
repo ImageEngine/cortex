@@ -413,6 +413,9 @@ void bindTypeId()
 		.value( "TimeCodeParameter", TimeCodeParameterTypeId )
 		.value( "Options", OptionsTypeId )
 		.value( "MPlayDisplayDriver", MPlayDisplayDriverTypeId )
+		.value( "LensModel", LensModelTypeId )
+		.value( "StandardRadialLensModel", StandardRadialLensModelTypeId )
+		.value( "LensDistortOp", LensDistortOpTypeId )
 	;
 }
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 #  its affiliates and/or its licensors.
@@ -51,8 +51,8 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=7
-ieCoreMinorVersion=10
-ieCorePatchVersion=2
+ieCoreMinorVersion=11
+ieCorePatchVersion=0
 
 ###########################################################################################
 # Command line options

@@ -265,6 +265,8 @@ from TimeCodeDataTest import TimeCodeDataTest
 from TimeCodeParameterTest import TimeCodeParameterTest
 from OptionsTest import OptionsTest
 from NullObjectTest import NullObjectTest
+from StandardRadialLensModelTest import StandardRadialLensModelTest
+from LensDistortOpTest import LensDistortOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
