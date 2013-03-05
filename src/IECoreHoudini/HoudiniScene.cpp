@@ -77,6 +77,7 @@ HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &relativePath 
 		m_contentPath.hardenIfNeeded();
 	}
 	
+	m_relativePath.resize( relativePath.size() );
 	std::copy( relativePath.begin(), relativePath.end(), m_relativePath.begin() );
 	
 	// make sure the node is valid
@@ -112,7 +113,12 @@ void HoudiniScene::path( Path &p ) const
 {
 	p.clear();
 	
-	OP_Node *node = retrieveNode();
+	OP_Node *node = OPgetDirector()->findNode( m_nodePath );
+	if ( !node )
+	{
+		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
+	}
+	
 	if ( node->isManager() )
 	{
 		return;
@@ -148,7 +154,9 @@ void HoudiniScene::path( Path &p ) const
 	
 	if ( !m_relativePath.empty() )
 	{
-		std::copy( m_relativePath.begin(), m_relativePath.end(), p.end() );
+		size_t origSize = p.size();
+		p.resize( p.size() + m_relativePath.size() );
+		std::copy( m_relativePath.begin(), m_relativePath.end(), p.begin() + origSize );
 	}
 }
 
@@ -466,8 +474,18 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
 	}
 	
-	UT_String contentPath = ( m_contentPath.length() ) ? m_contentPath : m_nodePath;
-	OP_Node *contentNode = OPgetDirector()->findNode( contentPath );
+	OP_Node *contentNode = 0;
+	UT_String contentPath = m_contentPath;
+	if ( m_contentPath.length() )
+	{
+		contentNode = OPgetDirector()->findNode( m_contentPath );
+	}
+	else
+	{
+		contentNode = node;
+		contentPath = m_nodePath;
+	}
+	
 	if ( content )
 	{
 		if ( !contentNode && missingBehaviour == ThrowIfMissing )
@@ -642,11 +660,11 @@ void HoudiniScene::relativePath( const char *value, Path &result ) const
 	
 	size_t pathSize = path.size();
 	size_t myPathSize = myPath.size();
+	
+	// this happens for SOPs containing a parent object and our own
 	if ( pathSize < myPathSize )
 	{
-		std::string myPStr;
-		pathToString( myPath, myPStr );
-		throw Exception( "IECoreHoudini::HoudiniScene::relativePath: Path \"" + pStr + "\" is not a valid child of \"" + myPStr + "\"." );
+		return;
 	}
 	
 	for ( size_t i = 0; i < myPathSize; ++i )
@@ -659,5 +677,10 @@ void HoudiniScene::relativePath( const char *value, Path &result ) const
 		}
 	}
 	
-	std::copy( path.begin() + myPathSize, path.end(), result.begin() );
+	Path::iterator start = path.begin() + myPathSize;
+	if ( start != path.end() )
+	{
+		result.resize( path.end() - start );
+		std::copy( start, path.end(), result.begin() );
+	}
 }

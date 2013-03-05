@@ -54,6 +54,15 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		sub2 = obj.createNode( "subnet", "sub2" )
 		box1 = sub1.createOutputNode( "geo", "box1", run_init_scripts=False )
 		box1.createNode( "box", "actualBox" )
+		actualBox = box1.children()[0]
+		bname = actualBox.createOutputNode( "name" )
+		bname.parm( "name1" ).set( "/sub1/box1" )
+		torus = box1.createNode( "torus" )
+		tname = torus.createOutputNode( "name" )
+		tname.parm( "name1" ).set( "/sub1/box1/torus" )
+		merge = bname.createOutputNode( "merge" )
+		merge.setInput( 1, tname )
+		merge.setRenderFlag( True )
 		box2 = obj.createNode( "geo", "box2", run_init_scripts=False )
 		box2.createNode( "box", "actualBox" )
 		torus1 = sub1.createNode( "geo", "torus1", run_init_scripts=False )
@@ -77,9 +86,12 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		child3 = child2.child( "torus2" )
 		self.assertEqual( sorted( child3.childNames() ), [] )
 		
-		self.assertEqual( sorted( child.child( "box1" ).childNames() ), [] )
-		self.assertEqual( sorted( scene.child( "box2" ).childNames() ), [] )
-		self.assertEqual( sorted( scene.child( "sub2" ).childNames() ), [] )
+		box1 = child.child( "box1" )
+		self.assertEqual( sorted( box1.childNames() ), [ "torus" ] )
+		
+		self.assertEqual( box1.child( "torus" ).childNames(), [] )
+		self.assertEqual( scene.child( "box2" ).childNames(), [] )
+		self.assertEqual( scene.child( "sub2" ).childNames(), [] )
 	
 	def testHasChild( self ) :
 		
@@ -87,7 +99,6 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( scene.hasChild( "box2" ), True )
 		self.assertEqual( scene.hasChild( "sub1" ), True )
 		self.assertEqual( scene.hasChild( "sub2" ), True )
-		self.assertEqual( scene.hasChild( "box1" ), False )
 		self.assertEqual( scene.hasChild( "fake" ), False )
 		
 		child = scene.child( "sub1" )
@@ -95,6 +106,9 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( child.hasChild( "torus2" ), False )
 		self.assertEqual( child.child( "torus1" ).hasChild( "torus2" ), True )
 		self.assertEqual( child.hasChild( "fake" ), False )
+		
+		self.assertEqual( child.hasChild( "box1" ), True )
+		self.assertEqual( child.child( "box1" ).hasChild( "torus" ), True )
 	
 	def testNames( self ) :
 		
@@ -106,6 +120,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		sub1 = scene.child( "sub1" )
 		self.assertEqual( sub1.name(), "sub1" )
 		self.assertEqual( sub1.child( "box1" ).name(), "box1" )
+		self.assertEqual( sub1.child( "box1" ).child( "torus" ).name(), "torus" )
 		
 		torus1 = sub1.child( "torus1" )
 		self.assertEqual( torus1.name(), "torus1" )
@@ -126,6 +141,8 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sub1.pathAsString(), "/sub1" )
 		self.assertEqual( sub1.child( "box1" ).path(), [ "sub1", "box1" ] )
 		self.assertEqual( sub1.child( "box1" ).pathAsString(), "/sub1/box1" )
+		self.assertEqual( sub1.child( "box1" ).child( "torus" ).path(), [ "sub1", "box1", "torus" ] )
+		self.assertEqual( sub1.child( "box1" ).child( "torus" ).pathAsString(), "/sub1/box1/torus" )
 		
 		torus1 = sub1.child( "torus1" )
 		self.assertEqual( torus1.path(), [ "sub1", "torus1" ] )
@@ -181,6 +198,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( torus1.hasObject(), True )
 		self.assertEqual( torus1.child( "torus2" ).hasObject(), True )
 		self.assertEqual( sub1.child( "box1" ).hasObject(), True )
+		self.assertEqual( sub1.child( "box1" ).child( "torus" ).hasObject(), True )
 	
 	def testDeletedPath( self ) :
 		
@@ -240,6 +258,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		# the mesh hasn't moved because the deformer isn't the renderable SOP
 		self.assertEqual( mesh0, mesh0_5 )
 		self.assertEqual( mesh0, mesh1 )
+		self.assertEqual( len(mesh0["P"].data), 8 )
 		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
 		self.assertEqual( mesh0_5["P"].data[0].x, -0.5 )
 		self.assertEqual( mesh1["P"].data[0].x, -0.5 )
@@ -248,6 +267,9 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		mesh0   = box1.readObject( 0 )
 		mesh0_5 = box1.readObject( 0.5 )
 		mesh1   = box1.readObject( 1 )
+		self.assertEqual( len(mesh0["P"].data), 8 )
+		self.assertEqual( len(mesh0_5["P"].data), 8 )
+		self.assertEqual( len(mesh1["P"].data), 8 )
 		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
 		self.assertAlmostEqual( mesh0_5["P"].data[0].x, -0.521334, 6 )
 		self.assertAlmostEqual( mesh1["P"].data[0].x, -0.541675, 6 )
@@ -360,6 +382,6 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertAlmostEqual( transform0_5.translate.y, 1.5, 5 )
 		self.assertAlmostEqual( transform0_5.translate.z, 2.5, 5 )
 		self.assertEqual( transform1.translate, IECore.V3d( 1, 2, 3 ) )
-		
+
 if __name__ == "__main__":
 	unittest.main()
