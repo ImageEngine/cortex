@@ -52,7 +52,7 @@ SConsignFile()
 
 ieCoreMajorVersion=7
 ieCoreMinorVersion=11
-ieCorePatchVersion=0
+ieCorePatchVersion=1
 
 ###########################################################################################
 # Command line options
@@ -767,6 +767,8 @@ o.Add(
 		( "IECore.CubeColorTransformOp", "common/colorSpace/cubeColorTransform" ),
 		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),
 		( "IECore.LinearToCineonOp", "common/colorSpace/linearToCineon" ),
+		( "IECore.AlexaLogcToLinearOp", "common/colorSpace/alexaLogcToLinear" ),
+		( "IECore.LinearToAlexaLogcOp", "common/colorSpace/linearToAlexaLogc" ),
 		( "IECore.SRGBToLinearOp", "common/colorSpace/SRGBToLinear" ),
 		( "IECore.LinearToSRGBOp", "common/colorSpace/linearToSRGB" ),
 		( "IECore.Rec709ToLinearOp", "common/colorSpace/Rec709ToLinear" ),
