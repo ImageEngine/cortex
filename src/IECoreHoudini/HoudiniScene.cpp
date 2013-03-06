@@ -335,7 +335,6 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 		}
 		
 		result = converter->convert();
-		/// \todo: converters should ditch the name, namedIndices primVars
 		/// \todo: add parameter to GroupConverter (or all of them?) to only convert named shapes
 		///	   identify the appropriate shape name using pathToString( m_relativePaths )
 		///	   use that parameter to avoid converting the entire group
