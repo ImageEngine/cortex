@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -502,20 +502,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		del points["floatVert"]
 		
 		self.comparePrimAndSop( points, sop )
-
-	def testGroupName( self ) :
 		
-		sop = self.emptySop()
-		points = self.points()
-		points.blindData()["name"] = IECore.StringData( "testGroup" )
-		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
-		geometry = sop.geometry()
-		self.assertEqual( len(geometry.primGroups()), 0 )
-		pointGroups = geometry.pointGroups()
-		self.assertEqual( len(pointGroups), 1 )
-		self.assertEqual( pointGroups[0].name(), "testGroup" )
-		self.assertEqual( len(pointGroups[0].points()), points.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
-	
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestToHoudiniPointsConverter.__testScene ) :

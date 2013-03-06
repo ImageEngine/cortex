@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,11 +70,15 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 		}
 	}
 	
-	UT_PtrArray<const GA_ElementGroup*> primGroups;
-	geo->getElementGroupList( GA_ATTRIB_PRIMITIVE, primGroups );
-	if ( !primGroups.entries() || primGroups[0]->entries() == geo->getNumPrimitives() )
+	// is there a single named shape?
+	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
+	if ( attrHandle.isAttributeValid() )
 	{
-		return Ideal;
+		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
+		if ( geo->getUniqueValueCount( attrRef ) < 2 )
+		{
+			return Ideal;
+		}
 	}
 	
 	return Suitable;

@@ -24,6 +24,8 @@ Improvements :
 * Implemented the IECoreArnold::Renderer::light() method.
 * IECoreRI::Renderer now supports setting the hider via setOption().
 * IECoreRI::Renderer now groups options by type, outputting each group via a single RiOption call just before worldBegin(). This is necessary because 3delight requires certain options to be specified together in this way ( statistics "endofframe" and "filename" for example ). 
+* IECoreHoudini uses name attributes by default rather than Houdini groups. Conversion using PrimitiveGroups is still possible using the parameter on the FromHoudiniGroupConverter, but all automated processes will require names.
+* IECoreHoudini FromHoudini converters have an attribute filter that can be used to prevent conversion of unnecessary data.
 
 7.10.2 :
 

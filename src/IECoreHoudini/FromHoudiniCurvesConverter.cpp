@@ -97,11 +97,15 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 		}
 	}
 	
-	UT_PtrArray<const GA_ElementGroup*> primGroups;
-	geo->getElementGroupList( GA_ATTRIB_PRIMITIVE, primGroups );
-	if ( !primGroups.entries() || primGroups[0]->entries() == numPrims )
+	// is there a single named shape?
+	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
+	if ( attrHandle.isAttributeValid() )
 	{
-		return Ideal;
+		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
+		if ( geo->getUniqueValueCount( attrRef ) < 2 )
+		{
+			return Ideal;
+		}
 	}
 	
 	return Suitable;

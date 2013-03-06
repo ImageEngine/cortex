@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@
 
 #include "IECore/Primitive.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedData.h"
 
 #include "IECoreHoudini/TypeIds.h"
@@ -153,10 +154,13 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		void remapAttributes( const GU_Detail *geo, AttributeMap &pointAttributeMap, AttributeMap &primitiveAttributeMap ) const;
 
 		/// Utility functions for transfering each attrib type from Houdini onto the IECore::Primitive provided
-		void transferDetailAttribs( const GU_Detail *geo, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation ) const;
-		void transferElementAttribs(
-			const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, AttributeMap &attributeMap,
+		void transferDetailAttribs(
+			const GU_Detail *geo, const UT_StringMMPattern &attribFilter,
 			IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation
+		) const;
+		void transferElementAttribs(
+			const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter,
+			AttributeMap &attributeMap, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation
 		) const;
 		
 		void transferAttribData(
@@ -177,8 +181,11 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 
 	private :
 		
+		void constructCommon();
+		
 		// the handle to the GU_Detail
 		GU_DetailHandle m_geoHandle;
+		IECore::StringParameterPtr m_attributeFilterParameter;
 		
 		struct Types
 		{

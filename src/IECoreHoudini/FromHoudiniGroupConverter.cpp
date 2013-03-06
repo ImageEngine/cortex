@@ -68,26 +68,19 @@ void FromHoudiniGroupConverter::constructCommon()
 {
 	IntParameter::PresetsContainer groupingModePresets;
 	groupingModePresets.push_back( IntParameter::Preset( "PrimitiveGroup", PrimitiveGroup ) );
-	groupingModePresets.push_back( IntParameter::Preset( "AttributeValue", AttributeValue ) );
+	groupingModePresets.push_back( IntParameter::Preset( "NameAttribute", NameAttribute ) );
 	
 	IntParameterPtr groupingMode = new IntParameter(
 		"groupingMode",
 		"The mode used to separate Primitives during conversion",
+		NameAttribute,
 		PrimitiveGroup,
-		PrimitiveGroup,
-		AttributeValue,
+		NameAttribute,
 		groupingModePresets,
 		true
 	);
 	
-	StringParameterPtr groupingAttribute = new StringParameter(
-		"groupingAttribute",
-		"The string attribute used to separate Primitives during conversion (if groupingMode is AttributeValue)",
-		""
-	);
-	
 	parameters()->addParameter( groupingMode );
-	parameters()->addParameter( groupingAttribute );
 }
 
 FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConvert( const GU_Detail *geo )
@@ -107,6 +100,17 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
 	{
 		if ( primitives.get( it.getOffset() )->getTypeId() != firstPrimId )
+		{
+			return Ideal;
+		}
+	}
+	
+	// are there multiple named shapes?
+	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
+	if ( attrHandle.isAttributeValid() )
+	{
+		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
+		if ( geo->getUniqueValueCount( attrRef ) > 1 )
 		{
 			return Ideal;
 		}
@@ -137,10 +141,9 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 	
 	GroupPtr result = new Group();
 	
-	if ( operands->member<const IntData>( "groupingMode" )->readable() == AttributeValue )
+	if ( operands->member<const IntData>( "groupingMode" )->readable() == NameAttribute )
 	{
-		const std::string attributeName = operands->member<const StringData>( "groupingAttribute" )->readable();
-		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( attributeName.c_str() );
+		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( "name" );
 		if ( attributeRef.isInvalid() || !attributeRef.isString() )
 		{
 			GU_Detail ungroupedGeo( (GU_Detail*)geo );
@@ -330,6 +333,7 @@ PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *
 	FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
 	if ( !converter || converter->isInstanceOf( FromHoudiniGroupConverter::staticTypeId() ) )
 	{
+		/// \todo: if we're in PrimitiveGroup mode, but names exist, we return 0 when we should be returning a Group
 		return 0;
 	}
 	

@@ -255,47 +255,43 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.writeSCC()
 		node = self.sop()
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "root" ).set( "/1" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "root" ).set( "/1/2" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 12 )
-		self.assertEqual( len(primGroups), 2 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "root" ).set( "/1/2/3" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 	
 	def testSopSpaceModes( self ) :
@@ -304,48 +300,44 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = self.sop()
 		self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
@@ -353,48 +345,44 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node.parm( "root" ).set( "/1" )
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 5, 0, 0 ) )
 		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
@@ -404,35 +392,32 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.writeSCC()
 		node = self.sop()
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "shapeFilter" ).set( "* ^2" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 12 )
-		self.assertEqual( len(primGroups), 2 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1','_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "shapeFilter" ).set( "3" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
 		node.parm( "shapeFilter" ).set( "" )
@@ -445,35 +430,35 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = self.sop()
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "P" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
-		self.assertEqual( node.geometry().primAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "* ^Cd" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
-		self.assertEqual( node.geometry().primAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "Cd" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
-		self.assertEqual( node.geometry().primAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 	
@@ -487,12 +472,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = geo.children()[0]
 		self.assertEqual( node.name(), "root" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
@@ -504,12 +488,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( node.name(), "2" )
 		node.parm( "root" ).set( "/1/2" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 12 )
-		self.assertEqual( len(primGroups), 2 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
 	
@@ -537,11 +520,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.cookAll( xform )
 		node = geo.children()[0]
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1_2' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
@@ -554,11 +537,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.cookAll( xform )
 		node = geo.children()[0]
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1_2' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1" )
@@ -570,11 +553,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.cookAll( xform )
 		node = geo.children()[0]
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
 		
 		next = hou.node( xform.path()+"/2" )
@@ -585,11 +568,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.cookAll( xform )
 		node = geo.children()[0]
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1_2' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		next.parm( "build" ).pressButton()
@@ -631,11 +614,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		geo = hou.node( xform.path()+"/2" )
 		node = geo.children()[0]
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1_2' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
@@ -654,11 +637,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.cookAll( xform )
 		node = geo.children()[0]
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1_2' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1" )
@@ -671,11 +654,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.cookAll( xform )
 		node = geo.children()[0]
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
 		
 		next = hou.node( xform.path()+"/2" )
@@ -704,12 +687,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = geo.children()[0]
 		self.assertEqual( node.name(), "root" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 18 )
-		self.assertEqual( len(primGroups), 3 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
@@ -724,12 +706,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = geo.children()[0]
 		self.assertEqual( node.name(), "2" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 12 )
-		self.assertEqual( len(primGroups), 2 )
-		self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1_2', '_1_2_3'] )
-		for group in primGroups :
-			self.assertEqual( len(group.prims()), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1_2', '_1_2_3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
 		
@@ -744,11 +725,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = geo.children()[0]
 		self.assertEqual( node.name(), "1" )
 		prims = node.geometry().prims()
-		primGroups = node.geometry().primGroups()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( len(primGroups[0].prims()), 6 )
-		self.assertEqual( primGroups[0].name(), '_1' )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '_1' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
 	
 	def testReloadButton( self ) :
@@ -812,12 +793,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for time in times :
 			hou.setTime( time )
 			prims = sop.geometry().prims()
-			primGroups = sop.geometry().primGroups()
 			self.assertEqual( len(prims), 18 )
-			self.assertEqual( len(primGroups), 3 )
-			self.assertEqual( sorted( [ x.name() for x in primGroups ] ), ['_1', '_1_2', '_1_2_3'] )
-			for group in primGroups :
-				self.assertEqual( len(group.prims()), 6 )
+			nameAttr = sop.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '_1', '_1_2', '_1_2_3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, time, 0 ) )
 			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 2*time, 0 ) )
 			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 3*time, 0 ) )

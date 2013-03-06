@@ -39,9 +39,11 @@
 
 #include "CH/CH_Manager.h"
 #include "GEO/GEO_AttributeHandle.h"
+#include "UT/UT_StringMMPattern.h"
 #include "UT/UT_WorkArgs.h"
 
 #include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
@@ -54,16 +56,30 @@ IE_CORE_DEFINERUNTIMETYPED( FromHoudiniGeometryConverter );
 FromHoudiniGeometryConverter::FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description )
 	: FromHoudiniConverter( description ), m_geoHandle( handle )
 {
+	constructCommon();
 }
 
 FromHoudiniGeometryConverter::FromHoudiniGeometryConverter( const SOP_Node *sop, const std::string &description )
 	: FromHoudiniConverter( description )
 {
 	m_geoHandle = handle( sop );
+	
+	constructCommon();
 }
 
 FromHoudiniGeometryConverter::~FromHoudiniGeometryConverter()
 {
+}
+
+void FromHoudiniGeometryConverter::constructCommon()
+{
+	m_attributeFilterParameter = new StringParameter(
+		"attributeFilter",
+		"A list of attribute names to convert, if they exist. Uses Houdini matching syntax. P will always be converted",
+		"*"
+	);
+	
+	parameters()->addParameter( m_attributeFilterParameter );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -88,6 +104,8 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 	{
 		return 0;
 	}
+	
+	/// \todo: add a shapeFilter parameter, and use UT_String::match to create sub-GU_Details for conversion
 	
 	return doPrimitiveConversion( geo );
 }
@@ -221,30 +239,44 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	AttributeMap primitiveAttributeMap;
 	remapAttributes( geo, pointAttributeMap, primitiveAttributeMap );
 	
+	// build the attribute filter
+	/// \todo: add tests for this...
+	/// \todo: use operands instead of the parameter
+	UT_String p( "P" );
+	UT_String filter( m_attributeFilterParameter->getTypedValue() );
+	UT_StringMMPattern attribFilter;
+	// force P and prevent name
+	filter += " ^name";
+	if ( !p.match( filter ) )
+	{
+		filter += " P";
+	}
+	attribFilter.compile( filter );
+	
 	// add detail attribs	
 	if ( result->variableSize( detailInterpolation ) == 1 )
 	{
-		transferDetailAttribs( geo, result, detailInterpolation );
+		transferDetailAttribs( geo, attribFilter, result, detailInterpolation );
 	}
 	
 	// add point attribs
 	if ( result->variableSize( pointInterpolation ) == (unsigned)geo->getNumPoints() )
 	{
-		transferElementAttribs( geo, geo->getPointRange(), geo->pointAttribs(), pointAttributeMap, result, pointInterpolation );
+		transferElementAttribs( geo, geo->getPointRange(), geo->pointAttribs(), attribFilter, pointAttributeMap, result, pointInterpolation );
 	}
 	
 	// add primitive attribs
 	size_t numPrims = geo->getNumPrimitives();
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
-		transferElementAttribs( geo, geo->getPrimitiveRange(), geo->primitiveAttribs(), primitiveAttributeMap, result, primitiveInterpolation );
+		transferElementAttribs( geo, geo->getPrimitiveRange(), geo->primitiveAttribs(), attribFilter, primitiveAttributeMap, result, primitiveInterpolation );
 	}
 	
 	// add vertex attribs
 	size_t numVerts = geo->getNumVertices();
+	GA_Range primRange = geo->getPrimitiveRange();
 	if ( geo->vertexAttribs().entries() && result->variableSize( vertexInterpolation ) == numVerts )
 	{
-		GA_Range primRange = geo->getPrimitiveRange();
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 		
 		GA_OffsetList offsets;
@@ -269,26 +301,43 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		GA_Range vertRange( geo->getVertexMap(), offsets );
 		
 		AttributeMap defaultMap;
-		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), defaultMap, result, vertexInterpolation );
+		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
 	}
 	
 	/// \todo: should we convert uv to s and t automatically?
 	
-	// add the name blindData based on prim group
-	GA_Range primRange = geo->getPrimitiveRange();
-	const GA_ElementGroupTable &primGroups = geo->primitiveGroups();
-	for ( GA_GroupTable::iterator<GA_ElementGroup> it = primGroups.beginTraverse(); !it.atEnd(); ++it )
-	{
-		GA_ElementGroup *group = it.group();
-		if ( !group->getInternal() && group->containsAny( primRange ) )
+	// add the name blindData based on the name attribute
+	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
+	if ( attrHandle.isAttributeValid() )
+	{			
+		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
+		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
 		{
-			result->blindData()->member<StringData>( "name", false, true )->writable() = it.name();
-			break;
+			const char *name = attrRef.getString( it.getOffset() );
+			if ( name && strcmp( name, "" ) )
+			{
+				result->blindData()->member<StringData>( "name", false, true )->writable() = name;
+				break;
+			}
+		}
+	}
+	else
+	{
+		// fallback to names from groups
+		const GA_ElementGroupTable &primGroups = geo->primitiveGroups();
+		for ( GA_GroupTable::iterator<GA_ElementGroup> it = primGroups.beginTraverse(); !it.atEnd(); ++it )
+		{
+			GA_ElementGroup *group = it.group();
+			if ( !group->getInternal() && group->containsAny( primRange ) )
+			{
+				result->blindData()->member<StringData>( "name", false, true )->writable() = it.name();
+				break;
+			}
 		}
 	}
 }
 
-void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
 	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
@@ -300,6 +349,12 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		
 		const GA_ROAttributeRef attrRef( attr );
 		if ( attrRef.isInvalid() )
+		{
+			continue;
+		}
+		
+		UT_String name( attr->getName() );
+		if ( !name.multiMatch( attribFilter ) )
 		{
 			continue;
 		}
@@ -480,7 +535,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	}
 }
 
-void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, const UT_StringMMPattern &attribFilter, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
 	const GA_AttributeDict &attribs = geo->attribs();
 	
@@ -494,6 +549,12 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 		
 		const GA_ROAttributeRef attrRef( attr );
 		if ( attrRef.isInvalid() )
+		{
+			continue;
+		}
+		
+		UT_String name( attr->getName() );
+		if ( !name.multiMatch( attribFilter ) )
 		{
 			continue;
 		}
