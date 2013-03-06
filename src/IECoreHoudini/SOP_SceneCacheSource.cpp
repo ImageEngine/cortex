@@ -202,10 +202,6 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		SceneInterface::Path p;
 		scene->path( p );
 		SceneInterface::pathToString( p, fullName );
-		/// \todo: we either need a reserved character to reconstruct the hierarchy from group names
-		/// or we need Cortex to start using a name attribute instead of groups
-		boost::algorithm::replace_all( fullName, "/", "_" );
-		boost::algorithm::replace_all( fullName, ":", "" );
 		
 		modifyObject( object, fullName, attributeFilter );
 		
