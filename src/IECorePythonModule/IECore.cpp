@@ -215,6 +215,8 @@
 #include "IECorePython/SRGBToLinearOpBinding.h"
 #include "IECorePython/LinearToCineonOpBinding.h"
 #include "IECorePython/CineonToLinearOpBinding.h"
+#include "IECorePython/LinearToAlexaLogcOpBinding.h"
+#include "IECorePython/AlexaLogcToLinearOpBinding.h"
 #include "IECorePython/CubeColorLookupBinding.h"
 #include "IECorePython/CubeColorLookupDataBinding.h"
 #include "IECorePython/CubeColorTransformOpBinding.h"
@@ -520,6 +522,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinearToSRGBOp();
 	bindCineonToLinearOp();
 	bindLinearToCineonOp();
+	bindAlexaLogcToLinearOp();
+	bindLinearToAlexaLogcOp();
 	bindCubeColorLookup();
 	bindCubeColorLookupData();
 	bindCubeColorTransformOp();
