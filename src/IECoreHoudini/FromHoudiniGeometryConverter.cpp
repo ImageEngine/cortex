@@ -107,7 +107,7 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 	
 	/// \todo: add a shapeFilter parameter, and use UT_String::match to create sub-GU_Details for conversion
 	
-	return doPrimitiveConversion( geo );
+	return doPrimitiveConversion( geo, operands );
 }
 
 /// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
@@ -217,7 +217,7 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 }
 
 void FromHoudiniGeometryConverter::transferAttribs(
-	const GU_Detail *geo, IECore::Primitive *result,
+	const GU_Detail *geo, IECore::Primitive *result, const CompoundObject *operands,
 	PrimitiveVariable::Interpolation vertexInterpolation,
 	PrimitiveVariable::Interpolation primitiveInterpolation,
 	PrimitiveVariable::Interpolation pointInterpolation,
@@ -240,10 +240,8 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	remapAttributes( geo, pointAttributeMap, primitiveAttributeMap );
 	
 	// build the attribute filter
-	/// \todo: add tests for this...
-	/// \todo: use operands instead of the parameter
 	UT_String p( "P" );
-	UT_String filter( m_attributeFilterParameter->getTypedValue() );
+	UT_String filter( operands->member<StringData>( "attributeFilter" )->readable() );
 	UT_StringMMPattern attribFilter;
 	// force P and prevent name
 	filter += " ^name";

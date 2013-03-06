@@ -105,7 +105,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// need not reimplement this function, but should instead implement doPrimitiveConversion().
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 		/// Must be implemented by derived classes to return a IECore::Primitive created to represent the specified GU_Detail.
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const = 0;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const = 0;
 		
 		typedef FromHoudiniGeometryConverterPtr (*CreatorFn)( const GU_DetailHandle &handle );
 		typedef Convertability (*ConvertabilityFn)( const GU_DetailHandle &handle );
@@ -132,7 +132,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// Extracts position and attribs from the GU_Detail and stores them as primitive variables on the IECore::Primitive provided.
 		/// In most cases, this is the only transfer function that derived classes will need to use
 		void transferAttribs(
-			const GU_Detail *geo, IECore::Primitive *result,
+			const GU_Detail *geo, IECore::Primitive *result, const IECore::CompoundObject *operands,
 			IECore::PrimitiveVariable::Interpolation vertexInterpolation = IECore::PrimitiveVariable::FaceVarying,
 			IECore::PrimitiveVariable::Interpolation primitiveInterpolation = IECore::PrimitiveVariable::Uniform,
 			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,

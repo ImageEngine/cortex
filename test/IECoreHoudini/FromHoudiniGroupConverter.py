@@ -524,5 +524,30 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( m[key].data, c[key].data )
 				self.assertEqual( m[key], c[key] )
 
+	def testAttributeFilter( self ) :
+		
+		merge = self.buildScene()
+		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
+			self.assertEqual( sorted(child.keys()), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "P" )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertEqual( sorted(child.keys()), [ "P" ] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^generator* ^varmap ^born ^event" )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertEqual( sorted(child.keys()), ['Cd', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v'] )
+			
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
+		result = converter.convert()
+		for child in result.children() :
+			# P must be converted
+			self.assertTrue( "P" in child.keys() )
+
 if __name__ == "__main__":
     unittest.main()

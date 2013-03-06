@@ -71,7 +71,7 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 		
 		/// Uses the factory mechanism to find the best converter for the given GU_Detail
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 		
 	private :
 
@@ -88,10 +88,10 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		void constructCommon();
 		
 		/// Converts the contents of the GA_PrimitiveGroup into a VisibleRenderable
-		size_t doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result ) const;
+		size_t doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result, const IECore::CompoundObject *operands ) const;
 
 		/// Converts the given GA_PrimitiveGroup to an IECore::Primitive and adds it to the IECore::Group
-		void convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, IECore::GroupPtr &result ) const;
+		void convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, IECore::GroupPtr &result, const IECore::CompoundObject *operands ) const;
 		
 		/// Regroups a single GA_PrimitiveGroup into several groups, based on GA_PrimitiveTypeId
 		/// @param geo The GU_Detail containing the orginal group. New groups will be added based on GA_PrimitiveTypeId

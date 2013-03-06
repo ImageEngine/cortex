@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryCo
 	protected :
 		
 		/// performs conversion to a IECore::MeshPrimitive
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo ) const;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 
 	private :
 

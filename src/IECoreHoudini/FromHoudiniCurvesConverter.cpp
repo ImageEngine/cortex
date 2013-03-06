@@ -111,7 +111,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 	return Suitable;
 }
 
-PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail *geo ) const
+PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	
@@ -182,7 +182,7 @@ PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail 
 	
 	result->setTopology( new IntVectorData( origVertsPerCurve ), basis, periodic );
 	
-	transferAttribs( geo, result, PrimitiveVariable::Vertex );
+	transferAttribs( geo, result, operands, PrimitiveVariable::Vertex );
 	
 	if ( !duplicateEnds )
 	{
