@@ -52,6 +52,8 @@ if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
 
 	if IECore.withSignals() and IECore.withASIO() :
 		cortexMenu.addCommand( "Display", "nuke.createNode( 'ieDisplay' )" )
+		
+	cortexMenu.addCommand( "LensDistort", "nuke.createNode( 'ieLensDistort' )" )
 
 	proceduralMenu = cortexMenu.addMenu( "Procedural" )
 	IECoreNuke.Menus.addProceduralCreationCommands( proceduralMenu )

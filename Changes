@@ -5,6 +5,7 @@ Improvements :
 
 * Added the LensModel and StandardRadialLensModel classes to provide a framework for applying or removing lens distortion.
 * Added the LensDistortOp which distorts or undistorts an image using a parametric lens model.
+* Added the ieLensDistort node to IECoreNuke. The node can apply or remove lens distortion using any of the lens models registered to Cortex.
 
 Bug Fixes :
 
