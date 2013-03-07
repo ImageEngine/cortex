@@ -106,8 +106,8 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	
 	try
 	{
-		SceneInterface::Path path;
-		m_liveScene = new IECoreHoudini::HoudiniScene( value, path );
+		SceneInterface::Path emptyPath;
+		m_liveScene = new IECoreHoudini::HoudiniScene( value, emptyPath, emptyPath );
 	}
 	catch ( IECore::Exception &e )
 	{		

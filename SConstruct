@@ -2423,6 +2423,13 @@ houdiniEnv.Prepend( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
 
 houdiniPythonModuleEnv = pythonModuleEnv.Clone( **houdiniEnvSets )
 houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
+if env["PLATFORM"] == "posix" :
+	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
+	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
+	# be able to have -Werror but be missing one warning than to have no -Werror.
+	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
+	# fully work. Reenable when we encounter versions that work correctly.
+	houdiniPythonModuleEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
 
 houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 

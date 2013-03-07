@@ -839,12 +839,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
 	
-	def compareScene( self, a, b, time = 0, rootMatches=True, pathOffset=0 ) :
+	def compareScene( self, a, b, time = 0 ) :
 		
-		if rootMatches :
-			self.assertEqual( a.name(), b.name() )
-		
-		self.assertEqual( a.path(), b.path()[pathOffset:] )
+		self.assertEqual( a.name(), b.name() )
+		self.assertEqual( a.path(), b.path() )
 		ab = a.readBound( time )
 		bb = b.readBound( time )
 		self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
@@ -860,7 +858,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		self.assertEqual( a.childNames(), b.childNames() )
 		for child in a.childNames() :
-			self.compareScene( a.child( child ), b.child( child ), pathOffset=pathOffset )
+			self.compareScene( a.child( child ), b.child( child ) )
 	
 	def testRop( self ) :
 		
@@ -1008,8 +1006,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		b.parm( "build" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		live = IECoreHoudini.HoudiniScene().child( xform.name() )
-		self.compareScene( orig, live, rootMatches=False, pathOffset=1 )
+		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+		self.compareScene( orig, live )
 	
 	def tearDown( self ) :
 		

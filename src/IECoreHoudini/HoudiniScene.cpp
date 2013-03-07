@@ -53,19 +53,25 @@ using namespace IECoreHoudini;
 
 SceneInterface::FileFormatDescription< HoudiniScene > HoudiniScene::s_description( ".hip", IndexedIO::Read );
 
-HoudiniScene::HoudiniScene()
+HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
 	motDirector->getObjectManager()->getFullPath( m_nodePath );
+	
+	Path contentPath, rootPath;
+	calculatePath( contentPath, rootPath );
 }
 
-HoudiniScene::HoudiniScene( const std::string &fileName, IndexedIO::OpenMode )
+HoudiniScene::HoudiniScene( const std::string &fileName, IndexedIO::OpenMode ) : m_rootIndex( 0 ), m_contentIndex( 0 )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
 	motDirector->getObjectManager()->getFullPath( m_nodePath );
+	
+	Path contentPath, rootPath;
+	calculatePath( contentPath, rootPath );
 }
 
-HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &relativePath )
+HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath ) : m_rootIndex( 0 ), m_contentIndex( 0 )
 {
 	m_nodePath = nodePath;
 	m_nodePath.hardenIfNeeded();
@@ -77,8 +83,7 @@ HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &relativePath 
 		m_contentPath.hardenIfNeeded();
 	}
 	
-	m_relativePath.resize( relativePath.size() );
-	std::copy( relativePath.begin(), relativePath.end(), m_relativePath.begin() );
+	calculatePath( contentPath, rootPath );
 	
 	// make sure the node is valid
 	OP_Node *node = retrieveNode();
@@ -94,25 +99,22 @@ HoudiniScene::~HoudiniScene()
 
 SceneInterface::Name HoudiniScene::name() const
 {
-	if ( m_relativePath.empty() )
+	if ( m_path.empty() || m_rootIndex == m_path.size() )
 	{
-		if ( m_nodePath.length() == 1 || m_nodePath == "/obj" )
-		{
-			return SceneInterface::rootName;
-		}
-		
-		UT_String path, name;
-		m_nodePath.splitPath( path, name );
-		return name.toStdString();
+		return SceneInterface::rootName;
 	}
 	
-	return *m_relativePath.rbegin();
+	return *m_path.rbegin();
 }
 
 void HoudiniScene::path( Path &p ) const
 {
-	p.clear();
-	
+	p.resize( m_path.size() - m_rootIndex );
+	std::copy( m_path.begin() + m_rootIndex, m_path.end(), p.begin() );
+}
+
+void HoudiniScene::calculatePath( const Path &contentPath, const Path &rootPath )
+{
 	OP_Node *node = OPgetDirector()->findNode( m_nodePath );
 	if ( !node )
 	{
@@ -146,18 +148,39 @@ void HoudiniScene::path( Path &p ) const
 		// add them in reverse order
 		for ( int j = parentNames.entries() - 1; j >= 0; --j )
 		{
-			p.push_back( Name( parentNames( j ) ) );
+			m_path.push_back( Name( parentNames( j ) ) );
 		}
 		
-		p.push_back( Name( workArgs[i] ) );
+		m_path.push_back( Name( workArgs[i] ) );
 	}
 	
-	if ( !m_relativePath.empty() )
+	if ( !contentPath.empty() )
 	{
-		size_t origSize = p.size();
-		p.resize( p.size() + m_relativePath.size() );
-		std::copy( m_relativePath.begin(), m_relativePath.end(), p.begin() + origSize );
+		m_contentIndex = m_path.size();
+		m_path.resize( m_path.size() + contentPath.size() );
+		std::copy( contentPath.begin(), contentPath.end(), m_path.begin() + m_contentIndex );
 	}
+	
+	if ( m_path.size() < rootPath.size() )
+	{
+		std::string pStr, rStr;
+		pathToString( m_path, pStr );
+		pathToString( rootPath, rStr );
+		throw Exception( "IECoreHoudini::HoudiniScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
+	}
+	
+	for ( size_t i = 0; i < rootPath.size(); ++i )
+	{
+		if ( rootPath[i] != m_path[i] )
+		{
+			std::string pStr, rStr;
+			pathToString( m_path, pStr );
+			pathToString( rootPath, rStr );
+			throw Exception( "IECoreHoudini::HoudiniScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
+		}
+	}
+	
+	m_rootIndex = rootPath.size();
 }
 
 Imath::Box3d HoudiniScene::readBound( double time ) const
@@ -175,7 +198,7 @@ Imath::Box3d HoudiniScene::readBound( double time ) const
 	}
 	
 	// paths embedded within a sop already have bounds accounted for
-	if ( !m_relativePath.empty() )
+	if ( m_contentIndex )
 	{
 		return bounds;
 	}
@@ -224,7 +247,7 @@ Imath::M44d HoudiniScene::readTransformAsMatrix( double time ) const
 	}
 	
 	// paths embedded within a sop always have identity transforms
-	if ( !m_relativePath.empty() )
+	if ( m_contentIndex )
 	{
 		return Imath::M44d();
 	}
@@ -417,7 +440,7 @@ void HoudiniScene::childNames( NameList &childNames ) const
 		{
 			Path childPath;
 			relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-			if ( !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
+			if ( !childPath.empty() && childPath.begin()->string() != ".." && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
 			{
 				childNames.push_back( *childPath.begin() );
 			}
@@ -427,14 +450,14 @@ void HoudiniScene::childNames( NameList &childNames ) const
 
 bool HoudiniScene::hasChild( const Name &name ) const
 {
-	Path relativePath;
-	return (bool)retrieveChild( name, relativePath, NullIfMissing );
+	Path contentPath;
+	return (bool)retrieveChild( name, contentPath, NullIfMissing );
 }
 
 SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour )
 {
-	Path relativePath;
-	OP_Node *child = retrieveChild( name, relativePath, missingBehaviour );
+	Path contentPath;
+	OP_Node *child = retrieveChild( name, contentPath, missingBehaviour );
 	if ( !child )
 	{
 		return 0;
@@ -442,7 +465,13 @@ SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missin
 	
 	UT_String nodePath;
 	child->getFullPath( nodePath );
-	return new HoudiniScene( nodePath, relativePath );
+	
+	Path rootPath;
+	rootPath.resize( m_rootIndex );
+	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
+	
+	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
+	return new HoudiniScene( nodePath, contentPath, rootPath );
 }
 
 ConstSceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -495,7 +524,7 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 		node = contentNode;
 	}
 	
-	if ( !m_relativePath.empty() )
+	if ( m_contentIndex )
 	{
 		OBJ_Node *objNode = contentNode->castToOBJNode();
 		if ( objNode && objNode->getObjectType() == OBJ_GEOMETRY )
@@ -519,7 +548,7 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 				
 				if ( missingBehaviour == ThrowIfMissing )
 				{
-					throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + contentPath.toStdString() + "\" does not contain the expected geometry." );
+					throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + contentPath.toStdString() + "\" does not contain the expected geometry for \"" + name().string() + "\"." );
 				}
 			}
 		}
@@ -543,10 +572,10 @@ OP_Node *HoudiniScene::locateContent( OP_Node *node ) const
 		}
 	}
 	
-	return node;
+	return 0;
 }
 
-OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &relativePath, MissingBehaviour missingBehaviour ) const
+OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour ) const
 {
 	OP_Node *node = retrieveNode( false, missingBehaviour );
 	OP_Node *contentBaseNode = retrieveNode( true, missingBehaviour );
@@ -607,14 +636,14 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &relativePath, Miss
 				int numShapes = geo->getUniqueValueCount( attrRef );
 				for ( int i=0; i < numShapes; ++i )
 				{
-					this->relativePath( geo->getUniqueStringValue( attrRef, i ), relativePath );
-					if ( !relativePath.empty() && name == *relativePath.begin() )
+					relativePath( geo->getUniqueStringValue( attrRef, i ), contentPath );
+					if ( !contentPath.empty() && name == *contentPath.begin() )
 					{
 						return contentNode;
 					}
 					else
 					{
-						relativePath.clear();
+						contentPath.clear();
 					}
 				}
 			}
@@ -635,7 +664,30 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &relativePath, Miss
 
 SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
-	SceneInterfacePtr scene = new HoudiniScene();
+	Path rootPath, emptyPath;
+	rootPath.resize( m_rootIndex );
+	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
+	
+	HoudiniScenePtr rootScene = new HoudiniScene();
+	for ( Path::const_iterator it = rootPath.begin(); it != rootPath.end(); ++it )
+	{
+		rootScene = IECore::runTimeCast<HoudiniScene>( rootScene->child( *it ) );
+		if ( !rootScene )
+		{
+			return 0;
+		}
+	}
+	
+	UT_String rootNodePath;
+	OP_Node *node = rootScene->retrieveNode();
+	if ( !node )
+	{
+		return 0;
+	}
+	node->getFullPath( rootNodePath );
+	
+	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
+	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath );
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
 	{
 		scene = scene->child( *it, missingBehaviour );
@@ -654,24 +706,24 @@ void HoudiniScene::relativePath( const char *value, Path &result ) const
 	std::string pStr = value;
 	stringToPath( pStr, path );
 	
-	Path myPath;
-	this->path( myPath );
-	
 	size_t pathSize = path.size();
-	size_t myPathSize = myPath.size();
-	
+	size_t myPathSize = m_path.size();
 	// this happens for SOPs containing a parent object and our own
 	if ( pathSize < myPathSize )
 	{
+		for ( size_t i = pathSize; i < myPathSize; ++i )
+		{
+			result.push_back( ".." );
+		}
 		return;
 	}
 	
 	for ( size_t i = 0; i < myPathSize; ++i )
 	{
-		if ( path[i] != myPath[i] )
+		if ( path[i] != m_path[i] )
 		{
 			std::string myPStr;
-			pathToString( myPath, myPStr );
+			pathToString( m_path, myPStr );
 			throw Exception( "IECoreHoudini::HoudiniScene::relativePath: Path \"" + pStr + "\" is not a valid child of \"" + myPStr + "\"." );
 		}
 	}

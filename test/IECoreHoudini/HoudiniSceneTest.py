@@ -213,7 +213,6 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertRaises( RuntimeError, IECore.curry( torus1.child, "torus2" ) )
 		self.assertEqual( torus1.child( "torus2", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 		self.assertRaises( RuntimeError, torus1.childNames )
-		self.assertRaises( RuntimeError, torus1.path )
 		self.assertRaises( RuntimeError, torus1.hasObject )
 		self.assertRaises( RuntimeError, IECore.curry( torus1.readBound, 0.0 ) )
 		self.assertRaises( RuntimeError, IECore.curry( torus1.readObject, 0.0 ) )
@@ -382,6 +381,81 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertAlmostEqual( transform0_5.translate.y, 1.5, 5 )
 		self.assertAlmostEqual( transform0_5.translate.z, 2.5, 5 )
 		self.assertEqual( transform1.translate, IECore.V3d( 1, 2, 3 ) )
+	
+	def testRerooting( self ) :	
+		
+		self.buildScene()
+		scene = IECoreHoudini.HoudiniScene( "/obj/sub1", rootPath = [ "sub1" ] )
+		self.assertEqual( scene.path(), [] )
+		self.assertEqual( scene.pathAsString(), "/" )
+		self.assertEqual( scene.name(), "/" )
+		self.assertEqual( sorted( scene.childNames() ), [ "box1", "torus1" ] )
+		self.assertEqual( scene.hasChild( "box1" ), True )
+		self.assertEqual( scene.hasChild( "torus1" ), True )
+		self.assertEqual( scene.hasChild( "torus2" ), False )
+		self.assertEqual( scene.hasObject(), False )
+		
+		torus1 = scene.child( "torus1" )
+		self.assertEqual( torus1.path(), [ "torus1" ] )
+		self.assertEqual( torus1.pathAsString(), "/torus1" )
+		self.assertEqual( torus1.name(), "torus1" )
+		self.assertEqual( sorted( torus1.childNames() ), [ "torus2" ] )
+		self.assertEqual( torus1.hasChild( "torus2" ), True )
+		self.assertEqual( torus1.hasObject(), True )
+		mesh = torus1.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 100 )
+		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
+		
+		torus2 = torus1.child( "torus2" )
+		self.assertEqual( torus2.path(), [ "torus1", "torus2" ] )
+		self.assertEqual( torus2.pathAsString(), "/torus1/torus2" )
+		self.assertEqual( torus2.name(), "torus2" )
+		self.assertEqual( sorted( torus2.childNames() ), [] )
+		self.assertEqual( torus2.hasObject(), True )
+		mesh = torus2.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 100 )
+		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
+		
+		box1 = scene.child( "box1" )
+		self.assertEqual( box1.path(), [ "box1" ] )
+		self.assertEqual( box1.pathAsString(), "/box1" )
+		self.assertEqual( box1.name(), "box1" )
+		self.assertEqual( sorted( box1.childNames() ), [ "torus" ] )
+		self.assertEqual( box1.hasChild( "torus" ), True )
+		self.assertEqual( box1.hasObject(), True )
+		mesh = box1.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 8 )
+		# shape names do not re-root
+		self.assertEqual( mesh.blindData()["name"].value, "/sub1/box1" )
+		
+		boxTorus = box1.child( "torus" )
+		self.assertEqual( boxTorus.path(), [ "box1", "torus" ] )
+		self.assertEqual( boxTorus.pathAsString(), "/box1/torus" )
+		self.assertEqual( boxTorus.name(), "torus" )
+		self.assertEqual( boxTorus.childNames(), [] )
+		self.assertEqual( boxTorus.hasObject(), True )
+		mesh = boxTorus.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 100 )
+		# shape names do not re-root
+		self.assertEqual( mesh.blindData()["name"].value, "/sub1/box1/torus" )
+		
+		self.assertRaises( RuntimeError, scene.child, "box2" )
+		self.assertEqual( scene.child( "box2", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		
+		# test the node that does exist according to houdini, but is actually a grandchild in our world
+		self.assertRaises( RuntimeError, scene.child, "torus2" )
+		self.assertEqual( scene.child( "torus2", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		
+		torus1 = scene.scene( [ "torus1" ] )
+		self.assertEqual( torus1.pathAsString(), "/torus1" )
+		
+		# can't use scene() to go outside of the re-rooting
+		self.assertRaises( RuntimeError, scene.scene, [ "sub2" ] )
+		self.assertEqual( scene.scene( [ "sub2" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -54,7 +54,7 @@ class HoudiniScene : public IECore::SceneInterface
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HoudiniScene, HoudiniSceneTypeId, IECore::SceneInterface );
 		
 		HoudiniScene();
-		HoudiniScene( const UT_String &nodePath, const Path &relativePath );
+		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath );
 		HoudiniScene( const std::string &fileName, IECore::IndexedIO::OpenMode );
 		
 		virtual ~HoudiniScene();
@@ -93,14 +93,17 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		OP_Node *locateContent( OP_Node *node ) const;
-		OP_Node *retrieveChild( const Name &name, Path &relativePath, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		OP_Node *retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		
+		void calculatePath( const Path &contentPath, const Path &rootPath );
 		void relativePath( const char *value, Path &result ) const;
 		
 		UT_String m_nodePath;
 		UT_String m_contentPath;
-		IECore::SceneInterface::Path m_relativePath;
+		size_t m_rootIndex;
+		size_t m_contentIndex;
+		IECore::SceneInterface::Path m_path;
 
 };
 

@@ -37,14 +37,40 @@
 #include "IECoreHoudini/HoudiniScene.h"
 #include "IECoreHoudini/bindings/HoudiniSceneBinding.h"
 
+#include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
 
+static void listToPath( const list &l, IECore::SceneInterface::Path &p )
+{
+	int listLen = IECorePython::len( l );
+	for (int i = 0; i < listLen; i++ )
+	{
+		extract< std::string > ex( l[i] );
+		if ( !ex.check() )
+		{
+			throw IECore::InvalidArgumentException( std::string( "Invalid path! Should be a list of strings!" ) );
+		}
+		p.push_back( ex() );	
+	}
+}
+
+static HoudiniScenePtr constructor( const std::string n, const list &c, const list &r )
+{
+	UT_String nodePath( n );
+	IECore::SceneInterface::Path contentPath, rootPath;
+	listToPath( c, contentPath );
+	listToPath( r, rootPath );
+	
+	return new HoudiniScene( nodePath, contentPath, rootPath );
+}
+
 void IECoreHoudini::bindHoudiniScene()
 {
 	IECorePython::RunTimeTypedClass<HoudiniScene>()
 		.def( init<>() )
+		.def( "__init__", make_constructor( &constructor, default_call_policies(), ( arg( "nodePath" ), arg( "contentPath" ) = list(), arg( "rootPath" ) = list() ) ) )
 	;
 }
