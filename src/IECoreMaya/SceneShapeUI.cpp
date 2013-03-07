@@ -355,7 +355,7 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	{
 		return false;
 	}
-	
+
 	// we want to perform the selection using an IECoreGL::Selector, so we
 	// can avoid the performance penalty associated with using GL_SELECT mode.
 	// that means we don't really want to call view.beginSelect(), but we have to

@@ -37,6 +37,7 @@
 #include "IECoreMaya/MayaTypeIds.h"
 
 #include "maya/MFnTypedAttribute.h"
+#include "maya/MFnStringData.h"
 
 
 using namespace IECore;
@@ -78,13 +79,10 @@ MStatus SceneShape::initialize()
 	s = addAttribute( aSceneFilePlug );
 	assert( s );
 	
-	aSceneRootPlug = tAttr.create( "sceneRoot", "scr", MFnData::kString, &s );
+	aSceneRootPlug = tAttr.create( "sceneRoot", "scr", MFnData::kString, MFnStringData().create( "/" ), &s );
 	assert( s );
 	s = addAttribute( aSceneRootPlug );
 	assert( s );
-
-	attributeAffects( aSceneFilePlug, aChildrenNames );
-	attributeAffects( aSceneRootPlug, aChildrenNames );
 
 	return s;
 }
@@ -138,6 +136,8 @@ MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray
 	{
 		m_sceneDirty = true;
 		setDirty();
+		
+		SceneShapeInterface::getOutputPlugsArray( plugArray );
 	}
 
 	return SceneShapeInterface::setDependentsDirty( plug, plugArray );
