@@ -193,6 +193,12 @@ class IndexedIO : public RunTimeTyped
 		/// Any IndexedIO instances to child directories will be in a invalid state and should not be used after remove is called.
 		virtual void removeAll() = 0;
 
+		/// Commit the contents of the current directory to the file, further changes on this directory or it's subdirectories are not allowed.
+		/// This helps freeing memory and also gives hints to the implementation classes to structure the file format in a sensible way.
+		/// The commit() method is called by Object::save function.
+		/// Any IndexedIO instances to child directories will be in a invalid state and should not be used after commit is called.
+		virtual void commit() = 0;
+
 		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
 		virtual IndexedIOPtr parentDirectory() = 0;
 

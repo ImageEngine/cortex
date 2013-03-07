@@ -38,7 +38,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
-#include "tbb/mutex.h"
+#include "tbb/recursive_mutex.h"
 #include "boost/optional.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
 
@@ -91,6 +91,8 @@ class StreamIndexedIO : public IndexedIO
 		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing );
 
 		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const;
+
+		void commit();
 
 		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);
@@ -170,8 +172,9 @@ class StreamIndexedIO : public IndexedIO
 				IndexedIO::OpenMode openMode() const;
 
 				// returns a read lock, when thread-safety is required.
-				typedef tbb::mutex::scoped_lock MutexLock;
-				tbb::mutex & mutex();
+				typedef tbb::recursive_mutex Mutex;
+				typedef Mutex::scoped_lock MutexLock;
+				Mutex & mutex();
 
 				// utility function that returns a temporary buffer for io operations (not thread safe).
 				char *ioBuffer( unsigned long size );
@@ -190,7 +193,7 @@ class StreamIndexedIO : public IndexedIO
 
 				IndexedIO::OpenMode m_openmode;
 				std::iostream *m_stream;
-				tbb::mutex m_mutex;
+				Mutex m_mutex;
 
 				unsigned long m_ioBufferLen;
 				char *m_ioBuffer;

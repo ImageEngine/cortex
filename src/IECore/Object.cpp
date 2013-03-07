@@ -130,6 +130,7 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 	}
 	else
 	{
+		bool rootObject = ( m_savedObjects->size() == 0 );
 		IndexedIOPtr nameIO = container->subdirectory( name, IndexedIO::CreateIfMissing );
 
 		IndexedIO::EntryIDList pathParts;
@@ -143,6 +144,12 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 
 		SaveContext context( dataIO, m_savedObjects );
 		toSave->save( &context );
+
+		// Objects saved on a file can be committed to disk to free memory.
+		if ( rootObject )
+		{
+			nameIO->commit();
+		}
 	}
 }
 
