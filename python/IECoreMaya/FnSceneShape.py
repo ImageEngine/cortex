@@ -64,6 +64,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		fnDN = FnDagNode.createShapeWithParent( parentName, "ieSceneShape" )
 		fnScS = FnSceneShape( fnDN.object() )
 		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
+		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.inTime' )
 		
 		return fnScS
 
@@ -142,7 +143,10 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		return self.name()
 		
-	
+	def sceneInterface( self ) :
+
+		return _IECoreMaya._sceneShapeSceneInterface( self )
+		
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):
