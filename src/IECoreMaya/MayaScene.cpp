@@ -22,7 +22,6 @@
 #include "maya/MItDag.h"
 #include "maya/MPlug.h"
 #include "maya/MTransformationMatrix.h"
-#include "maya/MSelectionList.h"
 #include "maya/MDagPathArray.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
@@ -360,25 +359,22 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 		throw Exception( "MayaScene::retrieveChild: Dag path no longer exists!" );
 	}
 	
-	unsigned currentPathLength = m_dagPath.fullPathName().length();
-	MDagPathArray paths;
-	getChildDags( m_dagPath, paths );
+	MSelectionList sel;
+	sel.add( m_dagPath.fullPathName() + "|" + std::string( name ).c_str() );
 	
-	for( unsigned i=0; i < paths.length(); ++i )
+	MDagPath path;
+	MStatus st = sel.getDagPath( 0, path );
+	
+	if( !st )
 	{
-		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
-		if( name == childName )
+		if( missingBehaviour == SceneInterface::ThrowIfMissing )
 		{
-			return duplicate( paths[i] );
+			throw Exception( "MayaScene::retrieveChild: Couldn't find location at specified path" );
 		}
+		return 0;
 	}
 	
-	if( missingBehaviour == SceneInterface::ThrowIfMissing )
-	{
-		throw Exception( "MayaScene::retrieveChild: Dag path has no child named " + std::string( name ) );
-	}
-	
-	return 0;
+	return duplicate( path );
 }
 
 SceneInterfacePtr MayaScene::child( const Name &name, MissingBehaviour missingBehaviour )
