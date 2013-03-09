@@ -130,10 +130,10 @@ void SceneShapeUI::getDrawRequests( const MDrawInfo &info, bool objectAndActiveO
 	
 	if( glPreview || drawAllBounds )
 	{
-		// Trigger compute
-		MPlug pChildren( sceneShape->thisMObject(), SceneShape::aChildrenNames );
-		MObject getVal;
-		pChildren.getValue( getVal );
+		//// Trigger compute
+		//MPlug pChildren( sceneShape->thisMObject(), SceneShape::aChildrenNames );
+		//MObject getVal;
+		//pChildren.getValue( getVal );
 		
 		if( info.displayStyle()==M3dView::kGouraudShaded || info.displayStyle()==M3dView::kFlatShaded )
 		{

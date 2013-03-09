@@ -115,10 +115,8 @@ def __objectCallback( sceneShape, *unused ) :
 def __printComponents( sceneShape, *unused ) :
 
 	fnS = IECoreMaya.FnSceneShape( sceneShape )
-	names = fnS.componentNames()
-	names = list( names )
+	names = fnS.childrenNames()
 	names.sort()
-	print "\n"
 	print " ".join( names ) ,
 
 def __printSelectedComponents( sceneShape, *unused ) :
@@ -127,9 +125,7 @@ def __printSelectedComponents( sceneShape, *unused ) :
 	selectedNames = fnS.selectedComponentNames()
 	selectedNames = list( selectedNames )
 	selectedNames.sort()
-	print "\n"
 	print " ".join( selectedNames ) ,
-
 
 
 

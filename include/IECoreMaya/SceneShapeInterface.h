@@ -74,14 +74,11 @@ class SceneShapeInterface: public MPxComponentShape
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
-		
-		virtual void componentToPlugs( MObject &component, MSelectionList &selectionList ) const;
+
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
 
 		IECoreGL::ConstScenePtr scene();
 		void setDirty();
-		
-		void buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface );
 
 		virtual IECore::SceneInterfacePtr getSceneInterface();
 		virtual IECore::SceneInterface::Path getSceneRoot();
@@ -91,13 +88,13 @@ class SceneShapeInterface: public MPxComponentShape
 		IECoreGL::GroupPtr getGroup( std::string name );
 		int getIndex( std::string name );
 		std::string getName( int index );
+		std::vector< IECore::InternedString > getChildrenNames() const;
 		
+		static MObject aObjectOnly;
 		static MObject aDrawGeometry;
 		static MObject aDrawRootBound;
 		static MObject aDrawChildBounds;
 		static MObject aTime;
-		static MObject aPreviewSpace;
-		static MObject aChildrenNames;
 		static MObject aQuerySpace;
 		static MObject aSceneQueries;
 		// todo: attributeQueries
@@ -136,9 +133,7 @@ class SceneShapeInterface: public MPxComponentShape
 		enum Space
 		{
 			World,
-			Path,
-			Local,
-			Object
+			Local
 		};
 
 		bool m_sceneInterfaceDirty;
@@ -147,19 +142,22 @@ class SceneShapeInterface: public MPxComponentShape
 		IECoreGL::ScenePtr m_scene;
 		IECore::SceneInterface::Path m_sceneRoot;
 		
-		void buildSceneMaps();
-		void buildSceneMaps( IECore::ConstSceneInterfacePtr subSceneInterface );
+		void buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface );
+		
+		//void buildSceneMaps();
+		//void buildSceneMaps( IECore::ConstSceneInterfacePtr subSceneInterface );
 		
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 		
 		std::string getRelativePathName( IECore::SceneInterface::Path path );
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
 
-		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECore::ConstSceneInterfacePtr> > NameToIndexSceneMap;
+		//typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECore::ConstSceneInterfacePtr> > NameToIndexSceneMap;
+		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
-		typedef std::map< IECore::InternedString, IECoreGL::GroupPtr > NameToGroupMap;
+		//typedef std::map< IECore::InternedString, IECoreGL::GroupPtr > NameToGroupMap;
 		
-		NameToIndexSceneMap m_nameToIndexSceneMap;
+		//NameToIndexSceneMap m_nameToIndexSceneMap;
 		IndexToNameMap m_indexToNameMap;
 		NameToGroupMap m_nameToGroupMap;
 };

@@ -40,11 +40,12 @@ global proc AEieSceneShapeTemplate( string $nodeName )
 		editorTemplate -beginLayout "Scene Inputs";
 			editorTemplate -addControl "sceneFile";
 			editorTemplate -addControl "sceneRoot";
+			editorTemplate -addControl "objectOnly";
+			editorTemplate -addControl "time";
 			
 		editorTemplate -endLayout;
 		
 		editorTemplate -beginLayout "Preview";
-			editorTemplate -addControl "previewSpace";
 			editorTemplate -addControl "drawGeometry";
 			editorTemplate -addControl "drawRootBound";
 			editorTemplate -addControl "drawChildBounds";

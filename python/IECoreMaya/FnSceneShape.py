@@ -64,21 +64,10 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		fnDN = FnDagNode.createShapeWithParent( parentName, "ieSceneShape" )
 		fnScS = FnSceneShape( fnDN.object() )
 		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
-		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.inTime' )
+		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.time' )
 		
 		return fnScS
 
-	## Returns a set of the names of the components within the scene.
-	def componentNames( self ) :
-
-		attributeName = "%s.childrenNames" % self.fullPathName()
-	
-		result = set()
-		for i in range( maya.cmds.getAttr( attributeName, size=True ) ) :
-			result.add( maya.cmds.getAttr( "%s[%i]" % ( attributeName, i ) ) )
-		
-		return result
-		
 	## Returns a set of the names of any currently selected components.
 	def selectedComponentNames( self ) :
 
@@ -86,6 +75,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		s = maya.OpenMaya.MSelectionList()
 		maya.OpenMaya.MGlobal.getActiveSelectionList( s )
+		
+		allChildren = self.childrenNames()
 
 		fullPathName = self.fullPathName()
 		for i in range( 0, s.length() ) :
@@ -104,7 +95,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 					for j in range( 0, a.length() ) :
 
-						result.add( maya.cmds.getAttr( fullPathName + ".childrenNames[" + str( a[j] ) + "]" ) )
+						result.add( allChildren[ a[j] ] )
 
 			except :
 				pass
@@ -119,11 +110,9 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			componentNames = set( componentNames )
 
 		fullPathName = self.fullPathName()
-		validIndices = maya.cmds.getAttr( fullPathName + ".childrenNames", multiIndices=True )
-		toSelect = []
-		for i in validIndices :
-			componentName = maya.cmds.getAttr( fullPathName + ".childrenNames[" + str( i ) + "]" )
-			if componentName in componentNames :
+		allnames = self.childrenNames()
+		for i, name in enumerate( allNames ):
+			if name in componentNames:
 				toSelect.append( fullPathName + ".f[" + str( i ) + "]" )
 
 		maya.cmds.select( clear=True )
@@ -147,6 +136,10 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		return _IECoreMaya._sceneShapeSceneInterface( self )
 		
+	def childrenNames( self ) :
+
+		return _IECoreMaya._sceneShapeChildrenNames( self )
+	
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):

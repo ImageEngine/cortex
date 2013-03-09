@@ -85,18 +85,18 @@
 #include "maya/MFnGeometryData.h"
 #include "maya/MPlugArray.h"
 
+
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreMaya;
 
 MTypeId SceneShapeInterface::id = SceneShapeInterfaceId;
+MObject SceneShapeInterface::aObjectOnly;
 MObject SceneShapeInterface::aDrawGeometry;
 MObject SceneShapeInterface::aDrawRootBound;
 MObject SceneShapeInterface::aDrawChildBounds;
-MObject SceneShapeInterface::aPreviewSpace;
 MObject SceneShapeInterface::aQuerySpace;
 MObject SceneShapeInterface::aTime;
-MObject SceneShapeInterface::aChildrenNames;
 MObject SceneShapeInterface::aSceneQueries;
 MObject SceneShapeInterface::aOutputObjects;
 MObject SceneShapeInterface::aTransform;
@@ -128,7 +128,7 @@ MObject SceneShapeInterface::aBoundCenterZ;
 
 
 SceneShapeInterface::SceneShapeInterface()
-	: m_sceneInterfaceDirty( true ), m_previewSceneDirty( true )
+	: m_previewSceneDirty( true )
 {
 }
 
@@ -159,6 +159,15 @@ MStatus SceneShapeInterface::initialize()
 	
 	MStatus s;
 	
+	aObjectOnly = nAttr.create( "objectOnly", "obj", MFnNumericData::kBoolean, 1 );
+	nAttr.setReadable( true );
+	nAttr.setWritable( true );
+	nAttr.setStorable( true );
+	nAttr.setConnectable( true );
+	nAttr.setHidden( false );
+
+	addAttribute( aObjectOnly );
+	
 	aDrawGeometry = nAttr.create( "drawGeometry", "drg", MFnNumericData::kBoolean, 1, &s );
 	nAttr.setReadable( true );
 	nAttr.setWritable( true );
@@ -186,41 +195,20 @@ MStatus SceneShapeInterface::initialize()
 
 	s = addAttribute( aDrawChildBounds );
 	
-	aPreviewSpace = eAttr.create( "previewSpace", "psp", 0);
-	eAttr.addField( "World", World );
-	eAttr.addField( "Path", Path );
-
-	s = addAttribute( aPreviewSpace );
-	
 	aQuerySpace = eAttr.create( "querySpace", "qsp", 0);
 	eAttr.addField( "World", World );
-	eAttr.addField( "Path", Path );
 	eAttr.addField( "Local", Local );
-	eAttr.addField( "Object", Object );
 	
 	s = addAttribute( aQuerySpace );
     
-	aTime = uAttr.create( "inTime", "itm", MFnUnitAttribute::kTime, 0.0, &s );
+	aTime = uAttr.create( "time", "tim", MFnUnitAttribute::kTime, 0.0, &s );
 	uAttr.setConnectable( true );
-	uAttr.setHidden( true );
+	uAttr.setHidden( false );
 	uAttr.setReadable( true );
 	uAttr.setWritable( true );
 	uAttr.setStorable( true );
 	
 	s = addAttribute( aTime );
-	
-	// Scene children names
-	
-	aChildrenNames = tAttr.create( "childrenNames", "cnm", MFnData::kString, &s );
-	tAttr.setReadable( true );
-	tAttr.setWritable( false );
-	tAttr.setStorable( false );
-	tAttr.setHidden( true );
-	tAttr.setArray( true );
-	tAttr.setIndexMatters( true );
-	tAttr.setUsesArrayDataBuilder( true );
-	
-	s = addAttribute( aChildrenNames );
 
 	// Queries
 	
@@ -404,22 +392,9 @@ MBoundingBox SceneShapeInterface::boundingBox() const
 			MPlug pTime( thisMObject(), aTime );
 			MTime time;
 			pTime.getValue( time );
-			
-			MPlug pPreviewSpace( thisMObject(), aPreviewSpace );
-			int sceneSpace;
-			pPreviewSpace.getValue(sceneSpace);
 
 			Box3d b = scn->readBound( time.as( MTime::kSeconds ) );
-			
-			if( sceneSpace == World )
-			{
-				// World Space
-				SceneInterface::Path root;
-				SceneInterface::stringToPath( "/", root );
-				M44d transformd = const_cast<SceneShapeInterface*>(this)->worldTransform( scn, root, time.as( MTime::kSeconds ) );
-				b = transform( b, transformd );
-			}
-			
+
 			if( !b.isEmpty() )
 			{
 				bound = convert<MBoundingBox>( b );
@@ -446,7 +421,7 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 		if( sceneInterface && sceneInterface -> numBoundSamples() > 1 )
 		{
 			m_previewSceneDirty = true;
-
+			childChanged( kBoundingBoxChanged );
 			getOutputPlugsArray( plugArray );
 		}
 	}
@@ -454,7 +429,7 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 	{
 		getOutputPlugsArray( plugArray );
 	}
-	else if( plug == aDrawGeometry || plug == aDrawChildBounds || plug == aPreviewSpace )
+	else if( plug == aDrawGeometry || plug == aDrawChildBounds || plug == aObjectOnly )
 	{
 		m_previewSceneDirty = true;
 	}
@@ -525,9 +500,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			// Couldn't find input index
 			return MS::kSuccess;
 		}
-		
-		buildSceneMaps();
-		
+
 		MDataHandle timeHandle = dataBlock.inputValue( aTime );
 		MTime time = timeHandle.asTime();
 
@@ -539,16 +512,23 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		MPlug pQuery = pSceneQueries.elementByLogicalIndex( index );
 		MString name;
 		pQuery.getValue( name );
+
+		ConstSceneInterfacePtr sc = getSceneInterface();
 		
-		NameToIndexSceneMap::const_iterator scIt = m_nameToIndexSceneMap.find( name.asChar() );
-		if( scIt == m_nameToIndexSceneMap.end() )
+		SceneInterface::Path root = getSceneRoot();
+		std::string rootName;
+		SceneInterface::pathToString( root, rootName );
+		std::string pathName = rootName+name.asChar();
+		
+		SceneInterface::Path path;
+		SceneInterface::stringToPath( pathName, path );
+		ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
+		
+		if( !scene )
 		{
-			// Queried element doesn't exist
+			// Queried element doesn't exist. Decide what to do!
 			return MS::kSuccess;
 		}
-		
-		IECore::ConstSceneInterfacePtr scene = scIt->second.second;
-				
 		if( topLevelPlug == aTransform )
 		{
 			MArrayDataHandle transformHandle = dataBlock.outputArrayValue( aTransform );
@@ -557,14 +537,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			Imath::M44d transformd;
 			if( querySpace == World )
 			{
-				// World Space
-				IECore::SceneInterface::Path root;
-				IECore::SceneInterface::stringToPath( "/", root );
-				transformd = worldTransform( scene, root, time.as( MTime::kSeconds ) );
-			}
-			else if( querySpace == Path  and name != MString("/") )
-			{
-				// Path space
+				// World Space (starting from scene root)
 				transformd = worldTransform( scene, getSceneRoot(), time.as( MTime::kSeconds ) );
 			}
 			else if( querySpace == Local )
@@ -592,21 +565,10 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 
 			IECore::ObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
 			
-			if( querySpace == World || querySpace == Path )
+			if( querySpace == World )
 			{
 				Imath::M44d transformd;
-				IECore::SceneInterface::Path root;
-				
-				if( querySpace == World )
-				{
-					IECore::SceneInterface::stringToPath( "/", root );
-				}
-				else
-				{
-					root = getSceneRoot();
-				}
-				
-				transformd = worldTransform( scene, root, time.as( MTime::kSeconds ) );
+				transformd = worldTransform( scene, getSceneRoot(), time.as( MTime::kSeconds ) );
 				
 				TransformOpPtr transformer = new TransformOp();
 				transformer->inputParameter()->setValue( object );
@@ -655,19 +617,10 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			
 			if( querySpace == World )
 			{
-				// World Space
-				IECore::SceneInterface::Path root;
-				IECore::SceneInterface::stringToPath( "/", root );
-				Imath::M44d transformd = worldTransform( scene, root, time.as( MTime::kSeconds ) );
-				bboxd = transform( bboxd, transformd );
-			}
-			else if( querySpace == Path  and name != MString("/") )
-			{
-				// Path space
+				// World Space (from root path)
 				Imath::M44d transformd = worldTransform( scene, getSceneRoot(), time.as( MTime::kSeconds ) );
 				bboxd = transform( bboxd, transformd );
 			}
-			
 			Imath::Box3f bound( bboxd.min, bboxd.max );
 
 			MDataHandle boundElementHandle = boundBuilder.addElement( index );
@@ -705,29 +658,6 @@ Imath::M44d SceneShapeInterface::worldTransform( IECore::ConstSceneInterfacePtr 
 	return result;
 }
 
-void SceneShapeInterface::componentToPlugs( MObject &component, MSelectionList &selectionList ) const
-{
-	MStatus s;
-
-	if ( component.hasFn( MFn::kSingleIndexedComponent ) )
-	{
-		MFnSingleIndexedComponent fnComp( component, &s );
-		MObject thisNode = thisMObject();
-		MPlug plug( thisNode, aChildrenNames );
-		assert( !plug.isNull() );
-
-		int len = fnComp.elementCount( &s );
-		for ( int i = 0; i < len; i++ )
-		{
-			MPlug compPlug = plug.elementByLogicalIndex( fnComp.element(i), &s );
-			assert( s );
-			assert( !compPlug.isNull() );
-
-			selectionList.add( compPlug );
-		}
-	}
-}
-
 MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list )
 {
 	if( spec.length() == 1 )
@@ -736,10 +666,10 @@ MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelecti
 		MStatus s;
 
 		int dim = attrSpec.dimensions();
-		
-		if ( (dim > 0) && (attrSpec.name() == "childrenNames" || attrSpec.name() == "cnm" || attrSpec.name() == "f" ) )
+
+		if ( (dim > 0) && attrSpec.name() == "f" )
 		{
-			int numElements = m_nameToIndexSceneMap.size();
+			int numElements = m_nameToGroupMap.size();
 
 			MAttributeIndex attrIndex = attrSpec[0];
 
@@ -799,9 +729,9 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::Co
 	bool drawGeometry;
 	pDrawGeometry.getValue( drawGeometry );
 	
-	MPlug pPreviewSpace( thisMObject(), aPreviewSpace );
-	int previewSpace;
-	pPreviewSpace.getValue( previewSpace );
+	MPlug pObjectOnly( thisMObject(), aObjectOnly );
+	bool objectOnly;
+	pObjectOnly.getValue( objectOnly );
 
 	IECore::AttributeBlock a(renderer);
 	IECore::SceneInterface::Path pathName;
@@ -813,14 +743,7 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::Co
 	IECore::AttributeBlock aNew(renderer);
 
 	Imath::M44d transformd;
-	if( previewSpace == World )
-	{
-		// World Space
-		IECore::SceneInterface::Path root;
-		IECore::SceneInterface::stringToPath( "/", root );
-		transformd = worldTransform( subSceneInterface, root, time.as( MTime::kSeconds ) );
-	}
-	else if( previewSpace == Path and pathStr != "/")
+	if(pathStr != "/")
 	{
 		// Path space
 		transformd = worldTransform( subSceneInterface, getSceneRoot(), time.as( MTime::kSeconds ) );
@@ -854,14 +777,17 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::Co
 			IECore::CurvesPrimitive::createBox( bbox )->render( renderer );    
 		}
 	}
-
-	SceneInterface::NameList childNames;
-	subSceneInterface->childNames( childNames );
-	for ( SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
+	
+	if( !objectOnly )
 	{
-		IECore::SceneInterface::Name name = *it;
-		IECore::ConstSceneInterfacePtr childScene = subSceneInterface->child( name );
-		buildScene( renderer, childScene );
+		SceneInterface::NameList childNames;
+		subSceneInterface->childNames( childNames );
+		for ( SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
+		{
+			IECore::SceneInterface::Name name = *it;
+			IECore::ConstSceneInterfacePtr childScene = subSceneInterface->child( name );
+			buildScene( renderer, childScene );
+		}
 	}
 }
 
@@ -871,10 +797,9 @@ IECoreGL::ConstScenePtr SceneShapeInterface::scene()
 	{
 		return m_scene;
 	}
-	// Make sure components are updated
-	buildSceneMaps();
-	
+
 	IECore::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
+	m_sceneRoot = getSceneRoot();
 
 	if( sceneInterface )
 	{
@@ -896,8 +821,17 @@ IECoreGL::ConstScenePtr SceneShapeInterface::scene()
 
 	// Update component name to group map
 	m_nameToGroupMap.clear();
+	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
+	
+	int index = 0;
+	NameToGroupMap::iterator it = m_nameToGroupMap.begin();
+	for ( ; it != m_nameToGroupMap.end(); it ++ )
+	{
+		m_indexToNameMap.push_back( it->first ); 
+		it->second.first = index ++;
+	}
 	
 	m_previewSceneDirty = false;
 
@@ -921,7 +855,7 @@ void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr name
 		NameToGroupMap::const_iterator it = m_nameToGroupMap.find( name );
 		if( it == m_nameToGroupMap.end() )
 		{
-			m_nameToGroupMap[name] = group;
+			m_nameToGroupMap[name] = NameToGroupMap::mapped_type( 0, group );
 		}
 	}
 
@@ -939,96 +873,7 @@ void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr name
 
 void SceneShapeInterface::setDirty()
 {
-	m_sceneInterfaceDirty = true;
 	m_previewSceneDirty = true;
-	m_sceneRoot = getSceneRoot();
-}
-
-void SceneShapeInterface::buildSceneMaps( IECore::ConstSceneInterfacePtr subSceneInterface )
-{
-	IECore::SceneInterface::Path pathName;
-	subSceneInterface->path( pathName );
-	std::string pathStr = getRelativePathName( pathName );
-
-	NameToIndexSceneMap::const_iterator it = m_nameToIndexSceneMap.find( pathStr );
-	if( it == m_nameToIndexSceneMap.end() )
-	{
-		m_nameToIndexSceneMap[pathStr] = NameToIndexSceneMap::mapped_type( 0, subSceneInterface );
-	}
-
-	SceneInterface::NameList childNames;
-	subSceneInterface->childNames( childNames );
-	for ( SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
-	{
-		IECore::SceneInterface::Name name = *it;
-		IECore::ConstSceneInterfacePtr childScene = subSceneInterface->child( name );
-		buildSceneMaps( childScene );
-	}
-}
-
-void SceneShapeInterface::buildSceneMaps()
-{
-	MStatus s;
-	
-	if( !m_sceneInterfaceDirty )
-	{
-		return;
-	}
-
-	m_nameToIndexSceneMap.clear();
-	m_indexToNameMap.clear();
-
-	IECore::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
-	
-	if( sceneInterface )
-	{
-		m_sceneRoot = getSceneRoot();
-		
-		SceneInterface::NameList childNames;
-		sceneInterface->childNames( childNames );
-
-		// name
-		IECore::SceneInterface::Path pathName;
-		sceneInterface->path( pathName );
-		std::string pathStr = getRelativePathName( pathName );
-
-		NameToIndexSceneMap::const_iterator it = m_nameToIndexSceneMap.find( pathStr );
-		if( it == m_nameToIndexSceneMap.end() )
-		{
-			m_nameToIndexSceneMap[pathStr] = NameToIndexSceneMap::mapped_type( 0, sceneInterface );
-		}
-		
-		for ( SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
-		{
-			SceneInterface::Name name = *it;
-			IECore::ConstSceneInterfacePtr childScene = sceneInterface->child( name );
-			buildSceneMaps( childScene );
-		}
-	}
-	
-	MDataBlock block = forceCache();
-	MArrayDataHandle childrenNamesHandle = block.outputArrayValue( aChildrenNames, &s );
-	MArrayDataBuilder builder( aChildrenNames, m_nameToIndexSceneMap.size() );
-	
-	// Update index values and map index to component for convenience
-	int index = 0;
-	NameToIndexSceneMap::iterator it = m_nameToIndexSceneMap.begin();
-	for ( ; it != m_nameToIndexSceneMap.end(); it ++ )
-	{
-		m_indexToNameMap.push_back( it->first ); 
-		it->second.first = index ++;
-		
-		MFnStringData fnData;
-		MObject data = fnData.create( MString( it->first.c_str() ) );
-		MDataHandle h = builder.addElement( it->second.first, &s );
-		s = h.set( data );
-	}
-	
-	childrenNamesHandle.set( builder );
-	
-	m_sceneInterfaceDirty = false;
-
-	assert( s );
 }
 
 IECoreGL::GroupPtr SceneShapeInterface::getGroup( std::string name )
@@ -1036,7 +881,7 @@ IECoreGL::GroupPtr SceneShapeInterface::getGroup( std::string name )
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
 	{
-		return elementIt->second;
+		return elementIt->second.second;
 	}
 	else
 	{
@@ -1046,8 +891,8 @@ IECoreGL::GroupPtr SceneShapeInterface::getGroup( std::string name )
 
 int SceneShapeInterface::getIndex( std::string name )
 {
-	NameToIndexSceneMap::const_iterator elementIt = m_nameToIndexSceneMap.find( name );
-	if( elementIt != m_nameToIndexSceneMap.end() )
+	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
+	if( elementIt != m_nameToGroupMap.end() )
 	{
 		return elementIt->second.first;
 	}
@@ -1062,6 +907,10 @@ std::string SceneShapeInterface::getName( int index )
 	return m_indexToNameMap[index];
 }
 
+std::vector< IECore::InternedString > SceneShapeInterface::getChildrenNames() const
+{
+	return m_indexToNameMap;
+}
 
 std::string SceneShapeInterface::getRelativePathName( SceneInterface::Path path )
 {
