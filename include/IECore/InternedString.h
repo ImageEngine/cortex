@@ -80,6 +80,8 @@ class InternedString
 
 		const std::string *m_value;
 
+		static const InternedString &emptyString();
+
 };
 
 } // namespace IECore

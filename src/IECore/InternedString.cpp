@@ -109,4 +109,11 @@ size_t InternedString::numUniqueStrings()
 	return hashSet->size();
 }
 
+static InternedString g_emptyString("");
+
+const InternedString &InternedString::emptyString()
+{
+	return g_emptyString;
+}
+
 } // namespace IECore

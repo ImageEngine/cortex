@@ -39,7 +39,7 @@ namespace IECore
 {
 
 inline InternedString::InternedString()
-	:	m_value( internedString( "" ) )
+	:	m_value( InternedString::emptyString().m_value )
 {
 }
 
