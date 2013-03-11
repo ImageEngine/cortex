@@ -98,19 +98,21 @@ GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECo
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
 	
 	UT_StringArray strings;
-	const std::vector<std::string> &stringVector = stringVectorData->readable();
+	strings.fromStdVectorOfStrings( stringVectorData->readable() );
 	
 	const std::vector<int> &indices = ((const IECore::IntVectorData *)m_indicesParameter->getValidatedValue())->readable();
-	if ( indices.empty() || stringVector.empty() )
+	if ( indices.empty() || !strings.entries() )
 	{
 		return attrRef;
 	}
+	
+	GA_AIFSharedStringTuple::StringBuffer handles = tuple->addStrings( attr, strings );
 	
 	size_t i = 0;
 	size_t numIndices = indices.size();
 	for ( GA_Iterator it=range.begin(); !it.atEnd(), i < numIndices; ++it, ++i )
 	{
-		tuple->setString( attr, it.getOffset(), stringVector[ indices[i] ].c_str(), 0 );
+		tuple->setHandle( attr, it.getOffset(), handles.getStringIndex( indices[i] ), 0 );
 	}
 	
 	return attrRef;
