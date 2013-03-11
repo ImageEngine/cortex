@@ -68,7 +68,7 @@ ConstIntVectorParameterPtr ToHoudiniStringVectorAttribConverter::indicesParamete
 
 GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const
 {
-	IECore::msg( IECore::MessageHandler::Error, "ToHoudiniStringVectorAttribConverter", "Does not support Detail attributes." );
+	IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniStringVectorAttribConverter", "Does not support Detail attributes. Ignoring \"" + name + "\"" );
 	return GA_RWAttributeRef();
 }
 
