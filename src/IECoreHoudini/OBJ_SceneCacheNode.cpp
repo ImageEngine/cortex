@@ -145,12 +145,33 @@ void OBJ_SceneCacheNode<BaseType>::cleanHierarchy()
 }
 
 template<typename BaseType>
+void OBJ_SceneCacheNode<BaseType>::sceneChanged()
+{
+	m_loaded = false;
+	
+	std::string file;
+	if ( !OBJ_SceneCacheNode<BaseType>::ensureFile( file ) )
+	{
+		m_static = false;
+		return;
+	}
+	
+	std::string path = this->getPath();
+	
+	SceneCacheUtil::Cache::EntryPtr entry = SceneCacheNode<BaseType>::cache().entry( file, path );
+	const SampledSceneInterface *scene = IECore::runTimeCast<const SampledSceneInterface>( entry->sceneCache() );
+	if ( !scene )
+	{
+		m_static = false;
+		return;
+	}
+	
+	m_static = ( scene->numTransformSamples() < 2 );
+}
+
+template<typename BaseType>
 bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMatrix4 &xform )
 {
-	/// \todo: check for multiple samples before marking time dependant
-	BaseType::flags().setTimeDep( true );
-	BaseType::getParmList()->setCookTimeDependent( true );
-	
 	std::string file;
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
@@ -168,6 +189,20 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 		return false;
 	}
 	
+	if ( m_static )
+	{
+		if ( m_loaded && m_space == space )
+		{
+			xform = m_xform;
+			return true;
+		}
+	}
+	else
+	{
+		BaseType::flags().setTimeDep( true );
+		BaseType::getParmList()->setCookTimeDependent( true );
+	}
+	
 	Imath::M44d transform;
 	if ( space == SceneCacheNode<OP_Node>::World )
 	{
@@ -179,6 +214,9 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	}
 	
 	xform = IECore::convert<UT_Matrix4D>( transform );
+	m_xform = xform;
+	m_space = space;
+	m_loaded = true;
 	
 	return true;
 }

@@ -67,7 +67,13 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 	
 	protected :
 		
+		virtual void sceneChanged();
 		virtual bool getParmTransform( OP_Context &context, UT_DMatrix4 &xform );
+		
+		bool m_static;
+		bool m_loaded;
+		SceneCacheNode<OP_Node>::Space m_space;
+		UT_Matrix4D m_xform;
 
 };
 

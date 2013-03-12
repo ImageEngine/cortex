@@ -73,6 +73,8 @@ class SceneCacheNode : public BaseType
 		static PRM_ChoiceList rootMenu;
 		static PRM_ChoiceList spaceList;
 		
+		static int fileChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
+		static int pathChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static void buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
@@ -99,7 +101,10 @@ class SceneCacheNode : public BaseType
 	
 	protected :
 		
-		/// get the file and ensure it is a valid MDC
+		/// Called from setFile, setPath, and when either the file or path parameters are changed.
+		/// The default implementation does nothing. Derived nodes may override this if convenient.
+		virtual void sceneChanged();
+		/// get the file and ensure it is a valid SCC
 		bool ensureFile( std::string &file );
 		/// get a breadth first list of all descendant paths
 		void descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants );
@@ -138,7 +143,6 @@ class Cache
 				Entry( FileAndMutexPtr fileAndMutex );
 				
 				FileAndMutexPtr m_fileAndMutex;
-				tbb::mutex::scoped_lock m_lock;
 				IECore::ConstSceneInterfacePtr m_entry;
 				
 				friend class Cache;
@@ -158,7 +162,6 @@ class Cache
 		{
 			public :
 				
-				tbb::mutex mutex;
 				IECore::SceneInterfacePtr file;
 				
 		};
