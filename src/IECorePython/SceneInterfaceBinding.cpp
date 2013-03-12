@@ -179,6 +179,7 @@ void bindSceneInterface()
 		.def( "pathToString", pathToString ).staticmethod("pathToString")
 		.def( "stringToPath", stringToPath ).staticmethod("stringToPath")
 		.def( "create", SceneInterface::create ).staticmethod( "create" )
+		.def( "createShared", SceneInterface::createShared ).staticmethod( "createShared" )
 		.def( "supportedExtensions", supportedExtensions, ( arg("modes") = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append ) ).staticmethod( "supportedExtensions" )
 	;
 }
