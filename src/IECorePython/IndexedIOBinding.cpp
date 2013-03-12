@@ -237,6 +237,14 @@ struct IndexedIOHelper
 				return object( readSingle<unsigned short>(p, name, entry) );
 			case IndexedIO::UShortArray:
 				return object( readArray<unsigned short>(p, name, entry) );
+			case IndexedIO::Int64:
+				return object( readSingle<int64_t>(p, name, entry) );
+			case IndexedIO::Int64Array:
+				return object( readArray<int64_t>(p, name, entry) );
+			case IndexedIO::UInt64:
+				return object( readSingle<uint64_t>(p, name, entry) );
+			case IndexedIO::UInt64Array:
+				return object( readArray<uint64_t>(p, name, entry) );		
 			case IndexedIO::InternedStringArray:
 				return object( readArray<InternedString>(p, name, entry) );
 			default:
