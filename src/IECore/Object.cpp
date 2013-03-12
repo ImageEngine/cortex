@@ -131,7 +131,14 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 	else
 	{
 		bool rootObject = ( m_savedObjects->size() == 0 );
-		IndexedIOPtr nameIO = container->subdirectory( name, IndexedIO::CreateIfMissing );
+		if ( rootObject )
+		{
+			if ( container->hasEntry( name ) )
+			{
+				container->remove( name );
+			}
+		}
+		IndexedIOPtr nameIO = container->createSubdirectory( name );
 
 		IndexedIO::EntryIDList pathParts;
 		nameIO->path( pathParts );
@@ -139,7 +146,7 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 
 		nameIO->write( g_typeEntry, toSave->typeName() );
 
-		IndexedIOPtr dataIO = nameIO->subdirectory( g_dataEntry, IndexedIO::CreateIfMissing );
+		IndexedIOPtr dataIO = nameIO->createSubdirectory( g_dataEntry );
 		dataIO->removeAll();
 
 		SaveContext context( dataIO, m_savedObjects );
