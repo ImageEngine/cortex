@@ -1,5 +1,7 @@
 Additions :
 
+* IECoreMaya: ieSceneShape maya node now uses SceneInterface::createShared(), so it's not super slow when you've got a scene with multiple nodes referencing the same file.
+* createShared static method added to SceneInterface, which uses an LRU cache so you don't end up opening the same file over and over again
 * It's now possible to register FromMayaDagConverters for plugin maya nodes. Added the FromMayaProceduralHolderConverter.
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::SceneCache files, and a ROP for writing them
 * Added InternedStringData and InternedStringVectorDataTypes.
@@ -11,6 +13,7 @@ Additions :
 
 Improvements :
 
+* IECoreMaya: ieSceneShape maya node now tells maya its bounding box has changed when you change the file name or scene path
 * IECoreMaya::ClassParameterHandler and ClassVectorParameterHandler will only create attributes using 1-plug mode. 4-plug mode is still readable, but will be removed in the future. The ['maya']['compactClassPlugs'] userData is no longer accepted.
 * IECoreHoudini SOP_InterpolatedCacheReader now exposes samplesPerFrame and interpolation as parameters, instead of the frameMultiplier hack. fps is stil hidden, though may be exposed in the future.
 * IECore::Writer::create() now provides an overload which takes just a filename, allowing a Writer to be created before the object to be written is available.
