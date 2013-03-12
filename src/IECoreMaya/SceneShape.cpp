@@ -104,7 +104,7 @@ IECore::SceneInterfacePtr SceneShape::getSceneInterface()
 	
 	try
 	{
-		m_scene = IECore::SceneInterface::create( sceneFile.asChar(), IECore::IndexedIO::Read );
+		m_scene = IECore::SceneInterface::createShared( sceneFile.asChar() );
 		IECore::SceneInterface::Path rootPath;
 		IECore::SceneInterface::stringToPath( sceneRoot.asChar(), rootPath );
 		m_scene = m_scene->scene( rootPath );
@@ -136,7 +136,7 @@ MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray
 	{
 		m_sceneDirty = true;
 		setDirty();
-		
+		childChanged( kBoundingBoxChanged );
 		SceneShapeInterface::getOutputPlugsArray( plugArray );
 	}
 
