@@ -131,9 +131,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			node.cook( force=True )
 			self.failUnless( not node.errors() )
 			node.parm( "root" ).set( "/1/fake" )
+			node.parm( "root" ).pressButton()
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "root" ).set( "/1/2" )
+			node.parm( "root" ).pressButton()
 			node.cook( force=True )
 			self.failUnless( not node.errors() )
 			
@@ -141,6 +143,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 				node.parm( "build" ).pressButton()
 				self.failUnless( node.children() )
 				node.parm( "root" ).set( "/1/fake" )
+				node.parm( "root" ).pressButton()
 				node.parm( "build" ).pressButton()
 				self.assertEqual( node.children(), tuple() )
 		

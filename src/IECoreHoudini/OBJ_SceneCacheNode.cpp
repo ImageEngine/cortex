@@ -172,22 +172,7 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 template<typename BaseType>
 bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMatrix4 &xform )
 {
-	std::string file;
-	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
-	{
-		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .scc" ).c_str() );
-		return false;
-	}
-	
-	std::string path = this->getPath();
 	OBJ_SceneCacheNode<OP_Node>::Space space = (OBJ_SceneCacheNode<OP_Node>::Space)this->getSpace();
-	
-	const SceneInterface *scene = SceneCacheNode<BaseType>::cache().entry( file, path )->sceneCache();
-	if ( !scene )
-	{
-		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( path + " is not a valid location in " + file ).c_str() );
-		return false;
-	}
 	
 	if ( m_static )
 	{
@@ -201,6 +186,21 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	{
 		BaseType::flags().setTimeDep( true );
 		BaseType::getParmList()->setCookTimeDependent( true );
+	}
+	
+	std::string file;
+	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
+	{
+		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .scc" ).c_str() );
+		return false;
+	}
+	
+	std::string path = this->getPath();
+	const SceneInterface *scene = SceneCacheNode<BaseType>::cache().entry( file, path )->sceneCache();
+	if ( !scene )
+	{
+		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( path + " is not a valid location in " + file ).c_str() );
+		return false;
 	}
 	
 	Imath::M44d transform;
