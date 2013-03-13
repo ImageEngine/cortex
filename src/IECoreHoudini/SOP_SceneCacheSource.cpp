@@ -215,14 +215,9 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		
 		transformObject( object, currentTransform );
 		
-		VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
-		if ( renderable )
+		if ( !convertObject( object, fullName ) )
 		{
-			ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
-			if ( !converter || !converter->convert( myGdpHandle ) )
-			{
-				addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + fullName + " to houdini" ).c_str() );
-			}
+			addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + fullName + " to houdini" ).c_str() );
 		}
 	}
 	
@@ -295,6 +290,23 @@ IECore::ObjectPtr SOP_SceneCacheSource::transformObject( IECore::Object *object,
 	}
 	
 	return object;
+}
+
+bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &name )
+{
+	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
+	if ( !renderable )
+	{
+		return false;
+	}
+	
+	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	if ( !converter || !converter->convert( myGdpHandle ) )
+	{
+		return false;
+	}
+	
+	return true;
 }
 
 MatrixTransformPtr SOP_SceneCacheSource::matrixTransform( Imath::M44d t )

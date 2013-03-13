@@ -71,8 +71,16 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 	protected :
 	
 		virtual OP_ERROR cookMySop( OP_Context &context );
+		
+		/// Modify the object after it has been loaded in memory. Implemented to remove
+		/// PrimitiveVariables that do not match the attributeFilter.
 		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter );
+		/// Transform the object after it has been modified. Implemented to transform
+		/// Primitives (using IECore::TransformOp), Groups, and CoordinateSystems.
 		virtual IECore::ObjectPtr transformObject( IECore::Object *object, Imath::M44d transform );
+		/// Convert the object to Houdini. Implemented to convert using the ToHoudiniGeometryConverter
+		/// factory function.
+		virtual bool convertObject( IECore::Object *object, std::string &name );
 	
 	private :
 		
