@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -48,6 +48,14 @@ class TestFrameList( unittest.TestCase ) :
 		f = FrameList.parse( " " )
 		self.assert_( isinstance( f, EmptyFrameList ) )
 		self.assertEqual( len( f.asList() ), 0 )
-
+	
+	def testReverseConstruction( self ) :
+		
+		f = FrameList.parse( "1-5r" )
+		self.assertEqual( f.asList(), [ 5, 4, 3, 2, 1 ] )
+		self.assertEqual( frameListFromList( [ 5, 4, 3, 2, 1 ] ), f ) # Known error with IECore::frameListFromList
+	
+	## \todo: there should probably be a lot more tests in here...
+	
 if __name__ == "__main__":
         unittest.main()

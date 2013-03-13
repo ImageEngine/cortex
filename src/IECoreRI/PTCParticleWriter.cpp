@@ -161,8 +161,8 @@ void PTCParticleWriter::doWrite( const IECore::CompoundObject *operands )
 	checkPTCParticleIO();
 
 	// grab the PTCParticleIO and variableTypes map.
-	CompoundDataPtr blindData = particleObject()->blindData();
-	CompoundDataPtr variableTypes = 0;
+	ConstCompoundDataPtr blindData = particleObject()->blindData();
+	ConstCompoundDataPtr variableTypes = 0;
 	CompoundDataMap::const_iterator itBlind = blindData->readable().find( "PTCParticleIO" );
 	if ( itBlind == blindData->readable().end() )
 	{

@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/4693/trunk/include/IECoreMaya/bindings
+/svn/!svn/ver/5237/trunk/include/IECoreMaya/bindings
 END
 TypeIdBinding.h
 K 25
@@ -20,6 +20,18 @@ K 25
 svn:wc:ra_dav:version-url
 V 82
 /svn/!svn/ver/3828/trunk/include/IECoreMaya/bindings/ToMayaGroupConverterBinding.h
+END
+FnSceneShapeBinding.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/5237/trunk/include/IECoreMaya/bindings/FnSceneShapeBinding.h
+END
+MayaSceneBinding.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/5133/trunk/include/IECoreMaya/bindings/MayaSceneBinding.h
 END
 ToMayaParticleConverterBinding.h
 K 25
@@ -81,17 +93,17 @@ svn:wc:ra_dav:version-url
 V 99
 /svn/!svn/ver/2455/trunk/include/IECoreMaya/bindings/FromMayaTransformationMatrixConverterBinding.h
 END
-MDagPathFromPython.h
-K 25
-svn:wc:ra_dav:version-url
-V 73
-/svn/!svn/ver/1356/trunk/include/IECoreMaya/bindings/MDagPathFromPython.h
-END
 FromMayaGroupConverterBinding.h
 K 25
 svn:wc:ra_dav:version-url
 V 84
 /svn/!svn/ver/2453/trunk/include/IECoreMaya/bindings/FromMayaGroupConverterBinding.h
+END
+MDagPathFromPython.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/1356/trunk/include/IECoreMaya/bindings/MDagPathFromPython.h
 END
 MessageHandlerBinding.h
 K 25
@@ -212,6 +224,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 89
 /svn/!svn/ver/4140/trunk/include/IECoreMaya/bindings/FromMayaStringPlugConverterBinding.h
+END
+FromMayaProceduralHolderConverterBinding.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/5191/trunk/include/IECoreMaya/bindings/FromMayaProceduralHolderConverterBinding.h
 END
 ViewportPostProcessBinding.h
 K 25

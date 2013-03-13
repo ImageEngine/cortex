@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/Selector.h"
+#include "IECoreGL/ShaderStateComponent.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -53,7 +54,7 @@ Scene::~Scene()
 {
 }
 
-void Scene::render( const State * state ) const
+void Scene::render( State *state ) const
 {
 	if( m_camera )
 	{
@@ -74,7 +75,8 @@ void Scene::render( const State * state ) const
 
 void Scene::render() const
 {
-	render( State::defaultState() );
+	/// \todo Can we avoid this cast?
+	render( const_cast<State *>( State::defaultState().get() ) );
 }
 
 Imath::Box3f Scene::bound() const
@@ -82,23 +84,23 @@ Imath::Box3f Scene::bound() const
 	return root()->bound();
 }
 
-size_t Scene::select( const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
+size_t Scene::select( Selector::Mode mode, const Imath::Box2f &region, std::vector<HitRecord> &hits ) const
 {
-	ConstStatePtr state = State::defaultState();
-
 	if( m_camera )
 	{
-		m_camera->render( state );
+		m_camera->render( const_cast<State *>( State::defaultState().get() ) );
 	}
 
 	Selector selector;
-	selector.begin( region );
+	selector.begin( region, mode );
 	
 		State::bindBaseState();
-		state->bind();
-		root()->render( state );
+		selector.baseState()->bind();
+		root()->render( selector.baseState() );
 
-	return selector.end( hits );
+	size_t result = selector.end( hits );
+		
+	return result;
 }
 
 void Scene::setCamera( CameraPtr camera )

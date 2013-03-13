@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/include/IECore
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-18T20:06:00.689114Z
-4858
-thehaddonyoof
+2013-03-12T00:57:35.466744Z
+5246
+david.imageengine@gmail.com
 
 
 
@@ -66,11 +66,11 @@ file
 
 
 
-2012-01-09T09:46:08.000000Z
-594540d85270497bc252f567b185225f
-2012-01-02T21:00:00.969474Z
-4511
-thehaddonyoof
+2013-03-13T13:34:29.489466Z
+f5abaec1cb7b283c900f695283fa4485
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -92,7 +92,7 @@ thehaddonyoof
 
 
 
-5513
+5645
 
 Math.h
 file
@@ -127,6 +127,40 @@ lucio.imageengine
 
 
 2299
+
+InternedString.inl
+file
+
+
+
+
+2013-03-13T13:34:29.489466Z
+cf2a251c8a0ce0d6ee05396ff616bc20
+2013-03-11T19:48:41.778985Z
+5243
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3100
 
 ClassData.inl
 file
@@ -372,11 +406,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-49a68a5d9d5d4a0436020e9c7796dcaf
-2009-04-23T19:24:54.429117Z
-2362
-mark.imageengine
+2013-03-13T13:34:29.490466Z
+ba60bcb362192f50878a41d66ffcf03d
+2013-01-22T02:49:35.890674Z
+5125
+john.imageengine
 
 
 
@@ -398,7 +432,7 @@ mark.imageengine
 
 
 
-2285
+2220
 
 Rec709ToLinearDataConversion.h
 file
@@ -433,40 +467,6 @@ mark.imageengine
 
 
 2831
-
-Interned.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-4a93edd7f2abb2022ab87caab0c59ee9
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3450
 
 BoundedKDTree.inl
 file
@@ -1052,10 +1052,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-60a711fc569586de2bb2e0dbeaff2220
-2011-10-03T23:23:17.872282Z
-4407
+2013-03-13T13:34:29.490466Z
+958d05e008549bc22d7002bf6b4ef929
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -1078,7 +1078,7 @@ andrewk.imageengine
 
 
 
-4239
+4541
 
 Lookup.inl
 file
@@ -1154,11 +1154,11 @@ file
 
 
 
-2012-05-10T16:40:45.000000Z
-2ed6fb9fd859f96b3723bfb8f92d11ab
-2012-02-07T21:54:00.597141Z
-4579
-andrewk.imageengine
+2013-03-13T13:34:29.490466Z
+67b1885d52428c8316432c13da657bf2
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -1180,7 +1180,7 @@ andrewk.imageengine
 
 
 
-18100
+17649
 
 CubicBasis.h
 file
@@ -1324,11 +1324,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-5db6b9160dd2c595d00013a6b9e4c74b
-2009-05-26T22:05:35.229232Z
-2531
-mark.imageengine
+2013-03-13T13:34:29.490466Z
+8f44b78ea905cbcf3c2ca1220e7ce913
+2013-01-25T00:38:25.764400Z
+5127
+lucio.imageengine
 
 
 
@@ -1350,7 +1350,7 @@ mark.imageengine
 
 
 
-2935
+2899
 
 TestTypedData.inl
 file
@@ -1419,6 +1419,40 @@ john.imageengine
 
 
 7290
+
+SceneInterface.h
+file
+
+
+
+
+2013-03-13T13:34:29.491466Z
+86f4589846e288cc94030fc1af5f0b55
+2013-03-12T00:57:35.466744Z
+5246
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11076
 
 CompoundData.h
 file
@@ -1590,6 +1624,40 @@ john.imageengine
 
 3741
 
+StreamIndexedIO.h
+file
+
+
+
+
+2013-03-13T13:34:29.491466Z
+954f7d74f08c57c8454a340a2cf372c4
+2013-03-07T21:44:29.295330Z
+5238
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11815
+
 LinearToSRGBDataConversion.inl
 file
 
@@ -1698,11 +1766,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-b894a2727a192a9b4571e19f29b7a772
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
+2013-03-13T13:34:29.491466Z
+3eae15e830d75c72d593a91ebcfa0f20
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -1724,7 +1792,7 @@ john.imageengine
 
 
 
-3064
+3054
 
 TimeCodeParameter.h
 file
@@ -1767,10 +1835,10 @@ file
 
 
 
-0094d8ce1918e15c0a1636c28cb85a14
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+a7aa09459c0fe2a19d2b0a84b76a7bb6
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 Group.h
 file
@@ -1778,11 +1846,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-68f0b0ba750243a5d78e62f4e0681df8
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
+2013-03-13T13:34:29.492466Z
+4ad9f3ad0043c3363e79398c92758d3e
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -1804,7 +1872,7 @@ john.imageengine
 
 
 
-5794
+6261
 
 Reader.inl
 file
@@ -1914,10 +1982,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-60849cc3ec3e7b56a8aa98291468e408
-2010-03-08T22:55:09.888487Z
-3011
+2013-03-13T13:34:29.492466Z
+2b7253c58e1c9a79acab4060029deadc
+2013-01-04T19:43:36.740808Z
+5053
 lucio.imageengine
 
 
@@ -1940,7 +2008,7 @@ lucio.imageengine
 
 
 
-3390
+3385
 
 XYZToXYYColorTransform.h
 file
@@ -2078,40 +2146,6 @@ thehaddonyoof
 
 3053
 
-Turbulence.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-b62c6d4ff4ddaaf06657a7b2ecf0c8e8
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-5024
-
 LinearToCineonOp.h
 file
 
@@ -2146,17 +2180,17 @@ john.imageengine
 
 3046
 
-QuatInterpolator.inl
+Turbulence.h
 file
 
 
 
 
 2011-12-21T09:26:51.000000Z
-fc3e85d3dc31f0653c232d2fbb59b2df
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+b62c6d4ff4ddaaf06657a7b2ecf0c8e8
+2011-02-22T00:54:52.779433Z
+4111
+john.imageengine
 
 
 
@@ -2178,7 +2212,41 @@ mark.imageengine
 
 
 
-3197
+5024
+
+QuatInterpolator.inl
+file
+
+
+
+
+2013-03-13T13:34:29.492466Z
+7a1dd9fb48c3efccad9317f60a8736aa
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3301
 
 SphericalHarmonicsTensor.h
 file
@@ -2248,6 +2316,40 @@ thehaddonyoof
 
 3854
 
+SceneInterface.inl
+file
+
+
+
+
+2013-03-13T13:34:29.492466Z
+ef01345f6599a36cf483c5e5abf0d73f
+2013-02-04T18:15:51.262979Z
+5143
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2364
+
 OStreamMessageHandler.h
 file
 
@@ -2316,40 +2418,6 @@ lucio.imageengine
 
 3118
 
-IndexedIOFilter.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-e2f2a744e9984566e0c2616bff8dd115
-2010-02-11T22:44:46.908368Z
-2923
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3957
-
 SpherePrimitive.h
 file
 
@@ -2383,40 +2451,6 @@ john.imageengine
 
 
 3517
-
-ScopedMessageHandler.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-e1f05e6ef1e054fa3e85508c53f4e791
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2675
 
 MeshFaceFilterOp.h
 file
@@ -2492,10 +2526,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-0cbfcb4a2b1dc7e65c805d411469895b
-2011-02-22T00:54:52.779433Z
-4111
+2013-03-13T13:34:29.493466Z
+f3ed18985cbddf8cdc22faaa49585d03
+2013-01-16T02:24:42.096040Z
+5107
 john.imageengine
 
 
@@ -2518,7 +2552,7 @@ john.imageengine
 
 
 
-5258
+6053
 
 BezierAlgo.h
 file
@@ -3206,10 +3240,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-f4ddd179f4302462be5f001cb98a4480
-2011-02-22T00:54:52.779433Z
-4111
+2013-03-13T13:34:29.493466Z
+35f0b4f9d0954c353484a83bfa057571
+2013-01-22T02:49:35.890674Z
+5125
 john.imageengine
 
 
@@ -3232,7 +3266,7 @@ john.imageengine
 
 
 
-6261
+6503
 
 QuatAlgo.h
 file
@@ -3376,11 +3410,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-8fbdd2b05516f6effc5f129363c400ca
-2011-05-25T22:46:29.066191Z
-4218
-andrewk.imageengine
+2013-03-13T13:34:29.493466Z
+5790d04eb2032c0efbde64ff02a03771
+2012-10-26T01:10:07.134654Z
+4888
+david.imageengine@gmail.com
 
 
 
@@ -3402,7 +3436,7 @@ andrewk.imageengine
 
 
 
-7747
+7863
 
 PointNormalsOp.h
 file
@@ -3444,11 +3478,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-c522dd6909654f585423a7a009d53532
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.493466Z
+95d2413bac92027375cde8c455e2fe17
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
 
 
 
@@ -3470,7 +3504,7 @@ mark.imageengine
 
 
 
-2626
+2700
 
 BoxAlgo.inl
 file
@@ -3540,40 +3574,6 @@ john.imageengine
 
 2831
 
-IndexedIOInterface.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-3a2dc8c121f8a1e7a71760a7b60615b1
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-20137
-
 PointDistribution.h
 file
 
@@ -3614,11 +3614,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-1b971241878b52e7ebeb91f68b086233
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.494466Z
+0a7d546ec00faf820f2c53ead31877e7
+2012-11-06T11:43:38.196494Z
+4901
+thehaddonyoof
 
 
 
@@ -3640,7 +3640,7 @@ mark.imageengine
 
 
 
-4760
+5069
 
 PolygonIterator.inl
 file
@@ -3954,11 +3954,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-a967a9c43ad4cd574e51dc1c578016fa
-2011-05-27T18:03:41.482773Z
-4231
-john.imageengine
+2013-03-13T13:34:29.494466Z
+6c6273dd8a51882bb7a0066726d4bfe2
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
 
 
 
@@ -3980,7 +3980,7 @@ john.imageengine
 
 
 
-14837
+14985
 
 Data.h
 file
@@ -4185,6 +4185,40 @@ john.imageengine
 
 
 2880
+
+SceneCache.h
+file
+
+
+
+
+2013-03-13T13:34:29.494466Z
+3a2ac143fa9ee637f90044068caba9f2
+2013-03-04T23:51:15.865467Z
+5215
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6540
 
 Marschner.h
 file
@@ -4696,40 +4730,6 @@ lucio.imageengine
 
 2654
 
-Interned.inl
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-5f220230aed6e143e6c98e3a4543553f
-2010-02-12T02:48:22.533239Z
-2925
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4346
-
 LinearToCineonDataConversion.inl
 file
 
@@ -4940,11 +4940,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-223976a1ae94fecb4d1cfc243da7ab4a
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
+2013-03-13T13:34:29.494466Z
+84cca0d6fb25ce7347bed107c411cc54
+2013-02-13T01:52:32.301213Z
+5164
+lucio.imageengine
 
 
 
@@ -4966,7 +4966,7 @@ john.imageengine
 
 
 
-3847
+3970
 
 CompoundDataConversion.inl
 file
@@ -5818,6 +5818,40 @@ mark.imageengine
 
 4181
 
+FileIndexedIO.h
+file
+
+
+
+
+2013-03-13T13:34:29.495466Z
+3f0e6b36d4cba02ceb3da5bb3a9caed9
+2013-03-05T02:42:46.957911Z
+5220
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2933
+
 SphericalHarmonicsTransferMatrix.h
 file
 
@@ -5851,40 +5885,6 @@ john.imageengine
 
 
 3578
-
-FileIndexedIO.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-91f0d46899e4c79bc22070831c0d3d69
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-8905
 
 CineonToLinearDataConversion.h
 file
@@ -6266,11 +6266,11 @@ file
 
 
 
-2012-08-02T16:24:06.772191Z
-7bdecd33e54e76e6face712a864e9176
-2012-08-02T16:04:04.348516Z
-4774
-thehaddonyoof@gmail.com
+2013-03-13T13:34:29.495466Z
+b5c0a27c6b91eb2b429b785d0f4eb7d4
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -6292,7 +6292,7 @@ thehaddonyoof@gmail.com
 
 
 
-14728
+15068
 
 NURBSPrimitive.h
 file
@@ -6606,11 +6606,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-6965709e6de5b3f7daf3d94e172c3448
-2009-05-22T21:45:02.829739Z
-2520
-john.imageengine
+2013-03-13T13:34:29.495466Z
+da7d7b49d3d4b335e7477b83b52dfd35
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
 
 
 
@@ -6632,7 +6632,7 @@ john.imageengine
 
 
 
-7025
+7109
 
 VectorTraits.h
 file
@@ -7116,11 +7116,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-ea64eec2b9be8e42a4cdca5ddb6f2ac0
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.495466Z
+0cf902a78d70a2373f7f1f11473d3f3d
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
 
 
 
@@ -7142,7 +7142,7 @@ mark.imageengine
 
 
 
-4250
+3490
 
 ReorderedFrameList.inl
 file
@@ -7524,11 +7524,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-a33ddd28cd3067a73f3035dea0d232f6
-2010-08-17T23:33:05.723978Z
-3683
-andrewk.imageengine
+2013-03-13T13:34:29.496466Z
+72c707b53133b94b79af199064591e8c
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -7550,7 +7550,7 @@ andrewk.imageengine
 
 
 
-25322
+25341
 
 DataInterleaveOp.h
 file
@@ -7858,40 +7858,6 @@ thehaddonyoof
 
 2207
 
-HierarchicalCache.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-beabb811d2e41e23ef70a6d90128e589
-2010-03-10T17:18:38.646169Z
-3021
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-10363
-
 SpherePrimitiveEvaluator.h
 file
 
@@ -8170,10 +8136,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-e3f2b36c41c91f87290b70d653e6b3eb
-2010-07-06T23:26:33.699142Z
-3577
+2013-03-13T13:34:29.496466Z
+63dd9b2d47b09b15f3be8b91bd2a41a2
+2013-01-31T20:05:13.214986Z
+5134
 john.imageengine
 
 
@@ -8196,7 +8162,7 @@ john.imageengine
 
 
 
-3965
+3936
 
 IntrusivePtr.h
 file
@@ -8844,6 +8810,40 @@ mark.imageengine
 
 3606
 
+MatrixInterpolator.inl
+file
+
+
+
+
+2013-03-13T13:34:29.496466Z
+3832ad400686639ec128570d8991d0b0
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4636
+
 ImageCropOp.h
 file
 
@@ -9224,10 +9224,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-a4246ccc18c5f8dd0f0b74b385328421
-2011-02-22T00:54:52.779433Z
-4111
+2013-03-13T13:34:29.497466Z
+66f024600c1573081d70712220865929
+2013-01-31T20:05:13.214986Z
+5134
 john.imageengine
 
 
@@ -9250,7 +9250,7 @@ john.imageengine
 
 
 
-8382
+8353
 
 MatrixOps.inl
 file
@@ -9864,40 +9864,6 @@ andrewk.imageengine
 
 8989
 
-IndexedIO.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-7cf811aedf3c6648fc138b2c36f9f91d
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4038
-
 CineonToLinearOp.h
 file
 
@@ -9966,6 +9932,40 @@ andrewk.imageengine
 
 2350
 
+IndexedIO.h
+file
+
+
+
+
+2013-03-13T13:34:29.497466Z
+ad339e3238a3068f8f3abe56cab167bd
+2013-03-07T21:44:29.295330Z
+5238
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+25341
+
 Lookup.h
 file
 
@@ -10006,11 +10006,11 @@ file
 
 
 
-2012-01-09T09:46:08.000000Z
-c8643dd1e3351ab9efb2d473d80cdcbf
-2012-01-02T21:00:00.969474Z
-4511
-thehaddonyoof
+2013-03-13T13:34:29.497466Z
+3edf052f447a46d11d7ac0b847165fcd
+2013-01-31T20:05:13.214986Z
+5134
+john.imageengine
 
 
 
@@ -10032,7 +10032,7 @@ thehaddonyoof
 
 
 
-2577
+2548
 
 EnvMapSHProjector.h
 file
@@ -10142,11 +10142,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-754d05171807fbcdad2b09071b4b279e
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
+2013-03-13T13:34:29.497466Z
+46b4d4ce53bf55ad39621c067f9bc368
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -10168,7 +10168,7 @@ john.imageengine
 
 
 
-4882
+4898
 
 HitMissTransform.h
 file
@@ -10237,40 +10237,6 @@ john.imageengine
 
 
 3689
-
-FileSystemIndexedIO.h
-file
-
-
-
-
-2011-12-21T09:26:51.000000Z
-76026c011a93cfd05ab58995b8866fcc
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-7272
 
 BlobbyImplicitSurfaceFunction.inl
 file
@@ -10442,17 +10408,17 @@ john.imageengine
 
 6092
 
-IndexedIOPath.h
+ModelCache.h
 file
 
 
 
 
-2011-12-21T09:26:51.000000Z
-2068effd8caaa2d79f773d9128ffa5a8
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.498466Z
+e054a3ec8680f96d7d3c77adad52cc41
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -10474,7 +10440,7 @@ mark.imageengine
 
 
 
-3865
+5897
 
 Parameterised.h
 file
@@ -10958,11 +10924,11 @@ file
 
 
 
-2012-05-10T16:40:45.000000Z
-0abadc09934663ac77aab8e46f6d4fcc
-2012-03-29T10:08:16.180108Z
-4636
-thehaddonyoof
+2013-03-13T13:34:29.498466Z
+69746136fee4e8dd0df52c2e61577961
+2013-01-11T02:37:21.504331Z
+5085
+john.imageengine
 
 
 
@@ -10984,7 +10950,7 @@ thehaddonyoof
 
 
 
-6215
+5562
 
 IECore.h
 file
@@ -10992,11 +10958,11 @@ file
 
 
 
-2012-01-09T09:46:08.000000Z
-c9728e2c1ee77411a77effbd8cbe5bee
-2012-01-07T12:19:00.600213Z
-4520
-thehaddonyoof
+2013-03-13T13:34:29.498466Z
+e68cb58729f6f59e9d1d6f0100acaf25
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -11018,7 +10984,7 @@ thehaddonyoof
 
 
 
-17115
+17088
 
 DimensionTraits.inl
 file
@@ -11060,11 +11026,11 @@ file
 
 
 
-2012-05-10T16:40:45.000000Z
-1c1099d5198e9f4f6f90e72fabf21c36
-2012-01-24T17:23:52.366890Z
-4557
-thehaddonyoof
+2013-03-13T13:34:29.499466Z
+2576b7a27ebf2ccae33dd11e7899aaa9
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -11086,7 +11052,7 @@ thehaddonyoof
 
 
 
-6619
+6639
 
 TransformOp.h
 file
@@ -11162,10 +11128,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-48473b99acd3b0fde47851b6f7528963
-2011-10-07T23:55:14.813761Z
-4414
+2013-03-13T13:34:29.499466Z
+2fb141df9295e16bde49a87ed3b04587
+2012-12-17T19:42:55.884294Z
+5004
 andrewk.imageengine
 
 
@@ -11188,7 +11154,7 @@ andrewk.imageengine
 
 
 
-7225
+7612
 
 MappedRandomPointDistributionOp.h
 file
@@ -11230,11 +11196,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-7511f86db8fcaa4b816c12ce33db4807
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.499466Z
+da8a0c420de04130dacfb8715d728a07
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -11256,7 +11222,7 @@ mark.imageengine
 
 
 
-2549
+2526
 
 CSGImplicitSurfaceFunction.inl
 file
@@ -12251,10 +12217,10 @@ file
 
 
 
-16e6bee7da20497e06b44daff974e077
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+8d0c1c8fc1c6c922a8bc25a2eef15ebe
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 PerlinNoise.h
 file
@@ -12398,11 +12364,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-b0d93d7d4109b6c6e984136f36bd9453
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.500466Z
+ad77f273d42757413e7c65819f226f53
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -12424,7 +12390,7 @@ mark.imageengine
 
 
 
-6728
+6725
 
 ZhuBridsonImplicitSurfaceFunction.inl
 file
@@ -12494,17 +12460,51 @@ andrewk.imageengine
 
 4358
 
+InternedString.h
+file
+
+
+
+
+2013-03-13T13:34:29.500466Z
+e94ebf0bf97032b2620a5a784c54d684
+2013-03-11T19:48:41.778985Z
+5243
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3439
+
 MemoryIndexedIO.h
 file
 
 
 
 
-2011-12-21T09:26:51.000000Z
-6d192a708252956f9bb4e2a7d74322e1
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.500466Z
+feb5dbae63630c6a6d134e3079ded06e
+2013-03-05T02:42:46.957911Z
+5220
+lucio.imageengine
 
 
 
@@ -12526,7 +12526,7 @@ mark.imageengine
 
 
 
-2339
+2701
 
 PolygonIterator.h
 file
@@ -12902,6 +12902,40 @@ john.imageengine
 
 19943
 
+TypedDataInterpolator.inl
+file
+
+
+
+
+2013-03-13T13:34:29.501466Z
+68ddd4b51eb67704880c6b76a4e90ef2
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2634
+
 XYZToRGBColorTransform.inl
 file
 
@@ -13146,11 +13180,11 @@ file
 
 
 
-2012-07-19T11:27:18.804321Z
-4e7f2e225529d407a2a4dcd576648386
-2012-07-04T20:34:54.030416Z
-4741
-thehaddonyoof
+2013-03-13T13:34:29.501466Z
+3ba04514cb5180a03d25950077824533
+2013-02-22T17:53:54.262273Z
+5199
+john.imageengine
 
 
 
@@ -13172,7 +13206,7 @@ thehaddonyoof
 
 
 
-7441
+7619
 
 PreWorldRenderable.h
 file
@@ -13217,11 +13251,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-5ab15d161e7c92713f7be978e2b38c73
-2011-02-22T00:54:52.779433Z
-4111
-john.imageengine
+2013-03-13T13:34:29.501466Z
+4cf885a083d31ef79c0b8b268e033103
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -13243,7 +13277,7 @@ john.imageengine
 
 
 
-5468
+5617
 
 BINParticleWriter.h
 file
@@ -13557,10 +13591,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-167d9e7b3159186a84b01a8750e30a17
-2011-05-21T01:12:41.926394Z
-4213
+2013-03-13T13:34:29.501466Z
+01fbc1e41ed70431b5886cae13efceb7
+2013-01-04T19:43:36.740808Z
+5053
 lucio.imageengine
 
 
@@ -13583,7 +13617,7 @@ lucio.imageengine
 
 
 
-3106
+3145
 
 KDTree.inl
 file
@@ -14101,11 +14135,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-34d66450fe2e9ee36b7bf220d3d33953
-2009-05-26T22:05:35.229232Z
-2531
-mark.imageengine
+2013-03-13T13:34:29.502466Z
+e5f74d9e3d8ae4468b0059c8631d64ed
+2013-02-09T00:05:54.780901Z
+5157
+lucio.imageengine
 
 
 
@@ -14127,7 +14161,7 @@ mark.imageengine
 
 
 
-2930
+2838
 
 TetrahedronAlgo.h
 file
@@ -14747,11 +14781,11 @@ file
 
 
 
-2012-01-09T09:46:08.000000Z
-81149145d553963c4963f2a37bcf864f
-2012-01-02T21:00:00.969474Z
-4511
-thehaddonyoof
+2013-03-13T13:34:29.502466Z
+9a7f4e1c4af29e2b494d4a756194f045
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -14773,7 +14807,7 @@ thehaddonyoof
 
 
 
-6031
+6147
 
 RemoveSmoothSkinningInfluencesOp.h
 file
@@ -14815,11 +14849,11 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-0e5a0515121ce2417c057319ff43c739
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:29.502466Z
+0ba189afb64dcdbfda063c664b06d729
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -14841,7 +14875,7 @@ mark.imageengine
 
 
 
-12533
+12480
 
 TimeDurationParameter.h
 file
@@ -15257,10 +15291,10 @@ file
 
 
 
-2011-12-21T09:26:51.000000Z
-96bd1ce54efde0ca0a62780457fd3ddd
-2011-09-29T01:13:05.721677Z
-4400
+2013-03-13T13:34:29.503466Z
+75a34c4e3feba221d6e209b3450b019e
+2012-12-17T19:42:55.884294Z
+5004
 andrewk.imageengine
 
 
@@ -15283,7 +15317,7 @@ andrewk.imageengine
 
 
 
-6125
+6309
 
 PathVectorParameter.h
 file
@@ -15624,6 +15658,40 @@ thehaddonyoof@gmail.com
 
 
 2961
+
+SampledSceneInterface.h
+file
+
+
+
+
+2013-03-13T13:34:29.503466Z
+3ee12c263829e441f102e2b30a481ce4
+2013-02-27T23:22:58.750011Z
+5206
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5918
 
 CompoundParameter.h
 file

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,26 +68,19 @@ void FromHoudiniGroupConverter::constructCommon()
 {
 	IntParameter::PresetsContainer groupingModePresets;
 	groupingModePresets.push_back( IntParameter::Preset( "PrimitiveGroup", PrimitiveGroup ) );
-	groupingModePresets.push_back( IntParameter::Preset( "AttributeValue", AttributeValue ) );
+	groupingModePresets.push_back( IntParameter::Preset( "NameAttribute", NameAttribute ) );
 	
 	IntParameterPtr groupingMode = new IntParameter(
 		"groupingMode",
 		"The mode used to separate Primitives during conversion",
+		NameAttribute,
 		PrimitiveGroup,
-		PrimitiveGroup,
-		AttributeValue,
+		NameAttribute,
 		groupingModePresets,
 		true
 	);
 	
-	StringParameterPtr groupingAttribute = new StringParameter(
-		"groupingAttribute",
-		"The string attribute used to separate Primitives during conversion (if groupingMode is AttributeValue)",
-		""
-	);
-	
 	parameters()->addParameter( groupingMode );
-	parameters()->addParameter( groupingAttribute );
 }
 
 FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConvert( const GU_Detail *geo )
@@ -95,7 +88,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	
 	// are there multiple primitives?
-	size_t numPrims = geo->getNumPrimitives();
+	unsigned numPrims = geo->getNumPrimitives();
 	if ( numPrims < 2 )
 	{
 		return Admissible;
@@ -107,6 +100,17 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
 	{
 		if ( primitives.get( it.getOffset() )->getTypeId() != firstPrimId )
+		{
+			return Ideal;
+		}
+	}
+	
+	// are there multiple named shapes?
+	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
+	if ( attrHandle.isAttributeValid() )
+	{
+		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
+		if ( geo->getUniqueValueCount( attrRef ) > 1 )
 		{
 			return Ideal;
 		}
@@ -137,13 +141,35 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 	
 	GroupPtr result = new Group();
 	
-	if ( operands->member<const IntData>( "groupingMode" )->readable() == AttributeValue )
+	if ( operands->member<const IntData>( "groupingMode" )->readable() == NameAttribute )
 	{
-		const std::string attributeName = operands->member<const StringData>( "groupingAttribute" )->readable();
-		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( attributeName.c_str() );
+		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( "name" );
 		if ( attributeRef.isInvalid() || !attributeRef.isString() )
 		{
-			return 0;
+			GU_Detail ungroupedGeo( (GU_Detail*)geo );
+			GA_PrimitiveGroup *ungrouped = static_cast<GA_PrimitiveGroup*>( ungroupedGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__ungroupedPrimitives" ) );
+			ungrouped->toggleRange( ungroupedGeo.getPrimitiveRange() );
+			
+			VisibleRenderablePtr renderable = 0;
+			doGroupConversion( &ungroupedGeo, ungrouped, renderable, operands );
+			if ( renderable )
+			{
+				Group *group = runTimeCast<Group>( renderable );
+				if ( group )
+				{
+					const Group::ChildContainer &children = group->children();
+					for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+					{
+						result->addChild( *it );
+					}
+				}
+				else
+				{
+					result->addChild( renderable );
+				}
+			}
+			
+			return result;
 		}
 		
 		GU_Detail groupGeo( (GU_Detail*)geo );
@@ -153,7 +179,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		
 		for ( AttributePrimIdGroupMapIterator it=groupMap.begin(); it != groupMap.end(); ++it )
 		{
-			convertAndAddPrimitive( &groupGeo, it->second, result );
+			convertAndAddPrimitive( &groupGeo, it->second, result, operands );
 		}
 	}
 	else
@@ -167,7 +193,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			}
 
 			VisibleRenderablePtr renderable = 0;
-			numResultPrims += doGroupConversion( geo, group, renderable );
+			numResultPrims += doGroupConversion( geo, group, renderable, operands );
 			if( !renderable )
 			{
 				continue;
@@ -195,7 +221,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		}
 
 		VisibleRenderablePtr renderable = 0;
-		doGroupConversion( &ungroupedGeo, ungrouped, renderable );
+		doGroupConversion( &ungroupedGeo, ungrouped, renderable, operands );
 		if ( renderable )
 		{
 			result->addChild( renderable );
@@ -205,7 +231,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 	return result;
 }
 
-size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, VisibleRenderablePtr &result ) const
+size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, VisibleRenderablePtr &result, const CompoundObject *operands ) const
 {
 	GU_Detail groupGeo( (GU_Detail*)geo, group );
 	if ( !groupGeo.getNumPoints() )
@@ -216,7 +242,7 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	size_t numPrims = groupGeo.getNumPrimitives();
 	if ( numPrims < 2 )
 	{
-		result = doPrimitiveConversion( &groupGeo );
+		result = doPrimitiveConversion( &groupGeo, operands );
 		return numPrims;
 	}
 	
@@ -226,7 +252,7 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	
 	if ( numNewGroups < 2 )
 	{
-		result = doPrimitiveConversion( &groupGeo );
+		result = doPrimitiveConversion( &groupGeo, operands );
 		return numPrims;
 	}
 
@@ -238,7 +264,7 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	
 	for ( PrimIdGroupMapIterator it = groupMap.begin(); it != groupMap.end(); it++ )
 	{
-		convertAndAddPrimitive( &groupGeo, it->second, groupResult );
+		convertAndAddPrimitive( &groupGeo, it->second, groupResult, operands );
 	}
 
 	result = groupResult;
@@ -299,7 +325,7 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, AttributePrimIdGroupM
 	return groupMap.size();
 }
 
-PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *geo ) const
+PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	GU_DetailHandle handle;
 	handle.allocateAndSet( (GU_Detail*)geo, false );
@@ -307,13 +333,27 @@ PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *
 	FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
 	if ( !converter || converter->isInstanceOf( FromHoudiniGroupConverter::staticTypeId() ) )
 	{
+		/// \todo: if we're in PrimitiveGroup mode, but names exist, we return 0 when we should be returning a Group
 		return 0;
+	}
+	
+	// transfer the common parameter values
+	CompoundParameter *parameters = converter->parameters();
+	const CompoundParameter::ParameterMap &parameterMap = parameters->parameters();
+	const CompoundObject::ObjectMap &values = operands->members();
+	for ( CompoundObject::ObjectMap::const_iterator it = values.begin(); it != values.end(); ++it )
+	{
+		CompoundParameter::ParameterMap::const_iterator pIt = parameterMap.find( it->first );
+		if ( pIt != parameterMap.end() && pIt->second->defaultValue()->typeId() == it->second->typeId() )
+		{
+			parameters->setParameterValue( it->first, it->second );
+		}
 	}
 	
 	return IECore::runTimeCast<Primitive>( converter->convert() );
 }
 
-void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result ) const
+void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands ) const
 {
 	GU_Detail childGeo( geo, group );
 	for ( GA_GroupTable::iterator<GA_ElementGroup> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
@@ -322,7 +362,7 @@ void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_Primi
 	}
 	childGeo.destroyAllEmptyGroups();
 	
-	PrimitivePtr child = doPrimitiveConversion( &childGeo );
+	PrimitivePtr child = doPrimitiveConversion( &childGeo, operands );
 	if ( child )
 	{
 		result->addChild( child );

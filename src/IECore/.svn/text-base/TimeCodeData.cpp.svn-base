@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,29 +39,31 @@
 namespace IECore
 {
 
+static IndexedIO::EntryID g_valueEntry("value");
+
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TimeCodeData, TimeCodeDataTypeId )
 
 template<>
 void TimeCodeData::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	
 	const Imf::TimeCode &timeCode = readable();
 	/// \todo: should we be using FILM24_PACKING rather than the default? 
 	unsigned data[2] = { timeCode.timeAndFlags(), timeCode.userData() };
-	container->write( "value", data, 2 );
+	container->write( g_valueEntry, data, 2 );
 }
 
 template<>
 void TimeCodeData::load( LoadContextPtr context )
 {
 	Data::load( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	const IndexedIO *container = context->rawContainer();
 	
 	unsigned data[2];
 	unsigned *dataPtr = &data[0];
-	container->read( "value", dataPtr, 2 );
+	container->read( g_valueEntry, dataPtr, 2 );
 	
 	Imf::TimeCode &timeCode = writable();
 	timeCode.setTimeAndFlags( data[0] );

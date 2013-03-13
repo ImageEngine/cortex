@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,18 +83,15 @@ void Group::setState( StatePtr state )
 	m_state = state;
 }
 
-void Group::render( const State * state ) const
+void Group::render( State *currentState ) const
 {
 	glPushMatrix();
 	glMultMatrixf( m_transform.getValue() );
 	{
-		State::ScopedBinding scope( *m_state, *state );
-
-		ConstStatePtr s = scope.boundState();
-
+		State::ScopedBinding scope( *m_state, *currentState );
 		for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
 		{
-			(*it)->render( s );
+			(*it)->render( currentState );
 		}
 	}
 	glPopMatrix();

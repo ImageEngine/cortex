@@ -1,7 +1,7 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECore/data/png/PngTestSuite
 http://cortex-vfx.googlecode.com/svn
 
@@ -536,40 +536,6 @@ has-props
 
 215
 
-basi3p02.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-881a1ddc7c608a7ec20d5663634c7b62
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-193
-
 cs5n3p08.png
 file
 
@@ -603,6 +569,40 @@ has-props
 
 
 271
+
+basi3p02.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+881a1ddc7c608a7ec20d5663634c7b62
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+193
 
 cten0g04.png
 file
@@ -638,14 +638,14 @@ has-props
 
 748
 
-basi3p04.png
+s05i3p02.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-c3e82df18df5b5ced449af434f154556
+27cf7688b2357b16cfac2bdb45e35bad
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -670,7 +670,7 @@ has-props
 
 
 
-327
+134
 
 s01n3p01.png
 file
@@ -706,14 +706,14 @@ has-props
 
 113
 
-s05i3p02.png
+basi3p04.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-27cf7688b2357b16cfac2bdb45e35bad
+c3e82df18df5b5ced449af434f154556
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -738,7 +738,7 @@ has-props
 
 
 
-134
+327
 
 basn3p02.png
 file
@@ -808,40 +808,6 @@ has-props
 
 1527
 
-basn3p04.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-e1cd04323ac542c5970dc6f5e1f368da
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-216
-
 s05n3p02.png
 file
 
@@ -876,14 +842,14 @@ has-props
 
 129
 
-tp0n3p08.png
+basn3p04.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-54b9dec9aaed74f6f9809b8697762111
+e1cd04323ac542c5970dc6f5e1f368da
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -908,7 +874,7 @@ has-props
 
 
 
-1476
+216
 
 s37i3p04.png
 file
@@ -944,14 +910,14 @@ has-props
 
 393
 
-PngSuite.png
+tp0n3p08.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-b19f8c708af9041ffac53b040e11e507
+54b9dec9aaed74f6f9809b8697762111
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -976,7 +942,7 @@ has-props
 
 
 
-2262
+1476
 
 basn3p08.png
 file
@@ -1011,6 +977,40 @@ has-props
 
 
 1286
+
+PngSuite.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+b19f8c708af9041ffac53b040e11e507
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2262
 
 s37n3p04.png
 file
@@ -2168,14 +2168,14 @@ has-props
 
 1188
 
-xs7n0g01.png
+s03n3p01.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-0070bb804ea1639caeff36bcc684c0e2
+4b6619fef49b70816a1989182b58c4f2
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -2200,7 +2200,7 @@ has-props
 
 
 
-164
+120
 
 s07i3p02.png
 file
@@ -2236,14 +2236,14 @@ has-props
 
 149
 
-s03n3p01.png
+xs7n0g01.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-4b6619fef49b70816a1989182b58c4f2
+0070bb804ea1639caeff36bcc684c0e2
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -2268,7 +2268,7 @@ has-props
 
 
 
-120
+164
 
 s07n3p02.png
 file
@@ -2474,40 +2474,6 @@ has-props
 
 1633
 
-s39n3p04.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-3c56439c49ed70975ac6282613bbddf4
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-352
-
 g10n0g16.png
 file
 
@@ -2542,14 +2508,14 @@ has-props
 
 262
 
-f02n0g08.png
+s39n3p04.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-260a2074383316a012328846ba01ea04
+3c56439c49ed70975ac6282613bbddf4
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -2574,7 +2540,7 @@ has-props
 
 
 
-355
+352
 
 f04n2c08.png
 file
@@ -2610,14 +2576,14 @@ has-props
 
 985
 
-xdtn0g01.png
+f02n0g08.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-45be9407698ec596ae981ce82488deb1
+260a2074383316a012328846ba01ea04
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -2642,7 +2608,41 @@ has-props
 
 
 
-61
+355
+
+xcrn0g04.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+7e5424cb17b2389473af17fb92dc7d96
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+145
 
 cs5n2c08.png
 file
@@ -2678,14 +2678,14 @@ has-props
 
 186
 
-xcrn0g04.png
+xdtn0g01.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-7e5424cb17b2389473af17fb92dc7d96
+45be9407698ec596ae981ce82488deb1
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -2710,7 +2710,7 @@ has-props
 
 
 
-145
+61
 
 PngSuite.README
 file
@@ -2814,40 +2814,6 @@ has-props
 
 315
 
-ps1n2c16.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-2916ce33f039161e8aa9caa93a5420f7
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1620
-
 basi6a08.png
 file
 
@@ -2881,6 +2847,40 @@ has-props
 
 
 361
+
+ps1n2c16.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+2916ce33f039161e8aa9caa93a5420f7
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1620
 
 tp0n2c08.png
 file
@@ -3086,40 +3086,6 @@ has-props
 
 3172
 
-cs8n3p08.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-c3f49fc2c201945f7b3a68456855b890
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-256
-
 s40i3p04.png
 file
 
@@ -3154,14 +3120,14 @@ has-props
 
 357
 
-s32i3p04.png
+cs8n3p08.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-01ed70a9a978681825067fe70178e010
+c3f49fc2c201945f7b3a68456855b890
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -3186,7 +3152,7 @@ has-props
 
 
 
-355
+256
 
 cthn0g04.png
 file
@@ -3222,14 +3188,14 @@ has-props
 
 1275
 
-s04n3p01.png
+s32i3p04.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-ba668b6892d7d34406e6f81b775459c5
+01ed70a9a978681825067fe70178e010
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -3254,41 +3220,7 @@ has-props
 
 
 
-121
-
-cm0n0g04.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-c2a88a10a806064777f5569bf750d9c6
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-292
+355
 
 s08i3p02.png
 file
@@ -3324,6 +3256,74 @@ has-props
 
 149
 
+cm0n0g04.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+c2a88a10a806064777f5569bf750d9c6
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+292
+
+s04n3p01.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+ba668b6892d7d34406e6f81b775459c5
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+121
+
 s40n3p04.png
 file
 
@@ -3358,18 +3358,17 @@ has-props
 
 256
 
-s32n3p04.png
+PngSuite.LICENSE
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-fa0e62ac581789844755a06f8211dd27
+3a757502a50e1a57b053b93080679172
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
-has-props
 
 
 
@@ -3390,7 +3389,8 @@ has-props
 
 
 
-263
+
+167
 
 bgwn6a08.png
 file
@@ -3426,17 +3426,18 @@ has-props
 
 202
 
-PngSuite.LICENSE
+s32n3p04.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-3a757502a50e1a57b053b93080679172
+fa0e62ac581789844755a06f8211dd27
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
+has-props
 
 
 
@@ -3457,8 +3458,7 @@ ross.imageengine@gmail.com
 
 
 
-
-167
+263
 
 s08n3p02.png
 file
@@ -3528,40 +3528,6 @@ has-props
 
 2855
 
-oi1n2c16.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-a13a4da76576bc28d7014cb6e65ea1ce
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-302
-
 g10n2c08.png
 file
 
@@ -3596,14 +3562,14 @@ has-props
 
 285
 
-f03n0g08.png
+oi1n2c16.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-3ab012049a4d5a270d59956fa204d345
+a13a4da76576bc28d7014cb6e65ea1ce
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -3628,7 +3594,41 @@ has-props
 
 
 
-389
+302
+
+ccwn3p08.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+18e145898d2c8e030cc3dda6e8cb5c03
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1554
 
 g03n0g16.png
 file
@@ -3664,14 +3664,14 @@ has-props
 
 345
 
-ccwn3p08.png
+f03n0g08.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-18e145898d2c8e030cc3dda6e8cb5c03
+3ab012049a4d5a270d59956fa204d345
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -3696,7 +3696,7 @@ has-props
 
 
 
-1554
+389
 
 pp0n2c16.png
 file
@@ -3800,14 +3800,14 @@ has-props
 
 2484
 
-f99n0g04.png
+g05n3p04.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-078623c8987bf71ebc36b5aaf23b3939
+f28653982dda38a41bdd33ebd2f03b9d
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -3832,7 +3832,7 @@ has-props
 
 
 
-426
+206
 
 tbbn0g04.png
 file
@@ -3868,14 +3868,14 @@ has-props
 
 429
 
-g05n3p04.png
+f99n0g04.png
 file
 
 
 
 
 2011-12-21T09:26:37.000000Z
-f28653982dda38a41bdd33ebd2f03b9d
+078623c8987bf71ebc36b5aaf23b3939
 2011-07-04T18:24:14.167006Z
 4271
 ross.imageengine@gmail.com
@@ -3900,7 +3900,7 @@ has-props
 
 
 
-206
+426
 
 xs1n0g01.png
 file
@@ -4140,40 +4140,6 @@ has-props
 
 147
 
-s33n3p04.png
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-11289bf367020b1d2fb91d5a02572d1e
-2011-07-04T18:24:14.167006Z
-4271
-ross.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-329
-
 z09n2c08.png
 file
 
@@ -4207,6 +4173,40 @@ has-props
 
 
 224
+
+s33n3p04.png
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+11289bf367020b1d2fb91d5a02572d1e
+2011-07-04T18:24:14.167006Z
+4271
+ross.imageengine@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+329
 
 s09n3p02.png
 file

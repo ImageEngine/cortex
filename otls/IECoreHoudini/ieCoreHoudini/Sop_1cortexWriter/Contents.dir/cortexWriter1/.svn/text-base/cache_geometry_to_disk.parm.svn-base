@@ -45,7 +45,7 @@ if len(inputs)>0:
         object_from_sop = top.evalParm( \"name_object_from_sop\" )
         if not object_from_sop:
             object_name = top.evalParm( \"alternate_name\" )
-        writer = IECore.AttributeCache( file_path, IECore.IndexedIOOpenMode.Write )
+        writer = IECore.AttributeCache( file_path, IECore.IndexedIO.OpenMode.Write )
         for attr in converted.keys():
             writer.write( object_name, attr, converted[attr].data )
         del( writer )

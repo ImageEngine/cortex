@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,10 +47,10 @@ using namespace boost::python;
 namespace IECoreGL
 {
 
-static list select( Scene &s, const Imath::Box2f &b )
+static list select( Scene &s, Selector::Mode mode, const Imath::Box2f &b )
 {
 	std::vector<HitRecord> hits;
-	s.select( b, hits );
+	s.select( mode, b, hits );
 	list result;
 	for( std::vector<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
 	{
@@ -65,7 +65,7 @@ void bindScene()
 		.def( init<>() )
 		.def( "root", (GroupPtr (Scene::*)() )&Scene::root )
 		.def( "render", (void (Scene::*)() const )&Scene::render )
-		.def( "render", (void (Scene::*)( const State * ) const )&Scene::render )
+		.def( "render", (void (Scene::*)( State * ) const )&Scene::render )
 		.def( "select", &select )
 		.def( "setCamera", &Scene::setCamera )
 		.def( "getCamera", (CameraPtr (Scene::*)())&Scene::getCamera )

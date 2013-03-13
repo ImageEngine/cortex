@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -86,7 +86,7 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 		GU_PrimPoly *poly = GU_PrimPoly::build( geo, 0, GU_POLY_CLOSED, 0 );
 		offsets.append( geo->primitiveOffset( numPrims + f ) );
 		
-		for ( size_t v=0; v < verticesPerFace[f]; v++ )
+		for ( size_t v=0; v < (size_t)verticesPerFace[f]; v++ )
 		{
 			poly->appendVertex( pointOffsets.get( vertexIds[ vertCount + verticesPerFace[f] - 1 - v ] ) );
 		}

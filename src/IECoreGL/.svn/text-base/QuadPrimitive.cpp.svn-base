@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/QuadPrimitive.h"
-#include "IECoreGL/Exception.h"
-#include "IECoreGL/GL.h"
-
 #include "OpenEXR/ImathMath.h"
+
+#include "IECoreGL/QuadPrimitive.h"
+#include "IECoreGL/CachedConverter.h"
+#include "IECoreGL/Buffer.h"
+#include "IECoreGL/GL.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -47,31 +48,46 @@ IE_CORE_DEFINERUNTIMETYPED( QuadPrimitive );
 QuadPrimitive::QuadPrimitive( float width, float height )
 	:	m_width( width ), m_height( height )
 {
+	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
+	IECore::V2fVectorDataPtr stData = new IECore::V2fVectorData;
+	m_vertIds = new IECore::UIntVectorData;
+	
+	vector<V3f> &pVector = pData->writable();
+	vector<V3f> &nVector = nData->writable();
+	vector<V2f> &stVector = stData->writable();
+	vector<unsigned int> &vertIdsVector = m_vertIds->writable();
+	
+	nVector.push_back( V3f( 0, 0, 1 ) );
+	nVector.push_back( V3f( 0, 0, 1 ) );
+	nVector.push_back( V3f( 0, 0, 1 ) );
+	nVector.push_back( V3f( 0, 0, 1 ) );
+
+	pVector.push_back( V3f( -m_width/2.0f, -m_height/2.0f, 0 ) );
+	pVector.push_back( V3f( m_width/2.0f, -m_height/2.0f, 0 ) );
+	pVector.push_back( V3f( m_width/2.0f, m_height/2.0f, 0 ) );
+	pVector.push_back( V3f( -m_width/2.0f, m_height/2.0f, 0 ) );
+
+	stVector.push_back( V2f( 0.0f, 0.0f ) );
+	stVector.push_back( V2f( 1.0f, 0.0f ) );
+	stVector.push_back( V2f( 1.0f, 1.0f ) );
+	stVector.push_back( V2f( 0.0f, 1.0f ) );
+	
+	vertIdsVector.push_back( 0 );
+	vertIdsVector.push_back( 1 );
+	vertIdsVector.push_back( 2 );
+	
+	vertIdsVector.push_back( 0 );
+	vertIdsVector.push_back( 2 );
+	vertIdsVector.push_back( 3 );
+	
+	addVertexAttribute( "P", pData );
+	addVertexAttribute( "N", nData );
+	addVertexAttribute( "st", stData );
 }
 
 QuadPrimitive::~QuadPrimitive()
-{
-
-}
-
-void QuadPrimitive::setWidth( float width )
-{
-	m_width = width;
-}
-
-float QuadPrimitive::getWidth() const
-{
-	return m_width;
-}
-
-void QuadPrimitive::setHeight( float height )
-{
-	m_height = height;
-}
-
-float QuadPrimitive::getHeight() const
-{
-	return m_height;
+{	
 }
 
 void QuadPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
@@ -82,23 +98,18 @@ void QuadPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 	}
 }
 
-void QuadPrimitive::render( const State * state, IECore::TypeId style ) const
+void QuadPrimitive::renderInstances( size_t numInstances ) const
 {
-
-	glBegin( GL_QUADS );
-
-		glNormal3f( 0, 0, 1.0f );
-
-		glTexCoord2f( 0.0f, 0.0f );
-		glVertex2f( -m_width/2, -m_height/2 );
-		glTexCoord2f( 1.0f, 0.0f );
-		glVertex2f( m_width/2, -m_height/2 );
-		glTexCoord2f( 1.0f, 1.0f );
-		glVertex2f( m_width/2, m_height/2 );
-		glTexCoord2f( 0.0f, 1.0f );
-		glVertex2f( -m_width/2, m_height/2 );
-
-	glEnd();
+	if( !m_vertIdsBuffer )
+	{
+		// we don't build the actual buffer until now, because in the constructor we're not guaranteed
+		// a valid GL context.
+		CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+		m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( m_vertIds ) );
+	}
+	
+	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
+	glDrawElementsInstanced( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0, numInstances );
 }
 
 Imath::Box3f QuadPrimitive::bound() const

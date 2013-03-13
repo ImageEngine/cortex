@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 
 #include "RixDeepTexture.h"
 
+#include "IECore/CompoundObject.h"
 #include "IECore/DeepImageReader.h"
 
 #include "IECoreRI/TypeIds.h"
@@ -58,13 +59,15 @@ class DTEXDeepImageReader : public IECore::DeepImageReader
 		DTEXDeepImageReader( const std::string &filename );
 
 		virtual ~DTEXDeepImageReader();
-
+		
 		static bool canRead( const std::string &filename );
 
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
+		virtual Imath::M44f worldToCameraMatrix();
+		virtual Imath::M44f worldToNDCMatrix();
 
 	protected :
 
@@ -85,6 +88,8 @@ class DTEXDeepImageReader : public IECore::DeepImageReader
 		RixDeepTexture::DeepImage *m_dtexImage;
 		RixDeepTexture::DeepPixel *m_dtexPixel;
 		Imath::Box2i m_dataWindow;
+		Imath::M44f m_worldToCamera;
+		Imath::M44f m_worldToNDC;
 		std::string m_inputFileName;
 		std::string m_channelNames;
 

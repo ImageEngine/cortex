@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreGL/bindings
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 has-props
 
 
@@ -168,44 +168,10 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-1ba0500fe9bc4e2c1a2f6efcdf135843
-2012-01-30T20:14:08.739517Z
-4576
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2591
-
-WindowBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-24c2044db172916b489500a944e3b6e8
-2010-03-04T18:19:34.432667Z
-2996
+2013-03-13T13:36:27.968491Z
+a40c892d454d448ea3588452bd0adf98
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -228,7 +194,7 @@ john.imageengine
 
 
 
-3917
+2641
 
 PrimitiveBinding.cpp
 file
@@ -298,6 +264,40 @@ thehaddonyoof
 
 3950
 
+BufferBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:27.969466Z
+ed28b8ebc8a1b56e7e90ce17964f5abd
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2191
+
 ToGLMeshConverterBinding.cpp
 file
 
@@ -366,16 +366,16 @@ john.imageengine
 
 2216
 
-SceneViewerBinding.cpp
+SelectorBinding.cpp
 file
 
 
 
 
-2011-12-21T09:27:02.000000Z
-c71f06864b3968dc392519aa9b4909dc
-2010-03-02T00:22:32.598878Z
-2981
+2013-03-13T13:36:27.969466Z
+180c33f62b9fdd8df17100ad6a6e85ef
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -398,41 +398,7 @@ john.imageengine
 
 
 
-2254
-
-SelectorBinding.cpp
-file
-
-
-
-
-2012-05-10T16:40:49.000000Z
-0ca0f161ed17060852a87be1ac3c515d
-2012-01-24T10:11:49.424905Z
-4552
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2356
+2612
 
 HitRecordBinding.cpp
 file
@@ -508,11 +474,11 @@ file
 
 
 
-2012-09-11T09:54:38.250120Z
-8d524c183f97509cc523075568be6a5e
-2012-09-08T13:54:20.466126Z
-4828
-thehaddonyoof
+2013-03-13T13:36:27.969466Z
+140f2f60507e1d521a13b60658f5c7e4
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -534,7 +500,41 @@ thehaddonyoof
 
 
 
-4774
+4810
+
+ShaderStateComponentBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:27.970466Z
+d5af3a006d618da2b63ad821a7f8f775
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2810
 
 ToGLPointsConverterBinding.cpp
 file
@@ -604,40 +604,6 @@ lucio.imageengine
 
 3348
 
-CameraControllerBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-e689bfb6e66c5378a8e9f150af9fc605
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2807
-
 LuminanceTextureBinding.cpp
 file
 
@@ -672,17 +638,51 @@ john.imageengine
 
 2302
 
+ShaderLoaderBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:27.971466Z
+19632f41833b11bc1005710e4c9a2e5e
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2812
+
 SceneBinding.cpp
 file
 
 
 
 
-2012-05-10T16:40:49.000000Z
-c28a71d131a86439f79555a785ddadb5
-2012-01-24T10:11:49.424905Z
-4552
-thehaddonyoof
+2013-03-13T13:36:27.970466Z
+647d1c89c7fa31b5d9b05952c4e6be61
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -704,7 +704,7 @@ thehaddonyoof
 
 
 
-2778
+2799
 
 CachedConverterBinding.cpp
 file
@@ -814,11 +814,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-add8e5f9022d5fba60dd67e2265bc617
-2010-06-21T22:04:42.463716Z
-3519
-lucio.imageengine
+2013-03-13T13:36:27.971466Z
+1b2aef226ebdbdd0a3d88a0fd969ee06
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -840,7 +840,7 @@ lucio.imageengine
 
 
 
-2391
+2657
 
 RendererBinding.cpp
 file
@@ -848,11 +848,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-b49c7196183a64828b30cd60ca9180ab
-2010-03-25T21:34:32.389719Z
-3103
-lucio.imageengine
+2013-03-13T13:36:27.971466Z
+525da1375471934975cdbf8124669ac0
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -874,7 +874,7 @@ lucio.imageengine
 
 
 
-3020
+3089
 
 AlphaTextureBinding.cpp
 file
@@ -916,78 +916,10 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-11ebe7ffad8bf044cbbd47e037c64bf8
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-5815
-
-StateBinding.cpp
-file
-
-
-
-
-2012-05-10T16:40:49.000000Z
-ba7cb65b7cb43d68891df5a030b4dbba
-2012-01-24T10:13:26.297909Z
-4553
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2853
-
-FrameBufferBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-6ef54dada5932c6bcede48ab4916f00f
-2010-03-02T00:22:32.598878Z
-2981
+2013-03-13T13:36:27.972467Z
+b4ee90632b7b4eb95178e1dc01b005c4
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -1010,7 +942,75 @@ john.imageengine
 
 
 
-2612
+5135
+
+StateBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:27.972467Z
+d66f939ad4e5cd3d0322d89ce0bfee9a
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3311
+
+FrameBufferBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:27.973467Z
+d07e1e8b540868ba7e9aebcc8d7dfc57
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2607
 
 ToGLCurvesConverterBinding.cpp
 file
@@ -1113,6 +1113,40 @@ john.imageengine
 
 
 3269
+
+SplineToGLTextureConverterBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:27.973467Z
+deaff7ad65ab3ce36cbb56bc70012932
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2235
 
 FontLoaderBinding.cpp
 file
@@ -1249,40 +1283,6 @@ john.imageengine
 
 
 2199
-
-ShaderManagerBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-2f0180cbbfbf67ba59af9c5d10bb4b2f
-2010-03-23T00:04:56.589884Z
-3080
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2805
 
 OrthographicCameraBinding.cpp
 file

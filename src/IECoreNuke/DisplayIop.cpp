@@ -2,6 +2,8 @@
 //
 //  Copyright (c) 2012, J3P LLC. All rights reserved.
 //
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -188,7 +190,7 @@ int DisplayIop::knob_changed( DD::Image::Knob *knob )
 {	
 	if( knob->is( "portNumber" ) )
 	{
-	 	int portNumber = this->knob( "portNumber" )->get_value();
+	 	int portNumber = (int)this->knob( "portNumber" )->get_value();
 		m_server = g_servers.get( portNumber );
 		return 1;
 	}

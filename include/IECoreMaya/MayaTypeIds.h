@@ -65,6 +65,8 @@ enum MayaTypeId
 	DummyDataId = 0x00110DD0,
 	DrawableHolderId = 0x00110DD1,
 	GeometryCombinerId = 0x00110DD2,
+	SceneShapeId = 0x00110DD3,
+	SceneShapeInterfaceId = 0x00110DD4,
 	/// Don't forget to update MayaTypeIdsBinding.cpp
 
 	LastId = 0x00110E3F,

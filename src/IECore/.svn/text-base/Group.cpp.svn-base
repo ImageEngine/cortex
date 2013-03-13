@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,20 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include "IECore/Group.h"
 #include "IECore/Renderer.h"
 #include "IECore/AttributeBlock.h"
+#include "IECore/AttributeState.h"
 #include "IECore/MurmurHash.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
 #include "boost/format.hpp"
+#include "boost/lexical_cast.hpp"
 
 using namespace IECore;
 using namespace std;
 using namespace Imath;
 
+static IndexedIO::EntryID g_transformEntry("transform");
+static IndexedIO::EntryID g_stateEntry("state");
+static IndexedIO::EntryID g_childrenEntry("children");
 const unsigned int Group::m_ioVersion = 0;
+
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Group );
 
 Group::Group()
@@ -123,6 +130,58 @@ void Group::clearState()
 const Group::StateContainer &Group::state() const
 {
 	return m_state;
+}
+
+
+IECore::ConstDataPtr Group::getAttribute( const std::string &name ) const
+{
+	StateContainer::const_reverse_iterator it = m_state.rbegin();
+	for( ; it != m_state.rend(); ++it )
+	{
+		if( ConstAttributeStatePtr attr = runTimeCast< const AttributeState >( *it ) )
+		{
+			CompoundDataMap::const_iterator attrIt = attr->attributes().find( name );
+			if( attrIt != attr->attributes().end() )
+			{
+				return attrIt->second;
+			}
+		}
+	}
+	
+	if( m_parent )
+	{
+		return m_parent->getAttribute( name );
+	}
+	
+	return 0;
+}
+
+void Group::setAttribute( const std::string &name, ConstDataPtr value )
+{
+	// find existing attribute/override it ?
+	StateContainer::iterator it = m_state.begin();
+	AttributeStatePtr attrFound;
+	for( ; it != m_state.end(); ++it )
+	{
+		if( AttributeStatePtr attr = runTimeCast< AttributeState >( *it ) )
+		{
+			attrFound = attr;
+			CompoundDataMap::iterator attrIt = attr->attributes().find( name );
+			if( attrIt != attr->attributes().end() )
+			{
+				attr->attributes()[ name ] = value->copy();
+				return;
+			}
+		}
+	}
+	
+	if( !attrFound )
+	{
+		attrFound = new AttributeState;
+		addState( attrFound );
+	}
+	
+	attrFound->attributes()[ name ] = value->copy();
 }
 
 void Group::addChild( VisibleRenderablePtr child )
@@ -213,62 +272,84 @@ void Group::copyFrom( const Object *other, CopyContext *context )
 void Group::save( SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	if( m_transform )
 	{
-		context->save( m_transform, container, "transform" );
+		context->save( m_transform, container, g_transformEntry );
 	}
-	container->mkdir( "state" );
-	container->chdir( "state" );
-		int i = 0;
-		for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
-		{
-			string name = str( boost::format( "%d" ) % i );
-			context->save( *it, container, name );
-			i++;
-		}
-	container->chdir( ".." );
-	container->mkdir( "children" );
-	container->chdir( "children" );
-		i = 0;
-		for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
-		{
-			string name = str( boost::format( "%d" ) % i );
-			context->save( *it, container, name );
-			i++;
-		}
-	container->chdir( ".." );
+	IndexedIOPtr stateContainer = container->subdirectory( g_stateEntry, IndexedIO::CreateIfMissing );
+	int i = 0;
+	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
+	{
+		string name = str( boost::format( "%d" ) % i );
+		context->save( *it, stateContainer, name );
+		i++;
+	}
+	IndexedIOPtr childrenContainer = container->subdirectory( g_childrenEntry, IndexedIO::CreateIfMissing );
+	i = 0;
+	for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
+	{
+		string name = str( boost::format( "%d" ) % i );
+		context->save( *it, childrenContainer, name );
+		i++;
+	}
+}
+
+bool Group::entryListCompare( const IndexedIO::EntryID& a, const IndexedIO::EntryID& b )
+{
+	int a_idx( 0 );
+	int b_idx( 0 );
+	
+	try
+	{
+		a_idx = boost::lexical_cast<int>( a.value() );
+	}
+	catch (...)
+	{
+	}
+	try
+	{
+		b_idx = boost::lexical_cast<int>( b.value() );
+	}
+	catch (...)
+	{
+	}
+	
+	return a_idx < b_idx;
 }
 
 void Group::load( LoadContextPtr context )
 {
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, "transform" );
+		m_transform = context->load<Transform>( container, g_transformEntry );
 	}
 	catch( ... )
 	{
 	}
 	clearState();
-	container->chdir( "state" );
-		IndexedIO::EntryList l = container->ls();
-		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
-		{
-			addState( context->load<StateRenderable>( container, it->id() ) );
-		}
-	container->chdir( ".." );
+	
+	ConstIndexedIOPtr stateContainer = container->subdirectory( g_stateEntry );
+	IndexedIO::EntryIDList l;
+	stateContainer->entryIds( l );
+	sort( l.begin(), l.end(), entryListCompare );
+	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
+	{
+		addState( context->load<StateRenderable>( stateContainer, *it ) );
+	}
 	clearChildren();
-	container->chdir( "children" );
-		l = container->ls();
-		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
-		{
-			addChild( context->load<VisibleRenderable>( container, it->id() ) );
-		}
-	container->chdir( ".." );
+	ConstIndexedIOPtr childrenContainer = container->subdirectory( g_childrenEntry );
+	childrenContainer->entryIds( l );
+	sort( l.begin(), l.end(), entryListCompare );
+	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
+	{
+		addChild( context->load<VisibleRenderable>( childrenContainer, *it ) );
+	}
 }
 
 bool Group::isEqualTo( const Object *other ) const

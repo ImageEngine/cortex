@@ -194,6 +194,10 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		fnMesh2.getUVSetNames( uvSets2 )
 		
 		self.assertEqual( uvSets, uvSets2 )
+		
+		# Check uvIndices
+		coreMesh2 = IECoreMaya.FromMayaMeshConverter( mayaMesh2 ).convert()
+		self.assertEqual( coreMesh["stIndices"].data, coreMesh2["stIndices"].data )
 	
 	def testShadingGroup( self ) :
 	

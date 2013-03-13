@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,15 @@ using namespace std;
 using namespace IECore;
 using namespace Imath;
 using namespace boost;
+
+static IndexedIO::EntryID g_displayWindowMinXEntry("displayWindowMinX");
+static IndexedIO::EntryID g_displayWindowMinYEntry("displayWindowMinY");
+static IndexedIO::EntryID g_displayWindowMaxXEntry("displayWindowMaxX");
+static IndexedIO::EntryID g_displayWindowMaxYEntry("displayWindowMaxY");
+static IndexedIO::EntryID g_dataWindowMinXEntry("dataWindowMinX");
+static IndexedIO::EntryID g_dataWindowMinYEntry("dataWindowMinY");
+static IndexedIO::EntryID g_dataWindowMaxXEntry("dataWindowMaxX");
+static IndexedIO::EntryID g_dataWindowMaxYEntry("dataWindowMaxY");
 
 const unsigned int ImagePrimitive::m_ioVersion = 1;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(ImagePrimitive);
@@ -148,17 +157,17 @@ void ImagePrimitive::save(IECore::Object::SaveContext *context) const
 	assert( context );
 
 	Primitive::save(context);
-	IndexedIOInterfacePtr container = context->container(staticTypeName(), m_ioVersion);
+	IndexedIOPtr container = context->container(staticTypeName(), m_ioVersion);
 
-	container->write("displayWindowMinX", m_displayWindow.min.x);
-	container->write("displayWindowMinY", m_displayWindow.min.y);
-	container->write("displayWindowMaxX", m_displayWindow.max.x);
-	container->write("displayWindowMaxY", m_displayWindow.max.y);
+	container->write(g_displayWindowMinXEntry, m_displayWindow.min.x);
+	container->write(g_displayWindowMinYEntry, m_displayWindow.min.y);
+	container->write(g_displayWindowMaxXEntry, m_displayWindow.max.x);
+	container->write(g_displayWindowMaxYEntry, m_displayWindow.max.y);
 
-	container->write("dataWindowMinX", m_dataWindow.min.x);
-	container->write("dataWindowMinY", m_dataWindow.min.y);
-	container->write("dataWindowMaxX", m_dataWindow.max.x);
-	container->write("dataWindowMaxY", m_dataWindow.max.y);
+	container->write(g_dataWindowMinXEntry, m_dataWindow.min.x);
+	container->write(g_dataWindowMinYEntry, m_dataWindow.min.y);
+	container->write(g_dataWindowMaxXEntry, m_dataWindow.max.x);
+	container->write(g_dataWindowMaxYEntry, m_dataWindow.max.y);
 }
 
 void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
@@ -168,12 +177,12 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container(staticTypeName(), v);
+	ConstIndexedIOPtr container = context->container(staticTypeName(), v);
 
-	container->read("displayWindowMinX", m_displayWindow.min.x);
-	container->read("displayWindowMinY", m_displayWindow.min.y);
-	container->read("displayWindowMaxX", m_displayWindow.max.x);
-	container->read("displayWindowMaxY", m_displayWindow.max.y);
+	container->read(g_displayWindowMinXEntry, m_displayWindow.min.x);
+	container->read(g_displayWindowMinYEntry, m_displayWindow.min.y);
+	container->read(g_displayWindowMaxXEntry, m_displayWindow.max.x);
+	container->read(g_displayWindowMaxYEntry, m_displayWindow.max.y);
 
 	if ( v < 1 )
 	{
@@ -181,10 +190,10 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 	}
 	else
 	{
-		container->read("dataWindowMinX", m_dataWindow.min.x);
-		container->read("dataWindowMinY", m_dataWindow.min.y);
-		container->read("dataWindowMaxX", m_dataWindow.max.x);
-		container->read("dataWindowMaxY", m_dataWindow.max.y);
+		container->read(g_dataWindowMinXEntry, m_dataWindow.min.x);
+		container->read(g_dataWindowMinYEntry, m_dataWindow.min.y);
+		container->read(g_dataWindowMaxXEntry, m_dataWindow.max.x);
+		container->read(g_dataWindowMaxYEntry, m_dataWindow.max.y);
 	}
 }
 

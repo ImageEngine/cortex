@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECoreGL/images
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -93,40 +93,6 @@ has-props
 
 
 81822
-
-twoBSplineCirclesAsLines.tif
-file
-
-
-
-
-2011-12-21T09:26:42.000000Z
-91ca3d05f6a2ba55dadf949da9aa4092
-2008-04-11T16:27:11.699948Z
-1107
-john.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3822
 
 periodicBSpline.tif
 file
@@ -366,6 +332,40 @@ has-props
 
 91844
 
+helloWorldSprites.tif
+file
+
+
+
+
+2013-03-13T13:34:21.678469Z
+e6649adb94b45dc93c2be90c5d1de5df
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+22116
+
 linearPeriodicRibbon.tif
 file
 
@@ -434,6 +434,40 @@ has-props
 
 3608
 
+yellow.exr
+file
+
+
+
+
+2013-03-13T13:34:21.678469Z
+ed4a9fe03d3932c134ec8b7c32836887
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+92159
+
 numbers.exr
 file
 
@@ -468,40 +502,6 @@ has-props
 
 670769
 
-colorBarsH640x480.exr
-file
-
-
-
-
-2011-12-21T09:26:42.000000Z
-4c23f4e714bd301298370b49976cc8e7
-2007-11-09T01:04:41.944394Z
-250
-john.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-52643
-
 colorBarsWithAlphaF640x480.exr
 file
 
@@ -535,6 +535,40 @@ has-props
 
 
 87971
+
+colorBarsH640x480.exr
+file
+
+
+
+
+2011-12-21T09:26:42.000000Z
+4c23f4e714bd301298370b49976cc8e7
+2007-11-09T01:04:41.944394Z
+250
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+52643
 
 numbersWithAlpha.exr
 file

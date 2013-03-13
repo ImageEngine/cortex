@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,13 +34,13 @@
 
 #include <boost/python.hpp>
 
+#include "IECorePython/RunTimeTypedBinding.h"
+
 #include "IECoreGL/PointsPrimitive.h"
 #include "IECoreGL/State.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
 #include "IECoreGL/bindings/PointsPrimitiveBinding.h"
 #include "IECoreGL/bindings/TypedStateComponentBinding.inl"
-
 
 using namespace boost::python;
 
@@ -50,7 +50,16 @@ namespace IECoreGL
 void bindPointsPrimitive()
 {
 	scope s = IECorePython::RunTimeTypedClass<PointsPrimitive>()
+		.def( init<PointsPrimitive::Type>() )
 	;
+	
+	enum_<PointsPrimitive::Type>( "Type" )
+		.value( "Point", PointsPrimitive::Point )
+		.value( "Disk", PointsPrimitive::Disk )
+		.value( "Quad", PointsPrimitive::Quad )
+		.value( "Sphere", PointsPrimitive::Sphere )
+	;
+	
 	bindTypedStateComponent< PointsPrimitive::UseGLPoints >( "UseGLPoints" );
 	bindTypedStateComponent< PointsPrimitive::GLPointWidth >( "GLPointWidth" );
 }

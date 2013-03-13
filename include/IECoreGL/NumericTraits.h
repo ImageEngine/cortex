@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,11 +35,11 @@
 #ifndef IECOREGL_NUMERICTRAITS_H
 #define IECOREGL_NUMERICTRAITS_H
 
-#include "IECoreGL/GL.h"
-
 #include "OpenEXR/half.h"
 
-#include <cassert>
+#include "IECore/Data.h"
+
+#include "IECoreGL/GL.h"
 
 namespace IECoreGL
 {
@@ -51,7 +51,7 @@ struct NumericTraits
 {
 	/// Returns the appropriate enum value to tell OpenGL the type
 	/// of data being passed to it.
-	static GLenum glType() { /* must be specialised */ assert( 0 ); return 0; }
+	static GLenum glType() { return 0; }
 };
 
 template<>
@@ -80,6 +80,8 @@ GLenum NumericTraits<GLfloat>::glType();
 
 template<>
 GLenum NumericTraits<GLdouble>::glType();
+
+GLenum glType( const IECore::Data *data );
 
 } // namespace IECoreGL
 

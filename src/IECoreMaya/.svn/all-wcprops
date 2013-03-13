@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 39
-/svn/!svn/ver/4834/trunk/src/IECoreMaya
+/svn/!svn/ver/5247/trunk/src/IECoreMaya
 END
 ToMayaGroupConverter.cpp
 K 25
@@ -13,7 +13,7 @@ ToMayaMeshConverter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4722/trunk/src/IECoreMaya/ToMayaMeshConverter.cpp
+/svn/!svn/ver/4922/trunk/src/IECoreMaya/ToMayaMeshConverter.cpp
 END
 StatusException.cpp
 K 25
@@ -25,7 +25,7 @@ ClassParameterHandler.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 65
-/svn/!svn/ver/4704/trunk/src/IECoreMaya/ClassParameterHandler.cpp
+/svn/!svn/ver/5110/trunk/src/IECoreMaya/ClassParameterHandler.cpp
 END
 ObjectParameterHandler.cpp
 K 25
@@ -103,7 +103,7 @@ IECoreMaya.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/4194/trunk/src/IECoreMaya/IECoreMaya.cpp
+/svn/!svn/ver/5221/trunk/src/IECoreMaya/IECoreMaya.cpp
 END
 FloatSplineParameterHandler.cpp
 K 25
@@ -129,11 +129,17 @@ svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/2361/trunk/src/IECoreMaya/FromMayaStringPlugConverter.cpp
 END
+FromMayaProceduralHolderConverter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/5191/trunk/src/IECoreMaya/FromMayaProceduralHolderConverter.cpp
+END
 DisplayStyle.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 56
-/svn/!svn/ver/3123/trunk/src/IECoreMaya/DisplayStyle.cpp
+/svn/!svn/ver/5075/trunk/src/IECoreMaya/DisplayStyle.cpp
 END
 FromMayaSkinClusterConverter.cpp
 K 25
@@ -170,6 +176,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 70
 /svn/!svn/ver/4388/trunk/src/IECoreMaya/FromMayaTransformConverter.cpp
+END
+SceneShapeInterface.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/5241/trunk/src/IECoreMaya/SceneShapeInterface.cpp
 END
 ViewportPostProcessCallback.cpp
 K 25
@@ -241,7 +253,7 @@ Convert.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/3907/trunk/src/IECoreMaya/Convert.cpp
+/svn/!svn/ver/5132/trunk/src/IECoreMaya/Convert.cpp
 END
 FromMayaMatrixDataConverter.cpp
 K 25
@@ -277,7 +289,7 @@ ClassVectorParameterHandler.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 71
-/svn/!svn/ver/4704/trunk/src/IECoreMaya/ClassVectorParameterHandler.cpp
+/svn/!svn/ver/5110/trunk/src/IECoreMaya/ClassVectorParameterHandler.cpp
 END
 FromMayaParticleConverter.cpp
 K 25
@@ -307,13 +319,13 @@ ToMayaCameraConverter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 65
-/svn/!svn/ver/4693/trunk/src/IECoreMaya/ToMayaCameraConverter.cpp
+/svn/!svn/ver/5054/trunk/src/IECoreMaya/ToMayaCameraConverter.cpp
 END
 ProceduralHolderUI.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/svn/!svn/ver/4723/trunk/src/IECoreMaya/ProceduralHolderUI.cpp
+/svn/!svn/ver/5075/trunk/src/IECoreMaya/ProceduralHolderUI.cpp
 END
 ViewportPostProcessCallbackBinding.cpp
 K 25
@@ -331,7 +343,7 @@ ProceduralHolder.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 60
-/svn/!svn/ver/4723/trunk/src/IECoreMaya/ProceduralHolder.cpp
+/svn/!svn/ver/5075/trunk/src/IECoreMaya/ProceduralHolder.cpp
 END
 ToMayaNumericDataConverter.cpp
 K 25
@@ -343,7 +355,7 @@ ObjectData.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/3437/trunk/src/IECoreMaya/ObjectData.cpp
+/svn/!svn/ver/5130/trunk/src/IECoreMaya/ObjectData.cpp
 END
 SystemExitCmd.cpp
 K 25
@@ -368,6 +380,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/3975/trunk/src/IECoreMaya/V3Manipulator.cpp
+END
+MayaScene.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/5240/trunk/src/IECoreMaya/MayaScene.cpp
 END
 CallbackId.cpp
 K 25
@@ -445,7 +463,7 @@ FromMayaDagNodeConverter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 68
-/svn/!svn/ver/4140/trunk/src/IECoreMaya/FromMayaDagNodeConverter.cpp
+/svn/!svn/ver/5190/trunk/src/IECoreMaya/FromMayaDagNodeConverter.cpp
 END
 ImageViewportPostProcess.cpp
 K 25
@@ -519,6 +537,12 @@ svn:wc:ra_dav:version-url
 V 68
 /svn/!svn/ver/3907/trunk/src/IECoreMaya/ToMayaArrayDataConverter.cpp
 END
+SceneShapeUI.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/5241/trunk/src/IECoreMaya/SceneShapeUI.cpp
+END
 FromMayaNumericPlugConverter.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -531,6 +555,12 @@ svn:wc:ra_dav:version-url
 V 60
 /svn/!svn/ver/4196/trunk/src/IECoreMaya/ParameterHandler.cpp
 END
+SceneShape.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/5247/trunk/src/IECoreMaya/SceneShape.cpp
+END
 CacheSet.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -541,7 +571,7 @@ ParameterisedHolder.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4677/trunk/src/IECoreMaya/ParameterisedHolder.cpp
+/svn/!svn/ver/4866/trunk/src/IECoreMaya/ParameterisedHolder.cpp
 END
 DelightProceduralCacheCommand.cpp
 K 25

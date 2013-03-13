@@ -1,7 +1,7 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECore/data
 http://cortex-vfx.googlecode.com/svn
 
@@ -78,25 +78,25 @@ dir
 iffFiles
 dir
 
-cachedReaderPath1
-dir
-
 tiff
 dir
 
-cachedReaderPath2
-dir
-
-pdcFiles
+cachedReaderPath1
 dir
 
 fonts
 dir
 
-dpx
+pdcFiles
+dir
+
+cachedReaderPath2
 dir
 
 binFiles
+dir
+
+dpx
 dir
 
 cinFiles

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -119,6 +119,7 @@ __dataTypesConversionDict = {
 	IECore.CharData: (str, False),
 	IECore.UCharData: (int, False),
 	IECore.StringData: (str, True),
+	IECore.InternedStringData: (IECore.InternedString, True),
 	IECore.FloatData: (float, False),
 	IECore.DoubleData: (float, True),
 	IECore.HalfData: (float, False),
@@ -160,6 +161,7 @@ __dataTypesConversionDict = {
 	IECore.FloatVectorData: (list, False, float),
 	IECore.DoubleVectorData: (list, False, float),
 	IECore.StringVectorData: (list, False, str),
+	IECore.InternedStringVectorData: (list, False, IECore.InternedString),
 	IECore.ShortVectorData: (list, False, int),
 	IECore.UShortVectorData: (list, False, int),
 	IECore.Int64VectorData: (list, False, int),

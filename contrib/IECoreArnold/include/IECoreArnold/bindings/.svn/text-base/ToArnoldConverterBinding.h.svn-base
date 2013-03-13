@@ -35,9 +35,13 @@
 #ifndef IECOREARNOLD_TOARNOLDCONVERTERBINDING_H
 #define IECOREARNOLD_TOARNOLDCONVERTERBINDING_H
 
+#include "boost/python.hpp"
+#include "ai.h"
+
 namespace IECoreArnold
 {
 
+boost::python::object atNodeToPythonObject( AtNode *node );
 void bindToArnoldConverter();
 
 } // namespace IECoreArnold

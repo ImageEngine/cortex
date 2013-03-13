@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 48
-/svn/!svn/ver/4693/trunk/src/IECoreMaya/bindings
+/svn/!svn/ver/5241/trunk/src/IECoreMaya/bindings
 END
 FromMayaConverterBinding.cpp
 K 25
@@ -67,7 +67,7 @@ IECoreMaya.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4693/trunk/src/IECoreMaya/bindings/IECoreMaya.cpp
+/svn/!svn/ver/5237/trunk/src/IECoreMaya/bindings/IECoreMaya.cpp
 END
 ViewportPostProcessBinding.cpp
 K 25
@@ -139,7 +139,7 @@ TypeIdBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 66
-/svn/!svn/ver/4689/trunk/src/IECoreMaya/bindings/TypeIdBinding.cpp
+/svn/!svn/ver/5169/trunk/src/IECoreMaya/bindings/TypeIdBinding.cpp
 END
 ToMayaMeshConverterBinding.cpp
 K 25
@@ -153,11 +153,29 @@ svn:wc:ra_dav:version-url
 V 80
 /svn/!svn/ver/3828/trunk/src/IECoreMaya/bindings/ToMayaGroupConverterBinding.cpp
 END
+FromMayaProcedualHolderConverterBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/5191/trunk/src/IECoreMaya/bindings/FromMayaProcedualHolderConverterBinding.cpp
+END
+FnSceneShapeBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/5241/trunk/src/IECoreMaya/bindings/FnSceneShapeBinding.cpp
+END
+MayaSceneBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/5133/trunk/src/IECoreMaya/bindings/MayaSceneBinding.cpp
+END
 MayaTypeIdBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 70
-/svn/!svn/ver/3446/trunk/src/IECoreMaya/bindings/MayaTypeIdBinding.cpp
+/svn/!svn/ver/5221/trunk/src/IECoreMaya/bindings/MayaTypeIdBinding.cpp
 END
 ToMayaParticleConverterBinding.cpp
 K 25
@@ -177,17 +195,17 @@ svn:wc:ra_dav:version-url
 V 82
 /svn/!svn/ver/2981/trunk/src/IECoreMaya/bindings/FromMayaCurveConverterBinding.cpp
 END
-CallbackIdBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 70
-/svn/!svn/ver/4084/trunk/src/IECoreMaya/bindings/CallbackIdBinding.cpp
-END
 ToMayaObjectConverterBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 81
 /svn/!svn/ver/2981/trunk/src/IECoreMaya/bindings/ToMayaObjectConverterBinding.cpp
+END
+CallbackIdBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/4084/trunk/src/IECoreMaya/bindings/CallbackIdBinding.cpp
 END
 MObjectFromPython.cpp
 K 25

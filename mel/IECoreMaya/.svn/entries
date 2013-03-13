@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/mel/IECoreMaya
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-12T21:43:07.651942Z
-4834
-danield.imageengine
+2013-03-09T01:13:15.781465Z
+5241
+valerie.imageengine@gmail.com
 
 
 
@@ -128,40 +128,6 @@ john.imageengine
 
 2397
 
-ieImagePlaneHolderUI.mel
-file
-
-
-
-
-2011-12-21T09:27:07.000000Z
-d223f2f0b656ae30ed5b026ea78527bf
-2009-01-15T00:48:42.416302Z
-2021
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3896
-
 ieProceduralHolder.mel
 file
 
@@ -195,6 +161,40 @@ andrewk.imageengine
 
 
 2996
+
+ieImagePlaneHolderUI.mel
+file
+
+
+
+
+2011-12-21T09:27:07.000000Z
+d223f2f0b656ae30ed5b026ea78527bf
+2009-01-15T00:48:42.416302Z
+2021
+mark.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3896
 
 iePanel.mel
 file
@@ -230,6 +230,40 @@ john.imageengine
 
 2935
 
+IECoreMaya.mel
+file
+
+
+
+
+2013-03-13T13:39:23.418466Z
+e3ecbc1b6bfb0dc62604d8016c36c267
+2013-03-05T19:19:34.791963Z
+5221
+valerie.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2766
+
 ieParameterPanel.mel
 file
 
@@ -263,40 +297,6 @@ mark.imageengine
 
 
 3431
-
-IECoreMaya.mel
-file
-
-
-
-
-2011-12-21T09:27:07.000000Z
-0914c346cba0a0299517cc40d9e41f51
-2010-06-02T21:24:25.452553Z
-3432
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2726
 
 ieCurveCombinerUI.mel
 file
@@ -400,40 +400,6 @@ danield.imageengine
 
 2407
 
-ieAttr.mel
-file
-
-
-
-
-2011-12-21T09:27:07.000000Z
-6ad93bd277a291b4758e46d0c6c0a14a
-2008-09-05T23:58:42.566300Z
-1659
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2582
-
 ieOpHolderUI.mel
 file
 
@@ -468,6 +434,40 @@ tom.imageengine
 
 2405
 
+ieAttr.mel
+file
+
+
+
+
+2011-12-21T09:27:07.000000Z
+6ad93bd277a291b4758e46d0c6c0a14a
+2008-09-05T23:58:42.566300Z
+1659
+mark.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2582
+
 ieAttributeEditorControl.mel
 file
 
@@ -501,6 +501,40 @@ john.imageengine
 
 
 2720
+
+ieSceneShapeUI.mel
+file
+
+
+
+
+2013-03-13T13:39:23.418466Z
+8e916784dcddb6472427b853a3fd1276
+2013-03-09T01:13:15.781465Z
+5241
+valerie.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3020
 
 ieDrawableHolderUI.mel
 file
@@ -576,33 +610,11 @@ file
 
 
 
-2011-12-21T09:27:07.000000Z
-018fb3667875868a7d9ca95127a27d6c
-2010-07-05T19:42:41.185745Z
-3566
-tom.imageengine
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-10623
+4fa514722adac3724f2a6c0ab734335c
+2012-11-22T20:27:46.414186Z
+4931
+danield.imageengine
 
 ieParameterisedHolder.mel
 file

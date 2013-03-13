@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2011, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -91,6 +91,12 @@ class TestWriter( unittest.TestCase ) :
 				writer.canWrite
 				hasCanWrite = True
 			self.failUnless( hasCanWrite )
+
+	def testCreateWithoutObject( self ) :
+	
+		w = IECore.Writer.create( "/tmp/test.cob" )
+		self.assertTrue( isinstance( w, IECore.ObjectWriter ) )
+		self.assertEqual( w["fileName"].getTypedValue(), "/tmp/test.cob" )
 
 if __name__ == "__main__":
 	unittest.main()

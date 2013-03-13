@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -76,6 +76,7 @@ IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( unsigned short )
 IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( int64_t )
 IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( uint64_t )
 IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( std::string )
+IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( InternedString )
 
 // we have to specialise the repr() and str() separately here, because of
 // the whole vector<bool> is not a container thing.
@@ -170,6 +171,10 @@ void bindAllVectorTypedData()
 	BIND_VECTOR_TYPEDDATA (
 		std::string,
 		"string")
+		
+	BIND_VECTOR_TYPEDDATA (
+		InternedString,
+		"InternedString")	
 
 	// Imath types
 	bindImathMatrixVectorTypedData();

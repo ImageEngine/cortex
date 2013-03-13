@@ -173,6 +173,8 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 		friend class Result;
 
+		float integrateCurve( unsigned curveIndex, float vStart, float vEnd, int samples, Result& typedResult ) const;
+		
 		CurvesPrimitivePtr m_curvesPrimitive;
 		const std::vector<int> &m_verticesPerCurve;
 		std::vector<int> m_vertexDataOffsets; // one value per curve

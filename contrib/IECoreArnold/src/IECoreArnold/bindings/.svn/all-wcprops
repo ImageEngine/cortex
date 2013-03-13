@@ -1,7 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 71
-/svn/!svn/ver/4790/trunk/contrib/IECoreArnold/src/IECoreArnold/bindings
+/svn/!svn/ver/4910/trunk/contrib/IECoreArnold/src/IECoreArnold/bindings
+END
+InstancingConverterBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/!svn/ver/4910/trunk/contrib/IECoreArnold/src/IECoreArnold/bindings/InstancingConverterBinding.cpp
 END
 RendererBinding.cpp
 K 25
@@ -13,7 +19,7 @@ IECoreArnoldBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 95
-/svn/!svn/ver/4790/trunk/contrib/IECoreArnold/src/IECoreArnold/bindings/IECoreArnoldBinding.cpp
+/svn/!svn/ver/4910/trunk/contrib/IECoreArnold/src/IECoreArnold/bindings/IECoreArnoldBinding.cpp
 END
 ToArnoldPointsConverterBinding.cpp
 K 25
@@ -31,7 +37,7 @@ ToArnoldConverterBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 100
-/svn/!svn/ver/4790/trunk/contrib/IECoreArnold/src/IECoreArnold/bindings/ToArnoldConverterBinding.cpp
+/svn/!svn/ver/4909/trunk/contrib/IECoreArnold/src/IECoreArnold/bindings/ToArnoldConverterBinding.cpp
 END
 UniverseBlockBinding.cpp
 K 25

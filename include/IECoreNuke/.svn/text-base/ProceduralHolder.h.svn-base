@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,7 +77,9 @@ class ProceduralHolder : public ParameterisedHolderOp
 	protected :
 	
 		/// Implemented to draw the procedural
-#if	kDDImageVersionInteger >= 62000
+#if kDDImageVersionInteger >= 70000
+		virtual DD::Image::Op::HandlesMode doAnyHandles( DD::Image::ViewerContext *ctx );
+#elif kDDImageVersionInteger >= 62000
 		virtual bool doAnyHandles( DD::Image::ViewerContext *ctx );
 #endif
 		virtual void build_handles( DD::Image::ViewerContext *ctx );

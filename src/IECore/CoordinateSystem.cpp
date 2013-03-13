@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,8 @@
 using namespace IECore;
 using namespace boost;
 
+static IndexedIO::EntryID g_nameEntry("name");
+static IndexedIO::EntryID g_transformEntry("transform");
 const unsigned int CoordinateSystem::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CoordinateSystem );
 
@@ -145,11 +147,11 @@ void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 void CoordinateSystem::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( "name", m_name );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
+	container->write( g_nameEntry, m_name );
 	if( m_transform )
 	{
-		context->save( m_transform, container, "transform" );
+		context->save( m_transform, container, g_transformEntry );
 	}
 }
 
@@ -157,12 +159,12 @@ void CoordinateSystem::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	container->read( "name", m_name );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+	container->read( g_nameEntry, m_name );
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, "transform" );
+		m_transform = context->load<Transform>( container, g_transformEntry );
 	}
 	catch( ... )
 	{

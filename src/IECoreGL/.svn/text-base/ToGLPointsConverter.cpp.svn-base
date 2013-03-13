@@ -101,9 +101,11 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 
 	for ( IECore::PrimitiveVariableMap::const_iterator pIt = pointsPrim->variables.begin(); pIt != pointsPrim->variables.end(); ++pIt )
 	{
-		if ( pIt->first == "type" )
+		if( pIt->first == "type" )
+		{
 			continue;
-
+		}
+		
 		if ( pIt->second.data )
 		{
 			result->addPrimitiveVariable( pIt->first, pIt->second );
@@ -114,81 +116,5 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 		}
 	}
 
-	IECore::ConstFloatVectorDataPtr widths = pointsPrim->variableData<IECore::FloatVectorData>( "width" );
-	IECore::ConstFloatDataPtr width = pointsPrim->variableData<IECore::FloatData>( "width", IECore::PrimitiveVariable::Constant );
-
-	// use "constantwidth" as "width"
-	if ( pointsPrim->variables.find( "width" ) == pointsPrim->variables.end() )
-	{
-		IECore::PrimitiveVariableMap::const_iterator pIt = pointsPrim->variables.find( "constantwidth" );
-		if ( pIt != pointsPrim->variables.end() )
-		{
-			result->addPrimitiveVariable( "width", pIt->second );
-			width = IECore::runTimeCast< const IECore::FloatData >(pIt->second.data);
-		}
-	}
-
-	// compute heights
-	IECore::ConstFloatDataPtr constantAspectData = pointsPrim->variableData<IECore::FloatData>( "patchaspectratio", IECore::PrimitiveVariable::Constant );
-	IECore::ConstFloatVectorDataPtr aspectData = pointsPrim->variableData<IECore::FloatVectorData>( "patchaspectratio" );
-
-	if( !constantAspectData && !aspectData )
-	{
-		// heights = width
-		if ( widths )
-		{
-			result->addPrimitiveVariable( "height", pointsPrim->variables.find( "width" )->second );
-		}
-		else if ( width )
-		{
-			// constant width...
-			result->addPrimitiveVariable( "height", IECore::PrimitiveVariable( IECore::PrimitiveVariable::Constant, new IECore::FloatData(width->readable() ) ) );
-		}
-	}
-	else if( constantAspectData )
-	{
-		float aspect = constantAspectData->readable();
-		if ( widths )
-		{
-			IECore::FloatVectorDataPtr h = widths->copy();
-			std::vector<float> &hV = h->writable();
-			for( unsigned int i=0; i<hV.size(); i++ )
-			{
-				hV[i] /= aspect;
-			}
-			result->addPrimitiveVariable( "height", IECore::PrimitiveVariable( pointsPrim->variables.find("width")->second.interpolation, h ) );
-		}
-		else if ( width )
-		{
-			// constant width...
-			result->addPrimitiveVariable( "height", IECore::PrimitiveVariable( IECore::PrimitiveVariable::Constant, new IECore::FloatData(width->readable() / aspect) ) );
-		}
-	}
-	else
-	{
-		// we have varying aspect data
-		IECore::FloatVectorDataPtr h = aspectData->copy();
-		std::vector<float> &hV = h->writable();
-		float defaultWidth = 1;
-		const float *widthsP = &defaultWidth;
-		unsigned int widthStride = 0;
-		if( widths )
-		{
-			widthsP = &widths->readable()[0];
-			if ( widths->readable().size() == aspectData->readable().size() )
-				widthStride = 1;
-		}
-		else if ( width )
-		{
-			widthsP = &width->readable();
-			widthStride = 0;
-		}
-		for( unsigned int i=0; i<hV.size(); i++ )
-		{
-			hV[i] = *widthsP / hV[i];
-			widthsP += widthStride;
-		}
-		result->addPrimitiveVariable( "height", IECore::PrimitiveVariable( pointsPrim->variables.find("patchaspectratio")->second.interpolation, h ) );
-	}
 	return result;
 }

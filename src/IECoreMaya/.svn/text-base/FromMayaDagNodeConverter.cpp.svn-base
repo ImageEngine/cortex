@@ -37,6 +37,9 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/MessageHandler.h"
 
+#include "maya/MPxNode.h"
+#include "maya/MFnDagNode.h"
+
 using namespace IECoreMaya;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaDagNodeConverter );
@@ -57,8 +60,18 @@ IECore::ObjectPtr FromMayaDagNodeConverter::doConversion( const MObject &object,
 
 FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
 {
+	
+	MayaType typeId( dagPath.apiType(), 0 );
+	
+	MPxNode* userNode = MFnDagNode( dagPath ).userNode();
+	if( userNode )
+	{
+		typeId.first = MFn::kInvalid;
+		typeId.second = userNode->typeId().id();
+	}
+	
 	const TypesToFnsMap &m = typesToFns();
-	TypesToFnsMap::const_iterator it = m.find( Types( dagPath.apiType(), resultType ) );
+	TypesToFnsMap::const_iterator it = m.find( Types( typeId, resultType ) );
 	if( it!=m.end() )
 	{
 		return it->second( dagPath );
@@ -66,7 +79,7 @@ FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &da
 	
 	// if not then see if the default converter is suitable
 	DefaultConvertersMap &dc = defaultConverters();
-	DefaultConvertersMap::const_iterator dcIt = dc.find( dagPath.apiType() );
+	DefaultConvertersMap::const_iterator dcIt = dc.find( typeId );
 	if( dcIt != dc.end() )
 	{
 		if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
@@ -90,7 +103,7 @@ FromMayaDagNodeConverter::DefaultConvertersMap &FromMayaDagNodeConverter::defaul
 	return m;
 }
 
-void FromMayaDagNodeConverter::registerConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion, CreatorFn creator )
+void FromMayaDagNodeConverter::registerConverter( const MayaType fromType, IECore::TypeId resultType, bool defaultConversion, CreatorFn creator )
 {
 	TypesToFnsMap &m = typesToFns();
 	TypesToFnsMap::const_iterator it = m.insert( TypesToFnsMap::value_type( Types( fromType, resultType), creator ) ).first;
@@ -99,7 +112,7 @@ void FromMayaDagNodeConverter::registerConverter( const MFn::Type fromType, IECo
 		DefaultConvertersMap &dc = defaultConverters();
 		if( ! dc.insert( DefaultConvertersMap::value_type( fromType, it ) ).second )
 		{
-			IECore::msg( IECore::Msg::Error, "FromMayaDagNodeConverter::registerConverter", boost::format( "Default conversion for MFn::Type %d already registered - ignoring second registration." ) % fromType );
+			IECore::msg( IECore::Msg::Error, "FromMayaDagNodeConverter::registerConverter", boost::format( "Default conversion for MFn::Type %d already registered - ignoring second registration." ) % fromType.first );
 		}
 	}
 }

@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/include/IECorePython
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-07-19T11:25:15.465277Z
-4745
-thehaddonyoof@gmail.com
+2013-03-06T22:19:36.664650Z
+5233
+richardm.imageengine@gmail.com
 
 
 
@@ -1046,6 +1046,40 @@ john.imageengine
 
 1997
 
+LinearToAlexaLogcOpBinding.h
+file
+
+
+
+
+2013-03-13T13:34:35.573466Z
+a6259f0506f1c6aa67f8608f86214369
+2013-03-06T22:19:36.664650Z
+5233
+richardm.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2061
+
 PointerFromSWIG.inl
 file
 
@@ -1216,6 +1250,40 @@ john.imageengine
 
 1999
 
+IndexedIOBinding.h
+file
+
+
+
+
+2013-03-13T13:34:35.574466Z
+86426ca155bf47577da309d99cd72a22
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1973
+
 CineonToLinearOpBinding.h
 file
 
@@ -1317,40 +1385,6 @@ lucio.imageengine
 
 
 2044
-
-ScopedMessageHandlerBinding.h
-file
-
-
-
-
-2011-12-21T09:26:53.000000Z
-6a395d62019be4ac974aaf3925b74c7b
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2039
 
 ImageDisplayDriverBinding.h
 file
@@ -1521,40 +1555,6 @@ andrewk.imageengine
 
 
 2028
-
-IndexedIOInterfaceBinding.h
-file
-
-
-
-
-2011-12-21T09:26:53.000000Z
-86426ca155bf47577da309d99cd72a22
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1973
 
 PointDistributionBinding.h
 file
@@ -1929,6 +1929,40 @@ has-props
 
 
 2173
+
+SceneInterfaceBinding.h
+file
+
+
+
+
+2013-03-13T13:34:35.574466Z
+0b0ac00a333e4d2d376b4ab2926a5431
+2013-01-30T23:34:50.084069Z
+5131
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2010
 
 CompoundDataBinding.h
 file
@@ -3664,16 +3698,16 @@ john.imageengine
 
 2030
 
-HierarchicalCacheBinding.h
+InternedStringBinding.h
 file
 
 
 
 
-2011-12-21T09:26:53.000000Z
-52eba764b07405bf547487ed749ed4ad
-2010-03-02T00:22:32.598878Z
-2981
+2013-03-13T13:34:35.574466Z
+44e24bfed776ad0f9d7744a460e16b3b
+2013-01-31T20:05:13.214986Z
+5134
 john.imageengine
 
 
@@ -3696,7 +3730,7 @@ john.imageengine
 
 
 
-2025
+2015
 
 SpherePrimitiveEvaluatorBinding.h
 file
@@ -4106,6 +4140,40 @@ john.imageengine
 
 2029
 
+ModelCacheBinding.h
+file
+
+
+
+
+2013-03-13T13:34:35.574466Z
+2fc26076539819d22e9e55818ef443c0
+2012-10-05T09:36:09.718729Z
+4879
+thehaddonyoof
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1994
+
 LRUCacheBinding.h
 file
 
@@ -4242,40 +4310,6 @@ john.imageengine
 
 2037
 
-ImagePrimitiveEvaluatorBinding.h
-file
-
-
-
-
-2011-12-21T09:26:53.000000Z
-676fe548bac4ef20216fb7747fa3951d
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2050
-
 AddSmoothSkinningInfluencesOpBinding.h
 file
 
@@ -4309,6 +4343,40 @@ andrewk.imageengine
 
 
 2068
+
+ImagePrimitiveEvaluatorBinding.h
+file
+
+
+
+
+2011-12-21T09:26:53.000000Z
+676fe548bac4ef20216fb7747fa3951d
+2010-03-02T00:22:32.598878Z
+2981
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2050
 
 ReaderBinding.h
 file
@@ -4894,11 +4962,11 @@ file
 
 
 
-2011-12-21T09:26:53.000000Z
-845fd1ac92bd53424a8e1add71a952ae
-2011-02-20T22:03:40.431658Z
-4106
-thehaddonyoof
+2013-03-13T13:34:35.575466Z
+23aa86d5713f13c9a64349d44248006f
+2013-01-10T23:42:09.774746Z
+5084
+john.imageengine
 
 
 
@@ -4920,7 +4988,7 @@ thehaddonyoof
 
 
 
-4109
+4201
 
 TimeCodeParameterBinding.h
 file
@@ -5193,40 +5261,6 @@ john.imageengine
 
 
 2017
-
-InternedBinding.h
-file
-
-
-
-
-2011-12-21T09:26:53.000000Z
-5571b6a3edd2ccfe068c757008d73a49
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1991
 
 PlaneImplicitSurfaceFunctionBinding.h
 file
@@ -7234,6 +7268,40 @@ john.imageengine
 
 2017
 
+SceneCacheBinding.h
+file
+
+
+
+
+2013-03-13T13:34:35.575466Z
+f48104f10b072f6c8d48d8b0968963bd
+2013-01-30T23:34:50.084069Z
+5131
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1994
+
 PreWorldRenderableBinding.h
 file
 
@@ -7301,6 +7369,40 @@ tom.imageengine
 
 
 2029
+
+SampledSceneInterfaceBinding.h
+file
+
+
+
+
+2013-03-13T13:34:35.575466Z
+aa0de73d837fc9074cd3e3aaf07a24f9
+2013-01-30T23:34:50.084069Z
+5131
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2038
 
 MPlayDisplayDriverBinding.h
 file
@@ -8526,40 +8628,6 @@ john.imageengine
 
 2021
 
-ImathBoxBinding.h
-file
-
-
-
-
-2011-12-21T09:26:53.000000Z
-d15f20a3ab1cdb884bbb522af3b7c296
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1989
-
 TransformBinding.h
 file
 
@@ -8627,6 +8695,40 @@ john.imageengine
 
 
 2013
+
+ImathBoxBinding.h
+file
+
+
+
+
+2011-12-21T09:26:53.000000Z
+d15f20a3ab1cdb884bbb522af3b7c296
+2010-03-02T00:22:32.598878Z
+2981
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1989
 
 TypedPrimitiveOpBinding.h
 file
@@ -10225,4 +10327,38 @@ thehaddonyoof
 
 
 1998
+
+AlexaLogcToLinearOpBinding.h
+file
+
+
+
+
+2013-03-13T13:34:35.576466Z
+43f2de92a393640900f399c4f00430bb
+2013-03-06T22:19:36.664650Z
+5233
+richardm.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2061
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,7 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/TypedData.h"
 
+namespace IECore
+{
 
 template<typename T>
 void LinearInterpolator<T>::operator()(const T &y0, const T & y1, double x, T &result) const
@@ -41,6 +44,20 @@ void LinearInterpolator<T>::operator()(const T &y0, const T & y1, double x, T &r
 	assert(x <= 1.0);
 
 	result = static_cast<T>(y0 + (y1 - y0) * x);
+}
+
+template<typename T>
+void CubicInterpolator<T>::operator()(const T &y0, const T &y1, const T &y2, const T &y3, double x, T &result ) const
+{
+	assert(x >= 0.0);
+	assert(x <= 1.0);
+
+	T a0 = y3 - y2 - y0 + y1;
+	T a1 = y0 - y1 - a0;
+	T a2 = y2 - y0;
+	T a3 = y1;
+
+	result = static_cast<T>(a0*x*x*x + a1*x*x + a2*x + a3);
 }
 
 // Partially specialise for std::vector
@@ -66,33 +83,6 @@ struct LinearInterpolator< std::vector<T> >
 		assert(result.size() == size);
 	}
 };
-
-// Partially specialise for TypedData
-template<typename T>
-struct LinearInterpolator< TypedData< T > >
-{
-	void operator()(const typename TypedData< T >::Ptr &y0,
-			const typename TypedData< T >::Ptr &y1,
-			double x,
-			typename TypedData< T >::Ptr &result) const
-	{
-		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
-	}
-};
-
-template<typename T>
-void CubicInterpolator<T>::operator()(const T &y0, const T &y1, const T &y2, const T &y3, double x, T &result ) const
-{
-	assert(x >= 0.0);
-	assert(x <= 1.0);
-
-	T a0 = y3 - y2 - y0 + y1;
-	T a1 = y0 - y1 - a0;
-	T a2 = y2 - y0;
-	T a3 = y1;
-
-	result = static_cast<T>(a0*x*x*x + a1*x*x + a2*x + a3);
-}
 
 // Partially specialise for std::vector
 template<typename T>
@@ -123,18 +113,4 @@ struct CubicInterpolator< std::vector<T> >
 	}
 };
 
-// Partially specialise for TypedData
-template<typename T>
-struct CubicInterpolator< TypedData<T > >
-{
-	void operator()(const typename TypedData< T >::Ptr &y0,
-			const typename TypedData< T >::Ptr &y1,
-			const typename TypedData< T >::Ptr &y2,
-			const typename TypedData< T >::Ptr &y3,
-
-			double x,
-			typename TypedData< T >::Ptr &result) const
-	{
-		CubicInterpolator<T>()( y0->readable(), y1->readable(), y2->readable(), y3->readable(), x, result->writable());
-	}
-};
+} // namespace IECore

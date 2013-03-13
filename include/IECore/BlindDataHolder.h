@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,20 +49,18 @@ class BlindDataHolder : public Object
 		BlindDataHolder();
 		BlindDataHolder(CompoundDataPtr data);
 
-		BlindDataHolder( const BlindDataHolder &other );
-
 		virtual ~BlindDataHolder();
 
 		IE_CORE_DECLAREOBJECT( BlindDataHolder, Object );
 
 		/// Return the blind data for modification.
-		CompoundDataPtr blindData() const;
+		CompoundData *blindData();
 
-	protected:
-
-		CompoundDataPtr m_data;
+		const CompoundData *blindData() const;
 
 	private :
+
+		mutable CompoundDataPtr m_data;
 
 		static const unsigned int m_ioVersion;
 

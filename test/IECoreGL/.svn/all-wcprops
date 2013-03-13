@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 38
-/svn/!svn/ver/4829/trunk/test/IECoreGL
+/svn/!svn/ver/5147/trunk/test/IECoreGL
 END
 Camera.py
 K 25
@@ -19,7 +19,7 @@ ToGLConverterTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/4814/trunk/test/IECoreGL/ToGLConverterTest.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/ToGLConverterTest.py
 END
 Texture.py
 K 25
@@ -31,13 +31,7 @@ CurvesPrimitiveTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 61
-/svn/!svn/ver/3218/trunk/test/IECoreGL/CurvesPrimitiveTest.py
-END
-ShaderManager.py
-K 25
-svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/3218/trunk/test/IECoreGL/ShaderManager.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/CurvesPrimitiveTest.py
 END
 NameStateComponent.py
 K 25
@@ -51,12 +45,6 @@ svn:wc:ra_dav:version-url
 V 50
 /svn/!svn/ver/4576/trunk/test/IECoreGL/FontTest.py
 END
-Window.py
-K 25
-svn:wc:ra_dav:version-url
-V 48
-/svn/!svn/ver/3218/trunk/test/IECoreGL/Window.py
-END
 DeferredRenderer.py
 K 25
 svn:wc:ra_dav:version-url
@@ -67,13 +55,25 @@ All.py
 K 25
 svn:wc:ra_dav:version-url
 V 45
-/svn/!svn/ver/4829/trunk/test/IECoreGL/All.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/All.py
 END
 PrimitiveTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
 /svn/!svn/ver/4814/trunk/test/IECoreGL/PrimitiveTest.py
+END
+BufferTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/5075/trunk/test/IECoreGL/BufferTest.py
+END
+ShadingTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/5075/trunk/test/IECoreGL/ShadingTest.py
 END
 ToGLTextureConverter.py
 K 25
@@ -85,7 +85,7 @@ Image.py
 K 25
 svn:wc:ra_dav:version-url
 V 47
-/svn/!svn/ver/3218/trunk/test/IECoreGL/Image.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/Image.py
 END
 HitRecord.py
 K 25
@@ -97,13 +97,13 @@ TextTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/3218/trunk/test/IECoreGL/TextTest.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/TextTest.py
 END
 Selection.py
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/3218/trunk/test/IECoreGL/Selection.py
+/svn/!svn/ver/5147/trunk/test/IECoreGL/Selection.py
 END
 UserAttributesTest.py
 K 25
@@ -115,7 +115,13 @@ MeshPrimitiveTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/3233/trunk/test/IECoreGL/MeshPrimitiveTest.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/MeshPrimitiveTest.py
+END
+ShaderStateComponentTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/5075/trunk/test/IECoreGL/ShaderStateComponentTest.py
 END
 Orientation.py
 K 25
@@ -129,12 +135,6 @@ svn:wc:ra_dav:version-url
 V 47
 /svn/!svn/ver/3218/trunk/test/IECoreGL/Group.py
 END
-CameraController.py
-K 25
-svn:wc:ra_dav:version-url
-V 58
-/svn/!svn/ver/3218/trunk/test/IECoreGL/CameraController.py
-END
 LuminanceTextureTest.py
 K 25
 svn:wc:ra_dav:version-url
@@ -146,6 +146,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 62
 /svn/!svn/ver/3643/trunk/test/IECoreGL/CoordinateSystemTest.py
+END
+ShaderLoaderTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/5075/trunk/test/IECoreGL/ShaderLoaderTest.py
 END
 InstancingTest.py
 K 25
@@ -163,7 +169,7 @@ PointsPrimitive.py
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/3611/trunk/test/IECoreGL/PointsPrimitive.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/PointsPrimitive.py
 END
 AlphaTextureTest.py
 K 25
@@ -175,25 +181,25 @@ Renderer.py
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/4829/trunk/test/IECoreGL/Renderer.py
+/svn/!svn/ver/5107/trunk/test/IECoreGL/Renderer.py
 END
 Shader.py
 K 25
 svn:wc:ra_dav:version-url
 V 48
-/svn/!svn/ver/4472/trunk/test/IECoreGL/Shader.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/Shader.py
 END
 State.py
 K 25
 svn:wc:ra_dav:version-url
 V 47
-/svn/!svn/ver/3218/trunk/test/IECoreGL/State.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/State.py
 END
 DiskPrimitiveTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/3218/trunk/test/IECoreGL/DiskPrimitiveTest.py
+/svn/!svn/ver/5075/trunk/test/IECoreGL/DiskPrimitiveTest.py
 END
 ImmediateRenderer.py
 K 25

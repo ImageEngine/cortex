@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,14 +49,16 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 	def testVertexAttributes( self ) :
 
 		vertexSource = """
-		attribute vec2 st;
-		varying vec4 stColor;
+		in vec3 vertexP;
+		attribute vec2 vertexst;
+		varying out vec4 stColor;
 
 		void main()
 		{
-			gl_Position = ftransform();
+			vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );
+			gl_Position = gl_ProjectionMatrix * pCam;
 
-			stColor = vec4(st.x, st.y, 0.0, 1.0);
+			stColor = vec4(vertexst.x, vertexst.y, 0.0, 1.0);
 		}
 		"""
 

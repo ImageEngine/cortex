@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -628,13 +628,54 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
 	
-	def testGroupName( self ) :
+	def testName( self ) :
 		
 		torus = self.createTorus()
+		name = torus.createOutputNode( "name" )
+		name.parm( "name1" ).set( "testName" )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( name ).convert()
+		self.assertEqual( result.blindData()['name'].value, "testName" )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		
 		group = torus.createOutputNode( "group" )
 		group.parm( "crname" ).set( "testGroup" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( group ).convert()
 		self.assertEqual( result.blindData()['name'].value, "testGroup" )
+	
+	def testAttributeFilter( self ) :
+		
+		torus = self.createTorus()
+		
+		# add vertex normals
+		facet = torus.createOutputNode( "facet", node_name = "add_point_normals" )
+		facet.parm("postnml").set(True)
+		
+		# add a primitive colour attributes
+		primcol = facet.createOutputNode( "primitive", node_name = "prim_colour" )
+		primcol.parm("doclr").set(1)
+		primcol.parm("diffr").setExpression("rand($PR)")
+		primcol.parm("diffg").setExpression("rand($PR+1)")
+		primcol.parm("diffb").setExpression("rand($PR+2)")
+		
+		detail = primcol.createOutputNode( "attribcreate", node_name = "detail", exact_type_name=True )
+		detail.parm("name").set("detailAttr")
+		detail.parm("class").set(0)
+		detail.parm("type").set(1)
+		detail.parm("size").set(3)
+		detail.parm("value1").set(123)
+		detail.parm("value2").set(456.789) # can we catch it out with a float?
+		detail.parm("value3").set(789)
+		
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( detail )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cd", "N", "P", "detailAttr", "varmap" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "P" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^N ^varmap" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cd", "P", "detailAttr" ] )
+		# P must be converted
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
+		self.assertTrue( "P" in converter.convert().keys() )
 
 if __name__ == "__main__":
     unittest.main()

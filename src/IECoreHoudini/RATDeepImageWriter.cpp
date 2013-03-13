@@ -34,9 +34,13 @@
 
 #include "boost/format.hpp"
 
+#include "UT/UT_Matrix.h"
+#include "UT/UT_Options.h"
+
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 
+#include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/RATDeepImageWriter.h"
 
 using namespace IECore;
@@ -185,6 +189,12 @@ void RATDeepImageWriter::open()
 	if ( m_outputFile->open( fileName().c_str(), resolution.x, resolution.y ) )
 	{
 		m_outputFileName = fileName();
+		
+		// set the worldToCamera matrix
+		UT_Options *options = m_outputFile->getTBFOptions();
+		options->setOptionM4( "space:world", IECore::convert<UT_Matrix4>( worldToCameraParameter()->getTypedValue() ) );
+		
+		/// \todo: set the cameraToNDC parameters
 	}
 	else
 	{

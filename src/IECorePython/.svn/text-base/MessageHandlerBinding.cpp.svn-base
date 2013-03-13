@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -87,6 +87,11 @@ static MessageHandlerPtr currentHandler()
 	return MessageHandler::currentHandler();
 }
 
+static MessageHandlerPtr getDefaultHandler()
+{
+	return MessageHandler::getDefaultHandler();
+}
+
 void bindMessageHandler()
 {
 
@@ -95,12 +100,12 @@ void bindMessageHandler()
 	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrapPtr>( "MessageHandler" )
 		.def( init<>() )
 		.def( "handle", pure_virtual( &MessageHandler::handle ) )
-		.def( "pushHandler", &MessageHandler::pushHandler )
-		.staticmethod( "pushHandler" )
+		.def( "setDefaultHandler", &MessageHandler::setDefaultHandler )
+		.staticmethod( "setDefaultHandler" )
+		.def( "getDefaultHandler", &getDefaultHandler )
+		.staticmethod( "getDefaultHandler" )
 		.def( "currentHandler", &currentHandler )
 		.staticmethod( "currentHandler" )
-		.def( "popHandler", &MessageHandler::popHandler )
-		.staticmethod( "popHandler" )
 		.def( "output", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&MessageHandler::output )
 		.staticmethod( "output" )
 		.def( "levelAsString", MessageHandler::levelAsString )
@@ -144,6 +149,9 @@ void bindMessageHandler()
 		.value( "Info", MessageHandler::Info )
 		.value( "Debug", MessageHandler::Debug )
 		.value( "Invalid", MessageHandler::Invalid )
+	;
+
+	class_<MessageHandler::Scope, boost::noncopyable>( "_Scope", init<MessageHandler *>() )
 	;
 
 }

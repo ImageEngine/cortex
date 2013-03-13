@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,8 @@ namespace IECore
 namespace IECoreGL
 {
 
+IE_CORE_FORWARDDECLARE( Texture )
+
 /// Converts IECore::ImagePrimitive objects (or their CompoundData representation) into IECoreGL::Texture objects.
 /// Because its not possible to pass ImagePrimitives through calls that only accept types derived from IECore::Data.
 /// The converter also supports an IECore::CompoundData object as a representation of the image. This should have, at
@@ -79,6 +81,9 @@ class ToGLTextureConverter : public ToGLConverter
 
 	public :
 
+		typedef IECore::ImagePrimitive InputType;
+		typedef IECoreGL::Texture ResultType;
+		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLTextureConverter, ToGLTextureConverterTypeId, ToGLConverter );
 
 		ToGLTextureConverter( IECore::ConstObjectPtr toConvert = 0 );
@@ -92,6 +97,8 @@ class ToGLTextureConverter : public ToGLConverter
 
 		IECore::ImagePrimitivePtr imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const;
 
+		static ConverterDescription<ToGLTextureConverter> g_description;
+		static ConverterDescription<ToGLTextureConverter> g_compoundDataDescription;
 	
 };
 

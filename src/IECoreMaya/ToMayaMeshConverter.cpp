@@ -72,12 +72,14 @@ void ToMayaMeshConverter::assignDefaultShadingGroup( MObject &shape ) const
 	MGlobal::executeCommand( "sets -addElement initialShadingGroup " + fnDN.fullPathName() );
 }
 
-void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, MString *uvSetName ) const
+void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, const std::string &stIdPrimVarName, MString *uvSetName ) const
 {
 	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( sPrimVarName );
 	bool haveS = sIt != mesh->variables.end();
 	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( tPrimVarName );
 	bool haveT = tIt != mesh->variables.end();
+	IECore::PrimitiveVariableMap::const_iterator stIdIt = mesh->variables.find( stIdPrimVarName );
+	bool haveSTId = stIdIt != mesh->variables.end();
 
 	if ( haveS && haveT )
 	{
@@ -129,17 +131,13 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		assert( (int)v->readable().size() == numUVs );
 		vArray.setLength( numUVs );
 
-
-		MIntArray uvIds;
-		uvIds.setLength( numUVs );
 		for ( int i = 0; i < numUVs; i++)
 		{
 			uArray[i] = u->readable()[i];
 			// FromMayaMeshConverter does the opposite of this
 			vArray[i] = 1 - v->readable()[i];
-			uvIds[i] = i;
 		}
-		
+
 		if ( uvSetName )
 		{
 			bool setExists = false;
@@ -169,15 +167,59 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 				}
 			}
 		}
-
-		MStatus s = fnMesh.setUVs( uArray, vArray, uvSetName );
-		if ( !s )
+		
+		MIntArray uvIds;
+		uvIds.setLength( numUVs );
+		
+		if( haveSTId )
 		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set UVs." );
-			return;
+			IECore::ConstIntVectorDataPtr uvId = IECore::runTimeCast<const IECore::IntVectorData>(stIdIt->second.data);
+			if ( !uvId )
+			{
+				IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported type \"%s\"." ) % stIdPrimVarName % stIdIt->second.data->typeName() );
+				return;
+			}
+	
+			assert( (int)uvId->readable().size() == numUVs );
+
+			for ( int i = 0; i < numUVs; i++)
+			{
+				uvIds[i] = uvId->readable()[i];
+			}
+			// Set uv values one by one matching them with their uvId.
+			// Doing this now as the previous way was causing performance issues in maya
+			std::vector<int> uniqueIds;
+			
+			for ( int i = 0; i < numUVs; i++)
+			{
+				if( !(std::find(uniqueIds.begin(), uniqueIds.end(), uvIds[i]) != uniqueIds.end()) )
+				{
+					MStatus s = fnMesh.setUV( uvIds[i], uArray[i], vArray[i], uvSetName );
+					if ( !s )
+					{
+						IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set UVs." );
+						return;
+					}
+					uniqueIds.push_back( uvIds[i] );
+				}
+			}
+		}
+		else
+		{
+			// If for some reason we cannot find the uv indices, set the UVs using the old way.
+			for ( int i = 0; i < numUVs; i++)
+			{
+				uvIds[i] = i;
+			}
+			MStatus s = fnMesh.setUVs( uArray, vArray, uvSetName );
+			if ( !s )
+			{
+				IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set UVs." );
+				return;
+			}
 		}
 
-		fnMesh.assignUVs( polygonCounts, uvIds, uvSetName );
+		MStatus s = fnMesh.assignUVs( polygonCounts, uvIds, uvSetName );
 		if ( !s )
 		{
 			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to assign UVs." );
@@ -354,7 +396,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	bool haveDefaultUVs = false;
 	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( "s" );
 	IECore::RefCountedPtr sDataRef = ( sIt == mesh->variables.end() ) ? 0 : static_cast<IECore::RefCountedPtr>( sIt->second.data );
-	
+
 	/// Add named UV sets
 	std::set< std::string > uvSets;
 	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
@@ -371,8 +413,9 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 			{
 				MString uvSetName = uvSetNameStr.c_str();
 				std::string tName = uvSetNameStr + "_t";
+				std::string stIdName = uvSetNameStr + "Indices";
 
-				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, &uvSetName );
+				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, stIdName, &uvSetName );
 
 				uvSets.insert( uvSetNameStr );
 				
@@ -387,7 +430,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	/// Add default UV set if it isn't just a reference to a named set
 	if ( !haveDefaultUVs )
 	{
-		addUVSet( fnMesh, polygonCounts, mesh, "s", "t" );
+		addUVSet( fnMesh, polygonCounts, mesh, "s", "t", "stIndices" );
 	}
 	
 	/// We do the search again, but looking for primvars ending "_t", so we can catch cases where either "UVSETNAME_s" or "UVSETNAME_t" is present, but not both, taking care
@@ -406,8 +449,9 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 			{
 				MString uvSetName = uvSetNameStr.c_str();
 				std::string sName = uvSetNameStr + "_s";
-
-				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, &uvSetName );
+				std::string stIdName = uvSetNameStr + "Indices";
+				
+				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, stIdName, &uvSetName );
 				uvSets.insert( uvSetNameStr );
 			}
 		}

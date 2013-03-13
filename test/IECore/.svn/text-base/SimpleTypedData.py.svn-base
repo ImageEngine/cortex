@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -310,6 +310,20 @@ class SimpleTypedDataTest(unittest.TestCase):
 				v.value = b2
 				self.assertEqual( v.value, b2 )
 
+	def testInternedStringData( self ) :
+	
+		s = InternedStringData( "i" )
+		self.assertEqual( str( s ), "i" )
+		self.assertEqual( repr(s ), 'IECore.InternedStringData( "i" )' )
+
+		m = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Append )
+		s.save( m, "o" )
+		
+		s2 = Object.load( m, "o" )
+		
+		self.assertEqual( s2.value.value(), "i" )
+		self.assertEqual( s, s2 )
+		
 class BoolDataTest( unittest.TestCase ) :
 
 	def test( self ) :
@@ -330,7 +344,7 @@ class BoolDataTest( unittest.TestCase ) :
 		o = BoolData( True )
 		self.assertEqual( o.value, True )
 
-		iface = IndexedIOInterface.create( "test/IECore/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIO.create( "test/IECore/o.fio", IndexedIO.OpenMode.Write )
 
 		o.save( iface, "test" )
 		oo = Object.load( iface, "test" )

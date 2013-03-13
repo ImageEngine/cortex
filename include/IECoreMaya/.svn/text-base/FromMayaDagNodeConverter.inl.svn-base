@@ -41,7 +41,13 @@ namespace IECoreMaya
 template<class T>
 FromMayaDagNodeConverter::Description<T>::Description( const MFn::Type fromType, const IECore::TypeId resultType, bool defaultConversion )
 {
-	FromMayaDagNodeConverter::registerConverter( fromType, resultType, defaultConversion, creator );
+	FromMayaDagNodeConverter::registerConverter( MayaType( fromType, 0 ), resultType, defaultConversion, creator );
+}
+
+template<class T>
+FromMayaDagNodeConverter::Description<T>::Description( const MTypeId fromType, const IECore::TypeId resultType, bool defaultConversion )
+{
+	FromMayaDagNodeConverter::registerConverter( MayaType( MFn::kInvalid, fromType.id() ), resultType, defaultConversion, creator );
 }
 
 template<class T>

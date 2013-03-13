@@ -1,7 +1,7 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECore/data/cobFiles
 http://cortex-vfx.googlecode.com/svn
 
@@ -128,40 +128,6 @@ has-props
 
 823586
 
-header.cob
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-ff65aed356ffeff88b6d6ead693d0275
-2008-05-07T19:06:48.176575Z
-1349
-mark.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1318
-
 polySphereQuads.cob
 file
 
@@ -195,6 +161,40 @@ has-props
 
 
 45725
+
+header.cob
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+ff65aed356ffeff88b6d6ead693d0275
+2008-05-07T19:06:48.176575Z
+1349
+mark.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1318
 
 filteredBall.cob
 file
@@ -230,40 +230,6 @@ has-props
 
 179800
 
-intDataTen.cob
-file
-
-
-
-
-2011-12-21T09:26:37.000000Z
-8489d47077b083e0cf362b5738404210
-2007-09-16T17:46:04.446693Z
-93
-john.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2338
-
 meshPrimitiveV0.cob
 file
 
@@ -297,6 +263,40 @@ has-props
 
 
 67584
+
+intDataTen.cob
+file
+
+
+
+
+2011-12-21T09:26:37.000000Z
+8489d47077b083e0cf362b5738404210
+2007-09-16T17:46:04.446693Z
+93
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2338
 
 coordinateSystemBeforeTransforms.cob
 file

@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECoreGL
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-02-06T18:27:08.027234Z
+5147
+john.imageengine
 has-props
 
 
@@ -103,11 +103,11 @@ file
 
 
 
-2012-09-11T09:54:36.719124Z
-367119b45170a3c8d3269b1fb6a56a0d
-2012-09-04T09:42:04.123621Z
-4814
-thehaddonyoof
+2013-03-13T13:34:25.415466Z
+4d9ff9c6213df5d898eaf9a40e6fc726
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -129,7 +129,7 @@ thehaddonyoof
 
 
 
-3278
+5043
 
 CurvesPrimitiveTest.py
 file
@@ -137,11 +137,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-23d224abf30f266dfaa2fbb6271daa2a
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:25.415466Z
+a8eebcc554dccb9721fc41084650eb61
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -163,7 +163,7 @@ lucio.imageengine
 
 
 
-17085
+18182
 
 Texture.py
 file
@@ -198,40 +198,6 @@ danbethell
 
 
 3860
-
-ShaderManager.py
-file
-
-
-
-
-2011-12-21T09:26:43.000000Z
-f54a2b681008d3fbdd8fa941744a00a5
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2905
 
 NameStateComponent.py
 file
@@ -301,40 +267,6 @@ thehaddonyoof
 
 2204
 
-Window.py
-file
-
-
-
-
-2011-12-21T09:26:43.000000Z
-9841b86aecdf94bc6cbf9c285b512749
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2139
-
 DeferredRenderer.py
 file
 
@@ -375,11 +307,11 @@ file
 
 
 
-2012-09-11T09:54:36.719124Z
-a4075a3256b50c3b771218728d631d75
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-03-13T13:34:25.416467Z
+1f5ba171bdc18e776c24ddb06be58fd7
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -401,7 +333,7 @@ thehaddonyoof
 
 
 
-2894
+3044
 
 PrimitiveTest.py
 file
@@ -436,6 +368,74 @@ thehaddonyoof
 
 
 3162
+
+BufferTest.py
+file
+
+
+
+
+2013-03-13T13:34:25.416467Z
+85f610dcaad7c78fcd32db7847e3eb19
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2568
+
+ShadingTest.py
+file
+
+
+
+
+2013-03-13T13:34:25.416467Z
+c38419335c9ccbd78ac9f7795e6768b4
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+17707
 
 images
 dir
@@ -480,11 +480,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-b44eda970f0a19b7d45d470d5e202f50
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:25.417466Z
+67bcbddc269fdba573db9a77db1070eb
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -506,7 +506,7 @@ lucio.imageengine
 
 
 
-2615
+2365
 
 HitRecord.py
 file
@@ -548,11 +548,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-53b8d671a662b373af53cd4bcc3cfbea
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:25.417466Z
+453d01567cb7467ebeded20c4eda8cf6
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -574,7 +574,7 @@ lucio.imageengine
 
 
 
-3656
+5202
 
 Selection.py
 file
@@ -582,11 +582,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-3a307e6db2fefe273614f854723ffaf3
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:25.418467Z
+f3d75c73f87597de566ae1dbf205a3f7
+2013-02-06T18:27:08.027234Z
+5147
+john.imageengine
 
 
 
@@ -608,7 +608,7 @@ lucio.imageengine
 
 
 
-4846
+10947
 
 UserAttributesTest.py
 file
@@ -650,11 +650,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-48f9dc82623a91c48e0d2e946ab75f7e
-2010-04-21T23:35:53.116677Z
-3233
-andrewk.imageengine
+2013-03-13T13:34:25.418467Z
+731d3b04d4b2be89faed103dc5f86340
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -676,7 +676,41 @@ andrewk.imageengine
 
 
 
-3681
+3792
+
+ShaderStateComponentTest.py
+file
+
+
+
+
+2013-03-13T13:34:25.419466Z
+c1df3de3d534d77e7029a43a97c99949
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2401
 
 Orientation.py
 file
@@ -746,40 +780,6 @@ lucio.imageengine
 
 2576
 
-CameraController.py
-file
-
-
-
-
-2011-12-21T09:26:43.000000Z
-71b53a49a727518785d988ea0e2a0c07
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2846
-
 LuminanceTextureTest.py
 file
 
@@ -847,6 +847,40 @@ john.imageengine
 
 
 3959
+
+ShaderLoaderTest.py
+file
+
+
+
+
+2013-03-13T13:34:25.419466Z
+a87626e2a331b2329ca3df2d0c5626ee
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4336
 
 InstancingTest.py
 file
@@ -925,11 +959,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-1230d9504e5b4d9e7aacf4ef99a2b6ec
-2010-07-21T21:37:21.738949Z
-3611
-lucio.imageengine
+2013-03-13T13:34:25.419466Z
+677d756ce2a83c7eb951179a5c19fe84
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -951,7 +985,7 @@ lucio.imageengine
 
 
 
-9569
+18419
 
 Shader.py
 file
@@ -959,11 +993,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-9426fa7a9c580b02995620a8d775cf50
-2011-11-26T01:58:36.327730Z
-4472
-david.imageengine@gmail.com
+2013-03-13T13:34:25.420466Z
+adf50138ec72a59838b32f4b71f4f59a
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -985,7 +1019,7 @@ david.imageengine@gmail.com
 
 
 
-19421
+20332
 
 Renderer.py
 file
@@ -993,11 +1027,11 @@ file
 
 
 
-2012-09-11T09:54:36.739095Z
-20e30591df1707c6b54f4e50e9b64460
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-03-13T13:34:25.420466Z
+37d993993f340335170d8fecef21cd53
+2013-01-16T02:24:42.096040Z
+5107
+john.imageengine
 
 
 
@@ -1019,7 +1053,7 @@ thehaddonyoof
 
 
 
-42020
+42943
 
 AlphaTextureTest.py
 file
@@ -1064,11 +1098,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-8cccd9063333d9d014cf630400effc58
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:25.421466Z
+3edec5c32e8b6c59882e4b7e267d99b4
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1090,7 +1124,7 @@ lucio.imageengine
 
 
 
-2093
+5105
 
 DiskPrimitiveTest.py
 file
@@ -1098,11 +1132,11 @@ file
 
 
 
-2011-12-21T09:26:43.000000Z
-5e14554cefd9ffd20e5c87ba24714bb9
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:25.421466Z
+ed3188a35b25973a16812723568a0fd8
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1124,7 +1158,7 @@ lucio.imageengine
 
 
 
-3499
+5957
 
 ImmediateRenderer.py
 file

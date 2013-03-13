@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -166,6 +166,18 @@ string repr( std::string &x )
 	return "\"" + x + "\"";
 }
 
+template<>
+string str( InternedString &x )
+{
+	return x.value();
+}
+
+template<>
+string repr( InternedString &x )
+{
+	return "\"" + x.value() + "\"";
+}
+
 #define DEFINENUMERICSTRSPECIALISATION( TYPE )															\
 template<>																								\
 string repr<TYPE>( TYPE &x )																			\
@@ -223,6 +235,7 @@ DEFINETYPEDDATASTRSPECIALISATION( unsigned short );
 DEFINETYPEDDATASTRSPECIALISATION( int64_t );
 DEFINETYPEDDATASTRSPECIALISATION( uint64_t );
 DEFINETYPEDDATASTRSPECIALISATION( string );
+DEFINETYPEDDATASTRSPECIALISATION( InternedString );
 DEFINETYPEDDATASTRSPECIALISATION( half );
 DEFINETYPEDDATASTRSPECIALISATION( V2i );
 DEFINETYPEDDATASTRSPECIALISATION( V2f );
@@ -356,6 +369,8 @@ void bindAllSimpleTypedData()
 {
 	RunTimeTypedClass<StringData> sdc = bindSimpleData<StringData>();
 	sdc.def("__cmp__", &cmp<StringData> );
+	
+	bindSimpleData<InternedStringData>();
 
 	bindSimpleData<BoolData>();
 

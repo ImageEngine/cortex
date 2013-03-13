@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 38
-/svn/!svn/ver/4719/trunk/test/IECoreRI
+/svn/!svn/ver/5208/trunk/test/IECoreRI
 END
 Camera.py
 K 25
@@ -13,13 +13,13 @@ DTEXDeepImageReaderTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 65
-/svn/!svn/ver/4513/trunk/test/IECoreRI/DTEXDeepImageReaderTest.py
+/svn/!svn/ver/5004/trunk/test/IECoreRI/DTEXDeepImageReaderTest.py
 END
 DTEXDeepImageWriterTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 65
-/svn/!svn/ver/4513/trunk/test/IECoreRI/DTEXDeepImageWriterTest.py
+/svn/!svn/ver/5004/trunk/test/IECoreRI/DTEXDeepImageWriterTest.py
 END
 MotionTest.py
 K 25
@@ -73,7 +73,7 @@ SHWDeepImageReaderTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 64
-/svn/!svn/ver/4567/trunk/test/IECoreRI/SHWDeepImageReaderTest.py
+/svn/!svn/ver/5025/trunk/test/IECoreRI/SHWDeepImageReaderTest.py
 END
 ProceduralThreadingTest.py
 K 25
@@ -121,7 +121,7 @@ SHWDeepImageWriterTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 64
-/svn/!svn/ver/4567/trunk/test/IECoreRI/SHWDeepImageWriterTest.py
+/svn/!svn/ver/5025/trunk/test/IECoreRI/SHWDeepImageWriterTest.py
 END
 GXEvaluatorTest.py
 K 25
@@ -163,7 +163,7 @@ Renderer.py
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/4673/trunk/test/IECoreRI/Renderer.py
+/svn/!svn/ver/5208/trunk/test/IECoreRI/Renderer.py
 END
 PTCParticleWriter.py
 K 25
@@ -199,13 +199,13 @@ SLOReader.py
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/4269/trunk/test/IECoreRI/SLOReader.py
+/svn/!svn/ver/5174/trunk/test/IECoreRI/SLOReader.py
 END
 ArchiveRecord.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/2466/trunk/test/IECoreRI/ArchiveRecord.py
+/svn/!svn/ver/5107/trunk/test/IECoreRI/ArchiveRecord.py
 END
 MultipleContextsTest.py
 K 25

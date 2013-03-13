@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 68
-/svn/!svn/ver/4816/trunk/contrib/IECoreAlembic/include/IECoreAlembic
+/svn/!svn/ver/4896/trunk/contrib/IECoreAlembic/include/IECoreAlembic
 END
 FromAlembicPolyMeshConverter.h
 K 25
@@ -19,7 +19,7 @@ AlembicInput.h
 K 25
 svn:wc:ra_dav:version-url
 V 83
-/svn/!svn/ver/4806/trunk/contrib/IECoreAlembic/include/IECoreAlembic/AlembicInput.h
+/svn/!svn/ver/4896/trunk/contrib/IECoreAlembic/include/IECoreAlembic/AlembicInput.h
 END
 TypeIds.h
 K 25

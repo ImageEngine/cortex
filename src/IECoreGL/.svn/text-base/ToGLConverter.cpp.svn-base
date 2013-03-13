@@ -60,17 +60,22 @@ IECore::RunTimeTypedPtr ToGLConverter::convert()
 ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::TypeId resultType )
 {
 	Registrations &r = registrations();
-		
-	Registrations::const_iterator low = r.lower_bound( object->typeId() );
-	Registrations::const_iterator high = r.upper_bound( object->typeId() );
-	for( Registrations::const_iterator it = low; it != high; it++ )
-	{
-		if( it->second.resultType == resultType ||
-			IECore::RunTimeTyped::inheritsFrom( it->second.resultType, resultType )
-		)
+	
+	IECore::TypeId objectTypeId = object->typeId();
+	while( objectTypeId != InvalidTypeId )
+	{	
+		Registrations::const_iterator low = r.lower_bound( objectTypeId );
+		Registrations::const_iterator high = r.upper_bound( objectTypeId );
+		for( Registrations::const_iterator it = low; it != high; it++ )
 		{
-			return it->second.creator( object );
+			if( it->second.resultType == resultType ||
+				IECore::RunTimeTyped::inheritsFrom( it->second.resultType, resultType )
+			)
+			{
+				return it->second.creator( object );
+			}
 		}
+		objectTypeId = IECore::RunTimeTyped::baseTypeId( objectTypeId );
 	}
 	return 0;
 }

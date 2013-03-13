@@ -109,6 +109,12 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 	CompoundDataPtr typeHints = new CompoundData;
 	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:parameterTypeHints", typeHints ) );
 
+	// we lose the ordering of parameter names when we put them in result->parameters(),
+	// so we stick the correct order in the blind data as a workaround for anyone interested
+	// in the true ordering.
+	StringVectorDataPtr orderedParameterNames = new StringVectorData;
+	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:orderedParameterNames", orderedParameterNames ) );	
+
 	int numArgs = Slo_GetNArgs();
 	for( int i=1; i<=numArgs; i++ )
 	{
@@ -310,6 +316,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 
 		if( data )
 		{
+			orderedParameterNames->writable().push_back( arg->svd_name );
 			result->parameters().insert( CompoundDataMap::value_type( arg->svd_name, data ) );
 		}
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -82,6 +82,8 @@ class TestRATDeepImageWriter( IECoreHoudini.TestCase ) :
 		self.assertEqual( writer.parameters()['fileName'].getTypedValue(), TestRATDeepImageWriter.__output )
 		self.assertEqual( writer.parameters()['channelNames'].getValue(), IECore.StringVectorData( list("RGBA") ) )
 		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), IECore.V2i( 2048, 1556 ) )
+		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), IECore.M44f() )
+		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), IECore.M44f() )
 	
 	def testStrictChannels( self ) :
 		
@@ -114,6 +116,13 @@ class TestRATDeepImageWriter( IECoreHoudini.TestCase ) :
 		writer.parameters()['resolution'].setTypedValue( IECore.V2i( 2, 2 ) )
 		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), IECore.V2i( 2, 2 ) )
 		
+		wToC = IECore.M44f( 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11, 12.12, 13.13, 14.14, 15.15, 16.16 )
+		cToS = IECore.M44f( 10.1, 20.2, 30.3, 40.4, 50.5, 60.6, 7.7, 80.8, 90.9, 100.1, 110.11, 120.12, 130.13, 140.14, 150.15, 160.16 )
+		writer.parameters()['worldToCameraMatrix'].setTypedValue( wToC )
+		writer.parameters()['worldToNDCMatrix'].setTypedValue( cToS )
+		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), wToC )
+		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), cToS )
+		
 		p = reader.readPixel( 319, 45 )
 		self.assertEqual( p.channelNames(), ( "R", "G", "B", "A" ) )
 		self.assertEqual( p.numSamples(), 1 )
@@ -143,6 +152,9 @@ class TestRATDeepImageWriter( IECoreHoudini.TestCase ) :
 		reader = IECoreHoudini.RATDeepImageReader( TestRATDeepImageWriter.__output )
 		self.assertEqual( reader.dataWindow().size() + IECore.V2i( 1 ), IECore.V2i( 2, 2 ) )
 		self.assertEqual( reader.channelNames(), IECore.StringVectorData( list("RGBA") ) )
+		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( wToC, 1e-6 ) )
+		## \todo: enable test when RATDeepImageWriter supports the worldToNDC matrix
+		#self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( cToS, 1e-4 ) )
 		
 		rp = reader.readPixel( 0, 0 )
 		self.assertEqual( rp.channelNames(), tuple(reader.channelNames()) )

@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 46
-/svn/!svn/ver/4773/trunk/include/IECoreHoudini
+/svn/!svn/ver/5249/trunk/include/IECoreHoudini
 END
 ToHoudiniConverter.h
 K 25
@@ -19,7 +19,13 @@ GR_Cortex.h
 K 25
 svn:wc:ra_dav:version-url
 V 58
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/GR_Cortex.h
+/svn/!svn/ver/5075/trunk/include/IECoreHoudini/GR_Cortex.h
+END
+ROP_SceneCacheWriter.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/5213/trunk/include/IECoreHoudini/ROP_SceneCacheWriter.h
 END
 ToHoudiniGeometryConverter.inl
 K 25
@@ -37,13 +43,13 @@ FromHoudiniPolygonsConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 77
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/FromHoudiniPolygonsConverter.h
+/svn/!svn/ver/5228/trunk/include/IECoreHoudini/FromHoudiniPolygonsConverter.h
 END
 FnParameterisedHolder.h
 K 25
 svn:wc:ra_dav:version-url
 V 70
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/FnParameterisedHolder.h
+/svn/!svn/ver/5179/trunk/include/IECoreHoudini/FnParameterisedHolder.h
 END
 TypeTraits.h
 K 25
@@ -55,13 +61,19 @@ CoreHoudini.h
 K 25
 svn:wc:ra_dav:version-url
 V 60
-/svn/!svn/ver/4621/trunk/include/IECoreHoudini/CoreHoudini.h
+/svn/!svn/ver/5111/trunk/include/IECoreHoudini/CoreHoudini.h
 END
 RATDeepImageReader.h
 K 25
 svn:wc:ra_dav:version-url
 V 67
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/RATDeepImageReader.h
+/svn/!svn/ver/5112/trunk/include/IECoreHoudini/RATDeepImageReader.h
+END
+HoudiniScene.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/5239/trunk/include/IECoreHoudini/HoudiniScene.h
 END
 SOP_ProceduralHolder.h
 K 25
@@ -73,19 +85,25 @@ Convert.h
 K 25
 svn:wc:ra_dav:version-url
 V 56
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/Convert.h
+/svn/!svn/ver/5167/trunk/include/IECoreHoudini/Convert.h
 END
 TypeIds.h
 K 25
 svn:wc:ra_dav:version-url
 V 56
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/TypeIds.h
+/svn/!svn/ver/5175/trunk/include/IECoreHoudini/TypeIds.h
 END
 MessageHandler.h
 K 25
 svn:wc:ra_dav:version-url
 V 63
 /svn/!svn/ver/4773/trunk/include/IECoreHoudini/MessageHandler.h
+END
+SOP_SceneCacheSource.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/5154/trunk/include/IECoreHoudini/SOP_SceneCacheSource.h
 END
 ToHoudiniNumericAttribConverter.h
 K 25
@@ -105,6 +123,18 @@ svn:wc:ra_dav:version-url
 V 75
 /svn/!svn/ver/4619/trunk/include/IECoreHoudini/ToHoudiniPolygonsConverter.h
 END
+SceneCacheNode.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/5249/trunk/include/IECoreHoudini/SceneCacheNode.h
+END
+OBJ_SceneCacheGeometry.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/5154/trunk/include/IECoreHoudini/OBJ_SceneCacheGeometry.h
+END
 ToHoudiniStringAttribConverter.h
 K 25
 svn:wc:ra_dav:version-url
@@ -115,7 +145,7 @@ FromHoudiniGeometryConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 77
-/svn/!svn/ver/4757/trunk/include/IECoreHoudini/FromHoudiniGeometryConverter.h
+/svn/!svn/ver/5228/trunk/include/IECoreHoudini/FromHoudiniGeometryConverter.h
 END
 SOP_OpHolder.h
 K 25
@@ -145,13 +175,13 @@ FromHoudiniCurvesConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 75
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/FromHoudiniCurvesConverter.h
+/svn/!svn/ver/5228/trunk/include/IECoreHoudini/FromHoudiniCurvesConverter.h
 END
 SOP_ParameterisedHolder.h
 K 25
 svn:wc:ra_dav:version-url
 V 72
-/svn/!svn/ver/4770/trunk/include/IECoreHoudini/SOP_ParameterisedHolder.h
+/svn/!svn/ver/5179/trunk/include/IECoreHoudini/SOP_ParameterisedHolder.h
 END
 ToHoudiniGeometryConverter.h
 K 25
@@ -165,17 +195,17 @@ svn:wc:ra_dav:version-url
 V 72
 /svn/!svn/ver/4619/trunk/include/IECoreHoudini/ToHoudiniGroupConverter.h
 END
+OBJ_SceneCacheTransform.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/5154/trunk/include/IECoreHoudini/OBJ_SceneCacheTransform.h
+END
 FromHoudiniPointsConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 75
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/FromHoudiniPointsConverter.h
-END
-FromHoudiniConverter.h
-K 25
-svn:wc:ra_dav:version-url
-V 69
-/svn/!svn/ver/4619/trunk/include/IECoreHoudini/FromHoudiniConverter.h
+/svn/!svn/ver/5228/trunk/include/IECoreHoudini/FromHoudiniPointsConverter.h
 END
 SOP_ToHoudiniConverter.h
 K 25
@@ -183,17 +213,29 @@ svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/4619/trunk/include/IECoreHoudini/SOP_ToHoudiniConverter.h
 END
+FromHoudiniConverter.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/4619/trunk/include/IECoreHoudini/FromHoudiniConverter.h
+END
 ToHoudiniNumericAttribConverter.inl
 K 25
 svn:wc:ra_dav:version-url
 V 82
 /svn/!svn/ver/4619/trunk/include/IECoreHoudini/ToHoudiniNumericAttribConverter.inl
 END
+OBJ_SceneCacheNode.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/5249/trunk/include/IECoreHoudini/OBJ_SceneCacheNode.h
+END
 SOP_InterpolatedCacheReader.h
 K 25
 svn:wc:ra_dav:version-url
 V 76
-/svn/!svn/ver/4715/trunk/include/IECoreHoudini/SOP_InterpolatedCacheReader.h
+/svn/!svn/ver/5115/trunk/include/IECoreHoudini/SOP_InterpolatedCacheReader.h
 END
 FromHoudiniGeometryConverter.inl
 K 25
@@ -217,5 +259,5 @@ FromHoudiniGroupConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 74
-/svn/!svn/ver/4764/trunk/include/IECoreHoudini/FromHoudiniGroupConverter.h
+/svn/!svn/ver/5228/trunk/include/IECoreHoudini/FromHoudiniGroupConverter.h
 END

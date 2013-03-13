@@ -50,6 +50,8 @@ class ToArnoldPointsConverter : public ToArnoldShapeConverter
 
 	public :
 
+		typedef IECore::PointsPrimitive InputType;
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldPointsConverter, ToArnoldPointsConverterTypeId, ToArnoldShapeConverter );
 
 		ToArnoldPointsConverter( IECore::PointsPrimitivePtr toConvert );
@@ -58,6 +60,10 @@ class ToArnoldPointsConverter : public ToArnoldShapeConverter
 	protected :
 
 		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
+
+		static ConverterDescription<ToArnoldPointsConverter> g_description;
 
 };
 

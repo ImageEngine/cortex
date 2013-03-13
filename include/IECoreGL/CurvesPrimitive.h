@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,13 +35,15 @@
 #ifndef IECOREGL_CURVESPRIMITIVE_H
 #define IECOREGL_CURVESPRIMITIVE_H
 
-#include "IECoreGL/Primitive.h"
-
 #include "IECore/VectorTypedData.h"
 #include "IECore/CubicBasis.h"
 
+#include "IECoreGL/Primitive.h"
+
 namespace IECoreGL
 {
+
+IE_CORE_FORWARDDECLARE( Buffer )
 
 class CurvesPrimitive : public Primitive
 {
@@ -54,6 +56,10 @@ class CurvesPrimitive : public Primitive
 
 		virtual Imath::Box3f bound() const;
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
+		virtual void render( const State *currentState, IECore::TypeId style ) const;
+		/// Just renders each segment as linear with GL_LINES.
+		virtual void renderInstances( size_t numInstances = 1 ) const;
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -75,22 +81,19 @@ class CurvesPrimitive : public Primitive
 		IE_CORE_DECLAREPTR( GLLineWidth );
 		//@}
 
-	protected :
-
-		virtual void render( const State *state, IECore::TypeId style ) const;
-
 	private :
 
-		void renderLines( const State * state, IECore::TypeId style ) const;
-		void renderRibbons( const State * state, IECore::TypeId style ) const;
+		static const std::string &cubicLinesGeometrySource();
+		static const std::string &cubicRibbonsGeometrySource();
+		static const std::string &linearRibbonsGeometrySource();
 
-		Imath::Box3f m_bound;
-		IECore::CubicBasisf m_basis;
-		bool m_periodic;
-		IECore::IntVectorDataPtr m_vertsPerCurve;
-		float m_width;
-		IECore::V3fVectorData::ConstPtr m_points;
-
+		void ensureVertIds() const;
+		void ensureAdjacencyVertIds() const;
+		void ensureLinearAdjacencyVertIds() const;
+		
+		IE_CORE_FORWARDDECLARE( MemberData );
+		MemberDataPtr m_memberData;
+	
 };
 
 IE_CORE_DECLAREPTR( CurvesPrimitive );

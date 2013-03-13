@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -90,13 +90,24 @@ ObjectPtr DeepImageConverter::doOperation( const CompoundObject *operands )
 	}
 	
 	DeepImageWriterPtr writer = DeepImageWriter::create( m_outputFileParameter->getTypedValue() );
-
-	std::vector<std::string> channels;
-	reader->channelNames( channels );
-	writer->channelNamesParameter()->setValue( new StringVectorData( channels ) );
 	
-	Imath::Box2i dataWindow = reader->dataWindow();
+	CompoundObjectPtr header = reader->readHeader();
+	writer->channelNamesParameter()->setValue( header->member<StringVectorData>( "channelNames" ) );
+	
+	const Imath::Box2i dataWindow = header->member<Box2iData>( "dataWindow" )->readable();
 	writer->resolutionParameter()->setTypedValue( dataWindow.size() + Imath::V2i( 1 ) );
+	
+	M44fData *worldToCamera = header->member<M44fData>( "worldToCameraMatrix" );
+	if ( worldToCamera )
+	{
+		writer->worldToCameraParameter()->setValue( worldToCamera );
+	}
+	
+	M44fData *worldToNDC = header->member<M44fData>( "worldToNDCMatrix" );
+	if ( worldToNDC )
+	{
+		writer->worldToNDCParameter()->setValue( worldToNDC );
+	}
 	
 	for ( int y=dataWindow.min.y; y < dataWindow.max.y; ++y )
 	{

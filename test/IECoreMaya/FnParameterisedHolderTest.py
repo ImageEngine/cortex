@@ -859,6 +859,49 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.failUnless( isinstance( plug, maya.OpenMaya.MPlug ) )
 		self.failUnless( plug.isNull() )
 	
+	def testLsMethods( self ) :
+	
+		# create a couple of holders:
+		opHolderNode = maya.cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( opHolderNode )
+		fnOH.setOp( "floatParameter" )
+		
+		converterHolderNode = maya.cmds.createNode( "ieConverterHolder" )
+		fnCH = IECoreMaya.FnConverterHolder( converterHolderNode )
+		#fnCH.setOp( "floatParameter" )
+		
+		node = maya.cmds.createNode( "ieProceduralHolder" )
+		
+		node2 = maya.cmds.createNode( "ieProceduralHolder" )
+		
+		fnPH = IECoreMaya.FnProceduralHolder( node )
+		proc = IECore.ReadProcedural()
+		fnPH.setParameterised( proc )
+		
+		fnPH2 = IECoreMaya.FnProceduralHolder( node2 )
+		
+		# do an ls on the op holders: should only be one
+		opHolders = IECoreMaya.FnOpHolder.ls()
+		self.assertEqual( len( opHolders ), 1 )
+		self.failUnless( isinstance( opHolders[0], IECoreMaya.FnOpHolder ) )
+		self.assertEqual( opHolders[0].fullPathName(), opHolderNode )
+		
+		# do an ls on the procedural holders: should be two
+		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls() ), 2 )
+		
+		# do an ls on the procedural holders containing IECore.ReadProcedurals: should be one
+		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls( classType=IECore.ReadProcedural ) ), 1 )
+		
+		# find full path name of node holding ReadProcedural, and check it's the same as the one returned by ls:
+		node = maya.cmds.ls( node, l=True )[0]
+		self.assertEqual( IECoreMaya.FnProceduralHolder.ls( classType=IECore.ReadProcedural )[0].fullPathName(), node )
+		
+		# do an ls on the converter holders, this time just returning node names:
+		converterHolders = IECoreMaya.FnConverterHolder.ls( fnSets=False )
+		self.assertEqual( len( converterHolders ), 1 )
+		self.assertEqual( converterHolders[0], converterHolderNode )
+		
+	
 	def tearDown( self ) :
 
 		for f in [

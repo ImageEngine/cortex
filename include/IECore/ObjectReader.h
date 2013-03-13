@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef IE_CORE_OBJECTREADER_H
-#define IE_CORE_OBJECTEREADER_H
+#define IE_CORE_OBJECTREADER_H
 
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
@@ -68,7 +68,7 @@ class ObjectReader : public Reader
 
 		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
-		static IndexedIOInterfacePtr open( const std::string &fileName );
+		static IndexedIOPtr open( const std::string &fileName );
 
 	private :
 

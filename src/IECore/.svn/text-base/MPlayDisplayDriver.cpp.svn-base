@@ -31,7 +31,7 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
+#include <stdio.h>
 #include "boost/format.hpp"
 
 #include "IECore/MPlayDisplayDriver.h"

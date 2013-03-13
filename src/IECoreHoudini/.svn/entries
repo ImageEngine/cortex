@@ -1,14 +1,14 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreHoudini
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-08-01T22:44:12.748330Z
-4773
+2013-03-12T22:38:45.703310Z
+5250
 andrewk.imageengine
 has-props
 
@@ -134,10 +134,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-2da70d65a8cc44cf2f12ec1433546176
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.824466Z
+5d8a59e9fe378df22056c11332e89f5b
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -160,7 +160,7 @@ andrewk.imageengine
 
 
 
-7747
+7894
 
 SOP_ParameterisedHolder.cpp
 file
@@ -168,10 +168,10 @@ file
 
 
 
-2012-08-02T16:24:07.064190Z
-2983ebd8d1d9a5e8748b4e1142735e70
-2012-08-01T22:44:12.748330Z
-4773
+2013-03-13T13:36:23.824466Z
+1281e4f50f2115f178fff8f777431946
+2013-02-25T18:24:44.495735Z
+5202
 andrewk.imageengine
 has-props
 
@@ -194,7 +194,7 @@ has-props
 
 
 
-34486
+34963
 
 ToHoudiniGeometryConverter.cpp
 file
@@ -202,10 +202,10 @@ file
 
 
 
-2012-07-26T08:42:45.924788Z
-9e66c2346c7f1d273a4618e30639a616
-2012-07-25T18:15:44.725874Z
-4753
+2013-03-13T13:36:23.825466Z
+7fccc72ecf76822648c98111a460f7f0
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -228,7 +228,7 @@ andrewk.imageengine
 
 
 
-10238
+9826
 
 ToHoudiniGroupConverter.cpp
 file
@@ -236,10 +236,44 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-95d6925693b9066439a6baf13c44114f
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.825466Z
+71ccb28164449f638529c77c69832cb2
+2013-01-04T21:58:56.782654Z
+5056
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4956
+
+OBJ_SceneCacheTransform.cpp
+file
+
+
+
+
+2013-03-13T13:36:23.825466Z
+e4c37b295c4356a680966ac12bbcbb8e
+2013-02-08T02:39:15.409400Z
+5154
 andrewk.imageengine
 
 
@@ -262,7 +296,7 @@ andrewk.imageengine
 
 
 
-4765
+7809
 
 FromHoudiniPointsConverter.cpp
 file
@@ -270,10 +304,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-da13a3c215f675f4a3e5cc63703265fe
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.826466Z
+523e404b0629b6c04b5064feacbfe78d
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -296,7 +330,7 @@ andrewk.imageengine
 
 
 
-3044
+3086
 
 FromHoudiniConverter.cpp
 file
@@ -372,16 +406,16 @@ dir
 plugin
 dir
 
-SOP_InterpolatedCacheReader.cpp
+OBJ_SceneCacheNode.cpp
 file
 
 
 
 
-2012-07-19T11:27:19.798321Z
-e09c0bb68f992ef43859590e3c2fc9bd
-2012-06-14T23:25:21.807445Z
-4715
+2013-03-13T13:36:23.826466Z
+8f78535edb571cba4fe83cf2815072a9
+2013-03-12T22:38:45.703310Z
+5250
 andrewk.imageengine
 
 
@@ -404,7 +438,7 @@ andrewk.imageengine
 
 
 
-9942
+7183
 
 ToHoudiniCurvesConverter.cpp
 file
@@ -412,10 +446,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-c0d8c188a13829e49016af0eb918107e
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.826466Z
+06851a41657de7afc9f46da1d960379d
+2013-02-14T23:49:52.752933Z
+5168
 andrewk.imageengine
 
 
@@ -438,7 +472,41 @@ andrewk.imageengine
 
 
 
-6410
+6426
+
+SOP_InterpolatedCacheReader.cpp
+file
+
+
+
+
+2013-03-13T13:36:23.826466Z
+e91ff66fc443e442237bceec5e6e23b3
+2013-02-14T23:49:52.752933Z
+5168
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+13842
 
 ToHoudiniPointsConverter.cpp
 file
@@ -480,10 +548,10 @@ file
 
 
 
-2012-08-02T16:24:07.064190Z
-4702fe4e856fe6c68172b2291313f678
-2012-08-01T17:14:19.941894Z
-4769
+2013-03-13T13:36:23.827466Z
+9a77809e5cb83235e70e7deb03d4cff8
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -506,7 +574,7 @@ andrewk.imageengine
 
 
 
-10511
+12106
 
 ToHoudiniConverter.cpp
 file
@@ -548,11 +616,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-3f6e68ef17223b8aec974a762eb86582
-2012-03-13T23:11:23.868031Z
-4619
-andrewk.imageengine
+2013-03-13T13:36:23.827466Z
+9f448b626e07e246f33543c024cb74f8
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 has-props
 
 
@@ -574,18 +642,18 @@ has-props
 
 
 
-7495
+7366
 
-FromHoudiniPolygonsConverter.cpp
+ROP_SceneCacheWriter.cpp
 file
 
 
 
 
-2012-05-10T16:40:48.000000Z
-f41e2098995565bfe7f2b85a1093831f
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.827466Z
+04fcae0e98835c0f7c505f7701292f7f
+2013-03-07T23:57:43.505758Z
+5239
 andrewk.imageengine
 
 
@@ -608,7 +676,41 @@ andrewk.imageengine
 
 
 
-4489
+5858
+
+FromHoudiniPolygonsConverter.cpp
+file
+
+
+
+
+2013-03-13T13:36:23.828466Z
+23adcc20502cd390c0f5f57e613ab95f
+2013-03-06T19:55:13.816517Z
+5228
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4603
 
 NodePassData.cpp
 file
@@ -650,10 +752,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-f9cb442c6d603379df96cd30b6d6fdba
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.828466Z
+ac6b751d5ce3217f47ebdcb917aaa913
+2013-02-16T00:50:22.849498Z
+5179
 andrewk.imageengine
 has-props
 
@@ -676,7 +778,7 @@ has-props
 
 
 
-3905
+4181
 
 CoreHoudini.cpp
 file
@@ -684,10 +786,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-9d47032aac11bcd54f3c6ba647a6de1f
-2012-03-15T18:03:03.696377Z
-4621
+2013-03-13T13:36:23.828466Z
+1801e9a36947fd9d34826eff275cf53b
+2013-01-17T23:49:44.336419Z
+5111
 andrewk.imageengine
 has-props
 
@@ -710,7 +812,7 @@ has-props
 
 
 
-3491
+3306
 
 RATDeepImageReader.cpp
 file
@@ -718,10 +820,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-be1f15203d476788a842f00b3dc0c311
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.829466Z
+da16a449a4c8e0e67cae8552f9dfeab9
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -744,7 +846,41 @@ andrewk.imageengine
 
 
 
-5999
+7101
+
+HoudiniScene.cpp
+file
+
+
+
+
+2013-03-13T13:36:23.829466Z
+b228f17c96f4e6d44745418390b63d31
+2013-03-07T23:57:43.505758Z
+5239
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+20262
 
 HoudiniHeaderGenerator.cpp
 file
@@ -786,10 +922,10 @@ file
 
 
 
-2012-08-02T16:24:07.065191Z
-25e50a75324d5055453fe2366f421d67
-2012-08-01T21:29:58.326489Z
-4770
+2013-03-13T13:36:23.829466Z
+5bce59b66dd165fe8f0b2a554b1c78df
+2013-02-16T00:50:22.849498Z
+5179
 andrewk.imageengine
 has-props
 
@@ -812,7 +948,7 @@ has-props
 
 
 
-6118
+5889
 
 Convert.cpp
 file
@@ -820,10 +956,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-f9d703d33f50d65c2df170ab5f130628
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.830466Z
+0d94ca9a4f2c9af380f6e79fc43f6941
+2013-02-13T23:13:37.555212Z
+5167
 andrewk.imageengine
 
 
@@ -846,7 +982,7 @@ andrewk.imageengine
 
 
 
-3963
+4778
 
 MessageHandler.cpp
 file
@@ -854,10 +990,10 @@ file
 
 
 
-2012-08-02T16:24:07.065191Z
-49a0a5fb806122bcfe6b3d91ade2fe19
-2012-08-01T22:44:12.748330Z
-4773
+2013-03-13T13:36:23.830466Z
+bed61dd4f3787fb34f19d4aa8439e155
+2013-02-14T23:49:52.752933Z
+5168
 andrewk.imageengine
 
 
@@ -880,7 +1016,7 @@ andrewk.imageengine
 
 
 
-2829
+2835
 
 ToHoudiniNumericAttribConverter.cpp
 file
@@ -916,16 +1052,16 @@ andrewk.imageengine
 
 4923
 
-RATDeepImageWriter.cpp
+SOP_SceneCacheSource.cpp
 file
 
 
 
 
-2012-05-10T16:40:48.000000Z
-b82a7a482c6f3f7df6b5876019f2e12c
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.830466Z
+7241efa398be0d8882b56e327a979b3f
+2013-03-06T20:25:11.180373Z
+5230
 andrewk.imageengine
 
 
@@ -948,7 +1084,41 @@ andrewk.imageengine
 
 
 
-5909
+9838
+
+RATDeepImageWriter.cpp
+file
+
+
+
+
+2013-03-13T13:36:23.830466Z
+606c5dd5e723cda8e747946b3abe99e8
+2012-12-17T19:42:55.884294Z
+5004
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6252
 
 ToHoudiniPolygonsConverter.cpp
 file
@@ -956,10 +1126,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-84c93e3c79cf829c1868960909a1f135
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.831466Z
+1e864ac9e5ba7436f2dc94a241c054fc
+2013-02-14T23:49:52.752933Z
+5168
 andrewk.imageengine
 
 
@@ -982,7 +1152,7 @@ andrewk.imageengine
 
 
 
-3793
+3801
 
 ToHoudiniStringAttribConverter.cpp
 file
@@ -990,10 +1160,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-438c3b0001db958311922198f1922ab8
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:23.831466Z
+8bac0a434e838aaf9f4d00048be22be0
+2013-03-11T21:23:23.180558Z
+5245
 andrewk.imageengine
 
 
@@ -1016,7 +1186,7 @@ andrewk.imageengine
 
 
 
-6512
+6614
 
 FromHoudiniGeometryConverter.cpp
 file
@@ -1024,10 +1194,10 @@ file
 
 
 
-2012-07-26T08:42:45.926802Z
-2dd10854b10b702715995cbade98f662
-2012-07-26T01:17:32.379302Z
-4757
+2013-03-13T13:36:23.831466Z
+46a1ef7e7bc14dec05e349d8bc05d234
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -1050,7 +1220,75 @@ andrewk.imageengine
 
 
 
-21061
+22782
+
+OBJ_SceneCacheGeometry.cpp
+file
+
+
+
+
+2013-03-13T13:36:23.831466Z
+b05db0fe69817e8cc53a8f9913b6a1e7
+2013-02-09T01:28:55.740650Z
+5160
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3543
+
+SceneCacheNode.cpp
+file
+
+
+
+
+2013-03-13T13:36:23.832466Z
+50241bc32c877e816ba04841637ac024
+2013-03-12T22:31:18.067161Z
+5249
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+12584
 
 SOP_OpHolder.cpp
 file
@@ -1058,10 +1296,10 @@ file
 
 
 
-2012-08-02T16:24:07.066191Z
-bea5f886027a20aaf40f52a4507ec017
-2012-08-01T21:29:58.326489Z
-4770
+2013-03-13T13:36:23.832466Z
+010c68a7d628405da89bc6d53e35ccce
+2013-02-16T00:50:22.849498Z
+5179
 andrewk.imageengine
 has-props
 
@@ -1084,5 +1322,5 @@ has-props
 
 
 
-5305
+5094
 

@@ -1,13 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 49
-/svn/!svn/ver/4631/trunk/include/IECoreRI/private
+/svn/!svn/ver/5208/trunk/include/IECoreRI/private
 END
 RendererImplementation.h
 K 25
 svn:wc:ra_dav:version-url
 V 74
-/svn/!svn/ver/4631/trunk/include/IECoreRI/private/RendererImplementation.h
+/svn/!svn/ver/5208/trunk/include/IECoreRI/private/RendererImplementation.h
 END
 SXRendererImplementation.h
 K 25

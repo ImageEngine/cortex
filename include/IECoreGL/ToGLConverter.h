@@ -88,6 +88,7 @@ class ToGLConverter : public IECore::FromCoreConverter
 		{
 			public :			
 				ConverterDescription();
+				ConverterDescription( IECore::TypeId inputType, IECore::TypeId resultType );
 			private :
 				static ToGLConverterPtr creator( IECore::ConstObjectPtr object );
 		};

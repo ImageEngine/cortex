@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreRI
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-06-04T15:40:27.937268Z
-4694
-david.imageengine@gmail.com
+2013-03-01T03:10:55.637348Z
+5208
+john.imageengine
 has-props
 
 
@@ -32,10 +32,10 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-861aaacf7dbe7cc01a57a26cad7e676c
-2012-01-29T00:26:10.727922Z
-4575
+2013-03-13T13:34:42.151492Z
+04bc0e4680ccb09b6f3852369ef62732
+2012-12-20T19:19:39.989125Z
+5025
 andrewk.imageengine
 
 
@@ -58,7 +58,7 @@ andrewk.imageengine
 
 
 
-7484
+7625
 
 GXEvaluator.cpp
 file
@@ -100,10 +100,10 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-1f657df756560c52cb93f28058955c85
-2012-01-03T21:50:17.714250Z
-4513
+2013-03-13T13:34:42.152466Z
+4d005f78fe98cb8dded6fd578106fb32
+2012-12-17T19:42:55.884294Z
+5004
 andrewk.imageengine
 
 
@@ -126,7 +126,7 @@ andrewk.imageengine
 
 
 
-7087
+7011
 
 PTCParticleIO.cpp
 file
@@ -202,11 +202,11 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-6921036f47f20db104e3c7200c9eba97
-2012-03-27T17:26:16.508822Z
-4634
-david.imageengine@gmail.com
+2013-03-13T13:34:42.152466Z
+a335a938852e3495ae8a16142ce05903
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -228,7 +228,7 @@ david.imageengine@gmail.com
 
 
 
-14239
+14249
 
 SXExecutor.cpp
 file
@@ -338,11 +338,11 @@ file
 
 
 
-2012-07-19T11:27:19.497321Z
-be86180fb8f0f687a06f36dc8545088f
-2012-05-24T10:16:10.876470Z
-4675
-thehaddonyoof
+2013-03-13T13:34:42.153466Z
+3e525303b96d8e52f3b84e48e0135258
+2013-03-01T03:10:55.637348Z
+5208
+john.imageengine
 
 
 
@@ -364,7 +364,7 @@ thehaddonyoof
 
 
 
-52455
+54401
 
 ParameterList.cpp
 file
@@ -477,10 +477,10 @@ file
 
 
 
-2011-12-21T09:26:57.000000Z
-a34405fd7729eb87f6e4e338c18db891
-2011-06-23T22:00:31.832437Z
-4269
+2013-03-13T13:34:42.153466Z
+12810172f19ac9529c2df951c382222f
+2013-02-15T02:37:18.326317Z
+5174
 john.imageengine
 
 
@@ -503,7 +503,7 @@ john.imageengine
 
 
 
-9164
+9619
 
 SXRenderer.cpp
 file
@@ -579,10 +579,10 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-27b70de338faf35aa51ca3a99eab5e34
-2012-01-29T00:26:10.727922Z
-4575
+2013-03-13T13:34:42.154467Z
+00430723e46beb995e012ecf97a6cd10
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -605,7 +605,7 @@ andrewk.imageengine
 
 
 
-6189
+6969
 
 SXRendererImplementation.cpp
 file
@@ -647,10 +647,10 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-bf3d2b1b081e93ca4a307a2114ac70af
-2012-01-03T21:50:17.714250Z
-4513
+2013-03-13T13:34:42.154467Z
+5b9b20a5450a4a2f0f1d6ce20c39c3fb
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -673,7 +673,7 @@ andrewk.imageengine
 
 
 
-6448
+6883
 
 PTCParticleReader.cpp
 file

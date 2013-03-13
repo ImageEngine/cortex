@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -148,10 +148,10 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 		}
 	}
 	
-	CompoundData *mayaData = camera->blindData()->member<CompoundData>( "maya" );
+	const CompoundData *mayaData = camera->blindData()->member<CompoundData>( "maya" );
 	if ( mayaData )
 	{
-		V2fData *apertureData = mayaData->member<V2fData>( "aperture" );
+		const V2fData *apertureData = mayaData->member<V2fData>( "aperture" );
 		if ( apertureData )
 		{
 			Imath::V2f aperture = apertureData->readable();

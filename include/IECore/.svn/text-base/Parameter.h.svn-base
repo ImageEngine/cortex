@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,12 +35,11 @@
 #ifndef IE_CORE_PARAMETER_H
 #define IE_CORE_PARAMETER_H
 
-#include "IECore/Object.h"
-#include "IECore/Interned.h"
-
 #include <map>
 #include <vector>
 #include <string>
+
+#include "IECore/Object.h"
 
 namespace IECore
 {

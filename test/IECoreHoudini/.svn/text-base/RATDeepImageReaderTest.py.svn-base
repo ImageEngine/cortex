@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -103,6 +103,8 @@ class TestRATDeepImageReader( IECoreHoudini.TestCase ) :
 		self.assertRaises( RuntimeError, reader.channelNames )
 		self.assertRaises( RuntimeError, reader.dataWindow )
 		self.assertRaises( RuntimeError, reader.displayWindow )
+		self.assertRaises( RuntimeError, reader.worldToCameraMatrix )
+		self.assertRaises( RuntimeError, reader.worldToNDCMatrix )
 	
 	def testDCMBasics( self ) :
 	
@@ -112,6 +114,8 @@ class TestRATDeepImageReader( IECoreHoudini.TestCase ) :
 		self.assertEqual( reader.channelNames(), IECore.StringVectorData( [ "R", "G", "B", "A" ] ) )
 		self.assertEqual( reader.dataWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 639, 479 ) ) )
 		self.assertEqual( reader.displayWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 639, 479 ) ) )
+		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( IECore.M44f( -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ), 1e-6 ) )
+		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( IECore.M44f( -2.41421, 0, 0, 0, 0, 3.21895, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0 ), 1e-4 ) )
 		
 	def testDSMBasics( self, dsm = __dsmMono ) :
 		
@@ -121,7 +125,9 @@ class TestRATDeepImageReader( IECoreHoudini.TestCase ) :
 		self.assertEqual( reader.channelNames(), IECore.StringVectorData( [ "A" ] ) )
 		self.assertEqual( reader.dataWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 639, 479 ) ) )
 		self.assertEqual( reader.displayWindow(), IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 639, 479 ) ) )
-		
+		self.failUnless( reader.worldToCameraMatrix().equalWithAbsError( IECore.M44f( -1, 0, -1.22465e-16, 0, 0, 1, -0, 0, -1.22465e-16, 0, 1, 0, 0, 0, -0, 1 ), 1e-6 ) )
+		self.failUnless( reader.worldToNDCMatrix().equalWithAbsError( IECore.M44f( -2.41421, 0, 0, 0, 0, 3.21895, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0 ), 1e-4 ) )
+	
 	def testDCMHeader( self ) :
 	
 		reader = IECoreHoudini.RATDeepImageReader( TestRATDeepImageReader.__dcm )
@@ -130,6 +136,8 @@ class TestRATDeepImageReader( IECoreHoudini.TestCase ) :
 		self.assertEqual( header["dataWindow"].value, reader.dataWindow() )
 		self.assertEqual( header["displayWindow"].value, reader.displayWindow() )
 		self.assertEqual( header["channelNames"], reader.channelNames() )
+		self.failUnless( header["worldToCameraMatrix"].value.equalWithAbsError( reader.worldToCameraMatrix(), 1e-6 ) )
+		self.failUnless( header["worldToNDCMatrix"].value.equalWithAbsError( reader.worldToNDCMatrix(), 1e-6 ) )
 	
 	def testDSMHeader( self, dsm = __dsmMono ) :
 	
@@ -139,6 +147,8 @@ class TestRATDeepImageReader( IECoreHoudini.TestCase ) :
 		self.assertEqual( header["dataWindow"].value, reader.dataWindow() )
 		self.assertEqual( header["displayWindow"].value, reader.displayWindow() )
 		self.assertEqual( header["channelNames"], reader.channelNames() )
+		self.failUnless( header["worldToCameraMatrix"].value.equalWithAbsError( reader.worldToCameraMatrix(), 1e-6 ) )
+		self.failUnless( header["worldToNDCMatrix"].value.equalWithAbsError( reader.worldToNDCMatrix(), 1e-6 ) )
 	
 	def testDCMReadPixel( self ) :
 	

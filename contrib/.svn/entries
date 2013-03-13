@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/contrib
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-19T10:49:26.417340Z
-4860
-ashley.retallack@gmail.com
+2013-02-21T01:54:35.148143Z
+5195
+andrewk.imageengine
 
 
 
@@ -36,5 +36,8 @@ IECoreArnold
 dir
 
 for_review
+dir
+
+IECoreMantra
 dir
 

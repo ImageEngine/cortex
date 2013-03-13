@@ -1,14 +1,14 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECoreHoudini/ops/parameters/groupParam
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-07-27T18:23:17.244453Z
-4763
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -32,10 +32,10 @@ file
 
 
 
-2012-07-26T08:42:45.085740Z
-1ff5ace440171d51a35688d5c9baad69
-2012-07-26T02:00:54.966348Z
-4758
+2013-03-13T13:34:13.128673Z
+9bf1aa2816055c480340e069af6d7c13
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -58,7 +58,7 @@ andrewk.imageengine
 
 
 
-680
+720
 
 groupParam-2.py
 file

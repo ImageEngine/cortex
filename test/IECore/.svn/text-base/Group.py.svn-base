@@ -83,6 +83,30 @@ class TestGroup( unittest.TestCase ) :
 		self.assert_( not gg.children()[0].isSame(ggg.children()[0] ) )
 		self.assert_( not gg.state()[0].isSame(ggg.state()[0] ) )
 
+	def testStateAndChildOrder( self ) :
+		
+		# check the state/children don't get reordered when a group is written out to disk
+		# and read back in again:
+		g = Group()
+		
+		for i in range( 100 ):
+			g.addState( Shader("%d" % i,"ddyup") )
+			
+			child = Group()
+			child.blindData()["id"] = IntData( i )
+			g.addChild( child )
+		
+		ObjectWriter( g, "test/group.cob" ).write()
+		
+		ggg = ObjectReader( "test/group.cob" ).read()
+		
+		for i in range( 100 ):
+			
+			self.assertEqual( g.state()[i].name, ggg.state()[i].name )
+			self.assertEqual( g.children()[i].blindData()["id"].value, ggg.children()[i].blindData()["id"].value )
+			
+		
+
 	def testParent( self ) :
 
 		g = Group()
@@ -108,7 +132,73 @@ class TestGroup( unittest.TestCase ) :
 
 		del g
 		self.assert_( g2.parent() is None )
-
+	
+	def testAttributes( self ) :
+		
+		# create a little hierarchy
+		g = Group()
+		g2 = Group()
+		g3 = Group()
+		
+		g.addChild( g2 )
+		g2.addChild( g3 )
+		
+		# define an attribute at the top of the hierarchy
+		g.setAttribute( "toptest", BoolData( False ) )
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( False ) )
+		
+		# change our mind and set it to true:
+		g.setAttribute( "toptest", BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		
+		# add another attribute
+		g.setAttribute( "toptest2", BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest2" ), BoolData( True ) )
+		
+		
+		# make sure there's only one AttributeState on the group:
+		self.assertEqual( len( g.state() ), 1 )
+		
+		# define one in the middle
+		g2.setAttribute( "middletest", BoolData( True ) )
+		
+		# override the one at the top
+		g2.setAttribute( "toptest", BoolData( False ) )
+		
+		# define one at the bottom
+		g3.setAttribute( "bottomtest", BoolData( False ) )
+		
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		self.assertEqual( g.getAttribute( "middletest" ), None )
+		self.assertEqual( g.getAttribute( "bottomtest" ), None )
+		
+		self.assertEqual( g2.getAttribute( "toptest" ), BoolData( False ) )
+		self.assertEqual( g2.getAttribute( "middletest" ), BoolData( True ) )
+		self.assertEqual( g2.getAttribute( "bottomtest" ), None )
+		
+		self.assertEqual( g3.getAttribute( "toptest" ), BoolData( False ) )
+		self.assertEqual( g3.getAttribute( "middletest" ), BoolData( True ) )
+		self.assertEqual( g3.getAttribute( "bottomtest" ), BoolData( False ) )
+		
+		
+		# check that the final attribute state is returned by getAttribute:
+		g = Group()
+		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
+		g.addState( AttributeState( {"toptest": BoolData( True ) } ) )
+		
+		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		
+		# make sure attributes get added to existing attributeStates:
+		g = Group()
+		g.addState( Shader("yup","ddyup", {}) )
+		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
+		g.addState( Shader("yup","yup", {}) )
+		g.setAttribute( "blahblah", BoolData( True ) )
+		
+		self.assertEqual( len( g.state() ), 3 )
+		
+		
+	
 	def testExceptions( self ) :
 
 		g = Group()

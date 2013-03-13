@@ -26,5 +26,7 @@ class groupParam( IECore.Op ) :
 		for child in args["input"].children() :
 			if child.isInstanceOf( IECore.TypeId.Primitive ) :
 				return child.copy()
+		
+		return IECore.PointsPrimitive( 0 )
 
 IECore.registerRunTimeTyped( groupParam )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,8 @@
 using namespace IECore;
 using namespace std;
 
+static IndexedIO::EntryID g_membersEntry("members");
+
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CompoundObject );
 
 const unsigned int CompoundObject::m_ioVersion = 0;
@@ -76,31 +78,32 @@ void CompoundObject::copyFrom( const Object *other, CopyContext *context )
 void CompoundObject::save( SaveContext *context ) const
 {
 	Object::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container->mkdir( "members" );
-	container->chdir( "members" );
-		ObjectMap::const_iterator it;
-		for( it=m_members.begin(); it!=m_members.end(); it++ )
-		{
-			context->save( it->second, container, it->first );
-		}
-	container->chdir( ".." );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
+	container = container->subdirectory( g_membersEntry, IndexedIO::CreateIfMissing );
+	ObjectMap::const_iterator it;
+	for( it=m_members.begin(); it!=m_members.end(); it++ )
+	{
+		context->save( it->second, container, it->first );
+	}
 }
 
 void CompoundObject::load( LoadContextPtr context )
 {
 	Object::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	m_members.clear();
-	container->chdir( "members" );
-		IndexedIO::EntryList l = container->ls();
-		IndexedIO::EntryList::const_iterator it;
-		for( it=l.begin(); it!=l.end(); it++ )
-		{
-			m_members[it->id()] = context->load<Object>( container, it->id() );
-		}
-	container->chdir( ".." );
+	container = container->subdirectory( g_membersEntry );
+
+	IndexedIO::EntryIDList memberNames;
+	container->entryIds( memberNames );
+	IndexedIO::EntryIDList::const_iterator it;
+
+	for( it=memberNames.begin(); it!=memberNames.end(); it++ )
+	{
+		m_members[*it] = context->load<Object>( container, *it );
+	}
 }
 
 bool CompoundObject::isEqualTo( const Object *other ) const

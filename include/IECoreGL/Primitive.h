@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,17 +35,15 @@
 #ifndef IECOREGL_PRIMITIVE_H
 #define IECOREGL_PRIMITIVE_H
 
-#include "boost/tuple/tuple.hpp"
+#include "OpenEXR/ImathBox.h"
 
-#include "IECoreGL/Renderable.h"
-#include "IECoreGL/GL.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/Shader.h"
-
-#include "IECore/Primitive.h"
+#include "IECore/PrimitiveVariable.h"
 #include "IECore/VectorTypedData.h"
 
-#include "OpenEXR/ImathBox.h"
+#include "IECoreGL/GL.h"
+#include "IECoreGL/Renderable.h"
+#include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/Shader.h"
 
 namespace IECoreGL
 {
@@ -65,30 +63,58 @@ class Primitive : public Renderable
 		Primitive();
 		virtual ~Primitive();
 
-		/// Renders the Primitive in the current
-		/// OpenGL context. The Primitive will draw itself
-		/// using the style represented by state, allowing
-		/// representations such as wireframe over shaded etc.
-		/// It temporarily changes the shader parameters that 
-		/// match the primitive's uniform variables.
-		/// An exception is thrown if state->isComplete() is not
-		/// true.
-		///
-		/// The default implementation for this function calls
-		/// the protected render() method several times
-		/// in different OpenGL states, once for each style
-		/// present in state.
-		virtual void render( const State *state ) const;
-
-		/// Adds a primitive variable on this primitive.
-		/// Derived classes should implement any customized filtering and/or convertions or call the base class implementation.
-		/// Default implementation sets Constant variables as uniform shader parameters and all the
-		/// others as vertex shader parameters.
+		/// Adds a primitive variable to this primitive. Derived classes should implement any filtering
+		/// or conversions that are necessary and then call addVertexAttribute() or addUniformAttribute().
+		/// The default implementation calls addUniformAttribute() for uniform primitive variables and
+		/// addVertexAttribute() for all others.
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) = 0;
 
+		/// Returns the bounding box for the primitive.
 		virtual Imath::Box3f bound() const = 0;
+		
+		/// High level rendering function which renders in the styles represented by
+		/// currentState, allowing representations such as wireframe over shaded etc to
+		/// be achieved with a single call. The currentState must be complete and
+		/// already have been bound. Finer grained control over rendering can be achieved
+		/// by using the shaderSetup() and renderInstances() methods - in fact those methods
+		/// are used to implement this one.  
+		virtual void render( State *currentState ) const;
 
-
+		//! @name Lower level rendering methods
+		/// These methods are used to implement the higher level render() method - they
+		/// may also be called directly to implement custom rendering.
+		//////////////////////////////////////////////////////////////////////////////
+		/// This method returns a Shader::Setup binding the primitive to a shader for
+		/// rendering in a particular state. It may be used in conjunction with renderInstances()
+		/// to provide finer grained control over rendering. All vertex attributes are
+		/// mapped to shader parameters prefixed with "vertex" so for instance "P" will be
+		/// mapped to "vertexP". Uniform attributes are mapped directly to shader uniforms with
+		/// no prefix. This naming convention corresponds to the inputs defined by the default
+		/// source defined in the Shader class, and should be adopted when writing custom shaders.
+		///
+		/// Most classes will not need to override this method - reasons for overriding would be
+		/// to substitute in custom geometry or vertex shaders and/or to bind in attributes
+		/// not already specified with addUniformAttribute() or addVertexAttribute().
+		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
+		/// Adds the primitive variables held by this Primitive to the specified Shader::Setup.
+		/// Vertex attributes will be prefixed as specified, and for each vertex attribute
+		/// a boolean uniform parameter called "${prefix}${attributeName}Active" will also be
+		/// added so the shader can determine whether or not the values for that input are useful.
+		void addPrimitiveVariablesToShaderSetup( Shader::Setup *shaderSetup, const std::string &vertexPrefix = "vertex", GLuint vertexDivisor = 0 ) const;
+		/// Renders the primitive using the specified state and with a particular style.
+		/// The style is specified using the TypeId of the StateComponent representing that style
+		/// (e.g. PrimitiveWireframeTypeId is passed for wireframe rendering).
+		///
+		/// The default implementation calls renderInstances() but derived classes may override it
+		/// to modify their drawing based on the state. A Shader::Setup
+		/// created for this primitive must be bound before calling this method.
+		virtual void render( const State *currentState, IECore::TypeId style ) const;
+		/// Renders a number of instances of the primitive by issuing a single call to
+		/// glDrawElementsInstanced() or glDrawArraysInstanced(). A Shader::Setup created for this
+		/// primitive must be bound before calling this method.
+		virtual void renderInstances( size_t numInstances = 1 ) const = 0;
+		///@}
+		
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
 		/// Primitive objects.
@@ -117,59 +143,24 @@ class Primitive : public Renderable
 
 	protected :
 
-		/// Must be implemented by subclasses. This function is called several
-		/// times by the standard render() call, once for each style of rendering
-		/// requested in state (wireframe, solid etc). The TypeId of the StateComponent
-		/// representing that style is passed so that the drawing can be optimised
-		/// for the particular style (e.g. PrimitiveWireframeTypeId is passed for
-		/// wireframe rendering).
-		virtual void render( const State *state, IECore::TypeId style ) const = 0;
-
+		/// Called by derived classes to register a uniform attribute. There are no type or length checks on this call.
+		void addUniformAttribute( const std::string &name, IECore::ConstDataPtr data );
 		/// Called by derived classes to register a vertex attribute. There are no type or length checks on this call.
 		void addVertexAttribute( const std::string &name, IECore::ConstDataPtr data );
 
-		/// Called by derived classes to register a uniform attribute. There are no type or length checks on this call.
-		void addUniformAttribute( const std::string &name, IECore::ConstDataPtr data );
-
-		template<typename T>
-		typename IECore::TypedData<T>::ConstPtr getUniformAttribute( const std::string &name );
-
-		template<typename T>
-		typename IECore::TypedData< std::vector<T> >::ConstPtr getVertexAttribute( const std::string &name );
-
-		/// Can be called from a derived class' render() method to set
-		/// vertex parameters of the current shader based on the
-		/// data from vertex attributes. Only vertex parameter that matches the given
-		/// length will be considered. This must /not/ be called unless the style
-		/// parameter passed to render is PrimitiveSolid - in all other cases no shader
-		/// is bound and an Exception will result.
-		void setVertexAttributes( unsigned length ) const;
-		/// Can be called from a derived class' render() method to
-		/// set uniform parameters of the current shader based on a single element of
-		/// data from the vertex attributes. Only vertex parameter that matches the given
-		/// length will be considered. This must /not/ be called unless the
-		/// style parameter passed to render is PrimitiveSolid - in all other cases
-		/// no shader is bound and an Exception will result.
-		void setVertexAttributesAsUniforms( unsigned length, unsigned int vertexIndex ) const;
 		/// Convenience function for use in render() implementations. Returns
 		/// true if TransparentShadingStateComponent is true and
 		/// PrimitiveTransparencySortStateComponent is true.
 		bool depthSortRequested( const State *state ) const;
 
-		/// This method is called by Primitive::render() function but it can also be called
-		/// by derived classes when they use other primitives and call render(state,style)
-		/// directly, like TextPrimitive does.
-		void setupVertexAttributes( Shader *s ) const;
-
 	private :
 
-		typedef std::vector< boost::tuple< Shader::VertexToUniform, size_t > > UniformDataMap;
-		typedef std::vector< boost::tuple< GLint, IECore::ConstDataPtr, size_t > > VertexDataMap;
-
-		mutable Shader* m_shaderSetup;
-		mutable UniformDataMap m_uniformMap;	// holds the uniform shader attributes that match non-const prim vars.
-		mutable VertexDataMap m_vertexMap;	// holds the vertex shader attributes that match non-const prim vars.
-
+		typedef std::vector<Shader::SetupPtr> ShaderSetupVector;
+		mutable ShaderSetupVector m_shaderSetups;
+		
+		mutable Shader::SetupPtr m_boundSetup;
+		const Shader::Setup *boundSetup() const;
+		
 		typedef std::map<std::string, IECore::ConstDataPtr> AttributeMap;
 		AttributeMap m_vertexAttributes;
 		AttributeMap m_uniformAttributes;
@@ -179,7 +170,5 @@ class Primitive : public Renderable
 IE_CORE_DECLAREPTR( Primitive );
 
 } // namespace IECoreGL
-
-#include "IECoreGL/Primitive.inl"
 
 #endif // IECOREGL_PRIMITIVE_H

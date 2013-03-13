@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,6 +64,7 @@ IECORE_DECLARE_TYPEDDATA( UShortVectorData, std::vector<unsigned short>, unsigne
 IECORE_DECLARE_TYPEDDATA( Int64VectorData, std::vector<int64_t>, int64_t, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( UInt64VectorData, std::vector<uint64_t>, uint64_t, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( StringVectorData, std::vector<std::string>, std::string, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( InternedStringVectorData, std::vector<InternedString>, InternedString, SharedDataHolder )
 
 // vectors of Imath types
 

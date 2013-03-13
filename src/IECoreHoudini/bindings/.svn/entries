@@ -1,14 +1,14 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreHoudini/bindings
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-07-27T19:06:36.168153Z
-4764
+2013-03-07T23:57:43.505758Z
+5239
 andrewk.imageengine
 has-props
 
@@ -100,10 +100,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-0e0e37d4a3142ded58a5d284e0d1ed41
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:20.686466Z
+b28559a17aadc252fa98924d431e8ed5
+2013-02-16T00:50:22.849498Z
+5179
 andrewk.imageengine
 
 
@@ -126,7 +126,7 @@ andrewk.imageengine
 
 
 
-2622
+2705
 
 ToHoudiniGroupConverterBinding.cpp
 file
@@ -202,10 +202,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-bbe7089f27b40297bf276cd5f5ba6962
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:20.686466Z
+a902cb672137154b91604931f790e2bd
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -263,6 +263,40 @@ andrewk.imageengine
 
 
 2181
+
+HoudiniSceneBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:20.686466Z
+0a6174bdf651fa1f2ae15d3ebc369b91
+2013-03-07T23:57:43.505758Z
+5239
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3016
 
 ToHoudiniCurvesConverterBinding.cpp
 file
@@ -366,6 +400,40 @@ andrewk.imageengine
 
 2242
 
+SceneCacheNodeBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:20.687467Z
+f35e3d75ddc1719b71b0e2894c098543
+2013-02-19T19:02:22.567454Z
+5184
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3170
+
 ToHoudiniPointsConverterBinding.cpp
 file
 
@@ -440,10 +508,10 @@ file
 
 
 
-2012-08-02T16:24:07.017190Z
-bee0b33093979a37ce91324c76d57b53
-2012-07-27T19:06:36.168153Z
-4764
+2013-03-13T13:36:20.687467Z
+2c23a214da236e258329db5aa45f88f2
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -466,7 +534,7 @@ andrewk.imageengine
 
 
 
-2510
+2508
 
 ToHoudiniConverterBinding.cpp
 file
@@ -542,10 +610,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-8ff94ab0b9c4a8221f5065cc705fd9c0
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:36:20.687467Z
+200a9db4fe9edd0ff13bf3d13bc5f46c
+2013-02-15T20:02:03.165860Z
+5175
 andrewk.imageengine
 
 
@@ -568,7 +636,7 @@ andrewk.imageengine
 
 
 
-4562
+4609
 
 IECoreHoudiniModule.cpp
 file
@@ -576,10 +644,10 @@ file
 
 
 
-2012-08-02T16:24:07.017190Z
-0e3b33bcd2530e4dec0a67c72fa678b5
-2012-07-26T20:36:57.712964Z
-4762
+2013-03-13T13:36:20.688466Z
+d2876282518939643b74ea4d8eb15006
+2013-02-15T20:02:03.165860Z
+5175
 andrewk.imageengine
 has-props
 
@@ -602,5 +670,5 @@ has-props
 
 
 
-5106
+5264
 

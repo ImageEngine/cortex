@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/python/IECore
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-08-10T22:56:00.769685Z
-4787
-thehaddonyoof
+2013-02-13T01:52:32.301213Z
+5164
+lucio.imageengine
 has-props
 
 
@@ -542,11 +542,11 @@ file
 
 
 
-2011-12-21T09:26:44.000000Z
-713d05d732d9acf0645369303c9f4cfd
-2010-03-11T17:43:57.331220Z
-3029
-lucio.imageengine
+2013-03-13T13:34:25.679537Z
+f4a465ee65b283c8f6ea89bc5c92dbfc
+2013-01-19T01:02:27.415096Z
+5117
+john.imageengine
 
 
 
@@ -568,7 +568,7 @@ lucio.imageengine
 
 
 
-4607
+4600
 
 SequenceCpOp.py
 file
@@ -644,11 +644,11 @@ file
 
 
 
-2011-12-21T09:26:44.000000Z
-fe96c2e74ea67476d05760c98d729147
-2010-03-11T17:43:57.331220Z
-3029
-lucio.imageengine
+2013-03-13T13:34:25.679537Z
+b226b5ddd09ab206f8a95304eca44eed
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -670,7 +670,7 @@ lucio.imageengine
 
 
 
-6905
+6993
 
 RelativePreset.py
 file
@@ -780,10 +780,10 @@ file
 
 
 
-2012-07-19T11:27:18.474321Z
-ccaa14e478a363ea141d67578aa3890a
-2012-05-18T00:26:46.315203Z
-4671
+2013-03-13T13:34:25.679537Z
+83fe458bbbf99c617f3091b4b1722bf4
+2012-11-20T18:50:07.204170Z
+4921
 andrewk.imageengine
 
 
@@ -806,7 +806,7 @@ andrewk.imageengine
 
 
 
-4261
+4268
 
 FileExaminer.py
 file
@@ -882,11 +882,11 @@ file
 
 
 
-2011-12-21T09:26:44.000000Z
-46221ed3585272a02bde94be23af98ca
-2010-03-17T00:53:39.907639Z
-3066
-john.imageengine
+2013-03-13T13:34:25.680466Z
+6f6a9d336dc92c7da38445fc4a408140
+2012-11-20T18:50:07.204170Z
+4921
+andrewk.imageengine
 
 
 
@@ -908,7 +908,7 @@ john.imageengine
 
 
 
-3036
+3019
 
 SWAReader.py
 file
@@ -1154,11 +1154,11 @@ file
 
 
 
-2012-05-10T16:40:43.000000Z
-bd30270306edbe6fd351d788e06a90fb
-2012-03-08T12:12:54.307845Z
-4617
-thehaddonyoof
+2013-03-13T13:34:25.680466Z
+00f16a85ffd3d65d6ed3d21016a95519
+2013-01-31T21:24:18.683777Z
+5135
+john.imageengine
 
 
 
@@ -1180,7 +1180,7 @@ thehaddonyoof
 
 
 
-22752
+23593
 
 SequenceCatOp.py
 file
@@ -1290,11 +1290,11 @@ file
 
 
 
-2012-07-19T11:27:18.474321Z
-b4c9a42d5ff776a2862ee60f2152de6f
-2012-06-06T01:09:50.820697Z
-4699
-andrewk.imageengine
+2013-03-13T13:34:25.680466Z
+ca81e9ab7408d24f21cab40450153d27
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -1316,7 +1316,7 @@ andrewk.imageengine
 
 
 
-11493
+11624
 
 FileSequenceFunctions.py
 file
@@ -1528,11 +1528,11 @@ file
 
 
 
-2011-12-21T09:26:44.000000Z
-51d3a18a4376232ebcc10c1d226828a5
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:34:25.681466Z
+4e3d60b832ec65a380b3412c5dbd3ceb
+2013-02-13T01:52:32.301213Z
+5164
+lucio.imageengine
 
 
 
@@ -1554,7 +1554,7 @@ mark.imageengine
 
 
 
-2315
+2675
 
 ParameterOverwriting.py
 file
@@ -1562,11 +1562,11 @@ file
 
 
 
-2011-12-21T09:26:44.000000Z
-dcfb2622b06261cc981ed787089ac92e
-2010-03-15T23:45:52.765836Z
-3053
-john.imageengine
+2013-03-13T13:34:25.681466Z
+f83b54f625a3671f9c59a08ec6965d54
+2013-01-07T19:31:16.777874Z
+5062
+lucio.imageengine
 
 
 
@@ -1588,7 +1588,7 @@ john.imageengine
 
 
 
-3520
+3123
 
 Log.py
 file
@@ -1698,11 +1698,11 @@ file
 
 
 
-2011-12-21T09:26:44.000000Z
-880e632821e19ab24fe71c153b3fbfb3
-2011-06-02T18:21:30.168436Z
-4238
-david.imageengine@gmail.com
+2013-03-13T13:34:25.681466Z
+a3d149123aa38562b7aa4178a18e6ad5
+2012-11-20T18:50:07.204170Z
+4921
+andrewk.imageengine
 
 
 
@@ -1724,7 +1724,7 @@ david.imageengine@gmail.com
 
 
 
-8123
+8135
 
 MenuItemDefinition.py
 file
@@ -2174,10 +2174,10 @@ file
 
 
 
-2011-12-21T09:26:44.000000Z
-069e121dc24c957e970278e041dc48d4
-2010-09-22T23:52:27.860043Z
-3789
+2013-03-13T13:34:25.681466Z
+9e05c8de58311279bface9df75b58a31
+2013-01-16T02:24:42.096040Z
+5107
 john.imageengine
 
 
@@ -2200,7 +2200,7 @@ john.imageengine
 
 
 
-2103
+2042
 
 ParameterAlgo.py
 file

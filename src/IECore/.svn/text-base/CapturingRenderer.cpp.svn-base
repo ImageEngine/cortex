@@ -53,7 +53,9 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/Group.h"
 #include "IECore/AttributeState.h"
+#include "IECore/Shader.h"
 #include "IECore/MatrixTransform.h"
+#include "IECore/Light.h"
 
 using namespace std;
 using namespace tbb;
@@ -251,8 +253,43 @@ class CapturingRenderer::Implementation
 				}
 			}
 			
-			return 0;
+			// if the attribute's not defined in the local state, maybe it's defined on the group, or one
+			// of its parents?
+			return stack.back().group->getAttribute( name );
 		}
+		
+		void light( const std::string &name, const std::string &handle, const CompoundDataMap &parameters )
+		{
+			ContextPtr context = currentContext();
+			if( !context )
+			{
+				return;
+			}
+			
+			Context::State &state = context->stack.back();
+			state.lights.push_back( new Light( name, handle, parameters ) );
+			if( state.group->children().size() )
+			{
+				state.canCollapseGroups = false;
+			}
+		}
+		
+		void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters )
+		{
+			ContextPtr context = currentContext();
+			if( !context )
+			{
+				return;
+			}
+			
+			Context::State &state = context->stack.back();
+			state.shaders.push_back( new Shader( name, type, parameters ) );
+			if( state.group->children().size() )
+			{
+				state.canCollapseGroups = false;
+			}
+		}
+		
 		
 		void primitive( PrimitivePtr primitive, const PrimitiveVariableMap &primVars )
 		{
@@ -312,7 +349,10 @@ class CapturingRenderer::Implementation
 			}
 			else
 			{
+				// enclose this in an attribute block to prevent leaking:
+				attributeBegin();
 				procedural->render( renderer );
+				attributeEnd();
 			}
 		}
 	
@@ -338,6 +378,8 @@ class CapturingRenderer::Implementation
 				
 				GroupPtr group;
 				CompoundDataMap attributes;
+				std::vector< ShaderPtr > shaders;
+				std::vector<LightPtr> lights;
 				M44f localTransform;
 				M44f worldTransform;
 				bool canCollapseGroups;
@@ -353,13 +395,6 @@ class CapturingRenderer::Implementation
 			{
 				stack.push_back( State() );
 				State &state = stack.back();
-				for( StateStack::const_iterator it=parent->stack.begin(); it!=parent->stack.end(); it++ )
-				{
-					for( CompoundDataMap::const_iterator dIt=it->attributes.begin(); dIt!=it->attributes.end(); dIt++ )
-					{
-						state.attributes.insert( *dIt );
-					}
-				}
 				state.worldTransform = parent->stack.back().worldTransform;
 			}
 		
@@ -585,6 +620,18 @@ class CapturingRenderer::Implementation
 				}
 				wrapper->addState( wrapperAttributeState );
 			}
+			if( state.shaders.size() )
+			{
+				for( std::vector< ShaderPtr >::const_iterator it = state.shaders.begin(); it!=state.shaders.end(); it++ )
+				{
+					wrapper->addState( (*it)->copy() );
+				}
+			}
+			
+			for( std::vector<LightPtr>::const_iterator it = state.lights.begin(); it!=state.lights.end(); it++ )
+			{
+				wrapper->addState( (*it)->copy() );
+			}
 			
 			if( state.localTransform != M44f() )
 			{
@@ -610,7 +657,19 @@ class CapturingRenderer::Implementation
 				}
 				state.group->addState( attributeState );
 			}
+			if( state.shaders.size() )
+			{
+				for( std::vector< ShaderPtr >::const_iterator it = state.shaders.begin(); it!=state.shaders.end(); it++ )
+				{
+					state.group->addState( (*it)->copy() );
+				}
+			}
 			
+			for( std::vector<LightPtr>::const_iterator it = state.lights.begin(); it!=state.lights.end(); it++ )
+			{
+				state.group->addState( (*it)->copy() );
+			}
+				
 			if( state.localTransform != M44f() )
 			{
 				state.group->setTransform( new MatrixTransform( state.localTransform ) );
@@ -741,12 +800,12 @@ ConstDataPtr CapturingRenderer::getAttribute( const std::string &name ) const
 
 void CapturingRenderer::shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "CapturingRenderer::shader", "Not implemented" );
+	m_implementation->shader( type, name, parameters );
 }
 
 void CapturingRenderer::light( const std::string &name, const std::string &handle, const CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "CapturingRenderer::light", "Not implemented" );
+	m_implementation->light( name, handle, parameters );
 }
 
 void CapturingRenderer::illuminate( const std::string &lightHandle, bool on )

@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -83,5 +84,66 @@ class CameraControllerTest( unittest.TestCase ) :
 		self.assertEqual( near, IECore.V3f( 0, 0, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 0, 0, -10 ) )
 
+	def testProjectOrthographic( self ) :
+	
+		camera = IECore.Camera()
+		camera.parameters()["clippingPlanes"] = IECore.V2f( .1, 10 )
+		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) )
+		camera.parameters()["resolution"] = IECore.V2i( 500, 250 )
+		camera.parameters()["projection"] = IECore.StringData( "orthographic" )
+		
+		controller = IECore.CameraController( camera )
+	
+		r = IECore.Rand48()
+		for i in range( 0, 100 ) :
+			rasterPosition = IECore.V2i( r.nexti() % 500, r.nexti() % 250 )
+			near, far = controller.unproject( rasterPosition )
+			nearProjected = controller.project( near )
+			farProjected = controller.project( far )
+			self.failUnless( nearProjected.equalWithAbsError( farProjected, 0.0001 ) )
+			self.failUnless(
+				IECore.V2f( rasterPosition.x, rasterPosition.y ).equalWithAbsError(
+					nearProjected, 0.0001
+				)
+			)
+	
+	def testProjectPerspective( self ) :
+	
+		camera = IECore.Camera()
+		camera.parameters()["clippingPlanes"] = IECore.V2f( .1, 10 )
+		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -1, -.5 ), IECore.V2f( 1, .5 ) )
+		camera.parameters()["resolution"] = IECore.V2i( 500, 250 )
+		camera.parameters()["projection"] = IECore.StringData( "perspective" )
+		camera.parameters()["projection:fov"] = IECore.FloatData( 50 )
+		
+		controller = IECore.CameraController( camera )
+	
+		r = IECore.Rand48()
+		for i in range( 0, 100 ) :
+			rasterPosition = IECore.V2i( r.nexti() % 500, r.nexti() % 250 )
+			near, far = controller.unproject( rasterPosition )
+			nearProjected = controller.project( near )
+			farProjected = controller.project( far )
+			self.failUnless( nearProjected.equalWithAbsError( farProjected, 0.0001 ) )
+			self.failUnless(
+				IECore.V2f( rasterPosition.x, rasterPosition.y ).equalWithAbsError(
+					nearProjected, 0.0001
+				)
+			)
+	
+	def testCameraWithExistingTransform( self ) :
+	
+		camera = IECore.Camera()
+		transform = IECore.MatrixTransform( IECore.M44f() )
+		originalMatrix = transform.transform()
+		camera.setTransform( transform )
+		
+		controller = IECore.CameraController( camera )
+		
+		controller.motionStart( controller.MotionType.Track, IECore.V2i( 0 ) )
+		controller.motionEnd( IECore.V2i( 10 ) )
+		
+		self.assertNotEqual( transform.transform(), originalMatrix )
+		
 if __name__ == "__main__":
         unittest.main()

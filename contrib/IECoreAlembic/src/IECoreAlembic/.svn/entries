@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/contrib/IECoreAlembic/src/IECoreAlembic
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-05T22:34:18.509470Z
-4816
-thehaddonyoof
+2012-11-07T17:58:27.709734Z
+4907
+david.imageengine@gmail.com
 has-props
 
 
@@ -66,11 +66,11 @@ file
 
 
 
-2012-08-23T11:40:46.247584Z
-d8988c03d7b9bb98017dc7b257053b33
-2012-08-16T16:47:51.265259Z
-4792
-thehaddonyoof@gmail.com
+2013-03-13T13:37:41.746466Z
+3619f75c6ed00a4b300ea1722dcb8bc1
+2012-09-26T15:28:54.673147Z
+4874
+thehaddonyoof
 
 
 
@@ -92,7 +92,7 @@ thehaddonyoof@gmail.com
 
 
 
-2761
+2932
 
 FromAlembicSubDConverter.cpp
 file
@@ -239,11 +239,11 @@ file
 
 
 
-2012-09-11T09:54:38.578094Z
-76d8e8c0e5b0719c348fd86e451f1163
-2012-09-05T22:34:18.509470Z
-4816
-thehaddonyoof
+2013-03-13T13:37:41.746466Z
+d3bb06fa81dcd1ec4513759c6857c59a
+2012-11-07T17:58:27.709734Z
+4907
+david.imageengine@gmail.com
 
 
 
@@ -265,5 +265,5 @@ thehaddonyoof
 
 
 
-13589
+13661
 

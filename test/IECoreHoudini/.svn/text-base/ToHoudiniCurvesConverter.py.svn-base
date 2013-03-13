@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -828,20 +828,16 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		sop = self.emptySop()
 		self.assertFalse( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 	
-	def testGroupName( self ) :
+	def testName( self ) :
 		
 		sop = self.emptySop()
 		curves = self.curves()
 		curves.blindData()["name"] = IECore.StringData( "testGroup" )
 		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
-		primGroups = sop.geometry().primGroups()
-		self.assertEqual( len(primGroups), 1 )
-		self.assertEqual( primGroups[0].name(), "testGroup" )
-		self.assertEqual( len(primGroups[0].prims()), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
-		pointGroups = sop.geometry().pointGroups()
-		self.assertEqual( len(pointGroups), 1 )
-		self.assertEqual( pointGroups[0].name(), "testGroup" )
-		self.assertEqual( len(pointGroups[0].points()), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "testGroup" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testGroup" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 	
 	def tearDown( self ) :
 		

@@ -88,52 +88,56 @@ Imath::Box3f TextPrimitive::bound() const
 
 void TextPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
 {
-	// \todo: add primitive variables here. Not sure what the interpolation means here. Varying = per character?
 }
 
-void TextPrimitive::render( const State * state, IECore::TypeId style ) const
+void TextPrimitive::render( State *currentState ) const
 {
 	if( !m_text.size() )
 	{
 		return;
 	}
 
-	ConstTypePtr t = state->get<Type>();
-	switch( t->value() )
+	switch( currentState->get<Type>()->value() )
 	{
 		case Mesh :
-			renderMeshes( state, style );
+			renderMeshes( currentState );
 			break;
 		case Sprite :
-			renderSprites( state, style );
+			renderSprites( currentState );
 			break;
 		default :
 			break;
 	}
 }
 
-void TextPrimitive::renderMeshes( const State * state, IECore::TypeId style ) const
+void TextPrimitive::renderInstances( size_t numInstances ) const
 {
-	m_font->renderMeshes( m_text, state, style );
+	// should never get here, because we override the master render()
+	// method above.
+	assert( 0 );
 }
 
-void TextPrimitive::renderSprites( const State * state, IECore::TypeId style ) const
+void TextPrimitive::renderMeshes( State *state ) const
 {
+	m_font->renderMeshes( m_text, state );
+}
+
+void TextPrimitive::renderSprites( State *state ) const
+{
+	if( !state->get<Primitive::DrawSolid>()->value() )
+	{
+		return;
+	}
+				
 	glPushAttrib( GL_TEXTURE_BIT | GL_ENABLE_BIT );
 	glPushMatrix();
 
-		/// \todo We need a better way of dealing with shader push/pop
-		/// How about some sort of ScopedProgram class which cleans up
-		/// after itself on destruction? Maybe we should generalise that
-		/// for all the bindables that don't work because there's no suitable
-		/// glPush/Pop for them.
+		/// \todo Can we integrate this with the Shader::Setup mechanism, and allow
+		/// custom shaders to be allowed for sprite rendering as well?
 		GLint oldProgram = 0;
-		if( GLEW_VERSION_2_0 )
-		{
-			glGetIntegerv( GL_CURRENT_PROGRAM, &oldProgram );
-		}
-
+		glGetIntegerv( GL_CURRENT_PROGRAM, &oldProgram );
 		glUseProgram( 0 );
+		
 		glEnable( GL_TEXTURE_2D );
 		glDisable( GL_LIGHTING ); /// \todo Perhaps we could support lighting even in this mode?
 		glActiveTexture( textureUnits()[0] );
@@ -143,10 +147,7 @@ void TextPrimitive::renderSprites( const State * state, IECore::TypeId style ) c
 
 		m_font->renderSprites( m_text );
 
-		if( GLEW_VERSION_2_0 )
-		{
-			glUseProgram( oldProgram );
-		}
+		glUseProgram( oldProgram );
 
 	glPopMatrix();
 	glPopAttrib();

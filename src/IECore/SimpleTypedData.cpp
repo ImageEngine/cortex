@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,8 @@
 namespace IECore
 {
 
+static IndexedIO::EntryID g_valueEntry("value");
+
 LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDataTypeId, "LongData" );
 
 #define IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( TNAME, TID, N )	\
@@ -50,8 +52,8 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 	{ \
 		Data::save( context ); \
 		assert( baseSize() == N ); \
-		IndexedIOInterfacePtr container = context->rawContainer(); \
-		container->write( "value", TNAME::baseReadable(), TNAME::baseSize() ); \
+		IndexedIO *container = context->rawContainer(); \
+		container->write( g_valueEntry, TNAME::baseReadable(), TNAME::baseSize() ); \
 	} \
 	\
 	template<> \
@@ -59,18 +61,17 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 	{ \
 		Data::load( context ); \
 		assert( ( sizeof( TNAME::ValueType ) / sizeof( TNAME::BaseType ) ) == N ); \
-		IndexedIOInterfacePtr container; \
 		TNAME::BaseType *p = TNAME::baseWritable(); \
 		try \
 		{ \
-			container = context->rawContainer(); \
-			container->read( "value", p, N ); \
+			const IndexedIO *container = context->rawContainer(); \
+			container->read( g_valueEntry, p, N ); \
 		} \
 		catch( ... ) \
 		{ \
 			unsigned int v = 0;	\
-			container = context->container( staticTypeName(), v ); \
-			container->read( "value", p, N ); \
+			ConstIndexedIOPtr container = context->container( staticTypeName(), v ); \
+			container->read( g_valueEntry, p, N ); \
 		} \
 	}
 
@@ -94,6 +95,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( UShortData, UShortDataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( Int64Data, Int64DataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( UInt64Data, UInt64DataTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( StringData, StringDataTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( InternedStringData, InternedStringDataTypeId )
 
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V2iData, V2iDataTypeId, 2 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V3iData, V3iDataTypeId, 3 )
@@ -139,12 +141,30 @@ void StringData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 }
 
 template<>
+void TypedData<InternedString>::save( SaveContext *context ) const
+{
+	Data::save( context );
+	IndexedIO *container = context->rawContainer();
+	container->write( g_valueEntry, readable().value() );
+}
+
+template<>
+void TypedData<InternedString>::load( LoadContextPtr context )
+{
+	Data::load( context );
+	std::string v;
+	const IndexedIO *container = context->rawContainer();
+	container->read( g_valueEntry, v );
+	writable() = v;
+}
+
+template<>
 void TypedData<bool>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	unsigned char c = readable();
-	container->write( "value", c );
+	container->write( g_valueEntry, c );
 }
 
 template<>
@@ -155,15 +175,15 @@ void TypedData<bool>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
-		container->read( "value", c );
+		const IndexedIO *container = context->rawContainer();
+		container->read( g_valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-		container->read( "value", c );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+		container->read( g_valueEntry, c );
 	}
 
 	writable() = c;
@@ -173,9 +193,9 @@ template<>
 void TypedData<short>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	int c = readable();
-	container->write( "value", c );
+	container->write( g_valueEntry, c );
 }
 
 template<>
@@ -186,15 +206,15 @@ void TypedData<short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
-		container->read( "value", c );
+		const IndexedIO *container = context->rawContainer();
+		container->read( g_valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-		container->read( "value", c );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+		container->read( g_valueEntry, c );
 	}
 
 	writable() = static_cast<short>( c );
@@ -204,9 +224,9 @@ template<>
 void TypedData<unsigned short>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	unsigned int c = readable();
-	container->write( "value", c );
+	container->write( g_valueEntry, c );
 }
 
 template<>
@@ -217,15 +237,15 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
-		container->read( "value", c );
+		const IndexedIO *container = context->rawContainer();
+		container->read( g_valueEntry, c );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-		container->read( "value", c );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+		container->read( g_valueEntry, c );
 	}
 
 	writable() = static_cast<unsigned short>( c );
@@ -269,6 +289,7 @@ template class TypedData<unsigned short>;
 template class TypedData<int64_t>;
 template class TypedData<uint64_t>;
 template class TypedData<std::string>;
+template class TypedData<InternedString>;
 template class TypedData<half>;
 template class TypedData<Imath::V2i>;
 template class TypedData<Imath::V3i>;

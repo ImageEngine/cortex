@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/contrib/IECoreAlembic/include/IECoreAlembic
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-05T22:34:18.509470Z
-4816
-thehaddonyoof
+2012-11-01T00:17:40.641063Z
+4896
+david.imageengine@gmail.com
 
 
 
@@ -100,11 +100,11 @@ file
 
 
 
-2012-08-30T17:19:28.919292Z
-4aec7708d28b7cce36ea593e1fb5f47e
-2012-08-30T16:28:50.892512Z
-4806
-thehaddonyoof@gmail.com
+2013-03-13T13:37:41.720466Z
+7026665c9bf83b341b4e988f54d1ec59
+2012-11-01T00:17:40.641063Z
+4896
+david.imageengine@gmail.com
 
 
 
@@ -126,7 +126,7 @@ thehaddonyoof@gmail.com
 
 
 
-6878
+6876
 
 TypeIds.h
 file

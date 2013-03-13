@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,15 @@ using namespace std;
 using namespace IECore;
 using namespace Imath;
 using namespace boost;
+
+static IndexedIO::EntryID g_uOrderEntry("uOrder");
+static IndexedIO::EntryID g_uKnotEntry("uKnot");
+static IndexedIO::EntryID g_uMinEntry("uMin");
+static IndexedIO::EntryID g_uMaxEntry("uMax");
+static IndexedIO::EntryID g_vOrderEntry("vOrder");
+static IndexedIO::EntryID g_vKnotEntry("vKnot");
+static IndexedIO::EntryID g_vMinEntry("vMin");
+static IndexedIO::EntryID g_vMaxEntry("vMax");
 
 const unsigned int NURBSPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(NURBSPrimitive);
@@ -262,17 +271,17 @@ void NURBSPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext 
 void NURBSPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
-	container->write( "uOrder", m_uOrder );
-	context->save( m_uKnot, container, "uKnot" );
-	container->write( "uMin", m_uMin );
-	container->write( "uMax", m_uMax );
+	container->write( g_uOrderEntry, m_uOrder );
+	context->save( m_uKnot, container, g_uKnotEntry );
+	container->write( g_uMinEntry, m_uMin );
+	container->write( g_uMaxEntry, m_uMax );
 
-	container->write( "vOrder", m_vOrder );
-	context->save( m_vKnot, container, "vKnot" );
-	container->write( "vMin", m_vMin );
-	container->write( "vMax", m_vMax );
+	container->write( g_vOrderEntry, m_vOrder );
+	context->save( m_vKnot, container, g_vKnotEntry );
+	container->write( g_vMinEntry, m_vMin );
+	container->write( g_vMaxEntry, m_vMax );
 }
 
 void NURBSPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -280,17 +289,17 @@ void NURBSPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( "uOrder", m_uOrder );
-	m_uKnot = context->load<FloatVectorData>( container, "uKnot" );
-	container->read( "uMin", m_uMin );
-	container->read( "uMax", m_uMax );
+	container->read( g_uOrderEntry, m_uOrder );
+	m_uKnot = context->load<FloatVectorData>( container, g_uKnotEntry );
+	container->read( g_uMinEntry, m_uMin );
+	container->read( g_uMaxEntry, m_uMax );
 
-	container->read( "vOrder", m_vOrder );
-	m_vKnot = context->load<FloatVectorData>( container, "vKnot" );
-	container->read( "vMin", m_vMin );
-	container->read( "vMax", m_vMax );
+	container->read( g_vOrderEntry, m_vOrder );
+	m_vKnot = context->load<FloatVectorData>( container, g_vKnotEntry );
+	container->read( g_vMinEntry, m_vMin );
+	container->read( g_vMaxEntry, m_vMax );
 }
 
 bool NURBSPrimitive::isEqualTo( const Object *other ) const

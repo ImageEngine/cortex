@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,10 @@
 
 using namespace IECore;
 using namespace boost;
+
+static IndexedIO::EntryID g_nameEntry("name");
+static IndexedIO::EntryID g_typeEntry("type");
+static IndexedIO::EntryID g_parametersEntry("parameters");
 
 const unsigned int Shader::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Shader );
@@ -129,20 +133,20 @@ void Shader::copyFrom( const Object *other, CopyContext *context )
 void Shader::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( "name", m_name );
-	container->write( "type", m_type );
-	context->save( m_parameters, container, "parameters" );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
+	container->write( g_nameEntry, m_name );
+	container->write( g_typeEntry, m_type );
+	context->save( m_parameters, container, g_parametersEntry );
 }
 
 void Shader::load( LoadContextPtr context )
 {
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	container->read( "name", m_name );
-	container->read( "type", m_type );
-	m_parameters = context->load<CompoundData>( container, "parameters" );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
+	container->read( g_nameEntry, m_name );
+	container->read( g_typeEntry, m_type );
+	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
 }
 
 void Shader::hash( MurmurHash &h ) const

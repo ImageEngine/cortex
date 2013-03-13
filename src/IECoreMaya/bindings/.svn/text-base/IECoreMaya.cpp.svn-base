@@ -55,6 +55,7 @@
 #include "IECoreMaya/bindings/FromMayaShapeConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaCurveConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaParticleConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaProceduralHolderConverterBinding.h"
 #include "IECoreMaya/bindings/StandaloneBinding.h"
 #include "IECoreMaya/bindings/FromMayaDagNodeConverterBinding.h"
 #include "IECoreMaya/bindings/TypeIdBinding.h"
@@ -90,6 +91,8 @@
 #include "IECoreMaya/bindings/FromMayaImageConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaStringPlugConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaCameraConverterBinding.h"
+#include "IECoreMaya/bindings/MayaSceneBinding.h"
+#include "IECoreMaya/bindings/FnSceneShapeBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -120,6 +123,7 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaShapeConverter();
 	bindFromMayaCurveConverter();
 	bindFromMayaParticleConverter();
+	bindFromMayaProceduralHolderConverter();
 	bindStandalone();
 	bindMPlugFromPython();
 	bindMObjectFromPython();
@@ -153,4 +157,6 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaImageConverter();
 	bindFromMayaStringPlugConverter();
 	bindToMayaCameraConverter();
+	bindMayaScene();
+	bindFnSceneShape();
 }

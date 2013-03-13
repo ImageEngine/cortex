@@ -210,7 +210,27 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( m.numSamples(), 10 )	
 		for i in range( 0, m.numSamples() ) :
 			self.assertAlmostEqual( m.timeAtSample( i ), (i + 1) / 24.0 )
-			
+		
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc" )
+		
+		self.assertEqual( a.numSamples(), 0 )
+		
+		# no time samples at the top level, so this should throw an exception:
+		self.assertRaises( Exception, a.timeAtSample, 0 )
+		
+		# should throw the RIGHT exceptions:
+		try:
+			a.timeAtSample(0)
+		except Exception, e:
+			self.assertEqual( str(e), "Invalid Argument : Sample index out of range" )
+		
+		# should these throw exceptions?
+		a.boundAtSample(0)
+		a.objectAtSample(0)
+		a.transformAtSample(0)
+		
+		
+	
 	def testOutOfRangeSamplesRaise( self ) :
 	
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )	
@@ -345,6 +365,9 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( a.child( "pCube1" ).child( "pCubeShape1" ).hasStoredBound(), True )		
 		self.assertEqual( a.child( "front" ).hasStoredBound(), False )
 		self.assertEqual( a.child( "front" ).child( "frontShape" ).hasStoredBound(), False )
+		
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc" )
+		self.assertEqual( a.hasStoredBound(), False )
 	
 	def testBoundAtSample( self ) :
 	

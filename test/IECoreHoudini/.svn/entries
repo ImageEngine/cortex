@@ -1,14 +1,14 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECoreHoudini
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-08-01T21:29:58.326489Z
-4770
+2013-03-12T22:38:45.703310Z
+5250
 andrewk.imageengine
 has-props
 
@@ -32,10 +32,10 @@ file
 
 
 
-2012-08-02T16:24:06.578217Z
-6ebb40f59605e805fee6954cb4f2e0eb
-2012-08-01T17:14:19.941894Z
-4769
+2013-03-13T13:34:17.293734Z
+c5460538ea341631d99b882cfabfa8e4
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -58,7 +58,7 @@ andrewk.imageengine
 
 
 
-25327
+27304
 
 AttributeRemap.py
 file
@@ -137,10 +137,10 @@ file
 
 
 
-2012-05-10T16:40:42.000000Z
-6e0a4f3c6bc4f2a14df89a37edb63fc7
-2011-01-19T21:59:05.058479Z
-4039
+2013-03-13T13:34:17.294466Z
+fd018afa59f661c614ecd5c97776e685
+2013-02-16T00:50:22.849498Z
+5179
 andrewk.imageengine
 has-props
 
@@ -163,7 +163,7 @@ has-props
 
 
 
-17281
+19896
 
 NodeHandle.py
 file
@@ -205,11 +205,11 @@ file
 
 
 
-2012-05-10T16:40:42.000000Z
-9b34bbaba23b7b0c3f6e7a020d182d45
-2010-12-21T21:35:28.651351Z
-4007
-andrewk.imageengine
+2013-03-13T13:34:17.295466Z
+bc01fa42655e758e060005ce7f1891a9
+2013-01-19T01:02:27.415096Z
+5117
+john.imageengine
 has-props
 
 
@@ -231,7 +231,7 @@ has-props
 
 
 
-7406
+7415
 
 InterpolatedCacheReader.py
 file
@@ -239,10 +239,10 @@ file
 
 
 
-2012-05-10T16:40:42.000000Z
-fe7d33f10c4740a17eb699e6b24333c1
-2012-04-09T19:04:53.677216Z
-4645
+2013-03-13T13:34:17.295466Z
+a8034cd5eb09e9c559368b16341eb9a4
+2013-01-18T18:53:35.162664Z
+5115
 andrewk.imageengine
 
 
@@ -265,7 +265,7 @@ andrewk.imageengine
 
 
 
-13188
+22259
 
 TemporaryParameterValuesTest.py
 file
@@ -307,10 +307,10 @@ file
 
 
 
-2012-08-02T16:24:06.578217Z
-c53c85594e44bab3206b526afdb180d3
-2012-07-26T20:36:57.712964Z
-4762
+2013-03-13T13:34:17.296466Z
+6c17b3352fc1a12475a2177712a539ca
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -333,7 +333,7 @@ andrewk.imageengine
 
 
 
-16698
+17775
 
 CobIOTranslator.py
 file
@@ -375,10 +375,10 @@ file
 
 
 
-2012-08-02T16:24:06.579204Z
-b8e92fe0bfafffa33aade1fc18c36d8c
-2012-07-26T20:36:57.712964Z
-4762
+2013-03-13T13:34:17.296466Z
+2ddb660ce77810e993e3e4ca3221bc36
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -401,7 +401,7 @@ andrewk.imageengine
 
 
 
-29371
+31167
 
 ToHoudiniGroupConverter.py
 file
@@ -409,10 +409,10 @@ file
 
 
 
-2012-08-02T16:24:06.579204Z
-9a86bd5f06217778c9e1fb9ee8a5bb9b
-2012-07-26T20:36:57.712964Z
-4762
+2013-03-13T13:34:17.296466Z
+72f8d2071f741692968f17df4644ee23
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -435,7 +435,7 @@ andrewk.imageengine
 
 
 
-22379
+22652
 
 FromHoudiniPointsConverter.py
 file
@@ -443,10 +443,10 @@ file
 
 
 
-2012-08-02T16:24:06.579204Z
-085506f3957ff4efb4862b918e92de20
-2012-07-26T20:36:57.712964Z
-4762
+2013-03-13T13:34:17.297466Z
+1b014690969694e545ae1ca868fbd13d
+2013-03-06T19:55:13.816517Z
+5228
 andrewk.imageengine
 
 
@@ -469,7 +469,7 @@ andrewk.imageengine
 
 
 
-33100
+35046
 
 All.py
 file
@@ -477,10 +477,10 @@ file
 
 
 
-2012-07-19T11:27:17.757321Z
-a4d1f79a3d617c46b938867759fbfee1
-2012-07-14T01:00:27.591557Z
-4744
+2013-03-13T13:34:17.297466Z
+7f9ba124ad1b498f3f0c959c58deedcc
+2013-02-15T20:02:03.165860Z
+5175
 andrewk.imageengine
 has-props
 
@@ -503,7 +503,7 @@ has-props
 
 
 
-2973
+3033
 
 DeepImageConverter.py
 file
@@ -548,10 +548,10 @@ file
 
 
 
-2012-05-10T16:40:42.000000Z
-66cb76dab66a108210a0557117358f6d
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:34:17.297466Z
+2affaf6411385466d07530fe469c34ac
+2012-12-17T19:42:55.884294Z
+5004
 andrewk.imageengine
 
 
@@ -574,7 +574,7 @@ andrewk.imageengine
 
 
 
-12699
+13872
 
 OpHolder.py
 file
@@ -582,10 +582,10 @@ file
 
 
 
-2012-08-02T16:24:06.580191Z
-b1f285cb21627f28c469b85561354f90
-2012-08-01T21:29:58.326489Z
-4770
+2013-03-13T13:34:17.298466Z
+16113f8fa54b91f5588a8d61504ab2ba
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 has-props
 
@@ -608,7 +608,41 @@ has-props
 
 
 
-30433
+33162
+
+HoudiniSceneTest.py
+file
+
+
+
+
+2013-03-13T13:34:17.298466Z
+df2faf04c085975960383a8be54d09a6
+2013-03-07T23:57:43.505758Z
+5239
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+21642
 
 CortexRmanInject.py
 file
@@ -678,6 +712,40 @@ andrewk.imageengine
 
 3924
 
+SceneCacheTest.py
+file
+
+
+
+
+2013-03-13T13:34:17.299466Z
+13c255b09c477aaa62b954d3cde4bae2
+2013-03-12T22:38:45.703310Z
+5250
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+48163
+
 data
 dir
 
@@ -687,10 +755,10 @@ file
 
 
 
-2012-07-26T08:42:45.568739Z
-a5402616c9980b9450cc398fbb869d69
-2012-07-24T17:40:07.205542Z
-4750
+2013-03-13T13:34:17.299466Z
+2591752de7c0b7b28335e01b15875418
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -713,7 +781,7 @@ andrewk.imageengine
 
 
 
-38738
+38518
 
 RATDeepImageWriterTest.py
 file
@@ -721,10 +789,10 @@ file
 
 
 
-2012-05-10T16:40:42.000000Z
-fbc0272b14bbcac7f3f536e771bc02f3
-2012-03-13T23:11:23.868031Z
-4619
+2013-03-13T13:34:17.299466Z
+e0bc130d39610dea2da5477342cf1f03
+2012-12-17T19:42:55.884294Z
+5004
 andrewk.imageengine
 
 
@@ -747,7 +815,7 @@ andrewk.imageengine
 
 
 
-17750
+18737
 
 ToHoudiniPolygonsConverter.py
 file
@@ -755,10 +823,10 @@ file
 
 
 
-2012-07-26T08:42:45.569739Z
-913b2fb352650887fe7f21e779c77b9a
-2012-07-24T17:40:07.205542Z
-4750
+2013-03-13T13:34:17.300466Z
+35cb722fb7dacc62a9198eb1e43863c0
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -781,7 +849,7 @@ andrewk.imageengine
 
 
 
-34105
+33876
 
 ToHoudiniPointsConverter.py
 file
@@ -789,10 +857,10 @@ file
 
 
 
-2012-07-26T08:42:45.569739Z
-25db47e5ef70e65329201b7f8c6acf38
-2012-07-24T17:40:07.205542Z
-4750
+2013-03-13T13:34:17.300466Z
+e0c3949f69ce474cbf291b1a6fb35081
+2013-03-06T18:32:03.208373Z
+5227
 andrewk.imageengine
 
 
@@ -815,7 +883,7 @@ andrewk.imageengine
 
 
 
-22759
+22193
 
 UpdateMode.py
 file

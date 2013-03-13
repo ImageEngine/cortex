@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -363,14 +363,34 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertNotEqual( result1["P"].data, result2["P"].data )
 		self.assertNotEqual( result1, result2 )
 	
-	def testGroupName( self ) :
+	def testName( self ) :
 		
 		curves = self.createCurves( 4 )
+		name = curves.createOutputNode( "name" )
+		name.parm( "name1" ).set( "testName" )
+		result = IECoreHoudini.FromHoudiniCurvesConverter( name ).convert()
+		self.assertEqual( result.blindData()['name'].value, "testName" )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		
 		group = curves.createOutputNode( "group" )
 		group.parm( "crname" ).set( "testGroup" )
 		result = IECoreHoudini.FromHoudiniCurvesConverter( group ).convert()
 		self.assertEqual( result.blindData()['name'].value, "testGroup" )
 	
+	def testAttributeFilter( self ) :
+		
+		curves = self.createCurves( 4 )
+		converter = IECoreHoudini.FromHoudiniCurvesConverter( curves )
+		self.assertEqual( sorted(converter.convert().keys()), ['P', 'detailAttribute', 'pointAttribute', 'primAttribute', 'varmap', 'vertexAttribute'] )
+		converter.parameters()["attributeFilter"].setTypedValue( "P" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^primAttribute ^varmap" )
+		self.assertEqual( sorted(converter.convert().keys()), ['P', 'detailAttribute', 'pointAttribute', 'vertexAttribute'] )
+		# P must be converted
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
+		self.assertTrue( "P" in converter.convert().keys() )
+		
 	def testErrorStates( self ) :
 		
 		# no prims

@@ -31,6 +31,42 @@ soptoolutils.genericTool(kwargs, 'ieProceduralHolder')]]></script>
 soptoolutils.genericTool(kwargs, 'ieToHoudiniConverter')]]></script>
   </tool> 
 
+  <!-- SceneCacheSource SOP -->
+  <tool name="cortexSceneCacheSource" label="SceneCache Source" icon="SOP_ieToHoudiniConverter">
+    <toolMenuContext name="network">
+      <contextNetType>SOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieSceneCacheSource')]]></script>
+  </tool>
+  
+  <!-- SceneCacheTransform OBJ -->
+  <tool name="cortexSceneCacheTransform" label="SceneCache Xform" icon="SOP_ieToHoudiniConverter">
+    <toolMenuContext name="network">
+      <contextNetType>OBJ</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieSceneCacheTransform')]]></script>
+  </tool>
+  
+  <!-- SceneCacheGeometry OBJ -->
+  <tool name="cortexSceneCacheGeometry" label="SceneCache GEO" icon="SOP_ieToHoudiniConverter">
+    <toolMenuContext name="network">
+      <contextNetType>OBJ</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieSceneCacheGeometry')]]></script>
+  </tool>
+  
+  <!-- SceneCacheWriter Writer -->
+  <tool name="cortexSceneCacheWriter" label="SceneCache Writer" icon="SOP_ieToHoudiniConverter">
+    <toolMenuContext name="network">
+      <contextNetType>ROP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import drivertoolutils; drivertoolutils.genericTool(kwargs, 'ieSceneCacheWriter')]]></script>
+  </tool>
+  
   <!-- Interpolated Cache Reader -->
   <tool name="cortex_interpolated_cache_reader" label="Interpolated Cache Reader" icon="SOP_ieInterpolatedCacheReader">
     <toolMenuContext name="network">

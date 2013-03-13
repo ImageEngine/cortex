@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -105,7 +105,26 @@ void ProceduralHolder::knobs( DD::Image::Knob_Callback f )
 	
 }
 
-#if	kDDImageVersionInteger >= 62000
+#if kDDImageVersionInteger >= 70000
+
+DD::Image::Op::HandlesMode ProceduralHolder::doAnyHandles( DD::Image::ViewerContext *ctx )
+{
+	HandlesMode result = ParameterisedHolderOp::doAnyHandles( ctx );
+	
+	if ( panel_visible() )
+	{
+		result |= eHandlesCooked;
+	}
+	
+	if ( ctx->connected() == DD::Image::SHOW_OBJECT )
+	{
+		result |= eHandlesCooked;
+	}
+	
+	return result;
+}
+
+#elif kDDImageVersionInteger >= 62000
 
 // Op::doAnyHandles() was introduced in Nuke 6.2.
 bool ProceduralHolder::doAnyHandles( DD::Image::ViewerContext *ctx )

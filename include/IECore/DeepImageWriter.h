@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -80,6 +80,14 @@ class DeepImageWriter : public Parameterised
 		/// \todo: should this be dataWindow or resolution?
 		IECore::V2iParameter *resolutionParameter();
 		const IECore::V2iParameter *resolutionParameter() const;
+		
+		/// The parameter specifying the world to camera space transformation matrix
+		IECore::M44fParameter *worldToCameraParameter();
+		const IECore::M44fParameter *worldToCameraParameter() const;
+		
+		/// The parameter specifying the world to screen space projection matrix
+		IECore::M44fParameter *worldToNDCParameter();
+		const IECore::M44fParameter *worldToNDCParameter() const;
 		
 		/// Writes an individual DeepPixel to the file. Should throw if the data could not
 		/// be written. Note that regardless of image format, x and y should be specified

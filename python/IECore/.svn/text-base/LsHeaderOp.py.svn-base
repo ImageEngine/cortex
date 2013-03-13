@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -54,7 +54,7 @@ class LsHeaderOp( Op ) :
 					description = "The file to list the header from.",
 					defaultValue = "",
 					check = FileNameParameter.CheckType.MustExist,
-					extensions = " ".join( IndexedIOInterface.supportedExtensions() + Reader.supportedExtensions() ),
+					extensions = " ".join( IndexedIO.supportedExtensions() + Reader.supportedExtensions() ),
 					allowEmptyString = False,
 				),
 
@@ -83,12 +83,12 @@ class LsHeaderOp( Op ) :
 		# \todo Do the exception handling properly!
 		headers = None
 		try:
-			cache = HierarchicalCache( operands["file"].value, IndexedIOOpenMode.Read )
+			cache = HierarchicalCache( operands["file"].value, IndexedIO.OpenMode.Read )
 			headers = cache.readHeader()
 		except:
 			debugException( "Error reading header as HierarchicalCache." )
 			try:
-				cache = AttributeCache( operands["file"].value, IndexedIOOpenMode.Read )
+				cache = AttributeCache( operands["file"].value, IndexedIO.OpenMode.Read )
 				headers = cache.readHeader()
 			except:
 				debugException( "Error reading header as AttributeCache." )

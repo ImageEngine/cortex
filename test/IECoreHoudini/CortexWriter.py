@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -112,7 +112,7 @@ class TestCortexWriter( IECoreHoudini.TestCase ):
 		files = glob.glob( "test/cortexWriter_testData/test.????.fio" )
 		self.assertEqual( len(files), 100 )
 		# check objects
-		ac = IECore.AttributeCache( "test/cortexWriter_testData/test.0001.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test.0001.fio", IECore.IndexedIO.OpenMode.Read )
 		self.failUnless( "scatter1" in ac.objects() )
 		p_1 = ac.read( "scatter1", "P" )
 		n_1 = ac.read( "scatter1", "N" )
@@ -121,7 +121,7 @@ class TestCortexWriter( IECoreHoudini.TestCase ):
 		n_1 = ac.read( "scatter1", "N" )
 		self.assert_( n_1 )
 		self.assertEqual( n_1.size(), 5000 )
-		ac = IECore.AttributeCache( "test/cortexWriter_testData/test.0100.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test.0100.fio", IECore.IndexedIO.OpenMode.Read )
 		self.failUnless( "scatter1" in ac.objects() )
 		p_2 = ac.read( "scatter1", "P" )
 		n_2 = ac.read( "scatter1", "N" )
@@ -152,7 +152,7 @@ class TestCortexWriter( IECoreHoudini.TestCase ):
 		files = glob.glob( "test/cortexWriter_testData/test2.????.fio" )
 		self.assertEqual( len(files), 100 )
 		# check objects
-		ac = IECore.AttributeCache( "test/cortexWriter_testData/test2.0001.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test2.0001.fio", IECore.IndexedIO.OpenMode.Read )
 		self.assert_( "scatter1" not in ac.objects() )
 		self.failUnless( "bob" in ac.objects() )
 		p_1 = ac.read( "bob", "P" )
@@ -161,7 +161,7 @@ class TestCortexWriter( IECoreHoudini.TestCase ):
 		n_1 = ac.read( "bob", "N" )
 		self.assert_( n_1 )
 		self.assertEqual( n_1.size(), 5000 )
-		ac = IECore.AttributeCache( "test/cortexWriter_testData/test2.0100.fio", IECore.IndexedIOOpenMode.Read )
+		ac = IECore.AttributeCache( "test/cortexWriter_testData/test2.0100.fio", IECore.IndexedIO.OpenMode.Read )
 		self.assert_( "scatter1" not in ac.objects() )
 		self.failUnless( "bob" in ac.objects() )
 		p_2 = ac.read( "bob", "P" )

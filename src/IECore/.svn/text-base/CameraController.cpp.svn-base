@@ -68,15 +68,12 @@ void CameraController::setCamera( CameraPtr camera )
 	{
 		m_fov = 0;
 	}
+	
 	TransformPtr transform = m_camera->getTransform();
-	if( !transform )
+	m_transform = runTimeCast<MatrixTransform>( transform );
+	if( !m_transform )
 	{
-		m_transform = new MatrixTransform;
-		m_camera->setTransform( m_transform );
-	}
-	else if( !transform->isInstanceOf( MatrixTransform::staticTypeId() ) )
-	{
-		m_transform = new MatrixTransform( transform->transform() );
+		m_transform = new MatrixTransform( transform ? transform->transform() : M44f() );
 		m_camera->setTransform( m_transform );
 	}
 
@@ -84,6 +81,11 @@ void CameraController::setCamera( CameraPtr camera )
 }
 
 CameraPtr CameraController::getCamera()
+{
+	return m_camera;
+}
+
+ConstCameraPtr CameraController::getCamera() const
 {
 	return m_camera;
 }
@@ -201,6 +203,41 @@ void CameraController::unproject( const Imath::V2i rasterPosition, Imath::V3f &n
 
 	near = near * m_transform->matrix;
 	far = far * m_transform->matrix;
+}
+
+Imath::V2f CameraController::project( const Imath::V3f &worldPosition ) const
+{
+	M44f inverseCameraMatrix = m_transform->matrix.inverse();
+	V3f cameraPosition = worldPosition * inverseCameraMatrix;
+	
+	const V2i &resolution = m_resolution->readable();
+	const Box2f &screenWindow = m_screenWindow->readable();
+	if( m_projection->readable() == "perspective" )
+	{
+		V3f screenPosition = cameraPosition / cameraPosition.z;
+		float fov = m_fov->readable();
+		float d = tan( degreesToRadians( fov / 2.0f ) ); // camera x coordinate at screen window x==1
+		screenPosition /= d;
+		V2f ndcPosition(
+			lerpfactor( screenPosition.x, screenWindow.max.x, screenWindow.min.x ),
+			lerpfactor( screenPosition.y, screenWindow.min.y, screenWindow.max.y )	
+		);
+		return V2f(
+			ndcPosition.x * resolution.x,
+			ndcPosition.y * resolution.y
+		);
+	}
+	else
+	{
+		V2f ndcPosition(
+			lerpfactor( cameraPosition.x, screenWindow.min.x, screenWindow.max.x ),
+			lerpfactor( cameraPosition.y, screenWindow.max.y, screenWindow.min.y )	
+		);
+		return V2f(
+			ndcPosition.x * resolution.x,
+			ndcPosition.y * resolution.y
+		);
+	}
 }
 
 void CameraController::motionStart( MotionType motion, const Imath::V2i &startPosition )

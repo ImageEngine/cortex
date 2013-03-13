@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -122,6 +122,8 @@ CompoundObjectPtr DeepImageReader::readHeader()
 	header->members()["displayWindow"] = new Box2iData( displayWindow() );
 	header->members()["dataWindow"] = new Box2iData( dataWindow() );
 	header->members()["channelNames"] = new StringVectorData( names );
+	header->members()["worldToCameraMatrix"] = new M44fData( worldToCameraMatrix() );
+	header->members()["worldToNDCMatrix"] = new M44fData( worldToNDCMatrix() );
 	
 	return header;
 }

@@ -83,23 +83,33 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	}\
 	virtual bool isInstanceOf( IECore::TypeId typeId ) const\
 	{\
+		if( CLASSNAME::isInstanceOf( typeId ) )\
+		{\
+			return true;\
+		}\
+		\
 		IECorePython::ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
 		{\
 			boost::python::object res = f( typeId ); \
 			return boost::python::extract<bool>( res );\
 		}\
-		return CLASSNAME::isInstanceOf( typeId );\
+		return false;\
 	}\
 	virtual bool isInstanceOf( const char *typeName ) const\
 	{\
+		if( CLASSNAME::isInstanceOf( typeName ) )\
+		{\
+			return true;\
+		}\
+		\
 		IECorePython::ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
 		{\
 			boost::python::object res = f( typeName ); \
 			return boost::python::extract<bool>( res );\
 		}\
-		return CLASSNAME::isInstanceOf( typeName );\
+		return false;\
 	}
 
 } // namespace IECorePython

@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -76,6 +76,42 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assert_( op )
 		self.assertEqual( op.typeName(), "noiseDeformer" )
 		
+	# tests creation within contexts (simulating from UIs)
+	def testContextCreator( self ) :
+		# test generic creation
+		n = IECoreHoudini.FnOpHolder.create( "vectorMaker", "vectors/V3fVectorCreator" )
+		self.assertEqual( n.path(), "/obj/vectorMaker/vectorMaker" )
+		
+		# test contextArgs outside UI mode fallback to generic behaviour
+		contextArgs = { "toolname" : "ieOpHolder" }
+		n2 = IECoreHoudini.FnOpHolder.create( "vectorMaker", "vectors/V3fVectorCreator", contextArgs=contextArgs )
+		self.assertEqual( n2.path(), "/obj/vectorMaker1/vectorMaker" )
+		
+		# test parent arg
+		geo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		n3 = IECoreHoudini.FnOpHolder.create( "vectorMaker", "vectors/V3fVectorCreator", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n3.path(), "/obj/geo1/vectorMaker" )
+		
+		# test automatic conversion
+		contextArgs["shiftclick"] = True
+		n4 = IECoreHoudini.FnOpHolder.create( "noise", "noiseDeformer", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n4.path(), "/obj/geo1/noise" )
+		self.assertEqual( len(n4.outputConnectors()[0]), 1 )
+		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieToHoudiniConverter" )
+		
+		# test automatic conversion and output connections
+		mountain = geo.createNode( "mountain" )
+		contextArgs["outputnodename"] = mountain.path()
+		n5 = IECoreHoudini.FnOpHolder.create( "noise", "noiseDeformer", parent=geo, contextArgs=contextArgs )
+		self.assertEqual( n5.path(), "/obj/geo1/noise1" )
+		self.assertEqual( len(n5.outputConnectors()[0]), 1 )
+		converter = n5.outputConnectors()[0][0].outputNode()
+		self.assertEqual( converter.type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( len(converter.outputConnectors()[0]), 1 )
+		outputNode = converter.outputConnectors()[0][0].outputNode()
+		self.assertEqual( outputNode.type().name(), "mountain" )
+		self.assertEqual( outputNode, mountain )
+	
 	# test that a C++ op can be assigned using the function set
 	def testCppOp(self):
 		(op,fn) = self.testOpHolder()
@@ -427,7 +463,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 		merge = holder.createInputNode( 0, "merge" )
 		attrib1 = merge.createInputNode( 0, "attribcreate" )
-		attrib1.parm( "name1" ).set( "test" )
+		attrib1.parm( "name1" ).set( "name" )
 		attrib1.parm( "class1" ).set( 1 ) # Prim
 		attrib1.parm( "type1" ).set( 3 ) # String
 		attrib1.parm( "string1" ).set( "torusGroup" )
@@ -436,7 +472,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		torus = group1.createInputNode( 0, "torus" )
 
 		attrib2 = merge.createInputNode( 1, "attribcreate" )
-		attrib2.parm( "name1" ).set( "test" )
+		attrib2.parm( "name1" ).set( "name" )
 		attrib2.parm( "class1" ).set( 1 ) # Prim
 		attrib2.parm( "type1" ).set( 3 ) # String
 		attrib2.parm( "string1" ).set( "boxGroup" )
@@ -444,6 +480,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		group2.parm( "crname" ).set( "boxGroup" )
 		box = group2.createInputNode( 0, "box" )
 		
+		holder.parm( "parm_input_groupingMode" ).set( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.PrimitiveGroup )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
@@ -453,6 +490,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 		group1.bypass( True )
 		group2.bypass( True )
+		attrib1.bypass( True )
+		attrib2.bypass( True )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
@@ -460,15 +499,16 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 106 )
 		
-		holder.parm( "parm_input_groupingMode" ).set( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.AttributeValue )
-		holder.parm( "parm_input_groupingAttribute" ).set( "test" )
+		## \todo: keep the names and convert in PrimitiveGroup mode. see todo in FromHoudiniGroupConverter.cpp
+		
+		attrib1.bypass( False )
+		attrib2.bypass( False )
+		holder.parm( "parm_input_groupingMode" ).set( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		self.assertEqual( result["test"].data, IECore.StringVectorData( [ "boxGroup" ] ) )
-		self.assertEqual( result["testIndices"].data, IECore.IntVectorData( [ 0 ] * 6 ) )
+		self.assertEqual( result.blindData()["name"].value, "boxGroup" )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
 	
 	def testInputConnectionsSaveLoad( self ) :
@@ -671,6 +711,22 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertRaises( hou.OperationFailed, holder2.cook )
 		self.assertNotEqual( holder2.errors(), "" )
 		self.assertEqual( holder2.warnings(), "" )
+	
+	def testAnimatedValues( self ) :
+		
+		noise = IECoreHoudini.FnOpHolder.create( "test", "noiseDeformer", 1 )
+		fn = IECoreHoudini.FnOpHolder( noise )
+		noise.parm( "parm_magnitude" ).setExpression( "$FF" )
+		hou.setFrame( 1 )
+		self.assertEqual( noise.evalParm( "parm_magnitude" ), 1 )
+		self.assertEqual( fn.getOp().parameters()["magnitude"].getTypedValue(), 1 )
+		hou.setFrame( 12.25 )
+		self.assertEqual( noise.evalParm( "parm_magnitude" ), 12.25  )
+		# values haven't been flushed yet
+		self.assertAlmostEqual( fn.getOp().parameters()["magnitude"].getTypedValue(), 1 )
+		# so we flush them
+		fn.setParameterisedValues()
+		self.assertAlmostEqual( fn.getOp().parameters()["magnitude"].getTypedValue(), 12.25 )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

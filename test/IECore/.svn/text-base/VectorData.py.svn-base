@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1258,6 +1258,26 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 		self.assertEqual( hm, hm2 )
 		# should be slow this time, as the hash is being recomputed
 		self.failIf( secondTime < 0.8 * firstTime )
+
+class TestInternedStringVectorData( unittest.TestCase ) :
+
+	def test( self ) :
+	
+		d = InternedStringVectorData( [ "1", "2", "3", "4" ] )
+		
+		self.assertEqual( d[0], InternedString( "1" ) )
+		d[0] = "20"
+		self.assertEqual( d[0], InternedString( "20" ) )
+		
+		d2 = d.copy()
+		self.assertEqual( d, d2 )
+		
+		m = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Append )
+		d.save( m, "o" )
+		
+		d2 = Object.load( m, "o" )
+		
+		self.assertEqual( d2, d )
 		
 if __name__ == "__main__":
     unittest.main()

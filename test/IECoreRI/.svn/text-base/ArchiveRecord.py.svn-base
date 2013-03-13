@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import unittest
 import IECore
 import IECoreRI
@@ -55,14 +57,13 @@ class ArchiveRecordTest( unittest.TestCase ) :
 		# passing printf style format strings in the record would blow up the renderer
 		# so check we're catching those
 
-		m = IECore.CapturingMessageHandler()
-		s = IECore.ScopedMessageHandler( m )
+		with IECore.CapturingMessageHandler() as m :
 
-		r = IECoreRI.Renderer( "test/IECoreRI/output/testArchiveRecord.rib" )
-		r.worldBegin()
+			r = IECoreRI.Renderer( "test/IECoreRI/output/testArchiveRecord.rib" )
+			r.worldBegin()
 
-		r.command( "ri:archiveRecord", { "type" : IECore.StringData( "verbatim" ), "record" : IECore.StringData( "NAUGHTY %s %f" ) } )
-		r.worldEnd()
+			r.command( "ri:archiveRecord", { "type" : IECore.StringData( "verbatim" ), "record" : IECore.StringData( "NAUGHTY %s %f" ) } )
+			r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/testArchiveRecord.rib" ).readlines() )
 		self.assert_( not "NAUGHTY" in l )

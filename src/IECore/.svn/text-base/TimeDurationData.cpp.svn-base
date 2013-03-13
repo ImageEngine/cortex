@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,30 +40,32 @@
 namespace IECore
 {
 
+static IndexedIO::EntryID g_valueEntry("value");
+
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TimeDurationData, TimeDurationDataTypeId )
 
 template<>
 void TimeDurationData::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 
 	/// This is cross-platform and handles special values cleanly. It's also going to be smaller than
 	/// creating a proper container, and storing the day/month/year/time_of_day components individually.
 	/// Boost doesn't make this any easier for us as many of the time functions deal with "long" integer types,
 	/// meaning that on 32-bit platforms can't just store the number of nanoseconds since midnight (there are
 	/// ~10^14 nanoseconds in a day)
-	container->write( "value", boost::posix_time::to_simple_string( readable() ) );
+	container->write( g_valueEntry, boost::posix_time::to_simple_string( readable() ) );
 }
 
 template<>
 void TimeDurationData::load( LoadContextPtr context )
 {
 	Data::load( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	const IndexedIO *container = context->rawContainer();
 
 	std::string t;
-	container->read( "value", t );
+	container->read( g_valueEntry, t );
 
 	try
 	{

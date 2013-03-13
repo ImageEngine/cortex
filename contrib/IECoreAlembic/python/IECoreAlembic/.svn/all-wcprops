@@ -1,7 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 67
-/svn/!svn/ver/4806/trunk/contrib/IECoreAlembic/python/IECoreAlembic
+/svn/!svn/ver/5117/trunk/contrib/IECoreAlembic/python/IECoreAlembic
+END
+ABCToMDC.py
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/5117/trunk/contrib/IECoreAlembic/python/IECoreAlembic/ABCToMDC.py
 END
 AlembicProcedural.py
 K 25
@@ -13,5 +19,5 @@ __init__.py
 K 25
 svn:wc:ra_dav:version-url
 V 79
-/svn/!svn/ver/4774/trunk/contrib/IECoreAlembic/python/IECoreAlembic/__init__.py
+/svn/!svn/ver/4879/trunk/contrib/IECoreAlembic/python/IECoreAlembic/__init__.py
 END

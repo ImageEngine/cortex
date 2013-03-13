@@ -21,7 +21,9 @@ build
 
 K 13
 svn:mergeinfo
-V 57
+V 115
 /branches/6_maintenance:4484-4543
+/branches/coreGL2:4937-5074
 /branches/h12:4331-4548
+/branches/indexedIO:5009-5052
 END

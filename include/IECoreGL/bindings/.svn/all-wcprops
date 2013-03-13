@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/4828/trunk/include/IECoreGL/bindings
+/svn/!svn/ver/5075/trunk/include/IECoreGL/bindings
 END
 CachedConverterBinding.h
 K 25
@@ -81,17 +81,23 @@ svn:wc:ra_dav:version-url
 V 66
 /svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/CameraBinding.h
 END
-ToGLConverterBinding.h
+SplineToGLTextureConverterBinding.h
 K 25
 svn:wc:ra_dav:version-url
-V 73
-/svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/ToGLConverterBinding.h
+V 86
+/svn/!svn/ver/5075/trunk/include/IECoreGL/bindings/SplineToGLTextureConverterBinding.h
 END
 FontLoaderBinding.h
 K 25
 svn:wc:ra_dav:version-url
 V 70
 /svn/!svn/ver/4576/trunk/include/IECoreGL/bindings/FontLoaderBinding.h
+END
+ToGLConverterBinding.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/ToGLConverterBinding.h
 END
 ColorTextureBinding.h
 K 25
@@ -104,12 +110,6 @@ K 25
 svn:wc:ra_dav:version-url
 V 67
 /svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/TextureBinding.h
-END
-ShaderManagerBinding.h
-K 25
-svn:wc:ra_dav:version-url
-V 73
-/svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/ShaderManagerBinding.h
 END
 OrthographicCameraBinding.h
 K 25
@@ -147,17 +147,17 @@ svn:wc:ra_dav:version-url
 V 79
 /svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/ToGLCameraConverterBinding.h
 END
-WindowBinding.h
-K 25
-svn:wc:ra_dav:version-url
-V 66
-/svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/WindowBinding.h
-END
 PrimitiveBinding.h
 K 25
 svn:wc:ra_dav:version-url
 V 69
 /svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/PrimitiveBinding.h
+END
+BufferBinding.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/5075/trunk/include/IECoreGL/bindings/BufferBinding.h
 END
 TypedStateComponentBinding.h
 K 25
@@ -176,12 +176,6 @@ K 25
 svn:wc:ra_dav:version-url
 V 80
 /svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/ToGLTextureConverterBinding.h
-END
-SceneViewerBinding.h
-K 25
-svn:wc:ra_dav:version-url
-V 71
-/svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/SceneViewerBinding.h
 END
 SelectorBinding.h
 K 25
@@ -207,6 +201,12 @@ svn:wc:ra_dav:version-url
 V 79
 /svn/!svn/ver/4814/trunk/include/IECoreGL/bindings/ToGLPointsConverterBinding.h
 END
+ShaderStateComponentBinding.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/5075/trunk/include/IECoreGL/bindings/ShaderStateComponentBinding.h
+END
 LuminanceTextureBinding.h
 K 25
 svn:wc:ra_dav:version-url
@@ -219,15 +219,15 @@ svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/GroupBinding.h
 END
-CameraControllerBinding.h
-K 25
-svn:wc:ra_dav:version-url
-V 76
-/svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/CameraControllerBinding.h
-END
 SceneBinding.h
 K 25
 svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/3218/trunk/include/IECoreGL/bindings/SceneBinding.h
+END
+ShaderLoaderBinding.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/5075/trunk/include/IECoreGL/bindings/ShaderLoaderBinding.h
 END

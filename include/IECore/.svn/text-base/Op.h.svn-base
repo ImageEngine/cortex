@@ -71,6 +71,9 @@ class Op : public Parameterised
 		/// Throws an Exception if the parameter values are not valid.
 		ObjectPtr operate();
 
+		/// Performs the operation using the given values of parameters.
+		ObjectPtr operate( const CompoundObject *operands );
+
 		/// Returns a parameter describing the result of the operation - the
 		/// value of this parameter is always the value last returned by operate.
 		const Parameter *resultParameter() const;

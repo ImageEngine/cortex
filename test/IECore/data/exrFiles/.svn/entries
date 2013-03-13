@@ -1,7 +1,7 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECore/data/exrFiles
 http://cortex-vfx.googlecode.com/svn
 
@@ -536,40 +536,6 @@ has-props
 
 17294
 
-checkerAnimated.0002.exr
-file
-
-
-
-
-2011-12-21T09:26:32.000000Z
-f07c41852c26550ab139848ee4709939
-2008-12-02T02:58:05.262396Z
-1941
-mark.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-17294
-
 float256x256.exr
 file
 
@@ -604,16 +570,16 @@ has-props
 
 1157
 
-colorBarsWithAlpha.exr
+checkerAnimated.0002.exr
 file
 
 
 
 
 2011-12-21T09:26:32.000000Z
-421e689d1bc0c5699ec4b60b8cf2829f
-2008-11-25T19:30:06.292951Z
-1889
+f07c41852c26550ab139848ee4709939
+2008-12-02T02:58:05.262396Z
+1941
 mark.imageengine
 has-props
 
@@ -636,7 +602,7 @@ has-props
 
 
 
-60829
+17294
 
 checkerAnimated.0003.exr
 file
@@ -671,6 +637,40 @@ has-props
 
 
 17294
+
+colorBarsWithAlpha.exr
+file
+
+
+
+
+2011-12-21T09:26:32.000000Z
+421e689d1bc0c5699ec4b60b8cf2829f
+2008-11-25T19:30:06.292951Z
+1889
+mark.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+60829
 
 checkerAnimated.0004.exr
 file

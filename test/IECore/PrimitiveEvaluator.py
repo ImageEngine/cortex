@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,14 +33,17 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestPrimitiveEvaluator( unittest.TestCase ) :
 
 	def testPrimitiveEvaluator( self ) :
-		""" Testing PrimitiveEvaluator """
 
-		self.assertRaises( RuntimeError, PrimitiveEvaluator )
+		self.assertRaises( RuntimeError, IECore.PrimitiveEvaluator )
+
+	def testCreateWithNone( self ) :
+	
+		self.assertRaises( ValueError, IECore.PrimitiveEvaluator.create, None )
 
 if __name__ == "__main__":
 	unittest.main()

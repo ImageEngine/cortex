@@ -1,14 +1,14 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECoreGL/expectedOutput
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2010-05-21T17:04:12.443752Z
-3387
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -59,6 +59,40 @@ has-props
 
 
 42264
+
+linearLinesWithVertexColor.tif
+file
+
+
+
+
+2013-03-13T13:34:19.158757Z
+f450b0e8cf2f793a5b35cbb829e5d64a
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+18252
 
 glPoints.tif
 file
@@ -161,6 +195,40 @@ has-props
 
 
 9308
+
+rotatedPointPatches.exr
+file
+
+
+
+
+2013-03-13T13:34:19.159466Z
+79edd1ab5d21a9c1bd1e7aafff26bafd
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+30268
 
 aimedOrthographicPatches.tif
 file
@@ -365,4 +433,38 @@ has-props
 
 
 9338
+
+twoBSplineCirclesAsLines.tif
+file
+
+
+
+
+2013-03-13T13:34:19.159466Z
+a3761f327258b20a65a3045a56059d01
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7632
 

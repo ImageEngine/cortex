@@ -99,7 +99,7 @@ class AlembicInput : public IECore::RefCounted
 		/// Alembic archives don't necessarily store bounding box
 		/// information for every object in the scene graph. This method
 		/// can be used to determine whether or not a bound has been
-		/// stored for this object. You should be able to rely on having
+		/// stored for this object. You can NOT EXACTLY rely on having
 		/// stored bounds at the top of the archive and at any geometry-containing
 		/// nodes.
 		bool hasStoredBound() const;

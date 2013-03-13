@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,9 @@
 #ifndef IECORE_COMPOUNDDATABASE_H
 #define IECORE_COMPOUNDDATABASE_H
 
-#include "IECore/TypedData.h"
-#include "IECore/Interned.h"
-
 #include <map>
+
+#include "IECore/TypedData.h"
 
 namespace IECore
 {

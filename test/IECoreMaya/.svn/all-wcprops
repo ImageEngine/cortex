@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/svn/!svn/ver/4834/trunk/test/IECoreMaya
+/svn/!svn/ver/5191/trunk/test/IECoreMaya
 END
 FromMayaPlugConverterTest.py
 K 25
@@ -49,13 +49,13 @@ FnParameterisedHolderTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 69
-/svn/!svn/ver/4820/trunk/test/IECoreMaya/FnParameterisedHolderTest.py
+/svn/!svn/ver/4889/trunk/test/IECoreMaya/FnParameterisedHolderTest.py
 END
 All.py
 K 25
 svn:wc:ra_dav:version-url
 V 47
-/svn/!svn/ver/4693/trunk/test/IECoreMaya/All.py
+/svn/!svn/ver/5170/trunk/test/IECoreMaya/All.py
 END
 ToMayaSkinClusterConverterTest.py
 K 25
@@ -87,11 +87,17 @@ svn:wc:ra_dav:version-url
 V 69
 /svn/!svn/ver/4396/trunk/test/IECoreMaya/FromMayaMeshConverterTest.py
 END
+FromMayaProceduralHolderConverterTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/5191/trunk/test/IECoreMaya/FromMayaProceduralHolderConverterTest.py
+END
 ParameterisedHolder.py
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4704/trunk/test/IECoreMaya/ParameterisedHolder.py
+/svn/!svn/ver/5110/trunk/test/IECoreMaya/ParameterisedHolder.py
 END
 FromMayaParticleConverterTest.py
 K 25
@@ -151,13 +157,19 @@ ToMayaMeshConverterTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 67
-/svn/!svn/ver/4722/trunk/test/IECoreMaya/ToMayaMeshConverterTest.py
+/svn/!svn/ver/4922/trunk/test/IECoreMaya/ToMayaMeshConverterTest.py
 END
 ToMayaGroupConverterTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 68
 /svn/!svn/ver/4724/trunk/test/IECoreMaya/ToMayaGroupConverterTest.py
+END
+MayaSceneTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/5165/trunk/test/IECoreMaya/MayaSceneTest.py
 END
 ToMayaParticleConverterTest.py
 K 25

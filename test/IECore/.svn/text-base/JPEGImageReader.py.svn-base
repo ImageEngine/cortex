@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -31,6 +31,8 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
+from __future__ import with_statement
 
 import unittest
 import glob
@@ -228,9 +230,7 @@ class TestJPEGReader(unittest.TestCase):
 		expectedFailures = "test/IECore/data/jpg/uvMap.512x256.truncated.jpg"
 
 		# Silence any warnings while the tests run
-		MessageHandler.pushHandler( NullMessageHandler() )
-
-		try:
+		with NullMessageHandler() :
 
 			for f in fileNames:
 
@@ -249,15 +249,6 @@ class TestJPEGReader(unittest.TestCase):
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
 					self.assert_( img.arePrimitiveVariablesValid() )
-
-		except:
-
-			raise
-
-		finally:
-
-			MessageHandler.popHandler()
-
 
 if __name__ == "__main__":
 	unittest.main()

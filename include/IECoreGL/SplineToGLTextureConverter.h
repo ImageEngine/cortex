@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,16 +35,14 @@
 #ifndef IECOREGL_SPLINETOGLTEXTURECONVERTER_H
 #define IECOREGL_SPLINETOGLTEXTURECONVERTER_H
 
-#include "IECoreGL/ToGLConverter.h"
 #include "IECore/SimpleTypedParameter.h"
 
-namespace IECore
-{
-	IE_CORE_FORWARDDECLARE( ImagePrimitive );
-}
+#include "IECoreGL/ToGLConverter.h"
 
 namespace IECoreGL
 {
+
+IE_CORE_FORWARDDECLARE( Texture )
 
 /// Converts IECore::SplineData objects into IECoreGL::Texture objects.
 /// The default conversion gives an image of 8x512 and it can return a ColorTexture or a LuminanceTexture.
@@ -53,6 +51,9 @@ class SplineToGLTextureConverter : public ToGLConverter
 {
 
 	public :
+
+		typedef IECore::Data InputType;
+		typedef IECoreGL::Texture ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::SplineToGLTextureConverter, SplineToGLTextureConverterTypeId, ToGLConverter );
 
@@ -64,6 +65,11 @@ class SplineToGLTextureConverter : public ToGLConverter
 		IECore::V2iParameterPtr m_resolutionParameter;
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
 	
+	private :
+	
+		static ConverterDescription<SplineToGLTextureConverter> g_descriptionff;
+		static ConverterDescription<SplineToGLTextureConverter> g_descriptionfColor3f;
+		static ConverterDescription<SplineToGLTextureConverter> g_descriptionfColor4f;
 	
 };
 

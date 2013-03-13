@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,56 +36,193 @@
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/StateComponent.h"
 
-#include <iostream>
-
 using namespace IECoreGL;
 using namespace std;
 
-IE_CORE_DEFINERUNTIMETYPED( State );
+//////////////////////////////////////////////////////////////////////////
+// Implementation
+//////////////////////////////////////////////////////////////////////////
 
-State::ScopedBinding::ScopedBinding( State &s, const State &currentState )
+class State::Implementation : public IECore::RefCounted
 {
-	m_savedComponents.reserve( s.m_components.size() );
 
-	for( ComponentMap::const_iterator it=s.m_components.begin(); it!=s.m_components.end(); it++ )
+	public :
+	
+		Implementation( bool complete )
+			:	m_userAttributes( 0 )
+		{
+			if( complete )
+			{
+				State::CreatorMap &c = *State::creators();
+				for( State::CreatorMap::const_iterator it = c.begin(); it!=c.end(); it++ )
+				{
+					add( it->second() );
+				}
+			}
+		}
+
+		Implementation( const Implementation &other )
+			:	m_components( other.m_components ), m_userAttributes( other.m_userAttributes ? other.m_userAttributes->copy() : 0 )
+		{
+		}
+		
+		virtual ~Implementation()
+		{
+		}
+	
+		void bind() const
+		{
+			for( ComponentMap::const_iterator it=m_components.begin(); it!=m_components.end(); it++ )
+			{
+				it->second.component->bind();
+			}
+		}
+		
+		void add( Implementation *s )
+		{
+			for( ComponentMap::iterator it=s->m_components.begin(); it!=s->m_components.end(); it++ )
+			{
+				add( it->second.component );
+			}
+			if( s->m_userAttributes )
+			{
+				/// \todo Is it not a bit questionable that we don't take a copy here?
+				IECore::CompoundDataMap &a = userAttributes()->writable();
+				IECore::CompoundDataMap &ao = s->m_userAttributes->writable();
+				for( IECore::CompoundDataMap::iterator it=ao.begin(); it!=ao.end(); it++ )
+				{
+					a.insert( *it );
+				}
+			}
+		}
+
+		void add( StateComponentPtr s, bool override = false )
+		{
+			m_components[s->typeId()] = Component( s, override );
+		}
+
+		StateComponent *get( IECore::TypeId componentType )
+		{
+			ComponentMap::const_iterator it = m_components.find( componentType );
+			if( it==m_components.end() )
+			{
+				return 0;
+			}
+			return it->second.component.get();
+		}
+			
+		const StateComponent *get( IECore::TypeId componentType ) const
+		{
+			ComponentMap::const_iterator it = m_components.find( componentType );
+			if( it==m_components.end() )
+			{
+				return 0;
+			}
+			return it->second.component.get();
+		}
+
+		void remove( IECore::TypeId componentType )
+		{
+			ComponentMap::iterator it = m_components.find( componentType );
+			if( it==m_components.end() )
+			{
+				return;
+			}
+			m_components.erase( it );
+		}
+		
+		bool isComplete() const
+		{
+			return m_components.size()==creators()->size();
+		}
+
+		IECore::CompoundData *userAttributes()
+		{
+			if( !m_userAttributes )
+			{
+				m_userAttributes = new IECore::CompoundData;
+			}
+			return m_userAttributes.get();
+		}
+
+		const IECore::CompoundData *userAttributes() const
+		{
+			if( !m_userAttributes )
+			{
+				m_userAttributes = new IECore::CompoundData;
+			}
+			return m_userAttributes.get();
+		}
+
+	private :
+	
+		friend class ScopedBinding;
+	
+		struct Component
+		{
+			Component()
+				: component( 0 ), override( false )
+			{
+			}
+			
+			Component( StateComponentPtr c, bool o )
+				:	component( c ), override( o )
+			{
+			}
+			StateComponentPtr component;
+			bool override;
+		};
+	
+		typedef std::map<IECore::TypeId, Component> ComponentMap;
+		ComponentMap m_components;
+		mutable IECore::CompoundDataPtr m_userAttributes;
+
+};
+
+//////////////////////////////////////////////////////////////////////////
+// ScopedBinding
+//////////////////////////////////////////////////////////////////////////
+
+State::ScopedBinding::ScopedBinding( const State &s, State &currentState )
+	:	m_currentState( currentState )
+{
+	m_savedComponents.reserve( s.m_implementation->m_components.size() );
+
+	for( Implementation::ComponentMap::const_iterator it=s.m_implementation->m_components.begin(); it!=s.m_implementation->m_components.end(); it++ )
 	{
-		m_savedComponents.push_back( currentState.get( it->first ) );
+		Implementation::ComponentMap::iterator cIt = m_currentState.m_implementation->m_components.find( it->first );
+		if( !cIt->second.override )
+		{
+			m_savedComponents.push_back( cIt->second.component );
+			it->second.component->bind();
+			cIt->second = it->second;
+		}		
 	}
-	s.bind();
-
-	m_boundState = new State( currentState );
-	m_boundState->add( &s );
-}
-
-ConstStatePtr State::ScopedBinding::boundState() const
-{
-	return m_boundState;
 }
 
 State::ScopedBinding::~ScopedBinding()
 {
-	for( std::vector< ConstStateComponentPtr >::const_iterator it=m_savedComponents.begin(); it!=m_savedComponents.end(); it++ )
+	for( std::vector<StateComponentPtr>::const_iterator it=m_savedComponents.begin(); it!=m_savedComponents.end(); it++ )
 	{
 		(*it)->bind();
+		m_currentState.add( *it );
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// State
+//////////////////////////////////////////////////////////////////////////
+
+IE_CORE_DEFINERUNTIMETYPED( State );
+
 State::State( bool complete )
+	:	m_implementation( new Implementation( complete ) )
 {
-	if( complete )
-	{
-		CreatorMap &c = *creators();
-		for( CreatorMap::const_iterator it = c.begin(); it!=c.end(); it++ )
-		{
-			add( it->second() );
-		}
-	}
 }
 
 State::State( const State &other )
+	:	m_implementation( new Implementation( *(other.m_implementation) ) )
 {
-	m_components = other.m_components;
-	m_userAttributes = other.m_userAttributes;
 }
 
 State::~State()
@@ -94,72 +231,47 @@ State::~State()
 
 void State::bind() const
 {
-	for( ComponentMap::const_iterator it=m_components.begin(); it!=m_components.end(); it++ )
-	{
-		it->second->bind();
-	}
+	m_implementation->bind();
 }
 
 void State::add( StatePtr s )
 {
-	for( ComponentMap::iterator it=s->m_components.begin(); it!=s->m_components.end(); it++ )
-	{
-		add( it->second );
-	}
-	for( UserAttributesMap::iterator it=s->m_userAttributes.begin(); it!=s->m_userAttributes.end(); it++ )
-	{
-		m_userAttributes.insert( *it );
-	}
+	m_implementation->add( s->m_implementation.get() );
 }
 
-void State::add( StateComponentPtr s )
+void State::add( StateComponentPtr s, bool override )
 {
-	m_components[s->typeId()] = s;
+	m_implementation->add( s, override );
 }
 
-StateComponentPtr State::get( IECore::TypeId componentType )
+StateComponent *State::get( IECore::TypeId componentType )
 {
-	ComponentMap::const_iterator it = m_components.find( componentType );
-	if( it==m_components.end() )
-	{
-		return 0;
-	}
-	return it->second;
+	return m_implementation->get( componentType );
 }
 
-ConstStateComponentPtr State::get( IECore::TypeId componentType ) const
+const StateComponent *State::get( IECore::TypeId componentType ) const
 {
-	ComponentMap::const_iterator it = m_components.find( componentType );
-	if( it==m_components.end() )
-	{
-		return 0;
-	}
-	return it->second;
+	return m_implementation->get( componentType );
 }
 
 void State::remove( IECore::TypeId componentType )
 {
-	ComponentMap::iterator it = m_components.find( componentType );
-	if( it==m_components.end() )
-	{
-		return;
-	}
-	m_components.erase( it );
+	return m_implementation->remove( componentType );
 }
 
-State::UserAttributesMap &State::userAttributes()
+IECore::CompoundData *State::userAttributes()
 {
-	return m_userAttributes;
+	return m_implementation->userAttributes();
 }
 
-const State::UserAttributesMap &State::userAttributes() const
+const IECore::CompoundData *State::userAttributes() const
 {
-	return m_userAttributes;
+	return m_implementation->userAttributes();
 }
 
 bool State::isComplete() const
 {
-	return m_components.size()==creators()->size();
+	return m_implementation->isComplete();
 }
 
 ConstStatePtr State::defaultState()
@@ -182,13 +294,5 @@ State::CreatorMap *State::creators()
 void State::bindBaseState()
 {
 	glEnable( GL_BLEND );
-	glEnable( GL_COLOR_MATERIAL );
-	glColorMaterial( GL_FRONT_AND_BACK, GL_DIFFUSE );
-	float black[4] = { 0, 0, 0, 0 };
-	glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, black );
-	glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, black );
-	glMaterialfv( GL_FRONT_AND_BACK, GL_EMISSION, black );
-	glShadeModel( GL_SMOOTH );
-	glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
 	glCullFace( GL_BACK );
 }

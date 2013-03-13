@@ -643,7 +643,7 @@ INPUT                  = include/IECore \
                          include/IECoreMaya \
                          doc/python/IECoreMaya \
                          mel/IECoreMaya \
-                         contrib/IECoreHoudini/include \
+                         include/IECoreHoudini \
                          doc/python/IECoreHoudini
 
 # This tag can be used to specify the character encoding of the source files

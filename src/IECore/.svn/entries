@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECore
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-18T20:06:00.689114Z
-4858
-thehaddonyoof
+2013-03-12T23:14:14.260292Z
+5252
+lucio.imageengine
 has-props
 
 
@@ -66,11 +66,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-d82a4b774a790af1d1e2ae138a2ba983
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.056466Z
+f38bef9895c8a7b851c52a3f76cff3b7
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -92,7 +92,7 @@ thehaddonyoof
 
 
 
-10413
+10827
 
 SimpleTypedParameter.cpp
 file
@@ -270,10 +270,10 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-fe64bf17442680002f35fd943e6f29a5
-2011-10-12T00:35:17.810501Z
-4416
+2013-03-13T13:36:19.057466Z
+8b7d910ff1f758d06aff148c7b234173
+2012-12-17T19:42:55.884294Z
+5004
 andrewk.imageengine
 
 
@@ -296,7 +296,7 @@ andrewk.imageengine
 
 
 
-4078
+4447
 
 CubeColorLookupParameter.cpp
 file
@@ -338,10 +338,10 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-23f8489bda9dd92800464ebcb9dbb22f
-2011-10-07T23:55:14.813761Z
-4414
+2013-03-13T13:36:19.057466Z
+f1c0124defd3e580f0623e138b8443df
+2012-12-17T19:42:55.884294Z
+5004
 andrewk.imageengine
 
 
@@ -364,7 +364,7 @@ andrewk.imageengine
 
 
 
-6126
+6953
 
 MixSmoothSkinningWeightsOp.cpp
 file
@@ -440,11 +440,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-228aec85d66891d62ae239b5042d7e7c
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+2013-03-13T13:36:19.057466Z
+50f5619f926ba1d8d6abe3b8e6db28df
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -466,7 +466,7 @@ thehaddonyoof
 
 
 
-7275
+7303
 
 ModifyOp.cpp
 file
@@ -638,40 +638,6 @@ john.imageengine
 
 3634
 
-IndexedIOInterface.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-1c43f5bcc77443be209e0946feec2a72
-2011-10-27T23:04:50.320177Z
-4441
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4111
-
 TimeCodeParameter.cpp
 file
 
@@ -712,11 +678,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-7c4e616f88bf6c2631e1f3d9d4eeb702
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+2013-03-13T13:36:19.058466Z
+0f2afb6c8bb6b4c876cac32d203322c7
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -738,7 +704,7 @@ thehaddonyoof
 
 
 
-4163
+4265
 
 HdrMergeOp.cpp
 file
@@ -814,11 +780,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-42add7a76b1978624c791a5c7b7376bf
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.058466Z
+2104172e7d1dc927e514360be1853106
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -840,7 +806,7 @@ thehaddonyoof
 
 
 
-9092
+9624
 
 SphericalHarmonicsProjector.cpp
 file
@@ -950,11 +916,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-7e06c52ccf67592f6a7311e075288be3
-2010-05-03T16:56:23.936861Z
-3279
-john.imageengine
+2013-03-13T13:36:19.058466Z
+41abf724d1b7c0356c3ca68d2aeacba1
+2013-03-05T02:42:46.957911Z
+5220
+lucio.imageengine
 
 
 
@@ -976,7 +942,7 @@ john.imageengine
 
 
 
-50286
+7008
 
 Data.cpp
 file
@@ -984,11 +950,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-4bd15a35946de2ec00ef8ad736eafc65
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.058466Z
+2074864cd051dcd25567f07ae68bf4fc
+2013-02-14T23:49:52.752933Z
+5168
+andrewk.imageengine
 
 
 
@@ -1010,7 +976,7 @@ thehaddonyoof
 
 
 
-2490
+2491
 
 Transform.cpp
 file
@@ -1018,11 +984,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-2128fc983ff2a9ebae7790d0a6398375
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.059466Z
+ed6eb11897e77fb5b93d5b5ae87ad484
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -1044,7 +1010,7 @@ thehaddonyoof
 
 
 
-2857
+2660
 
 TGAImageWriter.cpp
 file
@@ -1114,6 +1080,40 @@ mark.imageengine
 
 4524
 
+SceneCache.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.059466Z
+9244f427b266b515ef6b956cbd68cfe6
+2013-03-04T23:51:15.865467Z
+5215
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+59415
+
 DisplayDriverServerHeader.cpp
 file
 
@@ -1154,33 +1154,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-fc281354e7d40811505061c49a0f788b
-2010-05-07T21:43:48.736677Z
-3313
+
+e18158a1c1ebad83832cb1b6d2f0b849
+2013-01-16T02:24:42.096040Z
+5107
 john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4927
 
 SearchPath.cpp
 file
@@ -1222,11 +1200,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-127a4237578133b85a3c99485badaaa9
-2012-03-19T21:38:48.852201Z
-4626
-david.imageengine@gmail.com
+2013-03-13T13:36:19.059466Z
+e09c63cce6064175cb4c0edf3569758c
+2013-02-20T18:18:42.194196Z
+5188
+john.imageengine
 
 
 
@@ -1248,7 +1226,7 @@ david.imageengine@gmail.com
 
 
 
-24004
+25636
 
 DecompressSmoothSkinningDataOp.cpp
 file
@@ -1426,10 +1404,10 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-595692476fb80989fae6a667a94d0daa
-2011-10-03T23:23:17.872282Z
-4407
+2013-03-13T13:36:19.060466Z
+3726d83cae41226cb0155f8a056d0628
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -1452,7 +1430,7 @@ andrewk.imageengine
 
 
 
-4381
+4546
 
 IECore.cpp
 file
@@ -1494,11 +1472,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-45b5d19624e1bf042f8eb6148f51cf2a
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
+2013-03-13T13:36:19.060466Z
+c8cab774dced0cc2118cd85a1a1cefe1
+2013-01-11T02:37:21.504331Z
+5085
+john.imageengine
 
 
 
@@ -1520,7 +1498,7 @@ mark.imageengine
 
 
 
-17205
+19680
 
 PointVelocityDisplaceOp.cpp
 file
@@ -1692,17 +1670,51 @@ lucio.imageengine
 
 12784
 
+SampledSceneInterface.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.060466Z
+203683a8dd4b11a802126c66dd3b59fa
+2013-01-30T23:34:50.084069Z
+5131
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1999
+
 MPlayDisplayDriver.cpp
 file
 
 
 
 
-2012-09-11T09:54:37.853094Z
-18c0133b968e624a6eaffe62bba6ccea
-2012-09-06T09:51:23.734884Z
-4818
-thehaddonyoof@gmail.com
+2013-03-13T13:36:19.061466Z
+37a85ac062a6f43cbd67b4f652568251
+2013-01-31T23:42:53.210150Z
+5139
+paulo.imageengine@gmail.com
 
 
 
@@ -1724,7 +1736,7 @@ thehaddonyoof@gmail.com
 
 
 
-8026
+8044
 
 FaceAreaOp.cpp
 file
@@ -1902,11 +1914,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-75cc78d84b1127e5c2b77f7fdaa0268c
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.061466Z
+9d41566582a4e23afdea9b70941f79db
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -1928,7 +1940,7 @@ thehaddonyoof
 
 
 
-2879
+2683
 
 TGAImageReader.cpp
 file
@@ -2344,11 +2356,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-28af1cdf6938db9ee12d60bc4b6db0ff
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.061466Z
+a04ec1d9c90886f53763d9806ec7f290
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -2370,7 +2382,7 @@ thehaddonyoof
 
 
 
-10161
+10441
 
 ObjectVector.cpp
 file
@@ -2378,11 +2390,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-69797f9d20d017d56c249491a8280b74
-2011-12-30T16:40:20.452994Z
-4509
-thehaddonyoof
+2013-03-13T13:36:19.061466Z
+d93adb85878b91d3c1a5433adbcc51e0
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -2404,7 +2416,7 @@ thehaddonyoof
 
 
 
-5044
+5155
 
 IFFHairReader.cpp
 file
@@ -2446,11 +2458,11 @@ file
 
 
 
-2012-07-19T11:27:19.744321Z
-84dead45f519e1af8d6e4846763b1647
-2012-07-02T08:31:32.567280Z
-4739
-thehaddonyoof
+2013-03-13T13:36:19.062466Z
+cc37fc44788bf1e76179cb2cd4e64816
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -2472,7 +2484,7 @@ thehaddonyoof
 
 
 
-3868
+3988
 
 ImageConvolveOp.cpp
 file
@@ -2548,11 +2560,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-88d39473f92d839b67ee9124110b1276
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.062466Z
+62eb364d2738d016e140f302ef4d0629
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -2574,7 +2586,7 @@ thehaddonyoof
 
 
 
-3555
+3603
 
 TimeDurationParameter.cpp
 file
@@ -2616,11 +2628,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-8200c8cbe1fe641e2154ad86f317fdc6
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.062466Z
+246f3b79546accb783bdd44aa5f616c9
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -2642,7 +2654,7 @@ thehaddonyoof
 
 
 
-5054
+5281
 
 ReorderSmoothSkinningInfluencesOp.cpp
 file
@@ -2684,11 +2696,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-d5ed038bcf49fb885ee99b552a33494c
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.063466Z
+b5f3888437ad9ef734efec92a347797a
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -2710,7 +2722,7 @@ thehaddonyoof
 
 
 
-11353
+11981
 
 NullMessageHandler.cpp
 file
@@ -2854,11 +2866,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-349b71b0d09702029ce2468fd0d0eed4
-2012-01-09T12:57:01.082936Z
-4523
-thehaddonyoof
+2013-03-13T13:36:19.063466Z
+2c483a011539b01375dc700ec8c83c1c
+2012-10-26T01:10:07.134654Z
+4888
+david.imageengine@gmail.com
 
 
 
@@ -2880,7 +2892,41 @@ thehaddonyoof
 
 
 
-19319
+22277
+
+StreamIndexedIO.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.063466Z
+a23c11b61d34eda4a9985f44541eeca7
+2013-03-11T17:07:12.978180Z
+5242
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+64938
 
 CompoundParameter.cpp
 file
@@ -2922,11 +2968,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-52c0d0750193cef4f52e344e8899a7fd
-2011-12-30T16:40:20.452994Z
-4509
-thehaddonyoof
+2013-03-13T13:36:19.064466Z
+9e4c682e4b946d520ed10aa290544268
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -2948,7 +2994,7 @@ thehaddonyoof
 
 
 
-9493
+11417
 
 MeshPrimitiveImplicitSurfaceFunction.cpp
 file
@@ -3092,11 +3138,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-13e7ddff7057182817d4d3ff221bedd9
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+2013-03-13T13:36:19.064466Z
+aaf7793f4a3b598ead68ae1677e854cf
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -3118,7 +3164,7 @@ thehaddonyoof
 
 
 
-4787
+5173
 
 WorldBlock.cpp
 file
@@ -3222,40 +3268,6 @@ lucio.imageengine
 
 6074
 
-IndexedIO.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-6ea1639ae727be9e4c15aebfefe2e78b
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3120
-
 MeshPrimitiveEvaluator.cpp
 file
 
@@ -3289,6 +3301,40 @@ john.imageengine
 
 
 38697
+
+IndexedIO.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.064466Z
+0fadf448f1d8e34fe51dc63aa3151888
+2013-02-26T17:25:17.888732Z
+5204
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5792
 
 ImageThinner.cpp
 file
@@ -3398,11 +3444,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-508a4a93e69e152c59fd56c027a859bc
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.064466Z
+547bc500688e732ce18fe4ba7f5c6ad5
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -3424,7 +3470,7 @@ thehaddonyoof
 
 
 
-9100
+9557
 
 TransformBlock.cpp
 file
@@ -3670,11 +3716,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-ab4466d8217aa799c4092d3d41bcef9f
-2011-12-30T16:40:20.452994Z
-4509
-thehaddonyoof
+2013-03-13T13:36:19.065466Z
+88db7a84b824a66d24e0450da8854f42
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -3696,7 +3742,41 @@ thehaddonyoof
 
 
 
-7579
+7789
+
+InternedString.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.065466Z
+a24993cdd6a3464d37d27fd776f65f2a
+2013-03-11T19:48:41.778985Z
+5243
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3644
 
 CurveLineariser.cpp
 file
@@ -3806,11 +3886,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-e514d30f5b14f74b98a7f968ad928421
-2010-03-09T23:59:24.748551Z
-3016
-lucio.imageengine
+2013-03-13T13:36:19.065466Z
+c66908f9b359c1e1631d86aa19a87ac7
+2013-01-22T02:49:35.890674Z
+5125
+john.imageengine
 
 
 
@@ -3832,7 +3912,7 @@ lucio.imageengine
 
 
 
-5830
+6505
 
 DataPromoteOp.cpp
 file
@@ -3874,11 +3954,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-9e06dfeb19e8bad9878d225c60b538a3
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.065466Z
+ab2583adc2104b7b47a86b825c97e935
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -3900,7 +3980,7 @@ thehaddonyoof
 
 
 
-3662
+4429
 
 MappedRandomPointDistributionOp.cpp
 file
@@ -3942,11 +4022,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-a970c3b7ec59b7976b221ca7cf384dec
-2012-03-26T12:42:16.786740Z
-4632
-thehaddonyoof
+2013-03-13T13:36:19.066466Z
+069a40db4bc7fda153ddb03e00c78959
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -3968,7 +4048,7 @@ thehaddonyoof
 
 
 
-5264
+5429
 
 PointNormalsOp.cpp
 file
@@ -4044,11 +4124,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-4831929c8a96c12214d14f294fe8e967
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+2013-03-13T13:36:19.066466Z
+6a49c13dc0c6956e0281eb09a3fa284a
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -4070,7 +4150,7 @@ thehaddonyoof
 
 
 
-4468
+4494
 
 AttributeCache.cpp
 file
@@ -4078,11 +4158,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-41989b67f8eec82ccbe7c8b4c1ceba9b
-2011-02-02T18:29:43.924596Z
-4071
-john.imageengine
+2013-03-13T13:36:19.066466Z
+5a07eef0892cce7d1c0c53fd1d88f3be
+2013-01-30T19:47:31.327313Z
+5130
+lucio.imageengine
 
 
 
@@ -4104,7 +4184,7 @@ john.imageengine
 
 
 
-7633
+6071
 
 PrimitiveEvaluator.cpp
 file
@@ -4146,10 +4226,10 @@ file
 
 
 
-2012-08-23T11:40:45.706586Z
-a8e8eea0a69f75f69a57ef8ef8e9c57c
-2012-08-12T07:54:45.725198Z
-4789
+2013-03-13T13:36:19.067466Z
+48eb101a500566738a437c67341d3a95
+2012-11-06T11:43:38.196494Z
+4901
 thehaddonyoof
 
 
@@ -4172,7 +4252,7 @@ thehaddonyoof
 
 
 
-10378
+11483
 
 SpherePrimitiveEvaluator.cpp
 file
@@ -4208,74 +4288,6 @@ john.imageengine
 
 11166
 
-HierarchicalCache.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-301ad3bb916a440b07fd8cc990a1cb89
-2010-03-10T17:18:38.646169Z
-3021
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-20439
-
-CompoundDataBase.cpp
-file
-
-
-
-
-2012-05-10T16:40:48.000000Z
-1053b1479aa0200d8e1d77c7421537f9
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-5917
-
 EnvMapSHProjector.cpp
 file
 
@@ -4309,6 +4321,40 @@ lucio.imageengine
 
 
 6619
+
+CompoundDataBase.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.067466Z
+2163e5bd10129ae63200ddf738ba02d4
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5963
 
 EnvMapSampler.cpp
 file
@@ -4520,11 +4566,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-5e78a656a69f2daa3b4cd54c685dee72
-2012-01-06T10:45:30.444255Z
-4518
-thehaddonyoof
+2013-03-13T13:36:19.067466Z
+5e1027563d00a1af63e43473b44aa98b
+2013-01-30T19:47:31.327313Z
+5130
+lucio.imageengine
 
 
 
@@ -4546,7 +4592,7 @@ thehaddonyoof
 
 
 
-7527
+7559
 
 MarschnerParameter.cpp
 file
@@ -4622,11 +4668,11 @@ file
 
 
 
-2012-09-19T08:39:08.428745Z
-119a09925737051eb97b62863fb8626f
-2012-09-18T20:06:00.689114Z
-4858
-thehaddonyoof
+2013-03-13T13:36:19.067466Z
+a1677541f276519252de33ec47b4ff5b
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -4648,7 +4694,7 @@ thehaddonyoof
 
 
 
-8927
+9107
 
 TimeDurationData.cpp
 file
@@ -4656,11 +4702,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-539fa6bd929b8edbb3a1dad033c11f7c
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+2013-03-13T13:36:19.068466Z
+97ef7ec03dc5d2888dddd56af4b0b63b
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -4682,7 +4728,7 @@ thehaddonyoof
 
 
 
-3693
+3737
 
 MeshTangentsOp.cpp
 file
@@ -4792,11 +4838,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-7ffe2708b331c1a1433764e2c60cee2b
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.068466Z
+24c336ee8272b34fa6ef04cbbe22ef1c
+2013-03-12T23:14:14.260292Z
+5252
+lucio.imageengine
 
 
 
@@ -4818,7 +4864,7 @@ thehaddonyoof
 
 
 
-14497
+14581
 
 ParameterisedProcedural.cpp
 file
@@ -4826,11 +4872,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-c17926a49996c545d46cf0511ff768d1
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.068466Z
+eb467b05a4b178c695404f3d41d8a8a2
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -4852,7 +4898,7 @@ thehaddonyoof
 
 
 
-5622
+5678
 
 CubeColorTransformOp.cpp
 file
@@ -4921,6 +4967,40 @@ john.imageengine
 
 
 8453
+
+SceneInterface.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.069466Z
+f703958072916eeb450b4ce4037bfe8c
+2013-03-12T00:57:35.466744Z
+5246
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6043
 
 CompoundData.cpp
 file
@@ -5132,44 +5212,10 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-3f29b2c7febd098d53a241829fc45b3c
-2012-01-10T14:46:22.057053Z
-4529
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4465
-
-DisplayDriverServer.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-9f82cba16edfaf882638e86c2612869a
-2011-05-26T23:03:54.716382Z
-4225
+2013-03-13T13:36:19.069466Z
+3335bba2eca4258138b3ecb62195b5e3
+2013-01-04T19:43:36.740808Z
+5053
 lucio.imageengine
 
 
@@ -5192,7 +5238,41 @@ lucio.imageengine
 
 
 
-11905
+4636
+
+DisplayDriverServer.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.069466Z
+86e583daeada08f9466b067ac26d9558
+2013-01-30T19:47:31.327313Z
+5130
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11937
 
 FileSequenceParameter.cpp
 file
@@ -5336,11 +5416,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-964e10145d5f6c5db7aa3defb8523216
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.069466Z
+aba5f036fb3e2e88cbc41ef1ab6a4308
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -5362,41 +5442,7 @@ thehaddonyoof
 
 
 
-5570
-
-IndexedIOFilter.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-75f695f3f482db34019236db468b57ea
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3377
+5636
 
 ParticleMeshOp.cpp
 file
@@ -5710,11 +5756,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-25addaf0428606ffe1f7884f4355bac1
-2011-10-27T23:04:50.320177Z
-4441
-john.imageengine
+2013-03-13T13:36:19.070466Z
+b7717b55ebe978f2771dbcb3bb885453
+2013-03-05T02:42:46.957911Z
+5220
+lucio.imageengine
 
 
 
@@ -5736,7 +5782,7 @@ john.imageengine
 
 
 
-3549
+4973
 
 SGIImageReader.cpp
 file
@@ -5778,11 +5824,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-c1893f8d490fa220ab54fcc6207bc271
-2011-12-30T16:40:20.452994Z
-4509
-thehaddonyoof
+2013-03-13T13:36:19.070466Z
+cea87dc3cfcd88f4966708dfca17cb29
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -5804,7 +5850,7 @@ thehaddonyoof
 
 
 
-8139
+8368
 
 TransformOp.cpp
 file
@@ -5948,11 +5994,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-155dd67680049e4fe1ab66576d3c6c14
-2010-03-24T00:15:37.925250Z
-3086
-john.imageengine
+2013-03-13T13:36:19.070466Z
+d401d0ef42a998d72ced80d29aea6b35
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -5974,7 +6020,7 @@ john.imageengine
 
 
 
-3537
+3539
 
 ColorSpaceTransformOp.cpp
 file
@@ -6316,40 +6362,6 @@ mark.imageengine
 
 2122
 
-Interned.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-2665f08515780d95ff692ee6d694e11b
-2010-02-12T02:48:22.533239Z
-2925
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3221
-
 ColorTransformOp.cpp
 file
 
@@ -6390,11 +6402,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-cea5e30e37bdaa734bf4f9b1652e9ae0
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.071466Z
+f6cfa6ca3880b15cad24b1e758e0be22
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -6416,7 +6428,7 @@ thehaddonyoof
 
 
 
-6217
+6449
 
 TimeCodeData.cpp
 file
@@ -6424,11 +6436,11 @@ file
 
 
 
-2012-07-19T11:27:19.744321Z
-e6c690f14d63b6598735d42edc3c67f6
-2012-06-06T01:09:50.820697Z
-4699
-andrewk.imageengine
+2013-03-13T13:36:19.071466Z
+b376ba338fcbf6f207a323906604342a
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -6450,7 +6462,7 @@ andrewk.imageengine
 
 
 
-3435
+3484
 
 TIFFImageWriter.cpp
 file
@@ -6662,11 +6674,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-1e7c66c9ece05a0ddbe373d65bb3dea0
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.071466Z
+e764f6e6f711ffbcb6b66043ad8f7ef3
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -6688,7 +6700,7 @@ thehaddonyoof
 
 
 
-4600
+4776
 
 FrameRange.cpp
 file
@@ -6832,10 +6844,10 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-9176311f36116cc037b374234e88e2e6
-2010-03-09T23:59:24.748551Z
-3016
+2013-03-13T13:36:19.071466Z
+3ba96dcbf08ea909a4d5b193ccefb922
+2013-02-13T01:52:32.301213Z
+5164
 lucio.imageengine
 
 
@@ -6858,7 +6870,7 @@ lucio.imageengine
 
 
 
-2615
+2705
 
 DPXImageReader.cpp
 file
@@ -7070,11 +7082,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-e7195312f268928f49c7cdfcf842b8aa
-2012-01-24T17:44:07.228728Z
-4559
-thehaddonyoof
+2013-03-13T13:36:19.072466Z
+d93ea697a18c95cdbd4494d7ec4ee404
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -7096,7 +7108,7 @@ thehaddonyoof
 
 
 
-10810
+11425
 
 ImageUnpremultiplyOp.cpp
 file
@@ -7138,11 +7150,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-961cbc7c3ec87d9f7710aa79bf92cbb3
-2011-12-30T13:16:12.599232Z
-4505
-thehaddonyoof
+2013-03-13T13:36:19.072466Z
+927d21c66fdc3f47d0f4d43ece1dc5cd
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -7164,7 +7176,7 @@ thehaddonyoof
 
 
 
-4838
+4949
 
 MedianCutSampler.cpp
 file
@@ -7308,10 +7320,10 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-0a8dd689cbddad41bb4a82d1a1468165
-2010-03-04T22:32:29.351524Z
-3003
+2013-03-13T13:36:19.072466Z
+acb107febd86f5977e18ef03fec16289
+2013-01-30T19:47:31.327313Z
+5130
 lucio.imageengine
 
 
@@ -7334,7 +7346,7 @@ lucio.imageengine
 
 
 
-4158
+4165
 
 AttributeState.cpp
 file
@@ -7342,11 +7354,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-c71b3de750666cf8e11e4badee881212
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.073466Z
+f18f1e65ce917c50d5193699952a750b
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -7368,7 +7380,7 @@ thehaddonyoof
 
 
 
-4106
+4162
 
 PrimitiveOp.cpp
 file
@@ -7608,40 +7620,6 @@ lucio.imageengine
 
 6871
 
-ScopedMessageHandler.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-8cfbc9ad35c0696ed09a479500c13c61
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2352
-
 ReorderedFrameList.cpp
 file
 
@@ -7710,6 +7688,40 @@ lucio.imageengine
 
 2012
 
+ModelCache.cpp
+file
+
+
+
+
+2013-03-13T13:36:19.073466Z
+9ac97ca0e8d3988bceac74bdd8bfcb92
+2013-01-30T19:47:31.327313Z
+5130
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9075
+
 JPEGImageWriter.cpp
 file
 
@@ -7750,11 +7762,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-58c156b41259d684c9df0dfd0243b757
-2011-12-30T16:40:20.452994Z
-4509
-thehaddonyoof
+2013-03-13T13:36:19.073466Z
+c1de99304b8fa23a7dc33aad39ea465a
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -7776,7 +7788,7 @@ thehaddonyoof
 
 
 
-5904
+6122
 
 PDCParticleWriter.cpp
 file
@@ -7954,11 +7966,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-579f74717d259749038a74026479ff1b
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+2013-03-13T13:36:19.073466Z
+04d9810b4d7bb8a447327595f0bddf80
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -7980,7 +7992,7 @@ thehaddonyoof
 
 
 
-18493
+18714
 
 IFFFile.cpp
 file
@@ -8056,11 +8068,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-30437b6c3ff1e45bf2f3e2a20de64495
-2011-12-30T16:40:20.452994Z
-4509
-thehaddonyoof
+2013-03-13T13:36:19.074466Z
+7c52928c835f89d4b52039e30b50ea6d
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -8082,7 +8094,7 @@ thehaddonyoof
 
 
 
-4632
+4686
 
 WarpOp.cpp
 file
@@ -8158,11 +8170,11 @@ file
 
 
 
-2012-08-30T12:04:41.911293Z
-f3dae3bc4f93fec81cbb646270381698
-2012-08-30T10:30:59.628715Z
-4804
-thehaddonyoof@gmail.com
+2013-03-13T13:36:19.074466Z
+87157b5f5cd138cf164dbbce0ed7683b
+2013-01-25T00:38:25.764400Z
+5127
+lucio.imageengine
 
 
 
@@ -8184,7 +8196,7 @@ thehaddonyoof@gmail.com
 
 
 
-11965
+12201
 
 TriangulateOp.cpp
 file
@@ -8362,10 +8374,10 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-d41d370e263ed5118306ada90695c5ed
-2010-03-09T23:59:24.748551Z
-3016
+2013-03-13T13:36:19.074466Z
+c2f3246d9cb538eae59b0bf88e0e4389
+2013-01-30T19:47:31.327313Z
+5130
 lucio.imageengine
 
 
@@ -8388,7 +8400,7 @@ lucio.imageengine
 
 
 
-3908
+3888
 
 AlexaLogcToLinearOp.cpp
 file
@@ -8566,11 +8578,11 @@ file
 
 
 
-2011-12-21T09:27:00.000000Z
-a02c7bbb83a5a73e5732c7d1d5db4960
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:19.075466Z
+fe2472573814e9dc6f05153153c3a0a0
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 has-props
 
 
@@ -8592,7 +8604,7 @@ has-props
 
 
 
-11781
+12275
 
 MatrixAlgo.cpp
 file
@@ -8764,40 +8776,6 @@ has-props
 
 14801
 
-FileSystemIndexedIO.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-04e054d3b3e7bf2f3f8c7df1149e43e1
-2009-12-11T20:07:48.578768Z
-2800
-andrewk.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-18138
-
 PDCParticleReader.cpp
 file
 
@@ -8906,11 +8884,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-edb92766d64179ea07dfeda39b62d70f
-2012-01-09T21:54:53.550036Z
-4524
-thehaddonyoof
+2013-03-13T13:36:19.075466Z
+9cc0e77560da785aa9f46b98a6e2e841
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -8932,7 +8910,7 @@ thehaddonyoof
 
 
 
-6079
+6280
 
 LimitSmoothSkinningInfluencesOp.cpp
 file
@@ -9001,40 +8979,6 @@ john.imageengine
 
 
 2811
-
-IndexedIOPath.cpp
-file
-
-
-
-
-2011-12-21T09:27:00.000000Z
-47cd10b7f6a7382dd424b0af7fc5ef15
-2009-05-08T23:24:19.904341Z
-2466
-mark.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-8355
 
 CurvesMergeOp.cpp
 file

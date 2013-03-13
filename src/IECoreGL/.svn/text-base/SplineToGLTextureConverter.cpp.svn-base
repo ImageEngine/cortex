@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,10 @@
 using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( SplineToGLTextureConverter );
+
+SplineToGLTextureConverter::ConverterDescription<SplineToGLTextureConverter> SplineToGLTextureConverter::g_descriptionff( IECore::SplineffData::staticTypeId(), IECoreGL::Texture::staticTypeId() );
+SplineToGLTextureConverter::ConverterDescription<SplineToGLTextureConverter> SplineToGLTextureConverter::g_descriptionfColor3f( IECore::SplinefColor3fData::staticTypeId(), IECoreGL::Texture::staticTypeId() );
+SplineToGLTextureConverter::ConverterDescription<SplineToGLTextureConverter> SplineToGLTextureConverter::g_descriptionfColor4f( IECore::SplinefColor4fData::staticTypeId(), IECoreGL::Texture::staticTypeId() );
 
 SplineToGLTextureConverter::SplineToGLTextureConverter( IECore::ConstObjectPtr toConvert )
 	:	ToGLConverter( "Converts IECore::SplineData objects to IECoreGL::Texture objects.", IECore::ObjectTypeId )

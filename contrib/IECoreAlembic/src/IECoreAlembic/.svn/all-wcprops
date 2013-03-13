@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 64
-/svn/!svn/ver/4816/trunk/contrib/IECoreAlembic/src/IECoreAlembic
+/svn/!svn/ver/4907/trunk/contrib/IECoreAlembic/src/IECoreAlembic
 END
 FromAlembicCameraConverter.cpp
 K 25
@@ -13,7 +13,7 @@ FromAlembicXFormConverter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 94
-/svn/!svn/ver/4792/trunk/contrib/IECoreAlembic/src/IECoreAlembic/FromAlembicXFormConverter.cpp
+/svn/!svn/ver/4874/trunk/contrib/IECoreAlembic/src/IECoreAlembic/FromAlembicXFormConverter.cpp
 END
 FromAlembicSubDConverter.cpp
 K 25
@@ -43,5 +43,5 @@ AlembicInput.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 81
-/svn/!svn/ver/4816/trunk/contrib/IECoreAlembic/src/IECoreAlembic/AlembicInput.cpp
+/svn/!svn/ver/4907/trunk/contrib/IECoreAlembic/src/IECoreAlembic/AlembicInput.cpp
 END

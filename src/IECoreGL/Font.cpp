@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,13 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/MeshPrimitive.h"
 
 #include "IECoreGL/Font.h"
 #include "IECoreGL/ToGLMeshConverter.h"
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/ShaderStateComponent.h"
-
-#include "IECore/MeshPrimitive.h"
 
 using namespace IECoreGL;
 using namespace std;
@@ -50,23 +49,23 @@ IE_CORE_DEFINERUNTIMETYPED( Font );
 Font::Font( IECore::FontPtr font )
 	:	m_font( font ), m_texture( 0 )
 {
+	m_meshes.resize( 128 );
 }
 
 Font::~Font()
 {
 }
 
-IECore::FontPtr Font::coreFont()
+IECore::Font *Font::coreFont()
 {
 	return m_font;
 }
 
-ConstMeshPrimitivePtr Font::mesh( char c ) const
+const MeshPrimitive *Font::mesh( char c ) const
 {
-	MeshMap::const_iterator it = m_meshes.find( c );
-	if( it!=m_meshes.end() )
+	if( m_meshes[c] )
 	{
-		return it->second;
+		return m_meshes[c].get();
 	}
 
 	ToGLMeshConverter converter( m_font->mesh( c ) );
@@ -76,7 +75,7 @@ ConstMeshPrimitivePtr Font::mesh( char c ) const
 	return mesh;
 }
 
-ConstAlphaTexturePtr Font::texture() const
+const AlphaTexture *Font::texture() const
 {
 	if( m_texture )
 	{
@@ -125,19 +124,16 @@ void Font::renderSprites( const std::string &text ) const
 			origin += m_font->advance( c, text[i+1] );
 		}
 	}
-
 }
 
-void Font::renderMeshes( const std::string &text, const State *state, IECore::TypeId style ) const
+void Font::renderMeshes( const std::string &text, State *state ) const
 {
-	Shader *shader = state->get<ShaderStateComponent>()->shader();
 	glPushMatrix();
 
 		for( unsigned i=0; i<text.size(); i++ )
 		{
-			ConstMeshPrimitivePtr m = mesh( text[i] );
-			m->setupVertexAttributes( shader );
-			m->render( state, style );
+			const Primitive *m = mesh( text[i] );
+			m->render( state );
 			if( i < text.size() - 1 )
 			{
 				glTranslate( m_font->advance( text[i], text[i+1] ) );

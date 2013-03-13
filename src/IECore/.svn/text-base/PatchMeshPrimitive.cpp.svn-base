@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,15 @@
 #include "IECore/MurmurHash.h"
 
 using namespace IECore;
+
+static IndexedIO::EntryID g_uPointsEntry("uPoints");
+static IndexedIO::EntryID g_vPointsEntry("vPoints");
+static IndexedIO::EntryID g_uBasisMatrixEntry("uBasisMatrix");
+static IndexedIO::EntryID g_uBasisStepEntry("uBasisStep");
+static IndexedIO::EntryID g_vBasisMatrixEntry("vBasisMatrix");
+static IndexedIO::EntryID g_vBasisStepEntry("vBasisStep");
+static IndexedIO::EntryID g_uPeriodicEntry("uPeriodic");
+static IndexedIO::EntryID g_vPeriodicEntry("vPeriodic");
 
 const unsigned int PatchMeshPrimitive::m_ioVersion = 1;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PatchMeshPrimitive );
@@ -168,16 +177,16 @@ void PatchMeshPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save( context );
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
+	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
-	container->write( "uPoints", m_uPoints );
-	container->write( "vPoints", m_vPoints );
-	container->write( "uBasisMatrix", m_uBasis.matrix.getValue(), 16 );
-	container->write( "uBasisStep", m_uBasis.step );
-	container->write( "vBasisMatrix", m_vBasis.matrix.getValue(), 16 );
-	container->write( "vBasisStep", m_vBasis.step );
-	container->write( "uPeriodic", (char)(m_uPeriodic) );
-	container->write( "vPeriodic", (char)(m_vPeriodic) );
+	container->write( g_uPointsEntry, m_uPoints );
+	container->write( g_vPointsEntry, m_vPoints );
+	container->write( g_uBasisMatrixEntry, m_uBasis.matrix.getValue(), 16 );
+	container->write( g_uBasisStepEntry, m_uBasis.step );
+	container->write( g_vBasisMatrixEntry, m_vBasis.matrix.getValue(), 16 );
+	container->write( g_vBasisStepEntry, m_vBasis.step );
+	container->write( g_uPeriodicEntry, (char)(m_uPeriodic) );
+	container->write( g_vPeriodicEntry, (char)(m_vPeriodic) );
 }
 
 void PatchMeshPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -185,23 +194,23 @@ void PatchMeshPrimitive::load( IECore::Object::LoadContextPtr context )
 	Primitive::load( context );
 	unsigned int v = m_ioVersion;
 
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( "uPoints", m_uPoints );
-	container->read( "vPoints", m_vPoints );
+	container->read( g_uPointsEntry, m_uPoints );
+	container->read( g_vPointsEntry, m_vPoints );
 
 	float *f = m_uBasis.matrix.getValue();
-	container->read( "uBasisMatrix", f, 16 );
-	container->read( "uBasisStep", m_uBasis.step );
+	container->read( g_uBasisMatrixEntry, f, 16 );
+	container->read( g_uBasisStepEntry, m_uBasis.step );
 
 	f = m_vBasis.matrix.getValue();
-	container->read( "vBasisMatrix", f, 16 );
-	container->read( "vBasisStep", m_vBasis.step );
+	container->read( g_vBasisMatrixEntry, f, 16 );
+	container->read( g_vBasisStepEntry, m_vBasis.step );
 
 	char p = 0;
-	container->read( "uPeriodic", p );
+	container->read( g_uPeriodicEntry, p );
 	m_uPeriodic = p;
-	container->read( "vPeriodic", p );
+	container->read( g_vPeriodicEntry, p );
 	m_vPeriodic = p;
 
 	m_uLinear = m_uBasis==CubicBasisf::linear();

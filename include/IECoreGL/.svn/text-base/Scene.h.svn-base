@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,8 +37,7 @@
 
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/HitRecord.h"
-
-#include <list>
+#include "IECoreGL/Selector.h"
 
 namespace IECoreGL
 {
@@ -58,7 +57,7 @@ class Scene : public Renderable
 		/// Renders the scene, using the passed state as
 		/// the root state - it is not necessary for this
 		/// state to already be bound.
-		virtual void render( const State *state ) const;
+		virtual void render( State *state ) const;
 		/// Convenience function to bind a default state
 		/// and then call render() with it.
 		void render() const;
@@ -71,7 +70,7 @@ class Scene : public Renderable
 		/// using raw gl calls before calling Scene::select. In either case the region applies.
 		/// \todo Have an overload which takes a Box2i specifying a raster space region
 		/// instead.
-		size_t select( const Imath::Box2f &region, std::vector<HitRecord> &hits ) const;
+		size_t select( Selector::Mode mode, const Imath::Box2f &region, std::vector<HitRecord> &hits ) const;
 
 		/// Sets the camera used to view the scene. If unspecified then
 		/// you may position the scene using raw gl calls before

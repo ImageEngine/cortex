@@ -49,6 +49,11 @@ struct PrimitiveEvaluatorHelper
 {
 	static PrimitiveEvaluatorPtr create( PrimitivePtr primitive )
 	{
+		if( !primitive )
+		{
+			PyErr_SetString( PyExc_ValueError, "Null primitive" );
+			throw_error_already_set();
+		}
 		return PrimitiveEvaluator::create( primitive );
 	}
 

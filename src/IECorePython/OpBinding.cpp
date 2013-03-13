@@ -95,6 +95,13 @@ static ObjectPtr operate( Op &op )
 	return result;
 }
 
+static ObjectPtr operateWithArgs( Op &op, const CompoundObject *args )
+{
+	ScopedGILRelease gilRelease;
+	ObjectPtr result = op.operate(args);
+	return result;
+}
+
 void bindOp()
 {
 	using boost::python::arg;
@@ -104,7 +111,9 @@ void bindOp()
 		.def( init< const std::string &, CompoundParameterPtr, ParameterPtr >( ( arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )
 		.def( "resultParameter", &resultParameter )
 		.def( "operate", &operate )
+		.def( "operate", &operateWithArgs )
 		.def( "__call__", &operate )
+		.def( "__call__", &operateWithArgs )
 	;
 
 }

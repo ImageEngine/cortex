@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 36
-/svn/!svn/ver/4835/trunk/test/IECore
+/svn/!svn/ver/5246/trunk/test/IECore
 END
 PointDistributionOpTest.py
 K 25
@@ -25,7 +25,7 @@ MotionPrimitive.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/4498/trunk/test/IECore/MotionPrimitive.py
+/svn/!svn/ver/5117/trunk/test/IECore/MotionPrimitive.py
 END
 MatrixMultiplyOp.py
 K 25
@@ -109,7 +109,7 @@ ObjectVectorTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 56
-/svn/!svn/ver/4498/trunk/test/IECore/ObjectVectorTest.py
+/svn/!svn/ver/4876/trunk/test/IECore/ObjectVectorTest.py
 END
 TimeCodeParameterTest.py
 K 25
@@ -127,7 +127,7 @@ Group.py
 K 25
 svn:wc:ra_dav:version-url
 V 45
-/svn/!svn/ver/4498/trunk/test/IECore/Group.py
+/svn/!svn/ver/4946/trunk/test/IECore/Group.py
 END
 ConfigLoaderTest.py
 K 25
@@ -205,7 +205,7 @@ ImageDiffOp.py
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/2962/trunk/test/IECore/ImageDiffOp.py
+/svn/!svn/ver/5107/trunk/test/IECore/ImageDiffOp.py
 END
 CompressAndDecompressSmoothSkinningDataOpsTest.py
 K 25
@@ -223,7 +223,7 @@ DiskPrimitiveTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/4632/trunk/test/IECore/DiskPrimitiveTest.py
+/svn/!svn/ver/5117/trunk/test/IECore/DiskPrimitiveTest.py
 END
 WrapperToPython.py
 K 25
@@ -247,7 +247,7 @@ ParameterParser.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/4617/trunk/test/IECore/ParameterParser.py
+/svn/!svn/ver/5135/trunk/test/IECore/ParameterParser.py
 END
 ImageSequenceCompositeOpTest.py
 K 25
@@ -307,7 +307,7 @@ Writer.py
 K 25
 svn:wc:ra_dav:version-url
 V 46
-/svn/!svn/ver/4493/trunk/test/IECore/Writer.py
+/svn/!svn/ver/5125/trunk/test/IECore/Writer.py
 END
 TypedPrimitiveOp.py
 K 25
@@ -319,7 +319,7 @@ CompoundData.py
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/4498/trunk/test/IECore/CompoundData.py
+/svn/!svn/ver/5117/trunk/test/IECore/CompoundData.py
 END
 ParticleMeshOp.py
 K 25
@@ -415,7 +415,7 @@ DPXImageReader.py
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/2954/trunk/test/IECore/DPXImageReader.py
+/svn/!svn/ver/5107/trunk/test/IECore/DPXImageReader.py
 END
 SpaceTransformTest.cpp
 K 25
@@ -463,7 +463,7 @@ PrimitiveEvaluator.py
 K 25
 svn:wc:ra_dav:version-url
 V 58
-/svn/!svn/ver/2466/trunk/test/IECore/PrimitiveEvaluator.py
+/svn/!svn/ver/5046/trunk/test/IECore/PrimitiveEvaluator.py
 END
 DateTimeParameterTest.py
 K 25
@@ -511,13 +511,13 @@ IndexedIOTest.h
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/2488/trunk/test/IECore/IndexedIOTest.h
+/svn/!svn/ver/5130/trunk/test/IECore/IndexedIOTest.h
 END
 SGIImageReaderTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 58
-/svn/!svn/ver/2962/trunk/test/IECore/SGIImageReaderTest.py
+/svn/!svn/ver/5107/trunk/test/IECore/SGIImageReaderTest.py
 END
 PrimitiveTest.py
 K 25
@@ -536,6 +536,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/2962/trunk/test/IECore/TGAImageWriterTest.py
+END
+SceneInterfaceTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/5246/trunk/test/IECore/SceneInterfaceTest.py
 END
 AssociatedLegendreTest.inl
 K 25
@@ -597,6 +603,12 @@ svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/2951/trunk/test/IECore/OptionalCompoundParameter.py
 END
+InternedStringTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/5144/trunk/test/IECore/InternedStringTest.py
+END
 LookupTest.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -619,7 +631,7 @@ IndexedIO.py
 K 25
 svn:wc:ra_dav:version-url
 V 49
-/svn/!svn/ver/2466/trunk/test/IECore/IndexedIO.py
+/svn/!svn/ver/5220/trunk/test/IECore/IndexedIO.py
 END
 MeshPrimitiveEvaluator.py
 K 25
@@ -661,7 +673,7 @@ CompoundParameterTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 61
-/svn/!svn/ver/4525/trunk/test/IECore/CompoundParameterTest.py
+/svn/!svn/ver/5084/trunk/test/IECore/CompoundParameterTest.py
 END
 IgnoredExceptionsTest.py
 K 25
@@ -673,7 +685,7 @@ MurmurHashTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/4811/trunk/test/IECore/MurmurHashTest.py
+/svn/!svn/ver/5144/trunk/test/IECore/MurmurHashTest.py
 END
 MedianCutSamplerTest.py
 K 25
@@ -745,13 +757,7 @@ All.py
 K 25
 svn:wc:ra_dav:version-url
 V 43
-/svn/!svn/ver/4739/trunk/test/IECore/All.py
-END
-CompoundObject.py
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/4498/trunk/test/IECore/CompoundObject.py
+/svn/!svn/ver/5134/trunk/test/IECore/All.py
 END
 ImfTest.py
 K 25
@@ -759,11 +765,23 @@ svn:wc:ra_dav:version-url
 V 47
 /svn/!svn/ver/4698/trunk/test/IECore/ImfTest.py
 END
+CompoundObject.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/4498/trunk/test/IECore/CompoundObject.py
+END
 Op.py
 K 25
 svn:wc:ra_dav:version-url
 V 42
-/svn/!svn/ver/2933/trunk/test/IECore/Op.py
+/svn/!svn/ver/5164/trunk/test/IECore/Op.py
+END
+SceneCacheTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/5187/trunk/test/IECore/SceneCacheTest.py
 END
 ContrastSmoothSkinningWeightsOpTest.py
 K 25
@@ -799,7 +817,7 @@ MeshPrimitive.py
 K 25
 svn:wc:ra_dav:version-url
 V 53
-/svn/!svn/ver/4498/trunk/test/IECore/MeshPrimitive.py
+/svn/!svn/ver/5117/trunk/test/IECore/MeshPrimitive.py
 END
 FaceAreaOpTest.py
 K 25
@@ -883,7 +901,7 @@ MessageHandler.py
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/3825/trunk/test/IECore/MessageHandler.py
+/svn/!svn/ver/5107/trunk/test/IECore/MessageHandler.py
 END
 SearchPath.py
 K 25
@@ -907,7 +925,7 @@ EXRImageReader.py
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/4700/trunk/test/IECore/EXRImageReader.py
+/svn/!svn/ver/5107/trunk/test/IECore/EXRImageReader.py
 END
 BoostUnitTestTest.h
 K 25
@@ -919,7 +937,7 @@ FrameList.py
 K 25
 svn:wc:ra_dav:version-url
 V 49
-/svn/!svn/ver/2466/trunk/test/IECore/FrameList.py
+/svn/!svn/ver/4902/trunk/test/IECore/FrameList.py
 END
 LRUCacheTest.py
 K 25
@@ -931,7 +949,7 @@ AttributeCache.py
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/3819/trunk/test/IECore/AttributeCache.py
+/svn/!svn/ver/5117/trunk/test/IECore/AttributeCache.py
 END
 DataInterleaveOpTest.py
 K 25
@@ -992,6 +1010,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 67
 /svn/!svn/ver/3002/trunk/test/IECore/FileSequenceVectorParameter.py
+END
+NullObjectTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/4876/trunk/test/IECore/NullObjectTest.py
 END
 TGAImageReaderTest.py
 K 25
@@ -1231,7 +1255,7 @@ ObjectInterpolation.py
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/4804/trunk/test/IECore/ObjectInterpolation.py
+/svn/!svn/ver/5157/trunk/test/IECore/ObjectInterpolation.py
 END
 AssociatedLegendreTest.cpp
 K 25
@@ -1267,7 +1291,7 @@ VectorData.py
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/4524/trunk/test/IECore/VectorData.py
+/svn/!svn/ver/5144/trunk/test/IECore/VectorData.py
 END
 HeaderGenerator.py
 K 25
@@ -1299,12 +1323,6 @@ svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/4671/trunk/test/IECore/ClassParameterTest.py
 END
-Interned.py
-K 25
-svn:wc:ra_dav:version-url
-V 48
-/svn/!svn/ver/2466/trunk/test/IECore/Interned.py
-END
 CurvesPrimitiveEvaluatorThreadingTest.h
 K 25
 svn:wc:ra_dav:version-url
@@ -1329,6 +1347,12 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/2466/trunk/test/IECore/GenericImageTest.py
 END
+ModelCacheTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/5117/trunk/test/IECore/ModelCacheTest.py
+END
 ColorSpaceTransformOpTest.py
 K 25
 svn:wc:ra_dav:version-url
@@ -1351,13 +1375,13 @@ SimpleTypedData.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/4559/trunk/test/IECore/SimpleTypedData.py
+/svn/!svn/ver/5144/trunk/test/IECore/SimpleTypedData.py
 END
 InternedStringTest.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/2925/trunk/test/IECore/InternedStringTest.cpp
+/svn/!svn/ver/5134/trunk/test/IECore/InternedStringTest.cpp
 END
 NURBS.py
 K 25
@@ -1423,7 +1447,7 @@ JPEGImageReader.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/2962/trunk/test/IECore/JPEGImageReader.py
+/svn/!svn/ver/5107/trunk/test/IECore/JPEGImageReader.py
 END
 MeshMergeOpTest.py
 K 25
@@ -1453,7 +1477,7 @@ CapturingRendererTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 61
-/svn/!svn/ver/4626/trunk/test/IECore/CapturingRendererTest.py
+/svn/!svn/ver/5188/trunk/test/IECore/CapturingRendererTest.py
 END
 UniformRandomPointDistributionOpTest.py
 K 25
@@ -1477,19 +1501,13 @@ CameraControllerTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 60
-/svn/!svn/ver/4130/trunk/test/IECore/CameraControllerTest.py
+/svn/!svn/ver/4901/trunk/test/IECore/CameraControllerTest.py
 END
 ImageConvolveOpTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 59
 /svn/!svn/ver/3064/trunk/test/IECore/ImageConvolveOpTest.py
-END
-HierarchicalCache.py
-K 25
-svn:wc:ra_dav:version-url
-V 57
-/svn/!svn/ver/2466/trunk/test/IECore/HierarchicalCache.py
 END
 SpherePrimitiveEvaluator.py
 K 25
@@ -1501,7 +1519,7 @@ SmoothSkinningDataTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/svn/!svn/ver/3450/trunk/test/IECore/SmoothSkinningDataTest.py
+/svn/!svn/ver/5117/trunk/test/IECore/SmoothSkinningDataTest.py
 END
 Turbulence.py
 K 25
@@ -1591,13 +1609,13 @@ ObjectIO.py
 K 25
 svn:wc:ra_dav:version-url
 V 48
-/svn/!svn/ver/2466/trunk/test/IECore/ObjectIO.py
+/svn/!svn/ver/5117/trunk/test/IECore/ObjectIO.py
 END
 CINImageReader.py
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/2952/trunk/test/IECore/CINImageReader.py
+/svn/!svn/ver/5107/trunk/test/IECore/CINImageReader.py
 END
 SearchReplaceOp.py
 K 25
@@ -1627,13 +1645,13 @@ BasicPreset.py
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/4327/trunk/test/IECore/BasicPreset.py
+/svn/!svn/ver/4887/trunk/test/IECore/BasicPreset.py
 END
 ThreadingTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 53
-/svn/!svn/ver/4070/trunk/test/IECore/ThreadingTest.py
+/svn/!svn/ver/5117/trunk/test/IECore/ThreadingTest.py
 END
 LRUCacheThreadingTest.cpp
 K 25
@@ -1699,7 +1717,7 @@ BlindDataHolder.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/4498/trunk/test/IECore/BlindDataHolder.py
+/svn/!svn/ver/5117/trunk/test/IECore/BlindDataHolder.py
 END
 BoostUnitTestTest.cpp
 K 25
@@ -1729,13 +1747,13 @@ CapturingMessageHandler.py
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/2466/trunk/test/IECore/CapturingMessageHandler.py
+/svn/!svn/ver/5107/trunk/test/IECore/CapturingMessageHandler.py
 END
 IndexedIOTest.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 54
-/svn/!svn/ver/2899/trunk/test/IECore/IndexedIOTest.cpp
+/svn/!svn/ver/5053/trunk/test/IECore/IndexedIOTest.cpp
 END
 StringUtilTest.py
 K 25
@@ -1789,19 +1807,13 @@ InterpolatedCache.py
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/4070/trunk/test/IECore/InterpolatedCache.py
+/svn/!svn/ver/5117/trunk/test/IECore/InterpolatedCache.py
 END
 BoundedKDTree.py
 K 25
 svn:wc:ra_dav:version-url
 V 53
 /svn/!svn/ver/2466/trunk/test/IECore/BoundedKDTree.py
-END
-ScopedMessageHandlerTest.py
-K 25
-svn:wc:ra_dav:version-url
-V 64
-/svn/!svn/ver/2466/trunk/test/IECore/ScopedMessageHandlerTest.py
 END
 MeshFaceFilterOpTest.py
 K 25
@@ -1819,5 +1831,5 @@ CurvesPrimitiveEvaluatorTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 68
-/svn/!svn/ver/3659/trunk/test/IECore/CurvesPrimitiveEvaluatorTest.py
+/svn/!svn/ver/4888/trunk/test/IECore/CurvesPrimitiveEvaluatorTest.py
 END

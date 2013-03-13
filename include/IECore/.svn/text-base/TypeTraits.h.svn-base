@@ -242,6 +242,7 @@ template< typename T, template<typename> class Pred > struct IsInterpolableHelpe
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< Imath::Color3< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< Imath::Color4< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< Imath::Box< T >, Pred > : IsInterpolableHelper<T, Pred> {};
+template< typename T, template<typename> class Pred > struct IsInterpolableHelper< Imath::Matrix44< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< std::vector< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< TypedData< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< const T, Pred > : IsInterpolableHelper<T, Pred> {};

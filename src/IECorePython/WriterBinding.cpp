@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -81,7 +81,9 @@ void bindWriter()
 {
 	RunTimeTypedClass<Writer>()
 		.def( "write", &write )
-		.def( "create", &Writer::create ).staticmethod( "create" )
+		.def( "create", (WriterPtr(*)( ObjectPtr, const std::string & ) )&Writer::create )
+		.def( "create", (WriterPtr(*)( const std::string & ) )&Writer::create )
+		.staticmethod( "create" )
 		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
 		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )
 		.staticmethod( "supportedExtensions" )

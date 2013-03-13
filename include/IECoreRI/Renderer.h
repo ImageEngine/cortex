@@ -80,6 +80,10 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ri:pixelSamples" V2iData()</b><br>
 		/// Passed to an RiPixelSamples call.
 		///
+		/// \li <b>"ri:hider" StringData()</b></br>
+		/// \li <b>"ri:hider:*" StringData()</b></br>
+		/// Passed to an RiHider call.
+		///
 		/// \li <b>"ri:*:*"</b><br>
 		/// Passed to an RiOption call.
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );

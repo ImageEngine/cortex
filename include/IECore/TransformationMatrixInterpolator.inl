@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/TransformationMatrix.h"
+
+namespace IECore
+{
 
 // Partially specialize for TransformationMatrix
 // Assumes the two rotate members have the same rotation order and that they are sufficiently close
@@ -112,3 +116,5 @@ struct CubicInterpolator< TransformationMatrix<T> >
 		CubicInterpolator< Imath::Vec3< T > >()( y0.translate, y1.translate, y2.translate, y3.translate, x, result.translate );
 	}
 };
+
+} // namespace IECore

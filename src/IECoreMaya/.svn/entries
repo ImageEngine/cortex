@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreMaya
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-12T21:43:07.651942Z
-4834
-danield.imageengine
+2013-03-12T19:06:26.014266Z
+5247
+david.imageengine@gmail.com
 has-props
 
 
@@ -66,11 +66,11 @@ file
 
 
 
-2012-07-19T11:27:20.291306Z
-70f6be0d3cf6b185531cfab212fadacb
-2012-06-19T21:25:47.175101Z
-4722
-andrewk.imageengine
+2013-03-13T13:36:30.901466Z
+329e73c633695ea4a91d361bece620ba
+2012-11-20T20:19:51.779388Z
+4922
+valerie.imageengine@gmail.com
 
 
 
@@ -92,7 +92,7 @@ andrewk.imageengine
 
 
 
-13910
+15504
 
 StatusException.cpp
 file
@@ -134,10 +134,10 @@ file
 
 
 
-2012-07-19T11:27:20.292321Z
-3546dc55d2680a5a04f1677be3a5acfe
-2012-06-07T20:59:02.545006Z
-4704
+2013-03-13T13:36:30.901466Z
+94220ba16d5b55e5bf2f019cdcb30e88
+2013-01-17T02:11:18.660463Z
+5110
 andrewk.imageengine
 
 
@@ -160,7 +160,7 @@ andrewk.imageengine
 
 
 
-11719
+10604
 
 ObjectParameterHandler.cpp
 file
@@ -576,11 +576,11 @@ file
 
 
 
-2011-12-21T09:27:04.000000Z
-92e109a36f9fd61df6f063f5f5f492c1
-2011-05-10T18:57:32.286931Z
-4194
-john.imageengine
+2013-03-13T13:36:30.902466Z
+73a3d391695e6da52480ed5b5de732db
+2013-03-05T19:19:34.791963Z
+5221
+valerie.imageengine@gmail.com
 
 
 
@@ -602,7 +602,7 @@ john.imageengine
 
 
 
-12654
+12721
 
 FloatSplineParameterHandler.cpp
 file
@@ -718,17 +718,51 @@ mark.imageengine
 
 2545
 
+FromMayaProceduralHolderConverter.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.902466Z
+4edfaf5e9c2e0c614a3ae014adc1aaf8
+2013-02-20T23:29:36.329493Z
+5191
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3026
+
 DisplayStyle.cpp
 file
 
 
 
 
-2011-12-21T09:27:04.000000Z
-b33d630a919c183c4d4cc883cdd33570
-2010-03-31T00:01:13.147320Z
-3123
-lucio.imageengine
+2013-03-13T13:36:30.902466Z
+77a864464731835cbf37f0c38151a587
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -750,7 +784,7 @@ lucio.imageengine
 
 
 
-4006
+3999
 
 FromMayaSkinClusterConverter.cpp
 file
@@ -955,6 +989,40 @@ lucio.imageengine
 
 
 6621
+
+SceneShapeInterface.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.903466Z
+c60d7aa19f7226024768653291b2d2fa
+2013-03-09T01:13:15.781465Z
+5241
+valerie.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+27376
 
 ViewportPostProcessCallback.cpp
 file
@@ -1336,11 +1404,11 @@ file
 
 
 
-2011-12-21T09:27:04.000000Z
-0e677b4e8b171f9693883efc4e030603
-2010-11-05T18:36:55.436682Z
-3907
-john.imageengine
+2013-03-13T13:36:30.903466Z
+e8bb91c6d440c96f0cff7f855ecd3f6b
+2013-01-31T00:44:51.447768Z
+5132
+david.imageengine@gmail.com
 
 
 
@@ -1362,7 +1430,7 @@ john.imageengine
 
 
 
-15605
+15950
 
 FromMayaMatrixDataConverter.cpp
 file
@@ -1540,10 +1608,10 @@ file
 
 
 
-2012-07-19T11:27:20.292321Z
-6d911c2cd8405c4f7d33376e1f480ad8
-2012-06-07T20:59:02.545006Z
-4704
+2013-03-13T13:36:30.903466Z
+41e3ebd70240a3aa41cf493b2ed3e3d6
+2013-01-17T02:11:18.660463Z
+5110
 andrewk.imageengine
 
 
@@ -1566,7 +1634,7 @@ andrewk.imageengine
 
 
 
-13807
+12721
 
 FromMayaParticleConverter.cpp
 file
@@ -1676,11 +1744,11 @@ file
 
 
 
-2012-07-19T11:27:20.293321Z
-fa3469fcbb9f73c0e0a49576c5e68b93
-2012-06-02T00:09:15.288400Z
-4693
-andrewk.imageengine
+2013-03-13T13:36:30.903466Z
+91259574890a886b77897a9bdf9d0c21
+2013-01-04T19:55:13.577337Z
+5054
+lucio.imageengine
 
 
 
@@ -1702,7 +1770,7 @@ andrewk.imageengine
 
 
 
-7564
+7576
 
 FromMayaUnitPlugConverter.cpp
 file
@@ -1744,11 +1812,11 @@ file
 
 
 
-2012-07-19T11:27:20.293321Z
-6e3ac7ab2e99533e6485b25f94986239
-2012-06-20T01:25:04.554708Z
-4723
-david.imageengine@gmail.com
+2013-03-13T13:36:30.904466Z
+ad841e482c2768e33c6bc3e3c73d4e41
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1770,7 +1838,7 @@ david.imageengine@gmail.com
 
 
 
-22246
+20035
 
 ViewportPostProcessCallbackBinding.cpp
 file
@@ -1846,11 +1914,11 @@ file
 
 
 
-2012-07-19T11:27:20.293321Z
-d0267a0d0f28e0af4185f78dcba80483
-2012-06-20T01:25:04.554708Z
-4723
-david.imageengine@gmail.com
+2013-03-13T13:36:30.904466Z
+a18e11b86e308b08ca68a5676dae0114
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1872,7 +1940,7 @@ david.imageengine@gmail.com
 
 
 
-30158
+26864
 
 ToMayaNumericDataConverter.cpp
 file
@@ -1914,11 +1982,11 @@ file
 
 
 
-2011-12-21T09:27:04.000000Z
-ac9b657fc1e367bcf6cb0105b02e2f58
-2010-06-04T01:24:03.391678Z
-3437
-john.imageengine
+2013-03-13T13:36:30.904466Z
+1daad2eec61cf19e26cac48c2b80094c
+2013-01-30T19:47:31.327313Z
+5130
+lucio.imageengine
 
 
 
@@ -1940,7 +2008,7 @@ john.imageengine
 
 
 
-6115
+6179
 
 SystemExitCmd.cpp
 file
@@ -2077,6 +2145,40 @@ lucio.imageengine
 
 
 7209
+
+MayaScene.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.904466Z
+036ef66a94097624a46661ae6fef7118
+2013-03-08T18:22:36.621958Z
+5240
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+10550
 
 CallbackId.cpp
 file
@@ -2498,11 +2600,11 @@ file
 
 
 
-2011-12-21T09:27:04.000000Z
-85192f9853dd8f8dca41ed95ca89dd50
-2011-03-23T01:41:53.914896Z
-4140
-john.imageengine
+2013-03-13T13:36:30.905466Z
+b741f20fe806fb8a8f3ddb62b9f3c983
+2013-02-20T23:26:42.880913Z
+5190
+david.imageengine@gmail.com
 
 
 
@@ -2524,7 +2626,7 @@ john.imageengine
 
 
 
-4082
+4321
 
 ImageViewportPostProcess.cpp
 file
@@ -2934,6 +3036,40 @@ john.imageengine
 
 3969
 
+SceneShapeUI.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.905466Z
+4dcac1d1d6ef2083167780574ada02a5
+2013-03-09T01:13:15.781465Z
+5241
+valerie.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+19657
+
 FromMayaNumericPlugConverter.cpp
 file
 
@@ -3002,6 +3138,40 @@ john.imageengine
 
 7168
 
+SceneShape.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.905466Z
+5701ee9b94e9606d2460223e3e62a6a5
+2013-03-12T19:06:26.014266Z
+5247
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4197
+
 CacheSet.cpp
 file
 
@@ -3042,11 +3212,11 @@ file
 
 
 
-2012-07-19T11:27:20.294321Z
-ebd3e963acc8c54707c4a61ef60d0075
-2012-05-25T00:33:21.625212Z
-4677
-andrewk.imageengine
+2013-03-13T13:36:30.905466Z
+d6901ae168ba5ebd4bc8087cfaaf7fb6
+2012-09-20T22:17:23.015189Z
+4866
+danield.imageengine
 
 
 
@@ -3068,7 +3238,7 @@ andrewk.imageengine
 
 
 
-26071
+27156
 
 DelightProceduralCacheCommand.cpp
 file

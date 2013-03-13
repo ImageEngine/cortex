@@ -1,19 +1,19 @@
 K 25
 svn:wc:ra_dav:version-url
 V 41
-/svn/!svn/ver/4829/trunk/include/IECoreGL
+/svn/!svn/ver/5134/trunk/include/IECoreGL
 END
 SplineToGLTextureConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 70
-/svn/!svn/ver/4111/trunk/include/IECoreGL/SplineToGLTextureConverter.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/SplineToGLTextureConverter.h
 END
 ShaderStateComponent.h
 K 25
 svn:wc:ra_dav:version-url
 V 64
-/svn/!svn/ver/3218/trunk/include/IECoreGL/ShaderStateComponent.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/ShaderStateComponent.h
 END
 ToGLPointsConverter.h
 K 25
@@ -21,17 +21,11 @@ svn:wc:ra_dav:version-url
 V 63
 /svn/!svn/ver/4814/trunk/include/IECoreGL/ToGLPointsConverter.h
 END
-CameraController.h
-K 25
-svn:wc:ra_dav:version-url
-V 60
-/svn/!svn/ver/3218/trunk/include/IECoreGL/CameraController.h
-END
 Group.h
 K 25
 svn:wc:ra_dav:version-url
 V 49
-/svn/!svn/ver/3304/trunk/include/IECoreGL/Group.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Group.h
 END
 LuminanceTexture.h
 K 25
@@ -49,7 +43,7 @@ ToGLConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/4814/trunk/include/IECoreGL/ToGLConverter.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/ToGLConverter.h
 END
 Exception.h
 K 25
@@ -69,23 +63,29 @@ svn:wc:ra_dav:version-url
 V 52
 /svn/!svn/ver/3218/trunk/include/IECoreGL/Bindable.h
 END
-ShaderManager.h
+UIntTexture.h
 K 25
 svn:wc:ra_dav:version-url
-V 57
-/svn/!svn/ver/3218/trunk/include/IECoreGL/ShaderManager.h
+V 55
+/svn/!svn/ver/5075/trunk/include/IECoreGL/UIntTexture.h
 END
 PerspectiveCamera.h
 K 25
 svn:wc:ra_dav:version-url
 V 61
-/svn/!svn/ver/3304/trunk/include/IECoreGL/PerspectiveCamera.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/PerspectiveCamera.h
 END
 GL.h
 K 25
 svn:wc:ra_dav:version-url
 V 46
-/svn/!svn/ver/4551/trunk/include/IECoreGL/GL.h
+/svn/!svn/ver/5119/trunk/include/IECoreGL/GL.h
+END
+Renderable.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Renderable.h
 END
 StateComponent.h
 K 25
@@ -93,23 +93,11 @@ svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/3218/trunk/include/IECoreGL/StateComponent.h
 END
-Renderable.h
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/!svn/ver/3304/trunk/include/IECoreGL/Renderable.h
-END
-Primitive.inl
-K 25
-svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/3218/trunk/include/IECoreGL/Primitive.inl
-END
 Renderer.h
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/4829/trunk/include/IECoreGL/Renderer.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Renderer.h
 END
 AlphaTexture.h
 K 25
@@ -121,25 +109,25 @@ Shader.h
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/4473/trunk/include/IECoreGL/Shader.h
-END
-Window.h
-K 25
-svn:wc:ra_dav:version-url
-V 50
-/svn/!svn/ver/3218/trunk/include/IECoreGL/Window.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Shader.h
 END
 UniformFunctions.h
 K 25
 svn:wc:ra_dav:version-url
 V 60
-/svn/!svn/ver/3218/trunk/include/IECoreGL/UniformFunctions.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/UniformFunctions.h
+END
+Buffer.h
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Buffer.h
 END
 TypedStateComponent.h
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4829/trunk/include/IECoreGL/TypedStateComponent.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/TypedStateComponent.h
 END
 GLUT.h
 K 25
@@ -151,19 +139,13 @@ SpherePrimitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/3304/trunk/include/IECoreGL/SpherePrimitive.h
-END
-SceneViewer.h
-K 25
-svn:wc:ra_dav:version-url
-V 55
-/svn/!svn/ver/3218/trunk/include/IECoreGL/SceneViewer.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/SpherePrimitive.h
 END
 State.h
 K 25
 svn:wc:ra_dav:version-url
 V 49
-/svn/!svn/ver/4452/trunk/include/IECoreGL/State.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/State.h
 END
 BoxPrimitive.h
 K 25
@@ -175,19 +157,7 @@ TypeIds.h
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/4829/trunk/include/IECoreGL/TypeIds.h
-END
-HitRecord.h
-K 25
-svn:wc:ra_dav:version-url
-V 53
-/svn/!svn/ver/3218/trunk/include/IECoreGL/HitRecord.h
-END
-QuadPrimitive.h
-K 25
-svn:wc:ra_dav:version-url
-V 57
-/svn/!svn/ver/3304/trunk/include/IECoreGL/QuadPrimitive.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/TypeIds.h
 END
 TextureUnits.h
 K 25
@@ -195,17 +165,29 @@ svn:wc:ra_dav:version-url
 V 56
 /svn/!svn/ver/3218/trunk/include/IECoreGL/TextureUnits.h
 END
+HitRecord.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/5134/trunk/include/IECoreGL/HitRecord.h
+END
+QuadPrimitive.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/5075/trunk/include/IECoreGL/QuadPrimitive.h
+END
 FrameBuffer.h
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/3304/trunk/include/IECoreGL/FrameBuffer.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/FrameBuffer.h
 END
 MeshPrimitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/4576/trunk/include/IECoreGL/MeshPrimitive.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/MeshPrimitive.h
 END
 DepthTexture.h
 K 25
@@ -223,13 +205,13 @@ ToGLConverter.inl
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/4814/trunk/include/IECoreGL/ToGLConverter.inl
+/svn/!svn/ver/5075/trunk/include/IECoreGL/ToGLConverter.inl
 END
 NumericTraits.h
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/3218/trunk/include/IECoreGL/NumericTraits.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/NumericTraits.h
 END
 IECoreGL.h
 K 25
@@ -247,13 +229,19 @@ Scene.h
 K 25
 svn:wc:ra_dav:version-url
 V 49
-/svn/!svn/ver/4552/trunk/include/IECoreGL/Scene.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Scene.h
 END
 GL.inl
 K 25
 svn:wc:ra_dav:version-url
 V 48
 /svn/!svn/ver/4551/trunk/include/IECoreGL/GL.inl
+END
+ShaderLoader.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/5075/trunk/include/IECoreGL/ShaderLoader.h
 END
 StateComponent.inl
 K 25
@@ -271,25 +259,25 @@ CurvesPrimitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/3304/trunk/include/IECoreGL/CurvesPrimitive.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/CurvesPrimitive.h
 END
 Texture.h
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/4718/trunk/include/IECoreGL/Texture.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Texture.h
 END
 OrthographicCamera.h
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/svn/!svn/ver/3304/trunk/include/IECoreGL/OrthographicCamera.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/OrthographicCamera.h
 END
 NameStateComponent.h
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/svn/!svn/ver/4539/trunk/include/IECoreGL/NameStateComponent.h
+/svn/!svn/ver/5134/trunk/include/IECoreGL/NameStateComponent.h
 END
 TypedStateComponent.inl
 K 25
@@ -301,7 +289,7 @@ PointsPrimitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/3304/trunk/include/IECoreGL/PointsPrimitive.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/PointsPrimitive.h
 END
 ToGLCameraConverter.h
 K 25
@@ -313,13 +301,13 @@ Font.h
 K 25
 svn:wc:ra_dav:version-url
 V 48
-/svn/!svn/ver/4576/trunk/include/IECoreGL/Font.h
+/svn/!svn/ver/5085/trunk/include/IECoreGL/Font.h
 END
 Primitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 53
-/svn/!svn/ver/3304/trunk/include/IECoreGL/Primitive.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/Primitive.h
 END
 ToGLMeshConverter.h
 K 25
@@ -331,37 +319,37 @@ State.inl
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/3218/trunk/include/IECoreGL/State.inl
+/svn/!svn/ver/5075/trunk/include/IECoreGL/State.inl
 END
 TextPrimitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/4576/trunk/include/IECoreGL/TextPrimitive.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/TextPrimitive.h
 END
 ToGLTextureConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 64
-/svn/!svn/ver/4111/trunk/include/IECoreGL/ToGLTextureConverter.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/ToGLTextureConverter.h
 END
 Selector.h
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/4552/trunk/include/IECoreGL/Selector.h
+/svn/!svn/ver/5090/trunk/include/IECoreGL/Selector.h
 END
 DiskPrimitive.h
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/3304/trunk/include/IECoreGL/DiskPrimitive.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/DiskPrimitive.h
 END
 ToGLCurvesConverter.h
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4814/trunk/include/IECoreGL/ToGLCurvesConverter.h
+/svn/!svn/ver/5075/trunk/include/IECoreGL/ToGLCurvesConverter.h
 END
 Debug.h
 K 25
@@ -374,4 +362,10 @@ K 25
 svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/3218/trunk/include/IECoreGL/TextureLoader.h
+END
+ToGLBufferConverter.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/5075/trunk/include/IECoreGL/ToGLBufferConverter.h
 END

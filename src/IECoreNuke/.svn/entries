@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreNuke
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-01-19T15:58:16.110687Z
-4545
-thehaddonyoof
+2013-02-15T01:12:11.393879Z
+5171
+andrewk.imageengine
 has-props
 
 
@@ -32,33 +32,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-e4b9fa0dd1606078cd666911fc9606c8
-2011-10-27T23:04:50.320177Z
-4441
-john.imageengine
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-8303
+632725d426877fc62e8d0fb77ac237f3
+2012-09-26T17:28:20.689547Z
+4875
+andrewk.imageengine
 
 ClassParameterHandler.cpp
 file
@@ -344,11 +322,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-5f0d3b7716c746a937ef74c206e26e3d
-2012-01-19T15:58:16.110687Z
-4545
-thehaddonyoof
+2013-03-13T13:36:30.504465Z
+394923a7bf68b8aa601da660b82655ac
+2013-02-15T01:12:11.393879Z
+5171
+andrewk.imageengine
 
 
 
@@ -370,7 +348,7 @@ thehaddonyoof
 
 
 
-9972
+10050
 
 DrawableHolder.cpp
 file
@@ -412,11 +390,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-1318f9c3882c8536bfbdb31f39a8ce1e
-2011-10-27T23:04:50.320177Z
-4441
-john.imageengine
+2013-03-13T13:36:30.505465Z
+462ffc84ff633598f0ca555195c9420e
+2013-01-30T19:47:31.327313Z
+5130
+lucio.imageengine
 
 
 
@@ -438,7 +416,7 @@ john.imageengine
 
 
 
-5413
+5461
 
 Python.cpp
 file

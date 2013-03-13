@@ -151,6 +151,12 @@ template<>
 Imath::Box3f convert( const MBoundingBox &from );
 
 template<>
+MBoundingBox convert( const Imath::Box3d &from );
+
+template<>
+Imath::Box3d convert( const MBoundingBox &from );
+
+template<>
 Imath::Quatf convert( const MQuaternion &from );
 
 template<>

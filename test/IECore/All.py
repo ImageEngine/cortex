@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
 #
@@ -44,7 +44,6 @@ warnings.simplefilter( "error", DeprecationWarning )
 
 from ClassLoader import *
 from AttributeCache import *
-from HierarchicalCache import *
 from BlindDataHolder import *
 from CompoundData import *
 from CompoundObject import *
@@ -121,7 +120,7 @@ from PrimitiveEvaluator import *
 from MeshPrimitiveEvaluator import *
 from PrimitiveImplicitSurfaceFunction import *
 from MeshPrimitiveImplicitSurfaceOp import *
-from Interned import *
+from InternedStringTest import InternedStringTest
 from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
@@ -264,6 +263,9 @@ from ImfTest import *
 from TimeCodeDataTest import TimeCodeDataTest
 from TimeCodeParameterTest import TimeCodeParameterTest
 from OptionsTest import OptionsTest
+from NullObjectTest import NullObjectTest
+from ModelCacheTest import ModelCacheTest
+from SceneCacheTest import SceneCacheTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

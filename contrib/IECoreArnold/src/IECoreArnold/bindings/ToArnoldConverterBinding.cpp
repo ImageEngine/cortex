@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
 #include "IECoreArnold/ToArnoldConverter.h"
 #include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
 
@@ -44,9 +42,8 @@
 using namespace IECoreArnold;
 using namespace boost::python;
 
-static object convertWrapper( ToArnoldConverter &converter )
+boost::python::object IECoreArnold::atNodeToPythonObject( AtNode *node )
 {
-	AtNode *node = converter.convert();
 	if( !node )
 	{
 		return object();
@@ -61,9 +58,16 @@ static object convertWrapper( ToArnoldConverter &converter )
 	return converted;
 }
 
+static object convertWrapper( ToArnoldConverter &converter )
+{
+	return atNodeToPythonObject( converter.convert() );
+}
+
 void IECoreArnold::bindToArnoldConverter()
 {
 	IECorePython::RunTimeTypedClass<ToArnoldConverter>()
 		.def( "convert", &convertWrapper )
+		.def( "create", &ToArnoldConverter::create )
+		.staticmethod( "create" )
 	;
 }

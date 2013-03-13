@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -372,24 +372,23 @@ class RendererTest( unittest.TestCase ) :
 
 	def testIgnoreOtherAttributesAndOptions( self ) :
 
-		m = CapturingMessageHandler()
-		s = ScopedMessageHandler( m )
+		with CapturingMessageHandler() as m :
 
-		r = IECoreRI.Renderer( "test/IECoreRI/output/transform.rib" )
+			r = IECoreRI.Renderer( "test/IECoreRI/output/transform.rib" )
 
-		# this should be silently ignored
-		r.setOption( "someOthereRenderer:someOtherOption", IntData( 10 ) )
+			# this should be silently ignored
+			r.setOption( "someOthereRenderer:someOtherOption", IntData( 10 ) )
 
-		r.worldBegin()
+			r.worldBegin()
 
-		# this should be silently ignored
-		r.setAttribute( "someOtherRenderer:someOtherAttribute", IntData( 10 ) )
-		# as should this
-		self.assertEqual( r.getAttribute( "someOtherRenderer:someOtherAttribute" ), None )
-		# and this
-		self.assertEqual( r.getOption( "someOtherRenderer:someOtherOption" ), None )
-		
-		r.worldEnd()
+			# this should be silently ignored
+			r.setAttribute( "someOtherRenderer:someOtherAttribute", IntData( 10 ) )
+			# as should this
+			self.assertEqual( r.getAttribute( "someOtherRenderer:someOtherAttribute" ), None )
+			# and this
+			self.assertEqual( r.getOption( "someOtherRenderer:someOtherOption" ), None )
+
+			r.worldEnd()
 
 		self.assertEqual( len( m.messages ), 0 )
 		
@@ -397,16 +396,15 @@ class RendererTest( unittest.TestCase ) :
 
 		"""Check that missing shaders don't throw an exception but print a message instead."""
 
-		m = CapturingMessageHandler()
-		s = ScopedMessageHandler( m )
+		with CapturingMessageHandler() as m :
 
-		r = IECoreRI.Renderer( "test/IECoreRI/output/missingShaders.rib" )
+			r = IECoreRI.Renderer( "test/IECoreRI/output/missingShaders.rib" )
 
-		r.worldBegin()
+			r.worldBegin()
 
-		r.shader( "surface", "aShaderWhichDoesntExist", {} )
+			r.shader( "surface", "aShaderWhichDoesntExist", {} )
 
-		r.worldEnd()
+			r.worldEnd()
 
 		self.assertEqual( len( m.messages ), 1 )
 		self.assert_( "aShaderWhichDoesntExist" in m.messages[0].message )
@@ -499,7 +497,43 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 		with WorldBlock( r ) :
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : None } )
+	
+	def testErrorsReportedForUnknownRenderManOptions( self ) :
+	
+		with CapturingMessageHandler() as mh :
+		
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 			
+			r.setOption( "ri:unknownOption", StringData( "whatYouGonnaDo?" ) )
+			
+			with WorldBlock( r ) :
+				pass
+				
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertTrue( "ri:unknownOption" in mh.messages[0].message )
+		
+	def testSetHiderViaOptions( self ) :
+	
+		with CapturingMessageHandler() as mh :
+
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+			r.setOption( "ri:hider", "hidden" )
+			r.setOption( "ri:hider:jitter", True )
+			r.setOption( "ri:hider:depthfilter", "min" )
+
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+
+		self.assertTrue( "Hider" in rib )
+		self.assertTrue( "hidden" in rib )
+		self.assertTrue( "jitter" in rib )
+		self.assertTrue( "depthfilter" in rib )
+					
 	def tearDown( self ) :
 
 		files = [

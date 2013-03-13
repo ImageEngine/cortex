@@ -45,7 +45,7 @@ IE_CORE_FORWARDDECLARE( Object );
 template<>
 struct LinearInterpolator< Object >
 {
-	void operator()(const ObjectPtr &y0, const ObjectPtr &y1, double x, ObjectPtr &result ) const;
+	void operator()(const Object *y0, const Object *y1, double x, ObjectPtr &result ) const;
 	
 	private :
 	
@@ -55,7 +55,7 @@ struct LinearInterpolator< Object >
 template<>
 struct CubicInterpolator< Object >
 {
-	void operator()(const ObjectPtr &y0, const ObjectPtr &y1, const ObjectPtr &y2, const ObjectPtr &y3, double x, ObjectPtr &result ) const;
+	void operator()(const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x, ObjectPtr &result ) const;
 	
 	private :
 	
@@ -63,10 +63,10 @@ struct CubicInterpolator< Object >
 };
 
 /// Utility function that applies linear interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
-ObjectPtr linearObjectInterpolation( const ObjectPtr &y0, const ObjectPtr &y1, double x );
+ObjectPtr linearObjectInterpolation( const Object *y0, const Object *y1, double x );
 
 /// Utility function that applies cubic interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
-ObjectPtr cubicObjectInterpolation( const ObjectPtr &y0, const ObjectPtr &y1, const ObjectPtr &y2, const ObjectPtr &y3, double x );
+ObjectPtr cubicObjectInterpolation( const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x );
 
 } // namespace IECore
 

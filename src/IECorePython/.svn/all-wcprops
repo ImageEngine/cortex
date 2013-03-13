@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 41
-/svn/!svn/ver/4858/trunk/src/IECorePython
+/svn/!svn/ver/5251/trunk/src/IECorePython
 END
 ColorTransformOpBinding.cpp
 K 25
@@ -13,13 +13,19 @@ WriterBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/2996/trunk/src/IECorePython/WriterBinding.cpp
+/svn/!svn/ver/5125/trunk/src/IECorePython/WriterBinding.cpp
 END
 PDCParticleReaderBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 70
 /svn/!svn/ver/4480/trunk/src/IECorePython/PDCParticleReaderBinding.cpp
+END
+SceneInterfaceBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/5246/trunk/src/IECorePython/SceneInterfaceBinding.cpp
 END
 CompoundDataBinding.cpp
 K 25
@@ -61,7 +67,7 @@ CameraControllerBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 69
-/svn/!svn/ver/2981/trunk/src/IECorePython/CameraControllerBinding.cpp
+/svn/!svn/ver/4901/trunk/src/IECorePython/CameraControllerBinding.cpp
 END
 PathParameterBinding.cpp
 K 25
@@ -157,7 +163,7 @@ SimpleTypedDataBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 68
-/svn/!svn/ver/4511/trunk/src/IECorePython/SimpleTypedDataBinding.cpp
+/svn/!svn/ver/5144/trunk/src/IECorePython/SimpleTypedDataBinding.cpp
 END
 SRGBToLinearOpBinding.cpp
 K 25
@@ -177,17 +183,17 @@ svn:wc:ra_dav:version-url
 V 67
 /svn/!svn/ver/3739/trunk/src/IECorePython/PointsMotionOpBinding.cpp
 END
-VectorTypedDataBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 68
-/svn/!svn/ver/2981/trunk/src/IECorePython/VectorTypedDataBinding.cpp
-END
 TimePeriodParameterBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 72
 /svn/!svn/ver/2981/trunk/src/IECorePython/TimePeriodParameterBinding.cpp
+END
+VectorTypedDataBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/5144/trunk/src/IECorePython/VectorTypedDataBinding.cpp
 END
 ImageReaderBinding.cpp
 K 25
@@ -285,6 +291,12 @@ svn:wc:ra_dav:version-url
 V 58
 /svn/!svn/ver/3996/trunk/src/IECorePython/LightBinding.cpp
 END
+IndexedIOBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/5251/trunk/src/IECorePython/IndexedIOBinding.cpp
+END
 CineonToLinearOpBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -332,12 +344,6 @@ K 25
 svn:wc:ra_dav:version-url
 V 69
 /svn/!svn/ver/4679/trunk/src/IECorePython/MeshFaceFilterOpBinding.cpp
-END
-ScopedMessageHandlerBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 73
-/svn/!svn/ver/2981/trunk/src/IECorePython/ScopedMessageHandlerBinding.cpp
 END
 ValidatedStringParameterBinding.cpp
 K 25
@@ -451,7 +457,7 @@ OpBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/3074/trunk/src/IECorePython/OpBinding.cpp
+/svn/!svn/ver/5164/trunk/src/IECorePython/OpBinding.cpp
 END
 ScopedGILRelease.cpp
 K 25
@@ -483,6 +489,12 @@ svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/4745/trunk/src/IECorePython/MPlayDisplayDriverBinding.cpp
 END
+SampledSceneInterfaceBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/5131/trunk/src/IECorePython/SampledSceneInterfaceBinding.cpp
+END
 PDCParticleWriterBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -512,6 +524,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 62
 /svn/!svn/ver/2981/trunk/src/IECorePython/ExceptionBinding.cpp
+END
+InternedStringBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/5144/trunk/src/IECorePython/InternedStringBinding.cpp
 END
 SplineToImageBinding.cpp
 K 25
@@ -583,7 +601,7 @@ MessageHandlerBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 67
-/svn/!svn/ver/3313/trunk/src/IECorePython/MessageHandlerBinding.cpp
+/svn/!svn/ver/5107/trunk/src/IECorePython/MessageHandlerBinding.cpp
 END
 DataCastOpBinding.cpp
 K 25
@@ -633,12 +651,6 @@ svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/2981/trunk/src/IECorePython/ImagePremultiplyOpBinding.cpp
 END
-IndexedIOInterfaceBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 71
-/svn/!svn/ver/4523/trunk/src/IECorePython/IndexedIOInterfaceBinding.cpp
-END
 PointDistributionBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -649,7 +661,7 @@ MurmurHashBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4811/trunk/src/IECorePython/MurmurHashBinding.cpp
+/svn/!svn/ver/5144/trunk/src/IECorePython/MurmurHashBinding.cpp
 END
 FileSequenceVectorParameterBinding.cpp
 K 25
@@ -753,17 +765,17 @@ svn:wc:ra_dav:version-url
 V 68
 /svn/!svn/ver/2981/trunk/src/IECorePython/JPEGImageWriterBinding.cpp
 END
-ParticleReaderBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 67
-/svn/!svn/ver/2981/trunk/src/IECorePython/ParticleReaderBinding.cpp
-END
 DateTimeDataBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/4511/trunk/src/IECorePython/DateTimeDataBinding.cpp
+END
+ParticleReaderBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/2981/trunk/src/IECorePython/ParticleReaderBinding.cpp
 END
 ImathMatrixBinding.cpp
 K 25
@@ -913,7 +925,7 @@ ObjectBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/4498/trunk/src/IECorePython/ObjectBinding.cpp
+/svn/!svn/ver/5053/trunk/src/IECorePython/ObjectBinding.cpp
 END
 ChannelOpBinding.cpp
 K 25
@@ -991,7 +1003,7 @@ ObjectVectorBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 65
-/svn/!svn/ver/4069/trunk/src/IECorePython/ObjectVectorBinding.cpp
+/svn/!svn/ver/4876/trunk/src/IECorePython/ObjectVectorBinding.cpp
 END
 HexConversionBinding.cpp
 K 25
@@ -1011,6 +1023,12 @@ svn:wc:ra_dav:version-url
 V 70
 /svn/!svn/ver/2981/trunk/src/IECorePython/CompoundFrameListBinding.cpp
 END
+AlexaLogcToLinearOpBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/5233/trunk/src/IECorePython/AlexaLogcToLinearOpBinding.cpp
+END
 ImathVecBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -1022,12 +1040,6 @@ K 25
 svn:wc:ra_dav:version-url
 V 59
 /svn/!svn/ver/2981/trunk/src/IECorePython/ShaderBinding.cpp
-END
-InternedBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 61
-/svn/!svn/ver/2981/trunk/src/IECorePython/InternedBinding.cpp
 END
 MeshVertexReorderOpBinding.cpp
 K 25
@@ -1069,7 +1081,7 @@ PrimitiveEvaluatorBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 71
-/svn/!svn/ver/4218/trunk/src/IECorePython/PrimitiveEvaluatorBinding.cpp
+/svn/!svn/ver/5046/trunk/src/IECorePython/PrimitiveEvaluatorBinding.cpp
 END
 EXRImageWriterBinding.cpp
 K 25
@@ -1155,6 +1167,12 @@ svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/2981/trunk/src/IECorePython/RunTimeTypedBinding.cpp
 END
+LinearToAlexaLogcOpBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/5233/trunk/src/IECorePython/LinearToAlexaLogcOpBinding.cpp
+END
 HdrMergeOpBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -1179,12 +1197,6 @@ svn:wc:ra_dav:version-url
 V 77
 /svn/!svn/ver/2981/trunk/src/IECorePython/SpherePrimitiveEvaluatorBinding.cpp
 END
-HierarchicalCacheBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 70
-/svn/!svn/ver/2981/trunk/src/IECorePython/HierarchicalCacheBinding.cpp
-END
 ImathRandomBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -1201,7 +1213,7 @@ RendererBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 61
-/svn/!svn/ver/3103/trunk/src/IECorePython/RendererBinding.cpp
+/svn/!svn/ver/5134/trunk/src/IECorePython/RendererBinding.cpp
 END
 LinearToRec709OpBinding.cpp
 K 25
@@ -1351,7 +1363,7 @@ CompoundObjectBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 67
-/svn/!svn/ver/3577/trunk/src/IECorePython/CompoundObjectBinding.cpp
+/svn/!svn/ver/5064/trunk/src/IECorePython/CompoundObjectBinding.cpp
 END
 PointVelocityDisplaceOpBinding.cpp
 K 25
@@ -1387,7 +1399,7 @@ BlindDataHolderBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 68
-/svn/!svn/ver/2981/trunk/src/IECorePython/BlindDataHolderBinding.cpp
+/svn/!svn/ver/5053/trunk/src/IECorePython/BlindDataHolderBinding.cpp
 END
 CapturingRendererBinding.cpp
 K 25
@@ -1429,13 +1441,13 @@ TypeIdBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/4745/trunk/src/IECorePython/TypeIdBinding.cpp
+/svn/!svn/ver/5144/trunk/src/IECorePython/TypeIdBinding.cpp
 END
 DeepImageReaderBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 68
-/svn/!svn/ver/4407/trunk/src/IECorePython/DeepImageReaderBinding.cpp
+/svn/!svn/ver/5112/trunk/src/IECorePython/DeepImageReaderBinding.cpp
 END
 DisplayBinding.cpp
 K 25
@@ -1489,7 +1501,7 @@ CompoundParameterBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 70
-/svn/!svn/ver/4525/trunk/src/IECorePython/CompoundParameterBinding.cpp
+/svn/!svn/ver/5063/trunk/src/IECorePython/CompoundParameterBinding.cpp
 END
 MatrixMotionTransformBinding.cpp
 K 25
@@ -1515,17 +1527,17 @@ svn:wc:ra_dav:version-url
 V 67
 /svn/!svn/ver/2981/trunk/src/IECorePython/LinearToSRGBOpBinding.cpp
 END
-TransformationMatrixBinding.cpp
-K 25
-svn:wc:ra_dav:version-url
-V 73
-/svn/!svn/ver/2981/trunk/src/IECorePython/TransformationMatrixBinding.cpp
-END
 DPXImageWriterBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 67
 /svn/!svn/ver/2981/trunk/src/IECorePython/DPXImageWriterBinding.cpp
+END
+TransformationMatrixBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/2981/trunk/src/IECorePython/TransformationMatrixBinding.cpp
 END
 OBJReaderBinding.cpp
 K 25
@@ -1581,6 +1593,12 @@ svn:wc:ra_dav:version-url
 V 66
 /svn/!svn/ver/2981/trunk/src/IECorePython/DataPromoteOpBinding.cpp
 END
+SceneCacheBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/5131/trunk/src/IECorePython/SceneCacheBinding.cpp
+END
 ImathPlaneBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
@@ -1621,7 +1639,7 @@ GroupBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 58
-/svn/!svn/ver/3360/trunk/src/IECorePython/GroupBinding.cpp
+/svn/!svn/ver/4939/trunk/src/IECorePython/GroupBinding.cpp
 END
 MeshPrimitiveShrinkWrapOpBinding.cpp
 K 25
@@ -1664,6 +1682,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 77
 /svn/!svn/ver/4218/trunk/src/IECorePython/CurvesPrimitiveEvaluatorBinding.cpp
+END
+ModelCacheBinding.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/5053/trunk/src/IECorePython/ModelCacheBinding.cpp
 END
 CurvesMergeOpBinding.cpp
 K 25
@@ -1735,5 +1759,5 @@ NullObjectBinding.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/2981/trunk/src/IECorePython/NullObjectBinding.cpp
+/svn/!svn/ver/4876/trunk/src/IECorePython/NullObjectBinding.cpp
 END

@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECorePython
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-18T20:06:00.689114Z
-4858
-thehaddonyoof
+2013-03-12T23:01:29.258258Z
+5251
+john.imageengine
 has-props
 
 
@@ -66,10 +66,10 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-1c69d5cf2bca4a2c1b4d43083400e2fb
-2010-03-04T18:19:34.432667Z
-2996
+2013-03-13T13:36:25.381466Z
+e7df52908077406fb5e36dcc7ccad934
+2013-01-22T02:49:35.890674Z
+5125
 john.imageengine
 
 
@@ -92,7 +92,7 @@ john.imageengine
 
 
 
-2992
+3118
 
 PDCParticleReaderBinding.cpp
 file
@@ -127,6 +127,40 @@ thehaddonyoof
 
 
 2296
+
+SceneInterfaceBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.382466Z
+6ef2b2716b982ac0c66d1ef9dbcb9bac
+2013-03-12T00:57:35.466744Z
+5246
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6380
 
 CompoundDataBinding.cpp
 file
@@ -338,11 +372,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-f1b5972935bcf13efa6883556ce26eee
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
+2013-03-13T13:36:25.382466Z
+1260f6edb9f3c4f355be487e9e69afe9
+2012-11-06T11:43:38.196494Z
+4901
+thehaddonyoof
 
 
 
@@ -364,7 +398,7 @@ john.imageengine
 
 
 
-3555
+3696
 
 PathParameterBinding.cpp
 file
@@ -882,11 +916,11 @@ file
 
 
 
-2012-01-09T09:46:14.000000Z
-d5ac5389284f5e831fd0211042316fc7
-2012-01-02T21:00:00.969474Z
-4511
-thehaddonyoof
+2013-03-13T13:36:25.383466Z
+3122e182dfaeb56d5ccebad86675f090
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -908,7 +942,7 @@ thehaddonyoof
 
 
 
-13340
+13582
 
 SRGBToLinearOpBinding.cpp
 file
@@ -1012,40 +1046,6 @@ lucio.imageengine
 
 2130
 
-VectorTypedDataBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:01.000000Z
-fc4e77cd35d9280b0a21e4f42d0120f2
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-5216
-
 TimePeriodParameterBinding.cpp
 file
 
@@ -1079,6 +1079,40 @@ john.imageengine
 
 
 2088
+
+VectorTypedDataBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.383466Z
+efc6f936cecf595d98e69bc13e4ca578
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5348
 
 ImageReaderBinding.cpp
 file
@@ -1624,6 +1658,40 @@ lucio.imageengine
 
 2958
 
+IndexedIOBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.384467Z
+92c51a3a85468473c2ca089fc81a6dd3
+2013-03-12T23:01:29.258258Z
+5251
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+15178
+
 CineonToLinearOpBinding.cpp
 file
 
@@ -1895,40 +1963,6 @@ lucio.imageengine
 
 
 2186
-
-ScopedMessageHandlerBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:01.000000Z
-12bb8156ce34a3fc35448f2da5a26123
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2226
 
 ValidatedStringParameterBinding.cpp
 file
@@ -2548,11 +2582,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-46931b936910ac62484491833b4c0006
-2010-03-18T22:48:39.845098Z
-3074
-john.imageengine
+2013-03-13T13:36:25.384467Z
+375f65293330ae090a0a23bebaf14521
+2013-02-13T01:52:32.301213Z
+5164
+lucio.imageengine
 
 
 
@@ -2574,7 +2608,7 @@ john.imageengine
 
 
 
-3966
+4203
 
 ScopedGILRelease.cpp
 file
@@ -2746,6 +2780,40 @@ thehaddonyoof@gmail.com
 
 2782
 
+SampledSceneInterfaceBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.384467Z
+ee2670fe4e15f72b852e378eee7267e5
+2013-01-30T23:34:50.084069Z
+5131
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4458
+
 PDCParticleWriterBinding.cpp
 file
 
@@ -2915,6 +2983,40 @@ john.imageengine
 
 
 2433
+
+InternedStringBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.385467Z
+5f9c9089942b48a32f3174c4522d73d0
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3311
 
 SplineToImageBinding.cpp
 file
@@ -3296,10 +3398,10 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-fb15bf527690f8dbac5c9ae7056baf67
-2010-05-07T21:43:48.736677Z
-3313
+2013-03-13T13:36:25.385467Z
+1555dbf7ca76cc72eeca843c9b374429
+2013-01-16T02:24:42.096040Z
+5107
 john.imageengine
 
 
@@ -3322,7 +3424,7 @@ john.imageengine
 
 
 
-5518
+5729
 
 DataCastOpBinding.cpp
 file
@@ -3596,40 +3698,6 @@ john.imageengine
 
 2166
 
-IndexedIOInterfaceBinding.cpp
-file
-
-
-
-
-2012-05-10T16:40:48.000000Z
-4a76e231d5334a1ded8e4e8bff02fab7
-2012-01-09T12:57:01.082936Z
-4523
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-13411
-
 PointDistributionBinding.cpp
 file
 
@@ -3670,11 +3738,11 @@ file
 
 
 
-2012-09-11T09:54:37.901094Z
-0ffba10c03692527ac1d257d76c8e8a8
-2012-09-03T10:53:22.284342Z
-4811
-thehaddonyoof
+2013-03-13T13:36:25.385467Z
+ed6622658ac063c779237bf6e8d77829
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -3696,7 +3764,7 @@ thehaddonyoof
 
 
 
-7939
+8122
 
 FileSequenceVectorParameterBinding.cpp
 file
@@ -4276,40 +4344,6 @@ john.imageengine
 
 2206
 
-ParticleReaderBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:01.000000Z
-f375d958c1ab52716b8cebd08fd75e14
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2532
-
 DateTimeDataBinding.cpp
 file
 
@@ -4343,6 +4377,40 @@ thehaddonyoof
 
 
 5692
+
+ParticleReaderBinding.cpp
+file
+
+
+
+
+2011-12-21T09:27:01.000000Z
+f375d958c1ab52716b8cebd08fd75e14
+2010-03-02T00:22:32.598878Z
+2981
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2532
 
 ImathMatrixBinding.cpp
 file
@@ -5166,11 +5234,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-e0c0a1baa303d84628b9a64341c46941
-2011-12-20T13:52:34.308995Z
-4498
-thehaddonyoof
+2013-03-13T13:36:25.385467Z
+e52136517ba2b17df1f1f11635797886
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -5192,7 +5260,7 @@ thehaddonyoof
 
 
 
-3949
+3936
 
 ChannelOpBinding.cpp
 file
@@ -5608,11 +5676,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-d1ea54dd7a5dc7ce4c084734eebfccb8
-2011-02-01T18:43:08.906083Z
-4069
-john.imageengine
+2013-03-13T13:36:25.386466Z
+1ef860f0fb293bf62f9c818eeb8a61c6
+2012-10-01T10:53:58.946455Z
+4876
+thehaddonyoof
 
 
 
@@ -5634,7 +5702,7 @@ john.imageengine
 
 
 
-4514
+4997
 
 HexConversionBinding.cpp
 file
@@ -5738,6 +5806,40 @@ john.imageengine
 
 3898
 
+AlexaLogcToLinearOpBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.386466Z
+864cbfbe757fc14a965c1e2dc2297122
+2013-03-06T22:19:36.664650Z
+5233
+richardm.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2203
+
 ImathVecBinding.cpp
 file
 
@@ -5805,40 +5907,6 @@ john.imageengine
 
 
 2980
-
-InternedBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:01.000000Z
-f54d4fac8d77ab0964a726d7d6d00666
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3255
 
 MeshVertexReorderOpBinding.cpp
 file
@@ -6050,11 +6118,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-4a4bb980ea76004db4d4999b6b7a5bbd
-2011-05-25T22:46:29.066191Z
-4218
-andrewk.imageengine
+2013-03-13T13:36:25.386466Z
+02a73dff950125c005990c2ccbefaf4d
+2013-01-04T00:06:44.355706Z
+5046
+john.imageengine
 
 
 
@@ -6076,7 +6144,7 @@ andrewk.imageengine
 
 
 
-7677
+7792
 
 EXRImageWriterBinding.cpp
 file
@@ -6554,6 +6622,40 @@ john.imageengine
 
 3049
 
+LinearToAlexaLogcOpBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.387466Z
+9875751447acc0f83f1ab7015a303cf7
+2013-03-06T22:19:36.664650Z
+5233
+richardm.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2200
+
 HdrMergeOpBinding.cpp
 file
 
@@ -6690,40 +6792,6 @@ john.imageengine
 
 2369
 
-HierarchicalCacheBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:01.000000Z
-17d130649a3d7f69421486d44de9530d
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-7053
-
 ImathRandomBinding.cpp
 file
 
@@ -6798,11 +6866,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-a6e9aeba4cd765cdf89c83a5d22d1dc4
-2010-03-25T21:34:32.389719Z
-3103
-lucio.imageengine
+2013-03-13T13:36:25.387466Z
+7f2e1016eb1dcb23aab2d6a991f12626
+2013-01-31T20:05:13.214986Z
+5134
+john.imageengine
 
 
 
@@ -6824,7 +6892,7 @@ lucio.imageengine
 
 
 
-10978
+10999
 
 LinearToRec709OpBinding.cpp
 file
@@ -7648,11 +7716,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-297ffbca0679c25acb5c68a5151d6b64
-2010-07-06T23:26:33.699142Z
-3577
-john.imageengine
+2013-03-13T13:36:25.387466Z
+7578d7c4a718ddbdc6f4e68ea269a66b
+2013-01-07T21:48:03.719877Z
+5064
+lucio.imageengine
 
 
 
@@ -7674,7 +7742,7 @@ john.imageengine
 
 
 
-8187
+8180
 
 PointVelocityDisplaceOpBinding.cpp
 file
@@ -7852,11 +7920,11 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-071fa0f6cff6a2b598f9ae926b5c4d09
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
+2013-03-13T13:36:25.387466Z
+1f41808201d6bf76036054a80ef18ac9
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
 
 
 
@@ -7878,7 +7946,7 @@ john.imageengine
 
 
 
-2427
+2492
 
 CapturingRendererBinding.cpp
 file
@@ -8090,11 +8158,11 @@ file
 
 
 
-2012-07-19T11:27:19.908322Z
-456bf7da64dbb53a4a95439f52e7aba0
-2012-07-19T11:25:15.465277Z
-4745
-thehaddonyoof@gmail.com
+2013-03-13T13:36:25.388466Z
+e2b26da720ffdf38ffcc2994b8277421
+2013-02-04T18:22:36.870202Z
+5144
+john.imageengine
 
 
 
@@ -8116,7 +8184,7 @@ thehaddonyoof@gmail.com
 
 
 
-21785
+22270
 
 DeepImageReaderBinding.cpp
 file
@@ -8124,10 +8192,10 @@ file
 
 
 
-2011-12-21T09:27:01.000000Z
-42b6e8b99fb7f90b95cf3f7172ace46d
-2011-10-03T23:23:17.872282Z
-4407
+2013-03-13T13:36:25.388466Z
+841f2cc05f10bf365c2b7e01c2582c81
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -8150,7 +8218,7 @@ andrewk.imageengine
 
 
 
-2613
+2754
 
 DisplayBinding.cpp
 file
@@ -8430,11 +8498,11 @@ file
 
 
 
-2012-05-10T16:40:48.000000Z
-fa018b2ae3a027372b0ad08697a26ac9
-2012-01-10T13:39:11.346615Z
-4525
-thehaddonyoof
+2013-03-13T13:36:25.388466Z
+62d9f8f8950b873478606635fb69e898
+2013-01-07T19:32:25.149374Z
+5063
+lucio.imageengine
 
 
 
@@ -8456,7 +8524,7 @@ thehaddonyoof
 
 
 
-6734
+6820
 
 MatrixMotionTransformBinding.cpp
 file
@@ -8594,40 +8662,6 @@ john.imageengine
 
 2183
 
-TransformationMatrixBinding.cpp
-file
-
-
-
-
-2011-12-21T09:27:01.000000Z
-563ecb9755ffcb455eb597e3df86fd80
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3512
-
 DPXImageWriterBinding.cpp
 file
 
@@ -8661,6 +8695,40 @@ john.imageengine
 
 
 2225
+
+TransformationMatrixBinding.cpp
+file
+
+
+
+
+2011-12-21T09:27:01.000000Z
+563ecb9755ffcb455eb597e3df86fd80
+2010-03-02T00:22:32.598878Z
+2981
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3512
 
 OBJReaderBinding.cpp
 file
@@ -8968,6 +9036,40 @@ john.imageengine
 
 2151
 
+SceneCacheBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.389468Z
+9703acc425bbecb0da211a2ff5be6a7c
+2013-01-30T23:34:50.084069Z
+5131
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2671
+
 ImathPlaneBinding.cpp
 file
 
@@ -9178,11 +9280,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-e689c29d0fa69236aafb0fd8ffb2b207
-2010-05-18T17:37:00.885509Z
-3360
-john.imageengine
+2013-03-13T13:36:25.389468Z
+d197b294dae6b0d26321d0ddf7547d25
+2012-11-27T18:20:33.966561Z
+4939
+david.imageengine@gmail.com
 
 
 
@@ -9204,7 +9306,7 @@ john.imageengine
 
 
 
-4638
+4935
 
 MeshPrimitiveShrinkWrapOpBinding.cpp
 file
@@ -9443,6 +9545,40 @@ andrewk.imageengine
 
 
 3425
+
+ModelCacheBinding.cpp
+file
+
+
+
+
+2013-03-13T13:36:25.389468Z
+6481ace547fc12b76d86e0ebcaecedb7
+2013-01-04T19:43:36.740808Z
+5053
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3368
 
 CurvesMergeOpBinding.cpp
 file
@@ -9824,11 +9960,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-f88589c800ad6973cb2e2651c6b088da
-2010-03-02T00:22:32.598878Z
-2981
-john.imageengine
+2013-03-13T13:36:25.389468Z
+1e0c6f7ac598501e9760de47d3ad6937
+2012-10-01T10:53:58.946455Z
+4876
+thehaddonyoof
 
 
 
@@ -9850,5 +9986,5 @@ john.imageengine
 
 
 
-2189
+2407
 

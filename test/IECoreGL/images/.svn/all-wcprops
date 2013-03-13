@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 45
-/svn/!svn/ver/3218/trunk/test/IECoreGL/images
+/svn/!svn/ver/5075/trunk/test/IECoreGL/images
 END
 bezierHorseShoe.tif
 K 25
@@ -14,12 +14,6 @@ K 25
 svn:wc:ra_dav:version-url
 V 65
 /svn/!svn/ver/3218/trunk/test/IECoreGL/images/numberWithAlpha.exr
-END
-twoBSplineCirclesAsLines.tif
-K 25
-svn:wc:ra_dav:version-url
-V 74
-/svn/!svn/ver/3218/trunk/test/IECoreGL/images/twoBSplineCirclesAsLines.tif
 END
 periodicBSpline.tif
 K 25
@@ -63,6 +57,12 @@ svn:wc:ra_dav:version-url
 V 76
 /svn/!svn/ver/3218/trunk/test/IECoreGL/images/colorBarsWithAlphaH512x512.exr
 END
+helloWorldSprites.tif
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/5075/trunk/test/IECoreGL/images/helloWorldSprites.tif
+END
 linearPeriodicRibbon.tif
 K 25
 svn:wc:ra_dav:version-url
@@ -75,23 +75,29 @@ svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/3218/trunk/test/IECoreGL/images/linearHorseShoeRibbon.tif
 END
+yellow.exr
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/5075/trunk/test/IECoreGL/images/yellow.exr
+END
 numbers.exr
 K 25
 svn:wc:ra_dav:version-url
 V 57
 /svn/!svn/ver/3218/trunk/test/IECoreGL/images/numbers.exr
 END
-colorBarsH640x480.exr
-K 25
-svn:wc:ra_dav:version-url
-V 67
-/svn/!svn/ver/3218/trunk/test/IECoreGL/images/colorBarsH640x480.exr
-END
 colorBarsWithAlphaF640x480.exr
 K 25
 svn:wc:ra_dav:version-url
 V 76
 /svn/!svn/ver/3218/trunk/test/IECoreGL/images/colorBarsWithAlphaF640x480.exr
+END
+colorBarsH640x480.exr
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/3218/trunk/test/IECoreGL/images/colorBarsH640x480.exr
 END
 numbersWithAlpha.exr
 K 25

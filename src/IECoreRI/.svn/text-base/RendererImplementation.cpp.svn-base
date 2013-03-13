@@ -82,7 +82,7 @@ tbb::queuing_rw_mutex IECoreRI::RendererImplementation::g_nLoopsMutex;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
 IECoreRI::RendererImplementation::RendererImplementation( RendererImplementationPtr parent )
-	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : SharedData::Ptr( new SharedData ) )
+	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : SharedData::Ptr( new SharedData ) ), m_options( parent ? parent->m_options : 0 )
 {
 	constructCommon();
 }
@@ -90,6 +90,7 @@ IECoreRI::RendererImplementation::RendererImplementation( RendererImplementation
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
 	:	m_sharedData( new SharedData )
 {
+	m_options = new CompoundData();
 	constructCommon();
 	if( name!="" )
 	{
@@ -181,47 +182,35 @@ IECoreRI::RendererImplementation::~RendererImplementation()
 
 void IECoreRI::RendererImplementation::setOption( const std::string &name, IECore::ConstDataPtr value )
 {
-	ScopedContext scopedContext( m_context );
-
-	SetOptionHandlerMap::iterator it = m_setOptionHandlers.find( name );
-	if( it!=m_setOptionHandlers.end() )
+	if( !m_options )
 	{
-		(this->*(it->second))( name, value );
-	}
-	else if( name.compare( 0, 3, "ri:" )==0 )
-	{
-		size_t i = name.find_first_of( ":", 3 );
-		if( i==string::npos )
-		{
-			msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", format( "Expected option name matching \"ri:*:*\" but got \"%s\"." ) % name );
-		}
-		else
-		{
-			string s1( name, 3, i-3 );
-			string s2( name, i+1 );
-			ParameterList pl( s2, value );
-			RiOptionV( (char *)s1.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
-	}
-	else if( name.compare( 0, 5, "user:" )==0 )
-	{
-		string s( name, 5 );
-		ParameterList pl( s, value );
-		RiOptionV( "user", pl.n(), pl.tokens(), pl.values() );
-	}
-	else if( name.find_first_of( ":" )!=string::npos )
-	{
-		// ignore options prefixed for some other RendererImplementation
+		IECore::msg( Msg::Error, "IECoreRI::RendererImplementation::setOption", "Cannot call setOption on non-root renderer." );
 		return;
 	}
-	else
-	{
-		msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
-	}
+
+	// we need to group related options together into a single RiOption or RiHider call, so we
+	// just accumulate the options until worldBegin() where we'll emit them.
+	m_options->writable()[name] = value->copy();
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getOption( const std::string &name ) const
 {
+	if( m_options )
+	{
+		// we were created to perform a render from the beginning, and have been keeping
+		// track of the options ourselves.
+		const IECore::Data *result = m_options->member<IECore::Data>( name );
+		if( result )
+		{
+			return result;
+		}
+		else
+		{
+			// we don't have the option set explicitly, so fall through and
+			// try to use getRxOption to query the value from renderman directly.
+		}
+	}
+
 	ScopedContext scopedContext( m_context );
 	GetOptionHandlerMap::const_iterator it = m_getOptionHandlers.find( name );
 	if( it!=m_getOptionHandlers.end() )
@@ -257,8 +246,7 @@ void IECoreRI::RendererImplementation::setShaderSearchPathOption( const std::str
 	if( ConstStringDataPtr s = runTimeCast<const StringData>( d ) )
 	{
 		m_shaderCache = new CachedReader( SearchPath( s->readable(), ":" ), g_shaderCacheSize );
-		ParameterList p( "shader", d );
-		RiOptionV( "searchpath", p.n(), p.tokens(), p.values() );
+		// no need to call RiOption as that'll be done in worldBegin().
 	}
 	else
 	{
@@ -465,10 +453,81 @@ void IECoreRI::RendererImplementation::display( const std::string &name, const s
 void IECoreRI::RendererImplementation::worldBegin()
 {
 	ScopedContext scopedContext( m_context );
+	
+	// output all our stored options
+	
+	std::set<std::string> categoriesDone;
+	for( CompoundDataMap::const_iterator it = m_options->readable().begin(), eIt = m_options->readable().end(); it != eIt; it++ )
+	{
+		const std::string &name = it->first.string();
+		bool processed = false;
+		
+		if( name.compare( 0, 8, "ri:hider" ) == 0 )
+		{
+			if( categoriesDone.find( "hider" ) == categoriesDone.end() )
+			{		
+				const StringData *hiderData = m_options->member<StringData>( "ri:hider" );
+				const string hider = hiderData ? hiderData->readable() : "hidden";
+				ParameterList pl( m_options->readable(), "ri:hider:" );
+				RiHiderV( (char *)hider.c_str(), pl.n(), pl.tokens(), pl.values() ); 
+				categoriesDone.insert( "hider" );
+			}
+			processed = true;
+		}
+		else if( name.compare( 0, 3, "ri:" )==0 )
+		{
+			size_t i = name.find_first_of( ":", 3 );
+			if( i!=string::npos )
+			{
+				// ri:*:*
+				string category( name, 3, i-3 );
+				if( categoriesDone.find( category ) == categoriesDone.end() )
+				{
+					string prefix( name, 0, i+1 );
+					ParameterList pl( m_options->readable(), prefix );
+					RiOptionV( (char *)category.c_str(), pl.n(), pl.tokens(), pl.values() );
+					categoriesDone.insert( category );
+				}
+				processed = true;
+			}
+		}
+		else if( name.compare( 0, 5, "user:" )==0 )
+		{
+			// user:*
+			if( categoriesDone.find( "user" ) == categoriesDone.end() )
+			{
+				string s( name, 5 );
+				ParameterList pl( m_options->readable(), "user:" );
+				RiOptionV( "user", pl.n(), pl.tokens(), pl.values() );
+				categoriesDone.insert( "user" );
+			}
+			processed = true;
+		}
+		
+		// we might have custom handlers in addition to the default
+		// handling above. invoke those.
+		SetOptionHandlerMap::iterator hIt = m_setOptionHandlers.find( name );
+		if( hIt!=m_setOptionHandlers.end() )
+		{
+			(this->*(hIt->second))( name, it->second );
+			processed = true;
+		}
+		
+		if( !processed && ( name.find_first_of( ":" )==string::npos || name.compare( 0, 3, "ri:" ) == 0 ) )
+		{
+			msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
+		}
+	}
+	
+	// output any stored camera we might have
+	
 	if( m_camera )
 	{
 		outputCamera( m_camera );
 	}
+	
+	// get the world fired up
+	
 	RiWorldBegin();
 }
 

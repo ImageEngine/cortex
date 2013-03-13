@@ -1,7 +1,7 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECore/data/tiff
 http://cortex-vfx.googlecode.com/svn
 
@@ -60,40 +60,6 @@ has-props
 
 33162
 
-uvMap.512x256.16bit.truncated.tif
-file
-
-
-
-
-2011-12-21T09:26:38.000000Z
-60659a235816b795f3ecc70f63925cc4
-2008-04-07T20:44:47.387234Z
-1071
-mark.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-50000
-
 uvMap.200x100.rgba.16bit.tif
 file
 
@@ -128,17 +94,17 @@ has-props
 
 53452
 
-toTrace.tif
+uvMap.512x256.16bit.truncated.tif
 file
 
 
 
 
 2011-12-21T09:26:38.000000Z
-448bd3f5a941912571127b4c66689869
-2010-01-30T01:52:33.854482Z
-2874
-john.imageengine
+60659a235816b795f3ecc70f63925cc4
+2008-04-07T20:44:47.387234Z
+1071
+mark.imageengine
 has-props
 
 
@@ -160,7 +126,7 @@ has-props
 
 
 
-24756
+50000
 
 problem.tdl
 file
@@ -196,6 +162,40 @@ has-props
 
 5041
 
+toTrace.tif
+file
+
+
+
+
+2011-12-21T09:26:38.000000Z
+448bd3f5a941912571127b4c66689869
+2010-01-30T01:52:33.854482Z
+2874
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+24756
+
 uvMap.100x100.manyChannels.16bit.tif
 file
 
@@ -229,40 +229,6 @@ has-props
 
 
 29262
-
-uvMap.512x256.32bit.tif
-file
-
-
-
-
-2011-12-21T09:26:38.000000Z
-397bf5ebce15e400c4d64727479fc14d
-2008-03-20T18:00:12.373316Z
-971
-mark.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-371332
 
 toThin.tif
 file
@@ -298,6 +264,40 @@ has-props
 
 60344
 
+uvMap.512x256.32bit.tif
+file
+
+
+
+
+2011-12-21T09:26:38.000000Z
+397bf5ebce15e400c4d64727479fc14d
+2008-03-20T18:00:12.373316Z
+971
+mark.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+371332
+
 tilesWithLeftovers.tif
 file
 
@@ -331,40 +331,6 @@ has-props
 
 
 17518
-
-singlePixelT.tif
-file
-
-
-
-
-2011-12-21T09:26:38.000000Z
-08b05f901d15ce736447632b8bb2f8bf
-2010-02-01T23:26:41.316095Z
-2880
-john.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-412
 
 uvMap.512x256.16bit.tif
 file
@@ -400,6 +366,40 @@ has-props
 
 265716
 
+singlePixelT.tif
+file
+
+
+
+
+2011-12-21T09:26:38.000000Z
+08b05f901d15ce736447632b8bb2f8bf
+2010-02-01T23:26:41.316095Z
+2880
+john.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+412
+
 uvMapUpsideDown.512x256.16bit.tif
 file
 
@@ -434,40 +434,6 @@ has-props
 
 265352
 
-cropWindow.640x480.16bit.tif
-file
-
-
-
-
-2011-12-21T09:26:38.000000Z
-12c0e199b20d26fbb35662467062bb0e
-2008-03-20T18:00:12.373316Z
-971
-mark.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2482
-
 toTraceThinned.tif
 file
 
@@ -501,6 +467,40 @@ has-props
 
 
 56986
+
+cropWindow.640x480.16bit.tif
+file
+
+
+
+
+2011-12-21T09:26:38.000000Z
+12c0e199b20d26fbb35662467062bb0e
+2008-03-20T18:00:12.373316Z
+971
+mark.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2482
 
 uvMap.multiRes.32bit.tif
 file

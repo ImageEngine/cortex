@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -66,7 +66,7 @@ class TestInterpolatedCache(unittest.TestCase):
 
 		fs = FileSequence( self.pathTemplate, EmptyFrameList() )
 
-		cache = AttributeCache( fs.fileNameForFrame( frame ), IndexedIOOpenMode.Write)
+		cache = AttributeCache( fs.fileNameForFrame( frame ), IndexedIO.OpenMode.Write)
 	
 		dataWritten = self.__createV3f( value )
 		cache.write( "obj1", "v3fVec", dataWritten)

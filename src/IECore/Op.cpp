@@ -56,6 +56,11 @@ Op::~Op()
 ObjectPtr Op::operate()
 {
 	const CompoundObject *operands = parameters()->getTypedValidatedValue<CompoundObject>();
+	return operate( operands );
+}
+
+ObjectPtr Op::operate( const CompoundObject *operands )
+{
 	ObjectPtr result = doOperation( operands );
 	m_resultParameter->setValidatedValue( result );
 	return result;

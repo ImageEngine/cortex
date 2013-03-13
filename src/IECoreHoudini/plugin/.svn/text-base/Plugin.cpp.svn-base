@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,11 +46,15 @@
 #include <GR/GR_RenderTable.h>
 
 // IECoreHoudini
+#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
 #include "IECoreHoudini/SOP_ToHoudiniConverter.h"
 #include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
+#include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
 
@@ -68,38 +72,90 @@ extern "C"
 /// Declare our new SOPs
 void newSopOperator(OP_OperatorTable *table)
 {
-	table->addOperator(
-		new OP_Operator(
-			"ieProceduralHolder", "Cortex Procedural",
-			SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
-    			SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
-		)
+	OP_Operator *opHolder = new OP_Operator(
+		"ieOpHolder", "Cortex Op",
+		SOP_OpHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
+		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	table->addOperator(
-		new OP_Operator(
-			"ieOpHolder", "Cortex Op",
-			SOP_OpHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
-			SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
-		)
+	opHolder->setIconName( "SOP_ieOpHolder" );
+	
+	OP_Operator *proceduralHolder = new OP_Operator(
+		"ieProceduralHolder", "Cortex Procedural",
+		SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
+    		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	table->addOperator(
-		new OP_Operator(
-			"ieToHoudiniConverter", "Cortex To Houdini",
-			SOP_ToHoudiniConverter::create, SOP_ToHoudiniConverter::parameters, 1,	1,
-			SOP_ToHoudiniConverter::variables, OP_FLAG_GENERATOR
-		)
+	proceduralHolder->setIconName( "SOP_ieProceduralHolder" );
+	
+	OP_Operator *converter = new OP_Operator(
+		"ieToHoudiniConverter", "Cortex To Houdini",
+		SOP_ToHoudiniConverter::create, SOP_ToHoudiniConverter::parameters, 1,	1,
+		SOP_ToHoudiniConverter::variables, OP_FLAG_GENERATOR
 	);
-	table->addOperator(
-		new OP_Operator(
-			"ieInterpolatedCacheReader", "Interpolated Cache Reader",
-			SOP_InterpolatedCacheReader::create, SOP_InterpolatedCacheReader::parameters, 1, 1, 0
-		)
+	converter->setIconName( "SOP_ieToHoudiniConverter" );
+	
+	OP_Operator *cacheReader = new OP_Operator(
+		"ieInterpolatedCacheReader", "Interpolated Cache Reader",
+		SOP_InterpolatedCacheReader::create, SOP_InterpolatedCacheReader::parameters, 1, 1, 0
 	);
+	cacheReader->setIconName( "SOP_ieInterpolatedCacheReader" );
+	
+	OP_Operator *sceneCacheSource = new OP_Operator(
+		SOP_SceneCacheSource::typeName, "SceneCache Source",
+		SOP_SceneCacheSource::create, SOP_SceneCacheSource::buildParameters(), 0, 0,
+		NULL, OP_FLAG_GENERATOR
+	);
+	/// \todo: get a new icon
+	sceneCacheSource->setIconName( "SOP_ieToHoudiniConverter" );
+	
+	table->addOperator( proceduralHolder );
+	table->addOperator( opHolder );
+	table->addOperator( converter );
+	table->addOperator( cacheReader );
+	table->addOperator( sceneCacheSource );
+	
+	table->addOpHidden( opHolder->getName() );
+	table->addOpHidden( proceduralHolder->getName() );
+	table->addOpHidden( converter->getName() );
+	table->addOpHidden( cacheReader->getName() );
+	table->addOpHidden( sceneCacheSource->getName() );
+}
 
-	table->addOpHidden( "ieOpHolder" );
-	table->addOpHidden( "ieProceduralHolder" );
-	table->addOpHidden( "ieToHoudiniConverter" );
-	table->addOpHidden( "ieInterpolatedCacheReader" );
+void newObjectOperator( OP_OperatorTable *table )
+{
+	OP_Operator *sceneCacheTransform = new OP_Operator(
+		OBJ_SceneCacheTransform::typeName, "SceneCache Xform",
+		OBJ_SceneCacheTransform::create, OBJ_SceneCacheTransform::buildParameters(), 0, 1
+	);
+	/// \todo: get a new icon
+	sceneCacheTransform->setIconName( "SOP_ieToHoudiniConverter" );
+	
+	OP_Operator *sceneCacheGeometry = new OP_Operator(
+		OBJ_SceneCacheGeometry::typeName, "SceneCache GEO",
+		OBJ_SceneCacheGeometry::create, OBJ_SceneCacheGeometry::buildParameters(), 0, 1
+	);
+	/// \todo: get a new icon
+	sceneCacheGeometry->setIconName( "SOP_ieProceduralHolder" );
+	
+	table->addOperator( sceneCacheTransform );
+	table->addOperator( sceneCacheGeometry );
+	
+	table->addOpHidden( sceneCacheTransform->getName() );
+	table->addOpHidden( sceneCacheGeometry->getName() );
+}
+
+void newDriverOperator( OP_OperatorTable *table )
+{
+	OP_Operator *sceneCacheWriter = new OP_Operator(
+		ROP_SceneCacheWriter::typeName, "SceneCache Writer",
+		ROP_SceneCacheWriter::create, ROP_SceneCacheWriter::buildParameters(), 0, 999, 0,
+		OP_FLAG_GENERATOR
+	);
+	/// \todo: get a new icon
+	sceneCacheWriter->setIconName( "SOP_ieToHoudiniConverter" );
+	
+	table->addOperator( sceneCacheWriter );
+	
+	table->addOpHidden( sceneCacheWriter->getName() );
 }
 
 /// Declare our new Render Hooks

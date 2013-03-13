@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,13 +57,15 @@ class SHWDeepImageReader : public IECore::DeepImageReader
 		SHWDeepImageReader( const std::string &filename );
 
 		virtual ~SHWDeepImageReader();
-
+		
 		static bool canRead( const std::string &filename );
 
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
+		virtual Imath::M44f worldToCameraMatrix();
+		virtual Imath::M44f worldToNDCMatrix();
 
 	protected :
 
@@ -85,6 +87,8 @@ class SHWDeepImageReader : public IECore::DeepImageReader
 		DtexPixel *m_dtexPixel;
 		
 		Imath::Box2i m_dataWindow;
+		Imath::M44f m_worldToCamera;
+		Imath::M44f m_worldToNDC;
 		std::string m_inputFileName;
 		std::string m_channelNames;
 

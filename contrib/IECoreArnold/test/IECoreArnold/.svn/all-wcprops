@@ -1,13 +1,19 @@
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4842/trunk/contrib/IECoreArnold/test/IECoreArnold
+/svn/!svn/ver/5194/trunk/contrib/IECoreArnold/test/IECoreArnold
 END
 All.py
 K 25
 svn:wc:ra_dav:version-url
 V 70
-/svn/!svn/ver/4790/trunk/contrib/IECoreArnold/test/IECoreArnold/All.py
+/svn/!svn/ver/4911/trunk/contrib/IECoreArnold/test/IECoreArnold/All.py
+END
+ToArnoldConverterTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/4909/trunk/contrib/IECoreArnold/test/IECoreArnold/ToArnoldConverterTest.py
 END
 UniverseBlockTest.py
 K 25
@@ -39,6 +45,18 @@ svn:wc:ra_dav:version-url
 V 81
 /svn/!svn/ver/4815/trunk/contrib/IECoreArnold/test/IECoreArnold/ProceduralTest.py
 END
+AutomaticInstancingTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/4911/trunk/contrib/IECoreArnold/test/IECoreArnold/AutomaticInstancingTest.py
+END
+InstancingConverterTest.py
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/4910/trunk/contrib/IECoreArnold/test/IECoreArnold/InstancingConverterTest.py
+END
 ProceduralDSOTest.py
 K 25
 svn:wc:ra_dav:version-url
@@ -49,5 +67,5 @@ RendererTest.py
 K 25
 svn:wc:ra_dav:version-url
 V 79
-/svn/!svn/ver/4842/trunk/contrib/IECoreArnold/test/IECoreArnold/RendererTest.py
+/svn/!svn/ver/5194/trunk/contrib/IECoreArnold/test/IECoreArnold/RendererTest.py
 END

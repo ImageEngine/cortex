@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/DespatchTypedData.h"
+
 #include "IECoreGL/NumericTraits.h"
 
+using namespace IECore;
 using namespace IECoreGL;
 
 template<>
@@ -62,3 +65,29 @@ GLenum NumericTraits<GLfloat>::glType() { return GL_FLOAT; };
 
 template<>
 GLenum NumericTraits<GLdouble>::glType() { return GL_DOUBLE; };
+
+namespace IECoreGL
+{
+namespace Detail
+{
+
+struct GLType
+{
+
+	typedef GLenum ReturnType;
+
+	template<typename T>
+	ReturnType operator()( typename T::ConstPtr data ) const
+	{
+		return NumericTraits<typename T::BaseType>::glType();
+	}
+
+};
+
+} // namespace Detail
+} // namespace IECoreGL
+
+GLenum IECoreGL::glType( const IECore::Data *data )
+{
+	return despatchTypedData<IECoreGL::Detail::GLType, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
+}

@@ -320,3 +320,21 @@ IECore::DataPtr ToArnoldConverter::getParameterInternal( AtNode *node, const cha
 	}
 	return 0;
 }
+
+ToArnoldConverterPtr ToArnoldConverter::create( IECore::ObjectPtr object )
+{
+	const CreatorMap &m = creators();
+	CreatorMap::const_iterator it = m.find( object->typeId() );
+	if( it != m.end() )
+	{
+		return it->second( object );
+	}
+	return 0;
+}
+
+ToArnoldConverter::CreatorMap &ToArnoldConverter::creators()
+{
+	static CreatorMap m;
+	return m;
+}
+

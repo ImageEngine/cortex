@@ -1,13 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 37
-/svn/!svn/ver/4694/trunk/src/IECoreRI
+/svn/!svn/ver/5208/trunk/src/IECoreRI
 END
 SHWDeepImageWriter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 60
-/svn/!svn/ver/4575/trunk/src/IECoreRI/SHWDeepImageWriter.cpp
+/svn/!svn/ver/5025/trunk/src/IECoreRI/SHWDeepImageWriter.cpp
 END
 GXEvaluator.cpp
 K 25
@@ -25,7 +25,7 @@ DTEXDeepImageWriter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 61
-/svn/!svn/ver/4513/trunk/src/IECoreRI/DTEXDeepImageWriter.cpp
+/svn/!svn/ver/5004/trunk/src/IECoreRI/DTEXDeepImageWriter.cpp
 END
 Renderer.cpp
 K 25
@@ -37,7 +37,7 @@ PTCParticleWriter.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/4634/trunk/src/IECoreRI/PTCParticleWriter.cpp
+/svn/!svn/ver/5053/trunk/src/IECoreRI/PTCParticleWriter.cpp
 END
 RIBWriter.cpp
 K 25
@@ -67,7 +67,7 @@ RendererImplementation.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 64
-/svn/!svn/ver/4675/trunk/src/IECoreRI/RendererImplementation.cpp
+/svn/!svn/ver/5208/trunk/src/IECoreRI/RendererImplementation.cpp
 END
 Dspy.cpp
 K 25
@@ -79,7 +79,7 @@ SLOReader.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 51
-/svn/!svn/ver/4269/trunk/src/IECoreRI/SLOReader.cpp
+/svn/!svn/ver/5174/trunk/src/IECoreRI/SLOReader.cpp
 END
 Convert.cpp
 K 25
@@ -103,7 +103,7 @@ SHWDeepImageReader.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 60
-/svn/!svn/ver/4575/trunk/src/IECoreRI/SHWDeepImageReader.cpp
+/svn/!svn/ver/5112/trunk/src/IECoreRI/SHWDeepImageReader.cpp
 END
 SXRendererImplementation.cpp
 K 25
@@ -115,7 +115,7 @@ DTEXDeepImageReader.cpp
 K 25
 svn:wc:ra_dav:version-url
 V 61
-/svn/!svn/ver/4513/trunk/src/IECoreRI/DTEXDeepImageReader.cpp
+/svn/!svn/ver/5112/trunk/src/IECoreRI/DTEXDeepImageReader.cpp
 END
 PTCParticleReader.cpp
 K 25

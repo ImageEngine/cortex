@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -85,9 +85,9 @@ void bindObject()
 		.def( "create", (ObjectPtr (*)( const std::string &) )&Object::create )
 		.def( "create", (ObjectPtr (*)( TypeId ) )&Object::create )
 		.staticmethod( "create" )
-		.def( "load", (ObjectPtr (*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & ) )&Object::load )
+		.def( "load", (ObjectPtr (*)( ConstIndexedIOPtr, const IndexedIO::EntryID & ) )&Object::load )
 		.staticmethod( "load" )
-		.def( "save", (void (Object::*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & )const )&Object::save )
+		.def( "save", (void (Object::*)( IndexedIOPtr, const IndexedIO::EntryID & )const )&Object::save )
 		.def( "memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
 		.def( "hash", (MurmurHash (Object::*)() const)&Object::hash )
 		.def( "hash", (void (Object::*)( MurmurHash & ) const)&Object::hash )

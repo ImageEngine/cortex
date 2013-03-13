@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -701,21 +701,63 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		del points['source']
 		self.assertEqual( points2, points )
 	
-	def testGroupName( self ) :
+	def testName( self ) :
 		
 		points = self.createPoints()
 		particles = points.createOutputNode( "add" )
 		particles.parm( "addparticlesystem" ).set( True )
+		name = particles.createOutputNode( "name" )
+		name.parm( "name1" ).set( "testName" )
 		group = particles.createOutputNode( "group" )
 		group.parm( "crname" ).set( "testGroup" )
 		
 		particles.bypass( True )
+		result = IECoreHoudini.FromHoudiniPointsConverter( name ).convert()
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		
 		particles.bypass( False )
+		result = IECoreHoudini.FromHoudiniPointsConverter( name ).convert()
+		self.assertEqual( result.blindData()['name'].value, "testName" )
 		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
 		self.assertEqual( result.blindData()['name'].value, "testGroup" )
+
+	def testAttributeFilter( self ) :
+		
+		points = self.createPoints()
+		particles = points.createOutputNode( "add" )
+		particles.parm( "addparticlesystem" ).set( True )
+		
+		# add vertex normals
+		facet = particles.createOutputNode( "facet", node_name = "add_point_normals" )
+		facet.parm("postnml").set(True)
+		
+		# add a primitive colour attributes
+		primcol = facet.createOutputNode( "primitive", node_name = "prim_colour" )
+		primcol.parm("doclr").set(1)
+		primcol.parm("diffr").setExpression("rand($PR)")
+		primcol.parm("diffg").setExpression("rand($PR+1)")
+		primcol.parm("diffb").setExpression("rand($PR+2)")
+		
+		detail = primcol.createOutputNode( "attribcreate", node_name = "detail", exact_type_name=True )
+		detail.parm("name").set("detailAttr")
+		detail.parm("class").set(0)
+		detail.parm("type").set(1)
+		detail.parm("size").set(3)
+		detail.parm("value1").set(123)
+		detail.parm("value2").set(456.789) # can we catch it out with a float?
+		detail.parm("value3").set(789)
+		
+		converter = IECoreHoudini.FromHoudiniPointsConverter( detail )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cd", "N", "P", "detailAttr", "varmap" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "P" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^N ^varmap" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cd", "P", "detailAttr" ] )
+		# P must be converted
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
+		self.assertTrue( "P" in converter.convert().keys() )
 
 if __name__ == "__main__":
     unittest.main()

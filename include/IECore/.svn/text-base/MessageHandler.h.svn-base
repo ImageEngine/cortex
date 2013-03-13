@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MESSAGEHANDLER_H
-#define IE_CORE_MESSAGEHANDLER_H
-
-#include "IECore/RefCounted.h"
-
-#include "boost/format.hpp"
+#ifndef IECORE_MESSAGEHANDLER_H
+#define IECORE_MESSAGEHANDLER_H
 
 #include <stack>
+
+#include "boost/format.hpp"
+#include "boost/noncopyable.hpp"
+
+#include "IECore/RefCounted.h"
 
 namespace IECore
 {
@@ -82,28 +83,50 @@ class MessageHandler : public RefCounted
 		static void output( Level level, const std::string &context, const boost::format &message );
 		//@}
 
-		//! @name Handler stack manipulation
-		///
-		/// A stack of message handlers is provided to make it
-		/// easy to install a different message handler appropriate
-		/// to a new application context, and then revert to the
-		/// previous handler upon exiting that context. At startup
-		/// a single default handler resides on the stack - it
-		/// is an error to try to pop this.
-		/// \threading It is not safe to manipulate the handler stack from
-		/// concurrent threads.
+		//! @name Default handler
+		/// There is a single default MessageHandler specified
+		/// globally. Typically this will be set once on application
+		/// startup and then be left in place. This message handler
+		/// is used whenever there is no locally specified handler
+		/// installed using the Scope class below.
+		/// \threading These functions are not threadsafe - it is
+		/// expected that setDefaultHandler() will be called once
+		/// from the main thread on application startup.
 		///////////////////////////////////////////////////////
 		//@{
-		/// Pushes a new MessageHandler onto the stack. This will
-		/// be the current handler until popHandler() is called.
-		static void pushHandler( MessageHandlerPtr handler );
-		/// Pops the current MessageHandler from the stack. The current
-		/// handler will now be the one that was current prior to the
-		/// last pushHandler() call.
-		static MessageHandlerPtr popHandler();
-		/// Returns the current handler.
-		static MessageHandler *currentHandler();
+		static void setDefaultHandler( const MessageHandlerPtr &handler );
+		static MessageHandler *getDefaultHandler();
 		//@}
+		
+		/// Each thread has its own stack of message handlers which
+		/// may be pushed and popped to provide message handling specific
+		/// to particular contexts. The Scope class is used to install
+		/// these local handlers on construction and uninstall them on
+		/// destruction.
+		/// \threading The Scope class provides a threadsafe means of
+		/// installing and uninstalling MessageHandlers.
+		class Scope : boost::noncopyable
+		{
+		
+			public :
+				
+				/// Pushes the specified handler, making it
+				/// the currentHandler() for this thread. It is
+				/// the caller's responsibility to keep the handler
+				/// alive for the lifetime of the Scope class.
+				Scope( MessageHandler *handler );
+				/// Pops the handler pushed in the constructor,
+				/// reverting to the previous handler.
+				~Scope();
+				
+		};
+		
+		/// Returns the current handler for this thread, reverting
+		/// to the result of getDefaultHandler() if no thread-local
+		/// handler has been installed.
+		/// \threading This is threadsafe with respect to handlers installed
+		/// by the Scope class.
+		static MessageHandler *currentHandler();
 
 		//! @name Conversions between Level and string
 		////////////////////////////////////////////////////////
@@ -114,13 +137,9 @@ class MessageHandler : public RefCounted
 		static Level stringAsLevel( const std::string &level );
 		//@}
 
-		/// Must be implemented by subclasses to output the message appropriately.
+		/// Must be implemented by subclasses to output the message appropriately. Client code
+		/// should use MessageHandler::output() rather than call this directly.
 		virtual void handle( Level level, const std::string &context, const std::string &message ) = 0;
-
-	private :
-
-		/// Returns the stack of message handlers.
-		static std::stack<MessageHandlerPtr> *handlerStack();
 
 };
 
@@ -134,4 +153,4 @@ void msg( MessageHandler::Level level, const std::string &context, const boost::
 
 }; // namespace IECore
 
-#endif // IE_CORE_MESSAGEHANDLER_H
+#endif // IECORE_MESSAGEHANDLER_H

@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/include/IECoreRI
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-03-22T17:23:25.804431Z
-4631
-thehaddonyoof
+2013-03-01T03:10:55.637348Z
+5208
+john.imageengine
 
 
 
@@ -236,11 +236,11 @@ file
 
 
 
-2012-05-10T16:40:44.000000Z
-3e084474552f56ad4520a9d043b6cb66
-2012-03-22T17:23:25.804431Z
-4631
-thehaddonyoof
+2013-03-13T13:34:26.468466Z
+54689fa535a3fcc30f997e6ebaf378ab
+2013-03-01T03:10:55.637348Z
+5208
+john.imageengine
 
 
 
@@ -262,7 +262,7 @@ thehaddonyoof
 
 
 
-14030
+14163
 
 PTCParticleWriter.h
 file
@@ -684,10 +684,10 @@ file
 
 
 
-2012-05-10T16:40:44.000000Z
-1e9ce59634d426a20b7875e0b6389540
-2012-01-27T00:06:52.011215Z
-4567
+2013-03-13T13:34:26.469466Z
+cc10cdd997c5124048822dc83b0443d5
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -710,7 +710,7 @@ andrewk.imageengine
 
 
 
-3463
+3616
 
 DTEXDeepImageReader.h
 file
@@ -718,10 +718,10 @@ file
 
 
 
-2012-01-09T09:45:08.000000Z
-7dd9b3a33fc54207dbccf9857cfd087a
-2012-01-03T21:50:17.714250Z
-4513
+2013-03-13T13:34:26.469466Z
+d5d1082d1d341fbf0ead48e6aacaf65e
+2013-01-18T00:55:27.472076Z
+5112
 andrewk.imageengine
 
 
@@ -744,5 +744,5 @@ andrewk.imageengine
 
 
 
-3622
+3805
 

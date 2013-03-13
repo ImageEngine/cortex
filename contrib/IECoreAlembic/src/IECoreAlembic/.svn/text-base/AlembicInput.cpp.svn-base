@@ -121,8 +121,15 @@ size_t AlembicInput::numSamples() const
 	if( !m_data->object.getParent() )
 	{
 		// top of archive
-		Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
-		m_data->numSamples = boundsProperty.getNumSamples();
+		if( m_data->object.getProperties().getPropertyHeader( ".childBnds" ) )
+		{
+			Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
+			m_data->numSamples = boundsProperty.getNumSamples();
+		}
+		else
+		{
+			m_data->numSamples = 0;
+		}
 	}
 	else if( IXform::matches( md ) )
 	{
@@ -186,10 +193,7 @@ bool AlembicInput::hasStoredBound() const
 	const MetaData &md = m_data->object.getMetaData();
 	if( !m_data->object.getParent() )
 	{
-		// top of archive
-		/// \todo Is this assumption ok? If not then fix
-		/// this and update the comment in the header.
-		return true;
+		return m_data->object.getProperties().getPropertyHeader( ".childBnds" ) != 0x0;
 	}
 	else if( IXform::matches( md ) )
 	{

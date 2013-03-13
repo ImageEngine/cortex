@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@ using namespace IECore;
 using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( ToArnoldMeshConverter );
+
+ToArnoldMeshConverter::ConverterDescription<ToArnoldMeshConverter> ToArnoldMeshConverter::g_description;
 
 ToArnoldMeshConverter::ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert )
 	:	ToArnoldShapeConverter( "Converts IECore::MeshPrimitives to arnold polymesh nodes", IECore::MeshPrimitive::staticTypeId() )

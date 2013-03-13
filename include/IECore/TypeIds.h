@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -410,6 +410,15 @@ enum TypeId
 	TimeCodeParameterTypeId = 362,
 	OptionsTypeId = 363,
 	MPlayDisplayDriverTypeId = 364,
+	SceneInterfaceTypeId = 365,
+	SampledSceneInterfaceTypeId = 366,
+	SceneCacheTypeId = 367,
+	IndexedIOTypeId = 368,
+	StreamIndexedIOTypeId = 369,
+	FileIndexedIOTypeId = 370,
+	MemoryIndexedIOTypeId = 371,
+	InternedStringVectorDataTypeId = 372,
+	InternedStringDataTypeId = 373,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 
@@ -448,6 +457,9 @@ enum TypeId
 
 	FirstCoreAlembicTypeId = 112000,
 	LastCoreAlembicTypeId = 112999,
+
+	FirstCoreMantraTypeId = 113000,
+	LastCoreMantraTypeId = 113999,
 
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,

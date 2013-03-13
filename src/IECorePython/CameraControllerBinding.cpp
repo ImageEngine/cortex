@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,7 +60,7 @@ void bindCameraController()
 
 	scope s = class_<CameraController>( "CameraController", init<CameraPtr>() )
 		.def( "setCamera", &CameraController::setCamera )
-		.def( "getCamera", &CameraController::getCamera )
+		.def( "getCamera", (CameraPtr (CameraController::*)())&CameraController::getCamera )
 		.def( "setCentreOfInterest", &CameraController::setCentreOfInterest )
 		.def( "getCentreOfInterest", &CameraController::getCentreOfInterest )
 		.def( "setResolution", &CameraController::setResolution )
@@ -67,6 +68,7 @@ void bindCameraController()
 		.def( "frame", (void (CameraController::*)( const Imath::Box3f & ))&CameraController::frame )
 		.def( "frame", (void (CameraController::*)( const Imath::Box3f &, const Imath::V3f &, const Imath::V3f & ))&CameraController::frame )
 		.def( "unproject", &unproject )
+		.def( "project", &CameraController::project )
 		.def( "motionStart", &CameraController::motionStart )
 		.def( "motionUpdate", &CameraController::motionUpdate )
 		.def( "motionEnd", &CameraController::motionEnd )

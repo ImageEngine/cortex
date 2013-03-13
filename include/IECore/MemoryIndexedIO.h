@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,24 +36,36 @@
 #define IE_CORE_MEMORYINDEXEDIO_H
 
 
-#include "FileIndexedIO.h"
+#include "StreamIndexedIO.h"
 #include "VectorTypedData.h"
 
 namespace IECore
 {
 
-class MemoryIndexedIO : public FileIndexedIO
+/// An implementation of StreamIndexedIO which operates with a buffer in memory.
+/// \ingroup ioGroup
+class MemoryIndexedIO : public StreamIndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( MemoryIndexedIO );
+		IE_CORE_DECLARERUNTIMETYPED( MemoryIndexedIO, StreamIndexedIO );
 
-		MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
 		virtual ~MemoryIndexedIO();
-		ConstCharVectorDataPtr buffer();
+
+		/// Returns a copy of the internal buffer representing the entire file.
+		CharVectorDataPtr buffer();
 
 	protected:
+
+		MemoryIndexedIO();
+
+		MemoryIndexedIO( StreamIndexedIO::Node &rootNode );
+
+		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
+
+		class StreamFile;
 };
 
 IE_CORE_DECLAREPTR( MemoryIndexedIO )

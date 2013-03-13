@@ -117,6 +117,9 @@ enum TypeId
 	AlphaTestStateComponentTypeId = 105074,
 	AlphaFuncStateComponentTypeId = 105075,
 	AutomaticInstancingStateComponentTypeId = 105076,
+	BufferTypeId = 105077,
+	ToGLBufferConverterTypeId = 105078,
+	UIntTextureTypeId = 105079,
 	LastCoreGLTypeId = 105999,
 };
 

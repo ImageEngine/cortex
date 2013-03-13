@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 38
-/svn/!svn/ver/4787/trunk/python/IECore
+/svn/!svn/ver/5164/trunk/python/IECore
 END
 RenamePrimitiveVariables.py
 K 25
@@ -97,7 +97,7 @@ LsHeaderOp.py
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/3029/trunk/python/IECore/LsHeaderOp.py
+/svn/!svn/ver/5117/trunk/python/IECore/LsHeaderOp.py
 END
 SequenceCpOp.py
 K 25
@@ -115,7 +115,7 @@ ReadProcedural.py
 K 25
 svn:wc:ra_dav:version-url
 V 56
-/svn/!svn/ver/3029/trunk/python/IECore/ReadProcedural.py
+/svn/!svn/ver/5075/trunk/python/IECore/ReadProcedural.py
 END
 RelativePreset.py
 K 25
@@ -139,7 +139,7 @@ ClassParameter.py
 K 25
 svn:wc:ra_dav:version-url
 V 56
-/svn/!svn/ver/4671/trunk/python/IECore/ClassParameter.py
+/svn/!svn/ver/4921/trunk/python/IECore/ClassParameter.py
 END
 FileExaminer.py
 K 25
@@ -157,7 +157,7 @@ DateTimeParameterParser.py
 K 25
 svn:wc:ra_dav:version-url
 V 65
-/svn/!svn/ver/3066/trunk/python/IECore/DateTimeParameterParser.py
+/svn/!svn/ver/4921/trunk/python/IECore/DateTimeParameterParser.py
 END
 SWAReader.py
 K 25
@@ -205,7 +205,7 @@ ParameterParser.py
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/svn/!svn/ver/4617/trunk/python/IECore/ParameterParser.py
+/svn/!svn/ver/5135/trunk/python/IECore/ParameterParser.py
 END
 FormattedParameterHelp.py
 K 25
@@ -223,7 +223,7 @@ DataTraits.py
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/4699/trunk/python/IECore/DataTraits.py
+/svn/!svn/ver/5144/trunk/python/IECore/DataTraits.py
 END
 SearchReplaceOp.py
 K 25
@@ -271,13 +271,13 @@ OpOverwriting.py
 K 25
 svn:wc:ra_dav:version-url
 V 55
-/svn/!svn/ver/2466/trunk/python/IECore/OpOverwriting.py
+/svn/!svn/ver/5164/trunk/python/IECore/OpOverwriting.py
 END
 ParameterOverwriting.py
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/svn/!svn/ver/3053/trunk/python/IECore/ParameterOverwriting.py
+/svn/!svn/ver/5062/trunk/python/IECore/ParameterOverwriting.py
 END
 Log.py
 K 25
@@ -295,7 +295,7 @@ ClassVectorParameter.py
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/svn/!svn/ver/4238/trunk/python/IECore/ClassVectorParameter.py
+/svn/!svn/ver/4921/trunk/python/IECore/ClassVectorParameter.py
 END
 LayeredDict.py
 K 25
@@ -385,7 +385,7 @@ MessageHandlerOverwriting.py
 K 25
 svn:wc:ra_dav:version-url
 V 67
-/svn/!svn/ver/3789/trunk/python/IECore/MessageHandlerOverwriting.py
+/svn/!svn/ver/5107/trunk/python/IECore/MessageHandlerOverwriting.py
 END
 ParameterAlgo.py
 K 25

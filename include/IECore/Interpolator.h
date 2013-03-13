@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,13 +39,6 @@
 #include <vector>
 #include <math.h>
 
-#include "OpenEXR/ImathQuat.h"
-#include "OpenEXR/ImathBox.h"
-
-#include "IECore/TransformationMatrix.h"
-#include "IECore/TypedData.h"
-#include "IECore/QuatAlgo.h"
-
 namespace IECore
 {
 
@@ -73,11 +66,13 @@ struct CubicInterpolator
 
 };
 
+} // namespace IECore
+
 #include "Interpolator.inl"
 #include "QuatInterpolator.inl"
 #include "BoxInterpolator.inl"
+#include "MatrixInterpolator.inl"
 #include "TransformationMatrixInterpolator.inl"
-
-} // namespace IECore
+#include "TypedDataInterpolator.inl"
 
 #endif // IE_CORE_INTERPOLATOR_H

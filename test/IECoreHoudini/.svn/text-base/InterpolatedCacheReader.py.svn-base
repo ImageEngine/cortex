@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -43,11 +43,11 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 	
 	__torusTestFile = "test/IECoreHoudini/data/torus.cob"
 	
-	def cacheSop( self ) :
+	def cacheSop( self, file=__torusTestFile ) :
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
 		torus = geo.createNode( "file" )
-		torus.parm( "file" ).set( TestInterpolatedCacheReader.__torusTestFile )
+		torus.parm( "file" ).set( file )
 		group = torus.createOutputNode( "group" )
 		group.parm( "crname" ).set( "torus" )
 		group.parm( "entity" ).set( 1 )
@@ -74,20 +74,70 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.assertNotEqual( orig['Cd'], result['Cd'] )
 		self.assertEqual( orig['pointId'], result['pointId'] )
 	
-	def testFrameMultiplier( self ) :
+	def testSubFrameData( self ) :
 		cache = self.cacheSop()
 		self.failUnless( isinstance( cache.geometry(), hou.Geometry ) )
-		cache.parm( "frameMultiplier" ).set( 250 )
+		cache.parm( "samplesPerFrame" ).set( 1 )
+		cache.parm( "interpolation" ).set( IECore.InterpolatedCache.Interpolation.Linear )
+		hou.setFrame( 1 )
+		cache.cook( force=True )
+		self.assertEqual( len(cache.geometry().points()), 100 )
+		pos1 = cache.geometry().points()[0].position()
+		hou.setFrame( 2 )
+		cache.cook( force=True )
+		self.assertEqual( len(cache.geometry().points()), 100 )
+		pos2 = cache.geometry().points()[0].position()
+		self.assertNotEqual( pos1, pos2 )
+		hou.setFrame( 1.8 )
+		cache.cook( force=True )
+		self.assertEqual( len(cache.geometry().points()), 100 )
+		
+		# samplesPerFrame 1 ignores the file that exists for 1.8, and linear interpolation blends 1 and 2
+		pos18 = cache.geometry().points()[0].position()
+		self.assertNotEqual( pos18, pos1 )
+		self.assertNotEqual( pos18, pos2 )
+		self.failUnless( pos18.isAlmostEqual( pos1*0.2 + pos2*0.8 ) )
+		
+		# samplesPerFrame 2 doesn't have the correct files on disk
+		cache.parm( "samplesPerFrame" ).set( 2 )
 		cache.cook( force=True )
 		self.failUnless( cache.warnings() )
 		self.assertEqual( len(cache.geometry().points()), 0 )
-		shutil.copyfile( "test/IECoreHoudini/data/torusVertCache.0001.fio", "test/IECoreHoudini/data/torusVertCache.0250.fio" )
-		# need to refresh the LRUCache in order to get passed the original error
-		cache.parm( "frameMultiplier" ).set( 1 )
-		cache.cook()
-		cache.parm( "frameMultiplier" ).set( 250 )
-		self.assertEqual( len(cache.geometry().points()), 100 )
-		os.remove( "test/IECoreHoudini/data/torusVertCache.0250.fio" )
+		
+		# samplesPerFrame 1 ignores the file that exists for 1.8, and no interpolation chooses frame 1
+		cache.parm( "samplesPerFrame" ).set( 1 )
+		cache.parm( "interpolation" ).set( IECore.InterpolatedCache.Interpolation.None )
+		cache.cook( force=True )
+		pos18 = cache.geometry().points()[0].position()
+		self.assertEqual( pos18, pos1 )
+		self.assertNotEqual( pos18, pos2 )
+		
+		# samplesPerFrame 1 ignores the file that exists for 1.8, and cubic interpolation can't find the necessary files
+		cache.parm( "interpolation" ).set( IECore.InterpolatedCache.Interpolation.Cubic )
+		cache.cook( force=True )
+		self.failUnless( cache.warnings() )
+		self.assertEqual( len(cache.geometry().points()), 0 )
+		
+		# samplesPerFrame 5 uses the file for 1.8 for linear and no interpolation
+		cache.parm( "samplesPerFrame" ).set( 5 )
+		cache.parm( "interpolation" ).set( IECore.InterpolatedCache.Interpolation.Linear )
+		cache.cook( force=True )
+		pos18 = cache.geometry().points()[0].position()
+		self.assertNotEqual( pos18, pos1 )
+		# this is true because the 1.8 file is an exact copy of frame 2
+		self.assertEqual( pos18, pos2 )
+		cache.parm( "interpolation" ).set( IECore.InterpolatedCache.Interpolation.None )
+		cache.cook( force=True )
+		pos18 = cache.geometry().points()[0].position()
+		self.assertNotEqual( pos18, pos1 )
+		self.assertEqual( pos18, pos2 )
+		
+		# samplesPerFrame 5 has enough surrounding files for cubic
+		cache.parm( "interpolation" ).set( IECore.InterpolatedCache.Interpolation.Cubic )
+		cache.cook( force=True )
+		pos18 = cache.geometry().points()[0].position()
+		self.assertNotEqual( pos18, pos1 )
+		self.assertEqual( pos18, pos2 )
 	
 	def testNonExistantFile( self ) :
 		cache = self.cacheSop()
@@ -99,7 +149,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 	def testNoFileForFrame( self ) :
 		cache = self.cacheSop()
 		cache.parm( "cacheSequence" ).set( "test/IECoreHoudini/data/torusVertCache.####.fio" )
-		hou.setFrame( 4 )
+		hou.setFrame( 5 )
 		cache.cook( force=True )
 		self.failUnless( cache.warnings() )
 		self.assertEqual( len(cache.geometry().points()), 0 )
@@ -192,7 +242,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		hou.setFrame( 2.5 )
 		self.assertEqual( cache.geometry(), None )
-		self.failUnless( "FileIndexedIO: Entry not found" in cache.errors() )
+		self.failUnless( "Entry not found" in cache.errors() )
 		hou.setFrame( 3 )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		self.failUnless( isinstance( cache.geometry(), hou.Geometry ) )
@@ -245,7 +295,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		merge = cache.inputs()[0].createOutputNode( "merge" )
 		merge.setInput( 1, group )
 		cache.setInput( 0, merge )
-		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1 ) )
 		self.assert_( "notData" in i.attributes( 3, 'badObject' ) )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		self.assert_( "notData" not in result )
@@ -261,7 +311,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		merge = cache.inputs()[0].createOutputNode( "merge" )
 		merge.setInput( 1, group )
 		cache.setInput( 0, merge )
-		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1 ) )
 		self.assert_( "splineColor4fData" in i.attributes( 3, 'badObject' ) )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		self.assert_( "splineColor4fData" not in result )
@@ -305,13 +355,137 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.assertEqual( orig['Cd'], result['Cd'] )
 		self.assertEqual( orig['pointId'], result['pointId'] )
 		
-		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1, 24 ) )
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1 ) )
 		matrix = i.read( 2, "torus", "transform" ).value.transform
 		origP = orig["P"].data
 		resultP = result["P"].data
 		for i in range( 0, origP.size() ) :
 			self.assertNotEqual( resultP[i], origP[i] )
 			self.assertEqual( resultP[i], matrix.multVecMatrix( origP[i] ) )
+	
+	def testPrimitiveGroupModeWithTransformAttribute( self ) :
+		cache = self.cacheSop( file="test/IECoreHoudini/data/torusWithVertexNormals.bgeo" )
+		cache.parm( "groupingMode" ).set( 0 )
+		hou.parm( "/obj/geo1/group1/entity" ).set( 0 )
+		hou.setFrame( 2 )
+		orig = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		cache.parm( "transformAttribute" ).set( "transform" )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.assertNotEqual( orig, result )
+		self.assertNotEqual( orig['P'], result['P'] )
+		self.assertNotEqual( orig['N'], result['N'] )
+		self.assertEqual( orig['P'].data.size(), result['P'].data.size() )
+		self.assertEqual( orig['N'].data.size(), result['N'].data.size() )
+		self.assertEqual( orig['Cd'], result['Cd'] )
+		self.assertEqual( orig['pointId'], result['pointId'] )
+		
+		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1 ) )
+		matrix = i.read( 2, "torus", "transform" ).value.transform
+		origP = orig["P"].data
+		origN = orig["N"].data
+		resultP = result["P"].data
+		resultN = result["N"].data
+		for i in range( 0, origP.size() ) :
+			self.assertNotEqual( resultP[i], origP[i] )
+			self.assertNotEqual( resultN[i], origN[i] )
+			self.assertEqual( resultP[i], matrix.multVecMatrix( origP[i] ) )
+			self.failUnless( resultN[i].equalWithAbsError( matrix.multDirMatrix( origN[i] ), 1e-6 ) )
+	
+	def testPrimitiveGroupModeWithMultipleObjects( self ) :
+		hou.setFrame( 3 )
+		cache = self.cacheSop( file="test/IECoreHoudini/data/torusWithVertexNormals.bgeo" )
+		cache.parm( "groupingMode" ).set( 0 )
+		hou.parm( "/obj/geo1/group1/entity" ).set( 0 )
+		torus = cache.parent().createNode( "file" )
+		torus.parm( "file" ).set( "test/IECoreHoudini/data/torusWithVertexNormals.bgeo" )
+		group = torus.createOutputNode( "group" )
+		group.parm( "crname" ).set( "torus2" )
+		merge = cache.inputs()[0].createOutputNode( "merge" )
+		merge.setInput( 1, group )
+		cache.setInput( 0, merge )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		numTorusPoints = len(torus.geometry().points())
+		for key in [ "P", "Cd" ] :
+			self.assert_( key in result )
+			self.assertEqual( result[key].data.size(), 2 * numTorusPoints )
+		
+		for i in range( 0, numTorusPoints ) :
+			self.assertNotEqual( result['P'].data[i], result['P'].data[numTorusPoints+i] )
+			self.assertEqual( result['Cd'].data[i], result['Cd'].data[numTorusPoints+i] )
+		
+		numTorusVerts = sum( [ len(x.vertices()) for x in torus.geometry().prims() ] )
+		self.assert_( "N" in result )
+		self.assertEqual( result["N"].data.size(), 2 * numTorusVerts )
+		for i in range( 0, numTorusVerts ) :
+			self.assertNotEqual( result['N'].data[i], result['N'].data[numTorusPoints+i] )
+	
+	def testPrimitiveGroupModeWithPrimAttribs( self ) :
+		
+		# Cd defaults to a Point attrib
+		cache = self.cacheSop()
+		self.failUnless( isinstance( cache.geometry().findPointAttrib( "Cd" ), hou.Attrib ) )
+		self.failUnless( cache.geometry().findPrimAttrib( "Cd" ) is None )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "Cd" in result.keys() )
+		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		
+		# Since the point and prim count match, Cd becomes a Primitive attrib if we use PrimitiveGroup mode
+		group = hou.node( "/obj/geo1/group1" )
+		group.parm( "entity" ).set( 0 )
+		cache.parm( "groupingMode" ).set( 0 )
+		self.failUnless( cache.geometry().findPointAttrib( "Cd" ) is None )
+		self.failUnless( isinstance( cache.geometry().findPrimAttrib( "Cd" ), hou.Attrib ) )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "Cd" in result.keys() )
+		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# By creating Cd as a Point attrib before the cache, we can force it's type
+		color = group.createOutputNode( "color" )
+		cache.setInput( 0, color )
+		self.failUnless( isinstance( cache.geometry().findPointAttrib( "Cd" ), hou.Attrib ) )
+		self.failUnless( cache.geometry().findPrimAttrib( "Cd" ) is None )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "Cd" in result.keys() )
+		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+	
+	def testPrimitiveGroupModeWithVertexAttribs( self ) :
+		
+		# N defaults to a Point attrib
+		hou.setFrame( 4 )
+		cache = self.cacheSop()
+		self.failUnless( isinstance( cache.geometry().findPointAttrib( "N" ), hou.Attrib ) )
+		self.failUnless( cache.geometry().findVertexAttrib( "N" ) is None )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "N" in result.keys() )
+		self.assertEqual( result["N"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["N"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		
+		# Since N actually has more values than points should, N becomes a Vertex attrib if we use PrimitiveGroup mode
+		group = hou.node( "/obj/geo1/group1" )
+		group.parm( "entity" ).set( 0 )
+		cache.parm( "groupingMode" ).set( 0 )
+		self.failUnless( cache.geometry().findPointAttrib( "N" ) is None )
+		self.failUnless( isinstance( cache.geometry().findVertexAttrib( "N" ), hou.Attrib ) )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "N" in result.keys() )
+		self.assertEqual( result["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len(result["N"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ) )
+		
+		# Even if we create N as a Point attrib before the cache, it remains a Vertex attrib since the sizes do not match
+		facet = group.createOutputNode( "facet" )
+		facet.parm( "postnml" ).set( True )
+		cache.setInput( 0, facet )
+		self.failUnless( isinstance( facet.geometry().findPointAttrib( "N" ), hou.Attrib ) )
+		self.failUnless( facet.geometry().findVertexAttrib( "N" ) is None )
+		self.failUnless( cache.geometry().findPointAttrib( "N" ) is None )
+		self.failUnless( isinstance( cache.geometry().findVertexAttrib( "N" ), hou.Attrib ) )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
+		self.failUnless( "N" in result.keys() )
+		self.assertEqual( result["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len(result["N"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ) )
 
 if __name__ == "__main__":
 	unittest.main()

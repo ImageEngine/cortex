@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,10 +57,12 @@ DeepImageWriter::DeepImageWriter( const std::string &description ) : Parameteris
 	m_channelsParameter = new StringVectorParameter( "channelNames", "The list of channels to write.", defaultChannels );
 	
 	m_resolutionParameter = new V2iParameter( "resolution", "The resolution of the image to write.", new V2iData( Imath::V2i( 2048, 1556 ) ) );
-
+	
 	parameters()->addParameter( m_fileNameParameter );
 	parameters()->addParameter( m_channelsParameter );
 	parameters()->addParameter( m_resolutionParameter );
+	parameters()->addParameter( new M44fParameter( "worldToCameraMatrix", "world to camera space transformation matrix", new M44fData() ) );
+	parameters()->addParameter( new M44fParameter( "worldToNDCMatrix", "world to screen space projection matrix", new M44fData() ) );
 }
 
 const std::string &DeepImageWriter::fileName() const
@@ -86,6 +88,26 @@ V2iParameter *DeepImageWriter::resolutionParameter()
 const V2iParameter *DeepImageWriter::resolutionParameter() const
 {
 	return m_resolutionParameter;
+}
+
+M44fParameter *DeepImageWriter::worldToCameraParameter()
+{
+	return parameters()->parameter<M44fParameter>( "worldToCameraMatrix" );
+}
+
+const M44fParameter *DeepImageWriter::worldToCameraParameter() const
+{
+	return parameters()->parameter<M44fParameter>( "worldToCameraMatrix" );
+}
+
+M44fParameter *DeepImageWriter::worldToNDCParameter()
+{
+	return parameters()->parameter<M44fParameter>( "worldToNDCMatrix" );
+}
+
+const M44fParameter *DeepImageWriter::worldToNDCParameter() const
+{
+	return parameters()->parameter<M44fParameter>( "worldToNDCMatrix" );
 }
 
 void DeepImageWriter::writePixel( int x, int y, const DeepPixel *pixel )

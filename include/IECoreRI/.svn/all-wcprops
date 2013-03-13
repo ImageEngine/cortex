@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 41
-/svn/!svn/ver/4631/trunk/include/IECoreRI
+/svn/!svn/ver/5208/trunk/include/IECoreRI
 END
 PTCParticleReader.h
 K 25
@@ -43,7 +43,7 @@ Renderer.h
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/4631/trunk/include/IECoreRI/Renderer.h
+/svn/!svn/ver/5208/trunk/include/IECoreRI/Renderer.h
 END
 PTCParticleWriter.h
 K 25
@@ -121,11 +121,11 @@ SHWDeepImageReader.h
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/svn/!svn/ver/4567/trunk/include/IECoreRI/SHWDeepImageReader.h
+/svn/!svn/ver/5112/trunk/include/IECoreRI/SHWDeepImageReader.h
 END
 DTEXDeepImageReader.h
 K 25
 svn:wc:ra_dav:version-url
 V 63
-/svn/!svn/ver/4513/trunk/include/IECoreRI/DTEXDeepImageReader.h
+/svn/!svn/ver/5112/trunk/include/IECoreRI/DTEXDeepImageReader.h
 END

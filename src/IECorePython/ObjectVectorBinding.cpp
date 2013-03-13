@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,6 +73,31 @@ static std::vector<ObjectVector>::size_type convertIndex( ObjectVector &o, long 
 	return index;
 }
 
+static std::string repr( ObjectVector &o )
+{
+	std::stringstream s;
+
+	s << "IECore." << o.typeName() << "(";
+
+	if( o.members().size() )
+	{
+		s << " [ ";
+	
+		for( size_t i = 0, e = o.members().size(); i < e; i++ )
+		{
+			object item( o.members()[i] );
+			std::string v = call_method< std::string >( item.ptr(), "__repr__" );
+			s << v << ", ";
+		}
+	
+		s << "] ";
+	}
+
+	s << ")";
+
+	return s.str();
+}
+
 static size_t len( ObjectVector &o )
 {
 	return o.members().size();
@@ -134,6 +160,7 @@ void bindObjectVector()
 	RunTimeTypedClass<ObjectVector>()
 		.def( init<>() )
 		.def( "__init__", make_constructor( &constructFromSequence ) )
+		.def( "__repr__", &repr )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )

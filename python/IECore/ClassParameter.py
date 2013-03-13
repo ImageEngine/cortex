@@ -87,7 +87,7 @@ class ClassParameter( IECore.CompoundParameter ) :
 		self.__searchPathEnvVar = searchPathToUse
 
 	@staticmethod
-	def _serialise( parameter ) :
+	def _serialise( parameter, value ) :
 
 		return [
 

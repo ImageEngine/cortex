@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/src/IECoreGL
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-02-28T19:43:51.341974Z
+5207
+john.imageengine
 has-props
 
 
@@ -66,10 +66,10 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-47c81fb71ea187d02b88204683c84686
-2011-03-03T22:25:31.805185Z
-4129
+2013-03-13T13:36:30.475466Z
+129ed65bc4499bc1d63c365ea6cfb4be
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -92,7 +92,7 @@ john.imageengine
 
 
 
-12401
+14782
 
 Texture.cpp
 file
@@ -100,11 +100,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-9930d0c7462a0ce19568caa0341b7110
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.475466Z
+2b851292da805946ab8ee80d4317b5aa
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -126,7 +126,7 @@ lucio.imageengine
 
 
 
-2354
+2986
 
 OrthographicCamera.cpp
 file
@@ -134,11 +134,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-3126e366c0ac7923558a90c3864d3146
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:36:30.476466Z
+799eba1816d5270775a83f8a6af57b68
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -168,11 +168,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-568dbfc5de417c35641cb1ba88025c9a
-2012-01-13T13:05:58.813455Z
-4539
-thehaddonyoof
+2013-03-13T13:36:30.476466Z
+03df663f5c56b3698312e368edd5add2
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -194,7 +194,7 @@ thehaddonyoof
 
 
 
-3926
+4018
 
 Display.cpp
 file
@@ -236,11 +236,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-6eea530244ab834391023fd43bbb5650
-2012-01-09T12:57:01.082936Z
-4523
-thehaddonyoof
+2013-03-13T13:36:30.477467Z
+b1fe6e22728e297f6b81e8f9ca9f60de
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -262,7 +262,7 @@ thehaddonyoof
 
 
 
-10301
+13646
 
 ToGLCameraConverter.cpp
 file
@@ -304,11 +304,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-1f8a3a7bb5920fe4a45986485768c1d5
-2012-01-30T20:14:08.739517Z
-4576
-thehaddonyoof
+2013-03-13T13:36:30.477467Z
+3db066ba85e4eed0c85c70c3ca58aa0b
+2013-01-11T02:37:21.504331Z
+5085
+john.imageengine
 
 
 
@@ -330,7 +330,7 @@ thehaddonyoof
 
 
 
-4493
+4320
 
 Primitive.cpp
 file
@@ -338,10 +338,10 @@ file
 
 
 
-2012-09-11T09:54:38.407145Z
-d5accd80fedef0c45950d68eb9187641
-2012-09-04T09:23:21.724514Z
-4813
+2013-03-13T13:36:30.478467Z
+0bcd0dcf5b49f16e602e5e92c8e11c23
+2013-01-19T22:37:10.415523Z
+5119
 thehaddonyoof
 
 
@@ -364,7 +364,7 @@ thehaddonyoof
 
 
 
-11828
+11722
 
 ToGLMeshConverter.cpp
 file
@@ -409,11 +409,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-89f6a9b105ada39d6789fa58838a7376
-2012-01-30T20:14:08.739517Z
-4576
-thehaddonyoof
+2013-03-13T13:36:30.478467Z
+54ca1099a55b43fe5839b876e9c4cc9b
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -435,7 +435,7 @@ thehaddonyoof
 
 
 
-4675
+4487
 
 ToGLTextureConverter.cpp
 file
@@ -443,11 +443,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-20b3f4d503863e36aae39b095a79a724
-2012-01-24T15:34:07.861212Z
-4556
-thehaddonyoof
+2013-03-13T13:36:30.478467Z
+ca82f7702d9f419a29e4b89c9d6ce03d
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -469,7 +469,7 @@ thehaddonyoof
 
 
 
-5934
+6224
 
 Selector.cpp
 file
@@ -477,11 +477,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-f07bc58c60744590a66ea2e3a1bcf1c8
-2012-01-24T10:11:49.424905Z
-4552
-thehaddonyoof
+2013-03-13T13:36:30.479467Z
+c813af2d0c77c39617cc0e64fb73691d
+2013-02-06T18:27:08.027234Z
+5147
+john.imageengine
 
 
 
@@ -503,7 +503,7 @@ thehaddonyoof
 
 
 
-3441
+13518
 
 DiskPrimitive.cpp
 file
@@ -511,11 +511,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-fbeef0d451cafbafcc047a6990bd37df
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:36:30.479467Z
+c600d8adc4bd47cf62a6f14a1014e613
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -537,7 +537,7 @@ lucio.imageengine
 
 
 
-3345
+4076
 
 ToGLCurvesConverter.cpp
 file
@@ -545,11 +545,11 @@ file
 
 
 
-2012-09-11T09:54:38.408095Z
-c661d0f5f8f7cd9a3dacc96eb6c8f4d8
-2012-09-04T09:42:04.123621Z
-4814
-thehaddonyoof
+2013-03-13T13:36:30.480467Z
+84eefe77297249b077c016fa2d3e658c
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -571,7 +571,7 @@ thehaddonyoof
 
 
 
-4005
+5763
 
 Debug.cpp
 file
@@ -606,6 +606,40 @@ lucio.imageengine
 
 
 2499
+
+ToGLBufferConverter.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.480467Z
+894e3d1d6267277153a99eedccd8273d
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3441
 
 TextureLoader.cpp
 file
@@ -647,78 +681,10 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-3c57f07d3b9d6be2f039d0eae0d882dc
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3648
-
-ToGLPointsConverter.cpp
-file
-
-
-
-
-2012-09-11T09:54:38.408095Z
-6f1a3762677bc93bdb8c641a24c28fb5
-2012-09-04T09:42:04.123621Z
-4814
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-7196
-
-ShaderStateComponent.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-29fb9f9da197a69a99975c4449f4fdcb
-2010-05-06T22:07:24.095295Z
-3309
+2013-03-13T13:36:30.481466Z
+9af6e5b3758f51f13c45c71528f5d84d
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -741,7 +707,75 @@ john.imageengine
 
 
 
-8822
+4269
+
+ToGLPointsConverter.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.481466Z
+e9e140c1e316273ad16c0c566abca514
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4532
+
+ShaderStateComponent.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.481466Z
+769c89973c2ec6b9f9a596bb0296fad7
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7388
 
 ImmediateRendererImplementation.cpp
 file
@@ -749,11 +783,11 @@ file
 
 
 
-2012-09-11T09:54:38.409095Z
-f20c74fedbe95e97c7f9d64ad4c5d2f1
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-03-13T13:36:30.482466Z
+d3fe167f669e390796f59dc0dfeeb659
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -775,7 +809,7 @@ thehaddonyoof
 
 
 
-6772
+6890
 
 Group.cpp
 file
@@ -783,11 +817,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-b4e9240d534371933a454984b291e1d4
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:36:30.483467Z
+343da283bd6121b906b3bf282d43f872
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -809,41 +843,7 @@ lucio.imageengine
 
 
 
-3543
-
-CameraController.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-95d5d1508274f42b5cc837372924bd33
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-7123
+3519
 
 LuminanceTexture.cpp
 file
@@ -851,11 +851,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-f478046dd9e501e39830cd83ee5188a4
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.482466Z
+b1a96fbf466c5100e3871903b08ed112
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -877,7 +877,7 @@ lucio.imageengine
 
 
 
-6541
+6430
 
 FontLoader.cpp
 file
@@ -919,11 +919,11 @@ file
 
 
 
-2012-09-11T09:54:38.410095Z
-40b57c80c0e6c23de075597577518b97
-2012-09-04T09:42:04.123621Z
-4814
-thehaddonyoof
+2013-03-13T13:36:30.483467Z
+464dd9ebb22526e8681e3374cf7e183f
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -945,7 +945,7 @@ thehaddonyoof
 
 
 
-3067
+3232
 
 Exception.cpp
 file
@@ -987,11 +987,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-fa489265b17e3ac697580584e0e33bf3
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.484466Z
+6e9cb7c0b5898e41b0a2d41f52172f51
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1013,7 +1013,7 @@ lucio.imageengine
 
 
 
-9955
+9854
 
 Bindable.cpp
 file
@@ -1049,17 +1049,17 @@ lucio.imageengine
 
 1972
 
-ShaderManager.cpp
+UIntTexture.cpp
 file
 
 
 
 
-2011-12-21T09:27:02.000000Z
-866e3f81c462773ef685d38155b0585c
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.484466Z
+b7148f74c7aa30fc7eb3888aacc0d7ab
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1081,7 +1081,7 @@ lucio.imageengine
 
 
 
-6066
+3528
 
 PerspectiveCamera.cpp
 file
@@ -1089,11 +1089,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-40df8a6a0ef9718beef9263decd81308
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:36:30.484466Z
+e9c60354c0984e8f4e91a1d18f88e01b
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1191,11 +1191,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-764e330e1e2ad19d075fa866118d4592
-2011-11-29T02:36:09.989988Z
-4473
-david.imageengine@gmail.com
+2013-03-13T13:36:30.485466Z
+7884cdeb6d80503b2fee5bd526848263
+2013-02-28T19:43:51.341974Z
+5207
+john.imageengine
 
 
 
@@ -1217,7 +1217,7 @@ david.imageengine@gmail.com
 
 
 
-45128
+26094
 
 AlphaTexture.cpp
 file
@@ -1225,11 +1225,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-fd1e323418ea17a3c09d17d1e6034ee5
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.485466Z
+f067df4302ff406976d15bdc0eb10ea2
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1251,7 +1251,7 @@ lucio.imageengine
 
 
 
-5241
+5150
 
 Renderer.cpp
 file
@@ -1259,11 +1259,11 @@ file
 
 
 
-2012-09-11T09:54:38.410095Z
-63800b963172ec4ffa2c51603f4555c4
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-03-13T13:36:30.485466Z
+48f3bd8ce8972a634c0e40fde6179d05
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1285,41 +1285,7 @@ thehaddonyoof
 
 
 
-66898
-
-Window.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-d0cf3e96600fb538812e9c703da394ce
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-5393
+67055
 
 UniformFunctions.cpp
 file
@@ -1327,11 +1293,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-3baa7b3688d4dfdabc16acc57c44eb70
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.486466Z
+66131040ac12963897ec058271c7938f
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1353,7 +1319,7 @@ lucio.imageengine
 
 
 
-2529
+3652
 
 TypedStateComponent.cpp
 file
@@ -1388,6 +1354,40 @@ thehaddonyoof
 
 
 8589
+
+Buffer.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.486466Z
+4561d4090464885d04da6ed51d4e0151
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3634
 
 RendererImplementation.cpp
 file
@@ -1429,112 +1429,10 @@ file
 
 
 
-2012-09-11T09:54:38.411094Z
-4efccd8e9c15fe9e88ff9ffadef94872
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-17539
-
-SpherePrimitive.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-843d0d02e12775bdbe5aa827c6298154
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4848
-
-SceneViewer.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-93cf8d9d08f65ec78f7e7ffa6f352754
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3523
-
-State.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-2756e86cd1c0a59f698c1a8b87940e1e
-2011-11-09T01:17:17.873501Z
-4452
+2013-03-13T13:36:30.486466Z
+1d9a430d51a46dcf42b1adba20bcc80a
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -1557,7 +1455,75 @@ john.imageengine
 
 
 
-5144
+17574
+
+SpherePrimitive.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.487466Z
+d87a9f32227d6afb8c5ec063b23b2c7a
+2013-02-20T19:51:46.803853Z
+5189
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5756
+
+State.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.487466Z
+2f45507f55997ec63568f56e3674c53b
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7710
 
 BoxPrimitive.cpp
 file
@@ -1667,78 +1633,10 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-ce8f6d714fd288d10a75f58af90aed9a
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3262
-
-FrameBuffer.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-415232f1e622ad6ef6675ba1d69afbea
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-5222
-
-MeshPrimitive.cpp
-file
-
-
-
-
-2011-12-21T09:27:02.000000Z
-922c1e9c7b39509c4e569fce9c11fa12
-2010-05-28T23:10:20.538291Z
-3417
+2013-03-13T13:36:30.487466Z
+d2e5cb2bb84a17eba3181d4d76325a57
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -1761,7 +1659,75 @@ john.imageengine
 
 
 
-4718
+4491
+
+FrameBuffer.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.487466Z
+d6eda13aa56bc77cbf6eb3497f42ceda
+2013-01-11T22:10:43.899743Z
+5089
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5780
+
+MeshPrimitive.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.488466Z
+d37a461d0ec4275c0a0b6b98cd48bc88
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4632
 
 DepthTexture.cpp
 file
@@ -1769,11 +1735,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-58438cd9c8a52ff9732072d6b9a3f26d
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.488466Z
+959e465259384b6f2c889c490d960923
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1795,7 +1761,7 @@ lucio.imageengine
 
 
 
-2924
+3797
 
 Camera.cpp
 file
@@ -1837,11 +1803,11 @@ file
 
 
 
-2011-12-21T09:27:02.000000Z
-5a1872f2a43fe74bd190f009caea0d96
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:36:30.488466Z
+414b768d0bdf3c580633734f7be252de
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1863,7 +1829,7 @@ lucio.imageengine
 
 
 
-2570
+3126
 
 IECoreGL.cpp
 file
@@ -1939,11 +1905,11 @@ file
 
 
 
-2012-05-10T16:40:49.000000Z
-5dcfce37c069dfa0be54b023a94aeca3
-2012-01-24T10:11:49.424905Z
-4552
-thehaddonyoof
+2013-03-13T13:36:30.488466Z
+bdea7988567a432b07d9934c70ae8c32
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1965,5 +1931,39 @@ thehaddonyoof
 
 
 
-3236
+3419
+
+ShaderLoader.cpp
+file
+
+
+
+
+2013-03-13T13:36:30.489466Z
+84f6cfd46a0a8696a0b19cd818da00e8
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+10271
 

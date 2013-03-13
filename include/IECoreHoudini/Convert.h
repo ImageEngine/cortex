@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,16 +62,34 @@ template<>
 Imath::V3f convert( const UT_Vector3 &from );
 
 template<>
+UT_Vector3 convert( const Imath::V3d &from );
+
+template<>
+Imath::V3d convert( const UT_Vector3 &from );
+
+template<>
 UT_Vector4 convert( const Imath::V3f &from );
 
 template<>
 Imath::V3f convert( const UT_Vector4 &from );
 
 template<>
+UT_Vector4 convert( const Imath::V3d &from );
+
+template<>
+Imath::V3d convert( const UT_Vector4 &from );
+
+template<>
 UT_BoundingBox convert( const Imath::Box3f &from );
 
 template<>
 Imath::Box3f convert( const UT_BoundingBox &from );
+
+template<>
+UT_BoundingBox convert( const Imath::Box3d &from );
+
+template<>
+Imath::Box3d convert( const UT_BoundingBox &from );
 
 template<>
 UT_Matrix4T<double> convert( const Imath::M44d &from );

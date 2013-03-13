@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECoreMaya
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-12T21:43:07.651942Z
-4834
-danield.imageengine
+2013-02-20T23:29:36.329493Z
+5191
+david.imageengine@gmail.com
 has-props
 
 
@@ -270,11 +270,11 @@ file
 
 
 
-2012-09-11T09:54:36.780095Z
-ecc38b95fd22e9623ad47047eba99df1
-2012-09-07T00:33:56.101624Z
-4820
-andrewk.imageengine
+2013-03-13T13:34:25.453466Z
+f28695bba7bad83d332d5172b819aa00
+2012-10-29T18:26:24.110106Z
+4889
+david.imageengine@gmail.com
 
 
 
@@ -296,7 +296,7 @@ andrewk.imageengine
 
 
 
-34115
+35881
 
 All.py
 file
@@ -304,10 +304,10 @@ file
 
 
 
-2012-07-19T11:27:18.214321Z
-bb3197e72be80e37cd4c74b43c657f74
-2012-06-02T00:09:15.288400Z
-4693
+2013-03-13T13:34:25.453466Z
+2e029c15c72b928c98cb2f4ee969cee4
+2013-02-15T00:51:16.625067Z
+5170
 andrewk.imageengine
 
 
@@ -330,7 +330,7 @@ andrewk.imageengine
 
 
 
-3677
+3705
 
 ToMayaSkinClusterConverterTest.py
 file
@@ -502,16 +502,50 @@ lucio.imageengine
 
 14557
 
+FromMayaProceduralHolderConverterTest.py
+file
+
+
+
+
+2013-03-13T13:34:25.453466Z
+3673f94adede2e99da74f79f24f29311
+2013-02-20T23:29:36.329493Z
+5191
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3023
+
 ParameterisedHolder.py
 file
 
 
 
 
-2012-07-19T11:27:18.215321Z
-8909b6719b6891629252aa4ca2099870
-2012-06-07T20:59:02.545006Z
-4704
+2013-03-13T13:34:25.454466Z
+c1b0372943963b5189adc2993f892db3
+2013-01-17T02:11:18.660463Z
+5110
 andrewk.imageengine
 
 
@@ -534,7 +568,7 @@ andrewk.imageengine
 
 
 
-66702
+67200
 
 FromMayaParticleConverterTest.py
 file
@@ -854,11 +888,11 @@ file
 
 
 
-2012-07-19T11:27:18.216321Z
-a3edcec28c7088ff6f38ae9a02a806c8
-2012-06-19T21:25:47.175101Z
-4722
-andrewk.imageengine
+2013-03-13T13:34:25.454466Z
+c09ef1a221bbcdc705523bb3ccc6b034
+2012-11-20T20:19:51.779388Z
+4922
+valerie.imageengine@gmail.com
 
 
 
@@ -880,7 +914,7 @@ andrewk.imageengine
 
 
 
-10221
+10392
 
 ToMayaGroupConverterTest.py
 file
@@ -916,17 +950,17 @@ david.imageengine@gmail.com
 
 5319
 
-ToMayaParticleConverterTest.py
+MayaSceneTest.py
 file
 
 
 
 
-2011-12-21T09:26:44.000000Z
-169b004af641ee91f72b1196c26907d6
-2010-11-05T18:36:55.436682Z
-3907
-john.imageengine
+2013-03-13T13:34:25.454466Z
+d265914eafad5f49d7d281571e86948a
+2013-02-13T20:18:27.837201Z
+5165
+david.imageengine@gmail.com
 
 
 
@@ -948,7 +982,7 @@ john.imageengine
 
 
 
-5744
+20183
 
 MayaTypeIdTest.py
 file
@@ -983,6 +1017,40 @@ john.imageengine
 
 
 2261
+
+ToMayaParticleConverterTest.py
+file
+
+
+
+
+2011-12-21T09:26:44.000000Z
+169b004af641ee91f72b1196c26907d6
+2010-11-05T18:36:55.436682Z
+3907
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5744
 
 FromMayaCurveConverterTest.py
 file

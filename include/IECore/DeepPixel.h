@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -101,7 +101,9 @@ class DeepPixel : public RefCounted
 		/// It can be assumed that every DeepPixel from a single DeepImage will contain
 		/// the same channels. As such, channels cannot be added or destroyed once a
 		/// DeepPixel has been initialized. Note that RGBA are considered 4 separate
-		/// channels, and depth is not considered a channel.
+		/// channels, and depth is not considered a channel. The channel data is
+		/// considered uncomposited; that is to say the channel values match exactly
+		/// the value at each depth sample, and not a summation of values over depth.
 		//////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Returns the number of channels

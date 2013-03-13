@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -215,46 +215,19 @@ void ToHoudiniGeometryConverter::transferAttribs(
 		}
 	}
 	
-	// add the groups based on blindData
+	// add the name attribute based on blindData
 	const StringData *nameData = primitive->blindData()->member<StringData>( "name" );
 	if ( nameData )
 	{
-		const char *name = nameData->readable().c_str();
-		
-		if ( newPoints.isValid() )
-		{
-			GA_ElementGroup *group = geo->findPointGroup( name );
-			if ( !group || group->classType() != GA_GROUP_POINT )
-			{
-				group = geo->createElementGroup( GA_ATTRIB_POINT, name );
-			}
-			
-			if ( group )
-			{
-				group->addRange( newPoints );
-			}
-			else
-			{
-				IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "Group " + nameData->readable() + " is invalid." );
-			}
-		}
-		
 		if ( newPrims.isValid() )
 		{
-			GA_ElementGroup *group = geo->findPrimitiveGroup( name );
-			if ( !group || group->classType() != GA_GROUP_PRIMITIVE )
-			{
-				group = geo->createElementGroup( GA_ATTRIB_PRIMITIVE, name );
-			}
-			
-			if ( group )
-			{
-				group->addRange( newPrims );
-			}
-			else
-			{
-				IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "Group " + nameData->readable() + " is invalid." );
-			}
+			StringVectorDataPtr nameVectorData = new StringVectorData();
+			nameVectorData->writable().push_back( nameData->readable() );
+			std::vector<int> indexValues( newPrims.getEntries(), 0 );
+			IntVectorDataPtr indexData = new IntVectorData( indexValues );
+			ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( nameVectorData );
+			converter->indicesParameter()->setValidatedValue( indexData );
+			converter->convert( "name", geo, newPrims );
 		}
 	}
 }

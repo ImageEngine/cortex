@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,167 +35,41 @@
 #ifndef IE_CORE_FILEINDEXEDIO_H
 #define IE_CORE_FILEINDEXEDIO_H
 
-#include <map>
-#include <iostream>
-#include <fstream>
-
-#include "boost/optional.hpp"
-
-#include "IndexedIOInterface.h"
-#include "Exception.h"
-#include "VectorTypedData.h"
+#include "StreamIndexedIO.h"
 
 namespace IECore
 {
-/// An implementation of IndexedIOInterface which operates within a single file on disk.
-/// \todo Most of the implementation of this class would be better of in a "StreamIndexedIO" class which
-/// FileIndexedIO and MemoryIndexedIO derive from. MemoryIndexedIO wasn't implemented that cleanly in the first
-/// place due to the necessity to maintain binary compatibility.
+
+/// An implementation of StreamIndexedIO which operates within a single file on disk.
 /// \ingroup ioGroup
-class FileIndexedIO : public IndexedIOInterface
+class FileIndexedIO : public StreamIndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( FileIndexedIO );
+		IE_CORE_DECLARERUNTIMETYPED( FileIndexedIO, StreamIndexedIO );
 
-		static IndexedIOInterfacePtr create(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		static IndexedIOPtr create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
 		static bool canRead( const std::string &path );
 
-		/// Open an existing device or create a new one
-		FileIndexedIO(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		/// Open or create an file at the given root location
+		FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
 		virtual ~FileIndexedIO();
 
-		virtual IndexedIO::OpenMode openMode() const;
-
-		IndexedIOInterfacePtr resetRoot() const;
-
-		void chdir(const IndexedIO::EntryID &name);
-
-		void mkdir(const IndexedIO::EntryID &name);
-
-		IndexedIO::EntryID pwd();
-
-		IndexedIO::EntryList ls(IndexedIOFilterPtr f=0);
-
-		IndexedIO::Entry ls(const IndexedIO::EntryID &name);
-
-		unsigned long rm(const IndexedIO::EntryID &name);
-
-		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const float &x);
-		void write(const IndexedIO::EntryID &name, const double &x);
-		void write(const IndexedIO::EntryID &name, const half &x);
-		void write(const IndexedIO::EntryID &name, const int &x);
-		void write(const IndexedIO::EntryID &name, const int64_t &x);
-		void write(const IndexedIO::EntryID &name, const uint64_t &x);
-		void write(const IndexedIO::EntryID &name, const std::string &x);
-		void write(const IndexedIO::EntryID &name, const unsigned int &x);
-		void write(const IndexedIO::EntryID &name, const char &x);
-		void write(const IndexedIO::EntryID &name, const unsigned char &x);
-		void write(const IndexedIO::EntryID &name, const short &x);
-		void write(const IndexedIO::EntryID &name, const unsigned short &x);
-
-		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, float &x);
-		void read(const IndexedIO::EntryID &name, double &x);
-		void read(const IndexedIO::EntryID &name, half &x);
-		void read(const IndexedIO::EntryID &name, int &x);
-		void read(const IndexedIO::EntryID &name, int64_t &x);
-		void read(const IndexedIO::EntryID &name, uint64_t &x);
-		void read(const IndexedIO::EntryID &name, std::string &x);
-		void read(const IndexedIO::EntryID &name, unsigned int &x);
-		void read(const IndexedIO::EntryID &name, char &x);
-		void read(const IndexedIO::EntryID &name, unsigned char &x);
-		void read(const IndexedIO::EntryID &name, short &x);
-		void read(const IndexedIO::EntryID &name, unsigned short &x);
-
-		ConstCharVectorDataPtr buf();
+		/// Returns the full file name accessed by this object.
+		const std::string &fileName() const;
 
 	protected:
 
-		IndexedIOPath m_currentDirectory;
-
-		/// The mode this device was opened with
-		IndexedIO::OpenMode m_mode;
-
-		FileIndexedIO(const FileIndexedIO &other, IndexedIO::OpenMode mode);
-
-		/// Check for existence of the entry with specified type
-		bool exists(const IndexedIOPath &path, IndexedIO::EntryType e) const;
-
-		/// Check for existence of the entry with any type
-		bool exists(const IndexedIO::EntryID &name) const;
-
-		/// Variant of "rm" which allows exceptions to be optionally thrown
-		/// if the entry to remove does not exist.
-		unsigned long rm(const IndexedIO::EntryID &name, bool throwIfNonExistent);
-
-		// Write an array of POD types
-		template<typename T>
-		void write(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength);
-
-		// Read an array of POD types
-		template<typename T>
-		void read(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const;
-
-		// Write an instance of a type which is able to flatten itself.
-		template<typename T>
-		void write(const IndexedIO::EntryID &name, const T &x);
-
-		// Read an instance of a type which is able to unflatten itself.
-		template<typename T>
-		void read(const IndexedIO::EntryID &name, T &x) const;
-
-		class Index;
-		IE_CORE_DECLAREPTR( Index );
-
-		class IndexedFile;
-		IE_CORE_DECLAREPTR( IndexedFile );
-
-		IndexedFilePtr m_indexedFile;
-
-		class Node;
-		IE_CORE_DECLAREPTR( Node );
-
-		NodePtr m_currentDirectoryNode, m_rootDirectoryNode;
-
-		bool find( const IndexedIO::EntryID &name, NodePtr &node ) const;
-		NodePtr insert( const IndexedIO::EntryID &name );
-
-		/// \todo Should be virtual
-		boost::optional<Imf::Int64> flush();
-
-		/// \todo Add virtual method to obtain device name ( e.g filename, "memory", etc )
-
-		std::iostream *device();
-
-		void open( std::iostream *device, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode, bool newStream = false );
-
 		FileIndexedIO();
+
+		FileIndexedIO( StreamIndexedIO::Node &rootNode );
+
+		// duplicates this object by mapping it to a different root node.
+		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
+
+		class StreamFile;
 };
 
 IE_CORE_DECLAREPTR( FileIndexedIO )

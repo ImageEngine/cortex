@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,7 @@
 namespace IECoreHoudini
 {
 
+/// \todo: This class is a bit funny. Is it meant to be more like IECoreMaya::ParameterisedInterface?
 class FnParameterisedHolder
 {
 	public :
@@ -57,7 +58,12 @@ class FnParameterisedHolder
 
 		void setParameterised( IECore::RunTimeTypedPtr p );
 		void setParameterised( const std::string &className, int classVerison, const std::string &seachPathEnvVar );
-
+		
+		/// Sets the values of the parameters of the held Parameterised object
+		/// to reflect the values of the attributes of the node.
+		/// \todo: add setNodeValues as well
+		void setParameterisedValues( double time );
+		
 		IECore::RunTimeTypedPtr getParameterised();
 
 	private :

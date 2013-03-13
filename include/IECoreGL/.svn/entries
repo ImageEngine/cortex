@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/include/IECoreGL
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-01-31T20:05:13.214986Z
+5134
+john.imageengine
 
 
 
@@ -26,51 +26,17 @@ thehaddonyoof
 
 07b78fde-9e1a-0410-98de-79dcf2039bee
 
-CameraController.h
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-5db8e2094c0d1aab6278f779b167deaf
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3373
-
 ToGLConverter.h
 file
 
 
 
 
-2012-09-11T09:54:37.720123Z
-583f02728ea4e9c47835a103258ecabc
-2012-09-04T09:42:04.123621Z
-4814
-thehaddonyoof
+2013-03-13T13:34:41.891688Z
+254f80678a8e2f4e7dca9197a9c7bbac
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -92,7 +58,7 @@ thehaddonyoof
 
 
 
-4787
+4868
 
 ColorTexture.h
 file
@@ -128,17 +94,17 @@ lucio.imageengine
 
 3898
 
-ShaderManager.h
+UIntTexture.h
 file
 
 
 
 
-2011-12-21T09:26:54.000000Z
-4131e4434e4868c769dda1fee9b1aec7
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:41.892498Z
+eadee3cd54924a97422716ff555da0c6
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -160,7 +126,7 @@ lucio.imageengine
 
 
 
-4710
+2440
 
 GL.h
 file
@@ -168,10 +134,10 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-c3419a1320ca0e4d1dd48e71dd30c2b1
-2012-01-24T09:46:15.992017Z
-4551
+2013-03-13T13:34:41.893497Z
+6eda19c2d79e43788d5848ed9b69cb74
+2013-01-19T22:37:10.415523Z
+5119
 thehaddonyoof
 
 
@@ -194,7 +160,7 @@ thehaddonyoof
 
 
 
-2605
+2751
 
 PerspectiveCamera.h
 file
@@ -202,11 +168,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-17706773fff472cc50596aa122dd74df
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.892498Z
+8ad90ea7f9a9c130bde5f569eef14d51
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -228,7 +194,7 @@ lucio.imageengine
 
 
 
-2792
+2793
 
 StateComponent.h
 file
@@ -264,51 +230,17 @@ lucio.imageengine
 
 2800
 
-Primitive.inl
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-edd6ecadc28deb992a38a3d0d769ac52
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2613
-
 Renderer.h
 file
 
 
 
 
-2012-09-11T09:54:37.763134Z
-dfbf7b5d8da92e2c4a4f54a68e670c40
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-03-13T13:34:41.893497Z
+d68d3687cbe4b2b3ff10ca3209937460
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -330,7 +262,7 @@ thehaddonyoof
 
 
 
-23182
+23184
 
 UniformFunctions.h
 file
@@ -338,11 +270,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-e15af53acf12d2df34182c4b00c3c401
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:41.894486Z
+df52187eba6ea9b739149ccc4ece5022
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -364,7 +296,7 @@ lucio.imageengine
 
 
 
-2997
+3506
 
 TypedStateComponent.h
 file
@@ -372,11 +304,11 @@ file
 
 
 
-2012-09-11T09:54:37.764095Z
-90bcac3670baf3d26d2012b59cf6adb3
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-03-13T13:34:41.895498Z
+108c6d6ceb133c064437554f69c6e060
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -398,7 +330,7 @@ thehaddonyoof
 
 
 
-10378
+10425
 
 TextureUnits.h
 file
@@ -440,11 +372,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-29fca85ac7df9dc9ae53f3cde45d22ac
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:41.897498Z
+9ad6e7559e44dc72c43defa5c801c28a
+2013-01-31T20:05:13.214986Z
+5134
+john.imageengine
 
 
 
@@ -466,7 +398,7 @@ lucio.imageengine
 
 
 
-3131
+3142
 
 DepthTexture.h
 file
@@ -542,11 +474,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-29010338cc52a74167f4edfdc75d1070
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:41.899498Z
+c5a71036345055767d030f84308b0796
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -568,7 +500,7 @@ lucio.imageengine
 
 
 
-2827
+2843
 
 Lights.h
 file
@@ -638,6 +570,40 @@ thehaddonyoof
 
 2424
 
+ShaderLoader.h
+file
+
+
+
+
+2013-03-13T13:34:41.900498Z
+750fc8876908755faa41d9f9d938ec99
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4334
+
 CachedConverter.h
 file
 
@@ -678,180 +644,10 @@ file
 
 
 
-2012-07-19T11:27:19.120321Z
-4f39d4ceb56d1dd6fb6dcf84558a6af8
-2012-06-15T17:53:37.685107Z
-4718
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3479
-
-CurvesPrimitive.h
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-4306ef5fbaa08da5d39ef8c498337794
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3940
-
-NameStateComponent.h
-file
-
-
-
-
-2012-05-10T16:40:47.000000Z
-f962d230d6f064657920b8d7e4ca86b9
-2012-01-13T13:05:58.813455Z
-4539
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4417
-
-PointsPrimitive.h
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-bcd31ecd84f53ebd9e36fb401e4ab5ab
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4708
-
-TextPrimitive.h
-file
-
-
-
-
-2012-05-10T16:40:47.000000Z
-3a809ccb4566d6614178b4077d32d0b2
-2012-01-30T20:14:08.739517Z
-4576
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3319
-
-ToGLTextureConverter.h
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-6f91af44697c7791e0a5fffe11807a81
-2011-02-22T00:54:52.779433Z
-4111
+2013-03-13T13:34:41.901490Z
+bb3db6c39780efc7d3fab81e433e10a0
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -874,7 +670,177 @@ john.imageengine
 
 
 
-3908
+3650
+
+CurvesPrimitive.h
+file
+
+
+
+
+2013-03-13T13:34:41.900498Z
+ed21c6bd1d66fd8e159c56d19b429531
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4214
+
+NameStateComponent.h
+file
+
+
+
+
+2013-03-13T13:34:41.901490Z
+2f8db3223462d27e69d06b17839f142d
+2013-01-31T20:05:13.214986Z
+5134
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4605
+
+PointsPrimitive.h
+file
+
+
+
+
+2013-03-13T13:34:41.902498Z
+ceeed55ae40c4634ebc40180c72b3053
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3981
+
+TextPrimitive.h
+file
+
+
+
+
+2013-03-13T13:34:41.903498Z
+0ce4d873e72e243cf1c7c7bdb868ba26
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3233
+
+ToGLTextureConverter.h
+file
+
+
+
+
+2013-03-13T13:34:41.904477Z
+99edd1cf3c52b672d7d84d82b2712659
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4176
 
 Selector.h
 file
@@ -882,11 +848,11 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-9e80ead69aaefc0951b56d58d4741769
-2012-01-24T10:11:49.424905Z
-4552
-thehaddonyoof
+2013-03-13T13:34:41.904477Z
+ad27803ca875db25dcdbe41c75b8a836
+2013-01-12T01:15:22.919365Z
+5090
+john.imageengine
 
 
 
@@ -908,7 +874,7 @@ thehaddonyoof
 
 
 
-2922
+5101
 
 DiskPrimitive.h
 file
@@ -916,11 +882,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-cb7503ace367ad96fecbeffa7018d444
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.905498Z
+e3e661b4ee750222ff538ea09fd861d1
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -942,7 +908,7 @@ lucio.imageengine
 
 
 
-2898
+2595
 
 private
 dir
@@ -953,44 +919,10 @@ file
 
 
 
-2012-09-11T09:54:37.764095Z
-b7ad4297427185878bc754b24f644e4f
-2012-09-04T09:42:04.123621Z
-4814
-thehaddonyoof
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2856
-
-SplineToGLTextureConverter.h
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-8814d111a9e8e63aac60e8c564b26bcb
-2011-02-22T00:54:52.779433Z
-4111
+2013-03-13T13:34:41.905498Z
+9fd6d22aaf9364cef07c464c10bd03e6
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -1013,7 +945,75 @@ john.imageengine
 
 
 
-2918
+2885
+
+ToGLBufferConverter.h
+file
+
+
+
+
+2013-03-13T13:34:41.905498Z
+0ef0fbb849f7b8a26efaa138b2f373d6
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2839
+
+SplineToGLTextureConverter.h
+file
+
+
+
+
+2013-03-13T13:34:41.793505Z
+9b4436224cb84e2f3b7d9ea05a77dc50
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3214
 
 ShaderStateComponent.h
 file
@@ -1021,11 +1021,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-f57b7209e8e1fbac11a188a3f307355e
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:41.794467Z
+9e7c48799d95bbf97d2954e1e43dc5c5
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1047,7 +1047,7 @@ lucio.imageengine
 
 
 
-4240
+4580
 
 ToGLPointsConverter.h
 file
@@ -1089,11 +1089,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-88c40b18ed004b500cecdd275712dbe4
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.794467Z
+cbafd5643c7fd50451c3216864e77f2a
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1115,7 +1115,7 @@ lucio.imageengine
 
 
 
-3354
+3386
 
 LuminanceTexture.h
 file
@@ -1259,11 +1259,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-2370eb286ba5ef59512f4cd889ff0f4c
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.893497Z
+ff5f7caf3d0160b96a850a1c59edf01a
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1285,7 +1285,7 @@ lucio.imageengine
 
 
 
-2891
+3018
 
 AlphaTexture.h
 file
@@ -1327,11 +1327,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-a0799cc1e87469a82e309a64b8173ddc
-2011-11-29T02:36:09.989988Z
-4473
-david.imageengine@gmail.com
+2013-03-13T13:34:41.894486Z
+47bc3b062a8c0c9bef8c469a7865685e
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1353,22 +1353,22 @@ david.imageengine@gmail.com
 
 
 
-12584
+8461
 
 bindings
 dir
 
-Window.h
+Buffer.h
 file
 
 
 
 
-2011-12-21T09:26:54.000000Z
-318d8a3691f20b7bf0dd8e9ae58a93e9
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:41.895498Z
+5c8da2ae31eca25a86efb1d7c5f135df
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1390,7 +1390,7 @@ lucio.imageengine
 
 
 
-5061
+3397
 
 GLUT.h
 file
@@ -1432,78 +1432,10 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-a0b190144210b07d620f86914bf6fe8e
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3172
-
-SceneViewer.h
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-196112e2f13431888e76fd427c0d2bee
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2824
-
-State.h
-file
-
-
-
-
-2011-12-21T09:26:54.000000Z
-69f406dba1c0e31b35a3c54c109ab4ba
-2011-11-09T01:17:17.873501Z
-4452
+2013-03-13T13:34:41.896482Z
+ec15023756b578a8869ab2509ad45858
+2013-01-09T03:05:32.376470Z
+5075
 john.imageengine
 
 
@@ -1526,7 +1458,41 @@ john.imageengine
 
 
 
-5034
+2933
+
+State.h
+file
+
+
+
+
+2013-03-13T13:34:41.896482Z
+af5ee8f510287c72838aa7ec10435e71
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5365
 
 BoxPrimitive.h
 file
@@ -1568,11 +1534,11 @@ file
 
 
 
-2012-09-11T09:54:37.765095Z
-0b7d8f9b24f60533da2243f23c4ce5fe
-2012-09-08T16:09:25.472626Z
-4829
-thehaddonyoof
+2013-03-13T13:34:41.896482Z
+6f3cc877ddef62e3574b08e6b48099e8
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1594,7 +1560,7 @@ thehaddonyoof
 
 
 
-4857
+4947
 
 QuadPrimitive.h
 file
@@ -1602,11 +1568,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-b88ee5f77597dd76d75d9afdf2ee8d54
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.897498Z
+002a83b551a4379a3838a1d9667afcf2
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1628,7 +1594,7 @@ lucio.imageengine
 
 
 
-2807
+2660
 
 FrameBuffer.h
 file
@@ -1636,11 +1602,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-570097165b2ce3f6cd48dba89dae61f1
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.898498Z
+68ca56fe244a4bd58a17766b1e8ab921
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1662,7 +1628,7 @@ lucio.imageengine
 
 
 
-4305
+4615
 
 MeshPrimitive.h
 file
@@ -1670,11 +1636,11 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-974442d0689305cf15666af75a895ab5
-2012-01-30T20:14:08.739517Z
-4576
-thehaddonyoof
+2013-03-13T13:34:41.898498Z
+3fcfd1844816bfc7cb4e52a998ae7484
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1696,7 +1662,7 @@ thehaddonyoof
 
 
 
-2929
+2907
 
 ToGLConverter.inl
 file
@@ -1704,11 +1670,11 @@ file
 
 
 
-2012-09-11T09:54:37.765095Z
-07d2c4b7fe05231016532c18a501784c
-2012-09-04T09:42:04.123621Z
-4814
-thehaddonyoof
+2013-03-13T13:34:41.898498Z
+329191f52d36a05fe93fef0679dbe04b
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1730,7 +1696,7 @@ thehaddonyoof
 
 
 
-2436
+2713
 
 IECoreGL.h
 file
@@ -1772,11 +1738,11 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-c213a65a9a378233a43b491593f8827a
-2012-01-24T10:11:49.424905Z
-4552
-thehaddonyoof
+2013-03-13T13:34:41.899498Z
+286d76abc84004cf659bc12d4593e3d2
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1798,7 +1764,7 @@ thehaddonyoof
 
 
 
-3856
+3885
 
 StateComponent.inl
 file
@@ -1840,11 +1806,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-727e714cc950b082a33557213a17790c
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.901490Z
+519790e9a322a42a0f32aab4685bd675
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -1866,7 +1832,7 @@ lucio.imageengine
 
 
 
-2537
+2538
 
 TypedStateComponent.inl
 file
@@ -1942,11 +1908,11 @@ file
 
 
 
-2012-05-10T16:40:47.000000Z
-2e5d6cec6eee2678d5e993f0cac0e94e
-2012-01-30T20:14:08.739517Z
-4576
-thehaddonyoof
+2013-03-13T13:34:41.902498Z
+4de746cf758802c82cc948a3f41ff1fb
+2013-01-11T02:37:21.504331Z
+5085
+john.imageengine
 
 
 
@@ -1968,7 +1934,7 @@ thehaddonyoof
 
 
 
-2991
+2952
 
 Primitive.h
 file
@@ -1976,11 +1942,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-eaff631d16672eeccf59639727650523
-2010-05-06T17:34:32.127363Z
-3304
-lucio.imageengine
+2013-03-13T13:34:41.903498Z
+da37134b26dd9b68b3bad32c147758d3
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -2002,7 +1968,7 @@ lucio.imageengine
 
 
 
-8414
+8715
 
 ToGLMeshConverter.h
 file
@@ -2044,11 +2010,11 @@ file
 
 
 
-2011-12-21T09:26:54.000000Z
-3c936c6edfb62ff6adcafa7e07cf6314
-2010-04-19T18:04:19.280169Z
-3218
-lucio.imageengine
+2013-03-13T13:34:41.903498Z
+e02b805fe0c8be4a956e3b9934134e07
+2013-01-09T03:05:32.376470Z
+5075
+john.imageengine
 
 
 
@@ -2070,7 +2036,7 @@ lucio.imageengine
 
 
 
-467
+2233
 
 Debug.h
 file

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 //  its affiliates and/or its licensors.
@@ -50,182 +50,154 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Shader );
-IE_CORE_FORWARDDECLARE( Primitive );
+IE_CORE_FORWARDDECLARE( Texture );
 
 /// A class to represent GLSL shaders.
-class Shader : public Bindable
+class Shader : public IECore::RunTimeTyped
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Shader, ShaderTypeId, Bindable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Shader, ShaderTypeId, IECore::RunTimeTyped );
 
-		/// Either vertexSource or fragmentSource may be empty to use the fixed
-		/// functionality for that shader component.
-		/// Throws an Exception if the shader fails to compile, or if the OpenGL
-		/// version isn't sufficient to support shaders.
+		/// Either vertexSource or fragmentSource may be empty to use a simple default
+		/// shader for that shader component. Throws a descriptive Exception if the shader
+		/// fails to compile.
 		Shader( const std::string &vertexSource, const std::string &fragmentSource );
+		/// Either vertexSource or fragmentSource may be empty to use a simple default
+		/// shader for that shader component. If geometrySource is empty then no geometry shader
+		/// will be used. Throws a descriptive Exception if the shader fails to compile.
+		Shader( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource );
 		virtual ~Shader();
 
-		bool operator==( const Shader &other ) const;
+		/// Returns the GL program this shader represents. Note that this is owned by the Shader,
+		/// and will be destroyed upon destruction of the Shader - you must not call glDeleteProgram() yourself.
+		GLuint program() const;
 
-		virtual void bind() const;
-
-		/////////////////////////////////////////////////////////////
-		///
-		/// Uniform Parameters
-		///
-		/////////////////////////////////////////////////////////////
-	
+		//! @name Source accessors.
+		/// These functions return the shader source as passed to
+		/// the constructor. In the case of an empty string being
+		/// returned, you can determine the effective source by
+		/// calling defaultVertexSource() or defaultFragmentSource().
+		///////////////////////////////////////////////////////////
+		//@{
+		const std::string &vertexSource() const;
+		const std::string &geometrySource() const;
+		const std::string &fragmentSource() const;
+		//@}
+		
+		struct Parameter
+		{
+			/// Type as reported by glGetActiveUnifom() or
+			/// glGetActiveAttrib().
+			GLenum type;
+			/// Size as reported by glGetActiveUniform() or
+			/// glGetActiveAttrib().
+			GLint size;
+			/// Location as reported by glGetUniformLocation()
+			/// or glGetAttribLocation().
+			GLint location;
+			/// Texture unit assigned for this parameter - only
+			/// valid for uniform parameters of sampler type.
+			/// This does not store an enum but instead an index
+			/// (so 0 represents GL_TEXTURE0).
+			GLuint textureUnit;
+		};
+		
 		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
 		/// array[n] names used internally in OpenGL.
 		void uniformParameterNames( std::vector<std::string> &names ) const;
-		/// Returns a numeric index for the named uniform parameter. This can be
-		/// used in the calls below to avoid more expensive lookups by name.
-		/// Throws an Exception if parameter does not exist.
-		GLint uniformParameterIndex( const std::string &parameterName ) const;
-		/// Returns true if the Shader has a uniform parameter of the given name.
-		bool hasUniformParameter( const std::string &parameterName ) const;
-
-		/// Returns the type of a named uniform parameter, described in terms of the
-		/// most closely related IECore datatype. The type here is the type of
-		/// data returned by the getUniformParameter() function below, except in the case
-		/// of 2d samplers, where TextureTypeId will be returned.
-		IECore::TypeId uniformParameterType( GLint parameterIndex ) const;
-		/// As above but by specifying the parameter by name.
-		IECore::TypeId uniformParameterType( const std::string &parameterName ) const;
-
-		//! @name getUniformParameterDefault
-		/// Returns a new data object containing the suggested default value (zero)
-		/// to be set on the given parameter.
-		/// The default values are not supported by OpenGL. So the shader does not
-		/// have to be bound at the time of calling.
-		//////////////////////////////////////////////////////////////////////
-		//@{
-		IECore::DataPtr getUniformParameterDefault( GLint parameterIndex ) const;
-		IECore::DataPtr getUniformParameterDefault( const std::string &parameterName ) const;
-		//@}
-
-		//! @name Uniform Parameter getting
-		/// These calls return the current values of shader uniform parameters. Unlike
-		/// the calls to set values (see below) the shader does not have to be
-		/// bound at the time of calling.
-		//////////////////////////////////////////////////////////////////////
-		//@{
-		IECore::DataPtr getUniformParameter( GLint parameterIndex ) const;
-		IECore::DataPtr getUniformParameter( const std::string &parameterName ) const;
-		//@}
-
-		//! @name Uniform Parameter setting
-		/// These calls set shader parameters. They can only be called while
-		/// the Shader is bound (using bind()) as the current shader - Exceptions
-		/// will result if this is not the case.
-		//////////////////////////////////////////////////////////////////////
-		//@{
-		/// Returns true if the specified data type is valid for setting the
-		/// specified uniform parameter, and false if not.
-		bool uniformValueValid( GLint parameterIndex, IECore::TypeId type ) const;
-		/// Returns true if the specified value is valid for setting the
-		/// specified uniform parameter, and false if not.
-		bool uniformValueValid( GLint parameterIndex, const IECore::Data *value ) const;
-		/// As above, but specifying the uniform parameter by name.
-		bool uniformValueValid( const std::string &parameterName, const IECore::Data *value ) const;
-		/// Sets the specified uniform parameter to the value specified. value must
-		/// be of an appropriate type for the parameter - an Exception is thrown
-		/// if this is not the case.
-		void setUniformParameter( GLint parameterIndex, const IECore::Data *value );
-		/// Sets the specified parameter to the value provided. value must be
-		/// of an appropriate simple type or a Imath type.
-		template< typename T >
-		typename boost::disable_if_c< boost::is_convertible< T, IECore::Data * >::value >::type 
-		setUniformParameter( GLint parameterIndex, const T &value )
-		{
-			IECore::TypeId t = IECore::TypedData< T >::staticTypeId();
-			if ( !uniformValueValid( parameterIndex, t ) )
-			{
-				throw IECore::Exception( "Can't set uniform parameter value. Type mismatch." );
-			}
-			setUniformParameter( parameterIndex, t, &value );
-		}
-		/// Sets the specified parameter to the value specified. value must
-		/// be of an appropriate type for the parameter - an Exception is thrown
-		/// if this is not the case. This call may be slower than the overload based
-		/// on parameter indexes.
-		void setUniformParameter( const std::string &parameterName, const IECore::Data *value );
-		/// Sets the specified sampler parameter to use the texture unit indicated.
-		void setUniformParameter( GLint parameterIndex, unsigned int textureUnit );
-		/// Sets the specified sampler parameter to use the texture unit indicated.
-		/// This call may be slower than the overload based
-		/// on parameter indexes.
-		void setUniformParameter( const std::string &parameterName, unsigned int textureUnit );
-		void setUniformParameter( GLint parameterIndex, int value );
-		void setUniformParameter( const std::string &parameterName, int value );
-		/// Returns true if the specified vector data is valid for setting one of it's items to the
-		/// specified uniform parameter, and false if not.
-		bool uniformVectorValueValid( GLint parameterIndex, const IECore::Data *value ) const;
-		/// As above, but specifying the uniform parameter by name.
-		bool uniformVectorValueValid( const std::string &parameterName, const IECore::Data *value ) const;
-		/// Sets the specified uniform parameter to a single item from a vector Data type.
-		/// Raises an exception if the type is not compatible.
-		void setUniformParameterFromVector( GLint parameterIndex, const IECore::Data *vector, unsigned int item );
-		void setUniformParameterFromVector( const std::string &parameterName, const IECore::Data *vector, unsigned int item );
-
-		struct VertexToUniform 
-		{
-			public:
-				VertexToUniform();
-				VertexToUniform( GLint p, unsigned char d, bool i, const void *a );
-				void operator() ( int index ) const;
-
-			private:
-				GLint m_paramId;
-				unsigned char m_dimensions;
-				bool m_isInteger;
-				const void *m_array;
-		};
-		/// Returns a callable object that sets a uniform shader parameter with a single item value from a given vector.
-		VertexToUniform uniformParameterFromVectorSetup( GLint parameterIndex, const IECore::Data *vector ) const;
-		//@}
-
-		/////////////////////////////////////////////////////////////
-		///
-		/// Vertex Parameters
-		///
-		/////////////////////////////////////////////////////////////
-		
+		/// Returns the details of the named uniform parameter, or 0 if no such
+		/// parameter exists. The return value directly references data held within
+		/// the Shader, and will die when the Shader dies.
+		const Parameter *uniformParameter( const std::string &name ) const; 
+				
 		/// Fills the passed vector with the names of all vertex shader parameters.
-		void vertexParameterNames( std::vector<std::string> &names ) const;
-		/// Returns a numeric index for the named vertex parameter. This can be
-		/// used in the calls below to avoid more expensive lookups by name.
-		/// Throws an Exception if parameter does not exist.
-		GLint vertexParameterIndex( const std::string &parameterName ) const;
-		/// Returns true if the Shader has a vertex parameter of the given name.
-		bool hasVertexParameter( const std::string &parameterName ) const;
-		/// Returns true if the specified vertex data object is valid for setting the
-		/// specified vertex parameter, and false if not.
-		bool vertexValueValid( GLint parameterIndex, const IECore::Data *value ) const;
-		/// As above, but specifying the vertex parameter by name.
-		bool vertexValueValid( const std::string &parameterName, const IECore::Data *value ) const;
-		/// Sets the specified vertex parameter to the value specified. value must
-		/// be of an appropriate type for the parameter - an Exception is thrown
-		/// if this is not the case.
-		/// Derived classes can set normalize to true when they know a integer typed
-		/// vector should be normalized to [-1,1] or [0,1] when passed to the shader.
-		void setVertexParameter( GLint parameterIndex, const IECore::Data *value, bool normalize = false );
-		/// As above, but specifying the vertex parameter by name.
-		void setVertexParameter( const std::string &parameterName, const IECore::Data *value, bool normalize = false );
-		/// Unsets all vertex parameters from the shader.
-		void unsetVertexParameters();
-
+		void vertexAttributeNames( std::vector<std::string> &names ) const;		
+		/// Returns the details of the named vertex attribute, or 0 if no such
+		/// parameter exists. The return value directly references data held within
+		/// the Shader, and will die when the Shader dies.
+		const Parameter *vertexAttribute( const std::string &name ) const; 
+		
+		/// Shaders are only useful when associated with a set of values for
+		/// their uniform parameters and vertex attributes, and to render
+		/// different objects in different forms different sets of values
+		/// will be a necessary. The Setup class encapsulates a set of such
+		/// values and provides a means of cleanly binding and unbinding the
+		/// Shader using them.
+		class Setup : public IECore::RefCounted
+		{
+		
+			public :
+		
+				IE_CORE_DECLAREMEMBERPTR( Setup )
+				
+				Setup( ConstShaderPtr shader );
+				
+				const Shader *shader() const;
+		
+				void addUniformParameter( const std::string &name, ConstTexturePtr value );
+				void addUniformParameter( const std::string &name, IECore::ConstDataPtr value );
+				/// Binds the specified value to the named vertex attribute. The divisor will be passed to
+				/// glVertexAttribDivisor(). 
+				void addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor = 0 );
+		
+				/// The ScopedBinding class cleanly binds and unbinds the shader
+				/// Setup, making the shader current and setting the uniform
+				/// and vertex values as necessary.
+				class ScopedBinding
+				{
+				
+					public :
+					
+						/// Binds the setup. It is the responsibility of the
+						/// caller to ensure the setup remains alive for
+						/// the lifetime of the ScopedBinding.
+						ScopedBinding( const Setup &setup );
+						/// Unbinds the setup, reverting to the previous state.
+						~ScopedBinding();
+				
+					private :
+					
+						GLint m_previousProgram;
+						const Setup &m_setup;
+				
+				};
+		
+			private :
+		
+				IE_CORE_FORWARDDECLARE( MemberData );
+				
+				MemberDataPtr m_memberData;
+					
+		};
+		
+		IE_CORE_DECLAREPTR( Setup );
+		
+		//! @name Default shader source.
+		/// These functions return the default shader source used
+		/// when source isn't provided to the constructor.
+		///////////////////////////////////////////////////////////
+		//@{
+		/// Default vertex shader source. This takes vertexP, vertexN,
+		/// vertexst, vertexCs and Cs inputs and sets fragmentI, fragmentN,
+		/// fragmentst and fragmentCs outputs. It also sets equivalent geometry*
+		/// outputs which may be used by geometry shaders in calculating new
+		/// values for the corresponding fragment* outputs.
+		static const std::string &defaultVertexSource();
+		/// Default fragment shader source. This uses fragmentI, fragmentN
+		/// and fragmentCs to compute a simple facing ratio.
+		static const std::string &defaultFragmentSource();
+		//@}
+		
 		//! @name Built in shaders
 		/// These functions provide access to static instances of
 		/// various simple but useful shaders.
 		///////////////////////////////////////////////////////////
 		//@{
-		/// Returns a shader which shades as a constant flat color
-		/// using the current gl color.
+		/// Returns a shader which shades as a constant flat color.
 		static ShaderPtr constant();
 		/// Returns a shader which shades as a facing ratio.
 		static ShaderPtr facingRatio();
@@ -233,39 +205,9 @@ class Shader : public Bindable
 
 	private :
 
-		/// default constructor creates an empty Shader, which simply disables OpenGL shaders and
-		/// only accepts old gl vertex and uniform parameters.
-		Shader();
+		IE_CORE_FORWARDDECLARE( Implementation )
+		ImplementationPtr m_implementation;
 
-		struct VectorValueValid;
-		struct VectorSetValue;
-		struct VectorSetup;
-
-		void compile( const std::string &source, GLenum type, GLuint &shader );
-		void release();
-
-		size_t getDataSize( const IECore::Data* data );
-
-		void setUniformParameter( GLint parameterIndex, IECore::TypeId type, const void *p );
-
-		GLuint m_vertexShader;
-		GLuint m_fragmentShader;
-		GLuint m_program;
-
-		struct ParameterDescription
-		{
-			std::string name;
-			GLenum type;
-			GLint size;
-		};
-		/// Maps from the uniform location to the parameter details.
-		typedef std::map<GLint, ParameterDescription> ParameterMap;
-		ParameterMap m_uniformParameters;
-		ParameterMap m_vertexParameters;
-		/// Throws an Exception if the parameter doesn't exist.
-		const ParameterDescription &uniformParameterDescription( GLint parameterIndex ) const;
-		/// Throws an Exception if the parameter doesn't exist.
-		const ParameterDescription &vertexParameterDescription( GLint parameterIndex ) const;
 };
 
 } // namespace IECoreGL

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -110,6 +110,20 @@ Imath::Box2i SHWDeepImageReader::displayWindow()
 	return dataWindow();
 }
 
+Imath::M44f SHWDeepImageReader::worldToCameraMatrix()
+{
+	open( true );
+	
+	return m_worldToCamera;
+}
+
+Imath::M44f SHWDeepImageReader::worldToNDCMatrix()
+{
+	open( true );
+	
+	return  m_worldToNDC;
+}
+
 DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 {
 	if ( !open() )
@@ -134,17 +148,26 @@ DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 	
 	float depth = 0;
 	float channelData[numRealChannels];
+	float previous[numRealChannels];
+	for ( unsigned j=0; j < numRealChannels; ++j )
+	{
+		previous[j] = 0.0;
+	}
 	
 	for ( int i=0; i < numSamples; ++i )
 	{
 		DtexPixelGetPoint( m_dtexPixel, i, &depth, channelData );
 		
-		// SHW files represent occlusion, but we really want transparency,
-		// so we invert the data upon reading it.
-		/// \todo: consider a parameter to opt out of this behaviour
 		for ( unsigned j=0; j < numRealChannels; ++j )
 		{
-			channelData[j] = 1.0 - channelData[j];
+			// SHW files represent occlusion, but we really want transparency,
+			// so we invert the data upon reading it.
+			/// \todo: consider a parameter to opt out of this behaviour
+			float current = 1.0 - channelData[j];
+			
+			// SHW files store composited values, accumulated over depth, but we want uncomposited values
+			channelData[j] = ( previous[j] == 1.0 ) ? 1.0 : ( current - previous[j] ) / ( 1 - previous[j] );
+			previous[j] = current;
 		}
 		
 		pixel->addSample( depth, channelData );
@@ -165,6 +188,9 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 	m_channelNames = "";
 	m_dataWindow.max.x = 0;
 	m_dataWindow.max.y = 0;
+	m_worldToCamera = Imath::M44f();
+	m_worldToNDC = Imath::M44f();
+	
 	clean();
 	
 	m_dtexCache = DtexCreateCache( 10000, NULL );
@@ -185,6 +211,9 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		
 		m_dataWindow.max.x = DtexWidth( m_dtexImage ) - 1;
 		m_dataWindow.max.y = DtexHeight( m_dtexImage ) - 1;
+		
+		DtexNl( m_dtexImage, m_worldToCamera.getValue() );
+		DtexNP( m_dtexImage, m_worldToNDC.getValue() );
 	}
 	else
 	{
@@ -192,6 +221,8 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		m_channelNames = "";
 		m_dataWindow.max.x = 0;
 		m_dataWindow.max.y = 0;
+		m_worldToCamera = Imath::M44f();
+		m_worldToNDC = Imath::M44f();
 		clean();
 		
 		if ( !throwOnFailure )

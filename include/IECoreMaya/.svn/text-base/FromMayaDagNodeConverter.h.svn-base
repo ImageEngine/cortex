@@ -38,6 +38,7 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 
 #include "maya/MDagPath.h"
+#include "maya/MTypeId.h"
 
 namespace IECoreMaya
 {
@@ -77,7 +78,13 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 		class Description
 		{
 			public :
+			
+				/// use this constructor to register a converter for a native maya node:
 				Description( MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion );
+				
+				/// use this constructor to register a converter for a plugin maya node:
+				Description( MTypeId fromType, IECore::TypeId resultType, bool defaultConversion );
+				
 			private :
 				static FromMayaDagNodeConverterPtr creator( const MDagPath &dagPath );
 		};
@@ -87,13 +94,14 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 		MDagPath m_dagPath;
 
 		typedef FromMayaDagNodeConverterPtr (*CreatorFn)( const MDagPath &dagPath );
-		typedef std::pair<MFn::Type, IECore::TypeId> Types;
-		typedef std::map<Types, CreatorFn> TypesToFnsMap;
-		typedef std::map<MFn::Type, TypesToFnsMap::const_iterator> DefaultConvertersMap;
+		typedef std::pair<MFn::Type, unsigned > MayaType;
+		typedef std::pair< MayaType, IECore::TypeId > Types;
+		typedef std::map< Types, CreatorFn > TypesToFnsMap;
+		typedef std::map< MayaType, TypesToFnsMap::const_iterator> DefaultConvertersMap;
 
 		static TypesToFnsMap &typesToFns();
 		static DefaultConvertersMap &defaultConverters();
-		static void registerConverter( const MFn::Type fromType, IECore::TypeId resultType, bool defaultConverter, CreatorFn creator );
+		static void registerConverter( const MayaType fromType, IECore::TypeId resultType, bool defaultConverter, CreatorFn creator );
 
 };
 

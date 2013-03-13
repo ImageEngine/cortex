@@ -34,6 +34,8 @@
 
 from __future__ import with_statement
 
+import time
+import threading
 import math
 import unittest
 import IECore
@@ -104,7 +106,87 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 					pointsPrimitive.render( r )
 						
 			w.start()
+	
+	def testLinearSubsetLength( self ) :
+		
+		pts = IECore.V3fVectorData()
+		pts.append( IECore.V3f( 0,0,0 ) )
+		pts.append( IECore.V3f( 1,0,0 ) )
+		pts.append( IECore.V3f( 1,1,0 ) )
+		pts.append( IECore.V3f( 2,1,0 ) )
+		pts.append( IECore.V3f( 2,1,1 ) )
+		
+		c = IECore.CurvesPrimitive( IECore.IntVectorData( [len( pts )] ), IECore.CubicBasisf.linear(), False, pts )
+		e = IECore.CurvesPrimitiveEvaluator( c )
+		
+		self.assertEqual( e.curveLength( 0, 0.125, 0.875 ), 3 )
+		
+		
+	def testCurveLengthAccuracy( self ) :
+		
+		pts = IECore.V3fVectorData()
+		pts.append( IECore.V3f( 0,0,0 ) )
+		pts.append( IECore.V3f( 0,0,0 ) )
+		pts.append( IECore.V3f( 0,0,0 ) )
+		pts.append( IECore.V3f( 1000,0,0 ) )
+		pts.append( IECore.V3f( 1000,0,0 ) )
+		pts.append( IECore.V3f( 1000,0,0 ) )
+		
+		c = IECore.CurvesPrimitive( IECore.IntVectorData( [len( pts )] ), IECore.CubicBasisf.bSpline(), False, pts )
+		e = IECore.CurvesPrimitiveEvaluator( c )
+		
+		self.assertAlmostEqual( e.curveLength( 0 ), 1000.0, 3 )
+		
+		# measure the length of a semicircle:
+		pts = IECore.V3fVectorData()
+		pts.append( IECore.V3f( 1,0,0 ) )
+		pts.append( IECore.V3f( 1,0,0 ) )
+		
+		for i in range( 0,201 ):
+			angle = math.pi * float(i) / 200
+			pts.append( IECore.V3f( math.cos( angle ), math.sin( angle ), 0 ) )
+		
+		pts.append( IECore.V3f( -1,0,0 ) )
+		pts.append( IECore.V3f( -1,0,0 ) )
+		
+		c = IECore.CurvesPrimitive( IECore.IntVectorData( [len( pts )] ), IECore.CubicBasisf.bSpline(), False, pts )
+		e = IECore.CurvesPrimitiveEvaluator( c )
+		
+		self.assertAlmostEqual( e.curveLength( 0 ), 3.1415926, 3 )
+		
+		# measure the perimeter of a circle:
+		pts = IECore.V3fVectorData()
+		
+		for i in range( 0,401 ):
+			angle = 2 * math.pi * float(i) / 400
+			pts.append( IECore.V3f( math.cos( angle ), math.sin( angle ), 0 ) )
+		
+		c = IECore.CurvesPrimitive( IECore.IntVectorData( [len( pts )] ), IECore.CubicBasisf.bSpline(), True, pts )
+		e = IECore.CurvesPrimitiveEvaluator( c )
+		
+		self.assertAlmostEqual( e.curveLength( 0 ), 2 * 3.1415926, 3 )
+		
+	
+	def testCurveLengthFreeze( self ) :
+		
+		# this test freezes because of a precision bug...
+		pts = IECore.V3fVectorData()
+		
+		for i in range( 0,1008 ):
+			pts.append( IECore.V3f( i,0,0 ) )
 
+		c = IECore.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 1008 ] ),
+			IECore.CubicBasisf.bSpline(),
+			False,
+			pts
+		)
+
+		e = IECore.CurvesPrimitiveEvaluator( c )
+		
+		e.curveLength( 0, ( 3008.0 - 1.0 ) / 3008, 1 )
+		
 	def test3SegmentBSpline( self ) :
 
 		v = IECore.V3f
@@ -178,7 +260,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			IECore.V3f( 1.83333, 0.833333, 0 )
 		] )
 		
-		lengths = IECore.FloatVectorData( [ 2.1398146 ] )
+		lengths = IECore.FloatVectorData( [ 2.2106194496154785 ] )
 		
 		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 	
@@ -389,7 +471,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			IECore.V3f( 1.83333, 1.83333, 0 )
 		] )
 
-		lengths = IECore.FloatVectorData( [ 2.1398146, 2.1398146 ] )
+		lengths = IECore.FloatVectorData( [ 2.2106194496154785, 2.2106194496154785 ] )
 		
 		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 
@@ -766,6 +848,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 					v( 1, 1, 0 ),
 					v( 2, 1, 0 ),
 					v( 2, 0, 0 ),
+					
 					v( 0, 2, 0 ),
 					v( 0, 1, 0 ),
 					v( 1, 1, 0 ),

@@ -48,6 +48,15 @@ ToGLConverter::ConverterDescription<T>::ConverterDescription()
 };
 
 template<class T>
+ToGLConverter::ConverterDescription<T>::ConverterDescription( IECore::TypeId inputType, IECore::TypeId resultType )
+{
+	Registration r;
+	r.resultType = resultType;
+	r.creator = creator;
+	registrations().insert( Registrations::value_type( inputType, r ) );
+};
+
+template<class T>
 ToGLConverterPtr ToGLConverter::ConverterDescription<T>::creator( IECore::ConstObjectPtr object )
 {
 	return new T( IECore::staticPointerCast<const typename T::InputType>( object ) );

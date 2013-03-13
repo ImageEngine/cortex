@@ -1,7 +1,7 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/test/IECore/data/expectedResults
 http://cortex-vfx.googlecode.com/svn
 
@@ -570,17 +570,17 @@ has-props
 
 479676
 
-uvMapWithDataWindow.100x100.jpg
+imageCompositeOpOver.exr
 file
 
 
 
 
-2012-07-19T11:27:17.574321Z
-af9e44afbac1452ed93454492c18348e
-2012-06-28T19:04:12.297326Z
-4735
-luke.imageengine@gmail.com
+2011-12-21T09:26:35.000000Z
+8a907821056afb44104baab62e9016c2
+2008-11-29T00:12:31.744243Z
+1932
+mark.imageengine
 has-props
 
 
@@ -602,7 +602,7 @@ has-props
 
 
 
-1850
+341273
 
 imageCropDataWindow2Matched.exr
 file
@@ -638,17 +638,17 @@ has-props
 
 15561
 
-imageCompositeOpOver.exr
+uvMapWithDataWindow.100x100.jpg
 file
 
 
 
 
-2011-12-21T09:26:35.000000Z
-8a907821056afb44104baab62e9016c2
-2008-11-29T00:12:31.744243Z
-1932
-mark.imageengine
+2012-07-19T11:27:17.574321Z
+af9e44afbac1452ed93454492c18348e
+2012-06-28T19:04:12.297326Z
+4735
+luke.imageengine@gmail.com
 has-props
 
 
@@ -670,41 +670,7 @@ has-props
 
 
 
-341273
-
-inverseDistanceWeightedInterpolationV2ff.exr
-file
-
-
-
-
-2011-12-21T09:26:35.000000Z
-3c6c0f48d268b70a1de9845f269c6040
-2009-04-01T20:17:42.317068Z
-2226
-mark.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-583600
+1850
 
 oversizeDataWindow.cin
 file
@@ -740,16 +706,16 @@ has-props
 
 263168
 
-meshVertexReorderQuadSphere.cob
+inverseDistanceWeightedInterpolationV2ff.exr
 file
 
 
 
 
 2011-12-21T09:26:35.000000Z
-cfb985ddb4f5ba953981290a31a81ba5
-2008-07-09T22:18:07.140059Z
-1496
+3c6c0f48d268b70a1de9845f269c6040
+2009-04-01T20:17:42.317068Z
+2226
 mark.imageengine
 has-props
 
@@ -772,41 +738,7 @@ has-props
 
 
 
-45306
-
-windowWrite.jpg
-file
-
-
-
-
-2011-12-21T09:26:35.000000Z
-069e3c9dc78db60a29d691e70a875fad
-2009-02-25T20:07:19.118111Z
-2100
-mark.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-6218
+583600
 
 imageCompositeOpMultiply.exr
 file
@@ -842,16 +774,16 @@ has-props
 
 145999
 
-oversizeDataWindow.tga
+windowWrite.jpg
 file
 
 
 
 
 2011-12-21T09:26:35.000000Z
-7fc68ac320024ece6db50d5a7059406b
-2009-05-21T02:25:54.426744Z
-2510
+069e3c9dc78db60a29d691e70a875fad
+2009-02-25T20:07:19.118111Z
+2100
 mark.imageengine
 has-props
 
@@ -874,7 +806,41 @@ has-props
 
 
 
-196626
+6218
+
+meshVertexReorderQuadSphere.cob
+file
+
+
+
+
+2011-12-21T09:26:35.000000Z
+cfb985ddb4f5ba953981290a31a81ba5
+2008-07-09T22:18:07.140059Z
+1496
+mark.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+45306
 
 imagePrimitiveEvaluatorUpscale.tiff
 file
@@ -910,16 +876,16 @@ has-props
 
 68366
 
-imageCompositeOpMin.exr
+oversizeDataWindow.tga
 file
 
 
 
 
 2011-12-21T09:26:35.000000Z
-2796e62df39b27a09a52c2816b8357f1
-2008-11-29T00:12:31.744243Z
-1932
+7fc68ac320024ece6db50d5a7059406b
+2009-05-21T02:25:54.426744Z
+2510
 mark.imageengine
 has-props
 
@@ -942,7 +908,7 @@ has-props
 
 
 
-120835
+196626
 
 convolvedColorBarsWithAlpha.exr
 file
@@ -978,16 +944,16 @@ has-props
 
 2911279
 
-imageCropDataWindow2.exr
+imageCompositeOpMin.exr
 file
 
 
 
 
 2011-12-21T09:26:35.000000Z
-4b951552f8f5cd7ac11b600cdfb78f1d
-2008-11-27T01:08:23.134499Z
-1906
+2796e62df39b27a09a52c2816b8357f1
+2008-11-29T00:12:31.744243Z
+1932
 mark.imageengine
 has-props
 
@@ -1010,7 +976,7 @@ has-props
 
 
 
-14831
+120835
 
 imageCompositeOpMax.exr
 file
@@ -1045,6 +1011,40 @@ has-props
 
 
 287359
+
+imageCropDataWindow2.exr
+file
+
+
+
+
+2011-12-21T09:26:35.000000Z
+4b951552f8f5cd7ac11b600cdfb78f1d
+2008-11-27T01:08:23.134499Z
+1906
+mark.imageengine
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+14831
 
 uvMapWithDataWindow.100x100.dpx
 file

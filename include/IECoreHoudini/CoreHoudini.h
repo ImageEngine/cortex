@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,19 +58,15 @@ class CoreHoudini
 		/// This loads hou into the global context
 		static void initPython();
 
-		/// Utility method to import a python module into the
-		/// global context
+		/// Utility method to import a python module into the global context
 		static void import( const std::string &module );
 
 		/// Utility method for getting the global python context
-		static boost::python::object &globalContext() {
+		static boost::python::object &globalContext()
+		{
 			return g_globalContext;
 		}
-
-		/// Utility method for getting the current global time
-		/// \todo: this is deprecated in favour of the native CHgetEvalTime(). Remove for Cortex 8.
-		static float currTime();
-
+		
 		/// Run misc python command
 		static boost::python::object evalPython( const std::string &cmd );
 

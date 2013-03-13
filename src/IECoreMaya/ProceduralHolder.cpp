@@ -48,7 +48,6 @@
 #include "IECoreGL/Group.h"
 #include "IECoreGL/Primitive.h"
 
-#include "IECoreMaya/ParameterHandler.h"
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/MayaTypeIds.h"
@@ -63,8 +62,6 @@
 #include "IECore/AngleConversion.h"
 
 #include "maya/MFnNumericAttribute.h"
-#include "maya/MFnDependencyNode.h"
-#include "maya/MFnEnumAttribute.h"
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnCompoundAttribute.h"
 #include "maya/MFnSingleIndexedComponent.h"
@@ -83,7 +80,6 @@ using namespace boost;
 
 MTypeId ProceduralHolder::id = ProceduralHolderId;
 MObject ProceduralHolder::aGLPreview;
-MObject ProceduralHolder::aCulling;
 MObject ProceduralHolder::aTransparent;
 MObject ProceduralHolder::aDrawBound;
 MObject ProceduralHolder::aDrawCoordinateSystems;
@@ -118,7 +114,7 @@ MObject ProceduralHolder::aComponentBoundCenterZ;
 
 
 ProceduralHolder::ProceduralHolder()
-	:	m_boundDirty( true ), m_sceneDirty( true ), m_lastRenderer( 0 ), m_sceneUpdateCount( 0 )
+	:	m_boundDirty( true ), m_sceneDirty( true ), m_lastRenderer( 0 )
 {
 }
 
@@ -145,7 +141,6 @@ MStatus ProceduralHolder::initialize()
 	MFnNumericAttribute nAttr;
 	MFnTypedAttribute tAttr;
 	MFnCompoundAttribute cAttr;
-	MFnEnumAttribute eAttr;
 
 	// drawing attributes
 
@@ -191,21 +186,6 @@ MStatus ProceduralHolder::initialize()
 	nAttr.setHidden( false );
 
 	s = addAttribute( aDrawCoordinateSystems );
-	assert( s );
-	
-	aCulling = eAttr.create( "culling", "clg", 0, &s );
-	assert( s );
-	eAttr.setReadable( true );
-	eAttr.setWritable( true );
-	eAttr.setStorable( true );
-	eAttr.setConnectable( true );
-	eAttr.setHidden( false );
-	
-	eAttr.addField( "None", 0 );
-	eAttr.addField( "Back Face", 1 );
-	eAttr.addField( "Front Face", 2 );
-	
-	s = addAttribute( aCulling );
 	assert( s );
 
 	// component attributes
@@ -566,142 +546,15 @@ MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
 	return ParameterisedHolderComponentShape::compute( plug, dataBlock );
 }
 
-MStatus ProceduralHolder::createDisplaylistAttribute()
-{
-	MStatus st;
-
-	MFnDependencyNode fnNode( thisMObject() );
-	
-	MObject attribute = fnNode.attribute( "useDisplayLists", &st );
-	
-	if( st )
-	{
-		fnNode.removeAttribute( attribute );
-	}
-	
-	ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
-	if( !parameterisedInterface )
-	{
-		return MS::kSuccess;
-	}
-	
-	IECore::CompoundParameterPtr parameters = parameterisedInterface->parameters();
-
-	if( !parameters )
-	{
-		return MS::kSuccess;
-	}
-
-	IECore::ConstCompoundObjectPtr userData = parameters->userData();
-	
-	if( !userData )
-	{
-		return MS::kSuccess;
-	}
-
-	if( userData->members().empty() )
-	{
-		return MS::kSuccess;
-	}
-	
-	IECore::ConstCompoundObjectPtr mayaUserData = userData->member<IECore::CompoundObject>( "maya" );
-	if( !mayaUserData )
-	{
-		return MS::kSuccess;
-	}
-	
-	IECore::ConstBoolDataPtr displayListOptionPtr = mayaUserData->member<const IECore::BoolData>( "displayListOption" );
-	if( !displayListOptionPtr )
-	{
-		return MS::kSuccess;
-	}
-	
-	if( displayListOptionPtr->readable() )
-	{
-		MFnNumericAttribute fnNAttr;
-		MObject attribute = fnNAttr.create( "useDisplayLists", "udl", MFnNumericData::kBoolean, true );
-		fnNode.addAttribute( attribute );
-	}
-	
-	return MS::kSuccess;
-}
-
-bool ProceduralHolder::useDisplayLists()
-{
-	MStatus st;
-	
-	MFnDependencyNode fnNode( thisMObject(), &st );
-	if( !st )
-	{
-		return false;
-	}
-	
-	
-	MPlug useDisplayListsPlug = fnNode.findPlug( "useDisplayLists", true, &st );
-	if( !st )
-	{
-		return false;
-	}
-	
-	return useDisplayListsPlug.asBool();
-	
-}
-
 MStatus ProceduralHolder::setProcedural( const std::string &className, int classVersion )
 {
-	return ParameterisedHolderComponentShape::setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" );
+	return setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" );
 }
 
 IECore::ParameterisedProceduralPtr ProceduralHolder::getProcedural( std::string *className, int *classVersion )
 {
 	return runTimeCast<IECore::ParameterisedProcedural>( getParameterised( className, classVersion ) );
 }
-
-MStatus ProceduralHolder::setParameterised( IECore::RunTimeTypedPtr p )
-{
-	MStatus st = ParameterisedHolderComponentShape::setParameterised( p );
-	
-	if( !st )
-	{
-		return st;
-	}
-	
-	return createDisplaylistAttribute();
-}
-
-MStatus ProceduralHolder::updateParameterised()
-{
-	createDisplaylistAttribute();
-	return ParameterisedHolderComponentShape::updateParameterised();
-}
-
-IECore::RunTimeTypedPtr ProceduralHolder::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
-{
-	MPlug pClassName( thisMObject(), aParameterisedClassName );
-	
-	MString className;
-	MStatus s = pClassName.getValue( className );
-	
-	bool doAttributes( false );
-	if( !m_parameterised && !m_failedToLoad )
-	{
-		if( className!="" )
-		{
-			doAttributes = true;
-		}
-	}
-	
-	m_parameterised = ParameterisedHolderComponentShape::getParameterised( classNameOut, classVersionOut, searchPathEnvVarOut );
-	
-	if( doAttributes )
-	{
-		createDisplaylistAttribute();
-	}
-
-	return m_parameterised;
-}
-
-
 
 IECoreGL::ConstScenePtr ProceduralHolder::scene()
 {
@@ -789,9 +642,8 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		{
 			msg( Msg::Error, "ProceduralHolder::scene", "Caught unknown exception" );
 		}
-		++m_sceneUpdateCount;
 	}
-	
+
 	m_sceneDirty = false;
 	return m_scene;
 }
@@ -918,11 +770,6 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 			buildComponents( nameState, group, groupTransform );
 		}
 	}
-}
-
-int ProceduralHolder::getSceneUpdateCount()
-{
-	return m_sceneUpdateCount;
 }
 
 void ProceduralHolder::buildComponents()

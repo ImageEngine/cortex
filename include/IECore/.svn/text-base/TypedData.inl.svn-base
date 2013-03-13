@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@
 /// files.
 
 #include <cassert>
-
+#include <boost/type_traits/is_void.hpp>
 #include "IECore/MurmurHash.h"
 
 namespace IECore {
@@ -109,7 +109,7 @@ template <class T>
 void TypedData<T>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->rawContainer();
+	IndexedIO *container = context->rawContainer();
 	container->write( "value", readable() );
 }
 
@@ -120,14 +120,14 @@ void TypedData<T>::load( LoadContextPtr context )
 	try
 	{
 		// optimised format for new files
-		IndexedIOInterfacePtr container = context->rawContainer();
+		const IndexedIO *container = context->rawContainer();
 		container->read( "value", writable() );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 		container->read( "value", writable() );
 	}
 }

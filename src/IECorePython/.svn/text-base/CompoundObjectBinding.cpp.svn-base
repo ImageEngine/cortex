@@ -217,13 +217,13 @@ class CompoundObjectFromPythonDict
 		static CompoundObjectPtr compoundObjectFromDict( const dict &v )
 		{
 			CompoundObjectPtr x = new CompoundObject();
-			list values = v.values();
 			list keys = v.keys();
-
-			for (int i = 0; i < keys.attr("__len__")(); i++)
+			int len = boost::python::len(v);
+			object key,value;
+			for (int i = 0; i < len; i++)
 			{
-				object key(keys[i]);
-				object value(values[i]);
+				key = keys[i];
+				value = v[key];
 				extract<const char *> keyElem(key);
 				if (!keyElem.check())
 				{

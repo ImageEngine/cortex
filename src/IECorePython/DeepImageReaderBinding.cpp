@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,6 +58,8 @@ void bindDeepImageReader()
 		.def( "channelNames", &channelNames )
 		.def( "dataWindow", &DeepImageReader::dataWindow )
 		.def( "displayWindow", &DeepImageReader::displayWindow )
+		.def( "worldToCameraMatrix", &DeepImageReader::worldToCameraMatrix )
+		.def( "worldToNDCMatrix", &DeepImageReader::worldToNDCMatrix )
 		.def( "readPixel", &DeepImageReader::readPixel, ( arg_( "x" ), arg_( "y" ) ) )
 	;
 }

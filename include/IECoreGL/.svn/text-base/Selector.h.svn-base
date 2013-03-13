@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,37 +39,89 @@
 
 #include "OpenEXR/ImathBox.h"
 
+#include "IECore/RefCounted.h"
+
 #include "IECoreGL/HitRecord.h"
 
 namespace IECoreGL
 {
 
+IE_CORE_FORWARDDECLARE( State );
+IE_CORE_FORWARDDECLARE( Shader );
+
 /// The Selector class simplifies the process of selecting objects
 /// rendered with OpenGL.
-class Selector
+class Selector : boost::noncopyable
 {
 
 	public :
 
+		/// The Mode defines the method used to perform selection.
+		/// Each mode has pros and cons.
+		enum Mode
+		{
+			Invalid,
+			/// Uses glRenderMode( GL_SELECT ). This can select multiple
+			/// overlapping objects at once and provides accurate depth
+			/// information for each. However it is officially deprecated
+			/// in modern OpenGL and has terrible performance on many
+			/// modern drivers due to using a software fallback path.
+			GLSelect,
+			/// Uses OpenGL occlusion queries. This can also select
+			/// multiple overlapping objects at once but does not provide
+			/// depth information at all.
+			OcclusionQuery,
+			/// Renders each object to an offscreen framebuffer using a
+			/// unique colour per object. Can therefore only select the
+			/// frontmost objects, but does provide accurate depth information. 
+			IDRender
+		};
+
 		Selector();
+		virtual ~Selector();
 		
 		/// Starts an operation to select objects in the specified
 		/// region of NDC space (0,0-1,1 top left to bottom right).
 		/// Set up the GL camera, call this function, then render
-		/// the objects with appropriate glLoadName() calls with names
+		/// the objects with appropriate loadName() calls with names
 		/// generated using NameStateComponent. Call selectEnd() to
 		/// retrieve the resulting selection hits. It is your responsibility
 		/// to keep the selector alive in between begin() and end() calls.
-		void begin( const Imath::Box2f &region );
+		void begin( const Imath::Box2f &region, Mode mode = GLSelect );
+		/// Call this to set the name attached to subsequently rendered objects.
+		/// If rendering a Scene, this will be called automatically
+		/// by the NameStateComponents within the Scene.
+		void loadName( GLuint name );
 		/// Ends a selection operation, filling the provided vector
 		/// with records of all the objects hit. Returns the new size
 		/// of the hits vector.
 		size_t end( std::vector<HitRecord> &hits );
-
-	private :
-	
-		std::vector<GLuint> m_selectBuffer;
 		
+		/// A State that should be used as the base state for
+		/// selection drawing. This is only valid if retrieved after
+		/// a call to begin() and before a call to end().
+		State *baseState();
+		
+		/// The IDRender mode requires a shader which takes a name
+		/// via a "uniform uint ieCoreGLName" parameter and outputs it
+		/// via an "out uint ieCoreGLNameOut" fragment output.
+		/// Typically one is set up automatically in baseState(), but
+		/// if rendering must be performed with an alternative shader
+		/// then it may be passed via this function following a call
+		/// to begin().
+		void loadIDShader( const IECoreGL::Shader *idShader );
+		
+		/// Returns the currently active Selector - this may be used
+		/// in drawing code to retrieve a selector to call loadName()
+		/// on. The NameStateComponent is an example of a class which
+		/// does this.
+		static Selector *currentSelector();
+		
+	private :
+		
+		IE_CORE_FORWARDDECLARE( Implementation )
+		ImplementationPtr m_implementation;
+						
 };
 
 } // namespace IECoreGL

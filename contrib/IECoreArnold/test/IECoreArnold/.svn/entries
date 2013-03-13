@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/contrib/IECoreArnold/test/IECoreArnold
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-09-13T16:31:22.156228Z
-4842
-thehaddonyoof@gmail.com
+2013-02-21T01:06:49.853728Z
+5194
+john.imageengine
 
 
 
@@ -32,10 +32,10 @@ file
 
 
 
-2012-08-23T11:40:46.426613Z
-0cc9f1200a4e3a6fac475a692ce73bd0
-2012-08-13T14:23:01.189496Z
-4790
+2013-03-13T13:37:41.770466Z
+bee516877b611d03e0383f9919554291
+2012-11-12T13:44:22.888612Z
+4911
 thehaddonyoof
 
 
@@ -58,10 +58,44 @@ thehaddonyoof
 
 
 
-2393
+2569
 
 plugins
 dir
+
+ToArnoldConverterTest.py
+file
+
+
+
+
+2013-03-13T13:37:41.770466Z
+e5ed04ac3b642bb85868b878e9b914db
+2012-11-12T11:12:09.936301Z
+4909
+thehaddonyoof
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2557
 
 UniverseBlockTest.py
 file
@@ -236,6 +270,74 @@ thehaddonyoof
 data
 dir
 
+AutomaticInstancingTest.py
+file
+
+
+
+
+2013-03-13T13:37:41.771466Z
+f73f88b0cf3e6870e3334dc9bbd8a1c6
+2012-11-12T13:44:22.888612Z
+4911
+thehaddonyoof
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5739
+
+InstancingConverterTest.py
+file
+
+
+
+
+2013-03-13T13:37:41.771466Z
+d7050634f5c90868228719fb2d7baeed
+2012-11-12T11:18:12.248943Z
+4910
+thehaddonyoof
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5390
+
 ProceduralDSOTest.py
 file
 
@@ -276,11 +378,11 @@ file
 
 
 
-2012-09-17T16:49:28.026705Z
-064b542f808bc3e7852c65005111325d
-2012-09-13T16:31:22.156228Z
-4842
-thehaddonyoof@gmail.com
+2013-03-13T13:37:41.771466Z
+55c6e067a5b58c9d6c7b59522e7033f9
+2013-02-21T01:06:49.853728Z
+5194
+john.imageengine
 
 
 
@@ -302,5 +404,5 @@ thehaddonyoof@gmail.com
 
 
 
-21485
+24189
 

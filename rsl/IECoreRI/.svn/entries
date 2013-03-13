@@ -1,7 +1,7 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/rsl/IECoreRI
 http://cortex-vfx.googlecode.com/svn
 
@@ -25,40 +25,6 @@ david.imageengine@gmail.com
 
 
 07b78fde-9e1a-0410-98de-79dcf2039bee
-
-Spline.h
-file
-
-
-
-
-2011-12-21T09:27:07.000000Z
-cdb4cf2c4c773f83713bd448aade8f5e
-2010-02-24T00:40:20.324919Z
-2960
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3088
 
 Distance.h
 file
@@ -93,6 +59,40 @@ lucio.imageengine
 
 
 3002
+
+Spline.h
+file
+
+
+
+
+2011-12-21T09:27:07.000000Z
+cdb4cf2c4c773f83713bd448aade8f5e
+2010-02-24T00:40:20.324919Z
+2960
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3088
 
 RayAlgo.h
 file
@@ -332,40 +332,6 @@ mark.imageengine
 
 3433
 
-Marschner.inl
-file
-
-
-
-
-2011-12-21T09:27:07.000000Z
-a0d657b445b467e3efd96e0fc67fb53f
-2010-12-20T18:18:39.179255Z
-4004
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-9460
-
 Noise.h
 file
 
@@ -399,6 +365,40 @@ john.imageengine
 
 
 3453
+
+Marschner.inl
+file
+
+
+
+
+2011-12-21T09:27:07.000000Z
+a0d657b445b467e3efd96e0fc67fb53f
+2010-12-20T18:18:39.179255Z
+4004
+lucio.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9460
 
 Brownian.h
 file
@@ -434,40 +434,6 @@ tom.imageengine
 
 3622
 
-ColorAlgo.h
-file
-
-
-
-
-2011-12-21T09:27:07.000000Z
-23cd3aab67897bf06dd9993b49184391
-2009-03-18T19:16:26.445115Z
-2142
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2953
-
 ArrayAlgo.h
 file
 
@@ -501,6 +467,40 @@ john.imageengine
 
 
 5586
+
+ColorAlgo.h
+file
+
+
+
+
+2011-12-21T09:27:07.000000Z
+23cd3aab67897bf06dd9993b49184391
+2009-03-18T19:16:26.445115Z
+2142
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2953
 
 Marschner.h
 file

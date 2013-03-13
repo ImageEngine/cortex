@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/include/IECoreMaya/bindings
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-06-02T00:09:15.288400Z
-4693
-andrewk.imageengine
+2013-03-07T17:38:41.813662Z
+5237
+valerie.imageengine@gmail.com
 
 
 
@@ -127,6 +127,74 @@ john.imageengine
 
 
 2027
+
+FnSceneShapeBinding.h
+file
+
+
+
+
+2013-03-13T13:34:41.975466Z
+ad71ae0e360ade19552b185d1b81e920
+2013-03-07T17:38:41.813662Z
+5237
+valerie.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2036
+
+MayaSceneBinding.h
+file
+
+
+
+
+2013-03-13T13:34:41.976465Z
+7d084eb9d511833205dceec851f9835c
+2013-01-31T00:47:58.526972Z
+5133
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1982
 
 ToMayaParticleConverterBinding.h
 file
@@ -468,40 +536,6 @@ john.imageengine
 
 2094
 
-MDagPathFromPython.h
-file
-
-
-
-
-2011-12-21T09:26:56.000000Z
-06c88641016c61c866c020c4062fcd2f
-2008-05-08T02:13:57.044395Z
-1356
-john.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1995
-
 FromMayaGroupConverterBinding.h
 file
 
@@ -535,6 +569,40 @@ john.imageengine
 
 
 2034
+
+MDagPathFromPython.h
+file
+
+
+
+
+2011-12-21T09:26:56.000000Z
+06c88641016c61c866c020c4062fcd2f
+2008-05-08T02:13:57.044395Z
+1356
+john.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1995
 
 FnProceduralHolderBinding.h
 file
@@ -1215,6 +1283,40 @@ john.imageengine
 
 
 2054
+
+FromMayaProceduralHolderConverterBinding.h
+file
+
+
+
+
+2013-03-13T13:34:41.976465Z
+dc31c484a9b9b4cdff27a0d437c43190
+2013-02-20T23:29:36.329493Z
+5191
+david.imageengine@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2082
 
 ViewportPostProcessBinding.h
 file

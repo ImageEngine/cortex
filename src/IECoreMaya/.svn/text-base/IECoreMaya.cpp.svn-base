@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,6 +78,9 @@
 #include "IECoreMaya/DrawableHolder.h"
 #include "IECoreMaya/GeometryCombiner.h"
 #include "IECoreMaya/TransformationMatrixManipulator.h"
+#include "IECoreMaya/SceneShape.h"
+#include "IECoreMaya/SceneShapeUI.h"
+#include "IECoreMaya/SceneShapeInterface.h"
 
 // see ObjectParameterHandler::doUpdate() for an explanation of the necessity for dummy data
 static void *dummyDataCreator()
@@ -143,6 +146,14 @@ MStatus initialize(MFnPlugin &plugin)
 
 		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id,
 			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );
+		assert( s );
+		
+		s = plugin.registerShape( "ieSceneShapeInterface", SceneShapeInterface::id,
+			SceneShapeInterface::creator, SceneShapeInterface::initialize, SceneShapeUI::creator );
+		assert( s );
+		
+		s = plugin.registerShape( "ieSceneShape", SceneShape::id,
+			SceneShape::creator, SceneShape::initialize, SceneShapeUI::creator );
 		assert( s );
 
 		s = plugin.registerNode( "ieOpHolderNode", OpHolderNode::id,
@@ -222,7 +233,7 @@ MStatus initialize(MFnPlugin &plugin)
 		{
 			IECore::MessageHandlerPtr h = new IECoreMaya::MessageHandler;
 			h = new IECore::LevelFilteredMessageHandler( h, IECore::LevelFilteredMessageHandler::defaultLevel() );
-			IECore::MessageHandler::pushHandler( h );
+			IECore::MessageHandler::setDefaultHandler( h );
 		}
 		
 		if( MGlobal::mayaState() == MGlobal::kInteractive )
@@ -259,6 +270,8 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ParameterisedHolderSurfaceShape::id );
 		s = plugin.deregisterNode( ParameterisedHolderComponentShape::id );
 		s = plugin.deregisterNode( ProceduralHolder::id );
+		s = plugin.deregisterNode( SceneShapeInterface::id );
+		s = plugin.deregisterNode( SceneShape::id );
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
@@ -286,13 +299,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterData( ObjectData::id );
 
 		s = plugin.deregisterImageFile( "ieImageFile" );
-
-		// \todo Should we also pop our message handler here if we pushed one in initialize?
-		// We're not doing that for now as IECore.Log.setLogLevel messes with the balancing of the
-		// stack so i'm not sure popping is a good idea. Also even if we fix that then there's no real
-		// guarantee that we're popping the one we pushed (other people could have pushed their own
-		// handlers since ours, and not popped 'em). Not sure - maybe we need some guidelines as to
-		// the nesting of handlers?
 		
 		if( MGlobal::mayaState() == MGlobal::kInteractive )
 		{

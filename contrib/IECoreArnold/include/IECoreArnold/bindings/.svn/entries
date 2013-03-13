@@ -1,14 +1,14 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/contrib/IECoreArnold/include/IECoreArnold/bindings
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2012-08-13T14:23:01.189496Z
-4790
+2012-11-12T11:18:12.248943Z
+4910
 thehaddonyoof
 
 
@@ -59,6 +59,40 @@ thehaddonyoof
 
 
 2073
+
+InstancingConverterBinding.h
+file
+
+
+
+
+2013-03-13T13:37:41.870528Z
+d94782ea297b59405d2944069b16f67e
+2012-11-12T11:18:12.248943Z
+4910
+thehaddonyoof
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2057
 
 RendererBinding.h
 file
@@ -168,10 +202,10 @@ file
 
 
 
-2012-08-23T11:40:46.670584Z
-05bee7fd9195649895fe4288350b9f7c
-2012-08-13T14:23:01.189496Z
-4790
+2013-03-13T13:37:41.870528Z
+987c7f7becf9af90ac0a5dab600d3c57
+2012-11-12T11:12:09.936301Z
+4909
 thehaddonyoof
 
 
@@ -194,7 +228,7 @@ thehaddonyoof
 
 
 
-2049
+2154
 
 UniverseBlockBinding.h
 file

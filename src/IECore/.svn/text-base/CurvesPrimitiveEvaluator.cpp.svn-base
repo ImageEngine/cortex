@@ -499,59 +499,139 @@ bool CurvesPrimitiveEvaluator::pointAtV( unsigned curveIndex, float v, Primitive
 	return true;
 }
 
+
+float CurvesPrimitiveEvaluator::integrateCurve( unsigned curveIndex, float vStart, float vEnd, int samples, Result& typedResult ) const
+{
+	// get first curve point:
+	(typedResult.*typedResult.m_init)( curveIndex, vStart, this );
+	Imath::V3f current;
+	Imath::V3f previous = typedResult.point();
+	
+	// take ten samples along the curve, and measure the length of the resulting polyline:
+	const float vStep = ( vEnd - vStart ) / samples;
+	float length = 0;
+	float v;
+	for( int i=1; i <= samples; ++i )
+	{
+		v = vStart + vStep * i;
+		(typedResult.*typedResult.m_init)( curveIndex, v, this );
+		current = typedResult.point();
+		
+		length += ( current - previous ).length();
+		
+		previous = current;
+	}
+	
+	return length;
+}
+
+
 float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, float vEnd ) const
 {
+	
 	if( curveIndex >= m_verticesPerCurve.size() || vStart >= vEnd || vStart < 0.0f || vStart > 1.0f || vEnd < 0.0f || vEnd > 1.0f )
 	{
 		return 0.0f;
 	}
 	
-	float samples = m_curvesPrimitive->numSegments( curveIndex ) * 10.0f;
-	float vStep = ( vEnd - vStart ) / samples;
-	float length = 0.0f;
-	Imath::V3f current( 0, 0, 0 );
-	
-	Result typedResult( m_p, m_curvesPrimitive->basis() == CubicBasisf::linear(), m_curvesPrimitive->periodic() );
-	(typedResult.*typedResult.m_init)( curveIndex, vStart, this );
-	Imath::V3f previous = typedResult.point();
-	
-	if ( typedResult.m_linear )
+	size_t nSegments = m_curvesPrimitive->numSegments( curveIndex );
+	if ( m_curvesPrimitive->basis() == CubicBasisf::linear() )
 	{
-		float firstV = 0.0f;
-		float lastV = 1.0f;
-		vStep = 1.0f / m_curvesPrimitive->numSegments( curveIndex );
 		
-		while ( firstV <= vStart )
-		{
-			firstV += vStep;
-		}
-		while ( lastV >= vEnd )
-		{
-			lastV -= vStep;
-		}
+		size_t curvePts = m_curvesPrimitive->variableSize( PrimitiveVariable::Vertex, curveIndex );
 		
-		for ( float v = firstV; v <= vEnd; v = ( v == lastV ) ? vEnd : v + vStep )
+		const std::vector<V3f> &p = static_cast<const V3fVectorData *>( m_p.data.get() )->readable();
+		
+		float lowerPos = vStart * nSegments;
+		float upperPos = vEnd * nSegments;
+		
+		// find curve relative vertex indices that bound the interval we're measuring:
+		size_t lowerVertex = (unsigned)floor( lowerPos );
+		size_t upperVertex = (unsigned)ceil( upperPos );
+		
+		if( upperVertex == lowerVertex + 1 )
 		{
-			(typedResult.*typedResult.m_init)( curveIndex, v, this );
+			// the interval lands entirely in one segment, so we just measure the length of the segment
+			// and scale it by the appropriate factor:
 			
-			current = typedResult.point();
-			length += ( current - previous ).length();
-			previous = current;
+			if( upperVertex == curvePts )
+			{
+				// this can happen if the curve's periodic:
+				upperVertex = 0;
+			}
+			
+			// offset into the main vertex list:
+			lowerVertex += m_vertexDataOffsets[ curveIndex ];
+			upperVertex += m_vertexDataOffsets[ curveIndex ];
+			
+			return ( p[ upperVertex ] - p[ lowerVertex ] ).length() * ( upperPos - lowerPos );
+		}
+		else
+		{
+			float length = 0.0f;
+			
+			float lowerFrac = lowerVertex + 1 - lowerPos;
+			float upperFrac = upperPos - ( upperVertex - 1 );
+			
+			// offset into the main vertex list:
+			lowerVertex += m_vertexDataOffsets[ curveIndex ];
+			upperVertex += m_vertexDataOffsets[ curveIndex ];
+			
+			// work out length in lower interval:
+			length = ( p[ lowerVertex + 1 ] - p[ lowerVertex ] ).length() * lowerFrac;
+			
+			// work out length in upper interval:
+			if( upperVertex - m_vertexDataOffsets[ curveIndex ] == curvePts )
+			{
+				// periodic!
+				length += ( p[ m_vertexDataOffsets[ curveIndex ] ] - p[ upperVertex - 1 ] ).length() * upperFrac;
+			}
+			else
+			{
+				length += ( p[ upperVertex ] - p[ upperVertex - 1 ] ).length() * upperFrac;
+			}
+			
+			// work out the intervals in between:
+			for( size_t currentVertex = lowerVertex + 1; currentVertex < ( upperVertex - 1 ); ++currentVertex )
+			{
+				length += ( p[ currentVertex + 1 ] - p[ currentVertex ] ).length();
+			}
+			return length;
 		}
 		
-		return length;
 	}
-	
-	for ( float v = vStart + vStep; v <= vEnd; v += vStep )
+	else
 	{
-		(typedResult.*typedResult.m_init)( curveIndex, v, this );
+		// find curve relative vertex indices that bound the interval we're measuring:
+		size_t lowerVertex = (unsigned)floor( vStart * nSegments );
+		size_t upperVertex = (unsigned)ceil( vEnd * nSegments );
 		
-		current = typedResult.point();
-		length += ( current - previous ).length();
-		previous = current;
+		Result typedResult( m_p, false, m_curvesPrimitive->periodic() );
+		
+		const int curveSamples = 10;
+		
+		if( upperVertex - lowerVertex == 1 )
+		{
+			// entirely in a single interval, so just directly integrate with ten samples:
+			return integrateCurve( curveIndex, vStart, vEnd, curveSamples, typedResult );
+		}
+		else
+		{
+			// integrate from vStart to first control point after vStart:
+			float length = integrateCurve( curveIndex, vStart, ( lowerVertex + 1.0f ) / nSegments, curveSamples, typedResult );
+			
+			// measure the intervals between the start and end intervals:
+			for( size_t currentVertex = lowerVertex + 1; currentVertex < ( upperVertex - 1 ); ++currentVertex )
+			{
+				length += integrateCurve( curveIndex, float(currentVertex) / nSegments, float(currentVertex + 1) / nSegments, curveSamples, typedResult );
+			}
+			
+			// integrate from the last control point before vEnd to vEnd:
+			length += integrateCurve( curveIndex, ( upperVertex - 1.0f ) / nSegments, vEnd, curveSamples, typedResult );
+			
+			return length;
+		}
 	}
- 	
-	return length;
 }
 
 void CurvesPrimitiveEvaluator::buildTree()

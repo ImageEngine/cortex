@@ -50,8 +50,8 @@ def getOption( name, default ) :
 	return result
 
 # decide what compiler/app we're targeting. we either pass COMPILER_VERSION, COMPILER and PYTHON_VERSION
-# to do a straight install in /software/tools or we pass an APP and APP_VERSION pair
-# to do an install in /software/tools/app/appVersion - in this case the compiler and settings
+# to do a straight install in /software/apps/cortex/<cortexVersion>/$PLATFORM/base/ or we pass an APP and APP_VERSION pair
+# to do an install in /software/apps/cortex/<cortexVersion>/$PLATFORM/app/appVersion - in this case the compiler and settings
 # are dictated by the application.
 
 platform = IEEnv.platform()
@@ -63,7 +63,7 @@ targetApp = getOption( "APP", None )
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
 # fall back to the generic settings for this major version.
-cortexReg = IEEnv.registry["libraries"]["cortex"]["7"].get( platform, IEEnv.registry["libraries"]["cortex"]["7"] )
+cortexReg = IEEnv.registry["libraries"]["cortex"]["8"].get( platform, IEEnv.registry["libraries"]["cortex"]["8"] )
 
 tbbVersion = cortexReg["tbbVersion"]
 if targetApp :
@@ -83,6 +83,8 @@ if targetApp :
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
+	alembicVersion = targetAppReg.get( "AlembicVersion", cortexReg["AlembicVersion"] )
+	hdf5Version = targetAppReg.get( "hdf5Version", cortexReg["hdf5Version"] )
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
@@ -95,10 +97,12 @@ else :
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
+	alembicVersion = cortexReg["AlembicVersion"]
+	hdf5Version = cortexReg["hdf5Version"]
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
-	
+		
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
@@ -121,7 +125,7 @@ while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ '-pipe', '-Wall' ]
+CXXFLAGS = [ "-pipe", "-Wall", "-Werror" ]
 if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
 	
@@ -154,11 +158,6 @@ if not debug :
 
 	CXXFLAGS += [ "-O2" ]
 				
-PYTHONCXXFLAGS = copy.copy( CXXFLAGS )
-	
-## \todo Try to reintroduce -Werror whenever we find a boost version not riddled with warnings, or
-# when we use a compiler which properly supports the #pragma diagnostic to ignore warnings from boost.
-	
 LINKFLAGS = []	
 if compilerVersionInt < 350 :
 	##########################################################################################################
@@ -173,7 +172,8 @@ if compilerVersionInt < 350 :
 TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
-GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
+GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion + "/GL"
+GLEW_LIB_SUFFIX = "-" + glewVersion
 
 if platform == "cent6.x86_64" :
 	# use the /usr/lib versions of tiff, png, freetype and jpeg
@@ -182,11 +182,8 @@ else :
 	TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
 	JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
-	CPPPATH = "/software/tools/include/freetype/2.3.5"
-	if targetApp != "nuke" :
-		# we use the system libpng when building for nuke, as it links to an older
-		# version than we have installed centrally.
-		PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
+	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
+	CXXFLAGS += [ "-isystem", "/software/tools/include/freetype/2.3.5" ]
 	
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
@@ -245,6 +242,13 @@ except :
 # ask for opengl support
 WITH_GL=1
 
+# get the installation locations right
+INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
+installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "$IECORE_MAJORMINORPATCH_VERSION", platform )
+basePrefix = os.path.join( installPrefix, "base" )
+if targetApp :
+	appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
+
 # find maya if we're building for maya
 if targetApp=="maya" :
 
@@ -255,35 +259,41 @@ if targetApp=="maya" :
 	MAYA_ROOT = mayaReg["location"]
 	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 	MAYA_ADLM_ENV_FILE=mayaReg["wrapperEnvVars"].get( "AUTODESK_ADLM_THINCLIENT_ENV", "" )
-	INSTALL_MAYALIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
-	INSTALL_MAYAPLUGIN_NAME = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
-	INSTALL_MAYAICON_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/icons"
+	INSTALL_MAYALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_MEL_DIR = os.path.join( appPrefix, "mel", "$IECORE_NAME" )
+	INSTALL_MAYAPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
+	INSTALL_MAYAICON_DIR = os.path.join( appPrefix, "icons" )
 	WITH_MAYA_PLUGIN_LOADER = 1
 	
 	if mayaMajorVersion == "2012" :
 		mtoaVersion = getOption( "MTOA_VERSION", os.environ["MTOA_VERSION"] )
 		MTOA_ROOT = "/software/apps/mtoa/" + mtoaVersion + "/" + platform + "/" + mayaMajorVersion
 		MTOA_SOURCE_ROOT = "/home/john/opendev/mtoa" ## \todo Remove when this hack is no longer necessary
-		INSTALL_MTOAEXTENSION_NAME = "$INSTALL_PREFIX/tools/mtoa/" + mtoaVersion + "/maya" + mayaMajorVersion + "/cortex$IECORE_MAJOR_VERSION/extensions/" + platform + "/$IECORE_NAME"
+		INSTALL_MTOAEXTENSION_NAME = os.path.join( appPrefix, "mtoa", mtoaVersion, "extensions/$IECORE_NAME" )
 
 else :
 
 	mayaMajorVersion = "0" # it needs a value just for the install setup below to execute			
 
-# find nuke, unless we're on intel macs where the library doesn't link right now
-if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and targetApp=="nuke" :
-	try :
-		nukeVersion = targetAppVersion
-		nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-		if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
-			NUKE_ROOT = nukeReg["location"]
-			NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
-			INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
-			INSTALL_NUKEPLUGIN_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
-	except :
-		pass
+# find nuke if we're building for nuke
+if targetApp=="nuke" :
+	
+	nukeVersion = targetAppVersion
+	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
+	if "pngVersion" in nukeReg :
+		pngVersion = nukeReg["pngVersion"]
+		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + pngVersion
+		PNG_LIB_SUFFIX = "".join( pngVersion.split( "." )[:-1] )
+	else :
+		# we use the system libpng when building for Nuke 6 or below, as it links to an older
+		# version than we have installed centrally.
+		PNG_INCLUDE_PATH = "/usr/local/include/"
+	
+	NUKE_ROOT = nukeReg["location"]
+	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
+	INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 
 # find houdini if we're building for houdini
 if targetApp=="houdini" :
@@ -298,12 +308,21 @@ if targetApp=="houdini" :
 	PNG_INCLUDE_PATH = OPENEXR_INCLUDE_PATH
 	
 	HOUDINI_ROOT = houdiniReg['location']
-	HOUDINI_CXX_FLAGS = '-DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -c  -DGCC4 -DGCC3 -Wno-deprecated -Wall -W -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wno-uninitialized -Wunused -Wno-unused-parameter -Wno-strict-aliasing -O2 -DMAKING_DSO'
-	INSTALL_HOUDINILIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_HOUDINIPLUGIN_NAME = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
-	INSTALL_HOUDINIOTL_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/otls/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/"
-	INSTALL_HOUDINIICON_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/icons/"
-	INSTALL_HOUDINITOOLBAR_DIR = "$INSTALL_PREFIX/tools/houdini/" + houdiniVersion + "/toolbar/"
+	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated'
+	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
+	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
+	INSTALL_HOUDINIICON_DIR = os.path.join( appPrefix, "icons" )
+	INSTALL_HOUDINITOOLBAR_DIR = os.path.join( appPrefix, "toolbar" )
+	INSTALL_HOUDINIMENU_DIR = os.path.join( appPrefix, "generic" )
+	
+	INSTALL_COREHOUDINI_POST_COMMAND="scons -i -f config/ie/postCoreHoudiniInstall HOUDINI_VERSION='" + houdiniVersion + "' INSTALLPREFIX="+installPrefix+" MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION INSTALL_HOUDINITOOLBAR_DIR=$INSTALL_HOUDINITOOLBAR_DIR INSTALL_IECORE_OPS=\"$INSTALL_IECORE_OPS\" install"
+	
+	# install IECoreMantra if we're using a recent Houdini
+	if houdiniReg.get( "compatibilityVersion", "12.0" ) >= "12.1" :
+		WITH_MANTRA = True
+		INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+		INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
 
 # find truelight, unless we're on osx, where we haven't got it to link yet
 if not IEEnv.platformOS().startswith("osx") :
@@ -315,6 +334,15 @@ if not IEEnv.platformOS().startswith("osx") :
 else :
 	TRUELIGHT_ROOT=""
 
+
+# find alembic:
+ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
+ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
+
+# find hdf5:
+HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
+HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
+
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 
@@ -325,55 +353,44 @@ ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_W
 TEST_LIBPATH = ":".join( [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ] )
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
-# get the installation locations right
-INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
-
 # install the op stubs and procedural stubs
-INSTALL_IECORE_PROCEDURAL_PATH = "$INSTALL_PREFIX/tools/procedurals/$IECORE_MAJOR_VERSION/$IECORE_NAME-${IECORE_MAJORMINORPATCH_VERSION}.py"
-INSTALL_IECORE_OP_PATH = "$INSTALL_PREFIX/tools/ops/$IECORE_MAJOR_VERSION/$IECORE_NAME-${IECORE_MAJORMINORPATCH_VERSION}.py"
+INSTALL_IECORE_PROCEDURAL_PATH = os.path.join( basePrefix, "procedurals", "$IECORE_NAME-${IECORE_MAJOR_VERSION}.py" )
+INSTALL_IECORE_OP_PATH = os.path.join( basePrefix, "ops", "$IECORE_NAME-${IECORE_MAJOR_VERSION}.py" )
 
 if targetApp :
-	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/include/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
-	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_RMANLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_ARNOLDLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppMajorVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	# we don't want to build the renderman procedurals when we build houdini, as otherwise they end
+	INSTALL_HEADER_DIR = os.path.join( appPrefix, "include" )
+	INSTALL_LIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION-python$PYTHON_VERSION" )
+	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
+	INSTALL_RMANLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_ARNOLDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	# we don't want to build the renderman procedurals when we build apps, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
-	# boost version houdini needs, whereas the other libraries are linking to the correct boost version for
-	# 3delight and the rest of the world. the same potential exists for other app specific builds too so we just
-	# install the procedurals into /tmp where they can't do any harm.
-	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_RMANDISPLAY_NAME = "/tmp/unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_ARNOLDPROCEDURAL_NAME = "/tmp/unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	# boost version an app needs, whereas the other libraries are linking to the correct boost version for
+	# 3delight, so we just install the procedurals into /tmp where they can't do any harm.
+	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME"
+	INSTALL_RMANDISPLAY_NAME = "/tmp/unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJOR_VERSION"
+	INSTALL_ARNOLDPROCEDURAL_NAME = "/tmp/unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION"
+	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 else :
-	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
-	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/" + pythonVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_RMANLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_RMANPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/procedurals/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_RMANDISPLAY_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/displayDrivers/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
-	INSTALL_ARNOLDLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_ARNOLDPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/arnold/" + arnoldVersion + "/plugins/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
-	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "$INSTALL_PREFIX/tools/arnold/" + arnoldVersion + "/plugins/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME"
+	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
+	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION-python$PYTHON_VERSION" )
+	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion )
+	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "$IECORE_NAME" )
+	INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", "$IECORE_NAME" )
+	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )
+	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )
+	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 
-INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_GLSL_SHADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_RSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/rsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
+INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )
+INSTALL_RSL_HEADER_DIR =  os.path.join( basePrefix, "rsl" )
+INSTALL_DOC_DIR = os.path.join( installPrefix, "doc" )
 INSTALL_PKG_CONFIG_FILE = "0"
-
-# set up a post install script to make op wrappers for IECore
-INSTALL_CORE_POST_COMMAND="scons -i -f config/ie/postCoreInstall INSTALLPREFIX=$INSTALL_PREFIX MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"
-
-# set up a post install script to make op wrappers for IECore
-INSTALL_COREMAYA_POST_COMMAND="scons -i -f config/ie/postCoreMayaInstall MAYA_VERSION='" + mayaMajorVersion + "' INSTALLPREFIX=$INSTALL_PREFIX MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"
-
-# set up a post install script to make op wrappers for IECoreTruelight
-INSTALL_CORETRUELIGHT_POST_COMMAND="scons -i -f config/ie/installTruelightOps INSTALLPREFIX=$INSTALL_PREFIX MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"
 
 # speed up the build a bit hopefully.
 BUILD_CACHEDIR = os.environ["IEBUILD_CACHEDIR"]

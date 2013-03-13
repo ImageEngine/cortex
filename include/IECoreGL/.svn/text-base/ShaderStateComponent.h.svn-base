@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,20 +35,16 @@
 #ifndef IECOREGL_SHADERSTATECOMPONENT_H
 #define IECOREGL_SHADERSTATECOMPONENT_H
 
-#include "IECoreGL/StateComponent.h"
-#include "IECoreGL/ShaderManager.h"
-#include "IECoreGL/TextureLoader.h"
 #include "IECore/CompoundObject.h"
 
-#include <map>
-#include <set>
-#include <string>
+#include "IECoreGL/StateComponent.h"
+#include "IECoreGL/Shader.h"
 
 namespace IECoreGL
 {
 
-IE_CORE_FORWARDDECLARE( Shader );
-IE_CORE_FORWARDDECLARE( Texture );
+IE_CORE_FORWARDDECLARE( ShaderLoader )
+IE_CORE_FORWARDDECLARE( TextureLoader )
 
 /// The ShaderStateComponent class represents a Shader
 /// object and a set of associated parameter values. It derives
@@ -62,47 +58,42 @@ class ShaderStateComponent : public StateComponent
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ShaderStateComponent, ShaderStateComponentTypeId, StateComponent );
 
-		// default constructor uses no shader.
+		/// Default constructor creates a facing ratio shader.
 		ShaderStateComponent();
-		ShaderStateComponent( const ShaderStateComponent &other );
-		// Creates a ShaderStateComponent with the given parameters.
-		ShaderStateComponent( ShaderManagerPtr shaderManager, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues = 0 );
+		/// Creates a ShaderStateComponent referencing a previously created shading setup.
+		ShaderStateComponent( Shader::SetupPtr shaderSetup );
+		/// Creates a ShaderStateComponent with the given source and parameters. The loaders are passed to
+		/// allow the creation of GL resources to be deferred until shaderSetup() is called - this makes
+		/// it possible to create ShaderStateComponents concurrently in multiple threads, with the actual
+		/// GL resource creation deferred until the drawing thread uses shaderSetup().
+		ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues );
 
-		//! @name Bindable interface
-		////////////////////////////////////////////////////
-		//@{
+		/// Implemented to do nothing - it is the responsibility of the Primitive
+		/// to actually bind the shaderSetup() at an appropriate time.
 		virtual void bind() const;
-		//@}
 
-		//! @name shader
-		// Returns the shader object.
-		// This function can only be called from a thread 
-		// with the valid GL context loaded.
-		////////////////////////////////////////////////////
-		//@{
-		ShaderPtr shader();
-		ShaderPtr shader() const;
-		//@}
+		ShaderLoader *shaderLoader();
+		TextureLoader *textureLoader();
 
-		// Adds or replaces a shader parameter in the ShaderStateComponent.
-		// this function can be called even if there's no GL context.
-		void addShaderParameterValue( const std::string &paramName, IECore::ConstObjectPtr paramValue );
+		/// Returns a Shader::Setup object for binding the shader. This function can
+		/// only be called from a thread with a valid GL context.
+		Shader::Setup *shaderSetup();
+		const Shader::Setup *shaderSetup() const;
 
-	protected :
+		/// Adds the parameters this StateComponent holds to the specified
+		/// setup - this can be of use when Primitives wish to use a modified
+		/// shader to take advantage of custom vertex or geometry shaders.
+		/// There is no need to call this for setups retrieved using the shaderSetup()
+		/// method above - that will have been done automatically.
+		void addParametersToShaderSetup( Shader::Setup *shaderSetup ) const;
 
-		typedef std::map<std::string, ConstTexturePtr> TexturesMap;
+	private :
 
-		ShaderManagerPtr m_shaderManager;
-		TextureLoaderPtr m_textureLoader;
-		std::string m_fragmentShader;
-		std::string m_vertexShader;
-		IECore::CompoundObjectPtr m_parameterMap;
-		ShaderPtr m_shader;
-
-		mutable std::set< std::string > m_dirtyTextures;
-		mutable TexturesMap m_textureParameters;
+		IE_CORE_FORWARDDECLARE( Implementation );
+		ImplementationPtr m_implementation;
 
 		static Description<ShaderStateComponent> g_description;
+		
 };
 
 IE_CORE_DECLAREPTR( ShaderStateComponent );

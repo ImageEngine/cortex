@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -179,9 +179,9 @@ ToHoudiniCurvesConverter::RemoveDuplicateEnds::ReturnType ToHoudiniCurvesConvert
 	size_t index = 0;
 	for ( size_t i=0; i < m_vertsPerCurve.size(); i++ )
 	{
-		for ( size_t j=0; j < m_vertsPerCurve[i]; j++, index++ )
+		for ( size_t j=0; j < (size_t)m_vertsPerCurve[i]; j++, index++ )
 		{
-			if ( j > 1 && j < m_vertsPerCurve[i]-2 )
+			if ( j > 1 && j < (size_t)m_vertsPerCurve[i]-2 )
 			{
 				newValues.push_back( origValues[index] );
 			}

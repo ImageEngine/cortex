@@ -1,14 +1,14 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/include/IECoreHoudini/bindings
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2011-10-05T21:53:19.067878Z
-4413
+2013-02-15T20:02:03.165860Z
+5175
 andrewk.imageengine
 
 
@@ -332,6 +332,40 @@ andrewk.imageengine
 
 2042
 
+HoudiniSceneBinding.h
+file
+
+
+
+
+2013-03-13T13:34:30.294787Z
+bb92d0e6d2dcb336b5ac5da818224425
+2013-02-15T20:02:03.165860Z
+5175
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2006
+
 ToHoudiniCurvesConverterBinding.h
 file
 
@@ -501,6 +535,40 @@ andrewk.imageengine
 
 
 2053
+
+SceneCacheNodeBinding.h
+file
+
+
+
+
+2013-03-13T13:34:30.294787Z
+d290e9ab7d0040be75386a91ef0124bb
+2013-02-07T18:19:36.404597Z
+5152
+andrewk.imageengine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2015
 
 FromHoudiniGroupConverterBinding.h
 file

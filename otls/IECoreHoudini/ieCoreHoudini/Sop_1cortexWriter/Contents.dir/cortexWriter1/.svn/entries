@@ -1,15 +1,15 @@
 10
 
 dir
-4862
+5253
 http://cortex-vfx.googlecode.com/svn/trunk/otls/IECoreHoudini/ieCoreHoudini/Sop_1cortexWriter/Contents.dir/cortexWriter1
 http://cortex-vfx.googlecode.com/svn
 
 
 
-2010-12-21T01:17:16.542776Z
-4006
-andrewk.imageengine
+2013-01-19T01:02:27.415096Z
+5117
+john.imageengine
 
 
 
@@ -338,11 +338,11 @@ file
 
 
 
-2012-05-10T16:40:43.000000Z
-4c8261e875552ab161c9cc1e0a704ff0
-2010-12-21T01:17:16.542776Z
-4006
-andrewk.imageengine
+2013-03-13T13:34:25.494536Z
+683ba1f10794530a7d5eb905df06fa5a
+2013-01-19T01:02:27.415096Z
+5117
+john.imageengine
 
 
 
@@ -364,7 +364,7 @@ andrewk.imageengine
 
 
 
-2444
+2445
 
 OUT.init
 file
