@@ -137,8 +137,7 @@ void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 	}
 	
 	std::vector<std::string> descendants;
-	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, SceneInterface::rootName );
-	node->descendantNames( entry->sceneCache(), descendants );
+	node->descendantNames( node->scene( file, SceneInterface::rootName ), descendants );
 	node->createMenu( menu, descendants );
 }
 
@@ -309,42 +308,24 @@ void SceneCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std
 	menu[pos].setToken( 0 );
 }
 
-static SceneCacheUtil::Cache c;
-
 template<typename BaseType>
-SceneCacheUtil::Cache &SceneCacheNode<BaseType>::cache()
+ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileName, const std::string &path )
 {
-	return c;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// SceneCacheUtil Cache implementation
-//////////////////////////////////////////////////////////////////////////////////////////
-
-SceneCacheUtil::Cache::Cache() : m_fileCache( fileCacheGetter, 200 )
-{
-};
-
-SceneCacheUtil::Cache::EntryPtr SceneCacheUtil::Cache::entry( const std::string &fileName, const std::string &path )
-{
-	FileAndMutexPtr f = m_fileCache.get( fileName );
-	EntryPtr result = new Entry( f ); // this locks the mutex for us
-	result->m_entry = result->m_fileAndMutex->file;
-	
+	ConstSceneInterfacePtr result = cache().get( fileName );
 	if ( path != SceneInterface::rootName.string() )
 	{
 		SceneInterface::Path p;
 		SceneInterface::stringToPath( path, p );
-		result->m_entry = result->m_entry->scene( p, SceneInterface::NullIfMissing );
+		result = result->scene( p, SceneInterface::NullIfMissing );
 	}
 	
 	return result;
 }
 
-Imath::M44d SceneCacheUtil::Cache::worldTransform( const std::string &fileName, const std::string &path, double time )
+template<typename BaseType>
+Imath::M44d SceneCacheNode<BaseType>::worldTransform( const std::string &fileName, const std::string &path, double time )
 {
-	EntryPtr thisEntry = entry( fileName, SceneInterface::rootName );
-	ConstSceneInterfacePtr scene = thisEntry->sceneCache();
+	ConstSceneInterfacePtr scene = this->scene( fileName, SceneInterface::rootName );
 	
 	SceneInterface::Path p;
 	SceneInterface::stringToPath( path, p );
@@ -363,6 +344,27 @@ Imath::M44d SceneCacheUtil::Cache::worldTransform( const std::string &fileName, 
 	return result;
 }
 
+static SceneCacheUtil::Cache c;
+
+template<typename BaseType>
+SceneCacheUtil::Cache &SceneCacheNode<BaseType>::cache()
+{
+	return c;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// SceneCacheUtil Cache implementation
+//////////////////////////////////////////////////////////////////////////////////////////
+
+SceneCacheUtil::Cache::Cache() : m_fileCache( fileCacheGetter, 200 )
+{
+};
+
+ConstSceneInterfacePtr SceneCacheUtil::Cache::get( const std::string &fileName )
+{
+	return m_fileCache.get( fileName );
+}
+
 void SceneCacheUtil::Cache::erase( const std::string &fileName )
 {
 	m_fileCache.erase( fileName );
@@ -373,26 +375,11 @@ void SceneCacheUtil::Cache::clear()
 	m_fileCache.clear();
 }
 
-SceneCacheUtil::Cache::FileAndMutexPtr SceneCacheUtil::Cache::fileCacheGetter( const std::string &fileName, size_t &cost )
+ConstSceneInterfacePtr SceneCacheUtil::Cache::fileCacheGetter( const std::string &fileName, size_t &cost )
 {
-	FileAndMutexPtr result = new FileAndMutex;
-	result->file = new SceneCache( fileName, IndexedIO::Read );
+	ConstSceneInterfacePtr result = new SceneCache( fileName, IndexedIO::Read );
 	cost = 1;
 	return result;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// SceneCacheUtil Entry implementation
-//////////////////////////////////////////////////////////////////////////////////////////
-
-SceneCacheUtil::Cache::Entry::Entry( FileAndMutexPtr fileAndMutex )
-	: m_fileAndMutex( fileAndMutex )
-{
-}
-
-const SceneInterface *SceneCacheUtil::Cache::Entry::sceneCache()
-{
-	return m_entry;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -130,9 +130,7 @@ void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int
 		return;
 	}
 	
-	std::vector<std::string> objects;
-	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, node->getPath() );
-	const SceneInterface *scene = entry->sceneCache();
+	ConstSceneInterfacePtr scene = node->scene( file, node->getPath() );
 	if ( !scene )
 	{
 		// mark the end of our menu
@@ -140,6 +138,7 @@ void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int
 		return;
 	}
 	
+	std::vector<std::string> objects;
 	node->objectNames( scene, objects );
 	node->createMenu( menu, objects );
 }
@@ -174,17 +173,16 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	}
 	attributeFilter.compile( value );
 	
-	Space space = getSpace();
-	Imath::M44d transform = ( space == World ) ? cache().worldTransform( file, path, context.getTime() ) : Imath::M44d();
-	
-	SceneCacheUtil::Cache::EntryPtr entry = cache().entry( file, path );
-	const SceneInterface *scene = entry->sceneCache();
+	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
 	{
 		addError( SOP_ATTRIBUTE_INVALID, ( path + " is not a valid location in " + file ).c_str() );
 		gdp->destroyStashed();
 		return error();
 	}
+	
+	Space space = getSpace();
+	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, context.getTime() ) : Imath::M44d();
 	
 	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter );
 	

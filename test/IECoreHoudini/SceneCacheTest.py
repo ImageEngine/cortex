@@ -106,12 +106,15 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		def testNode( node ) :
 			
 			node.parm( "file" ).set( "" )
+			node.parm( "file" ).pressButton()
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )		
 			node.parm( "file" ).set( "/tmp/fake" )
+			node.parm( "file" ).pressButton()
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "file" ).set( TestSceneCache.__testFile )
+			node.parm( "file" ).pressButton()
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
 			self.writeSCC()
