@@ -226,8 +226,6 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		}
 	}
 	
-	/// \todo: don't recurse to children if shapeFilter is a single item matching scene->name()
-	
 	SceneInterface::NameList children;
 	scene->childNames( children );
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
