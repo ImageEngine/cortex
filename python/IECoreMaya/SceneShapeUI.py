@@ -72,7 +72,7 @@ def _dagMenu( menu, sceneShape ) :
 	)
 	maya.cmds.menuItem(
 		label = "Object",
-		radialPosition = "W",
+		radialPosition = "NW",
 		command = IECore.curry( __objectCallback, sceneShape ),
 	)
 	
@@ -84,7 +84,7 @@ def _dagMenu( menu, sceneShape ) :
 	
 	maya.cmds.menuItem(
 		label = "Preview...",
-		radialPosition = "E",
+		radialPosition = "W",
 		subMenu = True		
 	)
 	
@@ -244,10 +244,28 @@ def __expandAll( sceneShape, *unused ) :
 	
 def __expandToSelected( sceneShape, *unused ) :
 	
+	fnScS = IECoreMaya.FnSceneShape( sceneShape )
 	selectedNames = fnScS.selectedComponentNames()
+	if "/" in selectedNames:
+		selectedNames.remove("/")
+	if selectedNames == []:
+		return
+
+	for selected in selectedNames:
+
+		transformName = "|".join( sceneShape.split("|")[:-1] )
+		transformNames = [ transformName ]
+		for item in selected.split("/")[1:]:
+			transformName = transformName + "|" + item
+			if not transformName in transformNames:
+				transformNames.append( transformName )
+		
+		for transform in transformNames:
+			shape = maya.cmds.listRelatives( transform, fullPath=True, type = "ieSceneShape" )[0]
+			fnS = IECoreMaya.FnSceneShape( shape )
+			fnS.expandScene()
+
 	
-	fnS = IECoreMaya.FnSceneShape( sceneShape )
-	fnS.expandScene()
 
 def __collapseChildren( sceneShape, *unused ) :
 	
