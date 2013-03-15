@@ -169,6 +169,19 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		if sceneChildren == []:
 			# No children to expand to
 			return []
+			
+		newSceneShapeFns = []
+		
+		if maya.cmds.getAttr( node+".objectOnly"):
+			# Already expanded, return existing scene shapes
+			childTransforms = maya.cmds.listRelatives( transform, f=True, type="transform" ) or []
+			for t in childTransforms:
+				childSceneShape = maya.cmds.listRelatives( t, f=True, type="ieSceneShape" ) or []
+				if childSceneShape:
+					newSceneShapeFns.append( IECoreMaya.FnSceneShape( childSceneShape[0] ) )
+		
+		if len(newSceneShapeFns):
+			return newSceneShapeFns
 
 		sceneFile = maya.cmds.getAttr( node+".sceneFile" )
 		sceneRoot = maya.cmds.getAttr( node+".sceneRoot" )
@@ -181,14 +194,12 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		drawGeo = maya.cmds.getAttr( node+".drawGeometry" )
 		drawChildBounds = maya.cmds.getAttr( node+".drawChildBounds" )
 		drawRootBound = maya.cmds.getAttr( node+".drawRootBound" )
-		
-		newSceneShapeFns = []
-		
+
 		for i, child in enumerate( sceneChildren ):
 			
 			maya.cmds.setAttr( node+".sceneQueries["+str(i)+"]", "/"+child, type="string" )
 			
-			# Create sceneShape file for child
+			# Create sceneShape for child
 			fnChild = IECoreMaya.FnSceneShape.create( child )
 			childNode = fnChild.fullPathName()
 			childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
@@ -199,7 +210,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectTranslate", childTransform+".translate" )
 			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectRotate", childTransform+".rotate" )
 			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectScale", childTransform+".scale" )
-			
+
 			maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
 			maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
 			maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
@@ -209,6 +220,21 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			newSceneShapeFns.append( fnChild )
 			
 		return newSceneShapeFns
+	
+
+	def expandAllChildren( self ):
+		
+		newFn = []
+		def recursiveExpand( fnSceneShape ):
+			
+			new = fnSceneShape.expandScene()
+			newFn.extend( new )
+			for n in new:
+				recursiveExpand( n )
+			
+		recursiveExpand( self )
+		
+		return newFn
 	
 	
 	def collapseScene( self ) :
@@ -224,7 +250,60 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		maya.cmds.setAttr( node+".objectOnly", l=False )
 		maya.cmds.setAttr( node+".objectOnly", 0 )
 		maya.cmds.setAttr( node+".objectOnly", l=True )
+		maya.cmds.setAttr( node+".visibility", True )
+	
+	def convertToGeometry( self ) :
 
+		# Expand scene first, then for each scene shape we turn off visibility and connect a mesh
+		self.expandAllChildren()
+		transform = maya.cmds.listRelatives( self.fullPathName(), parent=True, f=True )[0]
+		
+		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
+		
+		for sceneShape in allSceneShapes:
+			maya.cmds.setAttr( sceneShape+".visibility", False )
+			maya.cmds.setAttr( sceneShape+".querySpace", 1 )
+			
+			fn = FnSceneShape( sceneShape )
+			if fn.sceneInterface().hasObject():
+
+				parent = maya.cmds.listRelatives( sceneShape, parent=True, f=True )[0]
+				object = fn.sceneInterface().readObject( 0.0 )
+				
+				if isinstance( object, IECore.MeshPrimitive ):
+					shapeName = parent.split("|")[-1]+"_mesh"
+				elif isinstance( object, IECore.CurvesPrimitive ):
+					shapeName = parent.split("|")[-1]+"_curve"
+				else:
+					# Not compatible with what can be in the outputObjects sceneShape plug
+					continue
+				if maya.cmds.objExists( parent+"|"+shapeName ):
+					# Already there
+					continue
+				
+				index = None
+				validIndices = maya.cmds.getAttr( sceneShape+".sceneQueries", mi=True )
+				
+				if validIndices == [] or validIndices is None:
+					index = 0
+				else:
+					for i in validIndices:
+						if maya.cmds.getAttr( sceneShape+".sceneQueries["+str(i)+"]") == "/":
+							index = i
+					if index is None:
+						# Didn't find "/", get the next available index
+						index = max( i for i in validIndices ) +1
+				
+				maya.cmds.setAttr( sceneShape+".sceneQueries["+str(index)+"]", "/", type="string" )
+				
+				if isinstance( object, IECore.MeshPrimitive ):
+					mesh = maya.cmds.createNode( "mesh", parent = parent, name = shapeName )
+					maya.cmds.connectAttr( sceneShape+'.outputObjects['+str(index)+']', mesh+".inMesh" )
+					maya.cmds.sets( mesh, add="initialShadingGroup" )
+				elif isinstance( object, IECore.CurvesPrimitive ):
+					curve = maya.cmds.createNode( "nurbsCurve", parent = parent, name = shapeName )
+					maya.cmds.connectAttr( sceneShape+'.outputObjects['+str(index)+']', mesh+".create" )
+					
 
 	## Returns the maya node type that this function set operates on
 	@classmethod

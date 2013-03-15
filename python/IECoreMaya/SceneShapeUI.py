@@ -75,13 +75,7 @@ def _dagMenu( menu, sceneShape ) :
 		radialPosition = "NW",
 		command = IECore.curry( __objectCallback, sceneShape ),
 	)
-	
-	maya.cmds.menuItem(
-		label = "Print Component Names",
-		radialPosition = "NE",
-		command = IECore.curry( __printComponents, sceneShape )
-	)
-	
+
 	maya.cmds.menuItem(
 		label = "Preview...",
 		radialPosition = "W",
@@ -128,12 +122,20 @@ def _dagMenu( menu, sceneShape ) :
 	
 	# If the objectOnly flag is on, assume it's already expanded
 	fnScS = IECoreMaya.FnSceneShape( sceneShape )
-	if fnScS.canBeExpanded():
-		maya.cmds.menuItem(
-			label = "Expand...",
-			radialPosition = "SE",
-			subMenu = True
+	
+	maya.cmds.menuItem(
+		label = "Expand...",
+		radialPosition = "SE",
+		subMenu = True
+	)
+	
+	maya.cmds.menuItem(
+			label = "Expand As Geometry",
+			radialPosition = "W",
+			command = IECore.curry( __expandAsGeometry, sceneShape )
 		)
+		
+	if fnScS.canBeExpanded():
 		
 		maya.cmds.menuItem(
 			label = "Expand Scene",
@@ -154,7 +156,7 @@ def _dagMenu( menu, sceneShape ) :
 				command = IECore.curry( __expandToSelected, sceneShape )
 			)
 			
-		maya.cmds.setParent( "..", menu=True )
+	maya.cmds.setParent( "..", menu=True )
 
 	parentSceneShape = __parentSceneShape( sceneShape )
 	if fnScS.canBeCollapsed() or ( parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed() ):
@@ -183,6 +185,13 @@ def _dagMenu( menu, sceneShape ) :
 	
 	# Check if any component is selected
 	if fnScS.selectedComponentNames() :
+			
+		maya.cmds.menuItem(
+			label = "Print Component Names",
+			radialPosition = "NE",
+			command = IECore.curry( __printComponents, sceneShape )
+		)
+		
 		maya.cmds.menuItem(
 			label = "Print Selected Component Names",
 			radialPosition = "E",
@@ -195,6 +204,8 @@ def _dagMenu( menu, sceneShape ) :
 	
 def __componentCallback( sceneShape, *unused ) :
 
+	# Make sure childBounds is turned on
+	maya.cmds.setAttr( sceneShape + ".drawChildBounds", 1 )
 	parent = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
 	maya.cmds.selectMode( component=True )
 	maya.cmds.hilite( parent )
@@ -229,18 +240,22 @@ def __printSelectedComponents( sceneShape, *unused ) :
 def __expandScene( sceneShape, *unused ) :
 	
 	fnS = IECoreMaya.FnSceneShape( sceneShape )
-	fnS.expandScene()
+	new = fnS.expandScene()
+	toSelect = map( lambda x: x.fullPathName(), new )
+	maya.cmds.select( toSelect, replace=True )
 	
 def __expandAll( sceneShape, *unused ) :
 	
-	def recursiveExpand( fnSceneShape ):
-		
-		new = fnSceneShape.expandScene()
-		for n in new:
-			recursiveExpand( n )
+	fnS = IECoreMaya.FnSceneShape( sceneShape )
+	newFn = fnS.expandAllChildren()
+	
+	toSelect = map( lambda x: x.fullPathName(), newFn )
+	maya.cmds.select( toSelect, replace=True )
+
+def __expandAsGeometry( sceneShape, *unused ) :
 	
 	fnS = IECoreMaya.FnSceneShape( sceneShape )
-	recursiveExpand( fnS )
+	fnS.convertToGeometry()
 	
 def __expandToSelected( sceneShape, *unused ) :
 	
@@ -248,8 +263,16 @@ def __expandToSelected( sceneShape, *unused ) :
 	selectedNames = fnScS.selectedComponentNames()
 	if "/" in selectedNames:
 		selectedNames.remove("/")
+	
+	# Go back to object mode
+	parent =  maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
+	maya.cmds.hilite( parent, unHilite=True )
+	maya.cmds.selectMode( object=True )
+	
 	if selectedNames == []:
 		return
+	
+	toSelect = []	
 
 	for selected in selectedNames:
 
@@ -264,8 +287,11 @@ def __expandToSelected( sceneShape, *unused ) :
 			shape = maya.cmds.listRelatives( transform, fullPath=True, type = "ieSceneShape" )[0]
 			fnS = IECoreMaya.FnSceneShape( shape )
 			fnS.expandScene()
-
+		
+		toSelect.append( transformNames[-1] )
 	
+	maya.cmds.select( toSelect, replace=True )
+
 
 def __collapseChildren( sceneShape, *unused ) :
 	
@@ -282,6 +308,7 @@ def __collapseToParentScene( sceneShape, *unused ) :
 			if parentShape:
 				fnParent = IECoreMaya.FnSceneShape( parentShape[0] )
 				fnParent.collapseScene()
+				maya.cmds.select( fnParent.fullPathName(), replace=True )
 
 def __parentSceneShape( sceneShape ):
 	
