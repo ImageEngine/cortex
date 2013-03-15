@@ -60,10 +60,14 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@staticmethod
 	def create( parentName ) :
-
-		fnDN = FnDagNode.createShapeWithParent( parentName, "ieSceneShape" )
+		
+		try:
+			fnDN = FnDagNode.createShapeWithParent( parentName, "ieSceneShape" )
+		except:
+			fnDN = FnDagNode.createShapeWithParent( "sceneShape_"+parentName, "ieSceneShape" )
 		fnScS = FnSceneShape( fnDN.object() )
 		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
+		maya.cmds.setAttr( fnScS.fullPathName()+".objectOnly", l=True )
 		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.time' )
 		
 		return fnScS
@@ -140,6 +144,88 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		return _IECoreMaya._sceneShapeChildrenNames( self )
 	
+	def canBeExpanded( self ) :
+		
+		# An already expanded scene should have objectOnly on
+		if not maya.cmds.getAttr( self.fullPathName()+".objectOnly" ):
+			# Check if you have any children to expand to
+			if len( self.childrenNames() ) > 1:
+				return True
+		return False
+
+	def canBeCollapsed( self ) :
+		
+		# if already collapsed, objectOnly is off
+		return maya.cmds.getAttr( self.fullPathName()+".objectOnly" )
+
+
+	def expandScene( self ) :
+
+		node = self.fullPathName()
+		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
+		scene = self.sceneInterface()
+		sceneChildren = scene.childNames()
+		
+		if sceneChildren == []:
+			# No children to expand to
+			return []
+
+		sceneFile = maya.cmds.getAttr( node+".sceneFile" )
+		sceneRoot = maya.cmds.getAttr( node+".sceneRoot" )
+		
+		maya.cmds.setAttr( node+".querySpace", 1 )
+		maya.cmds.setAttr( node+".objectOnly", l=False )
+		maya.cmds.setAttr( node+".objectOnly", 1 )
+		maya.cmds.setAttr( node+".objectOnly", l=True )
+		
+		drawGeo = maya.cmds.getAttr( node+".drawGeometry" )
+		drawChildBounds = maya.cmds.getAttr( node+".drawChildBounds" )
+		drawRootBound = maya.cmds.getAttr( node+".drawRootBound" )
+		
+		newSceneShapeFns = []
+		
+		for i, child in enumerate( sceneChildren ):
+			
+			maya.cmds.setAttr( node+".sceneQueries["+str(i)+"]", "/"+child, type="string" )
+			
+			# Create sceneShape file for child
+			fnChild = IECoreMaya.FnSceneShape.create( child )
+			childNode = fnChild.fullPathName()
+			childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
+			maya.cmds.setAttr( childNode+".sceneFile", sceneFile, type="string" )
+			sceneRootName = "/"+child if sceneRoot == "/" else sceneRoot+"/"+child
+			maya.cmds.setAttr( childNode+".sceneRoot", sceneRootName, type="string" )
+			
+			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectTranslate", childTransform+".translate" )
+			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectRotate", childTransform+".rotate" )
+			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectScale", childTransform+".scale" )
+			
+			maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
+			maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
+			maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
+
+			maya.cmds.parent( childTransform, transform, relative=True )
+			
+			newSceneShapeFns.append( fnChild )
+			
+		return newSceneShapeFns
+	
+	
+	def collapseScene( self ) :
+		
+		node = self.fullPathName()
+		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
+		allTransformChildren = maya.cmds.listRelatives( transform, f=True, type = "transform" ) or []
+		
+		for child in allTransformChildren:
+			# Do a bunch of tests first!
+			maya.cmds.delete( child )
+		
+		maya.cmds.setAttr( node+".objectOnly", l=False )
+		maya.cmds.setAttr( node+".objectOnly", 0 )
+		maya.cmds.setAttr( node+".objectOnly", l=True )
+
+
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):

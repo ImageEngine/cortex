@@ -82,7 +82,106 @@ def _dagMenu( menu, sceneShape ) :
 		command = IECore.curry( __printComponents, sceneShape )
 	)
 	
+	maya.cmds.menuItem(
+		label = "Preview...",
+		radialPosition = "E",
+		subMenu = True		
+	)
+	
+	maya.cmds.menuItem(
+			label = "All Geometry On",
+			radialPosition = "E",
+			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawGeometry", True )
+		)
+	
+	maya.cmds.menuItem(
+			label = "All Child Bounds On",
+			radialPosition = "SE",
+			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawChildBounds", True )
+		)
+	
+	maya.cmds.menuItem(
+			label = "All Root Bound On",
+			radialPosition = "NE",
+			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawRootBound", True )
+		)
+	
+	maya.cmds.menuItem(
+			label = "All Geometry Off",
+			radialPosition = "W",
+			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawGeometry", False )
+		)
+	
+	maya.cmds.menuItem(
+			label = "All Child Bounds Off",
+			radialPosition = "SW",
+			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawChildBounds", False )
+		)
+	
+	maya.cmds.menuItem(
+			label = "All Root Bound Off",
+			radialPosition = "NW",
+			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawRootBound", False )
+		)
+	
+	maya.cmds.setParent( "..", menu=True )
+	
+	# If the objectOnly flag is on, assume it's already expanded
 	fnScS = IECoreMaya.FnSceneShape( sceneShape )
+	if fnScS.canBeExpanded():
+		maya.cmds.menuItem(
+			label = "Expand...",
+			radialPosition = "SE",
+			subMenu = True
+		)
+		
+		maya.cmds.menuItem(
+			label = "Expand Scene",
+			radialPosition = "E",
+			command = IECore.curry( __expandScene, sceneShape )
+		)
+		
+		maya.cmds.menuItem(
+			label = "Expand All Children",
+			radialPosition = "N",
+			command = IECore.curry( __expandAll, sceneShape )
+		)
+		
+		if fnScS.selectedComponentNames() :
+			maya.cmds.menuItem(
+				label = "Expand to Selected Components",
+				radialPosition = "S",
+				command = IECore.curry( __expandToSelected, sceneShape )
+			)
+			
+		maya.cmds.setParent( "..", menu=True )
+
+	parentSceneShape = __parentSceneShape( sceneShape )
+	if fnScS.canBeCollapsed() or ( parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed() ):
+		
+		maya.cmds.menuItem(
+				label = "Collapse...",
+				radialPosition = "SW",
+				subMenu = True
+			)
+	
+		if parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed():
+			maya.cmds.menuItem(
+					label = "Collapse to Parent Scene",
+					radialPosition = "N",
+					command = IECore.curry( __collapseToParentScene, sceneShape )
+				)
+		
+		if fnScS.canBeCollapsed():
+			maya.cmds.menuItem(
+					label = "Collapse Children",
+					radialPosition = "W",
+					command = IECore.curry( __collapseChildren, sceneShape )
+				)
+			
+		maya.cmds.setParent( "..", menu=True )
+	
+	# Check if any component is selected
 	if fnScS.selectedComponentNames() :
 		maya.cmds.menuItem(
 			label = "Print Selected Component Names",
@@ -126,6 +225,65 @@ def __printSelectedComponents( sceneShape, *unused ) :
 	selectedNames = list( selectedNames )
 	selectedNames.sort()
 	print " ".join( selectedNames ) ,
+
+def __expandScene( sceneShape, *unused ) :
+	
+	fnS = IECoreMaya.FnSceneShape( sceneShape )
+	fnS.expandScene()
+	
+def __expandAll( sceneShape, *unused ) :
+	
+	def recursiveExpand( fnSceneShape ):
+		
+		new = fnSceneShape.expandScene()
+		for n in new:
+			recursiveExpand( n )
+	
+	fnS = IECoreMaya.FnSceneShape( sceneShape )
+	recursiveExpand( fnS )
+	
+def __expandToSelected( sceneShape, *unused ) :
+	
+	selectedNames = fnScS.selectedComponentNames()
+	
+	fnS = IECoreMaya.FnSceneShape( sceneShape )
+	fnS.expandScene()
+
+def __collapseChildren( sceneShape, *unused ) :
+	
+	fnS = IECoreMaya.FnSceneShape( sceneShape )
+	fnS.collapseScene()
+	
+def __collapseToParentScene( sceneShape, *unused ) :
+	
+	transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
+	if transform:
+		parent = maya.cmds.listRelatives( transform[0], parent=True, fullPath=True )
+		if parent:
+			parentShape = maya.cmds.listRelatives( parent[0], fullPath=True, type = "ieSceneShape" )
+			if parentShape:
+				fnParent = IECoreMaya.FnSceneShape( parentShape[0] )
+				fnParent.collapseScene()
+
+def __parentSceneShape( sceneShape ):
+	
+	transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
+	if transform:
+		parent = maya.cmds.listRelatives( transform[0], parent=True, fullPath=True )
+		if parent:
+			parentShape = maya.cmds.listRelatives( parent[0], fullPath=True, type = "ieSceneShape" )
+			if parentShape:
+				return parentShape[0]
+	return None
+
+def __setChildrenPreviewAttributes( sceneShape, attributeName, value, *unused ) :
+
+	transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
+	if transform:
+		allChildren = maya.cmds.listRelatives( transform[0], ad=True, fullPath=True, type = "ieSceneShape" ) or []
+		for node in allChildren:
+			maya.cmds.setAttr( node+"."+attributeName, value )
+
 
 
 

@@ -159,7 +159,7 @@ MStatus SceneShapeInterface::initialize()
 	
 	MStatus s;
 	
-	aObjectOnly = nAttr.create( "objectOnly", "obj", MFnNumericData::kBoolean, 1 );
+	aObjectOnly = nAttr.create( "objectOnly", "obj", MFnNumericData::kBoolean, 0 );
 	nAttr.setReadable( true );
 	nAttr.setWritable( true );
 	nAttr.setStorable( true );
@@ -168,7 +168,7 @@ MStatus SceneShapeInterface::initialize()
 
 	addAttribute( aObjectOnly );
 	
-	aDrawGeometry = nAttr.create( "drawGeometry", "drg", MFnNumericData::kBoolean, 1, &s );
+	aDrawGeometry = nAttr.create( "drawGeometry", "drg", MFnNumericData::kBoolean, 0, &s );
 	nAttr.setReadable( true );
 	nAttr.setWritable( true );
 	nAttr.setStorable( true );
@@ -392,12 +392,45 @@ MBoundingBox SceneShapeInterface::boundingBox() const
 			MPlug pTime( thisMObject(), aTime );
 			MTime time;
 			pTime.getValue( time );
-
-			Box3d b = scn->readBound( time.as( MTime::kSeconds ) );
-
-			if( !b.isEmpty() )
+			
+			// Check what bounding box we need. If objectOnly we want the objectBound, else the scene bound.
+			// If objectOnly and no object, return the scene bound to have something sensible. It won't be drawn.
+			
+			MPlug pObjectOnly( thisMObject(), aObjectOnly );
+			bool objectOnly;
+			pObjectOnly.getValue( objectOnly );
+			
+			bool objectBound = objectOnly;
+			if( objectOnly )
 			{
-				bound = convert<MBoundingBox>( b );
+				// Check for an object
+				if( scn->hasObject() )
+				{
+					ObjectPtr object = scn->readObject( time.as( MTime::kSeconds ) );
+					VisibleRenderablePtr obj = IECore::runTimeCast< VisibleRenderable >( object );
+					if( obj )
+					{
+						Box3f objBox = obj->bound();
+						if( !objBox.isEmpty() )
+						{
+							bound = convert<MBoundingBox>( objBox );
+						}
+					}
+				}
+				else
+				{
+					objectBound = false;
+				}
+				
+			}
+			
+			if( !objectBound )
+			{
+				Box3d b = scn->readBound( time.as( MTime::kSeconds ) );
+				if( !b.isEmpty() )
+				{
+					bound = convert<MBoundingBox>( b );
+				}
 			}
 		}
 		catch( std::exception &e )
@@ -763,7 +796,7 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::Co
 		}
 	}
 	
-	if( drawBounds )
+	if( drawBounds && pathStr != "/" )
 	{
 		IECore::AttributeBlock aBox(renderer);
 		renderer->setAttribute( "gl:primitive:wireframe", new BoolData( true ) );
@@ -824,15 +857,7 @@ IECoreGL::ConstScenePtr SceneShapeInterface::scene()
 	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
-	
-	int index = 0;
-	NameToGroupMap::iterator it = m_nameToGroupMap.begin();
-	for ( ; it != m_nameToGroupMap.end(); it ++ )
-	{
-		m_indexToNameMap.push_back( it->first ); 
-		it->second.first = index ++;
-	}
-	
+
 	m_previewSceneDirty = false;
 
 	return m_scene;
@@ -852,10 +877,13 @@ void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr name
 	const std::string &name = nameState->name();
 	if( name != "unnamed" )
 	{
-		NameToGroupMap::const_iterator it = m_nameToGroupMap.find( name );
-		if( it == m_nameToGroupMap.end() )
+		int index = m_nameToGroupMap.size();
+		std::pair< NameToGroupMap::iterator, bool> ret;
+		ret = m_nameToGroupMap.insert( std::pair< IECore::InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
+		if( ret.second )
 		{
-			m_nameToGroupMap[name] = NameToGroupMap::mapped_type( 0, group );
+			IndexToNameMap::iterator idIt = m_indexToNameMap.begin() + index;
+			m_indexToNameMap.insert( idIt, name ); 	
 		}
 	}
 
@@ -907,7 +935,7 @@ std::string SceneShapeInterface::getName( int index )
 	return m_indexToNameMap[index];
 }
 
-std::vector< IECore::InternedString > SceneShapeInterface::getChildrenNames() const
+const std::vector< IECore::InternedString > & SceneShapeInterface::getChildrenNames() const
 {
 	return m_indexToNameMap;
 }

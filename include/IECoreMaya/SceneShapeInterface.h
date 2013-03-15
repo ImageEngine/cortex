@@ -88,7 +88,7 @@ class SceneShapeInterface: public MPxComponentShape
 		IECoreGL::GroupPtr getGroup( std::string name );
 		int getIndex( std::string name );
 		std::string getName( int index );
-		std::vector< IECore::InternedString > getChildrenNames() const;
+		const std::vector< IECore::InternedString > & getChildrenNames() const;
 		
 		static MObject aObjectOnly;
 		static MObject aDrawGeometry;
@@ -144,20 +144,14 @@ class SceneShapeInterface: public MPxComponentShape
 		
 		void buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface );
 		
-		//void buildSceneMaps();
-		//void buildSceneMaps( IECore::ConstSceneInterfacePtr subSceneInterface );
-		
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 		
 		std::string getRelativePathName( IECore::SceneInterface::Path path );
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
 
-		//typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECore::ConstSceneInterfacePtr> > NameToIndexSceneMap;
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
-		//typedef std::map< IECore::InternedString, IECoreGL::GroupPtr > NameToGroupMap;
-		
-		//NameToIndexSceneMap m_nameToIndexSceneMap;
+
 		IndexToNameMap m_indexToNameMap;
 		NameToGroupMap m_nameToGroupMap;
 };

@@ -106,17 +106,32 @@ void SceneShapeUI::getDrawRequests( const MDrawInfo &info, bool objectAndActiveO
 
 	// a request for the bound if necessary
 	MPlug pDrawBound( sceneShape->thisMObject(), SceneShape::aDrawRootBound );
-	bool drawBound = true;
+	bool drawBound;
 	pDrawBound.getValue( drawBound );
 	
 	if( drawBound )
 	{
-		MDrawRequest request = info.getPrototype( *this );
-		request.setDrawData( drawData );
-		request.setToken( BoundDrawMode );
-		request.setDisplayStyle( M3dView::kWireFrame );
-		setWireFrameColors( request, info.displayStatus() );
-		requests.add( request );
+		bool doDrawBound = true;
+		
+		// If objectOnly is true, check for an object. If none found, no need to add the bound request.
+		MPlug pObjectOnly( sceneShape->thisMObject(), SceneShape::aObjectOnly );
+		bool objectOnly;
+		pObjectOnly.getValue( objectOnly );
+		if( objectOnly && !sceneShape->getSceneInterface()->hasObject() )
+		{
+			doDrawBound = false;
+		}
+		
+		if( doDrawBound )
+		{
+			MDrawRequest request = info.getPrototype( *this );
+			request.setDrawData( drawData );
+			request.setToken( BoundDrawMode );
+			request.setDisplayStyle( M3dView::kWireFrame );
+			setWireFrameColors( request, info.displayStatus() );
+			requests.add( request );
+		}
+
 	}
 
 	MPlug pDrawAllBounds( sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
@@ -125,7 +140,7 @@ void SceneShapeUI::getDrawRequests( const MDrawInfo &info, bool objectAndActiveO
 	
 	// requests for the scene if necessary
 	MPlug pGLPreview( sceneShape->thisMObject(), SceneShape::aDrawGeometry );
-	bool glPreview = false;
+	bool glPreview;
 	pGLPreview.getValue( glPreview );
 	
 	if( glPreview || drawAllBounds )
