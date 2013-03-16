@@ -57,7 +57,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		child = scene.child( "pSphere1" )
 		
-		self.assertEqual( set( child.childNames() ), set( [ "pSphere2", "pSphere3", "pSphere1Shape" ] ) )
+		self.assertEqual( set( child.childNames() ), set( [ "pSphere2", "pSphere3" ] ) )
+		
+		self.assertEqual( scene.child( "pSphere1" ).child( "pSphere2" ).childNames(), [] )
 
 	def testHasChild( self ) :
 		
@@ -73,8 +75,8 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( scene.hasChild("pSphere1"), True )
-		self.assertEqual( scene.hasChild("pSphere1Shape"), False )
 		
+		self.assertEqual( child.hasChild("pSphere1Shape"), False )
 		self.assertEqual( child.hasChild("pSphere2"), True )
 		self.assertEqual( child.hasChild("pSphere3"), True )
 		self.assertEqual( child.hasChild("pSphere3Shape"), False )
@@ -96,23 +98,17 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		
 		sphere1 = scene.child( "pSphere1" )
-		sphere1Shape = sphere1.child( "pSphere1Shape" )
 		
 		sphere2 = sphere1.child( "pSphere2" )
-		sphere2Shape = sphere2.child( "pSphere2Shape" )
 		
 		sphere3 = sphere1.child( "pSphere3" )
-		sphere3Shape = sphere3.child( "pSphere3Shape" )
 		
 		self.assertEqual( str( scene.name() ), "/" )
 		self.assertEqual( str( sphere1.name() ), "pSphere1" )
-		self.assertEqual( str( sphere1Shape.name() ), "pSphere1Shape" )
 		
 		self.assertEqual( str( sphere2.name() ), "pSphere2" )
-		self.assertEqual( str( sphere2Shape.name() ), "pSphere2Shape" )
 		
 		self.assertEqual( str( sphere3.name() ), "pSphere3" )
-		self.assertEqual( str( sphere3Shape.name() ), "pSphere3Shape" )
 	
 	def testPaths( self ) :
 		
@@ -127,23 +123,17 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		
 		sphere1 = scene.child( "pSphere1" )
-		sphere1Shape = sphere1.child( "pSphere1Shape" )
 		
 		sphere2 = sphere1.child( "pSphere2" )
-		sphere2Shape = sphere2.child( "pSphere2Shape" )
 		
 		sphere3 = sphere1.child( "pSphere3" )
-		sphere3Shape = sphere3.child( "pSphere3Shape" )
 	
 		self.assertEqual( scene.path(), [] )
 		self.assertEqual( sphere1.path(), [ "pSphere1" ] )
-		self.assertEqual( sphere1Shape.path(), [ "pSphere1", "pSphere1Shape" ] )
 		
 		self.assertEqual( sphere2.path(), [ "pSphere1", "pSphere2" ] )
-		self.assertEqual( sphere2Shape.path(), [ "pSphere1", "pSphere2", "pSphere2Shape" ] )
 		
 		self.assertEqual( sphere3.path(), [ "pSphere1", "pSphere3" ] )
-		self.assertEqual( sphere3Shape.path(), [ "pSphere1", "pSphere3", "pSphere3Shape" ] )
 	
 	def testSceneMethod( self ) :
 		
@@ -158,15 +148,12 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		
 		self.assertEqual( str( scene.scene( ["pSphere1"] ).name() ), "pSphere1" )
-		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere1Shape"] ).name() ), "pSphere1Shape" )
 		
 		# does it still return absolute paths if we've gone to another location?
 		scene = scene.scene( ["pSphere1"] )
 		self.assertEqual( str( scene.scene( [] ).name() ), "/" )
 		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere2"] ).name() ), "pSphere2" )
-		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere2", "pSphere2Shape"] ).name() ), "pSphere2Shape" )
 		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere3"] ).name() ), "pSphere3" )
-		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere3", "pSphere3Shape"] ).name() ), "pSphere3Shape" )
 		
 		self.assertEqual( scene.scene( ["idontexist"], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 		self.assertRaises( RuntimeError, IECore.curry( scene.scene, ["idontexist"] ) )
@@ -176,12 +163,10 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		sphere = maya.cmds.polySphere( name="pSphere1" )
 		
 		scene = IECoreMaya.MayaScene()
-		transformChild = scene.child( "pSphere1" )
-		shapeChild = transformChild.child( "pSphere1Shape" )
+		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( scene.hasObject(), False )
-		self.assertEqual( transformChild.hasObject(), False )
-		self.assertEqual( shapeChild.hasObject(), True )
+		self.assertEqual( child.hasObject(), True )
 	
 	def testReadTransformMethods( self ) :
 		
@@ -334,11 +319,11 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "pCube1.rz", 30 )
 		
 		scene = IECoreMaya.MayaScene()
-		shapeChild = scene.child( "pCube1" ).child( "pCube1Shape" )
+		cube = scene.child( "pCube1" )
 		
 		# read mesh at time 0:
 		maya.cmds.currentTime( "0.0sec" )
-		mesh = shapeChild.readObject( 0 )
+		mesh = cube.readObject( 0 )
 		
 		vertList = list( mesh["P"].data )
 		
@@ -368,15 +353,15 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setKeyframe( cluster, attribute="tx", t="1sec", v=-1 )
 		
 		scene = IECoreMaya.MayaScene()
-		shapeChild = scene.child( "pCube1" ).child( "pCube1Shape" )
+		cube = scene.child( "pCube1" )
 		
 		# read mesh at different times:
 		maya.cmds.currentTime( "0.0sec" )
-		mesh0   = shapeChild.readObject( 0 )
+		mesh0   = cube.readObject( 0 )
 		maya.cmds.currentTime( "0.5sec" )
-		mesh0_5 = shapeChild.readObject( 0.5 )
+		mesh0_5 = cube.readObject( 0.5 )
 		maya.cmds.currentTime( "1.0sec" )
-		mesh1   = shapeChild.readObject( 1 )
+		mesh1   = cube.readObject( 1 )
 		
 		# have we moved vertex 0?
 		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
@@ -424,10 +409,6 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		# should be in object space!!!
 		self.assertEqual( cube1Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -1.5, -1.5, -1.5 ), IECore.V3d( 1.5, 1.5, 1.5 ) ) )
-		
-		# check the shape:
-		cube1Shape = cube1Transform.child( "pCube1Shape" )
-		self.assertEqual( cube1Shape.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
 		
 		cube2Transform = cube1Transform.child( "pCube2" )
 		self.assertEqual( cube2Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
@@ -491,7 +472,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		cameraTransform = scene.child( "persp" )
 		maya.cmds.currentTime( "0.0sec" )
-		camera = cameraTransform.child( "perspShape" ).readObject( 0 )
+		camera = cameraTransform.readObject( 0 )
 		
 		# sanity check: camera transform is not identity?
 		self.assertNotEqual( cameraTransform.readTransformAsMatrix( 0 ), IECore.M44f() )
@@ -504,11 +485,10 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		sphere = maya.cmds.polySphere( name="pSphere1" )
 		
 		scene = IECoreMaya.MayaScene()
-		transform = scene.child( "pSphere1" )
-		shape = transform.child( "pSphere1Shape" )
+		sphere = scene.child( "pSphere1" )
 		
 		maya.cmds.currentTime( "0.0sec" )
-		mesh = shape.readObject( 0 )
+		mesh = sphere.readObject( 0 )
 		
 		# should default to 382 verts:
 		self.assertEqual( len( mesh["P"].data ), 382 )
@@ -516,7 +496,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "polySphere1.subdivisionsAxis", 3 )
 		maya.cmds.setAttr( "polySphere1.subdivisionsHeight", 3 )
 		
-		mesh = shape.readObject( 0 )
+		mesh = sphere.readObject( 0 )
 		
 		# should be 8 verts now:
 		self.assertEqual( len( mesh["P"].data ), 8 )

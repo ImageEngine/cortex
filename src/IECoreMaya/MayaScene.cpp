@@ -235,7 +235,13 @@ bool MayaScene::hasObject() const
 		throw Exception( "MayaScene::hasObject: Dag path no longer exists!" );
 	}
 	
-	return !m_dagPath.hasFn( MFn::kTransform );
+	MDagPath childDag = m_dagPath;
+	if( childDag.extendToShapeDirectlyBelow( 0 ) )
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 ObjectPtr MayaScene::readObject( double time ) const
@@ -252,24 +258,30 @@ ObjectPtr MayaScene::readObject( double time ) const
 		throw Exception( "MayaScene::readObject: time must be the same as on the maya timeline!" );
 	}
 	
-	if( m_dagPath.hasFn( MFn::kCamera ) )
+	MDagPath childDag = m_dagPath;
+	if( childDag.extendToShapeDirectlyBelow( 0 ) )
 	{
-		FromMayaCameraConverter converter( m_dagPath );
-		CameraPtr cam = runTimeCast< Camera >( converter.convert() );
-		cam->setTransform( new MatrixTransform( Imath::M44f() ) );
-		return cam;
-	}
-	
-	FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( m_dagPath );
-	if( shapeConverter )
-	{
-		return shapeConverter->convert();
-	}
-	
-	FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( m_dagPath );
-	if( dagConverter )
-	{
-		return dagConverter->convert();
+		
+		if( childDag.hasFn( MFn::kCamera ) )
+		{
+			FromMayaCameraConverter converter( childDag );
+			CameraPtr cam = runTimeCast< Camera >( converter.convert() );
+			cam->setTransform( new MatrixTransform( Imath::M44f() ) );
+			return cam;
+		}
+		
+		FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
+		if( shapeConverter )
+		{
+			return shapeConverter->convert();
+		}
+		
+		FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
+		if( dagConverter )
+		{
+			return dagConverter->convert();
+		}
+		
 	}
 	
 	return 0;
@@ -321,8 +333,11 @@ void MayaScene::childNames( NameList &childNames ) const
 	
 	for( unsigned i=0; i < paths.length(); ++i )
 	{
-		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
-		childNames.push_back( Name( childName ) );
+		if( paths[i].hasFn( MFn::kTransform ) )
+		{
+			std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
+			childNames.push_back( Name( childName ) );
+		}
 	}
 }
 
@@ -341,10 +356,13 @@ bool MayaScene::hasChild( const Name &name ) const
 	
 	for( unsigned i=0; i < paths.length(); ++i )
 	{
-		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
-		if( Name( childName ) == name )
+		if( paths[i].hasFn( MFn::kTransform ) )
 		{
-			return true;
+			std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
+			if( Name( childName ) == name )
+			{
+				return true;
+			}
 		}
 	}
 	return false;
@@ -365,11 +383,11 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 	MDagPath path;
 	MStatus st = sel.getDagPath( 0, path );
 	
-	if( !st )
+	if( !path.hasFn( MFn::kTransform ) )
 	{
 		if( missingBehaviour == SceneInterface::ThrowIfMissing )
 		{
-			throw Exception( "MayaScene::retrieveChild: Couldn't find location at specified path" );
+			throw Exception( "MayaScene::retrieveChild: Couldn't find transform at specified path " + std::string( path.fullPathName().asChar() ) );
 		}
 		return 0;
 	}
@@ -418,7 +436,13 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	{
 		if( missingBehaviour == SceneInterface::ThrowIfMissing )
 		{
-			throw Exception( "MayaScene::retrieveScene: Couldn't find location at specified path" );
+			std::string pathName;
+			for( size_t i = 0; i < path.size(); ++i )
+			{
+				pathName += std::string( path[i] ) + "/";
+			}
+			
+			throw Exception( "MayaScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
 		return 0;
 	}
@@ -426,7 +450,24 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	MDagPath dagPath;
 	sel.getDagPath( 0, dagPath );
 	
-	return duplicate( dagPath );
+	if( dagPath.hasFn( MFn::kTransform ) )
+	{
+		return duplicate( dagPath );
+	}
+	else
+	{
+		if( missingBehaviour == SceneInterface::ThrowIfMissing )
+		{
+			std::string pathName;
+			for( size_t i = 0; i < path.size(); ++i )
+			{
+				pathName += std::string( path[i] ) + "/";
+			}
+			
+			throw Exception( "MayaScene::retrieveScene: Couldn't find transform at specified path " + pathName );
+		}
+		return 0;
+	}
 	
 }
 
