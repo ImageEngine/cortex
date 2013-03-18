@@ -492,6 +492,15 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	}
 	else
 	{
+		// Check if we should be able to select that object
+		MPlug pObjectOnly( sceneShape->thisMObject(), SceneShape::aObjectOnly );
+		bool objectOnly;
+		pObjectOnly.getValue( objectOnly );
+		if( objectOnly && !sceneShape->getSceneInterface()->hasObject() )
+		{
+			return true;
+		}
+		
 		// selecting objects
 		MSelectionList item;
 		item.add( selectInfo.selectPath() );
