@@ -226,6 +226,10 @@ void PatchMeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void PatchMeshPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void PatchMeshPrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_uPoints );
 	h.append( m_vPoints );
 	h.append( m_uBasis.matrix );

@@ -362,6 +362,10 @@ void NURBSPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void NURBSPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void NURBSPrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_uOrder );
 	m_uKnot->hash( h );
 	h.append( m_uMin );

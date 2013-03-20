@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,6 +75,8 @@ class CurvesPrimitive : public Primitive
 
 		/// Creates a wireframe box of the specified size.
 		static Ptr createBox( const Imath::Box3f &b );
+		
+		virtual void topologyHash( MurmurHash &h ) const;
 
 	protected :
 

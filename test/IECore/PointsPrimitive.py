@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -145,6 +145,14 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		p2 = PointsPrimitive( 2 )
 		
 		self.assertNotEqual( p.hash(), p2.hash() )
+		self.assertNotEqual( p.topologyHash(), p2.topologyHash() )
+		
+		p3 = p2.copy()
+		self.assertEqual( p3.hash(), p2.hash() )
+		self.assertEqual( p3.topologyHash(), p2.topologyHash() )
+		p3["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
+		self.assertNotEqual( p3.hash(), p2.hash() )
+		self.assertEqual( p3.topologyHash(), p2.topologyHash() )
 		
 if __name__ == "__main__":
     unittest.main()

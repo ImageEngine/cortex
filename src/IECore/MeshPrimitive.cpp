@@ -253,6 +253,10 @@ void MeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void MeshPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void MeshPrimitive::topologyHash( MurmurHash &h ) const
+{
 	m_verticesPerFace->hash( h );
 	m_vertexIds->hash( h );
 	h.append( m_interpolation );

@@ -110,6 +110,10 @@ void PointsPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void PointsPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void PointsPrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( (uint64_t)m_numPoints );
 }
 

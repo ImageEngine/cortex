@@ -233,6 +233,10 @@ void SpherePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void SpherePrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void SpherePrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_radius );
 	h.append( m_zMin );
 	h.append( m_zMax );

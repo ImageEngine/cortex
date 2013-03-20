@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -99,6 +99,9 @@ class Primitive : public VisibleRenderable
 		/// Returns the number of values a piece of data must provide for the given
 		/// interpolation type. Must be implemented in all derived classes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const = 0;
+		
+		/// Hash representing the topology only
+		virtual void topologyHash( MurmurHash &h ) const = 0;
 
 	private:
 

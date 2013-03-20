@@ -223,6 +223,10 @@ void ImagePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void ImagePrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void ImagePrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_dataWindow );
 	h.append( m_displayWindow );
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -91,6 +91,8 @@ class MeshPrimitive : public Primitive
 		/// Creates a plane at z=0, with the geometric normal facing down positive z.
 		/// \todo Add subdivisions.
 		static MeshPrimitivePtr createPlane( const Imath::Box2f &b );
+		
+		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:
 

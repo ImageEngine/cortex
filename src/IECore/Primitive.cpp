@@ -171,6 +171,8 @@ void Primitive::hash( MurmurHash &h ) const
 		h.append( it->second.interpolation );
 		it->second.data->hash( h );
 	}
+	
+	topologyHash( h );
 }
 
 struct ValidateArraySize

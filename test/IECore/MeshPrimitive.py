@@ -105,21 +105,33 @@ class TestMeshPrimitive( unittest.TestCase ) :
 	
 		m = MeshPrimitive( IntVectorData(), IntVectorData(), "linear", V3fVectorData() )
 		h = m.hash()
+		t = m.topologyHash()
+		
+		m2 = m.copy()
+		self.assertEqual( m2.hash(), h )
+		self.assertEqual( m2.topologyHash(), t )
 		
 		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ), "linear" )
 		self.assertNotEqual( m.hash(), h )
+		self.assertNotEqual( m.topologyHash(), t )
 		h = m.hash()
+		t = m.topologyHash()
 		
 		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 2, 1 ] ), "linear" )
 		self.assertNotEqual( m.hash(), h )
+		self.assertNotEqual( m.topologyHash(), t )
 		h = m.hash()
+		t = m.topologyHash()
 		
 		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 2, 1 ] ), "catmullClark" )
 		self.assertNotEqual( m.hash(), h )
+		self.assertNotEqual( m.topologyHash(), t )
 		h = m.hash()
+		t = m.topologyHash()
 		
 		m["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( m.hash(), h )
+		self.assertEqual( m.topologyHash(), t )
 		
 	def tearDown( self ) :
 

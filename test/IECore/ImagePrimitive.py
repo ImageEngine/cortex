@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -383,17 +383,23 @@ class TestImagePrimitive( unittest.TestCase ) :
 		w = Box2i( V2i( 0 ), V2i( 10 ) )
 		i = ImagePrimitive( w, w )
 		h = i.hash()
+		t = i.topologyHash()
 		
 		i.displayWindow = Box2i( V2i( 10 ), V2i( 20 ) )
 		self.assertNotEqual( i.hash(), h )
+		self.assertNotEqual( i.topologyHash(), h )
 		h = i.hash()
+		t = i.topologyHash()
 		
 		i.dataWindow = Box2i( V2i( 10 ), V2i( 20 ) )
 		self.assertNotEqual( i.hash(), h )
+		self.assertNotEqual( i.topologyHash(), h )
 		h = i.hash()
+		t = i.topologyHash()
 		
 		i["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( i.hash(), h )
+		self.assertEqual( i.topologyHash(), t )
 		
 	def tearDown( self ) :
 
