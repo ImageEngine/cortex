@@ -78,6 +78,7 @@ from ImageConverterTest import ImageConverterTest
 from ObjectDataTest import ObjectDataTest
 from ToMayaCameraConverterTest import ToMayaCameraConverterTest
 from MayaSceneTest import *
+from SceneShapeTest import SceneShapeTest
 
 IECoreMaya.TestProgram(
 

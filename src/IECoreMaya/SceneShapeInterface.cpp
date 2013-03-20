@@ -360,6 +360,10 @@ MStatus SceneShapeInterface::initialize()
 	s = addAttribute( aBound );
 	assert( s );
 	
+	attributeAffects( aSceneQueries, aTransform );
+	attributeAffects( aSceneQueries, aBound );
+	attributeAffects( aSceneQueries, aOutputObjects );
+	
 	return s;
 }
 
@@ -478,7 +482,9 @@ void SceneShapeInterface::getOutputPlugsArray( MPlugArray &plugArray )
 		MPlug p = pObjects[i];
 		plugArray.append( p );
 	}
-	
+
+	MPlug pQueries( thisMObject(), aSceneQueries );
+
 	MPlug pTransform( thisMObject(), aTransform );
 	for( unsigned i=0; i<pTransform.numElements(); i++ )
 	{
@@ -525,15 +531,16 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			topLevelPlug = topLevelPlug.array();
 		}
 	}
-	
+
 	if( topLevelPlug == aOutputObjects || topLevelPlug == aTransform || topLevelPlug == aBound )
 	{
 		if( index == -1 )
 		{
 			// Couldn't find input index
+			msg( Msg::Warning, "[SceneShapeInterface::compute] Could not find queried index for", plug.name().asChar() );
 			return MS::kSuccess;
 		}
-
+		
 		MDataHandle timeHandle = dataBlock.inputValue( aTime );
 		MTime time = timeHandle.asTime();
 
@@ -559,7 +566,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		
 		if( !scene )
 		{
-			// Queried element doesn't exist. Decide what to do!
+			// Queried element doesn't exist
+			msg( Msg::Warning, "[SceneShapeInterface::compute] Queried element does not exist", name.asChar() );
 			return MS::kSuccess;
 		}
 		if( topLevelPlug == aTransform )
@@ -585,7 +593,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			Imath::extractSHRT( convert<Imath::M44f>( transform ), scale, shear, rotate, translate );
 
 			rotate = radiansToDegrees( rotate );
-			
+
 			MDataHandle transformElementHandle = transformBuilder.addElement( index );
 			transformElementHandle.child( aTranslate ).set3Float( translate[0], translate[1], translate[2] );
 			transformElementHandle.child( aRotate ).set3Float( rotate[0], rotate[1], rotate[2] );

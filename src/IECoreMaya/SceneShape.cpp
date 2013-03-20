@@ -83,6 +83,14 @@ MStatus SceneShape::initialize()
 	assert( s );
 	s = addAttribute( aSceneRootPlug );
 	assert( s );
+	
+	attributeAffects( aSceneFilePlug, aTransform );
+	attributeAffects( aSceneFilePlug, aBound );
+	attributeAffects( aSceneFilePlug, aOutputObjects );
+	
+	attributeAffects( aSceneRootPlug, aTransform );
+	attributeAffects( aSceneRootPlug, aBound );
+	attributeAffects( aSceneRootPlug, aOutputObjects );
 
 	return s;
 }
