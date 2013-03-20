@@ -257,17 +257,17 @@ MStatus SceneShapeInterface::initialize()
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 
-	aRotateX = nAttr.create( "objectRotateX", "orx", MFnNumericData::kFloat, 0, &s );
-	nAttr.setWritable( false );
-	nAttr.setStorable( false );
+	aRotateX = uAttr.create( "objectRotateX", "orx", MFnUnitAttribute::kAngle, 0.0, &s );
+	uAttr.setWritable( false );
+	uAttr.setStorable( false );
 		
-	aRotateY = nAttr.create( "objectRotateY", "ory", MFnNumericData::kFloat, 0, &s );
-	nAttr.setWritable( false );
-	nAttr.setStorable( false );
+	aRotateY = uAttr.create( "objectRotateY", "ory", MFnUnitAttribute::kAngle, 0.0, &s );
+	uAttr.setWritable( false );
+	uAttr.setStorable( false );
 	
-	aRotateZ = nAttr.create( "objectRotateZ", "orz", MFnNumericData::kFloat, 0, &s );
-	nAttr.setWritable( false );
-	nAttr.setStorable( false );	
+	aRotateZ = uAttr.create( "objectRotateZ", "orz", MFnUnitAttribute::kAngle, 0.0, &s );
+	uAttr.setWritable( false );
+	uAttr.setStorable( false );	
 		
 	aRotate = nAttr.create( "objectRotate", "obr", aRotateX, aRotateY, aRotateZ, &s );
 	nAttr.setWritable( false );
@@ -537,8 +537,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		if( index == -1 )
 		{
 			// Couldn't find input index
-			msg( Msg::Warning, "[SceneShapeInterface::compute] Could not find queried index for", plug.name().asChar() );
-			return MS::kSuccess;
+			msg( Msg::Warning, "SceneShapeInterface::compute",  boost::format( "Could not find queried index for '%s' " ) % plug.name().asChar() );
+			return MS::kFailure;
 		}
 		
 		MDataHandle timeHandle = dataBlock.inputValue( aTime );
@@ -567,8 +567,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		if( !scene )
 		{
 			// Queried element doesn't exist
-			msg( Msg::Warning, "[SceneShapeInterface::compute] Queried element does not exist", name.asChar() );
-			return MS::kSuccess;
+			msg( Msg::Warning, "SceneShapeInterface::compute",  boost::format( "Queried element '%s' at index '%s' does not exist " ) % name.asChar() % index );
+			return MS::kFailure;
 		}
 		if( topLevelPlug == aTransform )
 		{
@@ -592,11 +592,11 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			transform.setValue( transformd );
 			Imath::extractSHRT( convert<Imath::M44f>( transform ), scale, shear, rotate, translate );
 
-			rotate = radiansToDegrees( rotate );
-
 			MDataHandle transformElementHandle = transformBuilder.addElement( index );
 			transformElementHandle.child( aTranslate ).set3Float( translate[0], translate[1], translate[2] );
-			transformElementHandle.child( aRotate ).set3Float( rotate[0], rotate[1], rotate[2] );
+			transformElementHandle.child( aRotate ).child( aRotateX ).setMAngle( MAngle( rotate[0] ) );
+			transformElementHandle.child( aRotate ).child( aRotateY ).setMAngle( MAngle( rotate[1] ) );
+			transformElementHandle.child( aRotate ).child( aRotateZ ).setMAngle( MAngle( rotate[2] ) );
 			transformElementHandle.child( aScale ).set3Float( scale[0], scale[1], scale[2] );
 		}
 		else if( topLevelPlug == aOutputObjects && scene->hasObject() )

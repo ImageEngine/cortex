@@ -79,6 +79,8 @@ from ObjectDataTest import ObjectDataTest
 from ToMayaCameraConverterTest import ToMayaCameraConverterTest
 from MayaSceneTest import *
 from SceneShapeTest import SceneShapeTest
+from FnSceneShapeTest import FnSceneShapeTest
+
 
 IECoreMaya.TestProgram(
 
