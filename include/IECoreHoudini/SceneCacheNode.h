@@ -108,7 +108,7 @@ class SceneCacheNode : public BaseType
 		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );
 		
 		/// Called from setFile, setPath, and when either the file or path parameters are changed.
-		/// The default implementation does nothing. Derived nodes may override this if convenient.
+		/// The default implementation sets m_loaded false. Derived nodes may override this if convenient.
 		virtual void sceneChanged();
 		/// get the file and ensure it is a valid SCC
 		bool ensureFile( std::string &file );
@@ -119,6 +119,9 @@ class SceneCacheNode : public BaseType
 		void objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
+		
+		bool m_loaded;
+		IECore::MurmurHash m_hash;
 
 };
 

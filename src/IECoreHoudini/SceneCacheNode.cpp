@@ -189,6 +189,7 @@ int SceneCacheNode<BaseType>::reloadButtonCallback( void *data, int index, float
 template<typename BaseType>
 void SceneCacheNode<BaseType>::sceneChanged()
 {
+	m_loaded = false;
 }
 
 template<typename BaseType>

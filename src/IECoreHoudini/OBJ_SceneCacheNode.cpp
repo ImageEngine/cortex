@@ -145,7 +145,7 @@ void OBJ_SceneCacheNode<BaseType>::cleanHierarchy()
 template<typename BaseType>
 void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 {
-	m_loaded = false;
+	SceneCacheNode<BaseType>::sceneChanged();
 	
 	std::string file;
 	if ( !OBJ_SceneCacheNode<BaseType>::ensureFile( file ) )
@@ -170,11 +170,18 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 template<typename BaseType>
 bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMatrix4 &xform )
 {
+	std::string file = this->getFile();
+	std::string path = this->getPath();
 	OBJ_SceneCacheNode<OP_Node>::Space space = (OBJ_SceneCacheNode<OP_Node>::Space)this->getSpace();
+	
+	MurmurHash hash;
+	hash.append( file );
+	hash.append( path );
+	hash.append( space );
 	
 	if ( m_static )
 	{
-		if ( m_loaded && m_space == space )
+		if ( this->m_loaded && this->m_hash == hash )
 		{
 			xform = m_xform;
 			return true;
@@ -186,14 +193,12 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 		BaseType::getParmList()->setCookTimeDependent( true );
 	}
 	
-	std::string file;
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
 		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .scc" ).c_str() );
 		return false;
 	}
 	
-	std::string path = this->getPath();
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
 	{
@@ -213,8 +218,8 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	
 	xform = IECore::convert<UT_Matrix4D>( transform );
 	m_xform = xform;
-	m_space = space;
-	m_loaded = true;
+	this->m_hash = hash;
+	this->m_loaded = true;
 	
 	return true;
 }
