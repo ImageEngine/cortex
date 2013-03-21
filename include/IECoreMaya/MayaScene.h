@@ -72,14 +72,7 @@ class MayaScene : public IECore::SceneInterface
 		// default constructor
 		MayaScene();
 		
-		// constructor for the factory mechanism
-		MayaScene( const std::string&, IECore::IndexedIO::OpenMode );
-		
 		virtual ~MayaScene();
-		
-		static FileFormatDescription< MayaScene > s_description;
-		
-		// TODO: sort the name() method out!! Should it be returning a const reference? This means I have to have that mutable m_name variable
 		
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
 		virtual Name name() const;

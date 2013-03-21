@@ -36,7 +36,6 @@ IE_CORE_DEFINERUNTIMETYPED( MayaScene );
 
 // this stuff requires a mutex, as all them maya DG functions aint thread safe!
 MayaScene::Mutex MayaScene::s_mutex;
-SceneInterface::FileFormatDescription< MayaScene > MayaScene::s_description( ".ma", IndexedIO::Read );
 
 MayaScene::MayaScene() : m_isRoot( true )
 {
@@ -46,16 +45,6 @@ MayaScene::MayaScene() : m_isRoot( true )
 	MItDag it;
 	it.getPath( m_dagPath );
 }
-
-MayaScene::MayaScene( const std::string&, IndexedIO::OpenMode ) : m_isRoot( true )
-{
-	tbb::mutex::scoped_lock l( s_mutex );
-	
-	// initialize to the root path:
-	MItDag it;
-	it.getPath( m_dagPath );
-}
-
 
 MayaScene::MayaScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 {
