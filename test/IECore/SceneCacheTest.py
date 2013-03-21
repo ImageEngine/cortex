@@ -413,6 +413,55 @@ class SceneCacheTest( unittest.TestCase ) :
 			tmpBounds = m.readBound( time )
 			tmpBounds.extendBy( IECore.Box3d( tmpBounds.min - errorTolerance, tmpBounds.max + errorTolerance ) )
 			self.failUnless( tmpBounds.contains( transformedBound ) )	# interpolated bounding box must contain bounding box of interpolated rotation.
+	
+	def testAnimatedObjectAttributes( self ) :
+		
+		plane = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		box["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2 = box.copy()
+		box2["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		a = s.createChild( "a" )
+		b = a.createChild( "b" )
+		c = a.createChild( "c" )
+		d = a.createChild( "d" )
+		
+		# animated color
+		b.writeObject( box, 0 )
+		b.writeObject( box2, 1 )
+		
+		# static
+		c.writeObject( box, 0 )
+		c.writeObject( box, 1 )
+		
+		# animated topology
+		d.writeObject( box, 0 )
+		d.writeObject( plane, 1 )
+		
+		del s, a, b, c, d
+		
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		
+		a = s.child( "a" )
+		self.assertFalse( a.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertFalse( a.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+		
+		b = a.child( "b" )
+		self.assertFalse( b.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertTrue( b.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+		self.assertEqual( b.readAttribute( "sceneInterface:animatedObjectPrimVars", 0 ), IECore.InternedStringVectorData( [ "Cs" ] ) )
+		
+		c = a.child( "c" )
+		self.assertFalse( c.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertTrue( c.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+		self.assertEqual( c.readAttribute( "sceneInterface:animatedObjectPrimVars", 0 ), IECore.InternedStringVectorData() )
+		
+		d = a.child( "d" )
+		self.assertTrue( d.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertEqual( d.readAttribute( "sceneInterface:animatedObjectTopology", 0 ), IECore.BoolData( True ) )
+		self.assertFalse( d.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -123,6 +123,11 @@ class SceneCache : public SampledSceneInterface
 		SceneInterfacePtr createChild( const Name &name );
 		SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
 		ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
+		
+		// The attribute names used to mark animated topology and primitive variables
+		// when SceneCache objects are Primitives.
+		static const Name &animatedObjectTopologyAttribute;
+		static const Name &animatedObjectPrimVarsAttribute;
 
 	protected:
 	

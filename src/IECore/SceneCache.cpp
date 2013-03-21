@@ -39,6 +39,7 @@
 #include "IECore/HeaderGenerator.h"
 #include "IECore/VisibleRenderable.h"
 #include "IECore/ObjectInterpolator.h"
+#include "IECore/Primitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
 
@@ -66,6 +67,9 @@ static InternedString objectEntry("object");
 static InternedString attributesEntry("attributes");
 static InternedString childrenEntry("children");
 static InternedString sampleTimesEntry("sampleTimes");
+
+const SceneInterface::Name &SceneCache::animatedObjectTopologyAttribute = InternedString( "sceneInterface:animatedObjectTopology" );
+const SceneInterface::Name &SceneCache::animatedObjectPrimVarsAttribute = InternedString( "sceneInterface:animatedObjectPrimVars" );
 
 typedef std::vector<double> SampleTimes;
 
@@ -783,6 +787,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			m_objectSampleTimes.push_back( time );
 			IndexedIOPtr io = m_indexedIO->subdirectory( objectEntry, IndexedIO::CreateIfMissing );
 			object->save( io, sampleEntry(sampleIndex) );
+			
 			const VisibleRenderable *renderable = runTimeCast< const VisibleRenderable >( object );
 			if ( renderable )
 			{
@@ -790,6 +795,42 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				{
 					throw Exception( "Either all object samples must have bounds (VisibleRenderable) or none of them!" );
 				}
+				
+				const Primitive *primitive = runTimeCast< const Primitive >( renderable );
+				if ( primitive )
+				{
+					MurmurHash topologyHash;
+					primitive->topologyHash( topologyHash );
+					topologyHash.append( primitive->typeId() );
+					if ( !m_objectSamples.empty() && topologyHash != m_animatedObjectTopology.first )
+					{
+						m_animatedObjectTopology.second = true;
+					}
+					else
+					{
+						m_animatedObjectTopology = AnimatedHashTest( topologyHash, false );
+					}
+					
+					for ( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(); it != primitive->variables.end(); ++it )
+					{
+						Name primVarName = Name( it->first );
+						
+						MurmurHash hash;
+						it->second.data->hash( hash );
+						hash.append( it->second.interpolation );
+						
+						AnimatedPrimVarMap::iterator pIt = m_animatedObjectPrimVars.find( primVarName );
+						if ( pIt == m_animatedObjectPrimVars.end() )
+						{
+							m_animatedObjectPrimVars.insert( AnimatedPrimVarMap::value_type( primVarName, AnimatedHashTest( hash, false ) ) );
+						}
+						else if ( hash != pIt->second.first )
+						{
+							pIt->second.second = true;
+						}
+					}
+				}
+				
 				Box3f bf = renderable->bound();
 				Box3d bd(
 					V3d( bf.min.x, bf.min.y, bf.min.z ),
@@ -1083,6 +1124,30 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				io = m_indexedIO->subdirectory( transformEntry, IndexedIO::CreateIfMissing );
 				storeSampleTimes( m_transformSampleTimes, io );
 			}
+			
+			// detect if topology or prim vars are animated
+			if ( !m_objectSampleTimes.empty() )
+			{
+				if ( m_animatedObjectTopology.second )
+				{
+					writeAttribute( animatedObjectTopologyAttribute, new BoolData( true ), 0 );
+				}
+				else
+				{
+					InternedStringVectorDataPtr primVarData = new InternedStringVectorData();
+					std::vector<InternedString> &primVars = primVarData->writable();
+					for ( AnimatedPrimVarMap::iterator it = m_animatedObjectPrimVars.begin(); it != m_animatedObjectPrimVars.end(); ++it )
+					{
+						if ( it->second.second )
+						{
+							primVars.push_back( it->first );
+						}
+					}
+					
+					writeAttribute( animatedObjectPrimVarsAttribute, primVarData, 0 );
+				}
+			}
+			
 			// save the attribute sample times
 			if ( m_attributeSampleTimes.size() )
 			{
@@ -1436,6 +1501,12 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		BoxSamples m_objectSamples;
 		// overwriting bounding boxes (or used during flush to compute the final bounding boxes).
 		BoxSamples m_boundSamples;
+		
+		typedef std::pair< MurmurHash, bool> AnimatedHashTest;
+		typedef std::map< SceneCache::Name, AnimatedHashTest > AnimatedPrimVarMap;
+		
+		AnimatedHashTest m_animatedObjectTopology;
+		AnimatedPrimVarMap m_animatedObjectPrimVars;
 };
 
 //////////////////////////////////////////////////////////////////////////
