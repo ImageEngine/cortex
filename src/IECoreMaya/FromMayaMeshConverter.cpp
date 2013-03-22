@@ -278,12 +278,21 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
 		fnMesh.setObject( object() );
 	}
 
-	MFloatPointArray mPoints;
-	fnMesh.getPoints( mPoints, space() );
-
 	V3fVectorDataPtr points = new V3fVectorData;
-	points->writable().resize( mPoints.length() );
-	std::transform( MArrayIter<MFloatPointArray>::begin( mPoints ), MArrayIter<MFloatPointArray>::end( mPoints ), points->writable().begin(), VecConvert<MFloatPoint, V3f>() );
+	int numVerts = fnMesh.numVertices();
+	points->writable().resize( numVerts );
+	
+	if( space() == MSpace::kObject )
+	{
+		const V3f* rawPoints = ( const V3f* )fnMesh.getRawPoints(0);
+		copy( rawPoints, rawPoints + numVerts, points->writable().begin() );
+	}
+	else
+	{
+		MFloatPointArray mPoints;
+		fnMesh.getPoints( mPoints, space() );
+		std::transform( MArrayIter<MFloatPointArray>::begin( mPoints ), MArrayIter<MFloatPointArray>::end( mPoints ), points->writable().begin(), VecConvert<MFloatPoint, V3f>() );
+	}
 	return points;
 }
 
@@ -302,20 +311,47 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
 
 	V3fVectorDataPtr normalsData = new V3fVectorData;
 	vector<V3f> &normals = normalsData->writable();
-	normals.resize( fnMesh.numFaceVertices() );
-
+	normals.reserve( fnMesh.numFaceVertices() );
+	
 	int numPolygons = fnMesh.numPolygons();
-	MFloatVectorArray faceNormals;
-	unsigned int normalIndex = 0;
-	for( int i=0; i<numPolygons; i++ )
+	V3f blankVector;
+	
+	if( space() == MSpace::kObject )
 	{
-		fnMesh.getFaceVertexNormals( i, faceNormals, space() );
-		for( unsigned j=0; j<faceNormals.length(); j++ )
+		const float* rawNormals = fnMesh.getRawNormals(0);
+		MIntArray normalIds;
+		for( int i=0; i<numPolygons; i++ )
 		{
-			normals[normalIndex++] = vecConvert<MVector, V3f>( faceNormals[j] );
+			fnMesh.getFaceNormalIds( i, normalIds );
+			for( unsigned j=0; j < normalIds.length(); ++j )
+			{
+				const float* normalIt = rawNormals + 3 * normalIds[j];
+				normals.push_back( blankVector );
+				V3f& nn = normals.back();
+				nn.x = *normalIt++;
+				nn.y = *normalIt++;
+				nn.z = *normalIt;
+			}
 		}
 	}
-	assert( normalIndex==normals.size() );
+	else
+	{
+		MFloatVectorArray faceNormals;
+		for( int i=0; i<numPolygons; i++ )
+		{
+			fnMesh.getFaceVertexNormals( i, faceNormals, space() );
+			for( unsigned j=0; j<faceNormals.length(); j++ )
+			{
+				MFloatVector& n = faceNormals[j];
+				normals.push_back( blankVector );
+				V3f& nn = normals.back();
+				nn.x = n.x;
+				nn.y = n.y;
+				nn.z = n.z;
+			}
+		}
+	}
+	
 	return normalsData;
 }
 
@@ -345,19 +381,19 @@ void FromMayaMeshConverter::sAndT( const MString &uvSet, IECore::ConstIntVectorD
 		if( s )
 		{
 			vector< float >& sValues = s->writable();
-			sValues.resize( numIndices );
+			sValues.reserve( numIndices );
 			for( size_t i=0; i < numIndices; ++i )
 			{
-				sValues[i] = uArray[ stIndices[i] ];
+				sValues.push_back( uArray[ stIndices[i] ] );
 			}
 		}
 		if( t )
 		{
 			vector< float >& tValues = t->writable();
-			tValues.resize( numIndices );
+			tValues.reserve( numIndices );
 			for( size_t i=0; i < numIndices; ++i )
 			{
-				tValues[i] = 1 - vArray[ stIndices[i] ];
+				tValues.push_back( 1 - vArray[ stIndices[i] ] );
 			}
 		}
 	}
@@ -384,7 +420,26 @@ IECore::FloatVectorDataPtr FromMayaMeshConverter::t( const MString &uvSet ) cons
 	return tData;
 }
 
+
 IECore::IntVectorDataPtr FromMayaMeshConverter::stIndices( const MString &uvSet ) const
+{
+	MFnMesh fnMesh( object() );
+	
+	// get face vertex counts:
+	int numPolygons = fnMesh.numPolygons();
+	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
+	verticesPerFaceData->writable().resize( numPolygons );
+	vector<int>::iterator verticesPerFaceIt = verticesPerFaceData->writable().begin();
+	
+	for( int i=0; i<numPolygons; i++ )
+	{
+		*verticesPerFaceIt++ = fnMesh.polygonVertexCount( i );
+	}
+	
+	return getStIndices( uvSet, verticesPerFaceData );
+}
+
+IECore::IntVectorDataPtr FromMayaMeshConverter::getStIndices( const MString &uvSet, IECore::ConstIntVectorDataPtr verticesPerFaceData ) const
 {
 	MFnMesh fnMesh( object() );
 	IntVectorDataPtr resultData = new IntVectorData;
@@ -396,8 +451,7 @@ IECore::IntVectorDataPtr FromMayaMeshConverter::stIndices( const MString &uvSet 
 	fnMesh.getAssignedUVs( uvCounts, uvIds, &uvSet );
 	
 	// get per face vertex count data:
-	MIntArray vertsPerPoly, vertList;
-	fnMesh.getVertices( vertsPerPoly, vertList );
+	const std::vector<int> &vertsPerPoly = verticesPerFaceData->readable();
 	
 	int numPolygons = fnMesh.numPolygons();
 	int uvIdIndex = 0;
@@ -526,16 +580,13 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	IntVectorDataPtr vertexIds = new IntVectorData;
 	vertexIds->writable().resize( fnMesh.numFaceVertices() );
 	vector<int>::iterator vertexIdsIt = vertexIds->writable().begin();
-
-	MIntArray polygonVertices;
-	for( int i=0; i<numPolygons; i++ )
-	{
-		fnMesh.getPolygonVertices( i, polygonVertices );
-		*verticesPerFaceIt++ = polygonVertices.length();
-		copy( MArrayIter<MIntArray>::begin( polygonVertices ), MArrayIter<MIntArray>::end( polygonVertices ), vertexIdsIt );
-		vertexIdsIt += polygonVertices.length();
-	}
-
+	
+	MIntArray vertexCounts, polygonVertices;
+	fnMesh.getVertices( vertexCounts, polygonVertices );
+	
+	copy( MArrayIter<MIntArray>::begin( vertexCounts ), MArrayIter<MIntArray>::end( vertexCounts ), verticesPerFaceIt );
+	copy( MArrayIter<MIntArray>::begin( polygonVertices ), MArrayIter<MIntArray>::end( polygonVertices ), vertexIdsIt );
+	
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, m_interpolation->getTypedValue() );
 
 	if( m_points->getTypedValue() )
@@ -557,7 +608,7 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 		FloatVectorDataPtr sData = new FloatVectorData;
 		FloatVectorDataPtr tData = new FloatVectorData;
 		
-		IntVectorDataPtr stIndicesData = stIndices( uvSets[i] );
+		IntVectorDataPtr stIndicesData = getStIndices( uvSets[i], verticesPerFaceData );
 		
 		sAndT( uvSets[i], stIndicesData, sData, tData );
 		
