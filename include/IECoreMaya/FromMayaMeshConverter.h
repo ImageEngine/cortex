@@ -126,7 +126,7 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 
 		void constructCommon();
 
-		IECore::FloatVectorDataPtr sOrT( const MString &uvSet, unsigned int index ) const;
+		void sAndT( const MString &uvSet, IECore::ConstIntVectorDataPtr stIndicesData, IECore::FloatVectorDataPtr& s, IECore::FloatVectorDataPtr& t ) const;
 
 		IECore::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
 

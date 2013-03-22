@@ -319,35 +319,69 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
 	return normalsData;
 }
 
-IECore::FloatVectorDataPtr FromMayaMeshConverter::sOrT( const MString &uvSet, unsigned int index ) const
+void FromMayaMeshConverter::sAndT( const MString &uvSet, IECore::ConstIntVectorDataPtr stIndicesData, IECore::FloatVectorDataPtr& s, IECore::FloatVectorDataPtr& t ) const
 {
 	MFnMesh fnMesh( object() );
-	FloatVectorDataPtr resultData = new FloatVectorData;
-	vector<float> &result = resultData->writable();
-	result.resize( fnMesh.numFaceVertices() );
-	int numPolygons = fnMesh.numPolygons();
-	unsigned int resultIndex = 0;
-	for( int i=0; i<numPolygons; i++ )
+	
+	MFloatArray uArray, vArray;
+	fnMesh.getUVs( uArray, vArray, &uvSet );
+	
+	size_t numIndices = stIndicesData->readable().size();
+	
+	if( uArray.length() == 0 )
 	{
-		for( int j=0; j<fnMesh.polygonVertexCount( i ); j++ )
+		if( s )
 		{
-			float uv[2] = { 0, 0 };
-			fnMesh.getPolygonUV( i, j, uv[0], uv[1], &uvSet );
-			result[resultIndex++] = index==1 ? 1-uv[index] : uv[index];
+			s->writable().resize( numIndices, .0f );
+		}
+		if( t )
+		{
+			t->writable().resize( numIndices, .0f );
 		}
 	}
-	return resultData;
-
+	else
+	{
+		const vector< int >& stIndices = stIndicesData->readable();
+		if( s )
+		{
+			vector< float >& sValues = s->writable();
+			sValues.resize( numIndices );
+			for( size_t i=0; i < numIndices; ++i )
+			{
+				sValues[i] = uArray[ stIndices[i] ];
+			}
+		}
+		if( t )
+		{
+			vector< float >& tValues = t->writable();
+			tValues.resize( numIndices );
+			for( size_t i=0; i < numIndices; ++i )
+			{
+				tValues[i] = 1 - vArray[ stIndices[i] ];
+			}
+		}
+	}
+	
 }
 
 IECore::FloatVectorDataPtr FromMayaMeshConverter::s( const MString &uvSet ) const
 {
-	return sOrT( uvSet, 0 );
+	FloatVectorDataPtr sData = new FloatVectorData;
+	FloatVectorDataPtr tData = 0;
+	IntVectorDataPtr stIndicesData = stIndices( uvSet );
+	sAndT( uvSet, stIndicesData, sData, tData );
+	
+	return sData;
 }
 
 IECore::FloatVectorDataPtr FromMayaMeshConverter::t( const MString &uvSet ) const
 {
-	return sOrT( uvSet, 1 );
+	FloatVectorDataPtr sData = 0;
+	FloatVectorDataPtr tData = new FloatVectorData;
+	IntVectorDataPtr stIndicesData = stIndices( uvSet );
+	sAndT( uvSet, stIndicesData, sData, tData );
+	
+	return tData;
 }
 
 IECore::IntVectorDataPtr FromMayaMeshConverter::stIndices( const MString &uvSet ) const
@@ -355,17 +389,42 @@ IECore::IntVectorDataPtr FromMayaMeshConverter::stIndices( const MString &uvSet 
 	MFnMesh fnMesh( object() );
 	IntVectorDataPtr resultData = new IntVectorData;
 	vector<int> &result = resultData->writable();
-	result.resize( fnMesh.numFaceVertices() );
+	result.reserve( fnMesh.numFaceVertices() );
+	
+	// get uv data. A list of uv counts per polygon, and a bunch of uv ids:
+	MIntArray uvCounts, uvIds;
+	fnMesh.getAssignedUVs( uvCounts, uvIds, &uvSet );
+	
+	// get per face vertex count data:
+	MIntArray vertsPerPoly, vertList;
+	fnMesh.getVertices( vertsPerPoly, vertList );
+	
 	int numPolygons = fnMesh.numPolygons();
-	unsigned int resultIndex = 0;
-	for( int i=0; i<numPolygons; i++ )
+	int uvIdIndex = 0;
+	for( int i=0; i < numPolygons; ++i )
 	{
-		for( int j=0; j<fnMesh.polygonVertexCount( i ); j++ )
+		int numPolyUvs = uvCounts[i];
+		int numPolyVerts = vertsPerPoly[i];
+		
+		if( numPolyUvs == 0 )
 		{
-			fnMesh.getPolygonUVid( i, j, result[resultIndex++], &uvSet );
+			for( int j=0; j < numPolyVerts; ++j )
+			{
+				result.push_back( 0 );
+			}
 		}
+		else
+		{
+			for( int j=0; j < numPolyVerts; ++j )
+			{
+				result.push_back( uvIds[ uvIdIndex++ ] );
+			}
+		}
+		
 	}
+	
 	return resultData;
+
 }
 
 IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool forceRgb ) const
@@ -494,9 +553,14 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	fnMesh.getUVSetNames( uvSets );
 	for( unsigned int i=0; i<uvSets.length(); i++ )
 	{
-		FloatVectorDataPtr sData = s( uvSets[i] );
-		FloatVectorDataPtr tData = t( uvSets[i] );
+
+		FloatVectorDataPtr sData = new FloatVectorData;
+		FloatVectorDataPtr tData = new FloatVectorData;
+		
 		IntVectorDataPtr stIndicesData = stIndices( uvSets[i] );
+		
+		sAndT( uvSets[i], stIndicesData, sData, tData );
+		
 		if( uvSets[i]==currentUVSet )
 		{
 			if( m_st->getTypedValue() )
