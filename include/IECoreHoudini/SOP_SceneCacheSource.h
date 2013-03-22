@@ -80,7 +80,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		virtual IECore::ObjectPtr transformObject( IECore::Object *object, Imath::M44d transform );
 		/// Convert the object to Houdini. Implemented to convert using the ToHoudiniGeometryConverter
 		/// factory function.
-		virtual bool convertObject( IECore::Object *object, std::string &name );
+		virtual bool convertObject( IECore::Object *object, std::string &name, const IECore::SceneInterface *scene );
 	
 	private :
 		

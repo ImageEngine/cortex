@@ -993,6 +993,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live )
 	
+	def testTopologyChanges( self ) :
+		
+		## \todo: test animated object with changing topology
+		## \todo: test sop that contains changing topology, static object, and animated P object
+		pass
+	
 	def tearDown( self ) :
 		
 		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile ] :

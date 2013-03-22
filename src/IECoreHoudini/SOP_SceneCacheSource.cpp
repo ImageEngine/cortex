@@ -41,11 +41,15 @@
 #include "IECore/TransformOp.h"
 #include "IECore/VisibleRenderable.h"
 
+#include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
+#include "IECoreHoudini/ToHoudiniAttribConverter.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
+
+static InternedString pName( "P" );
 
 const char *SOP_SceneCacheSource::typeName = "ieSceneCacheSource";
 
@@ -145,48 +149,63 @@ void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int
 
 OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 {
-	/// \todo: check for multiple samples before marking time dependant
 	flags().setTimeDep( true );
-	gdp->stashAll();
 	
 	std::string file;
 	if ( !ensureFile( file ) )
 	{
 		addError( SOP_ATTRIBUTE_INVALID, ( file + " is not a valid .scc" ).c_str() );
-		gdp->destroyStashed();
+		gdp->clearAndDestroy();
 		return error();
 	}
 	
 	std::string path = getPath();
+	Space space = getSpace();
 	
-	UT_String value;
-	evalString( value, pShapeFilter.getToken(), 0, 0 );
+	UT_String shapeFilterStr;
+	evalString( shapeFilterStr, pShapeFilter.getToken(), 0, 0 );
 	UT_StringMMPattern shapeFilter;
-	shapeFilter.compile( value );
+	shapeFilter.compile( shapeFilterStr );
 	
 	UT_String p( "P" );
-	evalString( value, pAttributeFilter.getToken(), 0, 0 );
+	UT_String attributeFilterStr;
+	evalString( attributeFilterStr, pAttributeFilter.getToken(), 0, 0 );
 	UT_StringMMPattern attributeFilter;
-	if ( !p.match( value ) )
+	if ( !p.match( attributeFilterStr ) )
 	{
-		value += " P";
+		attributeFilterStr += " P";
 	}
-	attributeFilter.compile( value );
+	attributeFilter.compile( attributeFilterStr );
 	
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
 	{
 		addError( SOP_ATTRIBUTE_INVALID, ( path + " is not a valid location in " + file ).c_str() );
-		gdp->destroyStashed();
+		gdp->clearAndDestroy();
 		return error();
 	}
 	
-	Space space = getSpace();
+	MurmurHash hash;
+	hash.append( file );
+	hash.append( path );
+	hash.append( space );
+	hash.append( shapeFilterStr );
+	hash.append( attributeFilterStr );
+	
+	if ( !m_loaded || m_hash != hash )
+	{
+		gdp->clearAndDestroy();
+	}
+	
+	/// \todo: need to clearAndDestroy if any shapes have changing topology
+	
 	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, context.getTime() ) : Imath::M44d();
 	
 	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter );
 	
-	gdp->destroyStashed();
+	m_loaded = true;
+	m_hash = hash;
+	
 	return error();
 }
 
@@ -215,7 +234,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		
 		transformObject( object, currentTransform );
 		
-		if ( !convertObject( object, fullName ) )
+		if ( !convertObject( object, fullName, scene ) )
 		{
 			addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + fullName + " to houdini" ).c_str() );
 		}
@@ -292,7 +311,7 @@ IECore::ObjectPtr SOP_SceneCacheSource::transformObject( IECore::Object *object,
 	return object;
 }
 
-bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &name )
+bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &name, const IECore::SceneInterface *scene )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( !renderable )
@@ -300,13 +319,97 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &n
 		return false;
 	}
 	
-	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
-	if ( !converter || !converter->convert( myGdpHandle ) )
+	// attempt to optimize the conversion by re-using animated primitive variables
+	/// \todo: this doesn't account for objects with transforms (P will be changing, but wont be in the attribute)
+	const Primitive *primitive = IECore::runTimeCast<Primitive>( renderable );
+	if ( primitive && !scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute ) && scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute ) )
 	{
-		return false;
+		const ObjectPtr primVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
+		const InternedStringVectorData *primVarData = IECore::runTimeCast<const InternedStringVectorData>( primVarObj );
+		GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+		GA_Range primRange = gdp->getRangeByValue( nameAttrRef, name.c_str() );
+		if ( primVarData && nameAttrRef.isValid() && !primRange.isEmpty() )
+		{
+			const std::vector<InternedString> &primVars = primVarData->readable();
+			// this means constant topology and primitive variables, even though multiple samples were written
+			if ( primVars.empty() )
+			{
+				return true;
+			}
+			
+			bool optimized = false;
+			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
+			for ( std::vector<InternedString>::const_iterator it = primVars.begin(); it != primVars.end(); ++it )
+			{
+				// special case for P unfortunately
+				if ( *it == pName )
+				{
+					const V3fVectorData *positions = primitive->variableData<V3fVectorData>( pName.string() );
+					if ( !positions )
+					{
+						continue;
+					}
+					
+					const std::vector<Imath::V3f> &pos = positions->readable();
+					if ( (size_t)pointRange.getEntries() != pos.size() )
+					{
+						continue;
+					}
+					
+					size_t i = 0;
+					for ( GA_Iterator it=pointRange.begin(); !it.atEnd(); ++it, ++i )
+					{
+						gdp->setPos3( it.getOffset(), IECore::convert<UT_Vector3>( pos[i] ) );
+					}
+					
+					optimized = true;
+				}
+				else
+				{
+					PrimitiveVariableMap::const_iterator pIt = primitive->variables.find( it->string() );
+					if ( pIt == primitive->variables.end() )
+					{
+						continue;
+					}
+					
+					ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( pIt->second.data );
+					if ( !converter )
+					{
+						continue;
+					}
+					
+					if ( pIt->second.interpolation == PrimitiveVariable::Vertex )
+					{
+						converter->convert( pIt->first, gdp, pointRange );
+						optimized = true;
+					}
+					else if ( pIt->second.interpolation == PrimitiveVariable::Uniform )
+					{
+						converter->convert( pIt->first, gdp, primRange );
+						optimized = true;
+					}
+					else
+					{
+						addWarning( SOP_ATTRIBUTE_INVALID, ( pIt->first + " could not be converted for " + name + ". Only Vertex and Uniform variables can be optimized." ).c_str() );
+					}
+				}
+			}
+			
+			if ( optimized )
+			{
+				return true;
+			}
+		}
 	}
 	
-	return true;
+	// fallback to full conversion
+	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	if ( converter && converter->convert( myGdpHandle ) )
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 MatrixTransformPtr SOP_SceneCacheSource::matrixTransform( Imath::M44d t )
