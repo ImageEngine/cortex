@@ -197,8 +197,6 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 		gdp->clearAndDestroy();
 	}
 	
-	/// \todo: need to clearAndDestroy if any shapes have changing topology
-	
 	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, context.getTime() ) : Imath::M44d();
 	
 	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter );
@@ -322,12 +320,12 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &n
 	// attempt to optimize the conversion by re-using animated primitive variables
 	/// \todo: this doesn't account for objects with transforms (P will be changing, but wont be in the attribute)
 	const Primitive *primitive = IECore::runTimeCast<Primitive>( renderable );
+	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+	GA_Range primRange = gdp->getRangeByValue( nameAttrRef, name.c_str() );
 	if ( primitive && !scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute ) && scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute ) )
 	{
 		const ObjectPtr primVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
 		const InternedStringVectorData *primVarData = IECore::runTimeCast<const InternedStringVectorData>( primVarObj );
-		GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-		GA_Range primRange = gdp->getRangeByValue( nameAttrRef, name.c_str() );
 		if ( primVarData && nameAttrRef.isValid() && !primRange.isEmpty() )
 		{
 			const std::vector<InternedString> &primVars = primVarData->readable();
@@ -401,6 +399,10 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &n
 				return true;
 			}
 		}
+	}
+	else
+	{
+		gdp->destroyPrimitives( primRange, true );
 	}
 	
 	// fallback to full conversion

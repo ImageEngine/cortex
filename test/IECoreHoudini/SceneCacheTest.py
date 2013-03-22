@@ -995,9 +995,90 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testTopologyChanges( self ) :
 		
-		## \todo: test animated object with changing topology
-		## \todo: test sop that contains changing topology, static object, and animated P object
-		pass
+		plane = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		box["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2 = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 2 ), IECore.V3f( 3 ) ) )
+		box2["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		
+		s = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		a = s.createChild( "a" )
+		b = a.createChild( "b" )
+		c = a.createChild( "c" )
+		d = a.createChild( "d" )
+		
+		# animated topology
+		b.writeObject( box, 0 )
+		b.writeObject( plane, 1 )
+		
+		# static
+		c.writeObject( box, 0 )
+		c.writeObject( box, 1 )
+		
+		# animated P and Cd
+		d.writeObject( box, 0 )
+		d.writeObject( box2, 1 )
+		del s, a, b, c, d
+		import shutil
+		shutil.copyfile( TestSceneCache.__testFile, "/tmp/changer.scc" )
+		
+		hou.setTime( 0 )
+		node = self.sop()
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 18 )
+		self.assertEqual( len(node.geometry().points()), 24 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/a/b', '/a/c', '/a/d' ] ) )
+		bPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/b' ]
+		cPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/c' ]
+		dPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/d' ]
+		self.assertEqual( len(bPrims), 6 )
+		self.assertEqual( len(cPrims), 6 )
+		self.assertEqual( len(dPrims), 6 )
+		self.assertEqual( bPrims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
+		self.assertEqual( cPrims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
+		self.assertEqual( dPrims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
+		self.assertEqual( bPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
+		self.assertEqual( cPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
+		self.assertEqual( dPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
+		
+		hou.setTime( 1 )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 13 )
+		self.assertEqual( len(node.geometry().points()), 20 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/a/b', '/a/c', '/a/d' ] ) )
+		bPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/b' ]
+		cPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/c' ]
+		dPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/d' ]
+		self.assertEqual( len(bPrims), 1 )
+		self.assertEqual( len(cPrims), 6 )
+		self.assertEqual( len(dPrims), 6 )
+		self.assertEqual( bPrims[0].vertex( 0 ).point().position(), hou.Vector3( -1, 1, 0 ) )
+		self.assertEqual( cPrims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
+		self.assertEqual( dPrims[0].vertex( 0 ).point().position(), hou.Vector3( 2, 2, 2 ) )
+		self.assertEqual( bPrims[0].attribValue( "Cd" ), ( 0, 0, 0 ) )
+		self.assertEqual( cPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
+		self.assertEqual( dPrims[0].attribValue( "Cd" ), ( 0, 1, 0 ) )
+		
+		hou.setTime( 0.5 )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 13 )
+		self.assertEqual( len(node.geometry().points()), 20 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/a/b', '/a/c', '/a/d' ] ) )
+		bPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/b' ]
+		cPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/c' ]
+		dPrims = [ x for x in prims if x.attribValue( nameAttr ) == '/a/d' ]
+		self.assertEqual( len(bPrims), 1 )
+		self.assertEqual( len(cPrims), 6 )
+		self.assertEqual( len(dPrims), 6 )
+		self.assertEqual( bPrims[0].vertex( 0 ).point().position(), hou.Vector3( -1, 1, 0 ) )
+		self.assertEqual( cPrims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
+		self.assertEqual( dPrims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 1, 1 ) )
+		self.assertEqual( bPrims[0].attribValue( "Cd" ), ( 0, 0, 0 ) )
+		self.assertEqual( cPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
+		self.assertEqual( dPrims[0].attribValue( "Cd" ), ( 0.5, 0.5, 0 ) )
 	
 	def tearDown( self ) :
 		
