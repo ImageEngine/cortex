@@ -218,7 +218,22 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		scene->path( p );
 		SceneInterface::pathToString( p, fullName );
 		
-		modifyObject( object, fullName, attributeFilter );
+		bool hasAnimatedTopology = scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute );
+		bool hasAnimatedPrimVars = scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute );
+		std::vector<InternedString> animatedPrimVars;
+		if ( hasAnimatedPrimVars )
+		{
+			const ObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
+			const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj );
+			if ( animatedPrimVarData )
+			{
+				const std::vector<InternedString> &values = animatedPrimVarData->readable();
+				animatedPrimVars.resize( values.size() );
+				std::copy( values.begin(), values.end(), animatedPrimVars.begin() );
+			}
+		}
+		
+		modifyObject( object, fullName, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
 		
 		Imath::M44d currentTransform;
 		if ( space == Local )
@@ -230,9 +245,14 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			currentTransform = transform;
 		}
 		
-		transformObject( object, currentTransform );
+		// transform the object unless its an identity
+		if ( currentTransform != Imath::M44d() )
+		{
+			transformObject( object, currentTransform, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
+		}
 		
-		if ( !convertObject( object, fullName, scene ) )
+		// convert the object to Houdini
+		if ( !convertObject( object, fullName, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
 		{
 			addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + fullName + " to houdini" ).c_str() );
 		}
@@ -247,7 +267,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	}
 }
 
-IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter )
+IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( !renderable )
@@ -280,7 +300,7 @@ IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, st
 	return object;
 };
 
-IECore::ObjectPtr SOP_SceneCacheSource::transformObject( IECore::Object *object, Imath::M44d transform )
+void SOP_SceneCacheSource::transformObject( IECore::Object *object, const Imath::M44d &transform, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
 {
 	Primitive *primitive = IECore::runTimeCast<Primitive>( object );
 	if ( primitive )
@@ -289,27 +309,57 @@ IECore::ObjectPtr SOP_SceneCacheSource::transformObject( IECore::Object *object,
 		transformer->inputParameter()->setValue( primitive );
 		transformer->copyParameter()->setTypedValue( false );
 		transformer->matrixParameter()->setValue( new M44dData( transform ) );
-		return transformer->operate();
+		transformer->operate();
+		
+		std::vector<std::string> &primVars = transformer->pointPrimVarsParameter()->getTypedValue();
+		for ( std::vector<std::string>::iterator it = primVars.begin(); it != primVars.end(); ++it )
+		{
+			if ( std::find( animatedPrimVars.begin(), animatedPrimVars.end(), *it ) == animatedPrimVars.end() )
+			{
+				animatedPrimVars.push_back( *it );
+				hasAnimatedPrimVars = true;
+			}
+		}
+		
+		primVars = transformer->vectorPrimVarsParameter()->getTypedValue();
+		for ( std::vector<std::string>::iterator it = primVars.begin(); it != primVars.end(); ++it )
+		{
+			if ( std::find( animatedPrimVars.begin(), animatedPrimVars.end(), *it ) == animatedPrimVars.end() )
+			{
+				animatedPrimVars.push_back( *it );
+				hasAnimatedPrimVars = true;
+			}
+		}
+		
+		primVars = transformer->normalPrimVarsParameter()->getTypedValue();
+		for ( std::vector<std::string>::iterator it = primVars.begin(); it != primVars.end(); ++it )
+		{
+			if ( std::find( animatedPrimVars.begin(), animatedPrimVars.end(), *it ) == animatedPrimVars.end() )
+			{
+				animatedPrimVars.push_back( *it );
+				hasAnimatedPrimVars = true;
+			}
+		}
+		
+		return;
 	}
 	
 	Group *group = IECore::runTimeCast<Group>( object );
 	if ( group )
 	{
 		group->setTransform( matrixTransform( transform ) );
-		return group;
+		return;
 	}
 	
 	CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( object );
 	if ( coord )
 	{
 		coord->setTransform( matrixTransform( transform ) );
-		return coord;
+		return;
 	}
-	
-	return object;
 }
 
-bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &name, const IECore::SceneInterface *scene )
+bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &name, bool hasAnimatedTopology, bool hasAnimatedPrimVars, const std::vector<InternedString> &animatedPrimVars )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( !renderable )
@@ -318,26 +368,22 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &n
 	}
 	
 	// attempt to optimize the conversion by re-using animated primitive variables
-	/// \todo: this doesn't account for objects with transforms (P will be changing, but wont be in the attribute)
 	const Primitive *primitive = IECore::runTimeCast<Primitive>( renderable );
 	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 	GA_Range primRange = gdp->getRangeByValue( nameAttrRef, name.c_str() );
-	if ( primitive && !scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute ) && scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute ) )
+	if ( primitive && !hasAnimatedTopology && hasAnimatedPrimVars )
 	{
-		const ObjectPtr primVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
-		const InternedStringVectorData *primVarData = IECore::runTimeCast<const InternedStringVectorData>( primVarObj );
-		if ( primVarData && nameAttrRef.isValid() && !primRange.isEmpty() )
+		if ( nameAttrRef.isValid() && !primRange.isEmpty() )
 		{
-			const std::vector<InternedString> &primVars = primVarData->readable();
 			// this means constant topology and primitive variables, even though multiple samples were written
-			if ( primVars.empty() )
+			if ( animatedPrimVars.empty() )
 			{
 				return true;
 			}
 			
 			bool optimized = false;
 			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
-			for ( std::vector<InternedString>::const_iterator it = primVars.begin(); it != primVars.end(); ++it )
+			for ( std::vector<InternedString>::const_iterator it = animatedPrimVars.begin(); it != animatedPrimVars.end(); ++it )
 			{
 				// special case for P unfortunately
 				if ( *it == pName )

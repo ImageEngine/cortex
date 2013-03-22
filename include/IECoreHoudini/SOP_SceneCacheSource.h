@@ -73,16 +73,17 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		virtual OP_ERROR cookMySop( OP_Context &context );
 		
 		/// Modify the object after it has been loaded in memory. Implemented to remove
-		/// PrimitiveVariables that do not match the attributeFilter.
-		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter );
-		/// Transform the object after it has been modified. Implemented to transform
-		/// Primitives (using IECore::TransformOp), Groups, and CoordinateSystems.
-		virtual IECore::ObjectPtr transformObject( IECore::Object *object, Imath::M44d transform );
-		/// Convert the object to Houdini. Implemented to convert using the ToHoudiniGeometryConverter
-		/// factory function.
-		virtual bool convertObject( IECore::Object *object, std::string &name, const IECore::SceneInterface *scene );
+		/// PrimitiveVariables that do not match the attributeFilter. Derived classes
+		/// should update animatedTopology and animatedPrimVars if appropriate.
+		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
 	
 	private :
+		
+		// Transform the object after it has been modified. Transforms Primitives (using IECore::TransformOp),
+		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
+		void transformObject( IECore::Object *object, const Imath::M44d &transform, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
+		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
+		bool convertObject( IECore::Object *object, std::string &name, bool animatedTopology, bool hasAnimatedPrimVars, const std::vector<IECore::InternedString> &animatedPrimVars );
 		
 		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
