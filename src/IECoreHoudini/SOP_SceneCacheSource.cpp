@@ -390,6 +390,7 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &n
 					}
 					else
 					{
+						/// \todo: support FaceVarying and Constant prim vars
 						addWarning( SOP_ATTRIBUTE_INVALID, ( pIt->first + " could not be converted for " + name + ". Only Vertex and Uniform variables can be optimized." ).c_str() );
 					}
 				}
