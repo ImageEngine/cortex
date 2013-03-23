@@ -32,42 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORE_SHAREDSCENEINTERFACES_H
+#define IECORE_SHAREDSCENEINTERFACES_H
 
-#include "OP/OP_Node.h"
+#include "IECore/SceneInterface.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreHoudini/SceneCacheNode.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
-
-using namespace boost::python;
-using namespace IECoreHoudini;
-
-class SceneCacheNodeHelper
+namespace IECore
 {
-};
 
-void IECoreHoudini::bindSceneCacheNode()
+class SharedSceneInterfaces
 {
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
+	public :
+		
+		/// Creates a SceneInterface using a cache, so you don't end up opening the same file multiple times
+		static ConstSceneInterfacePtr get( const std::string &fileName );
+		
+		/// Erase a single file from the cache
+		static void erase( const std::string &fileName );
+		
+		/// Clear the entire cache
+		static void clear();
 	
-	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
-		.value( "World", SceneCacheNode<OP_Node>::World )
-		.value( "Path", SceneCacheNode<OP_Node>::Path )
-		.value( "Local", SceneCacheNode<OP_Node>::Local )
-		.value( "Object", SceneCacheNode<OP_Node>::Object )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
-		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
-		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
-		.value( "FlatGeometry", OBJ_SceneCacheTransform::FlatGeometry )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Depth>( "Depth" )
-		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
-		.value( "Children", OBJ_SceneCacheTransform::Children )
-	;
-}
+	private :
+		
+		class Cache;
+		static Cache& cache();
+
+}; 
+
+} // namespace IECore
+
+#endif // IECORE_SHAREDSCENEINTERFACES_H

@@ -92,9 +92,6 @@ class SceneInterface : public RunTimeTyped
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
 		static SceneInterfacePtr create(const std::string &path, IndexedIO::OpenMode mode);
 		
-		/// Creates an instance using a cache, so you don't end up opening the same file multiple times
-		static SceneInterfacePtr createShared( const std::string &path );
-
 		/// Returns all the file extensions for which a SceneInterface implementation is
 		/// available for the given access mode(s). Extensions do not include the preceding dot character ('.').
 		static std::vector<std::string> supportedExtensions( IndexedIO::OpenMode modes = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append );
@@ -218,10 +215,7 @@ class SceneInterface : public RunTimeTyped
 		class CreatorMap;
 		static CreatorMap &fileCreators();
 		static void registerCreator( const std::string &extension, IndexedIO::OpenMode modes, CreatorFn f );
-		
-		class Cache;
-		static Cache& cache();
-		
+
 };
 
 } // namespace IECore

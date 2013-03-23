@@ -313,6 +313,7 @@
 #include "IECorePython/MPlayDisplayDriverBinding.h"
 #include "IECorePython/ModelCacheBinding.h"
 #include "IECorePython/SceneInterfaceBinding.h"
+#include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
 #include "IECorePython/SceneCacheBinding.h"
 
@@ -631,6 +632,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMPlayDisplayDriver();
 	bindModelCache();
 	bindSceneInterface();
+	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();
 	bindSceneCache();
 

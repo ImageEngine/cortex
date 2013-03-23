@@ -34,40 +34,27 @@
 
 #include "boost/python.hpp"
 
-#include "OP/OP_Node.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreHoudini/SceneCacheNode.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
+#include "IECore/SharedSceneInterfaces.h"
 
 using namespace boost::python;
-using namespace IECoreHoudini;
+using namespace IECore;
 
-class SceneCacheNodeHelper
+namespace IECorePython
 {
-};
 
-void IECoreHoudini::bindSceneCacheNode()
+static SceneInterfacePtr nonConstGet( std::string fileName )
 {
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
-	
-	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
-		.value( "World", SceneCacheNode<OP_Node>::World )
-		.value( "Path", SceneCacheNode<OP_Node>::Path )
-		.value( "Local", SceneCacheNode<OP_Node>::Local )
-		.value( "Object", SceneCacheNode<OP_Node>::Object )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
-		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
-		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
-		.value( "FlatGeometry", OBJ_SceneCacheTransform::FlatGeometry )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Depth>( "Depth" )
-		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
-		.value( "Children", OBJ_SceneCacheTransform::Children )
+	ConstSceneInterfacePtr scene = SharedSceneInterfaces::get( fileName );
+	return const_cast<SceneInterface*>( scene.get() );
+}
+
+void bindSharedSceneInterfaces()
+{
+	class_<SharedSceneInterfaces>( "SharedSceneInterfaces" )
+		.def( "get", nonConstGet ).staticmethod( "get" )
+		.def( "erase", SharedSceneInterfaces::erase ).staticmethod( "erase" )
+		.def( "clear", SharedSceneInterfaces::clear ).staticmethod( "clear" )
 	;
 }
+
+} // namespace IECorePython

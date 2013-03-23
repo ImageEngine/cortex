@@ -45,11 +45,6 @@
 namespace IECoreHoudini
 {
 
-namespace SceneCacheUtil
-{
-class Cache;
-}
-
 /// Abstract class for using an IECore::SceneCache in Houdini.
 /// Derived nodes will do something useful with the data.
 template<typename BaseType>
@@ -93,10 +88,6 @@ class SceneCacheNode : public BaseType
 		void setPath( const IECore::SceneInterface *scene );
 		Space getSpace();
 		void setSpace( Space space );
-		
-		/// Access point to the cache of existing files.
-		/// \todo: replace with the central IECore version once it is finalized.
-		static SceneCacheUtil::Cache &cache();
 	
 	protected :
 		
@@ -124,34 +115,6 @@ class SceneCacheNode : public BaseType
 		IECore::MurmurHash m_hash;
 
 };
-
-namespace SceneCacheUtil
-{
-/// \todo: remove once the central IECore version is finalized.
-class Cache
-{
-	
-	private :
-	
-		IE_CORE_FORWARDDECLARE( FileAndMutex )
-	
-	public :
-	
-		Cache();
-		
-		IECore::ConstSceneInterfacePtr get( const std::string &fileName );
-		void erase( const std::string &fileName );
-		void clear();
-	
-	private :
-	
-		static IECore::ConstSceneInterfacePtr fileCacheGetter( const std::string &fileName, size_t &cost );
-		
-		typedef IECore::LRUCache<std::string, IECore::ConstSceneInterfacePtr> FileCache;
-		FileCache m_fileCache;
-
-};
-}
 
 } // namespace IECoreHoudini
 

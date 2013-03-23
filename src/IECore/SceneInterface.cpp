@@ -35,7 +35,6 @@
 #include "boost/filesystem/convenience.hpp"
 #include "boost/tokenizer.hpp"
 #include "IECore/SceneInterface.h"
-#include "IECore/LRUCache.h"
 
 using namespace IECore;
 
@@ -96,34 +95,6 @@ std::vector<std::string> SceneInterface::supportedExtensions( IndexedIO::OpenMod
 	return extensions;
 }
 
-
-typedef IECore::LRUCache< std::string, IECore::SceneInterfacePtr > SceneLRUCache;
-
-class SceneInterface::Cache : public SceneLRUCache
-{
-	public:
-		
-		Cache( SceneLRUCache::Cost maxCost )
-			: SceneLRUCache( fileCacheGetter, maxCost )
-		{
-		}
-	
-	private:
-	
-		static SceneInterfacePtr fileCacheGetter( const std::string &fileName, size_t &cost )
-		{
-			SceneInterfacePtr result = IECore::SceneInterface::create( fileName, IECore::IndexedIO::Read );
-			cost = 1;
-			return result;
-		}
-};
-
-SceneInterface::Cache& SceneInterface::cache()
-{
-	static Cache cache( 200 );
-	return cache;
-}
-
 SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::OpenMode mode )
 {
 	SceneInterfacePtr result = 0;
@@ -141,11 +112,6 @@ SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::Op
 	}
 
 	return (it->second)(path, mode);
-}
-
-SceneInterfacePtr SceneInterface::createShared( const std::string &path )
-{
-	return cache().get( path );
 }
 
 SceneInterface::~SceneInterface()

@@ -40,6 +40,8 @@
 #include "PRM/PRM_ChoiceList.h"
 #include "SOP/SOP_Node.h"
 
+#include "IECore/SharedSceneInterfaces.h"
+
 #include "IECoreHoudini/SceneCacheNode.h"
 
 using namespace IECore;
@@ -179,7 +181,7 @@ int SceneCacheNode<BaseType>::reloadButtonCallback( void *data, int index, float
 		return 0;
 	}
 	
-	cache().erase( file );
+	SharedSceneInterfaces::erase( file );
 	node->sceneChanged();
 	node->forceRecook();
 	
@@ -312,7 +314,7 @@ void SceneCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std
 template<typename BaseType>
 ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileName, const std::string &path )
 {
-	ConstSceneInterfacePtr result = cache().get( fileName );
+	ConstSceneInterfacePtr result = SharedSceneInterfaces::get( fileName );
 	if ( path != SceneInterface::rootName.string() )
 	{
 		SceneInterface::Path p;
@@ -342,44 +344,6 @@ Imath::M44d SceneCacheNode<BaseType>::worldTransform( const std::string &fileNam
 		result = scene->readTransformAsMatrix( time ) * result;
 	}
 	
-	return result;
-}
-
-static SceneCacheUtil::Cache c;
-
-template<typename BaseType>
-SceneCacheUtil::Cache &SceneCacheNode<BaseType>::cache()
-{
-	return c;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// SceneCacheUtil Cache implementation
-//////////////////////////////////////////////////////////////////////////////////////////
-
-SceneCacheUtil::Cache::Cache() : m_fileCache( fileCacheGetter, 200 )
-{
-};
-
-ConstSceneInterfacePtr SceneCacheUtil::Cache::get( const std::string &fileName )
-{
-	return m_fileCache.get( fileName );
-}
-
-void SceneCacheUtil::Cache::erase( const std::string &fileName )
-{
-	m_fileCache.erase( fileName );
-}
-
-void SceneCacheUtil::Cache::clear()
-{
-	m_fileCache.clear();
-}
-
-ConstSceneInterfacePtr SceneCacheUtil::Cache::fileCacheGetter( const std::string &fileName, size_t &cost )
-{
-	ConstSceneInterfacePtr result = new SceneCache( fileName, IndexedIO::Read );
-	cost = 1;
 	return result;
 }
 

@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/SharedSceneInterfaces.h"
 
 #include "IECoreMaya/SceneShape.h"
 #include "IECoreMaya/MayaTypeIds.h"
@@ -112,7 +113,7 @@ IECore::SceneInterfacePtr SceneShape::getSceneInterface()
 	
 	try
 	{
-		m_scene = IECore::SceneInterface::createShared( sceneFile.asChar() );
+		m_scene = IECore::SharedSceneInterfaces::get( sceneFile.asChar() );
 		IECore::SceneInterface::Path rootPath;
 		IECore::SceneInterface::stringToPath( sceneRoot.asChar(), rootPath );
 		m_scene = m_scene->scene( rootPath );

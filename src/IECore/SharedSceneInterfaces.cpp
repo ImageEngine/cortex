@@ -32,42 +32,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include "IECore/LRUCache.h"
+#include "IECore/SharedSceneInterfaces.h"
 
-#include "OP/OP_Node.h"
+using namespace IECore;
 
-#include "IECorePython/RunTimeTypedBinding.h"
+//////////////////////////////////////////////////////////////////////////////////////////
+// Cache implementation
+//////////////////////////////////////////////////////////////////////////////////////////
 
-#include "IECoreHoudini/SceneCacheNode.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
+typedef IECore::LRUCache< std::string, IECore::ConstSceneInterfacePtr > SceneLRUCache;
 
-using namespace boost::python;
-using namespace IECoreHoudini;
-
-class SceneCacheNodeHelper
+class SharedSceneInterfaces::Cache : public SceneLRUCache
 {
+	public :
+		
+		Cache( SceneLRUCache::Cost maxCost )
+			: SceneLRUCache( fileCacheGetter, maxCost )
+		{
+		}
+	
+	private :
+		
+		static SceneInterfacePtr fileCacheGetter( const std::string &fileName, size_t &cost )
+		{
+			SceneInterfacePtr result = SceneInterface::create( fileName, IECore::IndexedIO::Read );
+			cost = 1;
+			return result;
+		}
 };
 
-void IECoreHoudini::bindSceneCacheNode()
+SharedSceneInterfaces::Cache &SharedSceneInterfaces::cache()
 {
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
-	
-	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
-		.value( "World", SceneCacheNode<OP_Node>::World )
-		.value( "Path", SceneCacheNode<OP_Node>::Path )
-		.value( "Local", SceneCacheNode<OP_Node>::Local )
-		.value( "Object", SceneCacheNode<OP_Node>::Object )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
-		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
-		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
-		.value( "FlatGeometry", OBJ_SceneCacheTransform::FlatGeometry )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Depth>( "Depth" )
-		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
-		.value( "Children", OBJ_SceneCacheTransform::Children )
-	;
+	static Cache cache( 200 );
+	return cache;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// SharedSceneInterfaces implementation
+//////////////////////////////////////////////////////////////////////////////////////////
+
+ConstSceneInterfacePtr SharedSceneInterfaces::get( const std::string &fileName )
+{
+	return cache().get( fileName );
+}
+
+void SharedSceneInterfaces::erase( const std::string &fileName )
+{
+	cache().erase( fileName );
+}
+
+void SharedSceneInterfaces::clear()
+{
+	cache().clear();
 }

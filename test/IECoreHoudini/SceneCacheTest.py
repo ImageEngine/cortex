@@ -1086,7 +1086,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			if os.path.exists( f ) :
 				os.remove( f )
 		
-		IECoreHoudini.SceneCacheNode.clearCache()
+		IECore.SharedSceneInterfaces.clear()
 
 if __name__ == "__main__":
     unittest.main()

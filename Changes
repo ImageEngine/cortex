@@ -1,7 +1,7 @@
 Additions :
 
-* IECoreMaya: ieSceneShape maya node now uses SceneInterface::createShared(), so it's not super slow when you've got a scene with multiple nodes referencing the same file.
-* createShared static method added to SceneInterface, which uses an LRU cache so you don't end up opening the same file over and over again
+* IECoreMaya: ieSceneShape maya node now uses SharedSceneInterfaces, so it's not super slow when you've got a scene with multiple nodes referencing the same file.
+* Added SharedSceneInterfaces, which uses an LRU cache so you don't end up opening the same file over and over again
 * It's now possible to register FromMayaDagConverters for plugin maya nodes. Added the FromMayaProceduralHolderConverter.
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::SceneCache files, and a ROP for writing them
 * Added InternedStringData and InternedStringVectorDataTypes.

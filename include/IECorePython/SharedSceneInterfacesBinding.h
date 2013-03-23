@@ -32,42 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREPYTHON_SHAREDSCENEINTERFACESBINDING_H
+#define IECOREPYTHON_SHAREDSCENEINTERFACESBINDING_H
 
-#include "OP/OP_Node.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreHoudini/SceneCacheNode.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
-
-using namespace boost::python;
-using namespace IECoreHoudini;
-
-class SceneCacheNodeHelper
+namespace IECorePython
 {
-};
 
-void IECoreHoudini::bindSceneCacheNode()
-{
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
-	
-	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
-		.value( "World", SceneCacheNode<OP_Node>::World )
-		.value( "Path", SceneCacheNode<OP_Node>::Path )
-		.value( "Local", SceneCacheNode<OP_Node>::Local )
-		.value( "Object", SceneCacheNode<OP_Node>::Object )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
-		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
-		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
-		.value( "FlatGeometry", OBJ_SceneCacheTransform::FlatGeometry )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Depth>( "Depth" )
-		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
-		.value( "Children", OBJ_SceneCacheTransform::Children )
-	;
+void bindSharedSceneInterfaces();
+
 }
+
+#endif // IECOREPYTHON_SHAREDSCENEINTERFACESBINDING_H
