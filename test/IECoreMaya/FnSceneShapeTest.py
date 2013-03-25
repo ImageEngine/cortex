@@ -75,22 +75,22 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 		self.writeSCC()
 		node = maya.cmds.createNode( "ieSceneShape" )
-		maya.cmds.setAttr( node+'.sceneFile', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( node+'.file', FnSceneShapeTest.__testFile,type='string' )
 
 		fn = IECoreMaya.FnSceneShape( node )
 		
 		# Check scene for a wrong path
-		maya.cmds.setAttr( node+'.sceneRoot', 'blabla', type='string' )
+		maya.cmds.setAttr( node+'.root', 'blabla', type='string' )
 		scene = fn.sceneInterface()
 		self.assertEqual( scene, None )
 		
-		maya.cmds.setAttr( node+'.sceneRoot', '/', type='string' )
+		maya.cmds.setAttr( node+'.root', '/', type='string' )
 		scene = fn.sceneInterface()
 		self.assertTrue( isinstance( scene, IECore.SceneCache ) )
 		self.assertEqual( scene.childNames(), ['1'] )
 		self.assertFalse( scene.hasObject() )
 		
-		maya.cmds.setAttr( node+'.sceneRoot', '/1', type='string' )
+		maya.cmds.setAttr( node+'.root', '/1', type='string' )
 		scene = fn.sceneInterface()
 		self.assertTrue( isinstance( scene, IECore.SceneCache ) )
 		self.assertEqual( scene.childNames(), ['child'] )
@@ -120,19 +120,19 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		self.writeSCC()
 		fn = IECoreMaya.FnSceneShape.create( "test" )
-		maya.cmds.setAttr( fn.fullPathName()+'.sceneFile', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
 		result = fn.expandScene()
 		
 		self.assertTrue( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ) )
-		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".sceneQueries[0]" ), "/1" )
+		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".objectQueries[0]" ), "/1" )
 		
 		self.assertTrue( len(result) == 1 )
 		childFn = result[0]
 		self.assertTrue( isinstance( childFn, IECoreMaya.FnSceneShape ) )
 		self.assertEqual( childFn.fullPathName(), "|test|sceneShape_1|sceneShape_Shape1" )
-		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".sceneFile" ), FnSceneShapeTest.__testFile )
-		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".sceneRoot" ), "/1" )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".file" ), FnSceneShapeTest.__testFile )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".root" ), "/1" )
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".objectTransform[0].objectTranslate", "|test|sceneShape_1.translate" ) )
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".objectTransform[0].objectRotate", "|test|sceneShape_1.rotate" ) )
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".objectTransform[0].objectScale", "|test|sceneShape_1.scale" ) )
@@ -141,13 +141,13 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		result = childFn.expandScene()
 		
 		self.assertTrue( maya.cmds.getAttr( childFn.fullPathName()+".objectOnly" ) )
-		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".sceneQueries[0]" ), "/child" )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".objectQueries[0]" ), "/child" )
 		
 		self.assertTrue( len(result) == 1 )
 		self.assertTrue( isinstance( result[0], IECoreMaya.FnSceneShape ) )
 		self.assertEqual( result[0].fullPathName(), "|test|sceneShape_1|child|childShape" )
-		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".sceneFile" ), FnSceneShapeTest.__testFile )
-		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".sceneRoot" ), "/1/child" )
+		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".file" ), FnSceneShapeTest.__testFile )
+		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".root" ), "/1/child" )
 		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".objectTransform[0].objectTranslate", "|test|sceneShape_1|child.translate" ) )
 		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".objectTransform[0].objectRotate", "|test|sceneShape_1|child.rotate" ) )
 		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".objectTransform[0].objectScale", "|test|sceneShape_1|child.scale" ) )
@@ -158,7 +158,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		self.writeSCC()
 		fn = IECoreMaya.FnSceneShape.create( "test" )
-		maya.cmds.setAttr( fn.fullPathName()+'.sceneFile', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
 		result = fn.expandScene()
 		result[0].expandScene()
@@ -176,7 +176,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		self.writeSCC()
 		fn = IECoreMaya.FnSceneShape.create( "test" )
-		maya.cmds.setAttr( fn.fullPathName()+'.sceneFile', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
 		fn.convertToGeometry()
 		
@@ -189,7 +189,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.visibility" ), 0 )
 		self.assertEqual( maya.cmds.nodeType( "|test|sceneShape_1|sceneShape_1_mesh" ), "mesh")
 		
-		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.sceneQueries[1]" ), "/" )
+		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.objectQueries[1]" ), "/" )
 		self.assertTrue( maya.cmds.isConnected( "|test|sceneShape_1|sceneShape_Shape1.outputObjects[1]", "|test|sceneShape_1|sceneShape_1_mesh.inMesh" ) )
 		
 		

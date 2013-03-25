@@ -104,16 +104,16 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		
 		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( 'ieSceneShape' )
-		maya.cmds.setAttr( node+'.sceneFile', SceneShapeTest.__testFile,type='string' )
-		maya.cmds.setAttr( node+'.sceneRoot',"/",type='string' )
+		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( node+'.root',"/",type='string' )
 		
 		self.assertEqual( maya.cmds.getAttr( node+".objectTransform", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outputObjects", mi=True ), None)
 		
-		maya.cmds.setAttr( node+".sceneQueries[0]", "/1", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[1]", "/1/2", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[2]", "/1/2/3", type="string")
+		maya.cmds.setAttr( node+".objectQueries[0]", "/1", type="string")
+		maya.cmds.setAttr( node+".objectQueries[1]", "/1/2", type="string")
+		maya.cmds.setAttr( node+".objectQueries[2]", "/1/2/3", type="string")
 		
 		self.assertEqual( maya.cmds.getAttr( node+".objectTransform", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), None)
@@ -140,7 +140,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), [1])
 		self.assertEqual( maya.cmds.getAttr( node+".outputObjects", mi=True ), [2])
 		
-		maya.cmds.setAttr( node+".sceneQueries[3]", "/", type="string");
+		maya.cmds.setAttr( node+".objectQueries[3]", "/", type="string");
 		self.assertEqual( maya.cmds.getAttr( node+".objectTransform", mi=True ), [0, 1, 2])
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), [1])
 		self.assertEqual( maya.cmds.getAttr( node+".outputObjects", mi=True ), [2])
@@ -152,12 +152,12 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 
 		node = maya.cmds.createNode( 'ieSceneShape' )
-		maya.cmds.setAttr( node+'.sceneFile', SceneShapeTest.__testPlugFile,type='string' )
-		maya.cmds.setAttr( node+'.sceneRoot',"/",type='string' )
+		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugFile,type='string' )
+		maya.cmds.setAttr( node+'.root',"/",type='string' )
 
-		maya.cmds.setAttr( node+".sceneQueries[0]", "/1", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[1]", "/1/2", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[2]", "/1/2/3", type="string")
+		maya.cmds.setAttr( node+".objectQueries[0]", "/1", type="string")
+		maya.cmds.setAttr( node+".objectQueries[1]", "/1/2", type="string")
+		maya.cmds.setAttr( node+".objectQueries[2]", "/1/2/3", type="string")
 
 		# World space
 		maya.cmds.setAttr( node+".querySpace", 0)
@@ -204,11 +204,11 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".objectTransform[2].objectScale"), [(1.0, 1.0, 1.0)] )
 
 		# Change the root path
-		maya.cmds.setAttr( node+'.sceneRoot', "/1",type='string' )
+		maya.cmds.setAttr( node+'.root', "/1",type='string' )
 		
-		maya.cmds.setAttr( node+".sceneQueries[0]", "/", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[1]", "/2", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[2]", "/2/3", type="string")
+		maya.cmds.setAttr( node+".objectQueries[0]", "/", type="string")
+		maya.cmds.setAttr( node+".objectQueries[1]", "/2", type="string")
+		maya.cmds.setAttr( node+".objectQueries[2]", "/2/3", type="string")
 		
 		# World space
 		maya.cmds.setAttr( node+".querySpace", 0)
@@ -262,13 +262,13 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( 'ieSceneShape' )
 		maya.cmds.connectAttr( "time1.outTime", node+".time" )
-		maya.cmds.setAttr( node+'.sceneFile', SceneShapeTest.__testPlugAnimFile,type='string' )
+		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugAnimFile,type='string' )
 
-		maya.cmds.setAttr( node+'.sceneRoot',"/",type='string' )
+		maya.cmds.setAttr( node+'.root',"/",type='string' )
 		
-		maya.cmds.setAttr( node+".sceneQueries[0]", "/1", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[1]", "/1/2", type="string")
-		maya.cmds.setAttr( node+".sceneQueries[2]", "/1/2/3", type="string")
+		maya.cmds.setAttr( node+".objectQueries[0]", "/1", type="string")
+		maya.cmds.setAttr( node+".objectQueries[1]", "/1/2", type="string")
+		maya.cmds.setAttr( node+".objectQueries[2]", "/1/2/3", type="string")
 
 		maya.cmds.currentTime( 0 )
 

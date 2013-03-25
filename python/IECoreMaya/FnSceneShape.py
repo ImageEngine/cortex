@@ -183,8 +183,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		if len(newSceneShapeFns):
 			return newSceneShapeFns
 
-		sceneFile = maya.cmds.getAttr( node+".sceneFile" )
-		sceneRoot = maya.cmds.getAttr( node+".sceneRoot" )
+		sceneFile = maya.cmds.getAttr( node+".file" )
+		sceneRoot = maya.cmds.getAttr( node+".root" )
 		
 		maya.cmds.setAttr( node+".querySpace", 1 )
 		maya.cmds.setAttr( node+".objectOnly", l=False )
@@ -197,15 +197,15 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		for i, child in enumerate( sceneChildren ):
 			
-			maya.cmds.setAttr( node+".sceneQueries["+str(i)+"]", "/"+child, type="string" )
+			maya.cmds.setAttr( node+".objectQueries["+str(i)+"]", "/"+child, type="string" )
 			
 			# Create sceneShape for child
 			fnChild = IECoreMaya.FnSceneShape.create( child )
 			childNode = fnChild.fullPathName()
 			childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
-			maya.cmds.setAttr( childNode+".sceneFile", sceneFile, type="string" )
+			maya.cmds.setAttr( childNode+".file", sceneFile, type="string" )
 			sceneRootName = "/"+child if sceneRoot == "/" else sceneRoot+"/"+child
-			maya.cmds.setAttr( childNode+".sceneRoot", sceneRootName, type="string" )
+			maya.cmds.setAttr( childNode+".root", sceneRootName, type="string" )
 			
 			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectTranslate", childTransform+".translate" )
 			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectRotate", childTransform+".rotate" )
@@ -282,19 +282,19 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 					continue
 				
 				index = None
-				validIndices = maya.cmds.getAttr( sceneShape+".sceneQueries", mi=True )
+				validIndices = maya.cmds.getAttr( sceneShape+".objectQueries", mi=True )
 				
 				if validIndices == [] or validIndices is None:
 					index = 0
 				else:
 					for i in validIndices:
-						if maya.cmds.getAttr( sceneShape+".sceneQueries["+str(i)+"]") == "/":
+						if maya.cmds.getAttr( sceneShape+".objectQueries["+str(i)+"]") == "/":
 							index = i
 					if index is None:
 						# Didn't find "/", get the next available index
 						index = max( i for i in validIndices ) +1
 				
-				maya.cmds.setAttr( sceneShape+".sceneQueries["+str(index)+"]", "/", type="string" )
+				maya.cmds.setAttr( sceneShape+".objectQueries["+str(index)+"]", "/", type="string" )
 				
 				if isinstance( object, IECore.MeshPrimitive ):
 					mesh = maya.cmds.createNode( "mesh", parent = parent, name = shapeName )

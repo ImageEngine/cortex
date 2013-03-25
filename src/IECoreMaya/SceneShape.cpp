@@ -75,12 +75,12 @@ MStatus SceneShape::initialize()
 	MFnTypedAttribute tAttr;
 	
 	// will need to check for sceneFile extensions
-	aSceneFilePlug = tAttr.create( "sceneFile", "scf", MFnData::kString, &s );
+	aSceneFilePlug = tAttr.create( "file", "scf", MFnData::kString, &s );
 	assert( s );
 	s = addAttribute( aSceneFilePlug );
 	assert( s );
 	
-	aSceneRootPlug = tAttr.create( "sceneRoot", "scr", MFnData::kString, MFnStringData().create( "/" ), &s );
+	aSceneRootPlug = tAttr.create( "root", "scr", MFnData::kString, MFnStringData().create( "/" ), &s );
 	assert( s );
 	s = addAttribute( aSceneRootPlug );
 	assert( s );
@@ -96,7 +96,7 @@ MStatus SceneShape::initialize()
 	return s;
 }
 
-IECore::SceneInterfacePtr SceneShape::getSceneInterface()
+IECore::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 {
 	if( !m_sceneDirty )
 	{

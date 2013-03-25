@@ -53,8 +53,8 @@ static IECore::SceneInterfacePtr sceneInterface( MFnDependencyNode *fnDN )
 	MPxNode *userNode = fnDN->userNode();
 	SceneShapeInterface *sc = dynamic_cast<SceneShapeInterface *>( userNode );
 	assert( sc );
-	IECore::SceneInterfacePtr scnInterface = sc->getSceneInterface();
-	return scnInterface;
+	IECore::ConstSceneInterfacePtr scnInterface = sc->getSceneInterface();
+	return const_cast<IECore::SceneInterface*>( scnInterface.get() );
 }
 
 static list childrenNames( MFnDependencyNode *fnDN )

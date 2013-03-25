@@ -98,7 +98,10 @@ MObject SceneShapeInterface::aDrawChildBounds;
 MObject SceneShapeInterface::aQuerySpace;
 MObject SceneShapeInterface::aTime;
 MObject SceneShapeInterface::aSceneQueries;
+MObject SceneShapeInterface::aAttributeQueries;
 MObject SceneShapeInterface::aOutputObjects;
+MObject SceneShapeInterface::aAttributes;
+MObject SceneShapeInterface::aAttributeValues;
 MObject SceneShapeInterface::aTransform;
 MObject SceneShapeInterface::aTranslate;
 MObject SceneShapeInterface::aTranslateX;
@@ -212,7 +215,7 @@ MStatus SceneShapeInterface::initialize()
 
 	// Queries
 	
-	aSceneQueries = tAttr.create( "sceneQueries", "sqy", MFnData::kString, &s );
+	aSceneQueries = tAttr.create( "objectQueries", "oqy", MFnData::kString, &s );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -222,6 +225,17 @@ MStatus SceneShapeInterface::initialize()
 	tAttr.setIndexMatters( true );
 
 	s = addAttribute( aSceneQueries );
+	
+	aAttributeQueries = tAttr.create( "attributeQueries", "aqy", MFnData::kString, &s );
+	tAttr.setReadable( true );
+	tAttr.setWritable( true );
+	tAttr.setStorable( true );
+	tAttr.setConnectable( true );
+	tAttr.setHidden( false );
+	tAttr.setArray( true );
+	tAttr.setIndexMatters( true );
+
+	s = addAttribute( aAttributeQueries );
 
 	// Output objects
 
@@ -360,14 +374,45 @@ MStatus SceneShapeInterface::initialize()
 	s = addAttribute( aBound );
 	assert( s );
 	
+	// Attributes
+	
+	MFnGenericAttribute genAttr;
+	aAttributeValues = genAttr.create( "attributeValues", "atv", &s );
+	genAttr.addNumericDataAccept( MFnNumericData::kBoolean );
+	genAttr.addNumericDataAccept( MFnNumericData::kInt );
+	genAttr.addNumericDataAccept( MFnNumericData::kFloat );
+	genAttr.addDataAccept( MFnData::kString );
+	genAttr.setReadable( true );
+	genAttr.setWritable( false );
+	genAttr.setStorable( false );
+	genAttr.setConnectable( true );
+	genAttr.setHidden( true );
+	genAttr.setArray( true );
+	genAttr.setIndexMatters( true );
+	genAttr.setUsesArrayDataBuilder( true );
+
+	addAttribute( aAttributeValues );
+
+	
+	aAttributes = cAttr.create( "attributes", "ott" );
+	cAttr.addChild( aAttributeValues );
+	cAttr.setArray( true );
+	cAttr.setIndexMatters( true );
+	cAttr.setUsesArrayDataBuilder( true );
+	cAttr.setReadable( true );
+	
+	s = addAttribute( aAttributes );
+	
 	attributeAffects( aSceneQueries, aTransform );
 	attributeAffects( aSceneQueries, aBound );
 	attributeAffects( aSceneQueries, aOutputObjects );
+	attributeAffects( aSceneQueries, aAttributes );
+
 	
 	return s;
 }
 
-IECore::SceneInterfacePtr SceneShapeInterface::getSceneInterface( )
+IECore::ConstSceneInterfacePtr SceneShapeInterface::getSceneInterface( )
 {
 	throw Exception( "SceneShapeInterface: getSceneInterface not implemented!" );
 }
@@ -387,7 +432,7 @@ MBoundingBox SceneShapeInterface::boundingBox() const
 {
 	MBoundingBox bound( MPoint( -1, -1, -1 ), MPoint( 1, 1, 1 ) );
 	
-	SceneInterfacePtr scn = const_cast<SceneShapeInterface*>(this)->getSceneInterface();
+	ConstSceneInterfacePtr scn = const_cast<SceneShapeInterface*>(this)->getSceneInterface();
 	
 	if( scn )
 	{
@@ -454,7 +499,8 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 {
 	if( plug == aTime )
 	{
-		IECore::SceneCachePtr sceneInterface = runTimeCast< IECore::SceneCache >(getSceneInterface());
+		IECore::ConstSceneCachePtr sceneInterface = runTimeCast< const IECore::SceneCache >(getSceneInterface());
+		
 		if( sceneInterface && sceneInterface -> numBoundSamples() > 1 )
 		{
 			m_previewSceneDirty = true;
@@ -483,8 +529,6 @@ void SceneShapeInterface::getOutputPlugsArray( MPlugArray &plugArray )
 		plugArray.append( p );
 	}
 
-	MPlug pQueries( thisMObject(), aSceneQueries );
-
 	MPlug pTransform( thisMObject(), aTransform );
 	for( unsigned i=0; i<pTransform.numElements(); i++ )
 	{
@@ -510,6 +554,18 @@ void SceneShapeInterface::getOutputPlugsArray( MPlugArray &plugArray )
 			plugArray.append( p.child( j ).child( 2 ) );
 		}
 	}
+	
+	MPlug pAttributes( thisMObject(), aAttributes);
+	for( unsigned i=0; i<pAttributes.numElements(); i++ )
+	{
+		MPlug p = pAttributes[i];
+		MPlug pChild = p.child(0);
+		plugArray.append( pChild );
+		for( unsigned j=0; j<pChild.numElements(); j++ )
+		{
+			plugArray.append( pChild[j] );
+		}
+	}
 }
 
 
@@ -532,7 +588,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		}
 	}
 
-	if( topLevelPlug == aOutputObjects || topLevelPlug == aTransform || topLevelPlug == aBound )
+	if( topLevelPlug == aOutputObjects || topLevelPlug == aTransform || topLevelPlug == aBound || topLevelPlug == aAttributes )
 	{
 		if( index == -1 )
 		{
@@ -669,6 +725,69 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			boundElementHandle.child( aBoundMax ).set3Float( bound.max[0],  bound.max[1],  bound.max[2] );
 			Imath::V3f boundCenter = bound.center();
 			boundElementHandle.child( aBoundCenter ).set3Float( boundCenter[0], boundCenter[1], boundCenter[2] );
+		}
+		else if( topLevelPlug == aAttributes )
+		{
+
+			int attrIndex = -1;
+			if( plug.isElement() && !plug.isCompound() )
+			{
+				attrIndex = plug.logicalIndex();
+			}
+			else
+			{
+				return MS::kFailure;
+			}
+
+			MPlug pAttributeQueries( thisMObject(), aAttributeQueries );
+			MPlug pAttributeQuery = pAttributeQueries.elementByLogicalIndex( attrIndex );
+			MString attrName;
+			pAttributeQuery.getValue( attrName );
+
+			if( !scene->hasAttribute( attrName.asChar() ) )
+			{
+				// Queried attribute doesn't exist
+				msg( Msg::Warning, "SceneShapeInterface::compute",  boost::format( "Queried attribute '%s' at index '%s' does not exist " ) % attrName.asChar() % attrIndex );
+				return MS::kFailure;
+			}
+
+			MArrayDataHandle attributesHandle = dataBlock.outputArrayValue( aAttributes );
+			MArrayDataBuilder builder = attributesHandle.builder();
+			
+			MDataHandle elementHandle = builder.addElement( index );
+			
+			MDataHandle attributeValuesHandle = elementHandle.child( aAttributeValues );
+			
+			MArrayDataHandle arrayHandle( attributeValuesHandle );
+			arrayHandle.jumpToElement( attrIndex );
+			MDataHandle currentElement = arrayHandle.outputValue();
+			
+			ObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
+			IECore::TypeId type = attrValue->typeId();
+			if( type == IECore::BoolDataTypeId )
+			{
+				IECore::ConstBoolDataPtr val = runTimeCast< IECore::BoolData >(attrValue);
+				bool value = val->readable();
+				currentElement.setGenericBool( value, true);
+			}
+			else if( type == IECore::FloatDataTypeId )
+			{
+				IECore::ConstFloatDataPtr val = runTimeCast< IECore::FloatData >(attrValue);
+				float value = val->readable();
+				currentElement.setGenericFloat( value, true);
+			}
+			else if( type == IECore::IntDataTypeId )
+			{
+				IECore::ConstIntDataPtr val = runTimeCast< IECore::IntData >(attrValue);
+				int value = val->readable();
+				currentElement.setGenericInt( value, true);
+			}
+			else if( type == IECore::StringDataTypeId )
+			{
+				IECore::ConstStringDataPtr val = runTimeCast< IECore::StringData >(attrValue);
+				MString value( val->readable().c_str() );
+				currentElement.setString( value );
+			}
 		}
 	}
 

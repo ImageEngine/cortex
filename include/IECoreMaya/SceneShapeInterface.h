@@ -80,7 +80,7 @@ class SceneShapeInterface: public MPxComponentShape
 		IECoreGL::ConstScenePtr scene();
 		void setDirty();
 
-		virtual IECore::SceneInterfacePtr getSceneInterface();
+		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
 		virtual IECore::SceneInterface::Path getSceneRoot();
 		
 		void getOutputPlugsArray( MPlugArray &plugArray );
@@ -97,8 +97,10 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aTime;
 		static MObject aQuerySpace;
 		static MObject aSceneQueries;
-		// todo: attributeQueries
+		static MObject aAttributeQueries;
 		static MObject aOutputObjects;
+		static MObject aAttributes;
+		static MObject aAttributeValues;
 		
 		static MObject aTransform;
 		static MObject aTranslate;

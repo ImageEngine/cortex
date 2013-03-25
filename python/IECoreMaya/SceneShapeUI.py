@@ -63,140 +63,163 @@ def _dagMenu( menu, sceneShape ) :
 			return
 		else :
 			sceneShape = children[0]
-
-	maya.cmds.setParent( menu, menu=True )
-	maya.cmds.menuItem(
-		label = "Component",
-		radialPosition = "N",
-		command = IECore.curry( __componentCallback, sceneShape )
-	)
-	maya.cmds.menuItem(
-		label = "Object",
-		radialPosition = "NW",
-		command = IECore.curry( __objectCallback, sceneShape ),
-	)
-
-	maya.cmds.menuItem(
-		label = "Preview...",
-		radialPosition = "W",
-		subMenu = True		
-	)
-	
-	maya.cmds.menuItem(
-			label = "All Geometry On",
-			radialPosition = "E",
-			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawGeometry", True )
-		)
-	
-	maya.cmds.menuItem(
-			label = "All Child Bounds On",
-			radialPosition = "SE",
-			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawChildBounds", True )
-		)
-	
-	maya.cmds.menuItem(
-			label = "All Root Bound On",
-			radialPosition = "NE",
-			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawRootBound", True )
-		)
-	
-	maya.cmds.menuItem(
-			label = "All Geometry Off",
-			radialPosition = "W",
-			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawGeometry", False )
-		)
-	
-	maya.cmds.menuItem(
-			label = "All Child Bounds Off",
-			radialPosition = "SW",
-			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawChildBounds", False )
-		)
-	
-	maya.cmds.menuItem(
-			label = "All Root Bound Off",
-			radialPosition = "NW",
-			command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawRootBound", False )
-		)
-	
-	maya.cmds.setParent( "..", menu=True )
-	
-	# If the objectOnly flag is on, assume it's already expanded
+			
 	fnScS = IECoreMaya.FnSceneShape( sceneShape )
 	
-	maya.cmds.menuItem(
-		label = "Expand...",
-		radialPosition = "SE",
-		subMenu = True
-	)
+	maya.cmds.setParent( menu, menu=True )
 	
-	maya.cmds.menuItem(
-			label = "Expand As Geometry",
-			radialPosition = "W",
-			command = IECore.curry( __expandAsGeometry, sceneShape )
-		)
-		
-	if fnScS.canBeExpanded():
+	# Component mode
+	if maya.cmds.selectMode( q=True, component=True ):
 		
 		maya.cmds.menuItem(
-			label = "Expand Scene",
-			radialPosition = "E",
-			command = IECore.curry( __expandScene, sceneShape )
+		label = "Object",
+		radialPosition = "N",
+		command = IECore.curry( __objectCallback, sceneShape ),
 		)
 		
-		maya.cmds.menuItem(
-			label = "Expand All Children",
-			radialPosition = "N",
-			command = IECore.curry( __expandAll, sceneShape )
-		)
-		
-		if fnScS.selectedComponentNames() :
-			maya.cmds.menuItem(
-				label = "Expand to Selected Components",
-				radialPosition = "S",
-				command = IECore.curry( __expandToSelected, sceneShape )
-			)
-			
-	maya.cmds.setParent( "..", menu=True )
-
-	parentSceneShape = __parentSceneShape( sceneShape )
-	if fnScS.canBeCollapsed() or ( parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed() ):
-		
-		maya.cmds.menuItem(
-				label = "Collapse...",
-				radialPosition = "SW",
-				subMenu = True
-			)
-	
-		if parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed():
-			maya.cmds.menuItem(
-					label = "Collapse to Parent Scene",
-					radialPosition = "N",
-					command = IECore.curry( __collapseToParentScene, sceneShape )
-				)
-		
-		if fnScS.canBeCollapsed():
-			maya.cmds.menuItem(
-					label = "Collapse Children",
-					radialPosition = "W",
-					command = IECore.curry( __collapseChildren, sceneShape )
-				)
-			
-		maya.cmds.setParent( "..", menu=True )
-	
-	# Check if any component is selected
-	if fnScS.selectedComponentNames() :
-			
 		maya.cmds.menuItem(
 			label = "Print Component Names",
-			radialPosition = "NE",
+			radialPosition = "NW",
 			command = IECore.curry( __printComponents, sceneShape )
 		)
 		
+		# Check if any component is selected
+		if fnScS.selectedComponentNames() :
+
+			maya.cmds.menuItem(
+				label = "Print Selected Component Names",
+				radialPosition = "NE",
+				command = IECore.curry( __printSelectedComponents, sceneShape )
+			)
+		
+			maya.cmds.menuItem(
+				label = "Expand...",
+				radialPosition = "SE",
+				subMenu = True
+			)
+			
+			if fnScS.selectedComponentNames() :
+				maya.cmds.menuItem(
+					label = "Expand to Selected Components",
+					radialPosition = "S",
+					command = IECore.curry( __expandToSelected, sceneShape )
+				)
+			maya.cmds.setParent( "..", menu=True )
+	
+	# Object mode
+	elif maya.cmds.selectMode( q=True, object=True ):
+		
 		maya.cmds.menuItem(
-			label = "Print Selected Component Names",
-			radialPosition = "E",
-			command = IECore.curry( __printSelectedComponents, sceneShape )
+			label = "Component",
+			radialPosition = "N",
+			command = IECore.curry( __componentCallback, sceneShape )
+			)
+
+		maya.cmds.menuItem(
+			label = "Preview...",
+			radialPosition = "NW",
+			subMenu = True		
 		)
+	
+		maya.cmds.menuItem(
+				label = "All Geometry On",
+				radialPosition = "E",
+				command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawGeometry", True )
+			)
+		
+		maya.cmds.menuItem(
+				label = "All Child Bounds On",
+				radialPosition = "SE",
+				command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawChildBounds", True )
+			)
+		
+		maya.cmds.menuItem(
+				label = "All Root Bound On",
+				radialPosition = "NE",
+				command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawRootBound", True )
+			)
+		
+		maya.cmds.menuItem(
+				label = "All Geometry Off",
+				radialPosition = "W",
+				command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawGeometry", False )
+			)
+		
+		maya.cmds.menuItem(
+				label = "All Child Bounds Off",
+				radialPosition = "SW",
+				command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawChildBounds", False )
+			)
+		
+		maya.cmds.menuItem(
+				label = "All Root Bound Off",
+				radialPosition = "NW",
+				command = IECore.curry( __setChildrenPreviewAttributes, sceneShape, "drawRootBound", False )
+			)
+		
+		maya.cmds.setParent( "..", menu=True )
+	
+		maya.cmds.menuItem(
+			label = "Expand...",
+			radialPosition = "SE",
+			subMenu = True
+		)
+	
+		maya.cmds.menuItem(
+				label = "Recursive Expand As Geometry",
+				radialPosition = "W",
+				command = IECore.curry( __expandAsGeometry, sceneShape )
+			)
+		
+		if fnScS.canBeExpanded():
+			
+			maya.cmds.menuItem(
+				label = "Expand Down One Level",
+				radialPosition = "E",
+				command = IECore.curry( __expandScene, sceneShape )
+			)
+			
+			maya.cmds.menuItem(
+				label = "Recursive Expand",
+				radialPosition = "N",
+				command = IECore.curry( __expandAll, sceneShape )
+			)
+			
+			if fnScS.selectedComponentNames() :
+				maya.cmds.menuItem(
+					label = "Expand to Selected Components",
+					radialPosition = "S",
+					command = IECore.curry( __expandToSelected, sceneShape )
+				)
+			
+		maya.cmds.setParent( "..", menu=True )
+
+		parentSceneShape = __parentSceneShape( sceneShape )
+		if fnScS.canBeCollapsed() or ( parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed() ):
+			
+			maya.cmds.menuItem(
+					label = "Collapse...",
+					radialPosition = "SW",
+					subMenu = True
+				)
+			
+			if parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed():
+				
+				parentName = maya.cmds.listRelatives( parentSceneShape, p=True )[0]
+				maya.cmds.menuItem(
+						label = "Collapse to Parent: "+parentName,
+						radialPosition = "N",
+						command = IECore.curry( __collapseToParentScene, sceneShape )
+					)
+			
+			if fnScS.canBeCollapsed():
+				maya.cmds.menuItem(
+						label = "Collapse Children",
+						radialPosition = "W",
+						command = IECore.curry( __collapseChildren, sceneShape )
+					)
+				
+			maya.cmds.setParent( "..", menu=True )
 
 	for c in __dagMenuCallbacks :
 	

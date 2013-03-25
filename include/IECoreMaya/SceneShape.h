@@ -60,13 +60,13 @@ class SceneShape : public SceneShapeInterface
 		static MObject aSceneFilePlug;
 		static MObject aSceneRootPlug;
 		
-		virtual IECore::SceneInterfacePtr getSceneInterface();
+		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
 		virtual IECore::SceneInterface::Path getSceneRoot();
 		
 	private :
 		
 		bool m_sceneDirty;
-		IECore::SceneInterfacePtr m_scene;
+		IECore::ConstSceneInterfacePtr m_scene;
 };
 
 }
