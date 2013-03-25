@@ -51,18 +51,7 @@
 using namespace IECore;
 using namespace IECoreHoudini;
 
-SceneInterface::FileFormatDescription< HoudiniScene > HoudiniScene::s_description( ".hip", IndexedIO::Read );
-
 HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
-{
-	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
-	motDirector->getObjectManager()->getFullPath( m_nodePath );
-	
-	Path contentPath, rootPath;
-	calculatePath( contentPath, rootPath );
-}
-
-HoudiniScene::HoudiniScene( const std::string &fileName, IndexedIO::OpenMode ) : m_rootIndex( 0 ), m_contentIndex( 0 )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
 	motDirector->getObjectManager()->getFullPath( m_nodePath );

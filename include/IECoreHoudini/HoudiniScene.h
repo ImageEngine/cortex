@@ -55,11 +55,8 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		HoudiniScene();
 		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath );
-		HoudiniScene( const std::string &fileName, IECore::IndexedIO::OpenMode );
 		
 		virtual ~HoudiniScene();
-		
-		static FileFormatDescription<HoudiniScene> s_description;
 		
 		virtual Name name() const;
 		virtual void path( Path &p ) const;

@@ -41,12 +41,6 @@ import IECoreHoudini
 
 class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 	
-	def testFactory( self ) :
-		
-		scene = IECore.SceneInterface.create( "x.hip", IECore.IndexedIO.OpenMode.Read )
-		self.failUnless( isinstance( scene, IECoreHoudini.HoudiniScene ) )
-		self.assertEqual( scene.typeId(), IECoreHoudini.TypeId.HoudiniScene )
-	
 	def buildScene( self ) :
 		
 		obj = hou.node( "/obj" )
