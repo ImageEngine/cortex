@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -53,13 +53,19 @@ LRUCache<Key, Ptr>::CacheEntry::CacheEntry()
 			
 template<typename Key, typename Ptr>
 LRUCache<Key, Ptr>::LRUCache( GetterFunction getter )
-	:	m_getter( getter ), m_maxCost( 500 ), m_currentCost( 0 )
+	:	m_getter( getter ), m_removalCallback( nullRemovalCallback ), m_maxCost( 500 ), m_currentCost( 0 )
 {
 }
 
 template<typename Key, typename Ptr>
 LRUCache<Key, Ptr>::LRUCache( GetterFunction getter, Cost maxCost )
-	:	m_getter( getter ), m_maxCost( maxCost ), m_currentCost( 0 )
+	:	m_getter( getter ), m_removalCallback( nullRemovalCallback ), m_maxCost( maxCost ), m_currentCost( 0 )
+{
+}
+
+template<typename Key, typename Ptr>
+LRUCache<Key, Ptr>::LRUCache( GetterFunction getter, RemovalCallback removalCallback, Cost maxCost )
+	:	m_getter( getter ), m_removalCallback( removalCallback ), m_maxCost( maxCost ), m_currentCost( 0 )
 {
 }
 
@@ -85,6 +91,10 @@ void LRUCache<Key, Ptr>::clear()
 	// by m_list, and therefore has to do lookups in m_cache). 
 	for( typename Cache::iterator it = m_cache.begin(); it != m_cache.end(); ++it )
 	{
+		if( it->second.status == Cached )
+		{
+			m_removalCallback( it->first, it->second.data );
+		}
 		it->second.status = Erased;
 		it->second.cost = 0;
 		it->second.data = Ptr();
@@ -255,6 +265,7 @@ bool LRUCache<Key, Ptr>::erase( const Key &key )
 
 	if( it->second.status==Cached ) 
 	{
+		m_removalCallback( key, it->second.data );
 		m_currentCost -= it->second.cost;
 		m_list.erase( it->second.listIterator );
 		it->second.data = Ptr();
@@ -262,6 +273,11 @@ bool LRUCache<Key, Ptr>::erase( const Key &key )
 	
 	it->second.status = Erased;
 	return true;
+}
+
+template<typename Key, typename Ptr>
+void LRUCache<Key, Ptr>::nullRemovalCallback( const Key &key, const Ptr &data )
+{
 }
 
 } // namespace IECore

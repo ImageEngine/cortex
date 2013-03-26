@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -199,6 +199,48 @@ class LRUCacheTest( unittest.TestCase ) :
 		t2.start()
 		t1.join()
 		t2.join()
+		
+	def testRemovalCallback( self ) :
+	
+		def getter( key ) :
+		
+			return ( key * 2, 1 )
+		
+		removed = []
+		def removalCallback( key, value ) :
+		
+			removed.append( ( key, value ) )
+		
+		c = IECore.LRUCache( getter, removalCallback, 5 )
+		
+		self.assertEqual( c.get( 1 ), 2 )
+		self.assertEqual( removed, [] )
+		
+		self.assertEqual( c.get( 2 ), 4 )
+		self.assertEqual( removed, [] )
+		
+		self.assertEqual( c.get( 3 ), 6 )
+		self.assertEqual( removed, [] )
+		
+		self.assertEqual( c.get( 4 ), 8 )
+		self.assertEqual( removed, [] )
+		
+		self.assertEqual( c.get( 5 ), 10 )
+		self.assertEqual( removed, [] )
+		
+		self.assertEqual( c.get( 6 ), 12 )
+		self.assertEqual( removed, [ ( 1, 2 ) ] )
+		
+		self.assertEqual( c.get( 7 ), 14 )
+		self.assertEqual( removed, [ ( 1, 2 ), ( 2, 4 ) ] )
 
+		c.clear()
+		
+		self.assertEqual( len( removed ), 7 )
+		
+		keys = [ x[0] for x in removed ]
+		for i in range( 1, 8 ) :
+			self.failUnless( i in keys )
+			
 if __name__ == "__main__":
     unittest.main()

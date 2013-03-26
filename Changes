@@ -31,6 +31,7 @@ Improvements :
 * IECoreHoudini uses name attributes by default rather than Houdini groups. Conversion using PrimitiveGroups is still possible using the parameter on the FromHoudiniGroupConverter, but all automated processes will require names.
 * IECoreHoudini FromHoudini converters have an attribute filter that can be used to prevent conversion of unnecessary data.
 * Primitives provide a hash of their topology in addition to the complete hash (including primitive variables).
+* LRUCache class now accepts an optional removalCallback, which is called whenever an item is removed from the cache.
 
 7.10.2 :
 
