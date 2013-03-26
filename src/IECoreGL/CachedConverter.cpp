@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 
 #include "boost/lexical_cast.hpp"
 #include "boost/format.hpp"
+#include "boost/bind.hpp"
+#include "boost/bind/placeholders.hpp"
 
 #include "IECore/LRUCache.h"
 #include "IECore/MurmurHash.h"
@@ -45,8 +47,8 @@ using namespace IECoreGL;
 
 struct CachedConverter::MemberData
 {
-	MemberData()
-		:	cache( getter )
+	MemberData( size_t maxMemory )
+		:	cache( getter, boost::bind( &MemberData::removalCallback, this, ::_1, ::_2 ), maxMemory )
 	{
 	}
 	
@@ -105,14 +107,20 @@ struct CachedConverter::MemberData
 		return converter->convert();
 	}
 	
+	void removalCallback( const CacheKey &key, const IECore::RunTimeTypedPtr &value )
+	{
+		deferredRemovals.push_back( value );
+	}
+	
 	typedef IECore::LRUCache<CacheKey, IECore::RunTimeTypedPtr> Cache;
 	Cache cache;
+	std::vector<IECore::RunTimeTypedPtr> deferredRemovals;
+	
 };
 
 CachedConverter::CachedConverter( size_t maxMemory )
 {
-	m_data = new MemberData();
-	m_data->cache.setMaxCost( maxMemory );
+	m_data = new MemberData( maxMemory );
 }
 
 CachedConverter::~CachedConverter()
@@ -133,6 +141,12 @@ size_t CachedConverter::getMaxMemory() const
 void CachedConverter::setMaxMemory( size_t maxMemory )
 {
 	m_data->cache.setMaxCost( maxMemory );
+	clearUnused();
+}
+
+void CachedConverter::clearUnused()
+{
+	m_data->deferredRemovals.clear();
 }
 
 CachedConverterPtr CachedConverter::defaultCachedConverter()

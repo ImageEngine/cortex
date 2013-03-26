@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -139,6 +139,36 @@ class CachedConverterTest( unittest.TestCase ) :
 
 			for thread in threads :
 				thread.join()
+	
+	def testThrashingAndThreadingWithTextures( self ) :
+	
+		dataWindow = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 15 ) )
+	
+		i1 = IECore.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0.5, 0.25 ), dataWindow, dataWindow )
+		i2 = IECore.ImagePrimitive.createRGBFloat( IECore.Color3f( 0.75, 0.65, 0.55 ), dataWindow, dataWindow )
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * 10 ) )
+	
+		for i in range( 0, 1 ) :
+		
+			c = IECoreGL.CachedConverter( i1.memoryUsage() + i2.memoryUsage() ) # not enough for both the textures and the points
+			
+			# convert the textures. this is ok because we're doing it on the thread with the gl context.
+			c.convert( i1 )
+			c.convert( i2 )
+			
+			# convert the points on a different thread. if this removed the textures from the cache and destroyed them
+			# immediately, we'd be destroying the gl resources on a different thread than the one used to create them,
+			# which would explode. 
+			def t() :
+			
+				c.convert( p )
 				
+			thread = threading.Thread( target = t )
+			thread.start()
+			thread.join()
+			
+			# do the deferred removals now we're back on the main thread
+			c.clearUnused()
+		
 if __name__ == "__main__":
     unittest.main()

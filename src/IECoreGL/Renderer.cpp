@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -646,6 +646,7 @@ void IECoreGL::Renderer::worldEnd()
 	}
 	m_data->implementation->worldEnd();
 	m_data->inWorld = false;
+	m_data->cachedConverter->clearUnused();
 }
 
 ScenePtr IECoreGL::Renderer::scene()

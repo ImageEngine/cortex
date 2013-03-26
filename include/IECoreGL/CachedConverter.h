@@ -63,6 +63,16 @@ class CachedConverter : public IECore::RefCounted
 		/// is less than memoryUsage() then cache removals will result.
 		void setMaxMemory( size_t maxMemory );
 
+		/// The CachedConverter removes items from the cache during convert()
+		/// whenever it needs to free memory to make way for the new conversion.
+		/// However, if the call to convert() is made on a thread for which there's
+		/// no valid gl context, it is unable to free the resources immediately.
+		/// As a workaround it defers the freeing of all resources until clearUnused()
+		/// is called on the main opengl thread. It is the responsibility of the clients
+		/// of the CachedConverter to call this from the main thread periodically.
+		/// \todo Can we improve this situation?
+		void clearUnused();
+
 		/// Returns a static CachedConverter instance to be used by anything
 		/// wishing to share its cache with others. It makes sense to use
 		/// this wherever possible to conserve memory. This initially
