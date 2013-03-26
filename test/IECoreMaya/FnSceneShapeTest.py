@@ -125,7 +125,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		result = fn.expandScene()
 		
 		self.assertTrue( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ) )
-		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".objectQueries[0]" ), "/1" )
+		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".queryPaths[0]" ), "/1" )
 		
 		self.assertTrue( len(result) == 1 )
 		childFn = result[0]
@@ -141,7 +141,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		result = childFn.expandScene()
 		
 		self.assertTrue( maya.cmds.getAttr( childFn.fullPathName()+".objectOnly" ) )
-		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".objectQueries[0]" ), "/child" )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".queryPaths[0]" ), "/child" )
 		
 		self.assertTrue( len(result) == 1 )
 		self.assertTrue( isinstance( result[0], IECoreMaya.FnSceneShape ) )
@@ -189,7 +189,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.visibility" ), 0 )
 		self.assertEqual( maya.cmds.nodeType( "|test|sceneShape_1|sceneShape_1_mesh" ), "mesh")
 		
-		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.objectQueries[1]" ), "/" )
+		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.queryPaths[1]" ), "/" )
 		self.assertTrue( maya.cmds.isConnected( "|test|sceneShape_1|sceneShape_Shape1.outputObjects[1]", "|test|sceneShape_1|sceneShape_1_mesh.inMesh" ) )
 		
 		

@@ -68,8 +68,14 @@ def _dagMenu( menu, sceneShape ) :
 	
 	maya.cmds.setParent( menu, menu=True )
 	
+	if fnScS.sceneInterface() is None:
+		maya.cmds.menuItem(
+		label = "Invalid SceneShape Inputs!",
+		radialPosition = "N",
+		)
+		
 	# Component mode
-	if maya.cmds.selectMode( q=True, component=True ):
+	elif maya.cmds.selectMode( q=True, component=True ):
 		
 		maya.cmds.menuItem(
 		label = "Object",
@@ -174,7 +180,7 @@ def _dagMenu( menu, sceneShape ) :
 		if fnScS.canBeExpanded():
 			
 			maya.cmds.menuItem(
-				label = "Expand Down One Level",
+				label = "Expand One Level",
 				radialPosition = "E",
 				command = IECore.curry( __expandScene, sceneShape )
 			)
@@ -250,7 +256,9 @@ def __printComponents( sceneShape, *unused ) :
 	fnS = IECoreMaya.FnSceneShape( sceneShape )
 	names = fnS.childrenNames()
 	names.sort()
+	print "\n"
 	print " ".join( names ) ,
+	print "\n"
 
 def __printSelectedComponents( sceneShape, *unused ) :
 
@@ -258,7 +266,9 @@ def __printSelectedComponents( sceneShape, *unused ) :
 	selectedNames = fnS.selectedComponentNames()
 	selectedNames = list( selectedNames )
 	selectedNames.sort()
+	print "\n"
 	print " ".join( selectedNames ) ,
+	print "\n"
 
 def __expandScene( sceneShape, *unused ) :
 	

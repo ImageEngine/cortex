@@ -164,6 +164,9 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
 		scene = self.sceneInterface()
+		if not scene:
+			return []
+			
 		sceneChildren = scene.childNames()
 		
 		if sceneChildren == []:
@@ -197,7 +200,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		for i, child in enumerate( sceneChildren ):
 			
-			maya.cmds.setAttr( node+".objectQueries["+str(i)+"]", "/"+child, type="string" )
+			maya.cmds.setAttr( node+".queryPaths["+str(i)+"]", "/"+child, type="string" )
 			
 			# Create sceneShape for child
 			fnChild = IECoreMaya.FnSceneShape.create( child )
@@ -265,7 +268,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			maya.cmds.setAttr( sceneShape+".querySpace", 1 )
 			
 			fn = FnSceneShape( sceneShape )
-			if fn.sceneInterface().hasObject():
+			if fn.sceneInterface() and fn.sceneInterface().hasObject():
 
 				parent = maya.cmds.listRelatives( sceneShape, parent=True, f=True )[0]
 				object = fn.sceneInterface().readObject( 0.0 )
@@ -282,19 +285,19 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 					continue
 				
 				index = None
-				validIndices = maya.cmds.getAttr( sceneShape+".objectQueries", mi=True )
+				validIndices = maya.cmds.getAttr( sceneShape+".queryPaths", mi=True )
 				
 				if validIndices == [] or validIndices is None:
 					index = 0
 				else:
 					for i in validIndices:
-						if maya.cmds.getAttr( sceneShape+".objectQueries["+str(i)+"]") == "/":
+						if maya.cmds.getAttr( sceneShape+".queryPaths["+str(i)+"]") == "/":
 							index = i
 					if index is None:
 						# Didn't find "/", get the next available index
 						index = max( i for i in validIndices ) +1
 				
-				maya.cmds.setAttr( sceneShape+".objectQueries["+str(index)+"]", "/", type="string" )
+				maya.cmds.setAttr( sceneShape+".queryPaths["+str(index)+"]", "/", type="string" )
 				
 				if isinstance( object, IECore.MeshPrimitive ):
 					mesh = maya.cmds.createNode( "mesh", parent = parent, name = shapeName )

@@ -88,10 +88,12 @@ MStatus SceneShape::initialize()
 	attributeAffects( aSceneFilePlug, aTransform );
 	attributeAffects( aSceneFilePlug, aBound );
 	attributeAffects( aSceneFilePlug, aOutputObjects );
+	attributeAffects( aSceneFilePlug, aAttributes );
 	
 	attributeAffects( aSceneRootPlug, aTransform );
 	attributeAffects( aSceneRootPlug, aBound );
 	attributeAffects( aSceneRootPlug, aOutputObjects );
+	attributeAffects( aSceneRootPlug, aAttributes );
 
 	return s;
 }

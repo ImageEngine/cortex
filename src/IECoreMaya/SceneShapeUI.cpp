@@ -357,9 +357,14 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			return false;
 		}
 	}
-
+	
 	// early out if we have no scene to draw
 	SceneShape *sceneShape = static_cast<SceneShape *>( surfaceShape() );
+	if( !sceneShape->getSceneInterface() )
+	{
+		return false;
+	}
+
 	IECoreGL::ConstScenePtr scene = sceneShape->scene();
 	if( !scene )
 	{

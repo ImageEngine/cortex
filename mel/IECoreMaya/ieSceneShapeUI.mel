@@ -54,8 +54,8 @@ global proc AEieSceneShapeTemplate( string $nodeName )
 
 		editorTemplate -beginLayout "Queries";
 			editorTemplate -addControl "querySpace";
-			editorTemplate -addControl "objectQueries";
-			editorTemplate -addControl "attributeQueries";
+			editorTemplate -addControl "queryPaths";
+			editorTemplate -addControl "queryAttributes";
 			
 		editorTemplate -endLayout;
 		

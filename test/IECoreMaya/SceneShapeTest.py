@@ -44,13 +44,14 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 	__testFile = "test/test.scc"
 	__testPlugFile = "test/testPlug.scc"
 	__testPlugAnimFile = "test/testPlugAnim.scc"
+	__testPlugAttrFile = "test/testPlugAttr.scc"
+
 
 	def writeSCC( self, file, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
 		
 		scene = IECore.SceneCache( file, IECore.IndexedIO.OpenMode.Write )
 		sc = scene.createChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
@@ -58,7 +59,6 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		
 		sc = sc.createChild( str( 2 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
@@ -66,7 +66,6 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		
 		sc = sc.createChild( str( 3 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
@@ -86,8 +85,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 			
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
 			sc1.writeTransform( IECore.M44dData( matrix ), time )
-			
-			mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
+
 			sc2.writeObject( mesh, time )
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
@@ -95,6 +93,24 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
 
+		return scene
+
+	def writeAttributeSCC( self, file ) :
+		
+		scene = self.writeSCC( file )
+		sc1 = scene.child( str( 1 ) )
+		sc2 = sc1.child( str( 2 ) )
+		sc3 = sc2.child( str( 3 ) )
+
+		sc1.writeAttribute( "boolAttr", IECore.BoolData( True ), 0.0 )
+		sc1.writeAttribute( "floatAttr", IECore.FloatData( 5.20 ), 0.0 )
+		
+		sc2.writeAttribute( "boolAttr", IECore.BoolData( False ), 0.0 )
+		sc2.writeAttribute( "floatAttr", IECore.FloatData( 2.0 ), 0.0 )
+
+		sc3.writeAttribute( "intAttr", IECore.IntData( 12 ), 0.0 )
+		sc3.writeAttribute( "strAttr", IECore.StringData( "blah" ), 0.0 )
+		
 		return scene
 	
 
@@ -111,9 +127,9 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outputObjects", mi=True ), None)
 		
-		maya.cmds.setAttr( node+".objectQueries[0]", "/1", type="string")
-		maya.cmds.setAttr( node+".objectQueries[1]", "/1/2", type="string")
-		maya.cmds.setAttr( node+".objectQueries[2]", "/1/2/3", type="string")
+		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
+		maya.cmds.setAttr( node+".queryPaths[1]", "/1/2", type="string")
+		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
 		
 		self.assertEqual( maya.cmds.getAttr( node+".objectTransform", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), None)
@@ -140,7 +156,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), [1])
 		self.assertEqual( maya.cmds.getAttr( node+".outputObjects", mi=True ), [2])
 		
-		maya.cmds.setAttr( node+".objectQueries[3]", "/", type="string");
+		maya.cmds.setAttr( node+".queryPaths[3]", "/", type="string");
 		self.assertEqual( maya.cmds.getAttr( node+".objectTransform", mi=True ), [0, 1, 2])
 		self.assertEqual( maya.cmds.getAttr( node+".objectBound", mi=True ), [1])
 		self.assertEqual( maya.cmds.getAttr( node+".outputObjects", mi=True ), [2])
@@ -155,9 +171,9 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugFile,type='string' )
 		maya.cmds.setAttr( node+'.root',"/",type='string' )
 
-		maya.cmds.setAttr( node+".objectQueries[0]", "/1", type="string")
-		maya.cmds.setAttr( node+".objectQueries[1]", "/1/2", type="string")
-		maya.cmds.setAttr( node+".objectQueries[2]", "/1/2/3", type="string")
+		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
+		maya.cmds.setAttr( node+".queryPaths[1]", "/1/2", type="string")
+		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
 
 		# World space
 		maya.cmds.setAttr( node+".querySpace", 0)
@@ -206,9 +222,9 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		# Change the root path
 		maya.cmds.setAttr( node+'.root', "/1",type='string' )
 		
-		maya.cmds.setAttr( node+".objectQueries[0]", "/", type="string")
-		maya.cmds.setAttr( node+".objectQueries[1]", "/2", type="string")
-		maya.cmds.setAttr( node+".objectQueries[2]", "/2/3", type="string")
+		maya.cmds.setAttr( node+".queryPaths[0]", "/", type="string")
+		maya.cmds.setAttr( node+".queryPaths[1]", "/2", type="string")
+		maya.cmds.setAttr( node+".queryPaths[2]", "/2/3", type="string")
 		
 		# World space
 		maya.cmds.setAttr( node+".querySpace", 0)
@@ -266,9 +282,9 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		maya.cmds.setAttr( node+'.root',"/",type='string' )
 		
-		maya.cmds.setAttr( node+".objectQueries[0]", "/1", type="string")
-		maya.cmds.setAttr( node+".objectQueries[1]", "/1/2", type="string")
-		maya.cmds.setAttr( node+".objectQueries[2]", "/1/2/3", type="string")
+		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
+		maya.cmds.setAttr( node+".queryPaths[1]", "/1/2", type="string")
+		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
 
 		maya.cmds.currentTime( 0 )
 
@@ -370,10 +386,48 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".objectTransform[2].objectRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".objectTransform[2].objectRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".objectTransform[2].objectScale"), [(1.0, 1.0, 1.0)] )
+	
+	
+	def testqueryAttributes( self ) :
+		
+		self.writeAttributeSCC( file=SceneShapeTest.__testPlugAttrFile )
+
+		maya.cmds.file( new=True, f=True )
+		node = maya.cmds.createNode( 'ieSceneShape' )
+		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugAttrFile,type='string' )
+		
+		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
+		maya.cmds.setAttr( node+".queryPaths[1]", "/1/2", type="string")
+		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
+		
+		maya.cmds.setAttr( node+".queryAttributes[0]", "boolAttr", type="string")
+		maya.cmds.setAttr( node+".queryAttributes[1]", "floatAttr", type="string")
+		maya.cmds.setAttr( node+".queryAttributes[2]", "intAttr", type="string")
+		maya.cmds.setAttr( node+".queryAttributes[3]", "strAttr", type="string")
+		maya.cmds.setAttr( node+".queryAttributes[4]", "blablAttr", type="string")
+
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[0]" ), True )
+		self.assertEqual( round(maya.cmds.getAttr( node+".attributes[0].attributeValues[1]"), 6 ), 5.2 )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[2]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[3]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[4]" ), None )
+		
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[0]" ), False )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[1]" ), 2.0 )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[2]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[3]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[4]" ), None )
+		
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[0]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[1]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[2]" ), 12 )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[3]" ), "blah" )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[4]" ), None )
+
 
 	def tearDown( self ) :
 		
-		for f in [ SceneShapeTest.__testFile, SceneShapeTest.__testPlugFile, SceneShapeTest.__testPlugAnimFile ] :
+		for f in [ SceneShapeTest.__testFile, SceneShapeTest.__testPlugFile, SceneShapeTest.__testPlugAnimFile, SceneShapeTest.__testPlugAttrFile ] :
 			if os.path.exists( f ) :
 				os.remove( f )
 

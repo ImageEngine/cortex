@@ -215,7 +215,7 @@ MStatus SceneShapeInterface::initialize()
 
 	// Queries
 	
-	aSceneQueries = tAttr.create( "objectQueries", "oqy", MFnData::kString, &s );
+	aSceneQueries = tAttr.create( "queryPaths", "qpa", MFnData::kString, &s );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -226,7 +226,7 @@ MStatus SceneShapeInterface::initialize()
 
 	s = addAttribute( aSceneQueries );
 	
-	aAttributeQueries = tAttr.create( "attributeQueries", "aqy", MFnData::kString, &s );
+	aAttributeQueries = tAttr.create( "queryAttributes", "qat", MFnData::kString, &s );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -508,7 +508,7 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 			getOutputPlugsArray( plugArray );
 		}
 	}
-	else if( plug == aSceneQueries || plug == aQuerySpace )
+	else if( plug == aSceneQueries || plug == aQuerySpace || plug == aAttributeQueries )
 	{
 		getOutputPlugsArray( plugArray );
 	}
@@ -593,7 +593,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		if( index == -1 )
 		{
 			// Couldn't find input index
-			msg( Msg::Warning, "SceneShapeInterface::compute",  boost::format( "Could not find queried index for '%s' " ) % plug.name().asChar() );
+			MFnDagNode dag(thisMObject());
+			msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Could not find queried index for '%s' " ) % plug.name().asChar() );
 			return MS::kFailure;
 		}
 		
@@ -610,6 +611,12 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		pQuery.getValue( name );
 
 		ConstSceneInterfacePtr sc = getSceneInterface();
+		if( !sc )
+		{
+			MFnDagNode dag(thisMObject());
+			msg( Msg::Error, dag.fullPathName().asChar(),  "Input values are invalid." );
+			return MS::kFailure;
+		}
 		
 		SceneInterface::Path root = getSceneRoot();
 		std::string rootName;
@@ -623,7 +630,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		if( !scene )
 		{
 			// Queried element doesn't exist
-			msg( Msg::Warning, "SceneShapeInterface::compute",  boost::format( "Queried element '%s' at index '%s' does not exist " ) % name.asChar() % index );
+			MFnDagNode dag(thisMObject());
+			msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Queried element '%s' at index '%s' does not exist " ) % name.asChar() % index );
 			return MS::kFailure;
 		}
 		if( topLevelPlug == aTransform )
@@ -736,6 +744,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			}
 			else
 			{
+				MFnDagNode dag(thisMObject());
+				msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Cannot find index for queried attribute '%s'" ) % plug.name() );
 				return MS::kFailure;
 			}
 
@@ -747,7 +757,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			if( !scene->hasAttribute( attrName.asChar() ) )
 			{
 				// Queried attribute doesn't exist
-				msg( Msg::Warning, "SceneShapeInterface::compute",  boost::format( "Queried attribute '%s' at index '%s' does not exist " ) % attrName.asChar() % attrIndex );
+				MFnDagNode dag(thisMObject());
+				msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Queried attribute '%s' at index '%s' does not exist " ) % attrName.asChar() % attrIndex );
 				return MS::kFailure;
 			}
 
