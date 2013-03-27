@@ -94,7 +94,7 @@ class HoudiniScene : public IECore::SceneInterface
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
-		void relativePath( const char *value, Path &result ) const;
+		bool relativePath( const char *value, Path &result ) const;
 		
 		UT_String m_nodePath;
 		UT_String m_contentPath;

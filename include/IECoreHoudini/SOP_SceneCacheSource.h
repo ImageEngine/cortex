@@ -85,8 +85,9 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
 		bool convertObject( IECore::Object *object, std::string &name, bool animatedTopology, bool hasAnimatedPrimVars, const std::vector<IECore::InternedString> &animatedPrimVars );
 		
-		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter );
+		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
+		std::string relativePath( const IECore::SceneInterface *scene, size_t rootSize );
 
 };
 

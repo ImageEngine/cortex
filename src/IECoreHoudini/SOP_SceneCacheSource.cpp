@@ -199,7 +199,10 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	
 	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, context.getTime() ) : Imath::M44d();
 	
-	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter );
+	SceneInterface::Path rootPath;
+	scene->path( rootPath );
+	
+	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter, rootPath.size() );
 	
 	m_loaded = true;
 	m_hash = hash;
@@ -207,16 +210,12 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter )
+void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter, size_t rootSize )
 {
 	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
 	{
 		ObjectPtr object = scene->readObject( time );
-		
-		std::string fullName;
-		SceneInterface::Path p;
-		scene->path( p );
-		SceneInterface::pathToString( p, fullName );
+		std::string name = relativePath( scene, rootSize );
 		
 		bool hasAnimatedTopology = scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute );
 		bool hasAnimatedPrimVars = scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute );
@@ -233,7 +232,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			}
 		}
 		
-		modifyObject( object, fullName, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
+		modifyObject( object, name, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
 		
 		Imath::M44d currentTransform;
 		if ( space == Local )
@@ -252,9 +251,9 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		}
 		
 		// convert the object to Houdini
-		if ( !convertObject( object, fullName, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
+		if ( !convertObject( object, name, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
 		{
-			addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + fullName + " to houdini" ).c_str() );
+			addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + name + " to houdini" ).c_str() );
 		}
 	}
 	
@@ -263,7 +262,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr child = scene->child( *it );
-		loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, shapeFilter, attributeFilter );
+		loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, shapeFilter, attributeFilter, rootSize );
 	}
 }
 
@@ -471,4 +470,22 @@ MatrixTransformPtr SOP_SceneCacheSource::matrixTransform( Imath::M44d t )
 			t[3][0], t[3][1], t[3][2], t[3][3]
 		)
 	);
+}
+
+std::string SOP_SceneCacheSource::relativePath( const IECore::SceneInterface *scene, size_t rootSize )
+{
+	SceneInterface::Path path, relative;
+	scene->path( path );
+	
+	SceneInterface::Path::iterator start = path.begin() + rootSize;
+	if ( start != path.end() )
+	{
+		relative.resize( path.end() - start );
+		std::copy( start, path.end(), relative.begin() );
+	}
+	
+	std::string result;
+	SceneInterface::pathToString( relative, result );
+	
+	return result;
 }

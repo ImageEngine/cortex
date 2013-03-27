@@ -50,10 +50,10 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		box1.createNode( "box", "actualBox" )
 		actualBox = box1.children()[0]
 		bname = actualBox.createOutputNode( "name" )
-		bname.parm( "name1" ).set( "/sub1/box1" )
+		bname.parm( "name1" ).set( "/" )
 		torus = box1.createNode( "torus" )
 		tname = torus.createOutputNode( "name" )
-		tname.parm( "name1" ).set( "/sub1/box1/torus" )
+		tname.parm( "name1" ).set( "/torus" )
 		merge = bname.createOutputNode( "merge" )
 		merge.setInput( 1, tname )
 		merge.setRenderFlag( True )
@@ -423,7 +423,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 8 )
 		# shape names do not re-root
-		self.assertEqual( mesh.blindData()["name"].value, "/sub1/box1" )
+		self.assertEqual( mesh.blindData()["name"].value, "/" )
 		
 		boxTorus = box1.child( "torus" )
 		self.assertEqual( boxTorus.path(), [ "box1", "torus" ] )
@@ -435,7 +435,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
 		# shape names do not re-root
-		self.assertEqual( mesh.blindData()["name"].value, "/sub1/box1/torus" )
+		self.assertEqual( mesh.blindData()["name"].value, "/torus" )
 		
 		self.assertRaises( RuntimeError, scene.child, "box2" )
 		self.assertEqual( scene.child( "box2", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
