@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,24 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include "IECoreHoudini/ParameterisedHolderInterface.h"
 
-#include "OP/OP_Node.h"
+#include "IECore/Object.h"
+#include "IECore/ParameterisedInterface.h"
 
-#include "IECoreHoudini/FnParameterisedHolder.h"
-#include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
-
-using namespace boost::python;
 using namespace IECoreHoudini;
 
-void IECoreHoudini::bindFnParameterisedHolder()
+ParameterisedHolderInterface::ParameterisedHolderInterface()
 {
-	class_<FnParameterisedHolder>( "_FnParameterisedHolder" )
-		.def( init<OP_Node*>() )
-		.def( "hasParameterised", &FnParameterisedHolder::hasParameterised )
-		.def( "setParameterised", (void (FnParameterisedHolder::*)( IECore::RunTimeTypedPtr ))&FnParameterisedHolder::setParameterised )
-		.def( "setParameterised", (void (FnParameterisedHolder::*)( const std::string &, int, const std::string & ))&FnParameterisedHolder::setParameterised )
-		.def( "getParameterised", &FnParameterisedHolder::getParameterised )
-		.def( "setParameterisedValues", &FnParameterisedHolder::setParameterisedValues )
-	;
+}
+
+ParameterisedHolderInterface::~ParameterisedHolderInterface()
+{
+}
+
+IECore::ParameterisedInterface *ParameterisedHolderInterface::getParameterisedInterface()
+{
+	return dynamic_cast<IECore::ParameterisedInterface *>( getParameterised().get() );
 }

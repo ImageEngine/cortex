@@ -67,7 +67,7 @@ SOP_OpHolder::~SOP_OpHolder()
 /// Cook the SOP! This method does all the work
 OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 {
-	IECore::MessageHandler::Scope handlerScope( messageHandler() );
+	IECore::MessageHandler::Scope handlerScope( getMessageHandler() );
 	
 	// some defaults and useful variables
 	Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );

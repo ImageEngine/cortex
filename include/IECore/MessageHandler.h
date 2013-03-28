@@ -118,7 +118,11 @@ class MessageHandler : public RefCounted
 				/// Pops the handler pushed in the constructor,
 				/// reverting to the previous handler.
 				~Scope();
+			
+			private :
 				
+				MessageHandler *m_handler;
+		
 		};
 		
 		/// Returns the current handler for this thread, reverting
