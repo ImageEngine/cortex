@@ -496,5 +496,14 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		# should be 8 verts now:
 		self.assertEqual( len( mesh["P"].data ), 8 )
 	
+	def testWriteExceptions( self ) :
+		
+		scene = IECoreMaya.MayaScene()
+		
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeBound, IECore.Box3d(), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeTransform, IECore.M44dData( IECore.M44d() ), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeAttribute, "asdfs", IECore.BoolData( False ), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeObject, IECore.SpherePrimitive(), 0.0 ) )
+		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

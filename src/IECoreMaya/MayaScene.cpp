@@ -157,6 +157,7 @@ Imath::Box3d MayaScene::readBound( double time ) const
 
 void MayaScene::writeBound( const Imath::Box3d &bound, double time )
 {
+	throw Exception( "MayaScene::writeBound: write operations not supported!" );
 }
 
 DataPtr MayaScene::readTransform( double time ) const
@@ -191,6 +192,7 @@ Imath::M44d MayaScene::readTransformAsMatrix( double time ) const
 
 void MayaScene::writeTransform( const Data *transform, double time )
 {
+	throw Exception( "MayaScene::writeTransform: write operations not supported!" );
 }
 
 bool MayaScene::hasAttribute( const Name &name ) const
@@ -209,6 +211,7 @@ ObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 
 void MayaScene::writeAttribute( const Name &name, const Object *attribute, double time )
 {
+	throw Exception( "MayaScene::writeAttribute: write operations not supported!" );
 }
 
 bool MayaScene::hasObject() const
@@ -278,6 +281,7 @@ ObjectPtr MayaScene::readObject( double time ) const
 
 void MayaScene::writeObject( const Object *object, double time )
 {
+	throw Exception( "MayaScene::writeObject: write operations not supported!" );
 }
 
 void MayaScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const
