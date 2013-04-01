@@ -157,6 +157,7 @@ void bindSceneInterface()
 	// to exist for defining default values).
 	
 	sceneInterfaceClass.def( "path", path )
+		.def( "fileName", &SceneInterface::fileName )
 		.def( "pathAsString", pathAsString )
 		.def( "name", &SceneInterface::name )
 		.def( "readBound", &SceneInterface::readBound )

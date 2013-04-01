@@ -56,6 +56,11 @@ MayaScene::~MayaScene()
 {
 }
 
+std::string MayaScene::fileName() const
+{
+	throw Exception( "MayaScene does not support fileName()." );
+}
+
 MayaScenePtr MayaScene::duplicate( const MDagPath& p, bool isRoot ) const
 {
 	return new MayaScene( p, isRoot );

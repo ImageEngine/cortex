@@ -39,6 +39,11 @@ import IECoreMaya
 
 class MayaSceneTest( IECoreMaya.TestCase ) :
 	
+	def testFileName( self ) :
+
+		scene = IECoreMaya.MayaScene()
+		self.assertRaises( RuntimeError, scene.fileName )
+
 	def testChildNames( self ) :
 		
 		sphere = maya.cmds.polySphere( name="pSphere1" )

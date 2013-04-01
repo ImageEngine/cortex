@@ -80,49 +80,51 @@ class SceneCache : public SampledSceneInterface
 		 * virtual functions defined in SceneInterface.
 		 */
 
-		Name name() const;
-		void path( Path &p ) const;
+		virtual std::string fileName() const;
 
-		size_t numBoundSamples() const;
-		double boundSampleTime( size_t sampleIndex ) const;
-		double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		Imath::Box3d readBoundAtSample( size_t sampleIndex ) const;
-		Imath::Box3d readBound( double time ) const;
-		void writeBound( const Imath::Box3d &bound, double time );
+		virtual Name name() const;
+		virtual void path( Path &p ) const;
 
-		size_t numTransformSamples() const;
-		double transformSampleTime( size_t sampleIndex ) const;
-		double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		DataPtr readTransformAtSample( size_t sampleIndex ) const;
-		Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const;
-		DataPtr readTransform( double time ) const;
-		Imath::M44d readTransformAsMatrix( double time ) const;
-		void writeTransform( const Data *transform, double time );
+		virtual size_t numBoundSamples() const;
+		virtual double boundSampleTime( size_t sampleIndex ) const;
+		virtual double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
+		virtual Imath::Box3d readBoundAtSample( size_t sampleIndex ) const;
+		virtual Imath::Box3d readBound( double time ) const;
+		virtual void writeBound( const Imath::Box3d &bound, double time );
 
-		bool hasAttribute( const Name &name ) const;
-		void readAttributeNames( NameList &attrs ) const;
-		size_t numAttributeSamples( const Name &name ) const;
-		double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
-		double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		ObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
-		ObjectPtr readAttribute( const Name &name, double time ) const;
-		void writeAttribute( const Name &name, const Object *attribute, double time );
+		virtual size_t numTransformSamples() const;
+		virtual double transformSampleTime( size_t sampleIndex ) const;
+		virtual double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
+		virtual DataPtr readTransformAtSample( size_t sampleIndex ) const;
+		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const;
+		virtual DataPtr readTransform( double time ) const;
+		virtual Imath::M44d readTransformAsMatrix( double time ) const;
+		virtual void writeTransform( const Data *transform, double time );
 
-		bool hasObject() const;
-		size_t numObjectSamples() const;
-		double objectSampleTime( size_t sampleIndex ) const;
-		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		ObjectPtr readObjectAtSample( size_t sampleIndex ) const;
-		ObjectPtr readObject( double time ) const;
-		void writeObject( const Object *object, double time );
+		virtual bool hasAttribute( const Name &name ) const;
+		virtual void readAttributeNames( NameList &attrs ) const;
+		virtual size_t numAttributeSamples( const Name &name ) const;
+		virtual double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
+		virtual double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
+		virtual ObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
+		virtual ObjectPtr readAttribute( const Name &name, double time ) const;
+		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
 
-		bool hasChild( const Name &name ) const;
-		void childNames( NameList &childNames ) const;
-		SceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing );
-		ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
-		SceneInterfacePtr createChild( const Name &name );
-		SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
-		ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
+		virtual bool hasObject() const;
+		virtual size_t numObjectSamples() const;
+		virtual double objectSampleTime( size_t sampleIndex ) const;
+		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
+		virtual ObjectPtr readObjectAtSample( size_t sampleIndex ) const;
+		virtual ObjectPtr readObject( double time ) const;
+		virtual void writeObject( const Object *object, double time );
+
+		virtual bool hasChild( const Name &name ) const;
+		virtual void childNames( NameList &childNames ) const;
+		virtual SceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing );
+		virtual ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
+		virtual SceneInterfacePtr createChild( const Name &name );
+		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
+		virtual ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
 		
 		// The attribute names used to mark animated topology and primitive variables
 		// when SceneCache objects are Primitives.

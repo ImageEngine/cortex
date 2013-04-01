@@ -111,6 +111,9 @@ class SceneInterface : public RunTimeTyped
 		
 		virtual ~SceneInterface() = 0;
 
+		/// Returns the file that this scene is mapped to. Throws exception if there's no file.
+		virtual std::string fileName() const = 0;
+
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
 		virtual Name name() const = 0;
 		/// Returns the path scene this instance is referring to. 

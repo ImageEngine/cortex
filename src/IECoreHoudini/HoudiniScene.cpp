@@ -88,6 +88,11 @@ HoudiniScene::~HoudiniScene()
 {
 }
 
+std::string HoudiniScene::fileName() const
+{
+	throw Exception( "HoudiniScene does not support fileName()." );
+}
+
 SceneInterface::Name HoudiniScene::name() const
 {
 	if ( m_path.empty() || m_rootIndex == m_path.size() )

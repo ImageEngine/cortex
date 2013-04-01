@@ -81,6 +81,15 @@ class SceneCache::Implementation : public RefCounted
 		{
 		}
 
+		std::string fileName() const
+		{
+			if ( m_indexedIO->typeId() == FileIndexedIOTypeId )
+			{
+				return static_cast< FileIndexedIO * >( m_indexedIO.get() )->fileName();
+			}
+			throw Exception( "File name not available in scene cache!" );
+		}
+
 		bool hasObject() const
 		{
 			return m_indexedIO->hasEntry( objectEntry );
@@ -1572,6 +1581,11 @@ SceneCache::SceneCache( ImplementationPtr& impl )
 
 SceneCache::~SceneCache()
 {
+}
+
+std::string SceneCache::fileName() const
+{
+	return m_implementation->fileName();
 }
 
 void SceneCache::path( SceneCache::Path &p ) const

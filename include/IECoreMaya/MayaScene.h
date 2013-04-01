@@ -68,6 +68,8 @@ class MayaScene : public IECore::SceneInterface
 		
 		virtual ~MayaScene();
 		
+		virtual std::string fileName() const;
+
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
 		virtual Name name() const;
 		/// Returns the tokenized dag path this instance is referring to.

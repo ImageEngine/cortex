@@ -58,6 +58,8 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		virtual ~HoudiniScene();
 		
+		virtual std::string fileName() const;
+
 		virtual Name name() const;
 		virtual void path( Path &p ) const;
 		

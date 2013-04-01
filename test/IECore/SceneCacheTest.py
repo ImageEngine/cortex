@@ -52,11 +52,13 @@ class SceneCacheTest( unittest.TestCase ) :
 		# test Write factory function 
 		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		self.assertTrue( isinstance( m, IECore.SceneCache ) )
+		self.assertEqual( m.fileName(), "/tmp/test.scc" )
 		self.assertRaises( RuntimeError, m.readBound, 0.0 )
 		del m
 		# test Read factory function
 		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		self.assertTrue( isinstance( m, IECore.SceneCache ) )
+		self.assertEqual( m.fileName(), "/tmp/test.scc" )
 		m.readBound( 0.0 )
 
 	def testAppendRaises( self ) :
