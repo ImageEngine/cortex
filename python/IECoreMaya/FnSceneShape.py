@@ -210,9 +210,9 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			sceneRootName = "/"+child if sceneRoot == "/" else sceneRoot+"/"+child
 			maya.cmds.setAttr( childNode+".root", sceneRootName, type="string" )
 			
-			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectTranslate", childTransform+".translate" )
-			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectRotate", childTransform+".rotate" )
-			maya.cmds.connectAttr( node+".objectTransform["+str(i)+"].objectScale", childTransform+".scale" )
+			maya.cmds.connectAttr( node+".outTransform["+str(i)+"].outTranslate", childTransform+".translate" )
+			maya.cmds.connectAttr( node+".outTransform["+str(i)+"].outRotate", childTransform+".rotate" )
+			maya.cmds.connectAttr( node+".outTransform["+str(i)+"].outScale", childTransform+".scale" )
 
 			maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
 			maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
@@ -273,6 +273,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 				parent = maya.cmds.listRelatives( sceneShape, parent=True, f=True )[0]
 				object = fn.sceneInterface().readObject( 0.0 )
 				
+				# TODO: use the name of a regular maya shape, once the sceneShape uses a correct naming
 				if isinstance( object, IECore.MeshPrimitive ):
 					shapeName = parent.split("|")[-1]+"_mesh"
 				elif isinstance( object, IECore.CurvesPrimitive ):
@@ -301,11 +302,11 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 				
 				if isinstance( object, IECore.MeshPrimitive ):
 					mesh = maya.cmds.createNode( "mesh", parent = parent, name = shapeName )
-					maya.cmds.connectAttr( sceneShape+'.outputObjects['+str(index)+']', mesh+".inMesh" )
+					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', mesh+".inMesh" )
 					maya.cmds.sets( mesh, add="initialShadingGroup" )
 				elif isinstance( object, IECore.CurvesPrimitive ):
 					curve = maya.cmds.createNode( "nurbsCurve", parent = parent, name = shapeName )
-					maya.cmds.connectAttr( sceneShape+'.outputObjects['+str(index)+']', mesh+".create" )
+					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', mesh+".create" )
 					
 
 	## Returns the maya node type that this function set operates on

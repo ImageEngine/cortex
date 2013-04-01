@@ -286,7 +286,7 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 		{
 			resetHilites();
 			
-			IECoreGL::ConstScenePtr scene = sceneShape->scene();
+			IECoreGL::ConstScenePtr scene = sceneShape->glScene();
 			if( scene )
 			{
 				IECoreGL::State *displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
@@ -307,14 +307,14 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 					for ( int j = 0; j < len; j++ )
 					{
 						int index = fnComp.element(j);
-						groupNames.push_back( sceneShape->getName( index ) );
+						groupNames.push_back( sceneShape->selectionName( index ) );
 					}
 					// Sort by name to make sure we don't unhilite selected items that are further down the hierarchy
 					std::sort( groupNames.begin(), groupNames.end() );
 					
 					for ( std::vector<std::string>::iterator it = groupNames.begin(); it!= groupNames.end(); ++it)
 					{
-						IECoreGL::GroupPtr group = sceneShape->getGroup( *it );
+						IECoreGL::GroupPtr group = sceneShape->glGroup( *it );
 
 						hiliteGroups(
 								group,
@@ -365,7 +365,7 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 		return false;
 	}
 
-	IECoreGL::ConstScenePtr scene = sceneShape->scene();
+	IECoreGL::ConstScenePtr scene = sceneShape->glScene();
 	if( !scene )
 	{
 		return false;
@@ -428,7 +428,7 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			depthMin = hits[i].depthMin;
 			depthMinIndex = componentIndices.length();
 		}
-		int index = sceneShape->getIndex( hits[i].name.value() );
+		int index = sceneShape->selectionIndex( hits[i].name.value() );
 		componentIndices.append( index );
 	}
 	

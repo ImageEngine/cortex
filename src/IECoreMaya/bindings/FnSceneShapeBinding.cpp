@@ -63,7 +63,7 @@ static list childrenNames( MFnDependencyNode *fnDN )
 	MPxNode *userNode = fnDN->userNode();
 	SceneShapeInterface *sc = dynamic_cast<SceneShapeInterface *>( userNode );
 	assert( sc );
-	std::vector<IECore::InternedString> names = sc->getChildrenNames();
+	std::vector<IECore::InternedString> names = sc->childrenNames();
 	
 	list result;
 	for( std::vector<IECore::InternedString>::const_iterator it = names.begin(); it!=names.end(); it++ )

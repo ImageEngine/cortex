@@ -39,6 +39,7 @@
 
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnStringData.h"
+#include "maya/MPlugArray.h"
 
 
 using namespace IECore;
@@ -130,17 +131,6 @@ IECore::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 	return m_scene;
 }
 
-IECore::SceneInterface::Path SceneShape::getSceneRoot()
-{
-	MPlug pSceneRoot( thisMObject(), aSceneRootPlug );
-	MString sceneRoot;
-	pSceneRoot.getValue( sceneRoot );
-
-	IECore::SceneInterface::Path rootPath;
-	IECore::SceneInterface::stringToPath( sceneRoot.asChar(), rootPath );
-	return rootPath;
-}
-
 MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
 	if( plug == aSceneFilePlug || plug == aSceneRootPlug )
@@ -148,7 +138,6 @@ MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray
 		m_sceneDirty = true;
 		setDirty();
 		childChanged( kBoundingBoxChanged );
-		SceneShapeInterface::getOutputPlugsArray( plugArray );
 	}
 
 	return SceneShapeInterface::setDependentsDirty( plug, plugArray );

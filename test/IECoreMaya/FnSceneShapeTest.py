@@ -133,9 +133,9 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( childFn.fullPathName(), "|test|sceneShape_1|sceneShape_Shape1" )
 		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".file" ), FnSceneShapeTest.__testFile )
 		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".root" ), "/1" )
-		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".objectTransform[0].objectTranslate", "|test|sceneShape_1.translate" ) )
-		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".objectTransform[0].objectRotate", "|test|sceneShape_1.rotate" ) )
-		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".objectTransform[0].objectScale", "|test|sceneShape_1.scale" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outTranslate", "|test|sceneShape_1.translate" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outRotate", "|test|sceneShape_1.rotate" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outScale", "|test|sceneShape_1.scale" ) )
 		
 		maya.cmds.setAttr( childFn.fullPathName()+".drawGeometry", 1 )
 		result = childFn.expandScene()
@@ -148,9 +148,9 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( result[0].fullPathName(), "|test|sceneShape_1|child|childShape" )
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".file" ), FnSceneShapeTest.__testFile )
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".root" ), "/1/child" )
-		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".objectTransform[0].objectTranslate", "|test|sceneShape_1|child.translate" ) )
-		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".objectTransform[0].objectRotate", "|test|sceneShape_1|child.rotate" ) )
-		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".objectTransform[0].objectScale", "|test|sceneShape_1|child.scale" ) )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outTranslate", "|test|sceneShape_1|child.translate" ) )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outRotate", "|test|sceneShape_1|child.rotate" ) )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outScale", "|test|sceneShape_1|child.scale" ) )
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".drawGeometry"), 1 )
 		
 		
@@ -190,7 +190,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.nodeType( "|test|sceneShape_1|sceneShape_1_mesh" ), "mesh")
 		
 		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.queryPaths[1]" ), "/" )
-		self.assertTrue( maya.cmds.isConnected( "|test|sceneShape_1|sceneShape_Shape1.outputObjects[1]", "|test|sceneShape_1|sceneShape_1_mesh.inMesh" ) )
+		self.assertTrue( maya.cmds.isConnected( "|test|sceneShape_1|sceneShape_Shape1.outObjects[1]", "|test|sceneShape_1|sceneShape_1_mesh.inMesh" ) )
 		
 		
 

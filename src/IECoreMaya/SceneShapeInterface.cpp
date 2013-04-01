@@ -239,7 +239,7 @@ MStatus SceneShapeInterface::initialize()
 
 	// Output objects
 
-	aOutputObjects = gAttr.create( "outputObjects", "oob", &s );
+	aOutputObjects = gAttr.create( "outObjects", "oob", &s );
 	gAttr.addDataAccept( MFnMeshData::kMesh );
 	gAttr.addDataAccept( MFnNurbsCurveData::kNurbsCurve );
 	gAttr.setReadable( true );
@@ -255,55 +255,55 @@ MStatus SceneShapeInterface::initialize()
 
 	// Transform
 
-	aTranslateX = nAttr.create( "objectTranslateX", "otx", MFnNumericData::kFloat, 0, &s );
+	aTranslateX = nAttr.create( "outTranslateX", "otx", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 		
-	aTranslateY = nAttr.create( "objectTranslateY", "oty", MFnNumericData::kFloat, 0, &s );
+	aTranslateY = nAttr.create( "outTranslateY", "oty", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aTranslateZ = nAttr.create( "objectTranslateZ", "otz", MFnNumericData::kFloat, 0, &s );
+	aTranslateZ = nAttr.create( "outTranslateZ", "otz", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );	
 		
-	aTranslate = nAttr.create( "objectTranslate", "obt", aTranslateX, aTranslateY, aTranslateZ, &s );
+	aTranslate = nAttr.create( "outTranslate", "obt", aTranslateX, aTranslateY, aTranslateZ, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 
-	aRotateX = uAttr.create( "objectRotateX", "orx", MFnUnitAttribute::kAngle, 0.0, &s );
+	aRotateX = uAttr.create( "outRotateX", "orx", MFnUnitAttribute::kAngle, 0.0, &s );
 	uAttr.setWritable( false );
 	uAttr.setStorable( false );
 		
-	aRotateY = uAttr.create( "objectRotateY", "ory", MFnUnitAttribute::kAngle, 0.0, &s );
+	aRotateY = uAttr.create( "outRotateY", "ory", MFnUnitAttribute::kAngle, 0.0, &s );
 	uAttr.setWritable( false );
 	uAttr.setStorable( false );
 	
-	aRotateZ = uAttr.create( "objectRotateZ", "orz", MFnUnitAttribute::kAngle, 0.0, &s );
+	aRotateZ = uAttr.create( "outRotateZ", "orz", MFnUnitAttribute::kAngle, 0.0, &s );
 	uAttr.setWritable( false );
 	uAttr.setStorable( false );	
 		
-	aRotate = nAttr.create( "objectRotate", "obr", aRotateX, aRotateY, aRotateZ, &s );
+	aRotate = nAttr.create( "outRotate", "obr", aRotateX, aRotateY, aRotateZ, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aScaleX = nAttr.create( "objectScaleX", "osx", MFnNumericData::kFloat, 0, &s );
+	aScaleX = nAttr.create( "outScaleX", "osx", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 		
-	aScaleY = nAttr.create( "objectScaleY", "osy", MFnNumericData::kFloat, 0, &s );
+	aScaleY = nAttr.create( "outScaleY", "osy", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aScaleZ = nAttr.create( "objectScaleZ", "osz", MFnNumericData::kFloat, 0, &s );
+	aScaleZ = nAttr.create( "outScaleZ", "osz", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );	
 		
-	aScale = nAttr.create( "objectScale", "obs", aScaleX, aScaleY, aScaleZ, &s );
+	aScale = nAttr.create( "outScale", "obs", aScaleX, aScaleY, aScaleZ, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 
-	aTransform = cAttr.create( "objectTransform", "otr" );
+	aTransform = cAttr.create( "outTransform", "otr" );
 	cAttr.addChild( aTranslate );
 	cAttr.addChild( aRotate );
 	cAttr.addChild( aScale );
@@ -315,55 +315,55 @@ MStatus SceneShapeInterface::initialize()
 	
 	// Bounding box
 	
-	aBoundMinX = nAttr.create( "objectBoundMinX", "obminx", MFnNumericData::kFloat, 0, &s );
+	aBoundMinX = nAttr.create( "outBoundMinX", "obminx", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 		
-	aBoundMinY = nAttr.create( "objectBoundMinY", "cobminy", MFnNumericData::kFloat, 0, &s );
+	aBoundMinY = nAttr.create( "outBoundMinY", "cobminy", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundMinZ = nAttr.create( "objectBoundMinZ", "obminz", MFnNumericData::kFloat, 0, &s );
+	aBoundMinZ = nAttr.create( "outBoundMinZ", "obminz", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundMin = nAttr.create( "objectBoundMin", "obmin", aBoundMinX, aBoundMinY, aBoundMinZ, &s );
+	aBoundMin = nAttr.create( "outBoundMin", "obmin", aBoundMinX, aBoundMinY, aBoundMinZ, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundMaxX = nAttr.create( "objectBoundMaxX", "obmaxx", MFnNumericData::kFloat, 0, &s );
+	aBoundMaxX = nAttr.create( "outBoundMaxX", "obmaxx", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 		
-	aBoundMaxY = nAttr.create( "objectBoundMaxY", "cobmaxy", MFnNumericData::kFloat, 0, &s );
+	aBoundMaxY = nAttr.create( "outBoundMaxY", "cobmaxy", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundMaxZ = nAttr.create( "objectBoundMaxZ", "obmaxz", MFnNumericData::kFloat, 0, &s );
+	aBoundMaxZ = nAttr.create( "outBoundMaxZ", "obmaxz", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundMax = nAttr.create( "objectBoundMax", "obmax", aBoundMaxX, aBoundMaxY, aBoundMaxZ, &s );
+	aBoundMax = nAttr.create( "outBoundMax", "obmax", aBoundMaxX, aBoundMaxY, aBoundMaxZ, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundCenterX = nAttr.create( "objectBoundCenterX", "obcx", MFnNumericData::kFloat, 0, &s );
+	aBoundCenterX = nAttr.create( "outBoundCenterX", "obcx", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 		
-	aBoundCenterY = nAttr.create( "objectBoundCenterY", "obcy", MFnNumericData::kFloat, 0, &s );
+	aBoundCenterY = nAttr.create( "outBoundCenterY", "obcy", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundCenterZ = nAttr.create( "objectBoundCenterZ", "obcz", MFnNumericData::kFloat, 0, &s );
+	aBoundCenterZ = nAttr.create( "outBoundCenterZ", "obcz", MFnNumericData::kFloat, 0, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBoundCenter = nAttr.create( "objectBoundCenter", "obc", aBoundCenterX, aBoundCenterY, aBoundCenterZ, &s );
+	aBoundCenter = nAttr.create( "outBoundCenter", "obc", aBoundCenterX, aBoundCenterY, aBoundCenterZ, &s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
 	
-	aBound = cAttr.create( "objectBound", "obb" );
+	aBound = cAttr.create( "outBound", "obd" );
 	cAttr.addChild( aBoundMin );
 	cAttr.addChild( aBoundMax );
 	cAttr.addChild( aBoundCenter );
@@ -393,7 +393,6 @@ MStatus SceneShapeInterface::initialize()
 
 	addAttribute( aAttributeValues );
 
-	
 	aAttributes = cAttr.create( "attributes", "ott" );
 	cAttr.addChild( aAttributeValues );
 	cAttr.setArray( true );
@@ -408,20 +407,19 @@ MStatus SceneShapeInterface::initialize()
 	attributeAffects( aSceneQueries, aOutputObjects );
 	attributeAffects( aSceneQueries, aAttributes );
 
+	attributeAffects( aAttributeQueries, aAttributes );
 	
+	attributeAffects( aQuerySpace, aTransform );
+	attributeAffects( aQuerySpace, aBound );
+	attributeAffects( aQuerySpace, aOutputObjects );
+
 	return s;
 }
 
-IECore::ConstSceneInterfacePtr SceneShapeInterface::getSceneInterface( )
+ConstSceneInterfacePtr SceneShapeInterface::getSceneInterface( )
 {
 	throw Exception( "SceneShapeInterface: getSceneInterface not implemented!" );
 }
-
-IECore::SceneInterface::Path SceneShapeInterface::getSceneRoot( )
-{
-	throw Exception( "SceneShapeInterface: getSceneRoot not implemented!" );
-}
-
 
 bool SceneShapeInterface::isBounded() const
 {
@@ -456,7 +454,7 @@ MBoundingBox SceneShapeInterface::boundingBox() const
 				if( scn->hasObject() )
 				{
 					ObjectPtr object = scn->readObject( time.as( MTime::kSeconds ) );
-					VisibleRenderablePtr obj = IECore::runTimeCast< VisibleRenderable >( object );
+					VisibleRenderablePtr obj = runTimeCast< VisibleRenderable >( object );
 					if( obj )
 					{
 						Box3f objBox = obj->bound();
@@ -499,73 +497,68 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 {
 	if( plug == aTime )
 	{
-		IECore::ConstSceneCachePtr sceneInterface = runTimeCast< const IECore::SceneCache >(getSceneInterface());
+		ConstSceneCachePtr sceneInterface = runTimeCast< const SceneCache >(getSceneInterface());
 		
+		// Check if sceneInterface is animated. If not, plugs are not dependent on time
 		if( sceneInterface && sceneInterface -> numBoundSamples() > 1 )
 		{
 			m_previewSceneDirty = true;
-			childChanged( kBoundingBoxChanged );
-			getOutputPlugsArray( plugArray );
+			childChanged( kBoundingBoxChanged ); // needed to tell maya the bounding box has changed
+			
+			// Need to go through all output plugs, since Maya doesn't propagate dirtiness from parent plug to the children in setDependentsDirty
+			MPlug pObjects( thisMObject(), aOutputObjects );
+			for( unsigned i=0; i<pObjects.numElements(); i++ )
+			{
+				MPlug p = pObjects[i];
+				plugArray.append( p );
+			}
+		
+			MPlug pTransform( thisMObject(), aTransform );
+			for( unsigned i=0; i<pTransform.numElements(); i++ )
+			{
+				MPlug p = pTransform[i];
+				for( unsigned j=0; j<p.numChildren(); j++ )
+				{
+					plugArray.append( p.child( j ) );
+					plugArray.append( p.child( j ).child( 0 ) );
+					plugArray.append( p.child( j ).child( 1 ) );
+					plugArray.append( p.child( j ).child( 2 ) );
+				}
+			}
+			
+			MPlug pBound( thisMObject(), aBound);
+			for( unsigned i=0; i<pBound.numElements(); i++ )
+			{
+				MPlug p = pBound[i];
+				for( unsigned j=0; j<p.numChildren(); j++ )
+				{
+					plugArray.append( p.child( j ) );
+					plugArray.append( p.child( j ).child( 0 ) );
+					plugArray.append( p.child( j ).child( 1 ) );
+					plugArray.append( p.child( j ).child( 2 ) );
+				}
+			}
+			
+			MPlug pAttributes( thisMObject(), aAttributes);
+			for( unsigned i=0; i<pAttributes.numElements(); i++ )
+			{
+				MPlug p = pAttributes[i];
+				MPlug pChild = p.child(0);
+				plugArray.append( pChild );
+				for( unsigned j=0; j<pChild.numElements(); j++ )
+				{
+					plugArray.append( pChild[j] );
+				}
+			}
 		}
-	}
-	else if( plug == aSceneQueries || plug == aQuerySpace || plug == aAttributeQueries )
-	{
-		getOutputPlugsArray( plugArray );
 	}
 	else if( plug == aDrawGeometry || plug == aDrawChildBounds || plug == aObjectOnly )
 	{
+		// Preview plug values have changed, GL Scene is dirty
 		m_previewSceneDirty = true;
 	}
 	
 	return MS::kSuccess;
-}
-
-void SceneShapeInterface::getOutputPlugsArray( MPlugArray &plugArray )
-{
-	MPlug pObjects( thisMObject(), aOutputObjects );
-	for( unsigned i=0; i<pObjects.numElements(); i++ )
-	{
-		MPlug p = pObjects[i];
-		plugArray.append( p );
-	}
-
-	MPlug pTransform( thisMObject(), aTransform );
-	for( unsigned i=0; i<pTransform.numElements(); i++ )
-	{
-		MPlug p = pTransform[i];
-		for( unsigned j=0; j<p.numChildren(); j++ )
-		{
-			plugArray.append( p.child( j ) );
-			plugArray.append( p.child( j ).child( 0 ) );
-			plugArray.append( p.child( j ).child( 1 ) );
-			plugArray.append( p.child( j ).child( 2 ) );
-		}
-	}
-	
-	MPlug pBound( thisMObject(), aBound);
-	for( unsigned i=0; i<pBound.numElements(); i++ )
-	{
-		MPlug p = pBound[i];
-		for( unsigned j=0; j<p.numChildren(); j++ )
-		{
-			plugArray.append( p.child( j ) );
-			plugArray.append( p.child( j ).child( 0 ) );
-			plugArray.append( p.child( j ).child( 1 ) );
-			plugArray.append( p.child( j ).child( 2 ) );
-		}
-	}
-	
-	MPlug pAttributes( thisMObject(), aAttributes);
-	for( unsigned i=0; i<pAttributes.numElements(); i++ )
-	{
-		MPlug p = pAttributes[i];
-		MPlug pChild = p.child(0);
-		plugArray.append( pChild );
-		for( unsigned j=0; j<pChild.numElements(); j++ )
-		{
-			plugArray.append( pChild[j] );
-		}
-	}
 }
 
 
@@ -575,6 +568,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 
 	MPlug topLevelPlug = plug;
 	int index = -1;
+	// Look for parent plug index
 	while( topLevelPlug.isChild() || topLevelPlug.isElement() )
 	{
 		if( topLevelPlug.isChild() )
@@ -613,18 +607,23 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		ConstSceneInterfacePtr sc = getSceneInterface();
 		if( !sc )
 		{
+			// Scene Interface isn't valid
 			MFnDagNode dag(thisMObject());
 			msg( Msg::Error, dag.fullPathName().asChar(),  "Input values are invalid." );
 			return MS::kFailure;
 		}
 		
-		SceneInterface::Path root = getSceneRoot();
+		// get root path
+		SceneInterface::Path root;
+		getSceneInterface()->path( root );
 		std::string rootName;
 		SceneInterface::pathToString( root, rootName );
+		// get full path for query
 		std::string pathName = rootName+name.asChar();
 		
 		SceneInterface::Path path;
 		SceneInterface::stringToPath( pathName, path );
+		// Get sceneInterface for query path
 		ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
 		
 		if( !scene )
@@ -639,11 +638,11 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MArrayDataHandle transformHandle = dataBlock.outputArrayValue( aTransform );
 			MArrayDataBuilder transformBuilder = transformHandle.builder();
 			
-			Imath::M44d transformd;
+			M44d transformd;
 			if( querySpace == World )
 			{
 				// World Space (starting from scene root)
-				transformd = worldTransform( scene, getSceneRoot(), time.as( MTime::kSeconds ) );
+				transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
 			}
 			else if( querySpace == Local )
 			{
@@ -651,10 +650,10 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 				transformd = scene->readTransformAsMatrix( time.as( MTime::kSeconds ) );
 			}
 			
-			Imath::V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
-			Imath::M44f transform;
+			V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
+			M44f transform;
 			transform.setValue( transformd );
-			Imath::extractSHRT( convert<Imath::M44f>( transform ), scale, shear, rotate, translate );
+			extractSHRT( convert<M44f>( transform ), scale, shear, rotate, translate );
 
 			MDataHandle transformElementHandle = transformBuilder.addElement( index );
 			transformElementHandle.child( aTranslate ).set3Float( translate[0], translate[1], translate[2] );
@@ -668,12 +667,13 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MArrayDataHandle outputDataHandle = dataBlock.outputValue( aOutputObjects, &s );
 			MArrayDataBuilder outputBuilder = outputDataHandle.builder();
 
-			IECore::ObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
+			ObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
 			
 			if( querySpace == World )
 			{
-				Imath::M44d transformd;
-				transformd = worldTransform( scene, getSceneRoot(), time.as( MTime::kSeconds ) );
+				// If world space, need to transform the object using the concatenated matrix from the sceneInterface path to the query path
+				M44d transformd;
+				transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
 				
 				TransformOpPtr transformer = new TransformOp();
 				transformer->inputParameter()->setValue( object );
@@ -690,12 +690,12 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 				// Check the type for now, because a dag node is created if you pass an empty MObject to the converter
 				// Won't be needed anymore when the related todo is addressed in the converter
 				IECore::TypeId type = object->typeId();
-				if( type == IECore::MeshPrimitiveTypeId )
+				if( type == MeshPrimitiveTypeId )
 				{
 					MFnMeshData fnData;
 					data = fnData.create();
 				}
-				else if( type == IECore::CurvesPrimitiveTypeId )
+				else if( type == CurvesPrimitiveTypeId )
 				{
 					MFnNurbsCurveData fnData;
 					data = fnData.create();
@@ -718,26 +718,27 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MArrayDataHandle boundHandle = dataBlock.outputArrayValue( aBound );
 			MArrayDataBuilder boundBuilder = boundHandle.builder();
 			
-			Imath::Box3d bboxd = scene->readBound( time.as( MTime::kSeconds ) );
+			Box3d bboxd = scene->readBound( time.as( MTime::kSeconds ) );
 			
 			if( querySpace == World )
 			{
 				// World Space (from root path)
-				Imath::M44d transformd = worldTransform( scene, getSceneRoot(), time.as( MTime::kSeconds ) );
+				M44d transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
 				bboxd = transform( bboxd, transformd );
 			}
-			Imath::Box3f bound( bboxd.min, bboxd.max );
+			Box3f bound( bboxd.min, bboxd.max );
 
 			MDataHandle boundElementHandle = boundBuilder.addElement( index );
 			boundElementHandle.child( aBoundMin ).set3Float( bound.min[0],  bound.min[1],  bound.min[2] );
 			boundElementHandle.child( aBoundMax ).set3Float( bound.max[0],  bound.max[1],  bound.max[2] );
-			Imath::V3f boundCenter = bound.center();
+			V3f boundCenter = bound.center();
 			boundElementHandle.child( aBoundCenter ).set3Float( boundCenter[0], boundCenter[1], boundCenter[2] );
 		}
 		else if( topLevelPlug == aAttributes )
 		{
 
 			int attrIndex = -1;
+			// Look for attribute query index
 			if( plug.isElement() && !plug.isCompound() )
 			{
 				attrIndex = plug.logicalIndex();
@@ -761,7 +762,9 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 				msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Queried attribute '%s' at index '%s' does not exist " ) % attrName.asChar() % attrIndex );
 				return MS::kFailure;
 			}
-
+			
+			// Attribute query results are returned as attributes[ sceneQuery index ].attributeValues[ attributeQuery index ]
+			
 			MArrayDataHandle attributesHandle = dataBlock.outputArrayValue( aAttributes );
 			MArrayDataBuilder builder = attributesHandle.builder();
 			
@@ -775,27 +778,27 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			
 			ObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
 			IECore::TypeId type = attrValue->typeId();
-			if( type == IECore::BoolDataTypeId )
+			if( type == BoolDataTypeId )
 			{
-				IECore::ConstBoolDataPtr val = runTimeCast< IECore::BoolData >(attrValue);
+				ConstBoolDataPtr val = runTimeCast< BoolData >(attrValue);
 				bool value = val->readable();
 				currentElement.setGenericBool( value, true);
 			}
-			else if( type == IECore::FloatDataTypeId )
+			else if( type == FloatDataTypeId )
 			{
-				IECore::ConstFloatDataPtr val = runTimeCast< IECore::FloatData >(attrValue);
+				ConstFloatDataPtr val = runTimeCast< FloatData >(attrValue);
 				float value = val->readable();
 				currentElement.setGenericFloat( value, true);
 			}
-			else if( type == IECore::IntDataTypeId )
+			else if( type == IntDataTypeId )
 			{
-				IECore::ConstIntDataPtr val = runTimeCast< IECore::IntData >(attrValue);
+				ConstIntDataPtr val = runTimeCast< IntData >(attrValue);
 				int value = val->readable();
 				currentElement.setGenericInt( value, true);
 			}
-			else if( type == IECore::StringDataTypeId )
+			else if( type == StringDataTypeId )
 			{
-				IECore::ConstStringDataPtr val = runTimeCast< IECore::StringData >(attrValue);
+				ConstStringDataPtr val = runTimeCast< StringData >(attrValue);
 				MString value( val->readable().c_str() );
 				currentElement.setString( value );
 			}
@@ -805,19 +808,19 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 	return MS::kSuccess;
 }
 
-Imath::M44d SceneShapeInterface::worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time )
+M44d SceneShapeInterface::worldTransform( ConstSceneInterfacePtr scene, double time )
 {
-	IECore::SceneInterface::Path p;
+	SceneInterface::Path p;
 	scene->path( p );
-
-	IECore::ConstSceneInterfacePtr tmpScene = scene->scene( root );
-	IECore::SceneInterface::Path pRoot;
-	tmpScene->path( pRoot );
-	Imath::M44d result;
 	
-	for ( IECore::SceneInterface::Path::const_iterator it = p.begin()+pRoot.size(); tmpScene && it != p.end(); ++it )
+	ConstSceneInterfacePtr tmpScene = getSceneInterface();
+	SceneInterface::Path pRoot;
+	tmpScene->path( pRoot );
+	M44d result;
+	
+	for ( SceneInterface::Path::const_iterator it = p.begin()+pRoot.size(); tmpScene && it != p.end(); ++it )
 	{
-		tmpScene = tmpScene->child( *it, IECore::SceneInterface::NullIfMissing );
+		tmpScene = tmpScene->child( *it, SceneInterface::NullIfMissing );
 		if ( !tmpScene )
 		{
 			break;
@@ -886,8 +889,9 @@ MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelecti
 	return MPxSurfaceShape::matchComponent( item, spec, list );
 }
 
-void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface )
+void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstSceneInterfacePtr subSceneInterface )
 {
+	// Grab plug values to know what we need to render
 	MPlug pTime( thisMObject(), aTime );
 	MTime time;
 	pTime.getValue( time );
@@ -904,30 +908,30 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::Co
 	bool objectOnly;
 	pObjectOnly.getValue( objectOnly );
 
-	IECore::AttributeBlock a(renderer);
-	IECore::SceneInterface::Path pathName;
+	AttributeBlock a(renderer);
+	SceneInterface::Path pathName;
 	subSceneInterface->path( pathName );
-	std::string pathStr = getRelativePathName( pathName );
+	std::string pathStr = relativePathName( pathName );
 	renderer->setAttribute( "name", new StringData( pathStr ) );
 	
 	// Need to add this attribute block to get a parent group with that name that includes the object and/or bound
-	IECore::AttributeBlock aNew(renderer);
+	AttributeBlock aNew(renderer);
 
-	Imath::M44d transformd;
+	M44d transformd;
 	if(pathStr != "/")
 	{
 		// Path space
-		transformd = worldTransform( subSceneInterface, getSceneRoot(), time.as( MTime::kSeconds ) );
+		transformd = worldTransform( subSceneInterface, time.as( MTime::kSeconds ) );
 	}
 
-	Imath::M44f transform;
+	M44f transform;
 	transform.setValue( transformd );
 	renderer->setTransform( transform );
 	
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
-		IECore::ObjectPtr object = subSceneInterface->readObject( time.as( MTime::kSeconds ) );
-		VisibleRenderablePtr vis = IECore::runTimeCast< VisibleRenderable >(object);
+		ObjectPtr object = subSceneInterface->readObject( time.as( MTime::kSeconds ) );
+		VisibleRenderablePtr vis = runTimeCast< VisibleRenderable >(object);
 		if( vis )
 		{
 			vis->render(renderer);
@@ -936,7 +940,7 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::Co
 	
 	if( drawBounds && pathStr != "/" )
 	{
-		IECore::AttributeBlock aBox(renderer);
+		AttributeBlock aBox(renderer);
 		renderer->setAttribute( "gl:primitive:wireframe", new BoolData( true ) );
 		renderer->setAttribute( "gl:primitive:solid", new BoolData( false ) );
 		renderer->setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
@@ -945,32 +949,32 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, IECore::Co
 		Box3f bbox( b.min, b.max );
 		if( !bbox.isEmpty() )
 		{
-			IECore::CurvesPrimitive::createBox( bbox )->render( renderer );    
+			CurvesPrimitive::createBox( bbox )->render( renderer );    
 		}
 	}
 	
 	if( !objectOnly )
 	{
+		// We need the entire hierarchy, iterate through all the sceneInterface children
 		SceneInterface::NameList childNames;
 		subSceneInterface->childNames( childNames );
 		for ( SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
 		{
-			IECore::SceneInterface::Name name = *it;
-			IECore::ConstSceneInterfacePtr childScene = subSceneInterface->child( name );
+			SceneInterface::Name name = *it;
+			ConstSceneInterfacePtr childScene = subSceneInterface->child( name );
 			buildScene( renderer, childScene );
 		}
 	}
 }
 
-IECoreGL::ConstScenePtr SceneShapeInterface::scene()
+IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 {
 	if(!m_previewSceneDirty)
 	{
 		return m_scene;
 	}
 
-	IECore::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
-	m_sceneRoot = getSceneRoot();
+	ConstSceneInterfacePtr sceneInterface = getSceneInterface();
 
 	if( sceneInterface )
 	{
@@ -1017,7 +1021,7 @@ void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr name
 	{
 		int index = m_nameToGroupMap.size();
 		std::pair< NameToGroupMap::iterator, bool> ret;
-		ret = m_nameToGroupMap.insert( std::pair< IECore::InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
+		ret = m_nameToGroupMap.insert( std::pair< InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
 		if( ret.second )
 		{
 			IndexToNameMap::iterator idIt = m_indexToNameMap.begin() + index;
@@ -1042,7 +1046,7 @@ void SceneShapeInterface::setDirty()
 	m_previewSceneDirty = true;
 }
 
-IECoreGL::GroupPtr SceneShapeInterface::getGroup( std::string name )
+IECoreGL::GroupPtr SceneShapeInterface::glGroup( std::string name )
 {
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
@@ -1055,7 +1059,7 @@ IECoreGL::GroupPtr SceneShapeInterface::getGroup( std::string name )
 	}
 }
 
-int SceneShapeInterface::getIndex( std::string name )
+int SceneShapeInterface::selectionIndex( std::string name )
 {
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
@@ -1068,22 +1072,24 @@ int SceneShapeInterface::getIndex( std::string name )
 	}
 }
 
-std::string SceneShapeInterface::getName( int index )
+std::string SceneShapeInterface::selectionName( int index )
 {
 	return m_indexToNameMap[index];
 }
 
-const std::vector< IECore::InternedString > & SceneShapeInterface::getChildrenNames() const
+const std::vector< InternedString > & SceneShapeInterface::childrenNames() const
 {
 	return m_indexToNameMap;
 }
 
-std::string SceneShapeInterface::getRelativePathName( SceneInterface::Path path )
+std::string SceneShapeInterface::relativePathName( SceneInterface::Path path )
 {
-	assert( m_sceneRoot );
-	assert( m_sceneRoot.size() <= path.size() );
+	SceneInterface::Path root;
+	getSceneInterface()->path( root );
+	assert( root );
+	assert( root.size() <= path.size() );
 	
-	if( m_sceneRoot == path )
+	if( root == path )
 	{
 		return "/";
 	}
@@ -1091,7 +1097,7 @@ std::string SceneShapeInterface::getRelativePathName( SceneInterface::Path path 
 	std::string pathName;
 	
 	SceneInterface::Path::const_iterator it = path.begin();
-	it += m_sceneRoot.size();
+	it += root.size();
 
 	for ( ; it != path.end(); it++ )
 	{

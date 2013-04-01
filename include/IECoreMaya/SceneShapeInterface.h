@@ -57,6 +57,15 @@ IE_CORE_FORWARDDECLARE( Renderer );
 namespace IECoreMaya
 {
 
+/// A base class for a maya shape that can read an IECore::SceneInterface.
+/// getSceneInterface should be implemented by any derived class
+/// Builds a glScene for preview, which can draw all geometry in the hierarchy and the child bounds
+/// Can be used as objectOnly, in which case the glScene will only represent the current path of the sceneInterface
+/// or not objectOnly in which case the entire hierarchy starting from the current path is represented.
+/// Computes queries on paths to get transforms, bounds and objects as outputs, as well as attributes.
+/// The query paths are relative to the current sceneInterface path.
+/// Queries can be accessed in local space or world space (starting from the current path).
+///
 class SceneShapeInterface: public MPxComponentShape
 {
 	public:
@@ -64,45 +73,67 @@ class SceneShapeInterface: public MPxComponentShape
 		SceneShapeInterface();
 		virtual ~SceneShapeInterface();
 		
-		virtual void postConstructor();
+		/*
+		 * For Maya
+		 */
 		
+		virtual void postConstructor();
 		static void *creator();
 		static MStatus initialize();
-		static MTypeId id;
 		
 		virtual bool isBounded() const;
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
-
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
-
-		IECoreGL::ConstScenePtr scene();
-		void setDirty();
-
-		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
-		virtual IECore::SceneInterface::Path getSceneRoot();
 		
-		void getOutputPlugsArray( MPlugArray &plugArray );
+		static MTypeId id;
 		
-		IECoreGL::GroupPtr getGroup( std::string name );
-		int getIndex( std::string name );
-		std::string getName( int index );
-		const std::vector< IECore::InternedString > & getChildrenNames() const;
-		
+		// Public variables because plugs need to be accessed by the UI creator which implements the drawing/selection
 		static MObject aObjectOnly;
 		static MObject aDrawGeometry;
 		static MObject aDrawRootBound;
 		static MObject aDrawChildBounds;
+		
+		/*
+		 * Custom
+		 */
+		
+		/// Returns the sceneInterface for this node. Needs to be implemented by derived classes.
+		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
+		
+		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawChildBounds )
+		IECoreGL::ConstScenePtr glScene();
+		
+		/// Returns GL Group matching the given path name.
+		IECoreGL::GroupPtr glGroup( std::string name );
+		/// Returns the internal index stored for the given path
+		int selectionIndex( std::string name );
+		/// Returns the path name for the given index
+		std::string selectionName( int index );
+		/// Returns all component names currently existing in the shape
+		const std::vector< IECore::InternedString > & childrenNames() const;
+
+	protected :
+		
+		// protected variables, used by derived classes to set attribute dependencies
+		static MObject aOutputObjects;
+		static MObject aAttributes;
+		static MObject aTransform;
+		static MObject aBound;
+		
+		/// Flags the GL scene as dirty, for use by derived classes
+		void setDirty();
+		
+	private :
+
 		static MObject aTime;
 		static MObject aQuerySpace;
 		static MObject aSceneQueries;
 		static MObject aAttributeQueries;
-		static MObject aOutputObjects;
-		static MObject aAttributes;
+		
 		static MObject aAttributeValues;
 		
-		static MObject aTransform;
 		static MObject aTranslate;
 		static MObject aTranslateX;
 		static MObject aTranslateY;
@@ -116,7 +147,6 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aScaleY;
 		static MObject aScaleZ;
 		
-		static MObject aBound;
 		static MObject aBoundMin;
 		static MObject aBoundMinX;
 		static MObject aBoundMinY;
@@ -129,9 +159,8 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aBoundCenterX;
 		static MObject aBoundCenterY;
 		static MObject aBoundCenterZ;
-	
-	private :
 		
+		/// Available modes for querySpace: Local space or World space (starts at sceneInterface path)
 		enum Space
 		{
 			World,
@@ -142,14 +171,15 @@ class SceneShapeInterface: public MPxComponentShape
 		bool m_previewSceneDirty;
 
 		IECoreGL::ScenePtr m_scene;
-		IECore::SceneInterface::Path m_sceneRoot;
 		
+		/// Recursively parses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
 		void buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface );
-		
+		/// Recursively parses glScene to store GL Groups matching path names
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 		
-		std::string getRelativePathName( IECore::SceneInterface::Path path );
-		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
+		std::string relativePathName( IECore::SceneInterface::Path path );
+		/// Returns concatenated matrix from current sceneInterface path to given scene
+		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, double time );
 
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
