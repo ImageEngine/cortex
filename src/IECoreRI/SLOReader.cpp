@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -320,6 +320,17 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 			result->parameters().insert( CompoundDataMap::value_type( arg->svd_name, data ) );
 		}
 
+	}
+
+	// shader annotations
+	
+	CompoundDataPtr annotations = new CompoundData;
+	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:annotations", annotations ) );
+	
+	for( int i=1, n=Slo_GetNAnnotations(); i <= n; i++ )
+	{
+		const char *key = Slo_GetAnnotationKeyById( i );
+		annotations->writable()[key] = new StringData( Slo_GetAnnotationByKey( key ) );
 	}
 
 	Slo_EndShader();
