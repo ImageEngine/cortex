@@ -306,6 +306,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 						data = sData;
 						sData->writable().resize( arg->svd_arraylen );
 					}
+					typeHints->writable().insert( pair<string, DataPtr>( arg->svd_name, new StringData( Slo_TypetoStr( arg->svd_type ) ) ) );
 				}
 				break;
 

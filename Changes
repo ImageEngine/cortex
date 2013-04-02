@@ -33,7 +33,7 @@ Improvements :
 * Primitives provide a hash of their topology in addition to the complete hash (including primitive variables).
 * LRUCache class now accepts an optional removalCallback, which is called whenever an item is removed from the cache.
 * IECoreHoudini has new ParameterisedHolderInterface and ParameterisedHolder base classes, so we can hold parameterised objects in non-SOP contexts.
-* IECoreRI::SLOReader now loads shader annotations, providing them as an "ri:annotations" entry in the shader blind data.
+* IECoreRI::SLOReader now loads shader annotations, providing them as an "ri:annotations" entry in the shader blind data. It also adds a type hint to distinguish between parameters of type string and parameters or type shader.
 
 7.10.2 :
 
