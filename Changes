@@ -1,5 +1,6 @@
 Additions :
 
+* Added LinkedScene class, to support scene files that reference (link) to external files. The bounding boxes are incorporated in the master scene automatically when writing and when reading the traversal of the whole hierarchy is transparently switching between the files.
 * IECoreMaya: ieSceneShape maya node now uses SharedSceneInterfaces, so it's not super slow when you've got a scene with multiple nodes referencing the same file.
 * Added SharedSceneInterfaces, which uses an LRU cache so you don't end up opening the same file over and over again
 * It's now possible to register FromMayaDagConverters for plugin maya nodes. Added the FromMayaProceduralHolderConverter.

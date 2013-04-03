@@ -316,7 +316,7 @@
 #include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
 #include "IECorePython/SceneCacheBinding.h"
-
+#include "IECorePython/LinkedSceneBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -635,6 +635,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();
 	bindSceneCache();
+	bindLinkedScene();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

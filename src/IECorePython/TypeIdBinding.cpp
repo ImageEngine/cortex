@@ -422,6 +422,7 @@ void bindTypeId()
 		.value( "MemoryIndexedIO", MemoryIndexedIOTypeId )
 		.value( "InternedStringVectorData", InternedStringVectorDataTypeId )
 		.value( "InternedStringData", InternedStringDataTypeId )
+		.value( "LinkedScene", LinkedSceneTypeId )
 	;
 }
 

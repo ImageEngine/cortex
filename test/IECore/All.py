@@ -266,6 +266,7 @@ from OptionsTest import OptionsTest
 from NullObjectTest import NullObjectTest
 from ModelCacheTest import ModelCacheTest
 from SceneCacheTest import SceneCacheTest
+from LinkedSceneTest import LinkedSceneTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

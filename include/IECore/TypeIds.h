@@ -419,6 +419,7 @@ enum TypeId
 	MemoryIndexedIOTypeId = 371,
 	InternedStringVectorDataTypeId = 372,
 	InternedStringDataTypeId = 373,
+	LinkedSceneTypeId = 374,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 
