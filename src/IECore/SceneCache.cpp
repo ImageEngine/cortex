@@ -42,6 +42,7 @@
 #include "IECore/Primitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/SharedSceneInterfaces.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -1353,8 +1354,14 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 			if ( !m_parent && m_sampleTimesMap )
 			{
+				// we are at the root...
 				// deallocate samples map stored in the root object.
 				delete m_sampleTimesMap;
+				// and make sure the cache does not contain this file, forcing it to reload it.
+				if ( m_indexedIO->typeId() == FileIndexedIOTypeId )
+				{
+					SharedSceneInterfaces::erase( static_cast< FileIndexedIO * >( m_indexedIO.get() )->fileName() );
+				}
 			}
 			m_sampleTimesMap = 0;
 		}
