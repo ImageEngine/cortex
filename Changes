@@ -36,6 +36,11 @@ Improvements :
 * IECoreHoudini has new ParameterisedHolderInterface and ParameterisedHolder base classes, so we can hold parameterised objects in non-SOP contexts.
 * IECoreRI::SLOReader now loads shader annotations, providing them as an "ri:annotations" entry in the shader blind data. It also adds a type hint to distinguish between parameters of type string and parameters or type shader.
 
+Bug Fixes :
+
+* IECore ImageReader and ImageWriter not doing transformation on alpha anymore, A gets filtered out from the channel names given to ColorSpaceTransformOp.
+* IECore ColorSpaceTransformOp applies unpremult before channelOp conversion then premult after, as channelOp doesn't deal with unpremultiplication of the colour channels.
+
 7.10.2 :
 
 Improvements :

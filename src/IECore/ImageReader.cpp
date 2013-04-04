@@ -153,6 +153,14 @@ ObjectPtr ImageReader::doOperation( const CompoundObject *operands )
 	if ( colorspace != "linear" && !rawChannels )
 	{
 		// color convert the image to linear colorspace if R,G,B are there.
+		
+		// Make sure A is not in the list of channels
+		vector<string>::iterator it = find( channelNames.begin(), channelNames.end(), "A");
+		if( it != channelNames.end() )
+		{
+			channelNames.erase( it );
+		}
+		
 		ColorSpaceTransformOpPtr transformOp = new ColorSpaceTransformOp();
 		transformOp->inputColorSpaceParameter()->setTypedValue( colorspace );
 		transformOp->outputColorSpaceParameter()->setTypedValue( "linear" );
