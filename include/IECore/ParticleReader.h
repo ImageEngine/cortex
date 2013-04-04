@@ -78,6 +78,8 @@ class ParticleReader : public Reader
 		const StringVectorParameter * attributesParameter() const;
 		IntParameter * realTypeParameter();
 		const IntParameter * realTypeParameter() const;
+		BoolParameter * convertPrimVarNamesParameter();
+		const BoolParameter * convertPrimVarNamesParameter() const;
 		//@}
 
 		//! @name Particle specific reading functions.
@@ -122,12 +124,17 @@ class ParticleReader : public Reader
 		StringVectorParameterPtr m_attributesParameter;
 		RealType realType() const;
 		IntParameterPtr m_realTypeParameter;
+		bool convertPrimVarNames() const;
+		BoolParameterPtr m_convertPrimVarNamesParameter;
 
 		/// Convenience function to filter prim vars at a given percentage.
 		/// The filtering is based on the particle id or based on the 
 		/// particle index if no id is provided.
 		template<typename T, typename F>
 		typename T::Ptr filterAttr( const F * attr, float percentage, const Data *idAttr ) const;
+		
+		/// Returns the name of the original position primVar should we need to convert it to "P"
+		virtual std::string positionPrimVarName() = 0;
 
 	private :
 

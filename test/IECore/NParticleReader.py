@@ -45,10 +45,55 @@ class TestNParticleReader( unittest.TestCase ) :
 		self.assertEqual( type( r ), IECore.NParticleReader )
 		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/iffFiles/nParticleFrame2.mc" )
 
-	def testRead( self ) :
+	def testReadWithPrimVarConversion( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
 		self.assertEqual( type( r ), IECore.NParticleReader )
+
+		self.assertEqual( r.numParticles(), 4 )
+		self.assertEqual( len(r.frameTimes()), 1 )
+		attrNames = r.attributeNames()
+		expectedAttrNamesAndTypes = {
+			"nParticleShape1_id" : IECore.DoubleVectorData,
+			"nParticleShape1_birthTime" : IECore.DoubleVectorData,
+			"nParticleShape1_position" : IECore.V3dVectorData,
+			"nParticleShape1_lifespanPP" : IECore.DoubleVectorData,
+			"nParticleShape1_finalLifespanPP" : IECore.DoubleVectorData,
+			"nParticleShape1_velocity" : IECore.V3dVectorData,
+		}
+		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
+		for i in expectedAttrNamesAndTypes.keys() :
+			self.assert_( i in attrNames )
+
+		c = r.read()
+		expectedConvertedAttrNamesAndTypes = {
+			"nParticleShape1_id" : IECore.DoubleVectorData,
+			"nParticleShape1_birthTime" : IECore.DoubleVectorData,
+			"P" : IECore.V3dVectorData,
+			"nParticleShape1_lifespanPP" : IECore.DoubleVectorData,
+			"nParticleShape1_finalLifespanPP" : IECore.DoubleVectorData,
+			"nParticleShape1_velocity" : IECore.V3dVectorData,
+		}
+		self.assertEqual( type( c ), IECore.PointsPrimitive )
+		self.assertEqual( len( c ), len( expectedConvertedAttrNamesAndTypes ) )
+		for i in expectedConvertedAttrNamesAndTypes.keys() :
+			self.assert_( i in c )
+			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
+			self.assertEqual( len(c[i].data), r.numParticles() )
+
+		for p in c["P"].data :
+			self.assert_( abs( p.x ) < 0.022 )
+			self.assert_( abs( p.y ) < 0.017 )
+			self.assert_( abs( p.z ) < 0.020 )
+
+		self.assertEqual( c["nParticleShape1_id"].data, IECore.DoubleVectorData( range( 0, 4 ) ) )
+	
+	def testReadNoPrimVarConversion( self ) :
+
+		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
+		self.assertEqual( type( r ), IECore.NParticleReader )
+		r["convertPrimVarNames"].setValue( IECore.BoolData( False ) )
+		self.assertFalse( r.parameters()["convertPrimVarNames"].getTypedValue() )
 
 		self.assertEqual( r.numParticles(), 4 )
 		self.assertEqual( len(r.frameTimes()), 1 )
@@ -84,6 +129,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc" )
 		
+		self.assertTrue( r.parameters()["convertPrimVarNames"].getTypedValue() )
 		self.assertEqual( len(r.frameTimes()), 10 )
 		
 		self.assertEqual( r.numParticles(), 0 )
@@ -114,12 +160,22 @@ class TestNParticleReader( unittest.TestCase ) :
 		c = r.read()
 		self.assertEqual( type( c ), IECore.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
-		for i in expectedAttrNamesAndTypes.keys() :
+		
+		expectedConvertedAttrNamesAndTypes = {
+			"testParticleShape_id" : IECore.DoubleVectorData,
+			"testParticleShape_birthTime" : IECore.DoubleVectorData,
+			"P" : IECore.V3dVectorData,
+			"testParticleShape_lifespanPP" : IECore.DoubleVectorData,
+			"testParticleShape_finalLifespanPP" : IECore.DoubleVectorData,
+			"testParticleShape_velocity" : IECore.V3dVectorData,
+		}
+		
+		for i in expectedConvertedAttrNamesAndTypes.keys() :
 			self.assert_( i in c )
-			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
+			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
-		for p in c["testParticleShape_position"].data :
+		for p in c["P"].data :
 			self.assert_( abs( p.x ) < 0.159 )
 			self.assert_( abs( p.y ) < 0.145 )
 			self.assert_( abs( p.z ) < 0.138 )
@@ -142,7 +198,8 @@ class TestNParticleReader( unittest.TestCase ) :
 		p = r.read()
 		self.assert_( p.numPoints < 13 )
 		self.assert_( p.numPoints > 7 )
-		for attr in attributesToLoad :
+		convertedAttributes = [ "testParticleShape_birthTime", "P" ]
+		for attr in convertedAttributes :
 			self.assertEqual( p.numPoints, p[attr].data.size() )
 
 	def testConversion( self ) :
@@ -164,14 +221,22 @@ class TestNParticleReader( unittest.TestCase ) :
 		}
 
 		c = r.read()
+		expectedConvertedAttrNamesAndTypes = {
+			"testParticleShape_id" : IECore.FloatVectorData,
+			"testParticleShape_birthTime" : IECore.FloatVectorData,
+			"P" : IECore.V3fVectorData,
+			"testParticleShape_lifespanPP" : IECore.FloatVectorData,
+			"testParticleShape_finalLifespanPP" : IECore.FloatVectorData,
+			"testParticleShape_velocity" : IECore.V3fVectorData,
+		}
 		self.assertEqual( type( c ), IECore.PointsPrimitive )
-		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
-		for i in expectedAttrNamesAndTypes.keys() :
+		self.assertEqual( len( c ), len( expectedConvertedAttrNamesAndTypes ) )
+		for i in expectedConvertedAttrNamesAndTypes.keys() :
 			self.assert_( i in c )
-			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
+			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
-		for p in c["testParticleShape_position"].data :
+		for p in c["P"].data :
 			self.assert_( abs( p.x ) < 0.159 )
 			self.assert_( abs( p.y ) < 0.145 )
 			self.assert_( abs( p.z ) < 0.138 )
@@ -187,11 +252,10 @@ class TestNParticleReader( unittest.TestCase ) :
 		r.parameters()["realType"].setValue( "float" )
 		r.parameters()['frameIndex'].setValue( 5 )
 		
-		attrNames = r.attributeNames()
 		expectedAttrNamesAndTypes = {
 			"testParticleShape_id" : IECore.FloatVectorData,
 			"testParticleShape_birthTime" : IECore.FloatVectorData,
-			"testParticleShape_position" : IECore.V3fVectorData,
+			"P" : IECore.V3fVectorData,
 			"testParticleShape_lifespanPP" : IECore.FloatVectorData,
 			"testParticleShape_finalLifespanPP" : IECore.FloatVectorData,
 			"testParticleShape_velocity" : IECore.V3fVectorData,
@@ -205,7 +269,7 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
-		for p in c["testParticleShape_position"].data :
+		for p in c["P"].data :
 			self.assert_( abs( p.x ) < 0.159 )
 			self.assert_( abs( p.y ) < 0.145 )
 			self.assert_( abs( p.z ) < 0.138 )
@@ -218,7 +282,7 @@ class TestNParticleReader( unittest.TestCase ) :
 		expectedAttrNamesAndTypes = {
 			"nParticleShape1_id" : IECore.FloatVectorData,
 			"nParticleShape1_birthTime" : IECore.FloatVectorData,
-			"nParticleShape1_position" : IECore.V3fVectorData,
+			"P" : IECore.V3fVectorData,
 			"nParticleShape1_lifespanPP" : IECore.FloatVectorData,
 			"nParticleShape1_finalLifespanPP" : IECore.FloatVectorData,
 			"nParticleShape1_velocity" : IECore.V3fVectorData,
@@ -232,11 +296,11 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), 4 )
 
-		for p in c["nParticleShape1_position"].data :
+		for p in c["P"].data :
 			self.assert_( abs( p.x ) < 0.022 )
 			self.assert_( abs( p.y ) < 0.017 )
 			self.assert_( abs( p.z ) < 0.020 )
-
+	
 	def testNClothAsParticles( self ) :
 		
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nClothFrame3.mc" )

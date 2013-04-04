@@ -71,7 +71,10 @@ class BGEOParticleReader : public ParticleReader
 		/// Returns a PointsPrimitive object containing all the
 		/// This method overwrites the base class implementation.
 		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
-	
+		
+		// Returns the name of the position primVar
+		virtual std::string positionPrimVarName();
+		
 	private :
 
 		static const ReaderDescription<BGEOParticleReader> m_readerDescription;

@@ -129,7 +129,7 @@ void BINParticleWriter::constructParameters()
 	m_positionPrimVarParameter = new StringParameter(
 	        "positionPrimVar",
 	        "Name of the attribute containing position data",
-	        "position"
+	        "P"
 	);
 
 	m_velocityPrimVarParameter = new StringParameter(

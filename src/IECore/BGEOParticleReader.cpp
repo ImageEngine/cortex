@@ -537,3 +537,9 @@ CompoundDataPtr BGEOParticleReader::readAttributes( const std::vector<std::strin
 	return result;
 }
 
+
+std::string BGEOParticleReader::positionPrimVarName()
+{
+	return "P";	
+}
+

@@ -35,6 +35,7 @@ Improvements :
 * LRUCache class now accepts an optional removalCallback, which is called whenever an item is removed from the cache.
 * IECoreHoudini has new ParameterisedHolderInterface and ParameterisedHolder base classes, so we can hold parameterised objects in non-SOP contexts.
 * IECoreRI::SLOReader now loads shader annotations, providing them as an "ri:annotations" entry in the shader blind data. It also adds a type hint to distinguish between parameters of type string and parameters or type shader.
+* IECore::ParticleReader new parameter to convert primVar names to an appropriate name. Converts original position primVar name returned by derived classes to "P".
 
 Bug Fixes :
 

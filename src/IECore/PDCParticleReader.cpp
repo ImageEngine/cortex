@@ -404,3 +404,9 @@ const Data * PDCParticleReader::idAttribute()
 	}
 	return m_idAttribute;
 }
+
+std::string PDCParticleReader::positionPrimVarName()
+{
+	return "position";
+}
+
