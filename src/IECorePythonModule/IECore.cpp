@@ -48,6 +48,7 @@
 #include "IECorePython/KDTreeBinding.h"
 #include "IECorePython/IndexedIOBinding.h"
 #include "IECorePython/DataBinding.h"
+#include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
 #include "IECorePython/VectorTypedDataBinding.h"
 #include "IECorePython/ObjectBinding.h"
@@ -335,6 +336,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCompoundObject();
 	bindTypeId();
 	bindData();
+	bindGeometricTypedData();
 	bindAllSimpleTypedData();
 	bindAllVectorTypedData();
 	bindCompoundData();

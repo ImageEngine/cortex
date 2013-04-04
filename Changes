@@ -36,6 +36,7 @@ Improvements :
 * IECoreHoudini has new ParameterisedHolderInterface and ParameterisedHolder base classes, so we can hold parameterised objects in non-SOP contexts.
 * IECoreRI::SLOReader now loads shader annotations, providing them as an "ri:annotations" entry in the shader blind data. It also adds a type hint to distinguish between parameters of type string and parameters or type shader.
 * IECore::ParticleReader new parameter to convert primVar names to an appropriate name. Converts original position primVar name returned by derived classes to "P".
+* All V[2,3][i,f,d]Data and VectorData is now GeometricTypedData, which extends TypedData by adding an Interpretation value (Numeric, Point, Normal, Vector, Color).
 
 Bug Fixes :
 

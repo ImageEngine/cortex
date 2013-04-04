@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -60,6 +60,18 @@ class TestTypedData( unittest.TestCase ) :
 	
 		self.assertNotEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ).hash(), IECore.Color3fData( IECore.Color3f( 1, 2, 3 ) ).hash() )
 		self.assertNotEqual( IECore.IntVectorData( [ 0, 0, 0 ] ).hash(), IECore.UIntVectorData( [ 0, 0, 0 ] ).hash() )
+		
+		a = IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point )
+		b = a.copy()
+		self.assertEqual( a.hash(), b.hash() )
+		b.setInterpretation( IECore.GeometricData.Interpretation.Numeric )
+		self.assertNotEqual( a.hash(), b.hash() )
+		
+		a = IECore.V2dVectorData( [ IECore.V2d( 1, 2 ) ] )
+		b = a.copy()
+		self.assertEqual( a.hash(), b.hash() )
+		b.setInterpretation( IECore.GeometricData.Interpretation.Point )
+		self.assertNotEqual( a.hash(), b.hash() )
 
 if __name__ == "__main__":
 	unittest.main()

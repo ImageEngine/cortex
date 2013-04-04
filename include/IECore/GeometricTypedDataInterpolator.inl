@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,43 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/numeric/conversion/cast.hpp"
-#include "boost/python/implicit.hpp"
+#include "IECore/GeometricTypedData.h"
 
-#include "OpenEXR/ImathVec.h"
-
-#include "IECore/VectorTypedData.h"
-#include "IECorePython/GeometricTypedDataBinding.h"
-#include "IECorePython/VectorTypedDataBinding.inl"
-
-using namespace std;
-using std::string;
-using namespace boost;
-using namespace boost::python;
-using namespace Imath;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECore
 {
 
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2f )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2d )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2i )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3f )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3d )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3i )
-
-void bindImathVecVectorTypedData()
+// Partially specialise for GeometricTypedData
+template<typename T>
+struct LinearInterpolator< GeometricTypedData< T > >
 {
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< float >, "V2f")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< double >, "V2d")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< int >, "V2i")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< float >, "V3f")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< double >, "V3d")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< int >, "V3i")
-}
+	void operator()(const GeometricTypedData< T > *y0,
+			const GeometricTypedData< T > *y1,
+			double x,
+			typename GeometricTypedData< T >::Ptr &result) const
+	{
+		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
+	}
+};
 
-} // namespace IECorePython
+// Partially specialise for GeometricTypedData
+template<typename T>
+struct CubicInterpolator< GeometricTypedData< T > >
+{
+	void operator()(const GeometricTypedData< T > *y0,
+			const GeometricTypedData< T > *y1,
+			const GeometricTypedData< T > *y2,
+			const GeometricTypedData< T > *y3,
+			double x,
+			typename GeometricTypedData< T >::Ptr &result) const
+	{
+		CubicInterpolator<T>()( y0->readable(), y1->readable(), y2->readable(), y3->readable(), x, result->writable());
+	}
+};
+
+} // namespace IECore

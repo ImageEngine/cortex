@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/numeric/conversion/cast.hpp"
-#include "boost/python/implicit.hpp"
-
-#include "OpenEXR/ImathVec.h"
-
-#include "IECore/VectorTypedData.h"
-#include "IECorePython/GeometricTypedDataBinding.h"
-#include "IECorePython/VectorTypedDataBinding.inl"
-
-using namespace std;
-using std::string;
-using namespace boost;
-using namespace boost::python;
-using namespace Imath;
-using namespace IECore;
+#ifndef IECOREPYTHON_GEOMETRICTYPEDDATABINDING_H
+#define IECOREPYTHON_GEOMETRICTYPEDDATABINDING_H
 
 namespace IECorePython
 {
-
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2f )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2d )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2i )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3f )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3d )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3i )
-
-void bindImathVecVectorTypedData()
-{
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< float >, "V2f")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< double >, "V2d")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< int >, "V2i")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< float >, "V3f")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< double >, "V3d")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< int >, "V3i")
+extern void bindGeometricTypedData();
 }
 
-} // namespace IECorePython
+#include "GeometricTypedDataBinding.inl"
+
+#endif // IECOREPYTHON_GEOMETRICTYPEDDATABINDING_H

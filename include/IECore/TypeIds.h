@@ -420,6 +420,18 @@ enum TypeId
 	InternedStringVectorDataTypeId = 372,
 	InternedStringDataTypeId = 373,
 	LinkedSceneTypeId = 374,
+	V2fDataBaseTypeId = 375,
+	V2dDataBaseTypeId = 376,
+	V2iDataBaseTypeId = 377,
+	V3fDataBaseTypeId = 378,
+	V3dDataBaseTypeId = 379,
+	V3iDataBaseTypeId = 380,
+	V2fVectorDataBaseTypeId = 381,
+	V2dVectorDataBaseTypeId = 382,
+	V2iVectorDataBaseTypeId = 383,
+	V3fVectorDataBaseTypeId = 384,
+	V3dVectorDataBaseTypeId = 385,
+	V3iVectorDataBaseTypeId = 386,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 

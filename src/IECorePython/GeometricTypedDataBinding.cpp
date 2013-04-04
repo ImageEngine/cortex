@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,42 +33,32 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/numeric/conversion/cast.hpp"
-#include "boost/python/implicit.hpp"
 
-#include "OpenEXR/ImathVec.h"
-
-#include "IECore/VectorTypedData.h"
+#include "IECore/GeometricTypedData.h"
 #include "IECorePython/GeometricTypedDataBinding.h"
-#include "IECorePython/VectorTypedDataBinding.inl"
 
-using namespace std;
-using std::string;
 using namespace boost;
 using namespace boost::python;
-using namespace Imath;
 using namespace IECore;
 
 namespace IECorePython
 {
 
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2f )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2d )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V2i )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3f )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3d )
-IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( V3i )
-
-void bindImathVecVectorTypedData()
+class GeometricTypedDataHelper
 {
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< float >, "V2f")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< double >, "V2d")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec2< int >, "V2i")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< float >, "V3f")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< double >, "V3d")
-	BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA ( Vec3< int >, "V3i")
+};
+
+void bindGeometricTypedData()
+{
+	scope geometricTypedDataScope = class_<GeometricTypedDataHelper>( "GeometricData" );
+	
+	enum_<GeometricData::Interpretation>( "Interpretation" )
+		.value( "Numeric", GeometricData::Numeric )
+		.value( "Point", GeometricData::Point )
+		.value( "Normal", GeometricData::Normal )
+		.value( "Vector", GeometricData::Vector )
+		.value( "Color", GeometricData::Color )
+	;
 }
 
 } // namespace IECorePython

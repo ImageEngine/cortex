@@ -44,6 +44,7 @@
 #include "OpenEXR/halfLimits.h"
 
 #include "IECore/SimpleTypedData.h"
+#include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
@@ -86,6 +87,12 @@ template<class T>
 static typename T::Ptr constructWithValue( const typename T::ValueType &v )
 {
 	return new T( v );
+}
+
+template<class T>
+static typename T::Ptr constructWithValueAndInterpretation( const typename T::ValueType &v, IECore::GeometricData::Interpretation i )
+{
+	return new T( v, i );
 }
 
 template<class T>
@@ -237,12 +244,14 @@ DEFINETYPEDDATASTRSPECIALISATION( uint64_t );
 DEFINETYPEDDATASTRSPECIALISATION( string );
 DEFINETYPEDDATASTRSPECIALISATION( InternedString );
 DEFINETYPEDDATASTRSPECIALISATION( half );
-DEFINETYPEDDATASTRSPECIALISATION( V2i );
-DEFINETYPEDDATASTRSPECIALISATION( V2f );
-DEFINETYPEDDATASTRSPECIALISATION( V2d );
-DEFINETYPEDDATASTRSPECIALISATION( V3i );
-DEFINETYPEDDATASTRSPECIALISATION( V3f );
-DEFINETYPEDDATASTRSPECIALISATION( V3d );
+
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V2i );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V2f );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V2d );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V3i );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V3f );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V3d );
+
 DEFINETYPEDDATASTRSPECIALISATION( Box2i );
 DEFINETYPEDDATASTRSPECIALISATION( Box2f );
 DEFINETYPEDDATASTRSPECIALISATION( Box2d );
@@ -354,6 +363,22 @@ static RunTimeTypedClass<T> bindSimpleData()
 }
 
 template<class T>
+static RunTimeTypedClass<GeometricTypedData<T > > bindSimpleGeometricData()
+{
+	typedef TypedData<T> ParentClass;
+	typedef GeometricTypedData<T> ThisClass;
+	
+	RunTimeTypedClass<ParentClass>();
+	
+	RunTimeTypedClass<ThisClass> result = bindSimpleData<ThisClass>();
+	result.def( "__init__", make_constructor( &constructWithValueAndInterpretation<ThisClass> ), "Construct with the specified value and interpretation." );
+	result.def("getInterpretation", &ThisClass::getInterpretation, "Returns the geometric interpretation of this data.");
+	result.def("setInterpretation", &ThisClass::setInterpretation, "Sets the geometric interpretation of this data.");
+	
+	return result;
+}
+
+template<class T>
 static void bindNumericMethods( class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > &c )
 {
 	c.add_static_property( "minValue", &std::numeric_limits<typename T::ValueType>::min, "Minimum representable value." );
@@ -417,18 +442,13 @@ void bindAllSimpleTypedData()
 	RunTimeTypedClass<UInt64Data> ui64dc = bindSimpleData<UInt64Data>();
 	bindNumericMethods( ui64dc );
 	ui64dc.def( "__long__", &getValue<UInt64Data> );
-
-	bindSimpleData<V2iData>();
-
-	bindSimpleData<V3iData>();
-
-	bindSimpleData<V2fData>();
-
-	bindSimpleData<V3fData>();
-
-	bindSimpleData<V2dData>();
-
-	bindSimpleData<V3dData>();
+	
+	bindSimpleGeometricData<V2i>();
+	bindSimpleGeometricData<V3i>();
+	bindSimpleGeometricData<V2f>();
+	bindSimpleGeometricData<V3f>();
+	bindSimpleGeometricData<V2d>();
+	bindSimpleGeometricData<V3d>();
 
 	bindSimpleData<Box2iData>();
 

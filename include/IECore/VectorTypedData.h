@@ -45,6 +45,7 @@
 #include "OpenEXR/half.h"
 
 #include "IECore/TypedData.h"
+#include "IECore/GeometricTypedData.h"
 
 namespace IECore
 {
@@ -68,12 +69,13 @@ IECORE_DECLARE_TYPEDDATA( InternedStringVectorData, std::vector<InternedString>,
 
 // vectors of Imath types
 
-IECORE_DECLARE_TYPEDDATA( V2fVectorData, std::vector<Imath::V2f>, float, SharedDataHolder )
-IECORE_DECLARE_TYPEDDATA( V2dVectorData, std::vector<Imath::V2d>, double, SharedDataHolder )
-IECORE_DECLARE_TYPEDDATA( V2iVectorData, std::vector<Imath::V2i>, int, SharedDataHolder )
-IECORE_DECLARE_TYPEDDATA( V3fVectorData, std::vector<Imath::V3f>, float, SharedDataHolder )
-IECORE_DECLARE_TYPEDDATA( V3dVectorData, std::vector<Imath::V3d>, double, SharedDataHolder )
-IECORE_DECLARE_TYPEDDATA( V3iVectorData, std::vector<Imath::V3i>, int, SharedDataHolder )
+IECORE_DECLARE_GEOMETRICTYPEDDATA( V2fVectorData, std::vector<Imath::V2f>, float, SharedDataHolder )
+IECORE_DECLARE_GEOMETRICTYPEDDATA( V2dVectorData, std::vector<Imath::V2d>, double, SharedDataHolder )
+IECORE_DECLARE_GEOMETRICTYPEDDATA( V2iVectorData, std::vector<Imath::V2i>, int, SharedDataHolder )
+IECORE_DECLARE_GEOMETRICTYPEDDATA( V3fVectorData, std::vector<Imath::V3f>, float, SharedDataHolder )
+IECORE_DECLARE_GEOMETRICTYPEDDATA( V3dVectorData, std::vector<Imath::V3d>, double, SharedDataHolder )
+IECORE_DECLARE_GEOMETRICTYPEDDATA( V3iVectorData, std::vector<Imath::V3i>, int, SharedDataHolder )
+
 IECORE_DECLARE_TYPEDDATA( Box2iVectorData, std::vector<Imath::Box2i>, int, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( Box2fVectorData, std::vector<Imath::Box2f>, float, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( Box2dVectorData, std::vector<Imath::Box2d>, double, SharedDataHolder )

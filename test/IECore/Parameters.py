@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -439,6 +439,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertEqual( p.getTypedValue(), V3f( 1, 2, 3 ) )
 		p.setTypedValue( V3f( 12, 13, 14 ) )
 		self.assertEqual( p.getTypedValue(), V3f( 12, 13, 14 ) )
+		self.assertEqual( p.getValue(), V3fData( V3f( 12, 13, 14 ) ) )
 
 		self.assertEqual( p.typedDefaultValue, V3f( 1, 2, 3 ) )
 		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", V3f( 4, 5, 6 ) )
@@ -472,7 +473,44 @@ class TestTypedParameter( unittest.TestCase ) :
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
 		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )		
+	
+	def testInterpretation( self ) :
 		
+		p = V3fParameter( name="n", description="d", defaultValue = V3f( 1, 2, 3 ) )
+		self.assertEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Numeric )
+		self.assertEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Numeric )
+		
+		value = V3fData( V3f( 12, 13, 14 ) )
+		value.setInterpretation( GeometricData.Interpretation.Vector )
+		p.setValue( value )
+		self.assertNotEqual( p.getValue(), V3fData( V3f( 12, 13, 14 ) ) )
+		self.assertEqual( p.getValue(), value )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Vector )
+
+		dv = V3fData( V3f( 1, 2, 3 ), GeometricData.Interpretation.Normal )
+		p = V3fParameter( name="n", description="d", defaultValue = dv )
+		self.assertNotEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.defaultValue, dv )
+		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assertNotEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.getValue(), dv )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
+		
+		dv = V3fVectorData( [ V3f( 1, 2, 3 ) ], GeometricData.Interpretation.Normal )
+		p = V3fVectorParameter( name="n", description="d", defaultValue = dv )
+		self.assertNotEqual( p.defaultValue, V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
+		self.assertEqual( p.defaultValue, dv )
+		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assertNotEqual( p.getValue(), V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
+		self.assertEqual( p.getValue(), dv )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
+		
+		p.setValue( V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
+		self.assertEqual( p.getValue(), V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Numeric )
+
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :
