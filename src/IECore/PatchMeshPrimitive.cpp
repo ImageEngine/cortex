@@ -119,8 +119,10 @@ PatchMeshPrimitive::PatchMeshPrimitive(
 		{
 			throw InvalidArgumentException( "PatchMeshPrimitive: Invalid length of primitive variable P" );
 		}
-
-		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p->copy() );
+		
+		V3fVectorDataPtr pData = p->copy();
+		pData->setInterpretation( GeometricData::Point );
+		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
 	}
 }
 

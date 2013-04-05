@@ -77,8 +77,13 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.basis(), CubicBasisf.bSpline() )
 		self.assertEqual( c.periodic(), True )
 		self.assertEqual( c.keys(), [ "P" ] )
-		self.assertEqual( c["P"].data, p )
+		self.assertNotEqual( c["P"].data, p )
+		self.assertEqual( c["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
+		pp = p.copy()
+		pp.setInterpretation( GeometricData.Interpretation.Point )
+		self.assertEqual( c["P"].data, pp )
 		self.failIf( c["P"].data.isSame( p ) )
+		self.failIf( c["P"].data.isSame( pp ) )
 		self.failIf( c.verticesPerCurve().isSame( i ) )
 
 	def testConstructorValidation( self ) :

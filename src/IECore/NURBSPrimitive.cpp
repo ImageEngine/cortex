@@ -73,8 +73,9 @@ NURBSPrimitive::NURBSPrimitive( int uOrder, ConstFloatVectorDataPtr uKnot, float
 	setTopology( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax );
 	if( p )
 	{
-		variables.insert( PrimitiveVariableMap::value_type( "P", PrimitiveVariable( PrimitiveVariable::Vertex,
-			p->copy() ) ) );
+		V3fVectorDataPtr pData = p->copy();
+		pData->setInterpretation( GeometricData::Point );
+		variables.insert( PrimitiveVariableMap::value_type( "P", PrimitiveVariable( PrimitiveVariable::Vertex, pData ) ) );
 	}
 }
 

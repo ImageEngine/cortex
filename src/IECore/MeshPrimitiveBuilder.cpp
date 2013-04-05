@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,8 @@ MeshPrimitiveBuilder::MeshPrimitiveBuilder()
 {
 	m_P = new V3fVectorData();
 	m_N = new V3fVectorData();
+	m_P->setInterpretation( GeometricData::Point );
+	m_N->setInterpretation( GeometricData::Normal );
 	m_verticesPerFace = new IntVectorData();
 	m_vertexIds = new IntVectorData();
 }

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -53,6 +53,7 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 		normals = pp["N"].data
 		self.assert_( normals.isInstanceOf( V3fVectorData.staticTypeId() ) )
 		self.assertEqual( normals.size(), pp.variableSize( PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( normals.getInterpretation(), GeometricData.Interpretation.Normal )
 
 		for n in normals :
 
@@ -76,10 +77,11 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 
 		self.assert_( "N" in ss )
 		self.assertEqual( ss["N"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-
+		
 		normals = ss["N"].data
 		self.assert_( normals.isInstanceOf( V3fVectorData.staticTypeId() ) )
 		self.assertEqual( normals.size(), ss.variableSize( PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( normals.getInterpretation(), GeometricData.Interpretation.Normal )
 
 		points = ss["P"].data
 		for i in range( 0, normals.size() ) :

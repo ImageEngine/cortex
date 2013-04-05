@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,8 +41,8 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 
 	def testMultiplication( self ) :
 		vectorTypes = [
-			V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ),
-			V3dVectorData( [ V3d(1), V3d(2), V3d(3) ] ),
+			V3fVectorData( [ V3f(1), V3f(2), V3f(3) ], GeometricData.Interpretation.Vector ),
+			V3dVectorData( [ V3d(1), V3d(2), V3d(3) ], GeometricData.Interpretation.Vector ),
 		]
 		matrixTypes = [
 			M33fData( M33f() * 3 ),
@@ -64,9 +64,9 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 					continue
 				raise Exception, "Error testing vector " + str(type(vector)) + " against matrix " + str(type(matrix)) + ". Resulted " + str( res )
 
-	def testModes( self ) :
+	def testInterpretations( self ) :
 
-		v = V3fVectorData( [ V3f( 1 ), V3f( 2 ), V3f( 3 ) ] )
+		v = V3fVectorData( [ V3f( 1 ), V3f( 2 ), V3f( 3 ) ], GeometricData.Interpretation.Point )
 		o = MatrixMultiplyOp()
 
 		# as points
@@ -75,24 +75,48 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 			self.assertEqual( vt[i], v[i] + V3f( 1, 2, 3 ) )
 
 		# as vectors
-		o["mode"].setValue( "vector" )
-		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		v2 = v.copy()
+		v2.setInterpretation( GeometricData.Interpretation.Vector )
+		vt = o( object = v2, matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 
-		vt = o( object = v.copy(), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v2, matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )
 
 		# as normals
-		o["mode"].setValue( "normal" )
-		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		v3 = v.copy()
+		v3.setInterpretation( GeometricData.Interpretation.Normal )
+		vt = o( object = v3, matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 
-		vt = o( object = v.copy(), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v3, matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertNotEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )
+		
+		# nothing happens for numeric
+		v4 = v.copy()
+		v4.setInterpretation( GeometricData.Interpretation.Numeric )
+		vt = o( object = v4, matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] )
+
+		vt = o( object = v4, matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] )
+
+		# nothing happens for color
+		v5 = v.copy()
+		v5.setInterpretation( GeometricData.Interpretation.Color )
+		vt = o( object = v5, matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] )
+
+		vt = o( object = v5, matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] )
 
 if __name__ == "__main__":
         unittest.main()

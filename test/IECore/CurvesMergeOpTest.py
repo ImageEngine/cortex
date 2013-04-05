@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ class CurvesMergeOpTest( unittest.TestCase ) :
 	def test( self ) :
 
 		v = IECore.V3f
-		p1 = IECore.V3fVectorData( [ v( 0 ), v( 1 ), v( 2 ), v( 3 ) ] )
+		p1 = IECore.V3fVectorData( [ v( 0 ), v( 1 ), v( 2 ), v( 3 ) ], IECore.GeometricData.Interpretation.Point )
 		p2 = IECore.V3fVectorData( [ v( 4 ), v( 5 ), v( 6 ), v( 7 ), v( 8 ), v( 9 ), v( 10 ), v( 11 ) ] )
 	
 		c1 = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom(), False, p1 )

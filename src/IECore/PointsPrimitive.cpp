@@ -51,6 +51,7 @@ PointsPrimitive::PointsPrimitive( size_t numPoints )
 PointsPrimitive::PointsPrimitive( V3fVectorDataPtr points, FloatVectorDataPtr radii )
 	:	m_numPoints( points->readable().size() )
 {
+	points->setInterpretation( GeometricData::Point );
 	variables.insert( PrimitiveVariableMap::value_type( "P", PrimitiveVariable( PrimitiveVariable::Vertex, points ) ) );
 	if( radii )
 	{

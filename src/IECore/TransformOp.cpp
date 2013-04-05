@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 #include "IECore/TransformOp.h"
 #include "IECore/MatrixMultiplyOp.h"
+#include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Primitive.h"
 
@@ -47,32 +48,17 @@ TransformOp::TransformOp()
 	m_multiplyOp = new MatrixMultiplyOp;
 	m_multiplyOp->copyParameter()->setTypedValue( false );
 
-	StringVectorDataPtr pDefault = new StringVectorData;
-	pDefault->writable().push_back( "P" );
-	m_pointPrimVarsParameter = new StringVectorParameter(
-		"pointPrimVars",
-		"The names of primitive variables which should be transformed as points.",
-		pDefault
+	StringVectorDataPtr defaultPrimVars = new StringVectorData;
+	defaultPrimVars->writable().push_back( "P" );
+	defaultPrimVars->writable().push_back( "N" );
+	m_primVarsParameter = new StringVectorParameter(
+		"primVarsToModify",
+		"The names of primitive variables which should be transformed according to their Geometric Interpretation.",
+		defaultPrimVars
 	);
-
-	m_vectorPrimVarsParameter = new StringVectorParameter(
-		"vectorPrimVars",
-		"The names of primitive variables which should be transformed as vectors.",
-		new StringVectorData
-	);
-
-	StringVectorDataPtr nDefault = new StringVectorData;
-	nDefault->writable().push_back( "N" );
-	m_normalPrimVarsParameter = new StringVectorParameter(
-		"normalPrimVars",
-		"The names of primitive variables which should be transformed as normals.",
-		nDefault
-	);
-
+	
 	parameters()->addParameter( m_multiplyOp->matrixParameter() );
-	parameters()->addParameter( m_pointPrimVarsParameter );
-	parameters()->addParameter( m_vectorPrimVarsParameter );
-	parameters()->addParameter( m_normalPrimVarsParameter );
+	parameters()->addParameter( m_primVarsParameter );
 }
 
 ObjectParameter * TransformOp::matrixParameter()
@@ -85,71 +71,51 @@ const ObjectParameter * TransformOp::matrixParameter() const
 	return m_multiplyOp->matrixParameter();
 }
 
-StringVectorParameter * TransformOp::pointPrimVarsParameter()
+StringVectorParameter * TransformOp::primVarsParameter()
 {
-	return m_pointPrimVarsParameter;
+	return m_primVarsParameter;
 }
 
-const StringVectorParameter * TransformOp::pointPrimVarsParameter() const
+const StringVectorParameter * TransformOp::primVarsParameter() const
 {
-	return m_pointPrimVarsParameter;
-}
-
-StringVectorParameter * TransformOp::vectorPrimVarsParameter()
-{
-	return m_vectorPrimVarsParameter;
-}
-
-const StringVectorParameter * TransformOp::vectorPrimVarsParameter() const
-{
-	return m_vectorPrimVarsParameter;
-}
-
-StringVectorParameter * TransformOp::normalPrimVarsParameter()
-{
-	return m_normalPrimVarsParameter;
-}
-
-const StringVectorParameter * TransformOp::normalPrimVarsParameter() const
-{
-	return m_normalPrimVarsParameter;
+	return m_primVarsParameter;
 }
 
 void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
 {
-	m_multiplyOp->modeParameter()->setNumericValue( MatrixMultiplyOp::Point );
-	const std::vector<std::string> &p = m_pointPrimVarsParameter->getTypedValue();
-	for( std::vector<std::string>::const_iterator it = p.begin(); it!=p.end(); it++ )
+	const std::vector<std::string> &pv = m_primVarsParameter->getTypedValue();
+	for ( std::vector<std::string>::const_iterator it = pv.begin(); it != pv.end(); ++it )
 	{
 		PrimitiveVariableMap::iterator pIt = primitive->variables.find( *it );
-		if( pIt!=primitive->variables.end() && pIt->second.data )
+		if ( pIt == primitive->variables.end() || !pIt->second.data )
 		{
-			m_multiplyOp->inputParameter()->setValue( pIt->second.data );
-			m_multiplyOp->operate();
+			continue;
 		}
-	}
-
-	m_multiplyOp->modeParameter()->setNumericValue( MatrixMultiplyOp::Vector );
-	const std::vector<std::string> &v = m_vectorPrimVarsParameter->getTypedValue();
-	for( std::vector<std::string>::const_iterator it = v.begin(); it!=v.end(); it++ )
-	{
-		PrimitiveVariableMap::iterator pIt = primitive->variables.find( *it );
-		if( pIt!=primitive->variables.end() && pIt->second.data )
+		
+		Data *data = pIt->second.data;
+		
+		// fix for old files that don't store Interpretation properly
+		V3fVectorData *v3fData = runTimeCast<V3fVectorData>( data );
+		if ( v3fData )
 		{
-			m_multiplyOp->inputParameter()->setValue( pIt->second.data );
-			m_multiplyOp->operate();
+			GeometricData::Interpretation interp = v3fData->getInterpretation();
+			
+			if ( interp == GeometricData::Numeric )
+			{
+				if ( *it == "P" )
+				{
+					IECore::msg( IECore::MessageHandler::Warning, "TransformOp", "Primitive contains Numeric data named P. Converting to Point data." );
+					v3fData->setInterpretation( GeometricData::Point );
+				}
+				else if ( *it == "N" )
+				{
+					IECore::msg( IECore::MessageHandler::Warning, "TransformOp", "Primitive contains Numeric data named N. Converting to Normal data." );
+					v3fData->setInterpretation( GeometricData::Normal );
+				}
+			}
 		}
-	}
-
-	m_multiplyOp->modeParameter()->setNumericValue( MatrixMultiplyOp::Normal );
-	const std::vector<std::string> &n = m_normalPrimVarsParameter->getTypedValue();
-	for( std::vector<std::string>::const_iterator it = n.begin(); it!=n.end(); it++ )
-	{
-		PrimitiveVariableMap::iterator pIt = primitive->variables.find( *it );
-		if( pIt!=primitive->variables.end() && pIt->second.data )
-		{
-			m_multiplyOp->inputParameter()->setValue( pIt->second.data );
-			m_multiplyOp->operate();
-		}
+		
+		m_multiplyOp->inputParameter()->setValue( pIt->second.data );
+		m_multiplyOp->operate();
 	}
 }

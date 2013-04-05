@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -60,7 +60,8 @@ class FontTest( unittest.TestCase ) :
 			self.assert_( c.isInstanceOf( Group.staticTypeId() ) )
 			self.assertEqual( len( c.children() ), 1 )
 			self.assert_( c.children()[0].isInstanceOf( MeshPrimitive.staticTypeId() ) )
-
+			self.assertEqual( c.children()[0]["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
+			
 			v += c.children()[0]["P"].data.size()
 
 		self.assertEqual( v, m["P"].data.size() )

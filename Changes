@@ -37,6 +37,9 @@ Improvements :
 * IECoreRI::SLOReader now loads shader annotations, providing them as an "ri:annotations" entry in the shader blind data. It also adds a type hint to distinguish between parameters of type string and parameters or type shader.
 * IECore::ParticleReader new parameter to convert primVar names to an appropriate name. Converts original position primVar name returned by derived classes to "P".
 * All V[2,3][i,f,d]Data and VectorData is now GeometricTypedData, which extends TypedData by adding an Interpretation value (Numeric, Point, Normal, Vector, Color).
+* Primitive constructors that accept position data will force the geometric interpretation to Point. Users are responsible to set correct interpretation when assigning prim vars (including P and N) after construction.
+* MatrixMultiplyOp no longer has a mode parameter, and instead uses geometric interpretation to transform the input data appropriately.
+* TransformOp now takes a single list of primitive variables to modify, and uses geometric interpretation to transform them appropriately. For backwards compatibility with old files, if P and N are Numeric, they will be converted to the appropriate interpretation and a warning will be issued.
 
 Bug Fixes :
 

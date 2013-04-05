@@ -95,6 +95,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 	def testEmptyMeshConstructor( self ) :
 
 		m = MeshPrimitive( IntVectorData(), IntVectorData(), "linear", V3fVectorData() )
+		self.assertEqual( m["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
 		self.assert_( m.arePrimitiveVariablesValid() )
 
 	def testEqualityOfEmptyMeshes( self ) :

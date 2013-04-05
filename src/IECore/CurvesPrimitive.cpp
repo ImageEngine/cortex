@@ -67,7 +67,9 @@ CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const Cub
 
 	if( p )
 	{
-		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p->copy() );
+		V3fVectorDataPtr pData = p->copy();
+		pData->setInterpretation( GeometricData::Point );
+		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
 	}
 }
 

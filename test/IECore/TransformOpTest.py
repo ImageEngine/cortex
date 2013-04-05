@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,16 +41,60 @@ class TestTransformOp( unittest.TestCase ) :
 
 		o = TransformOp()
 
-		self.assertEqual( o["pointPrimVars"].getValue(), StringVectorData( [ "P" ] ) )
-		self.assertEqual( o["vectorPrimVars"].getValue(), StringVectorData() )
-		self.assertEqual( o["normalPrimVars"].getValue(), StringVectorData( [ "N" ] ) )
+		self.assertEqual( o["primVarsToModify"].getValue(), StringVectorData( [ "P", "N" ] ) )
 
 	def testTranformation( self ) :
 
 		m = MeshPrimitive.createBox( Box3f( V3f( -1 ), V3f( 1 ) ) )
-		mt = TransformOp()( input=m, matrix = M44fData( M44f.createTranslated( V3f( 1 ) ) ) )
-
+		MeshNormalsOp()( input = m, copyInput = False )
+		m["vel"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f( 0.5 ) ] * 8, GeometricData.Interpretation.Vector ) )
+		m["notVel"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f( 0.5 ) ] * 8 ) )
+		
+		mt = TransformOp()( input=m, primVarsToModify = StringVectorData( m.keys() ), matrix = M44fData( M44f.createTranslated( V3f( 1 ) ) ) )
+		
 		self.assertEqual( mt.bound(), Box3f( V3f( 0 ), V3f( 2 ) ) )
+		self.assertEqual( mt["P"].data, V3fVectorData( [ x + V3f( 1 ) for x in m["P"].data ], GeometricData.Interpretation.Point ) )
+		self.assertEqual( mt["N"].data, m["N"].data )
+		self.assertEqual( mt["vel"].data, m["vel"].data )
+		self.assertEqual( mt["notVel"].data, m["notVel"].data )
+		
+		ms = TransformOp()( input=m, primVarsToModify = StringVectorData( m.keys() ), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		
+		self.assertEqual( ms.bound(), Box3f( V3f( -1, -2, -3 ), V3f( 1, 2, 3 ) ) )
+		self.assertEqual( ms["P"].data, V3fVectorData( [ x * V3f( 1, 2, 3 ) for x in m["P"].data ], GeometricData.Interpretation.Point ) )
+		self.assertNotEqual( ms["N"].data, m["N"].data )
+		self.assertNotEqual( ms["N"].data, V3fVectorData( [ x * V3f( 1, 2, 3 ) for x in m["N"].data ], GeometricData.Interpretation.Normal ) )
+		self.assertEqual( ms["vel"].data, V3fVectorData( [ x * V3f( 1, 2, 3 ) for x in m["vel"].data ], GeometricData.Interpretation.Vector ) )
+		self.assertEqual( ms["notVel"].data, m["notVel"].data )
+		
+		self.assertEqual( ms["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
+		self.assertEqual( ms["N"].data.getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assertEqual( ms["vel"].data.getInterpretation(), GeometricData.Interpretation.Vector )
+		self.assertEqual( ms["notVel"].data.getInterpretation(), GeometricData.Interpretation.Numeric )
+	
+	def testPrimVarParameter( self ) :
+		
+		m = MeshPrimitive.createBox( Box3f( V3f( -1 ), V3f( 1 ) ) )
+		MeshNormalsOp()( input = m, copyInput = False )
+		m["vel"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f( 0.5 ) ] * 8, GeometricData.Interpretation.Vector ) )
+		m["notVel"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f( 0.5 ) ] * 8 ) )
+		
+		ms = TransformOp()( input=m, primVarsToModify = StringVectorData( [ "P", "vel" ] ), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		
+		self.assertEqual( ms.bound(), Box3f( V3f( -1, -2, -3 ), V3f( 1, 2, 3 ) ) )
+		self.assertEqual( ms["P"].data, V3fVectorData( [ x * V3f( 1, 2, 3 ) for x in m["P"].data ], GeometricData.Interpretation.Point ) )
+		self.assertEqual( ms["N"].data, m["N"].data )
+		self.assertEqual( ms["vel"].data, V3fVectorData( [ x * V3f( 1, 2, 3 ) for x in m["vel"].data ], GeometricData.Interpretation.Vector ) )
+		self.assertEqual( ms["notVel"].data, m["notVel"].data )
+		
+		ms = TransformOp()( input=m, primVarsToModify = StringVectorData( [ "P" ] ), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		
+		self.assertEqual( ms.bound(), Box3f( V3f( -1, -2, -3 ), V3f( 1, 2, 3 ) ) )
+		self.assertEqual( ms["P"].data, V3fVectorData( [ x * V3f( 1, 2, 3 ) for x in m["P"].data ], GeometricData.Interpretation.Point ) )
+		self.assertEqual( ms["N"].data, m["N"].data )
+		self.assertEqual( ms["N"].data, m["N"].data )
+		self.assertEqual( ms["notVel"].data, m["notVel"].data )
+		
 
 if __name__ == "__main__":
 	unittest.main()

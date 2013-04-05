@@ -114,9 +114,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 1 )
 		self.assertEqual( len( p ), 1 )
 		self.assert_( "P" in p )
-		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ] ) )
+		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ], GeometricData.Interpretation.Point ) )
 		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-
+		
 		p = PointsPrimitive( V3fVectorData( [ V3f( 1 ) ] ), FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p.numPoints, 1 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -127,7 +127,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( len( p ), 2 )
 		self.assert_( "P" in p )
 		self.assert_( "r" in p )
-		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ] ) )
+		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ], GeometricData.Interpretation.Point ) )
 		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p["r"].data, FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p["r"].interpolation, PrimitiveVariable.Interpolation.Vertex )
