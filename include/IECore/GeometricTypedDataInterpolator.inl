@@ -47,6 +47,7 @@ struct LinearInterpolator< GeometricTypedData< T > >
 			typename GeometricTypedData< T >::Ptr &result) const
 	{
 		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
+		result->setInterpretation( y0->getInterpretation() );
 	}
 };
 
@@ -62,6 +63,7 @@ struct CubicInterpolator< GeometricTypedData< T > >
 			typename GeometricTypedData< T >::Ptr &result) const
 	{
 		CubicInterpolator<T>()( y0->readable(), y1->readable(), y2->readable(), y3->readable(), x, result->writable());
+		result->setInterpretation( y0->getInterpretation() );
 	}
 };
 
