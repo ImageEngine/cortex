@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -127,6 +127,7 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnPartic
 	fnParticle.position( position );
 
 	IECore::V3fVectorDataPtr pos = new IECore::V3fVectorData();
+	pos->setInterpretation( IECore::GeometricData::Point );
 	pos->writable().resize( position.length() );
 	std::transform( MArrayIter<MVectorArray>::begin( position ), MArrayIter<MVectorArray>::end( position ), pos->writable().begin(), IECore::VecConvert<MVector, V3f>() );
 	points->variables["P"] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, pos );
@@ -170,6 +171,7 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnPartic
 			assert( len == fnParticle.count() );
 
 			IECore::V3fVectorDataPtr data = new IECore::V3fVectorData();
+			data->setInterpretation( IECore::GeometricData::Vector );
 			data->writable().resize( len );
 		        std::transform( MArrayIter<MVectorArray>::begin( arr ), MArrayIter<MVectorArray>::end( arr ), data->writable().begin(), IECore::VecConvert<MVector, V3f>() );
 			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );

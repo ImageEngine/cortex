@@ -40,6 +40,7 @@ Improvements :
 * Primitive constructors that accept position data will force the geometric interpretation to Point. Users are responsible to set correct interpretation when assigning prim vars (including P and N) after construction.
 * MatrixMultiplyOp no longer has a mode parameter, and instead uses geometric interpretation to transform the input data appropriately.
 * TransformOp now takes a single list of primitive variables to modify, and uses geometric interpretation to transform them appropriately. For backwards compatibility with old files, if P and N are Numeric, they will be converted to the appropriate interpretation and a warning will be issued.
+* IECoreMaya FromMayaShapeConverters correctly set the geometric interpretation of points, normals, and velocities.
 
 Bug Fixes :
 

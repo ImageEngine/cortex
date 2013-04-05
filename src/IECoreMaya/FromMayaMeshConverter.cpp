@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -279,6 +279,7 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
 	}
 
 	V3fVectorDataPtr points = new V3fVectorData;
+	points->setInterpretation( GeometricData::Point );
 	int numVerts = fnMesh.numVertices();
 	points->writable().resize( numVerts );
 	
@@ -310,6 +311,7 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
 	}
 
 	V3fVectorDataPtr normalsData = new V3fVectorData;
+	normalsData->setInterpretation( GeometricData::Normal );
 	vector<V3f> &normals = normalsData->writable();
 	normals.reserve( fnMesh.numFaceVertices() );
 	

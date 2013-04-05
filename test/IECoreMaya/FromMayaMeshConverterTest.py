@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -90,13 +90,17 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assertEqual( converter["points"].getTypedValue(), True )
-		self.assert_( "P" in converter.convert() )
+		m = converter.convert()
+		self.assert_( "P" in m )
+		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		converter["points"].setTypedValue( False )
 		self.assert_( not "P" in converter.convert() )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assertEqual( converter["normals"].getTypedValue(), True )
-		self.assert_( "N" in converter.convert() )
+		m = converter.convert()
+		self.assert_( "N" in m )
+		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 		converter["normals"].setTypedValue( False )
 		self.assert_( not "N" in converter.convert() )
 
@@ -126,6 +130,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m["s"].data.size(), 180 )
 		self.assertEqual( m["t"].data.size(), 180 )
 		self.assert_( m["P"].data == converter.points() )
+		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 		self.assert_( m["N"].data == converter.normals() )
 		self.assert_( m["s"].data == converter.s( "map1" ) )
 		self.assert_( m["t"].data == converter.t( "map1" ) )
@@ -161,6 +167,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		m = converter.convert()
 		self.assert_( "N" in m )
+		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 		converter["interpolation"].setTypedValue( "catmullClark" )
 		m = converter.convert()
@@ -225,6 +232,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		converter["space"].setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
 		m = converter.convert()
+		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
 
 	def testSharedSTIndices( self ) :
