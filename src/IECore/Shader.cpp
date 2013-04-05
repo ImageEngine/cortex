@@ -85,9 +85,14 @@ const CompoundDataMap &Shader::parameters() const
 	return m_parameters->readable();
 }
 
-CompoundDataPtr Shader::parametersData()
+CompoundData *Shader::parametersData()
 {
-	return m_parameters;
+	return m_parameters.get();
+}
+
+const CompoundData *Shader::parametersData() const
+{
+	return m_parameters.get();
 }
 
 void Shader::render( Renderer *renderer ) const
