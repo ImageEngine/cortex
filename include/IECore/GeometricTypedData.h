@@ -89,7 +89,7 @@ class GeometricTypedData : public TypedData<T>
 		/// Get/Set Interpretation may be used to distinguish different uses of common data types.
 		/// For example, one V3fVectorData may be interpreted as points, another as normals, and
 		/// yet another as colors.
-		GeometricData::Interpretation getInterpretation();
+		GeometricData::Interpretation getInterpretation() const;
 		void setInterpretation( GeometricData::Interpretation interpretation );
 	
 	protected :

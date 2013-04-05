@@ -65,7 +65,7 @@ GeometricTypedData<T>::~GeometricTypedData()
 }
 
 template<class T>
-GeometricData::Interpretation GeometricTypedData<T>::getInterpretation()
+GeometricData::Interpretation GeometricTypedData<T>::getInterpretation() const
 {
 	return m_interpretation;
 }
