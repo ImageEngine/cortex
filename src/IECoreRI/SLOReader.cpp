@@ -115,6 +115,11 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 	StringVectorDataPtr orderedParameterNames = new StringVectorData;
 	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:orderedParameterNames", orderedParameterNames ) );	
 
+	// we don't have a way of communicating which parameters are outputs in the Shader::parametersData(),
+	// so we work around that using the blind data too.
+	StringVectorDataPtr outputParameterNames = new StringVectorData;
+	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:outputParameterNames", outputParameterNames ) );	
+
 	int numArgs = Slo_GetNArgs();
 	for( int i=1; i<=numArgs; i++ )
 	{
@@ -319,6 +324,10 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 		{
 			orderedParameterNames->writable().push_back( arg->svd_name );
 			result->parameters().insert( CompoundDataMap::value_type( arg->svd_name, data ) );
+			if( arg->svd_storage == SLO_STOR_OUTPUTPARAMETER )
+			{
+				outputParameterNames->writable().push_back( arg->svd_name );
+			}
 		}
 
 	}
