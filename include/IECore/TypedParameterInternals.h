@@ -62,6 +62,20 @@ class TypedParameterTraits<Imath::Vec3<T> >
 		typedef GeometricTypedData<Imath::Vec3<T> > ObjectType;
 };
 
+template<typename T>
+class TypedParameterTraits<std::vector<Imath::Vec2<T> > >
+{
+	public :
+		typedef GeometricTypedData<std::vector<Imath::Vec2<T> > > ObjectType;
+};
+
+template<typename T>
+class TypedParameterTraits<std::vector<Imath::Vec3<T> > >
+{
+	public :
+		typedef GeometricTypedData<std::vector<Imath::Vec3<T> > > ObjectType;
+};
+
 } // namespace IECore
 
 #endif // IECORE_TYPEDPARAMETERINTERNALS_H
