@@ -310,27 +310,7 @@ void SOP_SceneCacheSource::transformObject( IECore::Object *object, const Imath:
 		transformer->matrixParameter()->setValue( new M44dData( transform ) );
 		transformer->operate();
 		
-		std::vector<std::string> &primVars = transformer->pointPrimVarsParameter()->getTypedValue();
-		for ( std::vector<std::string>::iterator it = primVars.begin(); it != primVars.end(); ++it )
-		{
-			if ( std::find( animatedPrimVars.begin(), animatedPrimVars.end(), *it ) == animatedPrimVars.end() )
-			{
-				animatedPrimVars.push_back( *it );
-				hasAnimatedPrimVars = true;
-			}
-		}
-		
-		primVars = transformer->vectorPrimVarsParameter()->getTypedValue();
-		for ( std::vector<std::string>::iterator it = primVars.begin(); it != primVars.end(); ++it )
-		{
-			if ( std::find( animatedPrimVars.begin(), animatedPrimVars.end(), *it ) == animatedPrimVars.end() )
-			{
-				animatedPrimVars.push_back( *it );
-				hasAnimatedPrimVars = true;
-			}
-		}
-		
-		primVars = transformer->normalPrimVarsParameter()->getTypedValue();
+		std::vector<std::string> &primVars = transformer->primVarsParameter()->getTypedValue();
 		for ( std::vector<std::string>::iterator it = primVars.begin(); it != primVars.end(); ++it )
 		{
 			if ( std::find( animatedPrimVars.begin(), animatedPrimVars.end(), *it ) == animatedPrimVars.end() )
