@@ -110,6 +110,11 @@ template<typename T> struct IsTypedData< TypedData<T> > : public boost::true_typ
 template<typename T> struct IsTypedData< GeometricTypedData<T> > : public boost::true_type {};
 template<typename T> struct IsTypedData< const T > : public IsTypedData<T> {};
 
+/// IsGeometricTypedData
+template<typename T> struct IsGeometricTypedData : public boost::false_type {};
+template<typename T> struct IsGeometricTypedData< GeometricTypedData<T> > : public boost::true_type {};
+template<typename T> struct IsGeometricTypedData< const T > : public IsGeometricTypedData<T> {};
+
 /// IsVectorTypedData
 template<typename T> struct IsVectorTypedData : public boost::false_type {};
 template<typename T> struct IsVectorTypedData< TypedData<std::vector<T> > > : public boost::true_type {};
