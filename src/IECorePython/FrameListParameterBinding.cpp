@@ -102,6 +102,9 @@ void bindFrameListParameter()
 {
 	using boost::python::arg;
 
+	FrameListPtr (FrameListParameter::*getFrameListValueInternalData)() const = &FrameListParameter::getFrameListValue;
+	FrameListPtr (FrameListParameter::*getFrameListValueStringData)( const StringData *value ) const = &FrameListParameter::getFrameListValue;
+	
 	RunTimeTypedClass<FrameListParameter, FrameListParameterWrap::Ptr>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, const dict &, bool, CompoundObjectPtr > >
@@ -117,7 +120,8 @@ void bindFrameListParameter()
 				)
 			)
 		)
-		.def( "getFrameListValue", &FrameListParameter::getFrameListValue )
+		.def( "getFrameListValue", getFrameListValueInternalData )
+		.def( "getFrameListValue", getFrameListValueStringData )
 		.def( "setFrameListValue", &FrameListParameter::setFrameListValue )
 		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( FrameListParameter )
 	;

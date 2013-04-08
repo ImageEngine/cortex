@@ -43,6 +43,7 @@ Improvements :
 * IECoreMaya FromMayaShapeConverters correctly set the geometric interpretation of points, normals, and velocities.
 * IECoreHoudini To/FromHoudini converters correctly set the geometric interpretation of points, normals, and velocities.
 * Shader::parametersData() now returns a raw pointer, and provides a const version.
+* IECore::FileSequenceParameter, FileSequenceVectorParameter, FrameListParameter can now return the FileSequences/FrameList using a StringData/StringVectorData argument instead of the internal value. To be used in ops doOperate in particular. Checks validity of given data.
 
 Bug Fixes :
 
