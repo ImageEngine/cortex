@@ -98,11 +98,12 @@ std::string str<GeometricTypedData<std::vector<TYPE> > >( GeometricTypedData<std
 } \
 
 template<typename ThisClass, typename ThisBinder>
-class GeometricVectorTypedDataFunctions
+class GeometricVectorTypedDataFunctions : ThisBinder
 {
 	public :
 		typedef typename ThisBinder::ThisClassPtr ThisClassPtr;
-
+		typedef typename ThisClass::ValueType Container;
+		
 		/// constructor that receives a python list object and an interpretation
 		static ThisClassPtr
 		dataListOrSizeConstructorAndInterpretation( boost::python::object v, IECore::GeometricData::Interpretation i )
@@ -110,6 +111,64 @@ class GeometricVectorTypedDataFunctions
 			ThisClassPtr r = ThisBinder::dataListOrSizeConstructor( v );
 			r->setInterpretation( i );
 			return r;
+		}
+		
+		/// binding for __getitem__ function
+		static boost::python::object getItem( ThisClass &x, PyObject *i )
+		{
+			if ( PySlice_Check( i ) )
+			{
+				return boost::python::object( getSlice( x, reinterpret_cast<PySliceObject*>( i ) ) );
+			}
+
+			const Container &xData = x.readable();
+			typename Container::size_type index = convertIndex( x, i );
+			return boost::python::object( xData[index] );
+		}
+		
+		/// return a new object containing the given range of items
+		static ThisClassPtr
+		getSlice( ThisClass &x, PySliceObject *i )
+		{
+			ThisClassPtr newObj = ThisBinder::getSlice( x, i );
+			newObj->setInterpretation( x.getInterpretation() );
+			return newObj;
+		}
+
+		/// binding for __add__ function
+		static ThisClassPtr add( ThisClass &x, PyObject* y )
+		{
+			/* create ptr to new object equal to x */
+			ThisClassPtr res = ThisClassPtr( new ThisClass( x.readable(), x.getInterpretation() ) );
+			iadd( res, y );
+			return res;
+		}
+
+		/// binding for __sub__ function
+		static ThisClassPtr sub( ThisClass &x, PyObject* y )
+		{
+			/* create ptr to new object equal to x */
+			ThisClassPtr res = ThisClassPtr( new ThisClass( x.readable(), x.getInterpretation() ) );
+			isub( res, y );
+			return res;
+		}
+
+		/// binding for __mul__ function
+		static ThisClassPtr mul( ThisClass &x, PyObject* y )
+		{
+			/* create ptr to new object equal to x */
+			ThisClassPtr res = ThisClassPtr( new ThisClass( x.readable(), x.getInterpretation() ) );
+			imul( res, y );
+			return res;
+		}
+
+		/// binding for __div__ function
+		static ThisClassPtr div( ThisClass &x, PyObject* y )
+		{
+			/* create ptr to new object equal to x */
+			ThisClassPtr res = ThisClassPtr( new ThisClass( x.readable(), x.getInterpretation() ) );
+			idiv( res, y );
+			return res;
 		}
 };
 
@@ -125,14 +184,16 @@ class GeometricVectorTypedDataFunctions
 			RunTimeTypedClass<TypedData< std::vector< T > > >(); \
 			\
 			BASIC_VECTOR_BINDING(GeometricTypedData< std::vector< T > >, Tname) \
+				/* operators modified from BIND_OPERATED_VECTOR_TYPEDDATA */ \
+				.def("__getitem__", &ThisGeometricBinder::getItem, "indexing operator.\nAccept an integer index (starting from 0), slices and negative indexes too.") \
+				.def("__add__", &ThisGeometricBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname) \
+				.def("__sub__", &ThisGeometricBinder::sub, "subtraction (s - v) : accepts another vector of the same type or a single " Tname) \
+				.def("__mul__", &ThisGeometricBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname) \
+				.def("__div__", &ThisGeometricBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname) \
 				/* operators duplicated from BIND_OPERATED_VECTOR_TYPEDDATA */ \
-				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname) \
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname) \
-				.def("__sub__", &ThisBinder::sub, "subtraction (s - v) : accepts another vector of the same type or a single " Tname) \
 				.def("__isub__", &ThisBinder::isub, "inplace subtraction (s -= v) : accepts another vector of the same type or a single " Tname) \
-				.def("__mul__", &ThisBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname) \
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname) \
-				.def("__div__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname) \
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname) \
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.") \
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.") \
