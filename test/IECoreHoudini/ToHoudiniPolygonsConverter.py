@@ -48,7 +48,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh = IECore.MeshPrimitive( vertsPerFace, vertexIds )
 		
 		floatData = IECore.FloatData( 1.5 )
-		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ) )
+		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ), IECore.GeometricData.Interpretation.Vector )
 		v3fData = IECore.V3fData( IECore.V3f( 1.5, 2.5, 3.5 ) )
 		color3fData = IECore.Color3fData( IECore.Color3f( 1.5, 2.5, 3.5 ) )
 		intData = IECore.IntData( 1 )
@@ -59,7 +59,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		intRange = range( 1, 25 )
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
 		v2fVectorData = IECore.V2fVectorData( [ IECore.V2f( x, x+0.5 ) for x in intRange ] )
-		v3fVectorData = IECore.V3fVectorData( [ IECore.V3f( x, x+0.5, x+0.75 ) for x in intRange ] )
+		v3fVectorData = IECore.V3fVectorData( [ IECore.V3f( x, x+0.5, x+0.75 ) for x in intRange ], IECore.GeometricData.Interpretation.Normal )
 		color3fVectorData = IECore.Color3fVectorData( [ IECore.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
 		intVectorData = IECore.IntVectorData( intRange )
 		v2iVectorData = IECore.V2iVectorData( [ IECore.V2i( x, -x ) for x in intRange ] )
@@ -85,7 +85,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		pData = IECore.V3fVectorData( [
 			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
 			IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ),
-		] )
+		], IECore.GeometricData.Interpretation.Point )
 		mesh["P"] = IECore.PrimitiveVariable( pointInterpolation, pData )
 		mesh["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
 		mesh["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2fVectorData[:8] )
@@ -205,6 +205,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopVerts[i].attribValue( "stringVert" ) )
 		
+		self.assertTrue( geo.findGlobalAttrib( "v2fDetail" ).isTransformedAsVector() )		
+		self.assertTrue( geo.findPointAttrib( "v3fPoint" ).isTransformedAsNormal() )
+		self.assertTrue( geo.findPrimAttrib( "v3fPrim" ).isTransformedAsNormal() )
+		self.assertTrue( geo.findVertexAttrib( "v3fVert" ).isTransformedAsNormal() )
+		
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
 		self.assertEqual( result.verticesPerFace, prim.verticesPerFace )
 		self.assertEqual( result.vertexIds, prim.vertexIds )
@@ -212,6 +217,12 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		for key in prim.keys() :
 			self.assertEqual( result[key], prim[key] )
 		self.assertEqual( result, prim )
+		
+		self.assertTrue( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertTrue( result["v2fDetail"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+		self.assertTrue( result["v3fPoint"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
+		self.assertTrue( result["v3fPrim"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
+		self.assertTrue( result["v3fVert"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 			
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=False ) :
 		geo = sop.geometry()
@@ -375,12 +386,23 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopVerts[ origNumVerts + i ].attribValue( "stringVert" ) )
 		
+		self.assertTrue( geo.findGlobalAttrib( "v2fDetail" ).isTransformedAsVector() )		
+		self.assertTrue( geo.findPointAttrib( "v3fPoint" ).isTransformedAsNormal() )
+		self.assertTrue( geo.findPrimAttrib( "v3fPrim" ).isTransformedAsNormal() )
+		self.assertTrue( geo.findVertexAttrib( "v3fVert" ).isTransformedAsNormal() )
+		
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
 		self.assertEqual( result.verticesPerFace[origNumPrims:], prim.verticesPerFace )
 		for i in range( 0, len(prim.vertexIds) ) :
 			self.assertEqual( result.vertexIds[origNumVerts + i], prim.vertexIds[i] + origNumPoints )
 		for key in prim.keys() :
 			self.assert_( key in result.keys() )
+		
+		self.assertTrue( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertTrue( result["v2fDetail"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+		self.assertTrue( result["v3fPoint"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
+		self.assertTrue( result["v3fPrim"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
+		self.assertTrue( result["v3fVert"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 		
 	def testCreateConverter( self )  :
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( self.mesh() )

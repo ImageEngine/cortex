@@ -548,6 +548,19 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		for child in result.children() :
 			# P must be converted
 			self.assertTrue( "P" in child.keys() )
+	
+	def testInterpretation( self ) :
+		
+		merge = self.buildScene()
+		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
+			self.assertEqual( sorted(child.keys()), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
+			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+			self.assertEqual( child["life"].data.getInterpretation(), IECore.GeometricData.Interpretation.Numeric )
+			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 if __name__ == "__main__":
     unittest.main()

@@ -208,6 +208,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( len(verts), result.verticesPerCurve()[i] )
 			sopVerts.extend( verts )
 		
+		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( len(sopVerts), result["P"].data.size() )	
 		for attr in geo.vertexAttribs() :
 			self.assert_( attr.name() in result )
@@ -253,6 +254,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) + extraPoints*len(geo.prims()) )
 		self.assertEqual( result.verticesPerCurve().size(), len(geo.prims()) )
+		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		
 		pIndex = 0
 		for i in range( len( result.verticesPerCurve() ) ) :

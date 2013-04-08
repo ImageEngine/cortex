@@ -52,6 +52,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def curves( self, basis=IECore.CubicBasisf.linear(), periodic=False, numCurves=4 ) :
 		vertsPerCurve = IECore.IntVectorData()
 		pData = IECore.V3fVectorData()
+		pData.setInterpretation( IECore.GeometricData.Interpretation.Point )
 		
 		for i in range( 0, numCurves ) :
 			p = TestToHoudiniCurvesConverter.__curveCoordinates[i%4]
@@ -102,6 +103,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		if not periodic and basis == IECore.CubicBasisf.bSpline() :
 			
 			modPData = IECore.V3fVectorData()
+			modPData.setInterpretation( IECore.GeometricData.Interpretation.Point )
 			floatPointData = IECore.FloatVectorData()
 			v2fPointData = IECore.V2fVectorData()
 			v3fPointData = IECore.V3fVectorData()

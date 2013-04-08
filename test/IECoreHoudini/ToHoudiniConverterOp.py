@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -116,6 +116,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		self.assertEqual( len(geo.points()), 100 )
 		self.assertEqual( len(geo.prims()), 100 )
 		self.assertEqual( geo.pointAttribs()[-1].name(), "N" )
+		self.assertTrue( geo.pointAttribs()[-1].isTransformedAsNormal() )
 
 if __name__ == "__main__":
 	unittest.main()

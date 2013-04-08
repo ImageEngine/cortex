@@ -232,7 +232,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		pData[it.getIndex()] = IECore::convert<Imath::V3f>( geo->getPos3( it.getOffset() ) );
 	}
 
-	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData ) );
+	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData, GeometricData::Point ) );
 	
 	// get RI remapping information from the detail
 	AttributeMap pointAttributeMap;

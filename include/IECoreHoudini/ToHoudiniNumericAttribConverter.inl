@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 
 #include "boost/format.hpp"
 
+#include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTraits.h"
 
 #include "IECoreHoudini/ToHoudiniNumericAttribConverter.h"
@@ -64,6 +65,38 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
 {
 	throw IECore::Exception( "ToHoudiniNumericVectorAttribConverter does not support Detail attributes." );
 }
+
+struct GetInterpretation
+{
+	typedef void ReturnType;
+	
+	GA_RWAttributeRef m_attrRef;
+	
+	template<typename T>
+	ReturnType operator() ( T *data )
+	{
+		assert( data );
+		
+		IECore::GeometricData::Interpretation interp = data->getInterpretation();
+		
+		if ( interp == IECore::GeometricData::Point )
+		{
+			m_attrRef.setTypeInfo( GA_TYPE_POINT );
+		}
+		else if ( interp == IECore::GeometricData::Normal )
+		{
+			m_attrRef.setTypeInfo( GA_TYPE_NORMAL );
+		}
+		else if ( interp == IECore::GeometricData::Vector )
+		{
+			m_attrRef.setTypeInfo( GA_TYPE_VECTOR );
+		}
+		else if ( interp == IECore::GeometricData::Color )
+		{
+			m_attrRef.setTypeInfo( GA_TYPE_COLOR );
+		}
+	}
+};
 
 template<typename T>
 GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const
@@ -94,7 +127,7 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
 	{
 		throw IECore::Exception( ( boost::format( "ToHoudiniNumericVectorAttribConverter::doConversion: Invalid GA_RWAttributeRef returned for PrimitiveVariable \"%s\"." ) % name ).str() );
 	}
-
+	
 	if ( IECoreHoudini::TypeTraits::IsAttribColorTypedData<T>::value )
 	{
 		attrRef.setTypeInfo( GA_TYPE_COLOR );
@@ -105,6 +138,10 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
 	
 	GA_Attribute *attr = attrRef.getAttribute();
 	attr->getAIFTuple()->setRange( attr, range, src );
+	
+	// set the geometric interpretation if it exists
+	GetInterpretation func = { attrRef };
+	IECore::despatchTypedData< GetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( const_cast<IECore::Data *>( data ), func );
 	
 	return attrRef;
 }
@@ -163,6 +200,10 @@ GA_RWAttributeRef ToHoudiniNumericDetailAttribConverter<T>::doConversion( const 
 
 	GA_Attribute *attr = attrRef.getAttribute();
 	attr->getAIFTuple()->setRange( attr, geo->getGlobalRange(), src );
+	
+	// set the geometric interpretation if it exists
+	GetInterpretation func = { attrRef };
+	IECore::despatchTypedData< GetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( const_cast<IECore::Data *>( data ), func );
 	
 	return attrRef;
 }
