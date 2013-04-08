@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,7 +49,7 @@ class OversamplesCalculatorTest( unittest.TestCase ) :
 		self.assertEqual( c.framesToTicks( 1 ), 250 )
 		self.assertEqual( c.framesToTicks( 1 + 1.0/3.0 ), 333 )
 		self.assertEqual( c.framesToTicks( 1 + 2.0/3.0 ), 416 )
-		self.assertEqual( c.nearestTick( 500 ), 499 )
+		self.assertEqual( c.nearestTick( 500 ), 500 )
 
 if __name__ == "__main__":
 	unittest.main()

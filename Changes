@@ -48,6 +48,7 @@ Bug Fixes :
 
 * IECore ImageReader and ImageWriter not doing transformation on alpha anymore, A gets filtered out from the channel names given to ColorSpaceTransformOp.
 * IECore ColorSpaceTransformOp applies unpremult before channelOp conversion then premult after, as channelOp doesn't deal with unpremultiplication of the colour channels.
+* Removed rounding hack in OversamplesCalculator.
 
 7.10.2 :
 
