@@ -774,6 +774,32 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( nameAttr.strings(), tuple( [ "testGroup" ] ) )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testGroup" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 	
+	def testAttributeFilter( self ) :
+		
+		mesh = self.mesh()
+		sop = self.emptySop()
+		
+		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'intPrim', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'intVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'floatDetail', 'intDetail', 'stringDetail', 'v2fDetail', 'v2iDetail', 'v3fDetail', 'v3iDetail'] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "P *3f*" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'v3fPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'v3fPrim'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'v3fVert'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'v3fDetail'] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^*Detail ^int*" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+	
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestToHoudiniPolygonsConverter.__testScene ) :

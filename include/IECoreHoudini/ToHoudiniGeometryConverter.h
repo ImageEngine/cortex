@@ -39,6 +39,7 @@
 #include "GU/GU_DetailHandle.h"
 
 #include "IECore/Primitive.h"
+#include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/VisibleRenderable.h"
 
@@ -76,6 +77,9 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a ToHoudiniGeometryConverter is available.
 		static void supportedTypes( std::set<IECore::TypeId> &types );
+		
+		IECore::StringParameter *attributeFilterParameter();
+		const IECore::StringParameter *attributeFilterParameter() const;
 
 	protected :
 
@@ -116,6 +120,8 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		) const;
 		
 	private :
+		
+		IECore::StringParameterPtr m_attributeFilterParameter;
 		
 		/// Struct for maintaining the registered derived classes
 		struct Types

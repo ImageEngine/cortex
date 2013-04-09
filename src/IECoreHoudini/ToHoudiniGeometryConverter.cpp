@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "UT/UT_StringMMPattern.h"
+
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
@@ -50,10 +52,28 @@ ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const VisibleRenderable 
 	:	ToHoudiniConverter( description, VisibleRenderableTypeId )
 {
 	srcParameter()->setValue( (VisibleRenderable *)renderable );
+	
+	m_attributeFilterParameter = new StringParameter(
+		"attributeFilter",
+		"A list of attribute names to convert, if they exist. Uses Houdini matching syntax.",
+		"*"
+	);
+	
+	parameters()->addParameter( m_attributeFilterParameter );
 }
 
 ToHoudiniGeometryConverter::~ToHoudiniGeometryConverter()
 {
+}
+
+StringParameter *ToHoudiniGeometryConverter::attributeFilterParameter()
+{
+	return m_attributeFilterParameter;
+}
+
+const StringParameter *ToHoudiniGeometryConverter::attributeFilterParameter() const
+{
+	return m_attributeFilterParameter;
 }
 
 bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
@@ -139,9 +159,10 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 
 	GA_Range vertRange( geo->getVertexMap(), offsets );
 	
+	UT_String filter( attributeFilterParameter()->getTypedValue() );
 	// P should already have been added as points
-	std::vector<std::string> variablesToIgnore;
-	variablesToIgnore.push_back( "P" );
+	/// \todo: we can't be ignoring P anymore
+	filter += " ^P";
 	
 	// match all the string variables to each associated indices variable
 	/// \todo: replace all this logic with IECore::IndexedData once it exists...
@@ -151,7 +172,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 		if ( !primitive->isPrimitiveVariableValid( it->second ) )
 		{
 			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invalid. Ignoring." );
-			variablesToIgnore.push_back( it->first );
+			filter += UT_String( " ^" + it->first );
 			continue;
 		}
 
@@ -168,17 +189,21 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			if ( indices != primitive->variables.end() && indices->second.data->isInstanceOf( IntVectorDataTypeId ) && primitive->isPrimitiveVariableValid( indices->second ) )
 			{
 				stringsToIndices[it->first] = indices->second;
-				variablesToIgnore.push_back( indicesVariableName );
+				filter += UT_String( " ^" + indicesVariableName );
 			}
 		}
 	}
+	
+	UT_StringMMPattern attribFilter;
+	attribFilter.compile( filter );
 	
 	/// \todo: should we convert s and t to uv automatically?
 	
  	// add the primitive variables to the various GEO_AttribDicts based on interpolation type
 	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
 	{
-		if ( find( variablesToIgnore.begin(), variablesToIgnore.end(), it->first ) != variablesToIgnore.end() )
+		UT_String varName( it->first );
+		if ( !varName.multiMatch( attribFilter ) )
 		{
 			continue;
 		}

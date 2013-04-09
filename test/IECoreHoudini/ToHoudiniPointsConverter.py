@@ -503,6 +503,32 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		
 		self.comparePrimAndSop( points, sop )
 		
+	def testAttributeFilter( self ) :
+		
+		points = self.points()
+		sop = self.emptySop()
+		
+		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'floatDetail', 'intDetail', 'stringDetail', 'v2fDetail', 'v2iDetail', 'v3fDetail', 'v3iDetail'] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "P *3f*" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'v3fPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'v3fDetail'] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^*Detail ^int*" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+	
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestToHoudiniPointsConverter.__testScene ) :
