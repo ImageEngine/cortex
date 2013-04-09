@@ -202,15 +202,46 @@ void MayaScene::writeTransform( const Data *transform, double time )
 
 bool MayaScene::hasAttribute( const Name &name ) const
 {
+	if( m_dagPath.length() == 0 )
+	{
+		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
+	}
+	std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().find(name);
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_has( m_dagPath );
+	}
 	return false;
 }
 
 void MayaScene::readAttributeNames( NameList &attrs ) const
 {
+	if( m_dagPath.length() == 0 )
+	{
+		throw Exception( "MayaScene::readAttributeNames: Dag path no longer exists!" );
+	}
+
+	attrs.clear();
+	for ( std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
+	{
+		if ( it->second.m_has( m_dagPath ) )
+		{
+			attrs.push_back( it->first );
+		}
+	}
 }
 
 ObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 {
+	if( m_dagPath.length() == 0 )
+	{
+		throw Exception( "MayaScene::readAttribute: Dag path no longer exists!" );
+	}
+	std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().find(name);
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_read( m_dagPath );
+	}
 	return 0;
 }
 
@@ -231,11 +262,42 @@ bool MayaScene::hasObject() const
 	{
 		throw Exception( "MayaScene::hasObject: Dag path no longer exists!" );
 	}
-	
-	MDagPath childDag = m_dagPath;
-	if( childDag.extendToShapeDirectlyBelow( 0 ) )
+
+	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
 	{
-		return true;
+		if ( it->m_has( m_dagPath ) )
+		{
+			return true;
+		}
+	}
+
+	// if no custom object was detected, we try the general cortex converter
+	unsigned int childCount = 0;
+	m_dagPath.numberOfShapesDirectlyBelow(childCount);
+
+	for ( unsigned int c = 0; c < childCount; c++ )
+	{
+		MDagPath childDag = m_dagPath;
+		if( childDag.extendToShapeDirectlyBelow( c ) )
+		{
+			MFnDagNode fnChildDag(childDag);
+			if ( fnChildDag.isIntermediateObject() )
+			{
+				continue;
+			}
+
+			FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
+			if( shapeConverter )
+			{
+				return true;
+			}
+		
+			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
+			if( dagConverter )
+			{
+				return true;
+			}
+		}
 	}
 	
 	return false;
@@ -254,33 +316,51 @@ ObjectPtr MayaScene::readObject( double time ) const
 	{
 		throw Exception( "MayaScene::readObject: time must be the same as on the maya timeline!" );
 	}
-	
-	MDagPath childDag = m_dagPath;
-	if( childDag.extendToShapeDirectlyBelow( 0 ) )
+
+	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
 	{
-		
-		if( childDag.hasFn( MFn::kCamera ) )
+		if ( it->m_has( m_dagPath ) )
 		{
-			FromMayaCameraConverter converter( childDag );
-			CameraPtr cam = runTimeCast< Camera >( converter.convert() );
-			cam->setTransform( new MatrixTransform( Imath::M44f() ) );
-			return cam;
+			return it->m_read( m_dagPath );
 		}
-		
-		FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
-		if( shapeConverter )
-		{
-			return shapeConverter->convert();
-		}
-		
-		FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
-		if( dagConverter )
-		{
-			return dagConverter->convert();
-		}
-		
 	}
-	
+
+	// if no custom object was detected, we try the general cortex converter
+	unsigned int childCount = 0;
+	m_dagPath.numberOfShapesDirectlyBelow(childCount);
+
+	for ( unsigned int c = 0; c < childCount; c++ )
+	{
+		MDagPath childDag = m_dagPath;
+		if( childDag.extendToShapeDirectlyBelow( c ) )
+		{
+			MFnDagNode fnChildDag(childDag);
+			if ( fnChildDag.isIntermediateObject() )
+			{
+				continue;
+			}
+
+			FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
+			if( shapeConverter )
+			{
+				return shapeConverter->convert();
+			}
+		
+			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
+			if( dagConverter )
+			{
+				ObjectPtr result = dagConverter->convert();
+				Camera *cam = runTimeCast< Camera >( result.get() );
+				if( cam )
+				{
+					// Cameras still carry the transform when converted from maya,
+					// so we have to remove them after conversion.
+					cam->setTransform( new MatrixTransform( Imath::M44f() ) );
+				}
+				return result;
+			}
+		}
+	}
 	return 0;
 }
 
@@ -469,7 +549,6 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	
 }
 
-
 ConstSceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
 	return retrieveScene( path, missingBehaviour );
@@ -478,4 +557,32 @@ ConstSceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour miss
 SceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour missingBehaviour )
 {
 	return retrieveScene( path, missingBehaviour );
+}
+
+void MayaScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
+{
+	CustomReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customObjectReaders().push_back(r);
+}
+
+void MayaScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )
+{
+	CustomReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customAttributeReaders()[attrName] = r;
+}
+
+std::vector< MayaScene::CustomReader > &MayaScene::customObjectReaders()
+{
+	static std::vector< MayaScene::CustomReader > readers;
+	return readers;
+}
+
+std::map< SceneInterface::Name, MayaScene::CustomReader > &MayaScene::customAttributeReaders()
+{
+	static std::map< SceneInterface::Name, MayaScene::CustomReader > readers;
+	return readers;
 }

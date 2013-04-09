@@ -36,15 +36,20 @@
 #define IE_COREMAYA_SCENESHAPE_H
 
 #include "IECore/SceneInterface.h"
-
 #include "IECoreMaya/SceneShapeInterface.h"
 
+namespace IECore
+{
+IE_CORE_FORWARDDECLARE( Object );
+}
 
 namespace IECoreMaya
 {
 
 /// A shape derived from a SceneShapeInterface which implements
 /// a shape which can read an IECore::SceneInterface using a file (.scc) and a root path
+/// It also registers itself in the MayaScene class so that the node is seen as a link to 
+/// an external file through the LinkedScene mechanism.
 class SceneShape : public SceneShapeInterface
 {
 	public :
@@ -76,6 +81,22 @@ class SceneShape : public SceneShapeInterface
 		
 		bool m_sceneDirty;
 		IECore::ConstSceneInterfacePtr m_scene;
+
+
+		static SceneShape *findScene( const MDagPath &p, MDagPath *dagPath = 0 );
+
+		/// functions registered in MayaScene as custom object and custom attributes
+		struct MayaSceneAddOn
+		{
+			MayaSceneAddOn();
+		};
+		static MayaSceneAddOn g_mayaSceneAddon;
+
+		static bool hasSceneShapeLink( const MDagPath &p );
+		static IECore::ObjectPtr readSceneShapeLink( const MDagPath &p );
+		static bool hasSceneShapeObject( const MDagPath &p );
+		static IECore::ObjectPtr readSceneShapeObject( const MDagPath &p );
+
 };
 
 }

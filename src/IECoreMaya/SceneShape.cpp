@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,14 +33,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/SharedSceneInterfaces.h"
+#include "IECore/LinkedScene.h"
 
 #include "IECoreMaya/SceneShape.h"
+#include "IECoreMaya/MayaScene.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnStringData.h"
 #include "maya/MPlugArray.h"
-
+#include "maya/MFnDagNode.h"
+#include "maya/MTime.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -49,6 +52,14 @@ MTypeId SceneShape::id = SceneShapeId;
 MObject SceneShape::aSceneFilePlug;
 MObject SceneShape::aSceneRootPlug;
 
+// registers this class in MayaScene
+SceneShape::MayaSceneAddOn SceneShape::g_mayaSceneAddon;
+
+SceneShape::MayaSceneAddOn::MayaSceneAddOn()
+{
+	MayaScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
+	MayaScene::registerCustomAttribute( LinkedScene::linkAttribute, SceneShape::hasSceneShapeLink, SceneShape::readSceneShapeLink );
+}
 
 SceneShape::SceneShape()
 	: m_sceneDirty( true )
@@ -143,8 +154,102 @@ MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray
 	return SceneShapeInterface::setDependentsDirty( plug, plugArray );
 }
 
+SceneShape *SceneShape::findScene( const MDagPath &p, MDagPath *dagPath )
+{
+	unsigned int childCount = 0;
+	p.numberOfShapesDirectlyBelow(childCount);
 
+	for ( unsigned int c = 0; c < childCount; c++ )
+	{
+		MDagPath childDag = p;
+		if( childDag.extendToShapeDirectlyBelow( c ) )
+		{
+			MFnDagNode fnChildDag(childDag);
+			if ( fnChildDag.isIntermediateObject() )
+			{
+				continue;
+			}
+
+			MPxNode* userNode = fnChildDag.userNode();
+
+			if( userNode && userNode->typeId() == SceneShapeId )
+			{
+				SceneShape *sceneShape = dynamic_cast< SceneShape * >( userNode );
+				if ( !sceneShape )
+				{
+					throw Exception( "Could not get a pointer to SceneShape!");
+				}
+				if ( dagPath )
+				{
+					*dagPath = childDag;
+				}
+				return sceneShape;
+			}
+		}
+	}
+	return 0;			
+}
+
+bool SceneShape::hasSceneShapeLink( const MDagPath &p )
+{
+	MDagPath dagPath;
+	SceneShape *sceneShape = findScene( p, &dagPath );
+	if ( !sceneShape )
+	{
+		return false;
+	}
 	
+	MFnDagNode fnChildDag = dagPath;
+	MStatus st;
+	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, &st );
+	if( !st )
+	{
+		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
+	}
+			
+	// if we're doing objects only, we just output the object directy, so we don't need link attributes... 
+	if( objectOnlyPlug.asBool() )
+	{
+		return false;
+	}
 	
-	
-	
+	// so if it's not object only, then we know the scene loads everything and we can create a link to it.
+	return true;
+}
+
+ObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
+{
+	SceneShape *sceneShape = findScene( p );
+	if ( !sceneShape )
+	{
+		throw Exception("readSceneShapeLink: Could not find SceneShape!");
+	}
+
+	return LinkedScene::linkAttributeData( sceneShape->getSceneInterface() );
+}
+
+bool SceneShape::hasSceneShapeObject( const MDagPath &p )
+{
+	SceneShape *sceneShape = findScene( p );
+	if ( !sceneShape )
+	{
+		return false;
+	}
+	return sceneShape->getSceneInterface()->hasObject();
+}
+
+ObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
+{
+	SceneShape *sceneShape = findScene( p );
+	if ( !sceneShape )
+	{
+		return 0;
+	}
+
+	MPlug pTime( sceneShape->thisMObject(), aTime );
+	MTime time;
+	pTime.getValue( time );
+	double t = time.as( MTime::kSeconds );
+	return sceneShape->getSceneInterface()->readObject( t );
+}
+

@@ -152,14 +152,35 @@ class MayaScene : public IECore::SceneInterface
 		/// Returns an object for querying the scene at the given path (full path). 
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
+		typedef bool (*HasFn)( const MDagPath& );
+		typedef IECore::ObjectPtr (*ReadFn)( const MDagPath& );
+
+		// Register callbacks for custom objects.		
+		// The has function will be called during hasObject and it stops in the first one that returns true.
+		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
+		static void registerCustomObject( HasFn hasFn, ReadFn readFn );
+
+		// Register callbacks for custom named attributes.
+		// The has function will be called during hasAttribute and it stops in the first one that returns true.
+		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
+		static void registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn );
+
 	private :
-				
 		
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveParent() const;
 		
 		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
+
+		/// Struct for registering readers for custom Object and Attributes.
+		struct CustomReader
+		{
+			HasFn m_has;
+			ReadFn m_read;
+		};
+		static std::vector< CustomReader > &customObjectReaders();
+		static std::map< Name, CustomReader > &customAttributeReaders();
 		
 	protected:
 		
