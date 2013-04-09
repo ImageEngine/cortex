@@ -322,6 +322,12 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::str
 		return false;
 	}
 	
+	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	if ( !converter )
+	{
+		return false;
+	}
+	
 	// attempt to optimize the conversion by re-using animated primitive variables
 	const Primitive *primitive = IECore::runTimeCast<Primitive>( renderable );
 	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
@@ -336,69 +342,18 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::str
 				return true;
 			}
 			
-			bool optimized = false;
 			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
+			
+			std::string animatedPrimVarStr = "";
 			for ( std::vector<InternedString>::const_iterator it = animatedPrimVars.begin(); it != animatedPrimVars.end(); ++it )
 			{
-				// special case for P unfortunately
-				if ( *it == pName )
-				{
-					const V3fVectorData *positions = primitive->variableData<V3fVectorData>( pName.string() );
-					if ( !positions )
-					{
-						continue;
-					}
-					
-					const std::vector<Imath::V3f> &pos = positions->readable();
-					if ( (size_t)pointRange.getEntries() != pos.size() )
-					{
-						continue;
-					}
-					
-					size_t i = 0;
-					for ( GA_Iterator it=pointRange.begin(); !it.atEnd(); ++it, ++i )
-					{
-						gdp->setPos3( it.getOffset(), IECore::convert<UT_Vector3>( pos[i] ) );
-					}
-					
-					optimized = true;
-				}
-				else
-				{
-					PrimitiveVariableMap::const_iterator pIt = primitive->variables.find( it->string() );
-					if ( pIt == primitive->variables.end() )
-					{
-						continue;
-					}
-					
-					ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( pIt->second.data );
-					if ( !converter )
-					{
-						continue;
-					}
-					
-					if ( pIt->second.interpolation == PrimitiveVariable::Vertex )
-					{
-						converter->convert( pIt->first, gdp, pointRange );
-						optimized = true;
-					}
-					else if ( pIt->second.interpolation == PrimitiveVariable::Uniform )
-					{
-						converter->convert( pIt->first, gdp, primRange );
-						optimized = true;
-					}
-					else
-					{
-						/// \todo: support FaceVarying and Constant prim vars
-						addWarning( SOP_ATTRIBUTE_INVALID, ( pIt->first + " could not be converted for " + name + ". Only Vertex and Uniform variables can be optimized." ).c_str() );
-					}
-				}
+				animatedPrimVarStr += it->string() + " ";
 			}
 			
-			if ( optimized )
-			{
-				return true;
-			}
+			converter->attributeFilterParameter()->setTypedValue( animatedPrimVarStr );
+			converter->transferAttribs( gdp, pointRange, primRange );
+			
+			return true;
 		}
 	}
 	else
@@ -407,15 +362,10 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::str
 	}
 	
 	// fallback to full conversion
-	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
-	if ( converter )
+	converter->attributeFilterParameter()->setTypedValue( attributeFilter );
+	if ( converter->convert( myGdpHandle ) )
 	{
-		converter->attributeFilterParameter()->setTypedValue( attributeFilter );
-		
-		if ( converter->convert( myGdpHandle ) )
-		{
-			return true;
-		}
+		return true;
 	}
 	
 	return false;
