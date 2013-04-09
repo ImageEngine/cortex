@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,13 @@ IE_CORE_FORWARDDECLARE( MatrixTransform )
 
 /// The CameraController class provides methods to aid in the use
 /// of the Camera class within the context of a GUI.
-class CameraController
+class CameraController : public boost::noncopyable
 {
 
 	public:
 
 		CameraController( CameraPtr camera );
+		~CameraController();
 
 		void setCamera( CameraPtr camera );
 		CameraPtr getCamera();
@@ -112,22 +113,9 @@ class CameraController
 		void tumble( const Imath::V2i &p );
 		void dolly( const Imath::V2i &p );
 
-		// parts of the camera we manipulate
-		CameraPtr m_camera;
-		V2iDataPtr m_resolution;
-		Box2fDataPtr m_screenWindow;
-		MatrixTransformPtr m_transform;
-		ConstStringDataPtr m_projection;
-		ConstFloatDataPtr m_fov;
-		ConstV2fDataPtr m_clippingPlanes;
-		float m_centreOfInterest;
+		IE_CORE_FORWARDDECLARE( MemberData );
 
-		// motion state
-		MotionType m_motionType;
-		Imath::V2i m_motionStart;
-		Imath::M44f m_motionMatrix;
-		float m_motionCentreOfInterest;
-		Imath::Box2f m_motionScreenWindow;
+		MemberDataPtr m_data;
 
 };
 
