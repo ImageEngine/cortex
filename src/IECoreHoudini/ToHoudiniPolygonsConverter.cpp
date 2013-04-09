@@ -60,7 +60,7 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 		return false;
 	}
 	
-	GA_Range newPoints = appendPoints( geo, mesh->variableData<V3fVectorData>( "P" ) );
+	GA_Range newPoints = appendPoints( geo, mesh->variableSize( PrimitiveVariable::Vertex ) );
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;

@@ -64,29 +64,16 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	GA_Range newPoints;
 	bool periodic = curves->periodic();
 	bool duplicatedEnds = !periodic && ( curves->basis() == CubicBasisf::bSpline() );
 	
-	// adjust for duplicated end points
+	size_t numPoints = curves->variableSize( PrimitiveVariable::Vertex );
 	if ( duplicatedEnds )
 	{
-		PrimitiveVariableMap::const_iterator pIt = curves->variables.find( "P" );
-		if ( pIt == curves->variables.end() || pIt->second.interpolation != IECore::PrimitiveVariable::Vertex )
-		{
-			return false;
-		}
-		
-		RemoveDuplicateEnds func( curves->verticesPerCurve()->readable() );
-		DataPtr pData = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( pIt->second.data, func );
-		
-		newPoints = appendPoints( geo, runTimeCast<const V3fVectorData>( pData ) );
-	}
-	else
-	{
-		newPoints = appendPoints( geo, curves->variableData<V3fVectorData>( "P" ) );
+		numPoints -= 4 * curves->numCurves();
 	}
 	
+	GA_Range newPoints = appendPoints( geo, numPoints );
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;

@@ -66,7 +66,7 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		positions = points->variableData<V3fVectorData>( "position" );
 	}
 	
-	GA_Range newPoints = appendPoints( geo, positions );
+	GA_Range newPoints = appendPoints( geo, points->getNumPoints() );
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;

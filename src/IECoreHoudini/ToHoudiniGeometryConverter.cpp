@@ -96,22 +96,19 @@ bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
 	return doConversion( renderable, geo );
 }
 
-GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, const IECore::V3fVectorData *positions ) const
+GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoints ) const
 {
-	if ( !positions )
+	if ( !numPoints )
 	{
 		return GA_Range();
 	}
 	
-	const std::vector<Imath::V3f> &pos = positions->readable();
 	GA_OffsetList offsets;
-	offsets.reserve( pos.size() );
+	offsets.reserve( numPoints );
 	
-	for ( size_t i=0; i < pos.size(); i++ )
+	for ( size_t i=0; i < numPoints; ++i )
 	{
-		GA_Offset offset = geo->appendPoint();
-		geo->setPos3( offset, IECore::convert<UT_Vector3>( pos[i] ) );
-		offsets.append( offset );
+		offsets.append( geo->appendPoint() );
 	}
 	
 	return GA_Range( geo->getPointMap(), offsets );
@@ -165,9 +162,6 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	GA_Range vertRange( geo->getVertexMap(), offsets );
 	
 	UT_String filter( attributeFilterParameter()->getTypedValue() );
-	// P should already have been added as points
-	/// \todo: we can't be ignoring P anymore
-	filter += " ^P";
 	
 	// match all the string variables to each associated indices variable
 	/// \todo: replace all this logic with IECore::IndexedData once it exists...
@@ -242,7 +236,15 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 		else if ( interpolation == pointInterpolation )
 		{
 			// add point attribs
- 			converter->convert( it->first, geo, points );
+			if ( it->first == "P" )
+			{
+				// special case for P
+				transferP( runTimeCast<const V3fVectorData>( primVar.data ), geo, points );
+			}
+			else
+			{
+ 				converter->convert( it->first, geo, points );
+			}
 		}
 		else if ( interpolation == primitiveInterpolation )
 		{
@@ -270,6 +272,22 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			converter->indicesParameter()->setValidatedValue( indexData );
 			converter->convert( "name", geo, prims );
 		}
+	}
+}
+
+void ToHoudiniGeometryConverter::transferP( const IECore::V3fVectorData *positions, GU_Detail *geo, const GA_Range &points ) const
+{
+	if ( !positions )
+	{
+		return;
+	}
+	
+	const std::vector<Imath::V3f> &pos = positions->readable();
+	
+	size_t i = 0;
+	for ( GA_Iterator it=points.begin(); !it.atEnd(); ++it, ++i )
+	{
+		geo->setPos3( it.getOffset(), IECore::convert<UT_Vector3>( pos[i] ) );
 	}
 }
 

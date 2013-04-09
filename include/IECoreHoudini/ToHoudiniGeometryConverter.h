@@ -109,9 +109,8 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 				static ToHoudiniGeometryConverterPtr creator( const IECore::VisibleRenderable *renderable );
 		};
 		
-		/// Appends points to the GU_Detail from the given V3fVectorData.
-		/// Returns a GA_Range containing the GA_Offsets for the newly added points.
-		GA_Range appendPoints( GA_Detail *geo, const IECore::V3fVectorData *positions ) const;
+		/// Appends points to the GA_Detail. Returns a GA_Range containing the GA_Offsets for the newly added points.
+		GA_Range appendPoints( GA_Detail *geo, size_t numPoints ) const;
 		
 		/// Transfers the primitive variables from the IECore::Primitive to the GU_Detail. In most cases,
 		/// derived classes will implement transferAttribs to call this method with the appropriate arguments.
@@ -126,6 +125,9 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 	private :
 		
 		IECore::StringParameterPtr m_attributeFilterParameter;
+		
+		// function to handle the special case for P
+		void transferP( const IECore::V3fVectorData *positions, GU_Detail *geo, const GA_Range &points ) const;
 		
 		/// Struct for maintaining the registered derived classes
 		struct Types
