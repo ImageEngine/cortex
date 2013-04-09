@@ -72,10 +72,9 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 	
 		virtual OP_ERROR cookMySop( OP_Context &context );
 		
-		/// Modify the object after it has been loaded in memory. Implemented to remove
-		/// PrimitiveVariables that do not match the attributeFilter. Derived classes
-		/// should update animatedTopology and animatedPrimVars if appropriate.
-		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
+		/// Modify the object after it has been loaded in memory. Implemented to add the name matching this
+		/// location in cache. Derived classes should update animatedTopology and animatedPrimVars if appropriate.
+		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, const std::string &name, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
 	
 	private :
 		
@@ -83,9 +82,9 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
 		void transformObject( IECore::Object *object, const Imath::M44d &transform, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
-		bool convertObject( IECore::Object *object, std::string &name, bool animatedTopology, bool hasAnimatedPrimVars, const std::vector<IECore::InternedString> &animatedPrimVars );
+		bool convertObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool animatedTopology, bool hasAnimatedPrimVars, const std::vector<IECore::InternedString> &animatedPrimVars );
 		
-		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter, size_t rootSize );
+		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
 		std::string relativePath( const IECore::SceneInterface *scene, size_t rootSize );
 

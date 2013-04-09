@@ -168,14 +168,12 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	shapeFilter.compile( shapeFilterStr );
 	
 	UT_String p( "P" );
-	UT_String attributeFilterStr;
-	evalString( attributeFilterStr, pAttributeFilter.getToken(), 0, 0 );
-	UT_StringMMPattern attributeFilter;
-	if ( !p.match( attributeFilterStr ) )
+	UT_String attributeFilter;
+	evalString( attributeFilter, pAttributeFilter.getToken(), 0, 0 );
+	if ( !p.match( attributeFilter ) )
 	{
-		attributeFilterStr += " P";
+		attributeFilter += " P";
 	}
-	attributeFilter.compile( attributeFilterStr );
 	
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
@@ -190,7 +188,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( path );
 	hash.append( space );
 	hash.append( shapeFilterStr );
-	hash.append( attributeFilterStr );
+	hash.append( attributeFilter );
 	
 	if ( !m_loaded || m_hash != hash )
 	{
@@ -202,7 +200,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	SceneInterface::Path rootPath;
 	scene->path( rootPath );
 	
-	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter, rootPath.size() );
+	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter.toStdString(), rootPath.size() );
 	
 	m_loaded = true;
 	m_hash = hash;
@@ -210,7 +208,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const UT_StringMMPattern &attributeFilter, size_t rootSize )
+void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, size_t rootSize )
 {
 	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
 	{
@@ -232,7 +230,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			}
 		}
 		
-		modifyObject( object, name, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
+		modifyObject( object, name, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
 		
 		Imath::M44d currentTransform;
 		if ( space == Local )
@@ -251,7 +249,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		}
 		
 		// convert the object to Houdini
-		if ( !convertObject( object, name, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
+		if ( !convertObject( object, name, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
 		{
 			addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + name + " to houdini" ).c_str() );
 		}
@@ -266,34 +264,12 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	}
 }
 
-IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, std::string &name, const UT_StringMMPattern &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
+IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, const std::string &name, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
-	if ( !renderable )
+	if ( renderable )
 	{
-		return object;
-	}
-	
-	renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
-	
-	Primitive *primitive = IECore::runTimeCast<Primitive>( renderable );
-	if ( primitive )
-	{
-		PrimitiveVariableMap &variables = primitive->variables;
-		PrimitiveVariableMap::iterator it = variables.begin();
-		PrimitiveVariableMap::iterator toErase = variables.begin();
-		while ( it != variables.end() )
-		{
-			UT_String attributeName( it->first );
-			if ( !attributeName.multiMatch( attributeFilter ) )
-			{
-				variables.erase( it++ );
-			}
-			else
-			{
-				it++;
-			}
-		}
+		renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
 	}
 	
 	return object;
@@ -338,7 +314,7 @@ void SOP_SceneCacheSource::transformObject( IECore::Object *object, const Imath:
 	}
 }
 
-bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &name, bool hasAnimatedTopology, bool hasAnimatedPrimVars, const std::vector<InternedString> &animatedPrimVars )
+bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool hasAnimatedTopology, bool hasAnimatedPrimVars, const std::vector<InternedString> &animatedPrimVars )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( !renderable )
@@ -432,9 +408,14 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, std::string &n
 	
 	// fallback to full conversion
 	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
-	if ( converter && converter->convert( myGdpHandle ) )
+	if ( converter )
 	{
-		return true;
+		converter->attributeFilterParameter()->setTypedValue( attributeFilter );
+		
+		if ( converter->convert( myGdpHandle ) )
+		{
+			return true;
+		}
 	}
 	
 	return false;
