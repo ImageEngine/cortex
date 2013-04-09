@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,7 +72,16 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	transferAttribs( points, geo, newPoints, GA_Range(), PrimitiveVariable::Vertex, PrimitiveVariable::Vertex );
+	transferAttribs( geo, newPoints, GA_Range() );
 	
 	return true;
+}
+
+void ToHoudiniPointsConverter::transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const
+{
+	const Primitive *primitive = IECore::runTimeCast<const Primitive>( srcParameter()->getValidatedValue() );
+	if ( primitive )
+	{
+		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex, PrimitiveVariable::Vertex );
+	}
 }

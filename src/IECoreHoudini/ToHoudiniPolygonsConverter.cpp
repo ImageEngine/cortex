@@ -95,7 +95,7 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 	}
 	
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
-	transferAttribs( mesh, geo, newPoints, newPrims );
+	transferAttribs( geo, newPoints, newPrims );
 	
 	return true;
 }

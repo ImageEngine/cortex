@@ -97,9 +97,18 @@ GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, const IECore:
 	return GA_Range( geo->getPointMap(), offsets );
 }
 
-void ToHoudiniGeometryConverter::transferAttribs(
+void ToHoudiniGeometryConverter::transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const
+{
+	const Primitive *primitive = IECore::runTimeCast<const Primitive>( srcParameter()->getValidatedValue() );
+	if ( primitive )
+	{
+		transferAttribValues( primitive, geo, points, prims );
+	}
+}
+
+void ToHoudiniGeometryConverter::transferAttribValues(
 	const Primitive *primitive, GU_Detail *geo,
-	const GA_Range &newPoints, const GA_Range &newPrims,
+	const GA_Range &points, const GA_Range &prims,
 	PrimitiveVariable::Interpolation vertexInterpolation,
 	PrimitiveVariable::Interpolation primitiveInterpolation,
 	PrimitiveVariable::Interpolation pointInterpolation,
@@ -107,10 +116,10 @@ void ToHoudiniGeometryConverter::transferAttribs(
 ) const
 {
 	GA_OffsetList offsets;
-	if ( newPrims.isValid() )
+	if ( prims.isValid() )
 	{
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-		for ( GA_Iterator it=newPrims.begin(); !it.atEnd(); ++it )
+		for ( GA_Iterator it=prims.begin(); !it.atEnd(); ++it )
 		{
 			const GA_Primitive *prim = primitives.get( it.getOffset() );
 			size_t numPrimVerts = prim->getVertexCount();
@@ -201,12 +210,12 @@ void ToHoudiniGeometryConverter::transferAttribs(
 		else if ( interpolation == pointInterpolation )
 		{
 			// add point attribs
- 			converter->convert( it->first, geo, newPoints );
+ 			converter->convert( it->first, geo, points );
 		}
 		else if ( interpolation == primitiveInterpolation )
 		{
 			// add primitive attribs
-			converter->convert( it->first, geo, newPrims );
+			converter->convert( it->first, geo, prims );
 		}
 		else if ( interpolation == vertexInterpolation )
 		{
@@ -219,15 +228,15 @@ void ToHoudiniGeometryConverter::transferAttribs(
 	const StringData *nameData = primitive->blindData()->member<StringData>( "name" );
 	if ( nameData )
 	{
-		if ( newPrims.isValid() )
+		if ( prims.isValid() )
 		{
 			StringVectorDataPtr nameVectorData = new StringVectorData();
 			nameVectorData->writable().push_back( nameData->readable() );
-			std::vector<int> indexValues( newPrims.getEntries(), 0 );
+			std::vector<int> indexValues( prims.getEntries(), 0 );
 			IntVectorDataPtr indexData = new IntVectorData( indexValues );
 			ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( nameVectorData );
 			converter->indicesParameter()->setValidatedValue( indexData );
-			converter->convert( "name", geo, newPrims );
+			converter->convert( "name", geo, prims );
 		}
 	}
 }

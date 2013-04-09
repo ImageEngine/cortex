@@ -53,6 +53,9 @@ class ToHoudiniCurvesConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 		ToHoudiniCurvesConverter( const IECore::VisibleRenderable *renderable );
 
 		virtual ~ToHoudiniCurvesConverter();
+		
+		/// Transfers the primitive variables from the IECore::Primitive to the GU_Detail.
+		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
 	
 	protected :
 		

@@ -136,7 +136,7 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 	}
 	
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
-	transferAttribs( curves, geo, newPoints, newPrims, PrimitiveVariable::Vertex );
+	transferAttribs( geo, newPoints, newPrims );
 	
 	// add the modified vertex variables
 	for ( std::map<std::string, DataPtr>::const_iterator it=modifiedData.begin() ; it != modifiedData.end(); it++ )
@@ -158,6 +158,15 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 	}
 	
 	return true;
+}
+
+void ToHoudiniCurvesConverter::transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const
+{
+	const Primitive *primitive = IECore::runTimeCast<const Primitive>( srcParameter()->getValidatedValue() );
+	if ( primitive )
+	{
+		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
+	}
 }
 
 ToHoudiniCurvesConverter::RemoveDuplicateEnds::RemoveDuplicateEnds( const std::vector<int> &vertsPerCurve ) : m_vertsPerCurve( vertsPerCurve )
