@@ -89,7 +89,11 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		
 		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::VisibleRenderable
 		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const = 0;
-
+		
+		/// May be implemented by derived classes to pre-process PrimitiveVariables before conversion.
+		/// Default implementation simply returns a shallow copy of the input variable.
+		virtual IECore::PrimitiveVariable processPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primVar ) const;
+		
 		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::VisibleRenderable *renderable );
 
 		static void registerConverter( IECore::TypeId fromType, CreatorFn creator );

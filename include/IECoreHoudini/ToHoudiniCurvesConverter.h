@@ -61,6 +61,9 @@ class ToHoudiniCurvesConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 		
 		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
 		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
+		
+		/// Implemented to adjust Vertex interpolated PrimitiveVariables for de-duplicated end points
+		virtual IECore::PrimitiveVariable processPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primVar ) const;
 
 	private :
 

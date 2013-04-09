@@ -117,6 +117,11 @@ GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, const IECore:
 	return GA_Range( geo->getPointMap(), offsets );
 }
 
+PrimitiveVariable ToHoudiniGeometryConverter::processPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primVar ) const
+{
+	return primVar;
+}
+
 void ToHoudiniGeometryConverter::transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const
 {
 	const Primitive *primitive = IECore::runTimeCast<const Primitive>( srcParameter()->getValidatedValue() );
@@ -208,13 +213,14 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			continue;
 		}
 		
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+		PrimitiveVariable primVar = processPrimitiveVariable( primitive, it->second );
+		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( primVar.data );
 		if ( !converter )
 		{
 			continue;
 		}
 		
-		PrimitiveVariable::Interpolation interpolation = it->second.interpolation;
+		PrimitiveVariable::Interpolation interpolation = primVar.interpolation;
 		
 		if ( converter->isInstanceOf( (IECore::TypeId)ToHoudiniStringVectorAttribConverterTypeId ) )
 		{
@@ -222,7 +228,8 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			if ( indices != stringsToIndices.end() )
 			{
 				ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter );
-				stringVectorConverter->indicesParameter()->setValidatedValue( indices->second.data );
+				PrimitiveVariable indicesPrimVar = processPrimitiveVariable( primitive, indices->second );
+				stringVectorConverter->indicesParameter()->setValidatedValue( indicesPrimVar.data );
 				interpolation = indices->second.interpolation;
 			}
 		}

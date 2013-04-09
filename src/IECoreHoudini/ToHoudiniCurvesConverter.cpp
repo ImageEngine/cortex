@@ -69,26 +69,18 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 	bool duplicatedEnds = !periodic && ( curves->basis() == CubicBasisf::bSpline() );
 	
 	// adjust for duplicated end points
-	std::map<std::string, DataPtr> modifiedData;
 	if ( duplicatedEnds )
 	{
-		RemoveDuplicateEnds func( curves->verticesPerCurve()->readable() );
-		for ( PrimitiveVariableMap::const_iterator it=curves->variables.begin() ; it != curves->variables.end(); it++ )
-		{
-			// only remove duplicates from vertex variables
-			if ( it->second.interpolation == IECore::PrimitiveVariable::Vertex )
-			{
-				modifiedData[it->first] = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
-			}
-		}
-		
-		std::map<std::string, DataPtr>::iterator pIt = modifiedData.find( "P" );
-		if ( pIt == modifiedData.end() )
+		PrimitiveVariableMap::const_iterator pIt = curves->variables.find( "P" );
+		if ( pIt == curves->variables.end() || pIt->second.interpolation != IECore::PrimitiveVariable::Vertex )
 		{
 			return false;
 		}
 		
-		newPoints = appendPoints( geo, runTimeCast<const V3fVectorData>( pIt->second ) );
+		RemoveDuplicateEnds func( curves->verticesPerCurve()->readable() );
+		DataPtr pData = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( pIt->second.data, func );
+		
+		newPoints = appendPoints( geo, runTimeCast<const V3fVectorData>( pData ) );
 	}
 	else
 	{
@@ -138,26 +130,27 @@ bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
 	transferAttribs( geo, newPoints, newPrims );
 	
-	// add the modified vertex variables
-	for ( std::map<std::string, DataPtr>::const_iterator it=modifiedData.begin() ; it != modifiedData.end(); it++ )
-	{
-		// P should already have been added as points
-		if ( it->first == "P" )
-		{
-			continue;
-		}
-		
-		// add point attribs
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second );
- 		if ( !converter )
- 		{
- 			continue;
- 		}
+	return true;
+}
 
- 		converter->convert( it->first, geo, newPoints );
+PrimitiveVariable ToHoudiniCurvesConverter::processPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primVar ) const
+{
+	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( primitive );
+	if ( !curves )
+	{
+		return primVar;
 	}
 	
-	return true;
+	// adjust for duplicated end points
+	bool duplicatedEnds = !curves->periodic() && ( curves->basis() == CubicBasisf::bSpline() );
+	if ( duplicatedEnds && primVar.interpolation == IECore::PrimitiveVariable::Vertex )
+	{
+		RemoveDuplicateEnds func( curves->verticesPerCurve()->readable() );
+		DataPtr data = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( primVar.data, func );
+		return PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
+	}
+	
+	return primVar;
 }
 
 void ToHoudiniCurvesConverter::transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const
