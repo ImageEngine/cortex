@@ -531,7 +531,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = converter.convert()
 		for child in result.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
-			self.assertEqual( sorted(child.keys()), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "P" )
 		result = converter.convert()
@@ -541,13 +541,44 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^generator* ^varmap ^born ^event" )
 		result = converter.convert()
 		for child in result.children() :
-			self.assertEqual( sorted(child.keys()), ['Cd', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v'] )
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v'] )
 			
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
 		result = converter.convert()
 		for child in result.children() :
 			# P must be converted
 			self.assertTrue( "P" in child.keys() )
+	
+	def testStandardAttributeConversion( self ) :
+		
+		merge = self.buildScene()
+		color = merge.createOutputNode( "color" )
+		color.parm( "colortype" ).set( 2 )
+		rest = color.createOutputNode( "rest" )
+		scale = rest.createOutputNode( "attribcreate" )
+		scale.parm( "name1" ).set( "pscale" )
+		scale.parm( "value1v1" ).setExpression( "$PT" )
+		uvunwrap = scale.createOutputNode( "uvunwrap" )
+		
+		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap', 'width'] )
+			self.assertTrue( child.arePrimitiveVariablesValid() )
+			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+			self.assertEqual( child["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+		
+		converter["convertStandardAttributes"].setTypedValue( False )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v', 'varmap'] )
+			self.assertTrue( child.arePrimitiveVariablesValid() )
+			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+			self.assertEqual( child["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 	
 	def testInterpretation( self ) :
 		
@@ -556,7 +587,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = converter.convert()
 		for child in result.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
-			self.assertEqual( sorted(child.keys()), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 			self.assertEqual( child["life"].data.getInterpretation(), IECore.GeometricData.Interpretation.Numeric )

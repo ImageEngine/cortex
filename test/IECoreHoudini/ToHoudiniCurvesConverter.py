@@ -867,6 +867,57 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
+	def testStandardAttributeConversion( self ) :
+		
+		sop = self.emptySop()
+		curves = self.curves()
+		for key in curves.keys() :
+			if key != "P" :
+				del curves[key]
+		rand = IECore.Rand32()
+		curves["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
+		curves["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
+		curves["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
+		curves["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
+		curves["Pref"] = curves["P"]
+		
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+		
+		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
+		self.assertTrue( converter.convert( sop ) )
+		geo = sop.geometry()
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
+		
+		sData = curves["s"].data
+		tData = curves["t"].data
+		uvs = geo.findPointAttrib( "uv" )
+		
+		i = 0
+		for point in geo.points() :
+			uvValues = point.attribValue( uvs )
+			self.assertAlmostEqual( uvValues[0], sData[i] )
+			self.assertAlmostEqual( uvValues[1], 1 - tData[i] )
+			i += 1
+		
+		converter["convertStandardAttributes"].setTypedValue( False )
+		self.assertTrue( converter.convert( sop ) )
+		geo = sop.geometry()
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['P', 'Pref', 'Pw', 's', 't', 'width'] )
+		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['Cs'] )
+		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
+		
+		i = 0
+		s = geo.findPointAttrib( "s" )
+		t = geo.findPointAttrib( "t" )
+		for point in geo.points() :
+			self.assertAlmostEqual( point.attribValue( s ), sData[i] )
+			self.assertAlmostEqual( point.attribValue( t ), tData[i] )
+			i += 1
+	
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestToHoudiniCurvesConverter.__testScene ) :

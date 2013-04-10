@@ -419,6 +419,56 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		hou.parm( "/obj/geo4/curve3/close" ).set( True )
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( merge )
 		self.assertRaises( RuntimeError, converter.convert )
+	
+	def testStandardAttributeConversion( self ) :
+		
+		curves = self.createCurves( 4 )
+		color = curves.createOutputNode( "color" )
+		color.parm( "colortype" ).set( 2 )
+		rest = color.createOutputNode( "rest" )
+		scale = rest.createOutputNode( "attribcreate" )
+		scale.parm( "name1" ).set( "pscale" )
+		scale.parm( "value1v1" ).setExpression( "$PT" )
+		uvunwrap = scale.createOutputNode( "uvunwrap" )
+		
+		converter = IECoreHoudini.FromHoudiniCurvesConverter( uvunwrap )
+		result = converter.convert()
+		self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "detailAttribute", "pointAttribute", "primAttribute", "s", "t", "varmap", "vertexAttribute", "width" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		
+		sData = result["s"].data
+		tData = result["t"].data
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+		
+		i = 0
+		for prim in geo.prims() :
+			for vert in prim.vertices() :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( sData[i], uvValues[0] )
+				self.assertAlmostEqual( tData[i], 1 - uvValues[1] )
+				i += 1
+		
+		converter["convertStandardAttributes"].setTypedValue( False )
+		result = converter.convert()
+		self.assertEqual( result.keys(), [ "Cd", "P", "detailAttribute", "pointAttribute", "primAttribute", "pscale", "rest", "uv", "varmap", "vertexAttribute" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( result["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		
+		uvData = result["uv"].data
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+		
+		i = 0
+		for prim in geo.prims() :
+			for vert in prim.vertices() :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvData[i][0], uvValues[0] )
+				self.assertAlmostEqual( uvData[i][1], uvValues[1] )
+				i += 1
 
 if __name__ == "__main__":
     unittest.main()

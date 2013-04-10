@@ -171,10 +171,10 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// Utility functions for extracting attrib data from Houdini and storing it as a DataPtr of type T
 		/// @parm index allows a single component to be extracted from a larger container
 		template <typename T>
-		IECore::DataPtr extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex = -1 ) const;
+		typename T::Ptr extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex = -1 ) const;
 		
 		template <typename T>
-		IECore::DataPtr extractData( const GA_Attribute *attr ) const;
+		typename T::Ptr extractData( const GA_Attribute *attr ) const;
 		
 		IECore::DataPtr extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IECore::IntVectorDataPtr &indexData ) const;
 		IECore::DataPtr extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const;
@@ -183,8 +183,12 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		
 		void constructCommon();
 		
+		// function to map standard Houdini names to IECore PrimitiveVariable names
+		const std::string processPrimitiveVariableName( const std::string &name ) const;
+		
 		// the handle to the GU_Detail
 		GU_DetailHandle m_geoHandle;
+		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		
 		struct Types

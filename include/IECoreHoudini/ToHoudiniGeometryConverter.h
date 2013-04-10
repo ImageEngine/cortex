@@ -78,6 +78,9 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// a ToHoudiniGeometryConverter is available.
 		static void supportedTypes( std::set<IECore::TypeId> &types );
 		
+		IECore::BoolParameter *convertStandardAttributesParameter();
+		const IECore::BoolParameter *convertStandardAttributesParameter() const;
+		
 		IECore::StringParameter *attributeFilterParameter();
 		const IECore::StringParameter *attributeFilterParameter() const;
 
@@ -124,10 +127,14 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		
 	private :
 		
+		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		
 		// function to handle the special case for P
 		void transferP( const IECore::V3fVectorData *positions, GU_Detail *geo, const GA_Range &points ) const;
+		
+		// function to map standard IECore PrimitiveVariable names to Houdini names
+		const std::string processPrimitiveVariableName( const std::string &name ) const;
 		
 		/// Struct for maintaining the registered derived classes
 		struct Types

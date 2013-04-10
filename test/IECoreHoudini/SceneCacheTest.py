@@ -77,7 +77,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		sc = scene.createChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
+		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
@@ -85,7 +85,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		sc = sc.createChild( str( 2 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
+		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
@@ -93,7 +93,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		sc = sc.createChild( str( 3 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
+		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
@@ -425,14 +425,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
-		node.parm( "attributeFilter" ).set( "* ^Cd" )
+		node.parm( "attributeFilter" ).set( "* ^Cs" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
-		node.parm( "attributeFilter" ).set( "Cd" )
+		node.parm( "attributeFilter" ).set( "Cs" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "name"] )
@@ -752,7 +752,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
 			sc1.writeTransform( IECore.M44dData( matrix ), time )
 			
-			mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
+			mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
 			sc2.writeObject( mesh, time )
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )

@@ -71,7 +71,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		self.assertNotEqual( orig, result )
 		self.assertNotEqual( orig['P'], result['P'] )
-		self.assertNotEqual( orig['Cd'], result['Cd'] )
+		self.assertNotEqual( orig['Cs'], result['Cs'] )
 		self.assertEqual( orig['pointId'], result['pointId'] )
 	
 	def testSubFrameData( self ) :
@@ -157,17 +157,17 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 	def testBadObjectHandle( self ) :
 		cache = self.cacheSop()
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" in orig )
+		self.assert_( "Cs" in orig )
 		cache.parm( "objectFixes1" ).set( "nope" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" not in result )
+		self.assert_( "Cs" not in result )
 		
 	def testNoGroups( self ) :
 		cache = self.cacheSop()
 		group = cache.inputs()[0]
 		group.destroy()
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" not in result )
+		self.assert_( "Cs" not in result )
 		
 	def testEmptyGroup( self ) :
 		hou.setFrame( 3 )
@@ -182,7 +182,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache.setInput( 0, merge )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		numTorusPoints = len(groupA.geometry().points())
-		for key in [ "P", "Cd" ] :
+		for key in [ "P", "Cs" ] :
 			self.assert_( key in result )
 			self.assertEqual( result[key].data.size(), numTorusPoints )
 		
@@ -191,28 +191,28 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		group = cache.inputs()[0]
 		group.parm( "crname" ).set( "rus" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" not in result )
+		self.assert_( "Cs" not in result )
 		cache.parm( "objectFixes1" ).set( "to" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" in result )
+		self.assert_( "Cs" in result )
 		
 		cache.parm( "objectFixes1" ).set( "" )
 		group.parm( "crname" ).set( "to" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" not in result )
+		self.assert_( "Cs" not in result )
 		cache.parm( "objectFixes2" ).set( "rus" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" in result )
+		self.assert_( "Cs" in result )
 		
 		cache.parm( "objectFixes1" ).set( "" )
 		cache.parm( "objectFixes2" ).set( "" )
 		group.parm( "crname" ).set( "oru" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" not in result )
+		self.assert_( "Cs" not in result )
 		cache.parm( "objectFixes1" ).set( "t" )
 		cache.parm( "objectFixes2" ).set( "s" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" in result )
+		self.assert_( "Cs" in result )
 	
 	def testMultipleObjects( self ) :
 		hou.setFrame( 3 )
@@ -227,13 +227,13 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache.setInput( 0, merge )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		numTorusPoints = len(torus.geometry().points()) 
-		for key in [ "P", "Cd" ] :
+		for key in [ "P", "Cs" ] :
 			self.assert_( key in result )
 			self.assertEqual( result[key].data.size(), 2 * numTorusPoints )
 		
 		for i in range( 0, numTorusPoints ) :
 			self.assertNotEqual( result['P'].data[i], result['P'].data[numTorusPoints+i] )
-			self.assertEqual( result['Cd'].data[i], result['Cd'].data[numTorusPoints+i] )
+			self.assertEqual( result['Cs'].data[i], result['Cs'].data[numTorusPoints+i] )
 	
 	def testAttributeMismatchBetweenFrames( self ) :
 		cache = self.cacheSop()
@@ -252,28 +252,28 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache = self.cacheSop()
 		cache.parm( "attributeFixes1" ).set( "C" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" not in result )
+		self.assert_( "Cs" not in result )
 		self.assert_( "pointId" in result )
 		self.assert_( "d" in result )
 		
 		cache.parm( "attributeFixes1" ).set( "" )
 		cache.parm( "attributeFixes2" ).set( "tId" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" in result )
+		self.assert_( "Cs" in result )
 		self.assert_( "pointId" not in result )
 		self.assert_( "poin" in result )
 		
 		cache.parm( "attributeFixes1" ).set( "po" )
 		cache.parm( "attributeFixes2" ).set( "tId" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" in result )
+		self.assert_( "Cs" in result )
 		self.assert_( "pointId" not in result )
 		self.assert_( "in" in result )
 		
 		cache.parm( "attributeFixes1" ).set( "C" )
 		cache.parm( "attributeFixes2" ).set( "tId" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" not in result )
+		self.assert_( "Cs" not in result )
 		self.assert_( "pointId" not in result )
 		self.assert_( "poin" in result )
 		self.assert_( "d" in result )
@@ -281,7 +281,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache.parm( "attributeFixes1" ).set( "oin" )
 		cache.parm( "attributeFixes2" ).set( "tI" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.assert_( "Cd" in result )
+		self.assert_( "Cs" in result )
 		self.assert_( "pointId" in result )
 		
 	def testNonDataAttr( self ) :
@@ -352,7 +352,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.assertNotEqual( orig, result )
 		self.assertNotEqual( orig['P'], result['P'] )
 		self.assertEqual( orig['P'].data.size(), result['P'].data.size() )
-		self.assertEqual( orig['Cd'], result['Cd'] )
+		self.assertEqual( orig['Cs'], result['Cs'] )
 		self.assertEqual( orig['pointId'], result['pointId'] )
 		
 		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1 ) )
@@ -376,7 +376,7 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.assertNotEqual( orig['N'], result['N'] )
 		self.assertEqual( orig['P'].data.size(), result['P'].data.size() )
 		self.assertEqual( orig['N'].data.size(), result['N'].data.size() )
-		self.assertEqual( orig['Cd'], result['Cd'] )
+		self.assertEqual( orig['Cs'], result['Cs'] )
 		self.assertEqual( orig['pointId'], result['pointId'] )
 		
 		i = IECore.InterpolatedCache( cache.parm( "cacheSequence" ).eval(), IECore.InterpolatedCache.Interpolation.Linear, IECore.OversamplesCalculator( 24, 1 ) )
@@ -405,13 +405,13 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		cache.setInput( 0, merge )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
 		numTorusPoints = len(torus.geometry().points())
-		for key in [ "P", "Cd" ] :
+		for key in [ "P", "Cs" ] :
 			self.assert_( key in result )
 			self.assertEqual( result[key].data.size(), 2 * numTorusPoints )
 		
 		for i in range( 0, numTorusPoints ) :
 			self.assertNotEqual( result['P'].data[i], result['P'].data[numTorusPoints+i] )
-			self.assertEqual( result['Cd'].data[i], result['Cd'].data[numTorusPoints+i] )
+			self.assertEqual( result['Cs'].data[i], result['Cs'].data[numTorusPoints+i] )
 		
 		numTorusVerts = sum( [ len(x.vertices()) for x in torus.geometry().prims() ] )
 		self.assert_( "N" in result )
@@ -426,9 +426,9 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.failUnless( isinstance( cache.geometry().findPointAttrib( "Cd" ), hou.Attrib ) )
 		self.failUnless( cache.geometry().findPrimAttrib( "Cd" ) is None )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.failUnless( "Cd" in result.keys() )
-		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.failUnless( "Cs" in result.keys() )
+		self.assertEqual( result["Cs"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["Cs"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
 		
 		# Since the point and prim count match, Cd becomes a Primitive attrib if we use PrimitiveGroup mode
 		group = hou.node( "/obj/geo1/group1" )
@@ -437,9 +437,9 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.failUnless( cache.geometry().findPointAttrib( "Cd" ) is None )
 		self.failUnless( isinstance( cache.geometry().findPrimAttrib( "Cd" ), hou.Attrib ) )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.failUnless( "Cd" in result.keys() )
-		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.failUnless( "Cs" in result.keys() )
+		self.assertEqual( result["Cs"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( len(result["Cs"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 		
 		# By creating Cd as a Point attrib before the cache, we can force it's type
 		color = group.createOutputNode( "color" )
@@ -447,9 +447,9 @@ class TestInterpolatedCacheReader( IECoreHoudini.TestCase ):
 		self.failUnless( isinstance( cache.geometry().findPointAttrib( "Cd" ), hou.Attrib ) )
 		self.failUnless( cache.geometry().findPrimAttrib( "Cd" ) is None )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( cache ).convert()
-		self.failUnless( "Cd" in result.keys() )
-		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( len(result["Cd"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.failUnless( "Cs" in result.keys() )
+		self.assertEqual( result["Cs"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len(result["Cs"].data), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
 	
 	def testPrimitiveGroupModeWithVertexAttribs( self ) :
 		

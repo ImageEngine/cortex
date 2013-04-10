@@ -281,15 +281,15 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result['detail_i3'].data.value.z, 789 )
 
 		# test primitive attributes
-		self.assert_( "Cd" in result )
-		self.assertEqual( result["Cd"].data.typeId(), IECore.TypeId.Color3fVectorData )
-		self.assertEqual( result["Cd"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( result["Cd"].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assert_( "Cs" in result )
+		self.assertEqual( result["Cs"].data.typeId(), IECore.TypeId.Color3fVectorData )
+		self.assertEqual( result["Cs"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( result["Cs"].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 		
 		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) :
 			for j in range( 0, 3 ) :
-				self.assert_( result["Cd"].data[i][j] >= 0.0 )
-				self.assert_( result["Cd"].data[i][j] <= 1.0 )
+				self.assert_( result["Cs"].data[i][j] >= 0.0 )
+				self.assert_( result["Cs"].data[i][j] <= 1.0 )
 
 		# test vertex attributes
 		attrs = [ "vert_f1", "vert_f2", "vert_f3", "vert_i1", "vert_i2", "vert_i3", "vert_v3f", "vertStringIndices" ]
@@ -670,14 +670,68 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		detail.parm("value3").set(789)
 		
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( detail )
-		self.assertEqual( sorted(converter.convert().keys()), [ "Cd", "N", "P", "detailAttr", "varmap" ] )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "N", "P", "detailAttr", "varmap" ] )
 		converter.parameters()["attributeFilter"].setTypedValue( "P" )
 		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^N ^varmap" )
-		self.assertEqual( sorted(converter.convert().keys()), [ "Cd", "P", "detailAttr" ] )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "P", "detailAttr" ] )
 		# P must be converted
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
 		self.assertTrue( "P" in converter.convert().keys() )
+	
+	def testStandardAttributeConversion( self ) :
+		
+		torus = self.createTorus()
+		color = torus.createOutputNode( "color" )
+		color.parm( "colortype" ).set( 2 )
+		rest = color.createOutputNode( "rest" )
+		scale = rest.createOutputNode( "attribcreate" )
+		scale.parm( "name1" ).set( "pscale" )
+		scale.parm( "value1v1" ).setExpression( "$PT" )
+		uvunwrap = scale.createOutputNode( "uvunwrap" )
+		
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( uvunwrap )
+		result = converter.convert()
+		self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "varmap", "width" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		
+		sData = result["s"].data
+		tData = result["t"].data
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+		
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( sData[i], uvValues[0] )
+				self.assertAlmostEqual( tData[i], 1 - uvValues[1] )
+				i += 1
+		
+		converter["convertStandardAttributes"].setTypedValue( False )
+		result = converter.convert()
+		self.assertEqual( result.keys(), [ "Cd", "P", "pscale", "rest", "uv", "varmap" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( result["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		
+		uvData = result["uv"].data
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+		
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvData[i][0], uvValues[0] )
+				self.assertAlmostEqual( uvData[i][1], uvValues[1] )
+				i += 1
 
 if __name__ == "__main__":
     unittest.main()

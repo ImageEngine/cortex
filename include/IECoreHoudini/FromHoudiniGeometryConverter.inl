@@ -102,7 +102,7 @@ struct SetInterpretation
 };
 
 template <typename T>
-IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const
+typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const
 {
 	typedef typename T::BaseType BaseType;
 	
@@ -127,7 +127,7 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 }
 
 template <typename T>
-IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr ) const
+typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr ) const
 {
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType ValueType;

@@ -93,6 +93,7 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 	
 	const StringData *groupName = group->blindData()->member<StringData>( "name" );
 	const std::string &attribFilter = attributeFilterParameter()->getTypedValue();
+	bool convertStandardAttributes = convertStandardAttributesParameter()->getTypedValue();
 	
 	const Group::ChildContainer &children = group->children();
 	for ( Group::ChildContainer::const_iterator it=children.begin(); it != children.end(); it++ )
@@ -121,7 +122,8 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 			continue;
 		}
 		
-		converter->parameters()->parameter<StringParameter>( "attributeFilter" )->setTypedValue( attribFilter );
+		converter->attributeFilterParameter()->setTypedValue( attribFilter );
+		converter->convertStandardAttributesParameter()->setTypedValue( convertStandardAttributes );
 		
 		ToHoudiniGroupConverter *groupConverter = runTimeCast<ToHoudiniGroupConverter>( converter );
 		if ( groupConverter )

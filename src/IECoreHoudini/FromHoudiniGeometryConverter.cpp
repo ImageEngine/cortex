@@ -73,12 +73,19 @@ FromHoudiniGeometryConverter::~FromHoudiniGeometryConverter()
 
 void FromHoudiniGeometryConverter::constructCommon()
 {
+	m_convertStandardAttributesParameter = new BoolParameter(
+		"convertStandardAttributes",
+		"Performs automated conversion of Houdini Attributes to standard PrimitiveVariables (i.e. rest->Pref ; Cd->Cs ; uv->s,t)",
+		true
+	);
+	
 	m_attributeFilterParameter = new StringParameter(
 		"attributeFilter",
 		"A list of attribute names to convert, if they exist. Uses Houdini matching syntax. P will always be converted",
 		"*"
 	);
 	
+	parameters()->addParameter( m_convertStandardAttributesParameter );
 	parameters()->addParameter( m_attributeFilterParameter );
 }
 
@@ -302,8 +309,6 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
 	}
 	
-	/// \todo: should we convert uv to s and t automatically?
-	
 	// add the name blindData based on the name attribute
 	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
 	if ( attrHandle.isAttributeValid() )
@@ -337,6 +342,8 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
+	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
+	
 	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
 		GA_Attribute *attr = it.attrib();
@@ -354,6 +361,23 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		UT_String name( attr->getName() );
 		if ( !name.multiMatch( attribFilter ) )
 		{
+			continue;
+		}
+		
+		// special case for uvs
+		if ( convertStandardAttributes && name.equal( "uv" ) )
+		{
+			FloatVectorDataPtr sData = extractData<FloatVectorData>( attr, range, 0 );
+			FloatVectorDataPtr tData = extractData<FloatVectorData>( attr, range, 1 );
+			std::vector<float> &tValues = tData->writable();
+			for ( size_t i=0; i < tValues.size(); ++i )
+			{
+				tValues[i] = 1 - tValues[i];
+			}
+			
+			result->variables["s"] = PrimitiveVariable( interpolation, sData );
+			result->variables["t"] = PrimitiveVariable( interpolation, tData );
+			
 			continue;
 		}
 		
@@ -520,12 +544,17 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	{
 		std::string varName( attr->getName() );
 		PrimitiveVariable::Interpolation varInterpolation = interpolation;
-
+		
 		// remap our name and interpolation
 		if ( remapInfo )
 		{
 			varName = remapInfo->name;
 			varInterpolation = remapInfo->interpolation;
+		}
+		
+		if ( m_convertStandardAttributesParameter->getTypedValue() )
+		{
+			varName = processPrimitiveVariableName( varName );
 		}
 		
 		// add the primitive variable to our result
@@ -708,6 +737,29 @@ DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, c
 	}
 	
 	return data;
+}
+
+const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( const std::string &name ) const
+{
+	/// \todo: This should probably be some formal static map. Make sure to update ToHoudiniGeometryConverter as well.
+	if ( name == "Cd" )
+	{
+		return "Cs";
+	}
+	else if ( name == "Alpha" )
+	{
+		return "Os";
+	}
+	else if ( name == "rest" )
+	{
+		return "Pref";
+	}
+	else if ( name == "pscale" )
+	{
+		return "width";
+	}
+	
+	return name;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

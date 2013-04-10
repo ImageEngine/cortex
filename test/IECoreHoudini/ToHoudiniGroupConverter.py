@@ -454,6 +454,69 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
+	def testStandardAttributeConversion( self ) :
+		
+		sop = self.emptySop()
+		
+		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECore.TriangulateOp()( input=mesh, copyInput=False )
+		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
+		mesh["Pref"] = mesh["P"]
+		
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
+		
+		group = IECore.Group()
+		group.addChild( mesh )
+		group.addChild( mesh.copy() )
+		group.addChild( mesh.copy() )
+		
+		converter = IECoreHoudini.ToHoudiniGroupConverter( group )
+		self.assertTrue( converter.convert( sop ) )
+		geo = sop.geometry()
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['N', 'P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
+		
+		sData = mesh["s"].data.copy()
+		sData.extend( mesh["s"].data )
+		sData.extend( mesh["s"].data )
+		tData = mesh["t"].data.copy()
+		tData.extend( mesh["t"].data )
+		tData.extend( mesh["t"].data )
+		uvs = geo.findVertexAttrib( "uv" )
+		
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvValues[0], sData[i] )
+				self.assertAlmostEqual( uvValues[1], 1 - tData[i] )
+				i += 1
+		
+		converter["convertStandardAttributes"].setTypedValue( False )
+		self.assertTrue( converter.convert( sop ) )
+		geo = sop.geometry()
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['N', 'P', 'Pref', 'Pw', 'width'] )
+		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cs', 's', 't'] )
+		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
+		
+		i = 0
+		s = geo.findVertexAttrib( "s" )
+		t = geo.findVertexAttrib( "t" )
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				self.assertAlmostEqual( vert.attribValue( s ), sData[i] )
+				self.assertAlmostEqual( vert.attribValue( t ), tData[i] )
+				i += 1
+	
 	def tearDown( self ) :
 		
 		if TestToHoudiniGroupConverter.__testOTLCopy in "".join( hou.hda.loadedFiles() ) :

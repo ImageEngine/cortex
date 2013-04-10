@@ -529,6 +529,30 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
+	def testStandardAttributeConversion( self ) :
+		
+		sop = self.emptySop()
+		points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 10 ) )
+		points["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 10, IECore.GeometricData.Interpretation.Color ) )
+		points["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 10 ) )
+		points["Pref"] = points["P"]
+		
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		
+		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['Cd', 'P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		converter["convertStandardAttributes"].setTypedValue( False )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['Cs', 'P', 'Pref', 'Pw', 'width'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+	
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestToHoudiniPointsConverter.__testScene ) :
