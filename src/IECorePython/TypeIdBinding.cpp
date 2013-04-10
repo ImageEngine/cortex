@@ -435,6 +435,9 @@ void bindTypeId()
 		.value( "V3fVectorDataBase", V3fVectorDataBaseTypeId )
 		.value( "V3dVectorDataBase", V3dVectorDataBaseTypeId )
 		.value( "V3iVectorDataBase", V3iVectorDataBaseTypeId )
+		.value( "LensModel", LensModelTypeId )
+		.value( "StandardRadialLensModel", StandardRadialLensModelTypeId )
+		.value( "LensDistortOp", LensDistortOpTypeId )
 	;
 }
 

@@ -432,6 +432,9 @@ enum TypeId
 	V3fVectorDataBaseTypeId = 384,
 	V3dVectorDataBaseTypeId = 385,
 	V3iVectorDataBaseTypeId = 386,
+	LensModelTypeId = 387,
+	StandardRadialLensModelTypeId = 388,
+	LensDistortOpTypeId = 389,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 

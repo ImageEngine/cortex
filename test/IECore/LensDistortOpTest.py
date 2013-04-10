@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,30 +32,38 @@
 #
 ##########################################################################
 
-## \addtogroup environmentGroup
-#
-# IECORENUKE_DISABLE_MENU
-# Set this to a value of 1 to disable the creation of the Cortex menu
-# in Nuke. You can then use the helper functions in IECoreNuke.Menus
-# to build your own site-specific menu structure.
+from IECore import *
+import sys
+import unittest
 
-import os
-
-if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
-
-	import IECore
-	import IECoreNuke
-
-	nodesMenu = nuke.menu( "Nodes" )
-	cortexMenu = nodesMenu.addMenu( "Cortex" )
-
-	if IECore.withSignals() and IECore.withASIO() :
-		cortexMenu.addCommand( "Display", "nuke.createNode( 'ieDisplay' )" )
+class LensDistortOpTest(unittest.TestCase):
+	
+	def testDistortOpWithStandardLensModel(self):
 		
-	cortexMenu.addCommand( "LensDistort", "nuke.createNode( 'ieLensDistort' )" )
+		# The lens model and parameters to use.
+		o = CompoundObject()
+		o["lensModel"] = StringData( "StandardRadialLensModel" )
+		o["distortion"] = DoubleData( 0.2 )
+		o["anamorphicSqueeze"] = DoubleData( 1. )
+		o["curvatureX"] = DoubleData( 0.2 )
+		o["curvatureY"] = DoubleData( 0.5 )
+		o["quarticDistortion"] = DoubleData( .1 )
+		
+		# The input image to read.
+		r = EXRImageReader("test/IECore/data/exrFiles/uvMapWithDataWindow.100x100.exr")
+		img = r.read()
+		
+		# Create the Op and set it's parameters.
+		op = LensDistortOp()
+		op["input"] = img
+		op["mode"] = 1
+		op['lensModel'].setValue(o)
+		
+		# Run the Op.
+		out = op()
+		
+		r = EXRImageReader("test/IECore/data/exrFiles/uvMapWithDataWindowDistorted.100x100.exr")
+		img2 = r.read()		
 
-	proceduralMenu = cortexMenu.addMenu( "Procedural" )
-	IECoreNuke.Menus.addProceduralCreationCommands( proceduralMenu )
-
-	opMenu = cortexMenu.addMenu( "Op" )
-	IECoreNuke.Menus.addOpCreationCommands( opMenu )
+		self.assertEqual( img.displayWindow, img2.displayWindow )
+		

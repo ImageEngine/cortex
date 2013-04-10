@@ -318,6 +318,9 @@
 #include "IECorePython/SampledSceneInterfaceBinding.h"
 #include "IECorePython/SceneCacheBinding.h"
 #include "IECorePython/LinkedSceneBinding.h"
+#include "IECorePython/LensModelBinding.h"
+#include "IECorePython/StandardRadialLensModelBinding.h"
+#include "IECorePython/LensDistortOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -638,6 +641,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSampledSceneInterface();
 	bindSceneCache();
 	bindLinkedScene();
+	bindLensModel();
+	bindStandardRadialLensModel();
+	bindLensDistortOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
