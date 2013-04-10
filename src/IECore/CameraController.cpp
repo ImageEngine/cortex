@@ -363,10 +363,12 @@ void CameraController::dolly( const Imath::V2i &p )
 
 	if( m_data->projection->readable()=="perspective" )
 	{
+		// perspective
+		m_data->centreOfInterest = m_data->motionCentreOfInterest * expf( -1.9f * d );
+		
 		M44f t = m_data->motionMatrix;
-		d *= 2.5f * m_data->motionCentreOfInterest; // 2.5 is a magic number that just makes the speed nice
-		t.translate( V3f( 0, 0, -d ) );
-		m_data->centreOfInterest = m_data->motionCentreOfInterest - d;
+		t.translate( V3f( 0, 0, m_data->centreOfInterest - m_data->motionCentreOfInterest ) );
+		
 		m_data->transform->matrix = t;
 	}
 	else
@@ -380,13 +382,14 @@ void CameraController::dolly( const Imath::V2i &p )
 			lerp( screenWindow.max.y, screenWindow.min.y, centreNDC.y )
 		);
 
-		float scale = 1.0f - d;
-		if( scale > 0.001 )
-		{
-			screenWindow.min = (screenWindow.min - centre) * scale + centre;
-			screenWindow.max = (screenWindow.max - centre) * scale + centre;
-			m_data->screenWindow->writable() = screenWindow;
-		}
-	}
+		float newWidth = m_data->motionScreenWindow.size().x * expf( -1.9f * d );
+		newWidth = std::max( newWidth, 0.01f );
+
+		float scale = newWidth / screenWindow.size().x;
+		
+		screenWindow.min = (screenWindow.min - centre) * scale + centre;
+		screenWindow.max = (screenWindow.max - centre) * scale + centre;
+		m_data->screenWindow->writable() = screenWindow;
+	}	
 }
 

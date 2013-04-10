@@ -45,6 +45,7 @@ Improvements :
 * Shader::parametersData() now returns a raw pointer, and provides a const version.
 * IECore::FileSequenceParameter, FileSequenceVectorParameter, FrameListParameter can now return the FileSequences/FrameList using a StringData/StringVectorData argument instead of the internal value. To be used in ops doOperate in particular. Checks validity of given data.
 * IECoreHoudini ToHoudiniGeometryConverters have an attribFilter parameter to control the which PrimitiveVariables are converted.
+* CameraController::dolly() behaviour now produces smoother movement.
 
 Bug Fixes :
 
