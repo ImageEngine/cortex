@@ -527,11 +527,12 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	def testAttributeFilter( self ) :
 		
 		merge = self.buildScene()
-		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
+		uvunwrap = merge.createOutputNode( "uvunwrap" )
+		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
 		result = converter.convert()
 		for child in result.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
-			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap'] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "P" )
 		result = converter.convert()
@@ -541,13 +542,24 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^generator* ^varmap ^born ^event" )
 		result = converter.convert()
 		for child in result.children() :
-			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v'] )
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v'] )
 			
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
 		result = converter.convert()
 		for child in result.children() :
 			# P must be converted
 			self.assertTrue( "P" in child.keys() )
+		
+		# have to filter the source attr uv and not s, t
+		converter.parameters()["attributeFilter"].setTypedValue( "s t Cs" )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertEqual( sorted(child.keys()), ['P'] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "uv Cd" )
+		result = converter.convert()
+		for child in result.children() :
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 's', 't'] )
 	
 	def testStandardAttributeConversion( self ) :
 		

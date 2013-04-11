@@ -211,7 +211,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	}
 	
 	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
-	if ( convertStandardAttributes )
+	if ( convertStandardAttributes && UT_String( "s" ).multiMatch( filter ) && UT_String( "t" ).multiMatch( filter ) )
 	{
 		// convert s and t to uv
 		PrimitiveVariableMap::const_iterator sPrimVar = primitive->variables.find( "s" );

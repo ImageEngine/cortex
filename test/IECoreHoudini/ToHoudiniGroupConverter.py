@@ -453,6 +453,48 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'name', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		# verify we can filter uvs
+		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECore.TriangulateOp()( input=mesh, copyInput=False )
+		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
+		mesh["Pref"] = mesh["P"]
+		group = IECore.Group()
+		group.addChild( mesh )
+		group.addChild( mesh.copy() )
+		group.addChild( mesh.copy() )
+		
+		converter = IECoreHoudini.ToHoudiniGroupConverter( group )
+		converter.parameters()["attributeFilter"].setTypedValue( "*" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		# have to filter the source attrs s, t and not uv
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t ^width ^Pref" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^width ^Cs" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['t'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
 	def testStandardAttributeConversion( self ) :
 		

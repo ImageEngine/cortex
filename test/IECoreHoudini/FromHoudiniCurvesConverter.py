@@ -383,15 +383,23 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def testAttributeFilter( self ) :
 		
 		curves = self.createCurves( 4 )
-		converter = IECoreHoudini.FromHoudiniCurvesConverter( curves )
-		self.assertEqual( sorted(converter.convert().keys()), ['P', 'detailAttribute', 'pointAttribute', 'primAttribute', 'varmap', 'vertexAttribute'] )
+		uvunwrap = curves.createOutputNode( "uvunwrap" )
+		converter = IECoreHoudini.FromHoudiniCurvesConverter( uvunwrap )
+		self.assertEqual( sorted(converter.convert().keys()), ['P', 'detailAttribute', 'pointAttribute', 'primAttribute', 's', 't', 'varmap', 'vertexAttribute'] )
 		converter.parameters()["attributeFilter"].setTypedValue( "P" )
 		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^primAttribute ^varmap" )
-		self.assertEqual( sorted(converter.convert().keys()), ['P', 'detailAttribute', 'pointAttribute', 'vertexAttribute'] )
+		self.assertEqual( sorted(converter.convert().keys()), ['P', 'detailAttribute', 'pointAttribute', 's', 't', 'vertexAttribute'] )
 		# P must be converted
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
 		self.assertTrue( "P" in converter.convert().keys() )
+		# have to filter the source attr uv and not s, t
+		converter.parameters()["attributeFilter"].setTypedValue( "s t" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "s" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "uv" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "P", "s", "t" ] )
 		
 	def testErrorStates( self ) :
 		

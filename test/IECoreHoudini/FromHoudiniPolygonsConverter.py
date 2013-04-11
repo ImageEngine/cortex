@@ -669,15 +669,24 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		detail.parm("value2").set(456.789) # can we catch it out with a float?
 		detail.parm("value3").set(789)
 		
-		converter = IECoreHoudini.FromHoudiniPolygonsConverter( detail )
-		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "N", "P", "detailAttr", "varmap" ] )
+		uvunwrap = detail.createOutputNode( "uvunwrap" )
+		
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( uvunwrap )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "N", "P", "detailAttr", "s", "t", "varmap" ] )
 		converter.parameters()["attributeFilter"].setTypedValue( "P" )
 		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^N ^varmap" )
-		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "P", "detailAttr" ] )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "P", "detailAttr", "s", "t" ] )
 		# P must be converted
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
 		self.assertTrue( "P" in converter.convert().keys() )
+		# have to filter the source attr uv and not s, t
+		converter.parameters()["attributeFilter"].setTypedValue( "s t Cs" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "s Cd" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "P" ] )
+		converter.parameters()["attributeFilter"].setTypedValue( "uv Cd" )
+		self.assertEqual( sorted(converter.convert().keys()), [ "Cs", "P", "s", "t" ] )
 	
 	def testStandardAttributeConversion( self ) :
 		

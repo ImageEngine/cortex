@@ -866,6 +866,46 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		# verify we can filter uvs
+		for key in curves.keys() :
+			if key != "P" :
+				del curves[key]
+		rand = IECore.Rand32()
+		curves["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
+		curves["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
+		curves["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
+		curves["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
+		curves["Pref"] = curves["P"]
+		
+		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		# have to filter the source attrs s, t and not uv
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t  ^width ^Pref" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^s  ^width ^Cs" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'rest', 't'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
 	def testStandardAttributeConversion( self ) :
 		
