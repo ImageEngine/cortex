@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "GA/GA_AIFBlindData.h"
+#include "PRM/PRM_Default.h"
 #include "UT/UT_Interrupt.h"
 
 #include "IECore/CapturingRenderer.h"
@@ -54,7 +55,24 @@
 
 using namespace IECoreHoudini;
 
+const char *SOP_ToHoudiniConverter::typeName = "ieToHoudiniConverter";
+
+PRM_Name SOP_ToHoudiniConverter::pConvertStandardAttributes( "convertStandardAttributes", "Convert Standard Attributes" );
+PRM_Name SOP_ToHoudiniConverter::pAttributeFilter( "attributeFilter", "Attribute Filter" );
+
+PRM_Default SOP_ToHoudiniConverter::convertStandardAttributesDefault( true );
+PRM_Default SOP_ToHoudiniConverter::attributeFilterDefault( 0, "*" );
+
 PRM_Template SOP_ToHoudiniConverter::parameters[] = {
+	PRM_Template(
+		PRM_TOGGLE, 1, &pConvertStandardAttributes, &convertStandardAttributesDefault, 0, 0, 0, 0, 0,
+		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv)"
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pAttributeFilter, &attributeFilterDefault, 0, 0, 0, 0, 0,
+		"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
+		"P will always be loaded."
+	),
 	PRM_Template()
 };
 
@@ -147,8 +165,19 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 		boss->opEnd();
 		return error();
 	}
-
+	
+	UT_String p( "P" );
+	UT_String attributeFilter;
+	evalString( attributeFilter, pAttributeFilter.getToken(), 0, 0 );
+	if ( !p.match( attributeFilter ) )
+	{
+		attributeFilter += " P";
+	}
+	
 	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	converter->attributeFilterParameter()->setTypedValue( attributeFilter.toStdString() );
+	converter->convertStandardAttributesParameter()->setTypedValue( evalInt( pConvertStandardAttributes.getToken(), 0, 0 ) );
+	
 	if ( !converter->convert( myGdpHandle ) )
 	{
 		addError( SOP_MESSAGE, "Input Cortex data could not be converted to Houdini Geo" );

@@ -118,6 +118,94 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		self.assertEqual( geo.pointAttribs()[-1].name(), "N" )
 		self.assertTrue( geo.pointAttribs()[-1].isTransformedAsNormal() )
 	
+	def testAttributeFilter( self ) :
+		
+		torus = hou.node("/obj").createNode("geo", run_init_scripts=False).createNode( "torus" )
+		color = torus.createOutputNode( "color" )
+		color.parm( "class" ).set( 3 )
+		color.parm( "colortype" ).set( 2 )
+		rest = color.createOutputNode( "rest" )
+		scale = rest.createOutputNode( "attribcreate" )
+		scale.parm( "name1" ).set( "pscale" )
+		scale.parm( "value1v1" ).setExpression( "$PT" )
+		uvunwrap = scale.createOutputNode( "uvunwrap" )
+		opHolder = uvunwrap.createOutputNode( "ieOpHolder" )
+		fn = IECoreHoudini.FnOpHolder( opHolder )
+		fn.setOp( "parameters/primitives/polyParam" )
+		out = opHolder.createOutputNode( "ieToHoudiniConverter" )
+		
+		# verify input
+		inGeo = uvunwrap.geometry()
+		self.assertEqual( sorted([ x.name() for x in inGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in inGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in inGeo.vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in inGeo.globalAttribs() ]), ['varmap'] )
+		
+		# verifty output
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+		
+		# verify intermediate op result
+		result = fn.getOp().resultParameter().getValue()
+		self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "varmap", "width" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		
+		# make sure P is forced
+		out.parm( "attributeFilter" ).set( "* ^P" )
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+		
+		# have to filter the source attrs s, t and not uv
+		out.parm( "attributeFilter" ).set( "* ^uv  ^pscale ^rest" )
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+		
+		out.parm( "attributeFilter" ).set( "* ^s ^t  ^width ^Pref" )
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+		
+		# make sure we can filter on both ends
+		opHolder.parm( "parm_input_attributeFilter" ).set( "* ^s ^t  ^width ^Pref" )
+		result = fn.getOp().resultParameter().getValue()
+		self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "varmap", "width" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+		
+		opHolder.parm( "parm_input_attributeFilter" ).set( "* ^uv  ^pscale ^rest" )
+		opHolder.cook( True )
+		result = fn.getOp().resultParameter().getValue()
+		self.assertEqual( result.keys(), [ "Cs", "P", "varmap" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+		
+		# since the vars never made it to the op, the never make it out
+		out.parm( "attributeFilter" ).set( "*" )
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+	
 	def testStandardAttributeConversion( self ) :
 		
 		torus = hou.node("/obj").createNode("geo", run_init_scripts=False).createNode( "torus" )
@@ -220,6 +308,49 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 				self.assertAlmostEqual( uvData[i][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[i][1], uvValues[1] )
 				i += 1
+		
+		# turn off the other half of the conversion
+		opHolder.parm( "parm_input_convertStandardAttributes" ).set( True )
+		out.parm( "convertStandardAttributes" ).set( False )
+		
+		# verifty output
+		outGeo = out.geometry()
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pref', 'Pw', 'width'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cs', 's', 't'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
+		
+		# verify intermediate op result
+		result = fn.getOp().resultParameter().getValue()
+		self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "varmap", "width" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		
+		sData = result["s"].data
+		tData = result["t"].data
+		inUvs = inGeo.findVertexAttrib( "uv" )
+		outS = outGeo.findVertexAttrib( "s" )
+		outT = outGeo.findVertexAttrib( "t" )
+		
+		i = 0
+		for prim in inGeo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( inUvs )
+				self.assertAlmostEqual( sData[i], uvValues[0] )
+				self.assertAlmostEqual( tData[i], 1 - uvValues[1] )
+				i += 1
+		
+		i = 0
+		for prim in outGeo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				self.assertAlmostEqual( sData[i], vert.attribValue( outS ) )
+				self.assertAlmostEqual( tData[i], vert.attribValue( outT ) )
+				i += 1		
 
 if __name__ == "__main__":
 	unittest.main()
