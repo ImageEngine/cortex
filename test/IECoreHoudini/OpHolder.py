@@ -97,7 +97,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		n4 = IECoreHoudini.FnOpHolder.create( "noise", "noiseDeformer", parent=geo, contextArgs=contextArgs )
 		self.assertEqual( n4.path(), "/obj/geo1/noise" )
 		self.assertEqual( len(n4.outputConnectors()[0]), 1 )
-		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieCortexConverter" )
 		
 		# test automatic conversion and output connections
 		mountain = geo.createNode( "mountain" )
@@ -106,7 +106,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( n5.path(), "/obj/geo1/noise1" )
 		self.assertEqual( len(n5.outputConnectors()[0]), 1 )
 		converter = n5.outputConnectors()[0][0].outputNode()
-		self.assertEqual( converter.type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( converter.type().name(), "ieCortexConverter" )
 		self.assertEqual( len(converter.outputConnectors()[0]), 1 )
 		outputNode = converter.outputConnectors()[0][0].outputNode()
 		self.assertEqual( outputNode.type().name(), "mountain" )

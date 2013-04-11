@@ -60,7 +60,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 	# check it works for points
 	def testPointConversion(self):
 		(op,fn) = self.testCreateToHoudiniConverter()
-		torus = op.createOutputNode( "ieToHoudiniConverter" )
+		torus = op.createOutputNode( "ieCortexConverter" )
 		scatter = torus.createOutputNode( "scatter" )
 		attr = scatter.createOutputNode( "attribcreate", exact_type_name=True )
 		attr.parm("name").set("testAttribute")
@@ -70,7 +70,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder(to_cortex)
 		fn.setParameterised(cl)
 		to_cortex.parm("parm_quiet").set(True)
-		to_houdini = to_cortex.createOutputNode("ieToHoudiniConverter")
+		to_houdini = to_cortex.createOutputNode("ieCortexConverter")
 		geo = to_houdini.geometry()
 		attrNames = [ p.name() for p in geo.pointAttribs() ]
 		attrNames.sort()
@@ -81,7 +81,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 	# check it works for polygons
 	def testPolygonConversion(self):
 		(op,fn) = self.testCreateToHoudiniConverter()
-		torus = op.createOutputNode( "ieToHoudiniConverter" )
+		torus = op.createOutputNode( "ieCortexConverter" )
 		geo = torus.geometry()
 		self.assertEqual( len(geo.points()), 100 )
 		self.assertEqual( len(geo.prims()), 100 )
@@ -105,7 +105,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnProceduralHolder( holder )
 		fn.setProcedural( "pointRender", 1 )
 		holder.parm( "parm_npoints" ).set( 123 )
-		converter = holder.createOutputNode( "ieToHoudiniConverter" )
+		converter = holder.createOutputNode( "ieCortexConverter" )
 		geo = converter.geometry()
 		self.assertEqual( len(geo.points()), 123 )
 		self.assertEqual( len(geo.prims()), 0 )
@@ -132,7 +132,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		opHolder = uvunwrap.createOutputNode( "ieOpHolder" )
 		fn = IECoreHoudini.FnOpHolder( opHolder )
 		fn.setOp( "parameters/primitives/polyParam" )
-		out = opHolder.createOutputNode( "ieToHoudiniConverter" )
+		out = opHolder.createOutputNode( "ieCortexConverter" )
 		
 		# verify input
 		inGeo = uvunwrap.geometry()
@@ -220,7 +220,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		opHolder = uvunwrap.createOutputNode( "ieOpHolder" )
 		fn = IECoreHoudini.FnOpHolder( opHolder )
 		fn.setOp( "parameters/primitives/polyParam" )
-		out = opHolder.createOutputNode( "ieToHoudiniConverter" )
+		out = opHolder.createOutputNode( "ieCortexConverter" )
 		
 		# verify input
 		inGeo = uvunwrap.geometry()

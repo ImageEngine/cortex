@@ -87,7 +87,7 @@ void newSopOperator(OP_OperatorTable *table)
 	proceduralHolder->setIconName( "SOP_ieProceduralHolder" );
 	
 	OP_Operator *converter = new OP_Operator(
-		SOP_ToHoudiniConverter::typeName, "Cortex To Houdini",
+		SOP_ToHoudiniConverter::typeName, "Cortex Convert",
 		SOP_ToHoudiniConverter::create, SOP_ToHoudiniConverter::parameters, 1,	1,
 		SOP_ToHoudiniConverter::variables, OP_FLAG_GENERATOR
 	);

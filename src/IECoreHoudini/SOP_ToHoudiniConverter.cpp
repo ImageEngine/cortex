@@ -55,7 +55,7 @@
 
 using namespace IECoreHoudini;
 
-const char *SOP_ToHoudiniConverter::typeName = "ieToHoudiniConverter";
+const char *SOP_ToHoudiniConverter::typeName = "ieCortexConverter";
 
 PRM_Name SOP_ToHoudiniConverter::pConvertStandardAttributes( "convertStandardAttributes", "Convert Standard Attributes" );
 PRM_Name SOP_ToHoudiniConverter::pAttributeFilter( "attributeFilter", "Attribute Filter" );
