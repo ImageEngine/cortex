@@ -61,6 +61,8 @@ class SOP_ToHoudiniConverter : public SOP_Node
 		
 		static PRM_Default convertStandardAttributesDefault;
 		static PRM_Default attributeFilterDefault;
+		
+		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
 
 	protected :
 

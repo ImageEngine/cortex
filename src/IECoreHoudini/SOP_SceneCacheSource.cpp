@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
 #include "UT/UT_StringMMPattern.h"
@@ -83,6 +84,7 @@ OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 		thisTemplate[4] = PRM_Template(
 			PRM_STRING, 1, &pAttributeFilter, &attributeFilterDefault, 0, 0, 0, 0, 0,
 			"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
+			"The filter expects Cortex names as exist in the cache, and performs automated conversion to standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). "
 			"P will always be loaded."
 		);
 		
@@ -369,6 +371,48 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::str
 	}
 	
 	return false;
+}
+
+void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
+{
+	SceneCacheNode<SOP_Node>::getNodeSpecificInfoText( context, parms );
+	
+	UT_String p( "P" );
+	UT_String filter;
+	evalString( filter, pAttributeFilter.getToken(), 0, 0 );
+	if ( !p.match( filter ) )
+	{
+		filter += " P";
+	}
+	UT_StringMMPattern attributeFilter;
+	attributeFilter.compile( filter );
+	
+	/// \todo: this text could come from a static method on a class that manages these name relations (once that exists)
+	parms.append( "Converting standard Cortex PrimitiveVariables:\n" );
+	if ( UT_String( "s" ).multiMatch( attributeFilter ) && UT_String( "t" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  s,t -> uv\n" );
+	}
+	
+	if ( UT_String( "Cs" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Cs -> Cd\n" );
+	}
+	
+	if ( UT_String( "Pref" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Pref -> rest\n" );
+	}
+	
+	if ( UT_String( "width" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  width -> pscale\n" );
+	}
+	
+	if ( UT_String( "Os" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Os -> Alpha\n" );
+	}
 }
 
 MatrixTransformPtr SOP_SceneCacheSource::matrixTransform( Imath::M44d t )

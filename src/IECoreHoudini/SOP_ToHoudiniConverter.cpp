@@ -36,8 +36,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "GA/GA_AIFBlindData.h"
+#include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_Default.h"
 #include "UT/UT_Interrupt.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/CapturingRenderer.h"
 #include "IECore/Group.h"
@@ -188,6 +190,53 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 	boss->opEnd();
 	unlockInputs();
 	return error();
+}
+
+void SOP_ToHoudiniConverter::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
+{
+	SOP_Node::getNodeSpecificInfoText( context, parms );
+	
+	if ( !evalInt( pConvertStandardAttributes.getToken(), 0, 0 ) )
+	{
+		return;
+	}
+	
+	UT_String p( "P" );
+	UT_String filter;
+	evalString( filter, pAttributeFilter.getToken(), 0, 0 );
+	if ( !p.match( filter ) )
+	{
+		filter += " P";
+	}
+	UT_StringMMPattern attributeFilter;
+	attributeFilter.compile( filter );
+	
+	/// \todo: this text could come from a static method on a class that manages these name relations (once that exists)
+	parms.append( "Converting standard Cortex PrimitiveVariables:\n" );
+	if ( UT_String( "s" ).multiMatch( attributeFilter ) && UT_String( "t" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  s,t -> uv\n" );
+	}
+	
+	if ( UT_String( "Cs" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Cs -> Cd\n" );
+	}
+	
+	if ( UT_String( "Pref" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Pref -> rest\n" );
+	}
+	
+	if ( UT_String( "width" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  width -> pscale\n" );
+	}
+	
+	if ( UT_String( "Os" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Os -> Alpha\n" );
+	}
 }
 
 const char *SOP_ToHoudiniConverter::inputLabel( unsigned pos ) const

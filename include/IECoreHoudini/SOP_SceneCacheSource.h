@@ -66,6 +66,8 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		
 		static PRM_ChoiceList shapeFilterMenu;
 		
+		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
+		
 		static void buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
 	protected :
