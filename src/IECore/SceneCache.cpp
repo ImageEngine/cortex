@@ -732,6 +732,11 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		{
 			writable();
 
+			if ( !transform )
+			{
+				throw Exception( "writeTransform: NULL transform data!" );
+			}
+
 			if ( !m_parent )
 			{
 				throw Exception( "Call to writeTransform at the root scene is not allowed!" );
@@ -762,6 +767,11 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		{
 			writable();
 
+			if ( !attribute )
+			{
+				throw Exception( "writeAttribute: NULL attribute data!" );
+			}
+
 			std::pair< AttributeSamplesMap::iterator, bool > it = m_attributeSampleTimes.insert( std::pair< SceneCache::Name, SampleTimes >( name, SampleTimes() ) );
 			SampleTimes &sampleTimes = it.first->second;
 			if ( !it.second )
@@ -781,6 +791,11 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		void writeObject( const Object *object, double time )
 		{
 			writable();
+
+			if ( !object )
+			{
+				throw Exception( "writeObject: NULL object data!" );
+			}
 
 			if ( !m_parent )
 			{

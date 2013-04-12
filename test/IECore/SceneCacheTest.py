@@ -290,6 +290,14 @@ class SceneCacheTest( unittest.TestCase ) :
 		# looks like an early version crashes here:
 		c.writeObject( IECore.Camera(), 0.0 )
 	
+	def testWriteNullPointers( self ) :
+
+		sc = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		t = sc.createChild( "transform" )
+		self.assertRaises( RuntimeError, t.writeAttribute, "a", None, 0 )
+		self.assertRaises( RuntimeError, t.writeObject, None, 0 )
+		self.assertRaises( RuntimeError, t.writeTransform, None, 0 )				
+
 	def testWritingOnFlushedFiles( self ) :
 
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
