@@ -262,9 +262,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		transform = maya.cmds.listRelatives( self.fullPathName(), parent=True, f=True )[0]
 		
 		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
-		
+
 		for sceneShape in allSceneShapes:
-			maya.cmds.setAttr( sceneShape+".visibility", False )
 			maya.cmds.setAttr( sceneShape+".querySpace", 1 )
 			
 			fn = FnSceneShape( sceneShape )
@@ -274,7 +273,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 				object = fn.sceneInterface().readObject( 0.0 )
 				
 				# TODO: use the name of a regular maya shape, once the sceneShape uses a correct naming
-				if isinstance( object, IECore.MeshPrimitive ):
+				if isinstance( object, IECore.MeshPrimitive ) or isinstance( object, IECore.SpherePrimitive ):
 					shapeName = parent.split("|")[-1]+"_mesh"
 				elif isinstance( object, IECore.CurvesPrimitive ):
 					shapeName = parent.split("|")[-1]+"_curve"
@@ -300,14 +299,16 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 				
 				maya.cmds.setAttr( sceneShape+".queryPaths["+str(index)+"]", "/", type="string" )
 				
-				if isinstance( object, IECore.MeshPrimitive ):
+				if isinstance( object, IECore.MeshPrimitive ) or isinstance( object, IECore.SpherePrimitive ):
 					mesh = maya.cmds.createNode( "mesh", parent = parent, name = shapeName )
 					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', mesh+".inMesh" )
 					maya.cmds.sets( mesh, add="initialShadingGroup" )
 				elif isinstance( object, IECore.CurvesPrimitive ):
 					curve = maya.cmds.createNode( "nurbsCurve", parent = parent, name = shapeName )
 					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', mesh+".create" )
-					
+
+			# turn the scene node an intermediateObject so it can't be seen by MayaScene
+			maya.cmds.setAttr( sceneShape+".intermediateObject", 1 )
 
 	## Returns the maya node type that this function set operates on
 	@classmethod

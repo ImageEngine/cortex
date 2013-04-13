@@ -544,8 +544,13 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		leafScene = spheresScene.child("A").child("a")
 		self.assertTrue( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertEqual( leafScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData([ 'A', 'a' ]) } ) )
+		self.assertFalse( leafScene.hasObject() )
+
+		# expand scene to meshes
+		fnSpheres.convertToGeometry()
+		self.assertFalse( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertTrue( leafScene.hasObject() )
-		self.assertEqual( leafScene.readObject( 0 ), IECore.SpherePrimitive(1) )
+		self.assertTrue( isinstance( leafScene.readObject(0), IECore.MeshPrimitive) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

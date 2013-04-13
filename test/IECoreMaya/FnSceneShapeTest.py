@@ -182,11 +182,11 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		children = set( ["|test|testShape", "|test|sceneShape_1"] )
 		self.assertEqual( set(maya.cmds.listRelatives( "|test", f=True )), children )
-		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".visibility" ), 0 )
+		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".intermediateObject" ), 1 )
 		
 		children = set( ["|test|sceneShape_1|sceneShape_Shape1", "|test|sceneShape_1|child", "|test|sceneShape_1|sceneShape_1_mesh"] )
 		self.assertEqual( set(maya.cmds.listRelatives( "|test|sceneShape_1", f=True )), children )
-		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.visibility" ), 0 )
+		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.intermediateObject" ), 1 )
 		self.assertEqual( maya.cmds.nodeType( "|test|sceneShape_1|sceneShape_1_mesh" ), "mesh")
 		
 		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.queryPaths[1]" ), "/" )

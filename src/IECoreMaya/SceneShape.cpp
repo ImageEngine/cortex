@@ -230,11 +230,27 @@ ObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 
 bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 {
-	SceneShape *sceneShape = findScene( p );
+	MDagPath dagPath;
+	SceneShape *sceneShape = findScene( p, &dagPath );
 	if ( !sceneShape )
 	{
 		return false;
 	}
+
+	MFnDagNode fnChildDag = dagPath;
+	MStatus st;
+	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, &st );
+	if( !st )
+	{
+		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
+	}
+			
+	// if we're rendering object and children than it should only be represented as a link to the scene and no objects. 
+	if( !objectOnlyPlug.asBool() )
+	{
+		return false;
+	}
+
 	return sceneShape->getSceneInterface()->hasObject();
 }
 
