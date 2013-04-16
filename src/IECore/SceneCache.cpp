@@ -43,6 +43,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/SharedSceneInterfaces.h"
+#include "IECore/MessageHandler.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -683,7 +684,18 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			// the root location destruction triggers the flush on the file.
 			if ( !m_parent )
 			{
-				flush();
+				try
+				{
+					flush();
+				}
+				catch ( Exception &e )
+				{
+					msg( Msg::Error, "SceneCache::~SceneCache", ( boost::format( "Corrupted file resulted from exception while flushing data: %s." ) % e.what() ).str() );
+				}
+				catch (...)
+				{
+					msg( Msg::Error, "SceneCache::~SceneCache", "Corrupted file resulted from unknown exception while flushing data." );
+				}
 			}
 		}
 
@@ -1766,6 +1778,13 @@ ObjectPtr SceneCache::readAttribute( const Name &name, double time ) const
 void SceneCache::writeAttribute( const Name &name, const Object *attribute, double time )
 {
 	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
+
+	if ( name == animatedObjectTopologyAttribute || name == animatedObjectPrimVarsAttribute )
+	{
+		// ignore reserved attribute names
+		return;
+	}
+
 	writer->writeAttribute( name, attribute, time );
 }
 
