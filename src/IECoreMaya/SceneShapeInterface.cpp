@@ -63,7 +63,7 @@
 #include "IECore/VisibleRenderable.h"
 #include "IECore/TransformBlock.h"
 #include "IECore/AttributeBlock.h"
-#include "IECore/SceneCache.h"
+#include "IECore/SampledSceneInterface.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/TransformOp.h"
 
@@ -497,10 +497,10 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 {
 	if( plug == aTime )
 	{
-		ConstSceneCachePtr sceneInterface = runTimeCast< const SceneCache >(getSceneInterface());
+		ConstSampledSceneInterfacePtr sceneInterface = runTimeCast< const SampledSceneInterface >(getSceneInterface());
 		
 		// Check if sceneInterface is animated. If not, plugs are not dependent on time
-		if( sceneInterface && sceneInterface -> numBoundSamples() > 1 )
+		if( !sceneInterface || ( sceneInterface && sceneInterface -> numBoundSamples() > 1 ) )
 		{
 			m_previewSceneDirty = true;
 			childChanged( kBoundingBoxChanged ); // needed to tell maya the bounding box has changed
