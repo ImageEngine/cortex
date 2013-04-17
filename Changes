@@ -53,6 +53,7 @@ Improvements :
 * CameraController::dolly() behaviour now produces smoother movement.
 * IECoreMaya::ToMayaMeshConverter now using compressed UV arrays matching uv indices to set uv values in addUVSet.
 * Added DisplayDriver::acceptsRepeatedData(), enabling the ImageDisplayDriver to support progressive rendering and rerendering when used via IECoreRI.
+* IECoreRI::ParameterList now accepts V2iData, converting it to RenderMan "integer[2]".
 
 Bug Fixes :
 

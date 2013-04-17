@@ -533,6 +533,23 @@ class RendererTest( unittest.TestCase ) :
 		self.assertTrue( "hidden" in rib )
 		self.assertTrue( "jitter" in rib )
 		self.assertTrue( "depthfilter" in rib )
+	
+	def testSetBucketSizeViaOptions( self ) :
+	
+		with CapturingMessageHandler() as mh :
+
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+			r.setOption( "ri:limits:bucketsize", V2i( 32, 32 ) )
+
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+
+		self.assertTrue( 'Option "limits" "integer bucketsize[2]" [ 32 32 ]' in rib )
 					
 	def tearDown( self ) :
 
