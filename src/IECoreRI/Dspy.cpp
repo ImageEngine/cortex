@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -279,6 +279,19 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 
 PtDspyError Dspy::imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size, void *data )
 {
+	DisplayDriver *dd = static_cast<DisplayDriver *>( image );
+	if( type == PkProgressiveQuery )
+	{
+		if( (!dd->scanLineOrderOnly()) && dd->acceptsRepeatedData() )
+		{
+			((PtDspyProgressiveInfo *)data)->acceptProgressive = 1;
+		}
+		else
+		{
+			((PtDspyProgressiveInfo *)data)->acceptProgressive = 0;
+		}
+		return PkDspyErrorNone;
+	}
 	return PkDspyErrorUnsupported;
 }
 
