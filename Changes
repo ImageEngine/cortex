@@ -52,6 +52,7 @@ Improvements :
 * IECoreHoudini To/FromHoudiniGeometryConverters automatically convert standard attributes between Cortex and Houdini (Pref->rest ; Cs->Cd ; s,t->uv, etc and vice versa). This behaviour can be disabled with a parameter, but is on by default (and hence is used by the file sop and other reader nodes).
 * CameraController::dolly() behaviour now produces smoother movement.
 * IECoreMaya::ToMayaMeshConverter now using compressed UV arrays matching uv indices to set uv values in addUVSet.
+* Added DisplayDriver::acceptsRepeatedData(), enabling the ImageDisplayDriver to support progressive rendering and rerendering when used via IECoreRI.
 
 Bug Fixes :
 
