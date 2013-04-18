@@ -113,7 +113,11 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.hasChild("a"), False )
 		self.assertEqual( m.hasChild("t"), True )
 		self.assertEqual( m.childNames(), [ "t" ] )
+		self.assertEqual( m.numBoundSamples(), 1 )
+		self.assertEqual( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( 0, -1, -1 ), IECore.V3d( 2, 1, 1 ) ) )
 		self.assertEqual( m.readBound(0.0), IECore.Box3d( IECore.V3d( 0, -1, -1 ), IECore.V3d( 2, 1, 1 ) ) )
+		self.assertEqual( m.numTransformSamples(), 1 )
+		self.assertEqual( m.readTransformAtSample(0), IECore.M44dData(IECore.M44d()) )
 		self.assertEqual( m.readTransform(0.0), IECore.M44dData(IECore.M44d()) )
 		self.assertEqual( m.hasObject(), False )
 		
@@ -145,6 +149,19 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( s.readObject(0.0), IECore.SpherePrimitive( 1 ) )
 	
 		self.assertEqual( s.readAttribute( "glah", 0 ), IECore.BoolData( True ) )
+
+	def testAnimatedAttributes( self ) :
+
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		m.writeAttribute( "w", IECore.BoolData( True ), 1.0 )
+		m.writeAttribute( "w", IECore.BoolData( False ), 2.0 )
+		del m
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( m.numAttributeSamples('w'), 2 )
+		self.assertEqual( m.readAttributeAtSample( "w", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( m.readAttributeAtSample( "w", 1 ), IECore.BoolData( False ) )
+		self.assertEqual( m.readAttribute( "w", 1 ), IECore.BoolData( True ) )
+		self.assertEqual( m.readAttribute( "w", 2 ), IECore.BoolData( False ) )
 
 	@staticmethod
 	def compareBBox( box1, box2 ):

@@ -225,6 +225,10 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			if ( !m_boundSampleTimes )
 			{
 				m_boundSampleTimes = restoreSampleTimes( boundEntry );
+				if ( !m_boundSampleTimes )
+				{
+					m_boundSampleTimes = &g_defaults.implicitSample;
+				}
 			}
 			return *m_boundSampleTimes;
 		}
@@ -321,6 +325,10 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			if ( !m_transformSampleTimes )
 			{
 				m_transformSampleTimes = restoreSampleTimes( transformEntry );
+				if ( !m_transformSampleTimes )
+				{
+					m_transformSampleTimes = &g_defaults.implicitSample;
+				}
 			}
 			return *m_transformSampleTimes;
 		}
@@ -594,7 +602,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			IndexedIOPtr location = m_indexedIO->subdirectory( childName, IndexedIO::NullIfMissing );
 			if ( location && attribName )
 			{
-				location = m_indexedIO->subdirectory( *attribName, IndexedIO::NullIfMissing );
+				location = location->subdirectory( *attribName, IndexedIO::NullIfMissing );
 			}
 			if ( !location || !location->hasEntry( sampleTimesEntry ) )
 			{
@@ -602,7 +610,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				{
 					throw Exception( (boost::format("No %s samples available") % childName.value()).str() );
 				}
-				return &g_defaults.implicitSample;
+				return 0;
 			}
 
 			uint64_t sampleTimesIndex = 0;
