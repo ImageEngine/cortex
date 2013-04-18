@@ -57,8 +57,9 @@ static SceneInterface::FileFormatDescription<LinkedScene> registrar(".lscc", Ind
 const SceneInterface::Name &LinkedScene::linkAttribute = InternedString( "sceneInterface:link" );
 const InternedString LinkedScene::g_fileNameLinkAttribute("fileName");
 const InternedString LinkedScene::g_rootLinkAttribute("root");
+const InternedString LinkedScene::g_timeAttribute("time");
 
-LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode ) : m_mainScene(0), m_linkedScene(0), m_rootLinkDepth(0), m_readOnly(mode & IndexedIO::Read), m_atLink(false), m_sampled(true)
+LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode ) : m_mainScene(0), m_linkedScene(0), m_rootLinkDepth(0), m_readOnly(mode & IndexedIO::Read), m_atLink(false), m_sampled(true), m_timeRemapped(false)
 {
 	if( mode & IndexedIO::Append )
 	{
@@ -68,12 +69,12 @@ LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode 
 	m_mainScene = new SceneCache( fileName, mode );
 }
 
-LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(0), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false)
+LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(0), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false), m_timeRemapped(false)
 {
 	m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene.get()) != NULL);
 }
 
-LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink ) : m_mainScene(mainScene), m_linkedScene(linkedScene), m_rootLinkDepth(rootLinkDepth), m_readOnly(readOnly), m_atLink(atLink)
+LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped ) : m_mainScene(mainScene), m_linkedScene(linkedScene), m_rootLinkDepth(rootLinkDepth), m_readOnly(readOnly), m_atLink(atLink), m_timeRemapped(timeRemapped)
 {
 	if ( !mainScene )
 	{
@@ -88,6 +89,7 @@ LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linke
 	{
 		m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene) != NULL);
 	}
+	
 }
 
 LinkedScene::~LinkedScene()
@@ -107,6 +109,13 @@ IECore::CompoundDataPtr LinkedScene::linkAttributeData( const SceneInterface *sc
 	CompoundDataPtr d = new CompoundData();
 	d->writable()[g_fileNameLinkAttribute] = new StringData(f);
 	d->writable()[g_rootLinkAttribute] = r;
+	return d;
+}
+
+IECore::CompoundDataPtr LinkedScene::linkAttributeData( const SceneInterface *scene, double time )
+{
+	IECore::CompoundDataPtr d = linkAttributeData(scene);
+	d->writable()[g_timeAttribute] = new DoubleData(time);
 	return d;
 }
 
@@ -154,7 +163,14 @@ size_t LinkedScene::numBoundSamples() const
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numBoundSamples();
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->numAttributeSamples( linkAttribute );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numBoundSamples();
+		}
 	}
 	else
 	{
@@ -170,7 +186,14 @@ double LinkedScene::boundSampleTime( size_t sampleIndex ) const
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->boundSampleTime(sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleTime( linkAttribute, sampleIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->boundSampleTime(sampleIndex);
+		}
 	}
 	else
 	{
@@ -186,7 +209,14 @@ double LinkedScene::boundSampleInterval( double time, size_t &floorIndex, size_t
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->boundSampleInterval(time,floorIndex,ceilIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleInterval( linkAttribute, time, floorIndex, ceilIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->boundSampleInterval(time,floorIndex,ceilIndex);
+		}
 	}
 	else
 	{
@@ -202,7 +232,14 @@ Imath::Box3d LinkedScene::readBoundAtSample( size_t sampleIndex ) const
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readBoundAtSample(sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return m_linkedScene->readBound( remappedLinkTimeAtSample(sampleIndex) );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readBoundAtSample(sampleIndex);
+		}
 	}
 	else
 	{
@@ -214,6 +251,10 @@ Imath::Box3d LinkedScene::readBound( double time ) const
 {
 	if ( m_linkedScene )
 	{
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
 		return m_linkedScene->readBound(time);
 	}
 	else
@@ -240,7 +281,14 @@ size_t LinkedScene::numTransformSamples() const
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numTransformSamples();
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->numAttributeSamples( linkAttribute );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numTransformSamples();
+		}
 	}
 	else
 	{
@@ -256,7 +304,14 @@ double LinkedScene::transformSampleTime( size_t sampleIndex ) const
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->transformSampleTime(sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleTime( linkAttribute, sampleIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->transformSampleTime(sampleIndex);
+		}
 	}
 	else
 	{
@@ -272,7 +327,14 @@ double LinkedScene::transformSampleInterval( double time, size_t &floorIndex, si
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->transformSampleInterval(time,floorIndex,ceilIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleInterval( linkAttribute, time, floorIndex, ceilIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->transformSampleInterval(time,floorIndex,ceilIndex);
+		}
 	}
 	else
 	{
@@ -288,7 +350,14 @@ DataPtr LinkedScene::readTransformAtSample( size_t sampleIndex ) const
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readTransformAtSample(sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return m_linkedScene->readTransform( remappedLinkTimeAtSample(sampleIndex) );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readTransformAtSample(sampleIndex);
+		}
 	}
 	else
 	{
@@ -304,7 +373,14 @@ Imath::M44d LinkedScene::readTransformAsMatrixAtSample( size_t sampleIndex ) con
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readTransformAsMatrixAtSample(sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return m_linkedScene->readTransformAsMatrix( remappedLinkTimeAtSample(sampleIndex) );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readTransformAsMatrixAtSample(sampleIndex);
+		}
 	}
 	else
 	{
@@ -316,6 +392,10 @@ DataPtr LinkedScene::readTransform( double time ) const
 {
 	if ( m_linkedScene && !m_atLink )
 	{
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
 		return m_linkedScene->readTransform(time);
 	}
 	else
@@ -328,6 +408,10 @@ Imath::M44d LinkedScene::readTransformAsMatrix( double time ) const
 {
 	if ( m_linkedScene && !m_atLink )
 	{
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
 		return m_linkedScene->readTransformAsMatrix(time);
 	}
 	else
@@ -391,7 +475,14 @@ size_t LinkedScene::numAttributeSamples( const Name &name ) const
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numAttributeSamples(name);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->numAttributeSamples( linkAttribute );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numAttributeSamples(name);
+		}
 	}
 	else
 	{
@@ -407,7 +498,14 @@ double LinkedScene::attributeSampleTime( const Name &name, size_t sampleIndex ) 
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->attributeSampleTime(name, sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleTime( linkAttribute, sampleIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->attributeSampleTime(name, sampleIndex);
+		}
 	}
 	else
 	{
@@ -423,7 +521,14 @@ double LinkedScene::attributeSampleInterval( const Name &name, double time, size
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->attributeSampleInterval(name,time,floorIndex,ceilIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleInterval( linkAttribute, time, floorIndex, ceilIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->attributeSampleInterval(name,time,floorIndex,ceilIndex);
+		}
 	}
 	else
 	{
@@ -439,7 +544,14 @@ ObjectPtr LinkedScene::readAttributeAtSample( const Name &name, size_t sampleInd
 	}
 	if ( m_linkedScene && !m_atLink )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readAttributeAtSample(name,sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return m_linkedScene->readAttribute( name, remappedLinkTimeAtSample(sampleIndex) );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readAttributeAtSample(name,sampleIndex);
+		}
 	}
 	else
 	{
@@ -451,6 +563,10 @@ ObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
 {
 	if ( m_linkedScene && !m_atLink )
 	{
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
 		return m_linkedScene->readAttribute(name,time);
 	}
 	else
@@ -497,7 +613,8 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 
 		// open the linked scene
 		int linkDepth;
-		ConstSceneInterfacePtr linkedScene = expandLink( d, linkDepth );
+		bool timeRemapped;
+		ConstSceneInterfacePtr linkedScene = expandLink( d, linkDepth, timeRemapped );
 		if ( !linkedScene )
 		{
 			throw Exception( "Trying to store a broken link!" );
@@ -505,11 +622,11 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 
 		// get the bounds of the linked scene
 		const SampledSceneInterface *sampledScene = runTimeCast< const SampledSceneInterface >(linkedScene.get());
-		if ( sampledScene )
+		if ( sampledScene && !timeRemapped )
 		{
+			// When there's no time remapping we get all the bounding box samples from the linked scene, using the same time.
 			if ( firstTime )
 			{
-				// get all the bounding box samples from the linked scene
 				size_t bounds = sampledScene->numBoundSamples();
 				for ( size_t b = 0; b < bounds; b++ )
 				{
@@ -526,12 +643,6 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		/// we keep the information this level has a link, so we can prevent attempts to 
 		/// create children or save objects at this level.
 		m_atLink = true;
-
-		// avoid saving this attribute multiple times. At least for now...
-		if ( !firstTime )
-		{
-			return;
-		}
 	}
 
 	m_mainScene->writeAttribute(name,attribute,time);
@@ -557,7 +668,14 @@ size_t LinkedScene::numObjectSamples() const
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numObjectSamples();
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->numAttributeSamples( linkAttribute );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->numObjectSamples();
+		}
 	}
 	else
 	{
@@ -573,7 +691,14 @@ double LinkedScene::objectSampleTime( size_t sampleIndex ) const
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->objectSampleTime(sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleTime( linkAttribute, sampleIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->objectSampleTime(sampleIndex);
+		}
 	}
 	else
 	{
@@ -589,7 +714,14 @@ double LinkedScene::objectSampleInterval( double time, size_t &floorIndex, size_
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->objectSampleInterval(time,floorIndex,ceilIndex);
+		if ( m_timeRemapped )
+		{
+			return static_cast<const SampledSceneInterface*>(m_mainScene.get())->attributeSampleInterval( linkAttribute, time, floorIndex, ceilIndex );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->objectSampleInterval(time,floorIndex,ceilIndex);
+		}
 	}
 	else
 	{
@@ -605,7 +737,14 @@ ObjectPtr LinkedScene::readObjectAtSample( size_t sampleIndex ) const
 	}
 	if ( m_linkedScene )
 	{
-		return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readObjectAtSample(sampleIndex);
+		if ( m_timeRemapped )
+		{
+			return m_linkedScene->readObject( remappedLinkTimeAtSample(sampleIndex) );
+		}
+		else
+		{
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readObjectAtSample(sampleIndex);
+		}
 	}
 	else
 	{
@@ -617,6 +756,10 @@ ObjectPtr LinkedScene::readObject( double time ) const
 {
 	if ( m_linkedScene )
 	{
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
 		return m_linkedScene->readObject(time);
 	}
 	else
@@ -651,7 +794,7 @@ void LinkedScene::childNames( NameList &childNames ) const
 	}
 }
 
-ConstSceneInterfacePtr LinkedScene::expandLink( const CompoundData *linkData, int &linkDepth )
+ConstSceneInterfacePtr LinkedScene::expandLink( const CompoundData *linkData, int &linkDepth, bool &timeRemapped )
 {
 	/// we found the link attribute...
 	const InternedStringVectorData *root = 0;
@@ -669,11 +812,42 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const CompoundData *linkData, in
 				// \todo Consider throwing or printing error message.
 				linkDepth = 0;
 			}
+			timeRemapped = bool(linkData->member< DoubleData >(g_timeAttribute));
 			return l;
 		}
 	}
 	linkDepth = 0;
 	return 0;
+}
+
+double LinkedScene::remappedLinkTime( double time ) const
+{
+	ConstCompoundDataPtr d = runTimeCast< CompoundData >( m_mainScene->readAttribute( linkAttribute, time ) );
+	if ( !d )
+	{
+		throw Exception( "Invalid link attribute when querying for time remapping!" );
+	}
+	ConstDoubleDataPtr t = d->member< DoubleData >(g_timeAttribute);
+	if ( !t )
+	{
+		throw Exception( "Invalid time when querying for time remapping!" );
+	}
+	return t->readable();
+}
+
+double LinkedScene::remappedLinkTimeAtSample( size_t sampleIndex ) const
+{
+	ConstCompoundDataPtr d = runTimeCast< CompoundData >( static_cast<const SampledSceneInterface*>(m_mainScene.get())->readAttributeAtSample( linkAttribute, sampleIndex ) );
+	if ( !d )
+	{
+		throw Exception( "Invalid link attribute when querying for time remapping!" );
+	}
+	ConstDoubleDataPtr t = d->member< DoubleData >(g_timeAttribute);
+	if ( !t )
+	{
+		throw Exception( "Invalid time when querying for time remapping!" );
+	}
+	return t->readable();
 }
 
 SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missingBehaviour )
@@ -697,7 +871,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 		{
 			return 0;
 		}
-		return new LinkedScene( m_mainScene, c, m_rootLinkDepth, m_readOnly, false );
+		return new LinkedScene( m_mainScene, c, m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
 	}
 	else
 	{
@@ -711,14 +885,15 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			ConstCompoundDataPtr d = runTimeCast< CompoundData >( c->readAttribute( linkAttribute, 0 ) );
 			/// we found the link attribute...
 			int linkDepth;
-			ConstSceneInterfacePtr l = expandLink( d, linkDepth );
+			bool timeRemapped;
+			ConstSceneInterfacePtr l = expandLink( d, linkDepth, timeRemapped );
 			if ( l )
 			{
-				return new LinkedScene( c, l, linkDepth, m_readOnly, true );
+				return new LinkedScene( c, l, linkDepth, m_readOnly, true, timeRemapped );
 			}
 		}
 
-		return new LinkedScene( c, 0, 0, m_readOnly, false );
+		return new LinkedScene( c, 0, 0, m_readOnly, false, false );
 	}
 }
 
@@ -779,11 +954,12 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 	ConstSceneInterfacePtr l = 0;
 	int linkDepth = 0;
 	bool atLink = (s->hasAttribute( linkAttribute ));
+	bool timeRemapped = false;
 
 	if ( atLink )
 	{
 		ConstCompoundDataPtr d = runTimeCast< CompoundData >( s->readAttribute( linkAttribute, 0 ) );
-		l = expandLink( d, linkDepth );
+		l = expandLink( d, linkDepth, timeRemapped );
 		if (!l)
 		{
 			atLink = false;
@@ -811,7 +987,7 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 		}
 		atLink = false;
 	}
-	return new LinkedScene( s, l, linkDepth, m_readOnly, atLink );
+	return new LinkedScene( s, l, linkDepth, m_readOnly, atLink, timeRemapped );
 }
 
 ConstSceneInterfacePtr LinkedScene::scene( const Path &path, LinkedScene::MissingBehaviour missingBehaviour ) const

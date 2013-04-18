@@ -120,6 +120,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 		)
 		self.assertEqual( attr, expectedAttr )
 
+		A = m.child("A")
+		attr = IECore.LinkedScene.linkAttributeData( A, 10.0 )
+		expectedAttr['time'] = IECore.DoubleData(10.0)
+		self.assertEqual( attr, expectedAttr )
+		
 	def testWriting( self ):
 
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
@@ -196,6 +201,63 @@ class LinkedSceneTest( unittest.TestCase ) :
 		t5 = base.createChild("test5")
 		t5.writeLink( A )
 		del l2, t1, t2, t3, t4, t5
+
+	def testTimeRemapping( self ):
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+
+		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		# save animated spheres with double the speed and with offset, using less samples (time remapping)
+		i0 = l.createChild("instance0")
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 1.0 )
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 3.0 ), 2.0 )
+		# save animated spheres with same speed and with offset, same samples (time remapping is identity)
+		i1 = l.createChild("instance1")
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 1.0 )
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 1.0 ), 2.0 )
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 2.0 ), 3.0 )
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 3.0 ), 4.0 )
+		# save animated spheres with half the speed, adding more samples to a range of the original (time remapping)
+		i2 = l.createChild("instance2")
+		i2.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 0.0 )
+		i2.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.5 ), 1.0 )
+		i2.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 1.0 ), 2.0 )
+
+		del i0, i1, i2, l
+
+		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( l.numBoundSamples(), 5 )
+		i0 = l.child("instance0")
+		self.assertEqual( i0.numBoundSamples(), 2 )
+		self.assertEqual( i0.numTransformSamples(), 1 )
+		self.assertEqual( i0.readTransformAtSample(0), IECore.M44dData() )
+		A0 = i0.child("A")
+		self.assertEqual( A0.numBoundSamples(), 2 )
+		self.assertEqual( A0.numTransformSamples(), 2 )
+		self.failUnless( LinkedSceneTest.compareBBox( A0.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( LinkedSceneTest.compareBBox( A0.readBoundAtSample(1), IECore.Box3d(IECore.V3d( 0,-1,-1 ), IECore.V3d( 2,1,1 ) ) ) )
+		self.assertEqual( A0.readTransformAtSample(0), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ) )
+		self.assertEqual( A0.readTransformAtSample(1), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
+		i1 = l.child("instance1")
+		self.assertEqual( i1.numBoundSamples(), 4 )
+		self.assertEqual( i1.numTransformSamples(), 1 )
+		A1 = i1.child("A")
+		self.assertEqual( A1.numTransformSamples(), 4 )
+		self.assertEqual( A1.readTransformAtSample(0), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ) )
+		self.assertEqual( A1.readTransformAtSample(1), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
+		self.assertEqual( A1.readTransformAtSample(2), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
+		self.assertEqual( A1.readTransformAtSample(3), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
+		i2 = l.child("instance2")
+		self.assertEqual( i2.numBoundSamples(), 3 )
+		self.assertEqual( i2.numTransformSamples(), 1 )
+		A2 = i2.child("A")
+		self.assertEqual( A2.numBoundSamples(), 3 )
+		self.assertEqual( A2.numTransformSamples(), 3 )
+		self.assertEqual( A2.readTransform(1.0), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1.5, 0, 0 ) ) ) )
+		self.assertEqual( A2.readTransformAtSample(0), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ) )
+		self.assertEqual( A2.readTransformAtSample(1), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1.5, 0, 0 ) ) ) )
+		self.assertEqual( A2.readTransformAtSample(2), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
+		
 
 	def testReading( self ):
 

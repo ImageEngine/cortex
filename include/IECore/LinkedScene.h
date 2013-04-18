@@ -44,16 +44,17 @@ IE_CORE_FORWARDDECLARE( LinkedScene );
 
 /// Implements a scene that have references (links) to external scenes.
 /// Links can be created at any location in a scene. When a link is created in a given location,
-/// the object, bounds and children will be loaded from the linked scene. The transform and attributes
+/// the object, bounds and children will be loaded from the linked scene (with time remapping). The transform and attributes
 /// are still loaded from the main scene.
 /// This class wraps another SceneInterface object that is responsible for actually storing the data
 /// (we call it the "main scene"). Links are represented as an attribute in the main scene called "SceneInterface:link".
 /// When created for reading, this class provides seamless access to the hierarchy inside the linked scenes, 
-/// concatenating the two hierarchies in a single path that uniquely identify that location.
-/// When writing, this class can create the links by either (1) a call to the function writeLink() or 
-/// (2) a call to the function writeAttribute( LinkedScene::linkSceneAttribute, LinkedScene::linkAttributeData(), ... ). 
-/// In that case, there's no access to the contents of the indexed scene.
-// \todo Consider storing time remapping to the linked scenes.
+/// concatenating the two hierarchies in a single path that uniquely identify that location. The time is also 
+/// transparently translated.
+/// When writing, there's no access to the contents of the indexed scene. Instead, it creates the links by either
+/// (1) calls to the function writeLink() or 
+/// (2) calls to the function writeAttribute( LinkedScene::linkSceneAttribute, LinkedScene::linkAttributeData(), ... ). 
+/// Note that the link can be animated, allowing for time remapped animations.
 class LinkedScene : public  SampledSceneInterface
 {
 	public :
@@ -75,11 +76,17 @@ class LinkedScene : public  SampledSceneInterface
 
 		virtual ~LinkedScene();
 
-		/// Creates an attribute on the current location of this scene that represents a link to the given scene.
+		/// Creates an attribute on the current location of this scene that represents a link to the given scene (no time remapping).
+		/// This function should only be used once in a given scene location. For more control (and time remapping), 
+		/// use writeAttribute in combination with linkAttributeData.
 		void writeLink( const SceneInterface *scene );
 
-		/// Returns the data that should be stored in a link attribute if we want to map it to the given scene.
+		/// Returns the data that should be stored in a link attribute if we want to map it to the given scene (no time remapping).
 		static IECore::CompoundDataPtr linkAttributeData( const SceneInterface *scene );
+
+		/// Returns the data that should be stored in a link attribute if we want to map it to the given scene (with time remapping).
+		/// \param time Specifies the time that should be used to query the given scene
+		static IECore::CompoundDataPtr linkAttributeData( const SceneInterface *scene, double time );
 
 		/*
 		 * virtual functions defined in SceneInterface.
@@ -133,9 +140,13 @@ class LinkedScene : public  SampledSceneInterface
 
 	private :
 
-		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink );
+		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped );
 
-		ConstSceneInterfacePtr expandLink( const CompoundData *linkData, int &linkDepth );
+		static ConstSceneInterfacePtr expandLink( const CompoundData *linkData, int &linkDepth, bool &timeRemapped );
+
+		// uses the mainScene to ask what is the time the link is remapped to. Should only be called when the linkAttribute is available.
+		double remappedLinkTime( double time ) const;
+		double remappedLinkTimeAtSample( size_t sampleIndex ) const;
 
 		SceneInterfacePtr m_mainScene;
 		ConstSceneInterfacePtr m_linkedScene;
@@ -143,10 +154,12 @@ class LinkedScene : public  SampledSceneInterface
 		bool m_readOnly;
 		bool m_atLink;
 		bool m_sampled;
+		bool m_timeRemapped;
 		// \todo: std::map< Path, LinkedScenes > for quick scene calls... built by scene... dies with the instance (usually only root uses it).
 
 		static const InternedString g_fileNameLinkAttribute;
 		static const InternedString g_rootLinkAttribute;
+		static const InternedString g_timeAttribute;
 };
 
 } // namespace IECore

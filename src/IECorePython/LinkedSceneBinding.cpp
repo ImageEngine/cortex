@@ -57,11 +57,15 @@ static LinkedScenePtr constructor2( IECore::SceneInterfacePtr scn )
 
 void bindLinkedScene()
 {
+	IECore::CompoundDataPtr (*linkAttributeData)( const SceneInterface *scene) = &LinkedScene::linkAttributeData;
+	IECore::CompoundDataPtr (*retimedLinkAttributeData)( const SceneInterface *scene, double time) = &LinkedScene::linkAttributeData;
+
 	RunTimeTypedClass<LinkedScene>()
 		.def( "__init__", make_constructor( &constructor ), "Opens a linked scene file for read or write." )
 		.def( "__init__", make_constructor( &constructor2 ), "Creates a linked scene to expand links in the given scene file." )
 		.def( "writeLink", &LinkedScene::writeLink )
-		.def( "linkAttributeData", &LinkedScene::linkAttributeData ).staticmethod( "linkAttributeData" )
+		.def( "linkAttributeData", linkAttributeData )
+		.def( "linkAttributeData", retimedLinkAttributeData ).staticmethod( "linkAttributeData" )
 		.def_readonly("linkAttribute", &LinkedScene::linkAttribute )
 	;
 }
