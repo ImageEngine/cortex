@@ -266,8 +266,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 			if not atLink :	# attributes and tranforms at link location are not loaded.
 
-				self.assertEqual( set(virtualScene.readAttributeNames()), set(realScene.readAttributeNames()) )
-				for attr in realScene.readAttributeNames() :
+				self.assertEqual( set(virtualScene.attributeNames()), set(realScene.attributeNames()) )
+				for attr in realScene.attributeNames() :
 					self.assertTrue( virtualScene.hasAttribute( attr ) )
 					self.assertEqual( virtualScene.numAttributeSamples(attr), realScene.numAttributeSamples(attr) )
 					for s in xrange(0,virtualScene.numAttributeSamples(attr)) :

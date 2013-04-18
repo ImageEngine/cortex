@@ -102,7 +102,7 @@ class SceneCache : public SampledSceneInterface
 		virtual void writeTransform( const Data *transform, double time );
 
 		virtual bool hasAttribute( const Name &name ) const;
-		virtual void readAttributeNames( NameList &attrs ) const;
+		virtual void attributeNames( NameList &attrs ) const;
 		virtual size_t numAttributeSamples( const Name &name ) const;
 		virtual double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
 		virtual double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;

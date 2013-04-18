@@ -104,7 +104,7 @@ class MayaScene : public IECore::SceneInterface
 
 		virtual bool hasAttribute( const Name &name ) const;
 		/// Fills attrs with the names of all attributes available in the current directory
-		virtual void readAttributeNames( NameList &attrs ) const;
+		virtual void attributeNames( NameList &attrs ) const;
 		/// Returns the attribute value at the given time, which must be equal to the current maya time in seconds.
 		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
 		/// Not currently supported - will throw an exception.

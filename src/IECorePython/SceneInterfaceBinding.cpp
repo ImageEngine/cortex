@@ -99,10 +99,10 @@ static SceneInterfacePtr nonConstScene( SceneInterface &m, list l, SceneInterfac
 	return m.scene( p, b );
 }
 
-static list readAttributeNames( const SceneInterface &m )
+static list attributeNames( const SceneInterface &m )
 {
 	SceneInterface::NameList a;
-	m.readAttributeNames( a );
+	m.attributeNames( a );
 	return arrayToList( a );
 }
 
@@ -166,7 +166,7 @@ void bindSceneInterface()
 		.def( "readTransformAsMatrix", &SceneInterface::readTransformAsMatrix )
 		.def( "writeTransform", &SceneInterface::writeTransform )
 		.def( "hasAttribute", &SceneInterface::hasAttribute )
-		.def( "readAttributeNames", readAttributeNames )
+		.def( "attributeNames", attributeNames )
 		.def( "readAttribute", &SceneInterface::readAttribute )
 		.def( "writeAttribute", &SceneInterface::writeAttribute )
 		.def( "readObject", &SceneInterface::readObject )

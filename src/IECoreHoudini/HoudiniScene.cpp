@@ -271,7 +271,7 @@ bool HoudiniScene::hasAttribute( const Name &name ) const
 	return false;
 }
 
-void HoudiniScene::readAttributeNames( NameList &attrs ) const
+void HoudiniScene::attributeNames( NameList &attrs ) const
 {
 }
 

@@ -154,7 +154,7 @@ class SceneInterface : public RunTimeTyped
 
 		virtual bool hasAttribute( const Name &name ) const = 0;
 		/// Fills attrs with the names of all attributes available in the current directory
-		virtual void readAttributeNames( NameList &attrs ) const = 0;
+		virtual void attributeNames( NameList &attrs ) const = 0;
 		/// Returns the attribute value at the given time.
 		virtual ObjectPtr readAttribute( const Name &name, double time ) const = 0;
 		/// Writers the attribute to this path within the scene

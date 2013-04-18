@@ -447,15 +447,15 @@ bool LinkedScene::hasAttribute( const Name &name ) const
 	}
 }
 
-void LinkedScene::readAttributeNames( NameList &attrs ) const
+void LinkedScene::attributeNames( NameList &attrs ) const
 {
 	if ( m_linkedScene && !m_atLink )
 	{
-		m_linkedScene->readAttributeNames(attrs);
+		m_linkedScene->attributeNames(attrs);
 	}
 	else
 	{
-		m_mainScene->readAttributeNames(attrs);
+		m_mainScene->attributeNames(attrs);
 		for ( NameList::iterator it = attrs.begin(); it != attrs.end(); it++ )
 		{
 			if ( *it == linkAttribute )

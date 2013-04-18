@@ -532,7 +532,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( spheresShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
 
 		self.assertEqual( set( scene.childNames() ).intersection([ envNode, spheresNode ]) , set( [ envNode, spheresNode ] ) )
-		self.assertTrue( IECore.LinkedScene.linkAttribute in envScene.readAttributeNames() )
+		self.assertTrue( IECore.LinkedScene.linkAttribute in envScene.attributeNames() )
 		self.assertEqual( envScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/environment.lscc'), "root":IECore.InternedStringVectorData() } ) )
 		self.assertFalse( envScene.hasObject() )
 

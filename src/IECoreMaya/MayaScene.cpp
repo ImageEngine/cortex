@@ -214,11 +214,11 @@ bool MayaScene::hasAttribute( const Name &name ) const
 	return false;
 }
 
-void MayaScene::readAttributeNames( NameList &attrs ) const
+void MayaScene::attributeNames( NameList &attrs ) const
 {
 	if( m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::readAttributeNames: Dag path no longer exists!" );
+		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
 	}
 
 	attrs.clear();

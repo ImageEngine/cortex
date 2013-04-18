@@ -106,7 +106,7 @@ class SceneCache::Implementation : public RefCounted
 			return attributes->hasEntry( name );
 		}
 
-		void readAttributeNames( NameList &attrsNames ) const
+		void attributeNames( NameList &attrsNames ) const
 		{
 			ConstIndexedIOPtr attributes = m_indexedIO->subdirectory( attributesEntry, IndexedIO::NullIfMissing );
 			if ( !attributes )
@@ -1748,9 +1748,9 @@ bool SceneCache::hasAttribute( const Name &name ) const
 	return m_implementation->hasAttribute(name);
 }
 
-void SceneCache::readAttributeNames( NameList &attrs ) const
+void SceneCache::attributeNames( NameList &attrs ) const
 {
-	m_implementation->readAttributeNames(attrs);
+	m_implementation->attributeNames(attrs);
 }
 
 size_t SceneCache::numAttributeSamples( const Name &name ) const
