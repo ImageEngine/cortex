@@ -212,6 +212,11 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 	{
 		return false;
 	}
+
+	if ( !sceneShape->getSceneInterface() )
+	{
+		return false;
+	}
 	
 	// so if it's not object only, then we know the scene loads everything and we can create a link to it.
 	return true;
@@ -219,13 +224,47 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 
 ObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 {
-	SceneShape *sceneShape = findScene( p );
+	MDagPath dagPath;
+	SceneShape *sceneShape = findScene( p, &dagPath );
 	if ( !sceneShape )
 	{
 		throw Exception("readSceneShapeLink: Could not find SceneShape!");
 	}
 
-	return LinkedScene::linkAttributeData( sceneShape->getSceneInterface() );
+	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	if ( !scene )
+	{
+		throw Exception( "Empty scene!");
+	}
+
+	MFnDagNode fnChildDag = dagPath;
+	MStatus st;
+	MPlug timePlug = fnChildDag.findPlug( aTime, &st );
+	if( !st )
+	{
+		throw Exception( "Could not find 'time' plug in SceneShape!");
+	}
+
+	// if time plug is connected to maya global time, then we assume there's no time remapping between the Maya scene and the loaded scene.
+	MPlugArray array;
+	timePlug.connectedTo( array, true, false, &st );
+	if( !st )
+	{
+		throw Exception( "Could not find 'time' plug connections in SceneShape!");
+	}
+
+	for ( unsigned int i = 0; i < array.length(); i++ )
+	{
+		if ( array[i].name() == "time1.outTime" )
+		{
+			/// connected to time, so no time remapping between maya scene and loaded scene.
+			return LinkedScene::linkAttributeData( scene );
+		}
+	}
+	/// couldn't find connection to maya time, so this node is mapping the time some other way.
+	MTime time;
+	timePlug.getValue( time );
+	return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
 }
 
 bool SceneShape::hasSceneShapeObject( const MDagPath &p )

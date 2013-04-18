@@ -515,22 +515,27 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 		# make sure we are at time 0
 		maya.cmds.currentTime( "0sec" )
+		scene = IECoreMaya.MayaScene()
 
-		envShape = str( maya.cmds.createNode( 'ieSceneShape' ) )
-		maya.cmds.setAttr( envShape+'.file', 'test/IECore/data/sccFiles/environment.lscc',type='string' )
+		envShape = str( IECoreMaya.FnSceneShape.create( "ieScene1" ).fullPathName() )
 		envNode = 'ieScene1'
 
-		spheresShape = str( maya.cmds.createNode( 'ieSceneShape' ) )
-		maya.cmds.setAttr( spheresShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
-		spheresNode = 'ieScene2'
-
-		scene = IECoreMaya.MayaScene()
-		self.assertEqual( set( scene.childNames() ).intersection([ envNode, spheresNode ]) , set( [ envNode, spheresNode ] ) )
 		envScene = scene.child( envNode )
+		self.assertFalse( envScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+
+		maya.cmds.setAttr( envShape+'.file', 'test/IECore/data/sccFiles/environment.lscc',type='string' )
+
 		self.assertTrue( envScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+
+		spheresShape = str( IECoreMaya.FnSceneShape.create( "ieScene2" ).fullPathName() )
+		spheresNode = 'ieScene2'
+		maya.cmds.setAttr( spheresShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
+
+		self.assertEqual( set( scene.childNames() ).intersection([ envNode, spheresNode ]) , set( [ envNode, spheresNode ] ) )
 		self.assertTrue( IECore.LinkedScene.linkAttribute in envScene.readAttributeNames() )
 		self.assertEqual( envScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/environment.lscc'), "root":IECore.InternedStringVectorData() } ) )
 		self.assertFalse( envScene.hasObject() )
+
 		spheresScene = scene.child( spheresNode )
 		self.assertTrue( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertEqual( spheresScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData() } ) )
@@ -552,5 +557,15 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertTrue( leafScene.hasObject() )
 		self.assertTrue( isinstance( leafScene.readObject(0), IECore.MeshPrimitive) )
 
+		# test time remapped scene readers...
+		spheresShape = str( maya.cmds.createNode( 'ieSceneShape' ) )
+		maya.cmds.setAttr( spheresShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
+		maya.cmds.setAttr( spheresShape+'.time', 24.0*10 )
+
+		spheresScene = scene.child( 'ieScene3' )
+
+		self.assertTrue( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual( spheresScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData(), "time":IECore.DoubleData(10.0) } ) )		
+
 if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
