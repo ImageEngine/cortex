@@ -297,6 +297,13 @@ static void worldEnd( Renderer &r )
 	r.worldEnd();
 }
 
+static void editBegin( Renderer &r, const std::string &name, const dict &parameters )
+{
+	IECore::CompoundDataMap p;
+	fillCompoundDataMap( p, parameters );
+	r.editBegin( name, p );
+}
+
 void bindRenderer()
 {
 	scope rendererScope =  RunTimeTypedClass<Renderer>( "An abstract class to define a renderer" )
@@ -348,7 +355,9 @@ void bindRenderer()
 		.def("instance", &Renderer::instance)
 
 		.def("command", &command)
-
+		
+		.def("editBegin", &editBegin)
+		.def("editEnd", &Renderer::editEnd)
 	;
 
 	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrapPtr>( "Procedural" )

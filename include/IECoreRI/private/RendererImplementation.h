@@ -114,6 +114,9 @@ class RendererImplementation : public IECore::Renderer
 
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
+		virtual void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void editEnd();
+
 	private :
 
 		// Does things common to both constructors

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -482,6 +482,10 @@ class Renderer : public IECore::Renderer
 		/// \todo Consider generalising an interface for scene edits and making it a standard part of the documentation
 		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
+		
+		/// \todo Implement the existing editing commands in this new form.
+		virtual void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void editEnd();
 
 		/// Returns the internal ShaderLoader object used to load the shaders for this renderer.
 		/// If called before worldBegin it returns 0.

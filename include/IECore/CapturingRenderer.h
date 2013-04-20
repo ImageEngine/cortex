@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -128,6 +128,9 @@ class CapturingRenderer : public Renderer
 
 		virtual DataPtr command( const std::string &name, const CompoundDataMap &parameters );
 
+		virtual void editBegin( const std::string &editType, const CompoundDataMap &parameters );
+		virtual void editEnd();
+		
 		/// Returns the world that was captured.
 		/// \todo If we had a class for representing whole Scenes (including stuff before worldBegin)
 		/// then we could have a scene() method instead.

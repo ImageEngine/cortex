@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -441,6 +441,20 @@ IECore::DataPtr IECoreRI::SXRendererImplementation::command( const std::string &
 	return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// rerendering
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void IECoreRI::SXRendererImplementation::editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters )
+{
+	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::editBegin", "Not implemented" );
+}
+
+void IECoreRI::SXRendererImplementation::editEnd()
+{
+	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::editEnd", "Not implemented" );
+}
+		
 /////////////////////////////////////////////////////////////////////////////////////////
 // shading
 /////////////////////////////////////////////////////////////////////////////////////////

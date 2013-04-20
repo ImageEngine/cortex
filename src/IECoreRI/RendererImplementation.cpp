@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -454,6 +454,23 @@ void IECoreRI::RendererImplementation::worldBegin()
 {
 	ScopedContext scopedContext( m_context );
 	
+	// we implement the "editable" option by specifying the raytrace hider with
+	// an "editable" parameter. preprocess our options to reflect that, warning
+	// the user if they were trying to use any hider other than the raytrace one.
+	
+	const BoolData *editableData = m_options->member<BoolData>( "editable" );
+	if( editableData && editableData->readable() )
+	{
+		const StringData *hiderData = m_options->member<StringData>( "ri:hider" );
+		if( hiderData && hiderData->readable() != "raytrace" )
+		{
+			msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", "Forcing hider to \"raytrace\" to support editable render." );
+		}
+		m_options->writable()["ri:hider"] = new StringData( "raytrace" );
+		m_options->writable()["ri:hider:editable"] = new BoolData( true );
+		m_options->writable()["ri:hider:progressive"] = new BoolData( true );
+	}
+	
 	// output all our stored options
 	
 	std::set<std::string> categoriesDone;
@@ -501,6 +518,10 @@ void IECoreRI::RendererImplementation::worldBegin()
 				RiOptionV( "user", pl.n(), pl.tokens(), pl.values() );
 				categoriesDone.insert( "user" );
 			}
+			processed = true;
+		}
+		else if( name == "editable" )
+		{
 			processed = true;
 		}
 		
@@ -1601,4 +1622,18 @@ IECore::DataPtr IECoreRI::RendererImplementation::illuminateCommand( const std::
 
 	RiIlluminate( (void *)handleData->readable().c_str(), stateData->readable() );
 	return 0;
+}
+
+void RendererImplementation::editBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	ScopedContext scopedContext( m_context );
+	
+	ParameterList p( parameters );
+	RiEditBeginV( name.c_str(), p.n(), p.tokens(), p.values() );
+}
+
+void RendererImplementation::editEnd()
+{
+	ScopedContext scopedContext( m_context );
+	RiEditEnd();
 }
