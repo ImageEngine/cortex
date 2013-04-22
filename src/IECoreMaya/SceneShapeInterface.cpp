@@ -177,6 +177,7 @@ MStatus SceneShapeInterface::initialize()
 	nAttr.setStorable( true );
 	nAttr.setConnectable( true );
 	nAttr.setHidden( false );
+	nAttr.setChannelBox( true );
 
 	s = addAttribute( aDrawGeometry );
 
@@ -186,6 +187,7 @@ MStatus SceneShapeInterface::initialize()
 	nAttr.setStorable( true );
 	nAttr.setConnectable( true );
 	nAttr.setHidden( false );
+	nAttr.setChannelBox( true );
 
 	s = addAttribute( aDrawRootBound );
 	
@@ -195,6 +197,7 @@ MStatus SceneShapeInterface::initialize()
 	nAttr.setStorable( true );
 	nAttr.setConnectable( true );
 	nAttr.setHidden( false );
+	nAttr.setChannelBox( true );
 
 	s = addAttribute( aDrawChildBounds );
 	

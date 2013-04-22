@@ -62,10 +62,22 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 	def create( parentName ) :
 		
 		try:
-			fnDN = FnDagNode.createShapeWithParent( parentName, "ieSceneShape" )
+			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True )
 		except:
-			fnDN = FnDagNode.createShapeWithParent( "sceneShape_"+parentName, "ieSceneShape" )
-		fnScS = FnSceneShape( fnDN.object() )
+			# The parent name is supposed to be the children names in a sceneInterface, they could be numbers, maya doesn't like that. Use a prefix.
+			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True )
+				
+		parentShort = parentNode.rpartition( "|" )[-1]
+		numbersMatch = re.search( "[0-9]+$", parentShort )
+		if numbersMatch is not None :
+			numbers = numbersMatch.group()
+			shapeName = parentShort[:-len(numbers)] + "SceneShape" + numbers
+		else :
+			shapeName = parentShort + "SceneShape"
+			
+		shapeNode = maya.cmds.createNode( "ieSceneShape", name=shapeName, parent=parentNode, skipSelect=True )
+		
+		fnScS = FnSceneShape( shapeNode )
 		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
 		maya.cmds.setAttr( fnScS.fullPathName()+".objectOnly", l=True )
 		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.time' )
@@ -127,7 +139,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 	
 	## Returns the full path name to this node.
 	def fullPathName( self ) :
-
+		
 		try :
 			f = maya.OpenMaya.MFnDagNode( self.object() )
 			return f.fullPathName()
@@ -253,15 +265,27 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		maya.cmds.setAttr( node+".objectOnly", l=False )
 		maya.cmds.setAttr( node+".objectOnly", 0 )
 		maya.cmds.setAttr( node+".objectOnly", l=True )
-		maya.cmds.setAttr( node+".visibility", True )
+		maya.cmds.setAttr( node+".intermediateObject", 0 )
 	
 	def convertToGeometry( self ) :
 
-		# Expand scene first, then for each scene shape we turn off visibility and connect a mesh
+		# Expand scene first, then for each scene shape we turn them into an intermediate object and connect a mesh
 		self.expandAllChildren()
 		transform = maya.cmds.listRelatives( self.fullPathName(), parent=True, f=True )[0]
 		
 		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
+
+		def getObjectShapeName( parentNode ):
+			
+			parentShort = parentNode.rpartition( "|" )[-1]
+			numbersMatch = re.search( "[0-9]+$", parentShort )
+			if numbersMatch is not None :
+				numbers = numbersMatch.group()
+				shapeName = parentShort[:-len(numbers)] + "Shape" + numbers
+			else :
+				shapeName = parentShort + "Shape"
+			
+			return shapeName
 
 		for sceneShape in allSceneShapes:
 			maya.cmds.setAttr( sceneShape+".querySpace", 1 )
@@ -273,10 +297,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 				object = fn.sceneInterface().readObject( 0.0 )
 				
 				# TODO: use the name of a regular maya shape, once the sceneShape uses a correct naming
-				if isinstance( object, IECore.MeshPrimitive ) or isinstance( object, IECore.SpherePrimitive ):
-					shapeName = parent.split("|")[-1]+"_mesh"
-				elif isinstance( object, IECore.CurvesPrimitive ):
-					shapeName = parent.split("|")[-1]+"_curve"
+				if isinstance( object, IECore.MeshPrimitive ) or isinstance( object, IECore.SpherePrimitive ) or isinstance( object, IECore.CurvesPrimitive ):
+					shapeName = getObjectShapeName( parent )
 				else:
 					# Not compatible with what can be in the outputObjects sceneShape plug
 					continue
