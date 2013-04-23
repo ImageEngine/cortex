@@ -39,6 +39,7 @@ import IECoreMaya
 
 class MayaSceneTest( IECoreMaya.TestCase ) :
 	
+	
 	def testFileName( self ) :
 
 		scene = IECoreMaya.MayaScene()
@@ -367,7 +368,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
 		self.assertEqual( mesh0_5["P"].data[0].x, -1 )
 		self.assertEqual( mesh1["P"].data[0].x, -1.5 )
-
+	
 	def testReadBound( self ) :
 		
 		# create some cubes:
@@ -415,7 +416,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		cube3Transform = cube1Transform.child( "pCube3" )
 		self.assertEqual( cube3Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
-
+	
 	def testAnimatedMeshBound( self ) :
 		
 		# Currently fails, because I'm pulling on the boundingBox plugs at arbitrary
@@ -566,6 +567,17 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 
 		self.assertTrue( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertEqual( spheresScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData(), "time":IECore.DoubleData(10.0) } ) )		
-
+	
+	def testReadRootAttribute( self ):
+		
+		maya.cmds.file( new=True, f=True )
+		# make sure we are at time 0
+		maya.cmds.currentTime( "0sec" )
+		scene = IECoreMaya.MayaScene()
+		
+		# tests a bug where calling attributeNames at the root raised an exception
+		scene.attributeNames()
+	
+		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
