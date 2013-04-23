@@ -44,7 +44,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 	
 	__testFile = "test/test.scc"
 
-	def writeSCC( self ) :
+	def setUp( self ) :
 		
 		scene = IECore.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
 		sc = scene.createChild( str(1) )
@@ -73,7 +73,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 	def testSceneInterface( self ) :
 
-		self.writeSCC()
+		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( "ieSceneShape" )
 		maya.cmds.setAttr( node+'.file', FnSceneShapeTest.__testFile,type='string' )
 
@@ -98,17 +98,19 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 	def testCreationName( self ) :
 	
+		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "bob" )
-		self.assertEqual( fn.fullPathName(), u"|bob|bobShape" )
+		self.assertEqual( fn.fullPathName(), u"|bob|bobSceneShape" )
 
 		fn = IECoreMaya.FnSceneShape.create( "bob1")
-		self.assertEqual( fn.fullPathName(), u"|bob1|bobShape1" )
+		self.assertEqual( fn.fullPathName(), u"|bob1|bobSceneShape1" )
 
 		fn = IECoreMaya.FnSceneShape.create( "bob" )
-		self.assertEqual( fn.fullPathName(), u"|bob2|bobShape2" )
+		self.assertEqual( fn.fullPathName(), u"|bob2|bobSceneShape2" )
 	
 	def testCreationSetup( self ) :
 		
+		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "test" )
 		
 		self.assertTrue( maya.cmds.sets( fn.fullPathName(), isMember="initialShadingGroup" ) )
@@ -118,7 +120,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 	def testExpandScene( self ) :
 		
-		self.writeSCC()
+		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "test" )
 		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
@@ -130,7 +132,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertTrue( len(result) == 1 )
 		childFn = result[0]
 		self.assertTrue( isinstance( childFn, IECoreMaya.FnSceneShape ) )
-		self.assertEqual( childFn.fullPathName(), "|test|sceneShape_1|sceneShape_Shape1" )
+		self.assertEqual( childFn.fullPathName(), "|test|sceneShape_1|sceneShape_SceneShape1" )
 		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".file" ), FnSceneShapeTest.__testFile )
 		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".root" ), "/1" )
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outTranslate", "|test|sceneShape_1.translate" ) )
@@ -145,7 +147,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		self.assertTrue( len(result) == 1 )
 		self.assertTrue( isinstance( result[0], IECoreMaya.FnSceneShape ) )
-		self.assertEqual( result[0].fullPathName(), "|test|sceneShape_1|child|childShape" )
+		self.assertEqual( result[0].fullPathName(), "|test|sceneShape_1|child|childSceneShape" )
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".file" ), FnSceneShapeTest.__testFile )
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".root" ), "/1/child" )
 		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outTranslate", "|test|sceneShape_1|child.translate" ) )
@@ -156,43 +158,41 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 	def testCollapseScene( self ) :
 		
-		self.writeSCC()
+		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "test" )
 		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
 		result = fn.expandScene()
 		result[0].expandScene()
 		
-		children = set( ["|test|testShape", "|test|sceneShape_1", "|test|sceneShape_1|sceneShape_Shape1", "|test|sceneShape_1|child", "|test|sceneShape_1|child|childShape"] )
+		children = set( ["|test|testSceneShape", "|test|sceneShape_1", "|test|sceneShape_1|sceneShape_SceneShape1", "|test|sceneShape_1|child", "|test|sceneShape_1|child|childSceneShape"] )
 		self.assertEqual( set(maya.cmds.listRelatives( "|test", ad=True, f=True )), children )
 		
 		fn.collapseScene()
-		self.assertEqual( maya.cmds.listRelatives( "|test", ad=True, f=True ), ["|test|testShape"] )
+		self.assertEqual( maya.cmds.listRelatives( "|test", ad=True, f=True ), ["|test|testSceneShape"] )
 		
 		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ), 0 )
 		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".visibility" ), 1 )
 	
 	def testConvertToGeometry( self ):
 		
-		self.writeSCC()
+		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "test" )
 		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
 		fn.convertToGeometry()
 		
-		children = set( ["|test|testShape", "|test|sceneShape_1"] )
+		children = set( ["|test|testSceneShape", "|test|sceneShape_1"] )
 		self.assertEqual( set(maya.cmds.listRelatives( "|test", f=True )), children )
 		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".intermediateObject" ), 1 )
 		
-		children = set( ["|test|sceneShape_1|sceneShape_Shape1", "|test|sceneShape_1|child", "|test|sceneShape_1|sceneShape_1_mesh"] )
+		children = set( ["|test|sceneShape_1|sceneShape_SceneShape1", "|test|sceneShape_1|child", "|test|sceneShape_1|sceneShape_Shape1"] )
 		self.assertEqual( set(maya.cmds.listRelatives( "|test|sceneShape_1", f=True )), children )
-		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.intermediateObject" ), 1 )
-		self.assertEqual( maya.cmds.nodeType( "|test|sceneShape_1|sceneShape_1_mesh" ), "mesh")
+		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_SceneShape1.intermediateObject" ), 1 )
+		self.assertEqual( maya.cmds.nodeType( "|test|sceneShape_1|sceneShape_Shape1" ), "mesh")
 		
-		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_Shape1.queryPaths[1]" ), "/" )
-		self.assertTrue( maya.cmds.isConnected( "|test|sceneShape_1|sceneShape_Shape1.outObjects[1]", "|test|sceneShape_1|sceneShape_1_mesh.inMesh" ) )
-		
-		
+		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_SceneShape1.queryPaths[1]" ), "/" )
+		self.assertTrue( maya.cmds.isConnected( "|test|sceneShape_1|sceneShape_SceneShape1.outObjects[1]", "|test|sceneShape_1|sceneShape_Shape1.inMesh" ) )
 
 	
 	def tearDown( self ) :
