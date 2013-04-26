@@ -84,11 +84,13 @@ void FromMayaMeshConverter::constructCommon()
 	StringParameter::PresetsContainer interpolationPresets;
 	interpolationPresets.push_back( StringParameter::Preset( "poly", "linear" ) );
 	interpolationPresets.push_back( StringParameter::Preset( "subdiv", "catmullClark" ) );
+	// the last interpolation type is 'default'
+	interpolationPresets.push_back( StringParameter::Preset( "default", "default" ) );
 
 	m_interpolation = new StringParameter(
 		"interpolation",
-		"Sets the interpolation type of the new mesh",
-		"linear",
+		"Sets the interpolation type of the new mesh. When 'default' is used it will query the attribute 'ieMeshInterpolation' from the Mesh instead (and use linear if nonexistent).",
+		"default",
 		interpolationPresets
 	);
 
@@ -589,13 +591,44 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	copy( MArrayIter<MIntArray>::begin( vertexCounts ), MArrayIter<MIntArray>::end( vertexCounts ), verticesPerFaceIt );
 	copy( MArrayIter<MIntArray>::begin( polygonVertices ), MArrayIter<MIntArray>::end( polygonVertices ), vertexIdsIt );
 	
-	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, m_interpolation->getTypedValue() );
+	std::string interpolation = m_interpolation->getTypedValue();
+	if ( interpolation == "default" )
+	{
+		MStatus st;
+		MPlug interpolationPlug = fnMesh.findPlug( "ieMeshInterpolation", &st );
+		if ( st )
+		{
+			unsigned int interpolationIndex = interpolationPlug.asInt(MDGContext::fsNormal, &st);
+			if ( st )
+			{
+				if ( interpolationIndex < m_interpolation->presets().size() - 1 )
+				{
+					// convert interpolation index to the preset value
+					interpolation = staticPointerCast< StringData >( m_interpolation->presets()[interpolationIndex].second )->readable();
+				}
+				else
+				{
+					interpolation = "linear";
+				}
+			}
+			else
+			{
+				interpolation = "linear";
+			}
+		}
+		else
+		{
+			interpolation = "linear";
+		}
+	}
+	
+	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, interpolation );
 
 	if( m_points->getTypedValue() )
 	{
 		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, points() );
 	}
-	if( m_normals->getTypedValue() && m_interpolation->getTypedValue()=="linear" )
+	if( m_normals->getTypedValue() && interpolation=="linear" )
 	{
 		result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, normals() );
 	}

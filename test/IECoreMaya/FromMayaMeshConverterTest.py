@@ -81,11 +81,16 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assertEqual( converter["interpolation"].getTypedValue(), "linear" )
+		self.assertEqual( converter["interpolation"].getTypedValue(), "default" )
+		p = converter.convert()
+		self.assertEqual( p.interpolation, "linear" )
+		self.assertTrue( "N" in p )
+		converter["interpolation"].setTypedValue( "linear" )
 		p = converter.convert()
 		self.assertEqual( p.interpolation, "linear" )
 		converter["interpolation"].setTypedValue( "catmullClark" )
 		p = converter.convert()
+		self.assertFalse( "N" in p )
 		self.assertEqual( p.interpolation, "catmullClark" )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
@@ -111,6 +116,31 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter["st"].setTypedValue( False )
 		self.assert_( not "s" in converter.convert() )
 		self.assert_( not "t" in converter.convert() )
+
+	def testInterpolationType( self ) :
+
+		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
+		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
+
+		# first time creates the plug
+		IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( sphere, "catmullClark" )
+		mesh = IECoreMaya.FromMayaShapeConverter.create( sphere ).convert()
+		self.assertEqual( mesh.interpolation, "catmullClark" )
+
+		# second time, just update the plug
+		IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( sphere, "linear" )
+		mesh = IECoreMaya.FromMayaShapeConverter.create( sphere ).convert()
+		self.assertEqual( mesh.interpolation, "linear" )
+
+		# accepts the labels for the presets "subdiv" -> "catmullClark"
+		IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( sphere, "subdiv" )
+		mesh = IECoreMaya.FromMayaShapeConverter.create( sphere ).convert()
+		self.assertEqual( mesh.interpolation, "catmullClark" )
+
+		# accepts the labels for the presets "poly" -> "linear"
+		IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( sphere, "poly" )
+		mesh = IECoreMaya.FromMayaShapeConverter.create( sphere ).convert()
+		self.assertEqual( mesh.interpolation, "linear" )
 
 	def testSphere( self ) :
 

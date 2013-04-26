@@ -251,5 +251,23 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 			self.assertEqual( origNormal, normal3f )
 			self.assertEqual( origNormal, normal3d )
 
+	def testSetMeshInterpolation( self ) :
+
+		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
+		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
+
+		self.assertRaises( ValueError, maya.cmds.getAttr, sphere + ".ieMeshInterpolation" )
+
+		IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( sphere )
+		self.assertEqual( maya.cmds.getAttr( sphere + ".ieMeshInterpolation" ), 0 )
+
+		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh.interpolation = "catmullClark"
+		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
+		transform = maya.cmds.createNode( "transform" )
+		self.assert_( converter.convert( transform ) )
+		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
+		self.assertEqual( maya.cmds.getAttr( mayaMesh + ".ieMeshInterpolation" ), 1 )
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
