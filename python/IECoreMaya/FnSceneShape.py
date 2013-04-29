@@ -67,6 +67,11 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			# The parent name is supposed to be the children names in a sceneInterface, they could be numbers, maya doesn't like that. Use a prefix.
 			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True )
 				
+		return FnSceneShape.createForTransform( parentNode )
+	
+	@staticmethod
+	def createForTransform( parentNode ) :
+		
 		parentShort = parentNode.rpartition( "|" )[-1]
 		numbersMatch = re.search( "[0-9]+$", parentShort )
 		if numbersMatch is not None :
@@ -83,6 +88,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.time' )
 		
 		return fnScS
+
 
 	## Returns a set of the names of any currently selected components.
 	def selectedComponentNames( self ) :
@@ -171,7 +177,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		return maya.cmds.getAttr( self.fullPathName()+".objectOnly" )
 
 
-	def expandScene( self ) :
+	def expandScene( self, ignoreObjectOnlyFlag = False ) :
 
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
@@ -187,7 +193,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			
 		newSceneShapeFns = []
 		
-		if maya.cmds.getAttr( node+".objectOnly"):
+		if not ignoreObjectOnlyFlag and maya.cmds.getAttr( node+".objectOnly"):
 			# Already expanded, return existing scene shapes
 			childTransforms = maya.cmds.listRelatives( transform, f=True, type="transform" ) or []
 			for t in childTransforms:
@@ -212,10 +218,18 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		for i, child in enumerate( sceneChildren ):
 			
+			if maya.cmds.objExists( transform+"|"+child ):
+				shape = maya.cmds.listRelatives( transform+"|"+child, f=True, type="ieSceneShape" )
+				if shape:
+					fnChild = IECoreMaya.FnSceneShape( shape[0] )
+					newSceneShapeFns.append( fnChild )
+					continue
+				else:
+					fnChild = IECoreMaya.FnSceneShape.createForTransform( transform+"|"+child )
+			else:
+				fnChild = IECoreMaya.FnSceneShape.create( child )
+
 			maya.cmds.setAttr( node+".queryPaths["+str(i)+"]", "/"+child, type="string" )
-			
-			# Create sceneShape for child
-			fnChild = IECoreMaya.FnSceneShape.create( child )
 			childNode = fnChild.fullPathName()
 			childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
 			maya.cmds.setAttr( childNode+".file", sceneFile, type="string" )
@@ -237,12 +251,12 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		return newSceneShapeFns
 	
 
-	def expandAllChildren( self ):
+	def expandAllChildren( self, ignoreObjectOnlyFlag = False ):
 		
 		newFn = []
 		def recursiveExpand( fnSceneShape ):
 			
-			new = fnSceneShape.expandScene()
+			new = fnSceneShape.expandScene( ignoreObjectOnlyFlag )
 			newFn.extend( new )
 			for n in new:
 				recursiveExpand( n )
@@ -267,10 +281,10 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		maya.cmds.setAttr( node+".objectOnly", l=True )
 		maya.cmds.setAttr( node+".intermediateObject", 0 )
 	
-	def convertToGeometry( self ) :
+	def convertToGeometry( self, ignoreObjectOnlyFlag = False ) :
 
 		# Expand scene first, then for each scene shape we turn them into an intermediate object and connect a mesh
-		self.expandAllChildren()
+		self.expandAllChildren( ignoreObjectOnlyFlag )
 		transform = maya.cmds.listRelatives( self.fullPathName(), parent=True, f=True )[0]
 		
 		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
@@ -295,9 +309,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 				parent = maya.cmds.listRelatives( sceneShape, parent=True, f=True )[0]
 				object = fn.sceneInterface().readObject( 0.0 )
-				
-				# TODO: use the name of a regular maya shape, once the sceneShape uses a correct naming
-				if isinstance( object, IECore.MeshPrimitive ) or isinstance( object, IECore.SpherePrimitive ) or isinstance( object, IECore.CurvesPrimitive ):
+
+				if isinstance( object, IECore.MeshPrimitive ) or isinstance( object, IECore.SpherePrimitive ) or isinstance( object, IECore.CurvesPrimitive ) or isinstance( object, IECore.CoordinateSystem ):
 					shapeName = getObjectShapeName( parent )
 				else:
 					# Not compatible with what can be in the outputObjects sceneShape plug
@@ -327,7 +340,11 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 					maya.cmds.sets( mesh, add="initialShadingGroup" )
 				elif isinstance( object, IECore.CurvesPrimitive ):
 					curve = maya.cmds.createNode( "nurbsCurve", parent = parent, name = shapeName )
-					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', mesh+".create" )
+					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', curve+".create" )
+				elif isinstance( object, IECore.CoordinateSystem ):
+					loc = maya.cmds.spaceLocator( name = shapeName )
+					maya.cmds.parent( loc[0], parent )
+					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', loc[0]+".localPosition" )
 
 			# turn the scene node an intermediateObject so it can't be seen by MayaScene
 			maya.cmds.setAttr( sceneShape+".intermediateObject", 1 )

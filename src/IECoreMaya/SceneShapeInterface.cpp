@@ -66,6 +66,8 @@
 #include "IECore/SampledSceneInterface.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/TransformOp.h"
+#include "IECore/CoordinateSystem.h"
+#include "IECore/Transform.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnEnumAttribute.h"
@@ -245,6 +247,7 @@ MStatus SceneShapeInterface::initialize()
 	aOutputObjects = gAttr.create( "outObjects", "oob", &s );
 	gAttr.addDataAccept( MFnMeshData::kMesh );
 	gAttr.addDataAccept( MFnNurbsCurveData::kNurbsCurve );
+	gAttr.addNumericDataAccept( MFnNumericData::k3Double );
 	gAttr.setReadable( true );
 	gAttr.setWritable( false );
 	gAttr.setStorable( false );
@@ -671,7 +674,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MArrayDataBuilder outputBuilder = outputDataHandle.builder();
 
 			ObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
-			
+
 			if( querySpace == World )
 			{
 				// If world space, need to transform the object using the concatenated matrix from the sceneInterface path to the query path
@@ -685,35 +688,55 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 				object = transformer->operate();
 			}
 
-			ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( object );
-
-			if( converter )
+			IECore::TypeId type = object->typeId();
+			if( type == CoordinateSystemTypeId )
 			{
-				MObject data;
-				// Check the type for now, because a dag node is created if you pass an empty MObject to the converter
-				// Won't be needed anymore when the related todo is addressed in the converter
-				IECore::TypeId type = object->typeId();
-				if( type == MeshPrimitiveTypeId )
+				IECore::ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( object );
+				Imath::M44f m = coordSys->getTransform()->transform();
+				Imath::V3f s,h,r,t;
+				Imath::extractSHRT(m, s, h, r, t);
+
+				MFnNumericData fnData;
+				MObject data = fnData.create( MFnNumericData::k3Double );
+				fnData.setData( (double)t[0], (double)t[1], (double)t[2] );
+
+				MDataHandle handle = outputBuilder.addElement( index );
+				handle.set( data );
+			}
+			else
+			{
+				ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( object );
+
+				if( converter )
 				{
-					MFnMeshData fnData;
-					data = fnData.create();
-				}
-				else if( type == CurvesPrimitiveTypeId )
-				{
-					MFnNurbsCurveData fnData;
-					data = fnData.create();
-				}
-				
-				if( !data.isNull() )
-				{
-					bool conversionSuccess = converter->convert( data );
-					if ( conversionSuccess )
+					MObject data;
+					// Check the type for now, because a dag node is created if you pass an empty MObject to the converter
+					// Won't be needed anymore when the related todo is addressed in the converter
+					
+					if( type == MeshPrimitiveTypeId )
 					{
-						MDataHandle h = outputBuilder.addElement( index, &s );
-						s = h.set( data );
+						MFnMeshData fnData;
+						data = fnData.create();
+					}
+					else if( type == CurvesPrimitiveTypeId )
+					{
+						MFnNurbsCurveData fnData;
+						data = fnData.create();
+					}
+
+					if( !data.isNull() )
+					{
+						bool conversionSuccess = converter->convert( data );
+						if ( conversionSuccess )
+						{
+							MDataHandle h = outputBuilder.addElement( index, &s );
+							s = h.set( data );
+						}
 					}
 				}
 			}
+
+			
 
 		}
 		else if( topLevelPlug == aBound )
