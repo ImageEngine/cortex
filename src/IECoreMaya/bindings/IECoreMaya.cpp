@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -93,6 +93,8 @@
 #include "IECoreMaya/bindings/ToMayaCameraConverterBinding.h"
 #include "IECoreMaya/bindings/MayaSceneBinding.h"
 #include "IECoreMaya/bindings/FnSceneShapeBinding.h"
+#include "IECoreMaya/bindings/FromMayaLocatorConverterBinding.h"
+#include "IECoreMaya/bindings/ToMayaLocatorConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -159,4 +161,6 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindToMayaCameraConverter();
 	bindMayaScene();
 	bindFnSceneShape();
+	bindFromMayaLocatorConverter();
+	bindToMayaLocatorConverter();
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -118,6 +118,8 @@ enum TypeId
 	ToMayaCameraConverterTypeId = 109071,
 	MayaSceneTypeId = 109072,
 	FromMayaProceduralHolderConverterTypeId = 109073,
+	FromMayaLocatorConverterTypeId = 109074,
+	ToMayaLocatorConverterTypeId = 109075,
 	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
 };
