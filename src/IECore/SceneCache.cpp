@@ -531,6 +531,35 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return object;
 		}
 
+		PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+		{
+			size_t sample1, sample2;
+			double x = objectSampleInterval( time, sample1, sample2 );
+			IndexedIOPtr objectIO = m_indexedIO->subdirectory( objectEntry );
+			if ( x == 0 )
+			{
+				return Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample1), primVarNames );
+			}
+			if ( x == 1 )
+			{
+				return Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample2), primVarNames );
+			}
+
+			PrimitiveVariableMap map1 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample1), primVarNames );
+			PrimitiveVariableMap map2 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample2), primVarNames );
+
+			for ( PrimitiveVariableMap::iterator it1 = map1.begin(); it1 != map1.end(); it1++ )
+			{
+				PrimitiveVariableMap::const_iterator it2 = map2.find( it1->first );
+				if ( it2 == map2.end() )
+				{
+					continue;
+				}
+				it1->second.data = staticPointerCast< Data >( linearObjectInterpolation( it1->second.data, it2->second.data, x ) );
+			}
+			return map1;
+		}
+
 		ReaderImplementationPtr child( const Name &name, MissingBehaviour missingBehaviour )
 		{
 			IndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, (IndexedIO::MissingBehaviour)missingBehaviour );
@@ -1829,6 +1858,12 @@ ObjectPtr SceneCache::readObject( double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readObject( time );
+}
+
+PrimitiveVariableMap SceneCache::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+{
+	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
+	return reader->readObjectPrimitiveVariables( primVarNames, time );
 }
 
 void SceneCache::writeObject( const Object *object, double time )

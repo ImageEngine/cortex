@@ -119,6 +119,9 @@ class MayaScene : public IECore::SceneInterface
 		/// Reads the object stored at this path in the scene at the given time - may
 		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
 		virtual IECore::ObjectPtr readObject( double time ) const;
+		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
+		/// Raises exception if it turns out not to be a Primitive object.
+		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
 		/// Not currently supported - will throw an exception.
 		virtual void writeObject( const IECore::Object *object, double time );
 

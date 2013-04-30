@@ -2,6 +2,7 @@
 #include "IECore/MatrixTransform.h"
 #include "IECore/Camera.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/Primitive.h"
 
 #include "IECoreMaya/MayaScene.h"
 #include "IECoreMaya/FromMayaTransformConverter.h"
@@ -362,6 +363,17 @@ ObjectPtr MayaScene::readObject( double time ) const
 		}
 	}
 	return 0;
+}
+
+PrimitiveVariableMap MayaScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+{
+	// \todo Optimize this function, adding special cases such as for Meshes.
+	PrimitivePtr prim = runTimeCast< Primitive >( readObject( time ) );
+	if ( !prim )
+	{
+		throw Exception( "Object does not have primitive variables!" );
+	}
+	return prim->variables;
 }
 
 void MayaScene::writeObject( const Object *object, double time )

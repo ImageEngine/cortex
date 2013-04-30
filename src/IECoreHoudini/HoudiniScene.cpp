@@ -385,6 +385,17 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 	return result;
 }
 
+PrimitiveVariableMap HoudiniScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+{
+	// \todo Optimize this function, adding special cases such as for Meshes.
+	PrimitivePtr prim = runTimeCast< Primitive >( readObject( time ) );
+	if ( !prim )
+	{
+		throw Exception( "Object does not have primitive variables!" );
+	}
+	return prim->variables;
+}
+
 void HoudiniScene::writeObject( const Object *object, double time )
 {
 	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );

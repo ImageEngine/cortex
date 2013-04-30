@@ -116,6 +116,7 @@ class SceneCache : public SampledSceneInterface
 		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
 		virtual ObjectPtr readObjectAtSample( size_t sampleIndex ) const;
 		virtual ObjectPtr readObject( double time ) const;
+		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const;
 		virtual void writeObject( const Object *object, double time );
 
 		virtual bool hasChild( const Name &name ) const;

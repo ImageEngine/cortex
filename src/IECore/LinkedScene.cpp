@@ -768,6 +768,22 @@ ObjectPtr LinkedScene::readObject( double time ) const
 	}
 }
 
+PrimitiveVariableMap LinkedScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+{
+	if ( m_linkedScene )
+	{
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
+		return m_linkedScene->readObjectPrimitiveVariables( primVarNames, time );
+	}
+	else
+	{
+		return m_mainScene->readObjectPrimitiveVariables( primVarNames, time );
+	}
+}
+
 void LinkedScene::writeObject( const Object *object, double time )
 {
 	if ( m_readOnly )

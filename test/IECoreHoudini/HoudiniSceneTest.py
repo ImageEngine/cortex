@@ -236,6 +236,9 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, -0.5 ) ), 1 )
 		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, -0.5 ) ), 1 )
 	
+		# check read primvars
+		self.assertEqual( mesh["P"], box1.readObjectPrimitiveVariables( [ "P" ], 0 )["P"] )
+
 	def testAnimatedMesh( self ) :
 		
 		scene = self.buildScene()

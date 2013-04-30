@@ -540,6 +540,30 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( d.readAttribute( "sceneInterface:animatedObjectTopology", 0 ), IECore.BoolData( True ) )
 		self.assertFalse( d.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
 
+	def testObjectPrimitiveVariablesRead( self ) :
+		
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		box["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2 = box.copy()
+		box2["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		b = s.createChild( "b" )
+		b.writeObject( box, 0 )
+		b.writeObject( box2, 1 )
+		
+		del s, b
+
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		b = s.child( "b" )
+
+		self.assertEqual( b.readObject(0)['P'], b.readObjectPrimitiveVariables(['P','Cs'], 0)['P'] )
+		self.assertEqual( b.readObject(0)['Cs'], b.readObjectPrimitiveVariables(['P','Cs'], 0)['Cs'] )
+		self.assertEqual( b.readObject(0.5)['P'], b.readObjectPrimitiveVariables(['P','Cs'], 0.5)['P'] )
+		self.assertEqual( b.readObject(0.5)['Cs'], b.readObjectPrimitiveVariables(['P','Cs'], 0.5)['Cs'] )
+		self.assertEqual( b.readObject(1)['P'], b.readObjectPrimitiveVariables(['P','Cs'], 1)['P'] )
+		self.assertEqual( b.readObject(1)['Cs'], b.readObjectPrimitiveVariables(['P','Cs'], 1)['Cs'] )
+
 if __name__ == "__main__":
 	unittest.main()
 

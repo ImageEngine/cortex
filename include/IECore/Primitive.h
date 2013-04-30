@@ -103,6 +103,13 @@ class Primitive : public VisibleRenderable
 		/// Hash representing the topology only
 		virtual void topologyHash( MurmurHash &h ) const = 0;
 
+		/// Utility function that can be used in place of Object::load() to load only the primitive variables from a Primitive object stored in a IndexedIO file.
+		/// The function tries to load the requested primitive variables and will ignore the ones that do not exist in the file.
+		/// \param ioInterface File handle where the Primitive is stored.
+		/// \param name Name of the entry where the Primitive is stored under the file location.
+		/// \param primVarNames List of primitive variable names that will be attempted to be loaded.
+		static PrimitiveVariableMap loadPrimitiveVariables( const IndexedIO *ioInterface, const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &primVarNames );
+
 	private:
 
 		static const unsigned int m_ioVersion;

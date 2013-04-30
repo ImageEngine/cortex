@@ -133,6 +133,33 @@ static list supportedExtensions( IndexedIO::OpenMode modes )
 	return result;
 }
 
+static dict readObjectPrimitiveVariables( const SceneInterface &m, list varNameList, double time )
+{
+	std::vector< InternedString > v;
+	int listLen = IECorePython::len( varNameList );
+	for (int i = 0; i < listLen; i++ )
+	{
+		extract< InternedString > inStr( varNameList[i] );
+		if ( !inStr.check() )
+		{
+			extract< std::string > ex( varNameList[i] );
+			if ( !ex.check() )
+			{
+				throw InvalidArgumentException( std::string( "Invalid prim var name! Should be a list of strings!" ) );
+			}
+			v.push_back( ex() );
+		}
+		v.push_back( inStr() );
+	}
+	PrimitiveVariableMap varMap = m.readObjectPrimitiveVariables( v, time );
+	dict result;
+	for ( PrimitiveVariableMap::const_iterator it = varMap.begin(); it != varMap.end(); it++ )
+	{
+		result[ it->first ] = it->second;
+	}
+	return result;
+}
+
 void bindSceneInterface()
 {
 	SceneInterfacePtr (SceneInterface::*nonConstChild)(const SceneInterface::Name &, SceneInterface::MissingBehaviour) = &SceneInterface::child;
@@ -170,6 +197,7 @@ void bindSceneInterface()
 		.def( "readAttribute", &SceneInterface::readAttribute )
 		.def( "writeAttribute", &SceneInterface::writeAttribute )
 		.def( "readObject", &SceneInterface::readObject )
+		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )
 		.def( "writeObject", &SceneInterface::writeObject )
 		.def( "hasObject", &SceneInterface::hasObject )
 		.def( "hasChild", &SceneInterface::hasChild )

@@ -40,6 +40,7 @@
 
 #include "IECore/Object.h"
 #include "IECore/Renderable.h"
+#include "IECore/PrimitiveVariable.h"
 
 namespace IECore
 {
@@ -52,7 +53,7 @@ IE_CORE_FORWARDDECLARE( SceneInterface );
 /// A path is an array of transform names.
 /// Using the method child, you can explore the hierarchy (and create new transforms).
 /// Each transform on the hierarchy has a unique name and contains the 3D transformation, custom attributes, 
-/// a bounding box, and EITHER more child transforms OR a leaf object. All of them can be animated.
+/// a bounding box, a main object and more child transforms. All of them can be animated.
 /// Animation is stored by providing the time and the value. When retrieving animation, the interface allows 
 /// for reading the individual stored samples or the interpolated value at any given time. 
 /// The path to the root transform is an empty array. The name of the root transform is "/" though.
@@ -169,6 +170,9 @@ class SceneInterface : public RunTimeTyped
 		virtual bool hasObject() const = 0;
 		/// Reads the object stored at this path in the scene at the given time.
 		virtual ObjectPtr readObject( double time ) const = 0;
+		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
+		/// Raises exception if it turns out not to be a Primitive object.
+		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const = 0;
 		/// Writes a geometry to this path in the scene.
 		/// Raises an exception if you try to write an object in the root path.
 		virtual void writeObject( const Object *object, double time ) = 0;
