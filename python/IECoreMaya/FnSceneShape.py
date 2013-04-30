@@ -342,9 +342,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 					curve = maya.cmds.createNode( "nurbsCurve", parent = parent, name = shapeName )
 					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', curve+".create" )
 				elif isinstance( object, IECore.CoordinateSystem ):
-					loc = maya.cmds.spaceLocator( name = shapeName )
-					maya.cmds.parent( loc[0], parent )
-					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', loc[0]+".localPosition" )
+					loc = maya.cmds.createNode( "locator", parent = parent, name = shapeName )
+					maya.cmds.connectAttr( sceneShape+'.outObjects['+str(index)+']', loc+".localPosition" )
 
 			# turn the scene node an intermediateObject so it can't be seen by MayaScene
 			maya.cmds.setAttr( sceneShape+".intermediateObject", 1 )
