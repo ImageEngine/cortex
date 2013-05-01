@@ -46,6 +46,9 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 	__testPlugAnimFile = "test/testPlugAnim.scc"
 	__testPlugAttrFile = "test/testPlugAttr.scc"
 
+	def setUp( self ) :
+
+		maya.cmds.file( new=True, f=True )
 
 	def writeSCC( self, file, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
 		
