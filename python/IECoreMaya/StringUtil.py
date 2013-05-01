@@ -73,7 +73,7 @@ def dagPathFromString( s ) :
 		IECore.msg( IECore.Msg.Level.Warning, "IECoreMaya.dagPathFromString", "Name \"%s\" is not unique." % s )
 
 	result = maya.OpenMaya.MDagPath()
-	sl.getDependNode( 0, result )
+	sl.getDagPath( 0, result )
 	return result
 
 ## Utility function to return an MPlug when
