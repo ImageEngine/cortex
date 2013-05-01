@@ -251,6 +251,53 @@ void MayaScene::writeAttribute( const Name &name, const Object *attribute, doubl
 	throw Exception( "MayaScene::writeAttribute: write operations not supported!" );
 }
 
+bool MayaScene::hasTag( const Name &name ) const
+{
+	if ( m_isRoot )
+	{
+		return false;
+	}
+
+	if( m_dagPath.length() == 0 )
+	{
+		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
+	}
+	std::map< Name, HasFn >::const_iterator it = customTagReaders().find(name);
+	if ( it != customTagReaders().end() )
+	{
+		return it->second( m_dagPath );
+	}
+	return false;
+}
+
+void MayaScene::readTags( NameList &tags, bool includeChildren ) const
+{
+	tags.clear();
+
+	if ( m_isRoot )
+	{
+		return;
+	}
+
+	if( m_dagPath.length() == 0 )
+	{
+		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
+	}
+
+	for ( std::map< Name, HasFn >::const_iterator it = customTagReaders().begin(); it != customTagReaders().end(); it++ )
+	{
+		if ( it->second( m_dagPath ) )
+		{
+			tags.push_back( it->first );
+		}
+	}
+}
+
+void MayaScene::writeTags( const NameList &tags )
+{
+	throw Exception( "MayaScene::writeTags not supported" );
+}
+
 bool MayaScene::hasObject() const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
@@ -587,6 +634,11 @@ void MayaScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, Read
 	customAttributeReaders()[attrName] = r;
 }
 
+void MayaScene::registerCustomTag( const Name &tagName, HasFn hasFn )
+{
+	customTagReaders()[tagName] = hasFn;
+}
+
 std::vector< MayaScene::CustomReader > &MayaScene::customObjectReaders()
 {
 	static std::vector< MayaScene::CustomReader > readers;
@@ -596,5 +648,11 @@ std::vector< MayaScene::CustomReader > &MayaScene::customObjectReaders()
 std::map< SceneInterface::Name, MayaScene::CustomReader > &MayaScene::customAttributeReaders()
 {
 	static std::map< SceneInterface::Name, MayaScene::CustomReader > readers;
+	return readers;
+}
+
+std::map< SceneInterface::Name, MayaScene::HasFn > &MayaScene::customTagReaders()
+{
+	static std::map< SceneInterface::Name, MayaScene::HasFn > readers;
 	return readers;
 }

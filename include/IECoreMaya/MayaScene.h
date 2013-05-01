@@ -35,6 +35,7 @@
 #ifndef IECOREMAYA_MAYASCENE_H
 #define IECOREMAYA_MAYASCENE_H
 
+#include "boost/function.hpp"
 #include "tbb/mutex.h"
 
 #include "IECore/SceneInterface.h"
@@ -111,10 +112,21 @@ class MayaScene : public IECore::SceneInterface
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
 
 		/*
+		 * Tags
+		 */
+
+		/// Uses the custom registered tags to return whether a given tag is present in the scene location or not.
+		virtual bool hasTag( const Name &name ) const;
+		/// Uses the custom registered tags to list all the tags present in the scene location.
+		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
+		/// Not currently supported - will throw an exception.
+		virtual void writeTags( const NameList &tags );
+
+		/*
 		 * Object
 		 */
 
-		/// Convenience method to determine if a piece of geometry exists without reading it
+		/// Checks if there are objects in the scene (convertible from Maya or registered as custom objects)
 		virtual bool hasObject() const;
 		/// Reads the object stored at this path in the scene at the given time - may
 		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
@@ -155,8 +167,8 @@ class MayaScene : public IECore::SceneInterface
 		/// Returns an object for querying the scene at the given path (full path). 
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
-		typedef bool (*HasFn)( const MDagPath& );
-		typedef IECore::ObjectPtr (*ReadFn)( const MDagPath& );
+		typedef boost::function<bool (const MDagPath &)> HasFn;
+		typedef boost::function<IECore::ObjectPtr (const MDagPath &)> ReadFn;
 
 		// Register callbacks for custom objects.		
 		// The has function will be called during hasObject and it stops in the first one that returns true.
@@ -167,6 +179,10 @@ class MayaScene : public IECore::SceneInterface
 		// The has function will be called during hasAttribute and it stops in the first one that returns true.
 		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
 		static void registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn );
+
+		// Register callbacks for custom named tags.
+		// The has function will be called during hasTag and readTags.
+		static void registerCustomTag( const Name &tagName, HasFn hasFn );
 
 	private :
 		
@@ -184,6 +200,7 @@ class MayaScene : public IECore::SceneInterface
 		};
 		static std::vector< CustomReader > &customObjectReaders();
 		static std::map< Name, CustomReader > &customAttributeReaders();
+		static std::map< Name, HasFn > &customTagReaders();
 		
 	protected:
 		

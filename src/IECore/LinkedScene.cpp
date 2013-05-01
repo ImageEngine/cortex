@@ -588,18 +588,24 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 
 		if ( firstTime )
 		{
-			// if it's the first time, we better check if this level already has objects or children
+			// if it's the first time, we better check if this level already has objects, tags or children
 			// and raise exceptions to prevent weird configurations...
 			if ( m_mainScene->hasObject() )
 			{
 				throw Exception( "Links to external scenes cannot be created on locations where there's already an object saved!" );
 			}
 
-			NameList children;
-			m_mainScene->childNames( children );
-			if ( children.size() )
+			NameList names;
+			m_mainScene->childNames( names );
+			if ( names.size() )
 			{
-				throw Exception( "Links to external scenes cannot be created on locations where the are already child locations!" );
+				throw Exception( "Links to external scenes cannot be created on locations where there are already child locations!" );
+			}
+
+			m_mainScene->readTags( names, false );
+			if ( names.size() )
+			{
+				throw Exception( "Links to external scenes cannot be created on locations where there are already tags stored!" );
 			}
 
 		}
@@ -640,12 +646,63 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			m_mainScene->writeBound( linkedScene->readBound(time), time );
 		}
 
+		if ( firstTime )
+		{
+			// save the tags from the linked file to the current location so it gets propagated to the root.
+			NameList tags;
+			linkedScene->readTags(tags);
+			m_mainScene->writeTags( tags );
+		}
+
 		/// we keep the information this level has a link, so we can prevent attempts to 
 		/// create children or save objects at this level.
 		m_atLink = true;
 	}
 
 	m_mainScene->writeAttribute(name,attribute,time);
+}
+
+bool LinkedScene::hasTag( const Name &name ) const
+{
+	if ( m_linkedScene )
+	{
+		return m_linkedScene->hasTag( name );
+	}
+	else
+	{
+		return m_mainScene->hasTag( name );
+	}
+}
+
+void LinkedScene::readTags( NameList &tags, bool includeChildren ) const
+{
+	if ( includeChildren && !m_readOnly )
+	{
+		throw Exception( "readTags with includeChildren option is only supported when reading the scene file!" );
+	}
+
+	if ( m_linkedScene )
+	{
+		return m_linkedScene->readTags( tags, includeChildren );
+	}
+	else
+	{
+		return m_mainScene->readTags( tags, includeChildren );
+	}
+}
+
+void LinkedScene::writeTags( const NameList &tags )
+{
+	if ( m_readOnly )
+	{
+		throw Exception( "No write access to scene file!" );
+	}
+	if ( m_atLink )
+	{
+		throw Exception( "Locations with links to external scene cannot have tags themselves!" );
+	}
+
+	m_mainScene->writeTags(tags);
 }
 
 bool LinkedScene::hasObject() const

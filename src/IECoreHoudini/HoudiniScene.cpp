@@ -285,6 +285,21 @@ void HoudiniScene::writeAttribute( const Name &name, const Object *attribute, do
 	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
 }
 
+bool HoudiniScene::hasTag( const Name &name ) const
+{
+	throw Exception( "HoudiniScene::hasTag not supported" );
+}
+
+void HoudiniScene::readTags( NameList &tags, bool includeChildren ) const
+{
+	throw Exception( "HoudiniScene::readTags not supported" );
+}
+
+void HoudiniScene::writeTags( const NameList &tags )
+{
+	throw Exception( "HoudiniScene::writeTags not supported" );
+}
+
 bool HoudiniScene::hasObject() const
 {
 	OP_Node *node = retrieveNode( true );

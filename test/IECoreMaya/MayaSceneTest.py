@@ -33,12 +33,16 @@
 ##########################################################################
 
 import maya.cmds
+import maya.OpenMaya as OpenMaya
 
 import IECore
 import IECoreMaya
 
 class MayaSceneTest( IECoreMaya.TestCase ) :
 	
+	def setUp( self ) :
+
+		maya.cmds.file( new=True, f=True )
 	
 	def testFileName( self ) :
 
@@ -516,7 +520,6 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 	def testSceneShapeCustomReaders( self ):
 		
-		maya.cmds.file( new=True, f=True )
 		# make sure we are at time 0
 		maya.cmds.currentTime( "0sec" )
 		scene = IECoreMaya.MayaScene()
@@ -581,6 +584,31 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		# tests a bug where calling attributeNames at the root raised an exception
 		scene.attributeNames()
 	
+	def testCustomTags( self ) :
+
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.select( clear = True )
+		sphere = maya.cmds.polySphere( name="pSphere" )
+
+		def renderableTag( node ):
+			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
+			try:
+				dagPath.extendToShapeDirectlyBelow(0)
+			except:
+				return False
+			return dagPath.fullPathName().endswith("Shape")
+
+		IECoreMaya.MayaScene.registerCustomTag( "renderable", renderableTag )
+
+		scene = IECoreMaya.MayaScene()
+		transformScene = scene.child(str(t))
+		sphereScene = scene.child('pSphere')
+		self.assertFalse( scene.hasTag( 'renderable' ) )
+		self.assertEqual( scene.readTags(), [] )
+		self.assertFalse( transformScene.hasTag( 'renderable' ) )
+		self.assertEqual( transformScene.readTags(), [] )
+		self.assertEqual( sphereScene.readTags(), [ IECore.InternedString('renderable') ] )
+		self.assertTrue( sphereScene.hasTag( 'renderable' ) )
 		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

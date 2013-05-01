@@ -52,13 +52,16 @@ IE_CORE_FORWARDDECLARE( SceneInterface );
 /// Each SceneInterface instance maps to a specific transform in a scene, uniquely identified by it's path.
 /// A path is an array of transform names.
 /// Using the method child, you can explore the hierarchy (and create new transforms).
-/// Each transform on the hierarchy has a unique name and contains the 3D transformation, custom attributes, 
+/// Each transform on the hierarchy has a unique name and contains the 3D transformation, custom attributes, tags,
 /// a bounding box, a main object and more child transforms. All of them can be animated.
 /// Animation is stored by providing the time and the value. When retrieving animation, the interface allows 
 /// for reading the individual stored samples or the interpolated value at any given time. 
 /// The path to the root transform is an empty array. The name of the root transform is "/" though.
-/// The root transform by definition cannot store transformation or an object. Attributes are allowed and they will usually
-/// be used to store global objects in the scene or objects that are not parented to transforms.
+/// The root transform by definition cannot store transformation or an object. Attributes and Tags are allowed.
+/// Tags is simply a set of labels assigned to any location in a scene and they are propagated up in the hierarchy
+/// when the scene is saved, so they can be used to filter the scene when reading. For example, some geo could be 
+/// tagged as "proxy", then readers could easily only display the proxy geometry for quick previsualization.
+/// Care must be taken when a tag is set in the middle of the hierarchy as child locations will not inherit the tag.
 /// \ingroup ioGroup
 /// \todo Implement a TransformStack class that can represent any custom 
 /// transformation that could be interpolated and consider using it here as the
@@ -153,6 +156,7 @@ class SceneInterface : public RunTimeTyped
 		 * Attributes
 		 */
 
+		/// Convenience method to determine if an attribute exists without reading it
 		virtual bool hasAttribute( const Name &name ) const = 0;
 		/// Fills attrs with the names of all attributes available in the current directory
 		virtual void attributeNames( NameList &attrs ) const = 0;
@@ -161,6 +165,20 @@ class SceneInterface : public RunTimeTyped
 		/// Writers the attribute to this path within the scene
 		/// Raises an exception if you try to write an attribute in the root path with a time different than 0.
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time ) = 0;
+
+		/*
+		 * Tags
+		 */
+
+		/// Utility function that quickly checks for the existence of one tag in the scene (written at the current or any child location).
+		virtual bool hasTag( const Name &name ) const = 0;
+		/// Reads all the tags on the current scene location.
+		/// \param includeChildren If false, then it will return tags that were written only in the current scene location.
+		/// Otherwise, will include the union of all tags from the children as well which is usually the expected behavior. 
+		/// Some implementations may not support recursing to the children due to performance reasons and will ignore this flag.
+		virtual void readTags( NameList &tags, bool includeChildren = true ) const = 0;
+		/// Adds tags to the current scene location.
+		virtual void writeTags( const NameList &tags ) = 0;
 
 		/*
 		 * Object

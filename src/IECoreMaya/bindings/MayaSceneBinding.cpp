@@ -32,19 +32,47 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "maya/MString.h"
+
 #include "boost/python.hpp"
 
 #include "IECoreMaya/MayaScene.h"
 #include "IECoreMaya/bindings/MayaSceneBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
+
+class CustomTagReader
+{
+	public :
+		CustomTagReader( object fnc ) : m_fnc(fnc)
+		{
+		}
+
+		bool operator() ( const MDagPath &dagPath )
+		{
+			MString p = dagPath.fullPathName();
+			IECorePython::ScopedGILLock gilLock;
+			return m_fnc( p.asChar() );
+		}
+
+	private :
+
+		object m_fnc;
+};
+
+void registerCustomTag( std::string tagName, object fnc )
+{
+	MayaScene::registerCustomTag( tagName, CustomTagReader(fnc) );
+}
 
 void IECoreMaya::bindMayaScene()
 {
 	IECorePython::RunTimeTypedClass<MayaScene>()
 		.def( init<>() )
+		.def( "registerCustomTag", registerCustomTag ).staticmethod( "registerCustomTag" )
 	;
 }

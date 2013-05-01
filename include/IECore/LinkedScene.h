@@ -44,7 +44,7 @@ IE_CORE_FORWARDDECLARE( LinkedScene );
 
 /// Implements a scene that have references (links) to external scenes.
 /// Links can be created at any location in a scene. When a link is created in a given location,
-/// the object, bounds and children will be loaded from the linked scene (with time remapping). The transform and attributes
+/// the object, tags, bounds and children will be loaded from the linked scene (with time remapping). The transform, attributes
 /// are still loaded from the main scene.
 /// This class wraps another SceneInterface object that is responsible for actually storing the data
 /// (we call it the "main scene"). Links are represented as an attribute in the main scene called "SceneInterface:link".
@@ -121,6 +121,10 @@ class LinkedScene : public  SampledSceneInterface
 		virtual ObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
 		virtual ObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
+
+		virtual bool hasTag( const Name &name ) const;
+		virtual void readTags( NameList &tags, bool includeChildren ) const;
+		virtual void writeTags( const NameList &tags );
 
 		virtual bool hasObject() const;
 		virtual size_t numObjectSamples() const;

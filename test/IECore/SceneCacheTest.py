@@ -564,6 +564,63 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( b.readObject(1)['P'], b.readObjectPrimitiveVariables(['P','Cs'], 1)['P'] )
 		self.assertEqual( b.readObject(1)['Cs'], b.readObjectPrimitiveVariables(['P','Cs'], 1)['Cs'] )
 
+	def testTags( self ) :
+
+		def testSet( values ):
+			return set( map( lambda s: IECore.InternedString(s), values ) )
+
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		A = m.createChild( "A" )
+		a = A.createChild( "a" )
+		aa = a.createChild( "aa" )
+		ab = a.createChild( "ab" )
+		B = m.createChild( "B" )
+		b = B.createChild( "b" )
+		c = B.createChild( "c" )
+
+		aa.writeTags( [ "t1" ] )
+		self.assertEqual( set( aa.readTags(includeChildren=False) ), testSet( [ "t1" ] ) )
+		self.assertRaises( RuntimeError, aa.readTags )
+		aa.writeTags( [ "t1" ] )
+		ab.writeTags( [ IECore.InternedString("t1") ] )
+		ab.writeTags( [ IECore.InternedString("t2") ] )
+
+		c.writeTags( [ "t3" ] )
+
+		B.writeTags( [ "t4" ] )
+
+		A.writeTags( [] )
+
+		del m, A, a, aa, ab, B, b, c
+
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		A = m.child("A")
+		a = A.child("a")
+		aa = a.child("aa")
+		ab = a.child("ab")
+		B = m.child("B")
+		b = B.child("b")
+		c = B.child("c")
+
+		self.assertEqual( set( m.readTags() ), testSet( [ "t1", "t2", "t3", "t4" ] ) )
+		self.assertEqual( set( m.readTags(includeChildren=False) ), testSet([]) )
+		self.assertEqual( set( A.readTags() ), testSet( [ "t1", "t2" ] ) )
+		self.assertEqual( set( a.readTags() ), testSet( [ "t1", "t2" ] ) )
+		self.assertEqual( set( aa.readTags() ), testSet( [ "t1" ] ) )
+		self.assertEqual( set( aa.readTags(includeChildren=False) ), testSet(['t1']) )
+		self.assertEqual( set( ab.readTags() ), testSet( [ "t1", "t2" ] ) )
+		self.assertEqual( set( B.readTags() ), testSet( [ "t3", "t4" ] ) )
+		self.assertEqual( set( B.readTags(includeChildren=False) ), testSet(['t4']) )
+		self.assertEqual( set( b.readTags() ), testSet( [] ) )
+		self.assertEqual( set( c.readTags() ), testSet( [ "t3" ] ) )
+
+		self.assertTrue( m.hasTag( "t1" ) )
+		self.assertTrue( m.hasTag( "t4" ) )
+		self.assertFalse( m.hasTag( "t5" ) )
+		self.assertTrue( B.hasTag( "t4" ) )
+		self.assertFalse( B.hasTag( "t1" ) )
+		self.assertTrue( B.hasTag( "t3" ) )
+
 if __name__ == "__main__":
 	unittest.main()
 
