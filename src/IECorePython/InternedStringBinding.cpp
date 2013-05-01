@@ -85,6 +85,18 @@ static string repr( const InternedString &str )
 	return s.str();
 }
 
+static int hash( const InternedString &str )
+{
+	const char *p = str.c_str();
+	unsigned int *hashComponents = (unsigned int*)p;
+	unsigned int result = hashComponents[0];
+	for ( unsigned int i = 1; i < sizeof(const char*)/sizeof(unsigned int); i++ )
+	{
+		result ^= hashComponents[i];
+	}
+	return result;
+}
+
 void bindInternedString()
 {
 
@@ -96,7 +108,8 @@ void bindInternedString()
 		.def( self == self )
 		.def( self != self )
 		.def( "numUniqueStrings", &InternedString::numUniqueStrings ).staticmethod( "numUniqueStrings" )
-		.def( "__repr__", &repr );
+		.def( "__repr__", &repr )
+		.def( "__hash__", &hash )
 	;
 	implicitly_convertible<InternedString, string>();
 
