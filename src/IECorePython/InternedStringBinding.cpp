@@ -78,6 +78,13 @@ struct InternedStringFromPython
 	}
 };
 
+static string repr( const InternedString &str )
+{
+	stringstream s;
+	s << "IECore.InternedString(\"" << str.value() << "\")";
+	return s.str();
+}
+
 void bindInternedString()
 {
 
@@ -89,6 +96,7 @@ void bindInternedString()
 		.def( self == self )
 		.def( self != self )
 		.def( "numUniqueStrings", &InternedString::numUniqueStrings ).staticmethod( "numUniqueStrings" )
+		.def( "__repr__", &repr );
 	;
 	implicitly_convertible<InternedString, string>();
 
