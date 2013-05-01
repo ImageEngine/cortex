@@ -75,6 +75,9 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 		if parameter.hasMaxValue():
 			kw['maxValue'] = parameter.maxValue
 
+		if self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
+			kw['step'] = 1
+
 
 		# \todo Add a way of overriding precision for both float and double parameters, giving
 		# each a sensible (and probably different) default
