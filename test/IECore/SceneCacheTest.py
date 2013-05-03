@@ -566,6 +566,9 @@ class SceneCacheTest( unittest.TestCase ) :
 
 	def testTags( self ) :
 
+		sphere = IECore.SpherePrimitive( 1 )
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+
 		def testSet( values ):
 			return set( map( lambda s: IECore.InternedString(s), values ) )
 
@@ -574,9 +577,14 @@ class SceneCacheTest( unittest.TestCase ) :
 		a = A.createChild( "a" )
 		aa = a.createChild( "aa" )
 		ab = a.createChild( "ab" )
+		ab.writeObject( box, 0 )
+		self.assertEqual( set( ab.readTags(includeChildren=False) ), testSet( [ "ObjectType:MeshPrimitive" ] ) )
 		B = m.createChild( "B" )
 		b = B.createChild( "b" )
 		c = B.createChild( "c" )
+		d = B.createChild( "d" )
+		d.writeObject( sphere, 0 )
+		self.assertEqual( set( d.readTags(includeChildren=False) ), testSet( [ "ObjectType:SpherePrimitive" ] ) )
 
 		aa.writeTags( [ "t1" ] )
 		self.assertEqual( set( aa.readTags(includeChildren=False) ), testSet( [ "t1" ] ) )
@@ -592,7 +600,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		a.writeTags( [] )
 		A.writeTags( [ "t1" ] )
 
-		del m, A, a, aa, ab, B, b, c
+		del m, A, a, aa, ab, B, b, c, d
 
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		A = m.child("A")
@@ -602,26 +610,31 @@ class SceneCacheTest( unittest.TestCase ) :
 		B = m.child("B")
 		b = B.child("b")
 		c = B.child("c")
+		d = B.child("d")
 
-		self.assertEqual( set( m.readTags() ), testSet( [ "t1", "t2", "t3", "t4" ] ) )
+		self.assertEqual( set( m.readTags() ), testSet( [ "t1", "t2", "t3", "t4", "ObjectType:MeshPrimitive", "ObjectType:SpherePrimitive" ] ) )
 		self.assertEqual( set( m.readTags(includeChildren=False) ), testSet([]) )
-		self.assertEqual( set( A.readTags() ), testSet( [ "t1", "t2" ] ) )
+		self.assertEqual( set( A.readTags() ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
 		self.assertEqual( set( A.readTags(includeChildren=False) ), testSet( [ "t1" ] ) )
-		self.assertEqual( set( a.readTags() ), testSet( [ "t1", "t2" ] ) )
+		self.assertEqual( set( a.readTags() ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
 		self.assertEqual( set( aa.readTags() ), testSet( [ "t1" ] ) )
 		self.assertEqual( set( aa.readTags(includeChildren=False) ), testSet(['t1']) )
-		self.assertEqual( set( ab.readTags() ), testSet( [ "t1", "t2" ] ) )
-		self.assertEqual( set( B.readTags() ), testSet( [ "t3", "t4" ] ) )
+		self.assertEqual( set( ab.readTags() ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqual( set( B.readTags() ), testSet( [ "t3", "t4", "ObjectType:SpherePrimitive" ] ) )
 		self.assertEqual( set( B.readTags(includeChildren=False) ), testSet(['t4']) )
 		self.assertEqual( set( b.readTags() ), testSet( [] ) )
 		self.assertEqual( set( c.readTags() ), testSet( [ "t3" ] ) )
+		self.assertEqual( set( d.readTags() ), testSet( [ "ObjectType:SpherePrimitive" ] ) )
 
 		self.assertTrue( m.hasTag( "t1" ) )
 		self.assertTrue( m.hasTag( "t4" ) )
 		self.assertFalse( m.hasTag( "t5" ) )
+		self.assertTrue( ab.hasTag( "ObjectType:MeshPrimitive" ) )
 		self.assertTrue( B.hasTag( "t4" ) )
 		self.assertFalse( B.hasTag( "t1" ) )
 		self.assertTrue( B.hasTag( "t3" ) )
+		self.assertTrue( B.hasTag( "ObjectType:SpherePrimitive" ) )
+		self.assertTrue( d.hasTag( "ObjectType:SpherePrimitive" ) )
 
 if __name__ == "__main__":
 	unittest.main()

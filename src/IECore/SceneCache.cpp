@@ -869,6 +869,15 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			attribute->save( io, sampleEntry(sampleIndex) );
 		}
 
+		void writeTag( const char *tag )
+		{
+			writable();
+			IndexedIOPtr io = m_indexedIO->subdirectory( tagsEntry, IndexedIO::CreateIfMissing );
+			// we represent local tags as a IndexedIO::File of bool type
+			const char localTag = 1;
+			io->write( tag, localTag );
+		}
+
 		void writeTags( const NameList &tags, bool fromChildren = false )
 		{
 			if ( !tags.size() )
@@ -970,6 +979,15 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					V3f( bf.max.x, bf.max.y, bf.max.z )
 				);
 				m_objectSamples.push_back( bd );
+
+				if ( sampleIndex == 0 )
+				{
+					// save the type of object as a tag
+					char objectTypeTag[128];
+					strcpy( objectTypeTag, "ObjectType:");
+					strcpy( &objectTypeTag[11], object->typeName() );
+					writeTag( objectTypeTag );
+				}
 			}
 			else
 			{
@@ -1482,9 +1500,6 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					NameList tags;
 					readTags( tags, true );
 					m_parent->writeTags( tags, true );
-
-					/// commits the tags directory so we don't affect the main index size
-					tagsIO->commit();
 				}
 			}
 
