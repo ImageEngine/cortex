@@ -589,7 +589,8 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		B.writeTags( [ "t4" ] )
 
-		A.writeTags( [] )
+		a.writeTags( [] )
+		A.writeTags( [ "t1" ] )
 
 		del m, A, a, aa, ab, B, b, c
 
@@ -605,6 +606,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( set( m.readTags() ), testSet( [ "t1", "t2", "t3", "t4" ] ) )
 		self.assertEqual( set( m.readTags(includeChildren=False) ), testSet([]) )
 		self.assertEqual( set( A.readTags() ), testSet( [ "t1", "t2" ] ) )
+		self.assertEqual( set( A.readTags(includeChildren=False) ), testSet( [ "t1" ] ) )
 		self.assertEqual( set( a.readTags() ), testSet( [ "t1", "t2" ] ) )
 		self.assertEqual( set( aa.readTags() ), testSet( [ "t1" ] ) )
 		self.assertEqual( set( aa.readTags(includeChildren=False) ), testSet(['t1']) )

@@ -871,6 +871,10 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		void writeTags( const NameList &tags, bool fromChildren = false )
 		{
+			if ( !tags.size() )
+			{
+				return;
+			}
 			writable();
 			IndexedIOPtr io = m_indexedIO->subdirectory( tagsEntry, IndexedIO::CreateIfMissing );
 			for ( NameList::const_iterator tIt = tags.begin(); tIt != tags.end(); tIt++ )
@@ -879,7 +883,10 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				// we can easily filter them when reading by entry type.
 				if ( fromChildren )
 				{
-					io->subdirectory( *tIt, IndexedIO::CreateIfMissing );
+					if ( !io->hasEntry( *tIt ) )
+					{
+						io->subdirectory( *tIt, IndexedIO::CreateIfMissing );
+					}
 				}
 				else
 				{
