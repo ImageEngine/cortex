@@ -566,10 +566,11 @@ StreamIndexedIO::Node* StreamIndexedIO::Node::child( const IndexedIO::EntryID &n
 	BaseNode *p = child(name);
 	if ( p )
 	{
-		if ( p->entryType() == IndexedIO::Directory && loadChildren )
+		if ( p->entryType() == IndexedIO::Directory )
 		{
 			n = static_cast< Node *>( p );
-			if ( n->m_subindex )
+			
+			if ( loadChildren && n->m_subindex )
 			{
 				m_idx->readNodeFromSubIndex( n );
 			}
