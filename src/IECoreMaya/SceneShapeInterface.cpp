@@ -34,7 +34,8 @@
 
 #include "IECoreMaya/SceneShapeInterface.h"
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+#include "boost/tokenizer.hpp"
 
 #include "OpenEXR/ImathMatrixAlgo.h"
 #include "OpenEXR/ImathBoxAlgo.h"
@@ -97,6 +98,7 @@ MObject SceneShapeInterface::aObjectOnly;
 MObject SceneShapeInterface::aDrawGeometry;
 MObject SceneShapeInterface::aDrawRootBound;
 MObject SceneShapeInterface::aDrawChildBounds;
+MObject SceneShapeInterface::aDrawTagsFilter;
 MObject SceneShapeInterface::aQuerySpace;
 MObject SceneShapeInterface::aTime;
 MObject SceneShapeInterface::aSceneQueries;
@@ -202,7 +204,12 @@ MStatus SceneShapeInterface::initialize()
 	nAttr.setChannelBox( true );
 
 	s = addAttribute( aDrawChildBounds );
-	
+
+	aDrawTagsFilter = tAttr.create( "drawTagsFilter", "dtf", MFnData::kString, MFnStringData().create( "" ), &s );
+	assert( s );
+	s = addAttribute( aDrawTagsFilter );
+	assert( s );
+
 	aQuerySpace = eAttr.create( "querySpace", "qsp", 0);
 	eAttr.addField( "World", World );
 	eAttr.addField( "Local", Local );
@@ -558,7 +565,7 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 			}
 		}
 	}
-	else if( plug == aDrawGeometry || plug == aDrawChildBounds || plug == aObjectOnly )
+	else if( plug == aDrawGeometry || plug == aDrawChildBounds || plug == aObjectOnly || plug == aDrawTagsFilter )
 	{
 		// Preview plug values have changed, GL Scene is dirty
 		m_previewSceneDirty = true;
@@ -934,6 +941,53 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 	bool objectOnly;
 	pObjectOnly.getValue( objectOnly );
 
+	MPlug pDrawTagsFilter( thisMObject(), aDrawTagsFilter );
+	MString drawTagsFilter;
+	pDrawTagsFilter.getValue( drawTagsFilter );
+
+	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+	std::string txt(drawTagsFilter.asChar());
+	Tokenizer tokens( txt, boost::char_separator<char>(" "));
+	Tokenizer::iterator t = tokens.begin();
+	SceneInterface::NameList drawTags;
+	for ( ; t != tokens.end(); t++ )
+	{
+		if ( t->size() )
+		{
+			/// test if the scene has the tag to start with..
+			if ( subSceneInterface->hasTag( *t ) )
+			{
+				drawTags.push_back( *t );
+			}
+			else
+			{
+				msg( Msg::Warning, name().asChar(), std::string("Tag '") + *t + "'does not exist in scene. Ignoring it for filtering.");
+			}
+		}
+	}
+
+	recurseBuildScene( renderer.get(), subSceneInterface.get(), time.as( MTime::kSeconds ), drawBounds, drawGeometry, objectOnly, drawTags );
+}
+
+void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, const SceneInterface *subSceneInterface, double time, bool drawBounds, bool drawGeometry, bool objectOnly, const SceneInterface::NameList &drawTags )
+{
+	if ( drawTags.size() )
+	{
+		SceneInterface::NameList::const_iterator it;
+		for ( it = drawTags.begin(); it != drawTags.end(); it++ )
+		{
+			if ( subSceneInterface->hasTag( *it ) )
+			{
+				break;
+			}
+		}
+		/// stop drawing if the current scene location does not have the required tags.
+		if ( it == drawTags.end() )
+		{
+			return;
+		}
+	}
+
 	AttributeBlock a(renderer);
 	SceneInterface::Path pathName;
 	subSceneInterface->path( pathName );
@@ -947,7 +1001,7 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 	if(pathStr != "/")
 	{
 		// Path space
-		transformd = worldTransform( subSceneInterface, time.as( MTime::kSeconds ) );
+		transformd = worldTransform( subSceneInterface, time );
 	}
 
 	M44f transform;
@@ -956,8 +1010,8 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 	
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
-		ObjectPtr object = subSceneInterface->readObject( time.as( MTime::kSeconds ) );
-		VisibleRenderablePtr vis = runTimeCast< VisibleRenderable >(object);
+		ObjectPtr object = subSceneInterface->readObject( time );
+		VisibleRenderable *vis = runTimeCast< VisibleRenderable >(object.get());
 		if( vis )
 		{
 			vis->render(renderer);
@@ -971,7 +1025,7 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 		renderer->setAttribute( "gl:primitive:solid", new BoolData( false ) );
 		renderer->setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
 
-		Box3d b = subSceneInterface->readBound( time.as( MTime::kSeconds ) );
+		Box3d b = subSceneInterface->readBound( time );
 		Box3f bbox( b.min, b.max );
 		if( !bbox.isEmpty() )
 		{
@@ -986,9 +1040,8 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 		subSceneInterface->childNames( childNames );
 		for ( SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
 		{
-			SceneInterface::Name name = *it;
-			ConstSceneInterfacePtr childScene = subSceneInterface->child( name );
-			buildScene( renderer, childScene );
+			ConstSceneInterfacePtr childScene = subSceneInterface->child( *it );
+			recurseBuildScene( renderer, childScene.get(), time, drawBounds, drawGeometry, objectOnly, drawTags );
 		}
 	}
 }

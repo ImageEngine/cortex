@@ -71,8 +71,10 @@ def _dagMenu( menu, sceneShape ) :
 	fnScS = IECoreMaya.FnSceneShape( sceneShape )
 	
 	maya.cmds.setParent( menu, menu=True )
+
+	scene = fnScS.sceneInterface()
 	
-	if fnScS.sceneInterface() is None:
+	if scene is None:
 		maya.cmds.menuItem(
 		label = "Invalid SceneShape Inputs!",
 		radialPosition = "N",
@@ -166,9 +168,67 @@ def _dagMenu( menu, sceneShape ) :
 				radialPosition = "NW",
 				command = IECore.curry( __setChildrenPreviewAttributes, sceneShapes, "drawRootBound", False )
 			)
-		
+
 		maya.cmds.setParent( "..", menu=True )
-	
+
+		tagTree = dict()
+		tags = scene.readTags()
+		for tag in tags :
+			tag = str(tag)
+			parts = tag.split(":")
+			if len(parts) == 1 :
+				if not tag in tagTree :
+					tagTree[tag] = None
+			else :
+				leftOverTag = tag[len(parts[0])+1:]
+				if not tag in tagTree or tagTree[parts[0]] is None :
+					tagTree[parts[0]] = [ leftOverTag ]
+				else :
+					tagTree[parts[0]].append( leftOverTag )
+
+		if tagTree :
+
+			maya.cmds.menuItem(
+				label = "Tags filter...",
+				radialPosition = "S",
+				subMenu = True
+			)
+			tags = tagTree.keys()
+			tags.sort()
+
+			for tag in tags :
+
+				if tagTree[tag] is None :
+
+					maya.cmds.menuItem(
+						label = tag,
+						command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag )
+					)
+
+				elif len(tagTree[tag]) == 1 :
+
+					maya.cmds.menuItem(
+						label = tag + ": " + tagTree[tag][0],
+						command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag + ":" + tagTree[tag][0] )
+					)
+
+				else :
+
+					maya.cmds.menuItem(
+						label = tag,
+						subMenu = True
+					)
+					tags = tagTree[tag]
+					tags.sort()
+					for tag in tags :
+						maya.cmds.menuItem(
+							label = tag,
+							command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag + ":" + tagTree[tag] )
+						)
+					maya.cmds.setParent( "..", menu=True )			
+					
+			maya.cmds.setParent( "..", menu=True )			
+			
 		maya.cmds.menuItem(
 			label = "Expand...",
 			radialPosition = "SE",
@@ -391,6 +451,11 @@ def __setChildrenPreviewAttributes( sceneShapes, attributeName, value, *unused )
 				maya.cmds.setAttr( node+"."+attributeName, value )
 
 
+def __setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused ) :
 
-
-
+	for sceneShape in sceneShapes:
+		transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
+		if transform:
+			allChildren = maya.cmds.listRelatives( transform[0], ad=False, fullPath=True, type = "ieSceneShape" ) or []
+			for node in allChildren:
+				maya.cmds.setAttr( node+".drawTagsFilter", tagName, type = "string" )

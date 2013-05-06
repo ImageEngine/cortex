@@ -49,6 +49,7 @@ global proc AEieSceneShapeTemplate( string $nodeName )
 			editorTemplate -addControl "drawGeometry";
 			editorTemplate -addControl "drawRootBound";
 			editorTemplate -addControl "drawChildBounds";
+			editorTemplate -addControl "drawTagsFilter";
 
 		editorTemplate -endLayout;
 

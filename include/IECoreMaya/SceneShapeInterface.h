@@ -94,6 +94,7 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aDrawGeometry;
 		static MObject aDrawRootBound;
 		static MObject aDrawChildBounds;
+		static MObject aDrawTagsFilter;
 		
 		/*
 		 * Custom
@@ -172,8 +173,12 @@ class SceneShapeInterface: public MPxComponentShape
 
 		IECoreGL::ScenePtr m_scene;
 		
-		/// Recursively parses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
+		/// Uses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
 		void buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface );
+
+		/// Recursively parses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
+		void recurseBuildScene( IECoreGL::Renderer * renderer, const IECore::SceneInterface *subSceneInterface, double time, bool drawBounds, bool drawGeometry, bool objectOnly, const IECore::SceneInterface::NameList &drawTags );
+
 		/// Recursively parses glScene to store GL Groups matching path names
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 		
