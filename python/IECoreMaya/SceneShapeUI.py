@@ -181,7 +181,7 @@ def _dagMenu( menu, sceneShape ) :
 					tagTree[tag] = None
 			else :
 				leftOverTag = tag[len(parts[0])+1:]
-				if not tag in tagTree or tagTree[parts[0]] is None :
+				if not parts[0] in tagTree or tagTree[parts[0]] is None :
 					tagTree[parts[0]] = [ leftOverTag ]
 				else :
 					tagTree[parts[0]].append( leftOverTag )
@@ -193,6 +193,12 @@ def _dagMenu( menu, sceneShape ) :
 				radialPosition = "S",
 				subMenu = True
 			)
+
+			maya.cmds.menuItem(
+				label = "Display All",
+				command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, "" )
+			)
+
 			tags = tagTree.keys()
 			tags.sort()
 
@@ -205,25 +211,18 @@ def _dagMenu( menu, sceneShape ) :
 						command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag )
 					)
 
-				elif len(tagTree[tag]) == 1 :
-
-					maya.cmds.menuItem(
-						label = tag + ": " + tagTree[tag][0],
-						command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag + ":" + tagTree[tag][0] )
-					)
-
 				else :
 
 					maya.cmds.menuItem(
 						label = tag,
 						subMenu = True
 					)
-					tags = tagTree[tag]
-					tags.sort()
-					for tag in tags :
+					subtags = tagTree[tag]
+					subtags.sort()
+					for tagSuffix in subtags :
 						maya.cmds.menuItem(
-							label = tag,
-							command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag + ":" + tagTree[tag] )
+							label = tagSuffix,
+							command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag + ":" + tagSuffix )
 						)
 					maya.cmds.setParent( "..", menu=True )			
 					
