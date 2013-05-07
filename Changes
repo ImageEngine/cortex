@@ -66,7 +66,7 @@ Bug Fixes :
 * IECore ImageReader and ImageWriter not doing transformation on alpha anymore, A gets filtered out from the channel names given to ColorSpaceTransformOp.
 * IECore ColorSpaceTransformOp applies unpremult before channelOp conversion then premult after, as channelOp doesn't deal with unpremultiplication of the colour channels.
 * Removed rounding hack in OversamplesCalculator.
-* Maya intField created to display IntParameter now has step size set to 1.  This prevents a warning when creating fields for parameters with max - min less than the default step of 10.
+* Maya intField created to display IntParameter now has step size set to 1 ( if min or max are set ).  This prevents a warning when creating fields for parameters with max - min less than the default step of 10.
 
 7.10.2 :
 
