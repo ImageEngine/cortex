@@ -83,7 +83,7 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual(v1["1"], v2["1"])
 		self.assertEqual(v1["0"], v4["0"])
 		self.assertEqual(v1["1"], v4["1"])
-		self.assertRaises( RuntimeError, v1.__setitem__, "2", None )	# should prevent setting None as value.
+		self.assertRaises( TypeError, v1.__setitem__, "2", None )	# should prevent setting None as value.
 
 	def testCopyOnWrite(self):
 		"""Test copy-on-write behavior"""
