@@ -55,6 +55,7 @@ class TestParameter( unittest.TestCase ) :
 		v = IntData( 2 )
 		p.setValue( v )
 		self.assertEqual( p.getValue(), v )
+		self.assertRaises( RuntimeError, Parameter, "name", "description", None )		# passing None as default value should raise exception as opposed to segfault!
 
 	def testUserData( self ):
 		compound = CompoundObject()

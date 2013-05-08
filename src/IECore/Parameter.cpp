@@ -54,7 +54,10 @@ Parameter::Parameter( const std::string &name, const std::string &description, O
 	:	m_name( name ), m_description( description ), m_defaultValue( defaultValue ), m_presetsOnly( presetsOnly ),
 		m_userData( userData ? userData->copy() : 0 )
 {
-	assert( defaultValue );
+	if ( !defaultValue )
+	{
+		throw Exception( "Invalid NULL default value!" );
+	}
 
 	for( PresetsContainer::const_iterator it=presets.begin(); it!=presets.end(); it++ )
 	{
