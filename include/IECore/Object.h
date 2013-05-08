@@ -99,6 +99,7 @@ class MurmurHash;
 
 /// A base class defining copying and streaming.
 /// \ingroup coreGroup
+/// \todo rename virtual functions that match non-virtual functions so that pointers to derived classes still provide access the non-virtual ones: example hash(), memoryUsage(), save().
 class Object : public RunTimeTyped
 {
 	public:
