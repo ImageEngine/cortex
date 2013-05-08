@@ -123,6 +123,11 @@ IndexedIO *Object::SaveContext::rawContainer()
 
 void Object::SaveContext::save( const Object *toSave, IndexedIO *container, const IndexedIO::EntryID &name )
 {
+	if ( !toSave )
+	{
+		throw Exception( "Error trying to save NULL pointer object!" );
+	}
+
 	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
 	{

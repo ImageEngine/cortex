@@ -176,6 +176,12 @@ class CompoundDataFunctions
 		{
 			key_type key = convertKey( x, i );
 			CompoundDataMap &xData = x.writable();
+			if ( !v )
+			{
+				// prevent python users to set value as "None"
+				PyErr_SetString(PyExc_TypeError, "Setting None to CompoundData items is not supported.");
+				throw_error_already_set();
+			}
 			xData[key] = v;
 		}
 

@@ -67,6 +67,7 @@ Bug Fixes :
 * IECore ColorSpaceTransformOp applies unpremult before channelOp conversion then premult after, as channelOp doesn't deal with unpremultiplication of the colour channels.
 * Removed rounding hack in OversamplesCalculator.
 * Maya intField created to display IntParameter now has step size set to 1 ( if min or max are set ).  This prevents a warning when creating fields for parameters with max - min less than the default step of 10.
+* Preventing segfaults when CompoundData and CompoundObject have items with NULL pointers.
 
 7.10.2 :
 

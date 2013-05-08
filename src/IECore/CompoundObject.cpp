@@ -71,6 +71,10 @@ void CompoundObject::copyFrom( const Object *other, CopyContext *context )
 	m_members.clear();
 	for( ObjectMap::const_iterator it=tOther->m_members.begin(); it!=tOther->m_members.end(); it++ )
 	{
+		if ( !it->second )
+		{
+			throw Exception( "Cannot copy CompoundObject will NULL data pointers!" );
+		}
 		m_members[it->first] = context->copy<Object>( it->second );
 	}
 }
@@ -125,9 +129,17 @@ bool CompoundObject::isEqualTo( const Object *other ) const
 		{
 			return false;
 		}
-		if( ! it1->second->isEqualTo( it2->second ) )
+		if ( it1->second != it2->second )
 		{
-			return false;
+			if ( !it1->second || !it2->second )
+			{
+				/// either one of the pointers is NULL
+				return false;
+			}
+			if( ! it1->second->isEqualTo( it2->second ) )
+			{
+				return false;
+			}
 		}
 		it1++;
 		it2++;
@@ -141,7 +153,10 @@ void CompoundObject::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_members.size() * sizeof( ObjectMap::value_type ) );	
 	for( ObjectMap::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
 	{
-		a.accumulate( it->second );
+		if ( it->second )
+		{
+			a.accumulate( it->second );
+		}
 	}
 }
 
@@ -172,6 +187,10 @@ void CompoundObject::hash( MurmurHash &h ) const
 	std::vector<ObjectMap::const_iterator>::const_iterator it;
 	for( it=iterators.begin(); it!=iterators.end(); it++ )
 	{
+		if ( !((*it)->second) )
+		{
+			throw Exception( "Cannot compute hash from a CompoundObject will NULL data pointers!" );
+		}
 		h.append( (*it)->first.value() );
 		(*it)->second->hash( h );
 	}
