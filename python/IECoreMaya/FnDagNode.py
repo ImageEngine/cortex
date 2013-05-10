@@ -65,15 +65,8 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 	def createShapeWithParent( parentName, shapeNodeType ) :
 	
 		parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True )
-		parentShort = parentNode.rpartition( "|" )[-1]
 		
-		numbersMatch = re.search( "[0-9]+$", parentShort )
-		if numbersMatch is not None :
-			numbers = numbersMatch.group()
-			shapeName = parentShort[:-len(numbers)] + "Shape" + numbers
-		else :
-			shapeName = parentShort + "Shape"
-			
+		shapeName = FnDagNode.defaultShapeName( parentNode )
 		shapeNode = maya.cmds.createNode( shapeNodeType, name=shapeName, parent=parentNode, skipSelect=True )
 		
 		return FnDagNode( shapeNode )	
@@ -114,6 +107,21 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 			parent	= maya.cmds.listRelatives( o, parent=True )
 
 		return hidden
+	
+	## Returns the default shape name maya uses when creating a shape under a transform. 
+	@staticmethod
+	def defaultShapeName( transformNode ):
+		
+		parentShort = transformNode.rpartition( "|" )[-1]
+		
+		numbersMatch = re.search( "[0-9]+$", parentShort )
+		if numbersMatch is not None :
+			numbers = numbersMatch.group()
+			shapeName = parentShort[:-len(numbers)] + "Shape" + numbers
+		else :
+			shapeName = parentShort + "Shape"
+		
+		return shapeName
 
 
 
