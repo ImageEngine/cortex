@@ -38,18 +38,19 @@ global proc AEieSceneShapeTemplate( string $nodeName )
 	editorTemplate -beginScrollLayout;
 		
 		editorTemplate -beginLayout "Inputs";
-			editorTemplate -addControl "file";
-			editorTemplate -addControl "root";
-			editorTemplate -addControl "objectOnly";
+			editorTemplate -annotation "Path to the scene interface file." -addControl "file" ;
+			editorTemplate -annotation "Path in the scene interface where you start reading." -addControl "root";
+			editorTemplate -annotation "If on, only read the object at the root path." -addControl "objectOnly";
 			editorTemplate -addControl "time";
 			
 		editorTemplate -endLayout;
 		
 		editorTemplate -beginLayout "Preview";
-			editorTemplate -addControl "drawGeometry";
-			editorTemplate -addControl "drawRootBound";
-			editorTemplate -addControl "drawChildBounds";
-			editorTemplate -addControl "drawTagsFilter";
+			editorTemplate -annotation "Draw all the geometry." -addControl "drawGeometry";
+			editorTemplate -annotation "If drawGeometry is on, also draw the locators." -addControl "drawLocators";
+			editorTemplate -annotation "Draw the bound for the root path." -addControl "drawRootBound";
+			editorTemplate -annotation "Draw the bounds of all the scene interface children." -addControl "drawChildBounds";
+			editorTemplate -annotation "Only draw the elements that match those tags." -addControl "drawTagsFilter";
 
 		editorTemplate -endLayout;
 

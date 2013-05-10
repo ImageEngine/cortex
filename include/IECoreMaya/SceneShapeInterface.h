@@ -92,6 +92,7 @@ class SceneShapeInterface: public MPxComponentShape
 		// Public variables because plugs need to be accessed by the UI creator which implements the drawing/selection
 		static MObject aObjectOnly;
 		static MObject aDrawGeometry;
+		static MObject aDrawLocators;
 		static MObject aDrawRootBound;
 		static MObject aDrawChildBounds;
 		static MObject aDrawTagsFilter;
@@ -103,7 +104,7 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Returns the sceneInterface for this node. Needs to be implemented by derived classes.
 		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
 		
-		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawChildBounds )
+		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawLocators, drawChildBounds )
 		IECoreGL::ConstScenePtr glScene();
 		
 		/// Returns GL Group matching the given path name.
