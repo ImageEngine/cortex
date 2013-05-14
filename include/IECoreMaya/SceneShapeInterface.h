@@ -114,7 +114,7 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Returns the path name for the given index
 		std::string selectionName( int index );
 		/// Returns all component names currently existing in the shape
-		const std::vector< IECore::InternedString > & childrenNames() const;
+		const std::vector< IECore::InternedString > & componentNames() const;
 
 	protected :
 		

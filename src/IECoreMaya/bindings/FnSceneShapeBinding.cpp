@@ -57,13 +57,13 @@ static IECore::SceneInterfacePtr sceneInterface( MFnDependencyNode *fnDN )
 	return const_cast<IECore::SceneInterface*>( scnInterface.get() );
 }
 
-static list childrenNames( MFnDependencyNode *fnDN )
+static list componentNames( MFnDependencyNode *fnDN )
 {
 	assert( fnDN );
 	MPxNode *userNode = fnDN->userNode();
 	SceneShapeInterface *sc = dynamic_cast<SceneShapeInterface *>( userNode );
 	assert( sc );
-	std::vector<IECore::InternedString> names = sc->childrenNames();
+	std::vector<IECore::InternedString> names = sc->componentNames();
 	
 	list result;
 	for( std::vector<IECore::InternedString>::const_iterator it = names.begin(); it!=names.end(); it++ )
@@ -78,6 +78,6 @@ void IECoreMaya::bindFnSceneShape()
 {
 
 	def( "_sceneShapeSceneInterface", &sceneInterface );
-	def( "_sceneShapeChildrenNames", &childrenNames );
+	def( "_sceneShapeComponentNames", &componentNames );
 
 }

@@ -1171,7 +1171,7 @@ std::string SceneShapeInterface::selectionName( int index )
 	return m_indexToNameMap[index];
 }
 
-const std::vector< InternedString > & SceneShapeInterface::childrenNames() const
+const std::vector< InternedString > & SceneShapeInterface::componentNames() const
 {
 	return m_indexToNameMap;
 }

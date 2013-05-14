@@ -33,7 +33,6 @@
 ##########################################################################
 
 import maya.cmds
-import maya.mel
 
 import IECore
 import IECoreMaya
@@ -114,7 +113,7 @@ def _dagMenu( menu, sceneShape ) :
 				maya.cmds.menuItem(
 					label = "Expand to Selected Components",
 					radialPosition = "S",
-					command = IECore.curry( __expandToSelected, sceneShapes )
+					command = IECore.curry( __expandToSelected, sceneShape )
 				)
 			maya.cmds.setParent( "..", menu=True )
 	
@@ -245,7 +244,7 @@ def _dagMenu( menu, sceneShape ) :
 			maya.cmds.menuItem(
 				label = "Expand One Level",
 				radialPosition = "E",
-				command = IECore.curry( __expandScene, sceneShapes )
+				command = IECore.curry( __expandOnce, sceneShapes )
 			)
 			
 			maya.cmds.menuItem(
@@ -294,6 +293,7 @@ def _dagMenu( menu, sceneShape ) :
 	
 		c( menu, sceneShape )
 
+## Returns all the selected scene shapes
 def __targets( sceneShape ) :
 	
 	allSceneShapes = []
@@ -309,7 +309,7 @@ def __targets( sceneShape ) :
 					allSceneShapes.append( child )
 	return allSceneShapes
 
-
+## Turns on child bounds and switches to component mode
 def __componentCallback( sceneShapes, *unused ) :
 
 	for sceneShape in sceneShapes:
@@ -319,7 +319,7 @@ def __componentCallback( sceneShapes, *unused ) :
 		maya.cmds.selectMode( component=True )
 		maya.cmds.hilite( parent )
 	
-
+## Switches to object mode
 def __objectCallback( sceneShapes, *unused ) :
 
 	for sceneShape in sceneShapes:
@@ -332,15 +332,17 @@ def __objectCallback( sceneShapes, *unused ) :
 		else :
 			maya.cmds.select( clear=True )
 
+## Print the existing component names for the scene shape
 def __printComponents( sceneShape, *unused ) :
 
 	fnS = IECoreMaya.FnSceneShape( sceneShape )
-	names = fnS.childrenNames()
+	names = fnS.componentNames()
 	names.sort()
 	print "\n"
 	print " ".join( names ) ,
 	print "\n"
 
+## Print the selected component names for the scene shape
 def __printSelectedComponents( sceneShape, *unused ) :
 
 	fnS = IECoreMaya.FnSceneShape( sceneShape )
@@ -351,72 +353,76 @@ def __printSelectedComponents( sceneShape, *unused ) :
 	print " ".join( selectedNames ) ,
 	print "\n"
 
-def __expandScene( sceneShapes, *unused ) :
+## Expand each scene shape one level down
+def __expandOnce( sceneShapes, *unused ) :
 	
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		new = fnS.expandScene()
+		new = fnS.expandOnce()
 		toSelect = map( lambda x: x.fullPathName(), new )
 		maya.cmds.select( toSelect, replace=True )
-	
+
+## Recursively expand the scene shapes
 def __expandAll( sceneShapes, *unused ) :
 	
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		newFn = fnS.expandAllChildren()
+		newFn = fnS.expandAll()
 		
 		toSelect = map( lambda x: x.fullPathName(), newFn )
 		maya.cmds.select( toSelect, replace=True )
 
+## Recursively expand the scene shapes and converts objects to geometry
 def __expandAsGeometry( sceneShapes, *unused ) :
 	
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		fnS.convertToGeometry()
-	
-def __expandToSelected( sceneShapes, *unused ) :
-	
-	for sceneShape in sceneShapes:
-		fnScS = IECoreMaya.FnSceneShape( sceneShape )
-		selectedNames = fnScS.selectedComponentNames()
-		if "/" in selectedNames:
-			selectedNames.remove("/")
-		
-		# Go back to object mode
-		parent =  maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
-		maya.cmds.hilite( parent, unHilite=True )
-		maya.cmds.selectMode( object=True )
-		
-		if selectedNames == []:
-			return
-		
-		toSelect = []	
-	
-		for selected in selectedNames:
-	
-			transformName = "|".join( sceneShape.split("|")[:-1] )
-			transformNames = [ transformName ]
-			for item in selected.split("/")[1:]:
-				transformName = transformName + "|" + item
-				if not transformName in transformNames:
-					transformNames.append( transformName )
-			
-			for transform in transformNames:
-				shape = maya.cmds.listRelatives( transform, fullPath=True, type = "ieSceneShape" )[0]
-				fnS = IECoreMaya.FnSceneShape( shape )
-				fnS.expandScene()
-			
-			toSelect.append( transformNames[-1] )
-		
-		maya.cmds.select( toSelect, replace=True )
+		fnS.convertAllToGeometry()
 
+## Expand the scene shape the minimal amount to reach the selected components
+def __expandToSelected( sceneShape, *unused ) :
 
+	fnScS = IECoreMaya.FnSceneShape( sceneShape )
+	sceneShape = fnScS.fullPathName()
+	selectedNames = fnScS.selectedComponentNames()
+	if "/" in selectedNames:
+		selectedNames.remove("/")
+	
+	# Go back to object mode
+	parent =  maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
+	maya.cmds.hilite( parent, unHilite=True )
+	maya.cmds.selectMode( object=True )
+	
+	if selectedNames == []:
+		return
+	
+	toSelect = []	
+
+	for selected in selectedNames:
+		transformName = "|".join( sceneShape.split("|")[:-1] )
+		transformNames = [ transformName ]
+		for item in selected.split("/")[1:]:
+			transformName = transformName + "|" + item
+			if not transformName in transformNames:
+				transformNames.append( transformName )
+		
+		for transform in transformNames:
+			shape = maya.cmds.listRelatives( transform, fullPath=True, type = "ieSceneShape" )[0]
+			fnS = IECoreMaya.FnSceneShape( shape )
+			fnS.expandOnce()
+		
+		toSelect.append( transformNames[-1] )
+	
+	maya.cmds.select( toSelect, replace=True )
+
+## Collapse all the children of the scene shapes
 def __collapseChildren( sceneShapes, *unused ) :
 	
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		fnS.collapseScene()
-	
+		fnS.collapse()
+
+## Collapse the scene shape and its relatives to their parent scene shape
 def __collapseToParentScene( sceneShape, *unused ) :
 	
 	transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
@@ -426,9 +432,11 @@ def __collapseToParentScene( sceneShape, *unused ) :
 			parentShape = maya.cmds.listRelatives( parent[0], fullPath=True, type = "ieSceneShape" )
 			if parentShape:
 				fnParent = IECoreMaya.FnSceneShape( parentShape[0] )
-				fnParent.collapseScene()
+				fnParent.collapse()
 				maya.cmds.select( fnParent.fullPathName(), replace=True )
 
+## Returns the parent scene shape for the given child scene shape
+# Returns None if no parent found.
 def __parentSceneShape( sceneShape ):
 	
 	transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
@@ -440,6 +448,8 @@ def __parentSceneShape( sceneShape ):
 				return parentShape[0]
 	return None
 
+## Sets the given preview attribute on the scene shapes with the given boolean value
+# Preview attributes can be drawGeometry, drawLocators, drawRootBound and drawChildBounds
 def __setChildrenPreviewAttributes( sceneShapes, attributeName, value, *unused ) :
 
 	for sceneShape in sceneShapes:
@@ -449,7 +459,7 @@ def __setChildrenPreviewAttributes( sceneShapes, attributeName, value, *unused )
 			for node in allChildren:
 				maya.cmds.setAttr( node+"."+attributeName, value )
 
-
+## Sets the given tags filter attribute on the scene shapes with the given string value
 def __setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused ) :
 
 	for sceneShape in sceneShapes:
@@ -458,3 +468,4 @@ def __setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused ) :
 			allChildren = maya.cmds.listRelatives( transform[0], ad=False, fullPath=True, type = "ieSceneShape" ) or []
 			for node in allChildren:
 				maya.cmds.setAttr( node+".drawTagsFilter", tagName, type = "string" )
+

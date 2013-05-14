@@ -118,13 +118,13 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertFalse( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ) )
 		self.assertTrue( maya.cmds.isConnected( "time1.outTime", fn.fullPathName()+".time" ) )
 
-	def testExpandScene( self ) :
+	def testExpandOnce( self ) :
 		
 		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "test" )
 		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
-		result = fn.expandScene()
+		result = fn.expandOnce()
 		
 		self.assertTrue( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ) )
 		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".queryPaths[0]" ), "/1" )
@@ -140,7 +140,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outScale", "|test|sceneShape_1.scale" ) )
 		
 		maya.cmds.setAttr( childFn.fullPathName()+".drawGeometry", 1 )
-		result = childFn.expandScene()
+		result = childFn.expandOnce()
 		
 		self.assertTrue( maya.cmds.getAttr( childFn.fullPathName()+".objectOnly" ) )
 		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".queryPaths[0]" ), "/child" )
@@ -156,31 +156,31 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".drawGeometry"), 1 )
 		
 		
-	def testCollapseScene( self ) :
+	def testCollapse( self ) :
 		
 		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "test" )
 		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
-		result = fn.expandScene()
-		result[0].expandScene()
+		result = fn.expandOnce()
+		result[0].expandOnce()
 		
 		children = set( ["|test|testSceneShape", "|test|sceneShape_1", "|test|sceneShape_1|sceneShape_SceneShape1", "|test|sceneShape_1|child", "|test|sceneShape_1|child|childSceneShape"] )
 		self.assertEqual( set(maya.cmds.listRelatives( "|test", ad=True, f=True )), children )
 		
-		fn.collapseScene()
+		fn.collapse()
 		self.assertEqual( maya.cmds.listRelatives( "|test", ad=True, f=True ), ["|test|testSceneShape"] )
 		
 		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ), 0 )
 		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".visibility" ), 1 )
 	
-	def testConvertToGeometry( self ):
+	def testConvertAllToGeometry( self ):
 		
 		maya.cmds.file( new=True, f=True )
 		fn = IECoreMaya.FnSceneShape.create( "test" )
 		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
 		
-		fn.convertToGeometry()
+		fn.convertAllToGeometry()
 		
 		children = set( ["|test|testSceneShape", "|test|sceneShape_1"] )
 		self.assertEqual( set(maya.cmds.listRelatives( "|test", f=True )), children )

@@ -550,7 +550,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 
 		# expand the scene
 		fnSpheres = IECoreMaya.FnSceneShape( spheresShape )
-		fnSpheres.expandAllChildren()
+		fnSpheres.expandAll()
 
 		self.assertFalse( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		leafScene = spheresScene.child("A").child("a")
@@ -559,7 +559,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertFalse( leafScene.hasObject() )
 
 		# expand scene to meshes
-		fnSpheres.convertToGeometry()
+		fnSpheres.convertAllToGeometry()
 		self.assertFalse( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertTrue( leafScene.hasObject() )
 		self.assertTrue( isinstance( leafScene.readObject(0), IECore.MeshPrimitive) )
