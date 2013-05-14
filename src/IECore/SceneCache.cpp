@@ -979,15 +979,6 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					V3f( bf.max.x, bf.max.y, bf.max.z )
 				);
 				m_objectSamples.push_back( bd );
-
-				if ( sampleIndex == 0 )
-				{
-					// save the type of object as a tag
-					char objectTypeTag[128];
-					strcpy( objectTypeTag, "ObjectType:");
-					strcpy( &objectTypeTag[11], object->typeName() );
-					writeTag( objectTypeTag );
-				}
 			}
 			else
 			{
@@ -995,6 +986,15 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				{
 					throw Exception( "Either all object samples must have bounds (VisibleRenderable) or none of them!" );
 				}
+			}
+
+			if ( sampleIndex == 0 )
+			{
+				// save the type of object as a tag
+				char objectTypeTag[128];
+				strcpy( objectTypeTag, "ObjectType:");
+				strcpy( &objectTypeTag[11], object->typeName() );
+				writeTag( objectTypeTag );
 			}
 		}
 
