@@ -58,7 +58,7 @@ float ieFilteredAbs( float x, fw )
 	
 	float x0 = x - 0.5*fw;
 	float x1 = x0 + fw;
-	return ( integral( x0 ) - integral( x1 ) ) / fw;
+	return ( integral( x1 ) - integral( x0 ) ) / fw;
 }
 
 #endif // IECORERI_FILTER_H
