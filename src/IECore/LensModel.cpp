@@ -57,7 +57,7 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 	Imath::Box2i out( input );
 	bool init( false );
 	
-	for( int i = input.min.x; i < input.max.x; ++i )
+	for( int i = input.min.x; i <= input.max.x; ++i )
 	{
 		for( int pass = 0; pass < 2; ++pass )
 		{
@@ -84,24 +84,24 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 				{
 					out.min.x = int( floor( pOut.x ) );
 					out.min.y = int( floor( pOut.y ) );
-					out.max.x = int( ceil( pOut.x ) );
-					out.max.y = int( ceil( pOut.y ) );
+					out.max.x = int( floor( pOut.x ) );
+					out.max.y = int( floor( pOut.y ) );
 					init = true;
 				}
 				else
 				{
 					out.min.x = min( int( floor( pOut.x ) ), out.min.x );
 					out.min.y = min( int( floor( pOut.y ) ), out.min.y );
-					out.max.x = max( int( ceil( pOut.x ) ), out.max.x );
-					out.max.y = max( int( ceil( pOut.y ) ), out.max.y );
+					out.max.x = max( int( floor( pOut.x ) ), out.max.x );
+					out.max.y = max( int( floor( pOut.y ) ), out.max.y );
 				}
 			}
 		}
 	}
 	
-	if (!init) return Imath::Box2i( Imath::V2i(0,0), Imath::V2i(0,0) );
+	if ( !init ) return Imath::Box2i( Imath::V2i(0,0), Imath::V2i(0,0) );
 	
-	for( int j = input.min.y; j < input.max.y; j++ )
+	for( int j = input.min.y; j <= input.max.y; j++ )
 	{
 		for( int pass = 0; pass < 2; pass++ )
 		{
@@ -127,8 +127,8 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 				
 				out.min.x = std::min( int( floor( pOut.x ) ), out.min.x );
 				out.min.y = std::min( int( floor( pOut.y ) ), out.min.y );
-				out.max.x = std::max( int( ceil( pOut.x ) ), out.max.x );
-				out.max.y = std::max( int( ceil( pOut.y ) ), out.max.y );
+				out.max.x = std::max( int( floor( pOut.x ) ), out.max.x );
+				out.max.y = std::max( int( floor( pOut.y ) ), out.max.y );
 			}
 		}
 	}
@@ -138,7 +138,7 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 
 LensModelPtr LensModel::create( const std::string &name )
 {
-	// Check to see whether the requested lens model is registered and if not, throw and exception.
+	// Check to see whether the requested lens model is registered and if not, throw an exception.
 	if ( creators().find( name ) == creators().end() )
 		throw IECore::Exception( (boost::format("LensModel: Could not find registered lens model \"%s\".") % name).str() );
 
@@ -159,7 +159,7 @@ LensModelPtr LensModel::create( IECore::ConstCompoundObjectPtr lensParams )
 	IECore::ConstStringDataPtr modelName(lensParams->member<IECore::StringData>("lensModel", true));
 	std::string name( modelName->readable() );
 
-	// Check to see whether the requested lens model is registered and if not, throw and exception.
+	// Check to see whether the requested lens model is registered and if not, throw an exception.
 	if ( creators().find( name ) == creators().end() )
 		throw IECore::Exception( (boost::format("LensModel: Could not find registered lens model \"%s\".") % name).str() );
 

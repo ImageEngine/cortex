@@ -148,16 +148,17 @@ void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 			}
 		}
 		++attrIdx;
-		
+	
 		if ( parameterExists ) continue;
-		
+	
 		// Add the new attribute.
 		double value( d->readable() );
 		m_pluginAttributes.insert( m_pluginAttributes.begin()+attrIdx-1, PluginAttribute( (*j)->name().c_str(), value ) );
 	}
 	
 	// Erase all remaining parameters that are not in our current lens model.
-	m_pluginAttributes.erase( m_pluginAttributes.begin()+attrIdx-1, m_pluginAttributes.end() );
+	m_pluginAttributes.erase( m_pluginAttributes.begin()+attrIdx, m_pluginAttributes.end() );
+
 }
 
 void LensDistort::setLensModel( IECore::ConstCompoundObjectPtr parameters )
@@ -213,7 +214,7 @@ void LensDistort::_validate(bool for_real)
 		return;
 	}
 
-	// Itterate over our list of parameters and update the lens models.
+	// Iterate over our list of parameters and update the lens models.
 	for( int i = 0; i < m_nThreads; i++ )
 	{
 		for( PluginAttributeList::const_iterator j = m_pluginAttributes.begin(); j != m_pluginAttributes.end(); j++)
@@ -224,7 +225,7 @@ void LensDistort::_validate(bool for_real)
 	}
 	
 	// Set the output bounding box according to the lens model.
-	Imath::Box2i input( Imath::V2i( input0().info().x(), input0().info().y() ), Imath::V2i( input0().info().r(), input0().info().t() ) );
+	Imath::Box2i input( Imath::V2i( input0().info().x(), input0().info().y() ), Imath::V2i( input0().info().r()-1, input0().info().t()-1 ) );
 	Imath::Box2i box( m_model[0]->bounds( m_mode, input, format().width(), format().height() ) );
 	info_.set( box.min.x, box.min.y, box.max.x, box.max.y );
 	
@@ -235,9 +236,9 @@ void LensDistort::_validate(bool for_real)
 // We do this be using the output size and getting the bounds of the inverse distortion.
 void LensDistort::_request( int x, int y, int r, int t, ChannelMask channels, int count )
 {
-	Imath::Box2i requestArea( Imath::V2i( x, y ), Imath::V2i( r, t ) );
+	Imath::Box2i requestArea( Imath::V2i( x, y ), Imath::V2i( r-1, t-1 ) );
 	Imath::Box2i box( m_model[0]->bounds( !m_mode, requestArea, format().width(), format().height() ) );
-	DD::Image::Box distortedRequestedBox( box.min.x, box.min.y, box.max.x, box.max.y );
+	DD::Image::Box distortedRequestedBox( box.min.x, box.min.y, box.max.x+1, box.max.y+1 );
 	distortedRequestedBox.intersect( input0().info() );
 	input0().request( distortedRequestedBox, channels, count );
 }
@@ -248,10 +249,10 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 	const double h( format().height() );
 	const double w( format().width() );
 	const double v( double(y)/h );
-	double x_min = 1000000;
-	double x_max = -x_min;
-	double y_min = 1000000;
-	double y_max = -y_min;
+	double x_min = std::numeric_limits<double>::max();
+	double x_max = std::numeric_limits<double>::min();
+	double y_min = std::numeric_limits<double>::max();
+	double y_max = std::numeric_limits<double>::min();
 	
 	// Work out which of the array of lens models we should use depending on the current thread.
 	int lensIdx = 0;
@@ -264,13 +265,11 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 	// Create an array of distorted values that we will populate.
 	Imath::V2d distort[r-x];
 	
-	// Threadsafe read of distortion data
+	// Thread safe read of distortion data.
 	{
-		// Hopefully we should never contend on this lock: each thread should be running
-		// on a separate plugin, so have a separate lock
 		Guard l( m_locks[lensIdx] );
 		
-		// Distort each pixel on row - store result in array, and track bounding box
+		// Distort each pixel on the row, store the result in an array and track the bounding box.
 		for( int i = x; i < r; i++ )
 		{
 			double u = (i+0.0)/w;
@@ -442,7 +441,7 @@ void LensDistort::knobs( Knob_Callback f )
 
 	static const char * const modes[] = { "Distort", "Undistort", 0 };
 	Enumeration_knob( f, &m_mode, modes, "mode", "Mode" );
-	Tooltip( f, "Whether to Distort or Unsdistort the input by the current lens model." );
+	Tooltip( f, "Whether to Distort or Undistort the input by the current lens model." );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
 	
