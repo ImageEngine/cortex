@@ -36,7 +36,9 @@
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnEnumAttribute.h"
+#include "maya/MFnTypedAttribute.h"
 #include "maya/MFnPluginData.h"
+#include "maya/MFnStringData.h"
 #include "maya/MPlugArray.h"
 #include "maya/MDagPath.h"
 
@@ -53,6 +55,7 @@ const MTypeId GeometryCombiner::id = GeometryCombinerId;
 const MString GeometryCombiner::typeName = "ieGeometryCombiner";
 MObject GeometryCombiner::aConvertPrimVars;
 MObject GeometryCombiner::aConvertBlindData;
+MObject GeometryCombiner::aBlindDataAttrPrefix;
 MObject GeometryCombiner::aConversionSpace;
 MObject GeometryCombiner::aInputGeometry;
 MObject GeometryCombiner::aOutputGroup;
@@ -75,9 +78,13 @@ MStatus GeometryCombiner::initialize()
 
 	MFnNumericAttribute fnNAttr;
 	MFnEnumAttribute fnEAttr;
+	MFnTypedAttribute tAttr;
 
 	aConvertPrimVars = fnNAttr.create( "convertPrimVars", "cpv", MFnNumericData::kBoolean, 0.0f );
 	addAttribute( aConvertPrimVars );
+
+	aBlindDataAttrPrefix = tAttr.create( "blindDataAttrPrefix", "bda", MFnData::kString, MFnStringData().create( "" ) );
+	addAttribute( aBlindDataAttrPrefix );
 	
 	aConvertBlindData = fnNAttr.create( "convertBlindData", "cbd", MFnNumericData::kBoolean, 0.0f );
 	addAttribute( aConvertBlindData );
@@ -112,6 +119,7 @@ MStatus GeometryCombiner::initialize()
 	addAttribute( aOutputGroup );
 	
 	attributeAffects( aConvertPrimVars, aOutputGroup );
+	attributeAffects( aBlindDataAttrPrefix, aOutputGroup );
 	attributeAffects( aConvertBlindData, aOutputGroup );
 	attributeAffects( aConversionSpace, aOutputGroup );
 	attributeAffects( aInputGeometry, aOutputGroup );
@@ -126,6 +134,7 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 	{
 	
 		bool convertPrimVars = dataBlock.inputValue( aConvertPrimVars ).asBool();
+		MString blindDataAttrPrefix = dataBlock.inputValue( aBlindDataAttrPrefix ).asString();
 		bool convertBlindData = dataBlock.inputValue( aConvertBlindData ).asBool();
 		FromMayaShapeConverter::Space conversionSpace = (FromMayaShapeConverter::Space)dataBlock.inputValue( aConversionSpace ).asInt();
 	
@@ -171,7 +180,11 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 				{
 					converter->primVarAttrPrefixParameter()->setTypedValue( "" );
 				}
-				if( !convertBlindData )
+				if( convertBlindData )
+				{
+					converter->blindDataAttrPrefixParameter()->setTypedValue( blindDataAttrPrefix.asChar() );
+				}
+				else
 				{
 					converter->blindDataAttrPrefixParameter()->setTypedValue( "" );
 				}

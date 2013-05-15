@@ -211,6 +211,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( circle + ".ieString", "banana", type="string" )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
+		converter['blindDataAttrPrefix'] = IECore.StringData("ie")
 		curve = converter.convert()
 
 		self.assertEqual( len( curve.blindData().keys() ), 2 )

@@ -228,6 +228,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( plane + ".ieString", "banana", type="string" )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane )
+		converter['blindDataAttrPrefix'] = IECore.StringData("ie")
 		m = converter.convert()
 
 		self.assertEqual( len( m.blindData().keys() ), 2 )
