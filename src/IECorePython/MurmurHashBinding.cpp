@@ -103,6 +103,7 @@ void bindMurmurHash()
 		.def( "append", (MurmurHash &(MurmurHash::*)( const Imath::Box3d & ))&MurmurHash::append, return_self<>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( const Imath::Quatf & ))&MurmurHash::append, return_self<>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( const Imath::Quatd & ))&MurmurHash::append, return_self<>() )
+		.def( "append", (MurmurHash &(MurmurHash::*)( const MurmurHash & ))&MurmurHash::append, return_self<>() )
 		// array append functions
 		.def( "append", &appendArray<char>, return_self<>() )
 		.def( "append", &appendArray<unsigned char>, return_self<>() )
