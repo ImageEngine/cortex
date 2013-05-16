@@ -303,7 +303,7 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 					
 					int len = fnComp.elementCount( &s );
 					assert( s );
-					std::vector<std::string> groupNames;
+					std::vector<IECore::InternedString> groupNames;
 					for ( int j = 0; j < len; j++ )
 					{
 						int index = fnComp.element(j);
@@ -312,7 +312,7 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 					// Sort by name to make sure we don't unhilite selected items that are further down the hierarchy
 					std::sort( groupNames.begin(), groupNames.end() );
 					
-					for ( std::vector<std::string>::iterator it = groupNames.begin(); it!= groupNames.end(); ++it)
+					for ( std::vector<IECore::InternedString>::iterator it = groupNames.begin(); it!= groupNames.end(); ++it)
 					{
 						IECoreGL::GroupPtr group = sceneShape->glGroup( *it );
 
@@ -428,7 +428,7 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			depthMin = hits[i].depthMin;
 			depthMinIndex = componentIndices.length();
 		}
-		int index = sceneShape->selectionIndex( hits[i].name.value() );
+		int index = sceneShape->selectionIndex( hits[i].name );
 		componentIndices.append( index );
 	}
 	

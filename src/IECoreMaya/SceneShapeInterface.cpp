@@ -1140,7 +1140,7 @@ void SceneShapeInterface::setDirty()
 	m_previewSceneDirty = true;
 }
 
-IECoreGL::GroupPtr SceneShapeInterface::glGroup( std::string name )
+IECoreGL::GroupPtr SceneShapeInterface::glGroup( const IECore::InternedString &name )
 {
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
@@ -1153,7 +1153,7 @@ IECoreGL::GroupPtr SceneShapeInterface::glGroup( std::string name )
 	}
 }
 
-int SceneShapeInterface::selectionIndex( std::string name )
+int SceneShapeInterface::selectionIndex( const IECore::InternedString &name )
 {
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
@@ -1166,7 +1166,7 @@ int SceneShapeInterface::selectionIndex( std::string name )
 	}
 }
 
-std::string SceneShapeInterface::selectionName( int index )
+IECore::InternedString SceneShapeInterface::selectionName( int index )
 {
 	return m_indexToNameMap[index];
 }
