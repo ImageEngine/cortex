@@ -83,7 +83,6 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	if( curves->basis() == CubicBasisf::bezier() )
 	{
 		AiNodeSetStr( result, "basis", "bezier" );
-		
 	}
 	else if( curves->basis() == CubicBasisf::bSpline() )
 	{
@@ -92,6 +91,10 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	else if( curves->basis() == CubicBasisf::catmullRom() )
 	{
 		AiNodeSetStr( result, "basis", "catmull-rom" );
+	}
+	else if( curves->basis() == CubicBasisf::linear() )
+	{
+		AiNodeSetStr( result, "basis", "linear" );
 	}
 	else
 	{
