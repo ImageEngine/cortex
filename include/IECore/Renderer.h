@@ -40,6 +40,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/CompoundData.h"
 #include "IECore/CubicBasis.h"
+#include "IECore/MurmurHash.h"
 
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathBox.h"
@@ -345,6 +346,8 @@ class Renderer : public RunTimeTyped
 				/// the geometry generated must be contained within the
 				/// box returned by bound().
 				virtual void render( RendererPtr renderer ) const = 0;
+				/// Implement this to return a hash for procedural level instancing.
+				virtual MurmurHash hash() const = 0;
 
 		};
 		IE_CORE_DECLAREPTR( Procedural );

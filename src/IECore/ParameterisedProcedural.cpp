@@ -124,6 +124,13 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 			parameterisedProcedural->doRender( renderer, validatedArgs );
 		}
 
+		/// returns a hash of the parameters, so the renderer can instance procedurals with
+		/// identical parameters
+		virtual MurmurHash hash() const
+		{
+			return parameterisedProcedural->parameters()->getValue()->hash();
+		}
+		
 		ConstParameterisedProceduralPtr parameterisedProcedural;
 		ConstCompoundObjectPtr validatedArgs;
 };
