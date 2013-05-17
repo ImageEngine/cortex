@@ -347,6 +347,10 @@ class Renderer : public RunTimeTyped
 				/// box returned by bound().
 				virtual void render( RendererPtr renderer ) const = 0;
 				/// Implement this to return a hash for procedural level instancing.
+				/// Procedurals with the same hash will be reused by renderers that
+				/// support this feature. If computing a sensible hash is difficult
+				/// or impossible, return IECore::MurmurHash() from this function
+				/// and this feature will be disabled.
 				virtual MurmurHash hash() const = 0;
 
 		};
