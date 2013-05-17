@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,51 +33,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IE_CORERI_CORE_H
+#define IE_CORERI_CORE_H
 
-#include "IECoreRI/IECoreRI.h"
-
-#include "IECoreRI/bindings/RendererBinding.h"
-#include "IECoreRI/bindings/SLOReaderBinding.h"
-
-#include "IECoreRI/bindings/PTCParticleReaderBinding.h"
-#include "IECoreRI/bindings/PTCParticleWriterBinding.h"
-#include "IECoreRI/bindings/RIBWriterBinding.h"
-#include "IECoreRI/bindings/SXRendererBinding.h"
-#include "IECoreRI/bindings/GXEvaluatorBinding.h"
-#include "IECoreRI/bindings/DTEXDeepImageReaderBinding.h"
-#include "IECoreRI/bindings/DTEXDeepImageWriterBinding.h"
-#include "IECoreRI/bindings/SHWDeepImageReaderBinding.h"
-#include "IECoreRI/bindings/SHWDeepImageWriterBinding.h"
-
-using namespace IECoreRI;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreRI )
+namespace IECoreRI
 {
-	bindRenderer();
-	bindSLOReader();
-#ifdef IECORERI_WITH_PTC
-	bindPTCParticleReader();
-	bindPTCParticleWriter();
-#endif // IECORERI_WITH_PTC
-	bindRIBWriter();
-#ifdef IECORERI_WITH_SX
-	bindSXRenderer();	
-#endif // IECORERI_WITH_SX
-#ifdef IECORERI_WITH_GX
-	bindGXEvaluator();	
-#endif // IECORERI_WITH_GX
-#ifdef IECORERI_WITH_RIXDEEP
-	bindDTEXDeepImageReader();
-	bindDTEXDeepImageWriter();
-#endif // IECORERI_WITH_RIXDEEP
-#ifdef IECORERI_WITH_DEEPSHW
-	bindSHWDeepImageReader();
-	bindSHWDeepImageWriter();
-#endif // IECORERI_WITH_DEEPSHW
 
-	def( "withRiProceduralV", &IECoreRI::withRiProceduralV );
-
+/// Returns true if IECoreRI was built against a renderer API with the RiProceduralV function
+bool withRiProceduralV();
 
 }
+
+#endif // IE_CORERI_CORE_H
