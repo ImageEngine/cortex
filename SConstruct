@@ -1656,6 +1656,10 @@ if doConfigure :
 		if c.CheckFunc( "RiObjectBeginV" ) :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
+			
+		if c.CheckFunc( "RiProceduralV" ) :
+			
+			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_PROCEDURALV" ] )
 		
 		if haveDelight and c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter" ) :
 		
