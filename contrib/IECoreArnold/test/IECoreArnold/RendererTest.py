@@ -439,7 +439,12 @@ class RendererTest( unittest.TestCase ) :
 				t = renderer.getAttribute( "user:test" ).value
 				attributeValues.append( t )
 				renderer.sphere( 1, -1, 1, 360, {} )
-	
+			
+			def hash( self ):
+			
+				h = IECore.MurmurHash()
+				return h
+		
 		r = IECoreArnold.Renderer()
 		
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )

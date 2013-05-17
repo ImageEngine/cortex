@@ -57,7 +57,12 @@ class ProceduralTest( unittest.TestCase ) :
 		def render( self, renderer ) :
 		
 			renderer.sphere( self.__radius, -1, 1, 360, {} )
-			
+		
+		def hash( self ):
+		
+			h = IECore.MurmurHash()
+			return h
+		
 	class TransformingProcedural( IECore.Renderer.Procedural ) :
 	
 		def __init__( self, transform, child ) :
@@ -82,7 +87,12 @@ class ProceduralTest( unittest.TestCase ) :
 					self.__child.render( renderer )
 				else :
 					renderer.procedural( self.__child )
-	
+		
+		def hash( self ):
+		
+			h = IECore.MurmurHash()
+			return h
+		
 	class ShaderProcedural( IECore.Renderer.Procedural ) :
 		
 		def __init__( self, shader, child ) :
@@ -102,7 +112,12 @@ class ProceduralTest( unittest.TestCase ) :
 			
 				self.__shader.render( renderer )
 				renderer.procedural( self.__child )
-					
+		
+		def hash( self ):
+		
+			h = IECore.MurmurHash()
+			return h
+		
 	def arnoldMessageCallback( self, logMask, severity, msg, tabs ) :
 	
 		self.__arnoldMessages += msg
@@ -189,7 +204,12 @@ class ProceduralTest( unittest.TestCase ) :
 			def render( self, renderer ) :
 			
 				pass
-		
+
+			def hash( self ):
+
+				h = IECore.MurmurHash()
+				return h
+
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
