@@ -121,6 +121,11 @@ class InstancingTest( unittest.TestCase ) :
 				else :
 					renderer.instance( "myLovelySphere" )
 		
+			def hash( self ) :
+			
+				h = MurmurHash()
+				return h
+			
 		# test writing a rib
 		
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
@@ -172,6 +177,11 @@ class InstancingTest( unittest.TestCase ) :
 				renderer.instanceEnd()
 				
 				renderer.instance( self.__instanceName )
+			
+			def hash( self ) :
+				
+				h = MurmurHash()
+				return h
 				
 		initThreads()
 		r = IECoreRI.Renderer( "" )
@@ -182,7 +192,144 @@ class InstancingTest( unittest.TestCase ) :
 		
 			for i in range( 0, 100 ) :
 				r.procedural( InstanceMakingProcedural( "instance%d" % i ) )
+	
+	def testProceduralLevelInstancing( self ) :
+		
+		if IECoreRI.withRiProceduralV():
 
+			class InstanceTestProcedural( Renderer.Procedural ) :
+
+				renderCount = 0
+
+				def __init__( self, instanceHash ) :
+
+					Renderer.Procedural.__init__( self )
+
+					self.__instanceHash = instanceHash
+
+				def bound( self ) :
+
+					return Box3f( V3f( -10 ), V3f( 10 ) )
+
+				def render( self, renderer ) :
+					InstanceTestProcedural.renderCount = InstanceTestProcedural.renderCount + 1
+					pass
+
+				def hash( self ) :
+					return self.__instanceHash
+
+			r = IECoreRI.Renderer("")
+
+			# give it a camera using the ray trace hider, and turn shareinstances on:
+			r.camera( "main", {
+				"resolution" : V2iData( V2i( 1024, 200 ) ),
+				"screenWindow" : Box2fData( Box2f( V2f( -1 ), V2f( 1 ) ) ),
+				"cropWindow" : Box2fData( Box2f( V2f( 0.1, 0.1 ), V2f( 0.9, 0.9 ) ) ),
+				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
+				"projection" : StringData( "perspective" ),
+				"projection:fov" : FloatData( 45 ),
+				"ri:hider" : StringData( "raytrace" ),
+			} )
+			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
+			
+			# chuck a couple of procedurals at it:
+			h1 = MurmurHash()
+			h2 = MurmurHash()
+			
+			h1.append( "instance1" )
+			h2.append( "instance2" )
+			
+			with WorldBlock( r ) :
+				r.procedural( InstanceTestProcedural(h1) )
+				r.procedural( InstanceTestProcedural(h1) )
+				r.procedural( InstanceTestProcedural(h2) )
+				r.procedural( InstanceTestProcedural(h2) )
+
+			# only two unique instances here, as there were 2 unique hashes....
+			self.assertEqual( InstanceTestProcedural.renderCount, 2 )
+			
+			InstanceTestProcedural.renderCount = 0
+			
+			# the system shouldn't perform instancing when the hash method returns empty hashes:
+			with WorldBlock( r ) :
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+			
+			self.assertEqual( InstanceTestProcedural.renderCount, 4 )
+
+		
+	def testParameterisedProceduralInstancing( self ) :
+	
+		if IECoreRI.withRiProceduralV():
+
+			class InstanceTestParamProcedural( ParameterisedProcedural ) :
+				
+				renderCount = 0
+
+				def __init__( self ) :
+					
+					ParameterisedProcedural.__init__( self, "Instancing test" )
+					
+					self.parameters().addParameters(
+			
+						[
+							BoolParameter(
+								name = "p1",
+								description = "whatever.",
+								defaultValue = True,
+							),
+
+							StringParameter(
+								name = "p2",
+								description = "yup.",
+								defaultValue = "blah"
+							),
+						]
+
+					)
+				
+				def doBound( self, args ) :
+
+					return Box3f( V3f( -10 ), V3f( 10 ) )
+
+				def doRender( self, renderer, args ) :
+					InstanceTestParamProcedural.renderCount = InstanceTestParamProcedural.renderCount + 1
+					pass
+			
+			r = IECoreRI.Renderer("")
+			
+			# give it a camera using the ray trace hider, and turn shareinstances on:
+			r.camera( "main", {
+				"resolution" : V2iData( V2i( 1024, 200 ) ),
+				"screenWindow" : Box2fData( Box2f( V2f( -1 ), V2f( 1 ) ) ),
+				"cropWindow" : Box2fData( Box2f( V2f( 0.1, 0.1 ), V2f( 0.9, 0.9 ) ) ),
+				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
+				"projection" : StringData( "perspective" ),
+				"projection:fov" : FloatData( 45 ),
+				"ri:hider" : StringData( "raytrace" ),
+			} )
+			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
+			
+			# chuck a couple of procedurals at it:
+			
+			proc1 = InstanceTestParamProcedural()
+			proc2 = InstanceTestParamProcedural()
+			
+			proc1["p1"].setValue( False )
+			proc1["p2"].setValue( StringData( "humpf" ) )
+			
+			with WorldBlock( r ) :
+				
+				proc1.render( r )
+				proc2.render( r )
+				proc2.render( r )
+				proc2.render( r )
+			
+			# only two unique instances here....
+			self.assertEqual( InstanceTestParamProcedural.renderCount, 2 )
+	
 	def tearDown( self ) :
 
 		files = [

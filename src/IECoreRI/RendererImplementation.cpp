@@ -45,6 +45,7 @@
 #include "IECore/Transform.h"
 #include "IECore/MatrixTransform.h"
 #include "IECore/Group.h"
+#include "IECore/MurmurHash.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
 #include "boost/format.hpp"
@@ -1461,7 +1462,33 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 	data->procedural = proc;
 	data->parentRenderer = this;
 	
+#ifdef IECORERI_WITH_PROCEDURALV
+	
+	IECore::MurmurHash h = proc->hash();
+	
+	if( h == IECore::MurmurHash() )
+	{
+		// empty hash => no procedural level instancing
+		RiProcedural( data, riBound, procSubdivide, procFree );
+	}
+	else
+	{
+		std::string hashStr = h.toString();
+
+		// specify an instance key for procedural level instancing
+		const char *tokens[] = { "instancekey" };
+		const char *keyPtr = hashStr.c_str();
+		void *values[] = { &keyPtr };
+
+		RiProceduralV( data, riBound, procSubdivide, procFree, 1, tokens, values );
+	}
+	
+#else
+
 	RiProcedural( data, riBound, procSubdivide, procFree );
+	
+#endif
+
 }
 
 void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )

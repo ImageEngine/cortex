@@ -67,7 +67,11 @@ class SimpleProcedural( Renderer.Procedural ) :
 		renderer.concatTransform( m )
 
 		renderer.transformEnd()
-
+	
+	def hash( self ):
+	
+		h = MurmurHash()
+		return h
 
 class RendererTest( unittest.TestCase ) :
 
@@ -550,7 +554,7 @@ class RendererTest( unittest.TestCase ) :
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
 
 		self.assertTrue( 'Option "limits" "integer bucketsize[2]" [ 32 32 ]' in rib )
-					
+	
 	def tearDown( self ) :
 
 		files = [

@@ -57,6 +57,10 @@ class TeapotProcedural( IECore.Renderer.Procedural ) :
 	
 		renderer.geometry( "teapot", {}, {} )
 		
+	def hash( self ):
+		h = IECore.MurmurHash()
+		return h
+	
 class ParameterisedTeapotProcedural( IECore.ParameterisedProcedural ) :
 
 	def __init__( self ) :
