@@ -592,6 +592,10 @@ class TestRenderer( unittest.TestCase ) :
 				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
 				self.assertEqual( commandResult, BoolData( True ) )
 
+			def hash( self ):
+				h = IECore.MurmurHash()
+				return h
+
 		r.command( "editBegin", {} )
 		r.procedural( RemovalProcedural() )
 		r.command( "editEnd", {} )
@@ -645,7 +649,12 @@ class TestRenderer( unittest.TestCase ) :
 
 				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
 				self.assertEqual( commandResult, BoolData( True ) )
-
+			
+			def hash( self ):
+			
+				h = IECore.MurmurHash()
+				return h
+		
 		r.command( "editBegin", {} )
 		
 		# typically you wouldn't call a renderer method on a separate thread like this. we're just
@@ -728,7 +737,12 @@ class TestRenderer( unittest.TestCase ) :
 					renderer.transformEnd()
 				renderer.transformEnd()
 			renderer.attributeEnd()
-
+		
+		def hash( self ):
+		
+			h = IECore.MurmurHash()
+			return h
+		
 	class RecursiveParameterisedProcedural( ParameterisedProcedural ):
 
 		maxLevel = 5
@@ -987,7 +1001,11 @@ class TestRenderer( unittest.TestCase ) :
 					g.addChild( myMesh )
 					g.addState( IECore.AttributeState( { "name" : StringData( str(self.__level) ) } ) )
 					g.render( renderer )
-
+			
+			def hash( self ):
+				h = IECore.MurmurHash()
+				return h
+			
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		r.worldBegin()
