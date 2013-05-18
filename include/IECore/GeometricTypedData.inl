@@ -97,25 +97,24 @@ void GeometricTypedData<T>::copyFrom( const Object *other, Object::CopyContext *
 template <class T>
 void GeometricTypedData<T>::save( Object::SaveContext *context ) const
 {
+	static InternedString interpretationEntry("interpretation");
 	TypedData<T>::save( context );
 	IndexedIO *container = context->rawContainer();
-	container->write( "interpretation", (unsigned)m_interpretation );
+	container->write( interpretationEntry, (unsigned)m_interpretation );
 }
 
 template <class T>
 void GeometricTypedData<T>::load( Object::LoadContextPtr context )
 {
+	static InternedString interpretationEntry("interpretation");
 	TypedData<T>::load( context );
-	try
+	const IndexedIO *container = context->rawContainer();
+	// test for new format
+	if ( container->hasEntry(interpretationEntry) )
 	{
-		// optimised format for new files
-		const IndexedIO *container = context->rawContainer();
 		unsigned tmp;
-		container->read( "interpretation", tmp );
+		container->read( interpretationEntry, tmp );
 		m_interpretation = (GeometricData::Interpretation)tmp;
-	}
-	catch( ... )
-	{
 	}
 }
 
