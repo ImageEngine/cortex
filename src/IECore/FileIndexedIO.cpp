@@ -33,6 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/filesystem/operations.hpp"
+#include "boost/iostreams/device/mapped_file.hpp"
+#include "boost/iostreams/stream.hpp"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/FileIndexedIO.h"
@@ -121,17 +123,39 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 	}
 	else
 	{
+		/// we always attempt first to open the file as memory mapped
 		assert( mode & IndexedIO::Read );
-		std::fstream *f = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in );
+		std::iostream *stream = 0;
+		boost::iostreams::stream<boost::iostreams::mapped_file> *fMapped = new boost::iostreams::stream<boost::iostreams::mapped_file>();
+		fMapped->open( filename.c_str() );
 
-		if (! f->is_open() )
+		if (fMapped->is_open() )
 		{
-			throw IOException( "FileIndexedIO: Cannot open file '" + filename + "' for read" );
+			stream = fMapped;
+		}
+		else
+		{
+			delete fMapped;
+		}
+
+		if ( !stream )
+		{
+			std::fstream *fFile = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in );
+
+			if ( fFile->is_open() )
+			{
+				stream = fFile;
+			}
+			else
+			{
+				delete fFile;
+				throw IOException( "FileIndexedIO: Cannot open file '" + filename + "' for read" );
+			}
 		}
 
 		try
 		{
-			setStream( f, false );
+			setStream( stream, false );
 		}
 		catch ( Exception &e )
 		{
