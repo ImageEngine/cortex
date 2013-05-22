@@ -92,7 +92,6 @@ class SceneShapeInterface: public MPxComponentShape
 		// Public variables because plugs need to be accessed by the UI creator which implements the drawing/selection
 		static MObject aObjectOnly;
 		static MObject aDrawGeometry;
-		static MObject aDrawLocators;
 		static MObject aDrawRootBound;
 		static MObject aDrawChildBounds;
 		static MObject aDrawTagsFilter;

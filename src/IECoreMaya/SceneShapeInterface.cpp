@@ -96,7 +96,6 @@ using namespace IECoreMaya;
 MTypeId SceneShapeInterface::id = SceneShapeInterfaceId;
 MObject SceneShapeInterface::aObjectOnly;
 MObject SceneShapeInterface::aDrawGeometry;
-MObject SceneShapeInterface::aDrawLocators;
 MObject SceneShapeInterface::aDrawRootBound;
 MObject SceneShapeInterface::aDrawChildBounds;
 MObject SceneShapeInterface::aDrawTagsFilter;
@@ -185,16 +184,6 @@ MStatus SceneShapeInterface::initialize()
 	nAttr.setChannelBox( true );
 
 	s = addAttribute( aDrawGeometry );
-	
-	aDrawLocators = nAttr.create( "drawLocators", "drl", MFnNumericData::kBoolean, 0, &s );
-	nAttr.setReadable( true );
-	nAttr.setWritable( true );
-	nAttr.setStorable( true );
-	nAttr.setConnectable( true );
-	nAttr.setHidden( false );
-	nAttr.setChannelBox( true );
-
-	s = addAttribute( aDrawLocators );
 
 	aDrawRootBound = nAttr.create( "drawRootBound", "drbd", MFnNumericData::kBoolean, 1, &s );
 	nAttr.setReadable( true );
@@ -576,7 +565,7 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 			}
 		}
 	}
-	else if( plug == aDrawGeometry || plug == aDrawLocators || plug == aDrawChildBounds || plug == aObjectOnly || plug == aDrawTagsFilter )
+	else if( plug == aDrawGeometry || plug == aDrawChildBounds || plug == aObjectOnly || plug == aDrawTagsFilter )
 	{
 		// Preview plug values have changed, GL Scene is dirty
 		m_previewSceneDirty = true;
@@ -1069,14 +1058,11 @@ IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 	{
 		SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );
-		
-		MPlug pDrawLocators( thisMObject(), aDrawLocators );
-		bool drawLocators;
-		pDrawLocators.getValue( drawLocators );
-		
+
 		IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 		renderer->setOption( "gl:mode", new StringData( "deferred" ) );
-		renderer->setOption( "gl:drawCoordinateSystems", new BoolData( drawLocators ) );
+		// Always draw locators. They can be hidden by using tags.
+		renderer->setOption( "gl:drawCoordinateSystems", new BoolData( true ) );
 		
 		renderer->worldBegin();
 		{

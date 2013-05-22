@@ -47,11 +47,11 @@ global proc AEieSceneShapeTemplate( string $nodeName )
 		
 		editorTemplate -beginLayout "Preview";
 			editorTemplate -annotation "Draw all the geometry." -addControl "drawGeometry";
-			editorTemplate -annotation "If drawGeometry is on, also draw the locators." -addControl "drawLocators";
+			editorTemplate -interruptOptimize;
 			editorTemplate -annotation "Draw the bound for the root path." -addControl "drawRootBound";
+			editorTemplate -interruptOptimize;
 			editorTemplate -annotation "Draw the bounds of all the scene interface children." -addControl "drawChildBounds";
 			editorTemplate -annotation "Only draw the elements that match those tags." -addControl "drawTagsFilter";
-
 		editorTemplate -endLayout;
 
 		editorTemplate -beginLayout "Queries";
