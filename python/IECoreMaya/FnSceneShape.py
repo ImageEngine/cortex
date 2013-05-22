@@ -380,7 +380,10 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			if type == "mesh":
 				object = self.sceneInterface().readObject(0.0)
 				interpolation = object.interpolation
-				IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( shape, interpolation )
+				try:
+					IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( shape, interpolation )
+				except:
+					IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.convertObjectToGeometry", "Failed to set interpolation on %s." % shape )
 
 
 	## Returns the maya node type that this function set operates on
