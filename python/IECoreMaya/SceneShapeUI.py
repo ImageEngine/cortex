@@ -450,18 +450,24 @@ def __collapseChildren( sceneShapes, *unused ) :
 # Returns None if no parent found.
 def __parentSceneShape( sceneShapes ):
 	
+	def getParentShapes( transform, allParentShapes ):
+		parent = maya.cmds.listRelatives( transform, p=True, fullPath=True )
+		if parent:
+			parentShape = maya.cmds.listRelatives( parent[0], fullPath=True, type = "ieSceneShape" )
+			if parentShape:
+			    allParentShapes.append( parentShape[0] )
+			    getParentShapes( parent[0], allParentShapes )
+		
 	parents = None
 	for sceneShape in sceneShapes:
 		transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
 		if transform:
-			parent = maya.cmds.listRelatives( transform[0], parent=True, fullPath=True )
-			if parent:
-				parentShape = maya.cmds.listRelatives( parent[0], fullPath=True, type = "ieSceneShape" )
-				if parentShape:
-					if parents is None:
-						parents = set( parentShape )
-					else:
-						parents.intersection_update( set(parentShape) )
+			allParentShapes = []
+			getParentShapes( transform[0], allParentShapes )
+			if parents is None:
+				parents = set( allParentShapes )
+			else:
+				parents.intersection_update( set(allParentShapes) )
 	if parents:
 		parent = ""
 		for p in parents:
