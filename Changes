@@ -57,6 +57,7 @@ Improvements :
 * Added DisplayDriver::acceptsRepeatedData(), enabling the ImageDisplayDriver to support progressive rendering and rerendering when used via IECoreRI.
 * IECoreRI::ParameterList now accepts V2iData, converting it to RenderMan "integer[2]".
 * Added Renderer option "editable", along with editBegin() and editEnd() methods, to allow interactive rerendering functionality to be implemented. These are currently only implemented by IECoreRI::Renderer.
+* Switched to Boost Filesystem version 3
 
 Bug Fixes :
 

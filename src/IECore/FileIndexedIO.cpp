@@ -224,7 +224,7 @@ FileIndexedIO::FileIndexedIO()
 FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
 {
 	const fs::path p = fs::path(path);
-	const std::string filename = p.native_file_string();
+	const std::string filename = p.string();
 
 	if (! fs::exists(filename) && (mode & IndexedIO::Read))
 	{

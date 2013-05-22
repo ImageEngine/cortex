@@ -181,7 +181,7 @@ void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequen
 	 	std::vector< std::string > files;
 		for ( boost::filesystem::directory_iterator it( path ); it != end; ++it )
 		{
-			files.push_back( it->leaf() );
+			files.push_back( it->path().filename().string() );
 		}
 
 		findSequences( files, sequences, minSequenceSize );
@@ -205,7 +205,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 
 	boost::filesystem::path dir = boost::filesystem::path( sequencePath ).branch_path();
 
-	std::string baseSequencePath = boost::filesystem::path( sequencePath ).leaf();
+	std::string baseSequencePath = boost::filesystem::path( sequencePath ).filename().string();
 
 	const std::string::size_type first = baseSequencePath.find_first_of( '#' );
 	assert( first != std::string::npos );
@@ -225,9 +225,9 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 
 	for ( boost::filesystem::directory_iterator it( dirToCheck ); it != end; ++it )
 	{
-		const std::string &fileName = it->leaf();
+		const std::string fileName = it->path().filename().string();
 
-		if ( fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
+		if ( fileName.size() >= std::min( prefix.size(), suffix.size() ) && fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
 		{
 			files.push_back( ( dir / boost::filesystem::path( fileName ) ).string() );
 		}
