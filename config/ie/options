@@ -113,11 +113,16 @@ os.environ["COMPILER_VERSION"] = compilerVersion
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
 
 m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
-if not m:
-	raise RuntimeError( "Cannot determine compiler version" )
-	
-compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
-compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+if m :
+	compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
+	compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+else :
+	m = re.compile( "^([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
+	compilerMajorVersion, compilerMinorVersion = m.group( 1, 2 )
+	compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + 9
+
+if not m :
+	raise RuntimeError( "Cannot determine compiler version (%s)" % compilerVersion )
 
 # figure out the suffix for boost libraries
 boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
