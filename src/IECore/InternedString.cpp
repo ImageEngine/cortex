@@ -116,4 +116,10 @@ const InternedString &InternedString::emptyString()
 	return g_emptyString;
 }
 
+std::ostream &operator << ( std::ostream &o, const InternedString &str )
+{
+	o << str.c_str();
+	return o;
+}
+
 } // namespace IECore

@@ -84,6 +84,8 @@ class InternedString
 
 };
 
+std::ostream &operator << ( std::ostream &o, const InternedString &str );
+
 } // namespace IECore
 
 #include "IECore/InternedString.inl"
