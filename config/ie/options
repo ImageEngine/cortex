@@ -130,7 +130,9 @@ while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ "-pipe", "-Wall", "-Werror" ]
+# adding "-Wno-write-strings" because gcc 4.4 complains about PyDateTime_IMPORT (python2.6) and gcc 4.1.2 doesn't accept pragmas
+## \todo: remove "-Wno-write-strings" if we ever drop support for older gcc versions or python2.6
+CXXFLAGS = [ "-pipe", "-Wall", "-Werror", "-Wno-write-strings" ]
 if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
 	

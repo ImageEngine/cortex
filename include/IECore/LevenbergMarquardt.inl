@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -520,7 +520,7 @@ void LevenbergMarquardt<T, ErrorFn, Traits>::qrFactorize()
 template<typename T, typename ErrorFn, template<typename> class Traits>
 T LevenbergMarquardt<T, ErrorFn, Traits>::computeLMParameter( std::vector<T> &x, std::vector<T> &sdiag, T delta )
 {
-	T par;
+	T par = 0.;
 
 	unsigned int i, iter, j, nsing;
 	T dxnorm, fp, fp_old, gnorm, parc, parl, paru;

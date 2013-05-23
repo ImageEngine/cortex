@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <string.h>
+
 #include "tbb/spin_rw_mutex.h"
 
 #include "boost/multi_index_container.hpp"

@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/functional/hash.hpp"
 
 #include "IECore/InternedString.h"
 #include "IECorePython/InternedStringBinding.h"
@@ -87,19 +88,7 @@ static string repr( const InternedString &str )
 
 static size_t hash( const InternedString &str )
 {
-	union {
-		const char *p;
-		size_t hashComponents[ sizeof(char*)/sizeof(size_t) ];
-	} v;
-
-	v.p = str.c_str();
-
-	size_t result = v.hashComponents[0];
-	for ( unsigned int i = 1; i < sizeof(char*)/sizeof(unsigned int); i++ )
-	{
-		result ^= v.hashComponents[i];
-	}
-	return result;
+	return boost::hash<const char *>()( str.c_str() );
 }
 
 void bindInternedString()
