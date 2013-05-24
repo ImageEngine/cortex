@@ -71,6 +71,7 @@ Bug Fixes :
 * Preventing segfaults when CompoundData and CompoundObject have items with NULL pointers.
 * Preventing segfaults when Parameter's default values are initialized with NULL pointers (or the Python None object).
 * ieFilteredAbs corrected to return positive values, ieTurbulence monochrome variant now filtered
+* Fixed a problem where it was impossible to kill the renderer in 3delight IPR mode, and therefore impossible to stop an IPR render. See comments above "struct ProceduralData" in include/IECoreRI/private/RendererImplementation.h
 
 7.10.2 :
 
