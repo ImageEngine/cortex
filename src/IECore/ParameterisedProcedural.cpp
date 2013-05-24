@@ -128,7 +128,9 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 		/// identical parameters
 		virtual MurmurHash hash() const
 		{
-			return parameterisedProcedural->parameters()->getValue()->hash();
+			MurmurHash h;
+			parameterisedProcedural->hash( h );
+			return h;
 		}
 		
 		ConstParameterisedProceduralPtr parameterisedProcedural;
