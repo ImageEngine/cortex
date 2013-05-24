@@ -88,6 +88,12 @@ IECoreRI::RendererImplementation::RendererImplementation( RendererImplementation
 	constructCommon();
 }
 
+IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
+{
+	constructCommon();
+}
+
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
 	:	m_sharedData( new SharedData )
 {
@@ -1460,7 +1466,8 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 
 	ProceduralData *data = new ProceduralData;
 	data->procedural = proc;
-	data->parentRenderer = this;
+	data->sharedData = m_sharedData;
+	data->options = m_options;
 	
 #ifdef IECORERI_WITH_PROCEDURALV
 	
@@ -1499,7 +1506,7 @@ void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 	// and the original renderer would be trying to switch to its original context. so we just create a temporary
 	// renderer which doesn't own a context and therefore use the context 3delight has arranged to call subdivide with.
 	// we do however share SharedData with the parent renderer, so that we can share instances among procedurals.
-	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer( new RendererImplementation( proceduralData->parentRenderer ) );
+	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer( new RendererImplementation( proceduralData->sharedData, proceduralData->options ) );
 	proceduralData->procedural->render( renderer );
 }
 
