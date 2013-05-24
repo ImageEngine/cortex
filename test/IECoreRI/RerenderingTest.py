@@ -37,12 +37,16 @@ from __future__ import with_statement
 import os
 import unittest
 import time
+import gc
+
+import weakref
 
 import IECore
 import IECoreRI
 				
 class RerenderingTest( unittest.TestCase ) :
-
+	
+	
 	def testEditLight( self ) :
 		
 		# start an editable render with one light colour
@@ -169,6 +173,82 @@ class RerenderingTest( unittest.TestCase ) :
 		newColor = IECore.Color3f( er.floatPrimVar( i["R"] ), er.floatPrimVar( i["G"] ), er.floatPrimVar( i["B"] ) )
 		
 		self.assertEqual( newColor / initialColor, IECore.Color3f( .5 ) )
+	
+	
+	def testRenderStop( self ) :
+		
+		# Tests a bug where it was impossible to stop an ipr render involving a procedural.
+		
+		# The bug happened because in ipr mode, 3delight was keeping hold of a "ProceduralData" structure
+		# containing the renderer's RendererImplementation and the procedural, until the IPR
+		# render was terminated with a call to RiEnd().
+		
+		# Unfortunately, the only way of calling RiEnd() in IECoreRI is to delete the renderer
+		# by reducing its reference count to zero, thereby destroying its implementation. This
+		# was impossible to do because 3delight was keeping hold of a reference to it.
+		
+		# We fixed this by removing the RendererImplementation from the ProceduralData structure and
+		# putting other data there instead...
+		
+		# We're going to excercise this by launching an IPR render of a procedural, then making
+		# sure that deleting the renderer kills the procedural. This impliess that the renderer
+		# has been successfully killed, which has called RiEnd() and released the contents of
+		# the ProceduralData structure.
+		
+		IECore.initThreads()
+		
+		r = IECoreRI.Renderer( "" )
+		
+		r.setOption( "editable", True )
+		
+		r.display( "test", "ie", "rgba",
+			{
+				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
+				"handle" : IECore.StringData( "myLovelySphere" ),
+				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
+			}
+		)
+		
+		class BlahProcedural( IECore.Renderer.Procedural ) :
+			
+			def __init__( self ) :
+
+				IECore.Renderer.Procedural.__init__( self )
+
+			def bound( self ) :
+
+				return IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) )
+			
+			def render( self, renderer ) :
+				renderer.sphere( 1, -1, 1, 360, {} )
+
+			def hash( self ) :
+				return IECore.MurmurHash()
+
+		
+		with IECore.WorldBlock( r ) :
+		
+			with IECore.AttributeBlock( r ) :
+			
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+				p = BlahProcedural()
+				r.procedural( p )
+		
+		# give it time to finish
+		time.sleep( 1 )
+		
+		# now try and kill a bunch of stuff...
+		procref = weakref.ref( p )
+		del p
+		del r
+		
+		while gc.collect():
+			pass
+		
+		IECore.RefCounted.collectGarbage()
+		
+		# and check we've actually killed it:
+		self.failUnless( procref() is None )
 		
 if __name__ == "__main__":
     unittest.main()
