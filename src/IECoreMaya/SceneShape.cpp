@@ -199,7 +199,7 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 		return false;
 	}
 	
-	MFnDagNode fnChildDag = dagPath;
+	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
 	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, &st );
 	if( !st )
@@ -237,7 +237,7 @@ ObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 		throw Exception( "Empty scene!");
 	}
 
-	MFnDagNode fnChildDag = dagPath;
+	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
 	MPlug timePlug = fnChildDag.findPlug( aTime, &st );
 	if( !st )
@@ -276,7 +276,7 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 		return false;
 	}
 
-	MFnDagNode fnChildDag = dagPath;
+	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
 	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, &st );
 	if( !st )
