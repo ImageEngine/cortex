@@ -1819,8 +1819,10 @@ if env["WITH_GL"] and doConfigure :
 		"CXXFLAGS" : [
 			"-isystem", "$GLEW_INCLUDE_PATH",
 			"-isystem", "$GLUT_INCLUDE_PATH",
-			# This is to allow a formatting warning in boost::wave
-			"-Wno-format"
+			# These are to work around warnings in boost::wave
+			# while still using -Werror.
+			"-Wno-format",
+			"-Wno-strict-aliasing",
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
