@@ -1,5 +1,6 @@
 Additions :
 
+* Renderer::Procedural classes must now implement a hash() method, which provides a hash of their input data. This is so renderers that support procedural caching can make use of the hash, allowing entire procedurals to be instanced.
 * Added Maya converters for IECore.CoordinateSystem to/from Maya Locators.
 * Added the LensModel and StandardRadialLensModel classes to provide a framework for applying or removing lens distortion.
 * Added the LensDistortOp which distorts or undistorts an image using a parametric lens model.
