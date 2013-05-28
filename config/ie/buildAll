@@ -83,6 +83,23 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	
 	installDocs()
 
+elif IEEnv.platform() == "cent6.x86_64" :
+	
+	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=UNDEFINED", "PYTHON_VERSION=2.6", "ARNOLD_VERSION=4.0.9.1" ] )
+	
+	for dlVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["3delight"] ):
+		build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION="+dlVersion, "PYTHON_VERSION=2.6", "ARNOLD_VERSION=UNDEFINED" ] )
+	
+	build( [ "APP=maya", "APP_VERSION=2013", "DL_VERSION=10.0.142", "ARNOLD_VERSION=4.0.9.1" ] )
+	
+	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
+		build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
+	
+	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
+		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
+	
+	installDocs()
+	
 else :
 
 	raise RuntimeError( "Unknown platform" )
