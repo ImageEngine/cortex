@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -90,10 +90,11 @@ if targetApp :
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
+	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
 	if not compiler :
-		compiler = IEEnv.registry["platformDefaults"][platform]["compiler"]
+		compiler = platformReg.get( "toolsCompiler", platformReg["compiler"] )
 	if not compilerVersion :
-		compilerVersion = IEEnv.registry["platformDefaults"][platform]["compilerVersion"]
+		compilerVersion = platformReg.get( "toolsCompilerVersion", platformReg["compilerVersion"] )
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
