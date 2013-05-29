@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,8 +49,8 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 	__outputValues = {
 		"Constant" : IECore.IntData( 10 ),
 		"Uniform" : IECore.IntVectorData( [ 1, 1, 1, 2, 2, 2 ] ),
-		"Varying" : IECore.IntVectorData( [ 1, 2, 3, 1, 3, 4 ] ),
-		"Vertex" : IECore.IntVectorData( [ 1, 2, 3, 1, 3, 4 ] ),
+		"Varying" : IECore.IntVectorData( [ 1, 2, 4, 1, 4, 3 ] ),
+		"Vertex" : IECore.IntVectorData( [ 1, 2, 4, 1, 4, 3 ] ),
 		"FaceVarying" : IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ),	
 	}
 
@@ -70,7 +70,6 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 
 		p = self.__plane()		
 		p2 = IECore.FaceVaryingPromotionOp()( input=p )
-		
 		self.failUnless( p2.arePrimitiveVariablesValid() )
 		
 		self.assertEqual( p2["Constant"], p["Constant"] )

@@ -89,8 +89,7 @@ class MeshPrimitive : public Primitive
 		/// \todo Add subdivisions and texture coordinates.
 		static MeshPrimitivePtr createBox( const Imath::Box3f &b );
 		/// Creates a plane at z=0, with the geometric normal facing down positive z.
-		/// \todo Add subdivisions.
-		static MeshPrimitivePtr createPlane( const Imath::Box2f &b );
+		static MeshPrimitivePtr createPlane( const Imath::Box2f &b, const Imath::V2i &divisions = Imath::V2i( 1 ) );
 		
 		virtual void topologyHash( MurmurHash &h ) const;
 

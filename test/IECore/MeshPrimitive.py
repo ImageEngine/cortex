@@ -133,7 +133,79 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( m.hash(), h )
 		self.assertEqual( m.topologyHash(), t )
+	
+	def testBox( self ) :
 		
+		m = MeshPrimitive.createBox( Box3f( V3f( 0 ), V3f( 1 ) ) )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Uniform ), 6 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Varying ), 8 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 24 )
+		self.assertEqual( m.numFaces(), 6 )
+		self.assertEqual( m.verticesPerFace, IntVectorData( [ 4 ] * 6 ) )
+		self.assertEqual( m.bound(), Box3f( V3f( 0 ), V3f( 1 ) ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+	
+	def testPlane( self ) :
+		
+		m = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Vertex ), 4 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Varying ), 4 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 4 )
+		self.assertEqual( m.numFaces(), 1 )
+		self.assertEqual( m.verticesPerFace, IntVectorData( [ 4 ] ) )
+		self.assertEqual( m.vertexIds, IntVectorData( [ 0, 1, 3, 2 ] ) )
+		self.assertEqual( m.bound(), Box3f( V3f( 0 ), V3f( 1, 1, 0 ) ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		
+		# verify uvs
+		e = MeshPrimitiveEvaluator( TriangulateOp()( input = m ) )
+		r = e.createResult()
+		self.assertTrue( e.pointAtUV( V2f( 0, 1 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[0] )
+		self.assertEqual( r.point(), V3f( 0, 0, 0 ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 1 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[1] )
+		self.assertEqual( r.point(), V3f( 1, 0, 0 ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 0 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[3] )
+		self.assertEqual( r.point(), V3f( 1, 1, 0 ) )
+		self.assertTrue( e.pointAtUV( V2f( 0, 0 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[2] )
+		self.assertEqual( r.point(), V3f( 0, 1, 0 ) )
+		
+		# test divisions
+		m = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ), divisions = V2i( 2, 3 ) )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Uniform ), 6 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Vertex ), 12 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Varying ), 12 )
+		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 24 )
+		self.assertEqual( m.numFaces(), 6 )
+		self.assertEqual( m.verticesPerFace, IntVectorData( [ 4 ] * 6 ) )
+		self.assertEqual( m.vertexIds, IntVectorData( [ 0, 1, 4, 3, 1, 2, 5, 4, 3, 4, 7, 6, 4, 5, 8, 7, 6, 7, 10, 9, 7, 8, 11, 10 ] ) )
+		self.assertEqual( m.bound(), Box3f( V3f( 0 ), V3f( 1, 1, 0 ) ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		
+		# corners still have correct uvs
+		e = MeshPrimitiveEvaluator( TriangulateOp()( input = m ) )
+		r = e.createResult()
+		self.assertTrue( e.pointAtUV( V2f( 0, 1 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[0] )
+		self.assertEqual( r.point(), V3f( 0, 0, 0 ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 1 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[2] )
+		self.assertEqual( r.point(), V3f( 1, 0, 0 ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 0 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[11] )
+		self.assertEqual( r.point(), V3f( 1, 1, 0 ) )
+		self.assertTrue( e.pointAtUV( V2f( 0, 0 ), r ) )
+		self.assertEqual( r.point(), m["P"].data[9] )
+		self.assertEqual( r.point(), V3f( 0, 1, 0 ) )
+
 	def tearDown( self ) :
 
 		if os.path.isfile("test/IECore/mesh.fio"):

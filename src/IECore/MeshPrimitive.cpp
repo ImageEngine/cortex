@@ -300,37 +300,67 @@ MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 	return new MeshPrimitive( new IntVectorData(verticesPerFaceVec), new IntVectorData(vertexIdsVec), interpolation, new V3fVectorData(p) );
 }
 
-MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b )
+MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &divisions )
 {
-	IntVectorDataPtr verticesPerFace = new IntVectorData;
-	verticesPerFace->writable().push_back( 4 );
-
+	V3fVectorDataPtr pData = new V3fVectorData;
+	std::vector<V3f> &p = pData->writable();
+	
+	// add vertices
+	float xStep = b.size().x / (float)divisions.x;
+	float yStep = b.size().y / (float)divisions.y;
+	for ( int i = 0; i <= divisions.y; ++i )
+	{
+		for ( int j = 0; j <= divisions.x; ++j )
+		{
+			p.push_back( V3f( b.min.x + j * xStep, b.min.y + i * yStep, 0 ) );
+		}
+	}
+	
 	IntVectorDataPtr vertexIds = new IntVectorData;
-	vertexIds->writable().push_back( 0 );
-	vertexIds->writable().push_back( 1 );
-	vertexIds->writable().push_back( 2 );
-	vertexIds->writable().push_back( 3 );
+	IntVectorDataPtr verticesPerFace = new IntVectorData;
+	std::vector<int> &vpf = verticesPerFace->writable();
+	std::vector<int> &vIds = vertexIds->writable();
+	
+	FloatVectorDataPtr sData = new FloatVectorData;
+	FloatVectorDataPtr tData = new FloatVectorData;
+	std::vector<float> &s = sData->writable();
+	std::vector<float> &t = tData->writable();
+	
+	float sStep = 1.0f / (float)divisions.x;
+	float tStep = 1.0f / (float)divisions.y;
+	
+	// add faces
+	int v0, v1, v2, v3;
+	for ( int i = 0; i < divisions.y; ++i )
+	{
+		for ( int j = 0; j < divisions.x; ++j )
+		{
+			v0 = j + (divisions.x+1) * i;
+			v1 = j + 1 + (divisions.x+1) * i;;
+			v2 = j + 1 + (divisions.x+1) * (i+1);
+			v3 = j + (divisions.x+1) * (i+1);
+			
+			vpf.push_back( 4 );
+			vIds.push_back( v0 );
+			vIds.push_back( v1 );
+			vIds.push_back( v2 );
+			vIds.push_back( v3 );
+			
+			s.push_back( j * sStep );
+			s.push_back( (j+1) * sStep );
+			s.push_back( (j+1) * sStep );
+			s.push_back( j * sStep );
+			
+			t.push_back( 1 - i * tStep );
+			t.push_back( 1 - i * tStep );
+			t.push_back( 1 - (i+1) * tStep );
+			t.push_back( 1 - (i+1) * tStep );
+		}
+	}
 
-	V3fVectorDataPtr p = new V3fVectorData;
-	p->writable().push_back( V3f( b.min.x, b.min.y, 0 ) );
-	p->writable().push_back( V3f( b.max.x, b.min.y, 0 ) );
-	p->writable().push_back( V3f( b.max.x, b.max.y, 0 ) );
-	p->writable().push_back( V3f( b.min.x, b.max.y, 0 ) );
-
-	FloatVectorDataPtr s = new FloatVectorData;
-	FloatVectorDataPtr t = new FloatVectorData;
-	s->writable().push_back( 0 );
-	t->writable().push_back( 1 );
-	s->writable().push_back( 1 );
-	t->writable().push_back( 1 );
-	s->writable().push_back( 1 );
-	t->writable().push_back( 0 );
-	s->writable().push_back( 0 );
-	t->writable().push_back( 0 );
-
-	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", p );
-	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, s );
-	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, t );
+	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
+	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
 
 	return result;
 }
