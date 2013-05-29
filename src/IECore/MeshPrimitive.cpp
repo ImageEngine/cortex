@@ -364,3 +364,69 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 
 	return result;
 }
+
+MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zMax, float thetaMax, const Imath::V2i &divisions )
+{
+	IntVectorDataPtr vertexIds = new IntVectorData;
+	IntVectorDataPtr verticesPerFace = new IntVectorData;
+	std::vector<int> &vpf = verticesPerFace->writable();
+	std::vector<int> &vIds = vertexIds->writable();
+	
+	V3fVectorDataPtr pData = new V3fVectorData;
+	V3fVectorDataPtr nData = new V3fVectorData;
+	std::vector<V3f> &pVector = pData->writable();
+	std::vector<V3f> &nVector = nData->writable();
+	
+	FloatVectorDataPtr sData = new FloatVectorData;
+	FloatVectorDataPtr tData = new FloatVectorData;
+	std::vector<float> &sVector = sData->writable();
+	std::vector<float> &tVector = tData->writable();
+	
+	float oMin = Math<float>::asin( zMin );
+	float oMax = Math<float>::asin( zMax );
+	const unsigned int nO = max( 4u, (unsigned int)( divisions.x * (oMax - oMin) / M_PI ) );
+
+	float thetaMaxRad = thetaMax / 180.0f * M_PI;
+	const unsigned int nT = max( 7u, (unsigned int)( divisions.y * thetaMaxRad / (M_PI*2) ) );
+
+	for ( unsigned int i=0; i<nO; i++ )
+	{
+		float v = (float)i/(float)(nO-1);
+		float o = lerp( oMin, oMax, v );
+		float z = radius * Math<float>::sin( o );
+		float r = radius * Math<float>::cos( o );
+		
+		for ( unsigned int j=0; j<nT; j++ )
+		{
+			float u = (float)j/(float)(nT-1);
+			float theta = thetaMaxRad * u;
+			V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
+			sVector.push_back( u );
+			tVector.push_back( v );
+			pVector.push_back( p );
+			nVector.push_back( p );
+			if( i < nO - 1 && j < nT - 1 )
+			{
+				unsigned int i0 = i * nT + j;
+				unsigned int i1 = i0 + 1;
+				unsigned int i2 = i0 + nT;
+				unsigned int i3 = i2 + 1;
+				vpf.push_back( 3 );
+				vIds.push_back( i0 );
+				vIds.push_back( i1 );
+				vIds.push_back( i2 );
+				vpf.push_back( 3 );
+				vIds.push_back( i1 );
+				vIds.push_back( i3 );
+				vIds.push_back( i2 );
+			}
+		}
+	}
+	
+	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
+	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::Vertex, sData );
+	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::Vertex, tData );
+
+	return result;
+}

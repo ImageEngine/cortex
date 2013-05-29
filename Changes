@@ -16,6 +16,7 @@ Additions :
 * Added IECoreMaya::MayaScene, a SceneInterface for live Maya scenes.
 * Added SceneShape and base class SceneShapeInterface to IECoreMaya for reading IECore::SceneInterface files, SceneShapeUI for drawing. Includes GL preview and output objects, transforms and bounding boxes, template and dag menu.
 * Added AlexaLogcToLinearOp and LinearToAlexaLogcOp bindings
+* MeshPrimitive::createSphere will create a sphere-like mesh with the same controls as SpherePrimitive, using the divisions argument to control tessellation.
 
 Improvements :
 

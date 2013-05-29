@@ -206,6 +206,63 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( r.point(), m["P"].data[9] )
 		self.assertEqual( r.point(), V3f( 0, 1, 0 ) )
 
+	def testSphere( self ) :
+		
+		m = MeshPrimitive.createSphere( radius = 1, divisions = V2i( 30, 40 ) )
+		self.assertTrue( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		me = PrimitiveEvaluator.create( m )
+		mer = me.createResult()
+		s = SpherePrimitive( 1 )
+		se = PrimitiveEvaluator.create( s )
+		ser = se.createResult()
+		for s in range( 0, 100 ) :
+			for t in range( 0, 100 ) :
+				me.pointAtUV( V2f( s/100., t/100. ), mer )
+				se.pointAtUV( V2f( s/100., t/100. ), ser )
+				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-2 ) )
+		
+		# test divisions
+		m = MeshPrimitive.createSphere( radius = 1, divisions = V2i( 300, 300 ) )
+		self.assertTrue( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		me = PrimitiveEvaluator.create( m )
+		mer = me.createResult()
+		for s in range( 0, 100 ) :
+			for t in range( 0, 100 ) :
+				me.pointAtUV( V2f( s/100., t/100. ), mer )
+				se.pointAtUV( V2f( s/100., t/100. ), ser )
+				# more divisions means points are closer to ground truth
+				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-4 ) )
+		
+		# test radius
+		m = MeshPrimitive.createSphere( radius = 2, divisions = V2i( 30, 40 ) )
+		self.assertFalse( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
+		self.assertTrue( Box3f( V3f( -2 ), V3f( 2 ) ).contains( m.bound() ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		me = PrimitiveEvaluator.create( m )
+		mer = me.createResult()
+		s = SpherePrimitive( 2 )
+		se = PrimitiveEvaluator.create( s )
+		ser = se.createResult()
+		for s in range( 0, 100 ) :
+			for t in range( 0, 100 ) :
+				me.pointAtUV( V2f( s/100., t/100. ), mer )
+				se.pointAtUV( V2f( s/100., t/100. ), ser )
+				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-2 ) )
+		
+		# test zMin/zMax
+		m = MeshPrimitive.createSphere( radius = 1, zMin = -0.75, zMax = 0.75 )
+		self.assertTrue( Box3f( V3f( -1, -1, -0.75 ), V3f( 1, 1, 0.75 ) ).contains( m.bound() ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		
+		# test thetaMax
+		m = MeshPrimitive.createSphere( radius = 1, thetaMax = 300 )
+		self.assertTrue( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		m2 = MeshPrimitive.createSphere( radius = 1 )
+		self.assertTrue( m.numFaces() < m2.numFaces() )
+	
 	def tearDown( self ) :
 
 		if os.path.isfile("test/IECore/mesh.fio"):
