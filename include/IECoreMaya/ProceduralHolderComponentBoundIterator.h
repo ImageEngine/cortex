@@ -52,9 +52,9 @@ namespace IECoreGL
 namespace IECoreMaya
 {
 
-/// The ProceduralHolder class represents implementation of the IECore::Renderer::Procedural
-/// class, presenting the procedural parameters as maya attributes. It also draws a bounding
-/// box for the procedural in the scene.
+/// The ProceduralHolderComponentBoundIterator allows maya to iterate over the bounding box corners of
+/// the ProceduralHolder components. It's currently used so you can frame procedural holder components
+/// in the maya viewport.
 class ProceduralHolderComponentBoundIterator : public MPxGeometryIterator
 {
 
