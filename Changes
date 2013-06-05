@@ -20,6 +20,7 @@ Additions :
 
 Improvements :
 
+* IECoreMaya: ieProceduralHolder now supports zooming in on individual components using the "f" key
 * IECoreMaya: ieSceneShape maya node now tells maya its bounding box has changed when you change the file name or scene path
 * IECoreMaya::ClassParameterHandler and ClassVectorParameterHandler will only create attributes using 1-plug mode. 4-plug mode is still readable, but will be removed in the future. The ['maya']['compactClassPlugs'] userData is no longer accepted.
 * IECoreHoudini SOP_InterpolatedCacheReader now exposes samplesPerFrame and interpolation as parameters, instead of the frameMultiplier hack. fps is stil hidden, though may be exposed in the future.
