@@ -64,7 +64,7 @@ Improvements :
 * MeshPrimitive::createPlane can create multi-face planes using the divisions argument
 
 Bug Fixes :
-
+* Fixed a maya 2013 crash when attempting to use the rotate manipulator that comes up when selecting an ieProceduralHolder component in rotate mode.
 * IECoreGL ColorTexture now uses GL_RGB16 as the internal colour format to the glTexImage2D call. This fixes colour banding in subtle gradients and edges with an alpha fade off. GL_RGB16 was chosen as 
   it is supported from OpenGl1.1 and earlier graphics cards that don't support it will reduce their bit precision to GL_RGB8. Please see the following document for more details:
   http://developer.download.nvidia.com/opengl/texture_formats/nv_ogl_texture_formats.pdf
