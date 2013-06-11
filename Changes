@@ -4,6 +4,7 @@
 Improvements:
 
 * Added AlexaLogcToLinearOp and LinearToAlexaLogcOp bindings
+* Merged over some From/ToMayaMeshConverter optimizations from cortex 8
 
 7.11.0 :
 
