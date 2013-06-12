@@ -257,12 +257,10 @@ MStatus SceneShapeInterface::initialize()
 	gAttr.addNumericDataAccept( MFnNumericData::k3Double );
 	gAttr.setReadable( true );
 	gAttr.setWritable( false );
-	gAttr.setStorable( false );
-	gAttr.setConnectable( true );
-	gAttr.setHidden( true );
 	gAttr.setArray( true );
 	gAttr.setIndexMatters( true );
 	gAttr.setUsesArrayDataBuilder( true );
+	gAttr.setStorable( false );
 
 	s = addAttribute( aOutputObjects );
 
@@ -320,9 +318,12 @@ MStatus SceneShapeInterface::initialize()
 	cAttr.addChild( aTranslate );
 	cAttr.addChild( aRotate );
 	cAttr.addChild( aScale );
+	cAttr.setReadable( true );
+	cAttr.setWritable( false );
 	cAttr.setArray( true );
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
+	cAttr.setStorable( false );
 	
 	s = addAttribute( aTransform );
 	
@@ -383,6 +384,7 @@ MStatus SceneShapeInterface::initialize()
 	cAttr.setArray( true );
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
+	cAttr.setStorable( false );
 	
 	s = addAttribute( aBound );
 	assert( s );
@@ -399,7 +401,6 @@ MStatus SceneShapeInterface::initialize()
 	genAttr.setWritable( false );
 	genAttr.setStorable( false );
 	genAttr.setConnectable( true );
-	genAttr.setHidden( true );
 	genAttr.setArray( true );
 	genAttr.setIndexMatters( true );
 	genAttr.setUsesArrayDataBuilder( true );
@@ -412,6 +413,7 @@ MStatus SceneShapeInterface::initialize()
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
 	cAttr.setReadable( true );
+	cAttr.setStorable( false );
 	
 	s = addAttribute( aAttributes );
 	
@@ -677,7 +679,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		}
 		else if( topLevelPlug == aOutputObjects && scene->hasObject() )
 		{
-			MArrayDataHandle outputDataHandle = dataBlock.outputValue( aOutputObjects, &s );
+			MArrayDataHandle outputDataHandle = dataBlock.outputArrayValue( aOutputObjects, &s );
 			MArrayDataBuilder outputBuilder = outputDataHandle.builder();
 
 			ObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );

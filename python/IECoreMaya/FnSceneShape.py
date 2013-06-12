@@ -231,6 +231,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		drawGeo = maya.cmds.getAttr( node+".drawGeometry" )
 		drawChildBounds = maya.cmds.getAttr( node+".drawChildBounds" )
 		drawRootBound = maya.cmds.getAttr( node+".drawRootBound" )
+		drawTagsFilter = maya.cmds.getAttr( node+".drawTagsFilter" )
 		
 		newSceneShapeFns = []
 
@@ -263,6 +264,16 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
 			maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
 			maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
+			
+			if drawTagsFilter:
+				parentTags = drawTagsFilter.split()
+				childTags = fnChild.sceneInterface().readTags()
+				commonTags = filter( lambda x: str(x) in childTags, parentTags )
+				if not commonTags:
+					# Hide that child since it doesn't match any filter
+					maya.cmds.setAttr( childTransform+".visibility", 0 )
+				else:
+					maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )	
 			
 			if maya.cmds.listRelatives( childTransform, parent = True, f=True ) != [ transform ]:
 				maya.cmds.parent( childTransform, transform, relative=True )
