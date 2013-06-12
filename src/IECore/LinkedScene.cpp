@@ -642,8 +642,10 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		}
 		else
 		{
+			// Query the bound at the remapped time
+			ConstDoubleDataPtr t = d->member< DoubleData >(g_timeAttribute);
 			/// we store just the current bounding box
-			m_mainScene->writeBound( linkedScene->readBound(time), time );
+			m_mainScene->writeBound( linkedScene->readBound(t->readable()), time );
 		}
 
 		if ( firstTime )
