@@ -7,5 +7,7 @@ To learn more, take a look at the http://vimeo.com/cortex[Cortex presentations f
 == Mailing Lists ==
 
 http://groups.google.com/group/cortexdev[Developer discussion]
+
 http://groups.google.com/group/cortexcommits[Commit notifications]
+
 http://groups.google.com/group/cortexissues[Issue tracker notifications]
