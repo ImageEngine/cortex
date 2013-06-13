@@ -1,0 +1,10 @@
+*.*~
+*.tmp
+*.swp
+*.os
+*.so
+*.dylib
+.sconsign.dblite
+doc/html
+doc/python
+
