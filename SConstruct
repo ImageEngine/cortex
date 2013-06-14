@@ -1971,7 +1971,7 @@ if env["PLATFORM"]=="posix" :
 elif env["PLATFORM"]=="darwin" :
 	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
 	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/MacOS"]
-	mayaEnvAppends["CPPPATH"] += ["$MAYA_ROOT/../../devkit/include"]
+	mayaEnvAppends["CPPPATH"] = ["$MAYA_ROOT/../../devkit/include"]
 	mayaEnvAppends["LIBS"] += ["Foundation", "OpenMayaRender"]
 	mayaEnvAppends["FRAMEWORKS"] = ["AGL", "OpenGL"]
 
