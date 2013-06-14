@@ -5,6 +5,14 @@
 *.so
 *.dylib
 .sconsign.dblite
+.sconf_temp
+.cproject
+.project
+.pydevproject
+.settings
 doc/html
 doc/python
-
+plugins
+lib
+build
+config.log
