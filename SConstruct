@@ -1539,6 +1539,7 @@ corePythonModuleEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LI
 corePythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 corePythonModule = corePythonModuleEnv.SharedLibrary( "python/IECore/_IECore", corePythonModuleSources )
 corePythonModuleEnv.Depends( corePythonModule, coreLibrary )
+corePythonModuleEnv.Depends( corePythonModule, corePythonLibrary )
 
 corePythonModuleInstall = corePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
 corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
