@@ -3,6 +3,8 @@
 *.swp
 *.os
 *.so
+*.o
+*.pyc
 *.dylib
 .sconsign.dblite
 doc/html
