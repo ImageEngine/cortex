@@ -61,8 +61,16 @@ struct CachedConverter::MemberData
 	// call to convert().
 	struct CacheKey
 	{
+
+		/// default constructor: implies using the default ToGLConverter factory function
 		CacheKey( const IECore::Object *o )
-			: object( o ), hash( o->hash() )
+			: object( o ), converter(0), hash( o->hash() )
+		{
+		}
+
+		/// custom converter constructor: provides a functor that is responsible for converting the object and also should return it's own hash.
+		CacheKey( const IECore::Object *o, ConverterFn conv, const IECore::MurmurHash &converterHash )
+			: object( o ), converter(conv), hash( converterHash )
 		{
 		}
 		
@@ -82,29 +90,38 @@ struct CachedConverter::MemberData
 		}
 		
 		mutable const IECore::Object *object;
+		ConverterFn converter;
 		IECore::MurmurHash hash;
 	};
 	
 	static IECore::RunTimeTypedPtr getter( const CacheKey &key, size_t &cost )
 	{
 		cost = key.object->memoryUsage();
-		ToGLConverterPtr converter = ToGLConverter::create( key.object );
-		if( !converter )
+
+		if ( key.converter )
 		{
-			throw IECore::Exception(
-				boost::str(
-					boost::format(
-						"Unable to create converter for Object of type \"%s\""
-					) % key.object->typeName()
-				)
-			);
+			return key.converter(key.object);
 		}
-		// It would be unsafe to access object from outside of this function,
-		// so we zero it out so that it will be obvious if anyone ever does.
-		// The only way I could see this happening is if the LRUCache implementation
-		// changed.
-		key.object = 0;
-		return converter->convert();
+		else
+		{
+			ToGLConverterPtr converter = ToGLConverter::create( key.object );
+			if( !converter )
+			{
+				throw IECore::Exception(
+					boost::str(
+						boost::format(
+							"Unable to create converter for Object of type \"%s\""
+						) % key.object->typeName()
+					)
+				);
+			}
+			// It would be unsafe to access object from outside of this function,
+			// so we zero it out so that it will be obvious if anyone ever does.
+			// The only way I could see this happening is if the LRUCache implementation
+			// changed.
+			key.object = 0;
+			return converter->convert();
+		}
 	}
 	
 	void removalCallback( const CacheKey &key, const IECore::RunTimeTypedPtr &value )
@@ -131,6 +148,11 @@ CachedConverter::~CachedConverter()
 IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object )
 {
 	return m_data->cache.get( MemberData::CacheKey( object ) );
+}
+
+IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object, ConverterFn converter, const IECore::MurmurHash &converterHash )
+{
+	return m_data->cache.get( MemberData::CacheKey( object, converter, converterHash ) );
 }
 
 size_t CachedConverter::getMaxMemory() const
