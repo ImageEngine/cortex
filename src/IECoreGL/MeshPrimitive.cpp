@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,14 @@
 #include <cassert>
 
 #include "IECore/DespatchTypedData.h"
+#include "IECore/TriangulateOp.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/MurmurHash.h"
 
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/State.h"
+#include "IECoreGL/CachedConverter.h"
 
 #include "OpenEXR/ImathMath.h"
 
@@ -46,31 +50,55 @@ using namespace IECoreGL;
 using namespace Imath;
 using namespace std;
 
-
 //////////////////////////////////////////////////////////////////////////
 // MemberData
 //////////////////////////////////////////////////////////////////////////
 
 struct MeshPrimitive::MemberData : public IECore::RefCounted
 {
-	MemberData( IECore::ConstIntVectorDataPtr verts ) : vertIds( verts )
+	MemberData( IECore::ConstIntVectorDataPtr verts ) : originalVerticesPerFace(0), originalVertexIds(0), vertIds( verts )
 	{
 	}
+
+	IECore::ConstIntVectorDataPtr originalVerticesPerFace;
+	IECore::ConstIntVectorDataPtr originalVertexIds;
 
 	IECore::ConstIntVectorDataPtr vertIds;
 	Imath::Box3f bound;
 
-	/// \todo This could be removed and the ToGLMeshConverter could use FaceVaryingPromotionOp
-	/// to convert everything to FaceVarying before being added.
-	class ToFaceVaryingConverter
+	/// Class to triangulate face-varying prim vars.
+	/// \todo Consider having a specific module for this class. Also consider avoiding code duplication with TriangulateOp.
+	class TriangulatedFaceVaryingPrimVar
 	{
 		public:
 
 		typedef IECore::DataPtr ReturnType;
 
-		ToFaceVaryingConverter( IECore::ConstIntVectorDataPtr vertIds ) : m_vertIds( vertIds )
+		/// Constructs the converter
+		/// \param faceVaryingLength Gives the expected output length of the face varying prim var after conversion.
+		/// \param verticesPerFace Vertices per shape array of the original non-triangulated mesh.
+		TriangulatedFaceVaryingPrimVar( size_t faceVaryingLength, const IECore::IntVectorData *verticesPerFace ) :
+				m_faceVaryingLength(faceVaryingLength), m_verticesPerFace(verticesPerFace)
 		{
-			assert( m_vertIds );
+			assert( vertIds );
+		}
+
+		IECore::MurmurHash hash( const IECore::Object *object ) const
+		{
+			IECore::MurmurHash h;
+			h.append( "TriangulatedFaceVaryingPrimVar");
+			if ( m_verticesPerFace )
+			{
+				m_verticesPerFace->hash(h);
+			}
+			object->hash(h);
+			return h;
+		}
+
+		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
+		{	
+			IECore::DataPtr data = const_cast< IECore::Data * >( static_cast< const IECore::Data * >(object) );
+			return IECore::despatchTypedData< TriangulatedFaceVaryingPrimVar, IECore::TypeTraits::IsVectorTypedData >( data, *this );
 		}
 
 		template<typename T>
@@ -79,19 +107,305 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			assert( inData );
 
 			const typename T::Ptr outData = new T();
-			outData->writable().resize( m_vertIds->readable().size() );
+			outData->writable().reserve( m_faceVaryingLength );
+			typename T::ValueType &out = outData->writable();
+			const typename T::ValueType &in = inData->readable();
 
-			typename T::ValueType::iterator outIt = outData->writable().begin();
+			const std::vector<int> &verticesPerFaceReadable = m_verticesPerFace->readable();
 
-			for ( typename T::ValueType::size_type i = 0; i <  m_vertIds->readable().size(); i++ )
+			typename T::ValueType::const_iterator inIt = in.begin();
+
+			for ( std::vector<int>::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); ++it )
 			{
-				*outIt++ = inData->readable()[ m_vertIds->readable()[ i ] ];
-			}
+				int numFaceVerts = *it;
 
+				if ( numFaceVerts > 3 )
+				{
+					for (int i = 1; i < numFaceVerts - 1; i++)
+					{
+						out.push_back( *inIt );
+						out.push_back( *(inIt+i) );
+						out.push_back( *(inIt+i+1) );
+					}
+					inIt += numFaceVerts;
+				}
+				else
+				{
+					out.push_back( *inIt++ );
+					out.push_back( *inIt++ );
+					out.push_back( *inIt++ );
+				}
+			}
 			return outData;
 		}
 
-		IECore::ConstIntVectorDataPtr m_vertIds;
+		private :
+
+		size_t m_faceVaryingLength;
+		const IECore::IntVectorData *m_verticesPerFace;
+	};
+
+
+	/// Class to triangulate and to promote vertex/varying prim vars to face varying interpolation.
+	/// \todo Consider having a specific module for this class. Also consider avoiding code duplication with TriangulateOp.
+	class TriangulatedVertexPrimVar
+	{
+		public:
+
+		typedef IECore::DataPtr ReturnType;
+
+		/// Constructs the converter
+		/// \param faceVaryingLength Gives the expected output length of the face varying prim var after conversion.
+		/// \param vertexIds Vertex ids of the original non-triangulated mesh
+		/// \param verticesPerFace Vertices per shape array of the original non-triangulated mesh or NULL if it was already triangulated.
+		TriangulatedVertexPrimVar( size_t faceVaryingLength, const IECore::IntVectorData *vertexIds, const IECore::IntVectorData *verticesPerFace ) :
+				m_faceVaryingLength(faceVaryingLength), m_vertexIds(vertexIds), m_verticesPerFace(verticesPerFace)
+		{
+			assert( vertIds );
+		}
+
+		IECore::MurmurHash hash( const IECore::Object *object ) const
+		{
+			IECore::MurmurHash h;
+			h.append( "TriangulatedVertexPrimVar");
+			h.append( m_faceVaryingLength );
+			m_vertexIds->hash(h);
+			if ( m_verticesPerFace )
+			{
+				m_verticesPerFace->hash(h);
+			}
+			object->hash(h);
+			return h;
+		}
+
+		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
+		{	
+			IECore::DataPtr data = const_cast< IECore::Data * >( static_cast< const IECore::Data * >(object) );
+			return IECore::despatchTypedData< TriangulatedVertexPrimVar, IECore::TypeTraits::IsVectorTypedData >( data, *this );
+		}
+
+		template<typename T>
+		IECore::DataPtr operator()( typename T::Ptr inData )
+		{
+			assert( inData );
+
+			const typename T::Ptr outData = new T();
+			outData->writable().reserve( m_faceVaryingLength );
+			typename T::ValueType &out = outData->writable();
+			const typename T::ValueType &in = inData->readable();
+
+			const std::vector<int> &vertexIdsReadable = m_vertexIds->readable();
+
+			if ( m_verticesPerFace )
+			{
+				const std::vector<int> &verticesPerFaceReadable = m_verticesPerFace->readable();
+				std::vector<int>::const_iterator vit = vertexIdsReadable.begin();
+
+				for ( std::vector<int>::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); ++it )
+				{
+					int numFaceVerts = *it;
+
+					if ( numFaceVerts > 3 )
+					{
+						const int v0 = *vit++;
+
+						for (int i = 1; i < numFaceVerts - 1; i++)
+						{
+							// convert vertex prim vars to face varying
+							out.push_back( in[v0] );
+							out.push_back( in[*vit++] );
+							out.push_back( in[*vit] );
+						}
+						vit++;
+					}
+					else
+					{
+						// convert vertex prim vars to face varying
+						out.push_back( in[*vit++] );
+						out.push_back( in[*vit++] );
+						out.push_back( in[*vit++] );
+					}
+				}
+			}
+			else 	/// triangulated case
+			{
+				for ( std::vector<int>::const_iterator vit = vertexIdsReadable.begin(); vit != vertexIdsReadable.end(); vit++ )
+				{
+					out.push_back( in[*vit] );
+				}
+			}
+			return outData;
+		}
+
+		private :
+
+		size_t m_faceVaryingLength;
+		const IECore::IntVectorData *m_vertexIds;
+		const IECore::IntVectorData *m_verticesPerFace;
+	};
+
+	/// Class to triangulate and to promote uniform prim vars to face varying interpolation.
+	/// \todo Consider having a specific module for this class. Also consider avoiding code duplication with TriangulateOp.
+	class TriangulatedUniformPrimVar
+	{
+		public:
+
+		typedef IECore::DataPtr ReturnType;
+
+		/// Constructs the converter
+		/// \param faceVaryingLength Gives the expected output length of the face varying prim var after conversion.
+		/// \param vertexIds Vertex ids of the original non-triangulated mesh
+		/// \param verticesPerFace Vertices per shape array of the original non-triangulated mesh or NULL if it was already triangulated.
+		TriangulatedUniformPrimVar( size_t faceVaryingLength, const IECore::IntVectorData *verticesPerFace ) :
+				m_faceVaryingLength(faceVaryingLength),  m_verticesPerFace(verticesPerFace)
+		{
+			assert( vertIds );
+		}
+
+		IECore::MurmurHash hash( const IECore::Object *object ) const
+		{
+			IECore::MurmurHash h;
+			h.append( "TriangulatedUniformPrimVar");
+			if ( m_verticesPerFace )
+			{
+				m_verticesPerFace->hash(h);
+			}
+			object->hash(h);
+			return h;
+		}
+
+		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
+		{	
+			IECore::DataPtr data = const_cast< IECore::Data * >( static_cast< const IECore::Data * >(object) );
+			return IECore::despatchTypedData< TriangulatedUniformPrimVar, IECore::TypeTraits::IsVectorTypedData >( data, *this );
+		}
+
+		template<typename T>
+		IECore::DataPtr operator()( typename T::Ptr inData )
+		{
+			assert( inData );
+
+			const typename T::Ptr outData = new T();
+			outData->writable().reserve( m_faceVaryingLength );
+			typename T::ValueType &out = outData->writable();
+			const typename T::ValueType &in = inData->readable();
+
+			if ( m_verticesPerFace )
+			{
+				const std::vector<int> &verticesPerFaceReadable = m_verticesPerFace->readable();
+				typename T::ValueType::const_iterator inIt = in.begin();
+
+				for ( std::vector<int>::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); ++it )
+				{
+					int numFaceVerts = *it;
+
+					if ( numFaceVerts > 3 )
+					{
+						for (int i = 1; i < numFaceVerts - 1; i++)
+						{
+							out.push_back( *inIt );
+							out.push_back( *inIt );
+							out.push_back( *inIt );
+						}
+					}
+					else
+					{
+						out.push_back( *inIt );
+						out.push_back( *inIt );
+						out.push_back( *inIt );
+					}
+					inIt++;
+				}
+			}
+			else 	/// triangulated case
+			{
+				for ( typename T::ValueType::const_iterator inIt = in.begin(); inIt != in.end(); inIt++ )
+				{
+					out.push_back( *inIt );
+					out.push_back( *inIt );
+					out.push_back( *inIt );
+				}
+			}
+			return outData;
+		}
+
+		private :
+
+		size_t m_faceVaryingLength;
+		const IECore::IntVectorData *m_verticesPerFace;
+	};
+
+	class TriangulatedVertices
+	{
+		public:
+
+		TriangulatedVertices( const IECore::IntVectorData *verticesPerFace ) :
+				m_verticesPerFace(verticesPerFace)
+		{
+		}
+
+		IECore::MurmurHash hash( const IECore::Object *object ) const
+		{
+			IECore::MurmurHash h;
+			h.append( "TriangulatedVertices");
+			m_verticesPerFace->hash(h);
+			object->hash(h);
+			return h;
+		}
+
+		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
+		{	
+			const vector<int> &verticesPerFace =  m_verticesPerFace->readable();
+			const vector<int> &vertexIds = static_cast< const IECore::IntVectorData * >(object)->readable();
+
+			/// triangulate the mesh topology
+			IECore::IntVectorDataPtr vertIds = new IECore::IntVectorData();
+			std::vector<int> &newVertexIdsWritable = vertIds->writable();
+			newVertexIdsWritable.reserve( vertexIds.size() + vertexIds.size()/2 );	/// assume we have quads
+
+			int faceVertexIdStart = 0;
+			for ( std::vector<int>::const_iterator it = verticesPerFace.begin(); it != verticesPerFace.end(); ++it )
+			{
+				int numFaceVerts = *it;
+
+				if ( numFaceVerts > 3 )
+				{
+					/// For the time being, just do a simple triangle fan.
+					const int i0 = faceVertexIdStart + 0;
+					const int v0 = vertexIds[ i0 ];
+	
+					int i1 = faceVertexIdStart + 1;
+					int i2 = faceVertexIdStart + 2;
+					int v1 = vertexIds[ i1 ];
+					int v2 = vertexIds[ i2 ];
+	
+					for (int i = 1; i < numFaceVerts - 1; i++)
+					{
+						i1 = faceVertexIdStart + ( (i + 0) % numFaceVerts );
+						i2 = faceVertexIdStart + ( (i + 1) % numFaceVerts );
+						v1 = vertexIds[ i1 ];
+						v2 = vertexIds[ i2 ];
+	
+						/// Triangulate the vertices
+						newVertexIdsWritable.push_back( v0 );
+						newVertexIdsWritable.push_back( v1 );
+						newVertexIdsWritable.push_back( v2 );
+					}
+				}
+				else
+				{
+					/// Copy across the vertexId data
+					newVertexIdsWritable.push_back( vertexIds[ faceVertexIdStart + 0 ] );
+					newVertexIdsWritable.push_back( vertexIds[ faceVertexIdStart + 1 ] );
+					newVertexIdsWritable.push_back( vertexIds[ faceVertexIdStart + 2 ] );
+				}
+				faceVertexIdStart += numFaceVerts;
+			}
+			return vertIds;
+		}
+
+		const IECore::IntVectorData *m_verticesPerFace;
+
 	};
 
 };
@@ -102,9 +416,28 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 
 IE_CORE_DEFINERUNTIMETYPED( MeshPrimitive );
 
+MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr verticesPerFace, IECore::ConstIntVectorDataPtr vertexIds ) : m_memberData( new MemberData(0) )
+{
+	if ( !verticesPerFace || !vertexIds )
+	{
+		throw IECore::Exception( "NULL pointers passed to MeshPrimitive constructor!" );
+	}
+
+	/// keep a copy of the mesh topology for future calls to addPrimitiveVariable
+	m_memberData->originalVerticesPerFace = verticesPerFace->copy();
+	m_memberData->originalVertexIds = vertexIds->copy();
+
+	/// triangulate the mesh topology
+	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+	MemberData::TriangulatedVertices triangulate( verticesPerFace );
+	m_memberData->vertIds = IECore::staticPointerCast< const IECore::IntVectorData >( cachedConverter->convert( vertexIds, triangulate ) );
+}
+
 MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds )
 	:	m_memberData( new MemberData( vertIds->copy() ) )
 {
+		m_memberData->originalVerticesPerFace = 0;
+		m_memberData->originalVertexIds = 0;
 }
 
 MeshPrimitive::~MeshPrimitive()
@@ -134,15 +467,38 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 				}
 			}
 		}
+	}
 
-		MemberData::ToFaceVaryingConverter primVarConverter( m_memberData->vertIds );
-		// convert to facevarying
-		IECore::DataPtr newData = IECore::despatchTypedData< MemberData::ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( primVar.data, primVarConverter );
+	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+
+	if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || 
+		 primVar.interpolation==IECore::PrimitiveVariable::Varying )
+	{
+		// triangulate and convert to facevarying
+		MemberData::TriangulatedVertexPrimVar primVarConverter(m_memberData->vertIds->readable().size(), 
+			( m_memberData->originalVerticesPerFace ? m_memberData->originalVertexIds : m_memberData->vertIds ), m_memberData->originalVerticesPerFace );
+
+		IECore::ConstDataPtr newData = IECore::staticPointerCast< const IECore::Data >( cachedConverter->convert( primVar.data, primVarConverter ) );
+
 		addVertexAttribute( name, newData );
 	}
 	else if ( primVar.interpolation==IECore::PrimitiveVariable::FaceVarying )
 	{
-		addVertexAttribute( name, primVar.data );
+		// triangulate facevarying
+		MemberData::TriangulatedFaceVaryingPrimVar primVarConverter(m_memberData->vertIds->readable().size(), m_memberData->originalVerticesPerFace );
+
+		IECore::ConstDataPtr newData = IECore::staticPointerCast< const IECore::Data >( cachedConverter->convert( primVar.data, primVarConverter ) );
+
+		addVertexAttribute( name, newData );
+	}
+	else if ( primVar.interpolation==IECore::PrimitiveVariable::Uniform )
+	{
+		// triangulate and convert to facevarying
+		MemberData::TriangulatedUniformPrimVar primVarConverter(m_memberData->vertIds->readable().size(), m_memberData->originalVerticesPerFace );
+
+		IECore::ConstDataPtr newData = IECore::staticPointerCast< const IECore::Data >( cachedConverter->convert( primVar.data, primVarConverter ) );
+
+		addVertexAttribute( name, newData );
 	}
 	else if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
 	{

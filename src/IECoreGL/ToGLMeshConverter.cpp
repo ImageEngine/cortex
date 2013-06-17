@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,16 +36,50 @@
 
 #include "boost/format.hpp"
 
-#include "IECoreGL/ToGLMeshConverter.h"
-#include "IECoreGL/MeshPrimitive.h"
-
-#include "IECore/MeshPrimitive.h"
-#include "IECore/TriangulateOp.h"
 #include "IECore/MeshNormalsOp.h"
-#include "IECore/DespatchTypedData.h"
+#include "IECore/MeshPrimitive.h"
 #include "IECore/MessageHandler.h"
 
+#include "IECoreGL/ToGLMeshConverter.h"
+#include "IECoreGL/MeshPrimitive.h"
+#include "IECoreGL/CachedConverter.h"
+
 using namespace IECoreGL;
+
+
+//////////////////////////////////////////////////////////////////////////
+// CreateNormalsConverter
+//////////////////////////////////////////////////////////////////////////
+
+class ToGLMeshConverter::CreateNormalsConverter
+{
+	public :
+
+		IECore::MurmurHash hash( const IECore::Object *object ) const
+		{
+			IECore::MurmurHash h;
+			h.append( "CreateNormalsConverter");
+			const IECore::MeshPrimitive *mesh = static_cast< const IECore::MeshPrimitive * >(object);
+			mesh->verticesPerFace()->hash(h);
+			mesh->vertexIds()->hash(h);
+			IECore::PrimitiveVariableMap::const_iterator pIt = mesh->variables.find("P");
+			pIt->second.data->hash(h);
+			return h;
+		}
+
+		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
+		{
+			IECore::MeshNormalsOpPtr normalOp = new IECore::MeshNormalsOp();
+			normalOp->inputParameter()->setValue( const_cast< IECore::Object * >(object) );
+			normalOp->copyParameter()->setTypedValue( true );
+			return normalOp->operate();
+		}
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+// ToGLMeshConverter
+//////////////////////////////////////////////////////////////////////////
 
 IE_CORE_DEFINERUNTIMETYPED( ToGLMeshConverter );
 
@@ -63,8 +97,12 @@ ToGLMeshConverter::~ToGLMeshConverter()
 
 IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::MeshPrimitivePtr mesh = IECore::staticPointerCast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
+	IECore::ConstMeshPrimitivePtr m = IECore::staticPointerCast< const IECore::MeshPrimitive>( src ); // safe because the parameter validated it for us
 
+	// we copy first the mesh because we will run some ops on it.
+	IECore::MeshPrimitivePtr mesh = m->copy();
+
+	/// \todo consider generating Normals when 'P' is added as a primVar. So we can update only 'P' and have normals recomputed.
 	if( mesh->interpolation() != "linear" )
 	{
 		// it's a subdivision mesh. in the absence of a nice subdivision algorithm to display things with,
@@ -72,19 +110,13 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		// if interpolation is linear and no normals are provided then we assume the faceted look is intentional.
 		if( mesh->variables.find( "N" )==mesh->variables.end() )
 		{
-			IECore::MeshNormalsOpPtr normalOp = new IECore::MeshNormalsOp();
-			normalOp->inputParameter()->setValue( mesh );
-			normalOp->copyParameter()->setTypedValue( false );
-			normalOp->operate();
+			CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
+			CreateNormalsConverter createNormals;
+			IECore::ConstRunTimeTypedPtr newMesh = cachedConverter->convert( mesh, createNormals );
+			IECore::ConstDataPtr newNormals = static_cast< const IECore::MeshPrimitive * >(newMesh.get())->variables.find("N")->second.data;
+			mesh->variables["N"] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, newNormals->copy() );
 		}
 	}
-		
-	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
-	op->inputParameter()->setValue( mesh );
-	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-
-	mesh = IECore::runTimeCast< IECore::MeshPrimitive > ( op->operate() );
-	assert( mesh );
 
 	IECore::ConstV3fVectorDataPtr p = 0;
 	IECore::PrimitiveVariableMap::const_iterator pIt = mesh->variables.find( "P" );
@@ -97,30 +129,69 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	}
 	if( !p )
 	{
-		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
+		throw IECore::Exception( "Could not find primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 	}
 
-	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->vertexIds() );
+	const std::vector<int> &verticesPerFaceReadable = mesh->verticesPerFace()->readable();
 
+	/// Check if the input mesh is already triangulated
+	bool alreadyTriangulated = true;
+	for ( std::vector<int>::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); it++ )
+	{
+		if (*it != 3)
+		{
+			alreadyTriangulated = false;
+			break;
+		}
+	}
+
+	MeshPrimitivePtr glMesh;
+
+	if ( alreadyTriangulated )
+	{
+		glMesh = new MeshPrimitive( mesh->vertexIds() );
+	}
+	else
+	{
+		glMesh = new MeshPrimitive( mesh->verticesPerFace(), mesh->vertexIds() );
+	}
+
+	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.end();
+	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.end();
+
+	// add the primitives to the mesh (which know how to triangulate)
 	for ( IECore::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{
+		/// only process valid prim vars
+		if ( !mesh->isPrimitiveVariableValid( pIt->second ) )
+		{
+			continue;
+		}
+
 		if ( pIt->second.data )
 		{
+			if ( pIt->first == "s" )
+			{
+				sIt = pIt;
+			}
+			else if ( pIt->first == "t" )
+			{
+				tIt = pIt;
+			}
 			glMesh->addPrimitiveVariable( pIt->first, pIt->second );
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
+			IECore::msg( IECore::Msg::Warning, "MeshPrimitive", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
 		}
 	}
 
-	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( "s" );
-	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( "t" );
+	/// \todo remove all this when we start supporting a V2f primVar for UVs.
+	/// create variable 'st' from 's' and 't'
 	if ( sIt != mesh->variables.end() && tIt != mesh->variables.end() )
 	{
-		if ( sIt->second.interpolation != IECore::PrimitiveVariable::Constant  
-			&&  tIt->second.interpolation != IECore::PrimitiveVariable::Constant
-			&& sIt->second.interpolation == tIt->second.interpolation )
+		if ( sIt->second.interpolation == tIt->second.interpolation && 
+			 sIt->second.interpolation != IECore::PrimitiveVariable::Constant )
 		{
 			IECore::ConstFloatVectorDataPtr s = IECore::runTimeCast< const IECore::FloatVectorData >( sIt->second.data );
 			IECore::ConstFloatVectorDataPtr t = IECore::runTimeCast< const IECore::FloatVectorData >( tIt->second.data );
