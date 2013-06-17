@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 import unittest
 import os.path
+import shutil
 
 import IECore
 
@@ -674,10 +675,15 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			shader = self.showColorShader(),
 		)
 		
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreGL/output" ) :
+			os.makedirs( "test/IECoreGL/output" )
+	
 	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
+		
+		if os.path.isdir( "test/IECoreGL/output" ) :
+			shutil.rmtree( "test/IECoreGL/output" )
 
 if __name__ == "__main__":
     unittest.main()

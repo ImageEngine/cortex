@@ -20,3 +20,4 @@ build
 config.log
 test/IECore/IECoreTest
 test/IECore/results.txt
+test/IECore/resultsPython.txt

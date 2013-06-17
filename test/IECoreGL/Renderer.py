@@ -40,6 +40,7 @@ import os
 import os.path
 import threading
 import math
+import shutil
 
 from IECore import *
 import IECore
@@ -1149,20 +1150,15 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( len( c.messages ), 1 )
 		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
 	
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreGL/output" ) :
+			os.makedirs( "test/IECoreGL/output" )
+	
 	def tearDown( self ) :
-
-		files = [
-			os.path.dirname( __file__ ) + "/output/testPrimVars.tif",
-			os.path.dirname( __file__ ) + "/output/testImage.exr",
-			os.path.dirname( __file__ ) + "/output/testStackBug.tif",
-			os.path.dirname( __file__ ) + "/output/proceduralTest.tif",
-			os.path.dirname( __file__ ) + "/output/depthTest.tif",
-			os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif",
-		]
-
-		for f in files :
-			if os.path.exists( f ) :
-				os.remove( f )
+		
+		if os.path.isdir( "test/IECoreGL/output" ) :
+			shutil.rmtree( "test/IECoreGL/output" )
 
 if __name__ == "__main__":
     unittest.main()
