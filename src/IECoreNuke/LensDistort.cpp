@@ -107,10 +107,8 @@ LensDistort::LensDistort( Node* node ) :
 	m_hasValidFileSequence( false ),
 	m_useFileSequence( false )
 {
-	// Work out the most threads we can have and create a plugin loader and lock for each one.
-	// We do this so that each thread can have it's own instance of a lens model.
-	// This will be useful in the future as if the ldpk library is ever implemented as a derived
-	// class from cortex then it won't have threading issues (because it is not thread safe).
+	// Work out the most threads we can have and create an instance of the lens model for each one.
+	// This is useful for any lens model implementation that uses the ldpk library is as it is not thread safe.
 	m_locks = new Lock[m_nThreads];
 	m_model.resize( m_nThreads, NULL );
 	for( int i = 0; i < m_nThreads; ++i ) m_model[i] = IECore::LensModel::create(modelNames()[0]);
