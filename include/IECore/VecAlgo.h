@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,7 +43,11 @@
 
 // Putting these operators in the Imath namespace so that the compiler can find them
 // using argument dependent lookup.
+#ifdef IMATH_INTERNAL_NAMESPACE
+namespace IMATH_INTERNAL_NAMESPACE
+#else
 namespace Imath
+#endif
 {
 
 /// Implementation of operator <, allowing vectors to be used as keys in maps and the like.
