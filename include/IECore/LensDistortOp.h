@@ -68,6 +68,9 @@ class LensDistortOp : public IECore::WarpOp
 
 	private :
 
+		Imath::V2f distort( const Imath::V2f &p ) const;
+		Imath::V2f undistort( const Imath::V2f &p ) const;
+
 		enum Mode
 		{
 			kUndistort = 0,
@@ -80,6 +83,8 @@ class LensDistortOp : public IECore::WarpOp
 		IECore::IntParameterPtr m_modeParameter;
 		Imath::V2i m_imageSize;
 		Imath::Box2i m_imageDataWindow;
+		Imath::Box2i m_distortedDataWindow;
+		IECore::FloatVectorDataPtr m_cachePtr;
 };
 
 IE_CORE_DECLAREPTR( LensDistortOp );
