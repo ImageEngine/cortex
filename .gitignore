@@ -18,3 +18,5 @@ plugins
 lib
 build
 config.log
+test/IECore/IECoreTest
+test/IECore/results.txt
