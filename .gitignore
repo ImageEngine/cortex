@@ -3,6 +3,8 @@
 *.swp
 *.os
 *.so
+*.o
+*.pyc
 *.dylib
 .sconsign.dblite
 .sconf_temp
@@ -16,3 +18,6 @@ plugins
 lib
 build
 config.log
+test/IECore/IECoreTest
+test/IECore/results.txt
+test/IECore/resultsPython.txt

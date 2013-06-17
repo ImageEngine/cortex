@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import shutil
 
 import IECore
 import IECoreGL
@@ -609,11 +610,15 @@ class ShadingTest( unittest.TestCase ) :
 			]
 		)	
 
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreGL/output" ) :
+			os.makedirs( "test/IECoreGL/output" )
+	
 	def tearDown( self ) :
-
-		for f in [ self.__imageFileName ] :
-			if os.path.exists( f ) :
-				os.remove( f )
+		
+		if os.path.isdir( "test/IECoreGL/output" ) :
+			shutil.rmtree( "test/IECoreGL/output" )
 		
 if __name__ == "__main__":
     unittest.main()
