@@ -297,7 +297,16 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 			ceilIndex = (it - sampleTimes.begin());
 			floorIndex = ceilIndex - 1;
-			return (time - sampleTimes[floorIndex]) / (sampleTimes[ceilIndex] - sampleTimes[floorIndex]);
+			double x = (time - sampleTimes[floorIndex]) / (sampleTimes[ceilIndex] - sampleTimes[floorIndex]);
+			if ( x < 1e-4 )
+			{
+				x = 0;
+			}
+			else if ( x > 1-1e-4)
+			{
+				x = 1;
+			}
+			return x;
 		}
 
 		double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
