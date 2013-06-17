@@ -132,22 +132,9 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		throw IECore::Exception( "Could not find primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 	}
 
-	const std::vector<int> &verticesPerFaceReadable = mesh->verticesPerFace()->readable();
-
-	/// Check if the input mesh is already triangulated
-	bool alreadyTriangulated = true;
-	for ( std::vector<int>::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); it++ )
-	{
-		if (*it != 3)
-		{
-			alreadyTriangulated = false;
-			break;
-		}
-	}
-
 	MeshPrimitivePtr glMesh;
 
-	if ( alreadyTriangulated )
+	if ( mesh->maxVerticesPerFace() 	== 3 )
 	{
 		glMesh = new MeshPrimitive( mesh->vertexIds() );
 	}
