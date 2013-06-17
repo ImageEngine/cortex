@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ class ParameterisedTeapotProcedural( IECore.ParameterisedProcedural ) :
 	
 		renderer.geometry( "teapot", {}, {} )		
 				
-class ProceduralThreadingTest( unittest.TestCase ) :
+class ProceduralThreadingTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testProceduralThreading.tif"
 	
@@ -164,11 +164,6 @@ class ProceduralThreadingTest( unittest.TestCase ) :
 			pass
 		IECore.RefCounted.collectGarbage()
 		self.assertEqual( numInstances, IECore.RefCounted.numWrappedInstances() )
-							
-	def tearDown( self ) :
-	
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()

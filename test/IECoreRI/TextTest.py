@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import os.path
 import IECore
 import IECoreRI
 
-class TextTest( unittest.TestCase ) :
+class TextTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testText.tif"
 
@@ -75,11 +75,6 @@ class TextTest( unittest.TestCase ) :
 		expectedImage = IECore.Reader.create( "test/IECoreRI/data/textImages/helloWorld.tif" ).read()
 
 		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
-
-	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()

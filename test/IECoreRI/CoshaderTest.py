@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ import os
 import IECore
 import IECoreRI
 
-class CoshaderTest( unittest.TestCase ) :
+class CoshaderTest( IECoreRI.TestCase ) :
 
 	def testRendererSupport( self ) :
 
@@ -75,10 +75,11 @@ class CoshaderTest( unittest.TestCase ) :
 		self.failUnless( "s" in k )
 		
 	def tearDown( self ) :
-	
+		
+		IECoreRI.TestCase.tearDown( self )
+		
 		for f in [
 			"test/IECoreRI/shaders/coshaderTest.sdl",
-			"test/IECoreRI/output/testCoshader.rib",
 		] :
 		
 			if os.path.exists( f ) :

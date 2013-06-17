@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import os.path
 import IECore
 import IECoreRI
 
-class IlluminateTest( unittest.TestCase ) :
+class IlluminateTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/illuminate.rib"
 
@@ -75,11 +75,6 @@ class IlluminateTest( unittest.TestCase ) :
 		self.assert_( '"color colour" [ 1 0 0 ]' in l ) 
 		self.assert_( '"int intensity" [ 2 ]' in l ) 
 		self.assert_( "Illuminate \"myLightHandle\" 0" in l )
-
-	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()

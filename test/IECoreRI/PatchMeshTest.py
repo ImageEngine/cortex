@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (p) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (p) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import os.path
 import IECore
 import IECoreRI
 
-class PatchMeshTest( unittest.TestCase ) :
+class PatchMeshTest( IECoreRI.TestCase ) :
 
 	outputFileName = "./test/IECoreRI/output/testPatchMesh.tif"
 
@@ -268,16 +268,6 @@ class PatchMeshTest( unittest.TestCase ) :
 		m[1] = p2
 
 		self.__performTest( m, "./test/IECoreRI/data/patchMeshImages/motionBlur.tif" )
-
-	def setUp( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
-
-	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@ from IECore import *
 import IECoreRI
 import os
 
-class InstancingTest( unittest.TestCase ) :
+class InstancingTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -329,18 +329,6 @@ class InstancingTest( unittest.TestCase ) :
 			
 			# only two unique instances here....
 			self.assertEqual( InstanceTestParamProcedural.renderCount, 2 )
-	
-	def tearDown( self ) :
-
-		files = [
-			"test/IECoreRI/output/instancing.rib",
-			"test/IECoreRI/output/instancing2.rib",
-			"test/IECoreRI/output/instancing3.rib",
-		]
-
-		for f in files :
-			if os.path.exists( f ):
-				os.remove( f )
 
 if __name__ == "__main__":
     unittest.main()

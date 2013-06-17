@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import os.path
 import IECore
 import IECoreRI
 
-class CoordinateSystemTest( unittest.TestCase ) :
+class CoordinateSystemTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/coordSys.rib"
 
@@ -109,11 +109,6 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		for i in range( 0, 10 ) :
 			
 			self.assertEqual( procedurals[i].coordinateSystem.translation(), IECore.V3f( i ) )
-	
-	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()

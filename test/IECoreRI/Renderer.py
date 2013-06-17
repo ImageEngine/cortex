@@ -73,7 +73,7 @@ class SimpleProcedural( Renderer.Procedural ) :
 		h = MurmurHash()
 		return h
 
-class RendererTest( unittest.TestCase ) :
+class RendererTest( IECoreRI.TestCase ) :
 
 	def loadShader( self, shader ) :
 
@@ -557,28 +557,15 @@ class RendererTest( unittest.TestCase ) :
 	
 	def tearDown( self ) :
 
+		IECoreRI.TestCase.tearDown( self )
+		
 		files = [
-			"test/IECoreRI/output/test.rib",
-			"test/IECoreRI/output/testAttributes.rib",
-			"test/IECoreRI/output/testProcedural.rib",
-			"test/IECoreRI/output/testGetOption.rib",
-			"test/IECoreRI/output/testDisplay.rib",
-			"test/IECoreRI/output/testCamera.rib",
-			"test/IECoreRI/output/subdiv.rib",
-			"test/IECoreRI/output/commands.rib",
-			"test/IECoreRI/output/motion.rib",
-			"test/IECoreRI/output/stringPrimVars.rib",
-			"test/IECoreRI/output/transform.rib",
-			"test/IECoreRI/output/missingShaders.rib",
-			"test/IECoreRI/output/getUserOption.rib",
-			"test/IECoreRI/output/getUserAttribute.rib",
 			"test/IECoreRI/shaders/types.sdl",
 		]
 
 		for f in files :
 			if os.path.exists( f ):
 				os.remove( f )
-
 
 if __name__ == "__main__":
     unittest.main()

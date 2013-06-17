@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,45 +32,19 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
+import os, shutil
 import unittest
-import IECore
-import IECoreRI
-import os.path
-import os
 
-class ArchiveRecordTest( IECoreRI.TestCase ) :
+## A class to help implement unit tests for IECoreRI functionality. It
+# implements setUp() and tearDown() to handle the output directory
+class TestCase( unittest.TestCase ) :
 
-	def test( self ) :
-
-		r = IECoreRI.Renderer( "test/IECoreRI/output/testArchiveRecord.rib" )
-		r.worldBegin()
-		r.command( "ri:archiveRecord", { "type" : IECore.StringData( "verbatim" ), "record" : IECore.StringData( "Geometry \"teapot\"\n" ) } )
-		r.worldEnd()
-
-		l = file( "test/IECoreRI/output/testArchiveRecord.rib" ).readlines()
-		self.assert_( "Geometry \"teapot\"\n" in l )
-
-	def testFormatCatcher( self ) :
-
-		# passing printf style format strings in the record would blow up the renderer
-		# so check we're catching those
-
-		with IECore.CapturingMessageHandler() as m :
-
-			r = IECoreRI.Renderer( "test/IECoreRI/output/testArchiveRecord.rib" )
-			r.worldBegin()
-
-			r.command( "ri:archiveRecord", { "type" : IECore.StringData( "verbatim" ), "record" : IECore.StringData( "NAUGHTY %s %f" ) } )
-			r.worldEnd()
-
-		l = "".join( file( "test/IECoreRI/output/testArchiveRecord.rib" ).readlines() )
-		self.assert_( not "NAUGHTY" in l )
-
-		self.assertEqual( len( m.messages ), 1 )
-		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Error )
-		self.assert_( "printf" in m.messages[0].message )
-
-if __name__ == "__main__":
-    unittest.main()
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreRI/output" ) :
+			os.makedirs( "test/IECoreRI/output" )
+		
+	def tearDown( self ) :
+		
+		if os.path.isdir( "test/IECoreRI/output" ) :
+			shutil.rmtree( "test/IECoreRI/output" )

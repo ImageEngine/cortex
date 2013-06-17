@@ -882,10 +882,13 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxIlluminanceTest.sdl",
 			"test/IECoreRI/shaders/sxLightTest.sdl",
 			"test/IECoreRI/shaders/sxStTest.sdl",
+			"test/IECoreRI/shaders/sxPredefinedPrimitiveVariableTest.sdl",
 			"test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest.sdl",
 			"test/IECoreRI/shaders/sxGetVarTest.sdl",
 			"test/IECoreRI/shaders/sxGetShaderTest.sdl",
 			"test/IECoreRI/shaders/sxTextureTest.sdl",
+			"test/IECoreRI/shaders/sxUniformPrimitiveVariableShaderParameterTest.sdl",
+			"test/IECoreRI/shaders/sxUniformPrimitiveVariableTest.sdl",
 		]
 		
 		for f in files :

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import IECoreRI
 import os.path
 import os
 
-class DoubleSidedTest( unittest.TestCase ) :
+class DoubleSidedTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -58,11 +58,6 @@ class DoubleSidedTest( unittest.TestCase ) :
 
 		l = "".join( file( "test/IECoreRI/output/testDoubleSided.rib" ).readlines() )
 		self.assert_( "Sides 2" in l )
-
-	def tearDown( self ) :
-
-		if os.path.exists( "test/IECoreRI/output/testDoubleSided.rib" ) :
-			os.remove( "test/IECoreRI/output/testDoubleSided.rib" )
 
 if __name__ == "__main__":
     unittest.main()
