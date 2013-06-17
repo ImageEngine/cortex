@@ -36,6 +36,7 @@
 
 #include "IECore/LensDistortOp.h"
 #include "IECore/LensModel.h"
+#include "IECore/FastFloat.h"
 #include "IECore/NullObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/ObjectParameter.h"
@@ -52,8 +53,8 @@ IE_CORE_DEFINERUNTIMETYPED( LensDistortOp );
 
 LensDistortOp::LensDistortOp()
 	:	WarpOp(
-			"Distorts an ImagePrimitive using a parameteric lens model which is supplied as a .cob file. "
-			"The resulting image will have the same display window as the origonal with a different data window."
+			"Distorts an ImagePrimitive using a parametric lens model which is supplied as a .cob file. "
+			"The resulting image will have the same display window as the original with a different data window."
 		)
 {
 
@@ -113,39 +114,78 @@ void LensDistortOp::begin( const CompoundObject * operands )
 	
 	m_imageSize = inputImage->getDisplayWindow().size();
 	m_imageDataWindow = inputImage->getDataWindow();
+
+	// Get the distorted window.
+	m_distortedDataWindow = m_lensModel->bounds( m_mode, m_imageDataWindow, m_imageSize.x, m_imageSize.y );
+
+	// Compute a 2D cache of the warped points for use in the warp() method.
+	IECore::FloatVectorDataPtr cachePtr = new IECore::FloatVectorData;
+	std::vector<float> &cache( cachePtr->writable() );
+	cache.resize( ( m_distortedDataWindow.size().x + 1 ) * ( m_distortedDataWindow.size().y + 1 ) * 2 ); // We interleave the X and Y vector components within the cache.
+
+	if ( m_mode == kDistort )
+	{
+		for( int y = m_distortedDataWindow.min.y, pixelIndex = 0; y <= m_distortedDataWindow.max.y; y++ )
+		{
+			for( int x = m_distortedDataWindow.min.x; x <= m_distortedDataWindow.max.x; x++ )
+			{
+				Imath::V2f inPos( distort( Imath::V2f( x, y ) ) );
+				cache[pixelIndex++] = inPos[0];
+				cache[pixelIndex++] = inPos[1];
+			}
+		}
+	}
+	else
+	{
+		for( int y = m_distortedDataWindow.min.y, pixelIndex = 0; y <= m_distortedDataWindow.max.y; y++ )
+		{
+			for( int x = m_distortedDataWindow.min.x; x <= m_distortedDataWindow.max.x; x++ )
+			{
+				Imath::V2f inPos( undistort( Imath::V2f( x, y ) ) );
+				cache[pixelIndex++] = inPos[0];
+				cache[pixelIndex++] = inPos[1];
+			}
+		}
+	}
+
+	m_cachePtr = cachePtr;
 }
 
 Imath::Box2i LensDistortOp::warpedDataWindow( const Imath::Box2i &dataWindow ) const
 {
-	return m_lensModel->bounds( m_mode, m_imageDataWindow, m_imageSize.x, m_imageSize.y );
+	return m_distortedDataWindow;
 }
 
-Imath::V2f LensDistortOp::warp( const Imath::V2f &p ) const
+Imath::V2f LensDistortOp::undistort( const Imath::V2f &p ) const
+{
+	// Convert to UV space.
+	Imath::V2d uv = p / m_imageSize;
+
+	// Undistort and convert to pixel space
+	Imath::V2d dp( m_lensModel->undistort( uv ) * m_imageSize );
+	
+	return dp;
+}
+
+Imath::V2f LensDistortOp::distort( const Imath::V2f &p ) const
 {
 	// Convert to UV space.
 	Imath::V2d uv = p / m_imageSize;
 	
-	// Distort/Undistort
-	Imath::V2d dp;
-	if ( m_mode == kDistort )
-	{
-		dp = m_lensModel->distort( uv );
-	}
-	else
-	{
-		dp = m_lensModel->undistort( uv );
-	}
-	
-	// Convert to pixel space.
-	dp *= m_imageSize;
-	
-	// Clamp to the data window.
-	if( m_imageDataWindow.min.x > dp.x ) dp.x = m_imageDataWindow.min.x;
-	if( m_imageDataWindow.min.y > dp.y ) dp.y = m_imageDataWindow.min.y;
-	if( m_imageDataWindow.max.x-1.0 < dp.x ) dp.x = m_imageDataWindow.max.x-1;
-	if( m_imageDataWindow.max.y-1.0 < dp.y ) dp.y = m_imageDataWindow.max.y-1; 
+	// Distort and convert to pixel space
+	Imath::V2d dp( m_lensModel->distort( uv ) * m_imageSize );
 	
 	return dp;
+}
+
+Imath::V2f LensDistortOp::warp( const Imath::V2f &p ) const
+{
+	// Just pull the distorted point from the cache.
+	const int w( m_distortedDataWindow.size().x + 1 );
+	const int xIdx( int( p[0] ) - m_distortedDataWindow.min.x );
+	const int yIdx( int( p[1] ) - m_distortedDataWindow.min.y );
+	const float *vector( &(( m_cachePtr->readable() )[ ( w * yIdx + xIdx ) * 2 ] ) );
+	return Imath::V2f( vector[0], vector[1] );
 }
 
 void LensDistortOp::end()
