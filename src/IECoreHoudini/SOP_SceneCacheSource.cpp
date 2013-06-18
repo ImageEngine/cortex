@@ -253,7 +253,11 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		// convert the object to Houdini
 		if ( !convertObject( object, name, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
 		{
-			addError( SOP_LOAD_UNKNOWN_BINARY_FLAG, ( "Could not convert " + name + " to houdini" ).c_str() );
+			std::string fullName;
+			SceneInterface::Path path;
+			scene->path( path );
+			SceneInterface::pathToString( path, fullName );
+			addError( SOP_MESSAGE, ( "Could not convert " + fullName + " to houdini" ).c_str() );
 		}
 	}
 	
