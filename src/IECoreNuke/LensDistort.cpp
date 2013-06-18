@@ -107,10 +107,8 @@ LensDistort::LensDistort( Node* node ) :
 	m_hasValidFileSequence( false ),
 	m_useFileSequence( false )
 {
-	// Work out the most threads we can have and create a plugin loader and lock for each one.
-	// We do this so that each thread can have it's own instance of a lens model.
-	// This will be useful in the future as if the ldpk library is ever implemented as a derived
-	// class from cortex then it won't have threading issues (because it is not thread safe).
+	// Work out the most threads we can have and create an instance of the lens model for each one.
+	// This is useful for any lens model implementation that uses the ldpk library is as it is not thread safe.
 	m_locks = new Lock[m_nThreads];
 	m_model.resize( m_nThreads, NULL );
 	for( int i = 0; i < m_nThreads; ++i ) m_model[i] = IECore::LensModel::create(modelNames()[0]);
@@ -339,9 +337,11 @@ bool LensDistort::getFileSequencePath( std::string& path )
 	// Check that the path isn't null.
 	try
 	{
-		if ( knob("lensDirectory") != NULL )
+		if ( knob("lensFileSequence") != NULL )
 		{
-			path = knob( "lensDirectory" )->get_text();
+			std::stringstream pathStream;
+			knob("lensFileSequence")->to_script( pathStream, &(outputContext()), false );
+			path = pathStream.str();
 
 			// If the text field has no data ...
 			if ( path == "" ) return false;
@@ -424,7 +424,7 @@ bool LensDistort::setLensFromFile( std::string &returnPath )
 
 void LensDistort::knobs( Knob_Callback f )
 {
-	File_knob( f, &m_assetPath, "lensDirectory", "Lens Directory" );
+	File_knob( f, &m_assetPath, "lensFileSequence", "Lens File Sequence" );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
 	SetFlags( f, Knob::NO_UNDO );
@@ -470,9 +470,9 @@ int LensDistort::knob_changed(Knob* k)
 {
 	bool updateUI = false;
 
-	// If the lensDirectory knob just changed then we need to check if it is valid and load it.
+	// If the lensFileSequence knob just changed then we need to check if it is valid and load it.
 	// Once loaded then we set the updateUI flag to trigger a UI update.
-	if ( k->is( "lensDirectory" ) )
+	if ( k->is( "lensFileSequence" ) )
 	{
 		std::string path;
 		bool oldValue = m_useFileSequence;
@@ -524,7 +524,7 @@ int LensDistort::knob_changed(Knob* k)
 		}
 	}
 
-	if ( k->is( "lensDirectory" ) ) return true;
+	if ( k->is( "lensFileSequence" ) ) return true;
 
 	return Iop::knob_changed(k);
 }
