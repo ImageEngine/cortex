@@ -54,7 +54,7 @@ const unsigned int MeshPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MeshPrimitive);
 
 MeshPrimitive::MeshPrimitive()
-	: m_verticesPerFace( new IntVectorData ), m_vertexIds( new IntVectorData ), m_numVertices( 0 ), m_interpolation( "linear" ), m_maxVerticesPerFace(0)
+	: m_verticesPerFace( new IntVectorData ), m_vertexIds( new IntVectorData ), m_numVertices( 0 ), m_interpolation( "linear" ), m_minVerticesPerFace(0), m_maxVerticesPerFace(0)
 {
 }
 
@@ -78,6 +78,11 @@ size_t MeshPrimitive::numFaces() const
 const IntVectorData *MeshPrimitive::verticesPerFace() const
 {
 	return m_verticesPerFace.get();
+}
+
+int MeshPrimitive::minVerticesPerFace() const
+{
+	return m_minVerticesPerFace;
 }
 
 int MeshPrimitive::maxVerticesPerFace() const
@@ -111,17 +116,19 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 		maxVertexId = std::max( maxVertexId, id );
 	}
 	
+	int minVertsPerFace = 0x7fffffff;
 	int maxVertsPerFace = 0;
 	unsigned int numExpectedVertexIds = 0;
 	for ( vector<int>::const_iterator it = verticesPerFace->readable().begin(); it != verticesPerFace->readable().end(); it++ )
 	{
 		int vertsPerFace = *it;
-		if( vertsPerFace<3 )
-		{
-			throw Exception( "Bad topology - number of vertices per face less than 3." );
-		}
+		minVertsPerFace = std::min( minVertsPerFace, vertsPerFace );
 		maxVertsPerFace = std::max( maxVertsPerFace, vertsPerFace );
 		numExpectedVertexIds += vertsPerFace;
+	}
+	if( minVertsPerFace<3 )
+	{
+		throw Exception( "Bad topology - number of vertices per face less than 3." );
 	}
 
 	if( numExpectedVertexIds!=vertexIds->readable().size() )
@@ -129,6 +136,7 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 		throw Exception( "Bad topology - number of vertexIds not equal to sum of verticesPerFace" );
 	}
 
+	m_minVerticesPerFace = ( verticesPerFace->readable().size() ? minVertsPerFace : 0 );
 	m_maxVerticesPerFace = maxVertsPerFace;
 	m_verticesPerFace = verticesPerFace->copy();
 	m_vertexIds = vertexIds->copy();

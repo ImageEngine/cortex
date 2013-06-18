@@ -60,6 +60,7 @@ namespace IECorePython
 			.def( init<>() )
 			.def( init<IntVectorDataPtr, IntVectorDataPtr, optional<const std::string &, V3fVectorDataPtr> >() )
 			.def( "numFaces", &MeshPrimitive::numFaces )
+			.def("minVerticesPerFace", &MeshPrimitive::minVerticesPerFace )
 			.def("maxVerticesPerFace", &MeshPrimitive::maxVerticesPerFace )
 			/// \todo I'd rather see these bound as functions rather than properties so they match the C++ interface.
 			/// I think this is particularly important for verticesPerFace and vertexIds as it's pretty unintuitive that a property
