@@ -297,6 +297,8 @@ if targetApp=="nuke" :
 		# version than we have installed centrally.
 		PNG_INCLUDE_PATH = "/usr/local/include/"
 	
+	# Nuke 6 uses an OpenEXR version that we can't install centrally
+	OPENEXR_LIB_SUFFIX = ""
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
