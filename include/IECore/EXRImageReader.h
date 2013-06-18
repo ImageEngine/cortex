@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,13 +35,10 @@
 #ifndef IE_CORE_EXRIMAGEREADER_H
 #define IE_CORE_EXRIMAGEREADER_H
 
-#include "IECore/ImageReader.h"
+#include "OpenEXR/ImfInputFile.h"
+#include "OpenEXR/ImfChannelList.h"
 
-namespace Imf
-{
-	class Channel;
-	class InputFile;
-};
+#include "IECore/ImageReader.h"
 
 namespace IECore
 {
