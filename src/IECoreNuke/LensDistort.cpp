@@ -339,7 +339,9 @@ bool LensDistort::getFileSequencePath( std::string& path )
 	{
 		if ( knob("lensFileSequence") != NULL )
 		{
-			path = knob( "lensFileSequence" )->get_text();
+			std::stringstream pathStream;
+			knob("lensFileSequence")->to_script( pathStream, &(outputContext()), false );
+			path = pathStream.str();
 
 			// If the text field has no data ...
 			if ( path == "" ) return false;
