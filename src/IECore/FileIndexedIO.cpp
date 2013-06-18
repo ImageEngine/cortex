@@ -144,10 +144,6 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 		}
 
 	}
-
-	assert( m_stream );
-	assert( m_stream->is_complete() );
-	assert( m_index );
 }
 
 void FileIndexedIO::StreamFile::flush( size_t endPosition )

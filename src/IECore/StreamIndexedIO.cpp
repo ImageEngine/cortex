@@ -1172,8 +1172,6 @@ void StreamIndexedIO::Index::writeNode( Node *node, F &f )
 			else
 			{
 				Node *child = static_cast< Node * >(p);
-				/// Check tree consistency before writing
-				assert( child->m_parent == this );
 				writeNode( child, f );
 			}
 		}
@@ -1646,7 +1644,6 @@ IndexedIO::OpenMode StreamIndexedIO::StreamFile::openMode() const
 void StreamIndexedIO::StreamFile::setStream( std::iostream *stream, bool emptyFile )
 {
 	m_stream = stream;
-	assert( m_stream->is_complete() );
 	if ( m_openmode & IndexedIO::Append && emptyFile )
 	{
 		m_openmode = (m_openmode ^ IndexedIO::Append) | IndexedIO::Write;
@@ -1682,8 +1679,6 @@ void StreamIndexedIO::StreamFile::flush( size_t endPosition )
 
 bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
 {
-	assert( f.is_complete() );
-
 	f.seekg( 0, std::ios::end );
 	Imf::Int64 end = f.tellg();
 
