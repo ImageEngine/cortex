@@ -604,6 +604,30 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 			self.assertEqual( child["life"].data.getInterpretation(), IECore.GeometricData.Interpretation.Numeric )
 			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+	
+	def testInterpolation( self ) :
+		
+		torusA = self.torusA()
+		attrA = torusA.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		attrA.parm( "name" ).set( "ieMeshInterpolation" )
+		attrA.parm( "class" ).set( 1 ) # prim
+		attrA.parm( "type" ).set( 3 ) # string
+		attrA.parm( "string") .set( "subdiv" )
+		torusB = self.torusB()
+		attrB = torusB.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		attrB.parm( "name" ).set( "ieMeshInterpolation" )
+		attrB.parm( "class" ).set( 1 ) # prim
+		attrB.parm( "type" ).set( 3 ) # string
+		attrB.parm( "string") .set( "poly" )
+		merge = self.geo().createNode( "merge" )
+		merge.setInput( 0, attrA )
+		merge.setInput( 1, attrB )
+		
+		result = IECoreHoudini.FromHoudiniGroupConverter( merge ).convert()
+		self.assertTrue( "ieMeshInterpolation" not in result.children()[0].keys() )
+		self.assertEqual( result.children()[0].interpolation, "catmullClark" )
+		self.assertTrue( "ieMeshInterpolation" not in result.children()[1].keys() )
+		self.assertEqual( result.children()[1].interpolation, "linear" )
 
 if __name__ == "__main__":
     unittest.main()

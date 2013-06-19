@@ -35,6 +35,7 @@
 #include "GU/GU_PrimPoly.h"
 
 #include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -96,6 +97,19 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 	
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
 	transferAttribs( geo, newPoints, newPrims );
+	
+	// add the interpolation type
+	if ( newPrims.isValid() )
+	{
+		std::string interpolation = ( mesh->interpolation() == "catmullClark" ) ? "subdiv" : "poly";
+		StringVectorDataPtr interpolationVectorData = new StringVectorData();
+		interpolationVectorData->writable().push_back( interpolation );
+		std::vector<int> indexValues( newPrims.getEntries(), 0 );
+		IntVectorDataPtr indexData = new IntVectorData( indexValues );
+		ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( interpolationVectorData );
+		converter->indicesParameter()->setValidatedValue( indexData );
+		converter->convert( "ieMeshInterpolation", geo, newPrims );
+	}
 	
 	return true;
 }

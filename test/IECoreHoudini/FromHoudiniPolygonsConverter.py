@@ -741,6 +741,27 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertAlmostEqual( uvData[i][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[i][1], uvValues[1] )
 				i += 1
+	
+	def testInterpolation( self ) :
+		
+		torus = self.createTorus()
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( torus ).convert()
+		self.assertTrue( "ieMeshInterpolation" not in result.keys() )
+		self.assertEqual( result.interpolation, "linear" )
+		
+		attr = torus.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		attr.parm( "name" ).set( "ieMeshInterpolation" )
+		attr.parm( "class" ).set( 1 ) # prim
+		attr.parm( "type" ).set( 3 ) # string
+		attr.parm( "string") .set( "subdiv" )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
+		self.assertTrue( "ieMeshInterpolation" not in result.keys() )
+		self.assertEqual( result.interpolation, "catmullClark" )
+		
+		attr.parm( "string") .set( "poly" )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
+		self.assertTrue( "ieMeshInterpolation" not in result.keys() )
+		self.assertEqual( result.interpolation, "linear" )
 
 if __name__ == "__main__":
     unittest.main()
