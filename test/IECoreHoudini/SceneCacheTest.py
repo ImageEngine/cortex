@@ -138,10 +138,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.failUnless( not node.errors() )
 			
 			if isinstance( node, hou.ObjNode ) :
-				node.parm( "build" ).pressButton()
+				node.parm( "expand" ).pressButton()
 				self.failUnless( node.children() )
 				node.parm( "root" ).set( "/1/fake" )
-				node.parm( "build" ).pressButton()
+				node.parm( "expand" ).pressButton()
 				self.assertEqual( node.children(), tuple() )
 		
 		self.writeSCC()
@@ -446,12 +446,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 	
-	def testBuildGeo( self ) :
+	def testExpandGeo( self ) :
 		
 		self.writeSCC()
 		geo = self.geometry()
 		self.assertEqual( geo.children(), tuple() )
-		geo.parm( "build" ).pressButton()
+		geo.parm( "expand" ).pressButton()
 		self.assertEqual( len(geo.children()), 1 )
 		node = geo.children()[0]
 		self.assertEqual( node.name(), "root" )
@@ -466,7 +466,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[12].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
 		
 		geo.parm( "root" ).set( "/1/2" )
-		geo.parm( "build" ).pressButton()
+		geo.parm( "expand" ).pressButton()
 		self.assertEqual( len(geo.children()), 1 )
 		node = geo.children()[0]
 		self.assertEqual( node.name(), "2" )
@@ -485,14 +485,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for child in node.children() :
 			self.cookAll( child )
 	
-	def testBuildSubNetwork( self ) :
+	def testExpandSubNetwork( self ) :
 		
 		self.writeSCC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1" ), hou.ObjNode ) )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1/geo" ), hou.ObjNode ) )
@@ -512,7 +512,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
 		self.failUnless( isinstance( geo, hou.ObjNode ) )
@@ -530,7 +530,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
 		self.failUnless( isinstance( hou.node( xform.path()+"/geo" ), hou.ObjNode ) )
@@ -559,7 +559,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
-		next.parm( "build" ).pressButton()
+		next.parm( "expand" ).pressButton()
 		self.assertEqual( len(next.children()), 2 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/2/3" ), hou.ObjNode ) )
 		
@@ -567,18 +567,18 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( next, hou.ObjNode ) )
 		self.assertEqual( len(next.children()), 1 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/2/3/geo" ), hou.ObjNode ) )
-		next.parm( "build" ).pressButton()
+		next.parm( "expand" ).pressButton()
 		self.assertEqual( len(next.children()), 1 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/2/3/geo" ), hou.ObjNode ) )		
 	
-	def testBuildParenting( self ) :
+	def testExpandParenting( self ) :
 		
 		self.writeSCC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 3 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1" ), hou.ObjNode ) )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1" ).children()[0], hou.SopNode ) )
@@ -606,7 +606,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
 		self.failUnless( isinstance( geo, hou.ObjNode ) )
@@ -630,7 +630,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
 		self.failUnless( isinstance( geo, hou.ObjNode ) )
@@ -655,14 +655,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(next.children()), 1 )
 		self.failUnless( isinstance( next.children()[0], hou.SopNode ) )
 	
-	def testBuildFlatGeometry( self ) :
+	def testExpandFlatGeometry( self ) :
 		
 		self.writeSCC()
 		xform = self.xform()
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
 		self.failUnless( isinstance( geo, hou.ObjNode ) )
@@ -681,7 +681,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[12].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
 		self.failUnless( isinstance( geo, hou.ObjNode ) )
@@ -700,7 +700,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
 		self.failUnless( isinstance( geo, hou.ObjNode ) )
@@ -788,7 +788,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( prims[6].attribValue( "Cd" ), ( time, 1, 0 ) )
 		
 		xform = self.xform()
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
 		b = [ x for x in a.children() if x.name() != "geo" ][0]
 		c = [ x for x in b.children() if x.name() != "geo" ][0]
@@ -806,7 +806,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
 	
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
 		b = xform.children()[1]
 		c = xform.children()[2]
@@ -859,7 +859,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.writeSCC()
 		xform = self.xform()
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		rop = self.rop( xform )
 		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
 		rop.parm( "execute" ).pressButton()
@@ -872,7 +872,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# test a subnet xform
 		os.remove( TestSceneCache.__testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
 		self.assertEqual( rop.errors(), "" )
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -883,11 +883,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		os.remove( TestSceneCache.__testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
 		a.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		a.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
-		a.parm( "build" ).pressButton()
+		a.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
 		self.assertEqual( rop.errors(), "" )
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -901,7 +901,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform = self.xform()
 		rop = self.rop( xform )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
 		self.assertEqual( rop.errors(), "" )
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -912,13 +912,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		os.remove( TestSceneCache.__testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
-		a.parm( "build" ).pressButton()
+		a.parm( "expand" ).pressButton()
 		b = a.children()[1]
 		b.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
 		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
-		b.parm( "build" ).pressButton()
+		b.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
 		self.assertEqual( rop.errors(), "" )
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -928,7 +928,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# test a OBJ Geo
 		os.remove( TestSceneCache.__testOutFile )
 		geo = self.geometry()
-		geo.parm( "build" ).pressButton()
+		geo.parm( "expand" ).pressButton()
 		rop.parm( "rootObject" ).set( geo.path() )
 		rop.parm( "execute" ).pressButton()
 		self.assertEqual( rop.errors(), "" )
@@ -972,7 +972,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.writeAnimSCC()
 		xform = self.xform()
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		rop = self.rop( xform )
 		rop.parm( "execute" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -995,13 +995,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform = self.xform()
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
-		xform.parm( "build" ).pressButton()
+		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
-		a.parm( "build" ).pressButton()
+		a.parm( "expand" ).pressButton()
 		b = a.children()[1]
 		b.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
 		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
-		b.parm( "build" ).pressButton()
+		b.parm( "expand" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live, bakedObjects = [ "3" ] )

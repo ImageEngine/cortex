@@ -52,7 +52,7 @@ OBJ_SceneCacheNode<BaseType>::~OBJ_SceneCacheNode()
 }
 
 template<typename BaseType>
-PRM_Name OBJ_SceneCacheNode<BaseType>::pBuild( "build", "Build Hierarchy" );
+PRM_Name OBJ_SceneCacheNode<BaseType>::pExpand( "expand", "Expand" );
 
 static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 {
@@ -99,9 +99,9 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
 		}
 		
 		thisTemplate[numObjParms + numSCCParms] = PRM_Template(
-			PRM_CALLBACK, 1, &pBuild, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::buildButtonCallback, 0, 0,
-			"Build the hierarchy below the specified root path.\n"
-			"Some nodes may define additional options that are used during the build process."
+			PRM_CALLBACK, 1, &pExpand, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::expandButtonCallback, 0, 0,
+			"Expand the hierarchy below the specified root path.\n"
+			"Some nodes may define additional options that are used during the expansion process."
 		);
 	}
 	
@@ -115,7 +115,7 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
 }
 
 template<typename BaseType>
-int OBJ_SceneCacheNode<BaseType>::buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
+int OBJ_SceneCacheNode<BaseType>::expandButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
 	std::string file;
 	OBJ_SceneCacheNode<BaseType> *node = reinterpret_cast<OBJ_SceneCacheNode<BaseType>*>( data );
@@ -124,14 +124,14 @@ int OBJ_SceneCacheNode<BaseType>::buildButtonCallback( void *data, int index, fl
 		return 0;
 	}
 	
-	node->cleanHierarchy();
-	node->buildHierarchy( node->scene( file, node->getPath() ) );
+	node->collapseHierarchy();
+	node->expandHierarchy( node->scene( file, node->getPath() ) );
 	
 	return 1;
 }
 
 template<typename BaseType>
-void OBJ_SceneCacheNode<BaseType>::cleanHierarchy()
+void OBJ_SceneCacheNode<BaseType>::collapseHierarchy()
 {
 	OP_NodeList childNodes;
 	for ( int i=0; i < this->getNchildren(); ++i )

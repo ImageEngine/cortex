@@ -92,21 +92,21 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 			thisTemplate[i] = parentTemplate[i];
 		}
 		
-		// then the build options
+		// then the expansion options
 		thisTemplate[numParentParms-1] = PRM_Template(
 			PRM_INT, 1, &pHierarchy, &hierarchyDefault, &hierarchyList, 0, 0, 0, 0,
-			"Choose the node network style used when building. Parenting will create a graph using "
+			"Choose the node network style used when expanding. Parenting will create a graph using "
 			"node connections, SubNetworks will create a deep hierarchy, and Flat Geometry will "
 			"create a single OBJ and SOP."
 		);
 		thisTemplate[numParentParms] = PRM_Template(
 			PRM_INT, 1, &pDepth, &depthDefault, &depthList, 0, 0, 0, 0,
-			"Choose how deep to build. All Descendants will build everything below the specified root "
-			"path and Children will only build the immediate children of the root path, which may "
+			"Choose how deep to expand. All Descendants will expand everything below the specified root "
+			"path and Children will only expand the immediate children of the root path, which may "
 			"or may not contain geometry."
 		);
 		
-		// then the build button
+		// then the expand button
 		thisTemplate[numParentParms+1] = parentTemplate[numParentParms-1];
 	}
 	
@@ -119,7 +119,7 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 	return templatePair;
 }
 
-void OBJ_SceneCacheTransform::buildHierarchy( const SceneInterface *scene )
+void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 {
 	if ( !scene )
 	{
@@ -131,14 +131,14 @@ void OBJ_SceneCacheTransform::buildHierarchy( const SceneInterface *scene )
 	
 	if ( hierarchy == FlatGeometry )
 	{
-		doBuildObject( scene, this, hierarchy, depth );
+		doExpandObject( scene, this, hierarchy, depth );
 		return;
 	}
 	
 	OBJ_Node *rootNode = this;
 	if ( scene->hasObject() )
 	{
-		OBJ_Node *objNode = doBuildObject( scene, this, SubNetworks, Children );
+		OBJ_Node *objNode = doExpandObject( scene, this, SubNetworks, Children );
 		if ( hierarchy == Parenting )
 		{
 			rootNode = objNode;
@@ -150,7 +150,7 @@ void OBJ_SceneCacheTransform::buildHierarchy( const SceneInterface *scene )
 		rootNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
 	}
 	
-	doBuildChildren( scene, rootNode, hierarchy, depth );
+	doExpandChildren( scene, rootNode, hierarchy, depth );
 	
 	if ( hierarchy == Parenting && !scene->hasObject() )
 	{
@@ -158,7 +158,7 @@ void OBJ_SceneCacheTransform::buildHierarchy( const SceneInterface *scene )
 	}
 }
 
-OBJ_Node *OBJ_SceneCacheTransform::doBuildObject( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
 	const char *name = ( hierarchy == Parenting ) ? scene->name().c_str() : "geo";
 	OP_Node *opNode = parent->createNode( OBJ_SceneCacheGeometry::typeName, name );
@@ -170,12 +170,12 @@ OBJ_Node *OBJ_SceneCacheTransform::doBuildObject( const SceneInterface *scene, O
 	Space space = ( depth == AllDescendants ) ? Path : ( hierarchy == Parenting ) ? Local : Object;
 	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
 	
-	geo->buildHierarchy( scene );
+	geo->expandHierarchy( scene );
 	
 	return geo;
 }
 
-OBJ_Node *OBJ_SceneCacheTransform::doBuildChild( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
 	OP_Node *opNode = parent->createNode( OBJ_SceneCacheTransform::typeName, scene->name().c_str() );
 	OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( opNode );
@@ -189,7 +189,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doBuildChild( const SceneInterface *scene, OP
 	return xform;
 }
 
-void OBJ_SceneCacheTransform::doBuildChildren( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
+void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth )
 {
 	OP_Network *inputNode = parent;
 	if ( hierarchy == Parenting )
@@ -206,21 +206,21 @@ void OBJ_SceneCacheTransform::doBuildChildren( const SceneInterface *scene, OP_N
 		OBJ_Node *childNode = 0;
 		if ( hierarchy == SubNetworks )
 		{
-			childNode = doBuildChild( child, parent, hierarchy, depth );
+			childNode = doExpandChild( child, parent, hierarchy, depth );
 			if ( child->hasObject() )
 			{
-				doBuildObject( child, childNode, hierarchy, Children );
+				doExpandObject( child, childNode, hierarchy, Children );
 			}
 		}
 		else if ( hierarchy == Parenting )
 		{
 			if ( child->hasObject() )
 			{
-				childNode = doBuildObject( child, parent, hierarchy, Children );
+				childNode = doExpandObject( child, parent, hierarchy, Children );
 			}
 			else
 			{
-				childNode = doBuildChild( child, parent, hierarchy, depth );
+				childNode = doExpandChild( child, parent, hierarchy, depth );
 			}
 			
 			childNode->setInput( 0, inputNode );
@@ -228,7 +228,7 @@ void OBJ_SceneCacheTransform::doBuildChildren( const SceneInterface *scene, OP_N
 		
 		if ( depth == AllDescendants )
 		{
-			doBuildChildren( child, childNode, hierarchy, depth );
+			doExpandChildren( child, childNode, hierarchy, depth );
 		}
 	}
 }
