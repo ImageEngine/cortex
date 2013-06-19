@@ -144,7 +144,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
@@ -157,7 +157,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		out.parm( "attributeFilter" ).set( "* ^P" )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
@@ -165,14 +165,14 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		out.parm( "attributeFilter" ).set( "* ^uv  ^pscale ^rest" )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
 		out.parm( "attributeFilter" ).set( "* ^s ^t  ^width ^Pref" )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
@@ -183,7 +183,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
@@ -194,7 +194,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
@@ -202,7 +202,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		out.parm( "attributeFilter" ).set( "*" )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 	
@@ -232,7 +232,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
@@ -274,7 +274,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
@@ -316,7 +316,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pref', 'Pw', 'width'] )
-		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), [] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cs', 's', 't'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
 		
