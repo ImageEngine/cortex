@@ -72,6 +72,8 @@ class MeshPrimitive : public Primitive
 		//@{
 		size_t numFaces() const;
 		const IntVectorData *verticesPerFace() const;
+		int minVerticesPerFace() const;
+		int maxVerticesPerFace() const;
 		const IntVectorData *vertexIds() const;
 		const std::string &interpolation() const;
 		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
@@ -103,6 +105,8 @@ class MeshPrimitive : public Primitive
 		IntVectorDataPtr m_vertexIds;
 		size_t m_numVertices;
 		std::string m_interpolation;
+		int m_minVerticesPerFace;
+		int m_maxVerticesPerFace;
 
 };
 
