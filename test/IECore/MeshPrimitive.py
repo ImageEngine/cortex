@@ -52,6 +52,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.vertexIds, IntVectorData() )
 		self.assertEqual( m.interpolation, "linear" )
 		self.assertEqual( m, m.copy() )
+		self.assertEqual( m.maxVerticesPerFace(), 0 )
 
 		iface = IndexedIO.create( "test/IECore/mesh.fio", IndexedIO.OpenMode.Write )
 		m.save( iface, "test" )
@@ -69,6 +70,8 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 6 )
 		self.assertEqual( m.numFaces(), 2 )
 		self.assertEqual( m.verticesPerFace, vertsPerFace )
+		self.assertEqual( m.maxVerticesPerFace(), 3 )
+		self.assertEqual( m.minVerticesPerFace(), 3 )
 		self.assert_( not m.verticesPerFace.isSame( vertsPerFace ) )
 		self.assertEqual( m.vertexIds, vertexIds )
 		self.assert_( not m.vertexIds.isSame( vertexIds ) )
@@ -101,6 +104,20 @@ class TestMeshPrimitive( unittest.TestCase ) :
 	def testEqualityOfEmptyMeshes( self ) :
 	
 		self.assertEqual( MeshPrimitive(), MeshPrimitive() )
+
+	def testVerticesPerFace( self ) :
+
+		vertexIds = IntVectorData( [ 0, 1, 2, 1, 2, 3, 4 ] )
+
+		vertsPerFace = IntVectorData( [ 3, 4 ] )
+		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
+		self.assertEqual( m.minVerticesPerFace(), 3 )
+		self.assertEqual( m.maxVerticesPerFace(), 4 )		
+
+		vertsPerFace = IntVectorData( [ 4, 3 ] )
+		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
+		self.assertEqual( m.minVerticesPerFace(), 3 )
+		self.assertEqual( m.maxVerticesPerFace(), 4 )		
 		
 	def testHash( self ) :
 	
