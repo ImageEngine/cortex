@@ -141,6 +141,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 				node.parm( "expand" ).pressButton()
 				self.failUnless( node.children() )
 				node.parm( "root" ).set( "/1/fake" )
+				node.parm( "collapse" ).pressButton()
 				node.parm( "expand" ).pressButton()
 				self.assertEqual( node.children(), tuple() )
 		
@@ -466,6 +467,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[12].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
 		
 		geo.parm( "root" ).set( "/1/2" )
+		geo.parm( "collapse" ).pressButton()
 		geo.parm( "expand" ).pressButton()
 		self.assertEqual( len(geo.children()), 1 )
 		node = geo.children()[0]
@@ -512,6 +514,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -530,6 +533,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -606,6 +610,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -630,6 +635,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 2 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -681,6 +687,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[12].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -700,6 +707,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -806,6 +814,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
 	
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
 		b = xform.children()[1]
@@ -883,6 +892,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		os.remove( TestSceneCache.__testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
 		a.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
@@ -912,6 +922,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		os.remove( TestSceneCache.__testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		a = xform.children()[0]
 		a.parm( "expand" ).pressButton()

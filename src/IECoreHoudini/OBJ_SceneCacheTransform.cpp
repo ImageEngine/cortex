@@ -84,22 +84,22 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 	{
 		PRM_Template *parentTemplate = OBJ_SceneCacheNode<OBJ_SubNet>::buildParameters()->myTemplate;
 		unsigned numParentParms = PRM_Template::countTemplates( parentTemplate );
-		thisTemplate = new PRM_Template[ numParentParms + 3 ];
+		thisTemplate = new PRM_Template[ numParentParms + 4 ];
 		
 		// add the common OBJ parms
-		for ( unsigned i = 0; i < numParentParms - 1; ++i )
+		for ( unsigned i = 0; i < numParentParms - 3; ++i )
 		{
 			thisTemplate[i] = parentTemplate[i];
 		}
 		
 		// then the expansion options
-		thisTemplate[numParentParms-1] = PRM_Template(
+		thisTemplate[numParentParms-3] = PRM_Template(
 			PRM_INT, 1, &pHierarchy, &hierarchyDefault, &hierarchyList, 0, 0, 0, 0,
 			"Choose the node network style used when expanding. Parenting will create a graph using "
 			"node connections, SubNetworks will create a deep hierarchy, and Flat Geometry will "
 			"create a single OBJ and SOP."
 		);
-		thisTemplate[numParentParms] = PRM_Template(
+		thisTemplate[numParentParms-2] = PRM_Template(
 			PRM_INT, 1, &pDepth, &depthDefault, &depthList, 0, 0, 0, 0,
 			"Choose how deep to expand. All Descendants will expand everything below the specified root "
 			"path and Children will only expand the immediate children of the root path, which may "
@@ -107,6 +107,8 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 		);
 		
 		// then the expand button
+		thisTemplate[numParentParms-1] = parentTemplate[numParentParms-3];
+		thisTemplate[numParentParms] = parentTemplate[numParentParms-2];
 		thisTemplate[numParentParms+1] = parentTemplate[numParentParms-1];
 	}
 	
@@ -131,7 +133,11 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	
 	if ( hierarchy == FlatGeometry )
 	{
+		// Collapse first, in case the immediate object was already created on during parent expansion
+		collapseHierarchy();
 		doExpandObject( scene, this, hierarchy, depth );
+		setInt( pExpanded.getToken(), 0, 0, 1 );
+		enableParm( pExpanded.getToken(), false );
 		return;
 	}
 	
@@ -151,6 +157,8 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	}
 	
 	doExpandChildren( scene, rootNode, hierarchy, depth );
+	setInt( pExpanded.getToken(), 0, 0, 1 );
+	enableParm( pExpanded.getToken(), false );
 	
 	if ( hierarchy == Parenting && !scene->hasObject() )
 	{
@@ -185,6 +193,14 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	xform->setSpace( Local );
 	xform->setInt( pHierarchy.getToken(), 0, 0, hierarchy );
 	xform->setInt( pDepth.getToken(), 0, 0, depth );
+	
+	SceneInterface::NameList children;
+	scene->childNames( children );
+	if ( children.empty() )
+	{
+		xform->setInt( pExpanded.getToken(), 0, 0, 1 );
+		xform->enableParm( pExpanded.getToken(), false );
+	}
 	
 	return xform;
 }
@@ -229,6 +245,8 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		if ( depth == AllDescendants )
 		{
 			doExpandChildren( child, childNode, hierarchy, depth );
+			childNode->setInt( pExpanded.getToken(), 0, 0, 1 );
+			childNode->enableParm( pExpanded.getToken(), false );
 		}
 	}
 }

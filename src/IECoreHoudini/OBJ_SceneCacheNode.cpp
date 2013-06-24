@@ -54,6 +54,12 @@ OBJ_SceneCacheNode<BaseType>::~OBJ_SceneCacheNode()
 template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pExpand( "expand", "Expand" );
 
+template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pCollapse( "collapse", "Collapse" );
+
+template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pExpanded( "expanded", "Expanded" );
+
 static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 {
 	PRM_Name *name = new PRM_Name( src.getToken(), src.getLabel(), src.getExpressionFlag() );
@@ -85,7 +91,7 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
 		PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
 		unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
 		unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
-		thisTemplate = new PRM_Template[ numObjParms + numSCCParms + 2 ];
+		thisTemplate = new PRM_Template[ numObjParms + numSCCParms + 4 ];
 		
 		for ( unsigned i = 0; i < numObjParms; ++i )
 		{
@@ -103,6 +109,17 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
 			"Expand the hierarchy below the specified root path.\n"
 			"Some nodes may define additional options that are used during the expansion process."
 		);
+		
+		thisTemplate[numObjParms + numSCCParms + 1] = PRM_Template(
+			PRM_CALLBACK, 1, &pCollapse, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::collapseButtonCallback, 0, 0,
+			"Clean the hierarchy below the specified root path."
+		);
+		
+		thisTemplate[numObjParms + numSCCParms + 2] = PRM_Template(
+			PRM_TOGGLE, 1, &pExpanded, 0, 0, 0, 0, 0, 0,
+			"A toggle to indicate whether this level is expanded or not. This does not affect cooking, "
+			"and the value may be changed by automated scripts. Expansion will be blocked when this is on."
+		);
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
@@ -119,13 +136,26 @@ int OBJ_SceneCacheNode<BaseType>::expandButtonCallback( void *data, int index, f
 {
 	std::string file;
 	OBJ_SceneCacheNode<BaseType> *node = reinterpret_cast<OBJ_SceneCacheNode<BaseType>*>( data );
-	if ( !node || !node->ensureFile( file ) )
+	if ( !node || !node->ensureFile( file ) || node->evalInt( pExpanded.getToken(), 0, 0 ) )
+	{
+		return 0;
+	}
+	
+	node->expandHierarchy( node->scene( file, node->getPath() ) );
+	
+	return 1;
+}
+
+template<typename BaseType>
+int OBJ_SceneCacheNode<BaseType>::collapseButtonCallback( void *data, int index, float time, const PRM_Template *tplate )
+{
+	OBJ_SceneCacheNode<BaseType> *node = reinterpret_cast<OBJ_SceneCacheNode<BaseType>*>( data );
+	if ( !node )
 	{
 		return 0;
 	}
 	
 	node->collapseHierarchy();
-	node->expandHierarchy( node->scene( file, node->getPath() ) );
 	
 	return 1;
 }
@@ -140,6 +170,8 @@ void OBJ_SceneCacheNode<BaseType>::collapseHierarchy()
 	}
 	
 	this->destroyNodes( childNodes );
+	this->setInt( pExpanded.getToken(), 0, 0, 0 );
+	this->enableParm( pExpanded.getToken(), true );
 }
 
 template<typename BaseType>
