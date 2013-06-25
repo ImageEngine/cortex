@@ -34,6 +34,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <math.h>
 #include <cassert>
 
 #include "OpenEXR/ImathFrame.h"

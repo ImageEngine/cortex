@@ -49,8 +49,8 @@ class AssociatedLegendreTest
 {
 	public:
 
-		void testEvaluation();
-		void testDepthEvaluation();
+		static testEvaluation();
+		static testDepthEvaluation();
 
 	private:
 

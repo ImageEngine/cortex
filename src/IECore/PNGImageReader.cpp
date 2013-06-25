@@ -368,8 +368,8 @@ bool PNGImageReader::open( bool throwOnFailure )
 		{
 			throw IOException( ( boost::format( "PNGImageReader: File %s could not be opened for reading" ) % m_bufferFileName ).str() );
 		}
-		fread(header, 1, 8, fp);
-		if (png_sig_cmp(header, 0, 8))
+		size_t sizeRead = fread(header, 1, 8, fp);
+		if ( sizeRead != 8 || png_sig_cmp(header, 0, 8))
 		{
 			throw IOException( ( boost::format( "PNGImageReader: File %s is not recognized as a PNG file" ) % m_bufferFileName ).str() );
 		}
