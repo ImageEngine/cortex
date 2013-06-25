@@ -268,15 +268,35 @@ void HoudiniScene::writeTransform( const Data *transform, double time )
 
 bool HoudiniScene::hasAttribute( const Name &name ) const
 {
+	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_has( retrieveNode() );
+	}
+	
 	return false;
 }
 
 void HoudiniScene::attributeNames( NameList &attrs ) const
 {
+	attrs.clear();
+	for ( std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); ++it )
+	{
+		if ( it->second.m_has( retrieveNode() ) )
+		{
+			attrs.push_back( it->first );
+		}
+	}
 }
 
 ObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
 {
+	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_read( retrieveNode() );
+	}
+	
 	return 0;
 }
 
@@ -752,4 +772,18 @@ bool HoudiniScene::relativePath( const char *value, Path &result ) const
 	}
 	
 	return true;
+}
+
+void HoudiniScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )
+{
+	CustomReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customAttributeReaders()[attrName] = r;
+}
+
+std::map<SceneInterface::Name, HoudiniScene::CustomReader> &HoudiniScene::customAttributeReaders()
+{
+	static std::map<SceneInterface::Name, HoudiniScene::CustomReader> readers;
+	return readers;
 }
