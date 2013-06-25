@@ -388,9 +388,12 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixd( projectionMatrix.getValue() );
 		
-		// Need OcclusionQuery Selector mode to be able to select child bounds. Will have to check IDRender would improve performances.
-		IECoreGL::Selector::Mode selectionMode = IECoreGL::Selector::OcclusionQuery;
-		
+		IECoreGL::Selector::Mode selectionMode = IECoreGL::Selector::IDRender;
+		if( selectInfo.displayStatus() == M3dView::kHilite && !selectInfo.singleSelection() )
+		{
+			selectionMode = IECoreGL::Selector::OcclusionQuery;
+		}
+
 		IECoreGL::Selector selector;
 		selector.begin( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode );
 				
@@ -400,8 +403,8 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 
 			if( selectInfo.displayStatus() != M3dView::kHilite )
 			{
-				// we're not in component selection mode. we'd like to be able to select the procedural
-				// object using the bounding box so we draw it too.
+				// We're not in component selection mode. We'd like to be able to select the scene shape
+				// using the bounding box so we draw it too.
 				IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( sceneShape->boundingBox() ) );
 			}
 			
