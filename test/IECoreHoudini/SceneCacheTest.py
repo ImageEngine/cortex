@@ -42,6 +42,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	__testFile = "test/test.scc"
 	__testOutFile = "test/testOut.scc"
+	__testLinkedOutFile = "test/testOut.lscc"
 	
 	def sop( self, parent=None ) :
 		if not parent :
@@ -847,10 +848,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( a.hasObject(), b.hasObject() )
 		if a.hasObject() :
 			# need to remove the name added by Houdini
+			## \todo: we really shouldn't have the name in the blindData in the first place
+			ma = a.readObject( time )
 			mb = b.readObject( time )
 			self.assertTrue( mb.isInstanceOf( IECore.TypeId.Renderable ) )
-			del mb.blindData()['name']
-			ma = a.readObject( time )
+			if ma.blindData().has_key( "name" ) :
+				del ma.blindData()['name']
+			if mb.blindData().has_key( "name" ) :
+				del mb.blindData()['name']
 			# need to adjust P for baked objects
 			if b.name() in bakedObjects :
 				IECore.TransformOp()( input=ma, copyInput=False, matrix=IECore.M44dData( parentTransform ) )
@@ -944,6 +949,65 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output, bakedObjects = [ "1", "2", "3" ] )
+	
+	def testRopLinked( self ) :
+		
+		self.writeSCC()
+		xform = self.xform()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "expand" ).pressButton()
+		a = xform.children()[0]
+		a.parm( "expand" ).pressButton()
+		# leaving b and below as a link
+		
+		rop = self.rop( xform )
+		rop.parm( "file" ).set( TestSceneCache.__testLinkedOutFile )
+		self.assertFalse( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		self.assertTrue( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
+		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+		linked = IECore.LinkedScene( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.compareScene( orig, linked )
+		
+		# make sure there really is a link
+		unlinked = IECore.SceneCache( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+		a = unlinked.child( "1" )
+		self.assertFalse( a.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		b = a.child( "2" )
+		self.assertEqual( b.childNames(), [] )
+		self.assertTrue( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual(
+			b.readAttribute( IECore.LinkedScene.linkAttribute, 0 ),
+			IECore.CompoundData( {
+				"fileName" : IECore.StringData( TestSceneCache.__testFile ),
+				"root" : IECore.InternedStringVectorData( [ "1", "2" ] )
+			} )
+		)
+		
+		# make sure we can force link expansion
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "file" ).set( TestSceneCache.__testLinkedOutFile )
+		self.assertEqual( xform.children(), tuple() )
+		self.assertEqual( xform.parm( "expanded" ).eval(), False )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "expand" ).pressButton()
+		rop.parm( "file" ).set( TestSceneCache.__testOutFile )
+		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		self.assertTrue( os.path.exists( TestSceneCache.__testOutFile ) )
+		expanded = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.compareScene( orig, expanded )
+		self.compareScene( expanded, linked )
+		
+		# make sure we can read back the whole structure in Houdini
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "expand" ).pressButton()
+		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+		self.compareScene( orig, live )
 	
 	def testRopErrors( self ) :
 		
@@ -1102,7 +1166,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def tearDown( self ) :
 		
-		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile ] :
+		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile ] :
 			if os.path.exists( f ) :
 				os.remove( f )
 
