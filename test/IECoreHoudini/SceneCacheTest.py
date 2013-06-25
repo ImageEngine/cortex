@@ -550,7 +550,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		next = hou.node( xform.path()+"/2" )
 		self.failUnless( isinstance( next, hou.ObjNode ) )
-		self.assertEqual( len(next.children()), 1 )
+		self.assertEqual( len(next.children()), 0 )
+		next.parm( "expand" ).pressButton()
+		self.assertEqual( len(next.children()), 2 )
+		self.failUnless( isinstance( hou.node( xform.path()+"/2/3" ), hou.ObjNode ) )
 		geo = hou.node( xform.path()+"/2/geo" )
 		self.failUnless( isinstance( geo, hou.ObjNode ) )
 		self.cookAll( xform )
@@ -563,17 +566,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		
-		next.parm( "expand" ).pressButton()
-		self.assertEqual( len(next.children()), 2 )
-		self.failUnless( isinstance( hou.node( xform.path()+"/2/3" ), hou.ObjNode ) )
-		
 		next = hou.node( xform.path()+"/2/3" )
 		self.failUnless( isinstance( next, hou.ObjNode ) )
-		self.assertEqual( len(next.children()), 1 )
-		self.failUnless( isinstance( hou.node( xform.path()+"/2/3/geo" ), hou.ObjNode ) )
+		self.assertEqual( len(next.children()), 0 )
 		next.parm( "expand" ).pressButton()
 		self.assertEqual( len(next.children()), 1 )
-		self.failUnless( isinstance( hou.node( xform.path()+"/2/3/geo" ), hou.ObjNode ) )		
+		self.failUnless( isinstance( hou.node( xform.path()+"/2/3/geo" ), hou.ObjNode ) )
 	
 	def testExpandParenting( self ) :
 		

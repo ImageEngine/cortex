@@ -196,7 +196,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	
 	SceneInterface::NameList children;
 	scene->childNames( children );
-	if ( children.empty() )
+	if ( children.empty() && !scene->hasObject() )
 	{
 		xform->setInt( pExpanded.getToken(), 0, 0, 1 );
 		xform->enableParm( pExpanded.getToken(), false );
@@ -223,7 +223,7 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		if ( hierarchy == SubNetworks )
 		{
 			childNode = doExpandChild( child, parent, hierarchy, depth );
-			if ( child->hasObject() )
+			if ( depth == AllDescendants && child->hasObject() )
 			{
 				doExpandObject( child, childNode, hierarchy, Children );
 			}
