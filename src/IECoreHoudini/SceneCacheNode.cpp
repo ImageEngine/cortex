@@ -210,7 +210,7 @@ bool SceneCacheNode<BaseType>::ensureFile( std::string &file )
 }
 
 template<typename BaseType>
-std::string SceneCacheNode<BaseType>::getFile()
+std::string SceneCacheNode<BaseType>::getFile() const
 {
 	UT_String value;
 	this->evalString( value, pFile.getToken(), 0, 0 );
@@ -225,7 +225,7 @@ void SceneCacheNode<BaseType>::setFile( std::string file )
 }
 
 template<typename BaseType>
-std::string SceneCacheNode<BaseType>::getPath()
+std::string SceneCacheNode<BaseType>::getPath() const
 {
 	UT_String value;
 	this->evalString( value, pRoot.getToken(), 0, 0 );
@@ -245,7 +245,7 @@ void SceneCacheNode<BaseType>::setPath( const IECore::SceneInterface *scene )
 }
 
 template<typename BaseType>
-typename SceneCacheNode<BaseType>::Space SceneCacheNode<BaseType>::getSpace()
+typename SceneCacheNode<BaseType>::Space SceneCacheNode<BaseType>::getSpace() const
 {
 	return (Space)this->evalInt( pSpace.getToken(), 0, 0 );
 }
