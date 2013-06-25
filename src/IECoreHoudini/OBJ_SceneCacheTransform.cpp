@@ -250,3 +250,43 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		}
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Registration for HoudiniScene extra attributes
+//////////////////////////////////////////////////////////////////////////////////////////
+
+OBJ_SceneCacheTransform::HoudiniSceneAddOn OBJ_SceneCacheTransform::g_houdiniSceneAddOn;
+
+OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
+{
+	HoudiniScene::registerCustomAttribute( LinkedScene::linkAttribute, OBJ_SceneCacheTransform::hasLink, OBJ_SceneCacheTransform::readLink );
+}
+
+bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
+{
+	const char *expanded = pExpanded.getToken();
+	if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
+{
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	if ( !sceneNode )
+	{
+		return 0;
+	}
+	
+	/// \todo: do we need to ensure the file exists first?
+	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
+	if ( !scene )
+	{
+		return 0;
+	}
+	
+	return LinkedScene::linkAttributeData( scene );
+}
