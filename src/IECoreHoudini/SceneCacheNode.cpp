@@ -98,16 +98,16 @@ template<typename BaseType>
 PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template(
 		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::fileChangedCallback, 0, 0,
-		"A static or animated SCC file to load, starting at the Root path provided."
+		"A static or animated SCC or LSCC file to load, starting at the Root path provided."
 	),
 	PRM_Template(
 		PRM_CALLBACK, 1, &pReload, 0, 0, 0, &SceneCacheNode<BaseType>::reloadButtonCallback, 0, 0,
-		"Removes the current SCC file from the cache. This will force a recook on this node, and "
-		"cause all other nodes using this SCC file to require a recook as well."
+		"Removes the current SCC or LSCC file from the cache. This will force a recook on this node, and "
+		"cause all other nodes using this file to require a recook as well."
 	),
 	PRM_Template(
 		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::pathChangedCallback, 0, 0,
-		"Root path inside the SCC of the hierarchy to load"
+		"Root path inside the SCC or LSCC of the hierarchy to load"
 	),
 	PRM_Template(
 		PRM_INT, 1, &pSpace, &spaceDefault, &spaceList, 0, 0, 0, 0,
@@ -200,7 +200,8 @@ bool SceneCacheNode<BaseType>::ensureFile( std::string &file )
 	file = getFile();
 	
 	boost::filesystem::path filePath = boost::filesystem::path( file );
-	if ( filePath.extension() == ".scc" && boost::filesystem::exists( filePath ) )
+	std::vector<std::string> extensions = SceneInterface::supportedExtensions( IndexedIO::Read );
+	if ( filePath.has_extension() && std::find( extensions.begin(), extensions.end(), filePath.extension().string().substr( 1 ) ) != extensions.end() && boost::filesystem::exists( filePath ) )
 	{
 		return true;
 	}
@@ -209,7 +210,7 @@ bool SceneCacheNode<BaseType>::ensureFile( std::string &file )
 }
 
 template<typename BaseType>
-std::string SceneCacheNode<BaseType>::getFile()
+std::string SceneCacheNode<BaseType>::getFile() const
 {
 	UT_String value;
 	this->evalString( value, pFile.getToken(), 0, 0 );
@@ -224,7 +225,7 @@ void SceneCacheNode<BaseType>::setFile( std::string file )
 }
 
 template<typename BaseType>
-std::string SceneCacheNode<BaseType>::getPath()
+std::string SceneCacheNode<BaseType>::getPath() const
 {
 	UT_String value;
 	this->evalString( value, pRoot.getToken(), 0, 0 );
@@ -244,7 +245,7 @@ void SceneCacheNode<BaseType>::setPath( const IECore::SceneInterface *scene )
 }
 
 template<typename BaseType>
-typename SceneCacheNode<BaseType>::Space SceneCacheNode<BaseType>::getSpace()
+typename SceneCacheNode<BaseType>::Space SceneCacheNode<BaseType>::getSpace() const
 {
 	return (Space)this->evalInt( pSpace.getToken(), 0, 0 );
 }

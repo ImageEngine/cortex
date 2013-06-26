@@ -92,7 +92,15 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		virtual IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
-
+		
+		typedef boost::function<bool (const OP_Node *)> HasFn;
+		typedef boost::function<IECore::ObjectPtr (const OP_Node *)> ReadFn;
+		
+		// Register callbacks for custom named attributes.
+		// The has function will be called during hasAttribute and it stops in the first one that returns true.
+		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
+		static void registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn );
+		
 	private :
 		
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
@@ -102,6 +110,15 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
 		bool relativePath( const char *value, Path &result ) const;
+		
+		/// Struct for registering readers for custom Attributes.
+		struct CustomReader
+		{
+			HasFn m_has;
+			ReadFn m_read;
+		};
+		
+		static std::map<Name, CustomReader> &customAttributeReaders();
 		
 		UT_String m_nodePath;
 		UT_String m_contentPath;

@@ -56,14 +56,17 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		
 		static OP_TemplatePair *buildParameters();
 		
-		static PRM_Name pBuild;
+		static PRM_Name pExpand;
+		static PRM_Name pCollapse;
+		static PRM_Name pExpanded;
 		
-		static int buildButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
+		static int expandButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
+		static int collapseButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 	
-		/// Derived classes should define this function to build the hierarchy contained in the SceneCache.
-		virtual void buildHierarchy( const IECore::SceneInterface *scene ) = 0;
+		/// Derived classes should define this function to expand the hierarchy contained in the SceneCache.
+		virtual void expandHierarchy( const IECore::SceneInterface *scene ) = 0;
 		/// Implemented to destroy all child nodes
-		virtual void cleanHierarchy();
+		virtual void collapseHierarchy();
 	
 	protected :
 		

@@ -64,17 +64,19 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 	return templatePair;
 }
 
-void OBJ_SceneCacheGeometry::buildHierarchy( const SceneInterface *scene )
+void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 {
 	if ( !scene )
 	{
 		return;
 	}
 	
-	doBuildGeometry( scene );
+	doExpandGeometry( scene );
+	setInt( pExpanded.getToken(), 0, 0, 1 );
+	enableParm( pExpanded.getToken(), false );
 }
 
-void OBJ_SceneCacheGeometry::doBuildGeometry( const SceneInterface *scene )
+void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 {
 	const char *name = ( scene->name() == SceneInterface::rootName ) ? "root" : scene->name().c_str();
 	OP_Node *opNode = createNode( SOP_SceneCacheSource::typeName, name );
