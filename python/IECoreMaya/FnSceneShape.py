@@ -306,7 +306,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		allTransformChildren = maya.cmds.listRelatives( transform, f=True, type = "transform" ) or []
 		
 		for child in allTransformChildren:
-			# Do a bunch of tests first!
+			# \todo check for connections and new parented nodes
 			maya.cmds.delete( child )
 		
 		maya.cmds.setAttr( node+".objectOnly", l=False )

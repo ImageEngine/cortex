@@ -1022,8 +1022,6 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	if( drawBounds && pathStr != "/" )
 	{
 		AttributeBlock aBox(renderer);
-		renderer->setAttribute( "gl:primitive:wireframe", new BoolData( true ) );
-		renderer->setAttribute( "gl:primitive:solid", new BoolData( false ) );
 		renderer->setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
 
 		Box3d b = subSceneInterface->readBound( time );

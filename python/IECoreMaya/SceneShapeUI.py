@@ -320,10 +320,12 @@ def __selectedSceneShapes() :
 	
 	selectedSceneShapes = maya.cmds.ls( sl=True, l=True )
 	for shape in selectedSceneShapes:
-		if maya.cmds.nodeType( shape ) == "ieSceneShape" and not shape in allSceneShapes:
-			allSceneShapes.append( shape )
+		# Make sure we have the shape name, it could be a component 
+		shapeName = shape.split(".f[")[0]
+		if maya.cmds.nodeType( shapeName ) == "ieSceneShape" and not shapeName in allSceneShapes:
+			allSceneShapes.append( shapeName )
 		else:
-			children = maya.cmds.listRelatives( shape, children=True, type="ieSceneShape", fullPath=True )
+			children = maya.cmds.listRelatives( shapeName, children=True, type="ieSceneShape", fullPath=True ) or []
 			for child in children:
 				if not child in allSceneShapes:
 					allSceneShapes.append( child )
