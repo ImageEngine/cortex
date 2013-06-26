@@ -82,18 +82,18 @@ class SceneCacheNode : public BaseType
 		};
 		
 		/// convienence methods for the common parameters;
-		std::string getFile();
+		std::string getFile() const;
 		void setFile( std::string file );
-		std::string getPath();
+		std::string getPath() const;
 		void setPath( const IECore::SceneInterface *scene );
-		Space getSpace();
+		Space getSpace() const;
 		void setSpace( Space space );
 	
 	protected :
 		
 		/// Access point to the actual SceneCache. All derived classes should only access the cache
 		/// using this method, in order to avoid re-opening existing files.
-		IECore::ConstSceneInterfacePtr scene( const std::string &fileName, const std::string &path );
+		static IECore::ConstSceneInterfacePtr scene( const std::string &fileName, const std::string &path );
 		
 		/// Computes the worldTransform for the specified path
 		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );

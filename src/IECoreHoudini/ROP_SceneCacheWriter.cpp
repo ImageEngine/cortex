@@ -32,9 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/filesystem/path.hpp"
+
 #include "PRM/PRM_Include.h"
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
+
+#include "IECore/LinkedScene.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/HoudiniScene.h"
@@ -101,22 +105,29 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 
 int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 {
+	UT_String nodePath;
+	evalString( nodePath, pRootObject.getToken(), 0, 0 );
+	
 	UT_String value;
-	evalString( value, pRootObject.getToken(), 0, 0 );
+	evalString( value, pFile.getToken(), 0, 0 );
+	std::string file = value.toStdString();
 	
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_liveScene = new IECoreHoudini::HoudiniScene( value, emptyPath, emptyPath );
+		m_liveScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath );
+		
+		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
+		if ( boost::filesystem::path( file ).extension().string() != ".lscc" )
+		{
+			m_liveScene = new LinkedScene( m_liveScene );
+		}
 	}
 	catch ( IECore::Exception &e )
 	{		
 		addError( ROP_MESSAGE, e.what() );
 		return false;
 	}
-	
-	evalString( value, pFile.getToken(), 0, 0 );
-	std::string file = value.toStdString();
 	
 	try
 	{
@@ -149,6 +160,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	if ( liveScene != m_liveScene )
 	{
 		outScene->writeTransform( liveScene->readTransform( time ), time );
+	}
+	
+	SceneInterface::NameList attrs;
+	liveScene->attributeNames( attrs );
+	for ( SceneInterface::NameList::iterator it = attrs.begin(); it != attrs.end(); ++it )
+	{
+		outScene->writeAttribute( *it, liveScene->readAttribute( *it, time ), time );
 	}
 	
 	if ( liveScene->hasObject() )
