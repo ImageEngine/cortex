@@ -337,11 +337,13 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 	CompoundDataPtr annotations = new CompoundData;
 	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:annotations", annotations ) );
 	
+#ifndef PRMANEXPORT
 	for( int i=1, n=Slo_GetNAnnotations(); i <= n; i++ )
 	{
 		const char *key = Slo_GetAnnotationKeyById( i );
 		annotations->writable()[key] = new StringData( Slo_GetAnnotationByKey( key ) );
 	}
+#endif
 
 	Slo_EndShader();
 	return result;
