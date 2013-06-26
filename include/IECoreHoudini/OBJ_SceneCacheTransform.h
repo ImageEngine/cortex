@@ -100,6 +100,8 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		/// Called by expandHierarchy() to expand the children of the SceneCache.
 		/// This will be called recursively for each child when Depth is AllDescenants.
 		virtual void doExpandChildren( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		
+		static OP_TemplatePair *buildExtraParameters();
 	
 	private :
 		

@@ -79,37 +79,35 @@ PRM_ChoiceList OBJ_SceneCacheTransform::depthList( PRM_CHOICELIST_SINGLE, &depth
 
 OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 {
+	static OP_TemplatePair *templatePair = 0;
+	if ( !templatePair )
+	{
+		OP_TemplatePair *firstTemplatePair = new OP_TemplatePair( buildExtraParameters()->myTemplate, buildExpansionParameters() );
+		templatePair = new OP_TemplatePair( buildBaseParameters()->myTemplate, firstTemplatePair );
+	}
+	
+	return templatePair;
+}
+
+OP_TemplatePair *OBJ_SceneCacheTransform::buildExtraParameters()
+{
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		PRM_Template *parentTemplate = OBJ_SceneCacheNode<OBJ_SubNet>::buildParameters()->myTemplate;
-		unsigned numParentParms = PRM_Template::countTemplates( parentTemplate );
-		thisTemplate = new PRM_Template[ numParentParms + 4 ];
+		thisTemplate = new PRM_Template[3];
 		
-		// add the common OBJ parms
-		for ( unsigned i = 0; i < numParentParms - 3; ++i )
-		{
-			thisTemplate[i] = parentTemplate[i];
-		}
-		
-		// then the expansion options
-		thisTemplate[numParentParms-3] = PRM_Template(
+		thisTemplate[0] = PRM_Template(
 			PRM_INT, 1, &pHierarchy, &hierarchyDefault, &hierarchyList, 0, 0, 0, 0,
 			"Choose the node network style used when expanding. Parenting will create a graph using "
 			"node connections, SubNetworks will create a deep hierarchy, and Flat Geometry will "
 			"create a single OBJ and SOP."
 		);
-		thisTemplate[numParentParms-2] = PRM_Template(
+		thisTemplate[1] = PRM_Template(
 			PRM_INT, 1, &pDepth, &depthDefault, &depthList, 0, 0, 0, 0,
 			"Choose how deep to expand. All Descendants will expand everything below the specified root "
 			"path and Children will only expand the immediate children of the root path, which may "
 			"or may not contain geometry."
 		);
-		
-		// then the expand button
-		thisTemplate[numParentParms-1] = parentTemplate[numParentParms-3];
-		thisTemplate[numParentParms] = parentTemplate[numParentParms-2];
-		thisTemplate[numParentParms+1] = parentTemplate[numParentParms-1];
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
