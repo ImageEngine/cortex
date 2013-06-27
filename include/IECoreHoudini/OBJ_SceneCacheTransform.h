@@ -121,6 +121,8 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		
 		static bool hasLink( const OP_Node *node );
 		static IECore::ObjectPtr readLink( const OP_Node *node );
+		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag );
+		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren );
 
 };
 

@@ -341,6 +341,7 @@ OBJ_SceneCacheTransform::HoudiniSceneAddOn OBJ_SceneCacheTransform::g_houdiniSce
 OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
 {
 	HoudiniScene::registerCustomAttribute( LinkedScene::linkAttribute, OBJ_SceneCacheTransform::hasLink, OBJ_SceneCacheTransform::readLink );
+	HoudiniScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
 }
 
 bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
@@ -370,4 +371,40 @@ IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 	}
 	
 	return LinkedScene::linkAttributeData( scene );
+}
+
+bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
+{
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	if ( !sceneNode )
+	{
+		return false;
+	}
+	
+	/// \todo: do we need to ensure the file exists first?
+	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
+	if ( !scene )
+	{
+		return false;
+	}
+	
+	return scene->hasTag( tag );
+}
+
+void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, bool includeChildren )
+{
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	if ( !sceneNode )
+	{
+		return;
+	}
+	
+	/// \todo: do we need to ensure the file exists first?
+	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
+	if ( !scene )
+	{
+		return;
+	}
+	
+	scene->readTags( tags, includeChildren );
 }

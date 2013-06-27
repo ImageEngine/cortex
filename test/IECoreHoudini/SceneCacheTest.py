@@ -800,6 +800,63 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( hou.node( xform.path()+"/2" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/3" ).isObjectDisplayed() )
 	
+	def testLiveTags( self ) :
+		
+		self.writeTaggedSCC()
+		
+		xform = self.xform()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "expand" ).pressButton()
+		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		
+		# test tags exist even when children aren't expanded 
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "expand" ).pressButton()
+		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		hou.node( xform.path()+"/1" ).parm( "expand" ).pressButton()
+		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		
+		# test tags for parented expansion
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "expand" ).pressButton()
+		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+	
 	def testReloadButton( self ) :
 		
 		def testNode( node ) :
