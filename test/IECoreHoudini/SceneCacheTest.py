@@ -723,6 +723,83 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
 	
+	def writeTaggedSCC( self ) :
+		
+		scene = self.writeSCC()
+		sc1 = scene.child( str( 1 ) )
+		sc2 = sc1.child( str( 2 ) )
+		sc3 = sc2.child( str( 3 ) )
+		sc1.writeTags( [ "a" ] )
+		sc2.writeTags( [ "b" ] )
+		sc3.writeTags( [ "c" ] )
+		
+		return scene
+	
+	def testTagFilter( self ) :
+		
+		self.writeTaggedSCC()
+		
+		xform = self.xform()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		self.assertEqual( sorted( xform.parm( "tagFilter" ).menuItems() ), [ "*", "ObjectType:MeshPrimitive", "a", "b", "c" ] )
+		xform.parm( "tagFilter" ).set( "b" )
+		xform.parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo" ).isObjectDisplayed() )
+		
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "tagFilter" ).set( "a" )
+		xform.parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/geo" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo" ).isObjectDisplayed() )
+		
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "tagFilter" ).set( "a b" )
+		xform.parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo" ).isObjectDisplayed() )
+		
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
+		xform.parm( "tagFilter" ).set( "b" )
+		xform.parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
+		self.assertEqual( hou.node( xform.path()+"/1/geo" ), None )
+		hou.node( xform.path()+"/1" ).parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
+		self.assertEqual( hou.node( xform.path()+"/1/2/geo" ), None )
+		hou.node( xform.path()+"/1/2" ).parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3/geo" ), None )
+		hou.node( xform.path()+"/1/2/3" ).parm( "expand" ).pressButton()
+		# is displayed because we forced it by expanding 3 explicitly
+		self.assertTrue( hou.node( xform.path()+"/1/2/3/geo" ).isObjectDisplayed() )
+		
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "tagFilter" ).set( "b" )
+		xform.parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/2" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/3" ).isObjectDisplayed() )
+	
 	def testReloadButton( self ) :
 		
 		def testNode( node ) :
