@@ -974,11 +974,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			parentTransform = aTransform if parentTransform is None else aTransform * parentTransform
 			self.assertEqual( b.readTransformAsMatrix( time ), IECore.M44d() )
 		else :
+			self.assertEqual( a.readTags(), b.readTags() )
 			self.assertEqual( a.readTransformAsMatrix( time ), b.readTransformAsMatrix( time ) )
 			ab = a.readBound( time )
 			bb = b.readBound( time )
 			self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
 			self.assertTrue( ab.max.equalWithAbsError( bb.max, 1e-6 ) )
+		
 		self.assertEqual( a.hasObject(), b.hasObject() )
 		if a.hasObject() :
 			# need to remove the name added by Houdini
@@ -1002,7 +1004,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testRopHierarchy( self ) :
 		
 		# test a parented xform
-		self.writeSCC()
+		self.writeTaggedSCC()
 		xform = self.xform()
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "expand" ).pressButton()
@@ -1086,7 +1088,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testRopLinked( self ) :
 		
-		self.writeSCC()
+		self.writeTaggedSCC()
 		xform = self.xform()
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
@@ -1198,7 +1200,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testLiveScene( self ) :
 		
-		self.writeSCC()
+		self.writeTaggedSCC()
 		xform = self.xform()
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
