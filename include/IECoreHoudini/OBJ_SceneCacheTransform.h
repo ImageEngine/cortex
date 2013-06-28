@@ -60,12 +60,17 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		
 		static PRM_Name pHierarchy;
 		static PRM_Name pDepth;
+		static PRM_Name pTagFilter;
 		
 		static PRM_Default hierarchyDefault;
 		static PRM_Default depthDefault;
+		static PRM_Default filterDefault;
 		
 		static PRM_ChoiceList hierarchyList;
 		static PRM_ChoiceList depthList;
+		static PRM_ChoiceList tagFilterMenu;
+		
+		static void buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
 		enum Hierarchy
 		{
@@ -90,18 +95,22 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		
 		/// Called by expandHierarchy() and doExpandChildren() when the SceneCache contains an object.
 		/// Implemented to expand the specific object using an OBJ_SceneCacheGeometry node.
-		virtual OBJ_Node *doExpandObject( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		virtual OBJ_Node *doExpandObject( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth, const UT_StringMMPattern &tagFilter );
 		
 		/// Called by doExpandChildren() when the SceneCache contains a child.
 		/// Implemented to expand the current cache path using an OBJ_SceneCacheTransform or
 		/// OBJ_SceneCacheGeometry node depending on the settings for hierarchy and depth.
-		virtual OBJ_Node *doExpandChild( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		virtual OBJ_Node *doExpandChild( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth, const UT_StringMMPattern &tagFilter );
 		
 		/// Called by expandHierarchy() to expand the children of the SceneCache.
 		/// This will be called recursively for each child when Depth is AllDescenants.
-		virtual void doExpandChildren( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth );
+		virtual void doExpandChildren( const IECore::SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth, const UT_StringMMPattern &tagFilter );
+		
+		static OP_TemplatePair *buildExtraParameters();
 	
 	private :
+		
+		bool tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter );
 		
 		/// functions registered in HoudiniScene as custom attributes
 		struct HoudiniSceneAddOn
@@ -112,6 +121,8 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		
 		static bool hasLink( const OP_Node *node );
 		static IECore::ObjectPtr readLink( const OP_Node *node );
+		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag );
+		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren );
 
 };
 
