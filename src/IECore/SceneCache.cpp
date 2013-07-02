@@ -899,6 +899,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				// we represent inherited tags as empty directories and local tags as a IndexedIO::File of bool type, so
 				// we can easily filter them when reading by entry type.
+				// Inherited tags do not override local tags.
 				if ( fromChildren )
 				{
 					if ( !io->hasEntry( *tIt ) )
@@ -1943,6 +1944,12 @@ void SceneCache::writeTags( const NameList &tags )
 {
 	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
 	writer->writeTags( tags );
+}
+
+void SceneCache::writeTags( const NameList &tags, bool fromChildren )
+{
+	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
+	writer->writeTags( tags, fromChildren );
 }
 
 bool SceneCache::hasObject() const
