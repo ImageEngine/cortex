@@ -162,18 +162,32 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		outScene->writeTransform( liveScene->readTransform( time ), time );
 	}
 	
+	bool link = false;
 	SceneInterface::NameList attrs;
 	liveScene->attributeNames( attrs );
 	for ( SceneInterface::NameList::iterator it = attrs.begin(); it != attrs.end(); ++it )
 	{
 		outScene->writeAttribute( *it, liveScene->readAttribute( *it, time ), time );
+		if ( *it == LinkedScene::linkAttribute )
+		{
+			link = true;
+		}
 	}
+	
+	// If this is a link, we exit now, since all other write calls will throw exceptions
+	if ( link )
+	{
+		return ROP_CONTINUE_RENDER;
+	}
+	
+	SceneInterface::NameList tags;
+	liveScene->readTags( tags, false );
+	outScene->writeTags( tags );
 	
 	if ( liveScene->hasObject() )
 	{
 		try
 		{
-			/// \todo: does an invisible node mean there is no object?
 			outScene->writeObject( liveScene->readObject( time ), time );
 		}
 		catch ( IECore::Exception &e )
@@ -187,7 +201,6 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	liveScene->childNames( children );
 	for ( SceneInterface::NameList::iterator it = children.begin(); it != children.end(); ++it )
 	{
-		/// \todo: does an invisible node mean its not a child?
 		ConstSceneInterfacePtr liveChild = liveScene->child( *it );
 		SceneInterfacePtr outChild = outScene->child( *it, SceneInterface::CreateIfMissing );
 		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time );
