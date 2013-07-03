@@ -36,6 +36,7 @@
 #define IECORE_LINKEDSCENE_H
 
 #include "IECore/SampledSceneInterface.h"
+#include "IECore/MurmurHash.h"
 
 namespace IECore
 {
@@ -56,6 +57,9 @@ IE_CORE_FORWARDDECLARE( LinkedScene );
 /// (1) calls to the function writeLink() or 
 /// (2) calls to the function writeAttribute( LinkedScene::linkSceneAttribute, LinkedScene::linkAttributeData(), ... ). 
 /// Note that the link can be animated, allowing for time remapped animations.
+/// When reading, this object will return a dynamically computed attribute "SceneInterface:linkHash", which will be 
+/// a MurmurHash (as a StringData) that uniquely identify a given linked file (with any time remapping on parent links) and 
+/// could be used by readers for automatic instantiation. This attribute is never returned by attributeNames() function.
 class LinkedScene : public  SampledSceneInterface
 {
 	public :
@@ -65,6 +69,9 @@ class LinkedScene : public  SampledSceneInterface
 		/// Equals to "SceneInterface:link" and it's the name given to the link attribute that is recognized
 		// by this class when expanding linked scenes.
 		static const Name &linkAttribute;
+		/// Equals to "SceneInterface:linkHash" and it's the name given to the attribute that uniquely identify
+		/// the target linked scene with any time remapping (recursivelly applied on all levels).
+		static const Name &linkHashAttribute;
 
 		/// When the open mode is Read it expands the links and only the const methods may be used and the
 		/// when the open mode is Write, only the non-const methods may be used and 
@@ -153,6 +160,10 @@ class LinkedScene : public  SampledSceneInterface
 		// uses the mainScene to ask what is the time the link is remapped to. Should only be called when the linkAttribute is available.
 		double remappedLinkTime( double time ) const;
 		double remappedLinkTimeAtSample( size_t sampleIndex ) const;
+
+		// creates the hash that represents the link at the current location.
+		Object *computeLinkHashAttribute() const;
+		void computeLinkHash( MurmurHash &h ) const;
 
 		SceneInterfacePtr m_mainScene;
 		ConstSceneInterfacePtr m_linkedScene;
