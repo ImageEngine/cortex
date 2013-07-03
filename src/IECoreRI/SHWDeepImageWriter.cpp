@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,7 +83,7 @@ bool SHWDeepImageWriter::canWrite( const std::string &fileName )
 	
 	int status = DTEX_NOFILE;
 	
-	std::string ext = boost::filesystem::extension( boost::filesystem::path( fileName ) );
+	std::string ext = boost::filesystem::path( fileName ).extension();
 	if ( ext == ".shw" )
 	{
 		status = DtexCreateFile( fileName.c_str(), dtexCache, &dtexFile );
