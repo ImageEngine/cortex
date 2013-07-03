@@ -57,6 +57,7 @@
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
 
 using namespace IECoreHoudini;
 
@@ -166,6 +167,17 @@ void newRenderHook( GR_RenderTable *table )
 	table->addHook( hook, GR_RENDER_HOOK_VERSION );
 }
 #endif
+
+void newGeometryPrim( GA_PrimitiveFactory *factory )
+{
+	GA_PrimitiveDefinition *primDef = factory->registerDefinition(
+		GU_CortexPrimitive::typeName, GU_CortexPrimitive::create,
+		GA_FAMILY_NONE, ( std::string( GU_CortexPrimitive::typeName ) + "s" ).c_str()
+	);
+	
+	/// \todo: This method is silly. Should we just give up and do the whole registration in GU_CortexPrimitive?
+	GU_CortexPrimitive::setTypeDef( primDef );
+}
 
 /// Declare our new IO Translators
 void newGeometryIO( void * )
