@@ -324,7 +324,7 @@ MStatus SceneShapeInterface::initialize()
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
 	cAttr.setStorable( false );
-	
+
 	s = addAttribute( aTransform );
 	
 	// Bounding box
@@ -381,6 +381,8 @@ MStatus SceneShapeInterface::initialize()
 	cAttr.addChild( aBoundMin );
 	cAttr.addChild( aBoundMax );
 	cAttr.addChild( aBoundCenter );
+	cAttr.setReadable( true );
+	cAttr.setWritable( false );
 	cAttr.setArray( true );
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
@@ -409,6 +411,8 @@ MStatus SceneShapeInterface::initialize()
 
 	aAttributes = cAttr.create( "attributes", "ott" );
 	cAttr.addChild( aAttributeValues );
+	cAttr.setReadable( true );
+	cAttr.setWritable( false );
 	cAttr.setArray( true );
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
