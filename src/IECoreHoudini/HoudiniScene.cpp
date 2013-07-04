@@ -340,10 +340,7 @@ void HoudiniScene::readTags( NameList &tags, bool includeChildren ) const
 	{
 		NameList values;
 		it->m_read( node, values, includeChildren );
-		for ( NameList::iterator vIt = values.begin(); vIt != values.end(); ++vIt )
-		{
-			tags.push_back( *vIt );
-		}
+		tags.insert( tags.end(), values.begin(), values.end() );
 	}
 }
 
