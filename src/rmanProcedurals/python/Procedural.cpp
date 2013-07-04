@@ -38,11 +38,14 @@
 
 #include "ri.h"
 
+#include "IECorePython/ScopedGILLock.h"
+
 #if defined(_WIN32)
 #define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif
+
 
 using namespace std;
 using namespace boost::python;
@@ -53,14 +56,29 @@ struct PythonInitialiser
 	PythonInitialiser()
 	{
 		// start python
-		Py_Initialize();
-		PyEval_InitThreads();
+		if (!Py_IsInitialized())
+		{
+			Py_Initialize();
+		}
+		IECorePython::ScopedGILLock lock;
+		
+
+		
 		
 			try
 			{
 			
-				mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
-				mainModuleNamespace = mainModule.attr( "__dict__" );
+				PyObject* sysModules = PyImport_GetModuleDict();
+				object mainModule(borrowed(PyDict_GetItemString(sysModules,"__main__")));
+				PyMethodDef initial_methods[]={{0,0,0,0}};
+				if (!mainModule)
+				{
+					mainModule=object(borrowed(Py_InitModule("__main__",initial_methods)));
+				}
+				//mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
+				//mainModuleNamespace = mainModule.attr( "__dict__" );
+				g_globalContext=mainModule.attr("__dict__");
+
 
 				// load the IECoreRI and IECore modules so people don't have to do that in the string
 				// they pass to be executed. this also means people don't have to worry about which
@@ -69,16 +87,18 @@ struct PythonInitialiser
 				// turns Ctrl-C into that annoying KeyboardInterrupt exception.
 				string toExecute =	"import sys\n"
 									"import ctypes\n"
+#ifndef WIN32
 									"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
 									"import signal\n"
 									"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
+#endif
 									"import IECore\n"
 									"import IECoreRI\n";
 
 				handle<> ignored( PyRun_String( 
 					toExecute.c_str(),
-					Py_file_input, mainModuleNamespace.ptr(),
-					mainModuleNamespace.ptr() ) );
+					Py_file_input, g_globalContext.ptr(),
+					g_globalContext.ptr() ) );
 					
 			}
 			catch( const error_already_set &e )
@@ -94,11 +114,11 @@ struct PythonInitialiser
 				cerr << "ERROR : Python procedural initialiser : caught unknown exception" << endl;
 			}
 		
-		PyEval_ReleaseThread( PyThreadState_Get() );
+		//PyEval_ReleaseThread( PyThreadState_Get() );
 	}
 	
 	object mainModule;
-	object mainModuleNamespace;
+	object g_globalContext;
 };
 
 static PythonInitialiser g_pythonInitialiser;
@@ -120,8 +140,8 @@ RtVoid DLLEXPORT Subdivide( RtPointer data, float detail )
 
 			string *i = (string *)data;
 
-			handle<> ignored( PyRun_String( i->c_str(), Py_file_input, g_pythonInitialiser.mainModuleNamespace.ptr(),
-				g_pythonInitialiser.mainModuleNamespace.ptr() ) );
+			handle<> ignored( PyRun_String( i->c_str(), Py_file_input, g_pythonInitialiser.g_globalContext.ptr(),
+				g_pythonInitialiser.g_globalContext.ptr() ) );
 
 		}
 		catch( const error_already_set &e )
