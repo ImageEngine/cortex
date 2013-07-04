@@ -93,6 +93,11 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 		sopSpace = SOP_SceneCacheSource::Path;
 	}
 	
+	UT_String attribFilter;
+	getAttributeFilter( attribFilter );
+	sop->setAttributeFilter( attribFilter );
+	
 	sop->setSpace( sopSpace );
+	sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)getGeometryType() );
 	sop->setString( shapes, CH_STRING_LITERAL, SOP_SceneCacheSource::pShapeFilter.getToken(), 0, 0 );
 }

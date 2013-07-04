@@ -61,12 +61,17 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pRoot;
 		static PRM_Name pSpace;
 		static PRM_Name pReload;
+		static PRM_Name pGeometryType;
+		static PRM_Name pAttributeFilter;
 		
 		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
+		static PRM_Default filterDefault;
+		static PRM_Default geometryTypeDefault;
 		
 		static PRM_ChoiceList rootMenu;
 		static PRM_ChoiceList spaceList;
+		static PRM_ChoiceList geometryTypeList;
 		
 		static int fileChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int pathChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
@@ -81,6 +86,12 @@ class SceneCacheNode : public BaseType
 			Object
 		};
 		
+		enum GeometryType
+		{
+			Cortex,
+			Houdini,
+		};
+		
 		/// convienence methods for the common parameters;
 		std::string getFile() const;
 		void setFile( std::string file );
@@ -88,6 +99,10 @@ class SceneCacheNode : public BaseType
 		void setPath( const IECore::SceneInterface *scene );
 		Space getSpace() const;
 		void setSpace( Space space );
+		GeometryType getGeometryType() const;
+		void setGeometryType( GeometryType type );
+		void getAttributeFilter( UT_String &filter ) const;
+		void setAttributeFilter( const UT_String &filter );
 	
 	protected :
 		

@@ -75,10 +75,22 @@ template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pSpace( "space", "Space" );
 
 template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pAttributeFilter( "attributeFilter", "Attribute Filter" );
+
+template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pGeometryType( "geometryType", "Geometry Type" );
+
+template<typename BaseType>
 PRM_Default SceneCacheNode<BaseType>::rootDefault( 0, "/" );
 
 template<typename BaseType>
 PRM_Default SceneCacheNode<BaseType>::spaceDefault( World );
+
+template<typename BaseType>
+PRM_Default SceneCacheNode<BaseType>::filterDefault( 0, "*" );
+
+template<typename BaseType>
+PRM_Default SceneCacheNode<BaseType>::geometryTypeDefault( Cortex );
 
 static PRM_Name spaceNames[] = {
 	PRM_Name( "0", "World" ),
@@ -88,11 +100,20 @@ static PRM_Name spaceNames[] = {
 	PRM_Name( 0 ) // sentinal
 };
 
+static PRM_Name geometryTypes[] = {
+	PRM_Name( "0", "Cortex Primitives" ),
+	PRM_Name( "1", "Houdini Geometry" ),
+	PRM_Name( 0 ) // sentinal
+};
+
 template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::rootMenu( PRM_CHOICELIST_REPLACE, &SceneCacheNode<BaseType>::buildRootMenu );
 
 template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::spaceList( PRM_CHOICELIST_SINGLE, &spaceNames[0] );
+
+template<typename BaseType>
+PRM_ChoiceList SceneCacheNode<BaseType>::geometryTypeList( PRM_CHOICELIST_SINGLE, &geometryTypes[0] );
 
 template<typename BaseType>
 PRM_Template SceneCacheNode<BaseType>::parameters[] = {
@@ -114,6 +135,18 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 		"Re-orient the objects by choosing a space. World transforms from \"/\" on down the hierarchy, "
 		"Path re-roots the transformation starting at the specified root path, Local uses the current level "
 		"transformations only, and Object is an identity transform"
+	),
+	PRM_Template(
+		PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
+		"The type of geometry to load. Cortex Primitives are faster, but only allow manipulation through "
+		"OpHolders or specificly designed nodes. Houdini Geometry will use the converters to create standard "
+		"geo that can be manipulated anywhere."
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pAttributeFilter, &filterDefault, 0, 0, 0, 0, 0,
+		"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
+		"The filter expects Cortex names as exist in the cache, and performs automated conversion to standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). "
+		"P will always be loaded."
 	),
 	PRM_Template()
 };
@@ -254,6 +287,30 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setSpace( SceneCacheNode<BaseType>::Space space )
 {
 	this->setInt( pSpace.getToken(), 0, 0, space );
+}
+
+template<typename BaseType>
+typename SceneCacheNode<BaseType>::GeometryType SceneCacheNode<BaseType>::getGeometryType() const
+{
+	return (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setGeometryType( SceneCacheNode<BaseType>::GeometryType type )
+{
+	this->setInt( pGeometryType.getToken(), 0, 0, type );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getAttributeFilter( UT_String &filter ) const
+{
+	this->evalString( filter, pAttributeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setAttributeFilter( const UT_String &filter )
+{
+	this->setString( filter, CH_STRING_LITERAL, pAttributeFilter.getToken(), 0, 0 );
 }
 
 template<typename BaseType>

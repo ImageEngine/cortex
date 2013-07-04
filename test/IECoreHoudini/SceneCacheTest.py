@@ -244,6 +244,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		self.writeSCC()
 		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -288,6 +289,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		self.writeSCC()
 		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		self.assertEqual( node.parm( "space" ).eval(), IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
@@ -299,7 +301,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
+		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -310,7 +324,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
+		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -321,7 +347,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 2.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -332,8 +370,20 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		
 		node.parm( "root" ).set( "/1" )
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -344,7 +394,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
+		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -355,7 +417,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 5, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 2.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 5.5, 0.5, 0.5 ) )
+		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -366,7 +440,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 2.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -376,11 +462,23 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0, 0, 0 ) )
+		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
 	
 	def testSopShapeFilter( self ) :
 		
 		self.writeSCC()
 		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -391,7 +489,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
+		
 		node.parm( "shapeFilter" ).set( "* ^2" )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 12 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -401,7 +511,18 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 2 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
+		
 		node.parm( "shapeFilter" ).set( "3" )
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 6 )
 		nameAttr = node.geometry().findPrimAttrib( "name" )
@@ -409,6 +530,15 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for name in nameAttr.strings() :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
+		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 1 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
 		
 		node.parm( "shapeFilter" ).set( "" )
 		self.assertEqual( len(node.geometry().prims()), 0 )
@@ -418,6 +548,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		self.writeSCC()
 		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
@@ -457,6 +588,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.writeSCC()
 		geo = self.geometry()
 		self.assertEqual( geo.children(), tuple() )
+		geo.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		geo.parm( "expand" ).pressButton()
 		self.assertEqual( len(geo.children()), 1 )
 		node = geo.children()[0]
@@ -499,6 +631,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1" ), hou.ObjNode ) )
@@ -585,6 +718,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 3 )
 		self.failUnless( isinstance( hou.node( xform.path()+"/1" ), hou.ObjNode ) )
@@ -671,6 +805,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( xform.children(), tuple() )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( len(xform.children()), 1 )
 		geo = hou.node( xform.path()+"/geo" )
@@ -726,6 +861,44 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for name in nameAttr.strings() :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
+	
+	def testParmTrickleDown( self ) :
+		
+		def checkParms( node, geoType, attribFilter ) :
+			
+			self.assertEqual( node.parm( "geometryType" ).eval(), geoType )
+			self.assertEqual( node.parm( "attributeFilter" ).eval(), attribFilter )
+			if isinstance( node, hou.ObjNode ) :
+				self.assertEqual( node.parm( "expanded" ).eval(), True )
+			
+			for child in node.children() :
+				checkParms( child, geoType, attribFilter )
+		
+		self.writeSCC()
+		xform = self.xform()
+		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		xform.parm( "attributeFilter" ).set( "*" )
+		xform.parm( "expand" ).pressButton()
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*" )
+		
+		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "expand" ).pressButton()
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "P ^N" )
+		
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
+		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		xform.parm( "attributeFilter" ).set( "*" )
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "expand" ).pressButton()
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*" )
+		
+		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "expand" ).pressButton()
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "P ^N" )
 	
 	def writeTaggedSCC( self ) :
 		
@@ -921,6 +1094,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		sop = self.sop()
 		for time in times :
 			hou.setTime( time )
+			sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 			prims = sop.geometry().prims()
 			self.assertEqual( len(prims), 18 )
 			nameAttr = sop.geometry().findPrimAttrib( "name" )
@@ -931,6 +1105,17 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 2*time, 0 ) )
 			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 3*time, 0 ) )
 			self.assertEqual( prims[6].attribValue( "Cd" ), ( time, 1, 0 ) )
+			
+			sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+			prims = sop.geometry().prims()
+			self.assertEqual( len(prims), 3 )
+			nameAttr = sop.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+			self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, time + 0.5, 0.5 ) )
+			self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 3.5, 2*time + 0.5, 0.5 ) )
+			self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 6.5, 3*time + 0.5, 0.5 ) )
 		
 		xform = self.xform()
 		xform.parm( "expand" ).pressButton()
@@ -1259,6 +1444,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		hou.setTime( 0 )
 		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 18 )
 		self.assertEqual( len(node.geometry().points()), 24 )
@@ -1394,6 +1580,87 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		reader.parm( "file" ).set( TestSceneCache.__testBgeo )
 		reader.cook( force = True )
 		reader.cook( force = True )
+	
+	def testNonPrimitiveCortexObjects( self ) :
+		
+		scene = self.writeAnimSCC()
+		coordChild = scene.child( "1" ).createChild( "coord" )
+		coord = IECore.CoordinateSystem()
+		coord.setName( "testing" )
+		coord.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
+		coordChild.writeObject( coord, 0 )
+		coord.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 5, 5 ) ) ) )
+		coordChild.writeObject( coord, 1 )
+		intsChild = scene.createChild( "ints" )
+		intsChild.writeObject( IECore.IntVectorData( [ 1, 10, 20, 30 ] ), 0 )
+		
+		del scene, coordChild, intsChild
+		
+		sop = self.sop()
+		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = sop.geometry().prims()
+		self.assertEqual( len(prims), 5 )
+		
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( sorted(nameAttr.strings()), ['/1', '/1/2', '/1/2/3', '/1/coord', '/ints'] )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		
+		for i in range( 0, 5 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+		
+		aPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1' ][0]
+		bPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1/2' ][0]
+		cPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1/2/3' ][0]
+		coordPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1/coord' ][0]
+		intsPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/ints' ][0]
+		
+		self.assertEqual( aPrim.vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( bPrim.vertices()[0].point().position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		self.assertEqual( cPrim.vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
+		self.assertEqual( coordPrim.vertices()[0].point().position(), hou.Vector3( 2, 2, 3 ) )
+		self.assertEqual( intsPrim.vertices()[0].point().position(), hou.Vector3( 0, 0, 0 ) )
+		
+		hou.setTime( 1 )
+		prims = sop.geometry().prims()
+		self.assertEqual( len(prims), 5 )
+		
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( sorted(nameAttr.strings()), ['/1', '/1/2', '/1/2/3', '/1/coord', '/ints'] )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		
+		for i in range( 0, 5 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+		
+		aPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1' ][0]
+		bPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1/2' ][0]
+		cPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1/2/3' ][0]
+		coordPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/1/coord' ][0]
+		intsPrim = [ x for x in prims if x.attribValue( nameAttr ) == '/ints' ][0]
+		
+		self.assertEqual( aPrim.vertices()[0].point().position(), hou.Vector3( 1.5, 1.5, 0.5 ) )
+		self.assertEqual( bPrim.vertices()[0].point().position(), hou.Vector3( 3.5, 2.5, 0.5 ) )
+		self.assertEqual( cPrim.vertices()[0].point().position(), hou.Vector3( 6.5, 3.5, 0.5 ) )
+		self.assertEqual( coordPrim.vertices()[0].point().position(), hou.Vector3( 2, 6, 5 ) )
+		self.assertEqual( intsPrim.vertices()[0].point().position(), hou.Vector3( 0, 0, 0 ) )
+		
+		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		prims = sop.geometry().prims()
+		self.assertEqual( len(prims), 18 )
+		self.assertTrue( "/1/coord" in sop.warnings() )
+		self.assertTrue( "/ints" in sop.warnings() )
+		
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 1, 0 ) )
+		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 2, 0 ) )
+		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 3, 0 ) )
 	
 	def tearDown( self ) :
 		
