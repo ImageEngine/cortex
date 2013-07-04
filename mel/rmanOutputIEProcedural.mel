@@ -1,0 +1,11 @@
+global proc rmanOutputIEProcedural()
+{
+	string $object = `rman ctxGetObject`;
+	if(`nodeType $object` != "ieProceduralHolder"){
+		return;
+	}
+	
+	ieDelightProceduralCache -a -st `currentTime -q` $object;
+	ieDelightProceduralCache -e $object;
+	ieDelightProceduralCache -f;
+}
