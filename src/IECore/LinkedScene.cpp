@@ -602,12 +602,6 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 				throw Exception( "Links to external scenes cannot be created on locations where there are already child locations!" );
 			}
 
-			m_mainScene->readTags( names, false );
-			if ( names.size() )
-			{
-				throw Exception( "Links to external scenes cannot be created on locations where there are already tags stored!" );
-			}
-
 		}
 
 		// we are creating a link!
@@ -652,8 +646,10 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		{
 			// save the tags from the linked file to the current location so it gets propagated to the root.
 			NameList tags;
-			linkedScene->readTags(tags);
-			m_mainScene->writeTags( tags );
+
+			/// copy all tags as non local (so we can distinguish from tags added in the LinkedScene)
+			linkedScene->readTags(tags, true);
+			static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
 		}
 
 		/// we keep the information this level has a link, so we can prevent attempts to 
@@ -666,14 +662,14 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 
 bool LinkedScene::hasTag( const Name &name ) const
 {
-	if ( m_linkedScene )
+	if ( m_linkedScene && !m_atLink  )
 	{
-		return m_linkedScene->hasTag( name );
+		if ( m_linkedScene->hasTag( name ) )
+		{
+			return true;
+		}
 	}
-	else
-	{
-		return m_mainScene->hasTag( name );
-	}
+	return m_mainScene->hasTag( name );
 }
 
 void LinkedScene::readTags( NameList &tags, bool includeChildren ) const
@@ -683,14 +679,46 @@ void LinkedScene::readTags( NameList &tags, bool includeChildren ) const
 		throw Exception( "readTags with includeChildren option is only supported when reading the scene file!" );
 	}
 
-	if ( m_linkedScene )
+	if ( includeChildren )
 	{
-		return m_linkedScene->readTags( tags, includeChildren );
+		/// we want all tags (local or inherited from children or parent links)
+
+		if ( !m_linkedScene || (m_linkedScene && m_atLink) )
+		{
+			m_mainScene->readTags( tags, true );
+		}
+		else
+		{
+			/// get only the tags that were saved in the LinkedScene at the link location (they will be applied to all the linked children)
+			m_mainScene->readTags( tags, false );
+
+			/// add the tags coming from the linked scene
+			NameList linkTags;
+			m_linkedScene->readTags( linkTags, true );
+			tags.insert( tags.end(), linkTags.begin(), linkTags.end() );
+		}
 	}
 	else
 	{
-		return m_mainScene->readTags( tags, includeChildren );
+		// we are interested only on the tags written at the current location... 
+
+		if ( m_linkedScene )
+		{
+			m_linkedScene->readTags( tags, false );
+			if ( m_atLink )
+			{
+				// if we are at the link location, we should add the tags written in the main scene too.
+				NameList mainTags;
+				m_mainScene->readTags( mainTags, false );
+				tags.insert( tags.end(), mainTags.begin(), mainTags.end() );
+			}
+		}
+		else
+		{
+			m_mainScene->readTags( tags, false );
+		}
 	}
+
 }
 
 void LinkedScene::writeTags( const NameList &tags )
@@ -698,10 +726,6 @@ void LinkedScene::writeTags( const NameList &tags )
 	if ( m_readOnly )
 	{
 		throw Exception( "No write access to scene file!" );
-	}
-	if ( m_atLink )
-	{
-		throw Exception( "Locations with links to external scene cannot have tags themselves!" );
 	}
 
 	m_mainScene->writeTags(tags);

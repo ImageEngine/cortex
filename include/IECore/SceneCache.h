@@ -141,6 +141,12 @@ class SceneCache : public SampledSceneInterface
 		IE_CORE_FORWARDDECLARE( Implementation );
 		virtual SceneCachePtr duplicate( ImplementationPtr& implementation ) const;
 		SceneCache( ImplementationPtr& implementation );
+
+		/// LinkedScene need to specify whether the tag is supposed to be saved
+		/// as a local tag or a tag that was artificially inherited from the child transforms.
+		void writeTags( const NameList &tags,  bool fromChildren );
+
+		friend class LinkedScene;
 		
 	private :
 

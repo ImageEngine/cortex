@@ -44,13 +44,14 @@ IE_CORE_FORWARDDECLARE( LinkedScene );
 
 /// Implements a scene that have references (links) to external scenes.
 /// Links can be created at any location in a scene. When a link is created in a given location,
-/// the object, tags, bounds and children will be loaded from the linked scene (with time remapping). The transform, attributes
-/// are still loaded from the main scene.
+/// the object, bounds and children will be loaded from the linked scene (with time remapping). The transform, attributes
+/// are still loaded from the main scene. Tags defined in the link location will be applied (when read) to all the child transforms from the linked scene.
 /// This class wraps another SceneInterface object that is responsible for actually storing the data
 /// (we call it the "main scene"). Links are represented as an attribute in the main scene called "SceneInterface:link".
 /// When created for reading, this class provides seamless access to the hierarchy inside the linked scenes, 
 /// concatenating the two hierarchies in a single path that uniquely identify that location. The time is also 
-/// transparently translated.
+/// transparently translated. Tags that were saved in the linked scene are propagated to the main scene, 
+/// to keep consistent behavior.
 /// When writing, there's no access to the contents of the indexed scene. Instead, it creates the links by either
 /// (1) calls to the function writeLink() or 
 /// (2) calls to the function writeAttribute( LinkedScene::linkSceneAttribute, LinkedScene::linkAttributeData(), ... ). 
@@ -123,7 +124,7 @@ class LinkedScene : public  SampledSceneInterface
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
 
 		virtual bool hasTag( const Name &name ) const;
-		virtual void readTags( NameList &tags, bool includeChildren ) const;
+		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
 		virtual void writeTags( const NameList &tags );
 
 		virtual bool hasObject() const;
