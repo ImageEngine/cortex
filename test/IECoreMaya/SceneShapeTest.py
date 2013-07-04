@@ -437,4 +437,4 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 			
 
 if __name__ == "__main__":
-    unittest.main()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
