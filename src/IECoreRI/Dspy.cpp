@@ -280,6 +280,9 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 PtDspyError Dspy::imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size, void *data )
 {
 	DisplayDriver *dd = static_cast<DisplayDriver *>( image );
+#ifdef PRMANEXPORT			
+	return PkDspyErrorUnsupported;
+#else				
 	if( type == PkProgressiveQuery )
 	{
 		if( (!dd->scanLineOrderOnly()) && dd->acceptsRepeatedData() )
@@ -293,6 +296,7 @@ PtDspyError Dspy::imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int
 		return PkDspyErrorNone;
 	}
 	return PkDspyErrorUnsupported;
+#endif				
 }
 
 PtDspyError Dspy::imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data )
