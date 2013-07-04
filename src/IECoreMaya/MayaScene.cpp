@@ -262,11 +262,16 @@ bool MayaScene::hasTag( const Name &name ) const
 	{
 		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
 	}
-	std::map< Name, HasFn >::const_iterator it = customTagReaders().find(name);
-	if ( it != customTagReaders().end() )
+	
+	std::vector<CustomTagReader> &tagReaders = customTagReaders();
+	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
-		return it->second( m_dagPath );
+		if ( it->m_has( m_dagPath, name ) )
+		{
+			return true;
+		}
 	}
+	
 	return false;
 }
 
@@ -283,13 +288,13 @@ void MayaScene::readTags( NameList &tags, bool includeChildren ) const
 	{
 		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
 	}
-
-	for ( std::map< Name, HasFn >::const_iterator it = customTagReaders().begin(); it != customTagReaders().end(); it++ )
+	
+	std::vector<CustomTagReader> &tagReaders = customTagReaders();
+	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
-		if ( it->second( m_dagPath ) )
-		{
-			tags.push_back( it->first );
-		}
+		NameList values;
+		it->m_read( m_dagPath, values, includeChildren );
+		tags.insert( tags.end(), values.begin(), values.end() );
 	}
 }
 
@@ -634,9 +639,12 @@ void MayaScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, Read
 	customAttributeReaders()[attrName] = r;
 }
 
-void MayaScene::registerCustomTag( const Name &tagName, HasFn hasFn )
+void MayaScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
 {
-	customTagReaders()[tagName] = hasFn;
+	CustomTagReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customTagReaders().push_back( r );
 }
 
 std::vector< MayaScene::CustomReader > &MayaScene::customObjectReaders()
@@ -651,8 +659,8 @@ std::map< SceneInterface::Name, MayaScene::CustomReader > &MayaScene::customAttr
 	return readers;
 }
 
-std::map< SceneInterface::Name, MayaScene::HasFn > &MayaScene::customTagReaders()
+std::vector<MayaScene::CustomTagReader> &MayaScene::customTagReaders()
 {
-	static std::map< SceneInterface::Name, MayaScene::HasFn > readers;
+	static std::vector<MayaScene::CustomTagReader> readers;
 	return readers;
 }
