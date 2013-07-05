@@ -600,6 +600,10 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 				dagPath.extendToShapeDirectlyBelow(0)
 			except:
 				return False
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
+				return False
+			
 			return dagPath.fullPathName().endswith("Shape")
 
 		def readMyTags( node, includeChildren ) :
@@ -608,6 +612,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 			try:
 				dagPath.extendToShapeDirectlyBelow(0)
 			except:
+				return []
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
 				return []
 			
 			if includeChildren :
