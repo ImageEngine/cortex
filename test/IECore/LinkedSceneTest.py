@@ -376,25 +376,37 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertFalse( C.hasAttribute( IECore.LinkedScene.linkHashAttribute ) )
 
 		hashes = map( lambda s: s.readAttribute( IECore.LinkedScene.linkHashAttribute, 0 ).value, [ i0, i1, i2, i3, i0b, i3b,  j0, j1, j2, j3, j4, j5, j6, j7, j8, j9, j10, j11, j12, j13, j14, j15 ] )
-		self.assertEqual( hashes, [
-			'76af06504f2ed9dc99a2a0296800fcec',  		# link to instance0 
-			'0de7db4782e9ac8156a7ce9ca1d9c282',  		# link to instance1
-			'dfccdfc6a154547d5fabe4d66f6b81a0',  			# link to instance2 
-			'9c70dc0a1f23a28312ee2697f011554c',  		# link to instance3
-			'76af06504f2ed9dc99a2a0296800fcec',  		# link to B/instance0
-			'9c70dc0a1f23a28312ee2697f011554c',  		# link to B/instance3
-			'80dac5c2fb4a6d47f6af7e885d07779d', 'c43c6cbce3c0781b400e9bd10910737a', 	# links to l (no time, remapped)
-			'76af06504f2ed9dc99a2a0296800fcec', 'e932e4f0cc42cea9c01093a4a01b2b57', 	# links to instance0 (no time, remapped)
-			'0de7db4782e9ac8156a7ce9ca1d9c282', 'bf687671afed325aa4fef99702920faa', 	# links to instance1 (no time, remapped)
-			'dfccdfc6a154547d5fabe4d66f6b81a0', 'b2ce41f20ef4a43e00339f8b2ea157aa', 		# links to instance2 (no time, remapped)
-			'9c70dc0a1f23a28312ee2697f011554c', '3fb4f7f029452a06579e6dbe27a9a88a',	# links to instance3 (no time, remapped)
-			'76af06504f2ed9dc99a2a0296800fcec', 'e932e4f0cc42cea9c01093a4a01b2b57', 	# links to B/instance1 (no time, remapped)
-			'9c70dc0a1f23a28312ee2697f011554c', '3fb4f7f029452a06579e6dbe27a9a88a', 	# links to B/instance3 (no time, remapped)
-			'c1046a0a73c11a5cf592fb733e848424',  	# link to B
-			'6df4e880b6e589e37dbcf174a6ba0848'		# link to C
-			]
-		)
 
+		matchingIndices = [
+			[ 0, 4, 8, 16 ],		# instance0 indices
+			[ 1, 10 ],				# instance1 indices
+			[ 2, 12 ],					# instance2 indices
+			[ 3, 5, 14, 18 ],		# instance3 indices
+			[ 9, 17 ],				# time remapped instance0
+			[ 15, 19 ],				# time remapped instance3
+		]
+
+		for indices in enumerate( matchingIndices ) :
+			h = hashes[indices[0]]
+			matchingHashes = map( lambda (i,h): h, filter( lambda (i,h): i in indices, enumerate(hashes) ) )
+			mismatchingHashes = set(hashes).difference( matchingHashes )
+			self.assertTrue( h in matchingHashes )
+			self.assertFalse( h in mismatchingHashes )
+
+		# test all the other hashes
+		otherIndices = list()
+		for i in xrange(0,len(hashes)):
+			for mid in xrange(0,len(matchingIndices)):
+				if i in matchingIndices[mid] :
+					break
+			else :
+				otherIndices.append(i)
+
+		for i in otherIndices :
+			h = hashes[i]
+			mismatchingHashes = list(hashes)
+			del mismatchingHashes[i]
+			self.assertFalse( h in mismatchingHashes )
 
 	def testReading( self ):
 
