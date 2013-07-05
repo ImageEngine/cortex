@@ -116,7 +116,18 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		
 		return scene
 	
-
+	def writeTagSCC( self, file ) :
+		
+		scene = self.writeSCC( file )
+		sc1 = scene.child( str( 1 ) )
+		sc2 = sc1.child( str( 2 ) )
+		sc3 = sc2.child( str( 3 ) )
+		sc1.writeTags( [ "a" ] )
+		sc2.writeTags( [ "b" ] )
+		sc3.writeTags( [ "c" ] )
+		
+		return scene
+	
 	def testComputePlugs( self ) :
 			
 		self.writeSCC( file = SceneShapeTest.__testFile )
@@ -427,7 +438,40 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[3]" ), "blah" )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[4]" ), None )
 
-
+	def testTags( self ) :
+		
+		self.writeTagSCC( file=SceneShapeTest.__testFile )
+		
+		maya.cmds.file( new=True, f=True )
+		node = maya.cmds.createNode( 'ieSceneShape' )
+		fn = IECoreMaya.FnSceneShape( node )
+		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
+		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
+		
+		scene = IECoreMaya.MayaScene().child( transform )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		
+		# double expanding because the first level has all the same tags
+		childFn = fn.expandOnce()[0].expandOnce()[0]
+		scene = childFn.sceneInterface()
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		
+		childFn = childFn.expandOnce()[0]
+		scene = childFn.sceneInterface()
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "fakeTag" ) )
+	
 	def tearDown( self ) :
 		
 		for f in [ SceneShapeTest.__testFile, SceneShapeTest.__testPlugFile, SceneShapeTest.__testPlugAnimFile, SceneShapeTest.__testPlugAttrFile ] :
