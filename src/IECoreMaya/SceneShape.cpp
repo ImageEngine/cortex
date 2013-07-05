@@ -59,6 +59,7 @@ SceneShape::MayaSceneAddOn::MayaSceneAddOn()
 {
 	MayaScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
 	MayaScene::registerCustomAttribute( LinkedScene::linkAttribute, SceneShape::hasSceneShapeLink, SceneShape::readSceneShapeLink );
+	MayaScene::registerCustomTags( SceneShape::hasTag, SceneShape::readTags );
 }
 
 SceneShape::SceneShape()
@@ -308,3 +309,36 @@ ObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
 	return sceneShape->getSceneInterface()->readObject( t );
 }
 
+bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag )
+{
+	SceneShape *sceneShape = findScene( p );
+	if ( !sceneShape )
+	{
+		return false;
+	}
+	
+	const SceneInterface *scene = sceneShape->getSceneInterface();
+	if ( !scene )
+	{
+		return false;
+	}
+	
+	return scene->hasTag( tag );
+}
+
+void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, bool includeChildren )
+{
+	SceneShape *sceneShape = findScene( p );
+	if ( !sceneShape )
+	{
+		return;
+	}
+	
+	const SceneInterface *scene = sceneShape->getSceneInterface();
+	if ( !scene )
+	{
+		return;
+	}
+	
+	scene->readTags( tags, includeChildren );
+}

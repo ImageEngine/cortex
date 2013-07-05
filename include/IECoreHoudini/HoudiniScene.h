@@ -125,7 +125,7 @@ class HoudiniScene : public IECore::SceneInterface
 			ReadFn m_read;
 		};
 		
-		/// Struct for registering readers for custom Attributes.
+		/// Struct for registering readers for custom Tags.
 		struct CustomTagReader
 		{
 			HasTagFn m_has;

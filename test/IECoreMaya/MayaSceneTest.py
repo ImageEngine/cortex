@@ -590,25 +590,53 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.select( clear = True )
 		sphere = maya.cmds.polySphere( name="pSphere" )
 
-		def renderableTag( node ):
+		def hasMyTags( node, tag ) :
+			
+			if tag not in ( "renderable", "archivable" ) :
+				return False
+			
 			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
 			try:
 				dagPath.extendToShapeDirectlyBelow(0)
 			except:
 				return False
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
+				return False
+			
 			return dagPath.fullPathName().endswith("Shape")
 
-		IECoreMaya.MayaScene.registerCustomTag( "renderable", renderableTag )
+		def readMyTags( node, includeChildren ) :
+			
+			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
+			try:
+				dagPath.extendToShapeDirectlyBelow(0)
+			except:
+				return []
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
+				return []
+			
+			if includeChildren :
+				return [ "renderable", "archivable" ]
+			
+			return [ "renderable" ]
+		
+		IECoreMaya.MayaScene.registerCustomTags( hasMyTags, readMyTags )
 
 		scene = IECoreMaya.MayaScene()
 		transformScene = scene.child(str(t))
 		sphereScene = scene.child('pSphere')
 		self.assertFalse( scene.hasTag( 'renderable' ) )
+		self.assertFalse( scene.hasTag( 'archivable' ) )
 		self.assertEqual( scene.readTags(), [] )
 		self.assertFalse( transformScene.hasTag( 'renderable' ) )
+		self.assertFalse( transformScene.hasTag( 'archivable' ) )
 		self.assertEqual( transformScene.readTags(), [] )
-		self.assertEqual( sphereScene.readTags(), [ IECore.InternedString('renderable') ] )
+		self.assertEqual( sphereScene.readTags(), [ IECore.InternedString('renderable'), IECore.InternedString('archivable') ] )
+		self.assertEqual( sphereScene.readTags( False ), [ IECore.InternedString('renderable') ] )
 		self.assertTrue( sphereScene.hasTag( 'renderable' ) )
+		self.assertTrue( sphereScene.hasTag( 'archivable' ) )
 		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
