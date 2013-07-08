@@ -146,6 +146,9 @@ void DeepImageWriter::registerDeepImageWriter( const std::string &extensions, Ca
 
 DeepImageWriterPtr DeepImageWriter::create( const std::string &fileName )
 {
+	/// \todo We can stop using this deprecated form when we no longer need to be compatible
+	/// with boost 1.43. At that point we can use path.extension().string() and compile with
+	/// BOOST_FILESYSTEM_NO_DEPRECATED.
 	std::string ext = boost::filesystem::extension( boost::filesystem::path( fileName ) );
 
 	ExtensionsToFnsMap *m = extensionsToFns();
