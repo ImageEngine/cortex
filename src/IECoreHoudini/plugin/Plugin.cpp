@@ -39,6 +39,7 @@
 #include <boost/python.hpp>
 
 // Houdini
+#include "DM/DM_RenderTable.h"
 #include <UT/UT_DSOVersion.h>
 #include <UT/UT_IOTable.h>
 #include <UT/UT_Version.h>
@@ -58,6 +59,7 @@
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
 
 using namespace IECoreHoudini;
 
@@ -177,6 +179,14 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 	
 	/// \todo: This method is silly. Should we just give up and do the whole registration in GU_CortexPrimitive?
 	GU_CortexPrimitive::setTypeDef( primDef );
+	
+/// Declare our new Render Hook for Houdini 12.5 and later
+#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
+
+	DM_RenderTable::getTable()->registerGEOHook( new GUI_CortexPrimitiveHook, primDef->getId(), 0 );
+
+#endif
+
 }
 
 /// Declare our new IO Translators
