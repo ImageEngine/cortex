@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,28 @@
 #ifndef IECOREPYTHON_SIMPLETYPEDDATABINDING_H
 #define IECOREPYTHON_SIMPLETYPEDDATABINDING_H
 
+#include "boost/python.hpp"
+
 namespace IECorePython
 {
+
+/// An rvalue converter to get TypedData<T> from a python object convertible to T.
+template<typename T>
+struct TypedDataFromType
+{
+	/// Constructing a instance of this class will register the converter.
+	TypedDataFromType();
+
+	static void *convertible( PyObject *obj );
+	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data );
+	
+};
+
 extern void bindAllSimpleTypedData();
+
 }
+
+#include "IECorePython/SimpleTypedDataBinding.inl"
 
 #endif // IECOREPYTHON_SIMPLETYPEDDATABINDING_H
 

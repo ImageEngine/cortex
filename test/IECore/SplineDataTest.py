@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -138,6 +138,12 @@ class SplineDataTest( unittest.TestCase ) :
 		s.value.basis.step = 2
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
+
+	def testSplineConversion( self ) :
+	
+		d = IECore.CompoundData()
+		d["s"] = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
+		self.assertEqual( d["s"].value, IECore.SplinefColor3f( IECore.CubicBasisf.linear() ) )
 
 	def setUp(self):
 
