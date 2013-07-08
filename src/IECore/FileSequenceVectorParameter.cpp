@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -129,7 +129,7 @@ bool FileSequenceVectorParameter::valueValid( const Object *value, std::string *
 
 		if ( m_extensions.size() )
 		{
-			std::string ext = boost::filesystem::extension( boost::filesystem::path( fileSequence->getFileName() ) );
+			std::string ext = boost::filesystem::path( fileSequence->getFileName() ).extension();
 			if ( ext.size() && ext[0] == '.' )
 			{
 				ext = ext.substr( 1, ext.size() - 1 );

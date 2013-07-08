@@ -146,7 +146,7 @@ void DeepImageWriter::registerDeepImageWriter( const std::string &extensions, Ca
 
 DeepImageWriterPtr DeepImageWriter::create( const std::string &fileName )
 {
-	std::string ext = boost::filesystem::extension( boost::filesystem::path( fileName ) );
+	std::string ext = boost::filesystem::path( fileName ).extension();
 
 	ExtensionsToFnsMap *m = extensionsToFns();
 	ExtensionsToFnsMap::const_iterator it = m->find( ext );

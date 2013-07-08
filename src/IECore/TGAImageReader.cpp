@@ -107,7 +107,7 @@ bool TGAImageReader::canRead( const string &fileName )
 	}
 	
 	/// No magic number for v1 files, so just check the extension
-	return boost::filesystem::extension( fileName ) == ".tga";
+	return boost::filesystem::path( fileName ).extension() == ".tga";
 }
 
 void TGAImageReader::channelNames( vector<string> &names )

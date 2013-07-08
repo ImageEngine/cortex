@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -79,7 +79,7 @@ ReaderPtr Reader::create( const std::string &fileName )
 	bool knownExtension = false;
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );
-	string ext = extension(boost::filesystem::path(fileName));
+	string ext = boost::filesystem::path( fileName ).extension();
 	if( ext!="" )
 	{
 		ExtensionsToFnsMap::const_iterator it = m->find( ext );
