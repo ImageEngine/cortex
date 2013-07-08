@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,76 +32,73 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-
-#include <sstream>
-
-#include "IECore/SplineData.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/IECoreBinding.h"
-#include "IECorePython/SimpleTypedDataBinding.h"
-
-using namespace std;
-using std::string;
-using namespace boost;
-using namespace boost::python;
-using namespace Imath;
-using namespace IECore;
+#include "IECore/SimpleTypedData.h"
 
 namespace IECorePython
 {
 
-template<class T>
-static std::string repr( T &x )
+template<typename T>
+TypedDataFromType<T>::TypedDataFromType()
 {
-	std::stringstream s;
+	boost::python::converter::registry::push_back(
+		&convertible,
+		&construct,
+		boost::python::type_id<typename T::Ptr>()
+	);
 
-	s << "IECore." << x.typeName() << "( ";
-
-	object item( x.readable() );
-
-	assert( item.attr( "__repr__" ) != object() );
-
-	s << call_method< std::string >( item.ptr(), "__repr__" );
-
-	s << " )";
-
-	return s.str();
 }
 
-template<class T>
-static void setValue( T &that, const typename T::ValueType &v )
+template<typename T>
+void *TypedDataFromType<T>::convertible( PyObject *obj )
 {
-	that.writable() = v;
+	boost::python::extract<typename T::ValueType> e( obj );
+	if( e.check() )
+	{
+		return obj;
+	}
+	return 0;
 }
 
-template<class T>
-static typename T::ValueType &getValue( T &that )
+template<typename T>
+void TypedDataFromType<T>::construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
 {
-	return that.writable();
+	void *storage = ((boost::python::converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
+	new (storage) typename T::Ptr( new T( boost::python::extract<typename T::ValueType>( obj ) ) );
+	data->convertible = storage;
 }
 
-template< typename T >
-void bindSplineData()
+// specialise the bool version so it doesn't go gobbling up ints and things and turning them
+// into BoolData
+template<>
+struct TypedDataFromType<IECore::BoolData>
 {
-	TypedDataFromType<T>();
 
-	RunTimeTypedClass<T>()
-		.def( init<>() )
-		.def( init<const typename T::ValueType &>() )
-		.add_property( "value", make_function( &getValue<T>, return_internal_reference<>() ), &setValue<T> )
-		.def( "__repr__", &repr<T> )
-		.def( "hasBase", &T::hasBase ).staticmethod( "hasBase" )
-	;
-}
+	TypedDataFromType()
+	{
+		boost::python::converter::registry::push_back(
+			&convertible,
+			&construct,
+			boost::python::type_id<IECore::BoolDataPtr>()
+		);
 
-void bindSplineData()
-{
-	bindSplineData<SplineffData>();
-	bindSplineData<SplineddData>();
-	bindSplineData<SplinefColor3fData>();
-	bindSplineData<SplinefColor4fData>();
-}
+	}
+
+	static void *convertible( PyObject *obj )
+	{
+		if( PyBool_Check( obj ) )
+		{
+			return obj;
+		}
+		return 0;
+	}
+
+	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
+	{
+		void *storage = ((boost::python::converter::rvalue_from_python_storage<IECore::BoolDataPtr>*)data)->storage.bytes;
+		new (storage) IECore::BoolDataPtr( new IECore::BoolData( boost::python::extract<bool>( obj ) ) );
+		data->convertible = storage;
+	}
+
+};
 
 } // namespace IECorePython
