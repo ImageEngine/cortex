@@ -555,7 +555,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertFalse( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		leafScene = spheresScene.child("A").child("a")
 		self.assertTrue( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
-		self.assertEqual( leafScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData([ 'A', 'a' ]) } ) )
+		# When expanding, we connect the child time attributes to their scene shape parent time attribute to propagate time remapping. When checking for time remapping, the scene shape
+		# currently only checks the direct connection, so we have here time in the link attributes. Will have to look out for performance issues.
+		self.assertEqual( leafScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData([ 'A', 'a' ]), 'time':IECore.DoubleData( 0 ) } ) )
 		self.assertFalse( leafScene.hasObject() )
 
 		# expand scene to meshes
