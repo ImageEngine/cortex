@@ -946,6 +946,11 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 	MPlug pObjectOnly( thisMObject(), aObjectOnly );
 	bool objectOnly;
 	pObjectOnly.getValue( objectOnly );
+	
+	if( !drawGeometry && !drawBounds )
+	{
+		return;
+	}
 
 	MPlug pDrawTagsFilter( thisMObject(), aDrawTagsFilter );
 	MString drawTagsFilter;
