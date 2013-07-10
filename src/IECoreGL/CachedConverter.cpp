@@ -97,10 +97,11 @@ struct CachedConverter::MemberData
 	static IECore::RunTimeTypedPtr getter( const CacheKey &key, size_t &cost )
 	{
 		cost = key.object->memoryUsage();
+		IECore::RunTimeTypedPtr ret;
 
 		if ( key.converter )
 		{
-			return key.converter(key.object);
+			ret = key.converter(key.object);
 		}
 		else
 		{
@@ -115,13 +116,16 @@ struct CachedConverter::MemberData
 					)
 				);
 			}
-			// It would be unsafe to access object from outside of this function,
-			// so we zero it out so that it will be obvious if anyone ever does.
-			// The only way I could see this happening is if the LRUCache implementation
-			// changed.
-			key.object = 0;
-			return converter->convert();
+			ret = converter->convert();
 		}
+
+		// It would be unsafe to access object from outside of this function,
+		// so we zero it out so that it will be obvious if anyone ever does.
+		// The only way I could see this happening is if the LRUCache implementation
+		// changed.
+		key.object = 0;
+
+		return ret;
 	}
 	
 	void removalCallback( const CacheKey &key, const IECore::RunTimeTypedPtr &value )

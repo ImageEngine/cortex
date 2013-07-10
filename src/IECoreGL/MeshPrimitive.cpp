@@ -83,6 +83,7 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			assert( vertIds );
 		}
 
+		/// hash function used by CachedConverter.
 		IECore::MurmurHash hash( const IECore::Object *object ) const
 		{
 			IECore::MurmurHash h;
@@ -95,12 +96,14 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			return h;
 		}
 
+		/// call operator used by the CachedConverter.
 		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
 		{	
 			IECore::DataPtr data = const_cast< IECore::Data * >( static_cast< const IECore::Data * >(object) );
 			return IECore::despatchTypedData< TriangulatedFaceVaryingPrimVar, IECore::TypeTraits::IsVectorTypedData >( data, *this );
 		}
 
+		/// function called by the despatchTypedData from the main call operator.
 		template<typename T>
 		IECore::DataPtr operator()( typename T::Ptr inData )
 		{
@@ -164,11 +167,12 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			assert( vertIds );
 		}
 
+		/// hash function used by CachedConverter.
 		IECore::MurmurHash hash( const IECore::Object *object ) const
 		{
 			IECore::MurmurHash h;
 			h.append( "TriangulatedVertexPrimVar");
-			h.append( m_faceVaryingLength );
+			h.append( (uint64_t)m_faceVaryingLength );
 			m_vertexIds->hash(h);
 			if ( m_verticesPerFace )
 			{
@@ -178,12 +182,14 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			return h;
 		}
 
+		/// call operator used by the CachedConverter.
 		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
 		{	
 			IECore::DataPtr data = const_cast< IECore::Data * >( static_cast< const IECore::Data * >(object) );
 			return IECore::despatchTypedData< TriangulatedVertexPrimVar, IECore::TypeTraits::IsVectorTypedData >( data, *this );
 		}
 
+		/// function called by the despatchTypedData from the main call operator.
 		template<typename T>
 		IECore::DataPtr operator()( typename T::Ptr inData )
 		{
@@ -262,6 +268,7 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			assert( vertIds );
 		}
 
+		/// hash function used by CachedConverter.
 		IECore::MurmurHash hash( const IECore::Object *object ) const
 		{
 			IECore::MurmurHash h;
@@ -274,12 +281,14 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			return h;
 		}
 
+		/// call operator used by the CachedConverter.
 		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
 		{	
 			IECore::DataPtr data = const_cast< IECore::Data * >( static_cast< const IECore::Data * >(object) );
 			return IECore::despatchTypedData< TriangulatedUniformPrimVar, IECore::TypeTraits::IsVectorTypedData >( data, *this );
 		}
 
+		/// function called by the despatchTypedData from the main call operator.
 		template<typename T>
 		IECore::DataPtr operator()( typename T::Ptr inData )
 		{
@@ -344,6 +353,7 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 		{
 		}
 
+		/// hash function used by CachedConverter.
 		IECore::MurmurHash hash( const IECore::Object *object ) const
 		{
 			IECore::MurmurHash h;
@@ -353,6 +363,7 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 			return h;
 		}
 
+		/// call operator used by the CachedConverter.
 		IECore::RunTimeTypedPtr operator()( const IECore::Object *object )
 		{	
 			const vector<int> &verticesPerFace =  m_verticesPerFace->readable();

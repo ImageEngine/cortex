@@ -62,8 +62,12 @@ class ToGLMeshConverter::CreateNormalsConverter
 			const IECore::MeshPrimitive *mesh = static_cast< const IECore::MeshPrimitive * >(object);
 			mesh->verticesPerFace()->hash(h);
 			mesh->vertexIds()->hash(h);
-			IECore::PrimitiveVariableMap::const_iterator pIt = mesh->variables.find("P");
-			pIt->second.data->hash(h);
+			IECore::ConstV3fVectorDataPtr p = mesh->variableData<IECore::V3fVectorData >( "P", IECore::PrimitiveVariable::Vertex );
+			if( !p )
+			{
+				throw IECore::Exception( "Could not find primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
+			}
+			p->hash(h);
 			return h;
 		}
 
@@ -118,15 +122,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		}
 	}
 
-	IECore::ConstV3fVectorDataPtr p = 0;
-	IECore::PrimitiveVariableMap::const_iterator pIt = mesh->variables.find( "P" );
-	if( pIt!=mesh->variables.end() )
-	{
-		if( pIt->second.interpolation==IECore::PrimitiveVariable::Vertex )
-		{
-			p = IECore::runTimeCast<const IECore::V3fVectorData>( pIt->second.data );
-		}
-	}
+	IECore::ConstV3fVectorDataPtr p = mesh->variableData<IECore::V3fVectorData >( "P", IECore::PrimitiveVariable::Vertex );
 	if( !p )
 	{
 		throw IECore::Exception( "Could not find primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
@@ -146,7 +142,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.end();
 	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.end();
 
-	// add the primitives to the mesh (which know how to triangulate)
+	// add the primitive variables to the mesh (which know how to triangulate)
 	for ( IECore::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{
 		/// only process valid prim vars
