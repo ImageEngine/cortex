@@ -138,6 +138,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outTranslate", "|test|sceneShape_1.translate" ) )
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outRotate", "|test|sceneShape_1.rotate" ) )
 		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outScale", "|test|sceneShape_1.scale" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".time", childFn.fullPathName()+".time" ) )
 		
 		maya.cmds.setAttr( childFn.fullPathName()+".drawGeometry", 1 )
 		result = childFn.expandOnce()
@@ -154,6 +155,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outRotate", "|test|sceneShape_1|child.rotate" ) )
 		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outScale", "|test|sceneShape_1|child.scale" ) )
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".drawGeometry"), 1 )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".time", result[0].fullPathName()+".time" ) )
 		
 		
 	def testCollapse( self ) :
