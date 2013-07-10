@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,52 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
-
-#include "IECoreGL/Primitive.h"
-
-#include "IECore/VectorTypedData.h"
-
 namespace IECoreGL
 {
 
-/// \todo Fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+template< typename T >
+IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object, T converter ) 
 {
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
-
-		/// Copies of all data are taken. Constructs from a non-triangulated GL mesh. When this constructor is used it will retain the given topology and use it to triangulate primitive variables passed to addPrimitiveVariable function. 
-		MeshPrimitive( IECore::ConstIntVectorDataPtr verticesPerFace, IECore::ConstIntVectorDataPtr vertexIds );
-
-		/// Copies of all data are taken. Assumes a triangulated mesh indices is given.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds );
-
-		virtual ~MeshPrimitive();
-
-		IECore::ConstIntVectorDataPtr vertexIds() const;
-
-		virtual Imath::Box3f bound() const;
-
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-
-		virtual void renderInstances( size_t numInstances = 1 ) const;
-
-	private :
-
-		IE_CORE_FORWARDDECLARE( MemberData );
-		MemberDataPtr m_memberData;
-
-		/// So Font can use the render( state, style ) method.
-		friend class Font;
-
-};
-
-IE_CORE_DECLAREPTR( MeshPrimitive );
+	return convert( object, converter, converter.hash(object) );
+}
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_MESHPRIMITIVE_H
