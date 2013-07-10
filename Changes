@@ -62,6 +62,13 @@ Improvements :
 * Added Renderer option "editable", along with editBegin() and editEnd() methods, to allow interactive rerendering functionality to be implemented. These are currently only implemented by IECoreRI::Renderer.
 * Switched to Boost Filesystem version 3
 * MeshPrimitive::createPlane can create multi-face planes using the divisions argument
+* Added MeshPrimitive::max/minVerticesPerFace
+* IECoreHoudini supports the ieMeshInterpolation attribute, using it to set the interpolation of converted MeshPrimitives
+* IECoreGL caches triangulation conversions for MeshPrimitives
+* IECoreHoudini supports reading and writing LinkedScenes (lscc)
+* IECoreHoudini and IECoreMaya are able to pass tags from SceneCache readers to the associated live scenes and writers
+* LinkedScenes now allow tags to be stored at link locations
+* Added Spline->SplineData boost python converter
 
 Bug Fixes :
 * Fixed a maya 2013 crash when attempting to use the rotate manipulator that comes up when selecting an ieProceduralHolder component in rotate mode.
@@ -76,6 +83,10 @@ Bug Fixes :
 * Preventing segfaults when Parameter's default values are initialized with NULL pointers (or the Python None object).
 * ieFilteredAbs corrected to return positive values, ieTurbulence monochrome variant now filtered
 * Fixed a problem where it was impossible to kill the renderer in 3delight IPR mode, and therefore impossible to stop an IPR render. See comments above "struct ProceduralData" in include/IECoreRI/private/RendererImplementation.h
+* Compatibility for OpenEXR 2.0.0
+* Compatibility for Alembic 1.1.2
+* Compatibility for PRMan 17
+* Compatibility for Boost Filesystem v2 and v3
 
 7.10.2 :
 
