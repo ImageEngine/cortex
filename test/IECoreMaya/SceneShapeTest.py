@@ -284,6 +284,9 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[2].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
 		
+		maya.cmds.setAttr( node+'.time', 5 )
+		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 5 )
+		
 		
 	def testAnimPlugValues( self ) :
 		
@@ -301,6 +304,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
 
 		maya.cmds.currentTime( 0 )
+		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 0 )
 
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outTranslate"), [(1.0, 0.0, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[0].outRotateX"), 0.0 )
@@ -321,6 +325,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
 		
 		maya.cmds.currentTime( 48 )
+		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 48 )
 
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outTranslate"), [(1.0, 2.0, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[0].outRotateX"), 0.0 )
@@ -341,6 +346,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
 		
 		maya.cmds.currentTime( 60 )
+		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 60 )
 
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outTranslate"), [(1.0, 2.5, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[0].outRotateX"), 0.0 )
@@ -362,6 +368,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		
 		maya.cmds.currentTime( 0 )
 		maya.cmds.setAttr( node+".querySpace", 1)
+		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 0 )
 
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outTranslate"), [(1.0, 0.0, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[0].outRotateX"), 0.0 )
@@ -382,6 +389,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
 		
 		maya.cmds.currentTime( 48 )
+		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 48 )
 
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outTranslate"), [(1.0, 2.0, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[0].outRotateX"), 0.0 )
