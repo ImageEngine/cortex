@@ -278,8 +278,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 					maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )
 			
 			# Connect child time to its parent so they're in sync
-			if not maya.cmds.isConnected( node+".time", childNode+".time" ):
-				maya.cmds.connectAttr( node+".time", childNode+".time", f=True )
+			if not maya.cmds.isConnected( node+".outTime", childNode+".time" ):
+				maya.cmds.connectAttr( node+".outTime", childNode+".time", f=True )
 
 			if maya.cmds.listRelatives( childTransform, parent = True, f=True ) != [ transform ]:
 				maya.cmds.parent( childTransform, transform, relative=True )
