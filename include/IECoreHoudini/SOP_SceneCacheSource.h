@@ -69,8 +69,9 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		virtual OP_ERROR cookMySop( OP_Context &context );
 		
 		/// Modify the object after it has been loaded in memory. Implemented to add the name matching this
-		/// location in cache. Derived classes should update animatedTopology and animatedPrimVars if appropriate.
-		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, const std::string &name, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
+		/// location in cache and to erase primitive variables that do not match the attribute filter.
+		/// Derived classes should update animatedTopology and animatedPrimVars if appropriate.
+		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
 	
 	private :
 		

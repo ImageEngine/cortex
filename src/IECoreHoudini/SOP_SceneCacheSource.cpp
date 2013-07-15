@@ -214,7 +214,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			}
 		}
 		
-		modifyObject( object, name, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
+		modifyObject( object, name, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
 		
 		Imath::M44d currentTransform;
 		if ( space == Local )
@@ -260,12 +260,25 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	}
 }
 
-IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, const std::string &name, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
+IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( renderable )
 	{
 		renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
+	}
+	
+	Primitive *primitive = IECore::runTimeCast<Primitive>( object );
+	if ( primitive )
+	{
+		PrimitiveVariableMap &variables = primitive->variables;
+		for ( PrimitiveVariableMap::iterator it = variables.begin(); it != variables.end(); ++it )
+		{
+			if ( !UT_String( it->first ).multiMatch( attributeFilter.c_str() ) )
+			{
+				variables.erase( it );
+			}
+		}
 	}
 	
 	return object;
