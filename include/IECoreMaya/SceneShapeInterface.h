@@ -119,6 +119,7 @@ class SceneShapeInterface: public MPxComponentShape
 		
 		// protected variables, used by derived classes to set attribute dependencies
 		static MObject aTime;
+		static MObject aOutTime;
 		static MObject aOutputObjects;
 		static MObject aAttributes;
 		static MObject aTransform;
