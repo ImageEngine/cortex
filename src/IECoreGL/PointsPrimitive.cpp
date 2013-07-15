@@ -360,17 +360,23 @@ std::string &PointsPrimitive::instancingVertexSource()
 {
 	static std::string s = 
 	
+		"#version 150 compatibility\n"
+		""
 		"#include \"IECoreGL/PointsPrimitive.h\"\n"
 		""
 		"IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS\n"
+		""
+		"in vec3 Cs;"
+		"uniform bool CsActive = false;"
 		""
 		"in vec3 instanceP;"
 		"in vec3 instanceN;"
 		"in vec2 instancest;"
 		""
-		"varying out vec3 fragmentI;"
-		"varying out vec3 fragmentN;"
-		"varying out vec2 fragmentst;"
+		"out vec3 fragmentI;"
+		"out vec3 fragmentN;"
+		"out vec2 fragmentst;"
+		"out vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
@@ -390,6 +396,7 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"		fragmentI = vec3( 0.0, 0.0, -1.0 );"
 		"	}"
 		""
+		"	fragmentCs = mix( vec3(1,1,1), Cs, CsActive );"
 		"	fragmentst = instancest;"
 		"}";
 		

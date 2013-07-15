@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@ from __future__ import with_statement
 import unittest
 import random
 import os
-import shutil
 
 import IECore
 import IECoreGL
@@ -270,6 +269,82 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
 		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+
+
+	
+	def testGLPointsWithCs( self ) :
+
+		fragmentSource = """
+		in vec3 fragmentCs;
+		void main()
+		{
+			gl_FragColor = vec4( fragmentCs, 1 );
+		}
+		"""	
+
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"projection:fov" : IECore.FloatData( 20 ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			
+			r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 40 ) )
+
+			with IECore.AttributeBlock( r ) :
+			
+				r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
+			
+				r.points( 1, { 
+						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( -1, 0, 0 ) ] ) ),
+						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) ),
+						"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.Color3fVectorData(  [ IECore.Color3f( 1, 0, 0 ) ]  ) )
+					}
+				)
+				
+			with IECore.AttributeBlock( r ) :
+			
+				r.points( 1, { 
+						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ) ] ) ),
+						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "particle" ) ),
+						"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.Color3fVectorData(  [ IECore.Color3f( 0, 1, 0 ) ]  ) )
+					}
+				)
+				
+			with IECore.AttributeBlock( r ) :
+			
+				r.points( 1, { 
+						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1.5, 0, 0 ) ] ) ),
+						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "sphere" ) ),
+						"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.Color3fVectorData(  [ IECore.Color3f( 0, 0, 1 ) ]  ) )
+					}
+				)	
+
+			with IECore.AttributeBlock( r ) :
+			
+				r.points( 1, { 
+						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, -1, 0 ) ] ) ),
+						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) ),
+						"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.Color3fVectorData(  [ IECore.Color3f( 1, 1, 0 ) ]  ) )
+					}
+				)	
+
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/glPointsWithCs.tif" ).read()
+		actualImage = IECore.Reader.create( self.outputFileName ).read()
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+
 	
 	def testTexturing( self ) :
 	
@@ -490,15 +565,11 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
 		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
 		
-	def setUp( self ) :
-		
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
-	
 	def tearDown( self ) :
 		
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.exists( self.outputFileName ) :
+			
+			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()
