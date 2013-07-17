@@ -1006,7 +1006,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 				ConstCompoundDataPtr d = runTimeCast< CompoundData >( c->readAttribute( linkAttribute, 0 ) );
 				/// we found the link attribute...
 				int linkDepth;
-				bool timeRemapped = d->member< const DoubleData >( g_time ) != 0;
+				bool timeRemapped = false;
 				ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 				if ( l )
 				{
@@ -1096,12 +1096,10 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 	{
 		atLink = true;
 		ConstCompoundDataPtr d = runTimeCast< CompoundData >( s->readAttribute( linkAttribute, 0 ) );
-		bool timeRemapped = d->member< const DoubleData >( g_time ) != 0;
-		ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
+		l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 		if ( !l )
 		{
 			atLink = false;
-			timeRemapped = false;
 		}
 	}
 
