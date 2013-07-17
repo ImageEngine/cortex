@@ -131,7 +131,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 		A = m.child("A")
 
-		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		l = IECore.LinkedScene( "/tmp/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Write )
 		i0 = l.createChild("instance0")
 		i0.writeLink( m )
 		i1 = l.createChild("instance1")
@@ -152,7 +152,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, b2.writeLink, A )
 		del i0, i1, i2, l, b1, b2, c2
 
-		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECore.LinkedScene( "/tmp/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( l.numBoundSamples(), 4 )
 		self.assertEqual( set(l.childNames()), set(['instance0','instance1','instance2','branch1','branch2']) )
@@ -194,7 +194,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( i0.path(), [ 'instance0' ] )
 
 		# test saving a two level LinkedScene
-		l2 = IECore.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
+		l2 = IECore.LinkedScene( "/tmp/environment.lscc", IECore.IndexedIO.OpenMode.Write )
 		base = l2.createChild("base")
 		t1 = base.createChild("test1")
 		t1.writeLink( l )
@@ -228,7 +228,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		
 		if len( messageHandler.messages ):
 			self.fail( messageHandler.messages[0].message )
-		
+
 	def testTimeRemapping( self ):
 
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
@@ -255,6 +255,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( l.numBoundSamples(), 5 )
 		i0 = l.child("instance0")
+		
+		self.assertEqual( i0.hasAttribute( "sceneInterface:time" ), True )
+		self.assertEqual( i0.readAttribute( "sceneInterface:time", 1 ).value, 0 )
+		self.assertEqual( i0.readAttribute( "sceneInterface:time", 2 ).value, 3 )
+		
 		self.assertEqual( i0.numBoundSamples(), 2 )
 		self.assertEqual( i0.numTransformSamples(), 1 )
 		self.assertEqual( i0.readTransformAtSample(0), IECore.M44dData() )
@@ -266,6 +271,13 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( A0.readTransformAtSample(0), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ) )
 		self.assertEqual( A0.readTransformAtSample(1), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		i1 = l.child("instance1")
+		
+		self.assertEqual( i1.hasAttribute( "sceneInterface:time" ), True )
+		self.assertEqual( i1.readAttribute( "sceneInterface:time", 1 ).value, 0 )
+		self.assertEqual( i1.readAttribute( "sceneInterface:time", 2 ).value, 1 )
+		self.assertEqual( i1.readAttribute( "sceneInterface:time", 3 ).value, 2 )
+		self.assertEqual( i1.readAttribute( "sceneInterface:time", 4 ).value, 3 )
+		
 		self.assertEqual( i1.numBoundSamples(), 4 )
 		self.assertEqual( i1.numTransformSamples(), 1 )
 		A1 = i1.child("A")
@@ -275,6 +287,12 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( A1.readTransformAtSample(2), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		self.assertEqual( A1.readTransformAtSample(3), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		i2 = l.child("instance2")
+		
+		self.assertEqual( i2.hasAttribute( "sceneInterface:time" ), True )
+		self.assertEqual( i2.readAttribute( "sceneInterface:time", 0 ).value, 0 )
+		self.assertEqual( i2.readAttribute( "sceneInterface:time", 1 ).value, 0.5 )
+		self.assertEqual( i2.readAttribute( "sceneInterface:time", 2 ).value, 1 )
+		
 		self.assertEqual( i2.numBoundSamples(), 3 )
 		self.assertEqual( i2.numTransformSamples(), 1 )
 		A2 = i2.child("A")
@@ -284,7 +302,6 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( A2.readTransformAtSample(0), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ) )
 		self.assertEqual( A2.readTransformAtSample(1), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1.5, 0, 0 ) ) ) )
 		self.assertEqual( A2.readTransformAtSample(2), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
-		
 
 	def testReading( self ):
 
@@ -319,8 +336,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 				self.assertTrue( virtualScene.hasChild(c) )
 				recurseCompare( basePath + [ str(c) ], virtualScene.child(c), realScene.child(c), False )
 
-		env = IECore.LinkedScene( "test/IECore/data/sccFiles/environment.lscc", IECore.IndexedIO.OpenMode.Read )
-		l = IECore.LinkedScene( "test/IECore/data/sccFiles/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Read )
+		env = IECore.LinkedScene( "test/IECore/data/sccFiles/environment.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting()
+		l = IECore.LinkedScene( "test/IECore/data/sccFiles/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting()
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 
 		base = env.child('base')
@@ -340,6 +357,24 @@ class LinkedSceneTest( unittest.TestCase ) :
 		test5 = base.child('test5')
 		self.assertEqual( test5.path(), [ "base", "test5" ] )
 		recurseCompare( test5.path(), test5, l.child('instance1').child('A') )
+		
+		
+		# attributes like sceneInterface:root, sceneInterface:fileName, and sceneInterface:time shouldn't show up at links, although they might be there...
+		self.assertEqual( test1.child('instance0').attributeNames(), [] )
+		self.assertEqual( test1.child('instance1').attributeNames(), [ 'testAttr' ] )
+		self.assertEqual( test1.child('instance2').attributeNames(), [] )
+		
+		
+		# hasAttribute should tell the truth though...
+		self.assertEqual( test1.child('instance0').hasAttribute( "sceneInterface:fileName" ), True )
+		self.assertEqual( test1.child('instance0').hasAttribute( "sceneInterface:root" ), True )
+		
+		self.assertEqual( test1.child('instance1').hasAttribute( "sceneInterface:fileName" ), True )
+		self.assertEqual( test1.child('instance1').hasAttribute( "sceneInterface:root" ), True )
+		
+		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:fileName" ), True )
+		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:root" ), True )
+		
 		
 		self.assertEqual( test1.child('instance0').path(), [ "base", "test1", "instance0" ] )
 		recurseCompare( test1.child('instance0').path(), test1.child('instance0'), m )
