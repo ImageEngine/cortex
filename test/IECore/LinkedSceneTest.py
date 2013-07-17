@@ -256,9 +256,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( l.numBoundSamples(), 5 )
 		i0 = l.child("instance0")
 		
-		self.assertEqual( i0.hasAttribute( "sceneInterface:time" ), True )
-		self.assertEqual( i0.readAttribute( "sceneInterface:time", 1 ).value, 0 )
-		self.assertEqual( i0.readAttribute( "sceneInterface:time", 2 ).value, 3 )
+		self.assertEqual( i0.hasAttribute( "sceneInterface:link.time" ), True )
+		self.assertEqual( i0.readAttribute( "sceneInterface:link.time", 1 ).value, 0 )
+		self.assertEqual( i0.readAttribute( "sceneInterface:link.time", 2 ).value, 3 )
 		
 		self.assertEqual( i0.numBoundSamples(), 2 )
 		self.assertEqual( i0.numTransformSamples(), 1 )
@@ -272,11 +272,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( A0.readTransformAtSample(1), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		i1 = l.child("instance1")
 		
-		self.assertEqual( i1.hasAttribute( "sceneInterface:time" ), True )
-		self.assertEqual( i1.readAttribute( "sceneInterface:time", 1 ).value, 0 )
-		self.assertEqual( i1.readAttribute( "sceneInterface:time", 2 ).value, 1 )
-		self.assertEqual( i1.readAttribute( "sceneInterface:time", 3 ).value, 2 )
-		self.assertEqual( i1.readAttribute( "sceneInterface:time", 4 ).value, 3 )
+		self.assertEqual( i1.hasAttribute( "sceneInterface:link.time" ), True )
+		self.assertEqual( i1.readAttribute( "sceneInterface:link.time", 1 ).value, 0 )
+		self.assertEqual( i1.readAttribute( "sceneInterface:link.time", 2 ).value, 1 )
+		self.assertEqual( i1.readAttribute( "sceneInterface:link.time", 3 ).value, 2 )
+		self.assertEqual( i1.readAttribute( "sceneInterface:link.time", 4 ).value, 3 )
 		
 		self.assertEqual( i1.numBoundSamples(), 4 )
 		self.assertEqual( i1.numTransformSamples(), 1 )
@@ -288,10 +288,10 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( A1.readTransformAtSample(3), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		i2 = l.child("instance2")
 		
-		self.assertEqual( i2.hasAttribute( "sceneInterface:time" ), True )
-		self.assertEqual( i2.readAttribute( "sceneInterface:time", 0 ).value, 0 )
-		self.assertEqual( i2.readAttribute( "sceneInterface:time", 1 ).value, 0.5 )
-		self.assertEqual( i2.readAttribute( "sceneInterface:time", 2 ).value, 1 )
+		self.assertEqual( i2.hasAttribute( "sceneInterface:link.time" ), True )
+		self.assertEqual( i2.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
+		self.assertEqual( i2.readAttribute( "sceneInterface:link.time", 1 ).value, 0.5 )
+		self.assertEqual( i2.readAttribute( "sceneInterface:link.time", 2 ).value, 1 )
 		
 		self.assertEqual( i2.numBoundSamples(), 3 )
 		self.assertEqual( i2.numTransformSamples(), 1 )
@@ -359,21 +359,21 @@ class LinkedSceneTest( unittest.TestCase ) :
 		recurseCompare( test5.path(), test5, l.child('instance1').child('A') )
 		
 		
-		# attributes like sceneInterface:root, sceneInterface:fileName, and sceneInterface:time shouldn't show up at links, although they might be there...
+		# attributes like sceneInterface:link.root, sceneInterface:link.fileName, and sceneInterface:link.time shouldn't show up at links, although they might be there...
 		self.assertEqual( test1.child('instance0').attributeNames(), [] )
 		self.assertEqual( test1.child('instance1').attributeNames(), [ 'testAttr' ] )
 		self.assertEqual( test1.child('instance2').attributeNames(), [] )
 		
 		
 		# hasAttribute should tell the truth though...
-		self.assertEqual( test1.child('instance0').hasAttribute( "sceneInterface:fileName" ), True )
-		self.assertEqual( test1.child('instance0').hasAttribute( "sceneInterface:root" ), True )
+		self.assertEqual( test1.child('instance0').hasAttribute( "sceneInterface:link.fileName" ), True )
+		self.assertEqual( test1.child('instance0').hasAttribute( "sceneInterface:link.root" ), True )
 		
-		self.assertEqual( test1.child('instance1').hasAttribute( "sceneInterface:fileName" ), True )
-		self.assertEqual( test1.child('instance1').hasAttribute( "sceneInterface:root" ), True )
+		self.assertEqual( test1.child('instance1').hasAttribute( "sceneInterface:link.fileName" ), True )
+		self.assertEqual( test1.child('instance1').hasAttribute( "sceneInterface:link.root" ), True )
 		
-		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:fileName" ), True )
-		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:root" ), True )
+		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:link.fileName" ), True )
+		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:link.root" ), True )
 		
 		
 		self.assertEqual( test1.child('instance0').path(), [ "base", "test1", "instance0" ] )

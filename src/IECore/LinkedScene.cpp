@@ -54,9 +54,9 @@ static SceneInterface::FileFormatDescription<LinkedScene> registrar(".lscc", Ind
 
 const SceneInterface::Name &LinkedScene::linkAttribute = InternedString( "sceneInterface:link" );
 
-const SceneInterface::Name &LinkedScene::fileNameLinkAttribute("sceneInterface:fileName");
-const SceneInterface::Name &LinkedScene::rootLinkAttribute("sceneInterface:root");
-const SceneInterface::Name &LinkedScene::timeAttribute("sceneInterface:time");
+const SceneInterface::Name &LinkedScene::fileNameLinkAttribute("sceneInterface:link.fileName");
+const SceneInterface::Name &LinkedScene::rootLinkAttribute("sceneInterface:link.root");
+const SceneInterface::Name &LinkedScene::timeAttribute("sceneInterface:link.time");
 
 const InternedString LinkedScene::g_fileName("fileName");
 const InternedString LinkedScene::g_root("root");
