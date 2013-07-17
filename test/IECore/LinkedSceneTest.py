@@ -337,18 +337,27 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# create a base scene
 		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
 		a = l.createChild('a')
-		a.writeTags( [ "test" ] )
+		a.writeTags( [ "testA" ] )
+		b = l.createChild('b')
+		b.writeTags(  [ "testB" ] )
 		l.writeTags( [ "tags" ] )
-		del a, l
+		del a, b, l
 
 		# now create a linked scene that should inherit the tags from the base one, plus add other ones
 		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
 		a = l.child('a')
+		b = l.child('b')
 
-		self.assertEqual( set(l.readTags()), testSet(["test","tags"]) )
+		self.assertEqual( set(l.readTags()), testSet(["testA", "testB", "tags"]) )
 		self.assertEqual( set(l.readTags(includeChildren=False)), testSet(["tags"]) )
-		self.assertEqual( set(a.readTags()), testSet(["test"]) )
-		self.assertEqual( set(a.readTags(includeChildren=False)), testSet(["test"]) )
+		self.assertEqual( set(a.readTags()), testSet(["testA"]) )
+		self.assertEqual( set(a.readTags(includeChildren=False)), testSet(["testA"]) )
+		self.assertEqual( set(b.readTags()), testSet(["testB"]) )
+		self.assertEqual( set(b.readTags(includeChildren=False)), testSet(["testB"]) )
+		self.assertTrue( a.hasTag("testA") )
+		self.assertFalse( a.hasTag("testB") )
+		self.assertTrue( b.hasTag("testB") )
+		self.assertFalse( b.hasTag("testA") )
 
 		l2 = IECore.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
 
@@ -368,7 +377,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		D.writeTags( [ 'D' ] )
 		D.writeLink( a )	# creating link after tag
 
-		del l, a, l2, A, B, C, c, D
+		del l, a, b, l2, A, B, C, c, D
 
 		l2 = IECore.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Read )
 		A = l2.child("A")
@@ -379,26 +388,32 @@ class LinkedSceneTest( unittest.TestCase ) :
 		ca = c.child("a")
 		D = l2.child("D")
 
-		self.assertTrue( l2.hasTag("test") )
+		self.assertTrue( l2.hasTag("testA") )
+		self.assertTrue( l2.hasTag("testB") )
 		self.assertFalse( l2.hasTag("t") )
-		self.assertEqual( set(l2.readTags()), testSet(["test","tags","C", "D","linkedA"]) )
+		self.assertEqual( set(l2.readTags()), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
 		self.assertEqual( set(l2.readTags(includeChildren=False)), testSet([]) )
-		self.assertEqual( set(A.readTags()), testSet(["test","tags","linkedA"]) )
+		self.assertEqual( set(A.readTags()), testSet(["testA","testB", "tags","linkedA"]) )
 		self.assertTrue( A.hasTag( "linkedA" ) )
 		self.assertTrue( A.hasTag( "tags" ) )
-		self.assertTrue( A.hasTag( "test" ) )
+		self.assertTrue( A.hasTag( "testA" ) )
+		self.assertTrue( A.hasTag( "testB" ) )
 		self.assertFalse( A.hasTag("C") )
 		self.assertEqual( set(A.readTags(includeChildren=False)), testSet(["tags","linkedA"]) )
-		self.assertEqual( set(Aa.readTags()), testSet(["test", "linkedA"]) )
-		self.assertEqual( set(Aa.readTags(includeChildren=False)), testSet(["test"]) )
-		self.assertEqual( set(B.readTags()), testSet(["test"]) )
-		self.assertEqual( set(C.readTags()), testSet(["test","tags","C"]) )
+		self.assertEqual( set(Aa.readTags()), testSet(["testA", "linkedA"]) )
+		self.assertEqual( set(Aa.readTags(includeChildren=False)), testSet(["testA"]) )
+		self.assertTrue( Aa.hasTag("testA") )
+		self.assertFalse( Aa.hasTag("testB") )
+		self.assertEqual( set(B.readTags()), testSet(["testA"]) )
+		self.assertEqual( set(C.readTags()), testSet(["testA","testB","tags","C"]) )
 		self.assertEqual( set(C.readTags(includeChildren=False)), testSet(["C"]) )
-		self.assertEqual( set(c.readTags()), testSet(["test","tags"]) )
+		self.assertEqual( set(c.readTags()), testSet(["testA", "testB","tags"]) )
 		self.assertEqual( set(c.readTags(includeChildren=False)), testSet(["tags"]) )
-		self.assertEqual( set(ca.readTags()), testSet(["test"]) )
+		self.assertEqual( set(ca.readTags()), testSet(["testA"]) )
+		self.assertTrue( ca.hasTag("testA") )
+		self.assertFalse( ca.hasTag("testB") )
 		self.assertEqual( set(C.readTags(includeChildren=False)), testSet(["C"]) )
-		self.assertEqual( set(D.readTags()), testSet(["D", "test"]) )
+		self.assertEqual( set(D.readTags()), testSet(["D", "testA"]) )
 
 if __name__ == "__main__":
 	unittest.main()
