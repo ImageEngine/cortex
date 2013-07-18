@@ -50,12 +50,8 @@ class MeshPrimitive : public Primitive
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
-		/// Copies of all data are taken. Constructs from a non-triangulated GL mesh. When this constructor is used it will retain the given topology and use it to triangulate primitive variables passed to addPrimitiveVariable function. 
-		MeshPrimitive( IECore::ConstIntVectorDataPtr verticesPerFace, IECore::ConstIntVectorDataPtr vertexIds );
-
-		/// Copies of all data are taken. Assumes a triangulated mesh indices is given.
+		/// Copies of all data are taken.
 		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds );
-
 		virtual ~MeshPrimitive();
 
 		IECore::ConstIntVectorDataPtr vertexIds() const;
