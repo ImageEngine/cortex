@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreMaya/SceneShapeInterface.h"
+#include "IECoreMaya/SceneShapeInterfaceComponentBoundIterator.h"
 
 #include "boost/python.hpp"
 #include "boost/tokenizer.hpp"
@@ -936,6 +937,56 @@ MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelecti
 	}
 
 	return MPxSurfaceShape::matchComponent( item, spec, list );
+}
+
+/// Blank implementation of this method. This is to avoid a crash when you try and use the rotation manipulator maya gives
+/// you when you've selected procedural components in rotation mode (maya 2013)
+void SceneShapeInterface::transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache )
+{
+}
+
+/// This method is overridden to supply a geometry iterator, which maya uses to work out
+/// the bounding boxes of the components you've selected in the viewport
+MPxGeometryIterator* SceneShapeInterface::geometryIteratorSetup( MObjectArray& componentList, MObject& components, bool forReadOnly )
+{
+	if ( components.isNull() )
+	{
+		return new SceneShapeInterfaceComponentBoundIterator( this, componentList );
+	}
+	else
+	{
+		return new SceneShapeInterfaceComponentBoundIterator( this, components );
+	}
+}
+
+Imath::Box3d SceneShapeInterface::componentBound( int idx )
+{
+	// get relative path name from index
+	IECore::InternedString name = selectionName( idx );
+	
+	// find root path
+	SceneInterface::Path root;
+	ConstSceneInterfacePtr sc = getSceneInterface();
+	sc->path( root );
+	std::string rootName;
+	SceneInterface::pathToString( root, rootName );
+	// get full path
+	std::string pathName = rootName+name.value();
+	SceneInterface::Path path;
+	SceneInterface::stringToPath( pathName, path );
+	ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
+	
+	MPlug pTime( thisMObject(), aTime );
+	MTime time;
+	pTime.getValue( time );
+	
+	// read bound from scene interface and return it in world space
+	Imath::Box3d componentBound = scene->readBound( time.as( MTime::kSeconds ) );
+	M44d transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
+
+	componentBound = transform( componentBound, transformd );
+
+	return componentBound;
 }
 
 void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstSceneInterfacePtr subSceneInterface )
