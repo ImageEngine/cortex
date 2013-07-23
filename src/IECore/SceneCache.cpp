@@ -684,7 +684,24 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 
 			uint64_t sampleTimesIndex = 0;
-			location->read( sampleTimesEntry, sampleTimesIndex );
+			SceneInterface::Name sampleEntryId;
+			if ( location->entry( sampleTimesEntry ).entryType() == IndexedIO::File )
+			{
+				/// Provided for backward compatibility.
+				location->read( sampleTimesEntry, sampleTimesIndex );
+				sampleEntryId = sampleEntry(sampleTimesIndex);
+			}
+			else
+			{
+				SceneInterface::NameList sampleList;
+				location->subdirectory( sampleTimesEntry )->entryIds(sampleList);
+				if ( sampleList.size() != 1 )
+				{
+					throw Exception( "Corrupted file! Could not find sample times key!!!" );
+				}
+				sampleEntryId = sampleList[0];
+				sampleTimesIndex = atoi( sampleEntryId.value().c_str() );
+			}
 
 			{
 				SampleTimesMap::const_accessor cit;
@@ -694,7 +711,6 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				}
 			}
 
-			const SceneInterface::Name &sampleEntryId = sampleEntry(sampleTimesIndex);
 			// never loaded before...
 			// change our reading location to the global location.
 			location = globalSampleTimes();
@@ -1088,7 +1104,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		void storeSampleTimes( const SampleTimes &sampleTimes, IndexedIOPtr location )
 		{
 			assert( m_sampleTimesMap );
-			uint64_t sampleTimesIndex = 0;
+			uint64_t sampleTimesIndex = 	0;
+			IndexedIO::EntryID samplesEntry;
 			std::pair< SampleTimesMap::iterator, bool > it = m_sampleTimesMap->insert( std::pair< SampleTimes, uint64_t >( sampleTimes, 0 ) );
 			if ( it.second )
 			{
@@ -1098,15 +1115,17 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				it.first->second = sampleTimesIndex;
 				// find the global location for the sample times from the root Scene.
 				IndexedIOPtr sampleTimesIO = globalSampleTimes();
+				samplesEntry = sampleEntry(sampleTimesIndex);
 				// write the sampleTimes in the file
-				sampleTimesIO->write( sampleEntry(sampleTimesIndex), &sampleTimes[0], sampleTimes.size() );
+				sampleTimesIO->write( samplesEntry, &sampleTimes[0], sampleTimes.size() );
 			}
 			else
 			{
 				// already saved in the global sample times section...
 				sampleTimesIndex = it.first->second;
+				samplesEntry = sampleEntry(sampleTimesIndex);
 			}
-			location->write( sampleTimesEntry, sampleTimesIndex );
+			location->createSubdirectory( sampleTimesEntry )->createSubdirectory( samplesEntry );
 		}
 
 		// function called when bounding boxes were not explicitly defined in this scene location.
