@@ -591,7 +591,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 
 	if ( name == linkAttribute )
 	{
-		bool firstTime = !m_mainScene->hasAttribute( linkAttribute );
+		bool firstTime = !m_mainScene->hasAttribute( fileNameLinkAttribute );
 
 		if ( firstTime )
 		{
