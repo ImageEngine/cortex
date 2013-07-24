@@ -54,7 +54,7 @@ static IndexedIO::EntryID g_valueEntry("value");
 			base.scalePivotTranslation.x, base.scalePivotTranslation.y, base.scalePivotTranslation.z,								\
 			base.rotatePivot.x, base.rotatePivot.y, base.rotatePivot.z,																\
 			base.rotationOrientation.r, base.rotationOrientation.v.x, base.rotationOrientation.v.y, base.rotationOrientation.v.z, 	\
-			(TNAME::BaseType)(base.rotate.order())+0.2, base.rotate.x, base.rotate.y, base.rotate.z, 								\
+			(TNAME::BaseType)(base.rotate.order())+0.2f, base.rotate.x, base.rotate.y, base.rotate.z, 								\
 			base.rotatePivotTranslation.x, base.rotatePivotTranslation.y, base.rotatePivotTranslation.z, 							\
 			base.translate.x, base.translate.y, base.translate.z 																	\
 		};																							\
