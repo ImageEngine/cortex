@@ -38,6 +38,7 @@
 #include <vector>
 #include <cassert>
 
+#include "IECore/ByteOrder.h"
 #include "IECore/MessageHandler.h"
 
 namespace IECore
