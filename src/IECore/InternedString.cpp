@@ -120,13 +120,19 @@ const InternedString &InternedString::emptyString()
 	return g_emptyString;
 }
 
-typedef tbb::concurrent_hash_map< int64_t, InternedString > NumbersMap;
-static NumbersMap g_numbers;
+// make sure we create the g_numbers map at load time.
+static InternedString g_zero((int64_t)0);
 
 const InternedString &InternedString::numberString( int64_t number )
 {
+	typedef tbb::concurrent_hash_map< int64_t, InternedString > NumbersMap;
+	static NumbersMap *g_numbers = 0;
+	if ( !g_numbers )
+	{
+		g_numbers = new NumbersMap;
+	}
 	NumbersMap::accessor it;
-	if ( g_numbers.insert( it, number ) )
+	if ( g_numbers->insert( it, number ) )
 	{
 		it->second = InternedString( ( boost::format("%d") % number ).str() );
 	}
