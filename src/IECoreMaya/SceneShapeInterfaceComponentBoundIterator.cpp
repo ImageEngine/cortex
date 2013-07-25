@@ -83,7 +83,7 @@ MPoint SceneShapeInterfaceComponentBoundIterator::point() const
 {
 	MPoint ret;
 	
-	Imath::Box3f bbox = m_sceneShapeInterface->componentBound( index() );
+	Imath::Box3d bbox = m_sceneShapeInterface->componentBound( index() );
 	
 	switch( m_idx % 8 )
 	{
