@@ -34,6 +34,7 @@
 
 import gc
 import sys
+import os
 import math
 import unittest
 
@@ -207,6 +208,27 @@ class LinkedSceneTest( unittest.TestCase ) :
 		t5.writeLink( A )
 		del l2, t1, t2, t3, t4, t5
 
+	def testWriteLinkAnimatedTransform( self ):
+
+		messageHandler = IECore.CapturingMessageHandler()
+		with messageHandler :
+		
+			m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+
+			l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+			i0 = l.createChild("instance0")
+			i0.writeLink( m )
+
+			# this was causing a problem upon deleting l, as the first transform sample doesn't coincide with the
+			# first bound sample in the link
+			i0.writeTransform( IECore.M44dData( IECore.M44d() ), 5.0 )
+			i0.writeTransform( IECore.M44dData( IECore.M44d() ), 6.0 )
+
+			del i0, l, m
+		
+		if len( messageHandler.messages ):
+			self.fail( messageHandler.messages[0].message )
+		
 	def testTimeRemapping( self ):
 
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )

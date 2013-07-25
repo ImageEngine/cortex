@@ -1550,27 +1550,19 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				throw Exception( "Mismatch number of box samples!" );
 			}
-
-			if ( *ttIt != *btIt )
-			{
-				/// by construction in flush() they should match...
-				throw Exception( "Initial transform and bound sample time don't match!" );
-			}
+			
 			LinearInterpolator<Box3d> boxInterpolator;
 			Imath::Box3d previousBox = *bsIt;
 			TransformSample previousTransform = *tsIt;
 			double previousTransformTime = *ttIt;
 			Imath::M44d previousTransformMatrix = dataToMatrix( previousTransform );
-			Imath::Box3d previousTransformedBox = transform(previousBox, previousTransformMatrix);
-			*bsIt = previousTransformedBox;
+			Imath::Box3d previousTransformedBox;
 			TransformSample nextTransform = 0;
-			bsIt++;
-			btIt++;
 			ttIt++;
 			tsIt++;
 
 			/// transform all box samples that come prior to the first transform as static boxes transformed by the first transform.
-			while( btIt != boxTimes.end() && *btIt < previousTransformTime )
+			while( btIt != boxTimes.end() && *btIt <= previousTransformTime )
 			{
 				previousBox = *bsIt;
 				previousTransformedBox = transform(previousBox, previousTransformMatrix);
