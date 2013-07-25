@@ -65,6 +65,12 @@ class InternedStringTest( unittest.TestCase ) :
 	
 		self.assertEqual( InternedString(), InternedString( "" ) )
 
+	def testNumberConstructor( self ) :
+
+		self.assertEqual( InternedString(0), InternedString("0") )
+		self.assertEqual( InternedString(-1), InternedString("-1") )
+		self.assertEqual( InternedString(1), InternedString("1") )
+
 	def testHashForSetsAndDicts( self ) :
 
 		def makeStrings( r ) :
