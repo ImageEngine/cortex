@@ -964,17 +964,9 @@ Imath::Box3d SceneShapeInterface::componentBound( int idx )
 	// get relative path name from index
 	IECore::InternedString name = selectionName( idx );
 	
-	// find root path
-	SceneInterface::Path root;
-	ConstSceneInterfacePtr sc = getSceneInterface();
-	sc->path( root );
-	std::string rootName;
-	SceneInterface::pathToString( root, rootName );
-	// get full path
-	std::string pathName = rootName+name.value();
 	SceneInterface::Path path;
-	SceneInterface::stringToPath( pathName, path );
-	ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
+	path = fullPathName( name.value() );
+	ConstSceneInterfacePtr scene = getSceneInterface()->scene( path,  SceneInterface::NullIfMissing );
 	
 	MPlug pTime( thisMObject(), aTime );
 	MTime time;
