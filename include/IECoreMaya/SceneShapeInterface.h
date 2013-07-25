@@ -184,6 +184,7 @@ class SceneShapeInterface: public MPxComponentShape
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 		
 		std::string relativePathName( IECore::SceneInterface::Path path );
+		IECore::SceneInterface::Path fullPathName( std::string relativeName );
 		/// Returns concatenated matrix from current sceneInterface path to given scene
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, double time );
 

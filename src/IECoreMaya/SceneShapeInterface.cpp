@@ -641,17 +641,9 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			msg( Msg::Error, dag.fullPathName().asChar(),  "Input values are invalid." );
 			return MS::kFailure;
 		}
-		
-		// get root path
-		SceneInterface::Path root;
-		getSceneInterface()->path( root );
-		std::string rootName;
-		SceneInterface::pathToString( root, rootName );
-		// get full path for query
-		std::string pathName = rootName+name.asChar();
-		
+
 		SceneInterface::Path path;
-		SceneInterface::stringToPath( pathName, path );
+		path = fullPathName( name.asChar() );
 		// Get sceneInterface for query path
 		ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
 		
@@ -1215,4 +1207,18 @@ std::string SceneShapeInterface::relativePathName( SceneInterface::Path path )
 	return pathName;
 }
 
+SceneInterface::Path SceneShapeInterface::fullPathName( std::string relativeName )
+{
+	SceneInterface::Path root;
+	getSceneInterface()->path( root );
+	assert( root );
+
+	SceneInterface::Path relativePath;
+	SceneInterface::stringToPath( relativeName, relativePath );
+
+	SceneInterface::Path fullPath( root );
+	fullPath.insert( fullPath.end(), relativePath.begin(), relativePath.end() );
+
+	return fullPath;
+}
 
