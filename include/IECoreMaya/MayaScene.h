@@ -116,7 +116,7 @@ class MayaScene : public IECore::SceneInterface
 		 */
 
 		/// Uses the custom registered tags to return whether a given tag is present in the scene location or not.
-		virtual bool hasTag( const Name &name ) const;
+		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
 		/// Uses the custom registered tags to list all the tags present in the scene location.
 		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
 		/// Not currently supported - will throw an exception.

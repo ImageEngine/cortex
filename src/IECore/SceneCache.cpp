@@ -119,14 +119,24 @@ class SceneCache::Implementation : public RefCounted
 			attributes->entryIds( attrsNames, IndexedIO::Directory );
 		}
 
-		bool hasTag( const Name &name ) const
+		bool hasTag( const Name &name, bool includeChildren ) const
 		{
 			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
 			if ( !tagsIO )
 			{
 				return false;
 			}
-			return tagsIO->hasEntry( name );
+
+			if ( tagsIO->hasEntry( name ) )
+			{
+				if ( includeChildren )
+				{
+					return true;
+				}
+				return ( tagsIO->entry( name ).entryType() == IndexedIO::File );
+			}
+
+			return false;
 		}
 
 		void readTags( NameList &tags, bool includeChildren ) const
@@ -1925,9 +1935,9 @@ void SceneCache::writeAttribute( const Name &name, const Object *attribute, doub
 	writer->writeAttribute( name, attribute, time );
 }
 
-bool SceneCache::hasTag( const Name &name ) const
+bool SceneCache::hasTag( const Name &name, bool includeChildren ) const
 {
-	return m_implementation->hasTag(name);
+	return m_implementation->hasTag(name, includeChildren);
 }
 
 void SceneCache::readTags( NameList &tags, bool includeChildren ) const

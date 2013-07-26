@@ -170,8 +170,10 @@ class SceneInterface : public RunTimeTyped
 		 * Tags
 		 */
 
-		/// Utility function that quickly checks for the existence of one tag in the scene (written at the current or any child location).
-		virtual bool hasTag( const Name &name ) const = 0;
+		/// Utility function that quickly checks for the existence of one tag in the scene
+		/// \param includeChildren If false, then it will return true only if the given tag was written in the current scene location.
+		/// Otherwise, will return true if the tag was set on any child location.
+		virtual bool hasTag( const Name &name, bool includeChildren = true ) const = 0;
 		/// Reads all the tags on the current scene location.
 		/// \param includeChildren If false, then it will return tags that were written only in the current scene location.
 		/// Otherwise, will include the union of all tags from the children as well which is usually the expected behavior. 
