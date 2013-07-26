@@ -147,7 +147,7 @@ size_t ObjectPool::getMaxMemoryUsage() const
 	return m_data->cache.getMaxCost();
 }
 
-size_t ObjectPool::currentMemoryUsage() const
+size_t ObjectPool::memoryUsage() const
 {
 	return m_data->cache.currentCost();
 }

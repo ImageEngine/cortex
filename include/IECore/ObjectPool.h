@@ -54,6 +54,8 @@ class ObjectPool : public RefCounted
 {
 	public:
 
+		IE_CORE_DECLAREMEMBERPTR( ObjectPool );
+
 		ObjectPool();
 		virtual ~ObjectPool();
 
@@ -70,7 +72,7 @@ class ObjectPool : public RefCounted
 		size_t getMaxMemoryUsage() const;
 
 		/// Returns the current memory cost of items held in the pool
-		size_t currentMemoryUsage() const;
+		size_t memoryUsage() const;
 
 		/// Returns true if the object with the given hash is in the pool.
 		/// Note: this function doesn't garantee that retrieve() will return an object in a multi-threaded application.

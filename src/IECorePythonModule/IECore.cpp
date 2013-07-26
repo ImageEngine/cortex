@@ -321,6 +321,7 @@
 #include "IECorePython/LensModelBinding.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/LensDistortOpBinding.h"
+#include "IECorePython/ObjectPoolBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -644,6 +645,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLensModel();
 	bindStandardRadialLensModel();
 	bindLensDistortOp();
+	bindObjectPool();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
