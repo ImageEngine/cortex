@@ -305,7 +305,7 @@ void HoudiniScene::writeAttribute( const Name &name, const Object *attribute, do
 	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
 }
 
-bool HoudiniScene::hasTag( const Name &name ) const
+bool HoudiniScene::hasTag( const Name &name, bool includeChildren ) const
 {
 	const OP_Node *node = retrieveNode();
 	if ( !node )

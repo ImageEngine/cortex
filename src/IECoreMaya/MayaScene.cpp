@@ -251,7 +251,7 @@ void MayaScene::writeAttribute( const Name &name, const Object *attribute, doubl
 	throw Exception( "MayaScene::writeAttribute: write operations not supported!" );
 }
 
-bool MayaScene::hasTag( const Name &name ) const
+bool MayaScene::hasTag( const Name &name, bool includeChildren ) const
 {
 	if ( m_isRoot )
 	{
@@ -260,7 +260,7 @@ bool MayaScene::hasTag( const Name &name ) const
 
 	if( m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
+		throw Exception( "MayaScene::hasTag: Dag path no longer exists!" );
 	}
 	
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
