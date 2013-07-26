@@ -67,6 +67,7 @@ void bindLinkedScene()
 		.def( "linkAttributeData", linkAttributeData )
 		.def( "linkAttributeData", retimedLinkAttributeData ).staticmethod( "linkAttributeData" )
 		.def_readonly("linkAttribute", &LinkedScene::linkAttribute )
+		.def_readonly("linkHashAttribute", &LinkedScene::linkHashAttribute )
 	;
 }
 

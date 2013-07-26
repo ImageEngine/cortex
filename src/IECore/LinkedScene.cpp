@@ -55,6 +55,7 @@ static IndexedIO::Description<FileIndexedIO> extensionDescription( ".lscc" );
 static SceneInterface::FileFormatDescription<LinkedScene> registrar(".lscc", IndexedIO::Read | IndexedIO::Write);
 
 const SceneInterface::Name &LinkedScene::linkAttribute = InternedString( "sceneInterface:link" );
+const SceneInterface::Name &LinkedScene::linkHashAttribute = InternedString( "sceneInterface:linkHash" );
 const InternedString LinkedScene::g_fileNameLinkAttribute("fileName");
 const InternedString LinkedScene::g_rootLinkAttribute("root");
 const InternedString LinkedScene::g_timeAttribute("time");
@@ -437,6 +438,19 @@ bool LinkedScene::hasAttribute( const Name &name ) const
 		return false;
 	}
 
+	if ( name == linkHashAttribute )
+	{
+		if ( m_linkedScene )
+		{
+			if ( m_atLink )
+			{
+				return true;
+			}
+			return m_linkedScene->hasAttribute(name);
+		}
+		return false;
+	}
+
 	if ( m_linkedScene && !m_atLink )
 	{
 		return m_linkedScene->hasAttribute(name);
@@ -469,6 +483,11 @@ void LinkedScene::attributeNames( NameList &attrs ) const
 
 size_t LinkedScene::numAttributeSamples( const Name &name ) const
 {
+	if ( name == linkHashAttribute )
+	{
+		return 1;
+	}
+
 	if (!m_sampled)
 	{
 		return 0;
@@ -492,6 +511,11 @@ size_t LinkedScene::numAttributeSamples( const Name &name ) const
 
 double LinkedScene::attributeSampleTime( const Name &name, size_t sampleIndex ) const
 {
+	if ( name == linkHashAttribute )
+	{
+		return 0;
+	}
+
 	if (!m_sampled)
 	{
 		throw Exception( "attributeSampleTime not supported: LinkedScene is pointing to a non-sampled scene!" );
@@ -515,6 +539,13 @@ double LinkedScene::attributeSampleTime( const Name &name, size_t sampleIndex ) 
 
 double LinkedScene::attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const
 {
+	if ( name == linkHashAttribute )
+	{
+		floorIndex = 0;
+		ceilIndex = 0;
+		return 0;
+	}
+
 	if (!m_sampled)
 	{
 		throw Exception( "attributeSampleInterval not supported: LinkedScene is pointing to a non-sampled scene!" );
@@ -536,8 +567,56 @@ double LinkedScene::attributeSampleInterval( const Name &name, double time, size
 	}
 }
 
+void LinkedScene::computeLinkHash( MurmurHash &h ) const
+{
+	if ( m_linkedScene )
+	{
+		if ( m_timeRemapped )
+		{
+			/// \todo consider baking the time remap hash as an attribute at each link location
+			/// \todo consider checking for identity remapping and ignoring the hash in that case.
+			size_t linkAttributeSamples = numAttributeSamples( linkAttribute );
+			const SampledSceneInterface *mainScene = static_cast<const SampledSceneInterface*>(m_mainScene.get());
+			for ( size_t s = 0; s < linkAttributeSamples; s++ )
+			{
+				h.append( mainScene->attributeSampleTime( linkAttribute, s ) );
+				h.append( remappedLinkTimeAtSample( s ) );
+			}
+		}
+
+		const LinkedScene *castedLinkedScene = runTimeCast< const LinkedScene >( m_linkedScene );
+		if ( castedLinkedScene )
+		{
+			castedLinkedScene->computeLinkHash( h );
+		}
+		else
+		{
+			linkAttributeData( m_linkedScene )->hash( h );
+		}
+	}
+	else
+	{
+		linkAttributeData( m_mainScene )->hash( h );
+	}
+}
+
+Object *LinkedScene::computeLinkHashAttribute() const
+{
+	MurmurHash hash;
+	computeLinkHash(hash);
+
+	StringData *d = new StringData();
+	d->writable() = hash.toString();
+	return d;
+}
+
 ObjectPtr LinkedScene::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
 {
+	if ( name == linkHashAttribute )
+	{
+		return computeLinkHashAttribute();
+	}
+
 	if (!m_sampled)
 	{
 		throw Exception( "readAttributeAtSample not supported: LinkedScene is pointing to a non-sampled scene!" );
@@ -561,6 +640,11 @@ ObjectPtr LinkedScene::readAttributeAtSample( const Name &name, size_t sampleInd
 
 ObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
 {
+	if ( name == linkHashAttribute )
+	{
+		return computeLinkHashAttribute();
+	}
+
 	if ( m_linkedScene && !m_atLink )
 	{
 		if ( m_timeRemapped )
