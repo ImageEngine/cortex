@@ -182,7 +182,7 @@ class SceneCache::Implementation : public RefCounted
 		// \todo Remove this when InternedString nativelly supports a constructor with integers.
 		static IndexedIO::EntryID sampleEntry( size_t sample )
 		{
-			return InternedString( ( boost::format("%d") % sample ).str() );
+			return InternedString( sample );
 		}
 
 		static inline Imath::M44d dataToMatrix( const Data *data )
