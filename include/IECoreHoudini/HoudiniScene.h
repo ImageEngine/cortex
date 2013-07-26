@@ -75,7 +75,7 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
 
-		virtual bool hasTag( const Name &name ) const;
+		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
 		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
 		virtual void writeTags( const NameList &tags );
 

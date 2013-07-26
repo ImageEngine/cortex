@@ -660,16 +660,34 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 	m_mainScene->writeAttribute(name,attribute,time);
 }
 
-bool LinkedScene::hasTag( const Name &name ) const
+bool LinkedScene::hasTag( const Name &name, bool includeChildren ) const
 {
-	if ( m_linkedScene && !m_atLink  )
+	if ( includeChildren )
 	{
-		if ( m_linkedScene->hasTag( name ) )
+		if ( !m_linkedScene || (m_linkedScene && m_atLink) )
 		{
-			return true;
+			return m_mainScene->hasTag( name, true );
+		}
+		else
+		{
+			/// get only the tags that were saved in the LinkedScene at the link location (they will be applied to all the linked children)
+			if ( m_mainScene->hasTag( name, false ) )
+				return true;
+
+			return m_linkedScene->hasTag( name, true );
 		}
 	}
-	return m_mainScene->hasTag( name );
+	else
+	{
+		if ( m_linkedScene && !m_atLink  )
+		{
+			return m_linkedScene->hasTag( name, false );
+		}
+		else
+		{
+			return m_mainScene->hasTag( name, false );
+		}
+	}
 }
 
 void LinkedScene::readTags( NameList &tags, bool includeChildren ) const
