@@ -38,6 +38,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/SharedSceneInterfaces.h"
+#include "IECore/MessageHandler.h"
 
 using namespace IECore;
 
@@ -921,7 +922,18 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const CompoundData *linkData, in
 		root = linkData->member< InternedStringVectorData >(g_rootLinkAttribute);
 		if ( fileName && root )
 		{
-			ConstSceneInterfacePtr l = SharedSceneInterfaces::get( fileName->readable() );
+			ConstSceneInterfacePtr l = 0;
+			try
+			{
+				l = SharedSceneInterfaces::get( fileName->readable() );
+			}
+			catch ( IECore::Exception &e )
+			{
+				IECore::msg( IECore::MessageHandler::Error, "LinkedScene::expandLink", e.what() );
+				linkDepth = 0;
+				return 0;
+			}
+			
 			linkDepth = root->readable().size();
 			l = l->scene(root->readable(), NullIfMissing);
 			if ( !l )

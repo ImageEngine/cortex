@@ -1144,6 +1144,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "expand" ).pressButton()
 		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live )
+		
+		# make sure it doesn't crash if the linked scene doesn't exist anymore
+		xform.parm( "collapse" ).pressButton()
+		os.remove( TestSceneCache.__testFile )
+		IECore.SharedSceneInterfaces.clear()
+		xform.parm( "reload" ).pressButton()
+		xform.parm( "expand" ).pressButton()
+		self.assertEqual( xform.parm( "root" ).menuItems(), ( "/", "/1", "/1/2" ) )
 	
 	def testRopErrors( self ) :
 		
