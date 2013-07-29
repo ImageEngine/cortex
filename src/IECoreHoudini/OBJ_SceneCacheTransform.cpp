@@ -346,6 +346,12 @@ OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
 
 bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 {
+	const SceneCacheNode<OP_Node> *sceneNode = dynamic_cast< const SceneCacheNode<OP_Node>* >( node );
+	if ( !sceneNode )
+	{
+		return false;
+	}
+	
 	const char *expanded = pExpanded.getToken();
 	if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
 	{
@@ -357,7 +363,7 @@ bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 
 IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	const SceneCacheNode<OP_Node> *sceneNode = dynamic_cast< const SceneCacheNode<OP_Node>* >( node );
 	if ( !sceneNode )
 	{
 		return 0;
@@ -375,7 +381,7 @@ IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 
 bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	const SceneCacheNode<OP_Node> *sceneNode = dynamic_cast< const SceneCacheNode<OP_Node>* >( node );
 	if ( !sceneNode )
 	{
 		return false;
@@ -393,7 +399,7 @@ bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface:
 
 void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, bool includeChildren )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	const SceneCacheNode<OP_Node> *sceneNode = dynamic_cast< const SceneCacheNode<OP_Node>* >( node );
 	if ( !sceneNode )
 	{
 		return;
