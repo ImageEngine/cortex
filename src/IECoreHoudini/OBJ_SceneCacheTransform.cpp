@@ -346,6 +346,12 @@ OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
 
 bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 {
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
+	{
+		return false;
+	}
+	
 	const char *expanded = pExpanded.getToken();
 	if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
 	{
@@ -357,12 +363,13 @@ bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 
 IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	if ( !sceneNode )
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
 		return 0;
 	}
 	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
 	/// \todo: do we need to ensure the file exists first?
 	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
 	if ( !scene )
@@ -375,12 +382,13 @@ IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 
 bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	if ( !sceneNode )
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
 		return false;
 	}
 	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
 	/// \todo: do we need to ensure the file exists first?
 	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
 	if ( !scene )
@@ -393,12 +401,13 @@ bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface:
 
 void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, bool includeChildren )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	if ( !sceneNode )
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
 		return;
 	}
 	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
 	/// \todo: do we need to ensure the file exists first?
 	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
 	if ( !scene )
