@@ -66,7 +66,7 @@ void bindObjectPool()
 		.def( "retrieve", &retrieve )
 		.def( "store",  &store )
 		.def( "contains", &ObjectPool::contains )
-		.add_property( "memoryUsage", &ObjectPool::memoryUsage )
+		.def( "memoryUsage", &ObjectPool::memoryUsage )
 		.add_property( "maxMemoryUsage", &ObjectPool::getMaxMemoryUsage, &ObjectPool::setMaxMemoryUsage )
 		.def( "defaultObjectPool", &ObjectPool::defaultObjectPool ).staticmethod( "defaultObjectPool" )
 	;
