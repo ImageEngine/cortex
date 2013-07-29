@@ -102,18 +102,15 @@ void PointDistribution::operator () ( const Imath::Box2f &bounds, float density,
 			int w = (sw + nw) % 2;
 			int n = (nw + ne) % 2;
 			int e = (ne + se) % 2;
-			bool tileFound = false;
 			for( unsigned i=0; i<m_tiles.size(); i++ )
 			{
 				const Tile *tile = &m_tiles[i];
 				if( tile->w==w && tile->n==n && tile->e==e )
 				{
 					processTile( *tile, Imath::V2f( x, y ), bounds, density, pointEmitter );
-					tileFound = true;
 					break;
 				}
 			}
-			assert( tileFound );
 		}
 	}
 }

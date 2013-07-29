@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "OpenEXR/ImathFun.h"
+
 #include "IECore/Math.h"
 
 namespace IECore
@@ -222,9 +224,9 @@ T MarschnerBCSDF<T>::marschnerA( int p,
 	}
 		
 	V h = sin( gammaI );			// from [1] right before equation 3.
-	V gammaT = asin( clamp( h/etaPerp, V(-1.0), V(1.0) ) );	// from [1] right before equation 3.
+	V gammaT = asin( Imath::clamp( h/etaPerp, V(-1.0), V(1.0) ) );	// from [1] right before equation 3.
 	
-	V etaOverRcosY = clamp( V( ( etaPerp/refraction ) * cos( light.y ) ), V(-1.0), V(1.0) );
+	V etaOverRcosY = Imath::clamp( V( ( etaPerp/refraction ) * cos( light.y ) ), V(-1.0), V(1.0) );
 	V thetaT = acos( etaOverRcosY ); // definition for equation 20 in [2].	
 	V cosTheta = cos( thetaT );
 	
@@ -286,7 +288,7 @@ T MarschnerBCSDF<T>::marschnerNP( int p,
 	// c = (6pC / PI - 2)
 	// d = (pPI - targetAngle)
 	
-	V C = asin( clamp( V(1.0)/etaPerp, V(-1.0), V(1.0) ) );
+	V C = asin( Imath::clamp( V(1.0)/etaPerp, V(-1.0), V(1.0) ) );
 	
 	V a = -8.0 * ( p*C / (M_PI*M_PI*M_PI) );
 	V b = 0.0;

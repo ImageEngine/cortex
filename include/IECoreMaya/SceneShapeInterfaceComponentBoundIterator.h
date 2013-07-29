@@ -32,48 +32,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
+#ifndef IECOREMAYA_SCENESHAPEINTERFACECOMPONENTBOUNDITERATOR_H
+#define IECOREMAYA_SCENESHAPEINTERFACECOMPONENTBOUNDITERATOR_H
 
-#include "IECoreGL/Primitive.h"
+#include "maya/MPxGeometryIterator.h"
+#include "maya/MPoint.h"
+#include "maya/MBoundingBox.h"
+#include "maya/MObjectArray.h"
 
-#include "IECore/VectorTypedData.h"
+#include "OpenEXR/ImathBox.h"
 
-namespace IECoreGL
+#include "IECoreMaya/SceneShapeInterface.h"
+
+namespace IECoreMaya
 {
 
-/// \todo Fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+/// The SceneShapeInterfaceComponentBoundIterator allows maya to iterate over the bounding box corners of
+/// the SceneShapeInterface components. It's currently used so you can frame scene shape components
+/// in the maya viewport.
+class SceneShapeInterfaceComponentBoundIterator : public MPxGeometryIterator
 {
 
-	public :
+	public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
-
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds );
-		virtual ~MeshPrimitive();
-
-		IECore::ConstIntVectorDataPtr vertexIds() const;
-
-		virtual Imath::Box3f bound() const;
-
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-
-		virtual void renderInstances( size_t numInstances = 1 ) const;
-
-	private :
-
-		IE_CORE_FORWARDDECLARE( MemberData );
-		MemberDataPtr m_memberData;
-
-		/// So Font can use the render( state, style ) method.
-		friend class Font;
-
+		SceneShapeInterfaceComponentBoundIterator( void *userGeometry, MObjectArray &components );
+		SceneShapeInterfaceComponentBoundIterator( void *userGeometry, MObject &components );
+		~SceneShapeInterfaceComponentBoundIterator();
+		
+		virtual bool isDone() const;
+		virtual void next();
+		virtual void reset();
+		virtual void component( MObject &component );
+		virtual bool hasPoints() const;
+		virtual int iteratorCount() const;
+		virtual MPoint point() const;
+		virtual void setPoint(const MPoint &) const;
+		virtual int setPointGetNext(MPoint &);
+		virtual int index() const;
+		virtual bool hasNormals() const;
+		virtual int indexUnsimplified() const;
+		
+	private:
+		
+		void computeNumComponents();
+		
+		SceneShapeInterface* m_sceneShapeInterface;
+		unsigned m_idx;
+		MObjectArray m_components;
+		unsigned m_numComponents;
+	
 };
 
-IE_CORE_DECLAREPTR( MeshPrimitive );
+} // namespace IECoreMaya
 
-} // namespace IECoreGL
-
-#endif // IECOREGL_MESHPRIMITIVE_H
+#endif // IECOREMAYA_SCENESHAPEINTERFACECOMPONENTBOUNDITERATOR_H

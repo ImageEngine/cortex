@@ -68,6 +68,8 @@ namespace IECoreMaya
 ///
 class SceneShapeInterface: public MPxComponentShape
 {
+	friend class SceneShapeInterfaceComponentBoundIterator;
+	
 	public:
 		
 		SceneShapeInterface();
@@ -86,6 +88,14 @@ class SceneShapeInterface: public MPxComponentShape
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
+		
+		/// This method is overridden to supply a geometry iterator, which maya uses to work out
+		/// the bounding boxes of the components you've selected in the viewport
+		virtual MPxGeometryIterator* geometryIteratorSetup( MObjectArray&, MObject&, bool );
+		
+		/// This is a blank override, to stop maya offering you a rotation manipulator for the
+		/// procedural components, then crashing when you try and use it (maya 2013)
+		virtual void transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache );
 		
 		static MTypeId id;
 		
@@ -184,8 +194,11 @@ class SceneShapeInterface: public MPxComponentShape
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 		
 		std::string relativePathName( IECore::SceneInterface::Path path );
+		IECore::SceneInterface::Path fullPathName( std::string relativeName );
 		/// Returns concatenated matrix from current sceneInterface path to given scene
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, double time );
+		/// Returns bound for the component matching the given index
+		Imath::Box3d componentBound( int idx );
 
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;

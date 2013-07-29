@@ -235,7 +235,6 @@ void SmoothSkinningData::validateOffsets() const
 	// check for mismatches of m_pointInfluenceCounts and m_pointIndexOffsets
 	std::vector<int>::const_iterator pio_it = m_pointIndexOffsets->readable().begin();
 	int sum = 0;
-	int lastOffset = 0;
 	for( std::vector<int>::const_iterator pic_it = m_pointInfluenceCounts->readable().begin();
 		 pic_it!=m_pointInfluenceCounts->readable().end(); ++pic_it )
 	{
@@ -250,8 +249,6 @@ void SmoothSkinningData::validateOffsets() const
 			throw Exception( error );
 		}
 		sum += pic;
-
-		lastOffset = pio;
 		++pio_it;
 	}
 }

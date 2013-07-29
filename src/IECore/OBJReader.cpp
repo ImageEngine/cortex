@@ -145,7 +145,7 @@ void OBJReader::parseVertex(const char * begin, const char * end)
 {
 	vector<float> vec;
 	srule vertex = "v" >> real_p[append(vec)] >> real_p[append(vec)] >> real_p[append(vec)];
-	parse_info<> result = parse(begin, vertex, space_p);
+	parse(begin, vertex, space_p);
 
 	// build v
 	V3f v;
@@ -162,7 +162,7 @@ void OBJReader::parseTextureCoordinate(const char * begin, const char * end)
 {
 	vector<float> vec;
 	srule vertex = "vt" >> real_p[append(vec)] >> real_p[append(vec)] >> *(real_p[append(vec)]);
-	parse_info<> result = parse(begin, vertex, space_p);
+	parse(begin, vertex, space_p);
 
 	// build v
 	V3f vt;
@@ -179,7 +179,7 @@ void OBJReader::parseNormal(const char * begin, const char * end)
 {
 	vector<float> vec;
 	srule vertex = "vn" >> real_p[append(vec)] >> real_p[append(vec)] >> real_p[append(vec)];
-	parse_info<> result = parse(begin, vertex, space_p);
+	parse(begin, vertex, space_p);
 
 	// build v
 	V3f vn;
@@ -205,7 +205,7 @@ void OBJReader::parseFace(const char * begin, const char * end)
 		);
 
 	srule face = "f"  >> entry >> entry >> entry >> *(entry);
-	parse_info<> result = parse(begin, face, space_p);
+	parse(begin, face, space_p);
 
 	// push back the degree of the face
 	m_vpf->push_back(vec.size());
@@ -278,7 +278,7 @@ void OBJReader::parseGroup(const char *begin, const char *end)
 	vector<string> groupNames;
 	srule grouping = "g" >> *(lexeme_d[alnum_p >> *(alnum_p)][append(groupNames)]);
 
-	parse_info<> result = parse(begin, grouping, space_p);
+	parse(begin, grouping, space_p);
 
 	// from 'http://local.wasp.uwa.edu.au/~pbourke/dataformats/obj/':
 	// The default group name is default.

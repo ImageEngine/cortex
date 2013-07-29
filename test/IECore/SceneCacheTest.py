@@ -628,9 +628,13 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		self.assertTrue( m.hasTag( "t1" ) )
 		self.assertTrue( m.hasTag( "t4" ) )
+		self.assertFalse( m.hasTag( "t1", includeChildren = False ) )
+		self.assertFalse( m.hasTag( "t4", includeChildren = False ) )
 		self.assertFalse( m.hasTag( "t5" ) )
+		self.assertFalse( m.hasTag( "t5", includeChildren = False ) )
 		self.assertTrue( ab.hasTag( "ObjectType:MeshPrimitive" ) )
 		self.assertTrue( B.hasTag( "t4" ) )
+		self.assertTrue( B.hasTag( "t4", includeChildren = False ) )
 		self.assertFalse( B.hasTag( "t1" ) )
 		self.assertTrue( B.hasTag( "t3" ) )
 		self.assertTrue( B.hasTag( "ObjectType:SpherePrimitive" ) )

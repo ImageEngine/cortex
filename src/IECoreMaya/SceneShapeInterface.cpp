@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreMaya/SceneShapeInterface.h"
+#include "IECoreMaya/SceneShapeInterfaceComponentBoundIterator.h"
 
 #include "boost/python.hpp"
 #include "boost/tokenizer.hpp"
@@ -641,17 +642,9 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			msg( Msg::Error, dag.fullPathName().asChar(),  "Input values are invalid." );
 			return MS::kFailure;
 		}
-		
-		// get root path
-		SceneInterface::Path root;
-		getSceneInterface()->path( root );
-		std::string rootName;
-		SceneInterface::pathToString( root, rootName );
-		// get full path for query
-		std::string pathName = rootName+name.asChar();
-		
+
 		SceneInterface::Path path;
-		SceneInterface::stringToPath( pathName, path );
+		path = fullPathName( name.asChar() );
 		// Get sceneInterface for query path
 		ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
 		
@@ -946,6 +939,48 @@ MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelecti
 	return MPxSurfaceShape::matchComponent( item, spec, list );
 }
 
+/// Blank implementation of this method. This is to avoid a crash when you try and use the rotation manipulator maya gives
+/// you when you've selected procedural components in rotation mode (maya 2013)
+void SceneShapeInterface::transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache )
+{
+}
+
+/// This method is overridden to supply a geometry iterator, which maya uses to work out
+/// the bounding boxes of the components you've selected in the viewport
+MPxGeometryIterator* SceneShapeInterface::geometryIteratorSetup( MObjectArray& componentList, MObject& components, bool forReadOnly )
+{
+	if ( components.isNull() )
+	{
+		return new SceneShapeInterfaceComponentBoundIterator( this, componentList );
+	}
+	else
+	{
+		return new SceneShapeInterfaceComponentBoundIterator( this, components );
+	}
+}
+
+Imath::Box3d SceneShapeInterface::componentBound( int idx )
+{
+	// get relative path name from index
+	IECore::InternedString name = selectionName( idx );
+	
+	SceneInterface::Path path;
+	path = fullPathName( name.value() );
+	ConstSceneInterfacePtr scene = getSceneInterface()->scene( path,  SceneInterface::NullIfMissing );
+	
+	MPlug pTime( thisMObject(), aTime );
+	MTime time;
+	pTime.getValue( time );
+	
+	// read bound from scene interface and return it in world space
+	Imath::Box3d componentBound = scene->readBound( time.as( MTime::kSeconds ) );
+	M44d transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
+
+	componentBound = transform( componentBound, transformd );
+
+	return componentBound;
+}
+
 void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstSceneInterfacePtr subSceneInterface )
 {
 	// Grab plug values to know what we need to render
@@ -1215,4 +1250,18 @@ std::string SceneShapeInterface::relativePathName( SceneInterface::Path path )
 	return pathName;
 }
 
+SceneInterface::Path SceneShapeInterface::fullPathName( std::string relativeName )
+{
+	SceneInterface::Path root;
+	getSceneInterface()->path( root );
+	assert( root );
+
+	SceneInterface::Path relativePath;
+	SceneInterface::stringToPath( relativeName, relativePath );
+
+	SceneInterface::Path fullPath( root );
+	fullPath.insert( fullPath.end(), relativePath.begin(), relativePath.end() );
+
+	return fullPath;
+}
 

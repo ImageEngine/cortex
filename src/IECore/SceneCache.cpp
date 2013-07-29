@@ -119,14 +119,24 @@ class SceneCache::Implementation : public RefCounted
 			attributes->entryIds( attrsNames, IndexedIO::Directory );
 		}
 
-		bool hasTag( const Name &name ) const
+		bool hasTag( const Name &name, bool includeChildren ) const
 		{
 			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
 			if ( !tagsIO )
 			{
 				return false;
 			}
-			return tagsIO->hasEntry( name );
+
+			if ( tagsIO->hasEntry( name ) )
+			{
+				if ( includeChildren )
+				{
+					return true;
+				}
+				return ( tagsIO->entry( name ).entryType() == IndexedIO::File );
+			}
+
+			return false;
 		}
 
 		void readTags( NameList &tags, bool includeChildren ) const
@@ -182,7 +192,7 @@ class SceneCache::Implementation : public RefCounted
 		// \todo Remove this when InternedString nativelly supports a constructor with integers.
 		static IndexedIO::EntryID sampleEntry( size_t sample )
 		{
-			return InternedString( ( boost::format("%d") % sample ).str() );
+			return InternedString( sample );
 		}
 
 		static inline Imath::M44d dataToMatrix( const Data *data )
@@ -684,7 +694,24 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 
 			uint64_t sampleTimesIndex = 0;
-			location->read( sampleTimesEntry, sampleTimesIndex );
+			SceneInterface::Name sampleEntryId;
+			if ( location->entry( sampleTimesEntry ).entryType() == IndexedIO::File )
+			{
+				/// Provided for backward compatibility.
+				location->read( sampleTimesEntry, sampleTimesIndex );
+				sampleEntryId = sampleEntry(sampleTimesIndex);
+			}
+			else
+			{
+				SceneInterface::NameList sampleList;
+				location->subdirectory( sampleTimesEntry )->entryIds(sampleList);
+				if ( sampleList.size() != 1 )
+				{
+					throw Exception( "Corrupted file! Could not find sample times key!!!" );
+				}
+				sampleEntryId = sampleList[0];
+				sampleTimesIndex = atoi( sampleEntryId.value().c_str() );
+			}
 
 			{
 				SampleTimesMap::const_accessor cit;
@@ -694,7 +721,6 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				}
 			}
 
-			const SceneInterface::Name &sampleEntryId = sampleEntry(sampleTimesIndex);
 			// never loaded before...
 			// change our reading location to the global location.
 			location = globalSampleTimes();
@@ -1088,7 +1114,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		void storeSampleTimes( const SampleTimes &sampleTimes, IndexedIOPtr location )
 		{
 			assert( m_sampleTimesMap );
-			uint64_t sampleTimesIndex = 0;
+			uint64_t sampleTimesIndex = 	0;
+			IndexedIO::EntryID samplesEntry;
 			std::pair< SampleTimesMap::iterator, bool > it = m_sampleTimesMap->insert( std::pair< SampleTimes, uint64_t >( sampleTimes, 0 ) );
 			if ( it.second )
 			{
@@ -1098,15 +1125,17 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				it.first->second = sampleTimesIndex;
 				// find the global location for the sample times from the root Scene.
 				IndexedIOPtr sampleTimesIO = globalSampleTimes();
+				samplesEntry = sampleEntry(sampleTimesIndex);
 				// write the sampleTimes in the file
-				sampleTimesIO->write( sampleEntry(sampleTimesIndex), &sampleTimes[0], sampleTimes.size() );
+				sampleTimesIO->write( samplesEntry, &sampleTimes[0], sampleTimes.size() );
 			}
 			else
 			{
 				// already saved in the global sample times section...
 				sampleTimesIndex = it.first->second;
+				samplesEntry = sampleEntry(sampleTimesIndex);
 			}
-			location->write( sampleTimesEntry, sampleTimesIndex );
+			location->createSubdirectory( sampleTimesEntry )->createSubdirectory( samplesEntry );
 		}
 
 		// function called when bounding boxes were not explicitly defined in this scene location.
@@ -1550,27 +1579,19 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				throw Exception( "Mismatch number of box samples!" );
 			}
-
-			if ( *ttIt != *btIt )
-			{
-				/// by construction in flush() they should match...
-				throw Exception( "Initial transform and bound sample time don't match!" );
-			}
+			
 			LinearInterpolator<Box3d> boxInterpolator;
 			Imath::Box3d previousBox = *bsIt;
 			TransformSample previousTransform = *tsIt;
 			double previousTransformTime = *ttIt;
 			Imath::M44d previousTransformMatrix = dataToMatrix( previousTransform );
-			Imath::Box3d previousTransformedBox = transform(previousBox, previousTransformMatrix);
-			*bsIt = previousTransformedBox;
+			Imath::Box3d previousTransformedBox;
 			TransformSample nextTransform = 0;
-			bsIt++;
-			btIt++;
 			ttIt++;
 			tsIt++;
 
 			/// transform all box samples that come prior to the first transform as static boxes transformed by the first transform.
-			while( btIt != boxTimes.end() && *btIt < previousTransformTime )
+			while( btIt != boxTimes.end() && *btIt <= previousTransformTime )
 			{
 				previousBox = *bsIt;
 				previousTransformedBox = transform(previousBox, previousTransformMatrix);
@@ -1925,9 +1946,9 @@ void SceneCache::writeAttribute( const Name &name, const Object *attribute, doub
 	writer->writeAttribute( name, attribute, time );
 }
 
-bool SceneCache::hasTag( const Name &name ) const
+bool SceneCache::hasTag( const Name &name, bool includeChildren ) const
 {
-	return m_implementation->hasTag(name);
+	return m_implementation->hasTag(name, includeChildren);
 }
 
 void SceneCache::readTags( NameList &tags, bool includeChildren ) const

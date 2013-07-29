@@ -170,6 +170,34 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 			idiv( res, y );
 			return res;
 		}
+		
+		static ThisClassPtr iadd( ThisClassPtr x_, PyObject* y )
+		{
+			return ThisBinder::iadd( x_, y );
+		}
+
+        static ThisClassPtr isub( ThisClassPtr x_, PyObject* y )
+		{
+			return ThisBinder::isub( x_, y );
+		}
+		
+		static ThisClassPtr imul( ThisClassPtr x_, PyObject* y )
+		{
+			return ThisBinder::imul( x_, y );
+		}
+		
+		static ThisClassPtr idiv( ThisClassPtr x_, PyObject* y )
+		{
+			return ThisBinder::idiv( x_, y );
+		}
+	
+	protected :
+	    
+	    typedef typename Container::size_type index_type;
+	    static index_type convertIndex( ThisClass &container, PyObject *i_,bool acceptExpand = false )
+	    {
+	        return ThisBinder::convertIndex( container, i_, acceptExpand );
+	    }
 };
 
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=)
@@ -191,10 +219,10 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 				.def("__mul__", &ThisGeometricBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname) \
 				.def("__div__", &ThisGeometricBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname) \
 				/* operators duplicated from BIND_OPERATED_VECTOR_TYPEDDATA */ \
-				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname) \
-				.def("__isub__", &ThisBinder::isub, "inplace subtraction (s -= v) : accepts another vector of the same type or a single " Tname) \
-				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname) \
-				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname) \
+				.def("__iadd__", &ThisGeometricBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname) \
+				.def("__isub__", &ThisGeometricBinder::isub, "inplace subtraction (s -= v) : accepts another vector of the same type or a single " Tname) \
+				.def("__imul__", &ThisGeometricBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname) \
+				.def("__idiv__", &ThisGeometricBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname) \
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.") \
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.") \
 				/* geometric methods */ \
