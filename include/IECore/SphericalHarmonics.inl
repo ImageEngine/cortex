@@ -153,7 +153,7 @@ void SphericalHarmonics<V>::convolve( const SphericalHarmonics<T> &sh )
 template <class S>
 SphericalHarmonics<S> operator + ( const SphericalHarmonics<S> &lsh, const SphericalHarmonics<S> &rsh )
 {
-	SphericalHarmonics<S> sh( max( lsh.bands(), rsh.bands() ) );
+	SphericalHarmonics<S> sh( std::max( lsh.bands(), rsh.bands() ) );
 	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
 	typename SphericalHarmonics<S>::CoefficientVector::const_iterator lit, rit;
 	for ( it = sh.coefficients().begin(), rit = rsh.coefficients().begin(), lit = lsh.coefficients().begin(); rit != rsh.coefficients().end() && lit != lsh.coefficients().end(); it++, rit++, lit++ )
@@ -190,7 +190,7 @@ const SphericalHarmonics<S> & operator += ( SphericalHarmonics<S> &lsh, const Sp
 template <class S>
 SphericalHarmonics<S> operator - ( const SphericalHarmonics<S> &lsh, const SphericalHarmonics<S> &rsh )
 {
-	SphericalHarmonics<S> sh( max( lsh.bands(), rsh.bands() ) );
+	SphericalHarmonics<S> sh( std::max( lsh.bands(), rsh.bands() ) );
 	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
 	typename SphericalHarmonics<S>::CoefficientVector::const_iterator lit, rit;
 	for ( it = sh.coefficients().begin(), rit = rsh.coefficients().begin(), lit = lsh.coefficients().begin(); rit != rsh.coefficients().end() && lit != lsh.coefficients().end(); it++, rit++, lit++ )
