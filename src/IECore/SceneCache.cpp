@@ -32,8 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include"boost/tuple/tuple.hpp"
 #include "tbb/concurrent_hash_map.h"
+
 #include "OpenEXR/ImathBoxAlgo.h"
+
 #include "IECore/SceneCache.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/HeaderGenerator.h"
@@ -44,9 +47,11 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/SharedSceneInterfaces.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/ComputationCache.h"
 
 using namespace IECore;
 using namespace Imath;
+using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( SceneCache )
 
@@ -219,25 +224,25 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		IE_CORE_DECLAREPTR( ReaderImplementation )
 
-		ReaderImplementation( IndexedIOPtr io, SceneCache::Implementation *parent = 0) : SceneCache::Implementation( io ), m_parent(static_cast< ReaderImplementation* >( parent )), m_sampleTimesMap(0), m_boundSampleTimes(0), m_transformSampleTimes(0), m_objectSampleTimes(0)
+		ReaderImplementation( IndexedIOPtr io, SceneCache::Implementation *parent = 0) : SceneCache::Implementation( io ), m_parent(static_cast< ReaderImplementation* >( parent )), m_sharedData(0), m_boundSampleTimes(0), m_transformSampleTimes(0), m_objectSampleTimes(0)
 		{
 			if ( m_parent )
 			{
 				// use same map from the root
-				m_sampleTimesMap = m_parent->m_sampleTimesMap;
+				m_sharedData = m_parent->m_sharedData;
 			}
 			else
 			{
 				// only the root instance allocate the map.
-				m_sampleTimesMap = new SampleTimesMap;
+				m_sharedData = new SharedData;
 			}
 		}
 	
 		virtual ~ReaderImplementation()
 		{
-			if ( m_sampleTimesMap && !m_parent )
+			if ( m_sharedData && !m_parent )
 			{
-				delete m_sampleTimesMap;
+				delete m_sharedData;
 			}
 		}
 
@@ -408,19 +413,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		DataPtr readTransformAtSample( size_t sampleIndex ) const
 		{
-			IndexedIOPtr io = m_indexedIO->subdirectory( transformEntry, IndexedIO::NullIfMissing );
-			if ( !io )
-			{
-				if ( sampleIndex==0 )
-				{
-					return g_defaults.defaultTransform;
-				}
-				else
-				{
-					throw Exception( "Sample index out of bounds!" );
-				}
-			}
-			return runTimeCast<Data>( Object::load( io, sampleEntry(sampleIndex) ) );
+			return m_sharedData->readTransformAtSample( this, sampleIndex );
 		}
 
 		Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const
@@ -495,7 +488,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		ObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex ) const
 		{
-			return Object::load( m_indexedIO->subdirectory(attributesEntry)->subdirectory(name), sampleEntry(sampleIndex) );
+			return m_sharedData->readAttributeAtSample( this, name, sampleIndex );
 		}
 
 		ObjectPtr readAttribute( const SceneCache::Name &name, double time ) const
@@ -555,7 +548,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		ObjectPtr readObjectAtSample( size_t sampleIndex ) const
 		{
-			return Object::load( m_indexedIO->subdirectory( objectEntry ), sampleEntry(sampleIndex) );
+			return m_sharedData->readObjectAtSample( this, sampleIndex );
 		}
 
 		ObjectPtr readObject( double time ) const
@@ -582,20 +575,26 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return object;
 		}
 
+		static PrimitiveVariableMap readObjectPrimitiveVariablesAtSample( const IndexedIOPtr &io, const std::vector<InternedString> &primVarNames, size_t sample )
+		{
+			return Primitive::loadPrimitiveVariables( io->subdirectory( objectEntry ), sampleEntry(sample), primVarNames );
+		}
+
 		PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 		{
 			size_t sample1, sample2;
 			double x = objectSampleInterval( time, sample1, sample2 );
-			IndexedIOPtr objectIO = m_indexedIO->subdirectory( objectEntry );
+
 			if ( x == 0 )
 			{
-				return Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample1), primVarNames );
+				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample1);
 			}
 			if ( x == 1 )
 			{
-				return Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample2), primVarNames );
+				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample2);
 			}
 
+			IndexedIOPtr objectIO = m_indexedIO->subdirectory( objectEntry );
 			PrimitiveVariableMap map1 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample1), primVarNames );
 			PrimitiveVariableMap map2 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample2), primVarNames );
 
@@ -659,10 +658,126 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		typedef tbb::concurrent_hash_map< uint64_t, SampleTimes > SampleTimesMap;
 		typedef std::map< IndexedIO::EntryID, const SampleTimes* > AttributeSamplesMap;
 
-		ReaderImplementationPtr m_parent;
-		mutable SampleTimesMap *m_sampleTimesMap;
+		typedef std::pair< const ReaderImplementation *, size_t > SimpleCacheKey;
+		typedef tuple< const ReaderImplementation *, const SceneCache::Name &, size_t > AttributeCacheKey;
 
-		/// pointers to values in m_sampleTimesMap.
+		typedef IECore::ComputationCache< SimpleCacheKey > SimpleCache;
+		typedef IECore::ComputationCache< AttributeCacheKey > AttributeCache;
+
+		/// Hold pointers to values allocated/deallocated by the root scene object (the last one to die)
+		class SharedData : public RefCounted
+		{
+			public :
+
+				SharedData() : 
+					objectCache( new SimpleCache( _readObjectAtSample, _simpleHash,  10000 )  ), 
+					attributeCache( new AttributeCache( _readAttributeAtSample, _attributeHash, 1000) ), 
+					transformCache( new SimpleCache(  _readTransformAtSample, _simpleHash, 1000) )
+				{
+				}
+
+				/// utility function used by the ReaderImplementation to use the LRUCache for transform reading
+				IECore::DataPtr readTransformAtSample( const ReaderImplementation *reader, size_t sample )
+				{
+					ConstDataPtr d = runTimeCast< const Data >( transformCache->get( SimpleCacheKey(reader, sample) ) );
+					return const_cast< Data * >( d.get() );
+					/// return d->copy();
+				}
+
+				/// utility function used by the ReaderImplementation to use the LRUCache for object reading
+				IECore::ObjectPtr readObjectAtSample( const ReaderImplementation *reader, size_t sample )
+				{
+					const size_t defaultSample = -1;
+					SimpleCacheKey currentKey( reader, sample );
+
+					// if constant topology and the object is not in the cache, we try to build it from another frame
+					if ( reader->hasAttribute(animatedObjectPrimVarsAttribute) )
+					{
+						/// Could not create the object from another time sample... so we load the entire object
+						SimpleCacheKey defaultKey( reader, defaultSample );
+
+						ConstObjectPtr obj = objectCache->retrieve( currentKey );
+						if ( !obj )
+						{
+							/// ok, try to build the object from another frame...
+							ConstObjectPtr defaultObj = objectCache->retrieve( defaultKey );
+							if ( defaultObj )
+							{
+								IECore::InternedStringVectorDataPtr varNames = runTimeCast<InternedStringVectorData>( reader->readAttributeAtSample(animatedObjectPrimVarsAttribute, 0) );
+								if ( varNames )
+								{
+									PrimitivePtr prim= runTimeCast< Primitive >( defaultObj->copy() );
+									if ( prim )
+									{
+										// we managed to load the object from a different time sample from the cache, just have to load the changing prim vars...
+										mergeMaps( prim->variables, readObjectPrimitiveVariablesAtSample( reader->m_indexedIO, varNames->readable(), sample ) );
+										objectCache->set( currentKey, prim );
+										return prim;
+									}
+								}
+							}
+							/// ok, we don't have the object even from other times in the cache... load it from the file then.
+							obj = objectCache->get( currentKey );
+						}
+						/// register the object as the default, so next frames could reuse them
+						objectCache->set( defaultKey, obj );
+						return const_cast< Object * >( obj.get() );
+	//					return obj->copy();
+					}
+					/// The object has animated topology... so we load the entire object
+					ConstObjectPtr obj = objectCache->get(currentKey);
+					return const_cast< Object * >( obj.get() );
+//					return obj->copy();
+				}
+
+				/// utility function used by the ReaderImplementation to use the LRUCache for attribute reading
+				IECore::ObjectPtr readAttributeAtSample( const ReaderImplementation *reader, const SceneCache::Name &name, size_t sample )
+				{
+					ConstObjectPtr attr = attributeCache->get( AttributeCacheKey(reader,name,sample) );
+					return const_cast< Object * >( attr.get() );
+//					return attr->copy();
+				}
+
+				// \todo Consider adding "ReaderImplementation *rootScene" to optimize the scene() calls.
+				SampleTimesMap sampleTimesMap;
+				SimpleCache::Ptr objectCache;
+				AttributeCache::Ptr attributeCache;
+				SimpleCache::Ptr transformCache;
+
+			private :
+
+			// utility function that copies all the values from the rhs dictionary to the lhs.
+			template< typename T >
+			static void mergeMaps ( T& lhs, const T& rhs) 
+			{
+	    		typename T::iterator lhsItr = lhs.begin();
+				typename T::const_iterator rhsItr = rhs.begin();
+	
+				while (lhsItr != lhs.end() && rhsItr != rhs.end()) 
+				{
+					if (rhsItr->first < lhsItr->first) 
+					{
+						lhs.insert(lhsItr, *rhsItr);
+						++rhsItr;
+					}
+					else if (rhsItr->first == lhsItr->first) 
+					{
+						lhsItr->second = rhsItr->second;
+						++lhsItr;
+						++rhsItr;
+					}
+					else
+						++lhsItr;
+				}
+				lhs.insert(rhsItr, rhs.end());
+			}
+
+		};
+
+		ReaderImplementationPtr m_parent;
+		mutable SharedData *m_sharedData;
+
+		/// pointers to values in m_sharedData->sampleTimesMap for the current scene location.
 		mutable const SampleTimes *m_boundSampleTimes;
 		mutable const SampleTimes *m_transformSampleTimes;
 		mutable AttributeSamplesMap m_attributeSampleTimes;
@@ -715,7 +830,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 			{
 				SampleTimesMap::const_accessor cit;
-				if ( m_sampleTimesMap->find( cit, sampleTimesIndex ) )
+				if ( m_sharedData->sampleTimesMap.find( cit, sampleTimesIndex ) )
 				{
 					return &(cit->second);
 				}
@@ -732,11 +847,79 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			// and loads the sample times on to the map before returning
 			location->read( sampleEntryId, ptrTimes, times.size() );
 			SampleTimesMap::accessor it;
-			if ( m_sampleTimesMap->insert( it, sampleTimesIndex ) )
+			if ( m_sharedData->sampleTimesMap.insert( it, sampleTimesIndex ) )
 			{
 				it->second = times;
 			}
 			return &(it->second);
+		}
+
+		static MurmurHash _simpleHash( const SimpleCacheKey &key )
+		{
+			const ReaderImplementation *reader = key.first;
+			size_t sample = key.second;
+
+			SceneInterface::Path p;
+			reader->path(p);
+
+			MurmurHash h;
+			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
+			{
+				h.append( it->value() );
+				h.append( '/' );
+			}
+			h.append(sample);
+			return h;
+		}
+
+		// static function used by the cache mechanism to actually load the object data from file.
+		static ObjectPtr _readTransformAtSample( const SimpleCacheKey &key )
+		{
+			IndexedIOPtr io = key.first->m_indexedIO->subdirectory( transformEntry, IndexedIO::NullIfMissing );
+			if ( !io )
+			{
+				if ( key.second==0 )
+				{
+					return g_defaults.defaultTransform;
+				}
+				else
+				{
+					throw Exception( "Sample index out of bounds!" );
+				}
+			}
+			return Object::load( io, sampleEntry(key.second) );
+		}
+
+		// static function used by the cache mechanism to actually load the object data from file.
+		static ObjectPtr _readObjectAtSample( const SimpleCacheKey &key )
+		{
+			return Object::load( key.first->m_indexedIO->subdirectory( objectEntry ), sampleEntry(key.second) );
+		}
+
+		static MurmurHash _attributeHash( const AttributeCacheKey &key )
+		{
+			const ReaderImplementation *reader = get<0>( key );
+			const SceneInterface::Name &name = get<1>( key );
+			size_t sample = get<2>( key );
+
+			SceneInterface::Path p;
+			reader->path(p);
+
+			MurmurHash h;
+			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
+			{
+				h.append( it->value() );
+				h.append( '/' );
+			}
+			h.append(name.value());
+			h.append(sample);
+			return h;
+		}
+
+		// static function used by the cache mechanism to actually load the attribute data from file.
+		static ObjectPtr _readAttributeAtSample( const AttributeCacheKey &key )
+		{
+			return Object::load( get<0>(key)->m_indexedIO->subdirectory(attributesEntry)->subdirectory(get<1>(key)), sampleEntry(get<2>(key)) );
 		}
 
 		/// Determine defaults when transform and bounds are not stored in the file.
@@ -756,6 +939,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				defaultBox.makeEmpty();
 			}
 		} g_defaults;
+
 };
 
 SceneCache::ReaderImplementation::Defaults SceneCache::ReaderImplementation::g_defaults;
