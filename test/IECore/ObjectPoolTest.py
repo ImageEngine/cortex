@@ -44,7 +44,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 
 		p = ObjectPool()
 		self.assertTrue( isinstance( p, ObjectPool ) )
-		self.assertEqual( p.memoryUsage, 0 )
+		self.assertEqual( p.memoryUsage(), 0 )
 		self.assertEqual( p.maxMemoryUsage, 500 )
 
 		p2 = ObjectPool.defaultObjectPool()
@@ -53,48 +53,48 @@ class ObjectPoolTest( unittest.TestCase ) :
 	def testUniqueness( self ) :
 		
 		p = ObjectPool()
-		self.assertEqual( p.memoryUsage, 0 )
+		self.assertEqual( p.memoryUsage(), 0 )
 
 		a = p.store( IntData(1) )
-		self.assertEqual( p.memoryUsage, a.memoryUsage() )
+		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		self.assertTrue( p.contains(a.hash()) )
 
 		self.assertTrue( a.isSame( p.retrieve(a.hash()) ) )
 		self.assertTrue( a.isSame( p.store(a) ) )
 		self.assertTrue( a.isSame( p.store(IntData(1)) ) )
 
-		self.assertEqual( p.memoryUsage, a.memoryUsage() )
+		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 
 	def testRemoval( self ) :
 
 		p = ObjectPool()
-		self.assertEqual( p.memoryUsage, 0 )
+		self.assertEqual( p.memoryUsage(), 0 )
 		a = p.store( IntData(1) )
 		self.assertTrue( p.contains(a.hash()) )
-		self.assertEqual( p.memoryUsage, a.memoryUsage() )
+		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		p.clear()
-		self.assertEqual( p.memoryUsage, 0 )
+		self.assertEqual( p.memoryUsage(), 0 )
 		self.assertFalse( p.contains(a.hash()) )
 
 		a = p.store( StringData("abc") )
 		self.assertTrue( p.contains(a.hash()) )
-		self.assertEqual( p.memoryUsage, a.memoryUsage() )
+		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		p.erase( a.hash() )
-		self.assertEqual( p.memoryUsage, 0 )
+		self.assertEqual( p.memoryUsage(), 0 )
 		self.assertFalse( p.contains(a.hash()) )
 
 	def testMaxMemoryUsage( self ) :
 
 		p = ObjectPool()
-		self.assertEqual( p.memoryUsage, 0 )
+		self.assertEqual( p.memoryUsage(), 0 )
 		a = p.store( IntData(1) )
-		self.assertEqual( p.memoryUsage, a.memoryUsage() )
+		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		b = p.store( StringData("abc") )
-		self.assertEqual( p.memoryUsage, a.memoryUsage()+b.memoryUsage() )
+		self.assertEqual( p.memoryUsage(), a.memoryUsage()+b.memoryUsage() )
 		
 		p.maxMemoryUsage = b.memoryUsage()
 
-		self.assertEqual( p.memoryUsage, b.memoryUsage() )
+		self.assertEqual( p.memoryUsage(), b.memoryUsage() )
 		self.assertFalse( p.contains(a.hash()) )
 		self.assertTrue( p.contains(b.hash()) )
 		
