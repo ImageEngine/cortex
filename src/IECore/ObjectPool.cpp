@@ -77,7 +77,7 @@ ConstObjectPtr ObjectPool::retrieve( const MurmurHash &hash ) const
 	return m_data->cache.get(hash);
 }
 
-ConstObjectPtr ObjectPool::store( const ConstObjectPtr &obj )
+ConstObjectPtr ObjectPool::store( ConstObjectPtr &obj )
 {
 	MurmurHash h = obj->hash();
 

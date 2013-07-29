@@ -84,7 +84,7 @@ class ObjectPool : public RefCounted
 		/// Stores a reference to the constant object in the pool.
 		/// The object passed should not be modified after this call otherwise it will affect the contents of the pool.
 		/// Returns the object stored in the pool, which could differ from the input object.
-		ConstObjectPtr store( const ConstObjectPtr &obj );
+		ConstObjectPtr store( ConstObjectPtr &obj );
 
 		/// Stores a copy of the object in the pool.
 		/// Returns the object stored in the pool, which could differ from the input object.
