@@ -441,11 +441,11 @@ bool LinkedScene::hasAttribute( const Name &name ) const
 	{
 		return false;
 	}
-	else if( name == timeAttribute )
+	if( name == timeAttribute )
 	{
 		return true;
 	}
-	
+
 	if ( m_linkedScene && !m_atLink )
 	{
 		return m_linkedScene->hasAttribute(name);
@@ -557,10 +557,6 @@ ObjectPtr LinkedScene::readAttributeAtSample( const Name &name, size_t sampleInd
 	{
 		if ( m_timeRemapped )
 		{
-			if( name == timeAttribute )
-			{
-				return new IECore::DoubleData( remappedLinkTimeAtSample(sampleIndex) );
-			}
 			return m_linkedScene->readAttribute( name, remappedLinkTimeAtSample(sampleIndex) );
 		}
 		else
@@ -582,9 +578,10 @@ ObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
 		{
 			time = remappedLinkTime( time );
 		}
-		if( name == timeAttribute )
+		if( name == timeAttribute && !m_linkedScene->hasAttribute( timeAttribute ) )
 		{
-			return new IECore::DoubleData( time );
+			// m_linkedScene is not necessarily a linked scene
+			return new DoubleData( time );
 		}
 		return m_linkedScene->readAttribute(name,time);
 	}
@@ -592,9 +589,8 @@ ObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
 	{
 		if( name == timeAttribute && !m_mainScene->hasAttribute( timeAttribute ) )
 		{
-			return new IECore::DoubleData( time );
+			return new DoubleData( time );
 		}
-		
 		return m_mainScene->readAttribute(name,time);
 	}
 }
