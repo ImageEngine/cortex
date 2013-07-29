@@ -441,17 +441,17 @@ bool LinkedScene::hasAttribute( const Name &name ) const
 	{
 		return false;
 	}
-	if( name == timeAttribute )
-	{
-		return true;
-	}
-
+	
 	if ( m_linkedScene && !m_atLink )
 	{
 		return m_linkedScene->hasAttribute(name);
 	}
 	else
 	{
+		if( name == timeAttribute && m_linkedScene )
+		{
+			return true;
+		}
 		return m_mainScene->hasAttribute(name);
 	}
 }

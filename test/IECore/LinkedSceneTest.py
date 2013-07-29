@@ -254,9 +254,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( l.numBoundSamples(), 5 )
-		self.assertEqual( l.hasAttribute( "sceneInterface:link.time" ), True )
-		self.assertEqual( l.readAttribute( "sceneInterface:link.time", 1 ).value, 1 )
-		self.assertEqual( l.readAttribute( "sceneInterface:link.time", 2 ).value, 2 )
+		self.assertEqual( l.hasAttribute( "sceneInterface:link.time" ), False )
 		i0 = l.child("instance0")
 		
 		self.assertEqual( i0.hasAttribute( "sceneInterface:link.time" ), True )
@@ -267,9 +265,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( i0.numTransformSamples(), 1 )
 		self.assertEqual( i0.readTransformAtSample(0), IECore.M44dData() )
 		A0 = i0.child("A")
-		self.assertEqual( A0.hasAttribute( "sceneInterface:link.time" ), True )
-		self.assertEqual( A0.readAttribute( "sceneInterface:link.time", 1 ).value, 0 )
-		self.assertEqual( A0.readAttribute( "sceneInterface:link.time", 2 ).value, 3 )
+		self.assertEqual( A0.hasAttribute( "sceneInterface:link.time" ), False )
 		
 		self.assertEqual( A0.numBoundSamples(), 2 )
 		self.assertEqual( A0.numTransformSamples(), 2 )
@@ -294,11 +290,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( A1.readTransformAtSample(2), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		self.assertEqual( A1.readTransformAtSample(3), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		
-		self.assertEqual( A1.hasAttribute( "sceneInterface:link.time" ), True )
-		self.assertEqual( A1.readAttribute( "sceneInterface:link.time", 1 ).value, 0 )
-		self.assertEqual( A1.readAttribute( "sceneInterface:link.time", 2 ).value, 1 )
-		self.assertEqual( A1.readAttribute( "sceneInterface:link.time", 3 ).value, 2 )
-		self.assertEqual( A1.readAttribute( "sceneInterface:link.time", 4 ).value, 3 )
+		self.assertEqual( A1.hasAttribute( "sceneInterface:link.time" ), False )
 		
 		i2 = l.child("instance2")
 		
@@ -317,10 +309,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( A2.readTransformAtSample(1), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1.5, 0, 0 ) ) ) )
 		self.assertEqual( A2.readTransformAtSample(2), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
 		
-		self.assertEqual( A2.hasAttribute( "sceneInterface:link.time" ), True )
-		self.assertEqual( A2.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
-		self.assertEqual( A2.readAttribute( "sceneInterface:link.time", 1 ).value, 0.5 )
-		self.assertEqual( A2.readAttribute( "sceneInterface:link.time", 2 ).value, 1 )
+		self.assertEqual( A2.hasAttribute( "sceneInterface:link.time" ), False )
+
 	
 	def testNestedTimeRemapping( self ):
 		
@@ -354,10 +344,21 @@ class LinkedSceneTest( unittest.TestCase ) :
 		
 		del l0, i0, t0
 		
-		del m, l1, l2
+		l0 = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECore.LinkedScene( "/tmp/testTop.lscc", IECore.IndexedIO.OpenMode.Write )
+		t = l.createChild("transform")
+		i = t.createChild("instance")
+		i.writeLink( l0 )
 		
-		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
-		t0 = l.child("transform0")
+		del l, i, t
+		
+		
+		del m, l0, l1, l2
+		
+		l = IECore.LinkedScene( "/tmp/testTop.lscc", IECore.IndexedIO.OpenMode.Read )
+		t = l.child("transform")
+		i = t.child("instance")
+		t0 = i.child("transform0")
 		i0 = t0.child("instance0")
 		t1 = i0.child("transform1")
 		i1 = t1.child("instance1")
@@ -365,31 +366,27 @@ class LinkedSceneTest( unittest.TestCase ) :
 		i2 = t2.child("instance2")
 		A = i2.child("A")
 		
-		# these two locations have no time remapping:
-		self.assertEqual( l.readAttribute( "sceneInterface:link.time", 0.25 ).value, 0.25 )
-		self.assertEqual( t0.readAttribute( "sceneInterface:link.time", 0.25 ).value, 0.25 )
+		# this location shouldn't be retimed:
+		self.assertEqual( i.hasAttribute( "sceneInterface:link.time" ), True )
+		self.assertEqual( i.readAttribute( "sceneInterface:link.time", 0.25 ).value, 0.25 )
 		
-		# these ones are sped up by a factor of 2:
+		# this location should be sped up by a factor of 2:
+		self.assertEqual( i0.hasAttribute( "sceneInterface:link.time" ), True )
 		self.assertEqual( i0.readAttribute( "sceneInterface:link.time", 0.25 ).value, 0.5 )
-		self.assertEqual( t1.readAttribute( "sceneInterface:link.time", 0.25 ).value, 0.5 )
 		
-		# these ones are remapped twice, so they're sped up by a factor of 4:
+		# this one is remapped twice, so it's sped up by a factor of 4:
+		self.assertEqual( i1.hasAttribute( "sceneInterface:link.time" ), True )
 		self.assertEqual( i1.readAttribute( "sceneInterface:link.time", 0.25 ).value, 1 )
-		self.assertEqual( t2.readAttribute( "sceneInterface:link.time", 0.25 ).value, 1 )
 		
-		# and these ones are remapped three times, so they're sped up by a factor of 8:
+		# and this one is remapped three times, so it's sped up by a factor of 8:
+		self.assertEqual( i2.hasAttribute( "sceneInterface:link.time" ), True )
 		self.assertEqual( i2.readAttribute( "sceneInterface:link.time", 0.25 ).value, 2 )
-		self.assertEqual( A.readAttribute( "sceneInterface:link.time", 0.25 ).value, 2 )
 		
 		# sanity check:
-		self.assertEqual( l.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
-		self.assertEqual( t0.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
+		self.assertEqual( i.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
 		self.assertEqual( i0.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
-		self.assertEqual( t1.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
 		self.assertEqual( i1.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
-		self.assertEqual( t2.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
 		self.assertEqual( i2.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
-		self.assertEqual( A.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
 		
 		# test multiple retiming of the transform:
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
@@ -403,7 +400,6 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( Aa.readTransformAsMatrix( 0.7 ), A.readTransformAsMatrix( 0.7 / 8 ) )
 		self.assertEqual( Aa.readTransformAsMatrix( 0.8 ), A.readTransformAsMatrix( 0.8 / 8 ) )
 		self.assertEqual( Aa.readTransformAsMatrix( 0.9 ), A.readTransformAsMatrix( 0.9 / 8 ) )
-		
 	
 	def testReading( self ):
 
@@ -573,7 +569,6 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertFalse( ca.hasTag("testB") )
 		self.assertEqual( set(C.readTags(includeChildren=False)), testSet(["C"]) )
 		self.assertEqual( set(D.readTags()), testSet(["D", "testA"]) )
-	
 	
 if __name__ == "__main__":
 	unittest.main()
