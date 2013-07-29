@@ -578,11 +578,6 @@ ObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
 		{
 			time = remappedLinkTime( time );
 		}
-		if( name == timeAttribute && !m_linkedScene->hasAttribute( timeAttribute ) )
-		{
-			// m_linkedScene is not necessarily a linked scene
-			return new DoubleData( time );
-		}
 		return m_linkedScene->readAttribute(name,time);
 	}
 	else
