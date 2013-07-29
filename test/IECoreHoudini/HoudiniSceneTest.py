@@ -194,6 +194,32 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sub1.child( "box1" ).hasObject(), True )
 		self.assertEqual( sub1.child( "box1" ).child( "torus" ).hasObject(), True )
 	
+	def testTags( self ) :
+		
+		# at this point, only SceneCacheNodes can define tags
+		scene = self.buildScene()
+		self.assertEqual( scene.readTags(), [] )
+		self.assertFalse( scene.hasTag( "any" ) )
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.readTags(), [] )
+		self.assertFalse( sub1.hasTag( "any" ) )
+		torus1 = sub1.child( "torus1" )
+		self.assertEqual( torus1.readTags(), [] )
+		self.assertFalse( torus1.hasTag( "any" ) )
+	
+	def testLinks( self ) :
+		
+		# at this point, only SceneCacheNodes can define links
+		scene = self.buildScene()
+		self.assertFalse( scene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual( scene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), None )
+		sub1 = scene.child( "sub1" )
+		self.assertFalse( sub1.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual( sub1.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), None )
+		torus1 = sub1.child( "torus1" )
+		self.assertFalse( torus1.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual( torus1.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), None )
+	
 	def testDeletedPath( self ) :
 		
 		scene = self.buildScene()
