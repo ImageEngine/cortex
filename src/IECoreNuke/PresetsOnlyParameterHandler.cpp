@@ -70,15 +70,6 @@ void PresetsOnlyParameterHandler::knobs( const IECore::Parameter *parameter, con
 
 void PresetsOnlyParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSource valueSource )
 {
-	int presetIndex = 0;
-	if( valueSource==Storage )
-	{
-		presetIndex = m_storage;
-	}
-	else
-	{
-		presetIndex = (int)m_knob->get_value();
-	}
 	parameter->setValue( parameter->presets()[m_storage].second );
 }
 
