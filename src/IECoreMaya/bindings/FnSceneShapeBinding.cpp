@@ -52,9 +52,14 @@ static IECore::SceneInterfacePtr sceneInterface( MFnDependencyNode *fnDN )
 	assert( fnDN );
 	MPxNode *userNode = fnDN->userNode();
 	SceneShapeInterface *sc = dynamic_cast<SceneShapeInterface *>( userNode );
-	assert( sc );
-	IECore::ConstSceneInterfacePtr scnInterface = sc->getSceneInterface();
-	return const_cast<IECore::SceneInterface*>( scnInterface.get() );
+	if( sc )
+	{
+		IECore::ConstSceneInterfacePtr scnInterface = sc->getSceneInterface();
+		return const_cast<IECore::SceneInterface*>( scnInterface.get() );
+	}
+	
+	// failed
+	throw IECore::Exception( ( MString("Node \"") + fnDN->name() + "\" is not a SceneShape" ).asChar() );
 }
 
 static list componentNames( MFnDependencyNode *fnDN )
@@ -62,16 +67,20 @@ static list componentNames( MFnDependencyNode *fnDN )
 	assert( fnDN );
 	MPxNode *userNode = fnDN->userNode();
 	SceneShapeInterface *sc = dynamic_cast<SceneShapeInterface *>( userNode );
-	assert( sc );
-	std::vector<IECore::InternedString> names = sc->componentNames();
-	
-	list result;
-	for( std::vector<IECore::InternedString>::const_iterator it = names.begin(); it!=names.end(); it++ )
+	if( sc )
 	{
-		result.append( (*it).value() );
+		std::vector<IECore::InternedString> names = sc->componentNames();
+	
+		list result;
+		for( std::vector<IECore::InternedString>::const_iterator it = names.begin(); it!=names.end(); it++ )
+		{
+			result.append( (*it).value() );
+		}
+				
+		return result;
 	}
-			
-	return result;
+	// failed
+	throw IECore::Exception( ( MString("Node \"") + fnDN->name() + "\" is not a SceneShape" ).asChar() );
 }
 
 void IECoreMaya::bindFnSceneShape()
