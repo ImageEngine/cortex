@@ -1111,16 +1111,17 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		unlinked = IECore.SceneCache( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 		a = unlinked.child( "1" )
 		self.assertFalse( a.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertFalse( a.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
+		self.assertFalse( a.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
+		self.assertFalse( a.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
 		b = a.child( "2" )
 		self.assertEqual( b.childNames(), [] )
-		self.assertTrue( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
-		self.assertEqual(
-			b.readAttribute( IECore.LinkedScene.linkAttribute, 0 ),
-			IECore.CompoundData( {
-				"fileName" : IECore.StringData( TestSceneCache.__testFile ),
-				"root" : IECore.InternedStringVectorData( [ "1", "2" ] )
-			} )
-		)
+		self.assertFalse( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertTrue( b.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
+		self.assertTrue( b.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
+		self.assertFalse( b.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
+		self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( TestSceneCache.__testFile ) )
+		self.assertEqual( b.readAttribute( IECore.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [ "1", "2" ] ) )
 		
 		# make sure we can force link expansion
 		xform.parm( "collapse" ).pressButton()
