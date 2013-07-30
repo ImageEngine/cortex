@@ -73,7 +73,6 @@ void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 	
 	doExpandGeometry( scene );
 	setInt( pExpanded.getToken(), 0, 0, 1 );
-	enableParm( pExpanded.getToken(), false );
 }
 
 void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )

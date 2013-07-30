@@ -72,7 +72,7 @@ class LinkedScene : public  SampledSceneInterface
 		
 		static const Name &fileNameLinkAttribute;
 		static const Name &rootLinkAttribute;
-		static const Name &timeAttribute;
+		static const Name &timeLinkAttribute;
 
 		/// When the open mode is Read it expands the links and only the const methods may be used and the
 		/// when the open mode is Write, only the non-const methods may be used and 
