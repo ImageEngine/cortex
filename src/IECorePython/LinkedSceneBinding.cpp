@@ -67,6 +67,9 @@ void bindLinkedScene()
 		.def( "linkAttributeData", linkAttributeData )
 		.def( "linkAttributeData", retimedLinkAttributeData ).staticmethod( "linkAttributeData" )
 		.def_readonly("linkAttribute", &LinkedScene::linkAttribute )
+		.def_readonly("fileNameLinkAttribute", &LinkedScene::fileNameLinkAttribute )
+		.def_readonly("rootLinkAttribute", &LinkedScene::rootLinkAttribute )
+		.def_readonly("timeLinkAttribute", &LinkedScene::timeLinkAttribute )
 	;
 }
 
