@@ -2297,7 +2297,11 @@ if doConfigure :
 				else :
 					nukeSources.remove( "src/IECoreNuke/DisplayIop.cpp" )							
 					nukeNodeNames.remove( "ieDisplay" )
-					
+				
+				if nukeMajorVersion < 7 :
+					nukeSources.remove( "src/IECoreNuke/SceneCacheReader.cpp" )
+					nukeHeaders.remove( "include/IECoreNuke/SceneCacheReader.h" )
+
 				# nuke library
 
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
