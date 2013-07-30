@@ -42,7 +42,8 @@ using namespace IECore;
 using namespace IECoreHoudini;
 
 template<typename BaseType>
-OBJ_SceneCacheNode<BaseType>::OBJ_SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : SceneCacheNode<BaseType>( net, name, op )
+OBJ_SceneCacheNode<BaseType>::OBJ_SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op )
+	: SceneCacheNode<BaseType>( net, name, op ), m_static( boost::indeterminate )
 {
 }
 
@@ -212,7 +213,7 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 	std::string file;
 	if ( !OBJ_SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
-		m_static = false;
+		m_static = boost::indeterminate;
 		return;
 	}
 	
@@ -220,13 +221,11 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 	
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene );
-	if ( !sampledScene )
-	{
-		m_static = false;
-		return;
-	}
 	
-	m_static = ( sampledScene->numTransformSamples() < 2 );
+	m_static = ( sampledScene ) ? ( sampledScene->numTransformSamples() < 2 ) : false;
+	
+	BaseType::flags().setTimeDep( bool( !m_static ) );
+	BaseType::getParmList()->setCookTimeDependent( bool( !m_static ) );
 }
 
 template<typename BaseType>
@@ -241,7 +240,13 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	hash.append( path );
 	hash.append( space );
 	
-	if ( m_static )
+	// make sure the state is valid
+	if ( boost::indeterminate( m_static ) )
+	{
+		sceneChanged();
+	}
+	
+	if ( m_static == true )
 	{
 		if ( this->m_loaded && this->m_hash == hash )
 		{

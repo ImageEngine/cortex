@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_OBJSCENECACHENODE_H
 #define IECOREHOUDINI_OBJSCENECACHENODE_H
 
+#include "boost/logic/tribool.hpp"
+
 #include "OBJ/OBJ_Node.h"
 
 #include "IECore/SceneCache.h"
@@ -76,7 +78,7 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		static OP_TemplatePair *buildBaseParameters();
 		static OP_TemplatePair *buildExpansionParameters();
 		
-		bool m_static;
+		boost::tribool m_static;
 		UT_Matrix4D m_xform;
 
 };
