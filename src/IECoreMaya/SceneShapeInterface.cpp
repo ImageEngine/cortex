@@ -70,6 +70,7 @@
 #include "IECore/TransformOp.h"
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Transform.h"
+#include "IECore/MatrixAlgo.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnEnumAttribute.h"
@@ -673,9 +674,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			}
 			
 			V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
-			M44f transform;
-			transform.setValue( transformd );
-			extractSHRT( convert<M44f>( transform ), scale, shear, rotate, translate );
+			extractSHRT( convert<M44f>( transformd ), scale, shear, rotate, translate );
 
 			MDataHandle transformElementHandle = transformBuilder.addElement( index );
 			transformElementHandle.child( aTranslate ).set3Float( translate[0], translate[1], translate[2] );
@@ -1030,6 +1029,8 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 		}
 	}
 
+	renderer->concatTransform( convert<M44f>( worldTransform( subSceneInterface, time.as( MTime::kSeconds ) ) ) );
+
 	recurseBuildScene( renderer.get(), subSceneInterface.get(), time.as( MTime::kSeconds ), drawBounds, drawGeometry, objectOnly, drawTags );
 }
 
@@ -1060,16 +1061,11 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	// Need to add this attribute block to get a parent group with that name that includes the object and/or bound
 	AttributeBlock aNew(renderer);
 
-	M44d transformd;
 	if(pathStr != "/")
 	{
 		// Path space
-		transformd = worldTransform( subSceneInterface, time );
+		renderer->concatTransform( convert<M44f>( subSceneInterface->readTransformAsMatrix( time ) ) );
 	}
-
-	M44f transform;
-	transform.setValue( transformd );
-	renderer->setTransform( transform );
 
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
