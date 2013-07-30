@@ -188,7 +188,6 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 		collapseHierarchy();
 		doExpandObject( scene, this, hierarchy, depth, tagFilter );
 		setInt( pExpanded.getToken(), 0, 0, 1 );
-		enableParm( pExpanded.getToken(), false );
 		return;
 	}
 	
@@ -209,7 +208,6 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	
 	doExpandChildren( scene, rootNode, hierarchy, depth, tagFilter );
 	setInt( pExpanded.getToken(), 0, 0, 1 );
-	enableParm( pExpanded.getToken(), false );
 	
 	if ( hierarchy == Parenting && !scene->hasObject() )
 	{
@@ -252,7 +250,6 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	if ( children.empty() && !scene->hasObject() )
 	{
 		xform->setInt( pExpanded.getToken(), 0, 0, 1 );
-		xform->enableParm( pExpanded.getToken(), false );
 	}
 	
 	if ( tagged( scene, tagFilter ) )
@@ -312,7 +309,6 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		{
 			doExpandChildren( child, childNode, hierarchy, depth, tagFilter );
 			childNode->setInt( pExpanded.getToken(), 0, 0, 1 );
-			childNode->enableParm( pExpanded.getToken(), false );
 		}
 	}
 }

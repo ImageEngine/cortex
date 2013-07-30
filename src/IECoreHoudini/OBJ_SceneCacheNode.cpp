@@ -202,7 +202,6 @@ void OBJ_SceneCacheNode<BaseType>::collapseHierarchy()
 	
 	this->destroyNodes( childNodes );
 	this->setInt( pExpanded.getToken(), 0, 0, 0 );
-	this->enableParm( pExpanded.getToken(), true );
 }
 
 template<typename BaseType>
@@ -288,6 +287,13 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	this->m_hash = hash;
 	this->m_loaded = true;
 	
+	return true;
+}
+
+template<typename BaseType>
+bool OBJ_SceneCacheNode<BaseType>::updateParmsFlags()
+{
+	this->enableParm( pExpanded.getToken(), !this->evalInt( pExpanded.getToken(), 0, 0 ) );
 	return true;
 }
 
