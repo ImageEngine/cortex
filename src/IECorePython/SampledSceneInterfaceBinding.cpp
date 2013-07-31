@@ -73,6 +73,36 @@ static tuple objectSampleInterval( const SampledSceneInterface &m, double time )
 	return make_tuple( x, floorIndex, ceilIndex );
 }
 
+DataPtr readTransformAtSample( SampledSceneInterface &m, size_t sampleIndex )
+{
+	ConstDataPtr d = m.readTransformAtSample(sampleIndex);
+	if ( d )
+	{
+		return d->copy();
+	}
+	return 0;
+}
+
+ObjectPtr readAttributeAtSample( SampledSceneInterface &m, const SceneInterface::Name &name, size_t sampleIndex )
+{
+	ConstObjectPtr o = m.readAttributeAtSample(name,sampleIndex);
+	if ( o )
+	{
+		return o->copy();
+	}
+	return 0;
+}
+
+ObjectPtr readObjectAtSample( SampledSceneInterface &m, size_t sampleIndex )
+{
+	ConstObjectPtr o = m.readObjectAtSample(sampleIndex);
+	if ( o )
+	{
+		return o->copy();
+	}
+	return 0;
+}
+
 void bindSampledSceneInterface()
 {
 	RunTimeTypedClass<SampledSceneInterface>()
@@ -85,10 +115,10 @@ void bindSampledSceneInterface()
 		.def( "attributeSampleTime", &SampledSceneInterface::attributeSampleTime )
 		.def( "objectSampleTime", &SampledSceneInterface::objectSampleTime )
 		.def( "readBoundAtSample", &SampledSceneInterface::readBoundAtSample )
-		.def( "readTransformAtSample", &SampledSceneInterface::readTransformAtSample )
+		.def( "readTransformAtSample", &readTransformAtSample )
 		.def( "readTransformAsMatrixAtSample", &SampledSceneInterface::readTransformAsMatrixAtSample )
-		.def( "readAttributeAtSample", &SampledSceneInterface::readAttributeAtSample )
-		.def( "readObjectAtSample", &SampledSceneInterface::readObjectAtSample )
+		.def( "readAttributeAtSample", &readAttributeAtSample )
+		.def( "readObjectAtSample", &readObjectAtSample )
 
 		.def( "boundSampleInterval", &boundSampleInterval )
 		.def( "transformSampleInterval", &transformSampleInterval )

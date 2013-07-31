@@ -223,7 +223,7 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 	return true;
 }
 
-ObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
+ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 {
 	MDagPath dagPath;
 	SceneShape *sceneShape = findScene( p, &dagPath );
@@ -294,7 +294,7 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 	return sceneShape->getSceneInterface()->hasObject();
 }
 
-ObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
+ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
 {
 	SceneShape *sceneShape = findScene( p );
 	if ( !sceneShape )

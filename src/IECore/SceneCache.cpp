@@ -411,7 +411,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		DataPtr readTransformAtSample( size_t sampleIndex ) const
+		ConstDataPtr readTransformAtSample( size_t sampleIndex ) const
 		{
 			return m_sharedData->readTransformAtSample( this, sampleIndex );
 		}
@@ -421,7 +421,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return dataToMatrix( readTransformAtSample( sampleIndex ) );
 		}
 
-		DataPtr readTransform( double time ) const
+		ConstDataPtr readTransform( double time ) const
 		{
 			size_t sample1, sample2;
 			double x = transformSampleInterval( time, sample1, sample2 );
@@ -433,8 +433,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			{
 				return readTransformAtSample( sample2 );
 			}
-			DataPtr transformData1 = readTransformAtSample( sample1 );
-			DataPtr transformData2 = readTransformAtSample( sample2 );
+			ConstDataPtr transformData1 = readTransformAtSample( sample1 );
+			ConstDataPtr transformData2 = readTransformAtSample( sample2 );
 			DataPtr transformData = runTimeCast< Data >( linearObjectInterpolation( transformData1, transformData2, x ) );
 			if ( !transformData )
 			{
@@ -486,12 +486,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		ObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex ) const
+		ConstObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex ) const
 		{
 			return m_sharedData->readAttributeAtSample( this, name, sampleIndex );
 		}
 
-		ObjectPtr readAttribute( const SceneCache::Name &name, double time ) const
+		ConstObjectPtr readAttribute( const SceneCache::Name &name, double time ) const
 		{
 			size_t sample1, sample2;
 			double x = attributeSampleInterval( name, time, sample1, sample2 );
@@ -504,8 +504,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				return readAttributeAtSample( name, sample2 );
 			}
 
-			ObjectPtr attributeObj1 = readAttributeAtSample( name, sample1 );
-			ObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
+			ConstObjectPtr attributeObj1 = readAttributeAtSample( name, sample1 );
+			ConstObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
 			ObjectPtr attributeObj = linearObjectInterpolation( attributeObj1, attributeObj2, x );
 			if ( !attributeObj )
 			{
@@ -546,12 +546,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		ObjectPtr readObjectAtSample( size_t sampleIndex ) const
+		ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const
 		{
 			return m_sharedData->readObjectAtSample( this, sampleIndex );
 		}
 
-		ObjectPtr readObject( double time ) const
+		ConstObjectPtr readObject( double time ) const
 		{
 			size_t sample1, sample2;
 			double x = objectSampleInterval( time, sample1, sample2 );
@@ -564,8 +564,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				return readObjectAtSample( sample2 );
 			}
 
-			ObjectPtr object1 = readObjectAtSample( sample1 );
-			ObjectPtr object2 = readObjectAtSample( sample2 );
+			ConstObjectPtr object1 = readObjectAtSample( sample1 );
+			ConstObjectPtr object2 = readObjectAtSample( sample2 );
 			ObjectPtr object = linearObjectInterpolation( object1, object2, x );
 			if ( !object )
 			{
@@ -677,15 +677,13 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				}
 
 				/// utility function used by the ReaderImplementation to use the LRUCache for transform reading
-				IECore::DataPtr readTransformAtSample( const ReaderImplementation *reader, size_t sample )
+				IECore::ConstDataPtr readTransformAtSample( const ReaderImplementation *reader, size_t sample )
 				{
-					ConstDataPtr d = runTimeCast< const Data >( transformCache->get( SimpleCacheKey(reader, sample) ) );
-					return const_cast< Data * >( d.get() );
-					/// return d->copy();
+					return runTimeCast< const Data >( transformCache->get( SimpleCacheKey(reader, sample) ) );
 				}
 
 				/// utility function used by the ReaderImplementation to use the LRUCache for object reading
-				IECore::ObjectPtr readObjectAtSample( const ReaderImplementation *reader, size_t sample )
+				IECore::ConstObjectPtr readObjectAtSample( const ReaderImplementation *reader, size_t sample )
 				{
 					const size_t defaultSample = -1;
 					SimpleCacheKey currentKey( reader, sample );
@@ -703,7 +701,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 							ConstObjectPtr defaultObj = objectCache->retrieve( defaultKey );
 							if ( defaultObj )
 							{
-								IECore::InternedStringVectorDataPtr varNames = runTimeCast<InternedStringVectorData>( reader->readAttributeAtSample(animatedObjectPrimVarsAttribute, 0) );
+								IECore::ConstInternedStringVectorDataPtr varNames = runTimeCast<const InternedStringVectorData>( reader->readAttributeAtSample(animatedObjectPrimVarsAttribute, 0) );
 								if ( varNames )
 								{
 									PrimitivePtr prim= runTimeCast< Primitive >( defaultObj->copy() );
@@ -721,21 +719,17 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 						}
 						/// register the object as the default, so next frames could reuse them
 						objectCache->set( defaultKey, obj );
-						return const_cast< Object * >( obj.get() );
-	//					return obj->copy();
+						return obj;
 					}
 					/// The object has animated topology... so we load the entire object
 					ConstObjectPtr obj = objectCache->get(currentKey);
-					return const_cast< Object * >( obj.get() );
-//					return obj->copy();
+					return obj;
 				}
 
 				/// utility function used by the ReaderImplementation to use the LRUCache for attribute reading
-				IECore::ObjectPtr readAttributeAtSample( const ReaderImplementation *reader, const SceneCache::Name &name, size_t sample )
+				IECore::ConstObjectPtr readAttributeAtSample( const ReaderImplementation *reader, const SceneCache::Name &name, size_t sample )
 				{
-					ConstObjectPtr attr = attributeCache->get( AttributeCacheKey(reader,name,sample) );
-					return const_cast< Object * >( attr.get() );
-//					return attr->copy();
+					return attributeCache->get( AttributeCacheKey(reader,name,sample) );
 				}
 
 				// \todo Consider adding "ReaderImplementation *rootScene" to optimize the scene() calls.
@@ -2047,7 +2041,7 @@ double SceneCache::transformSampleInterval( double time, size_t &floorIndex, siz
 	return reader->transformSampleInterval( time, floorIndex, ceilIndex );
 }
 
-DataPtr SceneCache::readTransformAtSample( size_t sampleIndex ) const
+ConstDataPtr SceneCache::readTransformAtSample( size_t sampleIndex ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readTransformAtSample( sampleIndex );
@@ -2059,7 +2053,7 @@ Imath::M44d SceneCache::readTransformAsMatrixAtSample( size_t sampleIndex ) cons
 	return reader->readTransformAsMatrixAtSample( sampleIndex );
 }
 
-DataPtr SceneCache::readTransform( double time ) const
+ConstDataPtr SceneCache::readTransform( double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readTransform( time );
@@ -2105,13 +2099,13 @@ double SceneCache::attributeSampleInterval( const Name &name, double time, size_
 	return reader->attributeSampleInterval( name, time, floorIndex, ceilIndex );
 }
 
-ObjectPtr SceneCache::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
+ConstObjectPtr SceneCache::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readAttributeAtSample( name, sampleIndex );
 }
 
-ObjectPtr SceneCache::readAttribute( const Name &name, double time ) const
+ConstObjectPtr SceneCache::readAttribute( const Name &name, double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readAttribute( name, time );
@@ -2180,13 +2174,13 @@ double SceneCache::objectSampleInterval( double time, size_t &floorIndex, size_t
 	return reader->objectSampleInterval( time, floorIndex, ceilIndex );
 }
 
-ObjectPtr SceneCache::readObjectAtSample( size_t sampleIndex ) const
+ConstObjectPtr SceneCache::readObjectAtSample( size_t sampleIndex ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readObjectAtSample( sampleIndex );
 }
 
-ObjectPtr SceneCache::readObject( double time ) const
+ConstObjectPtr SceneCache::readObject( double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readObject( time );

@@ -484,8 +484,8 @@ MBoundingBox SceneShapeInterface::boundingBox() const
 				// Check for an object
 				if( scn->hasObject() )
 				{
-					ObjectPtr object = scn->readObject( time.as( MTime::kSeconds ) );
-					VisibleRenderablePtr obj = runTimeCast< VisibleRenderable >( object );
+					ConstObjectPtr object = scn->readObject( time.as( MTime::kSeconds ) );
+					const VisibleRenderable *obj = runTimeCast< const VisibleRenderable >( object.get() );
 					if( obj )
 					{
 						Box3f objBox = obj->bound();
@@ -688,7 +688,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MArrayDataHandle outputDataHandle = dataBlock.outputArrayValue( aOutputObjects, &s );
 			MArrayDataBuilder outputBuilder = outputDataHandle.builder();
 
-			ObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
+			ConstObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
 
 			if( querySpace == World )
 			{
@@ -697,8 +697,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 				transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
 				
 				TransformOpPtr transformer = new TransformOp();
-				transformer->inputParameter()->setValue( object );
-				transformer->copyParameter()->setTypedValue( false );
+				transformer->inputParameter()->setValue( const_cast< Object *>(object.get()) );		/// safe const_cast because the op will duplicate the Object.
+				transformer->copyParameter()->setTypedValue( true );
 				transformer->matrixParameter()->setValue( new M44dData( transformd ) );
 				object = transformer->operate();
 			}
@@ -817,30 +817,26 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			arrayHandle.jumpToElement( attrIndex );
 			MDataHandle currentElement = arrayHandle.outputValue();
 			
-			ObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
+			ConstObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
 			IECore::TypeId type = attrValue->typeId();
 			if( type == BoolDataTypeId )
 			{
-				ConstBoolDataPtr val = runTimeCast< BoolData >(attrValue);
-				bool value = val->readable();
+				bool value = static_cast< const BoolData * >(attrValue.get())->readable();
 				currentElement.setGenericBool( value, true);
 			}
 			else if( type == FloatDataTypeId )
 			{
-				ConstFloatDataPtr val = runTimeCast< FloatData >(attrValue);
-				float value = val->readable();
+				float value = static_cast< const FloatData * >(attrValue.get())->readable();
 				currentElement.setGenericFloat( value, true);
 			}
 			else if( type == IntDataTypeId )
 			{
-				ConstIntDataPtr val = runTimeCast< IntData >(attrValue);
-				int value = val->readable();
+				int value = static_cast< const IntData * >(attrValue.get())->readable();
 				currentElement.setGenericInt( value, true);
 			}
 			else if( type == StringDataTypeId )
 			{
-				ConstStringDataPtr val = runTimeCast< StringData >(attrValue);
-				MString value( val->readable().c_str() );
+				MString value( static_cast< const StringData * >(attrValue.get())->readable().c_str() );
 				currentElement.setString( value );
 			}
 		}
@@ -1069,8 +1065,8 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
-		ObjectPtr object = subSceneInterface->readObject( time );
-		Renderable *o = runTimeCast< Renderable >(object.get());
+		ConstObjectPtr object = subSceneInterface->readObject( time );
+		const Renderable *o = runTimeCast< const Renderable >(object.get());
 		if( o )
 		{
 			o->render(renderer);

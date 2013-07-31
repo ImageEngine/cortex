@@ -66,13 +66,13 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual Imath::Box3d readBound( double time ) const;
 		virtual void writeBound( const Imath::Box3d &bound, double time );
 
-		virtual IECore::DataPtr readTransform( double time ) const;
+		virtual IECore::ConstDataPtr readTransform( double time ) const;
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
 		virtual void writeTransform( const IECore::Data *transform, double time );
 
 		virtual bool hasAttribute( const Name &name ) const;
 		virtual void attributeNames( NameList &attrs ) const;
-		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
+		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
 
 		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
@@ -80,7 +80,7 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual void writeTags( const NameList &tags );
 
 		virtual bool hasObject() const;
-		virtual IECore::ObjectPtr readObject( double time ) const;
+		virtual IECore::ConstObjectPtr readObject( double time ) const;
 		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
 		virtual void writeObject( const IECore::Object *object, double time );
 
@@ -94,7 +94,7 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		
 		typedef boost::function<bool (const OP_Node *)> HasFn;
-		typedef boost::function<IECore::ObjectPtr (const OP_Node *)> ReadFn;
+		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *)> ReadFn;
 		typedef boost::function<bool (const OP_Node *, const Name &)> HasTagFn;
 		typedef boost::function<void (const OP_Node *, NameList &, bool)> ReadTagsFn;
 		
