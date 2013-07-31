@@ -72,6 +72,8 @@ class PTCParticleReader : public IECore::ParticleReader
 		/// This method overwrites the base class implementation.
 		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands );
 
+		virtual std::string positionPrimVarName();
+
 	private :
 
 		static const ReaderDescription<PTCParticleReader> m_readerDescription;
