@@ -978,8 +978,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( a.readTransformAsMatrix( time ), b.readTransformAsMatrix( time ) )
 			ab = a.readBound( time )
 			bb = b.readBound( time )
-			self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
-			self.assertTrue( ab.max.equalWithAbsError( bb.max, 1e-6 ) )
+			## \todo: re-enable this if Houdini fixes their SubNet bounding box issue
+			if not ( hou.applicationVersion()[0] == 12 and hou.applicationVersion()[1] == 5 ) or not isinstance( b, IECoreHoudini.HoudiniScene ) :
+				self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
+				self.assertTrue( ab.max.equalWithAbsError( bb.max, 1e-6 ) )
 		
 		self.assertEqual( a.hasObject(), b.hasObject() )
 		if a.hasObject() :
