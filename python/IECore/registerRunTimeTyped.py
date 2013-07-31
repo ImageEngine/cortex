@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -66,18 +66,17 @@ __nextDynamicRunTimeTypedId = None
 # class for it to properly implement the RunTimeTyped interface. It should
 # be called once for all python classes inheriting from RunTimeTyped. It also
 # calls registerTypeId() for you.
-# baseClass is deprecated.
-# \todo Remove deprecation warning and baseClass parameter on Cortex 6.
 # typId is optional and if not defined, this function will associate a dynamic Id
 #       in the range FirstDynamicTypeId and LastDynamicTypeId from TypeIds.h.
 #       It's necessary to specify type Id for Object derived class or anything that
 #       is serializable.
-def registerRunTimeTyped( typ, typId = None, baseClass = None ) :
+# If typeName is not specified then the name of the class itself is used - you may wish
+# to provide an explicit typeName in order to prefix the name with a module name.
+def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 
-	if not baseClass is None :
-		IECore.warning( "%s: Passing base class is deprecated in registerRunTimeTyped." % typ )
-
-	typeName = typ.__name__
+	if typeName is None :
+		typeName = typ.__name__
+	
 	runTypedBaseClass = filter( lambda c: issubclass( c, IECore.RunTimeTyped ), typ.__bases__ )[0]
 
 	# constants below are the same as in TypeIds.h
