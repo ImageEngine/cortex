@@ -54,7 +54,12 @@ ObjectPtr store( ObjectPool &pool, Object* obj )
 
 ObjectPtr retrieve( const ObjectPool &pool, MurmurHash key )
 {
-	return const_cast< Object * >( pool.retrieve(key).get() );
+	ConstObjectPtr o = pool.retrieve(key);
+	if ( o )
+	{
+		return o->copy();
+	}
+	return 0;
 }
 
 void bindObjectPool()

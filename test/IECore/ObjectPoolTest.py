@@ -59,7 +59,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		self.assertTrue( p.contains(a.hash()) )
 
-		self.assertTrue( a.isSame( p.retrieve(a.hash()) ) )
+		self.assertTrue( a == p.retrieve(a.hash()) )
 		self.assertTrue( a.isSame( p.store(a) ) )
 		self.assertTrue( a.isSame( p.store(IntData(1)) ) )
 
