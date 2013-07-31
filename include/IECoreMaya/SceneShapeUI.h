@@ -36,6 +36,7 @@
 #define IECOREMAYA_SCENESHAPEUI_H
 
 #include "maya/MPxSurfaceShapeUI.h"
+#include "maya/MTypes.h"
 
 #include "IECore/Object.h"
 
@@ -64,7 +65,11 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		virtual void getDrawRequests( const MDrawInfo &info, bool objectAndActiveOnly, MDrawRequestQueue &requests );
 		virtual void draw( const MDrawRequest &request, M3dView &view ) const;
 		virtual bool select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const;
+
+		/// If the maya version is greater or equal to 2013 then add support for snapping geometry to the SceneShape.
+		#if MAYA_API_VERSION >= 201300
 		virtual bool snap( MSelectInfo &snapInfo ) const;
+		#endif
 
 		static void *creator();
 	

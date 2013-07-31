@@ -37,6 +37,7 @@
 
 #include "IECoreGL/GL.h" // must come first so glew.h is included before gl.h
 
+#include "maya/MTypes.h"
 #include "maya/MGlobal.h"
 #include "maya/MDrawData.h"
 #include "maya/MDagPath.h"
@@ -259,7 +260,6 @@ void SceneShapeUI::setWireFrameColors( MDrawRequest &request, M3dView::DisplaySt
 	}
 }
 
-
 void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 {
 	MStatus s;
@@ -346,6 +346,8 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 	
 	view.endGL();
 }
+
+#if MAYA_API_VERSION >= 201300
 
 bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 {
@@ -520,6 +522,8 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	snapInfo.setSnapPoint( MPoint( closestVertex[0], closestVertex[1], closestVertex[2] ) );
 	return true;
 }
+
+#endif
 
 void SceneShapeUI::selectionRayToWorldSpacePoint( const MDagPath &camera, const MSelectInfo &selectInfo, float depth, MPoint &worldIntersectionPoint ) const
 {
