@@ -1,3 +1,21 @@
+8.0.0-a13 :
+
+- General :
+	- Ubuntu compilation issues.
+
+- IECore :
+	- SceneCache changed to store samples index as a IndexedIO::Directory which is loaded once as opposed to a integer value. Improved performance on large environments.
+	- Improvements and bug fixes in LinkedScene associated to the usage of tags and the link attribute. The link attributes are now separated and can be queried in readers such as SceneShape to obtain the actual file,location and the time.
+	- Adding constructor for InternedString that accepts a signed 64bit integer for quick conversion from numbers to strings. Used in SceneCache.
+
+- IECoreMaya :
+	- Several improvements on the SceneShape node (SceneShapeInterface) and bug fixes.
+
+- IECoreGL :
+	- Reverting some optimizations done in the convertion of Meshes to IECoreGL which were not really effective.
+
+8.0.0 (up to a12) :
+
 Additions :
 * Added IECoreNuke::SceneCacheReader, which allows inspection of scene cache files and the selective display of it's geometry.
 * Renderer::Procedural classes must now implement a hash() method, which provides a hash of their input data. This is so renderers that support procedural caching can make use of the hash, allowing entire procedurals to be instanced.
