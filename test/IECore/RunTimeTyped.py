@@ -177,6 +177,27 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.failIf( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.MeshPrimitive, IECore.TypeId.Writer ) )
 		self.failIf( IECore.RunTimeTyped.inheritsFrom( "MeshPrimitive", "Writer" ) )
 
+	def testRegisterPrefixedTypeName( self ) :
+	
+		class Prefixed( IECore.ParameterisedProcedural ) :
+		
+			def __init__( self ) :
+			
+				IECore.ParameterisedProcedural.__init__( self, "" )
+				
+		prefixedTypeName = "SomeModuleName::Prefixed"
+		IECore.registerRunTimeTyped( Prefixed, typeName = prefixedTypeName )
+
+		self.assertEqual( Prefixed.staticTypeName(), prefixedTypeName )
+		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( Prefixed.staticTypeName() ), Prefixed.staticTypeId() )
+		
+		p = Prefixed()
+		self.assertEqual( p.typeName(), prefixedTypeName )
+		self.assertEqual( p.typeId(), IECore.RunTimeTyped.typeIdFromTypeName( Prefixed.staticTypeName() ) )
+		
+		self.assertTrue( p.isInstanceOf( IECore.VisibleRenderable.staticTypeId() ) )
+		self.assertTrue( p.isInstanceOf( IECore.ParameterisedProcedural.staticTypeId() ) )
+		self.assertTrue( p.isInstanceOf( IECore.RunTimeTyped.staticTypeId() ) )
 
 if __name__ == "__main__":
     unittest.main()
