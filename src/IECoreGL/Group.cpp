@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -85,8 +85,27 @@ void Group::setState( StatePtr state )
 
 void Group::render( State *currentState ) const
 {
-	glPushMatrix();
-	glMultMatrixf( m_transform.getValue() );
+	const bool haveTransform = m_transform != M44f();
+	if( haveTransform )
+	{
+		// We only call glPushMatrix() if the matrix is
+		// non-identity, in an attempt to avoid using all
+		// the available stack depth.
+		/// \todo Stop using the gl matrix stack. The proper
+		/// solution is to define the transform entirely ourselves
+		/// and pass it to a named shader parameter ourselves
+		/// via glUniform. If we hit the matrix stack limit before
+		/// we get the chance to implement the proper solution, an
+		/// improved interim solution might be to track the transform
+		/// ourselves without using the gl stack, and call glLoadMatrix
+		/// to load the matrix. That way we'd be moving towards the
+		/// proper solution, but without requiring all the shaders to
+		/// be rewritten to use a different variable for receiving the
+		/// matrix.
+		glPushMatrix();
+		glMultMatrixf( m_transform.getValue() );
+	}
+	
 	{
 		State::ScopedBinding scope( *m_state, *currentState );
 		for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
@@ -94,7 +113,11 @@ void Group::render( State *currentState ) const
 			(*it)->render( currentState );
 		}
 	}
-	glPopMatrix();
+	
+	if( haveTransform )
+	{
+		glPopMatrix();
+	}
 }
 
 Imath::Box3f Group::bound() const
