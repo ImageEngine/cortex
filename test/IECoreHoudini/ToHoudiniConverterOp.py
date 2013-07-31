@@ -115,8 +115,8 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		geo = converter.geometry()
 		self.assertEqual( len(geo.points()), 100 )
 		self.assertEqual( len(geo.prims()), 100 )
-		self.assertEqual( geo.pointAttribs()[-1].name(), "N" )
-		self.assertTrue( geo.pointAttribs()[-1].isTransformedAsNormal() )
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), [ "N", "P", "Pw" ] )
+		self.assertTrue( geo.findPointAttrib( "N" ).isTransformedAsNormal() )
 	
 	def testAttributeFilter( self ) :
 		

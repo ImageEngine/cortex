@@ -158,16 +158,14 @@ void newDriverOperator( OP_OperatorTable *table )
 	table->addOpHidden( sceneCacheWriter->getName() );
 }
 
-/// Declare our new Render Hooks
+/// Declare our new Render Hooks for Houdini 12.0 and 12.1 only
+#if UT_MAJOR_VERSION_INT >= 12 && UT_MINOR_VERSION_INT <= 1
 void newRenderHook( GR_RenderTable *table )
 {
 	GR_Cortex *hook = new GR_Cortex;
-#if UT_MAJOR_VERSION_INT >= 11
 	table->addHook( hook, GR_RENDER_HOOK_VERSION );
-#else
-	table->addHook( hook );
-#endif
 }
+#endif
 
 /// Declare our new IO Translators
 void newGeometryIO( void * )
