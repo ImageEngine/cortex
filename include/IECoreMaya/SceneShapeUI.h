@@ -64,6 +64,7 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		virtual void getDrawRequests( const MDrawInfo &info, bool objectAndActiveOnly, MDrawRequestQueue &requests );
 		virtual void draw( const MDrawRequest &request, M3dView &view ) const;
 		virtual bool select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const;
+		virtual bool snap( MSelectInfo &snapInfo ) const;
 
 		static void *creator();
 	
@@ -74,6 +75,9 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		void hiliteGroups( IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr hilite, IECoreGL::StateComponentPtr base ) const;
 		void unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const;
 		void resetHilites() const;
+
+		/// A useful method that calculates the world space position of the selection ray when given a camera and depth. The result is returned in worldIntersectionPoint.
+		void selectionRayToWorldSpacePoint( const MDagPath &camera, const MSelectInfo &selectInfo, float depth, MPoint &worldIntersectionPoint ) const;
 
 		mutable StateMap m_stateMap;
 		mutable DisplayStyle m_displayStyle;
