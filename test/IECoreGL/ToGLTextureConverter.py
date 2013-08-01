@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -61,8 +61,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 		)
 		
 		self.failIf( res.value )
-
-
+	
 	def testFromCompoundData( self ) :
 		""" Test conversion from a CompoundData representation of an ImagePrimitive """
 		
@@ -91,6 +90,40 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 		)
 
 		self.failIf( res.value )
+
+	def testMissingChannelCreation( self ) :
+		""" Test the creation of missing channels """
+		
+		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+
+		cd = CompoundData()
+		cd["displayWindow"] = Box2iData( i.displayWindow )
+		cd["dataWindow"] = Box2iData( i.dataWindow )
+
+		cnd = CompoundData()
+		cnd[ "R" ] = i[ "R" ].data
+
+		cd["channels"] = cnd
+		
+		exceptionOccured = False
+		try :
+			t = ToGLTextureConverter( cd ).convert()
+		except :
+			exceptionOccured = True
+
+		self.assertTrue( exceptionOccured )
+		
+		exceptionOccured = False
+		try :
+			t = ToGLTextureConverter( cd, True ).convert()
+		except :
+			exceptionOccured = True
+		self.assertFalse( exceptionOccured )
+
+		ii = t.imagePrimitive()
+		self.assertTrue( "R" in ii.channelNames() )
+		self.assertTrue( "G" in ii.channelNames() )
+		self.assertTrue( "B" in ii.channelNames() )
 
 
 
