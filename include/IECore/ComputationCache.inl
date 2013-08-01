@@ -56,6 +56,13 @@ void ComputationCache<T>::clear()
 }
 
 template< typename T >
+void ComputationCache<T>::erase( const T &args )
+{
+	MurmurHash computationHash = m_hashFn(args);
+	m_cache.erase( computationHash );
+}
+
+template< typename T >
 size_t ComputationCache<T>::getMaxComputations() const
 {
 	return m_cache.getMaxCost();
@@ -138,6 +145,12 @@ MurmurHash ComputationCache<T>::cacheGetter( const MurmurHash &h, size_t &cost )
 {
 	cost = 1;
 	return MurmurHash();
+}
+
+template< typename T >
+ObjectPool *ComputationCache<T>::objectPool() const
+{
+	return m_objectPool.get();
 }
 
 } // namespace IECore

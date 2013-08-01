@@ -69,6 +69,9 @@ class ComputationCache : public RefCounted
 		/// Removes all the stored computation information from the cache.
 		void clear();
 
+		/// Removes stored information about a specific computation result.
+		void erase( const T &args );
+
 		/// Returns the maximum number of stored computations in the cache.
 		size_t getMaxComputations() const;
 
@@ -94,6 +97,9 @@ class ComputationCache : public RefCounted
 
 		/// Registers the result of a computation explicitly
 		void set( const T &args, const Object *obj, StoreMode storeMode );
+
+		/// Returns the ObjectPool object used by this computation cache.
+		ObjectPool *objectPool() const;
 
 	private :
 
