@@ -45,7 +45,13 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( ObjectPool );
 
-/// Implements a cache of Object instances indexed by their own hash and limited by the memory consumption.
+/// \addtogroup environmentGroup
+///
+/// <b>IECORE_OBJECTPOOL_MEMORY</b><br>
+/// Used to specify the memory limits for the default ObjectPool. See
+/// ObjectPool::defaultObjectPool() for more information.
+
+/// The ObjectPool class implements a cache of Object instances indexed by their own hash and limited by the memory consumption.
 /// The function defaultObjectPool() returns a singleton object that should be used by most of the operations, 
 /// so there will be one single place where the total memory used by IECore objects is defined. 
 /// 
@@ -94,8 +100,13 @@ class ObjectPool : public RefCounted
 		/// prevent affecting the contents of the pool and it's memoryUsage count.
 		ConstObjectPtr store( const Object *obj, StoreMode mode );
 
-		/// Returns the singleton ObjectPool. It's default maximum cost is defined by the environment
-		/// variable $IECORE_OBJECTPOOL_MEMORY in mega bytes and it defaults to 500.
+		/// Returns a static ObjectPool instance to be used by anything
+		/// wishing to share IECore::Object instances. 
+		/// It makes sense to use this wherever possible to conserve memory. This initially
+		/// has a memory limit specified in megabytes by the IECORE_OBJECTPOOL_MEMORY
+		/// environment variable. If it needs changing it's recommended to do 
+		/// that from a config file loaded by the ConfigLoader, to avoid multiple 
+		/// clients fighting over the same set of settings.
 		static ObjectPoolPtr defaultObjectPool();
 
 	private:
