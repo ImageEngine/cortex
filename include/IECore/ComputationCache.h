@@ -51,12 +51,15 @@ class ComputationCache : public RefCounted
 {
 	public :
 
+		typedef ObjectPool::StoreMode StoreMode;
 		typedef boost::function<IECore::ConstObjectPtr ( const T & )> ComputeFn;
 		typedef boost::function<IECore::MurmurHash ( const T & )> HashFn;
 
 		IE_CORE_DECLAREMEMBERPTR( ComputationCache )
 
 		/// Constructs a cache for the given computation function and hash functions.
+		/// \param computeFn Functor that should know return the computation result from the templated parameters.
+		/// \param hashFn Functor that should compute a unique hash from the templated parameters identifying the computation result.
 		/// \param maxResults Limits the number of computation results this cache will hold.
 		/// \param objectPool Allows overriding the ObjectPool instance to be used for holding the resulting computed objects.
 		ComputationCache( ComputeFn computeFn, HashFn hashFn, size_t maxResults = 10000, ObjectPoolPtr objectPool = ObjectPool::defaultObjectPool() );
@@ -75,14 +78,22 @@ class ComputationCache : public RefCounted
 		/// Returns the number of stored computations
 		size_t cachedComputations() const;
 
-		/// Returns the computation result (by computing it or retrieving from the cache if available).
-		ConstObjectPtr get( const T &args );
+		/// Enum used to specify behavior when retrieving computation results from the cache.
+		typedef enum {
+			ThrowIfMissing = 0,
+			NullIfMissing,
+			ComputeIfMissing
+		} MissingBehaviour;
 
-		/// Retrieves the computation result if available on the cache, or returns NULL if not available.
-		ConstObjectPtr retrieve( const T &args );
+		/// Returns the computation results if available on the cache, otherwise behaves 
+		/// according to the missingBehavior parameter explained below:
+		/// ThrowIfMissing: Throws an Exception.
+		/// NullIfMissing: Returns NULL pointer.
+		/// ComputeIfMissing: Uses the compute function to generate the result and store it in the cache before returning it.
+		ConstObjectPtr get( const T &args, MissingBehaviour missingBehaviour = ComputeIfMissing );
 
 		/// Registers the result of a computation explicitly
-		void set( const T &args, ConstObjectPtr obj );
+		void set( const T &args, const Object *obj, StoreMode storeMode );
 
 	private :
 

@@ -55,28 +55,41 @@ class ObjectPoolTest( unittest.TestCase ) :
 		p = ObjectPool()
 		self.assertEqual( p.memoryUsage(), 0 )
 
-		a = p.store( IntData(1) )
+		a = p.store( IntData(1), ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		self.assertTrue( p.contains(a.hash()) )
 
-		self.assertTrue( a == p.retrieve(a.hash()) )
-		self.assertTrue( a.isSame( p.store(a) ) )
-		self.assertTrue( a.isSame( p.store(IntData(1)) ) )
+		self.assertTrue( a.isSame( p.retrieve(a.hash(),_copy=False) ) )
+		self.assertFalse( a.isSame( p.retrieve(a.hash() ) ) )
+		self.assertEqual( a, p.retrieve(a.hash() ) )
+		self.assertTrue( a.isSame( p.store(a, ObjectPool.StoreCopy) ) )
+		self.assertTrue( a.isSame( p.store(a, ObjectPool.StoreReference) ) )
+		self.assertTrue( a.isSame( p.store(IntData(1), ObjectPool.StoreReference) ) )
 
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 
+	def testStoreMode( self ) :
+
+		b = IntData(10)
+
+		p = ObjectPool()
+		self.assertTrue( b.isSame( p.store( b, ObjectPool.StoreReference ) ) )
+		p.clear()
+		self.assertFalse( b.isSame( p.store( b, ObjectPool.StoreCopy ) ) )
+		self.assertEqual( b, p.retrieve(b.hash(),_copy=False) )
+		
 	def testRemoval( self ) :
 
 		p = ObjectPool()
 		self.assertEqual( p.memoryUsage(), 0 )
-		a = p.store( IntData(1) )
+		a = p.store( IntData(1), ObjectPool.StoreReference )
 		self.assertTrue( p.contains(a.hash()) )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		p.clear()
 		self.assertEqual( p.memoryUsage(), 0 )
 		self.assertFalse( p.contains(a.hash()) )
 
-		a = p.store( StringData("abc") )
+		a = p.store( StringData("abc"), ObjectPool.StoreReference )
 		self.assertTrue( p.contains(a.hash()) )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		p.erase( a.hash() )
@@ -87,9 +100,9 @@ class ObjectPoolTest( unittest.TestCase ) :
 
 		p = ObjectPool()
 		self.assertEqual( p.memoryUsage(), 0 )
-		a = p.store( IntData(1) )
+		a = p.store( IntData(1), ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
-		b = p.store( StringData("abc") )
+		b = p.store( StringData("abc"), ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage()+b.memoryUsage() )
 		
 		p.maxMemoryUsage = b.memoryUsage()

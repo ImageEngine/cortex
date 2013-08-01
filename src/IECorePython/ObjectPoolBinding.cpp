@@ -47,28 +47,48 @@ using namespace IECore;
 namespace IECorePython
 {
 
-ObjectPtr store( ObjectPool &pool, Object* obj )
+ObjectPtr store( ObjectPool &pool, Object* obj, ObjectPool::StoreMode storeMode )
 {
-	return const_cast< Object * >( pool.storeReference(obj).get() );
+	return const_cast< Object * >( pool.store(obj, storeMode).get() );
 }
 
-ObjectPtr retrieve( const ObjectPool &pool, MurmurHash key )
+ObjectPtr retrieve( const ObjectPool &pool, MurmurHash key, bool _copy )
 {
 	ConstObjectPtr o = pool.retrieve(key);
-	if ( o )
+
+	if ( !o )
+	{
+		return 0;
+	}
+
+	if ( _copy )
 	{
 		return o->copy();
 	}
-	return 0;
+
+	return const_cast< Object * >(o.get());
 }
 
 void bindObjectPool()
 {
-	RefCountedClass<ObjectPool, RefCounted>( "ObjectPool" )
+	RefCountedClass<ObjectPool, RefCounted> objectPoolClass( "ObjectPool" );
+
+	{
+		// then define all the nested types
+		scope s( objectPoolClass );
+
+		enum_< ObjectPool::StoreMode > ("StoreMode")
+			.value("StoreCopy", ObjectPool::StoreCopy)
+			.value("StoreReference", ObjectPool::StoreReference)
+			.export_values()
+		;
+	}
+
+	objectPoolClass
 		.def( init<>() )
 		.def( "erase", &ObjectPool::erase )
 		.def( "clear", &ObjectPool::clear )
-		.def( "retrieve", &retrieve )
+		.def( "retrieve", &retrieve, ( arg("key"), arg("_copy") = true ) )		/// _copy=false provides low level access to the pointer stored in the cache
 		.def( "store",  &store )
 		.def( "contains", &ObjectPool::contains )
 		.def( "memoryUsage", &ObjectPool::memoryUsage )

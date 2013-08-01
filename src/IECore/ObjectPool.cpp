@@ -77,7 +77,7 @@ ConstObjectPtr ObjectPool::retrieve( const MurmurHash &hash ) const
 	return m_data->cache.get(hash);
 }
 
-ConstObjectPtr ObjectPool::store( ConstObjectPtr &obj )
+ConstObjectPtr ObjectPool::store( const Object *obj, StoreMode mode )
 {
 	MurmurHash h = obj->hash();
 
@@ -88,38 +88,21 @@ ConstObjectPtr ObjectPool::store( ConstObjectPtr &obj )
 		return cachedObj;
 	}
 
-	m_data->cache.set( h, obj, obj->memoryUsage() );
-	return obj;
-}
-
-ConstObjectPtr ObjectPool::store( const ObjectPtr &obj )
-{
-	MurmurHash h = obj->hash();
-
-	// first tries to see if the object is already in the cache and return that one quickly.
-	ConstObjectPtr cachedObj = m_data->cache.get(h);
-	if ( cachedObj )
+	if ( mode == StoreCopy )
 	{
+		cachedObj = obj->copy();
+		m_data->cache.set( h, cachedObj, obj->memoryUsage() );
 		return cachedObj;
 	}
-
-	m_data->cache.set( h, obj->copy(), obj->memoryUsage() );
-	return obj;
-}
-
-ConstObjectPtr ObjectPool::storeReference( const ObjectPtr &obj )
-{
-	MurmurHash h = obj->hash();
-
-	// first tries to see if the object is already in the cache and return that one quickly.
-	ConstObjectPtr cachedObj = m_data->cache.get(h);
-	if ( cachedObj )
+	else if ( mode == StoreReference )
 	{
-		return cachedObj;
+		m_data->cache.set( h, obj, obj->memoryUsage() );
+		return obj;
 	}
-
-	m_data->cache.set( h, obj, obj->memoryUsage() );
-	return obj;
+	else
+	{
+		throw Exception( "Invalid store mode!" );
+	}
 }
 
 bool ObjectPool::contains( const MurmurHash &hash ) const

@@ -694,11 +694,11 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 						/// Could not create the object from another time sample... so we load the entire object
 						SimpleCacheKey defaultKey( reader, defaultSample );
 
-						ConstObjectPtr obj = objectCache->retrieve( currentKey );
+						ConstObjectPtr obj = objectCache->get( currentKey, SimpleCache::NullIfMissing );
 						if ( !obj )
 						{
 							/// ok, try to build the object from another frame...
-							ConstObjectPtr defaultObj = objectCache->retrieve( defaultKey );
+							ConstObjectPtr defaultObj = objectCache->get( defaultKey, SimpleCache::NullIfMissing );
 							if ( defaultObj )
 							{
 								IECore::ConstInternedStringVectorDataPtr varNames = runTimeCast<const InternedStringVectorData>( reader->readAttributeAtSample(animatedObjectPrimVarsAttribute, 0) );
@@ -709,7 +709,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 									{
 										// we managed to load the object from a different time sample from the cache, just have to load the changing prim vars...
 										mergeMaps( prim->variables, readObjectPrimitiveVariablesAtSample( reader->m_indexedIO, varNames->readable(), sample ) );
-										objectCache->set( currentKey, prim );
+										objectCache->set( currentKey, prim, ObjectPool::StoreReference );
 										return prim;
 									}
 								}
@@ -718,7 +718,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 							obj = objectCache->get( currentKey );
 						}
 						/// register the object as the default, so next frames could reuse them
-						objectCache->set( defaultKey, obj );
+						objectCache->set( defaultKey, obj, ObjectPool::StoreReference );
 						return obj;
 					}
 					/// The object has animated topology... so we load the entire object

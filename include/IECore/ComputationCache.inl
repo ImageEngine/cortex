@@ -74,19 +74,7 @@ size_t ComputationCache<T>::cachedComputations() const
 }
 
 template< typename T >
-ConstObjectPtr ComputationCache<T>::retrieve( const T &args )
-{
-	MurmurHash computationHash = m_hashFn(args);
-	MurmurHash h = m_cache.get(computationHash);
-	if ( h == MurmurHash() )
-	{
-		return 0;
-	}
-	return m_objectPool->retrieve( h );
-}
-
-template< typename T >
-ConstObjectPtr ComputationCache<T>::get( const T &args )
+ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::MissingBehaviour missingBehaviour )
 {
 	ConstObjectPtr obj(0);
 	MurmurHash computationHash = m_hashFn(args);
@@ -94,11 +82,20 @@ ConstObjectPtr ComputationCache<T>::get( const T &args )
 
 	if ( objectHash == MurmurHash() )
 	{
+		/// don't know the computation hash... check the missing behaviour
+		if ( missingBehaviour == ThrowIfMissing )
+		{
+			throw Exception( "Computation not available in the cache!" );
+		}
+		else if ( missingBehaviour == NullIfMissing )
+		{
+			return 0;
+		}
 		obj = m_computeFn(args);
 		if ( obj )
 		{
 			m_cache.set( computationHash, obj->hash(), 1 );
-			obj = m_objectPool->store( obj );
+			obj = m_objectPool->store( obj, ObjectPool::StoreReference );
 		}
 	}
 	else
@@ -106,10 +103,19 @@ ConstObjectPtr ComputationCache<T>::get( const T &args )
 		obj = m_objectPool->retrieve(objectHash);
 		if ( !obj )
 		{
+			/// the computation result was not in the object pool.... check the missing behavour
+			if ( missingBehaviour == ThrowIfMissing )
+			{
+				throw Exception( "Computation result not available in the cache!" );
+			}
+			else if ( missingBehaviour == NullIfMissing )
+			{
+				return 0;
+			}
 			obj = m_computeFn(args);
 			if ( obj )
 			{
-				obj = m_objectPool->store( obj );
+				obj = m_objectPool->store( obj, ObjectPool::StoreReference );
 			}
 		}
 	}
@@ -117,12 +123,12 @@ ConstObjectPtr ComputationCache<T>::get( const T &args )
 }
 
 template< typename T >
-void ComputationCache<T>::set( const T &args, ConstObjectPtr obj )
+void ComputationCache<T>::set( const T &args, const Object *obj, StoreMode storeMode )
 {
 	MurmurHash computationHash = m_hashFn(args);
 	if ( obj )
 	{
-		m_objectPool->store(obj);
+		m_objectPool->store(obj, storeMode);
 		m_cache.set( computationHash, obj->hash(), 1 );
 	}
 }

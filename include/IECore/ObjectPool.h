@@ -81,19 +81,18 @@ class ObjectPool : public RefCounted
 		/// Retrieves the Object with the given hash, or NULL if not held in the pool.
 		ConstObjectPtr retrieve( const MurmurHash &hash ) const;
 
-		/// Stores a reference to the constant object in the pool.
-		/// The object passed should not be modified after this call otherwise it will affect the contents of the pool.
-		/// Returns the object stored in the pool, which could differ from the input object.
-		ConstObjectPtr store( ConstObjectPtr &obj );
+		/// Enum used to specify how to store the pointer passed to the store() function.
+		enum StoreMode
+		{
+			StoreCopy = 0,
+			StoreReference,
+		};
 
-		/// Stores a copy of the object in the pool.
-		/// Returns the object stored in the pool, which could differ from the input object.
-		ConstObjectPtr store( const ObjectPtr &obj );
-
-		/// Stores a reference to the object in the pool.
-		/// The object passed should not be modified otherwise it will affect the contents of the pool.
-		/// Returns the object stored in the pool, which could differ from the input object.
-		ConstObjectPtr storeReference( const ObjectPtr &obj );
+		/// Stores a reference to the object or a copy to the object in the pool, depending on the storeMode parameter. 
+		/// If the object passed is already in the pool, than this function will have no effect and will return the stored object instead.
+		/// If the storeMode is Reference, then the object should not be modified after the call to this function to 
+		/// prevent affecting the contents of the pool and it's memoryUsage count.
+		ConstObjectPtr store( const Object *obj, StoreMode mode );
 
 		/// Returns the singleton ObjectPool. It's default maximum cost is defined by the environment
 		/// variable $IECORE_OBJECTPOOL_MEMORY in mega bytes and it defaults to 500.
