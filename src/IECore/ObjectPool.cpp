@@ -45,7 +45,7 @@ using namespace IECore;
 struct ObjectPool::MemberData
 {
 
-	MemberData() : cache( getter )
+	MemberData( size_t maxMemory ) : cache( getter, maxMemory )
 	{
 	}
 
@@ -63,8 +63,8 @@ struct ObjectPool::MemberData
 // ObjectPool
 //////////////////////////////////////////////////////////////////////////
 
-ObjectPool::ObjectPool()
-	:	m_data( new MemberData )
+ObjectPool::ObjectPool( size_t maxMemory )
+	:	m_data( new MemberData(maxMemory) )
 {
 }
 
@@ -142,8 +142,7 @@ ObjectPoolPtr ObjectPool::defaultObjectPool()
 	{
 		const char *m = getenv( "IECORE_OBJECTPOOL_MEMORY" );
 		int mi = m ? boost::lexical_cast<int>( m ) : 500;
-		c = new ObjectPool();
-		c->setMaxMemoryUsage( 1024 * 1024 * mi );
+		c = new ObjectPool(1024 * 1024 * mi);
 	}
 	return c;
 }

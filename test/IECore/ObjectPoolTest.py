@@ -42,7 +42,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = ObjectPool()
+		p = ObjectPool(500)
 		self.assertTrue( isinstance( p, ObjectPool ) )
 		self.assertEqual( p.memoryUsage(), 0 )
 		self.assertEqual( p.maxMemoryUsage, 500 )
@@ -52,7 +52,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 
 	def testUniqueness( self ) :
 		
-		p = ObjectPool()
+		p = ObjectPool(500)
 		self.assertEqual( p.memoryUsage(), 0 )
 
 		a = p.store( IntData(1), ObjectPool.StoreReference )
@@ -72,7 +72,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 
 		b = IntData(10)
 
-		p = ObjectPool()
+		p = ObjectPool(500)
 		self.assertTrue( b.isSame( p.store( b, ObjectPool.StoreReference ) ) )
 		p.clear()
 		self.assertFalse( b.isSame( p.store( b, ObjectPool.StoreCopy ) ) )
@@ -80,7 +80,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 		
 	def testRemoval( self ) :
 
-		p = ObjectPool()
+		p = ObjectPool(500)
 		self.assertEqual( p.memoryUsage(), 0 )
 		a = p.store( IntData(1), ObjectPool.StoreReference )
 		self.assertTrue( p.contains(a.hash()) )
@@ -98,7 +98,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 
 	def testMaxMemoryUsage( self ) :
 
-		p = ObjectPool()
+		p = ObjectPool(500)
 		self.assertEqual( p.memoryUsage(), 0 )
 		a = p.store( IntData(1), ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )

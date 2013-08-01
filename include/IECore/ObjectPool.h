@@ -62,7 +62,7 @@ class ObjectPool : public RefCounted
 
 		IE_CORE_DECLAREMEMBERPTR( ObjectPool );
 
-		ObjectPool();
+		ObjectPool( size_t maxMemory );
 		virtual ~ObjectPool();
 
 		// Clears all the objects in the pool

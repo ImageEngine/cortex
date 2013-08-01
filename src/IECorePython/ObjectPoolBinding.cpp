@@ -85,7 +85,7 @@ void bindObjectPool()
 	}
 
 	objectPoolClass
-		.def( init<>() )
+		.def( init<size_t>() )
 		.def( "erase", &ObjectPool::erase )
 		.def( "clear", &ObjectPool::clear )
 		.def( "retrieve", &retrieve, ( arg("key"), arg("_copy") = true ) )		/// _copy=false provides low level access to the pointer stored in the cache
