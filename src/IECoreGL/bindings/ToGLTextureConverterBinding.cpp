@@ -48,8 +48,7 @@ namespace IECoreGL
 void bindToGLTextureConverter()
 {
 	IECorePython::RunTimeTypedClass<ToGLTextureConverter>()
-		.def( init< IECore::ConstObjectPtr >() )
-		.def( init< IECore::ConstObjectPtr, bool >() )
+		.def( init< IECore::ConstObjectPtr, bool >( boost::python::arg_( "createMissingRGBChannels" ) = false ) )
 	;
 }
 

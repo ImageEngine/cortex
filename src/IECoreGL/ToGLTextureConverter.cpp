@@ -123,7 +123,7 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 	return t;
 }
 
-IECore::ImagePrimitivePtr ToGLTextureConverter::createMissingChannels( IECore::ConstImagePrimitivePtr image ) const
+IECore::ImagePrimitivePtr ToGLTextureConverter::createMissingChannels( const IECore::ImagePrimitive *image ) const
 {
 	IECore::ImagePrimitivePtr newImage = image->copy();
 	if( newImage->getChannel<float>( "R" ) == 0)

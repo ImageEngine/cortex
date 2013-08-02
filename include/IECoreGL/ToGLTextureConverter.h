@@ -95,7 +95,7 @@ class ToGLTextureConverter : public ToGLConverter
 	
 	private :
 
-		IECore::ImagePrimitivePtr createMissingChannels( IECore::ConstImagePrimitivePtr image ) const;
+		IECore::ImagePrimitivePtr createMissingChannels( const IECore::ImagePrimitive *image ) const;
 		IECore::ImagePrimitivePtr imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const;
 		bool m_createMissingRGBChannels;
 

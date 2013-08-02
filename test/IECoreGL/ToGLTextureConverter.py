@@ -104,21 +104,11 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 		cnd[ "R" ] = i[ "R" ].data
 
 		cd["channels"] = cnd
-		
-		exceptionOccured = False
-		try :
-			t = ToGLTextureConverter( cd ).convert()
-		except :
-			exceptionOccured = True
 
-		self.assertTrue( exceptionOccured )
-		
-		exceptionOccured = False
-		try :
-			t = ToGLTextureConverter( cd, True ).convert()
-		except :
-			exceptionOccured = True
-		self.assertFalse( exceptionOccured )
+		# We are missing a channel and so an exception should be thrown if we try to convert it with the default arguments.	
+		self.assertRaises( RuntimeError, ToGLTextureConverter( cd ).convert )
+
+		t = ToGLTextureConverter( cd, True ).convert()
 
 		ii = t.imagePrimitive()
 		self.assertTrue( "R" in ii.channelNames() )
