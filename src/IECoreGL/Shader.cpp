@@ -423,15 +423,15 @@ struct Shader::Setup::MemberData : public IECore::RefCounted
 		virtual void bind()
 		{
 			Buffer::ScopedBinding binding( *m_buffer );
-			glEnableVertexAttribArray( m_attributeIndex );
-			glVertexAttribPointer( m_attributeIndex, m_size, m_type, false, 0, 0 );
-			glVertexAttribDivisor( m_attributeIndex, m_divisor );
+			glEnableVertexAttribArrayARB( m_attributeIndex );
+			glVertexAttribPointerARB( m_attributeIndex, m_size, m_type, false, 0, 0 );
+			glVertexAttribDivisorARB( m_attributeIndex, m_divisor );
 		}
 		
 		virtual void unbind()
 		{
-			glVertexAttribDivisor( m_attributeIndex, 0 );
-			glDisableVertexAttribArray( m_attributeIndex );
+			glVertexAttribDivisorARB( m_attributeIndex, 0 );
+			glDisableVertexAttribArrayARB( m_attributeIndex );
 		}
 		
 		private :
