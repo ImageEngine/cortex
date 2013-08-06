@@ -57,8 +57,9 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLTextureConverter );
 ToGLTextureConverter::ConverterDescription<ToGLTextureConverter> ToGLTextureConverter::g_description;
 ToGLTextureConverter::ConverterDescription<ToGLTextureConverter> ToGLTextureConverter::g_compoundDataDescription( IECore::CompoundData::staticTypeId(), IECoreGL::Texture::staticTypeId() );
 
-ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert )
-	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId )
+ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert, bool createMissingRGBChannels )
+	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId ),
+	m_createMissingRGBChannels( createMissingRGBChannels )
 {
 	srcParameter()->setValue( IECore::constPointerCast<IECore::Object>( toConvert ) );
 }
@@ -66,7 +67,6 @@ ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert )
 ToGLTextureConverter::~ToGLTextureConverter()
 {
 }
-
 
 IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
@@ -81,7 +81,7 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 	
 		IECore::CompoundData::ConstPtr data = IECore::runTimeCast<const IECore::CompoundData>( src );
 		if ( !data ) {
-			throw IECore::Exception( "Invald object supplied. ToGLTextureConverter takes an ImagePrimitive or its CompountData representaion." );
+			throw IECore::Exception( "Invalid object supplied. ToGLTextureConverter takes an ImagePrimitive or its CompoundData representation." );
 		}
 
 		image = imageFromCompoundData( data );
@@ -103,7 +103,15 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 	}
 	else
 	{
-		throw IECore::Exception( "Invalid image format, ToGLTextureConverter supports RGB[A] and Y[A]." );
+		if( m_createMissingRGBChannels )
+		{
+			image = createMissingChannels( image );
+			t = new ColorTexture( image );
+		}
+		else
+		{
+			throw IECore::Exception( "Invalid image format, ToGLTextureConverter supports RGB[A] and Y[A]." );
+		}
 	}
 
 	if ( ! t )
@@ -115,6 +123,23 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 	return t;
 }
 
+IECore::ImagePrimitivePtr ToGLTextureConverter::createMissingChannels( const IECore::ImagePrimitive *image ) const
+{
+	IECore::ImagePrimitivePtr newImage = image->copy();
+	if( newImage->getChannel<float>( "R" ) == 0)
+	{
+		newImage->createChannel<float>( "R" );
+	}
+	if( newImage->getChannel<float>( "G" ) == 0)
+	{
+		newImage->createChannel<float>( "G" );
+	}
+	if( newImage->getChannel<float>( "B" ) == 0)
+	{
+		newImage->createChannel<float>( "B" );
+	}
+	return newImage;
+}
 
 IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const
 {
@@ -129,7 +154,7 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::C
 	IECore::CompoundDataMap::const_iterator itData = data->readable().find( "dataWindow" );
 	if ( itData == data->readable().end() )
 	{
-		throw IECore::Exception( "Invald CompoundData supplied. ImagePrimitive representaitions need a dataWindow (Box2i)." );
+		throw IECore::Exception( "Invalid CompoundData supplied. ImagePrimitive representations need a dataWindow (Box2i)." );
 	}
 	dataWindow = IECore::runTimeCast<IECore::Box2iData>( itData->second );
 
@@ -137,7 +162,7 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::C
 	itData = data->readable().find( "displayWindow" );
 	if ( itData == data->readable().end() )
 	{
-		throw IECore::Exception( "Invald CompoundData supplied. ImagePrimitive representaitions need a screenWindow (Box2i)." );
+		throw IECore::Exception( "Invalid CompoundData supplied. ImagePrimitive representations need a screenWindow (Box2i)." );
 	}
 	screenWindow = IECore::runTimeCast<IECore::Box2iData>( itData->second );
 
@@ -145,14 +170,14 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::C
 	itData = data->readable().find( "channels" );
 	if ( itData == data->readable().end() )
 	{
-		throw IECore::Exception( "Invald CompoundData supplied. ImagePrimitive representaitions need a CompoundDataMap of channels." );
+		throw IECore::Exception( "Invalid CompoundData supplied. ImagePrimitive representations need a CompoundDataMap of channels." );
 	}
 	channels = IECore::runTimeCast<IECore::CompoundData>( itData->second );
 
 
 	if ( !dataWindow || !screenWindow || !channels )
 	{
-		throw IECore::Exception( "Invald CompoundData representation supplied. Some data is of the wrong type" );
+		throw IECore::Exception( "Invalid CompoundData representation supplied. Some data is of the wrong type" );
 	}
 
 
@@ -166,7 +191,7 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::C
 		IECore::FloatVectorDataPtr channelData = IECore::runTimeCast<IECore::FloatVectorData>( itChannels->second );
 		if ( ! channelData )
 		{
-			throw IECore::Exception( "Invald channel data found in ImagePrimitive representation, only 32bit float data is supported. Please check texture.");
+			throw IECore::Exception( "Invalid channel data found in ImagePrimitive representation, only 32bit float data is supported. Please check texture.");
 		}
 
 		newImage->variables.insert( IECore::PrimitiveVariableMap::value_type( itChannels->first, IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, channelData ) ) );
