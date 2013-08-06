@@ -145,7 +145,7 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 	template< typename T, int bands, int samples >
 	void addSphericalHarmonicsProjectorTest()
 	{
-	    typedef SphericalHarmonicsProjectorTest<T,bands,samples> TestType;
+		typedef SphericalHarmonicsProjectorTest<T,bands,samples> TestType;
 		static boost::shared_ptr<TestType> instance(new TestType());
 
 		add( BOOST_CLASS_TEST_CASE( &TestType::testProjection, instance ) );
