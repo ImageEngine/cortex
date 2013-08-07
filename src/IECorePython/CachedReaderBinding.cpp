@@ -63,6 +63,11 @@ static ObjectPtr read( CachedReader &r, const std::string &f )
 	}
 }
 
+static ObjectPoolPtr objectPool( CachedReader &r )
+{
+	return r.objectPool();
+}
+
 void bindCachedReader()
 {
 	RefCountedClass<CachedReader, RefCounted>( "CachedReader" )
@@ -77,6 +82,7 @@ void bindCachedReader()
 		.add_property( "searchPath", make_function( &CachedReader::getSearchPath, return_value_policy<copy_const_reference>() ), &CachedReader::setSearchPath )
 		.add_property( "maxMemory", &CachedReader::getMaxMemory, &CachedReader::setMaxMemory )
 		.def( "defaultCachedReader", &CachedReader::defaultCachedReader ).staticmethod( "defaultCachedReader" )
+		.def( "objectPool", &objectPool )
 	;
 }
 
