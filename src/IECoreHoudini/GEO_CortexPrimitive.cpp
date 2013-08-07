@@ -36,9 +36,15 @@
 #include "GA/GA_ElementWrangler.h"
 #include "GA/GA_IndexMap.h"
 #include "GA/GA_MergeMap.h"
+#include "GA/GA_PrimitiveJSON.h"
+#include "GA/GA_SaveMap.h"
+#include "UT/UT_JSONParser.h"
+#include "UT/UT_JSONWriter.h"
 
 #include "GEO/GEO_Detail.h"
 
+#include "IECore/HexConversion.h"
+#include "IECore/MemoryIndexedIO.h"
 #include "IECore/VisibleRenderable.h"
 
 #include "IECoreHoudini/Convert.h"
@@ -139,12 +145,6 @@ void GEO_CortexPrimitive::copyUnwiredForMerge( const GA_Primitive *src, const GA
 	
 	/// \todo: should we make a shallow or a deep copy?
 	m_object = orig->m_object;
-}
-
-const GA_PrimitiveJSON *GEO_CortexPrimitive::getJSON() const
-{
-	/// \todo: implement me
-	return 0;
 }
 
 void GEO_CortexPrimitive::reverse()
@@ -259,4 +259,244 @@ void GEO_CortexPrimitive::setObject( const IECore::Object *object )
 {
 	/// \todo: should this be a deep copy?
 	m_object = object->copy();
+}
+
+class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
+{
+	public :
+    		
+		geo_CortexPrimitiveJSON()
+		{
+		}
+		
+		virtual ~geo_CortexPrimitiveJSON()
+		{
+		}
+		
+		enum
+		{
+			geo_TBJ_VERTEX,
+			geo_TBJ_CORTEX,
+			geo_TBJ_ENTRIES
+		};
+		
+		const GEO_CortexPrimitive *object( const GA_Primitive *p ) const
+		{
+			return static_cast<const GEO_CortexPrimitive *>(p);
+		}
+		
+		GEO_CortexPrimitive *object( GA_Primitive *p ) const
+		{
+			return static_cast<GEO_CortexPrimitive *>(p);
+		}
+		
+		virtual int getEntries() const
+		{
+			return geo_TBJ_ENTRIES;
+		}
+		
+		virtual const char *getKeyword( int i ) const
+		{
+			switch ( i )
+			{
+				case geo_TBJ_VERTEX :
+				{
+					return "vertex";
+				}
+				case geo_TBJ_CORTEX :
+				{
+					return "cortex";
+				}
+				case geo_TBJ_ENTRIES :
+				{
+					break;
+				}
+			}
+			
+			return 0;
+		}
+		
+		virtual bool shouldSaveField( const GA_Primitive *prim, int i, const GA_SaveMap &sm ) const
+		{
+			switch ( i )
+			{
+				case geo_TBJ_VERTEX :
+				{
+					return true;
+				}
+				case geo_TBJ_CORTEX :
+				{
+					return true;
+				}
+				case geo_TBJ_ENTRIES :
+				{
+					break;
+				}
+			}
+			
+			return false;
+		}
+		
+		virtual bool saveField( const GA_Primitive *pr, int i, UT_JSONWriter &w, const GA_SaveMap &map ) const
+		{
+			switch ( i )
+			{
+				case geo_TBJ_VERTEX :
+				{
+					GA_Offset offset = object( pr )->getVertexOffset( 0 );
+					return w.jsonInt( int64( map.getVertexIndex( offset ) ) );
+				}
+				case geo_TBJ_CORTEX :
+				{
+					const IECore::Object *obj = object( pr )->getObject();
+					if ( !obj )
+					{
+						return false;
+					}
+					
+					try
+					{
+						IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( IECore::ConstCharVectorDataPtr(), IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Write );
+						
+						obj->save( io, "object" );
+						
+						IECore::ConstCharVectorDataPtr buf = io->buffer();
+						const IECore::CharVectorData::ValueType &data = buf->readable();
+						
+						if ( w.getBinary() )
+						{
+							int64 length = data.size();
+							w.jsonValue( length );
+							
+							UT_JSONWriter::TiledStream out( w );
+							out.write( &data[0], length );
+						}
+						else
+						{
+							std::string str = IECore::decToHex( data.begin(), data.end() );
+							w.jsonString( str.c_str(), str.size() );
+						}
+					}
+					catch ( std::exception &e )
+					{
+						std::cerr << e.what() << std::endl;
+						return false;
+					}
+					
+					return true;
+				}
+				case geo_TBJ_ENTRIES :
+				{
+					break;
+				}
+			}
+			
+			return false;
+		}
+		
+		virtual bool loadField( GA_Primitive *pr, int i, UT_JSONParser &p, const GA_LoadMap &map ) const
+		{
+			switch ( i )
+			{
+				case geo_TBJ_VERTEX :
+				{
+					int64 vId;
+					if ( !p.parseInt( vId ) )
+					{
+						return false;
+					}
+					
+					GEO_CortexPrimitive *prim = object( pr );
+					GA_Offset offset = map.getVertexOffset( GA_Index( vId ) );
+					if ( prim->m_offset != offset )
+					{
+						prim->destroyVertex( prim->m_offset );
+						prim->m_offset = offset;
+					}
+					
+					return true;
+				}
+				case geo_TBJ_CORTEX :
+				{
+					try
+					{
+						IECore::CharVectorDataPtr buf = new IECore::CharVectorData();
+						
+						if ( p.getBinary() )
+						{
+							int64 length;
+							if ( !p.parseValue( length ) )
+							{
+								return false;
+							}
+							
+							UT_JSONParser::TiledStream in( p );
+							buf->writable().resize( length );
+							in.read( &buf->writable()[0], length );
+						}
+						else
+						{
+							UT_WorkBuffer workBuffer;
+							if ( !p.parseString( workBuffer ) )
+							{
+								return false;
+							}
+							
+							buf->writable().resize( workBuffer.length() / 2 );
+							IECore::hexToDec<char>( workBuffer.buffer(), workBuffer.buffer() + workBuffer.length(), buf->writable().begin() );
+						}
+						
+						IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( buf, IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Read );
+						object( pr )->setObject( IECore::Object::load( io, "object" ) );
+					}
+					catch ( std::exception &e )
+					{
+						std::cerr << e.what() << std::endl;
+						return false;
+					}
+					
+					return true;
+				}
+				case geo_TBJ_ENTRIES :
+				{
+					break;
+				}
+			}
+			
+			return false;
+		}
+		
+		virtual bool isEqual( int i, const GA_Primitive *p0, const GA_Primitive *p1 ) const
+		{
+			switch ( i )
+			{
+				case geo_TBJ_VERTEX :
+				{
+					return ( p0->getVertexOffset( 0 ) == p1->getVertexOffset( 0 ) );
+				}
+				case geo_TBJ_CORTEX :
+				{
+					/// \todo: should this be returning object( p0 )->getPrimitive()->isSame( object( p1 )->getPrimitive() )?
+					return false;
+				}
+				case geo_TBJ_ENTRIES :
+				{
+					break;
+				}
+			}
+			
+			UT_ASSERT(0);
+			return false;
+		}
+};
+
+const GA_PrimitiveJSON *GEO_CortexPrimitive::getJSON() const
+{
+	static GA_PrimitiveJSON *jsonPrim = 0;
+	if ( !jsonPrim )
+	{
+		jsonPrim = new geo_CortexPrimitiveJSON();
+	}
+	
+	return jsonPrim;
 }

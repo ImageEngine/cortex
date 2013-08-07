@@ -86,6 +86,10 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		IECore::ObjectPtr m_object;
 		// offset for the representative vertex
 		GA_Offset m_offset;
+	
+	private :
+		
+		class geo_CortexPrimitiveJSON;
 
 };
 

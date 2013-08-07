@@ -43,6 +43,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	__testFile = "test/test.scc"
 	__testOutFile = "test/testOut.scc"
 	__testLinkedOutFile = "test/testOut.lscc"
+	__testHip = "test/test.hip"
+	__testBgeo = "test/test.bgeo"
+	__testBgeoGz = "test/test.bgeo.gz"
+	__testGeo = "test/test.geo"
 	
 	def sop( self, parent=None ) :
 		if not parent :
@@ -1311,9 +1315,89 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( cPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
 		self.assertEqual( dPrims[0].attribValue( "Cd" ), ( 0.5, 0.5, 0 ) )
 	
+	def testSaveLoadCortexObjects( self ) :
+		
+		self.writeSCC()
+		sop = self.sop()
+		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		null = sop.createOutputNode( "null" )
+		nullPath = null.path()
+		prims = null.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+		
+		# make sure they survive the locks
+		null.setHardLocked( True )
+		null.setInput( 0, None )
+		prims = null.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+		
+		# make sure they survive a scene save/load
+		hou.hipFile.save( TestSceneCache.__testHip )
+		hou.hipFile.load( TestSceneCache.__testHip )
+		null = hou.node( nullPath )
+		prims = null.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+		
+		# make sure they survive bgeo caching
+		writer = null.createOutputNode( "file" )
+		writer.parm( "file" ).set( TestSceneCache.__testBgeo )
+		writer.parm( "filemode" ).set( 2 ) # write
+		writer.cook( force = True )
+		reader = null.parent().createNode( "file" )
+		reader.parm( "file" ).set( TestSceneCache.__testBgeo )
+		prims = reader.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+		
+		# make sure they survive bgeo.gz caching
+		writer.parm( "file" ).set( TestSceneCache.__testBgeoGz )
+		writer.cook( force = True )
+		reader = null.parent().createNode( "file" )
+		reader.parm( "file" ).set( TestSceneCache.__testBgeoGz )
+		prims = reader.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+		
+		# make sure they survive geo caching
+		writer.parm( "file" ).set( TestSceneCache.__testGeo )
+		writer.cook( force = True )
+		reader = null.parent().createNode( "file" )
+		reader.parm( "file" ).set( TestSceneCache.__testGeo )
+		prims = reader.geometry().prims()
+		self.assertEqual( len(prims), 3 )
+		for i in range( 0, 3 ) :
+			self.assertEqual( prims[i].type(), hou.primType.Custom )
+			self.assertEqual( prims[i].vertices()[0].point().number(), i )
+	
+	def testStashing( self ) :
+		
+		self.writeSCC()
+		sop = self.sop()
+		writer = sop.createOutputNode( "file" )
+		writer.parm( "file" ).set( TestSceneCache.__testBgeo )
+		writer.parm( "filemode" ).set( 2 ) # write
+		writer.cook( force = True )
+		reader = sop.parent().createNode( "file" )
+		reader.parm( "file" ).set( TestSceneCache.__testBgeo )
+		reader.cook( force = True )
+		reader.cook( force = True )
+	
 	def tearDown( self ) :
 		
-		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile ] :
+		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile, TestSceneCache.__testHip, TestSceneCache.__testBgeo, TestSceneCache.__testBgeoGz, TestSceneCache.__testGeo ] :
 			if os.path.exists( f ) :
 				os.remove( f )
 
