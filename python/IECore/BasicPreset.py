@@ -266,7 +266,7 @@ IECore.registerRunTimeTyped( %s )
 		
 	@staticmethod
 	def _grabHierarchy( data, parameter, parameterList=() ) :
-				
+		
 		if parameter.staticTypeId() == IECore.TypeId.CompoundParameter :
 
 			for p in parameter.keys() :
@@ -289,6 +289,19 @@ IECore.registerRunTimeTyped( %s )
 				
 				BasicPreset._grabClassVectorParameter( parameter, data, parameterList )
 			
+			elif isinstance( parameter, IECore.CompoundParameter ) :
+			
+				# for classes derived from IECore.CompoundParameter:
+				for p in parameter.keys() :
+
+					data[p] = IECore.CompoundObject()
+
+					BasicPreset._grabHierarchy(
+						data[p],
+						parameter[p],
+						parameterList, 
+					 )
+				
 			else :	
 						
 				# Some parameter types end up with different python instance
