@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,12 +36,10 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/CachedReader.h"
-#include "IECore/Object.h"
-#include "IECore/ModifyOp.h"
-#include "IECorePython/CachedReaderBinding.h"
+#include "IECore/ObjectPool.h"
+
+#include "IECorePython/ObjectPoolBinding.h"
 #include "IECorePython/RefCountedBinding.h"
-#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -49,38 +47,54 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static ObjectPtr read( CachedReader &r, const std::string &f )
+ObjectPtr store( ObjectPool &pool, Object* obj, ObjectPool::StoreMode storeMode )
 {
-	ScopedGILRelease gilRelease;
-	ConstObjectPtr o = r.read( f );
-	if( o )
-	{
-		return o->copy();
-	}
-	else
+	return const_cast< Object * >( pool.store(obj, storeMode).get() );
+}
+
+ObjectPtr retrieve( const ObjectPool &pool, MurmurHash key, bool _copy )
+{
+	ConstObjectPtr o = pool.retrieve(key);
+
+	if ( !o )
 	{
 		return 0;
 	}
+
+	if ( _copy )
+	{
+		return o->copy();
+	}
+
+	return const_cast< Object * >(o.get());
 }
 
-static ObjectPoolPtr objectPool( CachedReader &r )
+void bindObjectPool()
 {
-	return r.objectPool();
-}
+	RefCountedClass<ObjectPool, RefCounted> objectPoolClass( "ObjectPool" );
 
-void bindCachedReader()
-{
-	RefCountedClass<CachedReader, RefCounted>( "CachedReader" )
-		.def( init<const SearchPath &, optional<ObjectPoolPtr> >() )
-		.def( init<const SearchPath &, ConstModifyOpPtr, optional<ObjectPoolPtr> >() )
-		.def( "read", &read )
-		.def( "clear", (void (CachedReader::*)( const std::string &) )&CachedReader::clear )
-		.def( "clear", (void (CachedReader::*)( void ) )&CachedReader::clear )
-		.def( "insert", &CachedReader::insert )
-		.def( "cached", &CachedReader::cached )
-		.add_property( "searchPath", make_function( &CachedReader::getSearchPath, return_value_policy<copy_const_reference>() ), &CachedReader::setSearchPath )
-		.def( "defaultCachedReader", &CachedReader::defaultCachedReader ).staticmethod( "defaultCachedReader" )
-		.def( "objectPool", &objectPool )
+	{
+		// then define all the nested types
+		scope s( objectPoolClass );
+
+		enum_< ObjectPool::StoreMode > ("StoreMode")
+			.value("StoreCopy", ObjectPool::StoreCopy)
+			.value("StoreReference", ObjectPool::StoreReference)
+			.export_values()
+		;
+	}
+
+	objectPoolClass
+		.def( init<size_t>() )
+		.def( "erase", &ObjectPool::erase )
+		.def( "clear", &ObjectPool::clear )
+		.def( "retrieve", &retrieve, ( arg("key"), arg("_copy") = true ) )		/// _copy=false provides low level access to the pointer stored in the cache
+		.def( "store",  &store )
+		.def( "contains", &ObjectPool::contains )
+		.def( "memoryUsage", &ObjectPool::memoryUsage )
+		.def( "getMaxMemoryUsage", &ObjectPool::getMaxMemoryUsage)
+		.def( "setMaxMemoryUsage", &ObjectPool::setMaxMemoryUsage )
+		.def( "defaultObjectPool", &ObjectPool::defaultObjectPool ).staticmethod( "defaultObjectPool" )
 	;
 }
 

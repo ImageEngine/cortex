@@ -78,7 +78,6 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 // IECoreRI::RendererImplementation implementation
 ////////////////////////////////////////////////////////////////////////
 
-const unsigned int IECoreRI::RendererImplementation::g_shaderCacheSize = 10 * 1024 * 1024;
 tbb::queuing_rw_mutex IECoreRI::RendererImplementation::g_nLoopsMutex;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
@@ -252,7 +251,7 @@ void IECoreRI::RendererImplementation::setShaderSearchPathOption( const std::str
 {
 	if( ConstStringDataPtr s = runTimeCast<const StringData>( d ) )
 	{
-		m_shaderCache = new CachedReader( SearchPath( s->readable(), ":" ), g_shaderCacheSize );
+		m_shaderCache = new CachedReader( SearchPath( s->readable(), ":" ) );
 		// no need to call RiOption as that'll be done in worldBegin().
 	}
 	else
@@ -1043,8 +1042,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const s
 IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
 {
 	static IECore::CachedReaderPtr g_defaultShaderCache = new CachedReader(
-		SearchPath( getenv( "DL_SHADERS_PATH" ) ? getenv( "DL_SHADERS_PATH" ) : "", ":" ),
-		g_shaderCacheSize
+		SearchPath( getenv( "DL_SHADERS_PATH" ) ? getenv( "DL_SHADERS_PATH" ) : "", ":" )
 	);
 	return g_defaultShaderCache;
 }

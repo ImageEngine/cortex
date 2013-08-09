@@ -357,7 +357,7 @@ bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 	return false;
 }
 
-IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
+IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )

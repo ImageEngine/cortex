@@ -214,7 +214,8 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 {
 	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
 	{
-		ObjectPtr object = scene->readObject( time );
+		// \todo See if there are ways to avoid the Object copy below.
+		ObjectPtr object = scene->readObject( time )->copy();
 		std::string name = relativePath( scene, rootSize );
 		
 		bool hasAnimatedTopology = scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute );
@@ -222,7 +223,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		std::vector<InternedString> animatedPrimVars;
 		if ( hasAnimatedPrimVars )
 		{
-			const ObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
+			const ConstObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
 			const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj );
 			if ( animatedPrimVarData )
 			{

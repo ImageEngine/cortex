@@ -222,7 +222,7 @@ void HoudiniScene::writeBound( const Imath::Box3d &bound, double time )
 	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
 }
 
-DataPtr HoudiniScene::readTransform( double time ) const
+ConstDataPtr HoudiniScene::readTransform( double time ) const
 {
 	Imath::V3d s, h, r, t;
 	Imath::M44d matrix = readTransformAsMatrix( time );
@@ -289,7 +289,7 @@ void HoudiniScene::attributeNames( NameList &attrs ) const
 	}
 }
 
-ObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
+ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
 {
 	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
 	if ( it != customAttributeReaders().end() )
@@ -401,7 +401,7 @@ bool HoudiniScene::hasObject() const
 	return false;
 }
 
-ObjectPtr HoudiniScene::readObject( double time ) const
+ConstObjectPtr HoudiniScene::readObject( double time ) const
 {
 	OBJ_Node *objNode = retrieveNode( true )->castToOBJNode();
 	if ( !objNode )
@@ -409,7 +409,7 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 		return 0;
 	}
 	
-	ObjectPtr result = 0;
+	ConstObjectPtr result = 0;
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
 		OP_Context context( time );
@@ -424,7 +424,7 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 		/// \todo: add parameter to GroupConverter (or all of them?) to only convert named shapes
 		///	   identify the appropriate shape name
 		///	   use that parameter to avoid converting the entire group
-		Group *group = IECore::runTimeCast<Group>( result );
+		const Group *group = IECore::runTimeCast<const Group>( result );
 		if ( group )
 		{
 			const Group::ChildContainer &children = group->children();
@@ -452,7 +452,7 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 PrimitiveVariableMap HoudiniScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 {
 	// \todo Optimize this function, adding special cases such as for Meshes.
-	PrimitivePtr prim = runTimeCast< Primitive >( readObject( time ) );
+	ConstPrimitivePtr prim = runTimeCast< const Primitive >( readObject( time ) );
 	if ( !prim )
 	{
 		throw Exception( "Object does not have primitive variables!" );

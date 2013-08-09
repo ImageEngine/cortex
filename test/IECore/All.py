@@ -269,6 +269,7 @@ from SceneCacheTest import SceneCacheTest
 from LinkedSceneTest import LinkedSceneTest
 from StandardRadialLensModelTest import StandardRadialLensModelTest
 from LensDistortOpTest import LensDistortOpTest
+from ObjectPoolTest import ObjectPoolTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

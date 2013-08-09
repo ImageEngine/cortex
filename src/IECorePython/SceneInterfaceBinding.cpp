@@ -175,6 +175,36 @@ void writeTags( SceneInterface &m, list tagList )
 	m.writeTags(v);	
 }
 
+DataPtr readTransform( SceneInterface &m, double time )
+{
+	ConstDataPtr t = m.readTransform(time);
+	if ( t )
+	{
+		return t->copy();
+	}
+	return 0;
+}
+
+ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, double time )
+{
+	ConstObjectPtr o = m.readAttribute(name,time);
+	if ( o )
+	{
+		return o->copy();
+	}
+	return 0;
+}
+
+ObjectPtr readObject( SceneInterface &m, double time )
+{
+	ConstObjectPtr o = m.readObject(time);
+	if ( o )
+	{
+		return o->copy();
+	}
+	return 0;
+}
+
 void bindSceneInterface()
 {
 	SceneInterfacePtr (SceneInterface::*nonConstChild)(const SceneInterface::Name &, SceneInterface::MissingBehaviour) = &SceneInterface::child;
@@ -204,17 +234,17 @@ void bindSceneInterface()
 		.def( "name", &SceneInterface::name )
 		.def( "readBound", &SceneInterface::readBound )
 		.def( "writeBound", &SceneInterface::writeBound )
-		.def( "readTransform", &SceneInterface::readTransform )
+		.def( "readTransform", &readTransform )
 		.def( "readTransformAsMatrix", &SceneInterface::readTransformAsMatrix )
 		.def( "writeTransform", &SceneInterface::writeTransform )
 		.def( "hasAttribute", &SceneInterface::hasAttribute )
 		.def( "attributeNames", attributeNames )
-		.def( "readAttribute", &SceneInterface::readAttribute )
+		.def( "readAttribute", &readAttribute )
 		.def( "writeAttribute", &SceneInterface::writeAttribute )
 		.def( "hasTag", &SceneInterface::hasTag, ( arg( "name" ), arg( "includeChildren" ) = true ) )
 		.def( "readTags", readTags, ( arg( "includeChildren" ) = true ) )
 		.def( "writeTags", writeTags )
-		.def( "readObject", &SceneInterface::readObject )
+		.def( "readObject", &readObject )
 		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )
 		.def( "writeObject", &SceneInterface::writeObject )
 		.def( "hasObject", &SceneInterface::hasObject )
