@@ -166,7 +166,7 @@ void MayaScene::writeBound( const Imath::Box3d &bound, double time )
 	throw Exception( "MayaScene::writeBound: write operations not supported!" );
 }
 
-DataPtr MayaScene::readTransform( double time ) const
+ConstDataPtr MayaScene::readTransform( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
@@ -193,7 +193,7 @@ DataPtr MayaScene::readTransform( double time ) const
 
 Imath::M44d MayaScene::readTransformAsMatrix( double time ) const
 {
-	return runTimeCast< TransformationMatrixdData >( readTransform( time ) )->readable().transform();
+	return runTimeCast< const TransformationMatrixdData >( readTransform( time ) )->readable().transform();
 }
 
 void MayaScene::writeTransform( const Data *transform, double time )
@@ -232,7 +232,7 @@ void MayaScene::attributeNames( NameList &attrs ) const
 	}
 }
 
-ObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
+ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 {
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -356,7 +356,7 @@ bool MayaScene::hasObject() const
 	return false;
 }
 
-ObjectPtr MayaScene::readObject( double time ) const
+ConstObjectPtr MayaScene::readObject( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
@@ -420,7 +420,7 @@ ObjectPtr MayaScene::readObject( double time ) const
 PrimitiveVariableMap MayaScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 {
 	// \todo Optimize this function, adding special cases such as for Meshes.
-	PrimitivePtr prim = runTimeCast< Primitive >( readObject( time ) );
+	ConstPrimitivePtr prim = runTimeCast< const Primitive >( readObject( time ) );
 	if ( !prim )
 	{
 		throw Exception( "Object does not have primitive variables!" );

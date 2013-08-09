@@ -347,7 +347,7 @@ double LinkedScene::transformSampleInterval( double time, size_t &floorIndex, si
 	}
 }
 
-DataPtr LinkedScene::readTransformAtSample( size_t sampleIndex ) const
+ConstDataPtr LinkedScene::readTransformAtSample( size_t sampleIndex ) const
 {
 	if (!m_sampled)
 	{
@@ -393,7 +393,7 @@ Imath::M44d LinkedScene::readTransformAsMatrixAtSample( size_t sampleIndex ) con
 	}
 }
 
-DataPtr LinkedScene::readTransform( double time ) const
+ConstDataPtr LinkedScene::readTransform( double time ) const
 {
 	if ( m_linkedScene && !m_atLink )
 	{
@@ -548,7 +548,7 @@ double LinkedScene::attributeSampleInterval( const Name &name, double time, size
 	}
 }
 
-ObjectPtr LinkedScene::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
+ConstObjectPtr LinkedScene::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
 {
 	if (!m_sampled)
 	{
@@ -571,7 +571,7 @@ ObjectPtr LinkedScene::readAttributeAtSample( const Name &name, size_t sampleInd
 	}
 }
 
-ObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
+ConstObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
 {
 	if ( m_linkedScene && !m_atLink )
 	{
@@ -861,7 +861,7 @@ double LinkedScene::objectSampleInterval( double time, size_t &floorIndex, size_
 	}
 }
 
-ObjectPtr LinkedScene::readObjectAtSample( size_t sampleIndex ) const
+ConstObjectPtr LinkedScene::readObjectAtSample( size_t sampleIndex ) const
 {
 	if (!m_sampled)
 	{
@@ -884,7 +884,7 @@ ObjectPtr LinkedScene::readObjectAtSample( size_t sampleIndex ) const
 	}
 }
 
-ObjectPtr LinkedScene::readObject( double time ) const
+ConstObjectPtr LinkedScene::readObject( double time ) const
 {
 	if ( m_linkedScene )
 	{
@@ -973,7 +973,7 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const StringData *fileName, cons
 
 double LinkedScene::remappedLinkTime( double time ) const
 {
-	ConstDoubleDataPtr t = runTimeCast< DoubleData >( m_mainScene->readAttribute( timeLinkAttribute, time ) );
+	ConstDoubleDataPtr t = runTimeCast< const DoubleData >( m_mainScene->readAttribute( timeLinkAttribute, time ) );
 	if ( !t )
 	{
 		throw Exception( "Invalid time when querying for time remapping!" );
@@ -983,7 +983,7 @@ double LinkedScene::remappedLinkTime( double time ) const
 
 double LinkedScene::remappedLinkTimeAtSample( size_t sampleIndex ) const
 {
-	ConstDoubleDataPtr t = runTimeCast< DoubleData >( static_cast<const SampledSceneInterface*>(m_mainScene.get())->readAttributeAtSample( timeLinkAttribute, sampleIndex ) );
+	ConstDoubleDataPtr t = runTimeCast< const DoubleData >( static_cast<const SampledSceneInterface*>(m_mainScene.get())->readAttributeAtSample( timeLinkAttribute, sampleIndex ) );
 	if ( !t )
 	{
 		throw Exception( "Invalid time when querying for time remapping!" );
@@ -1025,8 +1025,8 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 		{
 			if( c->hasAttribute( fileNameLinkAttribute ) && c->hasAttribute( rootLinkAttribute ) )
 			{
-				ConstStringDataPtr fileName = runTimeCast< StringData >( c->readAttribute( fileNameLinkAttribute, 0 ) );
-				ConstInternedStringVectorDataPtr root = runTimeCast< InternedStringVectorData >( c->readAttribute( rootLinkAttribute, 0 ) );
+				ConstStringDataPtr fileName = runTimeCast< const StringData >( c->readAttribute( fileNameLinkAttribute, 0 ) );
+				ConstInternedStringVectorDataPtr root = runTimeCast< const InternedStringVectorData >( c->readAttribute( rootLinkAttribute, 0 ) );
 
 				/// we found the link attribute...
 				int linkDepth;
@@ -1041,7 +1041,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			{
 				// read from old school link attribute.
 				// \todo: remove this when it doesn't break everyone's stuff!
-				ConstCompoundDataPtr d = runTimeCast< CompoundData >( c->readAttribute( linkAttribute, 0 ) );
+				ConstCompoundDataPtr d = runTimeCast< const CompoundData >( c->readAttribute( linkAttribute, 0 ) );
 				/// we found the link attribute...
 				int linkDepth;
 				bool timeRemapped = false;
@@ -1120,8 +1120,8 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 	{
 		atLink = true;
 		timeRemapped = s->hasAttribute( timeLinkAttribute );
-		ConstStringDataPtr fileName = runTimeCast< StringData >( s->readAttribute( fileNameLinkAttribute, 0 ) );
-		ConstInternedStringVectorDataPtr root = runTimeCast< InternedStringVectorData >( s->readAttribute( rootLinkAttribute, 0 ) );
+		ConstStringDataPtr fileName = runTimeCast< const StringData >( s->readAttribute( fileNameLinkAttribute, 0 ) );
+		ConstInternedStringVectorDataPtr root = runTimeCast< const InternedStringVectorData >( s->readAttribute( rootLinkAttribute, 0 ) );
 		
 		l = expandLink( fileName.get(), root.get(), linkDepth );
 		if (!l)
@@ -1133,7 +1133,7 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 	else if( s->hasAttribute( linkAttribute ) )
 	{
 		atLink = true;
-		ConstCompoundDataPtr d = runTimeCast< CompoundData >( s->readAttribute( linkAttribute, 0 ) );
+		ConstCompoundDataPtr d = runTimeCast< const CompoundData >( s->readAttribute( linkAttribute, 0 ) );
 		l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 		if ( !l )
 		{

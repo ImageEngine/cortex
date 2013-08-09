@@ -837,7 +837,7 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 	if( sceneInterface )
 	{
 		double time = outputContext().frame() / 24.0;
-		IECore::ObjectPtr object = sceneInterface->readObject( time );
+		IECore::ConstObjectPtr object = sceneInterface->readObject( time );
 		IECore::SceneInterface::Path rootPath;
 		if( m_worldSpace )
 		{
@@ -851,8 +851,8 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 		Imath::M44d transformd;
 		transformd = worldTransform( sceneInterface, rootPath, time );
 		IECore::TransformOpPtr transformer = new IECore::TransformOp();
-		transformer->inputParameter()->setValue( object );
-		transformer->copyParameter()->setTypedValue( false );
+		transformer->inputParameter()->setValue( const_cast< Object * >(object.get()) );	// safe const_cast because the Op will copy the input object.
+		transformer->copyParameter()->setTypedValue( true );
 		transformer->matrixParameter()->setValue( new IECore::M44dData( transformd ) );
 		object = transformer->operate();
 		

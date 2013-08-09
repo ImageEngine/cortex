@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
-
-#include "IECore/CachedReader.h"
-#include "IECore/Object.h"
-#include "IECore/ModifyOp.h"
-#include "IECorePython/CachedReaderBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-#include "IECorePython/ScopedGILRelease.h"
-
-using namespace boost::python;
-using namespace IECore;
+#ifndef IECOREPYTHON_OBJECTPOOL_H
+#define IECOREPYTHON_OBJECTPOOL_H
 
 namespace IECorePython
 {
-
-static ObjectPtr read( CachedReader &r, const std::string &f )
-{
-	ScopedGILRelease gilRelease;
-	ConstObjectPtr o = r.read( f );
-	if( o )
-	{
-		return o->copy();
-	}
-	else
-	{
-		return 0;
-	}
+void bindObjectPool();
 }
 
-static ObjectPoolPtr objectPool( CachedReader &r )
-{
-	return r.objectPool();
-}
-
-void bindCachedReader()
-{
-	RefCountedClass<CachedReader, RefCounted>( "CachedReader" )
-		.def( init<const SearchPath &, optional<ObjectPoolPtr> >() )
-		.def( init<const SearchPath &, ConstModifyOpPtr, optional<ObjectPoolPtr> >() )
-		.def( "read", &read )
-		.def( "clear", (void (CachedReader::*)( const std::string &) )&CachedReader::clear )
-		.def( "clear", (void (CachedReader::*)( void ) )&CachedReader::clear )
-		.def( "insert", &CachedReader::insert )
-		.def( "cached", &CachedReader::cached )
-		.add_property( "searchPath", make_function( &CachedReader::getSearchPath, return_value_policy<copy_const_reference>() ), &CachedReader::setSearchPath )
-		.def( "defaultCachedReader", &CachedReader::defaultCachedReader ).staticmethod( "defaultCachedReader" )
-		.def( "objectPool", &objectPool )
-	;
-}
-
-}
+#endif // IECOREPYTHON_OBJECTPOOL_H
