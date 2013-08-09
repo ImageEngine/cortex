@@ -670,9 +670,9 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			public :
 
 				SharedData() : 
-					objectCache( new SimpleCache( _readObjectAtSample, _simpleHash,  10000 )  ), 
-					attributeCache( new AttributeCache( _readAttributeAtSample, _attributeHash, 1000) ), 
-					transformCache( new SimpleCache(  _readTransformAtSample, _simpleHash, 1000) )
+					objectCache( new SimpleCache( doReadObjectAtSample, simpleHash,  10000 )  ), 
+					attributeCache( new AttributeCache( doReadAttributeAtSample, attributeHash, 1000) ), 
+					transformCache( new SimpleCache(  doReadTransformAtSample, simpleHash, 1000) )
 				{
 				}
 
@@ -848,7 +848,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return &(it->second);
 		}
 
-		static MurmurHash _simpleHash( const SimpleCacheKey &key )
+		static MurmurHash simpleHash( const SimpleCacheKey &key )
 		{
 			const ReaderImplementation *reader = key.first;
 			size_t sample = key.second;
@@ -867,7 +867,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		}
 
 		// static function used by the cache mechanism to actually load the object data from file.
-		static ObjectPtr _readTransformAtSample( const SimpleCacheKey &key )
+		static ObjectPtr doReadTransformAtSample( const SimpleCacheKey &key )
 		{
 			IndexedIOPtr io = key.first->m_indexedIO->subdirectory( transformEntry, IndexedIO::NullIfMissing );
 			if ( !io )
@@ -885,12 +885,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		}
 
 		// static function used by the cache mechanism to actually load the object data from file.
-		static ObjectPtr _readObjectAtSample( const SimpleCacheKey &key )
+		static ObjectPtr doReadObjectAtSample( const SimpleCacheKey &key )
 		{
 			return Object::load( key.first->m_indexedIO->subdirectory( objectEntry ), sampleEntry(key.second) );
 		}
 
-		static MurmurHash _attributeHash( const AttributeCacheKey &key )
+		static MurmurHash attributeHash( const AttributeCacheKey &key )
 		{
 			const ReaderImplementation *reader = get<0>( key );
 			const SceneInterface::Name &name = get<1>( key );
@@ -911,7 +911,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		}
 
 		// static function used by the cache mechanism to actually load the attribute data from file.
-		static ObjectPtr _readAttributeAtSample( const AttributeCacheKey &key )
+		static ObjectPtr doReadAttributeAtSample( const AttributeCacheKey &key )
 		{
 			return Object::load( get<0>(key)->m_indexedIO->subdirectory(attributesEntry)->subdirectory(get<1>(key)), sampleEntry(get<2>(key)) );
 		}
