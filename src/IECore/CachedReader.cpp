@@ -185,18 +185,6 @@ CachedReader::CachedReader( const SearchPath &paths, ConstModifyOpPtr postProces
 {
 }
 
-// \deprecate Provided for backward compatibility
-CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory  )
-	:	m_data( new MemberData( paths, 0, new ObjectPool(maxMemory) ) )
-{
-}
-
-// \deprecate Provided for backward compatibility
-CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory, ConstModifyOpPtr postProcessor )
-	:	m_data( new MemberData( paths, postProcessor, new ObjectPool(maxMemory) ) )
-{
-}
-
 ConstObjectPtr CachedReader::read( const std::string &file )
 {
 	return m_data->m_cache.get( PARAM(file) );
@@ -220,11 +208,6 @@ bool CachedReader::cached( const std::string &file ) const
 	}
 
 	return m_data->m_cache.get( PARAM(file), MemberData::Cache::NullIfMissing );
-}
-
-size_t CachedReader::memoryUsage() const
-{
-	return m_data->m_cache.objectPool()->memoryUsage();
 }
 
 void CachedReader::clear()
@@ -251,16 +234,6 @@ void CachedReader::setSearchPath( const SearchPath &paths )
 		m_data->m_searchPaths = paths;
 		clear();
 	}
-}
-
-size_t CachedReader::getMaxMemory() const
-{
-	return m_data->m_cache.objectPool()->getMaxMemoryUsage();
-}
-
-void CachedReader::setMaxMemory( size_t maxMemory )
-{
-	return m_data->m_cache.objectPool()->setMaxMemoryUsage(maxMemory);
 }
 
 ObjectPool *CachedReader::objectPool() const

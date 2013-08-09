@@ -80,27 +80,6 @@ class CachedReader : public RefCounted
 		/// objects following loading. Will use the given ObjectPool to store the loaded objects.
 		CachedReader( const SearchPath &paths, ConstModifyOpPtr postProcessor, ObjectPoolPtr objectPool = ObjectPool::defaultObjectPool() );
 
-		/////// 
-		/// Deprecated functions 
-		/////// 
-
-		// Creates cache with it's own ObjectPool with the specified memory limit
-		// \deprecated Provided for backward compatibility.
-		// \todo Remove this constructor
-		CachedReader( const SearchPath &paths, size_t maxMemory );
-		// Creates cache with it's own ObjectPool with the specified memory limit
-		// \deprecated Provided for backward compatibility.
-		// \todo Remove this constructor
-		CachedReader( const SearchPath &paths, size_t maxMemory, ConstModifyOpPtr postProcessor );
-		/// \deprecated It pulls the information from the ObjectPool it holds. Should instead use the object returned by objectPool().
-		size_t memoryUsage() const;
-		/// \deprecated It pulls the information to ObjectPool. Should instead use the object returned by objectPool().
-		size_t getMaxMemory() const;
-		/// \deprecated It sets the memory limit on the ObjectPool that it holds. Should instead use the object returned by objectPool().
-		void setMaxMemory( size_t maxMemory );
-
-		/////// 
-
 		/// Searches for the given file and loads it if found.
 		/// Throws an exception in case it cannot be found or no suitable Reader
 		/// exists. The Object is returned with only const access as
