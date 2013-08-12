@@ -264,6 +264,9 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 
 	view.beginGL();
 	
+	M3dView::LightingMode lightingMode;
+	view.getLightingMode( lightingMode );
+	
 	LightingState lightingState;
 	bool restoreLightState = cleanupLights( request, view, &lightingState );
 	
@@ -289,7 +292,7 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 			IECoreGL::ConstScenePtr scene = sceneShape->glScene();
 			if( scene )
 			{
-				IECoreGL::State *displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
+				IECoreGL::State *displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle(), lightingMode );
 				
 				if ( request.component() != MObject::kNullObj )
 				{
