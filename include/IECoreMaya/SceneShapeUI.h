@@ -84,6 +84,9 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		/// A useful method that calculates the world space position of the selection ray when given a camera and depth. The result is returned in worldIntersectionPoint.
 		void selectionRayToWorldSpacePoint( const MDagPath &camera, const MSelectInfo &selectInfo, float depth, MPoint &worldIntersectionPoint ) const;
 
+		/// Returns the concatenated object transforms of the SceneInterface.
+		Imath::M44d worldTransform( const IECore::SceneInterface *scene, double time ) const;
+
 		mutable StateMap m_stateMap;
 		mutable DisplayStyle m_displayStyle;
 		

@@ -402,7 +402,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	localToCamera.get( v ); 
 	Imath::M44d cam( v );
 	Imath::V3d ndcPt3d = ( (org * cam ) * projectionMatrix + Imath::V3d( 1. ) ) * Imath::V3d( .5 );
-	Imath::V2d ndcPt( std::max( std::min( ndcPt[0], 1. ), 0. ), 1. - std::max( std::min( ndcPt[1], 1. ), 0. ) );
+	Imath::V2d ndcPt( std::max( std::min( ndcPt3d[0], 1. ), 0. ), 1. - std::max( std::min( ndcPt3d[1], 1. ), 0. ) );
 
 	view.beginGL();
 	
@@ -443,31 +443,19 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	}
 
 	// Get the absolute path of the hit object.
-	IECore::SceneInterface::Path scenePath;
-	sceneInterface->path( scenePath );
-
-	std::string hitName( hits[depthMinIndex].name );
-
-	std::string::iterator it;
-	do
-	{
-		it = std::remove( hitName.begin(), hitName.end(), '/' ); // Remove all '/' the name 
-		hitName.erase( it );
-	}
-	while( it != hitName.end() );
+	IECore::SceneInterface::Path objPath;
+	std::string objPathStr;
+	sceneInterface->path( objPath );
+	IECore::SceneInterface::pathToString( objPath, objPathStr );
 	
-	if( !hitName.empty() )
-	{
-		scenePath.push_back( hitName );	
-	}
+	objPathStr += hits[depthMinIndex].name;
+	IECore::SceneInterface::stringToPath( objPathStr, objPath );
 
 	// Validate the hit selection.
-	std::string scenePathStr;
-	IECore::SceneInterface::pathToString( scenePath, scenePathStr );
 	IECore::ConstSceneInterfacePtr childInterface;
 	try
 	{
-		childInterface = sceneInterface->scene( scenePath );
+		childInterface = sceneInterface->scene( objPath );
 	}
 	catch(...)
 	{
@@ -494,10 +482,12 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 		return false;
 	}
 	
-	// Calculate the snap point in world space.
+	// Calculate the snap point in object space.
 	MPoint worldIntersectionPoint;
 	selectionRayToWorldSpacePoint( camera, snapInfo, depthMin, worldIntersectionPoint );
 	Imath::V3f pt( worldIntersectionPoint[0], worldIntersectionPoint[1], worldIntersectionPoint[2] );
+	Imath::M44f objToWorld( worldTransform( childInterface, time ) );
+	pt = pt * objToWorld.inverse();
 
 	// Get the list of vertices in the mesh.
 	IECore::V3fVectorData::ConstPtr pointData( meshPtr->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex ) ); 
@@ -506,10 +496,10 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	// Find the vertex that is closest to the snap point.
 	Imath::V3d closestVertex;
 	float closestDistance = std::numeric_limits<float>::max(); 
-	Imath::M44d transform( childInterface->readTransformAsMatrix( time ) );
+	
 	for( std::vector<Imath::V3f>::const_iterator it( vertices.begin() ); it != vertices.end(); ++it )
 	{
-		Imath::V3d vert = *it * transform; // Convert the vertex to world space.
+		Imath::V3d vert( *it );
 		float d( ( pt - vert ).length() ); // Calculate the distance between the vertex and the snap point.
 		if( d < closestDistance )
 		{
@@ -519,6 +509,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	}
 
 	// Snap to the vertex.
+	closestVertex *= objToWorld;
 	snapInfo.setSnapPoint( MPoint( closestVertex[0], closestVertex[1], closestVertex[2] ) );
 	return true;
 }
@@ -711,6 +702,28 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	}
 	
 	return true;
+}
+
+Imath::M44d SceneShapeUI::worldTransform( const IECore::SceneInterface *scene, double time ) const
+{
+	IECore::SceneInterface::Path p;
+	scene->path( p );
+
+	IECore::ConstSceneInterfacePtr tmpScene = scene->scene( IECore::SceneInterface::rootPath );
+	Imath::M44d result;
+
+	for ( IECore::SceneInterface::Path::const_iterator it = p.begin(); tmpScene && it != p.end(); ++it )
+	{
+		tmpScene = tmpScene->child( *it, IECore::SceneInterface::NullIfMissing );
+		if ( !tmpScene )
+		{
+			break;
+		}
+
+		result = tmpScene->readTransformAsMatrix( time ) * result;
+	}
+	
+	return result;
 }
 
 void SceneShapeUI::unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const
