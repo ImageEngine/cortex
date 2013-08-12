@@ -319,8 +319,7 @@ class Shader::Implementation : public IECore::RefCounted
 				glGetShaderInfoLog( shader, logLength, &l, &log[0] );
 				message = &log[0];
 				IECore::msg( IECore::Msg::Warning, "IECoreGL::Shader", message );
-			}				
-
+			}
 		}
 
 		void release()
@@ -817,7 +816,7 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// default shader source
+// common shader sources
 ///////////////////////////////////////////////////////////////////////////////
 
 const std::string &Shader::defaultVertexSource()
@@ -835,11 +834,13 @@ const std::string &Shader::defaultVertexSource()
 		"in vec3 vertexCs;"
 		""
 		"out vec3 geometryI;"
+		"out vec3 geometryP;"
 		"out vec3 geometryN;"
 		"out vec2 geometryst;"
 		"out vec3 geometryCs;"
 		""
 		"out vec3 fragmentI;"
+		"out vec3 fragmentP;"
 		"out vec3 fragmentN;"
 		"out vec2 fragmentst;"
 		"out vec3 fragmentCs;"
@@ -848,6 +849,7 @@ const std::string &Shader::defaultVertexSource()
 		"{"
 		"	vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );"
 		"	gl_Position = gl_ProjectionMatrix * pCam;"
+		"	geometryP = pCam.xyz;"
 		"	geometryN = normalize( gl_NormalMatrix * vertexN );"
 		"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
 		"	{"
@@ -869,11 +871,18 @@ const std::string &Shader::defaultVertexSource()
 		"	}"
 		""
 		"	fragmentI = geometryI;"
+		"	fragmentP = geometryP;"
 		"	fragmentN = geometryN;"
 		"	fragmentst = geometryst;"
 		"	fragmentCs = geometryCs;"
 		"}";
 		
+	return s;
+}
+
+const std::string &Shader::defaultGeometrySource()
+{
+	static string s = "";
 	return s;
 }
 
@@ -897,22 +906,60 @@ const std::string &Shader::defaultFragmentSource()
 	return s;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// definitions for useful simple shaders
-///////////////////////////////////////////////////////////////////////////////
-
-ShaderPtr Shader::constant()
+const std::string &Shader::constantFragmentSource()
 {
-	static const char *fragmentSource =
+	static string s = 
 	
+		"#version 150 compatibility\n"
+		""
 		"in vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
 		"	gl_FragColor = vec4( fragmentCs, 1 );"
 		"}";
+	
+	return s;
+}
 
-	static ShaderPtr s = new Shader( "", fragmentSource );
+const std::string &Shader::lambertFragmentSource()
+{
+	static string s = 
+	
+		"#version 150 compatibility\n"
+		""
+		"#include \"IECoreGL/Lights.h\"\n"
+		"#include \"IECoreGL/ColorAlgo.h\"\n"
+		"#include \"IECoreGL/Diffuse.h\"\n"
+
+		"in vec3 fragmentP;"
+		"in vec3 fragmentN;"
+		"in vec3 fragmentCs;"
+		""
+		"void main()"
+		"{"
+		"	vec3 n = normalize( fragmentN );"
+		""
+		"	vec3 L[ gl_MaxLights ];"
+		"	vec3 Cl[ gl_MaxLights ];"
+		""
+		"	lights( fragmentP, Cl, L, gl_MaxLights );"
+		""
+		"	vec3 Cdiffuse = ieDiffuse( fragmentP, n, Cl, L, gl_MaxLights );"
+		""
+		"	gl_FragColor = vec4( Cdiffuse, 1.0 );"
+		"}";
+	
+	return s;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// definitions for useful simple shaders
+///////////////////////////////////////////////////////////////////////////////
+
+ShaderPtr Shader::constant()
+{
+	static ShaderPtr s = new Shader( "", constantFragmentSource() );
 	return s;
 }
 
