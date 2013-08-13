@@ -71,6 +71,7 @@
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Transform.h"
 #include "IECore/MatrixAlgo.h"
+#include "IECore/LinkedScene.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnEnumAttribute.h"
@@ -1063,6 +1064,25 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 		renderer->concatTransform( convert<M44f>( subSceneInterface->readTransformAsMatrix( time ) ) );
 	}
 
+	if ( subSceneInterface->hasAttribute( LinkedScene::fileNameLinkAttribute ) )
+	{
+		// we are at a link location... create a hash to uniquely identify it.
+		MurmurHash hash;
+		subSceneInterface->readAttribute( LinkedScene::fileNameLinkAttribute, time )->hash( hash );
+		subSceneInterface->readAttribute( LinkedScene::rootLinkAttribute, time )->hash( hash );
+		subSceneInterface->readAttribute( LinkedScene::timeLinkAttribute, time )->hash( hash );
+		/// register the hash mapped to the name of the group
+		InternedString pathInternedStr(pathStr);
+		std::pair< HashToName::iterator, bool > ret = m_hashToName.insert( HashToName::value_type( hash, pathInternedStr ) );
+		if ( !ret.second )
+		{
+			/// the same location was already rendered, so we store the current location for instanting later...
+			m_instances.push_back( InstanceInfo(pathInternedStr, ret.first->second) );
+			return;
+		}
+	}
+
+
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
 		ConstObjectPtr object = subSceneInterface->readObject( time );
@@ -1099,6 +1119,65 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	}
 }
 
+void SceneShapeInterface::createInstances()
+{
+	for ( InstanceArray::iterator it = m_instances.begin(); it != m_instances.end(); it++ )
+	{
+		const InternedString &instanceName = it->first;
+		const InternedString &instanceSourceName = it->second;
+
+		NameToGroupMap::const_iterator srcIt = m_nameToGroupMap.find( instanceSourceName );
+		if ( srcIt == m_nameToGroupMap.end() )
+		{
+			/// \todo print error?
+std::cerr << "could not find!!" << std::endl;
+			continue;
+		}
+		const IECoreGL::Group *srcGroup = srcIt->second.second.get();
+		
+		NameToGroupMap::iterator trgIt = m_nameToGroupMap.find( instanceName );
+		IECoreGL::Group *trgGroup = trgIt->second.second.get();
+
+		// copy the src group to the trg group (empty instance group)
+		recurseCopyGroup( srcGroup, trgGroup );
+	}
+
+	/// clear the maps we don't need them.
+	m_hashToName.clear();
+	m_instances.clear();
+}
+
+void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup )
+{
+	if (  srcGroup->getState()->get< IECoreGL::NameStateComponent >() )
+	{
+		const IECoreGL::NameStateComponent *nameState = srcGroup->getState()->get< IECoreGL::NameStateComponent >();
+		std::string newName = nameState->name();
+		// replace prefix with new name
+		trgGroup->getState()->add( new IECoreGL::NameStateComponent( newName ) );
+	}
+	const IECoreGL::Group::ChildContainer &children = srcGroup->children();
+
+	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+	{
+		IECoreGL::Group *group = runTimeCast< IECoreGL::Group >( *it );
+
+		if ( group )
+		{
+			IECoreGL::GroupPtr newGroup = new IECoreGL::Group();
+			newGroup->setState( new IECoreGL::State( *trgGroup->getState() ) );
+			newGroup->setTransform( group->getTransform() );
+			recurseCopyGroup( group, newGroup );
+			trgGroup->addChild( newGroup );
+		}
+		else
+		{
+			trgGroup->addChild( *it );
+		}
+	}
+
+}
+
 IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 {
 	if(!m_previewSceneDirty)
@@ -1133,6 +1212,8 @@ IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
+
+	createInstances();
 
 	m_previewSceneDirty = false;
 

@@ -190,6 +190,8 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Recursively parses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
 		void recurseBuildScene( IECoreGL::Renderer * renderer, const IECore::SceneInterface *subSceneInterface, double time, bool drawBounds, bool drawGeometry, bool objectOnly, const IECore::SceneInterface::NameList &drawTags );
 
+		void createInstances();
+
 		/// Recursively parses glScene to store GL Groups matching path names
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 		
@@ -200,11 +202,18 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Returns bound for the component matching the given index
 		Imath::Box3d componentBound( int idx );
 
+		static void recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup );
+
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
+		typedef std::map< IECore::MurmurHash, IECore::InternedString > HashToName;
+		typedef std::pair< IECore::InternedString, IECore::InternedString > InstanceInfo;
+		typedef std::vector< InstanceInfo > InstanceArray;
 
 		IndexToNameMap m_indexToNameMap;
 		NameToGroupMap m_nameToGroupMap;
+		HashToName m_hashToName;
+		InstanceArray m_instances;
 };
 
 }
