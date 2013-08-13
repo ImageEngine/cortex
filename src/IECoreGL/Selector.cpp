@@ -49,6 +49,8 @@
 #include "IECoreGL/FrameBuffer.h"
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/Primitive.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/TextureLoader.h"
 
 using namespace IECoreGL;
 
@@ -246,9 +248,9 @@ class Selector::Implementation : public IECore::RefCounted
 		GLint m_prevViewport[4];
 		GLint m_nameUniformLocation;
 		
-		static Shader *idShader()
+		static const std::string &idShaderFragmentSource()
 		{
-			static const char *fragmentSource = 
+			static const std::string fragmentSource = 
 
 				"#version 330\n"
 				""
@@ -261,8 +263,7 @@ class Selector::Implementation : public IECore::RefCounted
 				"	ieCoreGLNameOut = ieCoreGLNameIn;"
 				"}";
 
-			static ShaderPtr s = new Shader( "", fragmentSource );
-			return s.get();
+			return fragmentSource;
 		}
 
 		static std::vector<StateComponentPtr> &idStateComponents()
@@ -270,7 +271,11 @@ class Selector::Implementation : public IECore::RefCounted
 			static std::vector<StateComponentPtr> s;
 			if( !s.size() )
 			{
-				s.push_back( new ShaderStateComponent( new Shader::Setup( idShader() ) ) );
+				s.push_back( new ShaderStateComponent(
+					ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(),
+					"", "", idShaderFragmentSource(),
+					new IECore::CompoundObject()
+				) );
 				s.push_back( new Primitive::DrawBound( false ) );
 				s.push_back( new Primitive::DrawWireframe( false ) );
 				s.push_back( new Primitive::DrawOutline( false ) );
@@ -301,7 +306,7 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 			
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
-			loadIDShader( idShader() );	
+			loadIDShader( m_baseState->get<ShaderStateComponent>()->shaderSetup()->shader() );	
 		}
 
 		void loadNameIDRender( GLuint name )
