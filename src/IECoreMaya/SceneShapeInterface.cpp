@@ -1130,7 +1130,6 @@ void SceneShapeInterface::createInstances()
 		if ( srcIt == m_nameToGroupMap.end() )
 		{
 			/// \todo print error?
-std::cerr << "could not find!!" << std::endl;
 			continue;
 		}
 		const IECoreGL::Group *srcGroup = srcIt->second.second.get();
@@ -1139,7 +1138,7 @@ std::cerr << "could not find!!" << std::endl;
 		IECoreGL::Group *trgGroup = trgIt->second.second.get();
 
 		// copy the src group to the trg group (empty instance group)
-		recurseCopyGroup( srcGroup, trgGroup );
+		recurseCopyGroup( srcGroup, trgGroup, instanceName.value() );
 	}
 
 	/// clear the maps we don't need them.
@@ -1147,15 +1146,8 @@ std::cerr << "could not find!!" << std::endl;
 	m_instances.clear();
 }
 
-void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup )
+void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix )
 {
-	if (  srcGroup->getState()->get< IECoreGL::NameStateComponent >() )
-	{
-		const IECoreGL::NameStateComponent *nameState = srcGroup->getState()->get< IECoreGL::NameStateComponent >();
-		std::string newName = nameState->name();
-		// replace prefix with new name
-		trgGroup->getState()->add( new IECoreGL::NameStateComponent( newName ) );
-	}
 	const IECoreGL::Group::ChildContainer &children = srcGroup->children();
 
 	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
@@ -1165,9 +1157,28 @@ void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IEC
 		if ( group )
 		{
 			IECoreGL::GroupPtr newGroup = new IECoreGL::Group();
-			newGroup->setState( new IECoreGL::State( *trgGroup->getState() ) );
+			 // copy state, including the name state component
+			IECoreGL::StatePtr newState = new IECoreGL::State( *group->getState() );
+			newGroup->setState( newState );
+			std::string newName;
+			const IECoreGL::NameStateComponent *nameState = newState->get< IECoreGL::NameStateComponent >();
+			/// now override the name state component
+			if ( nameState )
+			{
+				const std::string &srcName = nameState->name();
+				size_t found = srcName.rfind('/');
+				if (found!=std::string::npos)
+				{
+					// we take the current "directory" and prepend it with the namePrefix
+					newName = namePrefix;
+					newName.append( srcName, found, std::string::npos );
+					newState->add( new IECoreGL::NameStateComponent( newName ) );
+					// we also need to register the group in the selection maps...
+					registerGroup( newName, newGroup );
+				}
+			}
 			newGroup->setTransform( group->getTransform() );
-			recurseCopyGroup( group, newGroup );
+			recurseCopyGroup( group, newGroup, newName.size() ? newName.c_str() : namePrefix );
 			trgGroup->addChild( newGroup );
 		}
 		else
@@ -1212,12 +1223,22 @@ IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
-
 	createInstances();
 
 	m_previewSceneDirty = false;
 
 	return m_scene;
+}
+
+void SceneShapeInterface::registerGroup( const std::string &name, IECoreGL::GroupPtr &group )
+{
+		int index = m_nameToGroupMap.size();
+		std::pair< NameToGroupMap::iterator, bool> ret;
+		ret = m_nameToGroupMap.insert( std::pair< InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
+		if( ret.second )
+		{
+			m_indexToNameMap.push_back( name );
+		}
 }
 
 void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group )
@@ -1234,14 +1255,7 @@ void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr name
 	const std::string &name = nameState->name();
 	if( name != "unnamed" )
 	{
-		int index = m_nameToGroupMap.size();
-		std::pair< NameToGroupMap::iterator, bool> ret;
-		ret = m_nameToGroupMap.insert( std::pair< InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
-		if( ret.second )
-		{
-			IndexToNameMap::iterator idIt = m_indexToNameMap.begin() + index;
-			m_indexToNameMap.insert( idIt, name ); 	
-		}
+		registerGroup( name, group );
 	}
 
 	const IECoreGL::Group::ChildContainer &children = group->children();
