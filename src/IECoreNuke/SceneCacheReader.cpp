@@ -851,7 +851,7 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 		Imath::M44d transformd;
 		transformd = worldTransform( sceneInterface, rootPath, time );
 		IECore::TransformOpPtr transformer = new IECore::TransformOp();
-		transformer->inputParameter()->setValue( const_cast< Object * >(object.get()) );	// safe const_cast because the Op will copy the input object.
+		transformer->inputParameter()->setValue( const_cast< IECore::Object * >(object.get()) );	// safe const_cast because the Op will copy the input object.
 		transformer->copyParameter()->setTypedValue( true );
 		transformer->matrixParameter()->setValue( new IECore::M44dData( transformd ) );
 		object = transformer->operate();
