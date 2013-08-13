@@ -176,20 +176,27 @@ class Shader : public IECore::RunTimeTyped
 		
 		IE_CORE_DECLAREPTR( Setup );
 		
-		//! @name Default shader source.
-		/// These functions return the default shader source used
-		/// when source isn't provided to the constructor.
+		//! @name Common shader sources.
+		/// These functions return some common shader sources which
+		/// may be useful in many situations.
 		///////////////////////////////////////////////////////////
 		//@{
 		/// Default vertex shader source. This takes vertexP, vertexN,
-		/// vertexst, vertexCs and Cs inputs and sets fragmentI, fragmentN,
+		/// vertexst, vertexCs and Cs inputs and sets fragmentI, fragmentP, fragmentN,
 		/// fragmentst and fragmentCs outputs. It also sets equivalent geometry*
 		/// outputs which may be used by geometry shaders in calculating new
 		/// values for the corresponding fragment* outputs.
 		static const std::string &defaultVertexSource();
+		/// Default geometry shader source. This is provided to make a common
+		/// interface, but is actually just a no-op.
+		static const std::string &defaultGeometrySource();
 		/// Default fragment shader source. This uses fragmentI, fragmentN
 		/// and fragmentCs to compute a simple facing ratio.
 		static const std::string &defaultFragmentSource();
+		/// This uses fragmentCs as a constant flat color.
+		static const std::string &constantFragmentSource();
+		/// This passes fragmentP and fragmentN to ieDiffuse.
+		static const std::string &lambertFragmentSource();
 		//@}
 		
 		//! @name Built in shaders
