@@ -264,7 +264,6 @@ from TimeCodeDataTest import TimeCodeDataTest
 from TimeCodeParameterTest import TimeCodeParameterTest
 from OptionsTest import OptionsTest
 from NullObjectTest import NullObjectTest
-from ModelCacheTest import ModelCacheTest
 from SceneCacheTest import SceneCacheTest
 from LinkedSceneTest import LinkedSceneTest
 from StandardRadialLensModelTest import StandardRadialLensModelTest
