@@ -208,7 +208,7 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
 	}
 			
-	// if we're doing objects only, we just output the object directy, so we don't need link attributes... 
+	// if we're doing objects only, we just output the object directly, so we don't need link attributes... 
 	if( objectOnlyPlug.asBool() )
 	{
 		return false;

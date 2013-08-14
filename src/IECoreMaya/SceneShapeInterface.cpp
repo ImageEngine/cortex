@@ -457,6 +457,14 @@ bool SceneShapeInterface::isBounded() const
 	return true;
 }
 
+double SceneShapeInterface::time() const
+{
+	MPlug pTime( thisMObject(), aTime );
+	MTime time;
+	pTime.getValue( time );
+	return time.as( MTime::kSeconds );
+}
+
 MBoundingBox SceneShapeInterface::boundingBox() const
 {
 	MBoundingBox bound( MPoint( -1, -1, -1 ), MPoint( 1, 1, 1 ) );

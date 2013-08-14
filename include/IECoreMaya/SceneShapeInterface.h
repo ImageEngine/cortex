@@ -124,6 +124,8 @@ class SceneShapeInterface: public MPxComponentShape
 		IECore::InternedString selectionName( int index );
 		/// Returns all component names currently existing in the shape
 		const std::vector< IECore::InternedString > & componentNames() const;
+		/// Return the value of the time plug for the SceneShape.
+		double time() const;
 
 	protected :
 		
