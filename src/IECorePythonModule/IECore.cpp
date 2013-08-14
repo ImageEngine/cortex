@@ -312,7 +312,6 @@
 #include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
-#include "IECorePython/ModelCacheBinding.h"
 #include "IECorePython/SceneInterfaceBinding.h"
 #include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
@@ -636,7 +635,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimeCodeParameter();
 	bindOptions();
 	bindMPlayDisplayDriver();
-	bindModelCache();
 	bindSceneInterface();
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();
