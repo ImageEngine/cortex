@@ -412,19 +412,18 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixd( projectionMatrix.getValue() );
 		
-		IECoreGL::Selector selector;
-
 		float radius = .001; // The radius of the selection area in NDC.
 		double aspect = double( view.portWidth() ) / view.portHeight();
 		Imath::V2f selectionWH( radius, radius * aspect );
-		selector.begin( Imath::Box2f( ndcPt - selectionWH, ndcPt + selectionWH ), IECoreGL::Selector::IDRender );
+		
+		std::vector<IECoreGL::HitRecord> hits;
+		{
+			IECoreGL::Selector selector( Imath::Box2f( ndcPt - selectionWH, ndcPt + selectionWH ), IECoreGL::Selector::IDRender, hits );
 				
 			IECoreGL::State::bindBaseState();
 			selector.baseState()->bind();
-			scene->render( selector.baseState() );
-			
-		std::vector<IECoreGL::HitRecord> hits;
-		selector.end( hits );
+			scene->render( selector.baseState() );			
+		}
 				
 	view.endGL();
 
@@ -602,8 +601,9 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			selectionMode = IECoreGL::Selector::OcclusionQuery;
 		}
 
-		IECoreGL::Selector selector;
-		selector.begin( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode );
+		std::vector<IECoreGL::HitRecord> hits;
+		{
+			IECoreGL::Selector selector( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode, hits );
 				
 			IECoreGL::State::bindBaseState();
 			selector.baseState()->bind();
@@ -615,10 +615,8 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 				// using the bounding box so we draw it too.
 				IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( sceneShape->boundingBox() ) );
 			}
-			
-		std::vector<IECoreGL::HitRecord> hits;
-		selector.end( hits );
-				
+		}
+						
 	view.endGL();
 	
 	if( hits.empty() )
