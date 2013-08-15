@@ -211,6 +211,10 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ri:detailRange" FloatVectorData</b><br>
 		/// Passed to RiDetailRange. The FloatVectorData must have length 4.
 		/// \todo Consider whether or not we should have a standard LOD mechanism defined in IECore.
+		///
+		/// \li <b>"ri:automaticInstancing" BoolData</b><br>
+		/// When this is true, all primitives are rendered as instances, and if a previously rendered
+		/// primitive is encountered, the instance will simply be reused.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		/// \par Currently supported attributes :
 		///
