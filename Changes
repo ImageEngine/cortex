@@ -1,3 +1,28 @@
+8.0.0-a14 :
+
+- IECore :
+ - Modified BasicPreset so it works with parameters derived from CompoundParameter
+ - Added ObjectPool and ComputationCache classes for providing a unified cache mechanism for cortex objects (used in SceneCache and CachedReader).
+ - Removed ModelCache class (SceneInterface and SceneCache replaces that entirely).
+ 
+- IECoreMaya :
+ - Using the newly added GL lambert shader in the maya GL preview.
+ - Added geometry snapping to the SceneShape
+ - Optimization on the SceneShape by copying previously rendered GL groups at link locations.
+
+- IECoreHoudini :
+ - Added support for Cortex loaded geometry in the SceneCache reader.
+
+- IECoreGL :
+ - IECoreGL::ToGLTextureConverter option to add missing channels.
+ - Removed IECoreGL dependency on GLUT
+ - Replaced OpenGL 3 function calls with their 2.1 extensions
+ - Added a standard lambert shader to IECoreGL::Shader
+ - Fixes in Selector object and making it revert state when destroyed.
+
+- IECoreRI :
+ - Deprecated 3delight hack
+
 8.0.0-a13 :
 
 - General :
