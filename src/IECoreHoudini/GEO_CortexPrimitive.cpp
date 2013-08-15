@@ -488,6 +488,26 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 			UT_ASSERT(0);
 			return false;
 		}
+
+/// These methods were pure virtual in Houdini 12.1
+#if UT_MAJOR_VERSION_INT >= 12 && UT_MINOR_VERSION_INT <= 1
+
+		virtual bool saveField( const GA_Primitive *pr, int i, UT_JSONValue &val, const GA_SaveMap &map ) const
+		{
+			UT_AutoJSONWriter w( val );
+			return saveField( pr, i, *w, map );
+		}
+		
+		virtual bool loadField( GA_Primitive *pr, int i, UT_JSONParser &p, const UT_JSONValue &jval, const GA_LoadMap &map ) const
+		{
+			UT_AutoJSONParser parser( jval );
+			bool ok = loadField( pr, i, *parser, map );
+			p.stealErrors( *parser );
+			return ok;
+		}
+
+#endif
+
 };
 
 const GA_PrimitiveJSON *GEO_CortexPrimitive::getJSON() const
