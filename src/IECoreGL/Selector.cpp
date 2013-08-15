@@ -63,20 +63,24 @@ class Selector::Implementation : public IECore::RefCounted
 
 	public :
 	
-		Implementation( Selector *parent )
-			:	m_parent( parent ), m_mode( Invalid ), m_baseState( new State( true /* complete */ ) )
+		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
+			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) )
 		{
-		}
-	
-		void begin( const Imath::Box2f &region, Mode mode = GLSelect )
-		{
+			// we don't want preexisting errors to trigger exceptions
+			// from error checking code in the begin*() methods, because
+			// we'd then be throwing in a half constructed state, our destructor
+			// wouldn't be run, and we'd be unable to restore the gl state
+			// changes we'd made so far. so we throw immediately if there is a
+			// preexisting error.
+			IECoreGL::Exception::throwIfError();
+			
 			if( g_currentSelector )
 			{
 				throw( IECore::Exception( "Another Selector is already active" ) );
 			}
-
-			g_currentSelector = this->m_parent;
-
+			
+			g_currentSelector = parent;
+	
 			GLdouble projectionMatrix[16];
 			glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix );
 			GLint viewport[4];
@@ -95,7 +99,6 @@ class Selector::Implementation : public IECore::RefCounted
 			glMultMatrixd( projectionMatrix );
 			glMatrixMode( GL_MODELVIEW );
 
-			m_mode = mode;
 			switch( m_mode )
 			{
 				case GLSelect :
@@ -112,9 +115,41 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 
 			glPushAttrib( GL_ALL_ATTRIB_BITS );
-		
 		}
 		
+		~Implementation()
+		{
+			// we don't want preexisting errors to
+			// trigger exceptions from error checking code
+			// in the end*() methods, because it would prevent
+			// us destructing completely. the best we can do
+			// is to log the error and carry on.
+			GLenum error;
+			while( ( error = glGetError()) != GL_NO_ERROR )
+			{
+				IECore::msg( IECore::Msg::Error, "IECoreGL::Selector end", (const char *)gluErrorString( error ) );
+			}
+		
+			g_currentSelector = 0;
+			
+			glPopAttrib();
+			
+			switch( m_mode )
+			{
+				case GLSelect :
+					endGLSelect();
+					break;
+				case IDRender :
+					endIDRender();
+					break;
+				case OcclusionQuery :
+					endOcclusionQuery();
+					break;
+				default :
+					assert( 0 );
+			}
+		}
+
 		void loadName( GLuint name )
 		{
 			switch( m_mode )
@@ -133,28 +168,6 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 		}
 		
-		size_t end( std::vector<HitRecord> &hits )
-		{
-			glPopAttrib();
-			g_currentSelector = 0;
-			const Mode mode = m_mode;
-			m_mode = Invalid;
-			
-			switch( mode )
-			{
-				case GLSelect :
-					return endGLSelect( hits );
-				case IDRender :
-					return endIDRender( hits );
-				case OcclusionQuery :
-					return endOcclusionQuery( hits );
-				default :
-					assert( 0 );
-			}
-
-			return 0;
-		}
-
 		State *baseState()
 		{
 			return m_baseState;
@@ -191,10 +204,10 @@ class Selector::Implementation : public IECore::RefCounted
 
 	private :
 
-		Selector *m_parent;
 		Mode m_mode;
+		std::vector<HitRecord> &m_hits;
 		StatePtr m_baseState;
-
+		
 		static Selector *g_currentSelector;
 
 		//////////////////////////////////////////////////////////////////////////
@@ -218,7 +231,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glLoadName( name );
 		}
 
-		size_t endGLSelect( std::vector<HitRecord> &hits )
+		void endGLSelect()
 		{		
 			int numHits = glRenderMode( GL_RENDER );
 			if( numHits < 0 )
@@ -232,10 +245,9 @@ class Selector::Implementation : public IECore::RefCounted
 			for( int i=0; i<numHits; i++ )
 			{
 				HitRecord h( hitRecord );
-				hits.push_back( h );
+				m_hits.push_back( h );
 				hitRecord += h.offsetToNext();
 			}
-			return hits.size();
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -315,7 +327,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glUniform1ui( m_nameUniformLocation, name );
 		}
 
-		size_t endIDRender( std::vector<HitRecord> &hits )
+		void endIDRender()
 		{
 			glUseProgram( m_prevProgram );
 			glViewport( m_prevViewport[0], m_prevViewport[1], m_prevViewport[2], m_prevViewport[3] );
@@ -346,20 +358,12 @@ class Selector::Implementation : public IECore::RefCounted
 				it->second.depthMax = std::max( it->second.depthMax, z[i] );		
 			}
 
-			hits.clear();
-			hits.reserve( idRecords.size() );
+			m_hits.clear();
+			m_hits.reserve( idRecords.size() );
 			for( std::map<unsigned int, HitRecord>::const_iterator it = idRecords.begin(), eIt = idRecords.end(); it != eIt; it++ )
 			{
-				hits.push_back( it->second );
+				m_hits.push_back( it->second );
 			}
-
-			const std::vector<StateComponentPtr> &stateComponents = idStateComponents();
-			for( std::vector<StateComponentPtr>::const_iterator it = stateComponents.begin(), eIt = stateComponents.end(); it != eIt; it++ )
-			{
-				m_baseState->add( const_cast<StateComponent *>( State::defaultState()->get( (*it)->typeId() ) ), false /* no override */ );
-			}
-
-			return hits.size();
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -397,7 +401,7 @@ class Selector::Implementation : public IECore::RefCounted
 			m_queryNames.push_back( name );
 		}
 
-		size_t endOcclusionQuery( std::vector<HitRecord> &hits )
+		void endOcclusionQuery()
 		{	
 			if( m_queries.size() )
 			{
@@ -410,13 +414,12 @@ class Selector::Implementation : public IECore::RefCounted
 				glGetQueryObjectuiv( m_queries[i], GL_QUERY_RESULT, &samplesPassed );
 				if( samplesPassed )
 				{
-					hits.push_back( HitRecord( 0, 0, NameStateComponent::nameFromGLName( m_queryNames[i] ) ) );
+					m_hits.push_back( HitRecord( 0, 0, NameStateComponent::nameFromGLName( m_queryNames[i] ) ) );
 				}
 			}
 		
 			glDeleteQueries( m_queries.size(), &(m_queries[0]) );
 			m_baseState->add( const_cast<DepthTestStateComponent *>( State::defaultState()->get<DepthTestStateComponent>() ), false /* no override */ );
-			return hits.size();
 		}
 
 };
@@ -427,8 +430,8 @@ Selector *Selector::Implementation::g_currentSelector = 0;
 // Selector
 //////////////////////////////////////////////////////////////////////////
 
-Selector::Selector()
-	:	m_implementation( new Implementation( this ) )
+Selector::Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
+	:	m_implementation( new Implementation( this, region, mode, hits ) )
 {
 }
 
@@ -436,19 +439,9 @@ Selector::~Selector()
 {
 }
 
-void Selector::begin( const Imath::Box2f &region, Mode mode )
-{
-	m_implementation->begin( region, mode );
-}
-
 void Selector::loadName( GLuint name )
 {
 	m_implementation->loadName( name );
-}
-
-size_t Selector::end( std::vector<HitRecord> &hits )
-{
-	return m_implementation->end( hits );
 }
 
 State *Selector::baseState()
