@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECoreMaya/SceneShapeInterface.h"
 #include "IECoreMaya/SceneShapeInterfaceComponentBoundIterator.h"
 
@@ -71,6 +73,7 @@
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Transform.h"
 #include "IECore/MatrixAlgo.h"
+#include "IECore/LinkedScene.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnEnumAttribute.h"
@@ -1071,6 +1074,25 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 		renderer->concatTransform( convert<M44f>( subSceneInterface->readTransformAsMatrix( time ) ) );
 	}
 
+	if ( subSceneInterface->hasAttribute( LinkedScene::fileNameLinkAttribute ) )
+	{
+		// we are at a link location... create a hash to uniquely identify it.
+		MurmurHash hash;
+		subSceneInterface->readAttribute( LinkedScene::fileNameLinkAttribute, time )->hash( hash );
+		subSceneInterface->readAttribute( LinkedScene::rootLinkAttribute, time )->hash( hash );
+		subSceneInterface->readAttribute( LinkedScene::timeLinkAttribute, time )->hash( hash );
+		/// register the hash mapped to the name of the group
+		InternedString pathInternedStr(pathStr);
+		std::pair< HashToName::iterator, bool > ret = m_hashToName.insert( HashToName::value_type( hash, pathInternedStr ) );
+		if ( !ret.second )
+		{
+			/// the same location was already rendered, so we store the current location for instanting later...
+			m_instances.push_back( InstanceInfo(pathInternedStr, ret.first->second) );
+			return;
+		}
+	}
+
+
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
 		ConstObjectPtr object = subSceneInterface->readObject( time );
@@ -1107,6 +1129,74 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	}
 }
 
+void SceneShapeInterface::createInstances()
+{
+	for ( InstanceArray::iterator it = m_instances.begin(); it != m_instances.end(); it++ )
+	{
+		const InternedString &instanceName = it->first;
+		const InternedString &instanceSourceName = it->second;
+
+		NameToGroupMap::const_iterator srcIt = m_nameToGroupMap.find( instanceSourceName );
+
+		assert ( srcIt != m_nameToGroupMap.end() );
+
+		const IECoreGL::Group *srcGroup = srcIt->second.second.get();
+		
+		NameToGroupMap::iterator trgIt = m_nameToGroupMap.find( instanceName );
+		IECoreGL::Group *trgGroup = trgIt->second.second.get();
+
+		// copy the src group to the trg group (empty instance group)
+		recurseCopyGroup( srcGroup, trgGroup, instanceName.value() );
+	}
+
+	/// clear the maps we don't need them.
+	m_hashToName.clear();
+	m_instances.clear();
+}
+
+void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix )
+{
+	const IECoreGL::Group::ChildContainer &children = srcGroup->children();
+
+	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+	{
+		IECoreGL::Group *group = runTimeCast< IECoreGL::Group >( *it );
+
+		if ( group )
+		{
+			IECoreGL::GroupPtr newGroup = new IECoreGL::Group();
+			 // copy state, including the name state component
+			IECoreGL::StatePtr newState = new IECoreGL::State( *group->getState() );
+			newGroup->setState( newState );
+			std::string newName;
+			const IECoreGL::NameStateComponent *nameState = newState->get< IECoreGL::NameStateComponent >();
+			/// now override the name state component
+			if ( nameState )
+			{
+				const std::string &srcName = nameState->name();
+				size_t found = srcName.rfind('/');
+				if (found!=std::string::npos)
+				{
+					// we take the current "directory" and prepend it with the namePrefix
+					newName = namePrefix;
+					newName.append( srcName, found, std::string::npos );
+					newState->add( new IECoreGL::NameStateComponent( newName ) );
+					// we also need to register the group in the selection maps...
+					registerGroup( newName, newGroup );
+				}
+			}
+			newGroup->setTransform( group->getTransform() );
+			recurseCopyGroup( group, newGroup, newName.size() ? newName.c_str() : namePrefix );
+			trgGroup->addChild( newGroup );
+		}
+		else
+		{
+			trgGroup->addChild( *it );
+		}
+	}
+
+}
+
 IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 {
 	if(!m_previewSceneDirty)
@@ -1141,10 +1231,22 @@ IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
+	createInstances();
 
 	m_previewSceneDirty = false;
 
 	return m_scene;
+}
+
+void SceneShapeInterface::registerGroup( const std::string &name, IECoreGL::GroupPtr &group )
+{
+		int index = m_nameToGroupMap.size();
+		std::pair< NameToGroupMap::iterator, bool> ret;
+		ret = m_nameToGroupMap.insert( std::pair< InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
+		if( ret.second )
+		{
+			m_indexToNameMap.push_back( name );
+		}
 }
 
 void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group )
@@ -1161,14 +1263,7 @@ void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr name
 	const std::string &name = nameState->name();
 	if( name != "unnamed" )
 	{
-		int index = m_nameToGroupMap.size();
-		std::pair< NameToGroupMap::iterator, bool> ret;
-		ret = m_nameToGroupMap.insert( std::pair< InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
-		if( ret.second )
-		{
-			IndexToNameMap::iterator idIt = m_indexToNameMap.begin() + index;
-			m_indexToNameMap.insert( idIt, name ); 	
-		}
+		registerGroup( name, group );
 	}
 
 	const IECoreGL::Group::ChildContainer &children = group->children();
