@@ -64,7 +64,7 @@ class Selector::Implementation : public IECore::RefCounted
 	public :
 	
 		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
-			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) )
+			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_currentIDShader( 0 )
 		{
 			// we don't want preexisting errors to trigger exceptions
 			// from error checking code in the begin*() methods, because
@@ -150,6 +150,11 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 		}
 
+		Mode mode() const
+		{
+			return m_mode;
+		}
+
 		void loadName( GLuint name )
 		{
 			switch( m_mode )
@@ -166,6 +171,8 @@ class Selector::Implementation : public IECore::RefCounted
 				default :
 					assert( 0 );
 			}
+			
+			m_currentName = name;
 		}
 		
 		State *baseState()
@@ -175,6 +182,20 @@ class Selector::Implementation : public IECore::RefCounted
 
 		void loadIDShader( const IECoreGL::Shader *shader )
 		{
+			if( m_currentIDShader == shader->program() )
+			{
+				// early out to avoid the relatively expensive operations
+				// below if we've already loaded the shader. it's not
+				// absolutely totally inconceivable that the old shader
+				// has been destroyed and the new shader just happens to
+				// be reusing the same id, but avoiding the relatively expensive
+				// reference counting we'd need to track it by keeping a
+				// reference to the shader doesn't seem worth it, given that for
+				// our use cases we're typically drawing a static scene and not
+				// destroying shaders while drawing.
+				return;
+			}
+		
 			const IECoreGL::Shader::Parameter *nameParameter = shader->uniformParameter( "ieCoreGLNameIn" );
 			if( !nameParameter )
 			{
@@ -189,12 +210,15 @@ class Selector::Implementation : public IECore::RefCounted
 			
 			m_nameUniformLocation = nameParameter->location;
 			
-			glUseProgram( shader->program() );
+			m_currentIDShader = shader->program();
+			glUseProgram( m_currentIDShader );
 					
 			std::vector<GLenum> buffers;
 			buffers.resize( fragDataLocation + 1, GL_NONE );
 			buffers[buffers.size()-1] = GL_COLOR_ATTACHMENT0;
 			glDrawBuffers( buffers.size(), &buffers[0] );
+			
+			loadNameIDRender( m_currentName );
 		}
 
 		static Selector *currentSelector()
@@ -207,6 +231,7 @@ class Selector::Implementation : public IECore::RefCounted
 		Mode m_mode;
 		std::vector<HitRecord> &m_hits;
 		StatePtr m_baseState;
+		GLuint m_currentName;
 		
 		static Selector *g_currentSelector;
 
@@ -257,6 +282,7 @@ class Selector::Implementation : public IECore::RefCounted
 		FrameBufferPtr m_frameBuffer;
 		boost::shared_ptr<FrameBuffer::ScopedBinding> m_frameBufferBinding;
 		GLint m_prevProgram;
+		GLuint m_currentIDShader;
 		GLint m_prevViewport[4];
 		GLint m_nameUniformLocation;
 		
@@ -437,6 +463,11 @@ Selector::Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord
 
 Selector::~Selector()
 {
+}
+
+Selector::Mode Selector::mode() const
+{
+	return m_implementation->mode();
 }
 
 void Selector::loadName( GLuint name )

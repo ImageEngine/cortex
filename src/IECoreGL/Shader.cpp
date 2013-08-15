@@ -50,6 +50,7 @@
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/TextureUnits.h"
+#include "IECoreGL/Selector.h"
 
 using namespace std;
 using namespace boost;
@@ -801,6 +802,15 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
 	{
 		(*it)->bind();
+	}
+	
+	
+	if( Selector *currentSelector = Selector::currentSelector() )
+	{
+		if( currentSelector->mode() == Selector::IDRender )
+		{
+			currentSelector->loadIDShader( m_setup.shader() );
+		}	
 	}
 }
 
