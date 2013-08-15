@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_SCENECACHENODE_H
 #define IECOREHOUDINI_SCENECACHENODE_H
 
+#include "boost/logic/tribool.hpp"
+
 #include "tbb/mutex.h"
 
 #include "PRM/PRM_Name.h"
@@ -127,6 +129,7 @@ class SceneCacheNode : public BaseType
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
 		
 		bool m_loaded;
+		boost::tribool m_static;
 		IECore::MurmurHash m_hash;
 
 };
