@@ -38,12 +38,14 @@
 #include "IECore/Convert.h"
 #include "IECore/Data.h"
 
+#include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathEuler.h"
 
+#include "UT/UT_Color.h"
 #include "UT/UT_Matrix4.h"
 #include "UT/UT_Vector3.h"
 #include "UT/UT_BoundingBox.h"
@@ -80,6 +82,18 @@ template<>
 Imath::V3d convert( const UT_Vector4 &from );
 
 template<>
+Imath::Color3f convert( const UT_Color &from );
+
+template<>
+UT_Color convert( const Imath::Color3f &from );
+
+template<>
+Imath::Color4f convert( const UT_Color &from );
+
+template<>
+UT_Color convert( const Imath::Color4f &from );
+
+template<>
 UT_BoundingBox convert( const Imath::Box3f &from );
 
 template<>
@@ -98,10 +112,16 @@ template<>
 Imath::M44d convert( const UT_Matrix4T<double> &from );
 
 template<>
+Imath::M44f convert( const UT_Matrix4T<double> &from );
+
+template<>
 UT_Matrix4T<float> convert( const Imath::M44f &from );
 
 template<>
 Imath::M44f convert( const UT_Matrix4T<float> &from );
+
+template<>
+Imath::M44d convert( const UT_Matrix4T<float> &from );
 
 } // namespace IECore
 

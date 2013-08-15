@@ -32,48 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+/// GUI_PrimitiveHooks are used in Houdini 12.5, but do not exist in earlier versions.
+/// Check GR_Cortex.cpp for Cortex viewport rendering in Houdini 12.0.
+#include "UT/UT_Version.h"
+#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
 
-#include "OP/OP_Node.h"
+#include "IECoreHoudini/GR_CortexPrimitive.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreHoudini/SceneCacheNode.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
-
-using namespace boost::python;
 using namespace IECoreHoudini;
 
-class SceneCacheNodeHelper
+GUI_CortexPrimitiveHook::GUI_CortexPrimitiveHook() : GUI_PrimitiveHook( GU_CortexPrimitive::typeName )
 {
-};
-
-void IECoreHoudini::bindSceneCacheNode()
-{
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
-	
-	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
-		.value( "World", SceneCacheNode<OP_Node>::World )
-		.value( "Path", SceneCacheNode<OP_Node>::Path )
-		.value( "Local", SceneCacheNode<OP_Node>::Local )
-		.value( "Object", SceneCacheNode<OP_Node>::Object )
-	;
-	
-	enum_<SceneCacheNode<OP_Node>::GeometryType>( "GeometryType" )
-		.value( "Cortex", SceneCacheNode<OP_Node>::Cortex )
-		.value( "Houdini", SceneCacheNode<OP_Node>::Houdini )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
-		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
-		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
-		.value( "FlatGeometry", OBJ_SceneCacheTransform::FlatGeometry )
-	;
-	
-	enum_<OBJ_SceneCacheTransform::Depth>( "Depth" )
-		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
-		.value( "Children", OBJ_SceneCacheTransform::Children )
-	;
-	
 }
+
+GUI_CortexPrimitiveHook::~GUI_CortexPrimitiveHook()
+{
+}
+
+GR_Primitive *GUI_CortexPrimitiveHook::createPrimitive( const GT_PrimitiveHandle &gt_prim, const GEO_Primitive	*geo_prim, const GR_RenderInfo *info, const char *cache_name, GR_PrimAcceptResult &processed )
+{
+    return new GR_CortexPrimitive( info, cache_name, geo_prim );
+}
+
+#endif // 12.5 or later

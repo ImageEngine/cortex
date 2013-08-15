@@ -2401,6 +2401,7 @@ houdiniEnvAppends = {
 		"HoudiniPRM",
 		"HoudiniUT",
 		"HoudiniRAY",
+		"HoudiniAPPS3",
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
 		"GLEW$GLEW_LIB_SUFFIX"
 	]

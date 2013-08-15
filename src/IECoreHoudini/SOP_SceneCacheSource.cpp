@@ -43,9 +43,11 @@
 #include "IECore/VisibleRenderable.h"
 
 #include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
 #include "IECoreHoudini/ToHoudiniAttribConverter.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -55,10 +57,6 @@ static InternedString pName( "P" );
 const char *SOP_SceneCacheSource::typeName = "ieSceneCacheSource";
 
 PRM_Name SOP_SceneCacheSource::pShapeFilter( "shapeFilter", "Shape Filter" );
-PRM_Name SOP_SceneCacheSource::pAttributeFilter( "attributeFilter", "Attribute Filter" );
-
-PRM_Default SOP_SceneCacheSource::shapeFilterDefault( 0, "*" );
-PRM_Default SOP_SceneCacheSource::attributeFilterDefault( 0, "*" );
 
 PRM_ChoiceList SOP_SceneCacheSource::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SOP_SceneCacheSource::buildShapeFilterMenu );
 
@@ -67,38 +65,19 @@ OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<SOP_Node>::parameters );
-		thisTemplate = new PRM_Template[ numSCCParms + 3 ];
+		thisTemplate = new PRM_Template[2];
 		
-		// add the file parms
-		for ( unsigned i = 0; i < 3; ++i )
-		{
-			thisTemplate[i] = SceneCacheNode<SOP_Node>::parameters[i];
-		}
-		
-		// then the filters
-		thisTemplate[3] = PRM_Template(
-			PRM_STRING, 1, &pShapeFilter, &shapeFilterDefault, &shapeFilterMenu, 0, 0, 0, 0,
+		thisTemplate[0] = PRM_Template(
+			PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
 			"A list of filters to decide which shapes to load. Uses Houdini matching syntax"
 		);
-		thisTemplate[4] = PRM_Template(
-			PRM_STRING, 1, &pAttributeFilter, &attributeFilterDefault, 0, 0, 0, 0, 0,
-			"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
-			"The filter expects Cortex names as exist in the cache, and performs automated conversion to standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). "
-			"P will always be loaded."
-		);
-		
-		// then the rest
-		for ( unsigned i = 3; i < numSCCParms; ++i )
-		{
-			thisTemplate[2+i] = SceneCacheNode<SOP_Node>::parameters[i];
-		}
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( thisTemplate );
+		OP_TemplatePair *firstTemplatePair = new OP_TemplatePair( thisTemplate );
+		templatePair = new OP_TemplatePair( SceneCacheNode<SOP_Node>::parameters, firstTemplatePair );
 	}
 	
 	return templatePair;
@@ -163,6 +142,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	
 	std::string path = getPath();
 	Space space = getSpace();
+	GeometryType geometryType = (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
 	
 	UT_String shapeFilterStr;
 	evalString( shapeFilterStr, pShapeFilter.getToken(), 0, 0 );
@@ -191,6 +171,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( space );
 	hash.append( shapeFilterStr );
 	hash.append( attributeFilter );
+	hash.append( geometryType );
 	
 	if ( !m_loaded || m_hash != hash )
 	{
@@ -202,7 +183,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	SceneInterface::Path rootPath;
 	scene->path( rootPath );
 	
-	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter.toStdString(), rootPath.size() );
+	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter.toStdString(), geometryType, rootPath.size() );
 	
 	m_loaded = true;
 	m_hash = hash;
@@ -210,7 +191,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, size_t rootSize )
+void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, GeometryType geometryType, size_t rootSize )
 {
 	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
 	{
@@ -233,7 +214,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			}
 		}
 		
-		modifyObject( object, name, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
+		modifyObject( object, name, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
 		
 		Imath::M44d currentTransform;
 		if ( space == Local )
@@ -251,14 +232,22 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			transformObject( object, currentTransform, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
 		}
 		
-		// convert the object to Houdini
-		if ( !convertObject( object, name, attributeFilter, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
+		// load the Cortex object directly
+		if ( geometryType == Cortex )
 		{
-			std::string fullName;
-			SceneInterface::Path path;
-			scene->path( path );
-			SceneInterface::pathToString( path, fullName );
-			addError( SOP_MESSAGE, ( "Could not convert " + fullName + " to houdini" ).c_str() );
+			holdObject( object, name, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars );
+		}
+		else
+		{
+			// convert the object to Houdini
+			if ( !convertObject( object, name, attributeFilter, geometryType, hasAnimatedTopology, hasAnimatedPrimVars, animatedPrimVars ) )
+			{
+				std::string fullName;
+				SceneInterface::Path path;
+				scene->path( path );
+				SceneInterface::pathToString( path, fullName );
+				addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to houdini" ).c_str() );
+			}
 		}
 	}
 	
@@ -267,16 +256,29 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr child = scene->child( *it );
-		loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, shapeFilter, attributeFilter, rootSize );
+		loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, shapeFilter, attributeFilter, geometryType, rootSize );
 	}
 }
 
-IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, const std::string &name, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
+IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( renderable )
 	{
 		renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
+	}
+	
+	Primitive *primitive = IECore::runTimeCast<Primitive>( object );
+	if ( primitive )
+	{
+		PrimitiveVariableMap &variables = primitive->variables;
+		for ( PrimitiveVariableMap::iterator it = variables.begin(); it != variables.end(); ++it )
+		{
+			if ( !UT_String( it->first ).multiMatch( attributeFilter.c_str() ) )
+			{
+				variables.erase( it );
+			}
+		}
 	}
 	
 	return object;
@@ -309,19 +311,23 @@ void SOP_SceneCacheSource::transformObject( IECore::Object *object, const Imath:
 	Group *group = IECore::runTimeCast<Group>( object );
 	if ( group )
 	{
-		group->setTransform( matrixTransform( transform ) );
+		MatrixTransformPtr matTransform = matrixTransform( transform );
+		matTransform->matrix *= group->getTransform()->transform();
+		group->setTransform( matTransform );
 		return;
 	}
 	
 	CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( object );
 	if ( coord )
 	{
-		coord->setTransform( matrixTransform( transform ) );
+		MatrixTransformPtr matTransform = matrixTransform( transform );
+		matTransform->matrix *= coord->getTransform()->transform();
+		coord->setTransform( matTransform );
 		return;
 	}
 }
 
-bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool hasAnimatedTopology, bool hasAnimatedPrimVars, const std::vector<InternedString> &animatedPrimVars )
+bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, GeometryType geometryType, bool hasAnimatedTopology, bool hasAnimatedPrimVars, const std::vector<InternedString> &animatedPrimVars )
 {
 	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
 	if ( !renderable )
@@ -339,29 +345,26 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::str
 	const Primitive *primitive = IECore::runTimeCast<Primitive>( renderable );
 	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 	GA_Range primRange = gdp->getRangeByValue( nameAttrRef, name.c_str() );
-	if ( primitive && !hasAnimatedTopology && hasAnimatedPrimVars )
+	if ( primitive && !hasAnimatedTopology && hasAnimatedPrimVars && nameAttrRef.isValid() && !primRange.isEmpty() )
 	{
-		if ( nameAttrRef.isValid() && !primRange.isEmpty() )
+		// this means constant topology and primitive variables, even though multiple samples were written
+		if ( animatedPrimVars.empty() )
 		{
-			// this means constant topology and primitive variables, even though multiple samples were written
-			if ( animatedPrimVars.empty() )
-			{
-				return true;
-			}
-			
-			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
-			
-			std::string animatedPrimVarStr = "";
-			for ( std::vector<InternedString>::const_iterator it = animatedPrimVars.begin(); it != animatedPrimVars.end(); ++it )
-			{
-				animatedPrimVarStr += it->string() + " ";
-			}
-			
-			converter->attributeFilterParameter()->setTypedValue( animatedPrimVarStr );
-			converter->transferAttribs( gdp, pointRange, primRange );
-			
 			return true;
 		}
+		
+		GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
+		
+		std::string animatedPrimVarStr = "";
+		for ( std::vector<InternedString>::const_iterator it = animatedPrimVars.begin(); it != animatedPrimVars.end(); ++it )
+		{
+			animatedPrimVarStr += it->string() + " ";
+		}
+		
+		converter->attributeFilterParameter()->setTypedValue( animatedPrimVarStr );
+		converter->transferAttribs( gdp, pointRange, primRange );
+		
+		return true;
 	}
 	else
 	{
@@ -378,10 +381,85 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::str
 	return false;
 }
 
+void SOP_SceneCacheSource::holdObject( IECore::Object *object, const std::string &name, bool hasAnimatedTopology, bool hasAnimatedPrimVars, const std::vector<InternedString> &animatedPrimVars )
+{
+	// attempt to optimize the conversion by re-using animated primitive variables
+	const Primitive *primitive = IECore::runTimeCast<Primitive>( object );
+	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+	GA_Range primRange = gdp->getRangeByValue( nameAttrRef, name.c_str() );
+	if ( primitive && !hasAnimatedTopology && hasAnimatedPrimVars && nameAttrRef.isValid() && !primRange.isEmpty() )
+	{
+		// this means constant topology and primitive variables, even though multiple samples were written
+		if ( animatedPrimVars.empty() )
+		{
+			return;
+		}
+		
+		GA_Primitive *hPrim = gdp->getPrimitiveList().get( primRange.begin().getOffset() );
+		if ( hPrim->getTypeId() == GU_CortexPrimitive::typeId() )
+		{
+			/// \todo: can we just update the prim vars?
+			((GU_CortexPrimitive *)hPrim)->setObject( primitive );
+			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
+			gdp->setPos3( pointRange.begin().getOffset(), IECore::convert<UT_Vector3>( primitive->bound().center() ) );
+			return;
+		}
+	}
+	else
+	{
+		gdp->destroyPrimitives( primRange, true );
+	}
+	
+	size_t numPrims = gdp->getNumPrimitives();
+	GU_CortexPrimitive::build( gdp, object );
+	GA_Offset primOffset = gdp->primitiveOffset( numPrims );
+	
+	GA_OffsetList offsets;
+	offsets.append( primOffset );
+	GA_Range newPrims( gdp->getPrimitiveMap(), offsets );
+	
+	ToHoudiniStringVectorAttribConverter::convertString( "name", name, gdp, newPrims );
+}
+
 void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
 {
 	SceneCacheNode<SOP_Node>::getNodeSpecificInfoText( context, parms );
 	
+	// add type descriptions for the Cortex Objects
+	GeometryType geometryType = (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
+	if ( geometryType == Cortex )
+	{
+		std::map<std::string, int> typeMap;
+		const GU_Detail *geo = getCookedGeo( context );
+		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+		for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+		{
+			const GA_Primitive *prim = primitives.get( it.getOffset() );
+			if ( prim->getTypeId() == GU_CortexPrimitive::typeId() )
+			{
+				const IECore::Object *object = ((GU_CortexPrimitive *)prim)->getObject();
+				if ( object )
+				{
+					typeMap[object->typeName()] += 1;
+				}
+			}
+		}
+		
+		if ( typeMap.empty() )
+		{
+			return;
+		}
+		
+		parms.append( "Cortex Object Details:\n" );
+		for ( std::map<std::string, int>::iterator it = typeMap.begin(); it != typeMap.end(); ++it )
+		{
+			parms.append( ( boost::format( "  %d " + it->first + "s\n" ) % it->second ).str().c_str() );
+		}
+		
+		return;
+	}
+	
+	// add conversion details for Houdini geo
 	UT_String p( "P" );
 	UT_String filter;
 	evalString( filter, pAttributeFilter.getToken(), 0, 0 );
