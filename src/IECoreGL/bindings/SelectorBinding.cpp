@@ -35,6 +35,7 @@
 #include <boost/python.hpp>
 
 #include "IECoreGL/Selector.h"
+#include "IECoreGL/State.h"
 #include "IECoreGL/bindings/SelectorBinding.h"
 
 using namespace boost::python;
@@ -42,24 +43,61 @@ using namespace boost::python;
 namespace IECoreGL
 {
 
-static list end( Selector &s )
+class SelectorContext
 {
-	std::vector<HitRecord> hits;
-	s.end( hits );
-	list result;
-	for( std::vector<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
-	{
-		result.append( *it );
-	}
-	return result;
-}
+	
+	public :
+	
+		SelectorContext( const Imath::Box2f &region, Selector::Mode mode, boost::python::list hits )
+			:	m_region( region ), m_mode( mode ), m_hitsList( hits ), m_selector()
+		{
+		}
+
+		void enter()
+		{
+			m_selector = boost::shared_ptr<Selector>( new Selector( m_region, m_mode, m_hitsVector ) );
+		}
+		
+		void loadName( GLuint name )
+		{
+			if( m_selector )
+			{
+				m_selector->loadName( name );
+			}
+		}
+
+		StatePtr baseState()
+		{
+			return StatePtr( m_selector ? m_selector->baseState() : NULL );
+		}
+
+		void exit( object type, object value, object traceBack )
+		{
+			m_selector = boost::shared_ptr<Selector>();
+			for( std::vector<HitRecord>::const_iterator it=m_hitsVector.begin(); it!=m_hitsVector.end(); it++ )
+			{
+				m_hitsList.append( *it );
+			}
+		}
+
+	private :
+	
+		Imath::Box2f m_region;
+		Selector::Mode m_mode;
+		std::vector<HitRecord> m_hitsVector;
+		boost::python::list m_hitsList;
+		boost::shared_ptr<Selector> m_selector;
+		
+		
+};
 
 void bindSelector()
 {
-	scope s = class_<Selector, boost::noncopyable>( "Selector", init<>() )
-		.def( "begin", &Selector::begin )
-		.def( "loadName", &Selector::loadName )
-		.def( "end", &end )
+	scope s = class_<SelectorContext, boost::noncopyable>( "Selector", init<const Imath::Box2f &, Selector::Mode, boost::python::list>() )
+		.def( "loadName", &SelectorContext::loadName )
+		.def( "baseState", &SelectorContext::baseState )
+		.def( "__enter__", &SelectorContext::enter, return_self<>())
+		.def( "__exit__", &SelectorContext::exit )		
 	;
 	
 	enum_<Selector::Mode>( "Mode" )
