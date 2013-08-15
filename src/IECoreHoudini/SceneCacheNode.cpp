@@ -119,7 +119,7 @@ PRM_ChoiceList SceneCacheNode<BaseType>::geometryTypeList( PRM_CHOICELIST_SINGLE
 template<typename BaseType>
 PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template(
-		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::fileChangedCallback, 0, 0,
+		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
 		"A static or animated SCC or LSCC file to load, starting at the Root path provided."
 	),
 	PRM_Template(
@@ -128,7 +128,7 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 		"cause all other nodes using this file to require a recook as well."
 	),
 	PRM_Template(
-		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::pathChangedCallback, 0, 0,
+		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
 		"Root path inside the SCC or LSCC of the hierarchy to load"
 	),
 	PRM_Template(
@@ -178,21 +178,7 @@ void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 }
 
 template<typename BaseType>
-int SceneCacheNode<BaseType>::fileChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
-{
-	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
-	if ( !node )
-	{
-		return 0;
-	}
-	
-	node->sceneChanged();
-	
-	return 1;
-}
-
-template<typename BaseType>
-int SceneCacheNode<BaseType>::pathChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
+int SceneCacheNode<BaseType>::sceneParmChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
 	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
 	if ( !node )
