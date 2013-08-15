@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECoreMaya/SceneShapeInterface.h"
 #include "IECoreMaya/SceneShapeInterfaceComponentBoundIterator.h"
 
@@ -1127,11 +1129,9 @@ void SceneShapeInterface::createInstances()
 		const InternedString &instanceSourceName = it->second;
 
 		NameToGroupMap::const_iterator srcIt = m_nameToGroupMap.find( instanceSourceName );
-		if ( srcIt == m_nameToGroupMap.end() )
-		{
-			/// \todo print error?
-			continue;
-		}
+
+		assert ( srcIt != m_nameToGroupMap.end() );
+
 		const IECoreGL::Group *srcGroup = srcIt->second.second.get();
 		
 		NameToGroupMap::iterator trgIt = m_nameToGroupMap.find( instanceName );
