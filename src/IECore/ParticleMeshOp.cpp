@@ -396,6 +396,8 @@ ObjectPtr ParticleMeshOp::doOperation( const CompoundObject * operands )
 		throw IOException( "Could not create reader for particle cache file" );
 	}
 
+	reader->realTypeParameter()->setValue( "native" );
+
 	ConstObjectPtr positionAttributeData = positionAttributeParameter()->getValue();
 	const std::string &positionAttribute = staticPointerCast<const StringData>(positionAttributeData)->readable();
 	DataPtr positionData = reader->readAttribute( positionAttribute );
