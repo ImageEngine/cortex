@@ -1065,14 +1065,15 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	subSceneInterface->path( pathName );
 	std::string pathStr = relativePathName( pathName );
 	renderer->setAttribute( "name", new StringData( pathStr ) );
-	// Need to add this attribute block to get a parent group with that name that includes the object and/or bound
-	AttributeBlock aNew(renderer);
 
 	if(pathStr != "/")
 	{
 		// Path space
 		renderer->concatTransform( convert<M44f>( subSceneInterface->readTransformAsMatrix( time ) ) );
 	}
+	
+	// Need to add this attribute block to get a parent group with that name that includes the object and/or bound
+	AttributeBlock aNew(renderer);
 
 	if ( subSceneInterface->hasAttribute( LinkedScene::fileNameLinkAttribute ) )
 	{
