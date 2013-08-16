@@ -177,7 +177,11 @@ void Primitive::render( State *state ) const
 	const Shader *constantShader = Shader::constant();
 	const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
 	Shader::Setup::ScopedBinding constantBinding( *constantSetup );
-	const GLint csIndex = 0;
+	GLint csIndex = -1;
+	if( const Shader::Parameter *csParameter = constantSetup->shader()->csParameter() )
+	{
+		csIndex = csParameter->location;
+	}
 		
 	// wireframe
 	
@@ -188,7 +192,10 @@ void Primitive::render( State *state ) const
 		glEnable( GL_POLYGON_OFFSET_LINE );
 		glPolygonOffset( -1 * width, -1 );
 		glLineWidth( width );
-		glUniform3fv( csIndex, 1, state->get<WireframeColorStateComponent>()->value().getValue() );
+		if( csIndex >= 0 )
+		{
+			glUniform3fv( csIndex, 1, state->get<WireframeColorStateComponent>()->value().getValue() );
+		}
 		render( state, Primitive::DrawWireframe::staticTypeId() );
 	}
 	
@@ -201,7 +208,10 @@ void Primitive::render( State *state ) const
 		glEnable( GL_POLYGON_OFFSET_POINT );
 		glPolygonOffset( -2 * width, -1 );
 		glPointSize( width );
-		glUniform3fv( csIndex, 1, state->get<PointColorStateComponent>()->value().getValue() );
+		if( csIndex >= 0 )
+		{
+			glUniform3fv( csIndex, 1, state->get<PointColorStateComponent>()->value().getValue() );
+		}
 		render( state, Primitive::DrawPoints::staticTypeId() );
 	}
 	
@@ -214,7 +224,10 @@ void Primitive::render( State *state ) const
 		float width = 2 * state->get<Primitive::OutlineWidth>()->value();
 		glPolygonOffset( 2 * width, 1 );
 		glLineWidth( width );
-		glUniform3fv( csIndex, 1, state->get<OutlineColorStateComponent>()->value().getValue() );
+		if( csIndex >= 0 )
+		{
+			glUniform3fv( csIndex, 1, state->get<OutlineColorStateComponent>()->value().getValue() );
+		}
 		render( state, Primitive::DrawOutline::staticTypeId() );
 	}
 	
@@ -224,7 +237,10 @@ void Primitive::render( State *state ) const
 	{
 		Shader::Setup::ScopedBinding boundSetupBinding( *boundSetup() );
 		glLineWidth( 1 );
-		glUniform3fv( csIndex, 1, state->get<BoundColorStateComponent>()->value().getValue() );
+		if( csIndex >= 0 )
+		{
+			glUniform3fv( csIndex, 1, state->get<BoundColorStateComponent>()->value().getValue() );
+		}
 		glDrawArrays( GL_LINES, 0, 24 );
 	}
 	
