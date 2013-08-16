@@ -35,18 +35,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// Boost
 #include <boost/python.hpp>
 
-// Houdini
-#include "DM/DM_RenderTable.h"
 #include <UT/UT_DSOVersion.h>
 #include <UT/UT_IOTable.h>
 #include <UT/UT_Version.h>
 #include <OP/OP_OperatorTable.h>
 #include <GR/GR_RenderTable.h>
 
-// IECoreHoudini
+/// Used to our new Render Hook for Houdini 12.5 and later
+#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
+
+#include "DM/DM_RenderTable.h"
+
+#endif
+
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
