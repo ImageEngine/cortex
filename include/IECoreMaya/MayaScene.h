@@ -92,7 +92,7 @@ class MayaScene : public IECore::SceneInterface
 
 		/// Returns the local transform of this node at the specified 
 		/// point in time, which must be equal to the current maya time in seconds.
-		virtual IECore::DataPtr readTransform( double time ) const;
+		virtual IECore::ConstDataPtr readTransform( double time ) const;
 		/// Returns the transform of this node at the specified 
 		/// point in time as a matrix.
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
@@ -107,7 +107,7 @@ class MayaScene : public IECore::SceneInterface
 		/// Fills attrs with the names of all attributes available in the current directory
 		virtual void attributeNames( NameList &attrs ) const;
 		/// Returns the attribute value at the given time, which must be equal to the current maya time in seconds.
-		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
+		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		/// Not currently supported - will throw an exception.
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
 
@@ -130,7 +130,7 @@ class MayaScene : public IECore::SceneInterface
 		virtual bool hasObject() const;
 		/// Reads the object stored at this path in the scene at the given time - may
 		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
-		virtual IECore::ObjectPtr readObject( double time ) const;
+		virtual IECore::ConstObjectPtr readObject( double time ) const;
 		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
 		/// Raises exception if it turns out not to be a Primitive object.
 		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
@@ -168,7 +168,7 @@ class MayaScene : public IECore::SceneInterface
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
 		typedef boost::function<bool (const MDagPath &)> HasFn;
-		typedef boost::function<IECore::ObjectPtr (const MDagPath &)> ReadFn;
+		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &)> ReadFn;
 		typedef boost::function<bool (const MDagPath &, const Name &)> HasTagFn;
 		typedef boost::function<void (const MDagPath &, NameList &, bool)> ReadTagsFn;
 		

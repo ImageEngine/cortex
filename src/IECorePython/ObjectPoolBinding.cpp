@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,9 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/ModelCache.h"
+#include "IECore/ObjectPool.h"
+
+#include "IECorePython/ObjectPoolBinding.h"
 #include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;
@@ -45,44 +47,55 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static list childNames( const ModelCache &m )
+ObjectPtr store( ObjectPool &pool, Object* obj, ObjectPool::StoreMode storeMode )
 {
-	std::vector< IndexedIO::EntryID > n;
-	m.childNames( n );
-	
-	list result;
-	for( std::vector<IndexedIO::EntryID>::const_iterator it = n.begin(); it!=n.end(); it++ )
+	return const_cast< Object * >( pool.store(obj, storeMode).get() );
+}
+
+ObjectPtr retrieve( const ObjectPool &pool, MurmurHash key, bool _copy )
+{
+	ConstObjectPtr o = pool.retrieve(key);
+
+	if ( !o )
 	{
-		result.append( (*it).value() );
+		return 0;
 	}
-	
-	return result;
+
+	if ( _copy )
+	{
+		return o->copy();
+	}
+
+	return const_cast< Object * >(o.get());
 }
 
-static ModelCachePtr readableChild( const ModelCache &m, const std::string &c )
+void bindObjectPool()
 {
-	return constPointerCast<ModelCache>( m.readableChild( c ) );
-}
+	RefCountedClass<ObjectPool, RefCounted> objectPoolClass( "ObjectPool" );
 
-void bindModelCache()
-{
+	{
+		// then define all the nested types
+		scope s( objectPoolClass );
 
-	RefCountedClass<ModelCache, RefCounted>( "ModelCache" )
-		.def( init<const std::string &, IndexedIO::OpenMode>() )
-		.def( "path", &ModelCache::path, return_value_policy<copy_const_reference>() )
-		.def( "name", &ModelCache::name, return_value_policy<copy_const_reference>() )
-		.def( "readBound", &ModelCache::readBound )
-		.def( "writeBound", &ModelCache::writeBound )
-		.def( "readTransform", &ModelCache::readTransform )
-		.def( "writeTransform", &ModelCache::writeTransform )
-		.def( "readObject", &ModelCache::readObject )
-		.def( "writeObject", &ModelCache::writeObject )
-		.def( "hasObject", &ModelCache::hasObject )
-		.def( "childNames", &childNames )
-		.def( "writableChild", &ModelCache::writableChild )
-		.def( "readableChild", &readableChild )
+		enum_< ObjectPool::StoreMode > ("StoreMode")
+			.value("StoreCopy", ObjectPool::StoreCopy)
+			.value("StoreReference", ObjectPool::StoreReference)
+			.export_values()
+		;
+	}
+
+	objectPoolClass
+		.def( init<size_t>() )
+		.def( "erase", &ObjectPool::erase )
+		.def( "clear", &ObjectPool::clear )
+		.def( "retrieve", &retrieve, ( arg("key"), arg("_copy") = true ) )		/// _copy=false provides low level access to the pointer stored in the cache
+		.def( "store",  &store )
+		.def( "contains", &ObjectPool::contains )
+		.def( "memoryUsage", &ObjectPool::memoryUsage )
+		.def( "getMaxMemoryUsage", &ObjectPool::getMaxMemoryUsage)
+		.def( "setMaxMemoryUsage", &ObjectPool::setMaxMemoryUsage )
+		.def( "defaultObjectPool", &ObjectPool::defaultObjectPool ).staticmethod( "defaultObjectPool" )
 	;
-	
 }
 
-} // namespace IECorePython
+}

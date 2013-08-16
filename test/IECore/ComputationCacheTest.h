@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_MODELCACHEBINDING_H
-#define IECOREPYTHON_MODELCACHEBINDING_H
+#ifndef IECORE_COMPUTATIONCACHETEST_H
+#define IECORE_COMPUTATIONCACHETEST_H
 
-namespace IECorePython
+#include "boost/test/unit_test.hpp"
+
+namespace IECore
 {
 
-void bindModelCache();
+void addComputationCacheTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECOREPYTHON_MODELCACHEBINDING_H
+#endif  // IECORE_COMPUTATIONCACHETEST_H
+

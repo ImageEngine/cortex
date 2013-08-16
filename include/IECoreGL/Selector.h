@@ -77,29 +77,25 @@ class Selector : boost::noncopyable
 			IDRender
 		};
 
-		Selector();
-		virtual ~Selector();
-		
 		/// Starts an operation to select objects in the specified
 		/// region of NDC space (0,0-1,1 top left to bottom right).
-		/// Set up the GL camera, call this function, then render
+		/// Set up the GL camera, construct a Selector, then render
 		/// the objects with appropriate loadName() calls with names
-		/// generated using NameStateComponent. Call selectEnd() to
-		/// retrieve the resulting selection hits. It is your responsibility
-		/// to keep the selector alive in between begin() and end() calls.
-		void begin( const Imath::Box2f &region, Mode mode = GLSelect );
+		/// generated using NameStateComponent. It is the caller's
+		/// responsibility to keep the hits vector alive for the lifetime
+		/// of the Selector.
+		Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits );
+		/// Completes the selection operation, filling in the vector
+		/// of hits that was passed to the constructor.
+		virtual ~Selector();
+		
 		/// Call this to set the name attached to subsequently rendered objects.
 		/// If rendering a Scene, this will be called automatically
 		/// by the NameStateComponents within the Scene.
 		void loadName( GLuint name );
-		/// Ends a selection operation, filling the provided vector
-		/// with records of all the objects hit. Returns the new size
-		/// of the hits vector.
-		size_t end( std::vector<HitRecord> &hits );
 		
 		/// A State that should be used as the base state for
-		/// selection drawing. This is only valid if retrieved after
-		/// a call to begin() and before a call to end().
+		/// selection drawing.
 		State *baseState();
 		
 		/// The IDRender mode requires a shader which takes a name

@@ -102,13 +102,7 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 	if ( newPrims.isValid() )
 	{
 		std::string interpolation = ( mesh->interpolation() == "catmullClark" ) ? "subdiv" : "poly";
-		StringVectorDataPtr interpolationVectorData = new StringVectorData();
-		interpolationVectorData->writable().push_back( interpolation );
-		std::vector<int> indexValues( newPrims.getEntries(), 0 );
-		IntVectorDataPtr indexData = new IntVectorData( indexValues );
-		ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( interpolationVectorData );
-		converter->indicesParameter()->setValidatedValue( indexData );
-		converter->convert( "ieMeshInterpolation", geo, newPrims );
+		ToHoudiniStringVectorAttribConverter::convertString( "ieMeshInterpolation", interpolation, geo, newPrims );
 	}
 	
 	return true;

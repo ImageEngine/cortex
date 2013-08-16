@@ -305,7 +305,7 @@ void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) 
 
 void PointsPrimitive::renderInstances( size_t numInstances ) const
 {
-	glDrawArraysInstanced( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );
+	glDrawArraysInstancedARB( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );
 }
 
 Imath::Box3f PointsPrimitive::bound() const

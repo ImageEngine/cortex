@@ -60,6 +60,11 @@ void IECoreHoudini::bindSceneCacheNode()
 		.value( "Object", SceneCacheNode<OP_Node>::Object )
 	;
 	
+	enum_<SceneCacheNode<OP_Node>::GeometryType>( "GeometryType" )
+		.value( "Cortex", SceneCacheNode<OP_Node>::Cortex )
+		.value( "Houdini", SceneCacheNode<OP_Node>::Houdini )
+	;
+	
 	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
 		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
 		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
@@ -70,4 +75,5 @@ void IECoreHoudini::bindSceneCacheNode()
 		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
 		.value( "Children", OBJ_SceneCacheTransform::Children )
 	;
+	
 }

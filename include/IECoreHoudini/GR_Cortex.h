@@ -35,6 +35,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+/// GR_RenderHooks are used in Houdini 12.0 and cause problems in 12.5.
+/// Check GR_CortexPrimitive.h for Cortex viewport rendering in Houdini 12.5.
+#include "UT/UT_Version.h"
+#if UT_MAJOR_VERSION_INT >= 12 && UT_MINOR_VERSION_INT <= 1
+
 #ifndef IECOREHOUDINI_GRCORTEX_H
 #define IECOREHOUDINI_GRCORTEX_H
 
@@ -92,3 +97,5 @@ class GR_Cortex : public GR_RenderHook
 } // namespace IECoreHoudini
 
 #endif // IECOREHOUDINI_GRCORTEX_H
+
+#endif // 12.1 or earlier

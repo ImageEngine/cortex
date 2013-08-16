@@ -315,18 +315,9 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	
 	// add the name attribute based on blindData
 	const StringData *nameData = primitive->blindData()->member<StringData>( "name" );
-	if ( nameData )
+	if ( nameData && prims.isValid() )
 	{
-		if ( prims.isValid() )
-		{
-			StringVectorDataPtr nameVectorData = new StringVectorData();
-			nameVectorData->writable().push_back( nameData->readable() );
-			std::vector<int> indexValues( prims.getEntries(), 0 );
-			IntVectorDataPtr indexData = new IntVectorData( indexValues );
-			ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( nameVectorData );
-			converter->indicesParameter()->setValidatedValue( indexData );
-			converter->convert( "name", geo, prims );
-		}
+		ToHoudiniStringVectorAttribConverter::convertString( "name", nameData->readable(), geo, prims );
 	}
 }
 

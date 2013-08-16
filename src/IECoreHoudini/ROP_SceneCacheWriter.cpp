@@ -74,21 +74,14 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		PRM_Template *parentTemplate = ROP_Node::getROPbaseTemplate();
-		unsigned numParentParms = PRM_Template::countTemplates( parentTemplate );
-		thisTemplate = new PRM_Template[ numParentParms + 3 ];
+		thisTemplate = new PRM_Template[3];
 		
-		// add the common ROP parms
-		for ( unsigned i = 0; i < numParentParms; ++i )
-		{
-			thisTemplate[i] = parentTemplate[i];
-		}
-		
-		thisTemplate[numParentParms] = PRM_Template(
+		thisTemplate[0] = PRM_Template(
 			PRM_FILE, 1, &pFile, &fileDefault, 0, 0, 0, 0, 0,
 			"An SCC file to write, based on the Houdini hierarchy defined by the Root Object provided."
 		);
-		thisTemplate[numParentParms+1] = PRM_Template(
+		
+		thisTemplate[1] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &pRootObject, &rootObjectDefault, 0, 0, 0,
 			&PRM_SpareData::objPath, 0, "The node to use as the root of the SceneCache"
 		);
@@ -97,7 +90,8 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( thisTemplate );
+		OP_TemplatePair *extraTemplatePair = new OP_TemplatePair( thisTemplate );
+		templatePair = new OP_TemplatePair( ROP_Node::getROPbaseTemplate(), extraTemplatePair );
 	}
 	
 	return templatePair;

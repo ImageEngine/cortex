@@ -45,6 +45,7 @@
 #include "IECore/TransformationMatrixData.h"
 
 #include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/HoudiniScene.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
@@ -222,7 +223,7 @@ void HoudiniScene::writeBound( const Imath::Box3d &bound, double time )
 	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
 }
 
-DataPtr HoudiniScene::readTransform( double time ) const
+ConstDataPtr HoudiniScene::readTransform( double time ) const
 {
 	Imath::V3d s, h, r, t;
 	Imath::M44d matrix = readTransformAsMatrix( time );
@@ -289,7 +290,7 @@ void HoudiniScene::attributeNames( NameList &attrs ) const
 	}
 }
 
-ObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
+ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
 {
 	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
 	if ( it != customAttributeReaders().end() )
@@ -401,7 +402,7 @@ bool HoudiniScene::hasObject() const
 	return false;
 }
 
-ObjectPtr HoudiniScene::readObject( double time ) const
+ConstObjectPtr HoudiniScene::readObject( double time ) const
 {
 	OBJ_Node *objNode = retrieveNode( true )->castToOBJNode();
 	if ( !objNode )
@@ -409,11 +410,59 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 		return 0;
 	}
 	
-	ObjectPtr result = 0;
+	ConstObjectPtr result = 0;
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
 		OP_Context context( time );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context );
+		
+		// check if its holding a GU_CortexPrimitive
+		/// \todo: ideally this case would be handled by the converters as well...
+		{
+			GU_DetailHandleAutoReadLock readHandle( handle );
+			const GU_Detail *geo = readHandle.getGdp();
+			if ( geo )
+			{
+				// is there a named shape?
+				GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+				if ( nameAttrRef.isValid() )
+				{
+					unsigned numNames = geo->getUniqueValueCount( nameAttrRef );
+					for ( unsigned i=0; i < numNames; ++i )
+					{
+						const char *name = geo->getUniqueStringValue( nameAttrRef, i );
+						
+						Path childPath;
+						bool valid = relativePath( name, childPath );
+						if ( valid && childPath.empty() )
+						{
+							GA_Range primRange = geo->getRangeByValue( nameAttrRef, name );
+							GA_Primitive *hPrim = geo->getPrimitiveList().get( primRange.begin().getOffset() );
+							if ( hPrim->getTypeId() == GU_CortexPrimitive::typeId() )
+							{
+								/// todo: remove this copy once readObject returns a const object
+								return ((GU_CortexPrimitive *)hPrim)->getObject()->copy();
+							}
+						}
+					}
+				}
+				else
+				{
+					const GA_PrimitiveList &primitives = geo->getPrimitiveList();	
+					for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+					{
+						const GA_Primitive *hPrim = primitives.get( it.getOffset() );
+						if ( hPrim->getTypeId() == GU_CortexPrimitive::typeId() )
+						{
+							/// todo: remove this copy once readObject returns a const object
+							return ((GU_CortexPrimitive *)hPrim)->getObject()->copy();
+						}
+					}
+				}
+			}
+		}
+		
+		// try normal geometry conversion
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
 		if ( !converter )
 		{
@@ -424,7 +473,7 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 		/// \todo: add parameter to GroupConverter (or all of them?) to only convert named shapes
 		///	   identify the appropriate shape name
 		///	   use that parameter to avoid converting the entire group
-		Group *group = IECore::runTimeCast<Group>( result );
+		const Group *group = IECore::runTimeCast<const Group>( result );
 		if ( group )
 		{
 			const Group::ChildContainer &children = group->children();
@@ -452,7 +501,7 @@ ObjectPtr HoudiniScene::readObject( double time ) const
 PrimitiveVariableMap HoudiniScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 {
 	// \todo Optimize this function, adding special cases such as for Meshes.
-	PrimitivePtr prim = runTimeCast< Primitive >( readObject( time ) );
+	ConstPrimitivePtr prim = runTimeCast< const Primitive >( readObject( time ) );
 	if ( !prim )
 	{
 		throw Exception( "Object does not have primitive variables!" );
