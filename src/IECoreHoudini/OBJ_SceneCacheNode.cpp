@@ -223,8 +223,9 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 	
 	this->m_static = ( sampledScene ) ? ( sampledScene->numTransformSamples() < 2 ) : false;
 	
-	BaseType::flags().setTimeDep( bool( !this->m_static ) );
-	BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );
+	/// \todo: set this back to bool( !this->m_static ) if we can solve the update bug
+	BaseType::flags().setTimeDep( true );
+	BaseType::getParmList()->setCookTimeDependent( true );
 }
 
 template<typename BaseType>
@@ -245,18 +246,14 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 		sceneChanged();
 	}
 	
-	if ( this->m_static == true )
+	/// \todo: set this back to bool( !this->m_static ) if we can solve the update bug
+	BaseType::flags().setTimeDep( true );
+	BaseType::getParmList()->setCookTimeDependent( true );
+	
+	if ( this->m_static == true && this->m_loaded && this->m_hash == hash )
 	{
-		if ( this->m_loaded && this->m_hash == hash )
-		{
-			xform = m_xform;
-			return true;
-		}
-	}
-	else
-	{
-		BaseType::flags().setTimeDep( true );
-		BaseType::getParmList()->setCookTimeDependent( true );
+		xform = m_xform;
+		return true;
 	}
 	
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
