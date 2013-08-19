@@ -158,7 +158,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		{
 			const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
 			int numShapes = geo->getUniqueValueCount( attrRef );
-			bool reRoot = ( numShapes == 0 );
+			reRoot = ( numShapes == 0 );
 			if ( numShapes == 1 )
 			{
 				const char *name = geo->getUniqueStringValue( attrRef, 0 );
