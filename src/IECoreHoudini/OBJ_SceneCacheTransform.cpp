@@ -232,7 +232,15 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( opNode );
 	
 	geo->referenceParent( pFile.getToken() );
-	geo->setPath( scene );
+	if ( hierarchy == Parenting )
+	{
+		geo->setPath( scene );
+	}
+	else
+	{
+		geo->referenceParent( pRoot.getToken() );
+		geo->setIndirectInput( 0, parent->getParentInput( 0 ) );
+	}
 	
 	Space space = ( depth == AllDescendants ) ? Path : ( hierarchy == Parenting ) ? Local : Object;
 	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
@@ -242,11 +250,6 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	geo->expandHierarchy( scene );
 	
 	geo->setVisible( tagged( scene, tagFilter ) );
-	
-	if ( hierarchy != Parenting )
-	{
-		geo->setIndirectInput( 0, parent->getParentInput( 0 ) );
-	}
 	
 	return geo;
 }
