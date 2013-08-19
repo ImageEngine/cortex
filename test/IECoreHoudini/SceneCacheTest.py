@@ -1662,6 +1662,76 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 2, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 3, 0 ) )
 	
+	def testTimeDependent( self ) :
+		
+		self.writeSCC()
+		xform = self.xform()
+		xform.parm( "expand" ).pressButton()
+		self.assertFalse( hou.node( xform.path()+"/1" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/geo/1" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/geo/2" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo/3" ).isTimeDependent() )
+		
+		scene = self.writeSCC()
+		sc1 = scene.child( str( 1 ) )
+		sc2 = sc1.child( str( 2 ) )
+		sc3 = sc2.child( str( 3 ) )
+		
+		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
+			
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
+			sc1.writeTransform( IECore.M44dData( matrix ), time )
+			
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
+			sc3.writeTransform( IECore.M44dData( matrix ), time )
+		
+		del scene, sc1, sc2, sc3
+		
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/geo/1" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/geo/2" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/3" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/3/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo/3" ).isTimeDependent() )
+		
+		scene = self.writeSCC()
+		sc1 = scene.child( str( 1 ) )
+		sc2 = sc1.child( str( 2 ) )
+		sc3 = sc2.child( str( 3 ) )
+		
+		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
+			
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
+			sc1.writeTransform( IECore.M44dData( matrix ), time )
+			
+			mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
+			sc2.writeObject( mesh, time )
+		
+		del scene, sc1, sc2, sc3
+		
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "expand" ).pressButton()
+		self.assertTrue( hou.node( xform.path()+"/1" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/geo/1" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/geo/2" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/3/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo/3" ).isTimeDependent() )
+	
 	def tearDown( self ) :
 		
 		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile, TestSceneCache.__testHip, TestSceneCache.__testBgeo, TestSceneCache.__testBgeoGz, TestSceneCache.__testGeo ] :
