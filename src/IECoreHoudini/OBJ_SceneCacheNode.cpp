@@ -223,9 +223,12 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 	
 	this->m_static = ( sampledScene ) ? ( sampledScene->numTransformSamples() < 2 ) : false;
 	
-	/// \todo: set this back to bool( !this->m_static ) if we can solve the update bug
-	BaseType::flags().setTimeDep( true );
-	BaseType::getParmList()->setCookTimeDependent( true );
+	// only update time dependency if Houdini thinks its static
+	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
+	{
+		BaseType::flags().setTimeDep( bool( !this->m_static ) );
+		BaseType::getParmList()->setCookTimeDependent(  bool( !this->m_static ) );
+	}
 }
 
 template<typename BaseType>
@@ -246,9 +249,12 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 		sceneChanged();
 	}
 	
-	/// \todo: set this back to bool( !this->m_static ) if we can solve the update bug
-	BaseType::flags().setTimeDep( true );
-	BaseType::getParmList()->setCookTimeDependent( true );
+	// only update time dependency if Houdini thinks its static
+	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
+	{
+		BaseType::flags().setTimeDep( bool( !this->m_static ) );
+		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
+	}
 	
 	if ( this->m_static == true && this->m_loaded && this->m_hash == hash )
 	{
@@ -285,6 +291,21 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	this->m_loaded = true;
 	
 	return true;
+}
+
+template<typename BaseType>
+OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
+{
+	OP_ERROR status = BaseType::cookMyObj( context );
+	
+	// only update time dependency if Houdini thinks its static
+	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
+	{
+		BaseType::flags().setTimeDep( bool( !this->m_static ) );
+		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
+	}
+	
+	return status;
 }
 
 template<typename BaseType>

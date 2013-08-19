@@ -71,6 +71,8 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 	protected :
 		
 		virtual void sceneChanged();
+		
+		virtual OP_ERROR cookMyObj( OP_Context &context );
 		virtual bool getParmTransform( OP_Context &context, UT_DMatrix4 &xform );
 		virtual bool updateParmsFlags();
 		
