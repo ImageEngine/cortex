@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "OP/OP_Layout.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "UT/UT_StringMMPattern.h"
 
@@ -334,6 +335,14 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 			childNode->setInt( pExpanded.getToken(), 0, 0, 1 );
 		}
 	}
+	
+	OP_Layout layout( parent );
+	layout.addLayoutOp( parent->getParentInput( 0 ) );
+	for ( int i=0; i < parent->getNchildren(); ++i )
+	{
+		layout.addLayoutOp( parent->getChild( i ) );
+	}
+	layout.layoutOps( OP_LAYOUT_TOP_TO_BOT, parent, parent->getParentInput( 0 ) );
 }
 
 bool OBJ_SceneCacheTransform::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )
