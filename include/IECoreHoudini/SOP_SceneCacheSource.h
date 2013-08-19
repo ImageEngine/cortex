@@ -59,7 +59,11 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		static OP_TemplatePair *buildParameters();
 		
 		static PRM_Name pShapeFilter;
+		static PRM_Name pObjectOnly;
 		static PRM_ChoiceList shapeFilterMenu;
+		
+		bool getObjectOnly() const;
+		void setObjectOnly( bool objectOnly );
 		
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
 		static void buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
@@ -67,6 +71,8 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 	protected :
 	
 		virtual OP_ERROR cookMySop( OP_Context &context );
+		
+		virtual void sceneChanged();
 		
 		/// Modify the object after it has been loaded in memory. Implemented to add the name matching this
 		/// location in cache and to erase primitive variables that do not match the attribute filter.

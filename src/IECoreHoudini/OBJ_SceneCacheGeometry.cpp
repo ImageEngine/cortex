@@ -84,12 +84,12 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	sop->setFile( getFile() );
 	sop->setPath( scene );
 	
+	bool objectOnly = true;
 	Space space = getSpace();
-	UT_String shapes( name );
 	SOP_SceneCacheSource::Space sopSpace = SOP_SceneCacheSource::Object;
 	if ( space == World || space == Path )
 	{
-		shapes = "*";
+		objectOnly = false;
 		sopSpace = SOP_SceneCacheSource::Path;
 	}
 	
@@ -98,6 +98,6 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	sop->setAttributeFilter( attribFilter );
 	
 	sop->setSpace( sopSpace );
+	sop->setObjectOnly( objectOnly );
 	sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)getGeometryType() );
-	sop->setString( shapes, CH_STRING_LITERAL, SOP_SceneCacheSource::pShapeFilter.getToken(), 0, 0 );
 }
