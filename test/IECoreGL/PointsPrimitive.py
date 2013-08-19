@@ -489,7 +489,44 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
 		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
 		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+	
+	def testWireframeShading( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		
+		r.camera( 
+			"main",
+			{
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+			}
+		)
+		
+		r.display( self.outputFileName, "exr", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.setAttribute( "gl:primitive:wireframe", True )
+			r.setAttribute( "gl:primitive:wireframeColor", IECore.Color4f( 1, 0, 0, 1 ) )			
+			r.setAttribute( "gl:primitive:wireframeWidth", 5.0 )			
+			r.setAttribute( "gl:primitive:solid", False )
+						
+			r.points( 1, {
+				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+			} )
+		
+		e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
+		result = e.createResult()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+
 	def setUp( self ) :
 		
 		if not os.path.isdir( "test/IECoreGL/output" ) :

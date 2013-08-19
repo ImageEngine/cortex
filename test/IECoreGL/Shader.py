@@ -308,5 +308,10 @@ class TestShader( unittest.TestCase ) :
 	
 		s = IECoreGL.Shader( IECoreGL.Shader.defaultVertexSource(), "", IECoreGL.Shader.defaultFragmentSource() )
 
+	def testStandardParameters( self ) :
+	
+		s = IECoreGL.Shader.constant()
+		self.assertEqual( s.csParameter(), s.uniformParameter( "Cs" ) )
+	
 if __name__ == "__main__":
     unittest.main()

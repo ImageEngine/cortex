@@ -59,9 +59,8 @@ static boost::python::list uniformParameterNames( const Shader &s )
 	return result;
 }
 
-static object uniformParameter( const Shader &s, const std::string &n )
+static object parameterToObject( const Shader::Parameter *p )
 {
-	const Shader::Parameter *p = s.uniformParameter( n );
 	if( !p )
 	{
 		return object();
@@ -70,6 +69,11 @@ static object uniformParameter( const Shader &s, const std::string &n )
 	{
 		return object( Shader::Parameter( *p ) );
 	}
+}
+
+static object uniformParameter( const Shader &s, const std::string &n )
+{
+	return parameterToObject( s.uniformParameter( n ) );
 }
 
 static boost::python::list vertexAttributeNames( const Shader &s )
@@ -86,15 +90,12 @@ static boost::python::list vertexAttributeNames( const Shader &s )
 
 static object vertexAttribute( const Shader &s, const std::string &n )
 {
-	const Shader::Parameter *p = s.vertexAttribute( n );
-	if( !p )
-	{
-		return object();
-	}
-	else
-	{
-		return object( Shader::Parameter( *p ) );
-	}
+	return parameterToObject( s.vertexAttribute( n ) );
+}
+
+static object csParameter( const Shader &s )
+{
+	return parameterToObject( s.csParameter() );
 }
 
 static ShaderPtr shader( Shader::Setup &s )
@@ -115,6 +116,7 @@ void bindShader()
 		.def( "uniformParameter", &uniformParameter )
 		.def( "vertexAttributeNames", &vertexAttributeNames )
 		.def( "vertexAttribute", &vertexAttribute )
+		.def( "csParameter", &csParameter )
 		.def( "defaultVertexSource", &Shader::defaultVertexSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultVertexSource" )
 		.def( "defaultFragmentSource", &Shader::defaultFragmentSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultFragmentSource" )
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
@@ -134,6 +136,7 @@ void bindShader()
 		.def_readonly( "size", &Shader::Parameter::size )
 		.def_readonly( "location", &Shader::Parameter::location )
 		.def_readonly( "textureUnit", &Shader::Parameter::textureUnit )
+		.def( self == self )
 	;
 }
 
