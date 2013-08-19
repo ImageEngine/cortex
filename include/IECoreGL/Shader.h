@@ -88,6 +88,7 @@ class Shader : public IECore::RunTimeTyped
 		
 		struct Parameter
 		{
+			
 			/// Type as reported by glGetActiveUnifom() or
 			/// glGetActiveAttrib().
 			GLenum type;
@@ -102,6 +103,9 @@ class Shader : public IECore::RunTimeTyped
 			/// This does not store an enum but instead an index
 			/// (so 0 represents GL_TEXTURE0).
 			GLuint textureUnit;
+			
+			bool operator == ( const Parameter &other ) const;
+			
 		};
 		
 		/// Fills the passed vector with the names of all uniform shader parameters.
@@ -120,6 +124,20 @@ class Shader : public IECore::RunTimeTyped
 		/// parameter exists. The return value directly references data held within
 		/// the Shader, and will die when the Shader dies.
 		const Parameter *vertexAttribute( const std::string &name ) const; 
+		
+		//! @name Standard parameters
+		/// Cortex defines a set of standard shader parameters which
+		/// are used to pass state to the shaders. These functions
+		/// provide rapid access to the standard parameters if
+		/// they exist.
+		/// \todo Pass the matrices and projections via standard
+		/// parameters to avoid use of deprecated gl_ModelViewMatrix etc.
+		///////////////////////////////////////////////////////////
+		//@{
+		/// Returns the "uniform vec3 Cs" parameter used to specify
+		/// constant colours to the shader.
+		const Parameter *csParameter() const;
+		//@}
 		
 		/// Shaders are only useful when associated with a set of values for
 		/// their uniform parameters and vertex attributes, and to render
@@ -154,7 +172,9 @@ class Shader : public IECore::RunTimeTyped
 					
 						/// Binds the setup. It is the responsibility of the
 						/// caller to ensure the setup remains alive for
-						/// the lifetime of the ScopedBinding.
+						/// the lifetime of the ScopedBinding. The setup will
+						/// also be registered with the current Selector if
+						/// necessary.
 						ScopedBinding( const Setup &setup );
 						/// Unbinds the setup, reverting to the previous state.
 						~ScopedBinding();

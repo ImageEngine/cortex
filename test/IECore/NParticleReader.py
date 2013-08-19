@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
 		self.assertEqual( type( r ), IECore.NParticleReader )
+		r.parameters()["realType"].setValue( "native" )
 
 		self.assertEqual( r.numParticles(), 4 )
 		self.assertEqual( len(r.frameTimes()), 1 )
@@ -93,6 +94,7 @@ class TestNParticleReader( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
 		self.assertEqual( type( r ), IECore.NParticleReader )
 		r["convertPrimVarNames"].setValue( IECore.BoolData( False ) )
+		r["realType"].setValue( "native" )
 		self.assertFalse( r.parameters()["convertPrimVarNames"].getTypedValue() )
 
 		self.assertEqual( r.numParticles(), 4 )
@@ -128,6 +130,7 @@ class TestNParticleReader( unittest.TestCase ) :
 	def testMultiFrameFiles( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc" )
+		r.parameters()["realType"].setValue( "native" )
 		
 		self.assertTrue( r.parameters()["convertPrimVarNames"].getTypedValue() )
 		self.assertEqual( len(r.frameTimes()), 10 )
@@ -305,6 +308,7 @@ class TestNParticleReader( unittest.TestCase ) :
 		
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nClothFrame3.mc" )
 		self.assertEqual( type( r ), IECore.NParticleReader )
+		r.parameters()["realType"].setValue( "native" )
 		
 		self.assertEqual( r.numParticles(), 349 )
 		self.assertEqual( len(r.frameTimes()), 1 )

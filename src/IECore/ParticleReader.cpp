@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -84,7 +84,7 @@ ParticleReader::ParticleReader( const std::string &description )
 	m_realTypeParameter = new IntParameter(
 		"realType",
 		"The type of data to use to represent real values.",
-		Native,
+		Float,
 		Native,
 		Double,
 		realTypePresets,

@@ -130,130 +130,31 @@ class TestShader( unittest.TestCase ) :
 		s = IECoreGL.Shader( vertexSource, fragmentSource )
 		self.assert_( s==s )
 
-		expectedParameterNamesAndTypes = {
-			"boolParm" : IECore.TypeId.BoolData,
-			"intParm" : IECore.TypeId.IntData,
-			"floatParm" : IECore.TypeId.FloatData,
-			"bvec2Parm" : IECore.TypeId.V2iData,
-			"bvec3Parm" : IECore.TypeId.V3iData,
-			"ivec2Parm" : IECore.TypeId.V2iData,
-			"ivec3Parm" : IECore.TypeId.V3iData,
-			"vec2Parm" : IECore.TypeId.V2fData,
-			"vec3Parm" : IECore.TypeId.V3fData,
-			"vec4Parm" : IECore.TypeId.Color4fData,
-			"s.f" : IECore.TypeId.FloatData,
-			"s.i" : IECore.TypeId.IntData,
-			"s2D" : IECoreGL.Texture.staticTypeId(),
-			"mat3Parm" : IECore.TypeId.M33fData,
-			"mat4Parm" : IECore.TypeId.M44fData,
-		}
+		expectedParameterNames = [
+			"boolParm",
+			"intParm",
+			"floatParm",
+			"bvec2Parm",
+			"bvec3Parm",
+			"ivec2Parm",
+			"ivec3Parm",
+			"vec2Parm",
+			"vec3Parm",
+			"vec4Parm",
+			"s.f",
+			"s.i",
+			"s2D",
+			"mat3Parm",
+			"mat4Parm",
+		]
 
 		parameterNames = s.uniformParameterNames()
-		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndTypes ) )
-		for n in expectedParameterNamesAndTypes.keys() :
+		self.assertEqual( len( parameterNames ), len( expectedParameterNames ) )
+		for n in expectedParameterNames :
 			self.assert_( n in parameterNames )
 			self.assertTrue( s.uniformParameter( n ) is not None )
 			self.assertTrue( s.uniformParameter( n + "VeryUnlikelySuffix" ) is None )
-			self.assertEqual( s.uniformParameterType( n ), expectedParameterNamesAndTypes[n] )
-
-		expectedNamesAndValues = {
-			"boolParm" : IECore.BoolData( 0 ),
-			"intParm" : IECore.IntData( 0 ),
-			"floatParm" : IECore.FloatData( 0 ),
-			"bvec2Parm" : IECore.V2iData( IECore.V2i( 0 ) ),
-			"ivec2Parm" : IECore.V2iData( IECore.V2i( 0 ) ),
-			"vec2Parm" : IECore.V2fData( IECore.V2f( 0 ) ),
-			"bvec3Parm" : IECore.V3iData( IECore.V3i( 0 ) ),
-			"ivec3Parm" : IECore.V3iData( IECore.V3i( 0 ) ),
-			"vec3Parm" : IECore.V3fData( IECore.V3f( 0 ) ),
-			"vec4Parm" : IECore.Color4fData( IECore.Color4f( 0 ) ),
-		}
-		# Initial values are not necessarily zero. So we just test for the value type here.
-		for name, value in expectedNamesAndValues.items() :
-			self.assertEqual( type(s.getUniformParameter( name )), type(value) )
-
-		# must bind a shader before setting parameters
-		s.bind()
-
-		s.setUniformParameter( "intParm", IECore.IntData( 1 ) )
-		self.assertEqual( s.getUniformParameter( "intParm" ), IntData( 1 ) )
-
-		s.setUniformParameter( "boolParm", IECore.IntData( 2 ) )
-		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( 1 ) )
-
-		s.setUniformParameter( "boolParm", IECore.BoolData( False ) )
-		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( False ) )
-
-		s.setUniformParameter( "boolParm", IECore.BoolData( True ) )
-		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( True ) )
-
-		s.setUniformParameter( "boolParm", IECore.BoolData( 2 ) )
-		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( 1 ) )
-
-		s.setUniformParameter( "floatParm", IECore.FloatData( 1 ) )
-		self.assertEqual( s.getUniformParameter( "floatParm" ), FloatData( 1 ) )
-
-		s.setUniformParameter( "bvec2Parm", IECore.V2iData( IECore.V2i( 0, 1 ) ) )
-		self.assertEqual( s.getUniformParameter( "bvec2Parm" ), IECore.V2iData( IECore.V2i( 0, 1 ) ) )
-
-		s.setUniformParameter( "bvec3Parm", IECore.V3iData( IECore.V3i( 1 ) ) )
-		self.assertEqual( s.getUniformParameter( "bvec3Parm" ), IECore.V3iData( IECore.V3i( 1 ) ) )
-
-		s.setUniformParameter( "ivec2Parm", IECore.V2iData( IECore.V2i( 1, 2 ) ) )
-		self.assertEqual( s.getUniformParameter( "ivec2Parm" ), IECore.V2iData( IECore.V2i( 1, 2 ) ) )
-
-		s.setUniformParameter( "ivec3Parm", IECore.V3iData( IECore.V3i( 1 ) ) )
-		self.assertEqual( s.getUniformParameter( "ivec3Parm" ), IECore.V3iData( IECore.V3i( 1 ) ) )
-
-		s.setUniformParameter( "vec2Parm", IECore.V2fData( IECore.V2f( 1, 2 ) ) )
-		self.assertEqual( s.getUniformParameter( "vec2Parm" ), IECore.V2fData( V2f( 1, 2 ) ) )
-
-		s.setUniformParameter( "vec3Parm", IECore.Color3fData( IECore.Color3f( 1 ) ) )
-		self.assertEqual( s.getUniformParameter( "vec3Parm" ), IECore.V3fData( IECore.V3f( 1 ) ) )
-
-		s.setUniformParameter( "vec4Parm", IECore.Color4fData( IECore.Color4f( 1 ) ) )
-		self.assertEqual( s.getUniformParameter( "vec4Parm" ), IECore.Color4fData( IECore.Color4f( 1 ) ) )
-
-		s.setUniformParameter( "s.i", IECore.IntData( 1 ) )
-		self.assertEqual( s.getUniformParameter( "s.i" ), IECore.IntData( 1 ) )
-
-		s.setUniformParameter( "s.f", IECore.FloatData( 1 ) )
-		self.assertEqual( s.getUniformParameter( "s.f" ), IECore.FloatData( 1 ) )
-
-		s.setUniformParameter( "mat3Parm", IECore.M33fData( IECore.M33f.createTranslated( IECore.V2f( 1, 2 ) ) ) )
-		self.assertEqual( s.getUniformParameter( "mat3Parm" ), IECore.M33fData( IECore.M33f.createTranslated( IECore.V2f( 1, 2 ) ) ) )
-
-		s.setUniformParameter( "mat4Parm", IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
-		self.assertEqual( s.getUniformParameter( "mat4Parm" ), IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
-
-		# check that setting invalid values throws an Exception
-		self.assertRaises( Exception, s.setUniformParameter, "iDontExist", IECore.FloatData( 2 ) )
-		self.assertRaises( Exception, s.setUniformParameter, "boolParm", IECore.FloatData( 2 ) )
-		self.assertRaises( Exception, s.setUniformParameter, "intParm", IECore.FloatData( 2 ) )
-		self.assertRaises( Exception, s.setUniformParameter, "floatParm", IECore.IntData( 2 ) )
-		self.assertRaises( Exception, s.setUniformParameter, "ivec2Parm", IECore.V3iData( IECore.V3i( 2 ) ) )
-		self.assertRaises( Exception, s.setUniformParameter, "ivec3Parm", IECore.V3fData( IECore.V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setUniformParameter, "vec2Parm", IECore.V3fData( IECore.V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setUniformParameter, "vec3Parm", IECore.V2fData( IECore.V2f( 2 ) ) )
-		self.assertRaises( Exception, s.setUniformParameter, "vec4Parm", IECore.V3fData( IECore.V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setUniformParameter, "mat4Parm", IECore.V3fData( IECore.V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setUniformParameter, "mat3Parm", IECore.V3fData( IECore.V3f( 2 ) ) )
-
-		# check that both booldata is valid for bools
-		self.assert_( s.uniformValueValid( "boolParm", IECore.BoolData( True ) ) )
-
-		# check uniform parameters defined from vector items
-		self.assert_( s.uniformVectorValueValid( "vec2Parm", IECore.V2fVectorData( [ IECore.V2f() ] ) ) )
-		self.assert_( not s.uniformVectorValueValid( "vec2Parm", IECore.FloatVectorData( [ 1 ] ) ) )
-		self.assert_( s.uniformVectorValueValid( "floatParm", IECore.FloatVectorData( [ 1 ] ) ) )
-		self.assert_( not s.uniformVectorValueValid( "floatParm", IECore.IntVectorData( [ 1 ] ) ) )
-		self.assert_( s.uniformVectorValueValid( "vec3Parm", IECore.V3fVectorData( [ IECore.V3f() ] ) ) )
-		self.assert_( s.uniformVectorValueValid( "vec3Parm", IECore.Color3fVectorData( [ IECore.Color3f() ] ) ) )
-		self.assert_( not s.uniformVectorValueValid( "vec3Parm", IECore.V2fVectorData( [ IECore.V2f() ] ) ) )
-
-		v = IECore.V2fVectorData( [ IECore.V2f(9,9), IECore.V2f(1,2), IECore.V2f(9,9) ] )
-		s.setUniformParameterFromVector( "vec2Parm", v, 1 )
-		self.assertEqual( s.getUniformParameter( "vec2Parm" ), IECore.V2fData( IECore.V2f( 1, 2 ) ) )
+			self.assertEqual( s.uniformParameter( n ).size, 1 )
 	
 	def testUniformArrayParameters( self ) :
 		
@@ -271,19 +172,19 @@ class TestShader( unittest.TestCase ) :
 
 		fragmentSource = """
 		// uniform bool boolParm[4];
-		uniform int intParm[4];
+		uniform int intParm[2];
 		uniform float floatParm[4];
 		
 		// uniform bvec2 bvec2Parm[4];
 		// uniform bvec3 bvec3Parm[4];
 		// uniform ivec4 bvec4Parm; // we have no suitable datatype for specifying this in IECore
 		
-		uniform ivec2 ivec2Parm[4];
-		uniform ivec3 ivec3Parm[4];
+		uniform ivec2 ivec2Parm[5];
+		uniform ivec3 ivec3Parm[6];
 		// uniform ivec4 ivec4Parm; // we have no suitable datatype for specifying this in IECore
 
-		uniform vec2 vec2Parm[4];
-		uniform vec3 vec3Parm[4];
+		uniform vec2 vec2Parm[2];
+		uniform vec3 vec3Parm[3];
 		uniform vec4 vec4Parm[4];
 
 		//uniform sampler2D s2D[4];
@@ -312,77 +213,27 @@ class TestShader( unittest.TestCase ) :
 		s = IECoreGL.Shader( vertexSource, fragmentSource )
 		self.assert_( s==s )
 
-		expectedParameterNamesAndTypes = {
-			"intParm" : IECore.TypeId.IntVectorData,
-			"floatParm" : IECore.TypeId.FloatVectorData,
-			"ivec2Parm" : IECore.TypeId.V2iVectorData,
-			"ivec3Parm" : IECore.TypeId.V3iVectorData,
-			"vec2Parm" : IECore.TypeId.V2fVectorData,
-			"vec3Parm" : IECore.TypeId.V3fVectorData,
-			"vec4Parm" : IECore.TypeId.Color4fVectorData,
-			"mat3Parm" : IECore.TypeId.M33fVectorData,
-			"mat4Parm" : IECore.TypeId.M44fVectorData,
+		expectedParameterNamesAndSizes = {
+			"intParm" : 2,
+			"floatParm" : 4,
+			"ivec2Parm" : 5,
+			"ivec3Parm" : 6,
+			"vec2Parm" : 2,
+			"vec3Parm" : 3,
+			"vec4Parm" : 4,
+			"mat3Parm" : 4,
+			"mat4Parm" : 4,
 		}
 
 		parameterNames = s.uniformParameterNames()
-		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndTypes ) )
+		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndSizes ) )
 		
-		for n in expectedParameterNamesAndTypes.keys() :
+		for n in expectedParameterNamesAndSizes.keys() :
 			self.assertTrue( n in parameterNames )
 			self.assertTrue( s.uniformParameter( n ) is not None )
 			self.assertTrue( s.uniformParameter( n + "VeryUnlikelySuffix" ) is None )
 			
-			self.assertEqual( s.uniformParameterType( n ), expectedParameterNamesAndTypes[n] )
-
-		expectedNamesAndValues = {
-			"intParm" : IECore.IntVectorData( ),
-			"floatParm" : IECore.FloatVectorData( ),
-			"ivec2Parm" : IECore.V2iVectorData( ),
-			"vec2Parm" : IECore.V2fVectorData( ),
-			"ivec3Parm" : IECore.V3iVectorData( ),
-			"vec3Parm" : IECore.V3fVectorData( ),
-			"vec4Parm" : IECore.Color4fVectorData( ),
-		}
-		
-		# Initial values are not necessarily zero. So we just test for the value type here.
-		for name, value in expectedNamesAndValues.items() :
-			self.assertEqual( type(s.getUniformParameter( name ) ), type( value ) )
-
-		# must bind a shader before setting parameters
-		s.bind()
-		
-		def checkGetSet( test, s, paramName, paramData, expected=None ) :
-			s.setUniformParameter( paramName, paramData )
-			fetchedData = s.getUniformParameter( paramName )
-			if expected:
-				test.assertEqual( fetchedData, expected )
-			else :
-				test.assertEqual( fetchedData, paramData )
-				
-		
-		checkGetSet( self, s, "intParm", IECore.IntVectorData( range(0,4) ) )
-		checkGetSet( self, s, "floatParm", IECore.FloatVectorData( [ 0.0, 1.0, 2.0, 3.0 ]) )
-		checkGetSet( self, s, "ivec2Parm", IECore.V2iVectorData( [ IECore.V2i( 1, 2 ), IECore.V2i( 5, 4 ), IECore.V2i( 8, 5 ), IECore.V2i( 2, 3 ) ] ) )
-		checkGetSet( self, s, "ivec3Parm", IECore.V3iVectorData( [ IECore.V3i( 1 ), IECore.V3i( -2, 3, 5 ), IECore.V3i( 4 ), IECore.V3i( 10,12,45 ) ] ) )
-		checkGetSet( self, s, "vec2Parm", IECore.V2fVectorData( [ IECore.V2f( 1, 2 ), IECore.V2f( 5, 0.5 ), IECore.V2f( -12, 3 ), IECore.V2f( -1, 22 ) ] ) )
-		checkGetSet( self, s, "vec3Parm", IECore.Color3fVectorData( [ IECore.Color3f( 1 ), IECore.Color3f( 2,3,4 ), IECore.Color3f( 3 ), IECore.Color3f( 4 ) ] ), IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2,3,4 ), IECore.V3f( 3 ), IECore.V3f( 4 ) ] ) )
-		checkGetSet( self, s, "vec4Parm", IECore.Color4fVectorData( [ IECore.Color4f( 1 ), IECore.Color4f( 1.0,0.5,0.25, 1.0 ), IECore.Color4f( 4 ), IECore.Color4f( 3 ) ] ) )
-		checkGetSet( self, s, "mat3Parm", IECore.M33fVectorData( [ IECore.M33f.createTranslated( IECore.V2f( 1, 2 ) ), IECore.M33f.createTranslated( IECore.V2f( -1, 3 ) ), IECore.M33f.createTranslated( IECore.V2f( 2, 6 ) ), IECore.M33f.createTranslated( IECore.V2f( 4, 3 ) ) ] ) )
-		checkGetSet( self, s, "mat4Parm", IECore.M44fVectorData( [ IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ), IECore.M44f.createTranslated( IECore.V3f( -3, 8, -3 ) ), IECore.M44f.createTranslated( IECore.V3f( 2, 5, 9 ) ), IECore.M44f.createTranslated( IECore.V3f( 7, 6, 4 ) ) ] ) )
-		
-		
-		# check that setting invalid values throws an Exception
-		self.assertRaises( Exception, s.setUniformParameter, "iDontExist", IECore.FloatVectorData( [2] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "intParm", IECore.FloatVectorData( [2] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "floatParm", IECore.IntVectorData( [2] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "ivec2Parm", IECore.V3iVectorData( [IECore.V3i( 2 )] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "ivec3Parm", IECore.V3fVectorData( [IECore.V3f( 2 )] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "vec2Parm", IECore.V3fVectorData( [IECore.V3f( 2 )] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "vec3Parm", IECore.V2fVectorData( [IECore.V2f( 2 )] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "vec4Parm", IECore.V3fVectorData( [IECore.V3f( 2 )] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "mat4Parm", IECore.V3fVectorData( [IECore.V3f( 2 )] ) )
-		self.assertRaises( Exception, s.setUniformParameter, "mat3Parm", IECore.V3fVectorData( [IECore.V3f( 2 )] ) )
-
+			self.assertEqual( s.uniformParameter( n ).size, expectedParameterNamesAndSizes[n] )
 
 	def testVertexParameters( self ) :
 
@@ -414,64 +265,21 @@ class TestShader( unittest.TestCase ) :
 		s = IECoreGL.Shader( vertexSource, fragmentSource )
 		self.assert_( s==s )
 
-		expectedParameterNamesAndValues = {
-			"floatParm" : IECore.FloatVectorData(),
-			"vec2Parm" : IECore.V2fVectorData(),
-			"vec3Parm" : IECore.V3fVectorData(),
-			"vec4Parm" : IECore.Color4fVectorData(),
-		}
+		expectedParameterNames = [
+			"floatParm",
+			"vec2Parm",
+			"vec3Parm",
+			"vec4Parm",
+		]
 
 		parameterNames = s.vertexAttributeNames()
-		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndValues ) )
-		for n in expectedParameterNamesAndValues.keys() :
+		self.assertEqual( len( parameterNames ), len( expectedParameterNames ) )
+		for n in expectedParameterNames :
 			self.assert_( n in parameterNames )
 			self.assertTrue( s.vertexAttribute( n ) is not None )
 			self.assertTrue( s.vertexAttribute( n + "VeryUnlikelySuffix" ) is None )
-
-		s.setVertexParameter( "floatParm", IECore.FloatVectorData( [ 1 ] ), False )
-		s.setVertexParameter( "vec2Parm", IECore.V2fVectorData( [ IECore.V2f( 1, 2 ) ] ), False )
-		s.setVertexParameter( "vec3Parm", IECore.Color3fVectorData( [ IECore.Color3f( 1 ) ] ), True )
-		s.setVertexParameter( "vec4Parm", IECore.Color4fVectorData( [ IECore.Color4f( 1 ) ] ) )
-
-		s.unsetVertexParameters()
-		
-	def testVertexValueValid( self ) :
-	
-		## Shader.vertexValueValid should not throw exceptions, it should just return True or False
-		
-		vertexSource = """
-		attribute float floatParm;
-		attribute vec2 vec2Parm;
-		attribute vec3 vec3Parm;
-		attribute vec4 vec4Parm;
-
-		varying vec4 myColor;
-
-		void main()
-		{
-			myColor = vec4( floatParm + vec2Parm.x, vec3Parm.y, vec4Parm.r, 1 );
-			gl_Position = ftransform();
-		}
-		"""
-
-		fragmentSource = """
-
-		varying vec4 myColor;
-
-		void main()
-		{
-			gl_FragColor = myColor;
-		}
-		"""
-
-		s = IECoreGL.Shader( vertexSource, fragmentSource )
-		
-		self.failUnless( s.vertexValueValid( "floatParm", IECore.FloatVectorData() ) )
-		self.failIf( s.vertexValueValid( "floatParm", IECore.V3fVectorData() ) )
-		
-		self.failUnless( s.vertexValueValid( "vec3Parm", IECore.V3fVectorData() ) )
-		self.failIf( s.vertexValueValid( "vec3Parm", IECore.FloatVectorData() ) )
-		
+			self.assertEqual( s.vertexAttribute( n ).size, 1 )
+							
 	def testGeometryShader( self ) :
 	
 		geometrySource = """
@@ -500,5 +308,10 @@ class TestShader( unittest.TestCase ) :
 	
 		s = IECoreGL.Shader( IECoreGL.Shader.defaultVertexSource(), "", IECoreGL.Shader.defaultFragmentSource() )
 
+	def testStandardParameters( self ) :
+	
+		s = IECoreGL.Shader.constant()
+		self.assertEqual( s.csParameter(), s.uniformParameter( "Cs" ) )
+	
 if __name__ == "__main__":
     unittest.main()

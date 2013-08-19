@@ -89,6 +89,9 @@ class Selector : boost::noncopyable
 		/// of hits that was passed to the constructor.
 		virtual ~Selector();
 		
+		/// Returns the mode this Selector is operating in.
+		Mode mode() const;
+		
 		/// Call this to set the name attached to subsequently rendered objects.
 		/// If rendering a Scene, this will be called automatically
 		/// by the NameStateComponents within the Scene.
@@ -103,8 +106,7 @@ class Selector : boost::noncopyable
 		/// via an "out uint ieCoreGLNameOut" fragment output.
 		/// Typically one is set up automatically in baseState(), but
 		/// if rendering must be performed with an alternative shader
-		/// then it may be passed via this function following a call
-		/// to begin().
+		/// then it may be passed via this function.
 		void loadIDShader( const IECoreGL::Shader *idShader );
 		
 		/// Returns the currently active Selector - this may be used
