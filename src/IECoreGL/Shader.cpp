@@ -67,7 +67,8 @@ class Shader::Implementation : public IECore::RefCounted
 
 		Implementation( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource )
 			:	m_vertexSource( vertexSource ), m_geometrySource( geometrySource ), m_fragmentSource( fragmentSource ),
-				m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
+				m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 ),
+				m_csParameter( NULL )
 		{		
 			string actualVertexSource = vertexSource;
 			string actualFragmentSource = fragmentSource;
@@ -162,6 +163,11 @@ class Shader::Implementation : public IECore::RefCounted
 					}
 
 					m_uniformParameters[name] = p;
+					
+					if( name == "Cs" )
+					{
+						m_csParameter = &(m_uniformParameters[name]);
+					}
 				}
 			}
 
@@ -265,6 +271,11 @@ class Shader::Implementation : public IECore::RefCounted
 			return 0;
 		}
 	
+		const Shader::Parameter *csParameter() const
+		{
+			return m_csParameter;
+		}
+	
 	private :
 	
 		friend class Shader::Setup;
@@ -282,6 +293,8 @@ class Shader::Implementation : public IECore::RefCounted
 		typedef std::map<std::string, Shader::Parameter> ParameterMap;
 		ParameterMap m_uniformParameters;
 		ParameterMap m_vertexAttributes;
+		
+		const Shader::Parameter *m_csParameter;
 		
 		void compile( const std::string &source, GLenum type, GLuint &shader )
 		{
@@ -390,6 +403,20 @@ const Shader::Parameter *Shader::uniformParameter( const std::string &name ) con
 const Shader::Parameter *Shader::vertexAttribute( const std::string &name ) const
 {
 	return m_implementation->vertexAttribute( name );
+}
+
+const Shader::Parameter *Shader::csParameter() const
+{
+	return m_implementation->csParameter();
+}
+
+bool Shader::Parameter::operator == ( const Shader::Parameter &other ) const
+{
+	return 
+		type == other.type &&
+		size == other.size &&
+		location == other.location &&
+		textureUnit == other.textureUnit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
