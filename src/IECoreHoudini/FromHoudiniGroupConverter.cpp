@@ -119,12 +119,29 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	// are the primitives split into groups?
 	UT_PtrArray<const GA_ElementGroup*> primGroups;
 	geo->getElementGroupList( GA_ATTRIB_PRIMITIVE, primGroups );
-	if ( primGroups.isEmpty() || primGroups[0]->entries() == numPrims )
+	if ( primGroups.isEmpty() )
 	{
 		return Admissible;
 	}
 	
-	return Ideal;
+	bool externalGroups = false;
+	for ( int i=0; i < primGroups.entries(); ++i )
+	{
+		const GA_ElementGroup *group = primGroups[i];
+		if ( group->entries() == numPrims )
+		{
+			return Admissible;
+		}
+		
+		externalGroups |= ( !group->getInternal() );
+	}
+	
+	if ( externalGroups )
+	{
+		return Ideal;
+	}
+	
+	return Admissible;
 }
 
 ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operands ) const
