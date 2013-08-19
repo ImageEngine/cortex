@@ -172,7 +172,9 @@ class Shader : public IECore::RunTimeTyped
 					
 						/// Binds the setup. It is the responsibility of the
 						/// caller to ensure the setup remains alive for
-						/// the lifetime of the ScopedBinding.
+						/// the lifetime of the ScopedBinding. The setup will
+						/// also be registered with the current Selector if
+						/// necessary.
 						ScopedBinding( const Setup &setup );
 						/// Unbinds the setup, reverting to the previous state.
 						~ScopedBinding();
