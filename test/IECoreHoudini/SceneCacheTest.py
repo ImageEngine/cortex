@@ -1276,6 +1276,30 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output, bakedObjects = [ "1", "2", "3" ] )
+		
+	def testRopTopLevelGeo( self ) :
+		
+		self.writeSCC()
+		geo = self.geometry()
+		geo.parm( "expand" ).pressButton()
+		attr = geo.children()[0].createOutputNode( "attribute" )
+		attr.parm( "primdel" ).set( "name" )
+		attr.setDisplayFlag( True )
+		attr.setRenderFlag( True )
+		rop = self.rop( geo )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( output.name(), "/" )
+		self.assertEqual( output.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertFalse( output.hasObject() )
+		self.assertEqual( output.childNames(), [ "ieSceneCacheGeometry1" ] )
+		root = output.child( "ieSceneCacheGeometry1" )
+		self.assertEqual( root.name(), "ieSceneCacheGeometry1" )
+		self.assertEqual( root.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertTrue( root.hasObject() )
+		self.assertTrue( root.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertEqual( root.childNames(), [] )
 	
 	def testRopLinked( self ) :
 		
