@@ -210,6 +210,11 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 		rootNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
 	}
 	
+	if ( hierarchy == Parenting )
+	{
+		rootNode->setIndirectInput( 0, this->getParentInput( 0 ) );
+	}
+	
 	doExpandChildren( scene, rootNode, geomType, hierarchy, depth, attributeFilter, tagFilter );
 	setInt( pExpanded.getToken(), 0, 0, 1 );
 	
@@ -237,6 +242,11 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	
 	geo->setVisible( tagged( scene, tagFilter ) );
 	
+	if ( hierarchy != Parenting )
+	{
+		geo->setIndirectInput( 0, parent->getParentInput( 0 ) );
+	}
+	
 	return geo;
 }
 
@@ -260,7 +270,6 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 		xform->setInt( pExpanded.getToken(), 0, 0, 1 );
 	}
 	
-	
 	if ( tagged( scene, tagFilter ) )
 	{
 		// we can't get the string directly from the UT_StringMMPattern, and we don't want to re-compile the UT_StringMMPattern
@@ -272,6 +281,11 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	else
 	{
 		xform->setVisible( false );
+	}
+	
+	if ( hierarchy == SubNetworks )
+	{
+		xform->setIndirectInput( 0, parent->getParentInput( 0 ) );
 	}
 	
 	return xform;

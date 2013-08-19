@@ -37,6 +37,7 @@
 
 #include "OBJ/OBJ_Node.h" 
 #include "OP/OP_Director.h" 
+#include "OP/OP_Input.h" 
 #include "MGR/MGR_Node.h" 
 #include "MOT/MOT_Director.h" 
 #include "UT/UT_WorkArgs.h" 
@@ -526,9 +527,10 @@ void HoudiniScene::childNames( NameList &childNames ) const
 		for ( int i=0; i < node->getNchildren(); ++i )
 		{
 			OP_Node *child = node->getChild( i );
+			
 			// ignore children that have incoming connections, as those are actually grandchildren
 			// also ignore the contentNode, which is actually an extension of ourself
-			if ( !child->nInputs() && child != contentNode )
+			if ( child != contentNode && !hasInput( child ) )
 			{
 				childNames.push_back( Name( child->getName() ) );
 			}
@@ -724,14 +726,8 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 				continue;
 			}
 			
-			if ( child->getName().equal( name.c_str() ) )
+			if ( child->getName().equal( name.c_str() ) && !hasInput( child ) )
 			{
-				// if it has inputs, then it's not a direct child
-				if ( child->nInputs() )
-				{
-					continue;
-				}
-				
 				return child;
 			}
 		}
@@ -828,6 +824,21 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	}
 	
 	return scene;
+}
+
+bool HoudiniScene::hasInput( const OP_Node *node ) const
+{
+	int numInputs = node->nInputs();
+	for ( int j=0; j < numInputs; ++j )
+	{
+		OP_Input *input = node->getInputReferenceConst( j );
+		if ( input && !input->isIndirect() )
+		{
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 bool HoudiniScene::relativePath( const char *value, Path &result ) const
