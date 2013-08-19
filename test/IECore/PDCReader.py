@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -31,7 +31,9 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
 from __future__ import with_statement
+
 import unittest
 import sys
 import os
@@ -50,6 +52,7 @@ class TestPDCReader( unittest.TestCase ) :
 	def testReadWithPrimVarConversion( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r.parameters()["realType"].setValue( "native" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		self.assertTrue( r.parameters()["convertPrimVarNames"].getTypedValue() )
 		
@@ -118,6 +121,7 @@ class TestPDCReader( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		
+		r["realType"].setValue( "native" )
 		r["convertPrimVarNames"].setValue( IECore.BoolData( False ) )
 		self.assertFalse( r.parameters()["convertPrimVarNames"].getTypedValue() )
 
