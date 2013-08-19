@@ -484,6 +484,11 @@ void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_Node
 	{
 		std::map<std::string, int> typeMap;
 		const GU_Detail *geo = getCookedGeo( context );
+		if ( !geo )
+		{
+			return;
+		}
+		
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 		for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
 		{
