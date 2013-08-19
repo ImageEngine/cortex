@@ -38,6 +38,7 @@
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
 #include "PRM/PRM_ChoiceList.h"
+#include "PRM/PRM_Parm.h"
 #include "SOP/SOP_Node.h"
 
 #include "IECore/SharedSceneInterfaces.h"
@@ -298,6 +299,13 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setAttributeFilter( const UT_String &filter )
 {
 	this->setString( filter, CH_STRING_LITERAL, pAttributeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::referenceParent( const char *parmName )
+{
+	this->getParm( parmName ).setChannelReference( 0, 0, ( std::string( "../" ) + parmName ).c_str() );
+	sceneChanged();
 }
 
 template<typename BaseType>
