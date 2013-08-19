@@ -34,6 +34,10 @@
 
 #include "boost/filesystem/path.hpp"
 
+#include "GEO/GEO_AttributeHandle.h"
+#include "GU/GU_Detail.h"
+#include "OBJ/OBJ_Node.h" 
+#include "OP/OP_Director.h" 
 #include "PRM/PRM_Include.h"
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
@@ -138,7 +142,40 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *boss )
 {
-	return doWrite( m_liveScene, m_outScene, time );
+	SceneInterfacePtr outScene = m_outScene;
+	
+	// we need to re-root the scene if its trying to cache a top level object
+	UT_String nodePath;
+	evalString( nodePath, pRootObject.getToken(), 0, 0 );
+	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
+	if ( node && node->getObjectType() == OBJ_GEOMETRY )
+	{
+		OP_Context context( CHgetEvalTime() );
+		const GU_Detail *geo = node->getRenderGeometry( context );
+		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
+		bool reRoot = !attrHandle.isAttributeValid();
+		if ( attrHandle.isAttributeValid() )
+		{
+			const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
+			int numShapes = geo->getUniqueValueCount( attrRef );
+			reRoot = ( numShapes == 0 );
+			if ( numShapes == 1 )
+			{
+				const char *name = geo->getUniqueStringValue( attrRef, 0 );
+				if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+				{
+					reRoot = true;
+				}
+			}
+		}
+
+		if ( reRoot )
+		{
+			outScene = m_outScene->createChild( node->getName().toStdString() );
+		}
+	}
+	
+	return doWrite( m_liveScene, outScene, time );
 }
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
