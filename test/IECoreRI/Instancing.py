@@ -330,5 +330,84 @@ class InstancingTest( IECoreRI.TestCase ) :
 			# only two unique instances here....
 			self.assertEqual( InstanceTestParamProcedural.renderCount, 2 )
 
+	def testAutomaticInstancing( self ) :
+	
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		
+		with WorldBlock( r ) :
+			m.render( r )
+			m.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 0 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 2 )
+		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		with WorldBlock( r ) :
+			r.setAttribute( "ri:automaticInstancing", True )
+			m.render( r )
+			m.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 2 )
+
+	def testAutomaticInstancingWithMotionBlur( self ) :
+	
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		m2 = MeshPrimitive.createPlane( Box2f( V2f( -2 ), V2f( 2 ) ) )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		
+		with WorldBlock( r ) :
+
+			r.setAttribute( "ri:automaticInstancing", True )
+
+			with MotionBlock( r, [ 0, 1 ] ) :
+				m.render( r )
+				m2.render( r )
+			with MotionBlock( r, [ 0, 1 ] ) :
+				m.render( r )
+				m2.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 2 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 2 )
+
+	def testAutomaticInstancingWithThreadedProcedurals( self ) :
+	
+		class PlaneProcedural( Renderer.Procedural ) :
+		
+			def __init__( self ) :
+			
+				Renderer.Procedural.__init__( self )
+			
+			def bound( self ) :
+			
+				return Box3f( V3f( -10, -10, -0.01 ), V3f( 10, 10, 0.01 ) )
+				
+			def render( self, renderer ) :
+			
+				MeshPrimitive.createPlane( Box2f( V2f( -10 ), V2f( 10 ) ) ).render( renderer )
+				
+			def hash( self ) :
+			
+				h = MurmurHash()
+				return h
+			
+		initThreads()
+		r = IECoreRI.Renderer( "" )
+		
+		with WorldBlock( r ) :
+		
+			r.setAttribute( "ri:automaticInstancing", True )
+			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -20 ) ) )
+		
+			for i in range( 0, 1000 ) :
+				r.procedural( PlaneProcedural() )
+
+
 if __name__ == "__main__":
     unittest.main()

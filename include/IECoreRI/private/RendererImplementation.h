@@ -38,12 +38,21 @@
 #include <stack>
 
 #include "tbb/queuing_rw_mutex.h"
+#include "tbb/recursive_mutex.h"
 
 #include "ri.h"
 
 #include "IECore/CachedReader.h"
 #include "IECore/Camera.h"
 #include "IECore/Font.h"
+#include "IECore/Primitive.h"
+#include "IECore/MeshPrimitive.h"
+#include "IECore/PointsPrimitive.h"
+#include "IECore/DiskPrimitive.h"
+#include "IECore/CurvesPrimitive.h"
+#include "IECore/SpherePrimitive.h"
+#include "IECore/NURBSPrimitive.h"
+#include "IECore/PatchMeshPrimitive.h"
 
 #include "IECoreRI/Renderer.h"
 
@@ -136,7 +145,7 @@ class RendererImplementation : public IECore::Renderer
 			ObjectHandleMap objectHandles;	
 			// We need to mutex around access to objectHandles because it will be
 			// accessed from multiple threads when running threaded procedurals
-			typedef tbb::queuing_rw_mutex ObjectHandlesMutex;
+			typedef tbb::recursive_mutex ObjectHandlesMutex;
 			ObjectHandlesMutex objectHandlesMutex;
 		};
 				
@@ -194,6 +203,7 @@ class RendererImplementation : public IECore::Renderer
 		void setDetailAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setDetailRangeAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setTextureCoordinatesAttribute( const std::string &name, IECore::ConstDataPtr d );
+		void setAutomaticInstancingAttribute( const std::string &name, IECore::ConstDataPtr d );
 
 		IECore::ConstDataPtr getShadingRateAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getMatteAttribute( const std::string &name ) const;
@@ -201,6 +211,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getRightHandedOrientationAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getTextureCoordinatesAttribute( const std::string &name ) const;
+		IECore::ConstDataPtr getAutomaticInstancingAttribute( const std::string &name ) const;
 		
 		/// ProceduralData used to contain a smart pointer to the RendererImplementation which created it.
 		/// This normally works fine, as 3delight typically calls procFree() immediately after procSubdivide(),
@@ -227,7 +238,7 @@ class RendererImplementation : public IECore::Renderer
 		typedef std::map<std::string, CommandHandler> CommandHandlerMap;
 		CommandHandlerMap m_commandHandlers;
 
-		IECore::DataPtr  readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr illuminateCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
@@ -241,6 +252,23 @@ class RendererImplementation : public IECore::Renderer
 		static tbb::queuing_rw_mutex g_nLoopsMutex;
 		static std::vector<int> g_nLoops;
 
+		bool automaticInstancingEnabled() const; // as for getAutomaticInstancingAttribute but doesn't need to allocate heap memory for the result	
+		
+		void addPrimitive( IECore::ConstPrimitivePtr primitive );
+		
+		void emitPrimitiveAttributes( const IECore::Primitive *primitive );
+		void emitCurvesPrimitiveAttributes( const IECore::CurvesPrimitive *primitive );
+		void emitPatchMeshPrimitiveAttributes( const IECore::PatchMeshPrimitive *primitive );
+		
+		void emitPrimitive( const IECore::Primitive *primitive );
+		void emitPointsPrimitive( const IECore::PointsPrimitive *primitive );
+		void emitDiskPrimitive( const IECore::DiskPrimitive *primitive );
+		void emitCurvesPrimitive( const IECore::CurvesPrimitive *primitive );
+		void emitMeshPrimitive( const IECore::MeshPrimitive *primitive );
+		void emitSpherePrimitive( const IECore::SpherePrimitive *primitive );
+		void emitNURBSPrimitive( const IECore::NURBSPrimitive *primitive );
+		void emitPatchMeshPrimitive( const IECore::PatchMeshPrimitive *primitive );		
+		
 		/// Renderman treats curve basis as an attribute, whereas we want to treat it as
 		/// part of the topology of primitives. It makes no sense as an attribute, as it changes the
 		/// size of primitive variables - an attribute which makes a primitive invalid is dumb. This
@@ -255,7 +283,12 @@ class RendererImplementation : public IECore::Renderer
 		void delayedMotionBegin();
 		/// True when an RiMotionBegin call has been emitted but we have not yet emitted the matching RiMotionEnd.
 		bool m_inMotion;
+		/// The times we'll emit in delayedMotionBegin.
 		std::vector<float> m_delayedMotionTimes;
+		/// Renderman doesn't accept instances inside motion blocks, but it does accept motion blocks inside
+		/// instances. So when auto-instancing is on, we queue up primitives in here, and turn them into an instance
+		/// at motionEnd().
+		std::vector<IECore::ConstPrimitivePtr> m_motionPrimitives;
 
 };
 
