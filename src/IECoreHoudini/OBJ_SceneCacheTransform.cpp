@@ -34,6 +34,7 @@
 
 #include "OP/OP_Layout.h"
 #include "PRM/PRM_ChoiceList.h"
+#include "UT/UT_Interrupt.h"
 #include "UT/UT_StringMMPattern.h"
 
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
@@ -216,6 +217,12 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 		rootNode->setIndirectInput( 0, this->getParentInput( 0 ) );
 	}
 	
+	UT_Interrupt *progress = UTgetInterrupt();
+	if ( !progress->opStart( ( "Expand Hierarchy for " + getPath() ).c_str() ) )
+	{
+		return;
+	}
+	
 	doExpandChildren( scene, rootNode, geomType, hierarchy, depth, attributeFilter, tagFilter );
 	setInt( pExpanded.getToken(), 0, 0, 1 );
 	
@@ -223,6 +230,8 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	{
 		destroyNode( rootNode );
 	}
+	
+	progress->opEnd();
 }
 
 OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, OP_Network *parent, GeometryType geomType, Hierarchy hierarchy, Depth depth, const UT_String &attributeFilter, const UT_StringMMPattern &tagFilter )
@@ -297,6 +306,13 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 
 void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_Network *parent, GeometryType geomType, Hierarchy hierarchy, Depth depth, const UT_String &attributeFilter, const UT_StringMMPattern &tagFilter )
 {
+	UT_Interrupt *progress = UTgetInterrupt();
+	progress->setLongOpText( ( "Expanding " + scene->name().string() ).c_str() );
+	if ( progress->opInterrupt() )
+	{
+		return;
+	}
+	
 	OP_Network *inputNode = parent;
 	if ( hierarchy == Parenting )
 	{
