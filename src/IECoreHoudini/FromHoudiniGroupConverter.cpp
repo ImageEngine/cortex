@@ -128,12 +128,17 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	for ( int i=0; i < primGroups.entries(); ++i )
 	{
 		const GA_ElementGroup *group = primGroups[i];
+		if ( group->getInternal() )
+		{
+			continue;
+		}
+		
 		if ( group->entries() == numPrims )
 		{
 			return Admissible;
 		}
 		
-		externalGroups |= ( !group->getInternal() );
+		externalGroups = true;
 	}
 	
 	if ( externalGroups )
