@@ -54,6 +54,9 @@ OBJ_SceneCacheNode<BaseType>::~OBJ_SceneCacheNode()
 }
 
 template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pMainSwitcher( "mainSwitcher", "Main Switcher" );
+	
+template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pExpand( "expand", "Expand" );
 
 template<typename BaseType>
@@ -96,7 +99,7 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	unsigned numExtraParms = ( extraTemplate ) ? PRM_Template::countTemplates( extraTemplate ) : 0;
 	unsigned numExpansionParms = PRM_Template::countTemplates( expansionTemplate );
 	
-	PRM_Template *thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + 1 ];
+	PRM_Template *thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + 2 ];
 	
 	// add the generic OBJ_Node parms
 	unsigned totalParms = 0;
@@ -105,6 +108,15 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 		thisTemplate[totalParms] = objTemplate[i];
 		copyAndHideParm( objTemplate[i], thisTemplate[totalParms] );
 	}
+	
+	static PRM_Default mainSwitcherDefault[] =
+	{
+		PRM_Default( numSCCParms + numExtraParms + numExpansionParms, "Main" )
+	};
+	
+	// add the generic Main folder switcher
+	thisTemplate[totalParms] = PRM_Template( PRM_SWITCHER, 1, &pMainSwitcher, mainSwitcherDefault );
+	totalParms++;
 	
 	// add the generic SceneCacheNode parms
 	for ( unsigned i = 0; i < numSCCParms; ++i, ++totalParms )

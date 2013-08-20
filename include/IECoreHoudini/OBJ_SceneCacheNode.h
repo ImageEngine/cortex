@@ -56,6 +56,7 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		
 		static PRM_Template *buildParameters( OP_TemplatePair *extraParameters = 0 );
 		
+		static PRM_Name pMainSwitcher;
 		static PRM_Name pExpand;
 		static PRM_Name pCollapse;
 		static PRM_Name pExpanded;
