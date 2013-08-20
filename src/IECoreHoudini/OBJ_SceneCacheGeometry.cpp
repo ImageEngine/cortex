@@ -81,8 +81,8 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	OP_Node *opNode = createNode( SOP_SceneCacheSource::typeName, name );
 	SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( opNode );
 	
-	sop->setFile( getFile() );
-	sop->setPath( scene );
+	sop->referenceParent( pFile.getToken() );
+	sop->referenceParent( pRoot.getToken() );
 	
 	bool objectOnly = true;
 	Space space = getSpace();

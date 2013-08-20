@@ -104,6 +104,7 @@ class SceneCacheNode : public BaseType
 		void setGeometryType( GeometryType type );
 		void getAttributeFilter( UT_String &filter ) const;
 		void setAttributeFilter( const UT_String &filter );
+		void referenceParent( const char *parmName );
 	
 	protected :
 		

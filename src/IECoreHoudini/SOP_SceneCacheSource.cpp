@@ -231,16 +231,43 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	SceneInterface::Path rootPath;
 	scene->path( rootPath );
 	
+	UT_Interrupt *progress = UTgetInterrupt();
+	if ( !progress->opStart( ( "Cooking objects for " + getPath() ).c_str() ) )
+	{
+		addError( SOP_ATTRIBUTE_INVALID, "Cooking interrupted before it started" );
+		gdp->clearAndDestroy();
+		return error();
+	}
+	
 	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter.toStdString(), geometryType, rootPath.size() );
 	
-	m_loaded = true;
-	m_hash = hash;
+	if ( progress->opInterrupt( 100 ) )
+	{
+		addError( SOP_ATTRIBUTE_INVALID, "Cooking interrupted" );
+		gdp->clearAndDestroy();		
+		m_loaded = false;
+		m_hash = MurmurHash();
+	}
+	else
+	{
+		m_loaded = true;
+		m_hash = hash;
+	}
+	
+	progress->opEnd();
 	
 	return error();
 }
 
 void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, GeometryType geometryType, size_t rootSize )
 {
+	UT_Interrupt *progress = UTgetInterrupt();
+	progress->setLongOpText( ( "Loading " + scene->name().string() ).c_str() );
+	if ( progress->opInterrupt() )
+	{
+		return;
+	}
+	
 	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
 	{
 		// \todo See if there are ways to avoid the Object copy below.
@@ -484,6 +511,11 @@ void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_Node
 	{
 		std::map<std::string, int> typeMap;
 		const GU_Detail *geo = getCookedGeo( context );
+		if ( !geo )
+		{
+			return;
+		}
+		
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 		for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
 		{
