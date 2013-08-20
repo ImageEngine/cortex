@@ -468,14 +468,17 @@ enum TypeId
 	FirstGafferTypeId = 110000,
 	LastGafferTypeId = 110999,
 	
-	FirstCoreArnoldTypeId = 111000,
-	LastCoreArnoldTypeId = 111999,
+	FirstCoreHoudiniTypeId = 111000,
+	LastCoreHoudiniTypeId = 111999,
 
 	FirstCoreAlembicTypeId = 112000,
 	LastCoreAlembicTypeId = 112999,
 
 	FirstCoreMantraTypeId = 113000,
 	LastCoreMantraTypeId = 113999,
+	
+	FirstCoreArnoldTypeId = 114000,
+	LastCoreArnoldTypeId = 114999,
 
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,
