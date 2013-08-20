@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -230,7 +230,7 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 		
 		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
 		shaderStateComponent->addParametersToShaderSetup( instancingShaderSetup );
-		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "", 1 );
+		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "vertex", 1 );
 		
 		instancingShaderSetup->addUniformParameter( "useWidth", new BoolData( m_memberData->widths ) );
 		if( !m_memberData->constantWidth )
@@ -366,6 +366,9 @@ std::string &PointsPrimitive::instancingVertexSource()
 		""
 		"IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS\n"
 		""
+		"in vec3 vertexCs;"
+		"uniform bool vertexCsActive = false;"
+		""
 		"uniform vec3 Cs = vec3( 1, 1, 1 );"
 		""
 		"in vec3 instanceP;"
@@ -395,9 +398,9 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"		fragmentI = vec3( 0.0, 0.0, -1.0 );"
 		"	}"
 		""
+		"	fragmentCs = mix( Cs, vertexCs, float( vertexCsActive ) );"
 		"	fragmentst = instancest;"
 		""
-		"	fragmentCs = Cs;"
 		"}";
 		
 	return s;
