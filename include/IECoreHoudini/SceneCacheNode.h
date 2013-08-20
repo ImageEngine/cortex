@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_SCENECACHENODE_H
 #define IECOREHOUDINI_SCENECACHENODE_H
 
+#include "boost/logic/tribool.hpp"
+
 #include "tbb/mutex.h"
 
 #include "PRM/PRM_Name.h"
@@ -73,8 +75,7 @@ class SceneCacheNode : public BaseType
 		static PRM_ChoiceList spaceList;
 		static PRM_ChoiceList geometryTypeList;
 		
-		static int fileChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
-		static int pathChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
+		static int sceneParmChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static void buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
@@ -103,6 +104,7 @@ class SceneCacheNode : public BaseType
 		void setGeometryType( GeometryType type );
 		void getAttributeFilter( UT_String &filter ) const;
 		void setAttributeFilter( const UT_String &filter );
+		void referenceParent( const char *parmName );
 	
 	protected :
 		
@@ -127,6 +129,7 @@ class SceneCacheNode : public BaseType
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
 		
 		bool m_loaded;
+		boost::tribool m_static;
 		IECore::MurmurHash m_hash;
 
 };

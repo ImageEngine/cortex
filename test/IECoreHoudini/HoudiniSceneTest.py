@@ -87,6 +87,29 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( scene.child( "box2" ).childNames(), [] )
 		self.assertEqual( scene.child( "sub2" ).childNames(), [] )
 	
+	def testIndirectInputs( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1/torus1" ).setInput( 0, hou.node( "/obj/sub1" ).indirectInputs()[0] )
+		
+		self.assertEqual( sorted( scene.childNames() ), [ "box2", "sub1", "sub2" ] )
+		
+		child = scene.child( "sub1" )
+		self.assertEqual( sorted( child.childNames() ), [ "box1", "torus1" ] )
+		
+		child2 = child.child( "torus1" )
+		self.assertEqual( sorted( child2.childNames() ), [ "torus2" ] )
+		
+		child3 = child2.child( "torus2" )
+		self.assertEqual( sorted( child3.childNames() ), [] )
+		
+		box1 = child.child( "box1" )
+		self.assertEqual( sorted( box1.childNames() ), [ "torus" ] )
+		
+		self.assertEqual( box1.child( "torus" ).childNames(), [] )
+		self.assertEqual( scene.child( "box2" ).childNames(), [] )
+		self.assertEqual( scene.child( "sub2" ).childNames(), [] )
+	
 	def testHasChild( self ) :
 		
 		scene = self.buildScene()

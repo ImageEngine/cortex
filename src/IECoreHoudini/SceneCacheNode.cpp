@@ -38,6 +38,7 @@
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
 #include "PRM/PRM_ChoiceList.h"
+#include "PRM/PRM_Parm.h"
 #include "SOP/SOP_Node.h"
 
 #include "IECore/SharedSceneInterfaces.h"
@@ -52,7 +53,8 @@ using namespace IECoreHoudini;
 //////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename BaseType>
-SceneCacheNode<BaseType>::SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : BaseType( net, name, op )
+SceneCacheNode<BaseType>::SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) :
+	BaseType( net, name, op ), m_loaded( false ), m_static( boost::indeterminate )
 {
 	BaseType::flags().setTimeDep( true );
 }
@@ -118,7 +120,7 @@ PRM_ChoiceList SceneCacheNode<BaseType>::geometryTypeList( PRM_CHOICELIST_SINGLE
 template<typename BaseType>
 PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template(
-		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::fileChangedCallback, 0, 0,
+		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
 		"A static or animated SCC or LSCC file to load, starting at the Root path provided."
 	),
 	PRM_Template(
@@ -127,7 +129,7 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 		"cause all other nodes using this file to require a recook as well."
 	),
 	PRM_Template(
-		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::pathChangedCallback, 0, 0,
+		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
 		"Root path inside the SCC or LSCC of the hierarchy to load"
 	),
 	PRM_Template(
@@ -177,21 +179,7 @@ void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 }
 
 template<typename BaseType>
-int SceneCacheNode<BaseType>::fileChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
-{
-	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
-	if ( !node )
-	{
-		return 0;
-	}
-	
-	node->sceneChanged();
-	
-	return 1;
-}
-
-template<typename BaseType>
-int SceneCacheNode<BaseType>::pathChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
+int SceneCacheNode<BaseType>::sceneParmChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
 	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
 	if ( !node )
@@ -311,6 +299,13 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setAttributeFilter( const UT_String &filter )
 {
 	this->setString( filter, CH_STRING_LITERAL, pAttributeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::referenceParent( const char *parmName )
+{
+	this->getParm( parmName ).setChannelReference( 0, 0, ( std::string( "../" ) + parmName ).c_str() );
+	sceneChanged();
 }
 
 template<typename BaseType>

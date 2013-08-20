@@ -57,6 +57,7 @@ static InternedString pName( "P" );
 const char *SOP_SceneCacheSource::typeName = "ieSceneCacheSource";
 
 PRM_Name SOP_SceneCacheSource::pShapeFilter( "shapeFilter", "Shape Filter" );
+PRM_Name SOP_SceneCacheSource::pObjectOnly( "objectOnly", "Object Only" );
 
 PRM_ChoiceList SOP_SceneCacheSource::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SOP_SceneCacheSource::buildShapeFilterMenu );
 
@@ -65,11 +66,16 @@ OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[2];
+		thisTemplate = new PRM_Template[3];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
 			"A list of filters to decide which shapes to load. Uses Houdini matching syntax"
+		);
+		
+		thisTemplate[1] = PRM_Template(
+			PRM_TOGGLE, 1, &pObjectOnly, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
+			"Determines whether this SOP cooks the current object only, or traverses down through the hierarchy."
 		);
 	}
 	
@@ -128,9 +134,50 @@ void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int
 	node->createMenu( menu, objects );
 }
 
+bool SOP_SceneCacheSource::getObjectOnly() const
+{
+	return evalInt( pObjectOnly.getToken(), 0, 0 );
+}
+
+void SOP_SceneCacheSource::setObjectOnly( bool objectOnly )
+{
+	setInt( pObjectOnly.getToken(), 0, 0, objectOnly );
+	sceneChanged();
+}
+
+void SOP_SceneCacheSource::sceneChanged()
+{
+	SceneCacheNode<SOP_Node>::sceneChanged();
+	
+	std::string file;
+	if ( !ensureFile( file ) )
+	{
+		m_static = boost::indeterminate;
+		return;
+	}
+	
+	m_static = false;
+	
+	ConstSceneInterfacePtr scene = this->scene( file, getPath() );
+	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene );
+	if ( sampledScene )
+	{
+		bool objectOnly = this->evalInt( pObjectOnly.getToken(), 0, 0 );
+		m_static = ( objectOnly && sampledScene->hasObject() ) ? ( sampledScene->numObjectSamples() < 2 ) : ( sampledScene->numBoundSamples() < 2 );
+	}
+	
+	flags().setTimeDep( bool( !m_static ) );
+}
+
 OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 {
-	flags().setTimeDep( true );
+	// make sure the state is valid
+	if ( boost::indeterminate( m_static ) )
+	{
+		sceneChanged();
+	}
+	
+	flags().setTimeDep( bool( !m_static ) );
 	
 	std::string file;
 	if ( !ensureFile( file ) )
@@ -172,6 +219,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( shapeFilterStr );
 	hash.append( attributeFilter );
 	hash.append( geometryType );
+	hash.append( getObjectOnly() );
 	
 	if ( !m_loaded || m_hash != hash )
 	{
@@ -183,16 +231,43 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	SceneInterface::Path rootPath;
 	scene->path( rootPath );
 	
+	UT_Interrupt *progress = UTgetInterrupt();
+	if ( !progress->opStart( ( "Cooking objects for " + getPath() ).c_str() ) )
+	{
+		addError( SOP_ATTRIBUTE_INVALID, "Cooking interrupted before it started" );
+		gdp->clearAndDestroy();
+		return error();
+	}
+	
 	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter.toStdString(), geometryType, rootPath.size() );
 	
-	m_loaded = true;
-	m_hash = hash;
+	if ( progress->opInterrupt( 100 ) )
+	{
+		addError( SOP_ATTRIBUTE_INVALID, "Cooking interrupted" );
+		gdp->clearAndDestroy();		
+		m_loaded = false;
+		m_hash = MurmurHash();
+	}
+	else
+	{
+		m_loaded = true;
+		m_hash = hash;
+	}
+	
+	progress->opEnd();
 	
 	return error();
 }
 
 void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, GeometryType geometryType, size_t rootSize )
 {
+	UT_Interrupt *progress = UTgetInterrupt();
+	progress->setLongOpText( ( "Loading " + scene->name().string() ).c_str() );
+	if ( progress->opInterrupt() )
+	{
+		return;
+	}
+	
 	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
 	{
 		// \todo See if there are ways to avoid the Object copy below.
@@ -249,6 +324,11 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 				addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to houdini" ).c_str() );
 			}
 		}
+	}
+	
+	if ( evalInt( pObjectOnly.getToken(), 0, 0 ) )
+	{
+		return;
 	}
 	
 	SceneInterface::NameList children;
@@ -431,6 +511,11 @@ void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_Node
 	{
 		std::map<std::string, int> typeMap;
 		const GU_Detail *geo = getCookedGeo( context );
+		if ( !geo )
+		{
+			return;
+		}
+		
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 		for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
 		{

@@ -39,10 +39,10 @@
 
 #define IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS \
 	\
-	in vec3 P;\
-	in float width;\
-	in float patchaspectratio;\
-	in float patchrotation;\
+	in vec3 vertexP;\
+	in float vertexwidth;\
+	in float vertexpatchaspectratio;\
+	in float vertexpatchrotation;\
 	\
 	uniform bool useWidth;\
 	uniform bool useAspectRatio;\
@@ -51,10 +51,10 @@
 
 #define IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX \
 	iePointsPrimitiveInstanceMatrix(\
-		P,\
-		useWidth ? width * constantwidth : constantwidth,\
-		useAspectRatio ? patchaspectratio : 1.0,\
-		useRotation ? patchrotation : 0.0\
+		vertexP,\
+		useWidth ? vertexwidth * constantwidth : constantwidth,\
+		useAspectRatio ? vertexpatchaspectratio : 1.0,\
+		useRotation ? vertexpatchrotation : 0.0\
 	)
 	
 mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float width, in float aspectRatio, in float rotation )

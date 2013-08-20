@@ -32,7 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "OP/OP_Layout.h"
 #include "PRM/PRM_ChoiceList.h"
+#include "UT/UT_Interrupt.h"
 #include "UT/UT_StringMMPattern.h"
 
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
@@ -210,6 +212,17 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 		rootNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
 	}
 	
+	if ( hierarchy == Parenting )
+	{
+		rootNode->setIndirectInput( 0, this->getParentInput( 0 ) );
+	}
+	
+	UT_Interrupt *progress = UTgetInterrupt();
+	if ( !progress->opStart( ( "Expand Hierarchy for " + getPath() ).c_str() ) )
+	{
+		return;
+	}
+	
 	doExpandChildren( scene, rootNode, geomType, hierarchy, depth, attributeFilter, tagFilter );
 	setInt( pExpanded.getToken(), 0, 0, 1 );
 	
@@ -217,6 +230,8 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	{
 		destroyNode( rootNode );
 	}
+	
+	progress->opEnd();
 }
 
 OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, OP_Network *parent, GeometryType geomType, Hierarchy hierarchy, Depth depth, const UT_String &attributeFilter, const UT_StringMMPattern &tagFilter )
@@ -225,8 +240,16 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	OP_Node *opNode = parent->createNode( OBJ_SceneCacheGeometry::typeName, name );
 	OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( opNode );
 	
-	geo->setFile( getFile() );
-	geo->setPath( scene );
+	geo->referenceParent( pFile.getToken() );
+	if ( hierarchy == Parenting )
+	{
+		geo->setPath( scene );
+	}
+	else
+	{
+		geo->referenceParent( pRoot.getToken() );
+		geo->setIndirectInput( 0, parent->getParentInput( 0 ) );
+	}
 	
 	Space space = ( depth == AllDescendants ) ? Path : ( hierarchy == Parenting ) ? Local : Object;
 	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
@@ -245,7 +268,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	OP_Node *opNode = parent->createNode( OBJ_SceneCacheTransform::typeName, scene->name().c_str() );
 	OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( opNode );
 	
-	xform->setFile( getFile() );
+	xform->referenceParent( pFile.getToken() );
 	xform->setPath( scene );
 	xform->setSpace( Local );
 	xform->setGeometryType( (OBJ_SceneCacheTransform::GeometryType)geomType );
@@ -260,7 +283,6 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 		xform->setInt( pExpanded.getToken(), 0, 0, 1 );
 	}
 	
-	
 	if ( tagged( scene, tagFilter ) )
 	{
 		// we can't get the string directly from the UT_StringMMPattern, and we don't want to re-compile the UT_StringMMPattern
@@ -274,11 +296,23 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 		xform->setVisible( false );
 	}
 	
+	if ( hierarchy == SubNetworks )
+	{
+		xform->setIndirectInput( 0, parent->getParentInput( 0 ) );
+	}
+	
 	return xform;
 }
 
 void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_Network *parent, GeometryType geomType, Hierarchy hierarchy, Depth depth, const UT_String &attributeFilter, const UT_StringMMPattern &tagFilter )
 {
+	UT_Interrupt *progress = UTgetInterrupt();
+	progress->setLongOpText( ( "Expanding " + scene->name().string() ).c_str() );
+	if ( progress->opInterrupt() )
+	{
+		return;
+	}
+	
 	OP_Network *inputNode = parent;
 	if ( hierarchy == Parenting )
 	{
@@ -320,6 +354,14 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 			childNode->setInt( pExpanded.getToken(), 0, 0, 1 );
 		}
 	}
+	
+	OP_Layout layout( parent );
+	layout.addLayoutOp( parent->getParentInput( 0 ) );
+	for ( int i=0; i < parent->getNchildren(); ++i )
+	{
+		layout.addLayoutOp( parent->getChild( i ) );
+	}
+	layout.layoutOps( OP_LAYOUT_TOP_TO_BOT, parent, parent->getParentInput( 0 ) );
 }
 
 bool OBJ_SceneCacheTransform::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )

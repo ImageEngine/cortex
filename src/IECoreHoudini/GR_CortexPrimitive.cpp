@@ -116,11 +116,6 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 	renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
 	renderer->setOption( "gl:drawCoordinateSystems", new IECore::BoolData( true ) );
 	renderer->worldBegin();
-	renderer->transformBegin();
-	
-	UT_Matrix4D transform;
-	memcpy( transform.data(), r->getUniform( RE_UNIFORM_OBJECT_MATRIX )->getValue(), sizeof(double) * 16 );
-	renderer->setTransform( IECore::convert<Imath::M44f>( transform ) );
 	
 	if ( p.dopts.boundBox() )
 	{
@@ -135,7 +130,6 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 		m_renderable->render( renderer );
 	}
 	
-	renderer->transformEnd();
 	renderer->worldEnd();
 	
 	m_scene = renderer->scene();
@@ -149,7 +143,15 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 		return;
 	}
 	
-	m_scene->render( getState( render_mode, flags, opt ) );
+	UT_Matrix4D transform;
+	memcpy( transform.data(), r->getUniform( RE_UNIFORM_OBJECT_MATRIX )->getValue(), sizeof(double) * 16 );
+	
+	r->pushMatrix();
+		
+		r->multiplyMatrix( transform );
+		m_scene->render( getState( render_mode, flags, opt ) );
+	
+	r->popMatrix();
 }
 
 IECoreGL::StatePtr GR_CortexPrimitive::g_lit = 0;

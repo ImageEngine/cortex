@@ -1,3 +1,37 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
 #ifndef IENUKE_SCENECACHEREADER_H
 #define IENUKE_SCENECACHEREADER_H
 
@@ -107,11 +141,14 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		void loadPrimitive( DD::Image::GeometryList &out, const std::string &path );
 		/// Get the hash of the file path and root knob.
 		DD::Image::Hash sceneHash() const;
+		/// Evaluates the file path for the current context and returns the result.
+		std::string filePath() const;
 		
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
 	
 		// Knob Members.	
-		const char *m_file; // Holds the SceneCache file name.
+		const char *m_filePath; // Holds the raw SceneCache file path.
+		std::string m_evaluatedFilePath; // Holds the SceneCache file path after any TCL scripts have been evaluated..
 		std::string m_root; // Holds the root item in the SceneCache.
 		std::string m_filterText; // The text to filter the scene with.
 		std::string m_filterTagText; // The text to filter the tags with. This is set from the Enumeration_knob.
@@ -138,7 +175,7 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		unsigned int m_pathPrefixLength;
 	
 		// Pointers to various knobs.	
-		DD::Image::Knob *m_fileKnob;
+		DD::Image::Knob *m_filePathKnob;
 		DD::Image::Knob *m_baseParentMatrixKnob;
 		DD::Image::Knob *m_sceneKnob;
 		DD::Image::Knob *m_tagFilterKnob;

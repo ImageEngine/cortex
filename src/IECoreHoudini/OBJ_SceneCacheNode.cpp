@@ -43,7 +43,7 @@ using namespace IECoreHoudini;
 
 template<typename BaseType>
 OBJ_SceneCacheNode<BaseType>::OBJ_SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op )
-	: SceneCacheNode<BaseType>( net, name, op ), m_static( boost::indeterminate )
+	: SceneCacheNode<BaseType>( net, name, op )
 {
 }
 
@@ -212,7 +212,7 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 	std::string file;
 	if ( !OBJ_SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
-		m_static = boost::indeterminate;
+		this->m_static = boost::indeterminate;
 		return;
 	}
 	
@@ -221,10 +221,14 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene );
 	
-	m_static = ( sampledScene ) ? ( sampledScene->numTransformSamples() < 2 ) : false;
+	this->m_static = ( sampledScene ) ? ( sampledScene->numTransformSamples() < 2 ) : false;
 	
-	BaseType::flags().setTimeDep( bool( !m_static ) );
-	BaseType::getParmList()->setCookTimeDependent( bool( !m_static ) );
+	// only update time dependency if Houdini thinks its static
+	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
+	{
+		BaseType::flags().setTimeDep( bool( !this->m_static ) );
+		BaseType::getParmList()->setCookTimeDependent(  bool( !this->m_static ) );
+	}
 }
 
 template<typename BaseType>
@@ -240,23 +244,22 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	hash.append( space );
 	
 	// make sure the state is valid
-	if ( boost::indeterminate( m_static ) )
+	if ( boost::indeterminate( this->m_static ) )
 	{
 		sceneChanged();
 	}
 	
-	if ( m_static == true )
+	// only update time dependency if Houdini thinks its static
+	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
 	{
-		if ( this->m_loaded && this->m_hash == hash )
-		{
-			xform = m_xform;
-			return true;
-		}
+		BaseType::flags().setTimeDep( bool( !this->m_static ) );
+		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
 	}
-	else
+	
+	if ( this->m_static == true && this->m_loaded && this->m_hash == hash )
 	{
-		BaseType::flags().setTimeDep( true );
-		BaseType::getParmList()->setCookTimeDependent( true );
+		xform = m_xform;
+		return true;
 	}
 	
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
@@ -288,6 +291,21 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	this->m_loaded = true;
 	
 	return true;
+}
+
+template<typename BaseType>
+OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
+{
+	OP_ERROR status = BaseType::cookMyObj( context );
+	
+	// only update time dependency if Houdini thinks its static
+	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
+	{
+		BaseType::flags().setTimeDep( bool( !this->m_static ) );
+		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
+	}
+	
+	return status;
 }
 
 template<typename BaseType>

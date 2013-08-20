@@ -1,3 +1,36 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/GL.h" // must come first so glew.h is included before gl.h
 
@@ -64,14 +97,15 @@ bool bothSlashes( char a, char b )
 
 SceneCacheReader::SceneCacheReader( Node *node )
 	:	SourceGeo( node ),
-		m_file( "" ),
+		m_filePath( "" ),
+		m_evaluatedFilePath( "" ),
 		m_root( "/" ),
 		m_filterText( "" ),
 		m_filterTagText( "" ),
 		m_worldSpace( false ),
 		m_pathPrefix( "" ),
 		m_pathPrefixLength( 0 ),
-		m_fileKnob( NULL ),
+		m_filePathKnob( NULL ),
 		m_baseParentMatrixKnob( NULL ),
 		m_sceneKnob( NULL ),
 		m_tagFilterKnob( NULL ),
@@ -88,13 +122,18 @@ SceneCacheReader::~SceneCacheReader()
 
 void SceneCacheReader::_validate( bool forReal )
 {
-	if( knob("loadAll") )
+	m_evaluatedFilePath	= filePath();
+
+	if( !m_scriptLoaded )
 	{
-		m_scriptLoaded = true;
 		knob("loadAll")->set_value( true );
+		m_scriptLoaded = true;
+		loadAllFromKnobs();
 	}
 
+	filterScene( m_filterText, m_filterTagText );
 	rebuildSelection();
+
 	SourceGeo::_validate( forReal );
 }
 
@@ -102,7 +141,7 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 {
 	SourceGeo::knobs( f );
 
-	m_fileKnob = File_knob( f, &m_file, "file", "File" );
+	m_filePathKnob = File_knob( f, &m_filePath, "file", "File" );
 	SetFlags( f, DD::Image::Knob::MODIFIES_GEOMETRY | DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
 	Tooltip( f,
 		"File name for the scene cache."
@@ -122,7 +161,6 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 		"Filter items in the scene by their tagged attributes."
 	);
 
-	
 	m_sceneFilterKnob = String_knob( f, &m_filterText, "filterByName", "Filter Name" );
 	SetFlags( f, DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
 	Tooltip( f,
@@ -161,6 +199,21 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 	bool b = false;
 	Bool_knob( f, &b, "loadAll" );
 	SetFlags( f, DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS | DD::Image::Knob::INVISIBLE );
+	
+}
+
+std::string SceneCacheReader::filePath() const
+{
+	if( m_filePathKnob )
+	{
+		std::stringstream pathStream;
+		m_filePathKnob->to_script( pathStream, &(outputContext()), false );
+		return pathStream.str();
+	}
+	else
+	{
+		return "";
+	}
 }
 
 int SceneCacheReader::knob_changed(Knob* k)
@@ -179,9 +232,9 @@ int SceneCacheReader::knob_changed(Knob* k)
 			}
 			return 1;
 		}
-		else if( m_fileKnob == k )
+		else if( m_filePathKnob == k )
 		{
-			m_file = m_fileKnob->get_text();
+			m_evaluatedFilePath	= filePath();
 			rebuildSceneView();
 			filterScene( m_filterText, m_filterTagText );
 			return 1;
@@ -269,9 +322,10 @@ int SceneCacheReader::knob_changed(Knob* k)
 		// structures.
 		else if( knob("loadAll") == k )
 		{
-			knob("loadAll")->set_value(false);
+			return 1;
 			if( !m_scriptLoaded )
 			{
+				knob("loadAll")->set_value( true );
 				m_scriptLoaded = true;
 				loadAllFromKnobs();
 			}
@@ -290,11 +344,13 @@ void SceneCacheReader::loadAllFromKnobs()
 		throw IECore::Exception( "SceneCacheReader: Cannot load item as the script hasn't finished loading." );
 	}
 
+	m_evaluatedFilePath	= filePath();
+
 	SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
 
 	std::vector<unsigned int> selectionIndices;
 	sceneView->getSelectedItems( selectionIndices );
-
+	
 	std::vector<unsigned int> filterIndices;
 	sceneView->getImportedItems( filterIndices );
 
@@ -317,7 +373,7 @@ void SceneCacheReader::loadAllFromKnobs()
 		std::vector<std::string>::const_iterator selectedIt( std::find( items.begin(), items.end(), itemName ) );
 		if ( selectedIt == items.end() )
 		{
-			std::cerr << "WARNING: Could not load selected geometry \"" << itemName << "\" as it no longer exists in the scene cache." << std::endl;
+			warning( ( std::string( "WARNING: Could not load selected geometry \"" ) + itemName + std::string( "\" as it no longer exists in the scene cache." ) ).c_str() );
 			continue;
 		}
 		
@@ -329,6 +385,7 @@ void SceneCacheReader::loadAllFromKnobs()
 	{
 		*it = m_itemToFiltered[*it];
 	}
+	
 	sceneView->setSelectedItems( newSelectionIndices );
 	rebuildSelection();
 
@@ -353,6 +410,7 @@ void SceneCacheReader::rebuildSelection()
 		sceneView->getSelectedItems( selectionIndices );
 
 		Hash newSelectionHash( sceneHash() );
+
 		for( std::vector<unsigned int>::const_iterator it( selectionIndices.begin() ); it != selectionIndices.end(); ++it )
 		{
 			newSelectionHash.append( m_filteredToItem[*it] );
@@ -387,24 +445,31 @@ void SceneCacheReader::clearSceneViewSelection()
 
 Hash SceneCacheReader::sceneHash() const
 {
-	if( m_fileKnob == NULL || m_rootKnob == NULL || !m_file || 0==strcmp( m_file, "" ) || !getSceneInterface() )
+	if( m_filePathKnob == NULL || m_rootKnob == NULL || !m_filePath || !getSceneInterface() )
 	{
 		return Hash();
 	}
+
 	Hash newHash;
-	newHash.append( m_fileKnob->get_text() );
-	newHash.append( m_rootKnob->get_text() );
+	newHash.append( m_evaluatedFilePath );
+	newHash.append( m_filePath );
+	newHash.append( m_root );
 	return newHash;
 }
 
 void SceneCacheReader::rebuildSceneView()
 {
+	m_evaluatedFilePath	= filePath();
+
+	if( !m_scriptLoaded ) return;
+	
 	Hash newSceneHash( sceneHash() );
 	
 	// Check to see if the scene has changed. If it has then we need to 
 	// rebuild our internal representation of it.
 	if( m_sceneHash != newSceneHash )
 	{
+		IECore::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
 		SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
 
 		// If we have a selection, clear it!
@@ -420,8 +485,13 @@ void SceneCacheReader::rebuildSceneView()
 		std::vector<std::string> sceneItems;
 		sceneView->menu( sceneItems );
 		
+		// Validate our scene.
+		if( !sceneInterface || !sceneView )
+		{
+			return;
+		}
+
 		// Rebuild our list of items which we will use to populate the SceneView_knob.	
-		IECore::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
 		buildSceneView( sceneItems, sceneInterface );
 		
 		// Reset the list of selected entries and populate the SceneView_knob.
@@ -461,7 +531,7 @@ const std::string &SceneCacheReader::itemName( int index ) const
 void SceneCacheReader::filterScene( const std::string &filterText, const std::string &filterTag )
 {
 	if( !m_scriptLoaded ) return;
-	
+
 	Hash newFilterHash( sceneHash() );
 	newFilterHash.append( filterText );
 	newFilterHash.append( filterTag );
@@ -702,7 +772,8 @@ void SceneCacheReader::append( DD::Image::Hash &hash )
 	SourceGeo::append( hash );
 	hash.append( m_sceneHash );
 	hash.append( m_selectionHash );
-	hash.append( m_file );
+	hash.append( m_evaluatedFilePath );
+	hash.append( m_filePath );
 	hash.append( m_root );
 	hash.append( m_worldSpace );
 	hash.append( outputContext().frame() );
@@ -714,7 +785,7 @@ void SceneCacheReader::get_geometry_hash()
 
 	geo_hash[Group_Primitives].append( m_sceneHash );
 	geo_hash[Group_Primitives].append( m_selectionHash );
-	geo_hash[Group_Primitives].append( m_file );
+	geo_hash[Group_Primitives].append( m_evaluatedFilePath );
 	geo_hash[Group_Primitives].append( m_root );
 	geo_hash[Group_Primitives].append( m_worldSpace );
 
@@ -731,7 +802,7 @@ void SceneCacheReader::get_geometry_hash()
 	{
 		geo_hash[*g].append( m_sceneHash );
 		geo_hash[*g].append( m_selectionHash );
-		geo_hash[*g].append( m_file );
+		geo_hash[*g].append( m_evaluatedFilePath );
 		geo_hash[*g].append( m_root );
 		geo_hash[*g].append( m_worldSpace );
 		if( isAnimated )
@@ -785,7 +856,7 @@ void SceneCacheReader::create_geometry( DD::Image::Scene &scene, DD::Image::Geom
 		return;
 	}
 
-	if( !m_file || 0==strcmp( m_file, "" ) )
+	if( !m_filePath || m_evaluatedFilePath == "" )
 	{
 		// Get rid of the old stuff, and return.
 		out.delete_objects();
@@ -889,7 +960,7 @@ IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface( const string
 {
 	try
 	{
-		IECore::ConstSceneInterfacePtr scene = IECore::SharedSceneInterfaces::get( m_file );
+		IECore::ConstSceneInterfacePtr scene = IECore::SharedSceneInterfaces::get( m_evaluatedFilePath );
 		IECore::SceneInterface::Path itemPath;
 		IECore::SceneInterface::stringToPath( path, itemPath );
 		scene = scene->scene( itemPath );
@@ -905,7 +976,7 @@ IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface() const
 {
 	try
 	{
-		IECore::ConstSceneInterfacePtr scene = IECore::SharedSceneInterfaces::get( m_file );
+		IECore::ConstSceneInterfacePtr scene = IECore::SharedSceneInterfaces::get( m_evaluatedFilePath );
 		IECore::SceneInterface::Path rootPath;
 		IECore::SceneInterface::stringToPath( m_root, rootPath );
 		scene = scene->scene( rootPath );
