@@ -34,6 +34,7 @@
 
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
+#include "PRM/PRM_Include.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
@@ -84,47 +85,46 @@ static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 }
 
 template<typename BaseType>
-OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
+PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *extraParameters )
 {
-	static OP_TemplatePair *templatePair = 0;
-	if ( !templatePair )
+	PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
+	PRM_Template *extraTemplate = ( extraParameters ) ? extraParameters->myTemplate : 0;
+	PRM_Template *expansionTemplate = buildExpansionParameters()->myTemplate;
+	
+	unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
+	unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
+	unsigned numExtraParms = ( extraTemplate ) ? PRM_Template::countTemplates( extraTemplate ) : 0;
+	unsigned numExpansionParms = PRM_Template::countTemplates( expansionTemplate );
+	
+	PRM_Template *thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + 1 ];
+	
+	// add the generic OBJ_Node parms
+	unsigned totalParms = 0;
+	for ( unsigned i = 0; i < numObjParms; ++i, ++totalParms )
 	{
-		templatePair = new OP_TemplatePair( buildBaseParameters()->myTemplate, buildExpansionParameters() );
+		thisTemplate[totalParms] = objTemplate[i];
+		copyAndHideParm( objTemplate[i], thisTemplate[totalParms] );
 	}
 	
-	return templatePair;
-}
-
-template<typename BaseType>
-OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildBaseParameters()
-{
-	static PRM_Template *thisTemplate = 0;
-	if ( !thisTemplate )
+	// add the generic SceneCacheNode parms
+	for ( unsigned i = 0; i < numSCCParms; ++i, ++totalParms )
 	{
-		PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
-		unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
-		unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
-		thisTemplate = new PRM_Template[ numObjParms + numSCCParms + 1 ];
-		
-		for ( unsigned i = 0; i < numObjParms; ++i )
-		{
-			thisTemplate[i] = objTemplate[i];
-			copyAndHideParm( objTemplate[i], thisTemplate[i] );
-		}
-		
-		for ( unsigned i = 0; i < numSCCParms; ++i )
-		{
-			thisTemplate[numObjParms+i] = SceneCacheNode<BaseType>::parameters[i];
-		}
+		thisTemplate[totalParms] = SceneCacheNode<BaseType>::parameters[i];
 	}
 	
-	static OP_TemplatePair *templatePair = 0;
-	if ( !templatePair )
+	// add the extra parms for this node
+	for ( unsigned i = 0; i < numExtraParms; ++i, ++totalParms )
 	{
-		templatePair = new OP_TemplatePair( thisTemplate );
+		thisTemplate[totalParms] = extraTemplate[i];
 	}
 	
-	return templatePair;
+	// add the generic generic OBJ_SceneCacheNode expansion parms
+	for ( unsigned i = 0; i < numExpansionParms; ++i, ++totalParms )
+	{
+		thisTemplate[totalParms] = expansionTemplate[i];
+	}
+	
+	return thisTemplate;
 }
 
 template<typename BaseType>

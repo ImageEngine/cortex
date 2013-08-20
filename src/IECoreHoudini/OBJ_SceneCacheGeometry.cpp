@@ -58,7 +58,7 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( *OBJ_SceneCacheNode<OBJ_Geometry>::buildParameters() );
+		templatePair = new OP_TemplatePair( OBJ_SceneCacheNode<OBJ_Geometry>::buildParameters() );
 	}
 	
 	return templatePair;

@@ -54,7 +54,7 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		OBJ_SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~OBJ_SceneCacheNode();
 		
-		static OP_TemplatePair *buildParameters();
+		static PRM_Template *buildParameters( OP_TemplatePair *extraParameters = 0 );
 		
 		static PRM_Name pExpand;
 		static PRM_Name pCollapse;
@@ -76,10 +76,11 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		virtual bool getParmTransform( OP_Context &context, UT_DMatrix4 &xform );
 		virtual bool updateParmsFlags();
 		
-		static OP_TemplatePair *buildBaseParameters();
-		static OP_TemplatePair *buildExpansionParameters();
-		
 		UT_Matrix4D m_xform;
+	
+	private :
+		
+		static OP_TemplatePair *buildExpansionParameters();
 
 };
 
