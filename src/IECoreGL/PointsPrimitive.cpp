@@ -395,6 +395,7 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"		fragmentI = vec3( 0.0, 0.0, -1.0 );"
 		"	}"
 		""
+		"	fragmentCs = mix( vec3(1,1,1), Cs, CsActive );"
 		"	fragmentst = instancest;"
 		""
 		"	fragmentCs = Cs;"
