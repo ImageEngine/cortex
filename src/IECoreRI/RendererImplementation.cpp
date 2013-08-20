@@ -1488,6 +1488,7 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 			else
 			{
 				instanceBegin( instanceName, CompoundDataMap() );
+					emitPrimitiveAttributes( primitive );
 					emitPrimitive( primitive );
 				instanceEnd();
 				instance( instanceName );
