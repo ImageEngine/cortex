@@ -602,6 +602,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 1, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
+		self.assertEqual( geo.parmTuple( "outT" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( geo.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( geo.parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		
 		geo.parm( "root" ).set( "/1/2" )
 		geo.parm( "collapse" ).pressButton()
@@ -618,6 +621,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
 		self.assertEqual( prims[6].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 6, 0, 0 ) )
+		self.assertEqual( geo.parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( geo.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( geo.parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 	
 	def cookAll( self, node ) :
 		node.cook( force=True )
@@ -650,6 +656,18 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for name in nameAttr.strings() :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outT" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outT" ).eval(), ( 1, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2" ).parmTuple( "outT" ).eval(), ( 2, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3" ).parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
 		xform.parm( "collapse" ).pressButton()
@@ -668,6 +686,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for name in nameAttr.strings() :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
@@ -745,6 +769,18 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for name in nameAttr.strings() :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outT" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outT" ).eval(), ( 1, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/2" ).parmTuple( "outT" ).eval(), ( 2, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/2" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/2" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
 		xform.parm( "collapse" ).pressButton()
@@ -769,6 +805,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for name in nameAttr.strings() :
 			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 		self.assertEqual( prims[0].vertex( 0 ).point().position() * geo.worldTransform(), hou.Vector3( 3, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( xform.parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )

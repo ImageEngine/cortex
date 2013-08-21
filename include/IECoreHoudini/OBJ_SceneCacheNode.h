@@ -60,6 +60,9 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		static PRM_Name pExpand;
 		static PRM_Name pCollapse;
 		static PRM_Name pExpanded;
+		static PRM_Name pOutTranslate;
+		static PRM_Name pOutRotate;
+		static PRM_Name pOutScale;
 		
 		static int expandButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int collapseButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
@@ -82,6 +85,7 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 	private :
 		
 		static OP_TemplatePair *buildExpansionParameters();
+		static OP_TemplatePair *buildOutputParameters();
 
 };
 
