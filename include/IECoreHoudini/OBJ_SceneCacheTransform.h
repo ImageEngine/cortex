@@ -90,6 +90,9 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		/// Derived classes should re-implement doExpandObject() and doExpandChild() if specialized
 		/// behaviour is necessary.
 		virtual void expandHierarchy( const IECore::SceneInterface *scene );
+		/// Implemented to push the GeometryType and attribute filter values through the hierarchy,
+		/// and to update the visibility flags based on the tag filter.
+		virtual void pushToHierarchy();
 	
 	protected :
 		

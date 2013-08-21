@@ -363,6 +363,62 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 	layout.layoutOps( OP_LAYOUT_TOP_TO_BOT, parent, parent->getParentInput( 0 ) );
 }
 
+void OBJ_SceneCacheTransform::pushToHierarchy()
+{
+	UT_String attribFilter;
+	getAttributeFilter( attribFilter );
+	GeometryType geomType = getGeometryType();
+	
+	UT_String tagFilterStr;
+	evalString( tagFilterStr, pTagFilter.getToken(), 0, 0 );
+	UT_StringMMPattern tagFilter;
+	tagFilter.compile( tagFilterStr );
+	
+	UT_PtrArray<OP_Node*> children;
+	int numSceneNodes = getOpsByName( OBJ_SceneCacheTransform::typeName, children );
+	for ( int i=0; i < numSceneNodes; ++i )
+	{
+		OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( children[i] );
+		xform->setAttributeFilter( attribFilter );
+		xform->setGeometryType( geomType );
+		
+		std::string file;
+		bool visible = false;
+		if ( IECore::ConstSceneInterfacePtr scene = xform->scene() )
+		{
+			if ( tagged( scene, tagFilter ) )
+			{
+				visible = true;
+				xform->setString( tagFilterStr, CH_STRING_LITERAL, pTagFilter.getToken(), 0, 0 );
+			}
+		}
+		
+		xform->setRender( visible );
+		xform->setDisplay( visible );
+		xform->pushToHierarchy();
+	}
+	
+	children.clear();
+	numSceneNodes = getOpsByName( OBJ_SceneCacheGeometry::typeName, children );
+	for ( int i=0; i < numSceneNodes; ++i )
+	{
+		OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( children[i] );
+		geo->setAttributeFilter( attribFilter );
+		geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)geomType );
+		
+		std::string file;
+		bool visible = false;
+		if ( IECore::ConstSceneInterfacePtr scene = geo->scene() )
+		{
+			visible = tagged( scene, tagFilter );
+		}
+		
+		geo->setRender( visible );
+		geo->setDisplay( visible );
+		geo->pushToHierarchy();
+	}
+}
+
 bool OBJ_SceneCacheTransform::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )
 {
 	SceneInterface::NameList tags;
