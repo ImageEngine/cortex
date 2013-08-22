@@ -63,6 +63,7 @@
 #include "IECoreHoudini/GR_Cortex.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
+#include "IECoreHoudini/UT_ObjectPoolCache.h"
 
 using namespace IECoreHoudini;
 
@@ -72,6 +73,9 @@ extern "C"
 	DLLEXPORT void HoudiniDSOInit( UT_DSOInfo &dsoinfo )
 	{
 		dsoinfo.loadGlobal = true;
+		
+		/// Create the default ObjectPool cache
+		UT_ObjectPoolCache::defaultObjectPoolCache();
 	}
 }
 
