@@ -74,6 +74,24 @@ PRM_Name OBJ_SceneCacheNode<BaseType>::pOutRotate( "outR", "Out Rotate" );
 template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pOutScale( "outS", "Out Scale" );
 
+static PRM_Default outTranslateDefault[] = {
+	PRM_Default( 0, "hou.pwd().parmTransform().extractTranslates()[0]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractTranslates()[1]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractTranslates()[2]", CH_PYTHON_EXPRESSION )
+};
+
+static PRM_Default outRotateDefault[] = {
+	PRM_Default( 0, "hou.pwd().parmTransform().extractRotates()[0]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractRotates()[1]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractRotates()[2]", CH_PYTHON_EXPRESSION )
+};
+
+static PRM_Default outScaleDefault[] = {
+	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[0]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[1]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[2]", CH_PYTHON_EXPRESSION )
+};
+
 static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 {
 	PRM_Name *name = new PRM_Name( src.getToken(), src.getLabel(), src.getExpressionFlag() );
@@ -201,17 +219,17 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildOutputParameters()
 		thisTemplate = new PRM_Template[4];
 		
 		thisTemplate[0] = PRM_Template(
-			PRM_XYZ, 3, &pOutTranslate, 0, 0, 0, 0, 0, 0,
+			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutTranslate, outTranslateDefault, 0, 0, 0, 0, 0,
 			"Output translation calculated by this node. This is for user clarity only and is not editable."
 		);
 		
 		thisTemplate[1] = PRM_Template(
-			PRM_XYZ, 3, &pOutRotate, 0, 0, 0, 0, 0, 0,
+			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutRotate, outRotateDefault, 0, 0, 0, 0, 0,
 			"Output rotation calculated by this node. This is for user clarity only and is not editable."
 		);
 		
 		thisTemplate[2] = PRM_Template(
-			PRM_XYZ, 3, &pOutScale, 0, 0, 0, 0, 0, 0,
+			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutScale, outScaleDefault, 0, 0, 0, 0, 0,
 			"Output scale calculated by this node. This is for user clarity only and is not editable."
 		);
 	}
@@ -366,23 +384,6 @@ OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 	{
 		BaseType::flags().setTimeDep( bool( !this->m_static ) );
 		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
-	}
-	
-	UT_Vector3 translate;
-	UT_Vector3 rotate;
-	UT_Vector3 scale;
-	
-	if ( this->m_loaded )
-	{
-		m_xform.explode( UT_XformOrder(), rotate, scale, translate );
-	}
-	
-	double time = context.getTime();
-	for ( unsigned i=0; i < 3; ++i )
-	{
-		this->setFloat( pOutTranslate.getToken(), i, time, translate[i] );
-		this->setFloat( pOutRotate.getToken(), i, time, rotate[i] );
-		this->setFloat( pOutScale.getToken(), i, time, scale[i] );
 	}
 	
 	return status;

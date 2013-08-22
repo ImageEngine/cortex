@@ -662,12 +662,21 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outT" ).eval(), ( 1, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/1" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/geo" ).parmTuple( "outT" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/geo" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/geo" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		self.assertEqual( hou.node( xform.path()+"/1/2" ).parmTuple( "outT" ).eval(), ( 2, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/1/2" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/1/2" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/geo" ).parmTuple( "outT" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/geo" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/geo" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		self.assertEqual( hou.node( xform.path()+"/1/2/3" ).parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/1/2/3" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/1/2/3" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3/geo" ).parmTuple( "outT" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3/geo" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3/geo" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		
 		xform.parm( "root" ).set( "/1/2" )
 		xform.parm( "collapse" ).pressButton()
@@ -692,6 +701,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
 		self.assertEqual( hou.node( xform.path()+"/3" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		self.assertEqual( hou.node( xform.path()+"/3/geo" ).parmTuple( "outT" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3/geo" ).parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( hou.node( xform.path()+"/3/geo" ).parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
 		
 		xform.parm( "root" ).set( "/1" )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
@@ -1195,6 +1207,51 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+	
+	def testOBJOutputParms( self ) :
+		
+		self.writeAnimSCC()
+		xform = self.xform()
+		xform.parm( "expand" ).pressButton()
+		c = hou.node( xform.path()+"/1/2/3" )
+		
+		self.assertEqual( c.cookCount(), 0 )
+		self.assertEqual( c.parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( c.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
+		self.assertEqual( c.parmTuple( "outS" ).eval(), ( 1, 1, 1 ) )
+		# evaluating the output parms forces a cook
+		self.assertEqual( c.cookCount(), 0 )
+		
+		# referencing the output parms forces a cook
+		null = hou.node( "/obj" ).createNode( "null" )
+		self.assertEqual( null.parmTuple( "t" ).eval(), ( 0, 0, 0 ) )
+		null.parm( "tx" ).setExpression( 'ch( "%s/outTx" )' % c.path() )
+		null.parm( "ty" ).setExpression( 'ch( "%s/outTy" )' % c.path() )
+		null.parm( "tz" ).setExpression( 'ch( "%s/outTz" )' % c.path() )
+		self.assertEqual( null.parmTuple( "t" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( c.parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
+		self.assertEqual( c.cookCount(), 0 )
+		
+		# changing the time updates the output parms
+		hou.setTime( 2.5 )
+		self.assertEqual( null.parmTuple( "t" ).eval(), ( 3, 2.5, 0 ) )
+		self.assertEqual( c.parmTuple( "outT" ).eval(), ( 3, 2.5, 0 ) )
+		self.assertEqual( c.cookCount(), 0 )
+		
+		# referencing the node via origin returns the same results
+		null2 = hou.node( "/obj" ).createNode( "null" )
+		self.assertEqual( null2.parmTuple( "t" ).eval(), ( 0, 0, 0 ) )
+		null2.parm( "tx" ).setExpression( 'origin( "", "%s", "TX" )' % c.path() )
+		null2.parm( "ty" ).setExpression( 'origin( "", "%s", "TY" )' % c.path() )
+		null2.parm( "tz" ).setExpression( 'origin( "", "%s", "TZ" )' % c.path() )
+		self.assertEqual( null2.parmTuple( "t" ).eval(), ( 3, 2.5, 0 ) )
+		self.assertEqual( c.parmTuple( "outT" ).eval(), ( 3, 2.5, 0 ) )
+		self.assertEqual( c.cookCount(), 1 )
+		
+		# evaluating at different times also works
+		self.assertEqual( c.parmTuple( "outT" ).evalAtTime( 2.75 ), ( 3, 2.75, 0 ) )
+		self.assertEqual( null.parmTuple( "t" ).evalAtTime( 5.25 ), ( 3, 5.25, 0 ) )
+		self.assertEqual( c.cookCount(), 1 )
 	
 	def compareScene( self, a, b, time = 0, bakedObjects = [], parentTransform = None ) :
 		
