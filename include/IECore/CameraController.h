@@ -81,7 +81,7 @@ class CameraController : public boost::noncopyable
 		/// Computes the points on the near and far clipping planes that correspond
 		/// with the specified raster position. Points are computed in world space.
 		/// \todo Accept a V2f to provide extra precision and make this method const.
-		void unproject( const Imath::V2i rasterPosition, Imath::V3f &near, Imath::V3f &far );
+		void unproject( const Imath::V2f rasterPosition, Imath::V3f &near, Imath::V3f &far );
 		/// Projects the point in world space into a raster space position.
 		Imath::V2f project( const Imath::V3f &worldPosition ) const;
 		
@@ -99,19 +99,19 @@ class CameraController : public boost::noncopyable
 			Dolly
 		};
 		/// Starts a motion of the specified type.
-		void motionStart( MotionType motion, const Imath::V2i &startPosition );
+		void motionStart( MotionType motion, const Imath::V2f &startPosition );
 		/// Updates the camera position based on a changed mouse position. Can only
 		/// be called after motionStart() and before motionEnd().
-		void motionUpdate( const Imath::V2i &newPosition );
+		void motionUpdate( const Imath::V2f &newPosition );
 		/// End the current motion, ready to call motionStart() again if required.
-		void motionEnd( const Imath::V2i &endPosition );
+		void motionEnd( const Imath::V2f &endPosition );
 		//@}
 
 	private:
 
-		void track( const Imath::V2i &p );
-		void tumble( const Imath::V2i &p );
-		void dolly( const Imath::V2i &p );
+		void track( const Imath::V2f &p );
+		void tumble( const Imath::V2f &p );
+		void dolly( const Imath::V2f &p );
 
 		IE_CORE_FORWARDDECLARE( MemberData );
 
