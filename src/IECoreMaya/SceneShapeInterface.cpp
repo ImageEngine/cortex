@@ -55,6 +55,7 @@
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
 #include "IECoreMaya/MayaTypeIds.h"
+#include "IECoreMaya/PostLoadCallback.h"
 
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
@@ -92,7 +93,7 @@
 #include "maya/MFnNurbsCurveData.h"
 #include "maya/MFnGeometryData.h"
 #include "maya/MPlugArray.h"
-
+#include "maya/MFileIO.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -110,6 +111,7 @@ MObject SceneShapeInterface::aOutTime;
 MObject SceneShapeInterface::aSceneQueries;
 MObject SceneShapeInterface::aAttributeQueries;
 MObject SceneShapeInterface::aOutputObjects;
+MObject SceneShapeInterface::aObjectDependency;
 MObject SceneShapeInterface::aAttributes;
 MObject SceneShapeInterface::aAttributeValues;
 MObject SceneShapeInterface::aTransform;
@@ -139,10 +141,38 @@ MObject SceneShapeInterface::aBoundCenterX;
 MObject SceneShapeInterface::aBoundCenterY;
 MObject SceneShapeInterface::aBoundCenterZ;
 
+// This post load callback is used to dirty the aOutputObjects elements
+// following loading - see further  comments in initialize.
+class SceneShapeInterface::PostLoadCallback : public IECoreMaya::PostLoadCallback
+{
+
+	public :
+	
+		PostLoadCallback( SceneShapeInterface *node ) : m_node( node )
+		{
+		}
+	
+	protected :
+		
+		SceneShapeInterface *m_node;
+		
+		virtual void postLoad()
+		{
+			MFnDependencyNode fnDN( m_node->thisMObject() );
+			MPlug plug = fnDN.findPlug( aObjectDependency );
+			plug.setValue( 1 );
+			
+			m_node->m_postLoadCallback = 0; // remove this callback
+		}
+		
+};
 
 SceneShapeInterface::SceneShapeInterface()
 	: m_previewSceneDirty( true )
 {
+	// We only create the post load callback when Maya is reading a scene,
+	// so that it does not effect nodes as they are created by users.
+	m_postLoadCallback = ( MFileIO::isReadingFile() ) ? new PostLoadCallback( this ) : NULL;
 }
 
 SceneShapeInterface::~SceneShapeInterface()
@@ -263,7 +293,6 @@ MStatus SceneShapeInterface::initialize()
 	s = addAttribute( aAttributeQueries );
 
 	// Output objects
-
 	aOutputObjects = gAttr.create( "outObjects", "oob", &s );
 	gAttr.addDataAccept( MFnMeshData::kMesh );
 	gAttr.addDataAccept( MFnNurbsCurveData::kNurbsCurve );
@@ -274,9 +303,23 @@ MStatus SceneShapeInterface::initialize()
 	gAttr.setIndexMatters( true );
 	gAttr.setUsesArrayDataBuilder( true );
 	gAttr.setStorable( false );
-
 	s = addAttribute( aOutputObjects );
-
+	
+	// A Maya bug causes mesh attributes to compute on scene open, even when nothing should be
+	// pulling on them. While dynamic attributes can work around this issue for single meshes,
+	// arrays of meshes suffer from the erroneous compute as either static or dynamic attributes.
+	//
+	// We work around the problem by adding a PostLoadCallback if the node was created while the
+	// scene is being read from disk. This callback is used to short circuit the compute which
+	// was triggered on scene open. Since the compute may have actually been necessary, we use
+	// this dummy dependency attribute to dirty the output object attributes immediately following
+	// load. At this point the callback deletes itself, and the newly dirtied output objects will
+	// re-compute if something was actually pulling on them.
+	aObjectDependency = nAttr.create( "objectDependency", "objDep", MFnNumericData::kInt, 0 );
+	nAttr.setStorable( false );
+	nAttr.setHidden( true );
+	s = addAttribute( aObjectDependency );
+	
 	// Transform
 
 	aTranslateX = nAttr.create( "outTranslateX", "otx", MFnNumericData::kFloat, 0, &s );
@@ -438,7 +481,7 @@ MStatus SceneShapeInterface::initialize()
 	attributeAffects( aSceneQueries, aBound );
 	attributeAffects( aSceneQueries, aOutputObjects );
 	attributeAffects( aSceneQueries, aAttributes );
-
+	
 	attributeAffects( aAttributeQueries, aAttributes );
 	
 	attributeAffects( aQuerySpace, aTransform );
@@ -599,6 +642,15 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 		// Preview plug values have changed, GL Scene is dirty
 		m_previewSceneDirty = true;
 	}
+	else if ( plug == aObjectDependency )
+	{
+		MPlug pObjects( thisMObject(), aOutputObjects );
+		for( unsigned i=0; i<pObjects.numElements(); i++ )
+		{
+			MPlug p = pObjects[i];
+			plugArray.append( p );
+		}
+	}
 	
 	return MS::kSuccess;
 }
@@ -606,8 +658,12 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 
 MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 {
+	if ( m_postLoadCallback )
+	{
+		return MS::kFailure;
+	}
+	
 	MStatus s;
-
 	MPlug topLevelPlug = plug;
 	int index = -1;
 	// Look for parent plug index
@@ -623,7 +679,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			topLevelPlug = topLevelPlug.array();
 		}
 	}
-
+	
 	if( topLevelPlug == aOutputObjects || topLevelPlug == aTransform || topLevelPlug == aBound || topLevelPlug == aAttributes )
 	{
 		if( index == -1 )
