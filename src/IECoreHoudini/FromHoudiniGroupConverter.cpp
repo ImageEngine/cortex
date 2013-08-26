@@ -125,7 +125,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	}
 	
 	bool externalGroups = false;
-	for ( int i=0; i < primGroups.entries(); ++i )
+	for ( unsigned i=0; i < primGroups.entries(); ++i )
 	{
 		const GA_ElementGroup *group = primGroups[i];
 		if ( group->getInternal() )
