@@ -80,6 +80,8 @@ class Parameter : public RunTimeTyped
 		virtual const Object *defaultValue() const;
 		/// Returns the presets for this parameter.
 		virtual const PresetsContainer &presets() const;
+		/// Overrides the presets for this parameter.
+		virtual void setPresets( const PresetsContainer &presets );
 		/// Returns true if this parameter only accepts
 		/// parameters present as presets.
 		virtual bool presetsOnly() const;

@@ -191,6 +191,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		p.setValue( "four" )
 		self.assertEqual( p.getCurrentPresetName(), "four" )
+		self.assertRaises( RuntimeError, p.setPresets, [] )		# CompoundParameter created with adoptChildPresets=True does not allow overriding presets
 
 		p = CompoundParameter(
 			name = "c",
@@ -656,6 +657,31 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( c.presetsOnly, False )
 		self.assertEqual( c.userData()["ud"].value, 10 )
 
+		# when adoptChildPresets we can also set presets explicitly...
+		c['a'].setValue("one")
+		c['b'].setValue("two")
+		p1 = c.getValue().copy()
+		c['a'].setValue("two")
+		c['b'].setValue("one")
+		p2 = c.getValue().copy()
+		c.setValue( c.defaultValue )
+
+		c.setPresets(
+			[
+				( "p1", p1 ),
+				( "p2", p2 ),
+			]
+		)
+		pr = c.presets()
+		self.assertEqual( len( pr ), 2 )
+		self.assertEqual( pr["p1"], p1 )
+		self.assertEqual( pr["p2"], p2 )
+		self.assertEqual( c.presetNames(), [ "p1", "p2" ] )
+		c.setValue("p1")
+		self.assertEqual( c.getValue(), p1 )
+		c.setValue("p2")
+		self.assertEqual( c.getValue(), p2 )
+		
 	def testDerivingInPython( self ) :
 	
 		class DerivedCompoundParameter( CompoundParameter ) :

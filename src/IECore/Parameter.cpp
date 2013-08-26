@@ -96,6 +96,11 @@ const Parameter::PresetsContainer &Parameter::presets() const
 	return m_presets;
 }
 
+void Parameter::setPresets( const PresetsContainer &presets )
+{
+	m_presets = presets;
+}
+
 bool Parameter::presetsOnly() const
 {
 	return m_presetsOnly;

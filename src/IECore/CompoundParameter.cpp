@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -144,6 +144,15 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 	}
 	
 	return pr;
+}
+
+void CompoundParameter::setPresets( const PresetsContainer &presets )
+{
+	if (m_adoptChildPresets)
+	{
+		throw Exception( "CompoundParameter cannot override presets when initialized with adoptChildPresets to true.");
+	}
+	Parameter::setPresets(presets);
 }
 
 bool CompoundParameter::presetsOnly() const

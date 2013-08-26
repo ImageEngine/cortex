@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -86,6 +86,11 @@ static dict presets( Parameter &that )
 	return result;
 }
 
+static void setPresets( Parameter &p, const object &presets )
+{
+	p.setPresets( parameterPresets<Parameter::PresetsContainer>( presets ) );
+}
+
 static boost::python::tuple presetNames( const Parameter &that )
 {
 	boost::python::list result;
@@ -162,6 +167,7 @@ void bindParameter()
 		.def( "validate", &validate )
 		.add_property( "presetsOnly", &Parameter::presetsOnly )
 		.def( "presets", &presets, "Returns a dictionary containing presets for the parameter." )
+		.def( "setPresets", &setPresets, "Sets the presets for the parameter from a dictionary." )
 		.def( "presetNames", &presetNames, "Returns a tuple containing the names of all presets for the parameter." )
 		.def( "presetValues", &presetValues, "Returns a tuple containing the values of all presets for the parameter." )
 		.def( "userData", &userData )
