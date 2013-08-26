@@ -75,10 +75,10 @@ static void validate( Parameter &that, ObjectPtr value )
 	that.validate( value.get() );
 }
 
-static dict presets( Parameter &that )
+static dict getPresets( Parameter &that )
 {
 	dict result;
-	const Parameter::PresetsContainer &p = that.presets();
+	const Parameter::PresetsContainer &p = that.getPresets();
 	for( Parameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
 		result[it->first] = it->second->copy();
@@ -94,7 +94,7 @@ static void setPresets( Parameter &p, const object &presets )
 static boost::python::tuple presetNames( const Parameter &that )
 {
 	boost::python::list result;
-	const Parameter::PresetsContainer &p = that.presets();
+	const Parameter::PresetsContainer &p = that.getPresets();
 	for( Parameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
 		result.append( it->first );
@@ -105,7 +105,7 @@ static boost::python::tuple presetNames( const Parameter &that )
 static boost::python::tuple presetValues( const Parameter &that )
 {
 	boost::python::list result;
-	const Parameter::PresetsContainer &p = that.presets();
+	const Parameter::PresetsContainer &p = that.getPresets();
 	for( Parameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
 		result.append( it->second->copy() );
@@ -166,7 +166,8 @@ void bindParameter()
 		.def( "validate", (void (Parameter::*)() const)&Parameter::validate )
 		.def( "validate", &validate )
 		.add_property( "presetsOnly", &Parameter::presetsOnly )
-		.def( "presets", &presets, "Returns a dictionary containing presets for the parameter." )
+		.def( "presets", &getPresets, "Deprecated function. Use getPresets() instead." )
+		.def( "getPresets", &getPresets, "Returns a dictionary containing presets for the parameter." )
 		.def( "setPresets", &setPresets, "Sets the presets for the parameter from a dictionary." )
 		.def( "presetNames", &presetNames, "Returns a tuple containing the names of all presets for the parameter." )
 		.def( "presetValues", &presetValues, "Returns a tuple containing the values of all presets for the parameter." )

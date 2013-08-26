@@ -98,7 +98,7 @@ class TestParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 4 )
 		self.assertEqual( pr["p1"], FloatData( 40 ) )
 		self.assertEqual( pr["p2"], IntData( 60 ) )
@@ -127,7 +127,7 @@ class TestParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 4 )
 		self.assertEqual( pr["p1"], FloatData( 40 ) )
 		self.assertEqual( pr["p2"], IntData( 60 ) )
@@ -137,7 +137,7 @@ class TestParameter( unittest.TestCase ) :
 		# overriding presets
 
 		p.setPresets( [] )
-		self.assertEqual( p.presets(), dict() )
+		self.assertEqual( p.getPresets(), dict() )
 
 		p.setPresets(
 			[
@@ -145,7 +145,7 @@ class TestParameter( unittest.TestCase ) :
 				( "p1", IntData( 60 ) ),
 			]
 		)
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
 		self.assertEqual( pr["p5"], FloatData( 40 ) )
 		self.assertEqual( pr["p1"], IntData( 60 ) )
@@ -315,7 +315,7 @@ class TestNumericParameter( unittest.TestCase ) :
 			)
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
 		self.assertEqual( pr["one"], IntData( 1 ) )
 		self.assertEqual( pr["two"], IntData( 2 ) )
@@ -328,7 +328,7 @@ class TestNumericParameter( unittest.TestCase ) :
 				( "one", IntData( 1 ) ),
 			]
 		)
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
 		self.assertEqual( pr["four"], IntData( 4 ) )
 		self.assertEqual( pr["one"], IntData( 1 ) )
@@ -421,7 +421,7 @@ class TestTypedParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
 		self.assertEqual( pr["one"], V3fData( V3f( 1 ) ) )
 		self.assertEqual( pr["two"], V3fData( V3f( 2 ) ) )
@@ -437,7 +437,7 @@ class TestTypedParameter( unittest.TestCase ) :
 				( "one", V3fData( V3f(1) ) ),
 			]
 		)
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
 		self.assertEqual( pr["four"], V3fData( V3f(4) ) )
 		self.assertEqual( pr["one"], V3fData( V3f(1) ) )
@@ -585,7 +585,7 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 		p.setValue( StringData( "100" ) )
 		self.assertEqual( p.getValue(), StringData( "100" ) )
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
 		self.assert_( "100" in pr.keys() )
 		self.assert_( "200" in pr.keys() )
@@ -831,7 +831,7 @@ class TestObjectParameter( unittest.TestCase ) :
 				( "one", V3fData( V3f(1) ) ),
 			]
 		)
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
 		self.assertEqual( pr["four"], V3fData( V3f(4) ) )
 		self.assertEqual( pr["one"], V3fData( V3f(1) ) )
@@ -881,7 +881,7 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
 		self.assertEqual( pr["one"], mesh1 )
 		self.assertEqual( pr["two"], mesh2 )

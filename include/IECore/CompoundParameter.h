@@ -71,12 +71,14 @@ class CompoundParameter : public Parameter
 		/// of all the child objects.
 		/// \threading It is not safe to call this from multiple concurrent threads.
 		virtual const Object *defaultValue() const;
+		/// \deprecated Use getPresets instead.
+		virtual const PresetsContainer &presets() const;
 		/// If true was passed to adoptChildPresets at construction, then update the presets
 		/// with the intersection of the presets of all the child parameters, otherwise returns
 		/// an empty container or the presets defined by setPresets(). 
 		/// Please note that the map returned may differ between one call
 		/// to presets() and the next.
-		virtual const PresetsContainer &presets() const;
+		virtual const PresetsContainer &getPresets() const;
 		/// Defines presets for this Parameter.
 		/// Throws an exception if true was passed to adoptChildPresets at construction.
 		virtual void setPresets( const PresetsContainer &presets );

@@ -74,13 +74,18 @@ const Object *CompoundParameter::defaultValue() const
 
 const Parameter::PresetsContainer &CompoundParameter::presets() const
 {
+	return getPresets();
+}
+
+const Parameter::PresetsContainer &CompoundParameter::getPresets() const
+{
 	if( !m_adoptChildPresets )
 	{
-		return Parameter::presets();
+		return Parameter::getPresets();
 	}
 
 	// naughty? nah! it gives the right semantics to an outside observer
-	PresetsContainer &pr = const_cast<PresetsContainer &>( Parameter::presets() );
+	PresetsContainer &pr = const_cast<PresetsContainer &>( Parameter::getPresets() );
 	pr.clear();
 	if( !m_namesToParameters.size() )
 	{
@@ -88,12 +93,12 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 	}
 
 	// get a references for each child preset map.
-	// we only want to call presets() once for
+	// we only want to call getPresets() once for
 	// each child as the map returned may change between calls.
 	vector<const PresetsContainer *> childPresets;
 	for( size_t i=0; i<m_parameters.size(); i++ )
 	{
-		childPresets.push_back( &(m_parameters[i]->presets()) );
+		childPresets.push_back( &(m_parameters[i]->getPresets()) );
 	}
 	
 	// find the intersection of all the child preset names

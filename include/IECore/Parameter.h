@@ -78,8 +78,10 @@ class Parameter : public RunTimeTyped
 		const std::string &description() const;
 		/// Returns the default value for this parameter.
 		virtual const Object *defaultValue() const;
-		/// Returns the presets for this parameter.
+		/// \deprecated Use getPresets instead.
 		virtual const PresetsContainer &presets() const;
+		/// Returns the presets for this parameter.
+		virtual const PresetsContainer &getPresets() const;
 		/// Overrides the presets for this parameter.
 		virtual void setPresets( const PresetsContainer &presets );
 		/// Returns true if this parameter only accepts
