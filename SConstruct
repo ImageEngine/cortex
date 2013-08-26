@@ -53,7 +53,7 @@ SConsignFile()
 ieCoreMajorVersion=8
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="a14"	# used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="a15"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -1914,6 +1914,7 @@ if env["WITH_GL"] and doConfigure :
 
 		glTestEnv = testEnv.Clone()
 		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":python"
+		glTestEnv["ENV"]["IECOREGL_SHADER_INCLUDE_PATHS"] = "./glsl"
 		for e in ["DISPLAY", "XAUTHORITY"] :
 			if e in os.environ :
 				glTestEnv["ENV"][e] = os.environ[e]
