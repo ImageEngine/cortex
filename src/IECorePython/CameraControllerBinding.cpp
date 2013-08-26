@@ -48,7 +48,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static tuple unproject( CameraController &c, Imath::V2i &p )
+static tuple unproject( CameraController &c, Imath::V2f &p )
 {
 	Imath::V3f near, far;
 	c.unproject( p, near, far );

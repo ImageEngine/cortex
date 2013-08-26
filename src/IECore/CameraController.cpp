@@ -62,7 +62,7 @@ struct CameraController::MemberData : public IECore::RefCounted
 
 	// motion state
 	MotionType motionType;
-	Imath::V2i motionStart;
+	Imath::V2f motionStart;
 	Imath::M44f motionMatrix;
 	float motionCentreOfInterest;
 	Imath::Box2f motionScreenWindow;
@@ -204,7 +204,7 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 	m_data->screenWindow->writable() = screenWindow;
 }
 
-void CameraController::unproject( const Imath::V2i rasterPosition, Imath::V3f &near, Imath::V3f &far )
+void CameraController::unproject( const Imath::V2f rasterPosition, Imath::V3f &near, Imath::V3f &far )
 {
 	V2f ndc = V2f( rasterPosition ) / m_data->resolution->readable();
 	const Box2f &screenWindow = m_data->screenWindow->readable();
@@ -267,7 +267,7 @@ Imath::V2f CameraController::project( const Imath::V3f &worldPosition ) const
 	}
 }
 
-void CameraController::motionStart( MotionType motion, const Imath::V2i &startPosition )
+void CameraController::motionStart( MotionType motion, const Imath::V2f &startPosition )
 {
 	m_data->motionType = motion;
 	m_data->motionStart = startPosition;
@@ -276,7 +276,7 @@ void CameraController::motionStart( MotionType motion, const Imath::V2i &startPo
 	m_data->motionCentreOfInterest = m_data->centreOfInterest;
 }
 
-void CameraController::motionUpdate( const Imath::V2i &newPosition )
+void CameraController::motionUpdate( const Imath::V2f &newPosition )
 {
 	switch( m_data->motionType )
 	{
@@ -294,7 +294,7 @@ void CameraController::motionUpdate( const Imath::V2i &newPosition )
 	}
 }
 
-void CameraController::motionEnd( const Imath::V2i &endPosition )
+void CameraController::motionEnd( const Imath::V2f &endPosition )
 {
 	switch( m_data->motionType )
 	{
@@ -313,15 +313,15 @@ void CameraController::motionEnd( const Imath::V2i &endPosition )
 	m_data->motionType = None;
 }
 
-void CameraController::track( const Imath::V2i &p )
+void CameraController::track( const Imath::V2f &p )
 {
 	V2i resolution = m_data->resolution->readable();
 	Box2f screenWindow = m_data->screenWindow->readable();
 
-	V2i d = p - m_data->motionStart;
+	V2f d = p - m_data->motionStart;
 	V3f translate( 0.0f );
-	translate.x = -screenWindow.size().x * (float)d.x/(float)resolution.x;
-	translate.y = screenWindow.size().y * (float)d.y/(float)resolution.y;
+	translate.x = -screenWindow.size().x * d.x/(float)resolution.x;
+	translate.y = screenWindow.size().y * d.y/(float)resolution.y;
 	if( m_data->projection->readable()=="perspective" && m_data->fov )
 	{
 		translate *= tan( M_PI * m_data->fov->readable() / 360.0f ) * (float)m_data->centreOfInterest;
@@ -331,9 +331,9 @@ void CameraController::track( const Imath::V2i &p )
 	m_data->transform->matrix = t;
 }
 
-void CameraController::tumble( const Imath::V2i &p )
+void CameraController::tumble( const Imath::V2f &p )
 {
-	V2i d = p - m_data->motionStart;
+	V2f d = p - m_data->motionStart;
 
 	V3f centreOfInterestInWorld = V3f( 0, 0, -m_data->centreOfInterest ) * m_data->motionMatrix;
 	V3f xAxisInWorld = V3f( 1, 0, 0 );
@@ -355,7 +355,7 @@ void CameraController::tumble( const Imath::V2i &p )
 	m_data->transform->matrix = m_data->motionMatrix * t;
 }
 
-void CameraController::dolly( const Imath::V2i &p )
+void CameraController::dolly( const Imath::V2f &p )
 {
 	V2i resolution = m_data->resolution->readable();
 	V2f dv = V2f( (p - m_data->motionStart) ) / resolution;
