@@ -34,6 +34,7 @@
 
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
+#include "PRM/PRM_Include.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
@@ -53,6 +54,9 @@ OBJ_SceneCacheNode<BaseType>::~OBJ_SceneCacheNode()
 }
 
 template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pMainSwitcher( "mainSwitcher", "Main Switcher" );
+	
+template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pExpand( "expand", "Expand" );
 
 template<typename BaseType>
@@ -60,6 +64,33 @@ PRM_Name OBJ_SceneCacheNode<BaseType>::pCollapse( "collapse", "Collapse" );
 
 template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pExpanded( "expanded", "Expanded" );
+
+template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pOutTranslate( "outT", "Out Translate" );
+
+template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pOutRotate( "outR", "Out Rotate" );
+
+template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pOutScale( "outS", "Out Scale" );
+
+static PRM_Default outTranslateDefault[] = {
+	PRM_Default( 0, "hou.pwd().parmTransform().extractTranslates()[0]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractTranslates()[1]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractTranslates()[2]", CH_PYTHON_EXPRESSION )
+};
+
+static PRM_Default outRotateDefault[] = {
+	PRM_Default( 0, "hou.pwd().parmTransform().extractRotates()[0]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractRotates()[1]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractRotates()[2]", CH_PYTHON_EXPRESSION )
+};
+
+static PRM_Default outScaleDefault[] = {
+	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[0]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[1]", CH_PYTHON_EXPRESSION ),
+	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[2]", CH_PYTHON_EXPRESSION )
+};
 
 static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 {
@@ -84,47 +115,64 @@ static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 }
 
 template<typename BaseType>
-OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildParameters()
+PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *extraParameters )
 {
-	static OP_TemplatePair *templatePair = 0;
-	if ( !templatePair )
+	PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
+	PRM_Template *extraTemplate = ( extraParameters ) ? extraParameters->myTemplate : 0;
+	PRM_Template *expansionTemplate = buildExpansionParameters()->myTemplate;
+	PRM_Template *outputTemplate = buildOutputParameters()->myTemplate;
+	
+	unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
+	unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
+	unsigned numExtraParms = ( extraTemplate ) ? PRM_Template::countTemplates( extraTemplate ) : 0;
+	unsigned numExpansionParms = PRM_Template::countTemplates( expansionTemplate );
+	unsigned numOutputParms = PRM_Template::countTemplates( outputTemplate );
+	
+	PRM_Template *thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + numOutputParms + 2 ];
+	
+	// add the generic OBJ_Node parms
+	unsigned totalParms = 0;
+	for ( unsigned i = 0; i < numObjParms; ++i, ++totalParms )
 	{
-		templatePair = new OP_TemplatePair( buildBaseParameters()->myTemplate, buildExpansionParameters() );
+		thisTemplate[totalParms] = objTemplate[i];
+		copyAndHideParm( objTemplate[i], thisTemplate[totalParms] );
 	}
 	
-	return templatePair;
-}
-
-template<typename BaseType>
-OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildBaseParameters()
-{
-	static PRM_Template *thisTemplate = 0;
-	if ( !thisTemplate )
+	static PRM_Default mainSwitcherDefault[] =
 	{
-		PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
-		unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
-		unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
-		thisTemplate = new PRM_Template[ numObjParms + numSCCParms + 1 ];
-		
-		for ( unsigned i = 0; i < numObjParms; ++i )
-		{
-			thisTemplate[i] = objTemplate[i];
-			copyAndHideParm( objTemplate[i], thisTemplate[i] );
-		}
-		
-		for ( unsigned i = 0; i < numSCCParms; ++i )
-		{
-			thisTemplate[numObjParms+i] = SceneCacheNode<BaseType>::parameters[i];
-		}
+		PRM_Default( numSCCParms + numExtraParms + numExpansionParms, "Main" ),
+		PRM_Default( numOutputParms, "Output" )
+	};
+	
+	// add the generic Main folder switcher
+	thisTemplate[totalParms] = PRM_Template( PRM_SWITCHER, 2, &pMainSwitcher, mainSwitcherDefault );
+	totalParms++;
+	
+	// add the generic SceneCacheNode parms
+	for ( unsigned i = 0; i < numSCCParms; ++i, ++totalParms )
+	{
+		thisTemplate[totalParms] = SceneCacheNode<BaseType>::parameters[i];
 	}
 	
-	static OP_TemplatePair *templatePair = 0;
-	if ( !templatePair )
+	// add the extra parms for this node
+	for ( unsigned i = 0; i < numExtraParms; ++i, ++totalParms )
 	{
-		templatePair = new OP_TemplatePair( thisTemplate );
+		thisTemplate[totalParms] = extraTemplate[i];
 	}
 	
-	return templatePair;
+	// add the generic OBJ_SceneCacheNode expansion parms
+	for ( unsigned i = 0; i < numExpansionParms; ++i, ++totalParms )
+	{
+		thisTemplate[totalParms] = expansionTemplate[i];
+	}
+	
+	// add the OBJ_SceneCacheNode output parms
+	for ( unsigned i = 0; i < numOutputParms; ++i, ++totalParms )
+	{
+		thisTemplate[totalParms] = outputTemplate[i];
+	}
+	
+	return thisTemplate;
 }
 
 template<typename BaseType>
@@ -150,6 +198,39 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildExpansionParameters()
 			PRM_TOGGLE, 1, &pExpanded, 0, 0, 0, 0, 0, 0,
 			"A toggle to indicate whether this level is expanded or not. This does not affect cooking, "
 			"and the value may be changed by automated scripts. Expansion will be blocked when this is on."
+		);
+	}
+	
+	static OP_TemplatePair *templatePair = 0;
+	if ( !templatePair )
+	{
+		templatePair = new OP_TemplatePair( thisTemplate );
+	}
+	
+	return templatePair;
+}
+
+template<typename BaseType>
+OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildOutputParameters()
+{
+	static PRM_Template *thisTemplate = 0;
+	if ( !thisTemplate )
+	{
+		thisTemplate = new PRM_Template[4];
+		
+		thisTemplate[0] = PRM_Template(
+			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutTranslate, outTranslateDefault, 0, 0, 0, 0, 0,
+			"Output translation calculated by this node. This is for user clarity only and is not editable."
+		);
+		
+		thisTemplate[1] = PRM_Template(
+			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutRotate, outRotateDefault, 0, 0, 0, 0, 0,
+			"Output rotation calculated by this node. This is for user clarity only and is not editable."
+		);
+		
+		thisTemplate[2] = PRM_Template(
+			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutScale, outScaleDefault, 0, 0, 0, 0, 0,
+			"Output scale calculated by this node. This is for user clarity only and is not editable."
 		);
 	}
 	
@@ -312,6 +393,9 @@ template<typename BaseType>
 bool OBJ_SceneCacheNode<BaseType>::updateParmsFlags()
 {
 	this->enableParm( pExpanded.getToken(), !this->evalInt( pExpanded.getToken(), 0, 0 ) );
+	this->enableParm( pOutTranslate.getToken(), false );
+	this->enableParm( pOutRotate.getToken(), false );
+	this->enableParm( pOutScale.getToken(), false );
 	return true;
 }
 

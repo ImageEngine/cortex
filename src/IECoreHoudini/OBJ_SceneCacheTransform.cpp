@@ -88,8 +88,7 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		OP_TemplatePair *firstTemplatePair = new OP_TemplatePair( buildExtraParameters()->myTemplate, buildExpansionParameters() );
-		templatePair = new OP_TemplatePair( buildBaseParameters()->myTemplate, firstTemplatePair );
+		templatePair = new OP_TemplatePair( OBJ_SceneCacheNode<OBJ_SubNet>::buildParameters( buildExtraParameters() ) );
 	}
 	
 	return templatePair;
