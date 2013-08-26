@@ -133,6 +133,7 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aTime;
 		static MObject aOutTime;
 		static MObject aOutputObjects;
+		static MObject aObjectDependency;
 		static MObject aAttributes;
 		static MObject aTransform;
 		static MObject aBound;
@@ -218,6 +219,10 @@ class SceneShapeInterface: public MPxComponentShape
 		NameToGroupMap m_nameToGroupMap;
 		HashToName m_hashToName;
 		InstanceArray m_instances;
+		
+		IE_CORE_FORWARDDECLARE( PostLoadCallback );
+		PostLoadCallbackPtr m_postLoadCallback;
+
 };
 
 }
