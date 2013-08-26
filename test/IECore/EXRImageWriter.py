@@ -223,11 +223,11 @@ class TestEXRWriter(unittest.TestCase):
 		img = r.read()
 
 		w = Writer.create( img, "test/IECore/data/exrFiles/output.exr" )
-		w['compression'].setValue( w['compression'].presets()['zip'] )
+		w['compression'].setValue( w['compression'].getPresets()['zip'] )
 		w.write()
 
 		w = EXRImageWriter()
-		w['compression'].setValue( w['compression'].presets()['zip'] )
+		w['compression'].setValue( w['compression'].getPresets()['zip'] )
 
 	def testBlindDataToHeader( self ) :
 
