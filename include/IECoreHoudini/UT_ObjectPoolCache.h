@@ -51,7 +51,7 @@ class UT_ObjectPoolCache : public UT_Cache
 	
 	public :
 		
-		UT_ObjectPoolCache( IECore::ObjectPoolPtr objectPool = IECore::ObjectPool::defaultObjectPool() );
+		UT_ObjectPoolCache( const std::string &name, IECore::ObjectPoolPtr objectPool );
 		virtual ~UT_ObjectPoolCache();
 		
 		virtual const char *utGetCacheName() const;
@@ -66,6 +66,7 @@ class UT_ObjectPoolCache : public UT_Cache
 	
 	private :
 		
+		const std::string m_name;
 		IECore::ObjectPoolPtr m_pool;
 
 };

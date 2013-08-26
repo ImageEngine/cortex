@@ -36,9 +36,9 @@
 
 using namespace IECoreHoudini;
 
-UT_ObjectPoolCache::UT_ObjectPoolCache( IECore::ObjectPoolPtr objectPool )
+UT_ObjectPoolCache::UT_ObjectPoolCache( const std::string &name, IECore::ObjectPoolPtr objectPool )
+	: m_name( name ), m_pool( objectPool )
 {
-	m_pool = objectPool;
 }
 
 UT_ObjectPoolCache::~UT_ObjectPoolCache()
@@ -47,7 +47,7 @@ UT_ObjectPoolCache::~UT_ObjectPoolCache()
 
 const char *UT_ObjectPoolCache::utGetCacheName() const
 {
-	return "Cortex Object Pool";
+	return m_name.c_str();
 }
 
 int64 UT_ObjectPoolCache::utGetCurrentSize() const
@@ -91,7 +91,7 @@ UT_ObjectPoolCache *UT_ObjectPoolCache::defaultObjectPoolCache()
 	
 	if ( !defaultCache )
 	{
-		defaultCache = new UT_ObjectPoolCache();
+		defaultCache = new UT_ObjectPoolCache( "Cortex Object Pool", IECore::ObjectPool::defaultObjectPool() );
 	}
 	
 	return defaultCache;
