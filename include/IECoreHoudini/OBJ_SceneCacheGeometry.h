@@ -59,6 +59,8 @@ class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 		/// should re-implement doExpandGeometry() if specialized behaviour is necessary.
 		/// \todo: do we need this extra abstraction?
 		virtual void expandHierarchy( const IECore::SceneInterface *scene );
+		/// Implemented to push the GeometryType and attribute filter values to the sop below.
+		virtual void pushToHierarchy();
 	
 	protected :
 		
