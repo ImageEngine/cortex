@@ -75,6 +75,22 @@ void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 	setInt( pExpanded.getToken(), 0, 0, 1 );
 }
 
+void OBJ_SceneCacheGeometry::pushToHierarchy()
+{
+	UT_String attribFilter;
+	getAttributeFilter( attribFilter );
+	GeometryType geomType = getGeometryType();
+	
+	UT_PtrArray<OP_Node*> children;
+	int numSceneSops = getOpsByName( SOP_SceneCacheSource::typeName, children );
+	for ( int i=0; i < numSceneSops; ++i )
+	{
+		SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( children[i] );
+		sop->setAttributeFilter( attribFilter );
+		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
+	}
+}
+
 void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 {
 	const char *name = ( scene->name() == SceneInterface::rootName ) ? "root" : scene->name().c_str();

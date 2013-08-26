@@ -93,7 +93,7 @@ class SceneCacheNode : public BaseType
 			Houdini,
 		};
 		
-		/// convienence methods for the common parameters;
+		/// convenience methods for the common parameters;
 		std::string getFile() const;
 		void setFile( std::string file );
 		std::string getPath() const;
@@ -105,6 +105,10 @@ class SceneCacheNode : public BaseType
 		void getAttributeFilter( UT_String &filter ) const;
 		void setAttributeFilter( const UT_String &filter );
 		void referenceParent( const char *parmName );
+		
+		/// Access point to the actual SceneCache. All users should only access the cache
+		/// using this method, in order to avoid re-opening existing files.
+		IECore::ConstSceneInterfacePtr scene();
 	
 	protected :
 		
