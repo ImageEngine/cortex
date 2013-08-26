@@ -601,10 +601,10 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 			unsigned int interpolationIndex = interpolationPlug.asInt(MDGContext::fsNormal, &st);
 			if ( st )
 			{
-				if ( interpolationIndex < m_interpolation->presets().size() - 1 )
+				if ( interpolationIndex < m_interpolation->getPresets().size() - 1 )
 				{
 					// convert interpolation index to the preset value
-					interpolation = staticPointerCast< StringData >( m_interpolation->presets()[interpolationIndex].second )->readable();
+					interpolation = staticPointerCast< StringData >( m_interpolation->getPresets()[interpolationIndex].second )->readable();
 				}
 				else
 				{
