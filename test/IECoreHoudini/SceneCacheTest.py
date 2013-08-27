@@ -1291,7 +1291,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( b.readTransformAsMatrix( time ), IECore.M44d() )
 		else :
 			self.assertEqual( a.readTags(), b.readTags() )
-			self.assertEqual( a.readTransformAsMatrix( time ), b.readTransformAsMatrix( time ) )
+			self.assertTrue( a.readTransformAsMatrix( time ).equalWithAbsError( b.readTransformAsMatrix( time ), 1e-6 ) )
 			ab = a.readBound( time )
 			bb = b.readBound( time )
 			## \todo: re-enable this if Houdini fixes their SubNet bounding box issue
@@ -1534,6 +1534,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "expand" ).pressButton()
 		rop = self.rop( xform )
+		rop.parm( "trange" ).set( 1 )
+		rop.parmTuple( "f" ).set( ( 1, 10 * hou.fps(), 1 ) )
 		rop.parm( "execute" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
@@ -1547,7 +1549,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		times.sort()
 		
 		for time in times :
-			self.compareScene( orig, output )
+			self.compareScene( orig, output, time )
 	
 	def testLiveScene( self ) :
 		
