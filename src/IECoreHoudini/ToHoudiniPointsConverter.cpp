@@ -58,14 +58,6 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	const IECore::V3fVectorData *positions = points->variableData<V3fVectorData>( "P" );
-	if ( !positions )
-	{
-		// accept "position" so we can convert the results of the PDCParticleReader without having to rename things
-		/// \todo: Consider making the ParticleReader create a P if it doesn't exist for Cortex 6.
-		positions = points->variableData<V3fVectorData>( "position" );
-	}
-	
 	GA_Range newPoints = appendPoints( geo, points->getNumPoints() );
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
