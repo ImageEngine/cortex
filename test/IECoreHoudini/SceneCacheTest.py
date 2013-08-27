@@ -1817,6 +1817,33 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 2, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 3, 0 ) )
 	
+	def testPointsDontAccumulate( self ) :
+		
+		obj = hou.node("/obj")
+		geo = obj.createNode("geo", run_init_scripts=False)
+		box = geo.createNode( "box" )
+		facet = geo.createNode( "facet" )
+		facet.parm("postnml").set(True)
+		points = geo.createNode( "scatter" )
+		facet.setInput( 0, box )
+		points.setInput( 0, facet )
+		points.setRenderFlag( True )
+		points.setDisplayFlag( True )
+		
+		rop = self.rop( geo )
+		rop.parm( "trange" ).set( 1 )
+		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
+		rop.parm( "execute" ).pressButton()
+		
+		sop = self.sop()
+		sop.parm( "file" ).set( TestSceneCache.__testOutFile )
+		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		
+		for t in range( 0, 10 ) :
+			hou.setTime( t )
+			self.assertEqual( len(sop.geometry().points()), 5000 )
+			self.assertEqual( len(sop.geometry().prims()), 0 )
+	
 	def testTimeDependent( self ) :
 		
 		self.writeSCC()
