@@ -1414,6 +1414,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		attr.setDisplayFlag( True )
 		attr.setRenderFlag( True )
 		rop = self.rop( geo )
+		rop.parm( "trange" ).set( 1 )
+		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
 		rop.parm( "execute" ).pressButton()
 		self.assertEqual( rop.errors(), "" )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
