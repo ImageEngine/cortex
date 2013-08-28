@@ -82,6 +82,6 @@ void ToHoudiniPointsConverter::transferAttribs( GU_Detail *geo, const GA_Range &
 	const Primitive *primitive = IECore::runTimeCast<const Primitive>( srcParameter()->getValidatedValue() );
 	if ( primitive )
 	{
-		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex, PrimitiveVariable::Vertex );
+		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
 	}
 }
