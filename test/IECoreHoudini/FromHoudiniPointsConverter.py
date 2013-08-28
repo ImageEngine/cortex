@@ -679,7 +679,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm("value3").set( 3 )
 		
 		hou.setFrame( 5 )
-		converter = IECoreHoudini.FromHoudiniPointsConverter( pointAttr )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( pointAttr )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		points = converter.convert()
 		
 		self.assertEqual( type(points), IECore.PointsPrimitive )
@@ -703,6 +704,34 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		del points['generatorIndices']
 		del points['born']
 		del points['source']
+		self.assertEqual( points2, points )
+	
+	def testMultipleParticlePrimitives( self ) :
+		
+		obj = hou.node("/obj")
+		geo = obj.createNode( "geo", run_init_scripts=False )
+		popnet = geo.createNode( "popnet" )
+		fireworks = popnet.createNode( "fireworks" )
+		
+		hou.setFrame( 15 )
+		converter = IECoreHoudini.FromHoudiniPointsConverter( popnet )
+		points = converter.convert()
+		
+		self.assertEqual( type(points), IECore.PointsPrimitive )
+		self.assertEqual( points.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 24 )
+		self.assertEqual( points["accel"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( type(points["accel"].data), IECore.V3fVectorData )
+		self.assertEqual( points["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+		self.assertEqual( points["nextid"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( points["nextid"].data, IECore.IntData( 25 ) )
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		
+		add = popnet.createOutputNode( "add" )
+		add.parm( "keep" ).set( 1 ) # deletes primitive and leaves points
+		
+		converter = IECoreHoudini.FromHoudiniPointsConverter( add )
+		points2 = converter.convert()
+		# showing that prim attribs don't get converted because the interpolation size doesn't match
 		self.assertEqual( points2, points )
 	
 	def testName( self ) :
