@@ -171,7 +171,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 
 		if ( reRoot )
 		{
-			outScene = m_outScene->createChild( node->getName().toStdString() );
+			outScene = m_outScene->child( node->getName().toStdString(), SceneInterface::CreateIfMissing );
 		}
 	}
 	
