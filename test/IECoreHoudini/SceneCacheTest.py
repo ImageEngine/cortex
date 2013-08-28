@@ -1403,7 +1403,53 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output, bakedObjects = [ "1", "2", "3" ] )
+	
+	def testRopFlattenedWithGaps( self ) :
 		
+		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		
+		sc = scene.createChild( str( 1 ) )
+		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
+		sc.writeObject( mesh, 0 )
+		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		
+		sc = sc.createChild( str( 2 ) )
+		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		
+		sc = sc.createChild( str( 3 ) )
+		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
+		sc.writeObject( mesh, 0 )
+		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		
+		del scene, sc
+		
+		geo = self.geometry()
+		geo.parm( "expand" ).pressButton()
+		self.assertEqual( len(geo.children()), 1 )
+		node = geo.children()[0]
+		self.assertEqual( node.name(), "root" )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 2 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, 0.5, 0.5 ) )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 6.5, 0.5, 0.5 ) )
+		
+		rop = self.rop( geo )
+		rop.parm( "rootObject" ).set( geo.path() )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.compareScene( orig, output, bakedObjects = [ "1", "2", "3" ] )
+	
 	def testRopTopLevelGeo( self ) :
 		
 		self.writeSCC()
