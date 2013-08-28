@@ -658,11 +658,6 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 
 MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 {
-	if ( m_postLoadCallback )
-	{
-		return MS::kFailure;
-	}
-	
 	MStatus s;
 	MPlug topLevelPlug = plug;
 	int index = -1;
@@ -678,6 +673,11 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			index = topLevelPlug.logicalIndex();
 			topLevelPlug = topLevelPlug.array();
 		}
+	}
+	
+	if ( topLevelPlug == aOutputObjects && m_postLoadCallback )
+	{
+		return MS::kFailure;
 	}
 	
 	if( topLevelPlug == aOutputObjects || topLevelPlug == aTransform || topLevelPlug == aBound || topLevelPlug == aAttributes )
