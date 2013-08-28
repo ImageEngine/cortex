@@ -679,7 +679,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm("value3").set( 3 )
 		
 		hou.setFrame( 5 )
-		converter = IECoreHoudini.FromHoudiniPointsConverter( pointAttr )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( pointAttr )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		points = converter.convert()
 		
 		self.assertEqual( type(points), IECore.PointsPrimitive )

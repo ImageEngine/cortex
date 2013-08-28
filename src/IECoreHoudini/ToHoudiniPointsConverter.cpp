@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GU/GU_PrimPart.h"
+
 #include "IECoreHoudini/ToHoudiniPointsConverter.h"
 
 using namespace IECore;
@@ -58,13 +60,19 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	GA_Range newPoints = appendPoints( geo, points->getNumPoints() );
+	size_t numPrims = geo->getNumPrimitives();
+	GU_PrimParticle *system = GU_PrimParticle::build( geo, points->getNumPoints(), true );
+	GA_Range newPoints = system->getPointRange();
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
 	}
 	
-	transferAttribs( geo, newPoints, GA_Range() );
+	GA_OffsetList offsets;
+	offsets.append( geo->primitiveOffset( numPrims ) );
+	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
+	
+	transferAttribs( geo, newPoints, newPrims );
 	
 	return true;
 }

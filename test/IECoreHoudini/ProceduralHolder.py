@@ -295,8 +295,11 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.numFaces(), 100 )
+		self.assertEqual( result.typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.children()[0].typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.children()[0].numFaces(), 100 )
+		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.children()[1].numPoints, 0 )
 		
 		torus.parm( "type" ).set( 1 )
 		proc.cook()
@@ -304,9 +307,12 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( len(proc.geometry().points()), 8 )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.numFaces(), 100 )
-		
+		self.assertEqual( result.typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.children()[0].typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.children()[0].numFaces(), 100 )
+		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.children()[1].numPoints, 0 )
+	
 	def testObjectParameterWithMultipleTypesConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 3, "torus" )
@@ -316,8 +322,11 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.numFaces(), 100 )
+		self.assertEqual( result.typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.children()[0].typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.children()[0].numFaces(), 100 )
+		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.children()[1].numPoints, 0 )
 		
 		torus.parm( "type" ).set( 1 )
 		proc.cook()
@@ -327,7 +336,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.numPoints, 100 )
-
+	
 	def testPointsParameterConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 1, "torus" )
@@ -382,8 +391,11 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 208 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.numFaces(), 206 )
+		self.assertEqual( result.typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.children()[0].typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.children()[0].numFaces(), 206 )
+		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.children()[1].numPoints, 0 )
 		
 		torus2.parm( "type" ).set( 1 )
 		proc.cook()
@@ -391,9 +403,12 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( len(proc.geometry().points()), 8 )
 		self.assertEqual( len(converterSop.geometry().points()), 208 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.numFaces(), 106 )
-		self.assertEqual( result["P"].data.size(), 208 )
+		self.assertEqual( result.typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.children()[0].typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.children()[0].numFaces(), 106 )
+		self.assertEqual( result.children()[0]["P"].data.size(), 108 )
+		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.children()[1].numPoints, 100 )
 	
 	# test using op holders and procedural holders as inputs
 	def testCortexInputs( self ) :
@@ -428,8 +443,11 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 208 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.numFaces(), 206 )
+		self.assertEqual( result.typeId(), IECore.TypeId.Group )
+		self.assertEqual( result.children()[0].typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.children()[0].numFaces(), 206 )
+		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.children()[1].numPoints, 0 )
 	
 	def testAnimatedValues( self ) :
 		

@@ -1842,7 +1842,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for t in range( 0, 10 ) :
 			hou.setTime( t )
 			self.assertEqual( len(sop.geometry().points()), 5000 )
-			self.assertEqual( len(sop.geometry().prims()), 0 )
+			self.assertEqual( len(sop.geometry().prims()), 1 )
 	
 	def testTimeDependent( self ) :
 		
