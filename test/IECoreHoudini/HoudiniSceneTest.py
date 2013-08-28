@@ -53,7 +53,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		bname.parm( "name1" ).set( "/" )
 		torus = box1.createNode( "torus" )
 		tname = torus.createOutputNode( "name" )
-		tname.parm( "name1" ).set( "/torus" )
+		tname.parm( "name1" ).set( "/gap/torus" )
 		merge = bname.createOutputNode( "merge" )
 		merge.setInput( 1, tname )
 		merge.setRenderFlag( True )
@@ -81,9 +81,12 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( child3.childNames() ), [] )
 		
 		box1 = child.child( "box1" )
-		self.assertEqual( sorted( box1.childNames() ), [ "torus" ] )
+		self.assertEqual( sorted( box1.childNames() ), [ "gap" ] )
 		
-		self.assertEqual( box1.child( "torus" ).childNames(), [] )
+		gap = box1.child( "gap" )
+		self.assertEqual( sorted( gap.childNames() ), [ "torus" ] )
+		
+		self.assertEqual( gap.child( "torus" ).childNames(), [] )
 		self.assertEqual( scene.child( "box2" ).childNames(), [] )
 		self.assertEqual( scene.child( "sub2" ).childNames(), [] )
 	
@@ -104,9 +107,12 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( child3.childNames() ), [] )
 		
 		box1 = child.child( "box1" )
-		self.assertEqual( sorted( box1.childNames() ), [ "torus" ] )
+		self.assertEqual( sorted( box1.childNames() ), [ "gap" ] )
 		
-		self.assertEqual( box1.child( "torus" ).childNames(), [] )
+		gap = box1.child( "gap" )
+		self.assertEqual( sorted( gap.childNames() ), [ "torus" ] )
+		
+		self.assertEqual( gap.child( "torus" ).childNames(), [] )
 		self.assertEqual( scene.child( "box2" ).childNames(), [] )
 		self.assertEqual( scene.child( "sub2" ).childNames(), [] )
 	
@@ -125,7 +131,9 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( child.hasChild( "fake" ), False )
 		
 		self.assertEqual( child.hasChild( "box1" ), True )
-		self.assertEqual( child.child( "box1" ).hasChild( "torus" ), True )
+		self.assertEqual( child.child( "box1" ).hasChild( "gap" ), True )
+		self.assertEqual( child.child( "box1" ).hasChild( "torus" ), False )
+		self.assertEqual( child.child( "box1" ).child( "gap" ).hasChild( "torus" ), True )
 	
 	def testNames( self ) :
 		
@@ -137,7 +145,8 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		sub1 = scene.child( "sub1" )
 		self.assertEqual( sub1.name(), "sub1" )
 		self.assertEqual( sub1.child( "box1" ).name(), "box1" )
-		self.assertEqual( sub1.child( "box1" ).child( "torus" ).name(), "torus" )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).name(), "gap" )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).child( "torus" ).name(), "torus" )
 		
 		torus1 = sub1.child( "torus1" )
 		self.assertEqual( torus1.name(), "torus1" )
@@ -158,8 +167,10 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sub1.pathAsString(), "/sub1" )
 		self.assertEqual( sub1.child( "box1" ).path(), [ "sub1", "box1" ] )
 		self.assertEqual( sub1.child( "box1" ).pathAsString(), "/sub1/box1" )
-		self.assertEqual( sub1.child( "box1" ).child( "torus" ).path(), [ "sub1", "box1", "torus" ] )
-		self.assertEqual( sub1.child( "box1" ).child( "torus" ).pathAsString(), "/sub1/box1/torus" )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).path(), [ "sub1", "box1", "gap" ] )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).pathAsString(), "/sub1/box1/gap" )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).child( "torus" ).path(), [ "sub1", "box1", "gap", "torus" ] )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).child( "torus" ).pathAsString(), "/sub1/box1/gap/torus" )
 		
 		torus1 = sub1.child( "torus1" )
 		self.assertEqual( torus1.path(), [ "sub1", "torus1" ] )
@@ -215,7 +226,8 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( torus1.hasObject(), True )
 		self.assertEqual( torus1.child( "torus2" ).hasObject(), True )
 		self.assertEqual( sub1.child( "box1" ).hasObject(), True )
-		self.assertEqual( sub1.child( "box1" ).child( "torus" ).hasObject(), True )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).hasObject(), False )
+		self.assertEqual( sub1.child( "box1" ).child( "gap" ).child( "torus" ).hasObject(), True )
 	
 	def testTags( self ) :
 		
@@ -428,6 +440,50 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertAlmostEqual( transform0_5.translate.z, 2.5, 5 )
 		self.assertEqual( transform1.translate, IECore.V3d( 1, 2, 3 ) )
 	
+	def testFlatGeoWithGap( self ) :	
+	
+		scene = self.buildScene()
+		hou.node( "/obj/box1/name1" ).parm( "name1" ).set( "/gap/box" )
+		
+		box1 = scene.child( "sub1" ).child( "box1" )
+		self.assertEqual( box1.path(), [ "sub1", "box1" ] )
+		self.assertEqual( box1.pathAsString(), "/sub1/box1" )
+		self.assertEqual( box1.name(), "box1" )
+		self.assertEqual( sorted( box1.childNames() ), [ "gap" ] )
+		self.assertEqual( box1.hasChild( "gap" ), True )
+		self.assertEqual( box1.hasObject(), False )
+		
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.path(), [ "sub1", "box1", "gap" ] )
+		self.assertEqual( gap.pathAsString(), "/sub1/box1/gap" )
+		self.assertEqual( gap.name(), "gap" )
+		self.assertEqual( sorted( gap.childNames() ), [ "box", "torus" ] )
+		self.assertEqual( gap.hasChild( "torus" ), True )
+		self.assertEqual( gap.hasChild( "box" ), True )
+		self.assertEqual( gap.hasObject(), False )
+		
+		boxTorus = gap.child( "torus" )
+		self.assertEqual( boxTorus.path(), [ "sub1", "box1", "gap", "torus" ] )
+		self.assertEqual( boxTorus.pathAsString(), "/sub1/box1/gap/torus" )
+		self.assertEqual( boxTorus.name(), "torus" )
+		self.assertEqual( boxTorus.childNames(), [] )
+		self.assertEqual( boxTorus.hasObject(), True )
+		mesh = boxTorus.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 100 )
+		self.assertEqual( mesh.blindData()["name"].value, "/gap/torus" )
+		
+		boxBox = gap.child( "box" )
+		self.assertEqual( boxBox.path(), [ "sub1", "box1", "gap", "box" ] )
+		self.assertEqual( boxBox.pathAsString(), "/sub1/box1/gap/box" )
+		self.assertEqual( boxBox.name(), "box" )
+		self.assertEqual( boxBox.childNames(), [] )
+		self.assertEqual( boxBox.hasObject(), True )
+		mesh = boxBox.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 8 )
+		self.assertEqual( mesh.blindData()["name"].value, "/gap/box" )
+	
 	def testRerooting( self ) :	
 		
 		self.buildScene()
@@ -468,8 +524,8 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( box1.path(), [ "box1" ] )
 		self.assertEqual( box1.pathAsString(), "/box1" )
 		self.assertEqual( box1.name(), "box1" )
-		self.assertEqual( sorted( box1.childNames() ), [ "torus" ] )
-		self.assertEqual( box1.hasChild( "torus" ), True )
+		self.assertEqual( sorted( box1.childNames() ), [ "gap" ] )
+		self.assertEqual( box1.hasChild( "gap" ), True )
 		self.assertEqual( box1.hasObject(), True )
 		mesh = box1.readObject( 0 )
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
@@ -477,9 +533,17 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		# shape names do not re-root
 		self.assertEqual( mesh.blindData()["name"].value, "/" )
 		
-		boxTorus = box1.child( "torus" )
-		self.assertEqual( boxTorus.path(), [ "box1", "torus" ] )
-		self.assertEqual( boxTorus.pathAsString(), "/box1/torus" )
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.path(), [ "box1", "gap" ] )
+		self.assertEqual( gap.pathAsString(), "/box1/gap" )
+		self.assertEqual( gap.name(), "gap" )
+		self.assertEqual( sorted( gap.childNames() ), [ "torus" ] )
+		self.assertEqual( gap.hasChild( "torus" ), True )
+		self.assertEqual( gap.hasObject(), False )
+		
+		boxTorus = gap.child( "torus" )
+		self.assertEqual( boxTorus.path(), [ "box1", "gap", "torus" ] )
+		self.assertEqual( boxTorus.pathAsString(), "/box1/gap/torus" )
 		self.assertEqual( boxTorus.name(), "torus" )
 		self.assertEqual( boxTorus.childNames(), [] )
 		self.assertEqual( boxTorus.hasObject(), True )
@@ -487,7 +551,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
 		# shape names do not re-root
-		self.assertEqual( mesh.blindData()["name"].value, "/torus" )
+		self.assertEqual( mesh.blindData()["name"].value, "/gap/torus" )
 		
 		self.assertRaises( RuntimeError, scene.child, "box2" )
 		self.assertEqual( scene.child( "box2", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
