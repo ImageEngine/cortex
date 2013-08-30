@@ -56,9 +56,11 @@ class ROP_SceneCacheWriter : public ROP_Node
 		
 		static PRM_Name pFile;
 		static PRM_Name pRootObject;
+		static PRM_Name pForceObjects;
 		
 		static PRM_Default fileDefault;
 		static PRM_Default rootObjectDefault;
+		static PRM_SpareData forceObjectsSpareData;
 		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
@@ -69,14 +71,27 @@ class ROP_SceneCacheWriter : public ROP_Node
 		virtual ROP_RENDER_CODE renderFrame( fpreal time, UT_Interrupt *boss );
 		virtual ROP_RENDER_CODE endRender();
 		
+		virtual bool updateParmsFlags();
+		
 		/// Called recursively to traverse the IECoreHoudini::HoudiniScene, starting with the Root Object,
 		/// and write the hierarchy to the output file.
 		virtual ROP_RENDER_CODE doWrite( const IECore::SceneInterface *liveScene, IECore::SceneInterface *outScene, double time );
 	
 	private :
 		
+		bool linked( const std::string &file ) const;
+		
+		enum Mode
+		{
+			NaturalLink = 0,
+			ForcedLink,
+			NaturalExpand,
+			ForcedExpand
+		};
+		
 		IECore::ConstSceneInterfacePtr m_liveScene;
 		IECore::SceneInterfacePtr m_outScene;
+		UT_StringMMPattern *m_forceFilter;
 
 };
 

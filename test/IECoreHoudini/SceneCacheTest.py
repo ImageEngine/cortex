@@ -1353,7 +1353,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 				IECore.TransformOp()( input=ma, copyInput=False, matrix=IECore.M44dData( parentTransform ) )
 			self.assertEqual( ma, mb )
 		
-		self.assertEqual( a.childNames(), b.childNames() )
+		self.assertEqual( sorted( a.childNames() ), sorted( b.childNames() ) )
 		for child in a.childNames() :
 			self.compareScene( a.child( child ), b.child( child ), time = time, bakedObjects = bakedObjects, parentTransform = parentTransform )
 	
@@ -1581,6 +1581,93 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "reload" ).pressButton()
 		xform.parm( "expand" ).pressButton()
 		self.assertEqual( xform.parm( "root" ).menuItems(), ( "/", "/1", "/1/2" ) )
+	
+	def testRopForceObjects( self ) :
+		
+		s = self.writeSCC()
+		d = s.child( "1" ).createChild( "4" )
+		e = d.createChild( "5" )
+		box = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		d.writeObject( box, 0 )
+		e.writeObject( box, 0 )
+		
+		del s, d, e
+		
+		def testLinks( bakedObjects = None ) :
+			
+			if os.path.exists( TestSceneCache.__testLinkedOutFile ) :
+				os.remove( TestSceneCache.__testLinkedOutFile )
+			
+			rop.parm( "execute" ).pressButton()
+			self.assertEqual( rop.errors(), "" )
+			self.assertTrue( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
+			linked = IECore.LinkedScene( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+			if bakedObjects :
+				live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+				self.compareScene( linked, live, bakedObjects = bakedObjects )
+			else :
+				orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+				self.compareScene( orig, linked )
+			
+			# make sure the links are where we expect
+			unlinked = IECore.SceneCache( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+			a = unlinked.child( "1" )
+			self.assertFalse( a.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+			self.assertFalse( a.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
+			self.assertFalse( a.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
+			self.assertFalse( a.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
+			b = a.child( "2" )
+			self.assertEqual( b.childNames(), [] )
+			self.assertFalse( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+			self.assertTrue( b.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
+			self.assertTrue( b.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
+			self.assertFalse( b.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
+			self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( TestSceneCache.__testFile ) )
+			self.assertEqual( b.readAttribute( IECore.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [ "1", "2" ] ) )
+			d = a.child( "4" )
+			self.assertFalse( d.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+			self.assertFalse( d.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
+			self.assertFalse( d.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
+			self.assertFalse( d.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
+		
+		# force b and below as links even though they are expanded
+		xform = self.xform()
+		xform.parm( "expand" ).pressButton()
+		rop = self.rop( xform )
+		rop.parm( "file" ).set( TestSceneCache.__testLinkedOutFile )
+		rop.parm( "forceObjects" ).set( "*4*" )
+		testLinks()
+		
+		# make sure parents expand if their child is forced
+		rop.parm( "forceObjects" ).set( "*5*" )
+		testLinks()
+		
+		# make sure normal geo gets expanded regardless
+		geo = xform.createNode( "geo", "real" )
+		geo.createNode( "box" )
+		testLinks( bakedObjects = [ "real" ] )
+		unlinked = IECore.SceneCache( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+		real = unlinked.child( "real" )
+		self.assertFalse( real.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertFalse( real.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
+		self.assertFalse( real.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
+		self.assertFalse( real.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
+		self.assertTrue( real.hasObject() )
+		geo.destroy()
+		
+		# make sure natural links (unexpanded branches) still work
+		hou.node( xform.path() + "/1/2" ).parm( "collapse" ).pressButton()
+		testLinks()
+		
+		# make sure normal SceneCaches aren't broken by forceObjects
+		rop.parm( "file" ).set( TestSceneCache.__testOutFile )
+		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		self.assertTrue( os.path.exists( TestSceneCache.__testOutFile ) )
+		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+		result = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.compareScene( orig, result )
 	
 	def testRopErrors( self ) :
 		
