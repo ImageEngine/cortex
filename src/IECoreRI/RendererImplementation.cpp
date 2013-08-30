@@ -1146,8 +1146,29 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const std
 	ScopedContext scopedContext( m_context );
 	IECore::CompoundDataMap parametersCopy = parameters;
 	parametersCopy["__handleid"] = new StringData( handle );
+
+	bool areaLight = false;
+	CompoundDataMap::iterator it = parametersCopy.find( "ri:areaLight" );
+	if( it != parametersCopy.end() )
+	{
+		BoolData *b = runTimeCast<BoolData>( it->second );
+		if( b && b->readable() )
+		{
+			areaLight = true;
+		}
+		parametersCopy.erase( it );
+	}
+
 	ParameterList pl( parametersCopy );
-	RiLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+
+	if( areaLight )
+	{
+		RiAreaLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+	}
+	else
+	{
+		RiLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+	}
 }
 
 void IECoreRI::RendererImplementation::illuminate( const std::string &lightHandle, bool on )

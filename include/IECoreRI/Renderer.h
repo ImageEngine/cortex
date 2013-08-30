@@ -232,6 +232,9 @@ class Renderer : public IECore::Renderer
 		/// If type is "shader" or "ri:shader" then calls RiShader. In this case you must specify a handle
 		/// as a StringData parameter named "__handle".
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
+
+		/// By default, calls RiLightSource
+		/// If the "ri:areaLight" parameter is true, calls RiAreaLightSource instead
 		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
 		virtual void illuminate( const std::string &lightHandle, bool on );
 
