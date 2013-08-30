@@ -93,6 +93,9 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		
+		/// Convenience method to access the Houdini node this scene refers to
+		const OP_Node *node() const;
+		
 		typedef boost::function<bool (const OP_Node *)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *)> ReadFn;
 		typedef boost::function<bool (const OP_Node *, const Name &)> HasTagFn;
