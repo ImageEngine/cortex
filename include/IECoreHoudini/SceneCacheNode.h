@@ -108,7 +108,7 @@ class SceneCacheNode : public BaseType
 		
 		/// Access point to the actual SceneCache. All users should only access the cache
 		/// using this method, in order to avoid re-opening existing files.
-		IECore::ConstSceneInterfacePtr scene();
+		IECore::ConstSceneInterfacePtr scene() const;
 	
 	protected :
 		
