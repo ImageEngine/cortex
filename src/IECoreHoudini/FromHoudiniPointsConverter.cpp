@@ -59,9 +59,20 @@ FromHoudiniPointsConverter::~FromHoudiniPointsConverter()
 
 FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConvert( const GU_Detail *geo )
 {
-	if ( !geo->getNumPrimitives() )
+	size_t numPrims = geo->getNumPrimitives();
+	if ( !numPrims )
 	{
 		return Ideal;
+	}
+	
+	if ( numPrims == 1 )
+	{
+		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+		const GA_Primitive *prim = primitives.get( geo->getPrimitiveRange().begin().getOffset() );
+		if ( prim->getTypeId() == GEO_PRIMPART )
+		{
+			return Ideal;
+		}
 	}
 	
 	return Admissible;

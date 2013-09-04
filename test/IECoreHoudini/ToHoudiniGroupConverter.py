@@ -196,7 +196,9 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	
 	def pointTwoBox( self ) :
 		group = IECore.Group()
-		group.addChild( self.points() )
+		points = self.points()
+		points.blindData()['name'].value = "boxPoints"
+		group.addChild( points )
 		mesh = self.mesh()
 		del mesh.blindData()['name']
 		group.addChild( mesh )
@@ -252,10 +254,12 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( self.buildScene() ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "meshGroupA", "meshGroupB" ] )
+		self.assertEqual( sorted(nameAttr.strings()), [ "boxPoints", "curveBoxGroup", "meshGroupA", "meshGroupB", "pointsGroup" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "pointsGroup" ]), 1 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 1 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
@@ -270,32 +274,46 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "meshGroupA", "meshGroupB" ] )
+		self.assertEqual( sorted(nameAttr.strings()), [ "boxPoints", "curveBoxGroup", "meshGroupA", "meshGroupB", "pointsGroup" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "pointsGroup" ]), 1 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 1 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
 		for i in range ( 0, len(children) ) :
 			name = children[i].blindData()['name'].value
 			self.failUnless( name in nameAttr.strings() )
-			self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
+			if isinstance( children[i], IECore.PointsPrimitive ) :
+				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )
+				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), numPoints )
+			else :
+				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
 			
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null, append=True ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "meshGroupA", "meshGroupB" ] )
+		self.assertEqual( sorted(nameAttr.strings()), [ "boxPoints", "curveBoxGroup", "meshGroupA", "meshGroupB", "pointsGroup" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 24 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "pointsGroup" ]), 2 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 2 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
 		for i in range ( 0, len(children) ) :
 			name = children[i].blindData()['name'].value
 			self.failUnless( name in nameAttr.strings() )
-			self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
+			if isinstance( children[i], IECore.PointsPrimitive ) :
+				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )
+				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), numPoints )
+			else :
+				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
 		
 	def testConvertGroupedPoints( self ) :
 		null = self.emptySop()
@@ -330,8 +348,9 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( self.pointTwoBox() ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( nameAttr.strings(), tuple( [ "curveBoxGroup" ] ) )
+		self.assertEqual( sorted( nameAttr.strings() ), [ "boxPoints", "curveBoxGroup" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 1 )
 	
 	def testAdjustedStringVectorIndices( self ) :
 		null = self.emptySop()
@@ -413,18 +432,18 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		)
 		
 		self.assertEqual( len(sop.geometry().points()), 32 )
-		self.assertEqual( len(sop.geometry().prims()), 7 )
+		self.assertEqual( len(sop.geometry().prims()), 8 )
 		
 		sop.createInputNode( 0, "torus" )
 		
 		self.assertEqual( len(sop.geometry().points()), 32 )
-		self.assertEqual( len(sop.geometry().prims()), 7 )
+		self.assertEqual( len(sop.geometry().prims()), 8 )
 		
 		code = sop.type().definition().sections()["PythonCook"].contents()
 		sop.type().definition().sections()["PythonCook"].setContents( code.replace( "convertToGeo( hou.pwd().geometry() )", "convertToGeo( hou.pwd().geometry(), append=True )" ) )
 		
 		self.assertEqual( len(sop.geometry().points()), 132 )
-		self.assertEqual( len(sop.geometry().prims()), 107 )
+		self.assertEqual( len(sop.geometry().prims()), 108 )
 		
 		sop.destroy()
 	

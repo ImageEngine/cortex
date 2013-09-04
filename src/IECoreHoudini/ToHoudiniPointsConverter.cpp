@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GU/GU_PrimPart.h"
+
 #include "IECoreHoudini/ToHoudiniPointsConverter.h"
 
 using namespace IECore;
@@ -58,21 +60,19 @@ bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable
 		return false;
 	}
 	
-	const IECore::V3fVectorData *positions = points->variableData<V3fVectorData>( "P" );
-	if ( !positions )
-	{
-		// accept "position" so we can convert the results of the PDCParticleReader without having to rename things
-		/// \todo: Consider making the ParticleReader create a P if it doesn't exist for Cortex 6.
-		positions = points->variableData<V3fVectorData>( "position" );
-	}
-	
-	GA_Range newPoints = appendPoints( geo, points->getNumPoints() );
+	size_t numPrims = geo->getNumPrimitives();
+	GU_PrimParticle *system = GU_PrimParticle::build( geo, points->getNumPoints(), true );
+	GA_Range newPoints = system->getPointRange();
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
 	}
 	
-	transferAttribs( geo, newPoints, GA_Range() );
+	GA_OffsetList offsets;
+	offsets.append( geo->primitiveOffset( numPrims ) );
+	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
+	
+	transferAttribs( geo, newPoints, newPrims );
 	
 	return true;
 }
@@ -82,6 +82,6 @@ void ToHoudiniPointsConverter::transferAttribs( GU_Detail *geo, const GA_Range &
 	const Primitive *primitive = IECore::runTimeCast<const Primitive>( srcParameter()->getValidatedValue() );
 	if ( primitive )
 	{
-		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex, PrimitiveVariable::Vertex );
+		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
 	}
 }
