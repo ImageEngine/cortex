@@ -90,6 +90,11 @@ HoudiniScene::~HoudiniScene()
 {
 }
 
+const OP_Node *HoudiniScene::node() const
+{
+	return retrieveNode( false, NullIfMissing );
+}
+
 std::string HoudiniScene::fileName() const
 {
 	throw Exception( "HoudiniScene does not support fileName()." );
