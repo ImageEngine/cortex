@@ -58,7 +58,8 @@ namespace IECoreHoudini
 IE_CORE_FORWARDDECLARE( FromHoudiniGeometryConverter );
 
 /// The FromHoudiniGeometryConverter class forms a base class for all classes able to perform
-/// some kind of conversion from a Houdini GU_Detail to an IECore::Primitive.
+/// some kind of conversion from a Houdini GU_Detail to an IECore::Object. The most common use
+/// is conversion to an IECore::Primitive, but any Object could be supported.
 class FromHoudiniGeometryConverter : public FromHoudiniConverter
 {
 	public :
@@ -103,11 +104,11 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		virtual ~FromHoudiniGeometryConverter();
 		
 		/// Implemented to aquire the read lock on the GU_Detail held by the GU_DetailHandle,
-		/// call doPrimitiveConversion(), and finally unlock the GU_Detail. Derived classes
-		/// need not reimplement this function, but should instead implement doPrimitiveConversion().
+		/// call doDetailConversion(), and finally unlock the GU_Detail. Derived classes need
+		/// not reimplement this function, but should instead implement doDetailConversion().
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
-		/// Must be implemented by derived classes to return a IECore::Primitive created to represent the specified GU_Detail.
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const = 0;
+		/// Must be implemented by derived classes to return an IECore::Object created to represent the specified GU_Detail.
+		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const = 0;
 		
 		typedef FromHoudiniGeometryConverterPtr (*CreatorFn)( const GU_DetailHandle &handle );
 		typedef Convertability (*ConvertabilityFn)( const GU_DetailHandle &handle );
