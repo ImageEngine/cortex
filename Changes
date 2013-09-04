@@ -1,3 +1,16 @@
+8.0.0-a16 :
+
+IECoreMaya
+ - Fixed bug in SceneShape compute which prevented drawing on file open/import
+
+IECoreHoudini
+ - Added ForceObjects parameter to SceneCache ROP (to force what is expanded and what is a link)
+ - Added a ParticleSystem when converting PointsPrimitives to Houdini
+ - Fixed point doulbing bug with SceneCache SOP loading a PointsPrimitive
+ - Fixed bug when writing multiple frames of re-rooted scenes
+ - Fixed HoudiniScene bugs for flattened geometry (SOPs with gaps in the geo hierarchy can now be cached)
+ - SceneCache tagFilter supports SceneInterfaces with no tags
+
 8.0.0-a15 :
 
 IECore
