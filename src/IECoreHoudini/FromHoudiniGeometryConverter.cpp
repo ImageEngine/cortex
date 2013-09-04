@@ -73,20 +73,20 @@ FromHoudiniGeometryConverter::~FromHoudiniGeometryConverter()
 
 void FromHoudiniGeometryConverter::constructCommon()
 {
-	m_convertStandardAttributesParameter = new BoolParameter(
-		"convertStandardAttributes",
-		"Performs automated conversion of Houdini Attributes to standard PrimitiveVariables (i.e. rest->Pref ; Cd->Cs ; uv->s,t)",
-		true
-	);
-	
 	m_attributeFilterParameter = new StringParameter(
 		"attributeFilter",
 		"A list of attribute names to convert, if they exist. Uses Houdini matching syntax. P will always be converted",
 		"*"
 	);
 	
-	parameters()->addParameter( m_convertStandardAttributesParameter );
+	m_convertStandardAttributesParameter = new BoolParameter(
+		"convertStandardAttributes",
+		"Performs automated conversion of Houdini Attributes to standard PrimitiveVariables (i.e. rest->Pref ; Cd->Cs ; uv->s,t)",
+		true
+	);
+	
 	parameters()->addParameter( m_attributeFilterParameter );
+	parameters()->addParameter( m_convertStandardAttributesParameter );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -111,8 +111,6 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 	{
 		return 0;
 	}
-	
-	/// \todo: add a shapeFilter parameter, and use UT_String::match to create sub-GU_Details for conversion
 	
 	return doPrimitiveConversion( geo, operands );
 }
@@ -307,36 +305,6 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		
 		AttributeMap defaultMap;
 		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
-	}
-	
-	// add the name blindData based on the name attribute
-	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-	if ( attrHandle.isAttributeValid() )
-	{			
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
-		{
-			const char *name = attrRef.getString( it.getOffset() );
-			if ( name && strcmp( name, "" ) )
-			{
-				result->blindData()->member<StringData>( "name", false, true )->writable() = name;
-				break;
-			}
-		}
-	}
-	else
-	{
-		// fallback to names from groups
-		const GA_ElementGroupTable &primGroups = geo->primitiveGroups();
-		for ( GA_GroupTable::iterator<GA_ElementGroup> it = primGroups.beginTraverse(); !it.atEnd(); ++it )
-		{
-			GA_ElementGroup *group = it.group();
-			if ( !group->getInternal() && group->containsAny( primRange ) )
-			{
-				result->blindData()->member<StringData>( "name", false, true )->writable() = it.name();
-				break;
-			}
-		}
 	}
 }
 

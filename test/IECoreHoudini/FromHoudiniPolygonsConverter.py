@@ -634,16 +634,42 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		torus = self.createTorus()
 		name = torus.createOutputNode( "name" )
-		name.parm( "name1" ).set( "testName" )
-		result = IECoreHoudini.FromHoudiniPolygonsConverter( name ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testName" )
+		name.parm( "name1" ).set( "torus" )
+		box = torus.parent().createNode( "box" )
+		name2 = box.createOutputNode( "name" )
+		name2.parm( "name1" ).set( "box" )
+		merge = name.createOutputNode( "merge" )
+		merge.setInput( 1, name2 )
+		
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( merge )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		self.assertFalse( "nameIndices" in result )
+		# both torii were converted as one mesh
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 106 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		group = torus.createOutputNode( "group" )
-		group.parm( "crname" ).set( "testGroup" )
-		result = IECoreHoudini.FromHoudiniPolygonsConverter( group ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testGroup" )
+		converter["name"].setTypedValue( "torus" )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named polygons were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+		
+		converter["name"].setTypedValue( "box" )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named polygons were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
 	
 	def testAttributeFilter( self ) :
 		

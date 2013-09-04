@@ -162,6 +162,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 	size_t numOrigPrims = geo->getNumPrimitives();
 	
 	GroupPtr result = new Group();
+	std::vector<std::string> &childNames = result->blindData()->member<StringVectorData>( "childNames", false, true )->writable();
 	
 	if ( operands->member<const IntData>( "groupingMode" )->readable() == NameAttribute )
 	{
@@ -183,11 +184,13 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 					for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
 					{
 						result->addChild( *it );
+						childNames.push_back( "" );
 					}
 				}
 				else
 				{
 					result->addChild( renderable );
+					childNames.push_back( "" );
 				}
 			}
 			
@@ -202,6 +205,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		for ( AttributePrimIdGroupMapIterator it=groupMap.begin(); it != groupMap.end(); ++it )
 		{
 			convertAndAddPrimitive( &groupGeo, it->second, result, operands );
+			childNames.push_back( it->first.first );
 		}
 	}
 	else
@@ -222,6 +226,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			}
 
 			result->addChild( renderable );
+			childNames.push_back( group->getName().toStdString() );
 		}
 
 		if ( numOrigPrims == numResultPrims )
@@ -247,6 +252,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		if ( renderable )
 		{
 			result->addChild( renderable );
+			childNames.push_back( "" );
 		}
 	}
 	
@@ -279,14 +285,11 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	}
 
 	GroupPtr groupResult = new Group();
-	if ( !group->getInternal() )
-	{
-		groupResult->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
-	}
-	
+	std::vector<std::string> &childNames = groupResult->blindData()->member<StringVectorData>( "childNames", false, true )->writable();
 	for ( PrimIdGroupMapIterator it = groupMap.begin(); it != groupMap.end(); it++ )
 	{
 		convertAndAddPrimitive( &groupGeo, it->second, groupResult, operands );
+		childNames.push_back( "" );
 	}
 
 	result = groupResult;

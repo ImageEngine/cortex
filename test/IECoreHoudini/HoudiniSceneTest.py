@@ -471,7 +471,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		mesh = boxTorus.readObject( 0 )
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
-		self.assertEqual( mesh.blindData()["name"].value, "/gap/torus" )
+		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 		
 		boxBox = gap.child( "box" )
 		self.assertEqual( boxBox.path(), [ "sub1", "box1", "gap", "box" ] )
@@ -482,7 +482,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		mesh = boxBox.readObject( 0 )
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 8 )
-		self.assertEqual( mesh.blindData()["name"].value, "/gap/box" )
+		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 	
 	def testRerooting( self ) :	
 		
@@ -530,8 +530,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		mesh = box1.readObject( 0 )
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 8 )
-		# shape names do not re-root
-		self.assertEqual( mesh.blindData()["name"].value, "/" )
+		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 		
 		gap = box1.child( "gap" )
 		self.assertEqual( gap.path(), [ "box1", "gap" ] )
@@ -550,8 +549,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		mesh = boxTorus.readObject( 0 )
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
-		# shape names do not re-root
-		self.assertEqual( mesh.blindData()["name"].value, "/gap/torus" )
+		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 		
 		self.assertRaises( RuntimeError, scene.child, "box2" )
 		self.assertEqual( scene.child( "box2", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )

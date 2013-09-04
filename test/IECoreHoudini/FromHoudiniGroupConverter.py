@@ -181,16 +181,14 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.buildScene() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 5 )
-		self.assertEqual( result.children()[0].blindData()["name"].value, "curveBoxGroup" )
-		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[1].blindData()["name"].value, "curveBoxGroup" )
-		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
-		self.assertEqual( result.children()[2].blindData()["name"].value, "pointsGroup" )
-		self.failUnless( result.children()[2].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-		self.assertEqual( result.children()[3].blindData()["name"].value, "torusAGroup" )
-		self.failUnless( result.children()[3].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[4].blindData()["name"].value, "torusBGroup" )
-		self.failUnless( result.children()[4].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		names = IECore.StringVectorData( [ "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup", "torusBGroup" ] )
+		expectedTypes = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.CurvesPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive ]
+		for i in range( 0, len(result.children()) ) :
+		
+			child = result.children()[i]
+			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
+			# Names are never stored in blindData anymore
+			self.assertEqual( child.blindData(), IECore.CompoundData() )
 	
 	def testConvertSceneFromNameAttribute( self ) :
 		merge = self.buildScene()
@@ -201,24 +199,19 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 5 )
 		self.assertEqual( set([ x.typeId() for x in result.children() ]), set([IECore._IECore.TypeId.CurvesPrimitive, IECore._IECore.TypeId.MeshPrimitive, IECore._IECore.TypeId.PointsPrimitive]) )
-		names = [ "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup", "torusBGroup" ]
-		self.assertEqual( sorted([ x.blindData()["name"].value for x in result.children() ]), names )
+		names = IECore.StringVectorData( [ "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup", "torusBGroup" ] )
+		expectedTypes = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.CurvesPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive ]
+		self.assertEqual( result.blindData()["childNames"], names )
 		
-		for child in result.children() :
-			
+		for i in range( 0, len(result.children()) ) :
+		
+			child = result.children()[i]
 			self.failUnless( child.arePrimitiveVariablesValid() )
 			self.failUnless( "name" not in child )
 			self.failUnless( "nameIndices" not in child )
-			if child.blindData()["name"].value == "pointsGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-			elif child.blindData()["name"].value == "torusAGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			elif child.blindData()["name"].value == "torusBGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			elif child.blindData()["name"].value == "curveBoxGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.CurvesPrimitive ) or child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			else :
-				raise RuntimeError, "An unexpected shape name exists"
+			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
+			# Names are never stored in blindData anymore
+			self.assertEqual( child.blindData(), IECore.CompoundData() )
 		
 		null = merge.parent().createNode( "null" )
 		self.failUnless( IECoreHoudini.ToHoudiniGeometryConverter.create( result ).convert( null ) )
@@ -243,28 +236,26 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 4 )
 		self.assertEqual( set([ x.typeId() for x in result.children() ]), set([IECore._IECore.TypeId.Group, IECore._IECore.TypeId.MeshPrimitive, IECore._IECore.TypeId.PointsPrimitive]) )
-		names = [ "curveBoxGroup", "pointsGroup", "torusAGroup", "torusBGroup" ]
-		self.assertEqual( sorted([ x.blindData()["name"].value for x in result.children() ]), names )
+		names = IECore.StringVectorData( [ "pointsGroup", "torusAGroup", "torusBGroup", "curveBoxGroup" ] )
+		expectedTypes = [ IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.Group ]
+		self.assertEqual( result.blindData()["childNames"], names )
 		
-		for child in result.children() :
+		for i in range( 0, len(result.children()) ) :
+			
+			child = result.children()[i]
+			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
 			
 			if child.isInstanceOf( IECore.TypeId.Primitive ) :
 				self.failUnless( child.arePrimitiveVariablesValid() )
 				self.failUnless( "name" not in child )
 				self.failUnless( "nameIndices" not in child )
+				# Names are never stored in blindData anymore
+				self.assertEqual( child.blindData(), IECore.CompoundData() )
 			
-			if child.blindData()["name"].value == "pointsGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-			elif child.blindData()["name"].value == "torusAGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			elif child.blindData()["name"].value == "torusBGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			elif child.blindData()["name"].value == "curveBoxGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.Group ) )
+			elif child.isInstanceOf( IECore.TypeId.Group ) :
+				self.assertEqual( child.blindData(), IECore.CompoundData( { "childNames" : IECore.StringVectorData( [ "" ] * 2 ) } ) )
 				self.failUnless( child.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 				self.failUnless( child.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
-			else :
-				raise RuntimeError, "An unexpected shape name exists"
 		
 		null = merge.parent().createNode( "null" )
 		self.failUnless( IECoreHoudini.ToHoudiniGeometryConverter.create( result ).convert( null ) )
@@ -289,24 +280,19 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 5 )
 		self.assertEqual( set([ x.typeId() for x in result.children() ]), set([IECore._IECore.TypeId.CurvesPrimitive, IECore._IECore.TypeId.MeshPrimitive, IECore._IECore.TypeId.PointsPrimitive]) )
-		names = [ "", "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup" ]
-		self.assertEqual( sorted([ x.blindData().get( "name", IECore.StringData() ).value for x in result.children() ]), names )
+		names = IECore.StringVectorData( [ "", "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup" ] )
+		expectedTypes = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.CurvesPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive ]
+		self.assertEqual( result.blindData()["childNames"], names )
 		
-		for child in result.children() :
+		for i in range( 0, len(result.children()) ) :
 			
+			child = result.children()[i]
 			self.failUnless( child.arePrimitiveVariablesValid() )
 			self.failUnless( "name" not in child )
 			self.failUnless( "nameIndices" not in child )
-			if "name" not in child.blindData() :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			elif child.blindData()["name"].value == "pointsGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-			elif child.blindData()["name"].value == "torusAGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			elif child.blindData()["name"].value == "curveBoxGroup" :
-				self.failUnless( child.isInstanceOf( IECore.TypeId.CurvesPrimitive ) or child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-			else :
-				raise RuntimeError, "An unexpected shape name exists"
+			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
+			# Names are never stored in blindData anymore
+			self.assertEqual( child.blindData(), IECore.CompoundData() )
 		
 		null = merge.parent().createNode( "null" )
 		self.failUnless( IECoreHoudini.ToHoudiniGeometryConverter.create( result ).convert( null ) )
@@ -317,8 +303,10 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.points() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 1 )
+		names = IECore.StringVectorData( [ "pointsGroup" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-		self.assertEqual( result.children()[0].blindData()["name"].value, "pointsGroup" )
+		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 	
 	def testConvertUngroupedPoints( self ) :
 		group = self.points()
@@ -326,23 +314,29 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( group ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 1 )
+		names = IECore.StringVectorData( [ "" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 	
 	def testConvertGroupedCurves( self ) :
 		curve = self.curve()
-		group = curve.createOutputNode( "group" )
-		group.parm( "crname" ).set( "curvesGroup" )
-		result = IECoreHoudini.FromHoudiniGroupConverter( group ).convert()
+		name = curve.createOutputNode( "name" )
+		name.parm( "name1" ).set( "curvesGroup" )
+		result = IECoreHoudini.FromHoudiniGroupConverter( name ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 1 )
+		names = IECore.StringVectorData( [ "curvesGroup" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
-		self.assertEqual( result.children()[0].blindData()["name"].value, "curvesGroup" )
+		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 	
 	def testConvertUngroupedCurves( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.curve() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 1 )
+		names = IECore.StringVectorData( [ "" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 	
@@ -350,8 +344,10 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.torusA() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 1 )
+		names = IECore.StringVectorData( [ "torusAGroup" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[0].blindData()["name"].value, "torusAGroup" )
+		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 	
 	def testConvertUngroupedPolygons( self ) :
 		group = self.torusA()
@@ -359,6 +355,8 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( group ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 1 )
+		names = IECore.StringVectorData( [ "" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 	
@@ -366,13 +364,14 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.twoTorii() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 2 )
-		childNames = [ x.blindData()["name"].value for x in result.children() ]
+		names = IECore.StringVectorData( [ "torusAGroup", "torusBGroup" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.failUnless( "torusAGroup" in childNames )
 		self.assertEqual( result.children()[0]["P"].data.size(), 100 )
+		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.failUnless( "torusBGroup" in childNames )
 		self.assertEqual( result.children()[1]["P"].data.size(), 100 )
+		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData() )
 	
 	def testConvertUngroupedMultiPolygons( self ) :
 		merge = self.twoTorii()
@@ -381,6 +380,8 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( merge ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 1 )
+		names = IECore.StringVectorData( [ "" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 		self.assertEqual( result.children()[0]["P"].data.size(), 200 )
@@ -391,20 +392,24 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( merge ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 2 )
+		names = IECore.StringVectorData( [ "", "torusBGroup" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 		self.assertEqual( result.children()[0]["P"].data.size(), 100 )
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[1].blindData()["name"].value, "torusBGroup" )
+		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData() )
 		self.assertEqual( result.children()[1]["P"].data.size(), 100 )
 	
 	def testConvertGroupedCurvesAndPolygons( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.curveBox() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 2 )
-		self.assertEqual( result.children()[0].blindData()["name"].value, "curveBoxGroup" )
+		names = IECore.StringVectorData( [ "curveBoxGroup", "curveBoxGroup" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
+		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
-		self.assertEqual( result.children()[1].blindData()["name"].value, "curveBoxGroup" )
+		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 	
 	def testConvertUngroupedCurvesAndPolygons( self ) :
@@ -413,6 +418,8 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( group ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 2 )
+		names = IECore.StringVectorData( [ "", "" ] )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : names } ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData() )
@@ -427,7 +434,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		result = converter.convert()
 		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : IECore.StringVectorData( [ "" ] * 3 ) } ) )
 		self.assertEqual( len(result.children()), 3 )
 		for i in range( 0, 3 ) :
 			self.assertEqual( result.children()[i].blindData(), IECore.CompoundData() )
@@ -449,7 +456,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		result = converter.convert()
 		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : IECore.StringVectorData( [ "" ] * 3 ) } ) )
 		self.assertEqual( len(result.children()), 3 )
 		for i in range( 0, 3 ) :
 			self.assertEqual( result.children()[i].blindData(), IECore.CompoundData() )
@@ -469,7 +476,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		result = converter.convert()
 		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : IECore.StringVectorData( [ "" ] * 3 ) } ) )
 		self.assertEqual( len(result.children()), 3 )
 		for i in range( 0, 3 ) :
 			self.assertEqual( result.children()[i].blindData(), IECore.CompoundData() )

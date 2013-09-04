@@ -263,8 +263,9 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
+		childNames = result.blindData()["childNames"]
 		for i in range ( 0, len(children) ) :
-			name = children[i].blindData()['name'].value
+			name = childNames[i]
 			self.failUnless( name in nameAttr.strings() )
 			self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
 		
@@ -283,8 +284,9 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
+		childNames = result.blindData()["childNames"]
 		for i in range ( 0, len(children) ) :
-			name = children[i].blindData()['name'].value
+			name = childNames[i]
 			self.failUnless( name in nameAttr.strings() )
 			if isinstance( children[i], IECore.PointsPrimitive ) :
 				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )
@@ -305,8 +307,9 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
+		childNames = result.blindData()["childNames"]
 		for i in range ( 0, len(children) ) :
-			name = children[i].blindData()['name'].value
+			name = childNames[i]
 			self.failUnless( name in nameAttr.strings() )
 			if isinstance( children[i], IECore.PointsPrimitive ) :
 				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )
