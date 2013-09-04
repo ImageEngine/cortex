@@ -431,6 +431,12 @@ bool OBJ_SceneCacheTransform::tagged( const IECore::SceneInterface *scene, const
 		}
 	}
 	
+	// an empty list should be equivalent to matching an empty string
+	if ( tags.empty() && UT_String( "" ).multiMatch( filter ) )
+	{
+		return true;
+	}
+	
 	return false;
 }
 
