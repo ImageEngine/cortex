@@ -1059,6 +1059,44 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( hou.node( xform.path()+"/2" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/3" ).isObjectDisplayed() )
 	
+	def testEmptyTags( self ) :
+		
+		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		
+		sc = scene.createChild( str( 1 ) )
+		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		
+		sc = sc.createChild( str( 2 ) )
+		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		
+		sc = sc.createChild( str( 3 ) )
+		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+		sc.writeTransform( IECore.M44dData( matrix ), 0 )
+		
+		del scene, sc
+		
+		xform = self.xform()
+		xform.parm( "expand" ).pressButton()
+		self.assertEqual( len(xform.children()), 1 )
+		self.assertEqual( len(hou.node( xform.path()+"/1" ).children()), 1 )
+		self.assertEqual( len(hou.node( xform.path()+"/1/2" ).children()), 1 )
+		self.assertEqual( len(hou.node( xform.path()+"/1/2/3" ).children()), 0 )
+		
+		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( scene.readTags(), [] )
+		
+		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
+		self.assertTrue( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
+		
+		xform.parm( "tagFilter" ).set( "" )
+		xform.parm( "push" ).pressButton()
+		self.assertFalse( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
+		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
+	
 	def testLiveTags( self ) :
 		
 		self.writeTaggedSCC()
