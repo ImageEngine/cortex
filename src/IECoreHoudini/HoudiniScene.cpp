@@ -388,8 +388,8 @@ bool HoudiniScene::hasObject() const
 		for ( int i=0; i < numShapes; ++i )
 		{
 			Path childPath;
-			relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-			if ( childPath.empty() )
+			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+			if ( valid && childPath.empty() )
 			{
 				return true;
 			}
@@ -564,8 +564,8 @@ void HoudiniScene::childNames( NameList &childNames ) const
 		for ( int i=0; i < numShapes; ++i )
 		{
 			Path childPath;
-			relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-			if ( !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
+			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+			if ( valid && !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
 			{
 				childNames.push_back( *childPath.begin() );
 			}
@@ -661,11 +661,12 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 			{
 				const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
 				int numShapes = geo->getUniqueValueCount( attrRef );
+				size_t contentSize = m_path.size() - m_contentIndex;
 				for ( int i=0; i < numShapes; ++i )
 				{
 					Path childPath;
-					relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-					if ( childPath.empty() )
+					stringToPath( geo->getUniqueStringValue( attrRef, i ), childPath );
+					if ( childPath.empty() || name() == *( childPath.begin() + contentSize - 1 ) )
 					{
 						return node;
 					}
@@ -758,16 +759,17 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 				for ( int i=0; i < numShapes; ++i )
 				{
 					SceneInterface::Path childPath;
-					relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-					if ( !childPath.empty() && name == *childPath.begin() )
+					bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+					if ( valid && !childPath.empty() && name == *childPath.begin() )
 					{
 						size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-						contentPath.resize( contentSize + childPath.size() );
 						if ( contentSize )
 						{
+							contentPath.resize( contentSize );
 							std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
 						}
-						std::copy( childPath.begin(), childPath.end(), contentPath.begin() + contentSize );
+						
+						contentPath.push_back( name );
 						
 						return contentNode;
 					}
@@ -858,6 +860,16 @@ bool HoudiniScene::relativePath( const char *value, Path &result ) const
 	{
 		result.resize( path.end() - start );
 		std::copy( start, path.end(), result.begin() );
+	}
+	
+	// verify the pre-path matches
+	Path::const_iterator mIt = m_path.begin() + m_contentIndex;
+	for ( Path::iterator it = path.begin(); it != start && mIt != m_path.end(); ++it, ++mIt )
+	{
+		if ( *it != *mIt )
+		{
+			return false;
+		}
 	}
 	
 	return true;
