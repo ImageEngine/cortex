@@ -43,8 +43,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniPointsConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniPointsConverter> ToHoudiniPointsConverter::m_description( PointsPrimitiveTypeId );
 
-ToHoudiniPointsConverter::ToHoudiniPointsConverter( const VisibleRenderable *renderable ) :
-	ToHoudiniGeometryConverter( renderable, "Converts an IECore::PointsPrimitive to a Houdini GU_Detail." )
+ToHoudiniPointsConverter::ToHoudiniPointsConverter( const Object *object ) :
+	ToHoudiniGeometryConverter( object, "Converts an IECore::PointsPrimitive to a Houdini GU_Detail." )
 {
 }
 
@@ -52,9 +52,9 @@ ToHoudiniPointsConverter::~ToHoudiniPointsConverter()
 {
 }
 
-bool ToHoudiniPointsConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
+bool ToHoudiniPointsConverter::doConversion( const Object *object, GU_Detail *geo ) const
 {
-	const PointsPrimitive *points = static_cast<const PointsPrimitive *>( renderable );
+	const PointsPrimitive *points = static_cast<const PointsPrimitive *>( object );
 	if ( !points )
 	{
 		return false;

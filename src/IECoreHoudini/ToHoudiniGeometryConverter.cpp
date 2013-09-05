@@ -48,10 +48,10 @@ using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGeometryConverter );
 
-ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const VisibleRenderable *renderable, const std::string &description )
-	:	ToHoudiniConverter( description, VisibleRenderableTypeId )
+ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const IECore::Object *object, const std::string &description )
+	:	ToHoudiniConverter( description, ObjectTypeId )
 {
-	srcParameter()->setValue( (VisibleRenderable *)renderable );
+	srcParameter()->setValue( const_cast<Object*>( object ) ); // safe because the object is const in doConversion
 	
 	m_nameParameter = new StringParameter(
 		"name",
@@ -121,13 +121,7 @@ bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
 		return false;
 	}
 	
-	const VisibleRenderable *renderable = IECore::runTimeCast<const VisibleRenderable>( srcParameter()->getValidatedValue() );
-	if ( !renderable )
-	{
-		return false;
-	}
-	
-	return doConversion( renderable, geo );
+	return doConversion( srcParameter()->getValidatedValue(), geo );
 }
 
 GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoints ) const
@@ -393,13 +387,22 @@ const std::string ToHoudiniGeometryConverter::processPrimitiveVariableName( cons
 // Factory
 /////////////////////////////////////////////////////////////////////////////////
 
-ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::create( const VisibleRenderable *renderable )
+ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::create( const Object *object )
 {
 	const TypesToFnsMap *m = typesToFns();
-	TypesToFnsMap::const_iterator it = m->find( Types( renderable->typeId() ) );
+	TypesToFnsMap::const_iterator it = m->find( Types( object->typeId() ) );
 	if( it!=m->end() )
 	{
-		return it->second( renderable );
+		return it->second( object );
+	}
+	
+	// no exact match, so check for base class matches
+	for ( TypesToFnsMap::const_iterator it = m->begin(); it != m->end(); ++it )
+	{
+		if ( object->isInstanceOf( it->first.fromType ) )
+		{
+			return it->second( object );
+		}
 	}
 	
 	return 0;
