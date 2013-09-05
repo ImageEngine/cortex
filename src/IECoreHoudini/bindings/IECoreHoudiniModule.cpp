@@ -67,6 +67,7 @@
 #include "IECoreHoudini/bindings/RATDeepImageWriterBinding.h"
 #include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 #include "IECoreHoudini/bindings/HoudiniSceneBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -120,6 +121,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindRATDeepImageWriter();
 	bindSceneCacheNode();
 	bindHoudiniScene();
+	bindFromHoudiniCortexObjectConverter();
 	
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );
