@@ -65,6 +65,7 @@ from DeepImageConverter import *
 from UpdateMode import *
 from SceneCacheTest import *
 from HoudiniSceneTest import *
+from ToHoudiniCortexObjectConverter import *
 
 IECoreHoudini.TestProgram(
 	testRunner = unittest.TextTestRunner(

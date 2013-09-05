@@ -68,6 +68,7 @@
 #include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 #include "IECoreHoudini/bindings/HoudiniSceneBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -122,6 +123,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindSceneCacheNode();
 	bindHoudiniScene();
 	bindFromHoudiniCortexObjectConverter();
+	bindToHoudiniCortexObjectConverter();
 	
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );
