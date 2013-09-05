@@ -254,12 +254,12 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( self.buildScene() ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "boxPoints", "curveBoxGroup", "meshGroupA", "meshGroupB", "pointsGroup" ] )
+		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "pointsGroup" ]), 1 )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 1 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 1 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
@@ -274,12 +274,12 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "boxPoints", "curveBoxGroup", "meshGroupA", "meshGroupB", "pointsGroup" ] )
+		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "pointsGroup" ]), 1 )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 1 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 1 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
@@ -296,12 +296,12 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null, append=True ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "boxPoints", "curveBoxGroup", "meshGroupA", "meshGroupB", "pointsGroup" ] )
+		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 24 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "pointsGroup" ]), 2 )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 2 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 2 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
 		children = result.children()
@@ -348,9 +348,9 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( self.pointTwoBox() ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted( nameAttr.strings() ), [ "boxPoints", "curveBoxGroup" ] )
+		self.assertEqual( sorted( nameAttr.strings() ), [ "curveBoxGroup", "curveBoxGroup/boxPoints" ] )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 1 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 1 )
 	
 	def testAdjustedStringVectorIndices( self ) :
 		null = self.emptySop()
@@ -592,6 +592,38 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 				self.assertEqual( prim.attribValue( attrib ), "subdiv" )
 			else :
 				self.assertEqual( prim.attribValue( attrib ), "poly" )
+	
+	def testNameParameter( self ) :
+		
+		sop = self.emptySop()
+		group = self.pointTwoBox()
+		converter = IECoreHoudini.ToHoudiniGroupConverter( group )
+		
+		# blindData still works for backwards compatibility
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( sorted( nameAttr.strings() ), [ "curveBoxGroup", "curveBoxGroup/boxPoints" ] )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 1 )
+		
+		# we can still override the top level group name
+		converter["name"].setTypedValue( "nameOverride" )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( sorted( nameAttr.strings() ), [ "nameOverride", "nameOverride/boxPoints" ] )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "nameOverride" ]), 12 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "nameOverride/boxPoints" ]), 1 )
+		
+		# no blindData and no parameter value means no top level name
+		del group.blindData()["name"]
+		self.assert_( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( sorted( nameAttr.strings() ), [ "boxPoints" ] )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "" ]), 12 )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "boxPoints" ]), 1 )
 	
 	def tearDown( self ) :
 		

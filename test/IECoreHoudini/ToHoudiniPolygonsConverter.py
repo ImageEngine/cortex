@@ -767,12 +767,36 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		sop = self.emptySop()
 		mesh = self.mesh()
-		mesh.blindData()["name"] = IECore.StringData( "testGroup" )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
+		
+		# unnamed unless we set the parameter
+		self.assert_( converter.convert( sop ) )
 		geo = sop.geometry()
-		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( nameAttr.strings(), tuple( [ "testGroup" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testGroup" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( sop.geometry().findPrimAttrib( "name" ), None )
+		
+		converter["name"].setTypedValue( "testMesh" )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "testMesh" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testMesh" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# blindData still works for backwards compatibility
+		mesh.blindData()["name"] = IECore.StringData( "blindMesh" )
+		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "blindMesh" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindMesh" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# name parameter takes preference over blindData
+		converter["name"].setTypedValue( "testMesh" )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "testMesh" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testMesh" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 	
 	def testAttributeFilter( self ) :
 		

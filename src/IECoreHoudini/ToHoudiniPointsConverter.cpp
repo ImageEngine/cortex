@@ -84,4 +84,6 @@ void ToHoudiniPointsConverter::transferAttribs( GU_Detail *geo, const GA_Range &
 	{
 		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
 	}
+	
+	setName( geo, prims );
 }
