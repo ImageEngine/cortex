@@ -44,7 +44,7 @@
 namespace IECoreHoudini
 {
 
-/// Wrapper for hosting IECore::Primitives natively in Houdini
+/// Wrapper for hosting IECore::Objects natively in Houdini
 class GEO_CortexPrimitive : public GEO_Primitive
 {
 	public :
