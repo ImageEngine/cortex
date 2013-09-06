@@ -342,12 +342,6 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 
 IECore::ObjectPtr SOP_SceneCacheSource::modifyObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<InternedString> &animatedPrimVars )
 {
-	VisibleRenderable *renderable = IECore::runTimeCast<VisibleRenderable>( object );
-	if ( renderable )
-	{
-		renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
-	}
-	
 	Primitive *primitive = IECore::runTimeCast<Primitive>( object );
 	if ( primitive )
 	{
@@ -452,6 +446,7 @@ bool SOP_SceneCacheSource::convertObject( IECore::Object *object, const std::str
 	}
 	
 	// fallback to full conversion
+	converter->nameParameter()->setTypedValue( name );
 	converter->attributeFilterParameter()->setTypedValue( attributeFilter );
 	if ( converter->convert( myGdpHandle ) )
 	{
