@@ -69,17 +69,19 @@ GU_CortexPrimitive *GU_CortexPrimitive::build( GU_Detail *geo, const IECore::Obj
 	result->wireVertex( result->m_offset, point );
 	result->setObject( object );
 	
-	const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object );
-	if ( renderable )
+	if ( const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object ) )
 	{
 		geo->setPos3( point, IECore::convert<UT_Vector3>( renderable->bound().center() ) );
 		return result;
 	}
 	
-	const IECore::CoordinateSystem *coord = IECore::runTimeCast<const IECore::CoordinateSystem>( object );
-	if ( coord )
+	if ( const IECore::CoordinateSystem *coord = IECore::runTimeCast<const IECore::CoordinateSystem>( object ) )
 	{
-		geo->setPos3( point, IECore::convert<UT_Vector3>( coord->getTransform()->transform().translation() ) );
+		if ( const IECore::Transform *transform = coord->getTransform() )
+		{
+			geo->setPos3( point, IECore::convert<UT_Vector3>( transform->transform().translation() ) );
+		}
+		
 		return result;
 	}
 	
