@@ -42,6 +42,7 @@
 #include "GU/GU_Detail.h"
 #include "GU/GU_DetailHandle.h"
 #include "SOP/SOP_Node.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/Primitive.h"
 #include "IECore/SimpleTypedData.h"
@@ -80,6 +81,10 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a FromHoudiniGeometryConverter is available.
 		static void supportedTypes( std::set<IECore::TypeId> &types );
+		
+		/// Convenience function to extract the named shapes from the given GU_Detail. This can be used before
+		/// calling the factory create mechanism, when only the named portion of the detail is of interest.
+		static GU_DetailHandle extract( const GU_Detail *geo, const UT_StringMMPattern &nameFilter );
 		
 		enum Convertability
 		{

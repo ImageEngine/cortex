@@ -730,6 +730,36 @@ const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( co
 	return name;
 }
 
+GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, const UT_StringMMPattern &nameFilter )
+{
+	GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+	if ( nameAttrRef.isValid() )
+	{
+		bool match = false;
+		GU_Detail fullGeo( (GU_Detail*)geo );
+		GA_ElementGroup *group = fullGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGeometryConverter__extractor" );
+		unsigned numNames = geo->getUniqueValueCount( nameAttrRef );
+		for ( unsigned i=0; i < numNames; ++i )
+		{
+			const char *currentName = geo->getUniqueStringValue( nameAttrRef, i );
+			if ( UT_String( currentName ).multiMatch( nameFilter ) )
+			{
+				group->addRange( fullGeo.getRangeByValue( nameAttrRef, currentName ) );
+				match = true;
+			}
+		}
+		
+		if ( match )
+		{
+			GU_DetailHandle newHandle;
+			newHandle.allocateAndSet( new GU_Detail( &fullGeo, static_cast<GA_PrimitiveGroup *>( group ) ) );
+			return newHandle;
+		}
+	}
+	
+	return GU_DetailHandle();
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 // Factory
 /////////////////////////////////////////////////////////////////////////////////
