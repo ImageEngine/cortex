@@ -1988,6 +1988,28 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 2, 0 ) )
 		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 3, 0 ) )
 	
+	def testCoordinateSystemNoTransform( self ) :
+		
+		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		coordChild = scene.createChild( "coord")
+		coord = IECore.CoordinateSystem()
+		coord.setName( "testing" )
+		coordChild.writeObject( coord, 0 )
+		
+		del scene, coordChild
+		
+		sop = self.sop()
+		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		prims = sop.geometry().prims()
+		self.assertEqual( len(prims), 1 )
+		
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( sorted(nameAttr.strings()), [ "/coord" ] )
+		self.assertEqual( prims[0].attribValue( "name" ), "/coord" )
+		self.assertEqual( prims[0].type(), hou.primType.Custom )
+		self.assertEqual( prims[0].vertices()[0].point().number(), 0 )
+		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 0, 0, 0 ) )
+	
 	def testPointsDontAccumulate( self ) :
 		
 		obj = hou.node("/obj")
