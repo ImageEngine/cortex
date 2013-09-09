@@ -416,7 +416,6 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 		return 0;
 	}
 	
-	ConstObjectPtr result = 0;
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
 		OP_Context context( time );
@@ -469,39 +468,28 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 		}
 		
 		// try normal geometry conversion
-		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
+		GU_DetailHandleAutoReadLock readHandle( handle );
+		const GU_Detail *geo = readHandle.getGdp();
+		if ( !geo )
+		{
+			return 0;
+		}
+		
+		UT_StringMMPattern nameFilter;
+		nameFilter.compile( contentPathValue() );
+		GU_DetailHandle newHandle = FromHoudiniGeometryConverter::extract( geo, nameFilter );
+		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
 			return 0;
 		}
 		
-		result = converter->convert();
-		/// \todo: add parameter to GroupConverter (or all of them?) to only convert named shapes
-		///	   identify the appropriate shape name
-		///	   use that parameter to avoid converting the entire group
-		const Group *group = IECore::runTimeCast<const Group>( result );
-		if ( group )
-		{
-			const Group::ChildContainer &children = group->children();
-			for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
-			{
-				const StringData *name = (*it)->blindData()->member<StringData>( "name", false );
-				if ( name )
-				{
-					Path childPath;
-					bool valid = relativePath( name->readable().c_str(), childPath );
-					if ( valid && childPath.empty() )
-					{
-						return *it;
-					}
-				}
-			}
-		}
+		return converter->convert();
 	}
 	
 	/// \todo: need to account for cameras and lights
 	
-	return result;
+	return 0;
 }
 
 PrimitiveVariableMap HoudiniScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
@@ -878,6 +866,21 @@ bool HoudiniScene::relativePath( const char *value, Path &result ) const
 	}
 	
 	return true;
+}
+
+const char *HoudiniScene::contentPathValue() const
+{
+	if ( !m_contentIndex )
+	{
+		return rootName.c_str();
+	}
+	
+	Path relative;
+	std::string name;
+	relative.resize( m_path.size() - m_contentIndex );
+	std::copy( m_path.begin() + m_contentIndex, m_path.end(), relative.begin() );
+	pathToString( relative, name );
+	return name.c_str();
 }
 
 void HoudiniScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )
