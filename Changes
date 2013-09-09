@@ -1,3 +1,12 @@
+8.0.0-a17 :
+
+IECoreRI
+ - Added support for ri:areaLight parameter to IECoreRI
+
+IECoreHoudini
+ - Fixed bug when loading CoordinateSystems in Houdini
+
+
 8.0.0-a16 :
 
 IECoreMaya
