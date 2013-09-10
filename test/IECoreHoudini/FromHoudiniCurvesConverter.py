@@ -120,10 +120,10 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, IECore.TypeId.CurvesPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.CurvesPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, IECore.TypeId.Parameter )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.CurvesPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
@@ -386,7 +386,8 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 5 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		converter["name"].setTypedValue( "curvesA" )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesA" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		result = converter.convert()
 		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
@@ -396,7 +397,8 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 4 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		converter["name"].setTypedValue( "curvesB" )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesB" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		result = converter.convert()
 		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )

@@ -83,10 +83,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.PointsPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.PointsPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.Parameter )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
@@ -758,7 +758,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		converter["name"].setTypedValue( "points" )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "points" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
 		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
@@ -768,7 +769,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 5000 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		converter["name"].setTypedValue( "box" )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box", IECore.TypeId.PointsPrimitive )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
 		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )

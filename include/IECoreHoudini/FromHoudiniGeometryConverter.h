@@ -186,7 +186,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		void constructCommon();
 		
 		// This extra factory function is provided for the python bindings
-		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, IECore::TypeId resultType=IECore::InvalidTypeId );
+		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, const std::string &nameFilter = "", IECore::TypeId resultType=IECore::InvalidTypeId );
 		
 		// function to map standard Houdini names to IECore PrimitiveVariable names
 		const std::string processPrimitiveVariableName( const std::string &name ) const;

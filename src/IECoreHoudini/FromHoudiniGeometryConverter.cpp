@@ -814,8 +814,21 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_D
 	return 0;
 }
 
-FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_Node *sop, IECore::TypeId resultType )
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_Node *sop, const std::string &nameFilter, IECore::TypeId resultType )
 {
+	// try to reduce the geo to fit the name
+	GU_DetailHandleAutoReadLock readHandle( handle( sop ) );
+	if ( const GU_Detail *geo = readHandle.getGdp() )
+	{
+		UT_StringMMPattern filter;
+		filter.compile( nameFilter.c_str() );
+		GU_DetailHandle newHandle = extract( geo, filter );
+		if ( !newHandle.isNull() )
+		{
+			return create( newHandle, resultType );
+		}
+	}
+	
 	return create( handle( sop ), resultType );
 }
 

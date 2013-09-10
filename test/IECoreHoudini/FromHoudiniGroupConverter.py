@@ -115,10 +115,10 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( scene )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( self.box(), IECore.TypeId.Group )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( self.box(), resultType = IECore.TypeId.Group )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
 				
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( scene, IECore.TypeId.Parameter )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( scene, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 		
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( self.points() )
@@ -137,7 +137,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		merge.inputs()[0].bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-
+		
 		merge.inputs()[1].bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
