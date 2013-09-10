@@ -79,7 +79,7 @@ static FromHoudiniGeometryConverterPtr createDummy( object ids )
 	extract<IECore::TypeId> ex( ids );
 	if( ex.check() )
 	{
-		return FromHoudiniGeometryConverter::create( ex() );
+		return FromHoudiniGeometryConverter::create( GU_DetailHandle(), ex() );
 	}
 	
 	std::set<IECore::TypeId> resultTypes;
@@ -94,7 +94,7 @@ static FromHoudiniGeometryConverterPtr createDummy( object ids )
 		resultTypes.insert( ex() );
 	}
 	
-	return FromHoudiniGeometryConverter::create( resultTypes );
+	return FromHoudiniGeometryConverter::create( GU_DetailHandle(), resultTypes );
 }
 
 void IECoreHoudini::bindFromHoudiniGeometryConverter()

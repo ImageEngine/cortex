@@ -68,16 +68,14 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		//////////////////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Creates a converter which will convert the given Houdini GU_Detail to an IECore::Primitive.
-		/// If resultType is specified then only converters which create objects of that
-		/// type will be returned - the default value allows any suitable converter to be
-		/// created. If no matching converters exist then returns 0.
+		/// If resultType is specified then only converters which create objects of that type will
+		/// be returned - the default value allows any suitable converter to be created. If no
+		/// matching converters exist then returns 0. If a null handle is provided, any suitable
+		/// converter will be returned. This may be useful to access parameters of a derived
+		/// converter before the geometry exists. See SOP_ParameterisedHolder for an example.
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, IECore::TypeId resultType=IECore::InvalidTypeId );
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, const std::set<IECore::TypeId> &resultTypes );
 		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, IECore::TypeId resultType=IECore::InvalidTypeId );
-		/// Conversion will always fail with these factory functions, but it's useful to access parameters
-		/// of a derived converter before the geometry exists. See SOP_ParameterisedHolder for an example.
-		static FromHoudiniGeometryConverterPtr create( const std::set<IECore::TypeId> &resultTypes );
-		static FromHoudiniGeometryConverterPtr create( IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 		
 		/// Fills the passed vector with all the IECore::TypeIds for which

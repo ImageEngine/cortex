@@ -117,7 +117,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 				continue;
 			}
 			
-			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( objectParam->validTypes() );
+			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( GU_DetailHandle(), objectParam->validTypes() );
 			if ( converter )
 			{
 				m_inputParameters.push_back( *it );
