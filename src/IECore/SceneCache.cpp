@@ -1443,9 +1443,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			if ( newTimeIt != sampleTimes.end() )
 			{
 				size_t appendCount = (sampleTimes.end() - newTimeIt);
-				size_t index = currTimeIt - m_boundSampleTimes.begin();
-				m_boundSampleTimes.insert( currTimeIt, newTimeIt, sampleTimes.end() );
-				m_boundSamples.insert( currBoxIt, appendCount, newestKnownBox );
+				size_t index = m_boundSampleTimes.size();
+				m_boundSampleTimes.insert( m_boundSampleTimes.end(), newTimeIt, sampleTimes.end() );
+				m_boundSamples.insert( m_boundSamples.end(), appendCount, newestKnownBox );
 				// refresh iterators after insertion
 				currTimeIt = m_boundSampleTimes.begin() + index;
 				currBoxIt = m_boundSamples.begin() + index;
