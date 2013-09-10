@@ -108,7 +108,7 @@ void SceneShapeInterfaceComponentBoundIterator::setPoint( const MPoint & ) const
 int SceneShapeInterfaceComponentBoundIterator::iteratorCount() const
 {
 	// one for each bounding box corner
-	return 8;
+	return m_numComponents * 8;
 }
 
 bool SceneShapeInterfaceComponentBoundIterator::hasPoints() const
