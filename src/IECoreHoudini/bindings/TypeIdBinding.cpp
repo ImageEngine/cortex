@@ -79,6 +79,8 @@ void bindTypeId()
 		.value( "HoudiniScene", HoudiniSceneTypeId )
 		.value( "FromHoudiniCortexObjectConverter", FromHoudiniCortexObjectConverterTypeId )
 		.value( "ToHoudiniCortexObjectConverter", ToHoudiniCortexObjectConverterTypeId )
+		.value( "FromHoudiniCompoundObjectConverter", FromHoudiniCompoundObjectConverterTypeId )
+		.value( "ToHoudiniCompoundObjectConverter", ToHoudiniCompoundObjectConverterTypeId )
 	;
 }
 
