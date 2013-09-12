@@ -70,6 +70,7 @@
 #include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
 #include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniCompoundObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCompoundObjectConverterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -126,6 +127,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindFromHoudiniCortexObjectConverter();
 	bindToHoudiniCortexObjectConverter();
 	bindFromHoudiniCompoundObjectConverter();
+	bindToHoudiniCompoundObjectConverter();
 	
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );

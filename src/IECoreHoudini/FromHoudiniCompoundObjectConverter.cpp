@@ -128,7 +128,7 @@ ObjectPtr FromHoudiniCompoundObjectConverter::doDetailConversion( const GU_Detai
 		}
 		
 		ConstObjectPtr object = ((GU_CortexPrimitive *)prim)->getObject();
-		result->members()[name] = object->copy();
+		result->members()[name] = ( object ) ? object->copy() : 0;
 	}
 	
 	return result;
