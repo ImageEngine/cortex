@@ -51,6 +51,22 @@ class ShadingTest( unittest.TestCase ) :
 		m["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 4 ) )
 		return m
 	
+	def constantShader( self ) :
+	
+		s = IECore.Shader( "test", "gl:surface" )
+		
+		s.parameters["gl:fragmentSource"] = """
+			
+			in vec3 fragmentCs;
+						
+			void main()
+			{
+				gl_FragColor = vec4( fragmentCs, 1.0 );
+			}
+		"""
+		
+		return s
+	
 	def colorShader( self ) :
 	
 		s = IECore.Shader( "test", "gl:surface" )
@@ -610,6 +626,61 @@ class ShadingTest( unittest.TestCase ) :
 			]
 		)	
 
+	def testCsParameterTrumpsColorAttribute( self ) :
+	
+		# if there is no Cs parameter value specified then we should get
+		# Cs from the attribute state.
+		
+		g = IECore.Group()
+		g.addChild( self.mesh() )
+		
+		g.addState( IECore.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
+		g.addState( self.constantShader() )
+		
+		image = self.renderImage( g )
+		self.assertImageValues( image, [ ( IECore.V2f( 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ) ] )
+		
+		# but if there is a Cs parameter, it should override the colour
+		# from the attribute state.
+		
+		g = IECore.Group()
+		g.addChild( self.mesh() )
+		
+		g.addState( IECore.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
+		
+		s = self.constantShader()
+		s.parameters["Cs"] = IECore.Color3f( 0, 1, 0 )
+		g.addState( s )
+		
+		image = self.renderImage( g )
+		self.assertImageValues( image, [ ( IECore.V2f( 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ) ] )
+	
+	def testColorAttributeDoesntAffectWireframe( self ) :
+	
+		g = IECore.Group()
+		g.addChild( self.mesh() )
+		
+		g.addState(
+			IECore.AttributeState(
+				{
+					"color" : IECore.Color3f( 1, 0, 0 ),
+					"gl:primitive:solid" : IECore.BoolData( False ),
+					"gl:primitive:wireframe" : IECore.BoolData( True ),
+					"gl:primitive:wireframeColor" : IECore.Color4f( 0, 1, 0, 1 ),
+					"gl:primitive:wireframeWidth" : 6.0,
+				}
+			)
+		)
+
+		image = self.renderImage( g )
+		
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ), 
+			]
+		)
+				
 	def setUp( self ) :
 		
 		if not os.path.isdir( "test/IECoreGL/output" ) :
