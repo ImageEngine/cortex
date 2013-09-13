@@ -121,7 +121,13 @@ bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
 		return false;
 	}
 	
-	return doConversion( srcParameter()->getValidatedValue(), geo );
+	bool result = doConversion( srcParameter()->getValidatedValue(), geo );
+	if ( result )
+	{
+		geo->incrementMetaCacheCount();
+	}
+	
+	return result;
 }
 
 GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoints ) const
