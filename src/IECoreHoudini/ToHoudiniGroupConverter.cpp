@@ -106,7 +106,6 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 	
 	size_t i = 0;
 	const Group::ChildContainer &children = group->children();
-	const StringVectorData *childNames = group->blindData()->member<StringVectorData>( "childNames" );
 	for ( Group::ChildContainer::const_iterator it=children.begin(); it != children.end(); ++it, ++i )
 	{
 		ConstVisibleRenderablePtr child = *it;
@@ -125,25 +124,18 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 		}
 		
 		std::string name = groupName;
-		std::string childName = "";
-		if ( childNames )
+		if ( const StringData *childNameData = child->blindData()->member<StringData>( "name" ) )
 		{
-			childName = childNames->readable()[i];
-		}
-		// backwards compatibility with older data
-		else if ( const StringData *childNameData = child->blindData()->member<StringData>( "name" ) )
-		{
-			childName = childNameData->readable();
-		}
-		
-		if ( childName != "" )
-		{
-			if ( groupName != "" )
+			const std::string &childName = childNameData->readable();
+			if ( childName != "" )
 			{
-				name += "/";
+				if ( groupName != "" )
+				{
+					name += "/";
+				}
+				
+				name += childName;
 			}
-			
-			name += childName;
 		}
 		
 		converter->nameParameter()->setTypedValue( name );

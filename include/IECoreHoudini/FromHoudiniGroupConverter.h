@@ -91,7 +91,7 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		size_t doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result, const IECore::CompoundObject *operands ) const;
 
 		/// Converts the given GA_PrimitiveGroup to an IECore::Primitive and adds it to the IECore::Group
-		void convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, IECore::GroupPtr &result, const IECore::CompoundObject *operands ) const;
+		void convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, IECore::GroupPtr &result, const IECore::CompoundObject *operands, const std::string &name = "" ) const;
 		
 		/// Regroups a single GA_PrimitiveGroup into several groups, based on GA_PrimitiveTypeId
 		/// @param geo The GU_Detail containing the orginal group. New groups will be added based on GA_PrimitiveTypeId

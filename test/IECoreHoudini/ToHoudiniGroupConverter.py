@@ -254,7 +254,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( self.buildScene() ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ] )
+		names = [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ]
+		self.assertEqual( sorted(nameAttr.strings()), names )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
@@ -262,20 +263,21 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 1 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		children = result.children()
-		childNames = result.blindData()["childNames"]
 		for i in range ( 0, len(children) ) :
-			name = childNames[i]
+			name = names[i]
 			self.failUnless( name in nameAttr.strings() )
 			self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
-		
+	
 	def testAppending( self ) :
 		null = self.emptySop()
 		scene = self.buildScene()
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ] )
+		names = [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ]
+		self.assertEqual( sorted(nameAttr.strings()), names )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 6 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 12 )
@@ -283,10 +285,10 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 1 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		children = result.children()
-		childNames = result.blindData()["childNames"]
 		for i in range ( 0, len(children) ) :
-			name = childNames[i]
+			name = names[i]
 			self.failUnless( name in nameAttr.strings() )
 			if isinstance( children[i], IECore.PointsPrimitive ) :
 				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )
@@ -298,7 +300,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null, append=True ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ] )
+		names = [ "curveBoxGroup", "curveBoxGroup/boxPoints", "meshGroupA", "meshGroupB", "pointsGroup" ] 
+		self.assertEqual( sorted(nameAttr.strings()), names )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupA" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "meshGroupB" ]), 12 )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup" ]), 24 )
@@ -306,10 +309,10 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "curveBoxGroup/boxPoints" ]), 2 )
 		
 		result = IECoreHoudini.FromHoudiniGroupConverter( null ).convert()
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		children = result.children()
-		childNames = result.blindData()["childNames"]
 		for i in range ( 0, len(children) ) :
-			name = childNames[i]
+			name = names[i]
 			self.failUnless( name in nameAttr.strings() )
 			if isinstance( children[i], IECore.PointsPrimitive ) :
 				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )

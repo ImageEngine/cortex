@@ -678,11 +678,13 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
 		result = converter.convert()
 		numPrims = [ 6, 100 ]
-		self.assertEqual( result.blindData(), IECore.CompoundData( { "childNames" : IECore.StringVectorData( [ "box", "torus" ] ) } ) )
+		names = [ "box", "torus" ]
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		for i in range( 0, len(result.children()) ) :
 			child = result.children()[i]
 			self.assertFalse( "name" in child )
 			self.assertFalse( "nameIndices" in child )
+			self.assertEqual( child.blindData(), IECore.CompoundData( { "name" : names[i] } ) )
 			self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), numPrims[i] )
 			self.assertTrue(  child.arePrimitiveVariablesValid() )
 	
