@@ -201,7 +201,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		
 		for ( AttributePrimIdGroupMapIterator it=groupMap.begin(); it != groupMap.end(); ++it )
 		{
-			convertAndAddPrimitive( &groupGeo, it->second, result, operands );
+			convertAndAddPrimitive( &groupGeo, it->second, result, operands, it->first.first );
 		}
 	}
 	else
@@ -220,7 +220,8 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			{
 				continue;
 			}
-
+			
+			renderable->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
 			result->addChild( renderable );
 		}
 
@@ -279,11 +280,6 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	}
 
 	GroupPtr groupResult = new Group();
-	if ( !group->getInternal() )
-	{
-		groupResult->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
-	}
-	
 	for ( PrimIdGroupMapIterator it = groupMap.begin(); it != groupMap.end(); it++ )
 	{
 		convertAndAddPrimitive( &groupGeo, it->second, groupResult, operands );
@@ -375,7 +371,7 @@ PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *
 	return IECore::runTimeCast<Primitive>( converter->convert() );
 }
 
-void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands ) const
+void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands, const std::string &name ) const
 {
 	GU_Detail childGeo( geo, group );
 	for ( GA_GroupTable::iterator<GA_ElementGroup> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
@@ -387,6 +383,11 @@ void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_Primi
 	PrimitivePtr child = doPrimitiveConversion( &childGeo, operands );
 	if ( child )
 	{
+		if ( name != "" )
+		{
+			child->blindData()->member<StringData>( "name", false, true )->writable() = name;
+		}
+		
 		result->addChild( child );
 	}
 }

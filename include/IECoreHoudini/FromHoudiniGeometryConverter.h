@@ -42,6 +42,7 @@
 #include "GU/GU_Detail.h"
 #include "GU/GU_DetailHandle.h"
 #include "SOP/SOP_Node.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/Primitive.h"
 #include "IECore/SimpleTypedData.h"
@@ -68,21 +69,22 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		//////////////////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Creates a converter which will convert the given Houdini GU_Detail to an IECore::Primitive.
-		/// If resultType is specified then only converters which create objects of that
-		/// type will be returned - the default value allows any suitable converter to be
-		/// created. If no matching converters exist then returns 0.
+		/// If resultType is specified then only converters which create objects of that type will
+		/// be returned - the default value allows any suitable converter to be created. If no
+		/// matching converters exist then returns 0. If a null handle is provided, any suitable
+		/// converter will be returned. This may be useful to access parameters of a derived
+		/// converter before the geometry exists. See SOP_ParameterisedHolder for an example.
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, IECore::TypeId resultType=IECore::InvalidTypeId );
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, const std::set<IECore::TypeId> &resultTypes );
-		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, IECore::TypeId resultType=IECore::InvalidTypeId );
-		/// Conversion will always fail with these factory functions, but it's useful to access parameters
-		/// of a derived converter before the geometry exists. See SOP_ParameterisedHolder for an example.
-		static FromHoudiniGeometryConverterPtr create( const std::set<IECore::TypeId> &resultTypes );
-		static FromHoudiniGeometryConverterPtr create( IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 		
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a FromHoudiniGeometryConverter is available.
 		static void supportedTypes( std::set<IECore::TypeId> &types );
+		
+		/// Convenience function to extract the named shapes from the given GU_Detail. This can be used before
+		/// calling the factory create mechanism, when only the named portion of the detail is of interest.
+		static GU_DetailHandle extract( const GU_Detail *geo, const UT_StringMMPattern &nameFilter );
 		
 		enum Convertability
 		{
@@ -183,13 +185,16 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		
 		void constructCommon();
 		
+		// This extra factory function is provided for the python bindings
+		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, const std::string &nameFilter = "", IECore::TypeId resultType=IECore::InvalidTypeId );
+		
 		// function to map standard Houdini names to IECore PrimitiveVariable names
 		const std::string processPrimitiveVariableName( const std::string &name ) const;
 		
 		// the handle to the GU_Detail
 		GU_DetailHandle m_geoHandle;
-		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		IECore::StringParameterPtr m_attributeFilterParameter;
+		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		
 		struct Types
 		{

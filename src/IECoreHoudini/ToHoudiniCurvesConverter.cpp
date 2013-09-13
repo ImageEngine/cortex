@@ -147,6 +147,8 @@ void ToHoudiniCurvesConverter::transferAttribs( GU_Detail *geo, const GA_Range &
 	{
 		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
 	}
+	
+	setName( geo, prims );
 }
 
 ToHoudiniCurvesConverter::RemoveDuplicateEnds::RemoveDuplicateEnds( const std::vector<int> &vertsPerCurve ) : m_vertsPerCurve( vertsPerCurve )

@@ -53,10 +53,10 @@ ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const VisibleRenderable 
 {
 	srcParameter()->setValue( (VisibleRenderable *)renderable );
 	
-	m_convertStandardAttributesParameter = new BoolParameter(
-		"convertStandardAttributes",
-		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv)",
-		true
+	m_nameParameter = new StringParameter(
+		"name",
+		"The name given to the converted primitive(s). If empty, primitives will be unnamed",
+		""
 	);
 	
 	m_attributeFilterParameter = new StringParameter(
@@ -65,8 +65,15 @@ ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const VisibleRenderable 
 		"*"
 	);
 	
-	parameters()->addParameter( m_convertStandardAttributesParameter );
+	m_convertStandardAttributesParameter = new BoolParameter(
+		"convertStandardAttributes",
+		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv)",
+		true
+	);
+	
+	parameters()->addParameter( m_nameParameter );
 	parameters()->addParameter( m_attributeFilterParameter );
+	parameters()->addParameter( m_convertStandardAttributesParameter );
 }
 
 ToHoudiniGeometryConverter::~ToHoudiniGeometryConverter()
@@ -81,6 +88,16 @@ BoolParameter *ToHoudiniGeometryConverter::convertStandardAttributesParameter()
 const BoolParameter *ToHoudiniGeometryConverter::convertStandardAttributesParameter() const
 {
 	return m_convertStandardAttributesParameter;
+}
+
+StringParameter *ToHoudiniGeometryConverter::nameParameter()
+{
+	return m_nameParameter;
+}
+
+const StringParameter *ToHoudiniGeometryConverter::nameParameter() const
+{
+	return m_nameParameter;
 }
 
 StringParameter *ToHoudiniGeometryConverter::attributeFilterParameter()
@@ -142,6 +159,18 @@ void ToHoudiniGeometryConverter::transferAttribs( GU_Detail *geo, const GA_Range
 	if ( primitive )
 	{
 		transferAttribValues( primitive, geo, points, prims );
+	}
+	
+	setName( geo, prims );
+}
+
+void ToHoudiniGeometryConverter::setName( GU_Detail *geo, const GA_Range &prims ) const
+{
+	// add the name attribute based on the parameter
+	const std::string &name = nameParameter()->getTypedValue();
+	if ( name != "" && prims.isValid() )
+	{
+		ToHoudiniStringVectorAttribConverter::convertString( "name", name, geo, prims );
 	}
 }
 
@@ -313,7 +342,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 		}
 	}
 	
-	// add the name attribute based on blindData
+	// backwards compatibility with older data
 	const StringData *nameData = primitive->blindData()->member<StringData>( "name" );
 	if ( nameData && prims.isValid() )
 	{

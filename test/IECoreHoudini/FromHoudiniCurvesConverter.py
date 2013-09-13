@@ -120,10 +120,10 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, IECore.TypeId.CurvesPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.CurvesPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, IECore.TypeId.Parameter )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.CurvesPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
@@ -369,16 +369,44 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 		curves = self.createCurves( 4 )
 		name = curves.createOutputNode( "name" )
-		name.parm( "name1" ).set( "testName" )
-		result = IECoreHoudini.FromHoudiniCurvesConverter( name ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testName" )
+		name.parm( "name1" ).set( "curvesA" )
+		curves2 = self.createCurve( parent = curves.parent() )
+		name2 = curves2.createOutputNode( "name" )
+		name2.parm( "name1" ).set( "curvesB" )
+		merge = name.createOutputNode( "merge" )
+		merge.setInput( 1, name2 )
+		
+		converter = IECoreHoudini.FromHoudiniCurvesConverter( merge )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		self.assertFalse( "nameIndices" in result )
+		# all curves were converted as one CurvesPrimitive
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 5 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		group = curves.createOutputNode( "group" )
-		group.parm( "crname" ).set( "testGroup" )
-		result = IECoreHoudini.FromHoudiniCurvesConverter( group ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testGroup" )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesA" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named curves were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 4 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesB" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named curves were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
 	
 	def testAttributeFilter( self ) :
 		
