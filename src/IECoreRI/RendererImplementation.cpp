@@ -1283,8 +1283,9 @@ void IECoreRI::RendererImplementation::delayedMotionBegin()
 void IECoreRI::RendererImplementation::motionEnd()
 {
 	ScopedContext scopedContext( m_context );
-	if( !automaticInstancingEnabled() )
+	if( !automaticInstancingEnabled() || m_inMotion )
 	{
+		// no auto instancing, or perhaps we're in a transform motion block
 		RiMotionEnd();
 	}
 	else

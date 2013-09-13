@@ -375,7 +375,36 @@ class InstancingTest( IECoreRI.TestCase ) :
 		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
 		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 2 )
 		self.assertEqual( rib.count( "ObjectInstance" ), 2 )
+	
+	
+	def testAutomaticInstancingWithTransformMotionBlur( self ) :
+	
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		
+		with WorldBlock( r ) :
 
+			r.setAttribute( "ri:automaticInstancing", True )
+			
+			with TransformBlock( r ):
+			
+				with MotionBlock( r, [ 0, 1 ] ) :
+					r.setTransform( M44f.createTranslated( V3f( 0,0,0 ) ) )
+					r.setTransform( M44f.createTranslated( V3f( 1,0,0 ) ) )
+				m.render( r )
+			
+			with TransformBlock( r ):
+			
+				with MotionBlock( r, [ 0, 1 ] ) :
+					r.setTransform( M44f.createTranslated( V3f( 0,0,0 ) ) )
+					r.setTransform( M44f.createTranslated( V3f( 1,0,0 ) ) )
+				m.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 2 )
+	
 	def testAutomaticInstancingWithThreadedProcedurals( self ) :
 	
 		class PlaneProcedural( Renderer.Procedural ) :
