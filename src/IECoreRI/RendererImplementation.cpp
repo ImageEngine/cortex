@@ -1409,7 +1409,21 @@ void IECoreRI::RendererImplementation::image( const Imath::Box2i &dataWindow, co
 
 void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
 {
-	MeshPrimitivePtr mesh = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
+	IECore::MeshPrimitivePtr mesh = new IECore::MeshPrimitive;
+	IECore::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
+	if( it == primVars.end() )
+	{
+		IECore::msg( IECore::Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Trying to render a mesh without \"P\"" );
+		return;
+	}
+		
+	IECore::V3fVectorDataPtr pData = runTimeCast< IECore::V3fVectorData >( it->second.data );
+	if( !pData )
+	{
+		IECore::msg( IECore::Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Mesh \"P\" variable has incorrect type" );
+	}
+		
+	mesh->setTopologyUnchecked( vertsPerFace, vertIds, pData->readable().size(), interpolation );
 	mesh->variables = primVars;
 	addPrimitive( mesh );
 }
