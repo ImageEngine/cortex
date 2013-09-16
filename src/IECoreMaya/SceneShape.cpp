@@ -155,7 +155,7 @@ MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray
 	return SceneShapeInterface::setDependentsDirty( plug, plugArray );
 }
 
-SceneShape *SceneShape::findScene( const MDagPath &p, MDagPath *dagPath )
+SceneShape *SceneShape::findScene( const MDagPath &p, MDagPath *dagPath, bool noIntermediate )
 {
 	unsigned int childCount = 0;
 	p.numberOfShapesDirectlyBelow(childCount);
@@ -166,7 +166,7 @@ SceneShape *SceneShape::findScene( const MDagPath &p, MDagPath *dagPath )
 		if( childDag.extendToShapeDirectlyBelow( c ) )
 		{
 			MFnDagNode fnChildDag(childDag);
-			if ( fnChildDag.isIntermediateObject() )
+			if ( noIntermediate && fnChildDag.isIntermediateObject() )
 			{
 				continue;
 			}
@@ -311,7 +311,7 @@ ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
 
 bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag )
 {
-	SceneShape *sceneShape = findScene( p );
+	SceneShape *sceneShape = findScene( p, 0, false );
 	if ( !sceneShape )
 	{
 		return false;
@@ -328,7 +328,7 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag )
 
 void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, bool includeChildren )
 {
-	SceneShape *sceneShape = findScene( p );
+	SceneShape *sceneShape = findScene( p, 0, false );
 	if ( !sceneShape )
 	{
 		return;

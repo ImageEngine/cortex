@@ -83,7 +83,7 @@ class SceneShape : public SceneShapeInterface
 		IECore::ConstSceneInterfacePtr m_scene;
 
 
-		static SceneShape *findScene( const MDagPath &p, MDagPath *dagPath = 0 );
+		static SceneShape *findScene( const MDagPath &p, MDagPath *dagPath = 0, bool noIntermediate = true );
 
 		/// functions registered in MayaScene as custom object and custom attributes
 		struct MayaSceneAddOn
