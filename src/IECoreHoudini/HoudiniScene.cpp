@@ -374,7 +374,7 @@ bool HoudiniScene::hasObject() const
 	if ( type == OBJ_GEOMETRY  )
 	{
 		OP_Context context( CHgetEvalTime() );
-		const GU_Detail *geo = objNode->getRenderGeometry( context );
+		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
 		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
@@ -419,7 +419,7 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
 		OP_Context context( time );
-		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context );
+		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
 		GU_DetailHandleAutoReadLock readHandle( handle );
 		const GU_Detail *geo = readHandle.getGdp();
 		if ( !geo )
@@ -497,7 +497,7 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 	{
 		OP_Context context( CHgetEvalTime() );
-		const GU_Detail *geo = contentNode->getRenderGeometry( context );
+		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
 		if ( !attrHandle.isAttributeValid() )
 		{
@@ -600,7 +600,7 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 		if ( objNode && objNode->getObjectType() == OBJ_GEOMETRY )
 		{
 			OP_Context context( CHgetEvalTime() );
-			const GU_Detail *geo = objNode->getRenderGeometry( context );
+			const GU_Detail *geo = objNode->getRenderGeometry( context, false );
 			const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
 			if ( attrHandle.isAttributeValid() )
 			{
@@ -695,7 +695,7 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
 			OP_Context context( CHgetEvalTime() );
-			const GU_Detail *geo = contentNode->getRenderGeometry( context );
+			const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 			const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
 			if ( attrHandle.isAttributeValid() )
 			{

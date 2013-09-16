@@ -564,6 +564,22 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		# can't use scene() to go outside of the re-rooting
 		self.assertRaises( RuntimeError, scene.scene, [ "sub2" ] )
 		self.assertEqual( scene.scene( [ "sub2" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+	
+	def testHiddenObjects( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1" ).setDisplayFlag( False )
+		self.assertFalse(  hou.node( "/obj/sub1" ).isObjectDisplayed() )
+		self.assertFalse(  hou.node( "/obj/sub1/torus1" ).isObjectDisplayed() )
+		
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.childNames(), [ "torus1", "box1" ] )
+		self.assertFalse( sub1.hasObject() )
+		
+		torus = sub1.child( "torus1" )
+		self.assertEqual( torus.childNames(), [ "torus2" ] )
+		self.assertTrue( torus.hasObject() )
+		self.assertTrue( isinstance( torus.readObject( 0 ), IECore.MeshPrimitive ) )
 
 if __name__ == "__main__":
 	unittest.main()
