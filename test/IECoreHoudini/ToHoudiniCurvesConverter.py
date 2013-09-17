@@ -834,12 +834,36 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 		sop = self.emptySop()
 		curves = self.curves()
-		curves.blindData()["name"] = IECore.StringData( "testGroup" )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
+		
+		# unnamed unless we set the parameter
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		self.assertEqual( sop.geometry().findPrimAttrib( "name" ), None )
+		
+		converter["name"].setTypedValue( "testCurves" )
+		self.assert_( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
-		self.assertEqual( nameAttr.strings(), tuple( [ "testGroup" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testGroup" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( nameAttr.strings(), tuple( [ "testCurves" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testCurves" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# blindData still works for backwards compatibility
+		curves.blindData()["name"] = IECore.StringData( "blindCurves" )
+		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "blindCurves" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindCurves" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# name parameter takes preference over blindData
+		converter["name"].setTypedValue( "testCurves" )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "testCurves" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testCurves" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )	
 	
 	def testAttributeFilter( self ) :
 		

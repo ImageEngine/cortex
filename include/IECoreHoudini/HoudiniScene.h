@@ -121,6 +121,7 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
 		bool relativePath( const char *value, Path &result ) const;
+		const char *contentPathValue() const;
 		
 		/// Struct for registering readers for custom Attributes.
 		struct CustomReader

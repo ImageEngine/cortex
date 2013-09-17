@@ -78,12 +78,15 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// a ToHoudiniGeometryConverter is available.
 		static void supportedTypes( std::set<IECore::TypeId> &types );
 		
-		IECore::BoolParameter *convertStandardAttributesParameter();
-		const IECore::BoolParameter *convertStandardAttributesParameter() const;
+		IECore::StringParameter *nameParameter();
+		const IECore::StringParameter *nameParameter() const;
 		
 		IECore::StringParameter *attributeFilterParameter();
 		const IECore::StringParameter *attributeFilterParameter() const;
-
+		
+		IECore::BoolParameter *convertStandardAttributesParameter();
+		const IECore::BoolParameter *convertStandardAttributesParameter() const;
+	
 	protected :
 
 		ToHoudiniGeometryConverter( const IECore::VisibleRenderable *renderable, const std::string &description );
@@ -92,6 +95,10 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		
 		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::VisibleRenderable
 		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const = 0;
+		
+		/// Utility to name the primitives based on the name parameter. This is called by the default
+		/// implementation of transferAttribs(), and should be called by any overriding implementation.
+		void setName( GU_Detail *geo, const GA_Range &prims ) const;
 		
 		/// May be implemented by derived classes to pre-process PrimitiveVariables before conversion.
 		/// Default implementation simply returns a shallow copy of the input variable.
@@ -127,8 +134,9 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		
 	private :
 		
-		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
+		IECore::StringParameterPtr m_nameParameter;
 		IECore::StringParameterPtr m_attributeFilterParameter;
+		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		
 		// function to handle the special case for P
 		void transferP( const IECore::V3fVectorData *positions, GU_Detail *geo, const GA_Range &points ) const;

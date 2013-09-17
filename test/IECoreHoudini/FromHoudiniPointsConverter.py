@@ -83,10 +83,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.PointsPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.PointsPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.Parameter )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
@@ -740,22 +740,47 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		particles = points.createOutputNode( "add" )
 		particles.parm( "addparticlesystem" ).set( True )
 		name = particles.createOutputNode( "name" )
-		name.parm( "name1" ).set( "testName" )
-		group = particles.createOutputNode( "group" )
-		group.parm( "crname" ).set( "testGroup" )
+		name.parm( "name1" ).set( "points" )
+		box = points.parent().createNode( "box" )
+		name2 = box.createOutputNode( "name" )
+		name2.parm( "name1" ).set( "box" )
+		merge = name.createOutputNode( "merge" )
+		merge.setInput( 1, name2 )
 		
-		particles.bypass( True )
-		result = IECoreHoudini.FromHoudiniPointsConverter( name ).convert()
+		converter = IECoreHoudini.FromHoudiniPointsConverter( merge )
+		result = converter.convert()
+		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# both shapes were converted as one PointsPrimitive
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 5008 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		particles.bypass( False )
-		result = IECoreHoudini.FromHoudiniPointsConverter( name ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testName" )
-		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testGroup" )
-
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "points" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named points were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 5000 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box", IECore.TypeId.PointsPrimitive )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named points were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+	
 	def testAttributeFilter( self ) :
 		
 		points = self.createPoints()

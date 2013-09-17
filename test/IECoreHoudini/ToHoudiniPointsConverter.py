@@ -605,6 +605,41 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
+	def testName( self ) :
+		
+		sop = self.emptySop()
+		points = self.points()
+		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
+		
+		# unnamed unless we set the parameter
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		self.assertEqual( sop.geometry().findPrimAttrib( "name" ), None )
+		
+		converter["name"].setTypedValue( "testPoints" )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "testPoints" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# blindData still works for backwards compatibility
+		points.blindData()["name"] = IECore.StringData( "blindPoints" )
+		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "blindPoints" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		
+		# name parameter takes preference over blindData
+		converter["name"].setTypedValue( "testPoints" )
+		self.assert_( converter.convert( sop ) )
+		geo = sop.geometry()
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ "testPoints" ] ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+	
 	def tearDown( self ) :
 		
 		if os.path.isfile( TestToHoudiniPointsConverter.__testScene ) :

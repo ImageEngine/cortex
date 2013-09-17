@@ -79,7 +79,7 @@ static FromHoudiniGeometryConverterPtr createDummy( object ids )
 	extract<IECore::TypeId> ex( ids );
 	if( ex.check() )
 	{
-		return FromHoudiniGeometryConverter::create( ex() );
+		return FromHoudiniGeometryConverter::create( GU_DetailHandle(), ex() );
 	}
 	
 	std::set<IECore::TypeId> resultTypes;
@@ -94,13 +94,13 @@ static FromHoudiniGeometryConverterPtr createDummy( object ids )
 		resultTypes.insert( ex() );
 	}
 	
-	return FromHoudiniGeometryConverter::create( resultTypes );
+	return FromHoudiniGeometryConverter::create( GU_DetailHandle(), resultTypes );
 }
 
 void IECoreHoudini::bindFromHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniGeometryConverter >()
-		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, IECore::TypeId ) )&FromHoudiniGeometryConverter::create, ( arg_( "sop" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, const std::string &, IECore::TypeId ) )&FromHoudiniGeometryConverter::create, ( arg_( "sop" ), arg_( "nameFilter" ) = "", arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 		.def( "createFromGeo", &createFromGeo, ( arg_( "geo" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "createFromGeo" )
 		.def( "createDummy", &createDummy, ( arg_( "resultTypes" ) ) ).staticmethod( "createDummy" )
 		.def( "supportedTypes", &supportedTypes )
