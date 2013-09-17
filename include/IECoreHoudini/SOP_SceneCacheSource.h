@@ -73,19 +73,14 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		virtual OP_ERROR cookMySop( OP_Context &context );
 		
 		virtual void sceneChanged();
-		
-		/// Modify the object after it has been loaded in memory. Implemented to add the name matching this
-		/// location in cache and to erase primitive variables that do not match the attribute filter.
-		/// Derived classes should update animatedTopology and animatedPrimVars if appropriate.
-		virtual IECore::ObjectPtr modifyObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
 	
 	private :
 		
-		// Transform the object after it has been modified. Transforms Primitives (using IECore::TransformOp),
+		// Transform the object, copying if neccessary. Transforms Primitives (using IECore::TransformOp),
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
-		void transformObject( IECore::Object *object, const Imath::M44d &transform, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
+		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
-		bool convertObject( IECore::Object *object, const std::string &name, const std::string &attributeFilter, GeometryType geometryType, bool animatedTopology, bool hasAnimatedPrimVars, const std::vector<IECore::InternedString> &animatedPrimVars );
+		bool convertObject( const IECore::Object *object, const std::string &name, const std::string &attributeFilter, GeometryType geometryType, bool animatedTopology, bool hasAnimatedPrimVars, const std::vector<IECore::InternedString> &animatedPrimVars );
 		
 		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, GeometryType geometryType, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
