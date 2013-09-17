@@ -427,7 +427,10 @@ bool Shader::Parameter::operator == ( const Shader::Parameter &other ) const
 struct Shader::Setup::MemberData : public IECore::RefCounted
 {
 	
-	ConstShaderPtr shader;
+	MemberData( ConstShaderPtr &s )
+		:	shader( s ), hasCsValue( false )
+	{
+	}
 	
 	// base class for objects which can bind a value of some sort
 	// to a shader, and later unbind it.
@@ -602,14 +605,15 @@ struct Shader::Setup::MemberData : public IECore::RefCounted
 				
 	};
 	
+	ConstShaderPtr shader;
 	vector<ValuePtr> values;
+	bool hasCsValue;
 	
 };
 
 Shader::Setup::Setup( ConstShaderPtr shader )
-	:	m_memberData( new MemberData )
+	:	m_memberData( new MemberData( shader ) )
 {
-	m_memberData->shader = shader;
 }
 
 const Shader *Shader::Setup::shader() const
@@ -738,6 +742,11 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 			}
 			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, floats ) );
 		}
+		
+		if( name == "Cs" )
+		{
+			m_memberData->hasCsValue = true;
+		}
 	}
 	else if( p->type == GL_FLOAT_MAT3 || p->type == GL_FLOAT_MAT4 )
 	{
@@ -819,6 +828,11 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	m_memberData->values.push_back( new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor ) );
 }
 
+bool Shader::Setup::hasCsValue() const
+{
+	return m_memberData->hasCsValue;
+}
+
 Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	:	m_previousProgram( 0 ), m_setup( setup )
 {
@@ -898,15 +912,7 @@ const std::string &Shader::defaultVertexSource()
 		"	}"
 		""
 		"	geometryst = vertexst;"
-		"	if( vertexCsActive )"
-		"	{"
-		/// \todo: avoid using gl_Color by mapping to Cs correctly
-		"		geometryCs = gl_Color.rgb * Cs * vertexCs;"
-		"	}"
-		"	else"
-		"	{"
-		"		geometryCs = gl_Color.rgb * Cs;"
-		"	}"
+		"	geometryCs = mix( Cs, vertexCs, float( vertexCsActive ) );"
 		""
 		"	fragmentI = geometryI;"
 		"	fragmentP = geometryP;"
