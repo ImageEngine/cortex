@@ -738,10 +738,12 @@ GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, con
 		bool match = false;
 		GU_Detail fullGeo( (GU_Detail*)geo );
 		GA_ElementGroup *group = fullGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGeometryConverter__extractor" );
-		unsigned numNames = geo->getUniqueValueCount( nameAttrRef );
-		for ( unsigned i=0; i < numNames; ++i )
+		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		GA_Size numNames = tuple->getTableEntries( nameAttr );
+		for ( GA_Size i=0; i < numNames; ++i )
 		{
-			const char *currentName = geo->getUniqueStringValue( nameAttrRef, i );
+			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
 			if ( UT_String( currentName ).multiMatch( nameFilter ) )
 			{
 				group->addRange( fullGeo.getRangeByValue( nameAttrRef, currentName ) );

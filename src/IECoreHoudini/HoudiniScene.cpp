@@ -377,23 +377,25 @@ bool HoudiniScene::hasObject() const
 		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
-		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-		if ( !attrHandle.isAttributeValid() )
+		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+		if ( !nameAttrRef.isValid() )
 		{
 			return true;
 		}
 		
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		int numShapes = geo->getUniqueValueCount( attrRef );
+		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		GA_Size numShapes = tuple->getTableEntries( nameAttr );
 		if ( !numShapes )
 		{
 			return true;
 		}
 		
-		for ( int i=0; i < numShapes; ++i )
+		for ( GA_Size i=0; i < numShapes; ++i )
 		{
 			Path childPath;
-			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+			bool valid = relativePath( currentName, childPath );
 			if ( valid && childPath.empty() )
 			{
 				return true;
@@ -498,18 +500,20 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	{
 		OP_Context context( CHgetEvalTime() );
 		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
-		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-		if ( !attrHandle.isAttributeValid() )
+		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+		if ( !nameAttrRef.isValid() )
 		{
 			return;
 		}
 		
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		int numShapes = geo->getUniqueValueCount( attrRef );
-		for ( int i=0; i < numShapes; ++i )
+		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		GA_Size numShapes = tuple->getTableEntries( nameAttr );
+		for ( GA_Size i=0; i < numShapes; ++i )
 		{
 			Path childPath;
-			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+			bool valid = relativePath( currentName, childPath );
 			if ( valid && !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
 			{
 				childNames.push_back( *childPath.begin() );
@@ -601,16 +605,18 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 		{
 			OP_Context context( CHgetEvalTime() );
 			const GU_Detail *geo = objNode->getRenderGeometry( context, false );
-			const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-			if ( attrHandle.isAttributeValid() )
+			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+			if ( nameAttrRef.isValid() )
 			{
-				const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-				int numShapes = geo->getUniqueValueCount( attrRef );
+				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+				GA_Size numShapes = tuple->getTableEntries( nameAttr );
 				size_t contentSize = m_path.size() - m_contentIndex;
-				for ( int i=0; i < numShapes; ++i )
+				for ( GA_Size i=0; i < numShapes; ++i )
 				{
 					Path childPath;
-					stringToPath( geo->getUniqueStringValue( attrRef, i ), childPath );
+					const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+					stringToPath( currentName, childPath );
 					if ( childPath.empty() || name() == *( childPath.begin() + contentSize - 1 ) )
 					{
 						return node;
@@ -696,15 +702,17 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		{
 			OP_Context context( CHgetEvalTime() );
 			const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
-			const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-			if ( attrHandle.isAttributeValid() )
+			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+			if ( nameAttrRef.isValid() )
 			{
-				const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-				int numShapes = geo->getUniqueValueCount( attrRef );
-				for ( int i=0; i < numShapes; ++i )
+				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+				GA_Size numShapes = tuple->getTableEntries( nameAttr );
+				for ( GA_Size i=0; i < numShapes; ++i )
 				{
 					SceneInterface::Path childPath;
-					bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+					const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+					bool valid = relativePath( currentName, childPath );
 					if ( valid && !childPath.empty() && name == *childPath.begin() )
 					{
 						size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;

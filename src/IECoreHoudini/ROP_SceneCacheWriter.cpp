@@ -208,16 +208,17 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	{
 		OP_Context context( CHgetEvalTime() );
 		const GU_Detail *geo = node->getRenderGeometry( context );
-		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-		bool reRoot = !attrHandle.isAttributeValid();
-		if ( attrHandle.isAttributeValid() )
+		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+		bool reRoot = !nameAttrRef.isValid();
+		if ( nameAttrRef.isValid() )
 		{
-			const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-			int numShapes = geo->getUniqueValueCount( attrRef );
+			const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+			const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+			GA_Size numShapes = tuple->getTableEntries( nameAttr );
 			reRoot = ( numShapes == 0 );
 			if ( numShapes == 1 )
 			{
-				const char *name = geo->getUniqueStringValue( attrRef, 0 );
+				const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
 				if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
 				{
 					reRoot = true;
