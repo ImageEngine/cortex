@@ -735,26 +735,27 @@ GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, con
 	GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 	if ( nameAttrRef.isValid() )
 	{
-		bool match = false;
-		GU_Detail fullGeo( (GU_Detail*)geo );
-		GA_ElementGroup *group = fullGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGeometryConverter__extractor" );
 		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_Size numNames = tuple->getTableEntries( nameAttr );
-		for ( GA_Size i=0; i < numNames; ++i )
+		
+		GA_OffsetList offsets;
+		GA_Range primRange = geo->getPrimitiveRange();
+		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
 		{
-			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+			const char *currentName = tuple->getString( nameAttr, it.getOffset(), 0 );
 			if ( UT_String( currentName ).multiMatch( nameFilter ) )
 			{
-				group->addRange( fullGeo.getRangeByValue( nameAttrRef, currentName ) );
-				match = true;
+				offsets.append( it.getOffset() );
 			}
 		}
 		
-		if ( match )
+		if ( offsets.entries() )
 		{
+			GU_Detail *newGeo = new GU_Detail();
+			GA_Range matchPrims( geo->getPrimitiveMap(), offsets );
+			newGeo->mergePrimitives( *geo, matchPrims );
 			GU_DetailHandle newHandle;
-			newHandle.allocateAndSet( new GU_Detail( &fullGeo, static_cast<GA_PrimitiveGroup *>( group ) ) );
+			newHandle.allocateAndSet( newGeo );
 			return newHandle;
 		}
 	}
