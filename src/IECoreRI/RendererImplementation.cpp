@@ -154,12 +154,14 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["ri:subsurface"] = &IECoreRI::RendererImplementation::setSubsurfaceAttribute;
 	m_setAttributeHandlers["ri:detail"] = &IECoreRI::RendererImplementation::setDetailAttribute;
 	m_setAttributeHandlers["ri:detailRange"] = &IECoreRI::RendererImplementation::setDetailRangeAttribute;
+	m_setAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::setTextureCoordinatesAttribute;
 
 	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
 	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
 	m_getAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::getDoubleSidedAttribute;
 	m_getAttributeHandlers["rightHandedOrientation"] = &IECoreRI::RendererImplementation::getRightHandedOrientationAttribute;
 	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
+	m_getAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::getTextureCoordinatesAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
@@ -889,6 +891,25 @@ void IECoreRI::RendererImplementation::setDetailRangeAttribute( const std::strin
 	RiDetailRange( values[0], values[1], values[2], values[3] );
 }
 
+void IECoreRI::RendererImplementation::setTextureCoordinatesAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	const FloatVectorData *f = runTimeCast<const FloatVectorData>( d.get() );
+	if( !f )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setTextureCoordinatesAttribute", format( "%s attribute expects a FloatVectorData value." ) % name );
+		return;
+	}
+	
+	const vector<float> &values = f->readable();
+	if( values.size()!=8 )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setTextureCoordinatesAttribute", format( "Value must contain 8 elements (found %d)." ) %  values.size() );
+		return;
+	}
+	
+	RiTextureCoordinates( values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7] );
+}
+
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::string &name ) const
 {
 	ScopedContext scopedContext( m_context );
@@ -1037,6 +1058,23 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const s
 		}
 	}
 	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getTextureCoordinatesAttribute( const std::string &name ) const
+{
+	FloatVectorDataPtr result = new FloatVectorData;
+	result->writable().resize( 8 );
+
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxAttribute( "Ri:TextureCoordinates", result->baseWritable(), sizeof( float ) * 8, &resultType, &resultCount ) )
+	{
+		if( resultType==RxInfoFloat && resultCount==8 )
+		{
+			return result;
+		}
+	}
+	return NULL;
 }
 
 IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
