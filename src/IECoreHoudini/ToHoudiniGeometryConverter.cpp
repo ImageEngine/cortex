@@ -403,11 +403,13 @@ ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::create( const Object *
 	}
 	
 	// no exact match, so check for base class matches
-	for ( TypesToFnsMap::const_iterator it = m->begin(); it != m->end(); ++it )
+	const std::vector<IECore::TypeId> &bases = RunTimeTyped::baseTypeIds( object->typeId() );
+	for ( std::vector<IECore::TypeId>::const_iterator it = bases.begin(); it != bases.end(); ++it )
 	{
-		if ( object->isInstanceOf( it->first.fromType ) )
+		TypesToFnsMap::const_iterator cIt = m->find( Types( *it ) );
+		if ( cIt != m->end() )
 		{
-			return it->second( object );
+			return cIt->second( object );
 		}
 	}
 	
