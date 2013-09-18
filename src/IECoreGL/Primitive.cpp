@@ -158,6 +158,14 @@ void Primitive::render( State *state ) const
 		const Shader *shader = uniformSetup->shader();
 		const Shader::Setup *primitiveSetup = shaderSetup( shader, state );
 		Shader::Setup::ScopedBinding primitiveBinding( *primitiveSetup );
+		// inherit Cs from the state if it isn't provided by the shader or a primitive variable
+		if( !uniformSetup->hasCsValue() && !primitiveSetup->hasCsValue() )
+		{
+			if( const Shader::Parameter *csParameter = primitiveSetup->shader()->csParameter() )
+			{
+				glUniform3fv( csParameter->location, 1, state->get<Color>()->value().getValue() );
+			}
+		}
 		// then we defer to the derived class to perform the draw call.
 		render( state, Primitive::DrawSolid::staticTypeId() );
 	}

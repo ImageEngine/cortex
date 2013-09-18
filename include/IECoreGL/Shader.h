@@ -161,7 +161,10 @@ class Shader : public IECore::RunTimeTyped
 				/// Binds the specified value to the named vertex attribute. The divisor will be passed to
 				/// glVertexAttribDivisor(). 
 				void addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor = 0 );
-		
+				
+				/// Returns true if this setup specifies a value for the standard "Cs" parameter.
+				bool hasCsValue() const;
+					
 				/// The ScopedBinding class cleanly binds and unbinds the shader
 				/// Setup, making the shader current and setting the uniform
 				/// and vertex values as necessary.
