@@ -41,7 +41,8 @@
 namespace IECoreHoudini
 {
 
-/// Converter which converts from an IECore::Object to a Houdini GU_Detail
+/// Converter which converts from an IECore::Object to a Houdini GU_Detail. This converter
+/// creates a single GU_CortexPrimitive containing the Object, and adds it to the detail.
 class ToHoudiniCortexObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
