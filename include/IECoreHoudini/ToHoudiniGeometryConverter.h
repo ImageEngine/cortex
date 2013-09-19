@@ -52,7 +52,7 @@ namespace IECoreHoudini
 IE_CORE_FORWARDDECLARE( ToHoudiniGeometryConverter );
 
 /// The ToHoudiniGeometryConverter class forms a base class for all classes able to perform
-/// some kind of conversion from an IECore::Primitive to a Houdini GU_Detail.
+/// some kind of conversion from an IECore::Object to a Houdini GU_Detail.
 class ToHoudiniGeometryConverter : public ToHoudiniConverter
 {
 
@@ -60,7 +60,7 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniGeometryConverter, ToHoudiniGeometryConverterTypeId, ToHoudiniConverter );
 
-		/// Converts the IECore::Primitive into the given GU_Detail and returns true if successful
+		/// Converts the IECore::Object into the given GU_Detail and returns true if successful
 		/// and false otherwise. Implemented to aquire the write lock on the GU_Detail held by the
 		/// GU_DetailHandle, call doConversion(), and finally unlock the GU_Detail.
 		bool convert( GU_DetailHandle handle ) const;
@@ -70,9 +70,9 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// existing topology.
 		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
 		
-		/// Creates a converter which will convert the given IECore::Primitive to a Houdini GU_Detail.
+		/// Creates a converter which will convert the given IECore::Object to a Houdini GU_Detail.
 		/// Returns 0 if no such converter can be found.
-		static ToHoudiniGeometryConverterPtr create( const IECore::VisibleRenderable *renderable );
+		static ToHoudiniGeometryConverterPtr create( const IECore::Object *object );
 		
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a ToHoudiniGeometryConverter is available.
@@ -89,12 +89,12 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 	
 	protected :
 
-		ToHoudiniGeometryConverter( const IECore::VisibleRenderable *renderable, const std::string &description );
+		ToHoudiniGeometryConverter( const IECore::Object *object, const std::string &description );
 		
 		virtual ~ToHoudiniGeometryConverter();
 		
-		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::VisibleRenderable
-		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const = 0;
+		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::Object
+		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const = 0;
 		
 		/// Utility to name the primitives based on the name parameter. This is called by the default
 		/// implementation of transferAttribs(), and should be called by any overriding implementation.
@@ -104,7 +104,7 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// Default implementation simply returns a shallow copy of the input variable.
 		virtual IECore::PrimitiveVariable processPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primVar ) const;
 		
-		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::VisibleRenderable *renderable );
+		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::Object *object );
 
 		static void registerConverter( IECore::TypeId fromType, CreatorFn creator );
 
@@ -116,7 +116,7 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 			public :
 				Description( IECore::TypeId fromType );
 			private :
-				static ToHoudiniGeometryConverterPtr creator( const IECore::VisibleRenderable *renderable );
+				static ToHoudiniGeometryConverterPtr creator( const IECore::Object *object );
 		};
 		
 		/// Appends points to the GA_Detail. Returns a GA_Range containing the GA_Offsets for the newly added points.

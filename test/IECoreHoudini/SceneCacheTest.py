@@ -1948,6 +1948,17 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( coordPrim.vertices()[0].point().position(), hou.Vector3( 2, 2, 3 ) )
 		self.assertEqual( intsPrim.vertices()[0].point().position(), hou.Vector3( 0, 0, 0 ) )
 		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( sop )
+		self.assertTrue( isinstance( converter, IECoreHoudini.FromHoudiniCompoundObjectConverter ) )
+		result = converter.convert()
+		self.assertTrue( isinstance( result, IECore.CompoundObject ) )
+		self.assertEqual( sorted( result.keys() ), ['/1', '/1/2', '/1/2/3', '/1/coord', '/ints'] )
+		self.assertTrue( isinstance( result["/1"], IECore.MeshPrimitive ) )
+		self.assertTrue( isinstance( result["/1/2"], IECore.MeshPrimitive ) )
+		self.assertTrue( isinstance( result["/1/2/3"], IECore.MeshPrimitive ) )
+		self.assertTrue( isinstance( result["/1/coord"], IECore.CoordinateSystem ) )
+		self.assertEqual( result["/ints"], IECore.IntVectorData( [ 1, 10, 20, 30 ] ) )
+		
 		hou.setTime( 1 )
 		prims = sop.geometry().prims()
 		self.assertEqual( len(prims), 5 )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,10 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
-#define IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
-
-#include "IECore/MeshPrimitive.h"
+#ifndef IECOREHOUDINI_TOHOUDINICORTEXOBJECTCONVERTER_H
+#define IECOREHOUDINI_TOHOUDINICORTEXOBJECTCONVERTER_H
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
@@ -43,30 +41,40 @@
 namespace IECoreHoudini
 {
 
-/// Converter which converts from an IECore::MeshPrimitive to a Houdini GU_Detail
-class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+/// Converter which converts from an IECore::Object to a Houdini GU_Detail. This converter
+/// creates a single GU_CortexPrimitive containing the Object, and adds it to the detail.
+class ToHoudiniCortexObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPolygonsConverter, ToHoudiniPolygonsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniCortexObjectConverter, ToHoudiniCortexObjectConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniPolygonsConverter( const IECore::Object *object );
+		ToHoudiniCortexObjectConverter( const IECore::Object *object );
 
-		virtual ~ToHoudiniPolygonsConverter();
+		virtual ~ToHoudiniCortexObjectConverter();
+		
+		/// We don't actually transfer any attribs during conversion, but this method can be used to
+		/// transfer PrimitiveVariables from the source Object, provided it is an IECore::Primitive,
+		/// the GA_Range contains a GU_CortexPrimitive which also holds an IECore::Primitive, and both
+		/// Primitives have the same variable sizes.
+		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
 	
 	protected :
 		
-		/// performs conversion from the IECore::MeshPrimitive into the given GU_Detail
+		/// performs conversion from the IECore::Object into the given GU_Detail
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 	private :
-
-		static ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> m_description;
+		
+		// Used to apply the attributeFilter to the Object, if it is a Primitive
+		IECore::ConstObjectPtr filterAttribs( const IECore::Object *object ) const;
+		
+		static ToHoudiniGeometryConverter::Description<ToHoudiniCortexObjectConverter> m_description;
 };
 
 // register our converter
-IE_CORE_DECLAREPTR( ToHoudiniPolygonsConverter );
+IE_CORE_DECLAREPTR( ToHoudiniCortexObjectConverter );
 
 }
 
-#endif // IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
+#endif // IECOREHOUDINI_TOHOUDINICORTEXOBJECTCONVERTER_H

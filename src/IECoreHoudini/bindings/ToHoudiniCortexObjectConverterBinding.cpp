@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
-#define IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
+#include "boost/python.hpp"
 
-#include "IECore/MeshPrimitive.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECoreHoudini/TypeIds.h"
-#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
+#include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
 
-namespace IECoreHoudini
+using namespace boost::python;
+using namespace IECoreHoudini;
+
+void IECoreHoudini::bindToHoudiniCortexObjectConverter()
 {
-
-/// Converter which converts from an IECore::MeshPrimitive to a Houdini GU_Detail
-class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
-{
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPolygonsConverter, ToHoudiniPolygonsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
-
-		ToHoudiniPolygonsConverter( const IECore::Object *object );
-
-		virtual ~ToHoudiniPolygonsConverter();
-	
-	protected :
-		
-		/// performs conversion from the IECore::MeshPrimitive into the given GU_Detail
-		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
-
-	private :
-
-		static ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> m_description;
-};
-
-// register our converter
-IE_CORE_DECLAREPTR( ToHoudiniPolygonsConverter );
-
+	IECorePython::RunTimeTypedClass<ToHoudiniCortexObjectConverter>()
+		.def(init<IECore::Object*>())
+	;
 }
-
-#endif // IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H

@@ -420,54 +420,6 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 	{
 		OP_Context context( time );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context );
-		
-		// check if its holding a GU_CortexPrimitive
-		/// \todo: ideally this case would be handled by the converters as well...
-		{
-			GU_DetailHandleAutoReadLock readHandle( handle );
-			const GU_Detail *geo = readHandle.getGdp();
-			if ( geo )
-			{
-				// is there a named shape?
-				GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-				if ( nameAttrRef.isValid() )
-				{
-					unsigned numNames = geo->getUniqueValueCount( nameAttrRef );
-					for ( unsigned i=0; i < numNames; ++i )
-					{
-						const char *name = geo->getUniqueStringValue( nameAttrRef, i );
-						
-						Path childPath;
-						bool valid = relativePath( name, childPath );
-						if ( valid && childPath.empty() )
-						{
-							GA_Range primRange = geo->getRangeByValue( nameAttrRef, name );
-							GA_Primitive *hPrim = geo->getPrimitiveList().get( primRange.begin().getOffset() );
-							if ( hPrim->getTypeId() == GU_CortexPrimitive::typeId() )
-							{
-								/// todo: remove this copy once readObject returns a const object
-								return ((GU_CortexPrimitive *)hPrim)->getObject()->copy();
-							}
-						}
-					}
-				}
-				else
-				{
-					const GA_PrimitiveList &primitives = geo->getPrimitiveList();	
-					for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
-					{
-						const GA_Primitive *hPrim = primitives.get( it.getOffset() );
-						if ( hPrim->getTypeId() == GU_CortexPrimitive::typeId() )
-						{
-							/// todo: remove this copy once readObject returns a const object
-							return ((GU_CortexPrimitive *)hPrim)->getObject()->copy();
-						}
-					}
-				}
-			}
-		}
-		
-		// try normal geometry conversion
 		GU_DetailHandleAutoReadLock readHandle( handle );
 		const GU_Detail *geo = readHandle.getGdp();
 		if ( !geo )

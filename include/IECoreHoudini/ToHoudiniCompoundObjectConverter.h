@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,10 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
-#define IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
-
-#include "IECore/MeshPrimitive.h"
+#ifndef IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
+#define IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
@@ -43,30 +41,34 @@
 namespace IECoreHoudini
 {
 
-/// Converter which converts from an IECore::MeshPrimitive to a Houdini GU_Detail
-class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+/// Converter which converts from an IECore::CompoundObject to a Houdini GU_Detail. This converter
+/// unpacks the CompoundObject, creating a GU_CortexPrimitive for each member and naming it accordingly.
+class ToHoudiniCompoundObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPolygonsConverter, ToHoudiniPolygonsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
-
-		ToHoudiniPolygonsConverter( const IECore::Object *object );
-
-		virtual ~ToHoudiniPolygonsConverter();
+		
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniCompoundObjectConverter, ToHoudiniCompoundObjectConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
+		
+		ToHoudiniCompoundObjectConverter( const IECore::Object *object );
+		
+		virtual ~ToHoudiniCompoundObjectConverter();
+		
+		/// We don't actually transfer any attribs in this case, so overriding as a no-op
+		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
 	
 	protected :
 		
-		/// performs conversion from the IECore::MeshPrimitive into the given GU_Detail
+		/// performs conversion from the IECore::CompoundObject into the given GU_Detail
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
-
+	
 	private :
-
-		static ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> m_description;
+		
+		static ToHoudiniGeometryConverter::Description<ToHoudiniCompoundObjectConverter> m_description;
 };
 
 // register our converter
-IE_CORE_DECLAREPTR( ToHoudiniPolygonsConverter );
+IE_CORE_DECLAREPTR( ToHoudiniCompoundObjectConverter );
 
 }
 
-#endif // IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
+#endif // IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H

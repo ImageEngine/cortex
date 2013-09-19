@@ -46,8 +46,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGroupConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> ToHoudiniGroupConverter::m_description( GroupTypeId );
 
-ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::VisibleRenderable *renderable ) :
-	ToHoudiniGeometryConverter( renderable, "Converts an IECore::Group to a Houdini GU_Detail." )
+ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::Object *object ) :
+	ToHoudiniGeometryConverter( object, "Converts an IECore::Group to a Houdini GU_Detail." )
 {
 	m_transformParameter = new M44fParameter(
 		"transform",
@@ -72,9 +72,9 @@ const M44fParameter *ToHoudiniGroupConverter::transformParameter() const
 	return m_transformParameter;
 }
 
-bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
+bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Detail *geo ) const
 {
-	const Group *group = IECore::runTimeCast<const Group>( renderable );
+	const Group *group = IECore::runTimeCast<const Group>( object );
 	if ( !group )
 	{
 		return false;
