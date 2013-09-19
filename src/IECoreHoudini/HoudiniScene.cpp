@@ -64,7 +64,8 @@ HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
 	calculatePath( contentPath, rootPath );
 }
 
-HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath ) : m_rootIndex( 0 ), m_contentIndex( 0 )
+HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
+	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( splitter )
 {
 	m_nodePath = nodePath;
 	m_nodePath.hardenIfNeeded();
@@ -74,6 +75,13 @@ HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, 
 	{
 		contentNode->getFullPath( m_contentPath );
 		m_contentPath.hardenIfNeeded();
+		
+		if ( !m_splitter )
+		{
+			OP_Context context( CHgetEvalTime() );
+			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
+			m_splitter = new DetailSplitter( handle );
+		}
 	}
 	
 	calculatePath( contentPath, rootPath );
@@ -422,16 +430,13 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 	{
 		OP_Context context( time );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
-		GU_DetailHandleAutoReadLock readHandle( handle );
-		const GU_Detail *geo = readHandle.getGdp();
-		if ( !geo )
+		
+		if ( !m_splitter || ( handle != m_splitter->handle() ) )
 		{
-			return 0;
+			m_splitter = new DetailSplitter( handle );
 		}
 		
-		UT_StringMMPattern nameFilter;
-		nameFilter.compile( contentPathValue() );
-		GU_DetailHandle newHandle = FromHoudiniGeometryConverter::extract( geo, nameFilter );
+		GU_DetailHandle newHandle = m_splitter->split( contentPathValue() );
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
@@ -545,7 +550,7 @@ SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missin
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	return new HoudiniScene( nodePath, contentPath, rootPath );
+	return new HoudiniScene( nodePath, contentPath, rootPath, m_splitter );
 }
 
 ConstSceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -768,7 +773,7 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	node->getFullPath( rootNodePath );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath );
+	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath, m_splitter );
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
 	{
 		scene = scene->child( *it, missingBehaviour );

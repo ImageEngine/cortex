@@ -39,6 +39,8 @@
 #include "UT/UT_String.h"
 
 #include "IECore/SceneInterface.h"
+
+#include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/TypeIds.h"
 
 namespace IECoreHoudini
@@ -54,7 +56,7 @@ class HoudiniScene : public IECore::SceneInterface
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HoudiniScene, HoudiniSceneTypeId, IECore::SceneInterface );
 		
 		HoudiniScene();
-		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath );
+		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter = 0 );
 		
 		virtual ~HoudiniScene();
 		
@@ -145,6 +147,9 @@ class HoudiniScene : public IECore::SceneInterface
 		size_t m_rootIndex;
 		size_t m_contentIndex;
 		IECore::SceneInterface::Path m_path;
+		
+		// used by instances which track the hierarchy inside a SOP
+		mutable DetailSplitterPtr m_splitter;
 
 };
 
