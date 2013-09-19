@@ -99,11 +99,8 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		/// @return The number of newly created groups ( groupMap.size() )
 		size_t regroup( GU_Detail *geo, PrimIdGroupMap &groupMap ) const;
 		
-		/// Regroups the entire geo into several groups, based on attribute value and GA_PrimitiveTypeId
-		/// @param geo New groups will be added based on attribute value and GA_PrimitiveTypeId
-		/// @param groupMap A map from attribute value and GA_PrimitiveTypeId to the newly created group for that value/type pair
-		/// @return The number of newly created groups ( groupMap.size() )
-		size_t regroup( GU_Detail *geo, AttributePrimIdGroupMap &attrMap, GA_ROAttributeRef attrRef ) const;
+		/// Used in NameAttribute mode to handle any unnamed or mismatched portions of the src detail.
+		void doUnnamedConversion( const GU_Detail *geo, IECore::Group *result, const IECore::CompoundObject *operands, const std::string &name = "" ) const;
 		
 		static FromHoudiniGeometryConverter::Description<FromHoudiniGroupConverter> m_description;
 };

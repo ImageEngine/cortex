@@ -39,6 +39,7 @@
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 
+#include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGroupConverter.h"
 
 using namespace IECore;
@@ -152,61 +153,60 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 
 ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operands ) const
 {
-	GU_DetailHandleAutoReadLock readHandle( handle() );
-	const GU_Detail *geo = readHandle.getGdp();
-	if ( !geo )
-	{
-		return 0;
-	}
-	
-	size_t numResultPrims = 0;
-	size_t numOrigPrims = geo->getNumPrimitives();
-	
 	GroupPtr result = new Group();
 	
 	if ( operands->member<const IntData>( "groupingMode" )->readable() == NameAttribute )
 	{
-		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( "name" );
-		if ( attributeRef.isInvalid() || !attributeRef.isString() )
+		DetailSplitterPtr splitter = new DetailSplitter( handle() );
+		std::vector<std::string> children;
+		splitter->values( children );
+		
+		if ( children.empty() )
 		{
-			GU_Detail ungroupedGeo( (GU_Detail*)geo );
-			GA_PrimitiveGroup *ungrouped = static_cast<GA_PrimitiveGroup*>( ungroupedGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__ungroupedPrimitives" ) );
-			ungrouped->toggleRange( ungroupedGeo.getPrimitiveRange() );
-			
-			VisibleRenderablePtr renderable = 0;
-			doGroupConversion( &ungroupedGeo, ungrouped, renderable, operands );
-			if ( renderable )
-			{
-				Group *group = runTimeCast<Group>( renderable );
-				if ( group )
-				{
-					const Group::ChildContainer &children = group->children();
-					for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
-					{
-						result->addChild( *it );
-					}
-				}
-				else
-				{
-					result->addChild( renderable );
-				}
-			}
-			
+			doUnnamedConversion( GU_DetailHandleAutoReadLock( handle() ).getGdp(), result, operands );
 			return result;
 		}
 		
-		GU_Detail groupGeo( (GU_Detail*)geo );
-		
-		AttributePrimIdGroupMap groupMap;
-		regroup( &groupGeo, groupMap, attributeRef );
-		
-		for ( AttributePrimIdGroupMapIterator it=groupMap.begin(); it != groupMap.end(); ++it )
+		for ( std::vector<std::string>::iterator it = children.begin(); it != children.end(); ++it )
 		{
-			convertAndAddPrimitive( &groupGeo, it->second, result, operands, it->first.first );
+			const std::string &name = *it;
+			GU_DetailHandle childHandle = splitter->split( name );
+			if ( childHandle.isNull() )
+			{
+				continue;
+			}
+			
+			GU_DetailHandleAutoReadLock readHandle( childHandle );
+			const GU_Detail *childGeo = readHandle.getGdp();
+			ObjectPtr child = doDetailConversion( childGeo, operands );
+			if ( !child )
+			{
+				// this happens when mismatched primitives share the same name
+				doUnnamedConversion( childGeo, result, operands, name );
+			}
+			else if ( VisibleRenderablePtr renderable = IECore::runTimeCast<VisibleRenderable>( child ) )
+			{
+				if ( name != "" )
+				{
+					renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
+				}
+				
+				result->addChild( renderable );
+			}
 		}
 	}
 	else
 	{
+		GU_DetailHandleAutoReadLock readHandle( handle() );
+		const GU_Detail *geo = readHandle.getGdp();
+		if ( !geo )
+		{
+			return 0;
+		}
+
+		size_t numResultPrims = 0;
+		size_t numOrigPrims = geo->getNumPrimitives();
+
 		for ( GA_GroupTable::iterator<GA_ElementGroup> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 		{
 			GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup*>( it.group() );
@@ -311,37 +311,39 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, PrimIdGroupMap &group
 	return groupMap.size();
 }
 
-size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, AttributePrimIdGroupMap &groupMap, GA_ROAttributeRef attrRef ) const
+void FromHoudiniGroupConverter::doUnnamedConversion( const GU_Detail *geo, Group *result, const CompoundObject *operands, const std::string &name ) const
 {
-	const GA_Attribute *attr = attrRef.getAttribute();
-	const GA_AIFStringTuple *attrAIF = attrRef.getAIFStringTuple();
+	GU_Detail newGeo( (GU_Detail*)geo );
+	GA_PrimitiveGroup *newGroup = static_cast<GA_PrimitiveGroup*>( newGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__doUnnamedConversion" ) );
+	newGroup->toggleRange( newGeo.getPrimitiveRange() );
 	
-	AttributePrimIdGroupMapIterator it;
-	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	for ( GA_Iterator pIt=geo->getPrimitiveRange().begin(); !pIt.atEnd(); ++pIt )
+	VisibleRenderablePtr renderable = 0;
+	doGroupConversion( &newGeo, newGroup, renderable, operands );
+	if ( renderable )
 	{
-		GA_Primitive *prim = primitives.get( pIt.getOffset() );
-		unsigned primType = prim->getTypeId().get();
-		
-		std::string value = "";
-		const char *tmp = attrAIF->getString( attr, pIt.getOffset() );
-		if ( tmp )
+		if ( Group *group = IECore::runTimeCast<Group>( renderable ) )
 		{
-			value = tmp;
+			const Group::ChildContainer &children = group->children();
+			for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+			{
+				if ( name != "" )
+				{
+					(*it)->blindData()->member<StringData>( "name", false, true )->writable() = name;
+				}
+				
+				result->addChild( *it );
+			}
 		}
-		
-		AttributePrimIdPair key( value, primType );
-		it = groupMap.find( key );
-		if ( it == groupMap.end() )
+		else
 		{
-			AttributePrimIdGroupPair pair( key, static_cast<GA_PrimitiveGroup*>( geo->createInternalElementGroup( GA_ATTRIB_PRIMITIVE, ( boost::format( "FromHoudiniGroupConverter__typedPrimitives%d%s" ) % primType % value ).str().c_str() ) ) );
-			it = groupMap.insert( pair ).first;
+			if ( name != "" )
+			{
+				renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
+			}
+			
+			result->addChild( renderable );
 		}
-		
-		it->second->add( prim );
 	}
-	
-	return groupMap.size();
 }
 
 ObjectPtr FromHoudiniGroupConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
