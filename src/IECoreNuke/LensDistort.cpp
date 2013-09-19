@@ -1,4 +1,3 @@
-
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Weta Digital Limited. All rights reserved.
@@ -528,6 +527,9 @@ int LensDistort::knob_changed(Knob* k)
 		{
 			if ( k == it->m_knob )
 			{
+				std::stringstream s;
+				k->to_script( s, 0, false );
+				it->m_script = s.str();
 				it->m_value = k->get_value();
 				return true;
 			}
@@ -548,6 +550,7 @@ void LensDistort::addDynamicKnobs(void* p, DD::Image::Knob_Callback f)
 		attributeList[i].m_knob = Double_knob( f, &attributeList[i].m_value, attributeList[i].m_name.c_str(), attributeList[i].m_name.c_str() );
 		SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 		SetFlags( f, Knob::ALWAYS_SAVE );
+		attributeList[i].m_knob->from_script( attributeList[i].m_script.c_str() );
 	}
 }
 

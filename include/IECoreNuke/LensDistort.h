@@ -82,6 +82,7 @@ class LensDistort : public DD::Image::Iop
 			
 			std::string m_name;
 			DD::Image::Knob *m_knob;
+			std::string m_script;
 			double m_value;
 			double m_low;
 			double m_high;
