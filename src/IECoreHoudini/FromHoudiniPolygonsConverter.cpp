@@ -86,7 +86,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 	return Suitable;
 }
 
-PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
+ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	

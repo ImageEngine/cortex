@@ -71,7 +71,7 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 		
 		/// Uses the factory mechanism to find the best converter for the given GU_Detail
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
+		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 		
 	private :
 

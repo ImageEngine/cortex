@@ -48,10 +48,10 @@ using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGeometryConverter );
 
-ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const VisibleRenderable *renderable, const std::string &description )
-	:	ToHoudiniConverter( description, VisibleRenderableTypeId )
+ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const IECore::Object *object, const std::string &description )
+	:	ToHoudiniConverter( description, ObjectTypeId )
 {
-	srcParameter()->setValue( (VisibleRenderable *)renderable );
+	srcParameter()->setValue( const_cast<Object*>( object ) ); // safe because the object is const in doConversion
 	
 	m_nameParameter = new StringParameter(
 		"name",
@@ -121,13 +121,13 @@ bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
 		return false;
 	}
 	
-	const VisibleRenderable *renderable = IECore::runTimeCast<const VisibleRenderable>( srcParameter()->getValidatedValue() );
-	if ( !renderable )
+	bool result = doConversion( srcParameter()->getValidatedValue(), geo );
+	if ( result )
 	{
-		return false;
+		geo->incrementMetaCacheCount();
 	}
 	
-	return doConversion( renderable, geo );
+	return result;
 }
 
 GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoints ) const
@@ -393,13 +393,24 @@ const std::string ToHoudiniGeometryConverter::processPrimitiveVariableName( cons
 // Factory
 /////////////////////////////////////////////////////////////////////////////////
 
-ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::create( const VisibleRenderable *renderable )
+ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::create( const Object *object )
 {
 	const TypesToFnsMap *m = typesToFns();
-	TypesToFnsMap::const_iterator it = m->find( Types( renderable->typeId() ) );
+	TypesToFnsMap::const_iterator it = m->find( Types( object->typeId() ) );
 	if( it!=m->end() )
 	{
-		return it->second( renderable );
+		return it->second( object );
+	}
+	
+	// no exact match, so check for base class matches
+	const std::vector<IECore::TypeId> &bases = RunTimeTyped::baseTypeIds( object->typeId() );
+	for ( std::vector<IECore::TypeId>::const_iterator it = bases.begin(); it != bases.end(); ++it )
+	{
+		TypesToFnsMap::const_iterator cIt = m->find( Types( *it ) );
+		if ( cIt != m->end() )
+		{
+			return cIt->second( object );
+		}
 	}
 	
 	return 0;

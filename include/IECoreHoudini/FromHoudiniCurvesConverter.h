@@ -61,7 +61,7 @@ class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConv
 	protected :
 		
 		/// performs conversion to an IECore::CurvesPrimitive
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
+		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 
 	private :
 

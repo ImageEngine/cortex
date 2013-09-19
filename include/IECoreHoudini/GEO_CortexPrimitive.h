@@ -70,8 +70,13 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual UT_Vector3 computeNormal() const;
 		virtual int detachPoints( GA_PointGroup &grp );
 		
-		const IECore::Object *getObject() const;
+		/// Set the IECore::Object contained by this GEO_Primitive
 		void setObject( const IECore::Object *object );
+		/// Get the IECore::Object contained by this GEO_Primitive
+		const IECore::Object *getObject() const;
+		/// Allowing non-const access to the IECore::Object so it can be updated in-place.
+		/// Most users should prefer the const method above.
+		IECore::Object *getObject();
 	
 	protected :
 
