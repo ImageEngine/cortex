@@ -34,8 +34,6 @@
 
 #include "boost/python.hpp"
 
-#include <dlfcn.h>
-
 #include <iostream>
 
 #include "ri.h"
@@ -54,8 +52,6 @@ struct PythonInitialiser
 {
 	PythonInitialiser()
 	{
-		dlopen( "libpython2.7.so", RTLD_LAZY | RTLD_GLOBAL);
-
 		// start python
 		Py_Initialize();
 		PyEval_InitThreads();
