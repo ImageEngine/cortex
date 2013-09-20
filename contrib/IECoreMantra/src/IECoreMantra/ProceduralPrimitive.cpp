@@ -58,10 +58,6 @@ using namespace boost;
 IECoreMantra::ProceduralPrimitive::ProceduralPrimitive()
 	: m_renderer(0), m_procedural(0)
 {
-	import("global:fps", &m_fps, 1);
-	import("camera:shutter", m_cameraShutter, 2);
-	m_preBlur = -m_cameraShutter[0] / m_fps;
-	m_postBlur = -m_cameraShutter[1] / m_fps;
 }
 
 IECoreMantra::ProceduralPrimitive::~ProceduralPrimitive()
@@ -184,6 +180,10 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 	else if ( m_renderer->m_motionType == RendererImplementation::Velocity )
 	{
 		msg(Msg::Debug, "IECoreMantra::ProceduralPrimitive::addVisibleRenderable", "MotionBlur:Velocity" );
+		import("global:fps", &m_fps, 1);
+		import("camera:shutter", m_cameraShutter, 2);
+		m_preBlur = -m_cameraShutter[0] / m_fps;
+		m_postBlur = -m_cameraShutter[1] / m_fps;
 		openGeometryObject();
 			addGeometry(gdp, 0.0f);
 			addVelocityBlurGeometry(gdp, m_preBlur, m_postBlur);

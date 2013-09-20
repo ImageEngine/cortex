@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -230,7 +230,7 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 		
 		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
 		shaderStateComponent->addParametersToShaderSetup( instancingShaderSetup );
-		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "", 1 );
+		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "vertex", 1 );
 		
 		instancingShaderSetup->addUniformParameter( "useWidth", new BoolData( m_memberData->widths ) );
 		if( !m_memberData->constantWidth )
@@ -305,7 +305,7 @@ void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) 
 
 void PointsPrimitive::renderInstances( size_t numInstances ) const
 {
-	glDrawArraysInstanced( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );
+	glDrawArraysInstancedARB( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );
 }
 
 Imath::Box3f PointsPrimitive::bound() const
@@ -360,9 +360,16 @@ std::string &PointsPrimitive::instancingVertexSource()
 {
 	static std::string s = 
 	
+		"#version 120\n"
+		""
 		"#include \"IECoreGL/PointsPrimitive.h\"\n"
 		""
 		"IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS\n"
+		""
+		"in vec3 vertexCs;"
+		"uniform bool vertexCsActive = false;"
+		""
+		"uniform vec3 Cs = vec3( 1, 1, 1 );"
 		""
 		"in vec3 instanceP;"
 		"in vec3 instanceN;"
@@ -371,6 +378,7 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"varying out vec3 fragmentI;"
 		"varying out vec3 fragmentN;"
 		"varying out vec2 fragmentst;"
+		"varying out vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
@@ -390,7 +398,9 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"		fragmentI = vec3( 0.0, 0.0, -1.0 );"
 		"	}"
 		""
+		"	fragmentCs = mix( Cs, vertexCs, float( vertexCsActive ) );"
 		"	fragmentst = instancest;"
+		""
 		"}";
 		
 	return s;

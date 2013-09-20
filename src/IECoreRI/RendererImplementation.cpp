@@ -78,7 +78,6 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 // IECoreRI::RendererImplementation implementation
 ////////////////////////////////////////////////////////////////////////
 
-const unsigned int IECoreRI::RendererImplementation::g_shaderCacheSize = 10 * 1024 * 1024;
 tbb::queuing_rw_mutex IECoreRI::RendererImplementation::g_nLoopsMutex;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
@@ -155,12 +154,14 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["ri:subsurface"] = &IECoreRI::RendererImplementation::setSubsurfaceAttribute;
 	m_setAttributeHandlers["ri:detail"] = &IECoreRI::RendererImplementation::setDetailAttribute;
 	m_setAttributeHandlers["ri:detailRange"] = &IECoreRI::RendererImplementation::setDetailRangeAttribute;
+	m_setAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::setTextureCoordinatesAttribute;
 
 	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
 	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
 	m_getAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::getDoubleSidedAttribute;
 	m_getAttributeHandlers["rightHandedOrientation"] = &IECoreRI::RendererImplementation::getRightHandedOrientationAttribute;
 	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
+	m_getAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::getTextureCoordinatesAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
@@ -252,7 +253,7 @@ void IECoreRI::RendererImplementation::setShaderSearchPathOption( const std::str
 {
 	if( ConstStringDataPtr s = runTimeCast<const StringData>( d ) )
 	{
-		m_shaderCache = new CachedReader( SearchPath( s->readable(), ":" ), g_shaderCacheSize );
+		m_shaderCache = new CachedReader( SearchPath( s->readable(), ":" ) );
 		// no need to call RiOption as that'll be done in worldBegin().
 	}
 	else
@@ -890,6 +891,25 @@ void IECoreRI::RendererImplementation::setDetailRangeAttribute( const std::strin
 	RiDetailRange( values[0], values[1], values[2], values[3] );
 }
 
+void IECoreRI::RendererImplementation::setTextureCoordinatesAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	const FloatVectorData *f = runTimeCast<const FloatVectorData>( d.get() );
+	if( !f )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setTextureCoordinatesAttribute", format( "%s attribute expects a FloatVectorData value." ) % name );
+		return;
+	}
+	
+	const vector<float> &values = f->readable();
+	if( values.size()!=8 )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setTextureCoordinatesAttribute", format( "Value must contain 8 elements (found %d)." ) %  values.size() );
+		return;
+	}
+	
+	RiTextureCoordinates( values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7] );
+}
+
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::string &name ) const
 {
 	ScopedContext scopedContext( m_context );
@@ -1040,11 +1060,27 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const s
 	return 0;
 }
 
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getTextureCoordinatesAttribute( const std::string &name ) const
+{
+	FloatVectorDataPtr result = new FloatVectorData;
+	result->writable().resize( 8 );
+
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxAttribute( "Ri:TextureCoordinates", result->baseWritable(), sizeof( float ) * 8, &resultType, &resultCount ) )
+	{
+		if( resultType==RxInfoFloat && resultCount==8 )
+		{
+			return result;
+		}
+	}
+	return NULL;
+}
+
 IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
 {
 	static IECore::CachedReaderPtr g_defaultShaderCache = new CachedReader(
-		SearchPath( getenv( "DL_SHADERS_PATH" ) ? getenv( "DL_SHADERS_PATH" ) : "", ":" ),
-		g_shaderCacheSize
+		SearchPath( getenv( "DL_SHADERS_PATH" ) ? getenv( "DL_SHADERS_PATH" ) : "", ":" )
 	);
 	return g_defaultShaderCache;
 }
@@ -1148,8 +1184,29 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const std
 	ScopedContext scopedContext( m_context );
 	IECore::CompoundDataMap parametersCopy = parameters;
 	parametersCopy["__handleid"] = new StringData( handle );
+
+	bool areaLight = false;
+	CompoundDataMap::iterator it = parametersCopy.find( "ri:areaLight" );
+	if( it != parametersCopy.end() )
+	{
+		BoolData *b = runTimeCast<BoolData>( it->second );
+		if( b && b->readable() )
+		{
+			areaLight = true;
+		}
+		parametersCopy.erase( it );
+	}
+
 	ParameterList pl( parametersCopy );
-	RiLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+
+	if( areaLight )
+	{
+		RiAreaLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+	}
+	else
+	{
+		RiLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+	}
 }
 
 void IECoreRI::RendererImplementation::illuminate( const std::string &lightHandle, bool on )

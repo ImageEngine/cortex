@@ -35,17 +35,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// Boost
 #include <boost/python.hpp>
 
-// Houdini
 #include <UT/UT_DSOVersion.h>
 #include <UT/UT_IOTable.h>
 #include <UT/UT_Version.h>
 #include <OP/OP_OperatorTable.h>
 #include <GR/GR_RenderTable.h>
 
-// IECoreHoudini
+/// Used to our new Render Hook for Houdini 12.5 and later
+#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
+
+#include "DM/DM_RenderTable.h"
+
+#endif
+
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
@@ -57,6 +61,9 @@
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
+#include "IECoreHoudini/UT_ObjectPoolCache.h"
 
 using namespace IECoreHoudini;
 
@@ -66,6 +73,9 @@ extern "C"
 	DLLEXPORT void HoudiniDSOInit( UT_DSOInfo &dsoinfo )
 	{
 		dsoinfo.loadGlobal = true;
+		
+		/// Create the default ObjectPool cache
+		UT_ObjectPoolCache::defaultObjectPoolCache();
 	}
 }
 
@@ -158,15 +168,32 @@ void newDriverOperator( OP_OperatorTable *table )
 	table->addOpHidden( sceneCacheWriter->getName() );
 }
 
-/// Declare our new Render Hooks
+/// Declare our new Render Hooks for Houdini 12.0 and 12.1 only
+#if UT_MAJOR_VERSION_INT >= 12 && UT_MINOR_VERSION_INT <= 1
 void newRenderHook( GR_RenderTable *table )
 {
 	GR_Cortex *hook = new GR_Cortex;
-#if UT_MAJOR_VERSION_INT >= 11
 	table->addHook( hook, GR_RENDER_HOOK_VERSION );
-#else
-	table->addHook( hook );
+}
 #endif
+
+void newGeometryPrim( GA_PrimitiveFactory *factory )
+{
+	GA_PrimitiveDefinition *primDef = factory->registerDefinition(
+		GU_CortexPrimitive::typeName, GU_CortexPrimitive::create,
+		GA_FAMILY_NONE, ( std::string( GU_CortexPrimitive::typeName ) + "s" ).c_str()
+	);
+	
+	/// \todo: This method is silly. Should we just give up and do the whole registration in GU_CortexPrimitive?
+	GU_CortexPrimitive::setTypeDef( primDef );
+	
+/// Declare our new Render Hook for Houdini 12.5 and later
+#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
+
+	DM_RenderTable::getTable()->registerGEOHook( new GUI_CortexPrimitiveHook, primDef->getId(), 0 );
+
+#endif
+
 }
 
 /// Declare our new IO Translators

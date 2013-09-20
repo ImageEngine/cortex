@@ -41,15 +41,15 @@ namespace IECoreArnold
 
 enum TypeId
 {
-	RendererTypeId = 111000,
-	ToArnoldConverterTypeId = 111001,
-	ToArnoldMeshConverterTypeId = 111002,
-	ToArnoldCameraConverterTypeId = 111003,
-	ToArnoldCurvesConverterTypeId = 111004,
-	ToArnoldPointsConverterTypeId = 111005,
-	ToArnoldShapeConverterTypeId = 111006,
+	RendererTypeId = 114000,
+	ToArnoldConverterTypeId = 114001,
+	ToArnoldMeshConverterTypeId = 114002,
+	ToArnoldCameraConverterTypeId = 114003,
+	ToArnoldCurvesConverterTypeId = 114004,
+	ToArnoldPointsConverterTypeId = 114005,
+	ToArnoldShapeConverterTypeId = 114006,
 	
-	LastCoreArnoldTypeId = 111999,
+	LastCoreArnoldTypeId = 114999,
 };
 
 } // namespace IECoreRI

@@ -1,3 +1,4 @@
+
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2011, Weta Digital Limited. All rights reserved.
@@ -322,11 +323,20 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 
 void LensDistort::append( DD::Image::Hash &hash )
 {
+	std::string path;
+	if ( getFileSequencePath( path ) )
+	{
+		hash.append( path );
+	}
+	else
+	{
+		hash.append( m_assetPath );
+	}
+
 	hash.append( m_lensModel );
 	hash.append( m_mode );
 	hash.append( m_hasValidFileSequence );
 	hash.append( m_useFileSequence );
-	hash.append( m_assetPath );
 	hash.append( outputContext().frame() );
 }
 

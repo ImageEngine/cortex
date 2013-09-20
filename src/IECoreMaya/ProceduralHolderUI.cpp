@@ -360,8 +360,9 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 			selectionMode = IECoreGL::Selector::OcclusionQuery;
 		}
 		
-		IECoreGL::Selector selector;
-		selector.begin( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode );
+		std::vector<IECoreGL::HitRecord> hits;
+		{
+			IECoreGL::Selector selector( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode, hits );
 				
 			IECoreGL::State::bindBaseState();
 			selector.baseState()->bind();
@@ -379,10 +380,8 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 					IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
 				}
 			}
-			
-		std::vector<IECoreGL::HitRecord> hits;
-		selector.end( hits );
-				
+		}
+						
 	view.endGL();
 	
 	if( !hits.size() )

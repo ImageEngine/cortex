@@ -37,7 +37,7 @@ baker = hou.node(\"../INPUT_GEO\")
 inputs = baker.inputs()
 if len(inputs)>0:
     input_sop = inputs[0]
-    converter = IECoreHoudini.FromHoudiniGeometryConverter.create( input_sop, conversionType )
+    converter = IECoreHoudini.FromHoudiniGeometryConverter.create( input_sop, resultType = conversionType )
     converted = converter.convert()
 
     if output_format==\"FIO\":

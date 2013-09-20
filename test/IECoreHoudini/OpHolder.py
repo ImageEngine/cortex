@@ -485,7 +485,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.blindData()["name"].value, "torusGroup" )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "torusGroup" } ) )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
 		
 		group1.bypass( True )
@@ -508,7 +508,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.blindData()["name"].value, "boxGroup" )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "boxGroup" } ) )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
 	
 	def testInputConnectionsSaveLoad( self ) :

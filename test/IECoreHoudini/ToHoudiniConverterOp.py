@@ -76,7 +76,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		attrNames.sort()
 		self.assertEqual( attrNames, ["P", "Pw", "testAttribute"] )
 		self.assertEqual( len(geo.points()), 5000 )
-		self.assertEqual( len(geo.prims()), 0 )
+		self.assertEqual( len(geo.prims()), 1 )
 	
 	# check it works for polygons
 	def testPolygonConversion(self):
@@ -108,15 +108,15 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		converter = holder.createOutputNode( "ieCortexConverter" )
 		geo = converter.geometry()
 		self.assertEqual( len(geo.points()), 123 )
-		self.assertEqual( len(geo.prims()), 0 )
+		self.assertEqual( len(geo.prims()), 1 )
 
 		fn.setProcedural( "meshRender", 1 )
 		holder.parm( "parm_path" ).set( "test/IECoreHoudini/data/torus_with_normals.cob" )
 		geo = converter.geometry()
 		self.assertEqual( len(geo.points()), 100 )
 		self.assertEqual( len(geo.prims()), 100 )
-		self.assertEqual( geo.pointAttribs()[-1].name(), "N" )
-		self.assertTrue( geo.pointAttribs()[-1].isTransformedAsNormal() )
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), [ "N", "P", "Pw" ] )
+		self.assertTrue( geo.findPointAttrib( "N" ).isTransformedAsNormal() )
 	
 	def testAttributeFilter( self ) :
 		

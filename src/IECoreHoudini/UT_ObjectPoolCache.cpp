@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,57 +32,67 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
+#include "IECoreHoudini/UT_ObjectPoolCache.h"
 
-#include "IECore/ModelCache.h"
-#include "IECorePython/RefCountedBinding.h"
+using namespace IECoreHoudini;
 
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+UT_ObjectPoolCache::UT_ObjectPoolCache( const std::string &name, IECore::ObjectPoolPtr objectPool )
+	: m_name( name ), m_pool( objectPool )
 {
+}
 
-static list childNames( const ModelCache &m )
+UT_ObjectPoolCache::~UT_ObjectPoolCache()
 {
-	std::vector< IndexedIO::EntryID > n;
-	m.childNames( n );
+}
+
+const char *UT_ObjectPoolCache::utGetCacheName() const
+{
+	return m_name.c_str();
+}
+
+int64 UT_ObjectPoolCache::utGetCurrentSize() const
+{
+	return m_pool->memoryUsage();
+}
+
+int64 UT_ObjectPoolCache::utReduceCacheSizeBy( int64 amount )
+{
+	size_t begin = m_pool->memoryUsage();
+	size_t max = m_pool->getMaxMemoryUsage();
+	m_pool->setMaxMemoryUsage( begin - amount );
+	m_pool->setMaxMemoryUsage( max );
 	
-	list result;
-	for( std::vector<IndexedIO::EntryID>::const_iterator it = n.begin(); it!=n.end(); it++ )
+	return begin - m_pool->memoryUsage();
+}
+
+bool UT_ObjectPoolCache::utHasMaxSize() const
+{
+	return true;
+}
+
+int64 UT_ObjectPoolCache::utGetMaxSize() const
+{
+	return m_pool->getMaxMemoryUsage();
+}
+
+void UT_ObjectPoolCache::utSetMaxSize( int64 amount )
+{
+	m_pool->setMaxMemoryUsage( amount );
+}
+
+bool UT_ObjectPoolCache::utHasMinSize() const
+{
+	return false;
+}
+
+UT_ObjectPoolCache *UT_ObjectPoolCache::defaultObjectPoolCache()
+{
+	static UT_ObjectPoolCache *defaultCache = 0;
+	
+	if ( !defaultCache )
 	{
-		result.append( (*it).value() );
+		defaultCache = new UT_ObjectPoolCache( "Cortex Object Pool", IECore::ObjectPool::defaultObjectPool() );
 	}
 	
-	return result;
+	return defaultCache;
 }
-
-static ModelCachePtr readableChild( const ModelCache &m, const std::string &c )
-{
-	return constPointerCast<ModelCache>( m.readableChild( c ) );
-}
-
-void bindModelCache()
-{
-
-	RefCountedClass<ModelCache, RefCounted>( "ModelCache" )
-		.def( init<const std::string &, IndexedIO::OpenMode>() )
-		.def( "path", &ModelCache::path, return_value_policy<copy_const_reference>() )
-		.def( "name", &ModelCache::name, return_value_policy<copy_const_reference>() )
-		.def( "readBound", &ModelCache::readBound )
-		.def( "writeBound", &ModelCache::writeBound )
-		.def( "readTransform", &ModelCache::readTransform )
-		.def( "writeTransform", &ModelCache::writeTransform )
-		.def( "readObject", &ModelCache::readObject )
-		.def( "writeObject", &ModelCache::writeObject )
-		.def( "hasObject", &ModelCache::hasObject )
-		.def( "childNames", &childNames )
-		.def( "writableChild", &ModelCache::writableChild )
-		.def( "readableChild", &readableChild )
-	;
-	
-}
-
-} // namespace IECorePython

@@ -69,7 +69,7 @@ class MurmurHashTest( unittest.TestCase ) :
 		h.append( "the quick brown fox jumps over the lazy dog" )
 		self.assertEqual(
 			str( h ),
-			"bce4e9fee2ad86b30ae2e374406e4b7f",
+			"f476fee540bfc268dc36e7f3d95ddb72",
 		)
 
 		h = IECore.MurmurHash()
@@ -199,7 +199,23 @@ class MurmurHashTest( unittest.TestCase ) :
 		
 		h2.copyFrom( h1 )
 		self.assertEqual( h1, h2 )
-			
+	
+	def testHashOfEmptyStrings( self ) :
+	
+		h1 = IECore.MurmurHash()
+		h2 = IECore.MurmurHash()
+		
+		h2.append( "" )
+		self.assertNotEqual( h1, h2 )
+		
+		h1 = IECore.MurmurHash()
+		h2 = IECore.MurmurHash()
+		
+		h1.append( IECore.StringVectorData( [ "" ] ) )
+		h2.append( IECore.StringVectorData( [ "", "" ] ) )
+		
+		self.assertNotEqual( h1, h2 )
+		
 if __name__ == "__main__":
 	unittest.main()
 

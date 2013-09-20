@@ -179,7 +179,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		self.assertEqual( p.presetsOnly, True )
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
 		self.assert_( "one" in pr.keys() )
 		self.assert_( "two" in pr.keys() )
@@ -191,6 +191,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		p.setValue( "four" )
 		self.assertEqual( p.getCurrentPresetName(), "four" )
+		self.assertRaises( RuntimeError, p.setPresets, [] )		# CompoundParameter created with adoptChildPresets=True does not allow overriding presets
 
 		p = CompoundParameter(
 			name = "c",
@@ -220,7 +221,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.presetsOnly, False )
-		self.assertEqual( len( p.presets() ), 0 )
+		self.assertEqual( len( p.getPresets() ), 0 )
 
 	def testLateValidation( self ) :
 
@@ -346,18 +347,18 @@ class CompoundParameterTest( unittest.TestCase ) :
 			members = []
 		)
 
-		self.assertEqual( p.presets(), {} )
+		self.assertEqual( p.getPresets(), {} )
 
 		p.addParameter( IntParameter( name = "i", description = "d", defaultValue = 10, presets = ( ( "one", 1 ), ( "two", 2 ) ) ) )
 
-		self.assertEqual( len( p.presets() ), 2 )
-		self.assertEqual( p.presets(), { "one" : CompoundObject( { "i" : IntData( 1 ) } ), "two" : CompoundObject( { "i" : IntData( 2 ) } ) } )
+		self.assertEqual( len( p.getPresets() ), 2 )
+		self.assertEqual( p.getPresets(), { "one" : CompoundObject( { "i" : IntData( 1 ) } ), "two" : CompoundObject( { "i" : IntData( 2 ) } ) } )
 
 		fParam = FloatParameter( name = "f", description = "d", defaultValue = 20, presets = ( ( "one", 1 ), ) )
 		p.addParameter( fParam )
 
-		self.assertEqual( len( p.presets() ), 1 )
-		self.assertEqual( p.presets(), { "one" : CompoundObject( { "i" : IntData( 1 ), "f" : FloatData( 1 ) } ) } )
+		self.assertEqual( len( p.getPresets() ), 1 )
+		self.assertEqual( p.getPresets(), { "one" : CompoundObject( { "i" : IntData( 1 ), "f" : FloatData( 1 ) } ) } )
 
 		p.insertParameter( IntParameter( name = "x", description = "x", defaultValue = 10 ), fParam )
 		self.assertEqual( p.keys(), [ "i", "x", "f" ] )
@@ -586,7 +587,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 			],
 		)
 		
-		self.assertEqual( len( c.presets() ), 2 )
+		self.assertEqual( len( c.getPresets() ), 2 )
 		self.assertEqual( c.presetsOnly, True )
 		
 		# no adoption of presets
@@ -618,7 +619,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 			adoptChildPresets = False,
 		)
 		
-		self.assertEqual( len( c.presets() ), 0 )
+		self.assertEqual( len( c.getPresets() ), 0 )
 		self.assertEqual( c.presetsOnly, False )
 		
 		# no adoption of presets without use of keyword parameters
@@ -652,10 +653,35 @@ class CompoundParameterTest( unittest.TestCase ) :
 			False,
 		)
 		
-		self.assertEqual( len( c.presets() ), 0 )
+		self.assertEqual( len( c.getPresets() ), 0 )
 		self.assertEqual( c.presetsOnly, False )
 		self.assertEqual( c.userData()["ud"].value, 10 )
 
+		# when adoptChildPresets we can also set presets explicitly...
+		c['a'].setValue("one")
+		c['b'].setValue("two")
+		p1 = c.getValue().copy()
+		c['a'].setValue("two")
+		c['b'].setValue("one")
+		p2 = c.getValue().copy()
+		c.setValue( c.defaultValue )
+
+		c.setPresets(
+			[
+				( "p1", p1 ),
+				( "p2", p2 ),
+			]
+		)
+		pr = c.getPresets()
+		self.assertEqual( len( pr ), 2 )
+		self.assertEqual( pr["p1"], p1 )
+		self.assertEqual( pr["p2"], p2 )
+		self.assertEqual( c.presetNames(), ( "p1", "p2" ) )
+		c.setValue("p1")
+		self.assertEqual( c.getValue(), p1 )
+		c.setValue("p2")
+		self.assertEqual( c.getValue(), p2 )
+		
 	def testDerivingInPython( self ) :
 	
 		class DerivedCompoundParameter( CompoundParameter ) :

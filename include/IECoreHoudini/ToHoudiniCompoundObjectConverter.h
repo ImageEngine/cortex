@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_MODELCACHEBINDING_H
-#define IECOREPYTHON_MODELCACHEBINDING_H
+#ifndef IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
+#define IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
 
-namespace IECorePython
+#include "IECoreHoudini/TypeIds.h"
+#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+
+namespace IECoreHoudini
 {
 
-void bindModelCache();
+/// Converter which converts from an IECore::CompoundObject to a Houdini GU_Detail. This converter
+/// unpacks the CompoundObject, creating a GU_CortexPrimitive for each member and naming it accordingly.
+class ToHoudiniCompoundObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+{
+	public :
+		
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniCompoundObjectConverter, ToHoudiniCompoundObjectConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
+		
+		ToHoudiniCompoundObjectConverter( const IECore::Object *object );
+		
+		virtual ~ToHoudiniCompoundObjectConverter();
+		
+		/// We don't actually transfer any attribs in this case, so overriding as a no-op
+		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
+	
+	protected :
+		
+		/// performs conversion from the IECore::CompoundObject into the given GU_Detail
+		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
+	
+	private :
+		
+		static ToHoudiniGeometryConverter::Description<ToHoudiniCompoundObjectConverter> m_description;
+};
+
+// register our converter
+IE_CORE_DECLAREPTR( ToHoudiniCompoundObjectConverter );
 
 }
 
-#endif // IECOREPYTHON_MODELCACHEBINDING_H
+#endif // IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H

@@ -108,7 +108,7 @@ void ProceduralHolderComponentBoundIterator::setPoint( const MPoint & ) const
 int ProceduralHolderComponentBoundIterator::iteratorCount() const
 {
 	// one for each bounding box corner
-	return 8;
+	return m_numComponents * 8;
 }
 
 bool ProceduralHolderComponentBoundIterator::hasPoints() const

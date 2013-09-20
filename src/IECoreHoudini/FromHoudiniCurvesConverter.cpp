@@ -111,7 +111,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 	return Suitable;
 }
 
-PrimitivePtr FromHoudiniCurvesConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
+ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	

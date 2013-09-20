@@ -53,6 +53,7 @@ SConsignFile()
 ieCoreMajorVersion=8
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
+ieCoreVersionSuffix="a17"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -338,18 +339,6 @@ o.Add(
 	"The suffix appended to the names of the GLEW library. You can modify this "
 	"to link against libraries installed with non-defalt names.",
 	"",
-)
-
-o.Add(
-	"GLUT_INCLUDE_PATH",
-	"The path to the directory with glut.h in it.",
-	"$GLEW_INCLUDE_PATH",
-)
-
-o.Add(
-	"GLUT_LIB_PATH",
-	"The path to the directory with libGLUT in it.",
-	"$GLEW_LIB_PATH",
 )
 
 # Maya options
@@ -1001,8 +990,11 @@ if env["BUILD_CACHEDIR"] != "" :
 env["IECORE_MAJOR_VERSION"] = ieCoreMajorVersion
 env["IECORE_MINOR_VERSION"] = ieCoreMinorVersion
 env["IECORE_PATCH_VERSION"] = ieCorePatchVersion
+env["IECORE_VERSION_SUFFIX"] = ieCoreVersionSuffix
 env["IECORE_MAJORMINOR_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}"
 env["IECORE_MAJORMINORPATCH_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}"
+if ieCoreVersionSuffix :
+	env["IECORE_MAJORMINORPATCH_VERSION"] += "-${IECORE_VERSION_SUFFIX}"
 
 env.Append(
 	CPPFLAGS = [
@@ -1642,7 +1634,7 @@ if doConfigure :
 		riPythonSources = sorted( glob.glob( "src/IECoreRI/bindings/*.cpp" ) )
 		riPythonScripts = glob.glob( "python/IECoreRI/*.py" )
 	
-		if c.CheckHeader( "pointcloud.h" ) :
+		if c.CheckCXXHeader( "pointcloud.h" ) :
 			
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
@@ -1819,7 +1811,6 @@ if env["WITH_GL"] and doConfigure :
 		
 		"CXXFLAGS" : [
 			"-isystem", "$GLEW_INCLUDE_PATH",
-			"-isystem", "$GLUT_INCLUDE_PATH",
 			# These are to work around warnings in boost::wave
 			# while still using -Werror.
 			"-Wno-format",
@@ -1827,7 +1818,6 @@ if env["WITH_GL"] and doConfigure :
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
-			"$GLUT_LIB_PATH",
 		],
 	}
 	
@@ -1836,7 +1826,6 @@ if env["WITH_GL"] and doConfigure :
 	
 	c = Configure( glEnv )
 	
-	## \todo We need to check for GLUT here too
 	if not c.CheckLibWithHeader( env.subst( "GLEW$GLEW_LIB_SUFFIX" ), "glew.h", "CXX" ) :
 	
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
@@ -1853,7 +1842,6 @@ if env["WITH_GL"] and doConfigure :
 			glEnv.Append(
 				FRAMEWORKS = [
 					"OpenGL",
-					"GLUT",
 				]
 			)
 		else :
@@ -1861,7 +1849,6 @@ if env["WITH_GL"] and doConfigure :
 				LIBS = [
 					"GL",
 					"GLU",
-					"glut",
 				]
 			)
 
@@ -1927,6 +1914,7 @@ if env["WITH_GL"] and doConfigure :
 
 		glTestEnv = testEnv.Clone()
 		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":python"
+		glTestEnv["ENV"]["IECOREGL_SHADER_INCLUDE_PATHS"] = "./glsl"
 		for e in ["DISPLAY", "XAUTHORITY"] :
 			if e in os.environ :
 				glTestEnv["ENV"][e] = os.environ[e]
@@ -2134,6 +2122,10 @@ if doConfigure :
 		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
 		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya:./test/IECoreMaya/plugins"
 		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
+		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
+		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
+		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
+		mayaTestEnv["ENV"]["AUTODESK_ADLM_THINCLIENT_ENV"] = env["MAYA_ADLM_ENV_FILE"]
 		
 		mayaPythonTestEnv = mayaTestEnv.Clone()
 		
@@ -2145,10 +2137,6 @@ if doConfigure :
 				"OpenMayalib" 
 			] 
 		)
-		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
-		mayaTestEnv["ENV"]["AUTODESK_ADLM_THINCLIENT_ENV"] = env["MAYA_ADLM_ENV_FILE"]
 						
 		mayaPythonTest = mayaPythonTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, "mayapy $TEST_MAYA_SCRIPT" )
 		NoCache( mayaPythonTest )
@@ -2297,7 +2285,11 @@ if doConfigure :
 				else :
 					nukeSources.remove( "src/IECoreNuke/DisplayIop.cpp" )							
 					nukeNodeNames.remove( "ieDisplay" )
-					
+				
+				if nukeMajorVersion < 7 :
+					nukeSources.remove( "src/IECoreNuke/SceneCacheReader.cpp" )
+					nukeHeaders.remove( "include/IECoreNuke/SceneCacheReader.h" )
+
 				# nuke library
 
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
@@ -2410,6 +2402,7 @@ houdiniEnvAppends = {
 		"HoudiniPRM",
 		"HoudiniUT",
 		"HoudiniRAY",
+		"HoudiniAPPS3",
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
 		"GLEW$GLEW_LIB_SUFFIX"
 	]

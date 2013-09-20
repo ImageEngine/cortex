@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,28 +35,29 @@
 #ifndef IE_CORE_CACHEDREADER_H
 #define IE_CORE_CACHEDREADER_H
 
-#include "IECore/SearchPath.h"
-#include "IECore/LRUCache.h"
+#include "boost/shared_ptr.hpp"
 
-#include <set>
+#include "IECore/ObjectPool.h"
+#include "IECore/SearchPath.h"
+#include "IECore/ModifyOp.h"
 
 namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( CachedReader );
-IE_CORE_FORWARDDECLARE( ModifyOp );
-IE_CORE_FORWARDDECLARE( Object );
 
 /// \addtogroup environmentGroup
 ///
-/// <b>IECORE_CACHEDREADER_MEMORY</b><br>
 /// <b>IECORE_CACHEDREADER_PATHS</b><br>
 /// Used to specify the settings for the default CachedReader. See
 /// CachedReader::defaultCachedReader() for more information.
 
 /// The CachedReader class provides a means of loading files
 /// using the Reader subclasses, but caching them in memory to
-/// allow fast repeated loads.
+/// allow fast repeated loads. It uses a ObjectPool to store the images.
+/// It's recomended using the defaultObjectPool for sharing objects, which 
+/// limits the memory used by the IECORE_OBJECTPOOL_MEMORY
+/// environment variable.
 /// \todo We probably need a way of setting parameters for the
 /// Readers, and treating reads with different parameters as different
 /// entities in the cache.
@@ -72,12 +73,12 @@ class CachedReader : public RefCounted
 		IE_CORE_DECLAREMEMBERPTR( CachedReader );
 
 		/// Creates a reader that will search for files on the
-		/// given paths and load them. Up to maxMemory bytes of
-		/// memory will be used to cache loading.
-		CachedReader( const SearchPath &paths, size_t maxMemory );
+		/// given paths and load them. Will use the given ObjectPool to store the loaded objects.
+		CachedReader( const SearchPath &paths, ObjectPoolPtr objectPool = ObjectPool::defaultObjectPool() );
+
 		/// As above, but also takes an Op which will be applied to
-		/// objects following loading.
-		CachedReader( const SearchPath &paths, size_t maxMemory, ConstModifyOpPtr postProcessor );
+		/// objects following loading. Will use the given ObjectPool to store the loaded objects.
+		CachedReader( const SearchPath &paths, ConstModifyOpPtr postProcessor, ObjectPoolPtr objectPool = ObjectPool::defaultObjectPool() );
 
 		/// Searches for the given file and loads it if found.
 		/// Throws an exception in case it cannot be found or no suitable Reader
@@ -89,9 +90,6 @@ class CachedReader : public RefCounted
 		/// concurrent threads.
 		ConstObjectPtr read( const std::string &file );
 
-		/// Returns the amount of memory currently occupied by
-		/// the cache.
-		size_t memoryUsage() const;
 		/// Frees all memory used by the cache.
 		void clear();
 		/// Clears the cache for the given file.
@@ -108,30 +106,22 @@ class CachedReader : public RefCounted
 		/// potentially invalidates the contents of the cache.
 		void setSearchPath( const SearchPath &paths );
 
-		/// Returns the maximum amount of memory the cache will use.
-		size_t getMaxMemory() const;
-		/// Sets the maximum amount of memory the cache will use. If this
-		/// is less than memoryUsage() then cache removals will result.
-		void setMaxMemory( size_t maxMemory );
+		/// Returns the ObjectPool object used by this CachedReader.
+		ObjectPool *objectPool() const;
 
 		/// Returns a static CachedReader instance to be used by anything
 		/// wishing to share it's cache with others. It makes sense to use
 		/// this wherever possible to conserve memory. This initially
-		/// has a memory limit specified in megabytes by the IECORE_CACHEDREADER_MEMORY
-		/// environment variable and searchPaths set from the
-		/// IECORE_CACHEDREADER_PATHS environment variable. If either of these
-		/// need changing it's recommended to do that from a config file loaded
-		/// by the ConfigLoader, to avoid multiple clients fighting over the
-		/// same set of settings.
+		/// has searchPaths set from the IECORE_CACHEDREADER_PATHS 
+		/// environment variable. If it needs changing it's recommended to do 
+		/// that from a config file loaded by the ConfigLoader, to avoid multiple 
+		/// clients fighting over the same set of settings.
 		static CachedReaderPtr defaultCachedReader();
 
 	private :
 
-		struct Getter;
-
-		typedef LRUCache<std::string, ConstObjectPtr> Cache;
-		SearchPath m_paths;
-		Cache m_cache;
+		struct MemberData;
+		boost::shared_ptr<MemberData> m_data;
 
 };
 

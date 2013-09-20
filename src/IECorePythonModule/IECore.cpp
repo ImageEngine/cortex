@@ -312,7 +312,6 @@
 #include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
-#include "IECorePython/ModelCacheBinding.h"
 #include "IECorePython/SceneInterfaceBinding.h"
 #include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
@@ -321,6 +320,7 @@
 #include "IECorePython/LensModelBinding.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/LensDistortOpBinding.h"
+#include "IECorePython/ObjectPoolBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -635,7 +635,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimeCodeParameter();
 	bindOptions();
 	bindMPlayDisplayDriver();
-	bindModelCache();
 	bindSceneInterface();
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();
@@ -644,6 +643,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLensModel();
 	bindStandardRadialLensModel();
 	bindLensDistortOp();
+	bindObjectPool();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

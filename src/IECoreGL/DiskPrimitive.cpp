@@ -102,7 +102,7 @@ void DiskPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 
 void DiskPrimitive::renderInstances( size_t numInstances ) const
 {
-	glDrawArraysInstanced( GL_TRIANGLE_FAN, 0, m_nPoints, numInstances );
+	glDrawArraysInstancedARB( GL_TRIANGLE_FAN, 0, m_nPoints, numInstances );
 }
 
 Imath::Box3f DiskPrimitive::bound() const

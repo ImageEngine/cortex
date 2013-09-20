@@ -139,8 +139,6 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	}
 }
 
-#include "IECore/SceneInterface.h"
-
 PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInterface, const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &primVarNames )
 {
 	IECore::Object::LoadContextPtr context = new Object::LoadContext( ioInterface->subdirectory( name )->subdirectory( g_dataEntry ) );

@@ -255,7 +255,7 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 	// there are potentially loads of different internal formats which denote alpha.
 	// these are the only ones encountered so far, but it's not a great way of testing
 	// and i can't find another way of doing it.
-	if( internalFormat==GL_RGBA || internalFormat==GL_RGBA8_EXT )
+	if( internalFormat==GL_RGBA || internalFormat==GL_RGBA8_EXT || internalFormat==GL_RGBA16 )
 	{
 		ad = new FloatVectorData();
 		a = &ad->writable(); a->resize( width * height );

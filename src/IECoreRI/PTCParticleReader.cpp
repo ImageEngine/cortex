@@ -574,3 +574,8 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 
 	return result;
 }
+
+std::string PTCParticleReader::positionPrimVarName()
+{
+	return "P";
+}

@@ -93,7 +93,17 @@ const Object *Parameter::defaultValue() const
 
 const Parameter::PresetsContainer &Parameter::presets() const
 {
+	return getPresets();
+}
+
+const Parameter::PresetsContainer &Parameter::getPresets() const
+{
 	return m_presets;
+}
+
+void Parameter::setPresets( const PresetsContainer &presets )
+{
+	m_presets = presets;
 }
 
 bool Parameter::presetsOnly() const
@@ -145,7 +155,7 @@ bool Parameter::valueValid( const Object *value, std::string *reason ) const
 	{
 		return true;
 	}
-	const PresetsContainer &pr = presets();
+	const PresetsContainer &pr = getPresets();
 	for( PresetsContainer::const_iterator it = pr.begin(); it!=pr.end(); it++ )
 	{
 		if( it->second->isEqualTo( value ) )
@@ -201,7 +211,7 @@ void Parameter::setValidatedValue( ObjectPtr value )
 
 void Parameter::setValue( const std::string &presetName )
 {
-	const PresetsContainer &pr = presets();
+	const PresetsContainer &pr = getPresets();
 	
 	PresetsContainer::const_iterator it;
 	for( it=pr.begin(); it != pr.end(); it++ )
@@ -251,7 +261,7 @@ std::string Parameter::getCurrentPresetName() const
 	// didn't have to do a copy of the value. but that breaks with CompoundParameter
 	// as it builds the value dynamically in getValue().
 	const Object *currentValue = getValue();
-	const PresetsContainer &pr = presets();
+	const PresetsContainer &pr = getPresets();
 	PresetsContainer::const_iterator it;
 	for( it=pr.begin(); it!=pr.end(); it++ )
 	{

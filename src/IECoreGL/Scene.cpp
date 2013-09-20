@@ -91,16 +91,13 @@ size_t Scene::select( Selector::Mode mode, const Imath::Box2f &region, std::vect
 		m_camera->render( const_cast<State *>( State::defaultState().get() ) );
 	}
 
-	Selector selector;
-	selector.begin( region, mode );
+	Selector selector( region, mode, hits );
 	
-		State::bindBaseState();
-		selector.baseState()->bind();
-		root()->render( selector.baseState() );
+	State::bindBaseState();
+	selector.baseState()->bind();
+	root()->render( selector.baseState() );
 
-	size_t result = selector.end( hits );
-		
-	return result;
+	return hits.size();
 }
 
 void Scene::setCamera( CameraPtr camera )

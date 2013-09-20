@@ -143,7 +143,7 @@ class SceneInterface : public RunTimeTyped
 
 		/// Returns the interpolated transform object of this node at the specified 
 		/// point in time.
-		virtual DataPtr readTransform( double time ) const = 0;
+		virtual ConstDataPtr readTransform( double time ) const = 0;
 		/// Returns the transform of this node at the specified 
 		/// point in time as a matrix.
 		virtual Imath::M44d readTransformAsMatrix( double time ) const = 0;
@@ -161,7 +161,7 @@ class SceneInterface : public RunTimeTyped
 		/// Fills attrs with the names of all attributes available in the current directory
 		virtual void attributeNames( NameList &attrs ) const = 0;
 		/// Returns the attribute value at the given time.
-		virtual ObjectPtr readAttribute( const Name &name, double time ) const = 0;
+		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const = 0;
 		/// Writers the attribute to this path within the scene
 		/// Raises an exception if you try to write an attribute in the root path with a time different than 0.
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time ) = 0;
@@ -189,7 +189,7 @@ class SceneInterface : public RunTimeTyped
 		/// Convenience method to determine if a piece of geometry exists without reading it
 		virtual bool hasObject() const = 0;
 		/// Reads the object stored at this path in the scene at the given time.
-		virtual ObjectPtr readObject( double time ) const = 0;
+		virtual ConstObjectPtr readObject( double time ) const = 0;
 		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
 		/// Raises exception if it turns out not to be a Primitive object.
 		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const = 0;

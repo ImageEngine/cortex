@@ -85,14 +85,14 @@ class SampledSceneInterface : public SceneInterface
 		/// Returns the local bounding box of this node stored for the specified sample.
 		virtual Imath::Box3d readBoundAtSample( size_t sampleIndex ) const = 0;
 		/// Returns the transform applied to this path within the scene.
-		virtual DataPtr readTransformAtSample( size_t sampleIndex ) const = 0;
+		virtual ConstDataPtr readTransformAtSample( size_t sampleIndex ) const = 0;
 		/// Returns the transform applied to this path within the scene as a matrix.
 		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const = 0;
 		/// Reads the named attribute applied to this path within the scene.
-		virtual ObjectPtr readAttributeAtSample( const SceneInterface::Name &name, size_t sampleIndex ) const = 0;
+		virtual ConstObjectPtr readAttributeAtSample( const SceneInterface::Name &name, size_t sampleIndex ) const = 0;
 		/// Reads the object stored at this path in the scene - may
 		/// return 0 when no object has been stored.
-		virtual ObjectPtr readObjectAtSample( size_t sampleIndex ) const = 0;
+		virtual ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const = 0;
 
 		/// Computes a sample interval suitable for use in producing interpolated bounding box values.
 		virtual double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const = 0;

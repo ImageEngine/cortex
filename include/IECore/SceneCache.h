@@ -95,9 +95,9 @@ class SceneCache : public SampledSceneInterface
 		virtual size_t numTransformSamples() const;
 		virtual double transformSampleTime( size_t sampleIndex ) const;
 		virtual double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual DataPtr readTransformAtSample( size_t sampleIndex ) const;
+		virtual ConstDataPtr readTransformAtSample( size_t sampleIndex ) const;
 		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const;
-		virtual DataPtr readTransform( double time ) const;
+		virtual ConstDataPtr readTransform( double time ) const;
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
 		virtual void writeTransform( const Data *transform, double time );
 
@@ -106,8 +106,8 @@ class SceneCache : public SampledSceneInterface
 		virtual size_t numAttributeSamples( const Name &name ) const;
 		virtual double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
 		virtual double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual ObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
-		virtual ObjectPtr readAttribute( const Name &name, double time ) const;
+		virtual ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
+		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
 
 		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
@@ -118,8 +118,8 @@ class SceneCache : public SampledSceneInterface
 		virtual size_t numObjectSamples() const;
 		virtual double objectSampleTime( size_t sampleIndex ) const;
 		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual ObjectPtr readObjectAtSample( size_t sampleIndex ) const;
-		virtual ObjectPtr readObject( double time ) const;
+		virtual ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const;
+		virtual ConstObjectPtr readObject( double time ) const;
 		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const;
 		virtual void writeObject( const Object *object, double time );
 

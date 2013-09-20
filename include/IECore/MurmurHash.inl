@@ -112,7 +112,7 @@ inline MurmurHash &MurmurHash::append( const char *data )
 
 inline MurmurHash &MurmurHash::append( const std::string &data )
 {
-	append( data.c_str(), data.size(), sizeof( char ) );
+	append( data.c_str(), data.size() + 1, sizeof( char ) );
 	return *this;
 }
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -49,15 +49,15 @@ class CameraControllerTest( unittest.TestCase ) :
 		
 		controller = IECore.CameraController( camera )
 		
-		near, far = controller.unproject( IECore.V2i( 0, 0 ) )
+		near, far = controller.unproject( IECore.V2f( 0, 0 ) )
 		self.assertEqual( near, IECore.V3f( -2, 1, -.1 ) )
 		self.assertEqual( far, IECore.V3f( -2, 1, -10 ) )
 		
-		near, far = controller.unproject( IECore.V2i( 500, 250 ) )
+		near, far = controller.unproject( IECore.V2f( 500, 250 ) )
 		self.assertEqual( near, IECore.V3f( 2, -1, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 2, -1, -10 ) )
 		
-		near, far = controller.unproject( IECore.V2i( 250, 125 ) )
+		near, far = controller.unproject( IECore.V2f( 250, 125 ) )
 		self.assertEqual( near, IECore.V3f( 0, 0, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 0, 0, -10 ) )
 
@@ -72,15 +72,15 @@ class CameraControllerTest( unittest.TestCase ) :
 		
 		controller = IECore.CameraController( camera )
 				
-		near, far = controller.unproject( IECore.V2i( 0, 0 ) )
+		near, far = controller.unproject( IECore.V2f( 0, 0 ) )
 		self.assertEqual( near, IECore.V3f( -.1, .05, -.1 ) )
 		self.assertEqual( far, IECore.V3f( -10, 5, -10 ) )
 		
-		near, far = controller.unproject( IECore.V2i( 500, 250 ) )
+		near, far = controller.unproject( IECore.V2f( 500, 250 ) )
 		self.assertEqual( near, IECore.V3f( .1, -.05, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 10, -5, -10 ) )
 		
-		near, far = controller.unproject( IECore.V2i( 250, 125 ) )
+		near, far = controller.unproject( IECore.V2f( 250, 125 ) )
 		self.assertEqual( near, IECore.V3f( 0, 0, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 0, 0, -10 ) )
 
@@ -96,7 +96,7 @@ class CameraControllerTest( unittest.TestCase ) :
 	
 		r = IECore.Rand48()
 		for i in range( 0, 100 ) :
-			rasterPosition = IECore.V2i( r.nexti() % 500, r.nexti() % 250 )
+			rasterPosition = IECore.V2f( r.nexti() % 500, r.nexti() % 250 )
 			near, far = controller.unproject( rasterPosition )
 			nearProjected = controller.project( near )
 			farProjected = controller.project( far )
@@ -120,7 +120,7 @@ class CameraControllerTest( unittest.TestCase ) :
 	
 		r = IECore.Rand48()
 		for i in range( 0, 100 ) :
-			rasterPosition = IECore.V2i( r.nexti() % 500, r.nexti() % 250 )
+			rasterPosition = IECore.V2f( r.nexti() % 500, r.nexti() % 250 )
 			near, far = controller.unproject( rasterPosition )
 			nearProjected = controller.project( near )
 			farProjected = controller.project( far )
@@ -140,8 +140,8 @@ class CameraControllerTest( unittest.TestCase ) :
 		
 		controller = IECore.CameraController( camera )
 		
-		controller.motionStart( controller.MotionType.Track, IECore.V2i( 0 ) )
-		controller.motionEnd( IECore.V2i( 10 ) )
+		controller.motionStart( controller.MotionType.Track, IECore.V2f( 0 ) )
+		controller.motionEnd( IECore.V2f( 10 ) )
 		
 		self.assertNotEqual( transform.transform(), originalMatrix )
 		

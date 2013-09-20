@@ -88,6 +88,7 @@ class Shader : public IECore::RunTimeTyped
 		
 		struct Parameter
 		{
+			
 			/// Type as reported by glGetActiveUnifom() or
 			/// glGetActiveAttrib().
 			GLenum type;
@@ -102,6 +103,9 @@ class Shader : public IECore::RunTimeTyped
 			/// This does not store an enum but instead an index
 			/// (so 0 represents GL_TEXTURE0).
 			GLuint textureUnit;
+			
+			bool operator == ( const Parameter &other ) const;
+			
 		};
 		
 		/// Fills the passed vector with the names of all uniform shader parameters.
@@ -120,6 +124,20 @@ class Shader : public IECore::RunTimeTyped
 		/// parameter exists. The return value directly references data held within
 		/// the Shader, and will die when the Shader dies.
 		const Parameter *vertexAttribute( const std::string &name ) const; 
+		
+		//! @name Standard parameters
+		/// Cortex defines a set of standard shader parameters which
+		/// are used to pass state to the shaders. These functions
+		/// provide rapid access to the standard parameters if
+		/// they exist.
+		/// \todo Pass the matrices and projections via standard
+		/// parameters to avoid use of deprecated gl_ModelViewMatrix etc.
+		///////////////////////////////////////////////////////////
+		//@{
+		/// Returns the "uniform vec3 Cs" parameter used to specify
+		/// constant colours to the shader.
+		const Parameter *csParameter() const;
+		//@}
 		
 		/// Shaders are only useful when associated with a set of values for
 		/// their uniform parameters and vertex attributes, and to render
@@ -143,7 +161,10 @@ class Shader : public IECore::RunTimeTyped
 				/// Binds the specified value to the named vertex attribute. The divisor will be passed to
 				/// glVertexAttribDivisor(). 
 				void addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor = 0 );
-		
+				
+				/// Returns true if this setup specifies a value for the standard "Cs" parameter.
+				bool hasCsValue() const;
+					
 				/// The ScopedBinding class cleanly binds and unbinds the shader
 				/// Setup, making the shader current and setting the uniform
 				/// and vertex values as necessary.
@@ -154,7 +175,9 @@ class Shader : public IECore::RunTimeTyped
 					
 						/// Binds the setup. It is the responsibility of the
 						/// caller to ensure the setup remains alive for
-						/// the lifetime of the ScopedBinding.
+						/// the lifetime of the ScopedBinding. The setup will
+						/// also be registered with the current Selector if
+						/// necessary.
 						ScopedBinding( const Setup &setup );
 						/// Unbinds the setup, reverting to the previous state.
 						~ScopedBinding();
@@ -176,20 +199,27 @@ class Shader : public IECore::RunTimeTyped
 		
 		IE_CORE_DECLAREPTR( Setup );
 		
-		//! @name Default shader source.
-		/// These functions return the default shader source used
-		/// when source isn't provided to the constructor.
+		//! @name Common shader sources.
+		/// These functions return some common shader sources which
+		/// may be useful in many situations.
 		///////////////////////////////////////////////////////////
 		//@{
 		/// Default vertex shader source. This takes vertexP, vertexN,
-		/// vertexst, vertexCs and Cs inputs and sets fragmentI, fragmentN,
+		/// vertexst, vertexCs and Cs inputs and sets fragmentI, fragmentP, fragmentN,
 		/// fragmentst and fragmentCs outputs. It also sets equivalent geometry*
 		/// outputs which may be used by geometry shaders in calculating new
 		/// values for the corresponding fragment* outputs.
 		static const std::string &defaultVertexSource();
+		/// Default geometry shader source. This is provided to make a common
+		/// interface, but is actually just a no-op.
+		static const std::string &defaultGeometrySource();
 		/// Default fragment shader source. This uses fragmentI, fragmentN
 		/// and fragmentCs to compute a simple facing ratio.
 		static const std::string &defaultFragmentSource();
+		/// This uses fragmentCs as a constant flat color.
+		static const std::string &constantFragmentSource();
+		/// This passes fragmentP and fragmentN to ieDiffuse.
+		static const std::string &lambertFragmentSource();
 		//@}
 		
 		//! @name Built in shaders

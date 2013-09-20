@@ -236,7 +236,7 @@ void CurvesPrimitive::renderInstances( size_t numInstances ) const
 {
 	ensureVertIds();
 	Buffer::ScopedBinding indexBinding( *(m_memberData->vertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
-	glDrawElementsInstanced( GL_LINES, m_memberData->numVertIds, GL_UNSIGNED_INT, 0, numInstances );
+	glDrawElementsInstancedARB( GL_LINES, m_memberData->numVertIds, GL_UNSIGNED_INT, 0, numInstances );
 }
 
 const std::string &CurvesPrimitive::cubicLinesGeometrySource()

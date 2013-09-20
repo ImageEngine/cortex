@@ -124,6 +124,8 @@ class SceneShapeInterface: public MPxComponentShape
 		IECore::InternedString selectionName( int index );
 		/// Returns all component names currently existing in the shape
 		const std::vector< IECore::InternedString > & componentNames() const;
+		/// Return the value of the time plug for the SceneShape.
+		double time() const;
 
 	protected :
 		
@@ -131,6 +133,7 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aTime;
 		static MObject aOutTime;
 		static MObject aOutputObjects;
+		static MObject aObjectDependency;
 		static MObject aAttributes;
 		static MObject aTransform;
 		static MObject aBound;
@@ -190,8 +193,12 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Recursively parses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
 		void recurseBuildScene( IECoreGL::Renderer * renderer, const IECore::SceneInterface *subSceneInterface, double time, bool drawBounds, bool drawGeometry, bool objectOnly, const IECore::SceneInterface::NameList &drawTags );
 
+		void createInstances();
+
 		/// Recursively parses glScene to store GL Groups matching path names
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
+
+		void registerGroup( const std::string &name, IECoreGL::GroupPtr &group );
 		
 		std::string relativePathName( IECore::SceneInterface::Path path );
 		IECore::SceneInterface::Path fullPathName( std::string relativeName );
@@ -200,11 +207,22 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Returns bound for the component matching the given index
 		Imath::Box3d componentBound( int idx );
 
+		void recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix );
+
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
+		typedef std::map< IECore::MurmurHash, IECore::InternedString > HashToName;
+		typedef std::pair< IECore::InternedString, IECore::InternedString > InstanceInfo;
+		typedef std::vector< InstanceInfo > InstanceArray;
 
 		IndexToNameMap m_indexToNameMap;
 		NameToGroupMap m_nameToGroupMap;
+		HashToName m_hashToName;
+		InstanceArray m_instances;
+		
+		IE_CORE_FORWARDDECLARE( PostLoadCallback );
+		PostLoadCallbackPtr m_postLoadCallback;
+
 };
 
 }
