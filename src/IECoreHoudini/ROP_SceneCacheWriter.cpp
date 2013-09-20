@@ -190,6 +190,14 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *boss )
 {
+	// the interruptor passed in is null for some reason, so just get the global one
+	UT_Interrupt *progress = UTgetInterrupt();
+	if ( !progress->opStart( ( boost::format( "Writing time %f" ) % time ).str().c_str() ) )
+	{
+		addError( 0, "Cache aborted" );
+		return ROP_ABORT_RENDER;
+	}
+	
 	SceneInterfacePtr outScene = m_outScene;
 	
 	// we need to re-root the scene if its trying to cache a top level object
@@ -223,7 +231,9 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		}
 	}
 	
-	return doWrite( m_liveScene, outScene, time );
+	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, time, progress );
+	progress->opEnd();
+	return status;
 }
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
@@ -234,8 +244,15 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 	return ROP_CONTINUE_RENDER;
 }
 
-ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterface *outScene, double time )
+ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterface *outScene, double time, UT_Interrupt *progress )
 {
+	progress->setLongOpText( ( "Writing " + liveScene->name().string() ).c_str() );
+	if ( progress->opInterrupt() )
+	{
+		addError( 0, ( "Cache aborted during " + liveScene->name().string() ).c_str() );
+		return ROP_ABORT_RENDER;
+	}
+	
 	if ( liveScene != m_liveScene )
 	{
 		outScene->writeTransform( liveScene->readTransform( time ), time );
@@ -309,7 +326,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	{
 		ConstSceneInterfacePtr liveChild = liveScene->child( *it );
 		SceneInterfacePtr outChild = outScene->child( *it, SceneInterface::CreateIfMissing );
-		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time );
+		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time, progress );
 		if ( status != ROP_CONTINUE_RENDER )
 		{
 			return status;
