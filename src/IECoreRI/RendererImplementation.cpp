@@ -168,6 +168,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
 
 	m_inMotion = false;
+	m_numDisplays = 0;
 }
 
 IECoreRI::RendererImplementation::~RendererImplementation()
@@ -450,8 +451,17 @@ void IECoreRI::RendererImplementation::outputCamera( IECore::CameraPtr camera )
 void IECoreRI::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
+	
+	std::string prefixedName = name;
+	if( m_numDisplays )
+	{
+		prefixedName = "+" + prefixedName;
+	}
+	
 	ParameterList pl( parameters );
-	RiDisplayV( (char *)name.c_str(), (char *)type.c_str(), (char *)data.c_str(), pl.n(), pl.tokens(), pl.values() );
+	RiDisplayV( (char *)prefixedName.c_str(), (char *)type.c_str(), (char *)data.c_str(), pl.n(), pl.tokens(), pl.values() );
+	
+	m_numDisplays++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
