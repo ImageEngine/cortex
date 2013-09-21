@@ -348,6 +348,8 @@ void HoudiniScene::writeTags( const NameList &tags )
 	throw Exception( "HoudiniScene::writeTags not supported" );
 }
 
+static const char *emptyString = "";
+
 bool HoudiniScene::hasObject() const
 {
 	OP_Node *node = retrieveNode( true );
@@ -385,11 +387,11 @@ bool HoudiniScene::hasObject() const
 		
 		for ( GA_Size i=0; i < numShapes; ++i )
 		{
-			Path childPath;
 			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
-			bool valid = relativePath( currentName, childPath );
-			if ( valid && childPath.empty() )
+			const char *match = matchPath( currentName );
+			if ( match && *match == *emptyString )
 			{
+				// exact match
 				return true;
 			}
 		}
@@ -500,12 +502,16 @@ void HoudiniScene::childNames( NameList &childNames ) const
 		GA_Size numShapes = tuple->getTableEntries( nameAttr );
 		for ( GA_Size i=0; i < numShapes; ++i )
 		{
-			Path childPath;
 			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
-			bool valid = relativePath( currentName, childPath );
-			if ( valid && !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
+			const char *match = matchPath( currentName );
+			if ( match && *match != *emptyString )
 			{
-				childNames.push_back( *childPath.begin() );
+				std::pair<const char *, size_t> childMarker = nextWord( match );
+				std::string child( childMarker.first, childMarker.second );
+				if ( std::find( childNames.begin(), childNames.end(), child ) == childNames.end() )
+				{
+					childNames.push_back( child );
+				}
 			}
 		}
 	}
@@ -658,21 +664,25 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 				GA_Size numShapes = tuple->getTableEntries( nameAttr );
 				for ( GA_Size i=0; i < numShapes; ++i )
 				{
-					SceneInterface::Path childPath;
 					const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
-					bool valid = relativePath( currentName, childPath );
-					if ( valid && !childPath.empty() && name == *childPath.begin() )
+					const char *match = matchPath( currentName );
+					if ( match && *match != *emptyString )
 					{
-						size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-						if ( contentSize )
+						std::pair<const char *, size_t> childMarker = nextWord( match );
+						std::string child( childMarker.first, childMarker.second );
+						if ( name == child )
 						{
-							contentPath.resize( contentSize );
-							std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
+							size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
+							if ( contentSize )
+							{
+								contentPath.resize( contentSize );
+								std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
+							}
+							
+							contentPath.push_back( name );
+							
+							return contentNode;
 						}
-						
-						contentPath.push_back( name );
-						
-						return contentNode;
 					}
 				}
 			}
@@ -744,36 +754,89 @@ bool HoudiniScene::hasInput( const OP_Node *node ) const
 	return false;
 }
 
-bool HoudiniScene::relativePath( const char *value, Path &result ) const
+bool HoudiniScene::matchPattern( const char *value, const char *pattern ) const
 {
-	Path path;
-	std::string pStr = value;
-	stringToPath( pStr, path );
+	size_t size = strlen( pattern ) - 1;
 	
-	size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-	if ( contentSize > path.size() )
+	// can't be a match unless its exactly the right length
+	if ( strlen( value ) < size || value[size] == '\0' || value[size] == '/' )
 	{
 		return false;
 	}
 	
-	Path::iterator start = path.begin() + contentSize;
-	if ( path.end() - start > 0 )
+	for ( size_t i = 0; i < size; ++i )
 	{
-		result.resize( path.end() - start );
-		std::copy( start, path.end(), result.begin() );
-	}
-	
-	// verify the pre-path matches
-	Path::const_iterator mIt = m_path.begin() + m_contentIndex;
-	for ( Path::iterator it = path.begin(); it != start && mIt != m_path.end(); ++it, ++mIt )
-	{
-		if ( *it != *mIt )
+		if ( value[i] != pattern[i] )
 		{
 			return false;
 		}
 	}
 	
 	return true;
+}
+
+const char *HoudiniScene::matchPath( const char *value ) const
+{
+	// looking for empty path
+	if ( !m_contentIndex )
+	{
+		// houdini returns 0 for empty strings in some cases
+		if ( value == 0 || !value[0] || !strcmp( value, "/" ) )
+		{
+			return emptyString;
+		}
+		
+		return &value[0];
+	}
+	
+	// looking for some value, so empty is a failed match
+	if ( value == 0 )
+	{
+		return NULL;
+	}
+	
+	size_t i = 0;
+	for ( Path::const_iterator it = m_path.begin() + m_contentIndex; it != m_path.end(); ++it )
+	{
+		const char *current = it->c_str();
+		
+		if ( value[i] == '/' )
+		{
+			i++;
+		}
+		
+		if ( !matchPattern( &value[i], current ) )
+		{
+			return NULL;
+		}
+		
+		i += strlen( current );
+	}
+	
+	return &value[i];
+}
+
+std::pair<const char *, size_t> HoudiniScene::nextWord( const char *value ) const
+{
+	std::pair<const char *, size_t> result( value, 0 );
+	
+	if ( value[0] == '/' )
+	{
+		result.first = &value[1];
+		result.second = 1;
+	}
+	
+	size_t size = strlen( value );
+	for ( ; result.second < size; ++result.second )
+	{
+		if ( value[result.second] == '/' || value[result.second] == '\0' )
+		{
+			result.second--;
+			break;
+		}
+	}
+	
+	return result;
 }
 
 const char *HoudiniScene::contentPathValue() const

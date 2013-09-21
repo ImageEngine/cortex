@@ -122,7 +122,9 @@ class HoudiniScene : public IECore::SceneInterface
 		bool hasInput( const OP_Node *node ) const;
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
-		bool relativePath( const char *value, Path &result ) const;
+		const char *matchPath( const char *value ) const;
+		bool matchPattern( const char *value, const char *pattern ) const;
+		std::pair<const char *, size_t> nextWord( const char *value ) const;
 		const char *contentPathValue() const;
 		
 		/// Struct for registering readers for custom Attributes.
