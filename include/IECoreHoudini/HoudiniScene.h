@@ -143,7 +143,6 @@ class HoudiniScene : public IECore::SceneInterface
 		static std::vector<CustomTagReader> &customTagReaders();
 		
 		UT_String m_nodePath;
-		UT_String m_contentPath;
 		size_t m_rootIndex;
 		size_t m_contentIndex;
 		IECore::SceneInterface::Path m_path;

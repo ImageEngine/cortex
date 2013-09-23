@@ -70,12 +70,8 @@ HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, 
 	m_nodePath = nodePath;
 	m_nodePath.hardenIfNeeded();
 	
-	OP_Node *contentNode = locateContent( retrieveNode() );
-	if ( contentNode )
+	if ( OP_Node *contentNode = locateContent( retrieveNode() ) )
 	{
-		contentNode->getFullPath( m_contentPath );
-		m_contentPath.hardenIfNeeded();
-		
 		if ( !m_splitter )
 		{
 			OP_Context context( CHgetEvalTime() );
@@ -85,13 +81,6 @@ HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, 
 	}
 	
 	calculatePath( contentPath, rootPath );
-	
-	// make sure the node is valid
-	OP_Node *node = retrieveNode();
-	if ( !node->isManager() && !node->castToOBJNode() )
-	{
-		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" is not a valid OBJ." );
-	}
 }
 
 HoudiniScene::~HoudiniScene()
@@ -126,12 +115,7 @@ void HoudiniScene::path( Path &p ) const
 
 void HoudiniScene::calculatePath( const Path &contentPath, const Path &rootPath )
 {
-	OP_Node *node = OPgetDirector()->findNode( m_nodePath );
-	if ( !node )
-	{
-		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
-	}
-	
+	OP_Node *node = retrieveNode();
 	if ( node->isManager() )
 	{
 		return;
@@ -576,65 +560,24 @@ SceneInterfacePtr HoudiniScene::scene( const Path &path, MissingBehaviour missin
 OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehaviour ) const
 {
 	OP_Node *node = OPgetDirector()->findNode( m_nodePath );
-	if ( !node && missingBehaviour == ThrowIfMissing )
+	if ( node && content )
 	{
-		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
-	}
-	
-	OP_Node *contentNode = 0;
-	UT_String contentPath = m_contentPath;
-	if ( m_contentPath.length() )
-	{
-		contentNode = OPgetDirector()->findNode( m_contentPath );
-	}
-	else
-	{
-		contentNode = node;
-		contentPath = m_nodePath;
-	}
-	
-	if ( content )
-	{
-		if ( !contentNode && missingBehaviour == ThrowIfMissing )
+		if ( OP_Node *contentNode = locateContent( node ) )
 		{
-			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + contentPath.toStdString() + "\" no longer exists." );
+			node = contentNode;
 		}
-		
-		node = contentNode;
 	}
 	
-	if ( m_contentIndex )
+	if ( missingBehaviour == ThrowIfMissing )
 	{
-		OBJ_Node *objNode = contentNode->castToOBJNode();
-		if ( objNode && objNode->getObjectType() == OBJ_GEOMETRY )
+		if ( !node )
 		{
-			OP_Context context( CHgetEvalTime() );
-			const GU_Detail *geo = objNode->getRenderGeometry( context, false );
-			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-			if ( nameAttrRef.isValid() )
-			{
-				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-				GA_Size numShapes = tuple->getTableEntries( nameAttr );
-				size_t contentSize = m_path.size() - m_contentIndex;
-				for ( GA_Size i=0; i < numShapes; ++i )
-				{
-					Path childPath;
-					const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
-					stringToPath( currentName, childPath );
-					if ( childPath.empty() || name() == *( childPath.begin() + contentSize - 1 ) )
-					{
-						return node;
-					}
-				}
-				
-				if ( missingBehaviour == ThrowIfMissing )
-				{
-					throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + contentPath.toStdString() + "\" does not contain the expected geometry for \"" + name().string() + "\"." );
-				}
-				
-				return 0;
-			}
+			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
+		}
+
+		if ( !node->isManager() && !node->castToOBJNode() )
+		{
+			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" is not a valid OBJ." );
 		}
 	}
 	
