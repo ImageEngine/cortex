@@ -211,6 +211,9 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ri:detailRange" FloatVectorData</b><br>
 		/// Passed to RiDetailRange. The FloatVectorData must have length 4.
 		/// \todo Consider whether or not we should have a standard LOD mechanism defined in IECore.
+		///
+		/// \li <b>"ri:textureCoordinates" FloatVectorData( [ s1, t1, s2, t2, s3, t3, s4, t4 ] )</b><br>
+		/// Passed to RiTextureCoordinates.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		/// \par Currently supported attributes :
 		///
@@ -220,6 +223,7 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"user:*"</b>
 		/// \li <b>"ri:shadingRate"</b><br>
 		/// \li <b>"ri:matte"</b><br>
+		/// \li <b>"ri:textureCoordinates"</b><br>
 		/// \li <b>"ri:*:*"</b><br>
 		/// Supports all attributes for which the RxAttribute query works.
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
@@ -232,6 +236,9 @@ class Renderer : public IECore::Renderer
 		/// If type is "shader" or "ri:shader" then calls RiShader. In this case you must specify a handle
 		/// as a StringData parameter named "__handle".
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
+
+		/// By default, calls RiLightSource
+		/// If the "ri:areaLight" parameter is true, calls RiAreaLightSource instead
 		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
 		virtual void illuminate( const std::string &lightHandle, bool on );
 

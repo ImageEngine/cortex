@@ -36,11 +36,14 @@
 
 #include "GEO/GEO_AttributeHandle.h"
 #include "GU/GU_Detail.h"
-#include "OBJ/OBJ_Node.h" 
+#include "OBJ/OBJ_Node.h"
+#include "OP/OP_Bundle.h"
 #include "OP/OP_Director.h" 
 #include "PRM/PRM_Include.h"
+#include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/LinkedScene.h"
 
@@ -54,12 +57,13 @@ using namespace IECoreHoudini;
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
 
 ROP_SceneCacheWriter::ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op )
-	: ROP_Node( net, name, op ), m_liveScene( 0 ), m_outScene( 0 )
+	: ROP_Node( net, name, op ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 )
 {
 }
 
 ROP_SceneCacheWriter::~ROP_SceneCacheWriter()
 {
+	delete m_forceFilter;
 }
 
 OP_Node *ROP_SceneCacheWriter::create( OP_Network *net, const char *name, OP_Operator *op )
@@ -69,16 +73,18 @@ OP_Node *ROP_SceneCacheWriter::create( OP_Network *net, const char *name, OP_Ope
 
 PRM_Name ROP_SceneCacheWriter::pFile( "file", "File" );
 PRM_Name ROP_SceneCacheWriter::pRootObject( "rootObject", "Root Object" );
+PRM_Name ROP_SceneCacheWriter::pForceObjects( "forceObjects", "Force Objects" );
 
 PRM_Default ROP_SceneCacheWriter::fileDefault( 0, "$HIP/output.scc" );
 PRM_Default ROP_SceneCacheWriter::rootObjectDefault( 0, "/obj" );
+PRM_SpareData ROP_SceneCacheWriter::forceObjectsSpareData;
 
 OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 {
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[3];
+		thisTemplate = new PRM_Template[4];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_FILE, 1, &pFile, &fileDefault, 0, 0, 0, 0, 0,
@@ -88,6 +94,15 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 		thisTemplate[1] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &pRootObject, &rootObjectDefault, 0, 0, 0,
 			&PRM_SpareData::objPath, 0, "The node to use as the root of the SceneCache"
+		);
+		
+		forceObjectsSpareData.copyFrom( PRM_SpareData::objPath );
+		forceObjectsSpareData.setOpRelative( "/obj" );
+		
+		thisTemplate[2] = PRM_Template(
+			PRM_STRING, PRM_TYPE_DYNAMIC_PATH_LIST, 1, &pForceObjects, 0, 0, 0, 0,
+			&forceObjectsSpareData, 0, "Optional list of nodes to force as expanded objects. "
+			"If this list is used, then links will be stored for any node not listed."
 		);
 	}
 	
@@ -116,7 +131,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		m_liveScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath );
 		
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
-		if ( boost::filesystem::path( file ).extension().string() != ".lscc" )
+		if ( !linked( file ) )
 		{
 			m_liveScene = new LinkedScene( m_liveScene );
 		}
@@ -135,6 +150,39 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	{
 		addError( ROP_MESSAGE, ( "Could not create a writable IECore::SceneInterface at \"" + file + "\"" ).c_str() );
 		return false;
+	}
+	
+	UT_String forceObjects;
+	evalString( forceObjects, pForceObjects.getToken(), 0, 0 );
+	
+	m_forceFilter =  0;
+	if ( linked( file ) && !forceObjects.equal( "" ) )
+	{
+		// get the list of nodes matching the filter
+		const PRM_SpareData *data = getParm( pForceObjects.getToken() ).getSparePtr();
+		OBJ_Node *baseNode = OPgetDirector()->findNode( data->getOpRelative() )->castToOBJNode();
+		OP_Bundle *bundle = getParmBundle( pForceObjects.getToken(), 0, forceObjects, baseNode, data->getOpFilter() );
+		
+		// add all of the parent nodes
+		UT_PtrArray<OP_Node *> nodes;
+		bundle->getMembers( nodes );
+		size_t numNodes = nodes.entries();
+		for ( size_t i = 0; i < numNodes; ++i )
+		{
+			OP_Node *current = nodes[i]->getParent();
+			while ( current )
+			{
+				bundle->addOp( current );
+				current = current->getParent();
+			}
+		}
+		
+		// build a matchable filter from all these nodes
+		UT_WorkBuffer buffer;
+		bundle->buildString( buffer );
+		buffer.copyIntoString( forceObjects );
+		m_forceFilter = new UT_StringMMPattern();
+		m_forceFilter->compile( forceObjects );
 	}
 	
 	return true;
@@ -171,7 +219,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 
 		if ( reRoot )
 		{
-			outScene = m_outScene->createChild( node->getName().toStdString() );
+			outScene = m_outScene->child( node->getName().toStdString(), SceneInterface::CreateIfMissing );
 		}
 	}
 	
@@ -193,20 +241,47 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		outScene->writeTransform( liveScene->readTransform( time ), time );
 	}
 	
-	bool link = false;
+	Mode mode = NaturalExpand;
+	const HoudiniScene *hScene = IECore::runTimeCast<const HoudiniScene>( liveScene );
+	if ( hScene && m_forceFilter )
+	{
+		UT_String nodePath;
+		hScene->node()->getFullPath( nodePath );
+		mode = ( nodePath.multiMatch( *m_forceFilter ) ) ? ForcedExpand : ForcedLink;
+	}
+	
 	SceneInterface::NameList attrs;
 	liveScene->attributeNames( attrs );
 	for ( SceneInterface::NameList::iterator it = attrs.begin(); it != attrs.end(); ++it )
 	{
-		outScene->writeAttribute( *it, liveScene->readAttribute( *it, time ), time );
 		if ( *it == LinkedScene::linkAttribute )
 		{
-			link = true;
+			if ( mode == ForcedExpand )
+			{
+				continue;
+			}
+			
+			mode = NaturalLink;
+		}
+		
+		outScene->writeAttribute( *it, liveScene->readAttribute( *it, time ), time );
+	}
+	
+	if ( mode == ForcedLink )
+	{
+		const SceneCacheNode<OP_Node> *sceneNode = static_cast< const SceneCacheNode<OP_Node>* >( hScene->node() );
+		if ( sceneNode )
+		{
+			ConstSceneInterfacePtr scene = sceneNode->scene();
+			if ( scene )
+			{
+				IECore::runTimeCast<LinkedScene>( outScene )->writeLink( scene );
+				return ROP_CONTINUE_RENDER;
+			}
 		}
 	}
 	
-	// If this is a link, we exit now, since all other write calls will throw exceptions
-	if ( link )
+	if ( mode == NaturalLink )
 	{
 		return ROP_CONTINUE_RENDER;
 	}
@@ -242,4 +317,18 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	}
 	
 	return ROP_CONTINUE_RENDER;
+}
+
+bool ROP_SceneCacheWriter::updateParmsFlags()
+{
+	UT_String value;
+	evalString( value, pFile.getToken(), 0, 0 );
+	std::string file = value.toStdString();
+	enableParm( pForceObjects.getToken(), linked( file ) );
+	return true;
+}
+
+bool ROP_SceneCacheWriter::linked( const std::string &file ) const
+{
+	return ( boost::filesystem::path( file ).extension().string() == ".lscc" );
 }

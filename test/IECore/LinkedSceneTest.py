@@ -128,10 +128,16 @@ class LinkedSceneTest( unittest.TestCase ) :
 		
 	def testWriting( self ):
 
+		generateTestFiles = False	# change this to True to recreate the LinkedScene files for other tests.
+		if generateTestFiles :
+			outputPath = "test/IECore/data/sccFiles"
+		else :
+			outputPath = "/tmp"
+
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 		A = m.child("A")
 
-		l = IECore.LinkedScene( "/tmp/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Write )
+		l = IECore.LinkedScene( os.path.join(outputPath,"instancedSpheres.lscc"), IECore.IndexedIO.OpenMode.Write )
 		i0 = l.createChild("instance0")
 		i0.writeLink( m )
 		i1 = l.createChild("instance1")
@@ -152,7 +158,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, b2.writeLink, A )
 		del i0, i1, i2, l, b1, b2, c2
 
-		l = IECore.LinkedScene( "/tmp/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECore.LinkedScene( os.path.join(outputPath,"instancedSpheres.lscc"), IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( l.numBoundSamples(), 4 )
 		self.assertEqual( set(l.childNames()), set(['instance0','instance1','instance2','branch1','branch2']) )
@@ -194,7 +200,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( i0.path(), [ 'instance0' ] )
 
 		# test saving a two level LinkedScene
-		l2 = IECore.LinkedScene( "/tmp/environment.lscc", IECore.IndexedIO.OpenMode.Write )
+		l2 = IECore.LinkedScene( os.path.join(outputPath,"environment.lscc"), IECore.IndexedIO.OpenMode.Write )
 		base = l2.createChild("base")
 		t1 = base.createChild("test1")
 		t1.writeLink( l )
@@ -434,8 +440,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 				self.assertTrue( virtualScene.hasChild(c) )
 				recurseCompare( basePath + [ str(c) ], virtualScene.child(c), realScene.child(c), False )
 
-		env = IECore.LinkedScene( "test/IECore/data/sccFiles/environment.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting()
-		l = IECore.LinkedScene( "test/IECore/data/sccFiles/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting()
+		env = IECore.LinkedScene( "test/IECore/data/sccFiles/environment.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True
+		l = IECore.LinkedScene( "test/IECore/data/sccFiles/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 
 		base = env.child('base')

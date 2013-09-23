@@ -365,6 +365,26 @@ void SceneCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std
 }
 
 template<typename BaseType>
+ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene() const
+{
+	if ( !this->hasParm( pFile.getToken() ) || !this->hasParm( pRoot.getToken() ) )
+	{
+		return 0;
+	}
+	
+	try
+	{
+		return this->scene( getFile(), getPath() );
+	}
+	catch( ... )
+	{
+		return 0;
+	}
+	
+	return 0;
+}
+
+template<typename BaseType>
 ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileName, const std::string &path )
 {
 	ConstSceneInterfacePtr result = SharedSceneInterfaces::get( fileName );

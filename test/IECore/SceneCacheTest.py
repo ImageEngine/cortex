@@ -639,6 +639,22 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertTrue( B.hasTag( "t3" ) )
 		self.assertTrue( B.hasTag( "ObjectType:SpherePrimitive" ) )
 		self.assertTrue( d.hasTag( "ObjectType:SpherePrimitive" ) )
+	
+	def testSampleTimeOrder( self ):
+		
+		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+
+		t = m.createChild( "t" )
+		t.writeObject( IECore.SpherePrimitive( 1 ), 1.0 )
+		
+		s = m.createChild( "s" )
+		s.writeObject( IECore.SpherePrimitive( 1 ), 10.0 )
+
+		del m, t, s
+		
+		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertTrue( m.boundSampleTime(0) < m.boundSampleTime(1) )
+
 
 if __name__ == "__main__":
 	unittest.main()

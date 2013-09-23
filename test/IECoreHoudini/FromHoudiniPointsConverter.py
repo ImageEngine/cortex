@@ -83,10 +83,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.PointsPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.PointsPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.Parameter )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
@@ -679,7 +679,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm("value3").set( 3 )
 		
 		hou.setFrame( 5 )
-		converter = IECoreHoudini.FromHoudiniPointsConverter( pointAttr )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( pointAttr )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		points = converter.convert()
 		
 		self.assertEqual( type(points), IECore.PointsPrimitive )
@@ -705,28 +706,81 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		del points['source']
 		self.assertEqual( points2, points )
 	
+	def testMultipleParticlePrimitives( self ) :
+		
+		obj = hou.node("/obj")
+		geo = obj.createNode( "geo", run_init_scripts=False )
+		popnet = geo.createNode( "popnet" )
+		fireworks = popnet.createNode( "fireworks" )
+		
+		hou.setFrame( 15 )
+		converter = IECoreHoudini.FromHoudiniPointsConverter( popnet )
+		points = converter.convert()
+		
+		self.assertEqual( type(points), IECore.PointsPrimitive )
+		self.assertEqual( points.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 24 )
+		self.assertEqual( points["accel"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( type(points["accel"].data), IECore.V3fVectorData )
+		self.assertEqual( points["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+		self.assertEqual( points["nextid"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( points["nextid"].data, IECore.IntData( 25 ) )
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		
+		add = popnet.createOutputNode( "add" )
+		add.parm( "keep" ).set( 1 ) # deletes primitive and leaves points
+		
+		converter = IECoreHoudini.FromHoudiniPointsConverter( add )
+		points2 = converter.convert()
+		# showing that prim attribs don't get converted because the interpolation size doesn't match
+		self.assertEqual( points2, points )
+	
 	def testName( self ) :
 		
 		points = self.createPoints()
 		particles = points.createOutputNode( "add" )
 		particles.parm( "addparticlesystem" ).set( True )
 		name = particles.createOutputNode( "name" )
-		name.parm( "name1" ).set( "testName" )
-		group = particles.createOutputNode( "group" )
-		group.parm( "crname" ).set( "testGroup" )
+		name.parm( "name1" ).set( "points" )
+		box = points.parent().createNode( "box" )
+		name2 = box.createOutputNode( "name" )
+		name2.parm( "name1" ).set( "box" )
+		merge = name.createOutputNode( "merge" )
+		merge.setInput( 1, name2 )
 		
-		particles.bypass( True )
-		result = IECoreHoudini.FromHoudiniPointsConverter( name ).convert()
+		converter = IECoreHoudini.FromHoudiniPointsConverter( merge )
+		result = converter.convert()
+		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# both shapes were converted as one PointsPrimitive
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 5008 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		particles.bypass( False )
-		result = IECoreHoudini.FromHoudiniPointsConverter( name ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testName" )
-		result = IECoreHoudini.FromHoudiniPointsConverter( group ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testGroup" )
-
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "points" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named points were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 5000 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box", IECore.TypeId.PointsPrimitive )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named points were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+	
 	def testAttributeFilter( self ) :
 		
 		points = self.createPoints()

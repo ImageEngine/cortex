@@ -250,6 +250,11 @@ bool GEO_CortexPrimitive::evaluatePointRefMap( GA_Offset result_vtx, GA_Attribut
 	return false;
 }
 
+IECore::Object *GEO_CortexPrimitive::getObject()
+{
+	return m_object;
+}
+
 const IECore::Object *GEO_CortexPrimitive::getObject() const
 {
 	return m_object;

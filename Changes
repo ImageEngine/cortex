@@ -1,3 +1,71 @@
+8.0.0-a17 :
+
+IECoreRI
+ - Added support for ri:areaLight parameter to IECoreRI
+
+IECoreHoudini
+ - Fixed bug when loading CoordinateSystems in Houdini
+
+
+8.0.0-a16 :
+
+IECoreMaya
+ - Fixed bug in SceneShape compute which prevented drawing on file open/import
+
+IECoreHoudini
+ - Added ForceObjects parameter to SceneCache ROP (to force what is expanded and what is a link)
+ - Added a ParticleSystem when converting PointsPrimitives to Houdini
+ - Fixed point doulbing bug with SceneCache SOP loading a PointsPrimitive
+ - Fixed bug when writing multiple frames of re-rooted scenes
+ - Fixed HoudiniScene bugs for flattened geometry (SOPs with gaps in the geo hierarchy can now be cached)
+ - SceneCache tagFilter supports SceneInterfaces with no tags
+
+8.0.0-a15 :
+
+IECore
+ - Added Parameter::setPresets and getPresets.
+ - Improved precision of CameraController operations
+ - Default ParticleReader uses floats (#69)
+ - Fixed MurmurHash bug where empty strings had no effect on a hash
+
+IECoreGL
+ - Added Shader::csParameter() for constant time access to "Cs"
+ - Fixed bug with superimposed instances
+ - Fixed potential bug in Selector::loadIDShader()
+ - Fixed state leak for immediate renders
+ - Fixed PointsPrimitive selection and coloring
+ - Implemented per-vertex Cs for PointsPrimitive.
+
+IECoreMaya
+ - Fixed erroneous compute on SceneShape outputObjects
+ - Fixed tests for Maya 2014
+
+IECoreHoudini
+ - Added a Cache Manager for the Cortex ObjectPool (#40)
+ - SceneCache ROP allows caching of un-named top level geo (uses the OBJ node name instead)
+ - Fixed time dependency issues with SceneCache SOP and OBJs
+ - OBJ SceneCache nodes expose their transform via python expressions (see the Output tab)
+ - Expanding and SOP cooking are now interrupt-able using the escape key
+ - Improvements for expanding SceneCaches in Houdini
+  - Expanded nodes are now connected to the subnet indirect inputs
+  - Expanded nodes are placed using Houdini's layout automation
+  - File parms channel reference their parent
+  - Path parms channel reference their parent (when appropriate)
+  - New Push Parms button updates the filters and geometry type throughout the expanded hierarchy (no need to collapse). Note that this does not take hierarchy changes into account, just parameter values.
+ - FromHoudiniGroupConverter ignores internal groups
+ - Fixed compatibility issues with Houdini 12.1 (introduced in a14)
+ - Declared TypeId range
+ 
+IECoreNuke
+ - Added support for TCL expressions on SceneCacheReader
+ - Fixed a few bugs with SceneCacheReader
+
+IECoreArnold
+ - Fixed TypeId range so it doesn't conflict with IECoreHoudini
+ 
+IECoreMantra
+ - Houdini 12.5 compatibility
+
 8.0.0-a14 :
 
 - IECore :

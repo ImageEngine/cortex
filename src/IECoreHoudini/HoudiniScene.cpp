@@ -90,6 +90,11 @@ HoudiniScene::~HoudiniScene()
 {
 }
 
+const OP_Node *HoudiniScene::node() const
+{
+	return retrieveNode( false, NullIfMissing );
+}
+
 std::string HoudiniScene::fileName() const
 {
 	throw Exception( "HoudiniScene does not support fileName()." );
@@ -388,8 +393,8 @@ bool HoudiniScene::hasObject() const
 		for ( int i=0; i < numShapes; ++i )
 		{
 			Path childPath;
-			relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-			if ( childPath.empty() )
+			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+			if ( valid && childPath.empty() )
 			{
 				return true;
 			}
@@ -411,92 +416,32 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 		return 0;
 	}
 	
-	ConstObjectPtr result = 0;
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
 		OP_Context context( time );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context );
-		
-		// check if its holding a GU_CortexPrimitive
-		/// \todo: ideally this case would be handled by the converters as well...
+		GU_DetailHandleAutoReadLock readHandle( handle );
+		const GU_Detail *geo = readHandle.getGdp();
+		if ( !geo )
 		{
-			GU_DetailHandleAutoReadLock readHandle( handle );
-			const GU_Detail *geo = readHandle.getGdp();
-			if ( geo )
-			{
-				// is there a named shape?
-				GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-				if ( nameAttrRef.isValid() )
-				{
-					unsigned numNames = geo->getUniqueValueCount( nameAttrRef );
-					for ( unsigned i=0; i < numNames; ++i )
-					{
-						const char *name = geo->getUniqueStringValue( nameAttrRef, i );
-						
-						Path childPath;
-						bool valid = relativePath( name, childPath );
-						if ( valid && childPath.empty() )
-						{
-							GA_Range primRange = geo->getRangeByValue( nameAttrRef, name );
-							GA_Primitive *hPrim = geo->getPrimitiveList().get( primRange.begin().getOffset() );
-							if ( hPrim->getTypeId() == GU_CortexPrimitive::typeId() )
-							{
-								/// todo: remove this copy once readObject returns a const object
-								return ((GU_CortexPrimitive *)hPrim)->getObject()->copy();
-							}
-						}
-					}
-				}
-				else
-				{
-					const GA_PrimitiveList &primitives = geo->getPrimitiveList();	
-					for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
-					{
-						const GA_Primitive *hPrim = primitives.get( it.getOffset() );
-						if ( hPrim->getTypeId() == GU_CortexPrimitive::typeId() )
-						{
-							/// todo: remove this copy once readObject returns a const object
-							return ((GU_CortexPrimitive *)hPrim)->getObject()->copy();
-						}
-					}
-				}
-			}
+			return 0;
 		}
 		
-		// try normal geometry conversion
-		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
+		UT_StringMMPattern nameFilter;
+		nameFilter.compile( contentPathValue() );
+		GU_DetailHandle newHandle = FromHoudiniGeometryConverter::extract( geo, nameFilter );
+		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
 			return 0;
 		}
 		
-		result = converter->convert();
-		/// \todo: add parameter to GroupConverter (or all of them?) to only convert named shapes
-		///	   identify the appropriate shape name
-		///	   use that parameter to avoid converting the entire group
-		const Group *group = IECore::runTimeCast<const Group>( result );
-		if ( group )
-		{
-			const Group::ChildContainer &children = group->children();
-			for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
-			{
-				const StringData *name = (*it)->blindData()->member<StringData>( "name", false );
-				if ( name )
-				{
-					Path childPath;
-					bool valid = relativePath( name->readable().c_str(), childPath );
-					if ( valid && childPath.empty() )
-					{
-						return *it;
-					}
-				}
-			}
-		}
+		return converter->convert();
 	}
 	
 	/// \todo: need to account for cameras and lights
 	
-	return result;
+	return 0;
 }
 
 PrimitiveVariableMap HoudiniScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
@@ -564,8 +509,8 @@ void HoudiniScene::childNames( NameList &childNames ) const
 		for ( int i=0; i < numShapes; ++i )
 		{
 			Path childPath;
-			relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-			if ( !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
+			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+			if ( valid && !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
 			{
 				childNames.push_back( *childPath.begin() );
 			}
@@ -661,11 +606,12 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 			{
 				const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
 				int numShapes = geo->getUniqueValueCount( attrRef );
+				size_t contentSize = m_path.size() - m_contentIndex;
 				for ( int i=0; i < numShapes; ++i )
 				{
 					Path childPath;
-					relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-					if ( childPath.empty() )
+					stringToPath( geo->getUniqueStringValue( attrRef, i ), childPath );
+					if ( childPath.empty() || name() == *( childPath.begin() + contentSize - 1 ) )
 					{
 						return node;
 					}
@@ -758,16 +704,17 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 				for ( int i=0; i < numShapes; ++i )
 				{
 					SceneInterface::Path childPath;
-					relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-					if ( !childPath.empty() && name == *childPath.begin() )
+					bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
+					if ( valid && !childPath.empty() && name == *childPath.begin() )
 					{
 						size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-						contentPath.resize( contentSize + childPath.size() );
 						if ( contentSize )
 						{
+							contentPath.resize( contentSize );
 							std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
 						}
-						std::copy( childPath.begin(), childPath.end(), contentPath.begin() + contentSize );
+						
+						contentPath.push_back( name );
 						
 						return contentNode;
 					}
@@ -860,7 +807,32 @@ bool HoudiniScene::relativePath( const char *value, Path &result ) const
 		std::copy( start, path.end(), result.begin() );
 	}
 	
+	// verify the pre-path matches
+	Path::const_iterator mIt = m_path.begin() + m_contentIndex;
+	for ( Path::iterator it = path.begin(); it != start && mIt != m_path.end(); ++it, ++mIt )
+	{
+		if ( *it != *mIt )
+		{
+			return false;
+		}
+	}
+	
 	return true;
+}
+
+const char *HoudiniScene::contentPathValue() const
+{
+	if ( !m_contentIndex )
+	{
+		return rootName.c_str();
+	}
+	
+	Path relative;
+	std::string name;
+	relative.resize( m_path.size() - m_contentIndex );
+	std::copy( m_path.begin() + m_contentIndex, m_path.end(), relative.begin() );
+	pathToString( relative, name );
+	return name.c_str();
 }
 
 void HoudiniScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )

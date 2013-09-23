@@ -160,6 +160,7 @@ class RendererImplementation : public IECore::Renderer
 
 		IECore::CompoundDataPtr m_options;
 		IECore::CameraPtr m_camera;
+		size_t m_numDisplays;
 		void outputCamera( IECore::CameraPtr camera );
 
 		struct AttributeState
@@ -192,12 +193,14 @@ class RendererImplementation : public IECore::Renderer
 		void setSubsurfaceAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setDetailAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setDetailRangeAttribute( const std::string &name, IECore::ConstDataPtr d );
+		void setTextureCoordinatesAttribute( const std::string &name, IECore::ConstDataPtr d );
 
 		IECore::ConstDataPtr getShadingRateAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getMatteAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getDoubleSidedAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getRightHandedOrientationAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
+		IECore::ConstDataPtr getTextureCoordinatesAttribute( const std::string &name ) const;
 		
 		/// ProceduralData used to contain a smart pointer to the RendererImplementation which created it.
 		/// This normally works fine, as 3delight typically calls procFree() immediately after procSubdivide(),

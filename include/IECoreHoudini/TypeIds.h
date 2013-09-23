@@ -76,6 +76,10 @@ namespace IECoreHoudini
 		RATDeepImageReaderTypeId = 111029,
 		RATDeepImageWriterTypeId = 111030,
 		HoudiniSceneTypeId = 111031,
+		FromHoudiniCortexObjectConverterTypeId = 111032,
+		ToHoudiniCortexObjectConverterTypeId = 111033,
+		FromHoudiniCompoundObjectConverterTypeId = 111034,
+		ToHoudiniCompoundObjectConverterTypeId = 111035,
 		// remember to update TypeIdBinding.cpp
 		LastTypeId = 111999,
 	};

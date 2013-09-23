@@ -125,7 +125,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	}
 	
 	bool externalGroups = false;
-	for ( int i=0; i < primGroups.entries(); ++i )
+	for ( unsigned i=0; i < primGroups.entries(); ++i )
 	{
 		const GA_ElementGroup *group = primGroups[i];
 		if ( group->getInternal() )
@@ -201,7 +201,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		
 		for ( AttributePrimIdGroupMapIterator it=groupMap.begin(); it != groupMap.end(); ++it )
 		{
-			convertAndAddPrimitive( &groupGeo, it->second, result, operands );
+			convertAndAddPrimitive( &groupGeo, it->second, result, operands, it->first.first );
 		}
 	}
 	else
@@ -220,7 +220,8 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			{
 				continue;
 			}
-
+			
+			renderable->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
 			result->addChild( renderable );
 		}
 
@@ -264,7 +265,7 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	size_t numPrims = groupGeo.getNumPrimitives();
 	if ( numPrims < 2 )
 	{
-		result = doPrimitiveConversion( &groupGeo, operands );
+		result = IECore::runTimeCast<VisibleRenderable>( doDetailConversion( &groupGeo, operands ) );
 		return numPrims;
 	}
 	
@@ -274,16 +275,11 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	
 	if ( numNewGroups < 2 )
 	{
-		result = doPrimitiveConversion( &groupGeo, operands );
+		result = IECore::runTimeCast<VisibleRenderable>( doDetailConversion( &groupGeo, operands ) );
 		return numPrims;
 	}
 
 	GroupPtr groupResult = new Group();
-	if ( !group->getInternal() )
-	{
-		groupResult->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
-	}
-	
 	for ( PrimIdGroupMapIterator it = groupMap.begin(); it != groupMap.end(); it++ )
 	{
 		convertAndAddPrimitive( &groupGeo, it->second, groupResult, operands );
@@ -347,7 +343,7 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, AttributePrimIdGroupM
 	return groupMap.size();
 }
 
-PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
+ObjectPtr FromHoudiniGroupConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	GU_DetailHandle handle;
 	handle.allocateAndSet( (GU_Detail*)geo, false );
@@ -372,10 +368,10 @@ PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *
 		}
 	}
 	
-	return IECore::runTimeCast<Primitive>( converter->convert() );
+	return converter->convert();
 }
 
-void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands ) const
+void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands, const std::string &name ) const
 {
 	GU_Detail childGeo( geo, group );
 	for ( GA_GroupTable::iterator<GA_ElementGroup> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
@@ -384,9 +380,14 @@ void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_Primi
 	}
 	childGeo.destroyAllEmptyGroups();
 	
-	PrimitivePtr child = doPrimitiveConversion( &childGeo, operands );
+	PrimitivePtr child = IECore::runTimeCast<Primitive>( doDetailConversion( &childGeo, operands ) );
 	if ( child )
 	{
+		if ( name != "" )
+		{
+			child->blindData()->member<StringData>( "name", false, true )->writable() = name;
+		}
+		
 		result->addChild( child );
 	}
 }

@@ -47,8 +47,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniCurvesConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniCurvesConverter> ToHoudiniCurvesConverter::m_description( CurvesPrimitiveTypeId );
 
-ToHoudiniCurvesConverter::ToHoudiniCurvesConverter( const VisibleRenderable *renderable ) :
-	ToHoudiniGeometryConverter( renderable, "Converts an IECore::CurvesPrimitive to a Houdini GU_Detail." )
+ToHoudiniCurvesConverter::ToHoudiniCurvesConverter( const IECore::Object *object ) :
+	ToHoudiniGeometryConverter( object, "Converts an IECore::CurvesPrimitive to a Houdini GU_Detail." )
 {
 }
 
@@ -56,9 +56,9 @@ ToHoudiniCurvesConverter::~ToHoudiniCurvesConverter()
 {
 }
 
-bool ToHoudiniCurvesConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
+bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *geo ) const
 {
-	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( renderable );
+	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( object );
 	if ( !curves )
 	{
 		return false;
@@ -147,6 +147,8 @@ void ToHoudiniCurvesConverter::transferAttribs( GU_Detail *geo, const GA_Range &
 	{
 		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
 	}
+	
+	setName( geo, prims );
 }
 
 ToHoudiniCurvesConverter::RemoveDuplicateEnds::RemoveDuplicateEnds( const std::vector<int> &vertsPerCurve ) : m_vertsPerCurve( vertsPerCurve )

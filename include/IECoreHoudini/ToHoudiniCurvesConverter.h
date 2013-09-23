@@ -50,7 +50,7 @@ class ToHoudiniCurvesConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniCurvesConverter, ToHoudiniCurvesConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniCurvesConverter( const IECore::VisibleRenderable *renderable );
+		ToHoudiniCurvesConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniCurvesConverter();
 		
@@ -59,8 +59,8 @@ class ToHoudiniCurvesConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 	
 	protected :
 		
-		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
-		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
+		/// performs conversion from the IECore::CurvesPrimitive into the given GU_Detail
+		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 		
 		/// Implemented to adjust Vertex interpolated PrimitiveVariables for de-duplicated end points
 		virtual IECore::PrimitiveVariable processPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primVar ) const;

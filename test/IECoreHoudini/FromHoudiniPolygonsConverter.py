@@ -83,10 +83,10 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.MeshPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, IECore.TypeId.Parameter )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 		
 		self.failUnless( IECore.TypeId.MeshPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
@@ -634,16 +634,59 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		torus = self.createTorus()
 		name = torus.createOutputNode( "name" )
-		name.parm( "name1" ).set( "testName" )
-		result = IECoreHoudini.FromHoudiniPolygonsConverter( name ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testName" )
+		name.parm( "name1" ).set( "torus" )
+		box = torus.parent().createNode( "box" )
+		name2 = box.createOutputNode( "name" )
+		name2.parm( "name1" ).set( "box" )
+		merge = name.createOutputNode( "merge" )
+		merge.setInput( 1, name2 )
+		
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( merge )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		self.assertFalse( "nameIndices" in result )
+		# both torii were converted as one mesh
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 106 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
 		
-		group = torus.createOutputNode( "group" )
-		group.parm( "crname" ).set( "testGroup" )
-		result = IECoreHoudini.FromHoudiniPolygonsConverter( group ).convert()
-		self.assertEqual( result.blindData()['name'].value, "testGroup" )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "torus" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named polygons were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
+		result = converter.convert()
+		# names are not stored on the object at all
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		self.assertFalse( "name" in result )
+		self.assertFalse( "nameIndices" in result )
+		# only the named polygons were converted
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+		self.assertTrue(  result.arePrimitiveVariablesValid() )
+		
+		# the name filter will convert both, but keep them separate
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "*" )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+		result = converter.convert()
+		numPrims = [ 6, 100 ]
+		names = [ "box", "torus" ]
+		self.assertEqual( result.blindData(), IECore.CompoundData() )
+		for i in range( 0, len(result.children()) ) :
+			child = result.children()[i]
+			self.assertFalse( "name" in child )
+			self.assertFalse( "nameIndices" in child )
+			self.assertEqual( child.blindData(), IECore.CompoundData( { "name" : names[i] } ) )
+			self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), numPrims[i] )
+			self.assertTrue(  child.arePrimitiveVariablesValid() )
 	
 	def testAttributeFilter( self ) :
 		
