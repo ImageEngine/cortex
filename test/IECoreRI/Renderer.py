@@ -567,6 +567,20 @@ class RendererTest( IECoreRI.TestCase ) :
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
 		
 		self.assertTrue( 'TextureCoordinates 0 1 2 3 4 5 6 7' in rib )
+
+	def testMultipleDisplays( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		
+		r.display( "test.exr", "exr", "rgba", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
+		r.display( "z.exr", "exr", "z", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
+		
+		with WorldBlock( r ) :
+			pass
+			
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+				
+		self.assertTrue( "+z.exr" in rib )
 	
 	def tearDown( self ) :
 
