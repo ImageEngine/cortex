@@ -76,7 +76,8 @@ class MeshPrimitive : public Primitive
 		int maxVerticesPerFace() const;
 		const IntVectorData *vertexIds() const;
 		const std::string &interpolation() const;
-		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
+		void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
+		void setTopologyUnchecked( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, size_t numVertices, const std::string &interpolation = "linear" );
 		void setInterpolation( const std::string &interpolation );
 		PolygonIterator faceBegin();
 		PolygonIterator faceEnd();
@@ -105,8 +106,10 @@ class MeshPrimitive : public Primitive
 		IntVectorDataPtr m_vertexIds;
 		size_t m_numVertices;
 		std::string m_interpolation;
-		int m_minVerticesPerFace;
-		int m_maxVerticesPerFace;
+		
+		void computeMinMaxVertsPerFace() const;
+		mutable int m_minVerticesPerFace;
+		mutable int m_maxVerticesPerFace;
 
 };
 

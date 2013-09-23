@@ -1720,7 +1720,20 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 {
 	try
 	{
-		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
+		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive;
+		IECore::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
+		if( it == primVars.end() )
+		{
+			throw IECore::Exception( "Trying to render a mesh without \"P\"" );
+		}
+		
+		IECore::V3fVectorDataPtr pData = runTimeCast< IECore::V3fVectorData >( it->second.data );
+		if( !pData )
+		{
+			throw IECore::Exception( "Mesh \"P\" variable has incorrect type" );
+		}
+		
+		m->setTopologyUnchecked( vertsPerFace, vertIds, pData->readable().size(), interpolation );
 		m->variables = primVars;
 		m_data->addPrimitive( m.get() );
 	}
