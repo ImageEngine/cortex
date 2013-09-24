@@ -80,13 +80,47 @@ const IntVectorData *MeshPrimitive::verticesPerFace() const
 	return m_verticesPerFace.get();
 }
 
+void MeshPrimitive::computeMinMaxVertsPerFace() const
+{
+	int minVertsPerFace = 0x7fffffff;
+	int maxVertsPerFace = 0;
+	unsigned int numExpectedVertexIds = 0;
+	for ( vector<int>::const_iterator it = m_verticesPerFace->readable().begin(); it != m_verticesPerFace->readable().end(); it++ )
+	{
+		int vertsPerFace = *it;
+		minVertsPerFace = std::min( minVertsPerFace, vertsPerFace );
+		maxVertsPerFace = std::max( maxVertsPerFace, vertsPerFace );
+		numExpectedVertexIds += vertsPerFace;
+	}
+	if( minVertsPerFace<3 )
+	{
+		throw Exception( "Bad topology - number of vertices per face less than 3." );
+	}
+
+	if( numExpectedVertexIds!=m_vertexIds->readable().size() )
+	{
+		throw Exception( "Bad topology - number of vertexIds not equal to sum of verticesPerFace" );
+	}
+
+	m_minVerticesPerFace = ( m_verticesPerFace->readable().size() ? minVertsPerFace : 0 );
+	m_maxVerticesPerFace = maxVertsPerFace;
+}
+		
 int MeshPrimitive::minVerticesPerFace() const
 {
+	if( m_maxVerticesPerFace == 0 )
+	{
+		computeMinMaxVertsPerFace();
+	}
 	return m_minVerticesPerFace;
 }
 
 int MeshPrimitive::maxVerticesPerFace() const
 {
+	if( m_maxVerticesPerFace == 0 )
+	{
+		computeMinMaxVertsPerFace();
+	}
 	return m_maxVerticesPerFace;
 }
 
@@ -116,30 +150,11 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 		maxVertexId = std::max( maxVertexId, id );
 	}
 	
-	int minVertsPerFace = 0x7fffffff;
-	int maxVertsPerFace = 0;
-	unsigned int numExpectedVertexIds = 0;
-	for ( vector<int>::const_iterator it = verticesPerFace->readable().begin(); it != verticesPerFace->readable().end(); it++ )
-	{
-		int vertsPerFace = *it;
-		minVertsPerFace = std::min( minVertsPerFace, vertsPerFace );
-		maxVertsPerFace = std::max( maxVertsPerFace, vertsPerFace );
-		numExpectedVertexIds += vertsPerFace;
-	}
-	if( minVertsPerFace<3 )
-	{
-		throw Exception( "Bad topology - number of vertices per face less than 3." );
-	}
-
-	if( numExpectedVertexIds!=vertexIds->readable().size() )
-	{
-		throw Exception( "Bad topology - number of vertexIds not equal to sum of verticesPerFace" );
-	}
-
-	m_minVerticesPerFace = ( verticesPerFace->readable().size() ? minVertsPerFace : 0 );
-	m_maxVerticesPerFace = maxVertsPerFace;
 	m_verticesPerFace = verticesPerFace->copy();
 	m_vertexIds = vertexIds->copy();
+	
+	computeMinMaxVertsPerFace();
+	
 	if( m_vertexIds->readable().size() )
 	{
 		m_numVertices = 1 + maxVertexId;
@@ -149,6 +164,16 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 		m_numVertices = 0;
 	}
 	m_interpolation = interpolation;
+}
+
+void MeshPrimitive::setTopologyUnchecked( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, size_t numVertices, const std::string &interpolation )
+{
+	m_interpolation = interpolation;
+	m_verticesPerFace = verticesPerFace->copy();
+	m_vertexIds = vertexIds->copy();
+	m_numVertices = numVertices;
+	m_minVerticesPerFace = 0;
+	m_maxVerticesPerFace = 0;
 }
 
 void MeshPrimitive::setInterpolation( const std::string &interpolation )

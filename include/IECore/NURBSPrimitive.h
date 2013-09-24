@@ -72,7 +72,7 @@ class NURBSPrimitive : public Primitive
 		float vMax() const;
 		int vVertices() const;
 		int vSegments() const;
-		virtual void setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax,
+		void setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax,
 			int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax );
 		//@}
 
