@@ -54,7 +54,8 @@ def installDocs() :
 
 if IEEnv.platform() == "cent6.x86_64" :
 	
-	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=UNDEFINED", "PYTHON_VERSION=2.6", "ARNOLD_VERSION=4.0.9.1" ] )
+	for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
+		build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=UNDEFINED", "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=4.0.9.1" ] )
 	
 	for dlVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["3delight"] ):
 		build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION="+dlVersion, "PYTHON_VERSION=2.6", "ARNOLD_VERSION=UNDEFINED" ] )
