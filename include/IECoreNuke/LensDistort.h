@@ -82,6 +82,7 @@ class LensDistort : public DD::Image::Iop
 			
 			std::string m_name;
 			DD::Image::Knob *m_knob;
+			std::string m_script;
 			double m_value;
 			double m_low;
 			double m_high;
@@ -139,6 +140,9 @@ class LensDistort : public DD::Image::Iop
 		/// @param returnPath The path of the file that has been loaded.
 		/// @return Whether or not the file path was successful.
 		bool setLensFromFile( std::string &returnPath );
+
+		/// Iterates over all of the lens model's attributes and if they are associated with a knob, retrieves the information from the knob.
+		void updatePluginAttributesFromKnobs();
 		
 		/// The maximum number of threads that we are going to use in parallel.
 		const int m_nThreads;
