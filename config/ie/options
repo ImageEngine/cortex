@@ -218,7 +218,7 @@ pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
 if IEEnv.platformOS().startswith( "osx" ):
 	pythonRoot = os.path.join( pythonRoot, "Python.framework", "Versions", pythonVersion )
 
-PYTHON = "/software/tools/wrappers/python%s" % pythonVersion
+PYTHON = "/software/tools/wrappers/iePython%s" % pythonVersion
 PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 
