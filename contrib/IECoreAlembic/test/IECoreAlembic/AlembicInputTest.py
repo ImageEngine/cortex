@@ -438,6 +438,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.failUnless( "N" in mesh )
 		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
 		self.assertEqual( mesh["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 	
 	def testCamera( self ) :
 	

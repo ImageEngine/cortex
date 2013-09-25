@@ -32,12 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "Alembic/AbcGeom/IGeomParam.h"
-
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/MessageHandler.h"
 
 #include "IECoreAlembic/FromAlembicGeomBaseConverter.h"
+#include "IECoreAlembic/IGeomParamTraits.h"
 
 using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;
@@ -172,26 +171,49 @@ IECore::PrimitiveVariable::Interpolation FromAlembicGeomBaseConverter::interpola
 			return PrimitiveVariable::Invalid;
 	}
 }
-		
+
+
+template<typename DataType, typename GeomParam>
+struct ApplyGeometricInterpretation
+{
+	
+	static void apply( DataType *data )
+	{
+	};
+	
+};
+
+template<typename T, typename GeomParam>
+struct ApplyGeometricInterpretation<GeometricTypedData<T>, GeomParam>
+{
+
+	static void apply( GeometricTypedData<T> *data )
+	{
+		data->setInterpretation( IGeomParamTraits<GeomParam>::geometricInterpretation() );
+	};
+
+};
+	
 template<typename T>
 void FromAlembicGeomBaseConverter::convertGeomParam( T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
-	typedef typename T::prop_type::sample_type::value_vector ValueType;
-	typedef TypedData<ValueType> DataType;
+	typedef typename IGeomParamTraits<T>::DataType DataType;
 
 	if( param.getArrayExtent() > 1 )
 	{
 		IECore::msg( IECore::Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParam", boost::format( "Param \"%s\" has unsupported array extent" ) % param.getHeader().getName() );
 		return;
 	}
-	
+		
 	SamplePtr sample = param.getExpandedValue( sampleSelector ).getVals();
 	
-  	typename DataType::Ptr data = new TypedData<ValueType>();
-  	data->writable().resize( sample->size() );
-  	std::copy( sample->get(), sample->get() + sample->size(), data->writable().begin() );
-        
+	typename DataType::Ptr data = new DataType();
+	data->writable().resize( sample->size() );
+	std::copy( sample->get(), sample->get() + sample->size(), data->writable().begin() );
+ 
+	ApplyGeometricInterpretation<DataType, T>::apply( data.get() );
+	
 	PrimitiveVariable pv;
 	pv.interpolation = interpolationFromScope( param.getScope() );
 	pv.data = data;
