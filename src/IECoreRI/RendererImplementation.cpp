@@ -78,21 +78,13 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 // IECoreRI::RendererImplementation implementation
 ////////////////////////////////////////////////////////////////////////
 
+IECoreRI::RendererImplementation::ContextToSharedDataMapMutex IECoreRI::RendererImplementation::s_contextToSharedDataMapMutex;
+IECoreRI::RendererImplementation::ContextToSharedDataMap IECoreRI::RendererImplementation::s_contextToSharedDataMap;
 tbb::queuing_rw_mutex IECoreRI::RendererImplementation::g_nLoopsMutex;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
-IECoreRI::RendererImplementation::RendererImplementation( RendererImplementationPtr parent )
-	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : SharedData::Ptr( new SharedData ) ), m_options( parent ? parent->m_options : 0 )
-{
-	constructCommon();
-}
-
-IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
-	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
-{
-	constructCommon();
-}
-
+// This constructor launches a render within the current application. It creates a SharedData instance,
+// which gets propagated down to the renderers this object creates by launching procedurals.
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
 	:	m_sharedData( new SharedData )
 {
@@ -111,6 +103,71 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 #endif		
 	}
 	m_context = RiGetContext();
+	
+	// Add a correspondance between the current context and this object's SharedData instance,
+	// in case RendererImplementation() gets called later on with no arguments. This creates a
+	// RendererImplementation in the current context, which must have access to this object's
+	// SharedData instance.
+	
+	m_contextToSharedDataMapKey = m_context;
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
+}
+
+// This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
+// that launched the procedural
+IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
+{
+	constructCommon();
+	
+	// Add a correspondance between the current context and this object's SharedData instance,
+	// in case RendererImplementation() gets called later on with no arguments. This creates a
+	// RendererImplementation in the current context, which must have access to this object's
+	// SharedData instance.
+	
+	m_contextToSharedDataMapKey = RiGetContext();
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
+}
+
+// This constructor creates a RendererImplementation using the current RtContext. The SharedData is acquired by 
+// querying m_contextToSharedDataMap in one of two ways:
+//
+// 1)	If there's an entry for the current RtContext, this means the user's manually called Renderer() with no arguments
+//	in the course of a render, and we set m_sharedData to this entry.
+// 2)	If there isn't an entry for the current context, this means we're in a procedural that's been launched from a rib,
+//	and in this case we use a null context as a key into the map. If there's an entry for the null context, we
+//	set m_sharedData to that entry, otherwise we set it to a new SharedData.
+//
+IECoreRI::RendererImplementation::RendererImplementation()
+	:	m_context( 0 ), m_options( 0 )
+{
+	constructCommon();
+	
+	m_contextToSharedDataMapKey = RiGetContext();
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+
+	ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+	if( it == s_contextToSharedDataMap.end() )
+	{
+		m_contextToSharedDataMapKey = 0;
+		it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+		if( it == s_contextToSharedDataMap.end() )
+		{
+			m_sharedData = new SharedData;
+		}
+		else
+		{
+			m_sharedData = it->second;
+		}
+	}
+	else
+	{
+		m_sharedData = it->second;
+	}
+	
+	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
 }
 
 void IECoreRI::RendererImplementation::constructCommon()
@@ -155,6 +212,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["ri:detail"] = &IECoreRI::RendererImplementation::setDetailAttribute;
 	m_setAttributeHandlers["ri:detailRange"] = &IECoreRI::RendererImplementation::setDetailRangeAttribute;
 	m_setAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::setTextureCoordinatesAttribute;
+	m_setAttributeHandlers["ri:automaticInstancing"] = &IECoreRI::RendererImplementation::setAutomaticInstancingAttribute;
 
 	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
 	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
@@ -162,6 +220,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_getAttributeHandlers["rightHandedOrientation"] = &IECoreRI::RendererImplementation::getRightHandedOrientationAttribute;
 	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
 	m_getAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::getTextureCoordinatesAttribute;
+	m_getAttributeHandlers["ri:automaticInstancing"] = &IECoreRI::RendererImplementation::getAutomaticInstancingAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
@@ -182,6 +241,17 @@ IECoreRI::RendererImplementation::~RendererImplementation()
 		{
 			RiContext( c );
 		}
+	}
+	
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+	ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+	if( it == s_contextToSharedDataMap.end() )
+	{
+		IECore::msg( Msg::Warning, "IECoreRI::RendererImplementation::~RendererImplementation", "couldn't remove context->sharedData entry." );
+	}
+	else
+	{
+		s_contextToSharedDataMap.erase( it );
 	}
 }
 
@@ -920,6 +990,20 @@ void IECoreRI::RendererImplementation::setTextureCoordinatesAttribute( const std
 	RiTextureCoordinates( values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7] );
 }
 
+void IECoreRI::RendererImplementation::setAutomaticInstancingAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	const BoolData *b = runTimeCast<const BoolData>( d.get() );
+	if( !b )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAutomaticInstancingAttribute", format( "%s attribute expects a BoolData value." ) % name );
+		return;
+	}
+	
+	ParameterList pl( "cortexAutomaticInstancing", b );
+	RiAttributeV( "user", pl.n(), pl.tokens(), pl.values() );
+
+}
+
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::string &name ) const
 {
 	ScopedContext scopedContext( m_context );
@@ -1070,6 +1154,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const s
 	return 0;
 }
 
+
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getTextureCoordinatesAttribute( const std::string &name ) const
 {
 	FloatVectorDataPtr result = new FloatVectorData;
@@ -1085,6 +1170,20 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getTextureCoordinatesAttr
 		}
 	}
 	return NULL;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getAutomaticInstancingAttribute( const std::string &name ) const
+{
+	return new BoolData( automaticInstancingEnabled() );
+}
+
+bool IECoreRI::RendererImplementation::automaticInstancingEnabled() const
+{
+	RtInt result = 0;
+	RxInfoType_t resultType;
+	int resultCount;
+	RxAttribute( "user:cortexAutomaticInstancing", &result, sizeof( RtInt ), &resultType, &resultCount );
+	return result;
 }
 
 IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
@@ -1252,7 +1351,48 @@ void IECoreRI::RendererImplementation::delayedMotionBegin()
 void IECoreRI::RendererImplementation::motionEnd()
 {
 	ScopedContext scopedContext( m_context );
-	RiMotionEnd();
+	if( !automaticInstancingEnabled() || m_inMotion )
+	{
+		// no auto instancing, or perhaps we're in a transform motion block
+		RiMotionEnd();
+	}
+	else
+	{
+		MurmurHash h;
+		for( std::vector<float>::const_iterator it = m_delayedMotionTimes.begin(); it!=m_delayedMotionTimes.end(); it++ )
+		{
+			h.append( *it );
+		}
+		for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
+		{
+			(*it)->hash( h );
+		}
+		
+		std::string instanceName = "cortexAutomaticInstance" + h.toString();
+			
+		SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex);
+
+		SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );		
+		if( it != m_sharedData->objectHandles.end() )
+		{
+			instance( instanceName );
+		}
+		else
+		{
+			instanceBegin( instanceName, CompoundDataMap() );
+				emitPrimitiveAttributes( m_motionPrimitives[0] );
+				RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+					for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )					
+					{
+						emitPrimitive( *it );
+					}
+				RiMotionEnd();	
+			instanceEnd();
+			instance( instanceName );
+			m_delayedMotionTimes.clear();
+			m_motionPrimitives.clear();
+		}
+	}
 	m_inMotion = false;
 }
 
@@ -1262,51 +1402,29 @@ void IECoreRI::RendererImplementation::motionEnd()
 
 void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
-	RiPointsV( numPoints, pv.n(), pv.tokens(), pv.values() );
+	PointsPrimitivePtr points = new PointsPrimitive( numPoints );
+	points->variables = primVars;
+	addPrimitive( points );
+	
 }
 
 void IECoreRI::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
-	RiDiskV( z, radius, thetaMax, pv.n(), pv.tokens(), pv.values() );
+	DiskPrimitivePtr disk = new DiskPrimitive( radius, z, thetaMax );
+	disk->variables = primVars;
+	addPrimitive( disk );
 }
 
 void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
-	ScopedContext scopedContext( m_context );
-
-	// emit basis if we're not in a motion block right now
-	if( !m_inMotion )
-	{
-		RtMatrix b;
-		convert( basis.matrix, b );
-		RiBasis( b, basis.step, b, basis.step );
-	}
-
-	// then emit any overdue motionbegin calls.
-	delayedMotionBegin();
-
-	// finally emit the curves
-
-	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
-	vector<int> &numVerticesV = const_cast<vector<int> &>( numVertices->readable() );
-
-	RiCurvesV(	(char *)( basis==CubicBasisf::linear() ? "linear" : "cubic" ),
-				numVerticesV.size(), &*( numVerticesV.begin() ),
-				(char *)( periodic ? "periodic" : "nonperiodic" ),
-				pv.n(), pv.tokens(), pv.values() );
+	CurvesPrimitivePtr curves = new CurvesPrimitive();
+	curves->setTopology( numVertices, basis, periodic );
+	curves->variables = primVars;
+	addPrimitive( curves );
 }
 
 void IECoreRI::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-
 #ifdef IECORE_WITH_FREETYPE
 	IECore::FontPtr f = 0;
 	FontMap::const_iterator it = m_fonts.find( font );
@@ -1338,7 +1456,7 @@ void IECoreRI::RendererImplementation::text( const std::string &font, const std:
 	}
 
 	f->setKerning( kerning );
-	f->meshGroup( text )->render( this );
+	addPrimitive( f->mesh( text ) );
 #else
 	IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." );
 #endif // IECORE_WITH_FREETYPE
@@ -1346,28 +1464,220 @@ void IECoreRI::RendererImplementation::text( const std::string &font, const std:
 
 void IECoreRI::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
-	RiSphereV( radius, zMin * radius, zMax * radius, thetaMax, pv.n(), pv.tokens(), pv.values() );
+	SpherePrimitivePtr sphere = new SpherePrimitive( radius, zMin, zMax, thetaMax );
+	sphere->variables = primVars;
+	addPrimitive( sphere );
 }
 
 void IECoreRI::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-
 	msg( Msg::Warning, "IECoreRI::RendererImplementation::image", "Not implemented" );
 }
 
 void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
 {
+	IECore::MeshPrimitivePtr mesh = new IECore::MeshPrimitive;
+	IECore::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
+	if( it == primVars.end() )
+	{
+		IECore::msg( IECore::Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Trying to render a mesh without \"P\"" );
+		return;
+	}
+		
+	IECore::V3fVectorDataPtr pData = runTimeCast< IECore::V3fVectorData >( it->second.data );
+	if( !pData )
+	{
+		IECore::msg( IECore::Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Mesh \"P\" variable has incorrect type" );
+	}
+		
+	mesh->setTopologyUnchecked( vertsPerFace, vertIds, pData->readable().size(), interpolation );
+	mesh->variables = primVars;
+	addPrimitive( mesh );
+}
+
+void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+{
+	NURBSPrimitivePtr nurbs = new NURBSPrimitive( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax );
+	nurbs->variables = primVars;
+	addPrimitive( nurbs );
+}
+
+void IECoreRI::RendererImplementation::patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars )
+{
+	bool uLinear = uBasis == CubicBasisf::linear();
+	bool vLinear = vBasis == CubicBasisf::linear();
+
+	if( uLinear != vLinear )
+	{
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Mismatched u/v basis.");
+		return;
+	}
+	
+	PatchMeshPrimitivePtr mesh = new PatchMeshPrimitive( nu, nv, uBasis, vBasis, uPeriodic, vPeriodic );
+	mesh->variables = primVars;
+	addPrimitive( mesh );
+}
+
+void IECoreRI::RendererImplementation::geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars )
+{
 	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
 
-	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
+	if( type=="teapot" || type=="ri:teapot" )
+	{
+		RiGeometry( "teapot", 0 );
+	}
+	else
+	{
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::geometry", format( "Unsupported geometry type \"%s\"." ) % type );
+	}
+}
 
-	if( interpolation=="catmullClark" )
+/////////////////////////////////////////////////////////////////////////////////////////
+// primitive processing. the primitive methods above just create IECore::Primitives
+// and then pass them into addPrimitive(), where we do automatic instancing and suchlike
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr primitive )
+{
+	ScopedContext scopedContext( m_context );
+	
+	if( !automaticInstancingEnabled() )
+	{
+		if( !m_inMotion )
+		{
+			emitPrimitiveAttributes( primitive );		
+		}
+		delayedMotionBegin();		
+		emitPrimitive( primitive );
+	}
+	else
+	{
+		if( !m_delayedMotionTimes.size() )
+		{
+			// no motion blur - emit the primitive in instanced form
+			MurmurHash h;
+			primitive->hash( h );
+			std::string instanceName = "cortexAutomaticInstance" + h.toString();
+
+			SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
+			
+			SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );
+			if( it != m_sharedData->objectHandles.end() )
+			{
+				instance( instanceName );
+			}
+			else
+			{
+				instanceBegin( instanceName, CompoundDataMap() );
+					emitPrimitiveAttributes( primitive );
+					emitPrimitive( primitive );
+				instanceEnd();
+				instance( instanceName );
+			}
+		}
+		else
+		{
+			// motion blur. queue up the primitive for later emission.
+			m_motionPrimitives.push_back( primitive );
+		}
+	}
+}
+
+void IECoreRI::RendererImplementation::emitPrimitiveAttributes( const IECore::Primitive *primitive )
+{
+	switch( primitive->typeId() )
+	{
+		case CurvesPrimitiveTypeId :
+			emitCurvesPrimitiveAttributes( static_cast<const CurvesPrimitive *>( primitive ) );
+			break;
+		case PatchMeshPrimitiveTypeId :
+			emitPatchMeshPrimitiveAttributes( static_cast<const PatchMeshPrimitive *>( primitive ) );
+			break;
+		default :
+			// the other primitive types don't have weird attribute state interactions
+			break;
+	}
+}
+
+void IECoreRI::RendererImplementation::emitCurvesPrimitiveAttributes( const IECore::CurvesPrimitive *primitive )
+{
+	const CubicBasisf &basis = primitive->basis();
+	RtMatrix b;
+	convert( basis.matrix, b );
+	RiBasis( b, basis.step, b, basis.step );
+}
+
+void IECoreRI::RendererImplementation::emitPatchMeshPrimitiveAttributes( const IECore::PatchMeshPrimitive *primitive )
+{
+	const CubicBasisf &uBasis = primitive->uBasis();
+	const CubicBasisf &vBasis = primitive->vBasis();
+	RtMatrix ub, vb;
+	convert( uBasis.matrix, ub );
+	convert( vBasis.matrix, vb );
+	RiBasis( ub, uBasis.step, vb, vBasis.step );
+}
+
+void IECoreRI::RendererImplementation::emitPrimitive( const IECore::Primitive *primitive )
+{
+	switch( primitive->typeId() )
+	{
+		case PointsPrimitiveTypeId :
+			emitPointsPrimitive( static_cast<const PointsPrimitive *>( primitive ) );
+			break;
+		case MeshPrimitiveTypeId :
+			emitMeshPrimitive( static_cast<const MeshPrimitive *>( primitive ) );
+			break;
+		case CurvesPrimitiveTypeId :
+			emitCurvesPrimitive( static_cast<const CurvesPrimitive *>( primitive ) );
+			break;
+		case DiskPrimitiveTypeId :
+			emitDiskPrimitive( static_cast<const DiskPrimitive *>( primitive ) );
+			break;
+		case SpherePrimitiveTypeId :
+			emitSpherePrimitive( static_cast<const SpherePrimitive *>( primitive ) );
+			break;	
+		case NURBSPrimitiveTypeId :
+			emitNURBSPrimitive( static_cast<const NURBSPrimitive *>( primitive ) );
+			break;
+		case PatchMeshPrimitiveTypeId :
+			emitPatchMeshPrimitive( static_cast<const PatchMeshPrimitive *>( primitive ) );
+			break;
+		default :
+			// shouldn't be here
+			assert( 0 );
+	}
+}
+
+void IECoreRI::RendererImplementation::emitPointsPrimitive( const IECore::PointsPrimitive *primitive )
+{
+	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	RiPointsV( primitive->getNumPoints(), pv.n(), pv.tokens(), pv.values() );
+}
+
+void IECoreRI::RendererImplementation::emitDiskPrimitive( const IECore::DiskPrimitive *primitive )
+{
+	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	RiDiskV( primitive->getZ(), primitive->getRadius(), primitive->getThetaMax(), pv.n(), pv.tokens(), pv.values() );
+}
+
+void IECoreRI::RendererImplementation::emitCurvesPrimitive( const IECore::CurvesPrimitive *primitive )
+{
+	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	vector<int> &numVerticesV = const_cast<vector<int> &>( primitive->verticesPerCurve()->readable() );
+
+	RiCurvesV(	(char *)( primitive->basis()==CubicBasisf::linear() ? "linear" : "cubic" ),
+				numVerticesV.size(), &*( numVerticesV.begin() ),
+				(char *)( primitive->periodic() ? "periodic" : "nonperiodic" ),
+				pv.n(), pv.tokens(), pv.values() );
+}
+	
+void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrimitive *primitive )
+{
+	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	const std::vector<int> &vertsPerFace = primitive->verticesPerFace()->readable();
+	const std::vector<int> &vertIds = primitive->vertexIds()->readable();
+
+	if( primitive->interpolation()=="catmullClark" )
 	{
 		int numNames = 1;
 		const char *names[] = { "interpolateboundary", 0, 0, 0, 0, 0 };
@@ -1376,8 +1686,8 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 		const float *floats = 0;
 		const int *integers = 0;
 		
-		IECore::PrimitiveVariableMap::const_iterator tagIt = primVars.find( "tags" );
-		if( tagIt != primVars.end() )
+		IECore::PrimitiveVariableMap::const_iterator tagIt = primitive->variables.find( "tags" );
+		if( tagIt != primitive->variables.end() )
 		{
 			const CompoundData *tagsData = runTimeCast<const CompoundData>( tagIt->second.data.get() );
 			if( tagsData )
@@ -1401,117 +1711,94 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 				}
 				else
 				{
-					msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Primitive variable \"tags\" does not contain the required members - ignoring." );
+					msg( Msg::Warning, "IECoreRI::RendererImplementation::emitMesh", "Primitive variable \"tags\" does not contain the required members - ignoring." );
 				}
 			}
 			else
 			{
-				msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Primitive variable \"tags\" is not of type CompoundData - ignoring." );
+				msg( Msg::Warning, "IECoreRI::RendererImplementation::emitMesh", "Primitive variable \"tags\" is not of type CompoundData - ignoring." );
 			}
 		}
 
-		RiSubdivisionMeshV( "catmull-clark", vertsPerFace->readable().size(), (int *)&vertsPerFace->readable()[0], (int *)&vertIds->readable()[0],
+		RiSubdivisionMeshV( "catmull-clark", vertsPerFace.size(), const_cast<int *>( &vertsPerFace[0] ), const_cast<int *>( &vertIds[0] ),
 			numNames, (char **)names, (int *)nArgs, (int *)integers, (float *)floats,
 			pv.n(), pv.tokens(), pv.values() );
 
 		return;
 	}
 
-	if( interpolation!="linear" )
+	if( primitive->interpolation()!="linear" )
 	{
-		msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", boost::format( "Unsupported interpolation type \"%s\" - rendering as polygons." ) % interpolation );
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::emitMesh", boost::format( "Unsupported interpolation type \"%s\" - rendering as polygons." ) % primitive->interpolation() );
 	}
 
 	tbb::queuing_rw_mutex::scoped_lock lock( g_nLoopsMutex, false /* read only */ );
-	if( g_nLoops.size()<vertsPerFace->readable().size() )
+	if( g_nLoops.size()<vertsPerFace.size() )
 	{
 		lock.upgrade_to_writer();
-			if( g_nLoops.size()<vertsPerFace->readable().size() ) // checking again as i think g_nLoops may have been resized by another thread getting the write lock first
+			if( g_nLoops.size()<vertsPerFace.size() ) // checking again as i think g_nLoops may have been resized by another thread getting the write lock first
 			{
-				g_nLoops.resize( vertsPerFace->readable().size(), 1 );
+				g_nLoops.resize( vertsPerFace.size(), 1 );
 			}
 		lock.downgrade_to_reader();
 	}
 
-	vector<int> &vertsPerFaceV = const_cast<vector<int> &>( vertsPerFace->readable() );
-	vector<int> &vertIdsV = const_cast<vector<int> &>( vertIds->readable() );
-
-	RiPointsGeneralPolygonsV( vertsPerFaceV.size(), &*(g_nLoops.begin()), &*(vertsPerFaceV.begin()), &*(vertIdsV.begin()),
+	RiPointsGeneralPolygonsV( vertsPerFace.size(), &*(g_nLoops.begin()), const_cast<int *>( &vertsPerFace[0] ), const_cast<int *>( &vertIds[0] ),
 		pv.n(), pv.tokens(), pv.values() );
-
 }
 
-void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::emitSpherePrimitive( const IECore::SpherePrimitive *primitive )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-
-	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
-	RiNuPatchV(
-		uKnot->readable().size() - uOrder, // nu
-		uOrder,
-		const_cast<float *>( &(uKnot->readable()[0]) ),
-		uMin,
-		uMax,
-		vKnot->readable().size() - vOrder, // nv
-		vOrder,
-		const_cast<float *>( &(vKnot->readable()[0]) ),
-		vMin,
-		vMax,
+	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	RiSphereV(
+		primitive->radius(),
+		primitive->zMin() * primitive->radius(),
+		primitive->zMax() * primitive->radius(),
+		primitive->thetaMax(),
 		pv.n(), pv.tokens(), pv.values()
 	);
 }
 
-void IECoreRI::RendererImplementation::patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::emitNURBSPrimitive( const IECore::NURBSPrimitive *primitive )
 {
-	ScopedContext scopedContext( m_context );
+	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	
+	const std::vector<float> &uKnot = primitive->uKnot()->readable();
+	const std::vector<float> &vKnot = primitive->vKnot()->readable();
+	
+	RiNuPatchV(
+		uKnot.size() - primitive->uOrder(), // nu
+		primitive->uOrder(),
+		const_cast<float *>( &(uKnot[0]) ),
+		primitive->uMin(),
+		primitive->uMax(),
+		vKnot.size() - primitive->vOrder(), // nv
+		primitive->vOrder(),
+		const_cast<float *>( &(vKnot[0]) ),
+		primitive->vMin(),
+		primitive->vMax(),
+		pv.n(), pv.tokens(), pv.values()
+	);
+}
 
-	bool uLinear = uBasis == CubicBasisf::linear();
-	bool vLinear = vBasis == CubicBasisf::linear();
-
-	if ( uLinear != vLinear )
-	{
-		msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Mismatched u/v basis.");
-		return;
-	}
-
-	if( !m_inMotion )
-	{
-		RtMatrix ub, vb;
-		convert( uBasis.matrix, ub );
-		convert( vBasis.matrix, vb );
-		RiBasis( ub, uBasis.step, vb, vBasis.step );
-	}
-
-	delayedMotionBegin();
-
-	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
+void IECoreRI::RendererImplementation::emitPatchMeshPrimitive( const IECore::PatchMeshPrimitive *primitive )
+{
+	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	bool uLinear = primitive->uBasis() == CubicBasisf::linear();
 	const char *type = uLinear ? "bilinear" : "bicubic";
 	RiPatchMeshV(
 		const_cast< char * >( type ),
-		nu,
-		(char *)( uPeriodic ? "periodic" : "nonperiodic" ),
-		nv,
-		(char *)( vPeriodic ? "periodic" : "nonperiodic" ),
+		primitive->uPoints(),
+		(char *)( primitive->uPeriodic() ? "periodic" : "nonperiodic" ),
+		primitive->vPoints(),
+		(char *)( primitive->vPeriodic() ? "periodic" : "nonperiodic" ),
 		pv.n(), pv.tokens(), pv.values()
 	);
 }
-
-void IECoreRI::RendererImplementation::geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars )
-{
-	ScopedContext scopedContext( m_context );
-
-	if( type=="teapot" || type=="ri:teapot" )
-	{
-		delayedMotionBegin();
-		RiGeometry( "teapot", 0 );
-	}
-	else
-	{
-		delayedMotionBegin();
-		msg( Msg::Warning, "IECoreRI::RendererImplementation::geometry", format( "Unsupported geometry type \"%s\"." ) % type );
-	}
-}
+	
+/////////////////////////////////////////////////////////////////////////////////////////
+// procedurals
+/////////////////////////////////////////////////////////////////////////////////////////
 
 void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
@@ -1594,7 +1881,8 @@ void IECoreRI::RendererImplementation::instanceBegin( const std::string &name, c
 	// we get to choose the name for the object
 	const char *tokens[] = { "__handleid", "scope" };
 	const char *namePtr = name.c_str();
-	const char *scope = "world";
+	// we make the instance scope global so it's possible to share instances across world blocks
+	const char *scope = "global";
 	const void *values[] = { &namePtr, &scope };
 	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
 	m_sharedData->objectHandles[name] = RiObjectBeginV( 2, (char **)&tokens, (void **)&values );
@@ -1615,7 +1903,7 @@ void IECoreRI::RendererImplementation::instance( const std::string &name )
 {
 	ScopedContext scopedContext( m_context );
 	
-	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex, false /* read only lock */ );
+	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
 	SharedData::ObjectHandleMap::const_iterator hIt = m_sharedData->objectHandles.find( name );
 	if( hIt==m_sharedData->objectHandles.end() )
 	{
