@@ -65,7 +65,7 @@ class RendererImplementation : public IECore::Renderer
 
 	public :
 
-		RendererImplementation( RendererImplementationPtr parent = 0 );
+		RendererImplementation();
 		RendererImplementation( const std::string &name );
 
 		virtual ~RendererImplementation();
@@ -162,7 +162,7 @@ class RendererImplementation : public IECore::Renderer
 		// an entry associating the current context with a SharedData instance, so if the argument free constructor
 		// is called later on in the same context, it can query the map and grab the correct SharedData. This
 		// is a multimap, as multiple RendererImplementation instances can be created in a given context,
-		// and we want to be able to clean up by removing instances in the destructor.
+		// and we want to be able to clean up by removing entries in ~RendererImplementation().
 		
 		typedef tbb::mutex ContextToSharedDataMapMutex;
 		typedef std::multimap< RtContextHandle, SharedData::Ptr > ContextToSharedDataMap;

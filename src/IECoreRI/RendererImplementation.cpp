@@ -131,41 +131,42 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
 }
 
-// This constructor creates a RendererImplementation with an optional parent. If a parent is supplied,
-// it will inherit the parent's SharedData. Otherwise, m_contextToSharedDataMapKey gets queried with the current
-// RtContext, and one of two things can happen:
+// This constructor creates a RendererImplementation using the current RtContext. The SharedData is acquired by 
+// querying m_contextToSharedDataMap in one of two ways:
 //
-// 1)	There's an entry for the current context. This means the user's manually called Renderer() with no arguments
+// 1)	If there's an entry for the current RtContext, this means the user's manually called Renderer() with no arguments
 //	in the course of a render, and we set m_sharedData to this entry.
-// 2)	There isn't an entry for the current context. This means we're in a procedural that's been launched from a rib,
+// 2)	If there isn't an entry for the current context, this means we're in a procedural that's been launched from a rib,
 //	and in this case we use a null context as a key into the map. If there's an entry for the null context, we
 //	set m_sharedData to that entry, otherwise we set it to a new SharedData.
 //
-
-IECoreRI::RendererImplementation::RendererImplementation( RendererImplementationPtr parent )
-	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : 0 ), m_options( parent ? parent->m_options : 0 )
+IECoreRI::RendererImplementation::RendererImplementation()
+	:	m_context( 0 ), m_options( 0 )
 {
 	constructCommon();
 	
 	m_contextToSharedDataMapKey = RiGetContext();
 	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
-	if( !m_sharedData )
+
+	ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+	if( it == s_contextToSharedDataMap.end() )
 	{
-		ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+		m_contextToSharedDataMapKey = 0;
+		it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
 		if( it == s_contextToSharedDataMap.end() )
 		{
-			m_contextToSharedDataMapKey = 0;
-			it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
-			if( it == s_contextToSharedDataMap.end() )
-			{
-				m_sharedData = new SharedData;
-			}
-			else
-			{
-				m_sharedData = it->second;
-			}
+			m_sharedData = new SharedData;
+		}
+		else
+		{
+			m_sharedData = it->second;
 		}
 	}
+	else
+	{
+		m_sharedData = it->second;
+	}
+	
 	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
 }
 
