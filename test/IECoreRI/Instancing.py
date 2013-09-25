@@ -436,7 +436,101 @@ class InstancingTest( IECoreRI.TestCase ) :
 		
 			for i in range( 0, 1000 ) :
 				r.procedural( PlaneProcedural() )
+	
+	def testSharedHandles( self ) :
 
+		rib = """
+		Option "searchpath" "string procedural" "./src/rmanProcedurals/python"
+		
+		Display "test/IECoreRI/output/testPythonProcedural.tif" "tiff" "rgba" 
+		
+		Projection "perspective" "float fov" [ 40 ]
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+			
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+		
+		WorldEnd
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+			
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+		
+		WorldEnd
+		"""
+		
+		ribFile = open( "test/IECoreRI/output/pythonProcedural.rib", "w" )
+		ribFile.write( rib )
+		ribFile.close()
+		
+		os.system( "renderdl -callprocedurals -catrib test/IECoreRI/output/pythonProcedural.rib > test/IECoreRI/output/pythonProceduralExpanded.rib" )
+		
+		rib = "".join( open( "test/IECoreRI/output/pythonProceduralExpanded.rib" ).readlines() )
+		
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 12 )
+
+	def testSharedHandlesNestedProcedurals( self ) :
+		
+		# this string defines a procedural that renders a box:
+		boxProcString = "exec( 'import IECore\\\\nclass BoxProcedural( IECore.Renderer.Procedural ) :\\\\n\\\\tdef __init__( self ) :\\\\n\\\\t\\\\tIECore.Renderer.Procedural.__init__( self )\\\\n\\\\tdef bound( self ) :\\\\n\\\\t\\\\treturn IECore.Box3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 1, 1 ) )\\\\n\\\\tdef render( self, renderer ) :\\\\n\\\\t\\\\t\\\\tIECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) ).render( renderer )\\\\n\\\\tdef hash( self ) :\\\\n\\\\t\\\\th = IECore.MurmurHash()\\\\n\\\\t\\\\treturn h' )"
+		
+		# this procedural call renders a box, then calls our box procedural:
+		proceduralCallString = 'Procedural "DynamicLoad" [ "python" "' + boxProcString + ';r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) ).render( r );r.procedural( BoxProcedural() )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]\n'
+		
+		rib = """
+		Option "searchpath" "string procedural" "./src/rmanProcedurals/python"
+		
+		Display "test/IECoreRI/output/testPythonProcedural.tif" "tiff" "rgba" 
+		
+		Projection "perspective" "float fov" [ 40 ]
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+		"""
+		
+		rib += proceduralCallString * 6
+		
+		rib += """
+		WorldEnd
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+		"""
+		
+		rib += proceduralCallString * 6
+		
+		rib += """
+		WorldEnd
+		"""
+		
+		ribFile = open( "test/IECoreRI/output/pythonProcedural.rib", "w" )
+		ribFile.write( rib )
+		ribFile.close()
+		
+		os.system( "renderdl -callprocedurals -catrib test/IECoreRI/output/pythonProcedural.rib > test/IECoreRI/output/pythonProceduralExpanded.rib" )
+		
+		rib = "".join( open( "test/IECoreRI/output/pythonProceduralExpanded.rib" ).readlines() )
+		
+		# should get 24 instances of the same box!
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 24 )
 
 if __name__ == "__main__":
     unittest.main()

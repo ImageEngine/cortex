@@ -39,6 +39,7 @@
 
 #include "tbb/queuing_rw_mutex.h"
 #include "tbb/recursive_mutex.h"
+#include "tbb/mutex.h"
 
 #include "ri.h"
 
@@ -151,7 +152,25 @@ class RendererImplementation : public IECore::Renderer
 				
 		RtContextHandle m_context;
 		SharedData::Ptr m_sharedData;
-
+		
+		// All RendererImplementation instances associated with the same render must have the same SharedData
+		// object, otherwise we won't be able to share object instance handles between them. This is confounded
+		// when we call RendererImplementation() with no arguments, as it has no information about the render
+		// that called it, and hence no idea what SharedData to use.
+		
+		// We address this using s_contextToSharedDataMap. Whenever a RendererImplementation is created, it adds
+		// an entry associating the current context with a SharedData instance, so if the argument free constructor
+		// is called later on in the same context, it can query the map and grab the correct SharedData. This
+		// is a multimap, as multiple RendererImplementation instances can be created in a given context,
+		// and we want to be able to clean up by removing instances in the destructor.
+		
+		typedef tbb::mutex ContextToSharedDataMapMutex;
+		typedef std::multimap< RtContextHandle, SharedData::Ptr > ContextToSharedDataMap;
+		static ContextToSharedDataMapMutex s_contextToSharedDataMapMutex;
+		static ContextToSharedDataMap s_contextToSharedDataMap;
+		
+		RtContextHandle m_contextToSharedDataMapKey;
+		
 		typedef void (RendererImplementation::*SetOptionHandler)( const std::string &name, IECore::ConstDataPtr d );
 		typedef IECore::ConstDataPtr (RendererImplementation::*GetOptionHandler)( const std::string &name ) const;
 		typedef std::map<std::string, SetOptionHandler> SetOptionHandlerMap;

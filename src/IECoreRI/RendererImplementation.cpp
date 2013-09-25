@@ -78,21 +78,13 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 // IECoreRI::RendererImplementation implementation
 ////////////////////////////////////////////////////////////////////////
 
+IECoreRI::RendererImplementation::ContextToSharedDataMapMutex IECoreRI::RendererImplementation::s_contextToSharedDataMapMutex;
+IECoreRI::RendererImplementation::ContextToSharedDataMap IECoreRI::RendererImplementation::s_contextToSharedDataMap;
 tbb::queuing_rw_mutex IECoreRI::RendererImplementation::g_nLoopsMutex;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
-IECoreRI::RendererImplementation::RendererImplementation( RendererImplementationPtr parent )
-	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : SharedData::Ptr( new SharedData ) ), m_options( parent ? parent->m_options : 0 )
-{
-	constructCommon();
-}
-
-IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
-	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
-{
-	constructCommon();
-}
-
+// This constructor launches a render within the current application. It creates a SharedData instance,
+// which gets propagated down to the renderers this object creates by launching procedurals.
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
 	:	m_sharedData( new SharedData )
 {
@@ -111,6 +103,70 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 #endif		
 	}
 	m_context = RiGetContext();
+	
+	// Add a correspondance between the current context and this object's SharedData instance,
+	// in case RendererImplementation() gets called later on with no arguments. This creates a
+	// RendererImplementation in the current context, which must have access to this object's
+	// SharedData instance.
+	
+	m_contextToSharedDataMapKey = m_context;
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
+}
+
+// This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
+// that launched the procedural
+IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
+{
+	constructCommon();
+	
+	// Add a correspondance between the current context and this object's SharedData instance,
+	// in case RendererImplementation() gets called later on with no arguments. This creates a
+	// RendererImplementation in the current context, which must have access to this object's
+	// SharedData instance.
+	
+	m_contextToSharedDataMapKey = RiGetContext();
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
+}
+
+// This constructor creates a RendererImplementation with an optional parent. If a parent is supplied,
+// it will inherit the parent's SharedData. Otherwise, m_contextToSharedDataMapKey gets queried with the current
+// RtContext, and one of two things can happen:
+//
+// 1)	There's an entry for the current context. This means the user's manually called Renderer() with no arguments
+//	in the course of a render, and we set m_sharedData to this entry.
+// 2)	There isn't an entry for the current context. This means we're in a procedural that's been launched from a rib,
+//	and in this case we use a null context as a key into the map. If there's an entry for the null context, we
+//	set m_sharedData to that entry, otherwise we set it to a new SharedData.
+//
+
+IECoreRI::RendererImplementation::RendererImplementation( RendererImplementationPtr parent )
+	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : 0 ), m_options( parent ? parent->m_options : 0 )
+{
+	constructCommon();
+	
+	m_contextToSharedDataMapKey = RiGetContext();
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+	if( !m_sharedData )
+	{
+		ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+		if( it == s_contextToSharedDataMap.end() )
+		{
+			m_contextToSharedDataMapKey = 0;
+			it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+			if( it == s_contextToSharedDataMap.end() )
+			{
+				m_sharedData = new SharedData;
+			}
+			else
+			{
+				m_sharedData = it->second;
+			}
+		}
+	}
+	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
 }
 
 void IECoreRI::RendererImplementation::constructCommon()
@@ -184,6 +240,17 @@ IECoreRI::RendererImplementation::~RendererImplementation()
 		{
 			RiContext( c );
 		}
+	}
+	
+	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+	ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+	if( it == s_contextToSharedDataMap.end() )
+	{
+		IECore::msg( Msg::Warning, "IECoreRI::RendererImplementation::~RendererImplementation", "couldn't remove context->sharedData entry." );
+	}
+	else
+	{
+		s_contextToSharedDataMap.erase( it );
 	}
 }
 
@@ -1291,7 +1358,6 @@ void IECoreRI::RendererImplementation::motionEnd()
 	else
 	{
 		MurmurHash h;
-		h.append( (uint64_t)m_sharedData.get() ); // prevent clashes when two procedurals are loaded from a rib, as they don't share a common root renderer instance
 		for( std::vector<float>::const_iterator it = m_delayedMotionTimes.begin(); it!=m_delayedMotionTimes.end(); it++ )
 		{
 			h.append( *it );
@@ -1489,7 +1555,6 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 		{
 			// no motion blur - emit the primitive in instanced form
 			MurmurHash h;
-			h.append( (uint64_t)m_sharedData.get() ); // prevent clashes when two procedurals are loaded from a rib, as they don't share a common root renderer instance
 			primitive->hash( h );
 			std::string instanceName = "cortexAutomaticInstance" + h.toString();
 
@@ -1815,7 +1880,8 @@ void IECoreRI::RendererImplementation::instanceBegin( const std::string &name, c
 	// we get to choose the name for the object
 	const char *tokens[] = { "__handleid", "scope" };
 	const char *namePtr = name.c_str();
-	const char *scope = "world";
+	// we make the instance scope global so it's possible to share instances across world blocks
+	const char *scope = "global";
 	const void *values[] = { &namePtr, &scope };
 	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
 	m_sharedData->objectHandles[name] = RiObjectBeginV( 2, (char **)&tokens, (void **)&values );
