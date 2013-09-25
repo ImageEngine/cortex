@@ -136,16 +136,17 @@ class RendererTest( IECoreRI.TestCase ) :
 			( "ri:cull:hidden", IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]", False ),
 			( "name", StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True ),
 			( "ri:trace:bias", FloatData( 2 ), "Attribute \"trace\" \"float bias\" [ 2 ]", True ),
+			( "user:myString", StringData( "wellHello" ), "Attribute \"user\" \"string myString\" [ \"wellHello\" ]", True ),
+			( "ri:automaticInstancing", BoolData( True ), "Attribute \"user\" \"int cortexAutomaticInstancing\" [ 1 ]", True ),
 		]
 
 		for t in tests :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
-			r.worldBegin()
-			r.setAttribute( t[0], t[1] )
-			if t[3] :
-				self.assertEqual( r.getAttribute( t[0] ), t[1] )
-			r.worldEnd()
+			with WorldBlock( r ) :
+				r.setAttribute( t[0], t[1] )
+				if t[3] :
+					self.assertEqual( r.getAttribute( t[0] ), t[1] )
 
 			l = "".join( file( "test/IECoreRI/output/testAttributes.rib" ).readlines() )
 			l = " ".join( l.split() )
