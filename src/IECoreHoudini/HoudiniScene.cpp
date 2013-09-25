@@ -64,8 +64,19 @@ HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
 	calculatePath( contentPath, rootPath );
 }
 
+HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath )
+	: m_rootIndex( 0 ), m_contentIndex( 0 )
+{
+	constructCommon( nodePath, contentPath, rootPath, 0 );
+}
+
 HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
 	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( splitter )
+{
+	constructCommon( nodePath, contentPath, rootPath, splitter );
+}
+
+void HoudiniScene::constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
 {
 	m_nodePath = nodePath;
 	m_nodePath.hardenIfNeeded();

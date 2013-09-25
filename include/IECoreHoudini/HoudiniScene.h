@@ -56,7 +56,7 @@ class HoudiniScene : public IECore::SceneInterface
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HoudiniScene, HoudiniSceneTypeId, IECore::SceneInterface );
 		
 		HoudiniScene();
-		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter = 0 );
+		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath );
 		
 		virtual ~HoudiniScene();
 		
@@ -114,6 +114,9 @@ class HoudiniScene : public IECore::SceneInterface
 		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
 		
 	private :
+		
+		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
+		void constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
 		
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		OP_Node *locateContent( OP_Node *node ) const;
