@@ -136,7 +136,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		
 		merge.inputs()[0].bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
-		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		
 		merge.inputs()[1].bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )

@@ -39,6 +39,8 @@
 #include "UT/UT_String.h"
 
 #include "IECore/SceneInterface.h"
+
+#include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/TypeIds.h"
 
 namespace IECoreHoudini
@@ -113,6 +115,9 @@ class HoudiniScene : public IECore::SceneInterface
 		
 	private :
 		
+		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
+		void constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
+		
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		OP_Node *locateContent( OP_Node *node ) const;
 		OP_Node *retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
@@ -120,7 +125,9 @@ class HoudiniScene : public IECore::SceneInterface
 		bool hasInput( const OP_Node *node ) const;
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
-		bool relativePath( const char *value, Path &result ) const;
+		const char *matchPath( const char *value ) const;
+		bool matchPattern( const char *value, const char *pattern ) const;
+		std::pair<const char *, size_t> nextWord( const char *value ) const;
 		const char *contentPathValue() const;
 		
 		/// Struct for registering readers for custom Attributes.
@@ -141,10 +148,12 @@ class HoudiniScene : public IECore::SceneInterface
 		static std::vector<CustomTagReader> &customTagReaders();
 		
 		UT_String m_nodePath;
-		UT_String m_contentPath;
 		size_t m_rootIndex;
 		size_t m_contentIndex;
 		IECore::SceneInterface::Path m_path;
+		
+		// used by instances which track the hierarchy inside a SOP
+		mutable DetailSplitterPtr m_splitter;
 
 };
 

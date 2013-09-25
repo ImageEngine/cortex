@@ -32,69 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_ROPSCENECACHEWRITER_H
-#define IECOREHOUDINI_ROPSCENECACHEWRITER_H
+#ifndef IECOREHOUDINI_DETAILSPLITTER_H
+#define IECOREHOUDINI_DETAILSPLITTER_H
 
-#include "ROP/ROP_Node.h"
+#include <map>
+#include <string>
 
-#include "IECore/SceneInterface.h"
+#include "GU/GU_DetailHandle.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
+#include "IECore/RefCounted.h"
 
 namespace IECoreHoudini
 {
 
-/// Class for writing SceneCache files based on an existing Houdini hierarchy
-class ROP_SceneCacheWriter : public ROP_Node
+/// DetailSplitter is a convenience class for extracting select bits of geometry
+/// from a GU_Detail. It is intended to improve performance when making multiple
+/// calls to split the same detail. The default use is splitting based on the name
+/// attribute, but any primitive string attribute could be used.
+class DetailSplitter : public IECore::RefCounted
 {
+	
 	public :
 		
-		ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op );
-		virtual ~ROP_SceneCacheWriter();
+		IE_CORE_DECLAREMEMBERPTR( DetailSplitter );
 		
-		static const char *typeName;
+		/// Create a DetailSplitter which will split the handle by the given key.
+		/// @param key The name of a primitive string attribute on the GU_Detail.
+		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name" );
 		
-		static PRM_Name pFile;
-		static PRM_Name pRootObject;
-		static PRM_Name pForceObjects;
+		virtual ~DetailSplitter();
 		
-		static PRM_Default fileDefault;
-		static PRM_Default rootObjectDefault;
-		static PRM_SpareData forceObjectsSpareData;
+		/// Creates and returns a handle to a new GU_Detail which contains only
+		/// the primitives that match the value requested.
+		const GU_DetailHandle split( const std::string &value );
 		
-		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
-		static OP_TemplatePair *buildParameters();
+		/// Fills the result vector with all valid values in the GU_Detail
+		void values( std::vector<std::string> &result );
 		
-	protected :
-		
-		virtual int startRender( int nframes, fpreal s, fpreal e );
-		virtual ROP_RENDER_CODE renderFrame( fpreal time, UT_Interrupt *boss );
-		virtual ROP_RENDER_CODE endRender();
-		
-		virtual bool updateParmsFlags();
-		
-		/// Called recursively to traverse the IECoreHoudini::HoudiniScene, starting with the Root Object,
-		/// and write the hierarchy to the output file.
-		virtual ROP_RENDER_CODE doWrite( const IECore::SceneInterface *liveScene, IECore::SceneInterface *outScene, double time, UT_Interrupt *progress );
+		/// Returns the handle held by the splitter
+		const GU_DetailHandle &handle() const;
 	
 	private :
 		
-		bool linked( const std::string &file ) const;
+		bool validate();
 		
-		enum Mode
-		{
-			NaturalLink = 0,
-			ForcedLink,
-			NaturalExpand,
-			ForcedExpand
-		};
+		typedef std::map<std::string, GU_DetailHandle> Cache;
 		
-		IECore::ConstSceneInterfacePtr m_liveScene;
-		IECore::SceneInterfacePtr m_outScene;
-		UT_StringMMPattern *m_forceFilter;
+		int m_lastMetaCount;
+		const std::string m_key;
+		const GU_DetailHandle m_handle;
+		Cache m_cache;
 
 };
 
+IE_CORE_DECLAREPTR( DetailSplitter );
+
 } // namespace IECoreHoudini
 
-#endif // IECOREHOUDINI_ROPSCENECACHEWRITER_H
+#endif // IECOREHOUDINI_DETAILSPLITTER_H
