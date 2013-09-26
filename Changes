@@ -1,3 +1,57 @@
+# 8.0.0-a18 :
+
+#### IECore
+
+- Fixed sample time ordering bug in SceneCache.
+- Fixed transform matrix order in Group.globalTransformMatrix().
+- Added a new setTopologyUnchecked method to MeshPrimitive, plus lazy computation of min/maxVerticesPerFace.
+
+#### IECoreGL
+
+-  Fixed bugs in interpretation of "color" attribute in IECoreGL.
+
+#### IECoreMaya
+
+- Fixed a segfault which occured when selecting multiple components of a sceneShape in Maya.
+- Fixed maya procedural selection highlighting.
+
+#### IECoreHoudini
+
+- Optimised SceneCache caching time significantly.
+- Simplified FromHoudiniGeometryConverter factory functions.
+- Added name parameter to ToHoudiniGeometryConverter.
+- FromHoudiniGeometryConverters no longer add the name blindData.
+- Added nameFilter to FromHoudiniGeometryConverter python factory function.
+- HoudiniGeometryConverters now use Objects rather than VisibleRenderables.
+- Added FromHoudiniCortexObjectConverter for converting single GU_CortexPrimitives.
+- Added ToHoudiniCortexObjectConverter for creating GU_CortexPrimitives.
+- Fixed ToHoudiniGeometryConverter bug where it didn't call incrementMetaCacheCount().
+- Added FromHoudiniCompoundObjectConverter. This converts multiple GU_CortexPrimitives, maintaining the naming by storing each one in a CompoundObject.
+- Added ToHoudiniCompoundObjectConverter.
+- Added non-const access to the object in a Geo_CortexPrimitive.
+- Removed unecessary Object copy in SceneCache SOP.
+- Removed HoudiniScene::readObject hack for CortexObject prims.
+- Updated cob/pdv IO to allow conversion of general Objects and not just VisibleRenderables.
+- Fixed ToHoudiniGeometryConverter factory function search order.
+- Fixed bug when caching hidden OBJs.
+- Added interruptibility to SceneCache ROP.
+- Added DetailSplitter class for efficiently extracting select bits of geometry from a GU_Detail.
+- Reenabled the loading of multiple ieCoreHoudini plugins.
+
+#### IECoreRI
+
+- Added "ri:textureCoordinates" attribute to IECoreRI::Renderer. This maps to a call to RiTextureCoordinates.
+- Fixed specification of multiple displays via IECoreRI::Renderer::display().
+- Added automatic instancing capabilities to IECoreRI::Renderer.
+
+#### IECoreNuke
+
+- Added support for expressions in LensDistort.
+
+#### IECoreAlembic
+
+- Fixed IECoreAlembic to use GeometricTypedData appropriately (#28).
+
 8.0.0-a17 :
 
 IECoreRI
