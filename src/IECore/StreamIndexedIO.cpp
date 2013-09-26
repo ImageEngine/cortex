@@ -159,7 +159,7 @@ class StreamIndexedIO::StringCache
 
 				Imf::Int64 id;
 				readLittleEndian( f,id );
-				assert( id < sz );
+
 				m_prevId = std::max( id, m_prevId );
 
 				m_stringToIdMap[s] = id;
@@ -236,13 +236,10 @@ class StreamIndexedIO::StringCache
 		void add( const IndexedIO::EntryID &s )
 		{
 			(void)find(s, false);
-
-			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
 		}
 
 		Imf::Int64 size() const
 		{
-			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
 			return m_stringToIdMap.size();
 		}
 
