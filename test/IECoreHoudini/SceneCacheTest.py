@@ -1009,7 +1009,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
-		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo" ).isObjectDisplayed() )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3/geo" ), None )
 		
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "tagFilter" ).set( "a" )
@@ -1017,9 +1017,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
-		self.assertFalse( hou.node( xform.path()+"/1/2/geo" ).isObjectDisplayed() )
-		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
-		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo" ).isObjectDisplayed() )
+		self.assertEqual( hou.node( xform.path()+"/1/2/geo" ), None )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3" ), None )
 		
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "tagFilter" ).set( "a b" )
@@ -1029,7 +1028,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isObjectDisplayed() )
-		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo" ).isObjectDisplayed() )
+		self.assertEqual( hou.node( xform.path()+"/1/2/3/geo" ), None )
 		
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )

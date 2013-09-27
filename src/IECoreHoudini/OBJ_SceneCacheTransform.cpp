@@ -328,7 +328,7 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		if ( hierarchy == SubNetworks )
 		{
 			childNode = doExpandChild( child, parent, geomType, hierarchy, depth, attributeFilter, tagFilter );
-			if ( depth == AllDescendants && child->hasObject() )
+			if ( depth == AllDescendants && child->hasObject() && tagged( child, tagFilter ) )
 			{
 				doExpandObject( child, childNode, geomType, hierarchy, Children, attributeFilter, tagFilter );
 			}
@@ -349,6 +349,14 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		
 		if ( depth == AllDescendants )
 		{
+			if ( hierarchy == SubNetworks && !tagged( child, tagFilter ) )
+			{
+				// we don't expand non-tagged children for SubNetwork mode, but we
+				// do for Parenting mode, because otherwise the hierarchy would be
+				// stuck in an un-expandable state.
+				continue;
+			}
+			
 			doExpandChildren( child, childNode, geomType, hierarchy, depth, attributeFilter, tagFilter );
 			childNode->setInt( pExpanded.getToken(), 0, 0, 1 );
 		}
