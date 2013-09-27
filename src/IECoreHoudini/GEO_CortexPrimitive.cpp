@@ -43,13 +43,19 @@
 
 #include "GEO/GEO_Detail.h"
 
+#include "IECore/CoordinateSystem.h"
+#include "IECore/Group.h"
 #include "IECore/HexConversion.h"
+#include "IECore/MatrixTransform.h"
 #include "IECore/MemoryIndexedIO.h"
+#include "IECore/Primitive.h"
+#include "IECore/TransformOp.h"
 #include "IECore/VisibleRenderable.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 
+using namespace IECore;
 using namespace IECoreHoudini;
 
 GEO_CortexPrimitive::GEO_CortexPrimitive( GEO_Detail *detail, GA_Offset offset )
@@ -143,8 +149,40 @@ void GEO_CortexPrimitive::copyUnwiredForMerge( const GA_Primitive *src, const GA
 	
 	m_offset = ( map.isIdentityMap( GA_ATTRIB_VERTEX ) ) ? orig->m_offset : map.mapDestFromSource( GA_ATTRIB_VERTEX, orig->m_offset );
 	
-	/// \todo: should we make a shallow or a deep copy?
-	m_object = orig->m_object;
+	m_object = orig->m_object->copy();
+}
+
+void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
+{
+	if ( xform.isIdentity() )
+	{
+		return;
+	}
+	
+	Imath::M44f transform = IECore::convert<Imath::M44f>( xform );
+	
+	if ( Primitive *primitive = IECore::runTimeCast<Primitive>( m_object ) )
+	{
+		TransformOpPtr transformer = new TransformOp();
+		transformer->inputParameter()->setValue( primitive );
+		transformer->copyParameter()->setTypedValue( false );
+		transformer->matrixParameter()->setValue( new M44fData( transform ) );
+		transformer->operate();
+	}
+	else if ( Group *group = IECore::runTimeCast<Group>( m_object ) )
+	{
+		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( group->getTransform() ) )
+		{
+			matTransform->matrix = transform * matTransform->matrix;
+		}
+	}
+	else if ( CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( m_object ) )
+	{
+		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( coord->getTransform() ) )
+		{
+			matTransform->matrix = transform * matTransform->matrix;
+		}
+	}
 }
 
 void GEO_CortexPrimitive::reverse()

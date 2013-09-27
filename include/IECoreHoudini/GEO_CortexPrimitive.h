@@ -61,6 +61,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual void clearForDeletion();
 		virtual bool isDegenerate() const;
 		virtual void copyUnwiredForMerge( const GA_Primitive *src, const GA_MergeMap &map );
+		virtual void transform( const UT_Matrix4 &xform );
 		virtual const GA_PrimitiveJSON* getJSON() const;
 		virtual void reverse();
 		
