@@ -206,9 +206,18 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)geomType );
 	geo->setAttributeFilter( attributeFilter );
 	
-	geo->expandHierarchy( scene );
+	bool visible = tagged( scene, tagFilter );
+	if ( visible )
+	{
+		// we can't get the string directly from the UT_StringMMPattern, and we don't want to re-compile the UT_StringMMPattern
+		// from a string during a recursive expansion, so we get the filter string from the parameter again.
+		UT_String tagFilterStr;
+		getTagFilter( tagFilterStr );
+		geo->setTagFilter( tagFilterStr );
+	}
 	
-	geo->setVisible( tagged( scene, tagFilter ) );
+	geo->setVisible( visible );
+	geo->expandHierarchy( scene );
 	
 	return geo;
 }

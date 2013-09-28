@@ -930,41 +930,46 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testParmTrickleDown( self ) :
 		
-		def checkParms( node, geoType, attribFilter ) :
+		def checkParms( node, geoType, tagFilter, attribFilter ) :
 			
 			self.assertEqual( node.parm( "geometryType" ).eval(), geoType )
 			self.assertEqual( node.parm( "attributeFilter" ).eval(), attribFilter )
 			if isinstance( node, hou.ObjNode ) :
 				self.assertEqual( node.parm( "expanded" ).eval(), True )
+				
+				if node.isObjectDisplayed() :
+					self.assertEqual( node.parm( "tagFilter" ).eval(), tagFilter )
+				else :
+					self.assertEqual( node.parm( "tagFilter" ).eval(), "*" )
 			
 			for child in node.children() :
-				checkParms( child, geoType, attribFilter )
+				checkParms( child, geoType, tagFilter, attribFilter )
 		
 		self.writeTaggedSCC()
 		xform = self.xform()
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "*" )
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "P ^N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N" )
 		
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "*" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "P ^N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N" )
 		
 		# now check just pushing the parms
 		
@@ -974,7 +979,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "P ^N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "P ^N" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
@@ -986,7 +991,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "attributeFilter" ).set( "P N" )
 		xform.parm( "tagFilter" ).set( "b" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "P N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "b", "P N" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
@@ -1057,6 +1062,41 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/2" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/3" ).isObjectDisplayed() )
+	
+	def testSopTagFilter( self ) :
+		
+		self.writeTaggedSCC()
+		
+		sop = self.sop()
+		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		sop.parm( "tagFilter" ).set( "b" )
+		prims = sop.geometry().prims()
+		self.assertEqual( len(prims), 12 )
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
+		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
+		
+		sop.parm( "tagFilter" ).set( "a" )
+		prims = sop.geometry().prims()
+		self.assertEqual( len(prims), 6 )
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
+		
+		sop.parm( "tagFilter" ).set( "a b" )
+		prims = sop.geometry().prims()
+		self.assertEqual( len(prims), 12 )
+		nameAttr = sop.geometry().findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
+		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
 	
 	def testEmptyTags( self ) :
 		
