@@ -60,17 +60,12 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		
 		static PRM_Name pHierarchy;
 		static PRM_Name pDepth;
-		static PRM_Name pTagFilter;
 		
 		static PRM_Default hierarchyDefault;
 		static PRM_Default depthDefault;
-		static PRM_Default filterDefault;
 		
 		static PRM_ChoiceList hierarchyList;
 		static PRM_ChoiceList depthList;
-		static PRM_ChoiceList tagFilterMenu;
-		
-		static void buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
 		enum Hierarchy
 		{
@@ -112,8 +107,6 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		static OP_TemplatePair *buildExtraParameters();
 	
 	private :
-		
-		bool tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter );
 		
 		/// functions registered in HoudiniScene as custom attributes
 		struct HoudiniSceneAddOn

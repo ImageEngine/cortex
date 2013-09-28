@@ -60,11 +60,9 @@ OP_Node *OBJ_SceneCacheTransform::create( OP_Network *net, const char *name, OP_
 
 PRM_Name OBJ_SceneCacheTransform::pHierarchy( "hierarchy", "Hierarchy" );
 PRM_Name OBJ_SceneCacheTransform::pDepth( "depth", "Depth" );
-PRM_Name OBJ_SceneCacheTransform::pTagFilter( "tagFilter", "Tag Filter" );
 
 PRM_Default OBJ_SceneCacheTransform::hierarchyDefault( SubNetworks );
 PRM_Default OBJ_SceneCacheTransform::depthDefault( AllDescendants );
-PRM_Default OBJ_SceneCacheTransform::filterDefault( 0, "*" );
 
 static PRM_Name hierarchyNames[] = {
 	PRM_Name( "0", "SubNetworks" ),
@@ -81,7 +79,6 @@ static PRM_Name depthNames[] = {
 
 PRM_ChoiceList OBJ_SceneCacheTransform::hierarchyList( PRM_CHOICELIST_SINGLE, &hierarchyNames[0] );
 PRM_ChoiceList OBJ_SceneCacheTransform::depthList( PRM_CHOICELIST_SINGLE, &depthNames[0] );
-PRM_ChoiceList OBJ_SceneCacheTransform::tagFilterMenu( PRM_CHOICELIST_TOGGLE, &OBJ_SceneCacheTransform::buildTagFilterMenu );
 
 OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 {
@@ -99,21 +96,15 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildExtraParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[4];
+		thisTemplate = new PRM_Template[3];
 		
 		thisTemplate[0] = PRM_Template(
-			PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
-			"A list of filters to decide which tags to display when expanding. All children will be created, "
-			"the tag filters just control initial visibility. Uses Houdini matching syntax, but nodes will be "
-			"visible if the filter matches *any* of their tags."
-		);
-		thisTemplate[1] = PRM_Template(
 			PRM_INT, 1, &pHierarchy, &hierarchyDefault, &hierarchyList, 0, 0, 0, 0,
 			"Choose the node network style used when expanding. Parenting will create a graph using "
 			"node connections, SubNetworks will create a deep hierarchy, and Flat Geometry will "
 			"create a single OBJ and SOP."
 		);
-		thisTemplate[2] = PRM_Template(
+		thisTemplate[1] = PRM_Template(
 			PRM_INT, 1, &pDepth, &depthDefault, &depthList, 0, 0, 0, 0,
 			"Choose how deep to expand. All Descendants will expand everything below the specified root "
 			"path and Children will only expand the immediate children of the root path, which may "
@@ -130,44 +121,6 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildExtraParameters()
 	return templatePair;
 }
 
-void OBJ_SceneCacheTransform::buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
-{
-	OBJ_SceneCacheTransform *node = reinterpret_cast<OBJ_SceneCacheTransform*>( data );
-	if ( !node )
-	{
-		return;
-	}
-	
-	menu[0].setToken( "*" );
-	menu[0].setLabel( "*" );
-	
-	std::string file;
-	if ( !node->ensureFile( file ) )
-	{
-		// mark the end of our menu
-		menu[1].setToken( 0 );
-		return;
-	}
-	
-	ConstSceneInterfacePtr scene = node->scene( file, node->getPath() );
-	if ( !scene )
-	{
-		// mark the end of our menu
-		menu[1].setToken( 0 );
-		return;
-	}
-	
-	SceneInterface::NameList tags;
-	scene->readTags( tags );
-	std::vector<std::string> tagStrings;
-	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
-	{
-		tagStrings.push_back( *it );
-	}
-	
-	node->createMenu( menu, tagStrings );
-}
-
 void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 {
 	if ( !scene )
@@ -182,10 +135,8 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	UT_String attributeFilter;
 	getAttributeFilter( attributeFilter );
 	
-	UT_String tagFilterStr;
-	evalString( tagFilterStr, pTagFilter.getToken(), 0, 0 );
 	UT_StringMMPattern tagFilter;
-	tagFilter.compile( tagFilterStr );
+	getTagFilter( tagFilter );
 	
 	if ( hierarchy == FlatGeometry )
 	{
@@ -287,8 +238,8 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 		// we can't get the string directly from the UT_StringMMPattern, and we don't want to re-compile the UT_StringMMPattern
 		// from a string during a recursive expansion, so we get the filter string from the parameter again.
 		UT_String tagFilterStr;
-		evalString( tagFilterStr, pTagFilter.getToken(), 0, 0 );
-		xform->setString( tagFilterStr, CH_STRING_LITERAL, pTagFilter.getToken(), 0, 0 );
+		getTagFilter( tagFilterStr );
+		xform->setTagFilter( tagFilterStr );
 	}
 	else
 	{
@@ -378,8 +329,8 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	GeometryType geomType = getGeometryType();
 	
 	UT_String tagFilterStr;
-	evalString( tagFilterStr, pTagFilter.getToken(), 0, 0 );
 	UT_StringMMPattern tagFilter;
+	getTagFilter( tagFilterStr );
 	tagFilter.compile( tagFilterStr );
 	
 	UT_PtrArray<OP_Node*> children;
@@ -397,7 +348,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 			if ( tagged( scene, tagFilter ) )
 			{
 				visible = true;
-				xform->setString( tagFilterStr, CH_STRING_LITERAL, pTagFilter.getToken(), 0, 0 );
+				xform->setTagFilter( tagFilterStr );
 			}
 		}
 		
@@ -419,33 +370,16 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 		if ( IECore::ConstSceneInterfacePtr scene = geo->scene() )
 		{
 			visible = tagged( scene, tagFilter );
+			if ( visible )
+			{
+				geo->setTagFilter( tagFilterStr );
+			}
 		}
 		
 		geo->setRender( visible );
 		geo->setDisplay( visible );
 		geo->pushToHierarchy();
 	}
-}
-
-bool OBJ_SceneCacheTransform::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )
-{
-	SceneInterface::NameList tags;
-	scene->readTags( tags );
-	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
-	{
-		if ( UT_String( *it ).multiMatch( filter ) )
-		{
-			return true;
-		}
-	}
-	
-	// an empty list should be equivalent to matching an empty string
-	if ( tags.empty() && UT_String( "" ).multiMatch( filter ) )
-	{
-		return true;
-	}
-	
-	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
