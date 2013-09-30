@@ -112,6 +112,7 @@ class LensDistort : public DD::Image::Iop
 		virtual void _validate( bool for_real );
 		virtual void engine( int y, int x, int r, DD::Image::ChannelMask channels, DD::Image::Row & outrow );
 		
+		static void buildDynamicKnobs( void*, DD::Image::Knob_Callback f );
 		static void addDynamicKnobs( void*, DD::Image::Knob_Callback f );
 		static const Iop::Description m_description;
 		static DD::Image::Op *build( Node *node );
