@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_OBJSCENECACHETRANSFORM_H
 
 #include "OBJ/OBJ_SubNet.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/LinkedScene.h"
 
@@ -91,18 +92,32 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 	
 	protected :
 		
+		struct Parameters
+		{
+			Parameters();
+			Parameters( const Parameters &other );
+			
+			GeometryType geometryType;
+			Hierarchy hierarchy;
+			Depth depth;
+			UT_String attributeFilter;
+			UT_String shapeFilter;
+			UT_String tagFilterStr;
+			UT_StringMMPattern tagFilter;
+		};
+		
 		/// Called by expandHierarchy() and doExpandChildren() when the SceneCache contains an object.
 		/// Implemented to expand the specific object using an OBJ_SceneCacheGeometry node.
-		virtual OBJ_Node *doExpandObject( const IECore::SceneInterface *scene, OP_Network *parent, GeometryType geomType, Hierarchy hierarchy, Depth depth, const UT_String &attributeFilter, const UT_StringMMPattern &tagFilter );
+		virtual OBJ_Node *doExpandObject( const IECore::SceneInterface *scene, OP_Network *parent, const Parameters &params );
 		
 		/// Called by doExpandChildren() when the SceneCache contains a child.
 		/// Implemented to expand the current cache path using an OBJ_SceneCacheTransform or
 		/// OBJ_SceneCacheGeometry node depending on the settings for hierarchy and depth.
-		virtual OBJ_Node *doExpandChild( const IECore::SceneInterface *scene, OP_Network *parent, GeometryType geomType, Hierarchy hierarchy, Depth depth, const UT_String &attributeFilter, const UT_StringMMPattern &tagFilter );
+		virtual OBJ_Node *doExpandChild( const IECore::SceneInterface *scene, OP_Network *parent, const Parameters &params );
 		
 		/// Called by expandHierarchy() to expand the children of the SceneCache.
 		/// This will be called recursively for each child when Depth is AllDescenants.
-		virtual void doExpandChildren( const IECore::SceneInterface *scene, OP_Network *parent, GeometryType geomType, Hierarchy hierarchy, Depth depth, const UT_String &attributeFilter, const UT_StringMMPattern &tagFilter );
+		virtual void doExpandChildren( const IECore::SceneInterface *scene, OP_Network *parent, const Parameters &params );
 		
 		static OP_TemplatePair *buildExtraParameters();
 	
