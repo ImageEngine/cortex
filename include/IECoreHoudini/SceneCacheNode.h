@@ -66,6 +66,7 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pGeometryType;
 		static PRM_Name pAttributeFilter;
 		static PRM_Name pTagFilter;
+		static PRM_Name pShapeFilter;
 		
 		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
@@ -76,11 +77,13 @@ class SceneCacheNode : public BaseType
 		static PRM_ChoiceList spaceList;
 		static PRM_ChoiceList geometryTypeList;
 		static PRM_ChoiceList tagFilterMenu;
+		static PRM_ChoiceList shapeFilterMenu;
 		
 		static int sceneParmChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static void buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		static void buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
+		static void buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
 		enum Space
 		{
@@ -111,6 +114,9 @@ class SceneCacheNode : public BaseType
 		void getTagFilter( UT_String &filter ) const;
 		void getTagFilter( UT_StringMMPattern &filter ) const;
 		void setTagFilter( const UT_String &filter );
+		void getShapeFilter( UT_String &filter ) const;
+		void getShapeFilter( UT_StringMMPattern &filter ) const;
+		void setShapeFilter( const UT_String &filter );
 		void referenceParent( const char *parmName );
 		
 		/// Access point to the actual SceneCache. All users should only access the cache

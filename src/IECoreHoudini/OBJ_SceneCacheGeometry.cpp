@@ -77,9 +77,10 @@ void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 
 void OBJ_SceneCacheGeometry::pushToHierarchy()
 {
-	UT_String attribFilter, tagFilter;
+	UT_String attribFilter, tagFilter, shapeFilter;
 	getAttributeFilter( attribFilter );
 	getTagFilter( tagFilter );
+	getShapeFilter( shapeFilter );
 	GeometryType geomType = getGeometryType();
 	
 	UT_PtrArray<OP_Node*> children;
@@ -89,6 +90,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 		SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( children[i] );
 		sop->setAttributeFilter( attribFilter );
 		sop->setTagFilter( tagFilter );
+		sop->setShapeFilter( shapeFilter );
 		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
 	}
 }
@@ -111,11 +113,13 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 		sopSpace = SOP_SceneCacheSource::Path;
 	}
 	
-	UT_String attribFilter, tagFilter;
+	UT_String attribFilter, tagFilter, shapeFilter;
 	getAttributeFilter( attribFilter );
 	sop->setAttributeFilter( attribFilter );
 	getTagFilter( tagFilter );
 	sop->setTagFilter( tagFilter );
+	getShapeFilter( shapeFilter );
+	sop->setShapeFilter( shapeFilter );
 	
 	sop->setSpace( sopSpace );
 	sop->setObjectOnly( objectOnly );

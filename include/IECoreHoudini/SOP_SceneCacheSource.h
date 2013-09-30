@@ -58,15 +58,12 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
 		
-		static PRM_Name pShapeFilter;
 		static PRM_Name pObjectOnly;
-		static PRM_ChoiceList shapeFilterMenu;
 		
 		bool getObjectOnly() const;
 		void setObjectOnly( bool objectOnly );
 		
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
-		static void buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 	
 	protected :
 	

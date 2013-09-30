@@ -930,10 +930,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testParmTrickleDown( self ) :
 		
-		def checkParms( node, geoType, tagFilter, attribFilter ) :
+		def checkParms( node, geoType, tagFilter, attribFilter, shapeFilter ) :
 			
 			self.assertEqual( node.parm( "geometryType" ).eval(), geoType )
 			self.assertEqual( node.parm( "attributeFilter" ).eval(), attribFilter )
+			self.assertEqual( node.parm( "shapeFilter" ).eval(), shapeFilter )
 			if isinstance( node, hou.ObjNode ) :
 				self.assertEqual( node.parm( "expanded" ).eval(), True )
 				
@@ -943,33 +944,37 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 					self.assertEqual( node.parm( "tagFilter" ).eval(), "*" )
 			
 			for child in node.children() :
-				checkParms( child, geoType, tagFilter, attribFilter )
+				checkParms( child, geoType, tagFilter, attribFilter, shapeFilter )
 		
 		self.writeTaggedSCC()
 		xform = self.xform()
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "*" )
+		xform.parm( "shapeFilter" ).set( "*" )
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "shapeFilter" ).set( "2 ^3" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3" )
 		
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "*" )
+		xform.parm( "shapeFilter" ).set( "*" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "shapeFilter" ).set( "2 ^3" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3" )
 		
 		# now check just pushing the parms
 		
@@ -978,8 +983,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "expand" ).pressButton()
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "shapeFilter" ).set( "2 ^3" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "P ^N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "P ^N", "2 ^3" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
@@ -989,9 +995,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P N" )
+		xform.parm( "shapeFilter" ).set( "2 3" )
 		xform.parm( "tagFilter" ).set( "b" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "b", "P N" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "b", "P N", "2 3" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )

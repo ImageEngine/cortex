@@ -84,6 +84,9 @@ template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pTagFilter( "tagFilter", "Tag Filter" );
 
 template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pShapeFilter( "shapeFilter", "Shape Filter" );
+
+template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pGeometryType( "geometryType", "Geometry Type" );
 
 template<typename BaseType>
@@ -125,6 +128,9 @@ template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::tagFilterMenu( PRM_CHOICELIST_TOGGLE, &SceneCacheNode<BaseType>::buildTagFilterMenu );
 
 template<typename BaseType>
+PRM_ChoiceList SceneCacheNode<BaseType>::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SceneCacheNode<BaseType>::buildShapeFilterMenu );
+
+template<typename BaseType>
 PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template(
 		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
@@ -154,8 +160,13 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template(
 		PRM_STRING, 1, &pAttributeFilter, &filterDefault, 0, 0, 0, 0, 0,
 		"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
-		"The filter expects Cortex names as exist in the cache, and performs automated conversion to standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). "
-		"P will always be loaded."
+		"The filter expects Cortex names as exist in the cache, and performs automated conversion to "
+		"standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). P will always be loaded."
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
+		"A list of filters to decide which shapes to load. Only the shape basename is relevant, the path "
+		"is ignored. Uses Houdini matching syntax"
 	),
 	PRM_Template(
 		PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
@@ -228,6 +239,39 @@ void SceneCacheNode<BaseType>::buildTagFilterMenu( void *data, PRM_Name *menu, i
 	}
 	
 	node->createMenu( menu, tagStrings );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
+{
+	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
+	if ( !node )
+	{
+		return;
+	}
+	
+	menu[0].setToken( "*" );
+	menu[0].setLabel( "*" );
+	
+	std::string file;
+	if ( !node->ensureFile( file ) )
+	{
+		// mark the end of our menu
+		menu[1].setToken( 0 );
+		return;
+	}
+	
+	ConstSceneInterfacePtr scene = node->scene( file, node->getPath() );
+	if ( !scene )
+	{
+		// mark the end of our menu
+		menu[1].setToken( 0 );
+		return;
+	}
+	
+	std::vector<std::string> objects;
+	node->objectNames( scene, objects );
+	node->createMenu( menu, objects );
 }
 
 template<typename BaseType>
@@ -379,6 +423,26 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setTagFilter( const UT_String &filter )
 {
 	this->setString( filter, CH_STRING_LITERAL, pTagFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getShapeFilter( UT_String &filter ) const
+{
+	this->evalString( filter, pShapeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getShapeFilter( UT_StringMMPattern &filter ) const
+{
+	UT_String value;
+	getShapeFilter( value );
+	filter.compile( value );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setShapeFilter( const UT_String &filter )
+{
+	this->setString( filter, CH_STRING_LITERAL, pShapeFilter.getToken(), 0, 0 );
 }
 
 template<typename BaseType>
