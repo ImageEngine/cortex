@@ -98,6 +98,10 @@ class HoudiniScene : public IECore::SceneInterface
 		/// Convenience method to access the Houdini node this scene refers to
 		const OP_Node *node() const;
 		
+		/// The parameter name used to identify user defined tags on any OBJ node. This will be accessed
+		/// by hasTag and readTags as a string parameter, and will be split on spaces to separate tags.
+		static PRM_Name pTags;
+		
 		typedef boost::function<bool (const OP_Node *)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *)> ReadFn;
 		typedef boost::function<bool (const OP_Node *, const Name &)> HasTagFn;

@@ -231,7 +231,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 	
 	def testTags( self ) :
 		
-		# at this point, only SceneCacheNodes can define tags
+		# no tags by default
 		scene = self.buildScene()
 		self.assertEqual( scene.readTags(), [] )
 		self.assertFalse( scene.hasTag( "any" ) )
@@ -241,6 +241,28 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		torus1 = sub1.child( "torus1" )
 		self.assertEqual( torus1.readTags(), [] )
 		self.assertFalse( torus1.hasTag( "any" ) )
+		
+		def addTags( node, tags ) :
+			
+			parm = node.addSpareParmTuple( hou.StringParmTemplate( "ieTags", "ieTags", 1, "" ) )
+			parm.set( [ tags ] )
+		
+		# we can add tags to OBJ nodes, but they do not trickle up automatically
+		addTags( hou.node( "/obj/sub1/torus1" ), "yellow" )
+		addTags( hou.node( "/obj/box1" ), "sop top" )
+		self.assertEqual( scene.readTags(), [] )
+		self.assertFalse( scene.hasTag( "yellow" ) )
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.readTags(), [] )
+		self.assertFalse( sub1.hasTag( "yellow" ) )
+		torus1 = sub1.child( "torus1" )
+		self.assertEqual( torus1.readTags(), [ "yellow" ] )
+		self.assertTrue( torus1.hasTag( "yellow" ) )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.readTags(), [ "sop", "top" ] )
+		self.assertTrue( box1.hasTag( "sop" ) )
+		self.assertTrue( box1.hasTag( "top" ) )
+		self.assertFalse( box1.hasTag( "yellow" ) )
 	
 	def testLinks( self ) :
 		

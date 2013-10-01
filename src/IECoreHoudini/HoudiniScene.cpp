@@ -55,6 +55,8 @@ using namespace IECoreHoudini;
 
 static InternedString contentName( "geo" );
 
+PRM_Name HoudiniScene::pTags( "ieTags", "ieTags" );
+
 HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
@@ -323,6 +325,18 @@ bool HoudiniScene::hasTag( const Name &name, bool includeChildren ) const
 		return false;
 	}
 	
+	// check for user supplied tags
+	if ( node->hasParm( pTags.getToken() ) )
+	{
+		UT_String parmTags;
+		node->evalString( parmTags, pTags.getToken(), 0, 0 );
+		if ( UT_String( name.c_str() ).multiMatch( parmTags ) )
+		{
+			return true;
+		}
+	}
+	
+	// check with the registered tag readers
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
@@ -345,6 +359,23 @@ void HoudiniScene::readTags( NameList &tags, bool includeChildren ) const
 		return;
 	}
 	
+	// add user supplied tags
+	if ( node->hasParm( pTags.getToken() ) )
+	{
+		UT_String parmTagStr;
+		node->evalString( parmTagStr, pTags.getToken(), 0, 0 );
+		if ( !parmTagStr.equal( UT_String::getEmptyString() ) )
+		{
+			UT_WorkArgs tokens;
+			parmTagStr.tokenize( tokens, " " );
+			for ( int i = 0; i < tokens.getArgc(); ++i )
+			{
+				tags.push_back( tokens[i] );
+			}
+		}
+	}
+	
+	// add tags from the registered tag readers
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
