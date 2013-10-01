@@ -1199,6 +1199,23 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for tag in scene.readTags() :
 			self.assertTrue( scene.hasTag( tag ) )
 		self.assertFalse( scene.hasTag( "fakeTag" ) )
+		
+		# test user tags
+		b = hou.node( xform.path()+"/2" )
+		b.parm( "ieTags" ).set( "testing user:tags" )
+		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		# they don't currently affect parents, just the immediate node
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "testing" ) )
+		self.assertFalse( scene.hasTag( "user:tags" ) )
+		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b", "c", "testing", "user:tags" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "b", "testing", "user:tags" ] )
+		for tag in scene.readTags() :
+			self.assertTrue( scene.hasTag( tag ) )
 	
 	def testReloadButton( self ) :
 		
