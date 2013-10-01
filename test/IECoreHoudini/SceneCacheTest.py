@@ -2021,6 +2021,51 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[0].vertices()[0].point().number(), 0 )
 		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 0, 0, 0 ) )
 	
+	def testObjectMerge( self ) :
+		
+		self.writeSCC()
+		xform = self.xform()
+		xform.parm( "expand" ).pressButton()
+		origSop = hou.node( xform.path()+"/1/2/geo/2" )
+		merge = hou.node( "/obj" ).createNode( "geo" ).createNode( "object_merge" )
+		merge.parm( "objpath1" ).set( origSop.path() )
+		
+		# not transformed because we haven't set "Into this Object"
+		geo = merge.geometry()
+		self.assertEqual( geo.points()[0].position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 0, 0, 0, 1, 1, 1 ) )
+		
+		# transformed to its world position
+		merge.parm( "xformtype" ).set( 1 ) # "Into this Object"
+		geo = merge.geometry()
+		self.assertEqual( geo.points()[0].position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 3, 0, 0, 4, 1, 1 ) )
+		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( merge ).convert()
+		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 3, 0, 0 ), IECore.V3f( 4, 1, 1 ) ) )
+		
+		# didn't affect the original SOP because it stores it's own copy of the prim
+		geo = origSop.geometry()
+		self.assertEqual( geo.points()[0].position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 0, 0, 0, 1, 1, 1 ) )
+		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( origSop ).convert()
+		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		
+		# transformable at the SOP level as well
+		sopXform = merge.createOutputNode( "xform" )
+		sopXform.parm( "ty" ).set( 7 )
+		geo = sopXform.geometry()
+		self.assertEqual( geo.points()[0].position(), hou.Vector3( 3.5, 7.5, 0.5 ) )
+		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 3, 7, 0, 4, 8, 1 ) )
+		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( sopXform ).convert()
+		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 3, 7, 0 ), IECore.V3f( 4, 8, 1 ) ) )
+		
+		# didn't affect the input SOP because it stores it's own copy of the prim
+		geo = merge.geometry()
+		self.assertEqual( geo.points()[0].position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
+		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 3, 0, 0, 4, 1, 1 ) )
+		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( merge ).convert()
+		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 3, 0, 0 ), IECore.V3f( 4, 1, 1 ) ) )
+	
 	def testPointsDontAccumulate( self ) :
 		
 		obj = hou.node("/obj")
