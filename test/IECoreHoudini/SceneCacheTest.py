@@ -1203,6 +1203,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# test user tags
 		b = hou.node( xform.path()+"/2" )
 		b.parm( "ieTags" ).set( "testing user:tags" )
+		group = b.renderNode().createOutputNode( "group" )
+		group.parm( "crname" ).set( "ieTag_green" )
+		group2 = group.createOutputNode( "group" )
+		group2.parm( "crname" ).set( "notATag" )
+		group2.setRenderFlag( True )
 		scene = IECoreHoudini.HoudiniScene( xform.path() )
 		# they don't currently affect parents, just the immediate node
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
@@ -1211,11 +1216,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( scene.hasTag( tag ) )
 		self.assertFalse( scene.hasTag( "testing" ) )
 		self.assertFalse( scene.hasTag( "user:tags" ) )
+		self.assertFalse( scene.hasTag( "green" ) )
+		self.assertFalse( scene.hasTag( "notATag" ) )
 		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b", "c", "testing", "user:tags" ] )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "b", "testing", "user:tags" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b", "c", "green", "testing", "user:tags" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( False ) ]), [ "ObjectType:MeshPrimitive", "b", "green", "testing", "user:tags" ] )
 		for tag in scene.readTags() :
 			self.assertTrue( scene.hasTag( tag ) )
+		self.assertFalse( scene.hasTag( "notATag" ) )
 	
 	def testReloadButton( self ) :
 		

@@ -263,6 +263,46 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertTrue( box1.hasTag( "sop" ) )
 		self.assertTrue( box1.hasTag( "top" ) )
 		self.assertFalse( box1.hasTag( "yellow" ) )
+		
+		def addSopTags( node, tag, primRange ) :
+			
+			group = node.createOutputNode( "group" )
+			group.parm( "crname" ).set( tag )
+			group.parm( "groupop" ).set( 1 ) # by range
+			group.parm( "rangestart" ).set( primRange[0] )
+			group.parm( "rangeend" ).deleteAllKeyframes()
+			group.parm( "rangeend" ).set( primRange[1] )
+			group.parm( "select2" ).set( 1 )
+			group.setRenderFlag( True )
+		
+		# we can add tags to SOPs using groups, but they do not trickle up automatically
+		boxObj = hou.node( "/obj/box1" )
+		addSopTags( boxObj.renderNode(), "ieTag_itsABox", ( 0, 5 ) ) # box only
+		addSopTags( boxObj.renderNode(), "notATag", ( 0, 5 ) ) # box only
+		addSopTags( boxObj.renderNode(), "ieTag_itsATorus", ( 6, 105 ) ) # torus only
+		addSopTags( boxObj.renderNode(), "ieTag_both:and", ( 3, 50 ) ) # parts of each
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.readTags(), [] )
+		self.assertFalse( sub1.hasTag( "yellow" ) )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.readTags(), [ "sop", "top", "itsABox", "both:and" ] )
+		self.assertTrue( box1.hasTag( "sop" ) )
+		self.assertTrue( box1.hasTag( "top" ) )
+		self.assertTrue( box1.hasTag( "itsABox" ) )
+		self.assertTrue( box1.hasTag( "both:and" ) )
+		self.assertFalse( box1.hasTag( "itsATorus" ) )
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.readTags(), [] )
+		self.assertFalse( gap.hasTag( "sop" ) )
+		self.assertFalse( gap.hasTag( "top" ) )
+		self.assertFalse( gap.hasTag( "itsATorus" ) )
+		torus = gap.child( "torus" )
+		self.assertEqual( torus.readTags(), [ "itsATorus", "both:and" ] )
+		self.assertTrue( torus.hasTag( "itsATorus" ) )
+		self.assertTrue( torus.hasTag( "both:and" ) )
+		self.assertFalse( torus.hasTag( "sop" ) )
+		self.assertFalse( torus.hasTag( "top" ) )
+		self.assertFalse( torus.hasTag( "itsABox" ) )
 	
 	def testLinks( self ) :
 		
