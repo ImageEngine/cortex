@@ -1795,6 +1795,57 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for time in times :
 			self.compareScene( orig, output, time )
 	
+	def testRopCookCounts( self ) :
+		
+		self.writeAnimSCC()
+		xform = self.xform()
+		xform.parm( "expand" ).pressButton()
+		a = hou.node( xform.path()+"/1/geo/1" ) # static
+		b = hou.node( xform.path()+"/1/2/geo/2" ) # animated
+		c = hou.node( xform.path()+"/1/2/3/geo/3" ) # static
+		# make sure nothing has been cooked
+		self.assertEqual( a.cookCount(), 0 )
+		self.assertEqual( b.cookCount(), 0 )
+		self.assertEqual( c.cookCount(), 0 )
+		
+		# cook current frame
+		rop = self.rop( xform )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		self.assertEqual( a.cookCount(), 1 )
+		self.assertEqual( b.cookCount(), 1 )
+		self.assertEqual( c.cookCount(), 1 )
+		
+		# cook single frame that is not the current frame
+		self.assertNotEqual( hou.frame(), 10 )
+		rop.parm( "trange" ).set( 1 )
+		rop.parm( "f1" ).set( 10 )
+		rop.parm( "f2" ).set( 10 )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		self.assertEqual( a.cookCount(), 1 )
+		self.assertEqual( b.cookCount(), 2 )
+		self.assertEqual( c.cookCount(), 1 )
+		
+		# cook a range
+		rop.parm( "f1" ).set( 1 )
+		rop.parm( "f2" ).set( 10 )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		self.assertEqual( a.cookCount(), 1 )
+		self.assertEqual( b.cookCount(), 12 )
+		self.assertEqual( c.cookCount(), 1 )
+		
+		# with flat geo
+		sop = self.sop()
+		self.assertEqual( sop.cookCount(), 0 )
+		rop.parm( "rootObject" ).set( sop.parent().path() )
+		rop.parm( "trange" ).set( 1 )
+		rop.parm( "f1" ).set( 10 )
+		rop.parm( "f2" ).set( 10 )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( sop.cookCount(), 1 )
+	
 	def testLiveScene( self ) :
 		
 		self.writeTaggedSCC()
