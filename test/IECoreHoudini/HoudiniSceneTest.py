@@ -643,5 +643,40 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertTrue( torus.hasObject() )
 		self.assertTrue( isinstance( torus.readObject( 0 ), IECore.MeshPrimitive ) )
 
+	def testDefaultTime( self ) :
+		
+		self.buildScene()
+		box = hou.node( "/obj/box1" )
+		deformer = box.renderNode().createOutputNode( "twist" )
+		deformer.parm( "paxis" ).set( 1 )
+		deformer.parm( "strength" ).setExpression( "10*$T" )
+		deformer.setRenderFlag( True )
+		
+		self.assertNotEqual( hou.time(), 0.5 )
+		self.assertEqual( deformer.cookCount(), 0 )
+		scene = IECoreHoudini.HoudiniScene( box.path(), defaultTime = 0.5 )
+		self.assertEqual( scene.getDefaultTime(), 0.5 )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertEqual( scene.childNames(), [ "gap" ] )
+		self.assertEqual( deformer.cookCount(), 1 )
+		mesh0_5 = scene.readObject( 0.5 )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertEqual( len(mesh0_5["P"].data), 8 )
+		self.assertAlmostEqual( mesh0_5["P"].data[0].x, -0.521334, 6 )
+		
+		scene.setDefaultTime( 0 )
+		self.assertEqual( scene.getDefaultTime(), 0 )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( deformer.cookCount(), 2 )
+		self.assertEqual( scene.childNames(), [ "gap" ] )
+		self.assertEqual( deformer.cookCount(), 2 )
+		mesh0 = scene.readObject( 0 )
+		self.assertEqual( deformer.cookCount(), 2 )
+		self.assertEqual( len(mesh0["P"].data), 8 )
+		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
+
 if __name__ == "__main__":
 	unittest.main()
