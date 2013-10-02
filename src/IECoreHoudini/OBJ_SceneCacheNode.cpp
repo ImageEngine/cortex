@@ -37,6 +37,7 @@
 #include "PRM/PRM_Include.h"
 
 #include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/HoudiniScene.h"
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 using namespace IECore;
@@ -224,7 +225,7 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildOutputParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[4];
+		thisTemplate = new PRM_Template[5];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutTranslate, outTranslateDefault, 0, 0, 0, 0, 0,
@@ -239,6 +240,11 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildOutputParameters()
 		thisTemplate[2] = PRM_Template(
 			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutScale, outScaleDefault, 0, 0, 0, 0, 0,
 			"Output scale calculated by this node. This is for user clarity only and is not editable."
+		);
+		
+		thisTemplate[3] = PRM_Template(
+			PRM_STRING | PRM_TYPE_NOCOOK, 1, &HoudiniScene::pTags, 0, 0, 0, 0, 0, 0,
+			"A space separated list of tags to add when caching with the SceneCache ROP."
 		);
 	}
 	
