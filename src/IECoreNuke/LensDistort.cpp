@@ -461,7 +461,7 @@ void LensDistort::knobs( Knob_Callback f )
 	if( f.makeKnobs() )
 	{
 		setLensModel( modelNames()[0] );
-		m_numNewKnobs = add_knobs( addDynamicKnobs, this->firstOp(), f );
+		m_numNewKnobs = add_knobs( buildDynamicKnobs, this->firstOp(), f );
 	}
 	else 
 	{
@@ -514,6 +514,25 @@ int LensDistort::knob_changed(Knob* k)
 		updateUI = true;
 	}
 
+	// Update our internal reference of the knob value that just changed...
+	if ( !m_hasValidFileSequence )
+	{
+		std::stringstream s;
+		std::string name( k->name() );
+		for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+		{
+			if( name == it->m_name )
+			{
+				k->to_script( s, 0, false );
+				it->m_script = s.str();
+				it->m_value = k->get_value();
+				return true;
+			}
+		}
+	}
+
+	if ( k->is( "lensFileSequence" ) ) return true;
+	
 	// Do we need to update the UI?
 	if ( k == &Knob::showPanel || updateUI )
 	{
@@ -529,16 +548,23 @@ int LensDistort::knob_changed(Knob* k)
 		return true;
 	}
 
-	// Update our internal reference of the knob value that just changed...
-	if ( !m_hasValidFileSequence )
-	{
-		updatePluginAttributesFromKnobs();
-		return true;
-	}
-
-	if ( k->is( "lensFileSequence" ) ) return true;
 
 	return Iop::knob_changed(k);
+}
+
+void LensDistort::buildDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
+{
+	PluginAttributeList& attributeList( ((LensDistort*)p)->attributeList() );
+	const unsigned int nAttributes( attributeList.size() );
+	for ( unsigned int i = 0; i < nAttributes; ++i )
+	{
+		attributeList[i].m_knob = Double_knob( f, &attributeList[i].m_value, attributeList[i].m_name.c_str(), attributeList[i].m_name.c_str() );
+		if( attributeList[i].m_script != "" )
+		{
+			attributeList[i].m_knob->from_script( attributeList[i].m_script.c_str() );
+		}
+		SetFlags( f, Knob::ALWAYS_SAVE );
+	}
 }
 
 void LensDistort::addDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
@@ -553,6 +579,7 @@ void LensDistort::addDynamicKnobs(void* p, DD::Image::Knob_Callback f)
 			attributeList[i].m_knob->from_script( attributeList[i].m_script.c_str() );
 		}
 		SetFlags( f, Knob::ALWAYS_SAVE );
+		SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	}
 }
 
