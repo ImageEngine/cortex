@@ -170,9 +170,10 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	),
 	PRM_Template(
 		PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
-		"A list of filters to decide which tags to display when expanding. All children will be created, "
-		"the tag filters just control initial visibility. Uses Houdini matching syntax, but nodes will be "
-		"visible if the filter matches *any* of their tags."
+		"A list of filters to decide which tags to expand. In SubNetwork mode, branches that do not "
+		"match the filter will remain collapsed. In Parenting mode, the tag filters just control initial "
+		"visibility. In FlatGeometry mode they essentially delete the non-tagged geometry. Uses Houdini "
+		"matching syntax, but matches *any* of the tags."
 	),
 	PRM_Template()
 };
