@@ -320,7 +320,12 @@ template<typename BaseType>
 void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 {
 	SceneCacheNode<BaseType>::sceneChanged();
-	
+	this->m_static = boost::indeterminate;
+}
+
+template<typename BaseType>
+void OBJ_SceneCacheNode<BaseType>::updateState()
+{
 	std::string file;
 	if ( !OBJ_SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
@@ -358,7 +363,7 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	// make sure the state is valid
 	if ( boost::indeterminate( this->m_static ) )
 	{
-		sceneChanged();
+		updateState();
 	}
 	
 	// only update time dependency if Houdini thinks its static
