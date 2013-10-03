@@ -61,6 +61,7 @@ void bindShaderLoader()
 		.def( "create", &ShaderLoader::create )
 		.def( "load", &ShaderLoader::load )
 		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )
+		.def( "clear", &ShaderLoader::clear)
 	;
 }
 

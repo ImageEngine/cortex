@@ -196,6 +196,12 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 			}
 		}
 
+		void clear()
+		{
+			m_loadedSource.clear();
+			m_loadedShaders.clear();
+		}
+
 	private :
 	
 		struct Source
@@ -315,6 +321,11 @@ ShaderPtr ShaderLoader::create( const std::string &vertexShader, const std::stri
 void ShaderLoader::clearUnused( )
 {
 	m_implementation->clearUnused();
+}
+
+void ShaderLoader::clear( )
+{
+	m_implementation->clear();
 }
 
 ShaderPtr ShaderLoader::load( const std::string &name )
