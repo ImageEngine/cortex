@@ -243,15 +243,21 @@ IECoreRI::RendererImplementation::~RendererImplementation()
 		}
 	}
 	
-	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
-	ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
-	if( it == s_contextToSharedDataMap.end() )
+	// A null m_contextToSharedDataMapKey means this was launched straight from a rib. In this case we don't
+	// remove its entry from the map, as this could lead to the global shared data getting destroyed and recreated
+	// multiple times.
+	if( m_contextToSharedDataMapKey != 0 )
 	{
-		IECore::msg( Msg::Warning, "IECoreRI::RendererImplementation::~RendererImplementation", "couldn't remove context->sharedData entry." );
-	}
-	else
-	{
-		s_contextToSharedDataMap.erase( it );
+		ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
+		ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
+		if( it == s_contextToSharedDataMap.end() )
+		{
+			IECore::msg( Msg::Warning, "IECoreRI::RendererImplementation::~RendererImplementation", "couldn't remove context->sharedData entry." );
+		}
+		else
+		{
+			s_contextToSharedDataMap.erase( it );
+		}
 	}
 }
 
