@@ -82,6 +82,10 @@ class ShaderLoader : public IECore::RefCounted
 		/// Automatically called by create() function.
 		void clearUnused();
 
+
+		// Free all shaders - this allows us to reload shaders and pick up changes
+		void clear();
+
 		/// Returns a static ShaderLoader instance that everyone
 		/// can use. This has searchpaths set using the
 		/// IECOREGL_SHADER_PATHS environment variable,
