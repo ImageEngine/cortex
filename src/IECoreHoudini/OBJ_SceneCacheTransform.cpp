@@ -214,7 +214,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 		geo->setTagFilter( params.tagFilterStr );
 	}
 	
-	geo->setVisible( visible );
+	geo->setDisplay( visible );
 	geo->expandHierarchy( scene );
 	
 	return geo;
@@ -247,7 +247,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	}
 	else
 	{
-		xform->setVisible( false );
+		xform->setDisplay( false );
 	}
 	
 	if ( params.hierarchy == SubNetworks )
