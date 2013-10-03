@@ -267,7 +267,9 @@ int OBJ_SceneCacheNode<BaseType>::expandButtonCallback( void *data, int index, f
 		return 0;
 	}
 	
+	node->setDisplay( false );
 	node->expandHierarchy( node->scene( file, node->getPath() ) );
+	node->setDisplay( true );
 	
 	return 1;
 }
