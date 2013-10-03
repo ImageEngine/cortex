@@ -128,7 +128,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_liveScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath );
+		m_liveScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath, s );
 		
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
 		if ( !linked( file ) )
@@ -198,6 +198,21 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		return ROP_ABORT_RENDER;
 	}
 	
+	const HoudiniScene *hScene = IECore::runTimeCast<const HoudiniScene>( m_liveScene );
+	if ( !hScene )
+	{
+		if ( const LinkedScene *lScene = IECore::runTimeCast<const LinkedScene>( m_liveScene ) )
+		{
+			hScene = IECore::runTimeCast<const HoudiniScene>( lScene->mainScene() );
+		}
+	}
+	
+	// update the default evaluation time to avoid double cooking
+	if ( hScene )
+	{
+		hScene->setDefaultTime( time );
+	}
+	
 	SceneInterfacePtr outScene = m_outScene;
 	
 	// we need to re-root the scene if its trying to cache a top level object
@@ -206,7 +221,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
 	if ( node && node->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( CHgetEvalTime() );
+		OP_Context context( time );
 		const GU_Detail *geo = node->getRenderGeometry( context );
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 		bool reRoot = !nameAttrRef.isValid();

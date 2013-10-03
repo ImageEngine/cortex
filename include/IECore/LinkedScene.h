@@ -151,6 +151,10 @@ class LinkedScene : public  SampledSceneInterface
 		virtual SceneInterfacePtr createChild( const Name &name );
 		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
 		virtual ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;				
+		
+		/// Convenience method to access the main scene this LinkedScene refers to
+		const SceneInterface *mainScene() const;
+		
 
 	private :
 

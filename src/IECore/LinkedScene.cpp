@@ -1179,3 +1179,8 @@ ConstSceneInterfacePtr LinkedScene::scene( const Path &path, LinkedScene::Missin
 	SceneInterfacePtr (LinkedScene::*nonConstSceneFn)(const Path &, MissingBehaviour) = &LinkedScene::scene;
 	return (const_cast<LinkedScene*>(this)->*nonConstSceneFn)( path, missingBehaviour );
 }
+
+const SceneInterface *LinkedScene::mainScene() const
+{
+	return m_mainScene;
+}

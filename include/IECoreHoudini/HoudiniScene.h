@@ -56,7 +56,7 @@ class HoudiniScene : public IECore::SceneInterface
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HoudiniScene, HoudiniSceneTypeId, IECore::SceneInterface );
 		
 		HoudiniScene();
-		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath );
+		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime = std::numeric_limits<double>::infinity() );
 		
 		virtual ~HoudiniScene();
 		
@@ -98,6 +98,14 @@ class HoudiniScene : public IECore::SceneInterface
 		/// Convenience method to access the Houdini node this scene refers to
 		const OP_Node *node() const;
 		
+		/// These methods provide a default cooking time for methods that do not accept time
+		/// as an argument (e.g. hasObject or childNames). In a HoudiniScene which points at
+		/// a SOP, it is necessary to use time in these methods. The default time will pass
+		/// through to children automatically. If left unset, CHgetEvalTime() will be used
+		/// for these queries. See ROP_SceneCacheWriter for a use case.
+		double getDefaultTime() const;
+		void setDefaultTime( double time ) const;
+		
 		/// The parameter name used to identify user defined tags on any OBJ node. This will be accessed
 		/// by hasTag and readTags as a string parameter, and will be split on spaces to separate tags.
 		static PRM_Name pTags;
@@ -119,7 +127,7 @@ class HoudiniScene : public IECore::SceneInterface
 		
 	private :
 		
-		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
+		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter );
 		void constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
 		
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
@@ -158,6 +166,9 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		// used by instances which track the hierarchy inside a SOP
 		mutable DetailSplitterPtr m_splitter;
+		
+		// used as the default cook time for methods that do not accept a time
+		mutable double m_defaultTime;
 
 };
 
