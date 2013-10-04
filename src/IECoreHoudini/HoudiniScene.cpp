@@ -58,7 +58,7 @@ static InternedString contentName( "geo" );
 PRM_Name HoudiniScene::pTags( "ieTags", "ieTags" );
 static const UT_String tagGroupPrefix( "ieTag_" );
 
-HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
+HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
 	motDirector->getObjectManager()->getFullPath( m_nodePath );
@@ -67,14 +67,14 @@ HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
 	calculatePath( contentPath, rootPath );
 }
 
-HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath )
-	: m_rootIndex( 0 ), m_contentIndex( 0 )
+HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime )
+	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( defaultTime )
 {
 	constructCommon( nodePath, contentPath, rootPath, 0 );
 }
 
-HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
-	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( splitter )
+HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter )
+	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( splitter ), m_defaultTime( defaultTime )
 {
 	constructCommon( nodePath, contentPath, rootPath, splitter );
 }
@@ -88,7 +88,7 @@ void HoudiniScene::constructCommon( const UT_String &nodePath, const Path &conte
 	{
 		if ( !m_splitter )
 		{
-			OP_Context context( CHgetEvalTime() );
+			OP_Context context( getDefaultTime() );
 			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
 			m_splitter = new DetailSplitter( handle );
 		}
@@ -104,6 +104,21 @@ HoudiniScene::~HoudiniScene()
 const OP_Node *HoudiniScene::node() const
 {
 	return retrieveNode( false, NullIfMissing );
+}
+
+double HoudiniScene::getDefaultTime() const
+{
+	if ( m_defaultTime == std::numeric_limits<double>::infinity() )
+	{
+		return CHgetEvalTime();
+	}
+	
+	return m_defaultTime;
+}
+
+void HoudiniScene::setDefaultTime( double time )
+{
+	m_defaultTime = time;
 }
 
 std::string HoudiniScene::fileName() const
@@ -477,7 +492,7 @@ bool HoudiniScene::hasObject() const
 	OBJ_OBJECT_TYPE type = objNode->getObjectType();
 	if ( type == OBJ_GEOMETRY  )
 	{
-		OP_Context context( CHgetEvalTime() );
+		OP_Context context( getDefaultTime() );
 		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
@@ -599,7 +614,7 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	// add child shapes within the geometry
 	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( CHgetEvalTime() );
+		OP_Context context( getDefaultTime() );
 		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 		if ( !nameAttrRef.isValid() )
@@ -650,7 +665,7 @@ SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missin
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	return new HoudiniScene( nodePath, contentPath, rootPath, m_splitter );
+	return new HoudiniScene( nodePath, contentPath, rootPath, m_defaultTime, m_splitter );
 }
 
 ConstSceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -768,7 +783,7 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		// check child shapes within the geo
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
-			OP_Context context( CHgetEvalTime() );
+			OP_Context context( getDefaultTime() );
 			const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 			if ( nameAttrRef.isValid() )
@@ -840,7 +855,7 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	node->getFullPath( rootNodePath );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath, m_splitter );
+	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath, m_defaultTime, m_splitter );
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
 	{
 		scene = scene->child( *it, missingBehaviour );
