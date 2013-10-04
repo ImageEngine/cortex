@@ -49,6 +49,8 @@ namespace IECoreHoudini
 IE_CORE_FORWARDDECLARE( HoudiniScene );
 
 /// A read-only class for representing a live Houdini scene as an IECore::SceneInterface
+/// Note that this class treats time by SceneInterface standards, starting at Frame 0,
+/// as opposed to Houdini standards, which start at Frame 1.
 class HoudiniScene : public IECore::SceneInterface
 {
 	public :
@@ -103,6 +105,7 @@ class HoudiniScene : public IECore::SceneInterface
 		/// a SOP, it is necessary to use time in these methods. The default time will pass
 		/// through to children automatically. If left unset, CHgetEvalTime() will be used
 		/// for these queries. See ROP_SceneCacheWriter for a use case.
+		double defaultTime() const;
 		double getDefaultTime() const;
 		void setDefaultTime( double time );
 		
@@ -135,6 +138,9 @@ class HoudiniScene : public IECore::SceneInterface
 		OP_Node *retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		bool hasInput( const OP_Node *node ) const;
+		// We need to adjust the time internally, because SceneInterfaces treat time
+		// starting at Frame 0, while Houdini treats time starting at Frame 1. 
+		double adjustTime( double time ) const;
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
 		const char *matchPath( const char *value ) const;
