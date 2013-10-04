@@ -1783,7 +1783,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "expand" ).pressButton()
 		rop = self.rop( xform )
 		rop.parm( "trange" ).set( 1 )
-		rop.parmTuple( "f" ).set( ( 1, 10 * hou.fps(), 1 ) )
+		rop.parmTuple( "f" ).set( ( 0, 10 * hou.fps(), 1 ) )
 		rop.parm( "execute" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
