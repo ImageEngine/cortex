@@ -35,6 +35,7 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
+#include "CH/CH_Manager.h"
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
 #include "PRM/PRM_ChoiceList.h"
@@ -563,6 +564,12 @@ ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileN
 	}
 	
 	return result;
+}
+
+template<typename BaseType>
+double SceneCacheNode<BaseType>::time( OP_Context context ) const
+{
+	return context.getTime() + CHgetManager()->getSecsPerSample();
 }
 
 template<typename BaseType>

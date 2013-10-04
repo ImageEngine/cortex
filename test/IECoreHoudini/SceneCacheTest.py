@@ -1282,9 +1282,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		times.extend( quarters )
 		times.sort()
 		
+		spf = 1.0 / hou.fps()
+		
 		sop = self.sop()
 		for time in times :
-			hou.setTime( time )
+			hou.setTime( time - spf )
 			sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 			prims = sop.geometry().prims()
 			self.assertEqual( len(prims), 18 )
@@ -1314,13 +1316,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b = [ x for x in a.children() if x.name() != "geo" ][0]
 		c = [ x for x in b.children() if x.name() != "geo" ][0]
 		for time in times :
-			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time ).asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
 		
 		for time in times :
-			hou.setTime( time )
+			hou.setTime( time - spf )
 			self.assertEqual( IECore.M44d( list(xform.parmTransform().asTuple()) ), IECore.M44d() )
 			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
@@ -1333,13 +1335,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b = xform.children()[1]
 		c = xform.children()[2]
 		for time in times :
-			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time ).asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, 2*time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, 3*time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, 2*time, 0 ) ) )
+			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, 3*time, 0 ) ) )
 	
 		for time in times :
-			hou.setTime( time )
+			hou.setTime( time - spf )
 			self.assertEqual( IECore.M44d( list(xform.parmTransform().asTuple()) ), IECore.M44d() )
 			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
@@ -1352,6 +1354,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "expand" ).pressButton()
 		c = hou.node( xform.path()+"/1/2/3" )
 		
+		spf = 1.0 / hou.fps()
+		hou.setTime( 0 - spf )
 		self.assertEqual( c.cookCount(), 0 )
 		self.assertEqual( c.parmTuple( "outT" ).eval(), ( 3, 0, 0 ) )
 		self.assertEqual( c.parmTuple( "outR" ).eval(), ( 0, 0, 0 ) )
@@ -1370,7 +1374,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( c.cookCount(), 0 )
 		
 		# changing the time updates the output parms
-		hou.setTime( 2.5 )
+		hou.setTime( 2.5 - spf )
 		self.assertEqual( null.parmTuple( "t" ).eval(), ( 3, 2.5, 0 ) )
 		self.assertEqual( c.parmTuple( "outT" ).eval(), ( 3, 2.5, 0 ) )
 		self.assertEqual( c.cookCount(), 0 )
@@ -1386,8 +1390,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( c.cookCount(), 1 )
 		
 		# evaluating at different times also works
-		self.assertEqual( c.parmTuple( "outT" ).evalAtTime( 2.75 ), ( 3, 2.75, 0 ) )
-		self.assertEqual( null.parmTuple( "t" ).evalAtTime( 5.25 ), ( 3, 5.25, 0 ) )
+		self.assertEqual( c.parmTuple( "outT" ).evalAtTime( 2.75 - spf ), ( 3, 2.75, 0 ) )
+		self.assertEqual( null.parmTuple( "t" ).evalAtTime( 5.25 - spf ), ( 3, 5.25, 0 ) )
 		self.assertEqual( c.cookCount(), 1 )
 	
 	def compareScene( self, a, b, time = 0, bakedObjects = [], parentTransform = None ) :
@@ -1890,7 +1894,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		d.writeObject( box2, 1 )
 		del s, a, b, c, d
 		
-		hou.setTime( 0 )
+		spf = 1.0 / hou.fps()
+		hou.setTime( 0 - spf )
 		node = self.sop()
 		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = node.geometry().prims()
@@ -1911,7 +1916,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( cPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
 		self.assertEqual( dPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
 		
-		hou.setTime( 1 )
+		hou.setTime( 1 - spf )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 13 )
 		self.assertEqual( len(node.geometry().points()), 20 )
@@ -1930,7 +1935,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( cPrims[0].attribValue( "Cd" ), ( 1, 0, 0 ) )
 		self.assertEqual( dPrims[0].attribValue( "Cd" ), ( 0, 1, 0 ) )
 		
-		hou.setTime( 0.5 )
+		hou.setTime( 0.5 - spf )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 13 )
 		self.assertEqual( len(node.geometry().points()), 20 )
@@ -2044,6 +2049,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		del scene, coordChild, intsChild
 		
+		spf = 1.0 / hou.fps()
+		hou.setTime( 0 - spf )
 		sop = self.sop()
 		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		prims = sop.geometry().prims()
@@ -2081,7 +2088,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( isinstance( result["/1/coord"], IECore.CoordinateSystem ) )
 		self.assertEqual( result["/ints"], IECore.IntVectorData( [ 1, 10, 20, 30 ] ) )
 		
-		hou.setTime( 1 )
+		hou.setTime( 1 - spf )
 		prims = sop.geometry().prims()
 		self.assertEqual( len(prims), 5 )
 		

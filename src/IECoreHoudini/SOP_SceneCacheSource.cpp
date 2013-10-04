@@ -192,7 +192,8 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 		gdp->clearAndDestroy();
 	}
 	
-	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, context.getTime() ) : Imath::M44d();
+	double readTime = time( context );
+	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, readTime ) : Imath::M44d();
 	
 	SceneInterface::Path rootPath;
 	scene->path( rootPath );
@@ -205,7 +206,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 		return error();
 	}
 	
-	loadObjects( scene, transform, context.getTime(), space, tagFilter, shapeFilter, attributeFilter.toStdString(), geometryType, rootPath.size() );
+	loadObjects( scene, transform, readTime, space, tagFilter, shapeFilter, attributeFilter.toStdString(), geometryType, rootPath.size() );
 	
 	if ( progress->opInterrupt( 100 ) )
 	{
