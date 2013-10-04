@@ -89,6 +89,7 @@ class ROP_SceneCacheWriter : public ROP_Node
 			ForcedExpand
 		};
 		
+		IECoreHoudini::HoudiniScenePtr m_houdiniScene;
 		IECore::ConstSceneInterfacePtr m_liveScene;
 		IECore::SceneInterfacePtr m_outScene;
 		UT_StringMMPattern *m_forceFilter;

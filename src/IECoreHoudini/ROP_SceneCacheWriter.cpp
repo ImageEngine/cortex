@@ -57,7 +57,7 @@ using namespace IECoreHoudini;
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
 
 ROP_SceneCacheWriter::ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op )
-	: ROP_Node( net, name, op ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 )
+	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 )
 {
 }
 
@@ -128,12 +128,15 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_liveScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath );
-		
+		m_houdiniScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath, s );
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
-		if ( !linked( file ) )
+		if ( linked( file ) )
 		{
-			m_liveScene = new LinkedScene( m_liveScene );
+			m_liveScene = m_houdiniScene;
+		}
+		else
+		{
+			m_liveScene = new LinkedScene( m_houdiniScene );
 		}
 	}
 	catch ( IECore::Exception &e )
@@ -198,6 +201,9 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		return ROP_ABORT_RENDER;
 	}
 	
+	// update the default evaluation time to avoid double cooking
+	m_houdiniScene->setDefaultTime( time );
+	
 	SceneInterfacePtr outScene = m_outScene;
 	
 	// we need to re-root the scene if its trying to cache a top level object
@@ -206,7 +212,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
 	if ( node && node->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( CHgetEvalTime() );
+		OP_Context context( time );
 		const GU_Detail *geo = node->getRenderGeometry( context );
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 		bool reRoot = !nameAttrRef.isValid();
@@ -239,6 +245,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 {
+	m_houdiniScene = 0;
 	m_liveScene = 0;
 	m_outScene = 0;
 	
