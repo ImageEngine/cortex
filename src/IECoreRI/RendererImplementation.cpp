@@ -647,9 +647,38 @@ void IECoreRI::RendererImplementation::worldBegin()
 }
 
 void IECoreRI::RendererImplementation::worldEnd()
-{
-	ScopedContext scopedContext( m_context );
+{	
+	// we can't simply use ScopedContext here to manage our context
+	// as we do in the other methods, because 3delight versions >= 11.0.0
+	// actually change context in RiWorldEnd when rerendering. the old
+	// context disappears off onto some background thread which performs
+	// rerendering and we must now talk to a new context which is current
+	// when RiWorldEnd returns.
+	
+	// remember the previous context so we can restore it after doing
+	// the work we want in our context.
+	RtContextHandle previousContext = RiGetContext();
+	if( previousContext == m_context )
+	{
+		// we don't want to restore the previous context if it is actually
+		// our own - because after RiWorldEnd it might have disappeared off onto
+		// another thread.
+		previousContext = 0;
+	}
+	
+	RiContext( m_context );
 	RiWorldEnd();
+	
+	// get our new context which we can emit edits on. we can no longer make
+	// calls to our original context, and we must call RiEnd() with the new one
+	// rather than the old.
+	m_context = RiGetContext();
+	
+	if( previousContext )
+	{
+		// restore whatever context was current when we entered this method
+		RiContext( previousContext );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
