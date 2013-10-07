@@ -53,6 +53,7 @@ class TestPrimitive( unittest.TestCase ) :
 		IECoreGL.Primitive.DrawPoints( True )
 		IECoreGL.Primitive.PointWidth( 2.2 )
 		IECoreGL.Primitive.TransparencySort( True )
+		IECoreGL.Primitive.Selectable( False )
 
 	def testStateComponentsUsage( self ):
 
@@ -66,6 +67,7 @@ class TestPrimitive( unittest.TestCase ) :
 		g.getState().add( IECoreGL.Primitive.DrawPoints( True ) )
 		g.getState().add( IECoreGL.Primitive.PointWidth( 2.2 ) )
 		g.getState().add( IECoreGL.Primitive.TransparencySort( True ) )
+		g.getState().add( IECoreGL.Primitive.Selectable( False ) )
 		
 	def testRunTimeTyped( self ) :
 	
