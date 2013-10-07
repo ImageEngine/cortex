@@ -49,6 +49,8 @@ namespace IECoreHoudini
 IE_CORE_FORWARDDECLARE( HoudiniScene );
 
 /// A read-only class for representing a live Houdini scene as an IECore::SceneInterface
+/// Note that this class treats time by SceneInterface standards, starting at Frame 0,
+/// as opposed to Houdini standards, which start at Frame 1.
 class HoudiniScene : public IECore::SceneInterface
 {
 	public :
@@ -111,7 +113,7 @@ class HoudiniScene : public IECore::SceneInterface
 		static PRM_Name pTags;
 		
 		typedef boost::function<bool (const OP_Node *)> HasFn;
-		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *)> ReadFn;
+		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *, double &)> ReadFn;
 		typedef boost::function<bool (const OP_Node *, const Name &)> HasTagFn;
 		typedef boost::function<void (const OP_Node *, NameList &, bool)> ReadTagsFn;
 		
@@ -135,6 +137,10 @@ class HoudiniScene : public IECore::SceneInterface
 		OP_Node *retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		bool hasInput( const OP_Node *node ) const;
+		// We need to adjust the time internally, because SceneInterfaces treat time
+		// starting at Frame 0, while Houdini treats time starting at Frame 1. 
+		double adjustTime( double time ) const;
+		double adjustedDefaultTime() const;
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
 		const char *matchPath( const char *value ) const;

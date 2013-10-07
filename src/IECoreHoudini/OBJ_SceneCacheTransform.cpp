@@ -437,7 +437,7 @@ bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 	return false;
 }
 
-IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
+IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node, double time )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
@@ -453,7 +453,7 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 		return 0;
 	}
 	
-	return LinkedScene::linkAttributeData( scene );
+	return LinkedScene::linkAttributeData( scene, time );
 }
 
 bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
