@@ -88,7 +88,7 @@ void HoudiniScene::constructCommon( const UT_String &nodePath, const Path &conte
 	{
 		if ( !m_splitter )
 		{
-			OP_Context context( defaultTime() );
+			OP_Context context( adjustedDefaultTime() );
 			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
 			m_splitter = new DetailSplitter( handle );
 		}
@@ -106,7 +106,7 @@ const OP_Node *HoudiniScene::node() const
 	return retrieveNode( false, NullIfMissing );
 }
 
-double HoudiniScene::defaultTime() const
+double HoudiniScene::adjustedDefaultTime() const
 {
 	if ( m_defaultTime == std::numeric_limits<double>::infinity() )
 	{
@@ -497,7 +497,7 @@ bool HoudiniScene::hasObject() const
 	OBJ_OBJECT_TYPE type = objNode->getObjectType();
 	if ( type == OBJ_GEOMETRY  )
 	{
-		OP_Context context( defaultTime() );
+		OP_Context context( adjustedDefaultTime() );
 		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
@@ -619,7 +619,7 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	// add child shapes within the geometry
 	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( defaultTime() );
+		OP_Context context( adjustedDefaultTime() );
 		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 		if ( !nameAttrRef.isValid() )
@@ -788,7 +788,7 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		// check child shapes within the geo
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
-			OP_Context context( defaultTime() );
+			OP_Context context( adjustedDefaultTime() );
 			const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 			if ( nameAttrRef.isValid() )

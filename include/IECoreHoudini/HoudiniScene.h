@@ -105,7 +105,6 @@ class HoudiniScene : public IECore::SceneInterface
 		/// a SOP, it is necessary to use time in these methods. The default time will pass
 		/// through to children automatically. If left unset, CHgetEvalTime() will be used
 		/// for these queries. See ROP_SceneCacheWriter for a use case.
-		double defaultTime() const;
 		double getDefaultTime() const;
 		void setDefaultTime( double time );
 		
@@ -141,6 +140,7 @@ class HoudiniScene : public IECore::SceneInterface
 		// We need to adjust the time internally, because SceneInterfaces treat time
 		// starting at Frame 0, while Houdini treats time starting at Frame 1. 
 		double adjustTime( double time ) const;
+		double adjustedDefaultTime() const;
 		
 		void calculatePath( const Path &contentPath, const Path &rootPath );
 		const char *matchPath( const char *value ) const;
