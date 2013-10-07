@@ -60,6 +60,7 @@ void bindPrimitive()
 	bindTypedStateComponent< Primitive::OutlineWidth >( "OutlineWidth" );
 	bindTypedStateComponent< Primitive::DrawPoints >( "DrawPoints" );
 	bindTypedStateComponent< Primitive::PointWidth >( "PointWidth" );
+	bindTypedStateComponent< Primitive::Selectable >( "Selectable" );
 	bindTypedStateComponent< Primitive::TransparencySort >( "TransparencySort" );
 }
 

@@ -1340,6 +1340,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:primitive:boundColor"] = typedAttributeSetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeSetter<OutlineColorStateComponent>;
 		(*a)["gl:primitive:pointColor"] = typedAttributeSetter<PointColorStateComponent>;
+		(*a)["gl:primitive:selectable"] = typedAttributeSetter<IECoreGL::Primitive::Selectable>;
 		(*a)["gl:color"] = typedAttributeSetter<Color>;
 		(*a)["color"] = colorAttributeSetter;
 		(*a)["opacity"] = opacityAttributeSetter;
@@ -1393,6 +1394,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:primitive:boundColor"] = typedAttributeGetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeGetter<OutlineColorStateComponent>;
 		(*a)["gl:primitive:pointColor"] = typedAttributeGetter<PointColorStateComponent>;
+		(*a)["gl:primitive:selectable"] = typedAttributeGetter<IECoreGL::Primitive::Selectable>;
 		(*a)["gl:color"] = typedAttributeGetter<Color>;
 		(*a)["color"] = colorAttributeGetter;
 		(*a)["opacity"] = opacityAttributeGetter;
