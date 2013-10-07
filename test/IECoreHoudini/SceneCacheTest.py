@@ -1622,9 +1622,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertTrue( b.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
 		self.assertTrue( b.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
-		self.assertFalse( b.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
 		self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( TestSceneCache.__testFile ) )
 		self.assertEqual( b.readAttribute( IECore.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [ "1", "2" ] ) )
+		self.assertEqual( b.readAttribute( IECore.LinkedScene.timeLinkAttribute, 0 ), IECore.DoubleData( 1.0 / hou.fps() ) )
 		
 		# make sure we can force link expansion
 		xform.parm( "collapse" ).pressButton()
@@ -1696,9 +1696,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertFalse( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 			self.assertTrue( b.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
 			self.assertTrue( b.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
-			self.assertFalse( b.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
 			self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( TestSceneCache.__testFile ) )
 			self.assertEqual( b.readAttribute( IECore.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [ "1", "2" ] ) )
+			self.assertEqual( b.readAttribute( IECore.LinkedScene.timeLinkAttribute, 0 ), IECore.DoubleData( 1.0 / hou.fps() ) )
 			d = a.child( "4" )
 			self.assertFalse( d.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 			self.assertFalse( d.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )

@@ -327,7 +327,7 @@ ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) cons
 	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
 	if ( it != customAttributeReaders().end() )
 	{
-		return it->second.m_read( retrieveNode() );
+		return it->second.m_read( retrieveNode(), time );
 	}
 	
 	return 0;

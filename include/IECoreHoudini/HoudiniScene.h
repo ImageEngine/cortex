@@ -114,7 +114,7 @@ class HoudiniScene : public IECore::SceneInterface
 		static PRM_Name pTags;
 		
 		typedef boost::function<bool (const OP_Node *)> HasFn;
-		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *)> ReadFn;
+		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *, double &)> ReadFn;
 		typedef boost::function<bool (const OP_Node *, const Name &)> HasTagFn;
 		typedef boost::function<void (const OP_Node *, NameList &, bool)> ReadTagsFn;
 		

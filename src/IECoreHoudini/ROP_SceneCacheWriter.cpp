@@ -298,13 +298,11 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	
 	if ( mode == ForcedLink )
 	{
-		const SceneCacheNode<OP_Node> *sceneNode = static_cast< const SceneCacheNode<OP_Node>* >( hScene->node() );
-		if ( sceneNode )
+		if ( const SceneCacheNode<OP_Node> *sceneNode = static_cast< const SceneCacheNode<OP_Node>* >( hScene->node() ) )
 		{
-			ConstSceneInterfacePtr scene = sceneNode->scene();
-			if ( scene )
+			if ( ConstSceneInterfacePtr scene = sceneNode->scene() )
 			{
-				IECore::runTimeCast<LinkedScene>( outScene )->writeLink( scene );
+				outScene->writeAttribute( LinkedScene::linkAttribute, LinkedScene::linkAttributeData( scene, time ), time );
 				return ROP_CONTINUE_RENDER;
 			}
 		}
