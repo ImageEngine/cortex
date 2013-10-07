@@ -395,11 +395,11 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	Imath::M44d transform;
 	if ( space == SceneCacheNode<OP_Node>::World )
 	{
-		transform = SceneCacheNode<BaseType>::worldTransform( file, path, context.getTime() );
+		transform = SceneCacheNode<BaseType>::worldTransform( file, path, this->time( context ) );
 	}
 	else if ( space == SceneCacheNode<OP_Node>::Local )
 	{
-		transform = scene->readTransformAsMatrix( context.getTime() );
+		transform = scene->readTransformAsMatrix( this->time( context ) );
 	}
 	
 	xform = IECore::convert<UT_Matrix4D>( transform );

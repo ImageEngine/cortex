@@ -88,7 +88,7 @@ void HoudiniScene::constructCommon( const UT_String &nodePath, const Path &conte
 	{
 		if ( !m_splitter )
 		{
-			OP_Context context( getDefaultTime() );
+			OP_Context context( adjustedDefaultTime() );
 			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
 			m_splitter = new DetailSplitter( handle );
 		}
@@ -106,13 +106,18 @@ const OP_Node *HoudiniScene::node() const
 	return retrieveNode( false, NullIfMissing );
 }
 
-double HoudiniScene::getDefaultTime() const
+double HoudiniScene::adjustedDefaultTime() const
 {
 	if ( m_defaultTime == std::numeric_limits<double>::infinity() )
 	{
-		return CHgetEvalTime();
+		return adjustTime( CHgetEvalTime() );
 	}
 	
+	return adjustTime( m_defaultTime );
+}
+
+double HoudiniScene::getDefaultTime() const
+{
 	return m_defaultTime;
 }
 
@@ -216,7 +221,7 @@ Imath::Box3d HoudiniScene::readBound( double time ) const
 	
 	Imath::Box3d bounds;
 	UT_BoundingBox box;
-	OP_Context context( time );
+	OP_Context context( adjustTime( time ) );
 	/// \todo: this doesn't account for SOPs containing multiple shapes
 	/// if we fix it, we need to fix the condition below as well
 	if ( node->getBoundingBox( box, context ) )
@@ -280,7 +285,7 @@ Imath::M44d HoudiniScene::readTransformAsMatrix( double time ) const
 	}
 	
 	UT_DMatrix4 matrix;
-	OP_Context context( time );
+	OP_Context context( adjustTime( time ) );
 	if ( !objNode->getLocalTransform( context, matrix ) )
 	{
 		return Imath::M44d();
@@ -322,7 +327,7 @@ ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) cons
 	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
 	if ( it != customAttributeReaders().end() )
 	{
-		return it->second.m_read( retrieveNode() );
+		return it->second.m_read( retrieveNode(), time );
 	}
 	
 	return 0;
@@ -492,7 +497,7 @@ bool HoudiniScene::hasObject() const
 	OBJ_OBJECT_TYPE type = objNode->getObjectType();
 	if ( type == OBJ_GEOMETRY  )
 	{
-		OP_Context context( getDefaultTime() );
+		OP_Context context( adjustedDefaultTime() );
 		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
@@ -539,7 +544,7 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 	
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( time );
+		OP_Context context( adjustTime( time ) );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
 		
 		if ( !m_splitter || ( handle != m_splitter->handle() ) )
@@ -614,7 +619,7 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	// add child shapes within the geometry
 	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( getDefaultTime() );
+		OP_Context context( adjustedDefaultTime() );
 		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 		if ( !nameAttrRef.isValid() )
@@ -783,7 +788,7 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		// check child shapes within the geo
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
-			OP_Context context( getDefaultTime() );
+			OP_Context context( adjustedDefaultTime() );
 			const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
 			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 			if ( nameAttrRef.isValid() )
@@ -881,6 +886,11 @@ bool HoudiniScene::hasInput( const OP_Node *node ) const
 	}
 	
 	return false;
+}
+
+double HoudiniScene::adjustTime( double time ) const
+{
+	return time - CHgetManager()->getSecsPerSample();
 }
 
 bool HoudiniScene::matchPattern( const char *value, const char *pattern ) const

@@ -368,7 +368,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		shape = hou.node( "/obj/box1/actualBox" )
 		deformer = shape.createOutputNode( "twist" )
 		deformer.parm( "paxis" ).set( 1 )
-		deformer.parm( "strength" ).setExpression( "10*$T" )
+		deformer.parm( "strength" ).setExpression( "10*($T+(1.0/$FPS))" )
 		
 		box1 = scene.child( "sub1" ).child( "box1" )
 		mesh0   = box1.readObject( 0 )
@@ -423,13 +423,13 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		scene = self.buildScene()
 		hou.node( "/obj/sub1" ).parmTuple( "t" ).set( [ 1, 1, 1 ] )
-		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T" )
-		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T" )
-		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T+(1.0/$FPS)" )
+		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T+(1.0/$FPS)" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T+(1.0/$FPS)" )
 		hou.node( "/obj/sub1/torus2" ).parmTuple( "t" ).set( [ -1, 0, 2 ] )
-		hou.node( "/obj/box1" ).parm( "tx" ).setExpression( "-$T" )
-		hou.node( "/obj/box1" ).parm( "ty" ).setExpression( "-$T" )
-		hou.node( "/obj/box1" ).parm( "tz" ).setExpression( "-$T" )
+		hou.node( "/obj/box1" ).parm( "tx" ).setExpression( "-($T+(1.0/$FPS))" )
+		hou.node( "/obj/box1" ).parm( "ty" ).setExpression( "-($T+(1.0/$FPS))" )
+		hou.node( "/obj/box1" ).parm( "tz" ).setExpression( "-($T+(1.0/$FPS))" )
 		# to make the bounds nice round numbers
 		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "rows" ).set( 100 )
 		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "cols" ).set( 100 )
@@ -487,9 +487,9 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 	def testAnimatedTransform( self ) :
 		
 		scene = self.buildScene()
-		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T" )
-		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T+1" )
-		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T+2" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T+(1.0/$FPS)" )
+		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T+(1.0/$FPS)+1" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T+(1.0/$FPS)+2" )
 		
 		torus1 = scene.child( "sub1" ).child( "torus1" )
 		transform0 = torus1.readTransform( 0 ).value
@@ -649,7 +649,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		box = hou.node( "/obj/box1" )
 		deformer = box.renderNode().createOutputNode( "twist" )
 		deformer.parm( "paxis" ).set( 1 )
-		deformer.parm( "strength" ).setExpression( "10*$T" )
+		deformer.parm( "strength" ).setExpression( "10*($T+1.0/$FPS)" )
 		deformer.setRenderFlag( True )
 		
 		self.assertNotEqual( hou.time(), 0.5 )

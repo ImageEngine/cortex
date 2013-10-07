@@ -128,7 +128,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_houdiniScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath, s );
+		m_houdiniScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
 		if ( linked( file ) )
 		{
@@ -193,16 +193,20 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *boss )
 {
+	// We need to adjust the time for writing, because Houdini treats time starting
+	// at Frame 1, while SceneInterfaces treat time starting at Frame 0. 
+	double writeTime = time + CHgetManager()->getSecsPerSample();
+	
 	// the interruptor passed in is null for some reason, so just get the global one
 	UT_Interrupt *progress = UTgetInterrupt();
-	if ( !progress->opStart( ( boost::format( "Writing time %f" ) % time ).str().c_str() ) )
+	if ( !progress->opStart( ( boost::format( "Writing Houdini time %f as SceneCache time %f" ) % time % writeTime ).str().c_str() ) )
 	{
 		addError( 0, "Cache aborted" );
 		return ROP_ABORT_RENDER;
 	}
 	
 	// update the default evaluation time to avoid double cooking
-	m_houdiniScene->setDefaultTime( time );
+	m_houdiniScene->setDefaultTime( writeTime );
 	
 	SceneInterfacePtr outScene = m_outScene;
 	
@@ -238,7 +242,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		}
 	}
 	
-	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, time, progress );
+	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
 	progress->opEnd();
 	return status;
 }
@@ -294,13 +298,11 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	
 	if ( mode == ForcedLink )
 	{
-		const SceneCacheNode<OP_Node> *sceneNode = static_cast< const SceneCacheNode<OP_Node>* >( hScene->node() );
-		if ( sceneNode )
+		if ( const SceneCacheNode<OP_Node> *sceneNode = static_cast< const SceneCacheNode<OP_Node>* >( hScene->node() ) )
 		{
-			ConstSceneInterfacePtr scene = sceneNode->scene();
-			if ( scene )
+			if ( ConstSceneInterfacePtr scene = sceneNode->scene() )
 			{
-				IECore::runTimeCast<LinkedScene>( outScene )->writeLink( scene );
+				outScene->writeAttribute( LinkedScene::linkAttribute, LinkedScene::linkAttributeData( scene, time ), time );
 				return ROP_CONTINUE_RENDER;
 			}
 		}

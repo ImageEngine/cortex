@@ -123,6 +123,13 @@ class SceneCacheNode : public BaseType
 		/// using this method, in order to avoid re-opening existing files.
 		IECore::ConstSceneInterfacePtr scene() const;
 		
+		/// Return the SceneCache time represented by this Houdini Context. This is not a
+		/// simple getTime() call, because Houdini treats time starting at Frame 1, while
+		/// SceneCaches treat time starting at Frame 0. Note that this function should
+		/// really be adjusting time by 1/fps used at cache time, but we don't have access
+		/// to that, so we assume that Houdini's current frame rate is representative.
+		double time( OP_Context context ) const;
+		
 		/// Determine if the given scene has any tag matching the filter
 		static bool tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter );
 	
