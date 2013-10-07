@@ -316,6 +316,33 @@ class TestSelection( unittest.TestCase ) :
 		self.assertEqual( len( names ), 2 )
 		self.assert_( "one" in names )
 		self.assert_( "two" in names )
+
+	def testSelectableFlag( self ) :
+
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.setAttribute( "name", IECore.StringData( "selectableObj" ) )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+			r.geometry( "sphere", {}, {} )
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.setAttribute( "name", IECore.StringData( "unselectableObj" ) )
+			r.setAttribute( "gl:primitive:selectable", IECore.BoolData( False ) )
+
+			r.geometry( "sphere", {}, {} )
+
+		s = r.scene()
+		s.setCamera( IECoreGL.PerspectiveCamera() )
+
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		names = [ x.name.value() for x in ss ]
+		self.assertEqual( names, [ "selectableObj" ] )
 				
 if __name__ == "__main__":
     unittest.main()

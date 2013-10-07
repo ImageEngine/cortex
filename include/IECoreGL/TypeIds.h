@@ -120,6 +120,7 @@ enum TypeId
 	BufferTypeId = 105077,
 	ToGLBufferConverterTypeId = 105078,
 	UIntTextureTypeId = 105079,
+	PrimitiveSelectableTypeId = 105080,
 	LastCoreGLTypeId = 105999,
 };
 

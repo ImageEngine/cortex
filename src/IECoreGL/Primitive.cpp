@@ -71,6 +71,7 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::DrawOutline, P
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::OutlineWidth, PrimitiveOutlineWidthTypeId, float, 1.0f );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::DrawPoints, PrimitivePointsTypeId, bool, false );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::PointWidth, PrimitivePointWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::Selectable, PrimitiveSelectableTypeId, bool, true );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySort, PrimitiveTransparencySortStateComponentTypeId, bool, true );
 
 }
@@ -136,10 +137,14 @@ void Primitive::render( State *state ) const
 	glGetIntegerv(GL_RENDER_MODE, &renderMode);
 	if( renderMode == GL_SELECT )
 	{
-		const Shader *constantShader = constant2();
-		const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
-		Shader::Setup::ScopedBinding constantBinding( *constantSetup );
-		render( state, Primitive::DrawSolid::staticTypeId() );
+		// If we're not selectable, then do nothing in selection mode
+		if( state->get<Primitive::Selectable>()->value() )
+		{
+			const Shader *constantShader = constant2();
+			const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
+			Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+			render( state, Primitive::DrawSolid::staticTypeId() );
+		}
 		return;
 	}
 	

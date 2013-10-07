@@ -136,6 +136,8 @@ class Primitive : public Renderable
 		IE_CORE_DECLAREPTR( DrawPoints );
 		typedef TypedStateComponent<float, PrimitivePointWidthTypeId> PointWidth;
 		IE_CORE_DECLAREPTR( PointWidth );
+		typedef TypedStateComponent<bool, PrimitiveSelectableTypeId> Selectable;
+		IE_CORE_DECLAREPTR( Selectable );
 		/// Used to trigger sorting of the components of a primitive when the TransparentShadingStateComponent has a value of true.
 		typedef TypedStateComponent<bool, PrimitiveTransparencySortStateComponentTypeId> TransparencySort;
 		IE_CORE_DECLAREPTR( TransparencySort );
