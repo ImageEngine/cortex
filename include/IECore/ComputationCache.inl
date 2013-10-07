@@ -35,6 +35,8 @@
 #ifndef IECORE_COMPUTATIONCACHE_INL
 #define IECORE_COMPUTATIONCACHE_INL
 
+#include "IECore/MessageHandler.h"
+
 namespace IECore
 {
 
@@ -123,6 +125,13 @@ ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::Missin
 			if ( obj )
 			{
 				obj = m_objectPool->store( obj, ObjectPool::StoreReference );
+				MurmurHash h = obj->hash();
+				if ( h != objectHash )
+				{
+					/// the computation returned a different object for some reason, so we have to update the hash
+					m_cache.set( computationHash, h, 1 );	
+					msg( Msg::Warning, "ComputationCache::get", "Inconsistent hash detected." );
+				}
 			}
 		}
 	}

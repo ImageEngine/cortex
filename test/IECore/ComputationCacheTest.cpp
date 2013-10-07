@@ -51,6 +51,7 @@ namespace IECore
 struct ComputationCacheTest
 {
 
+	static int getCount;
 	typedef int ComputationParams;
 	typedef ComputationCache< ComputationParams > Cache;
 
@@ -65,6 +66,7 @@ struct ComputationCacheTest
 	static IntDataPtr get( const ComputationParams &params )
 	{
 		int id = params;
+		getCount++;
 		return new IntData( id );
 	}
 
@@ -150,6 +152,23 @@ struct ComputationCacheTest
 		v->writable() = 42;
 		BOOST_CHECK( *v != *cache.get( ComputationParams(1), Cache::NullIfMissing ) );
 
+		// test when the computation function does not match the already registered computation hash....
+		IntDataPtr weirdValue = new IntData(666);
+		cache.clear();
+		cache.set( ComputationParams(1), weirdValue, ObjectPool::StoreReference );
+		ConstObjectPtr v0 = cache.get( ComputationParams(1) );
+		BOOST_CHECK( *weirdValue == *cache.get( ComputationParams(1), Cache::NullIfMissing ) );
+		pool->clear();
+		int c1 = ComputationCacheTest::getCount;
+		ConstObjectPtr v1 = cache.get( ComputationParams(1) );
+		int c2 = ComputationCacheTest::getCount;
+		BOOST_CHECK_EQUAL( 1, static_cast< const IntData * >(v1.get())->readable() );
+		BOOST_CHECK_EQUAL( c1 + 1, c2 );
+		ConstObjectPtr v2 = cache.get( ComputationParams(1) );
+		int c3 = ComputationCacheTest::getCount;
+		BOOST_CHECK_EQUAL( 1, static_cast< const IntData * >(v2.get())->readable() );
+		/// garantee that there was no recomputation.
+		BOOST_CHECK_EQUAL( c2, c3 );
 	}
 
 	struct GetFromCache
@@ -192,6 +211,7 @@ struct ComputationCacheTest
 
 };
 
+int ComputationCacheTest::getCount(0);
 
 struct ComputationCacheTestSuite : public boost::unit_test::test_suite
 {
