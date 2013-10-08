@@ -1338,13 +1338,34 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			BoxSamples::const_iterator newBoxIt = boxSamples.begin();
 
 			//
+			// Pre-extrapolating phase:
+			//
+			// The oldest new box sample is used to expand all the known box samples that come earlier in time.
+			//
+			double oldestNewSample = sampleTimes[0];
+			double oldestKnownTime = m_boundSampleTimes[0];
+			if ( oldestNewSample > oldestKnownTime )
+			{
+				Imath::Box3d oldestNewSampleBox = *boxSamples.begin();
+
+				SampleTimes::iterator currTimeIt = m_boundSampleTimes.begin();
+				BoxSamples::iterator currBoxIt = m_boundSamples.begin();
+
+				while( oldestNewSample > *currTimeIt && currTimeIt != m_boundSampleTimes.end() )
+				{
+					currBoxIt->extendBy( oldestNewSampleBox );					
+					currBoxIt++;
+					currTimeIt++;
+				}
+			}
+
+			//
 			// Prepending phase: 
 			//
 			// All the new samples that exist prior to all the registered samples should  
 			// be prepended to the current samples buffer. Compute the union of the new samples 
 			// with the oldest sample known
 			//
-			double oldestKnownTime = m_boundSampleTimes[0];
 			Imath::Box3d oldestKnownBox = m_boundSamples[0];
 			for ( ; newTimeIt != sampleTimes.end() && *newTimeIt < oldestKnownTime; newTimeIt++ )
 			{
@@ -1407,6 +1428,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					}
 					else
 					{
+
 						// the new sample comes prior to the current known sample, so we must insert in the array of known samples.	
 						if ( currTimeIt == m_boundSampleTimes.begin() )
 						{
@@ -1456,9 +1478,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 
 			//
-			// Extrapolating phase:
+			// Post-extrapolating phase:
 			//
-			// The latest new box sample is used to expand all the prior known box samples that come later in time.
+			// The latest new box sample is used to expand all the known box samples that come later in time.
 			//
 			if ( currBoxIt != m_boundSamples.end() )
 			{
