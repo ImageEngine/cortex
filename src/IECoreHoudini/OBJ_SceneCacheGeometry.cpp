@@ -70,6 +70,18 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 	return templatePair;
 }
 
+bool OBJ_SceneCacheGeometry::runCreateScript()
+{
+	UT_String path;
+	getFullPath( path );
+	
+	// add the standard mantra geometry parms
+	UT_String script( "opproperty -f -F Render " + path.toStdString() + " mantra default_geometry" );
+	executeHscriptScript( script, 0 );
+	
+	return OBJ_Geometry::runCreateScript();
+}
+
 void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 {
 	if ( !scene )
