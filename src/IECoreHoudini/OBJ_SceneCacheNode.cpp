@@ -35,6 +35,7 @@
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
 #include "PRM/PRM_Include.h"
+#include "PRM/PRM_SpareData.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/HoudiniScene.h"
@@ -96,13 +97,13 @@ static PRM_Default outScaleDefault[] = {
 	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[2]", CH_PYTHON_EXPRESSION )
 };
 
-static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
+static void copyParm( PRM_Template &src, PRM_Template &dest )
 {
 	PRM_Name *name = new PRM_Name( src.getToken(), src.getLabel(), src.getExpressionFlag() );
 	name->harden();
 	
 	dest.initialize(
-		(PRM_Type) (src.getType() | PRM_TYPE_INVISIBLE),
+		src.getType(),
 		src.getTypeExtended(),
 		src.exportLevel(),
 		src.getVectorSize(),
@@ -121,6 +122,12 @@ static void copyAndHideParm( PRM_Template &src, PRM_Template &dest )
 template<typename BaseType>
 PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *extraParameters )
 {
+	static PRM_Template *thisTemplate = 0;
+	if ( thisTemplate )
+	{
+		return thisTemplate;
+	}
+	
 	PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
 	PRM_Template *extraTemplate = ( extraParameters ) ? extraParameters->myTemplate : 0;
 	PRM_Template *expansionTemplate = buildExpansionParameters()->myTemplate;
@@ -132,27 +139,52 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	unsigned numExpansionParms = PRM_Template::countTemplates( expansionTemplate );
 	unsigned numOutputParms = PRM_Template::countTemplates( outputTemplate );
 	
-	PRM_Template *thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + numOutputParms + 2 ];
+	thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + numOutputParms + 2 ];
 	
-	// add the generic OBJ_Node parms
-	unsigned totalParms = 0;
-	for ( unsigned i = 0; i < numObjParms; ++i, ++totalParms )
+	// add the SceneCacheNode folders to the stdswitcher
+	unsigned switcherIndex = PRM_Template::getTemplateIndexByToken( objTemplate, "stdswitcher" );
+	PRM_Template &stdswitcher = objTemplate[switcherIndex];
+	unsigned numFolders = stdswitcher.getVectorSize();
+	static PRM_Default *folders = new PRM_Default[ numFolders + 2 ];
+	folders[0] = PRM_Default( numSCCParms + numExtraParms + numExpansionParms, "Main" );
+	folders[1] = PRM_Default( numOutputParms, "Output" );
+	
+	UT_BitArray folderVis;
+	folderVis.append( true );
+	folderVis.append( true );
+	
+	// add the normal folders
+	PRM_Default *defaults = stdswitcher.getFactoryDefaults();
+	for ( unsigned j = 0; j < numFolders; ++j )
 	{
-		thisTemplate[totalParms] = objTemplate[i];
-		copyAndHideParm( objTemplate[i], thisTemplate[totalParms] );
+		folders[j+2] = defaults[j];
+		// hide the Transform folder, since those parms are not useable
+		folderVis.append( strcmp( defaults[j].getString(), "Transform" ) );
 	}
 	
-	static PRM_Default mainSwitcherDefault[] =
-	{
-		PRM_Default( numSCCParms + numExtraParms + numExpansionParms, "Main" ),
-		PRM_Default( numOutputParms, "Output" )
-	};
+	static PRM_SpareData *spareData = new PRM_SpareData();
+	spareData->setVisibleTabs( folderVis );
 	
-	// add the generic Main folder switcher
-	thisTemplate[totalParms] = PRM_Template( PRM_SWITCHER, 2, &pMainSwitcher, mainSwitcherDefault );
-	totalParms++;
+	// re-init the stdswitcher so we get our new folders
+	thisTemplate[0] = stdswitcher;
+	thisTemplate[0].initialize(
+		stdswitcher.getType(),
+		stdswitcher.getTypeExtended(),
+		stdswitcher.exportLevel(),
+		numFolders + 2,
+		stdswitcher.getNamePtr(),
+		folders,
+		stdswitcher.getChoiceListPtr(),
+		stdswitcher.getRangePtr(),
+		stdswitcher.getCallback(),
+		spareData,
+		stdswitcher.getParmGroup(),
+		(const char *)stdswitcher.getHelpText(),
+		stdswitcher.getConditionalBasePtr()
+	);
 	
 	// add the generic SceneCacheNode parms
+	unsigned totalParms = 1;
 	for ( unsigned i = 0; i < numSCCParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = SceneCacheNode<BaseType>::parameters[i];
@@ -174,6 +206,20 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	for ( unsigned i = 0; i < numOutputParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = outputTemplate[i];
+	}
+	
+	// add the generic OBJ_Node parms
+	for ( unsigned i = 0; i < numObjParms; ++i, ++totalParms )
+	{
+		// this was added above
+		if ( i == switcherIndex )
+		{
+			totalParms--;
+			continue;
+		}
+		
+		thisTemplate[totalParms] = objTemplate[i];
+		copyParm( objTemplate[i], thisTemplate[totalParms] );
 	}
 	
 	return thisTemplate;
