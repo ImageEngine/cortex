@@ -146,12 +146,29 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	UT_Matrix4D transform;
 	memcpy( transform.data(), r->getUniform( RE_UNIFORM_OBJECT_MATRIX )->getValue(), sizeof(double) * 16 );
 	
+	GLint currentProgram = 0;
+	glGetIntegerv( GL_CURRENT_PROGRAM, &currentProgram );
+	
+	IECoreGL::State *state = getState( render_mode, flags, opt );
+	
+	if ( render_mode == GR_RENDER_OBJECT_PICK )
+	{
+		const IECoreGL::Shader *shader = state->get<IECoreGL::ShaderStateComponent>()->shaderSetup()->shader();
+		glUseProgram( shader->program() );
+		glUniform1i( shader->uniformParameter( "objectPickId" )->location, r->getObjectPickID() );
+	}
+	
 	r->pushMatrix();
 		
 		r->multiplyMatrix( transform );
-		m_scene->render( getState( render_mode, flags, opt ) );
+		m_scene->render( state );
 	
 	r->popMatrix();
+	
+	if ( render_mode == GR_RENDER_OBJECT_PICK )
+	{
+		glUseProgram( currentProgram );
+	}
 }
 
 IECoreGL::StatePtr GR_CortexPrimitive::g_lit = 0;
@@ -161,10 +178,11 @@ IECoreGL::StatePtr GR_CortexPrimitive::g_wireLit = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_wireShaded = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_wireConstGhost = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_wireConstBG = 0;
+IECoreGL::StatePtr GR_CortexPrimitive::g_pick = 0;
 
 IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlags flags, const GR_DisplayOption *opt )
 {
-	if ( !g_lit || !g_shaded || !g_wire || !g_wireLit || !g_wireShaded || !g_wireConstGhost || !g_wireConstBG )
+	if ( !g_lit || !g_shaded || !g_wire || !g_wireLit || !g_wireShaded || !g_wireConstGhost || !g_wireConstBG || !g_pick )
 	{
 		g_shaded = new IECoreGL::State( true );
 		g_shaded->add( new IECoreGL::PointsPrimitive::UseGLPoints( IECoreGL::ForAll ) );
@@ -216,6 +234,19 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		
 		g_wireConstGhost = new IECoreGL::State( *g_wireConstBG );
 		g_wireConstGhost->add( new IECoreGL::Color( IECore::convert<Imath::Color4f>( opt->common().getColor( GR_GHOST_FILL_COLOR ) ) ) );
+		
+		g_pick = new IECoreGL::State( *g_shaded );
+		g_pick->add(
+			new IECoreGL::ShaderStateComponent(
+				IECoreGL::ShaderLoader::defaultShaderLoader(),
+				IECoreGL::TextureLoader::defaultTextureLoader(),
+				IECoreGL::Shader::defaultVertexSource(),
+				IECoreGL::Shader::defaultGeometrySource(),
+				pickFragmentSource(),
+				new IECore::CompoundObject()
+			),
+			true
+		);
 	}
 	
 	switch ( mode )
@@ -253,6 +284,10 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		{
 			return g_wireConstGhost;
 		}
+		case GR_RENDER_OBJECT_PICK :
+		{
+			return g_pick;
+		}
 		default :
 		{
 			break;
@@ -260,6 +295,24 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 	}
 	
 	return g_shaded;
+}
+
+const std::string &GR_CortexPrimitive::pickFragmentSource()
+{
+	static std::string s = 
+	
+		"#version 150 compatibility\n"
+		"#extension GL_EXT_gpu_shader4 : enable\n"
+		""
+		"uniform int objectPickId;"
+		"out ivec4 id;"
+		""
+		"void main()"
+		"{"
+		"	id = ivec4( objectPickId, 0, 0, 0 );"
+		"}";
+	
+	return s;
 }
 
 #endif // 12.5 or later

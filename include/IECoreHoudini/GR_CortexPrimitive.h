@@ -86,6 +86,8 @@ class GR_CortexPrimitive : public GR_Primitive
 		
 		IECoreGL::State *getState( GR_RenderMode mode, GR_RenderFlags flags, const GR_DisplayOption *opt );
 		
+		const std::string &pickFragmentSource();
+		
 		static IECoreGL::StatePtr g_lit;
 		static IECoreGL::StatePtr g_shaded;
 		static IECoreGL::StatePtr g_wire;
@@ -93,6 +95,7 @@ class GR_CortexPrimitive : public GR_Primitive
 		static IECoreGL::StatePtr g_wireShaded;
 		static IECoreGL::StatePtr g_wireConstGhost;
 		static IECoreGL::StatePtr g_wireConstBG;
+		static IECoreGL::StatePtr g_pick;
 
 };
 
