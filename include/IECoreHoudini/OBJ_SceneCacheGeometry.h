@@ -55,6 +55,8 @@ class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
 		
+		virtual bool runCreateScript();
+		
 		/// Implemented to expand the SceneCache using a SOP_SceneCacheSource. Derived classes
 		/// should re-implement doExpandGeometry() if specialized behaviour is necessary.
 		/// \todo: do we need this extra abstraction?
