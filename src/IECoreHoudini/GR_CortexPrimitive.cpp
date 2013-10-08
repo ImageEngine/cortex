@@ -284,6 +284,10 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		{
 			return g_wireConstGhost;
 		}
+		// hovering on GU_CortexPrimitives during GR_RENDER_OBJECT_PICK mode flips the mode
+		// to GR_RENDER_MATTE. Since we're not supporting that on its own, we'll consider it
+		// a continued pick for now. This avoids strange popping draws on hover.
+		case GR_RENDER_MATTE :
 		case GR_RENDER_OBJECT_PICK :
 		{
 			return g_pick;
