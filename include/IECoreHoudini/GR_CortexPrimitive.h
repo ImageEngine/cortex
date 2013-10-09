@@ -96,6 +96,10 @@ class GR_CortexPrimitive : public GR_Primitive
 		static IECoreGL::StatePtr g_wireConstGhost;
 		static IECoreGL::StatePtr g_wireConstBG;
 		static IECoreGL::StatePtr g_pick;
+		static IECoreGL::StatePtr g_selected;
+		static IECoreGL::StatePtr g_wireSelected;
+		static IECoreGL::StatePtr g_wireConstBGSelected;
+		static IECoreGL::StatePtr g_wireConstGhostSelected;
 
 };
 
