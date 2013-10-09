@@ -57,7 +57,7 @@ class ProceduralHolderTranslator : public CShapeTranslator
 	
 		virtual AtNode *CreateArnoldNodes()
 		{
-                  m_isMasterDag =  IsMasterInstance(m_masterDag);
+                  m_isMasterDag =  IsMasterInstance();
 
                   if (m_isMasterDag)
                   {
