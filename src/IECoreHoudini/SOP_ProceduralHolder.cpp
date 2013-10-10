@@ -47,8 +47,8 @@
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Camera.h"
 
-#include "IECoreHoudini/NodePassData.h"
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
@@ -138,34 +138,12 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	
 	setParameterisedValues( now );
 	
-	try
+	ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( procedural );
+	if ( !converter->convert( myGdpHandle ) )
 	{
-		// put our cortex passdata on our gdp as a detail attribute
-		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER );
-		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData", NULL, NULL, "blinddata" );
-		GA_Attribute *attr = attrRef.getAttribute();
-		const GA_AIFBlindData *blindData = attr->getAIFBlindData();
-		blindData->setDataSize( attr, sizeof(IECoreHoudini::NodePassData), &data );
-
-		// calculate our bounding box
-		Imath::Box3f bbox = procedural->bound();
-		gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y, bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
+		addError( SOP_MESSAGE, "Unable to store procedural on gdp" );
 	}
-	catch( boost::python::error_already_set )
-	{
-		addError( SOP_MESSAGE, "Error raised during Python evaluation!" );
-		IECorePython::ScopedGILLock lock;
-		PyErr_Print();
-	}
-	catch( const std::exception &e )
-	{
-		addError( SOP_MESSAGE, e.what() );
-	}
-	catch( ... )
-	{
-		addError( SOP_MESSAGE, "Procedural::bound() Caught unknown exception!" );
-	}
-
+	
 	// tidy up & go home!
 	boss->opEnd();
 	unlockInputs();
