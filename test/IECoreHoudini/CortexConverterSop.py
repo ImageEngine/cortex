@@ -41,10 +41,10 @@ import IECore
 import IECoreHoudini
 import unittest
 
-class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
+class TestCortexConverterSop( IECoreHoudini.TestCase ):
 	
 	# make sure we can create the op
-	def testCreateToHoudiniConverter(self)  :
+	def testCreateCortexConverter(self)  :
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		op = geo.createNode( "ieOpHolder" )
@@ -59,7 +59,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 	
 	# check it works for points
 	def testPointConversion(self):
-		(op,fn) = self.testCreateToHoudiniConverter()
+		(op,fn) = self.testCreateCortexConverter()
 		torus = op.createOutputNode( "ieCortexConverter" )
 		scatter = torus.createOutputNode( "scatter" )
 		attr = scatter.createOutputNode( "attribcreate", exact_type_name=True )
@@ -80,7 +80,7 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 	
 	# check it works for polygons
 	def testPolygonConversion(self):
-		(op,fn) = self.testCreateToHoudiniConverter()
+		(op,fn) = self.testCreateCortexConverter()
 		torus = op.createOutputNode( "ieCortexConverter" )
 		geo = torus.geometry()
 		self.assertEqual( len(geo.points()), 100 )
@@ -117,6 +117,123 @@ class TestToHoudiniCoverterOp( IECoreHoudini.TestCase ):
 		self.assertEqual( len(geo.prims()), 100 )
 		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), [ "N", "P", "Pw" ] )
 		self.assertTrue( geo.findPointAttrib( "N" ).isTransformedAsNormal() )
+	
+	def scene( self ) :
+		
+		geo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		boxA = geo.createNode( "box" )
+		nameA = boxA.createOutputNode( "name" )
+		nameA.parm( "name1" ).set( "boxA" )
+		boxB = geo.createNode( "box" )
+		nameB = boxB.createOutputNode( "name" )
+		nameB.parm( "name1" ).set( "boxB" )
+		torus = geo.createNode( "torus" )
+		nameC = torus.createOutputNode( "name" )
+		nameC.parm( "name1" ).set( "torus" )
+		merge = geo.createNode( "merge" )
+		merge.setInput( 0, nameA )
+		merge.setInput( 1, nameB )
+		merge.setInput( 2, nameC )
+		
+		return merge.createOutputNode( "ieCortexConverter" )
+	
+	def testNameFilter( self ) :
+		
+		node = self.scene()
+		
+		# it all converts to Cortex prims
+		node.parm( "resultType" ).set( 0 )
+		geo = node.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 3 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Custom ] * 3 )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'boxB', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 1 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
+		
+		# filter the middle shape only
+		node.parm( "nameFilter" ).set( "* ^boxB" )
+		geo = node.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 8 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Custom ] + [ hou.primType.Polygon ] * 6 + [ hou.primType.Custom ] )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'boxB', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
+		
+		# filters work on Cortex Prims as well
+		back = node.createOutputNode( "ieCortexConverter" )
+		back.parm( "nameFilter" ).set( "* ^torus" )
+		geo = back.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 13 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 12 + [ hou.primType.Custom ] )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'boxB', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 6 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
+		
+		# test unnamed shapes
+		delname = back.createOutputNode( "attribute" )
+		delname.parm( "primdel" ).set( "name" )
+		unnamed = delname.createOutputNode( "ieCortexConverter" )
+		geo = unnamed.geometry()
+		self.assertEqual( len(geo.prims()), 112 )
+		prims = geo.prims()
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 112 )
+		self.assertEqual( geo.findPrimAttrib( "name" ), None )
+		
+		# unnamed with no filter is just a pass through
+		unnamed.parm( "nameFilter" ).set( "" )
+		geo = unnamed.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 13 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 12 + [ hou.primType.Custom ] )
+		self.assertEqual( geo.findPrimAttrib( "name" ), None )
+	
+	def testResultType( self ) :
+		
+		node = self.scene()
+		
+		# it all passes through
+		geo = node.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 112 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 112 )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'boxB', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 6 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 100 )
+		
+		# it all converts to Cortex prims
+		node.parm( "resultType" ).set( 0 )
+		geo = node.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 3 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Custom ] * 3 )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'boxB', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 1 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
+		
+		# it all converts back to Houdini geo
+		back = node.createOutputNode( "ieCortexConverter" )
+		geo = back.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 112 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 112 )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'boxB', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 6 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 100 )
 	
 	def testAttributeFilter( self ) :
 		
