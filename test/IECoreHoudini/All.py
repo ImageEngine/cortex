@@ -51,7 +51,7 @@ from FromHoudiniPolygonsConverter import *
 from ToHoudiniPointsConverter import *
 from ToHoudiniPolygonsConverter import *
 from AttributeRemap import *
-from ToHoudiniConverterOp import *
+from CortexConverterSop import *
 from FromHoudiniCurvesConverter import *
 from ToHoudiniCurvesConverter import *
 from CobIOTranslator import *

@@ -55,7 +55,7 @@
 #include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
-#include "IECoreHoudini/SOP_ToHoudiniConverter.h"
+#include "IECoreHoudini/SOP_CortexConverter.h"
 #include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
@@ -97,11 +97,11 @@ void newSopOperator(OP_OperatorTable *table)
 	proceduralHolder->setIconName( "SOP_ieProceduralHolder" );
 	
 	OP_Operator *converter = new OP_Operator(
-		SOP_ToHoudiniConverter::typeName, "Cortex Convert",
-		SOP_ToHoudiniConverter::create, SOP_ToHoudiniConverter::parameters, 1,	1,
-		SOP_ToHoudiniConverter::variables, OP_FLAG_GENERATOR
+		SOP_CortexConverter::typeName, "Cortex Convert",
+		SOP_CortexConverter::create, SOP_CortexConverter::parameters, 1,	1,
+		SOP_CortexConverter::variables, OP_FLAG_GENERATOR
 	);
-	converter->setIconName( "SOP_ieToHoudiniConverter" );
+	converter->setIconName( "SOP_ieCortexConverter" );
 	
 	OP_Operator *cacheReader = new OP_Operator(
 		"ieInterpolatedCacheReader", "Interpolated Cache Reader",
@@ -115,7 +115,7 @@ void newSopOperator(OP_OperatorTable *table)
 		NULL, OP_FLAG_GENERATOR
 	);
 	/// \todo: get a new icon
-	sceneCacheSource->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheSource->setIconName( "SOP_ieCortexConverter" );
 	
 	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
@@ -137,7 +137,7 @@ void newObjectOperator( OP_OperatorTable *table )
 		OBJ_SceneCacheTransform::create, OBJ_SceneCacheTransform::buildParameters(), 0, 1
 	);
 	/// \todo: get a new icon
-	sceneCacheTransform->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheTransform->setIconName( "SOP_ieCortexConverter" );
 	
 	OP_Operator *sceneCacheGeometry = new OP_Operator(
 		OBJ_SceneCacheGeometry::typeName, "SceneCache GEO",
@@ -161,7 +161,7 @@ void newDriverOperator( OP_OperatorTable *table )
 		OP_FLAG_GENERATOR
 	);
 	/// \todo: get a new icon
-	sceneCacheWriter->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheWriter->setIconName( "SOP_ieCortexConverter" );
 	
 	table->addOperator( sceneCacheWriter );
 	
