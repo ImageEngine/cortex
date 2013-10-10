@@ -504,6 +504,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		attrib1.bypass( False )
 		attrib2.bypass( False )
 		holder.parm( "parm_input_groupingMode" ).set( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
+		holder.parm( "parm_input_useNameFilter" ).set( False )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
@@ -642,6 +643,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 		# at present, Int/FloatParameters only support presetsOnly presets, due to the limitations of hou.MenuParmTemplate
 		( holder, fn ) = self.testOpHolder()
+		holder.createInputNode( 0, "box" )
 		fn.setOp( "parameters/groupParam", 2 )
 		parm = holder.parm( "parm_switch" )
 		self.failUnless( isinstance( parm, hou.Parm ) )
@@ -727,6 +729,179 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		# so we flush them
 		fn.setParameterisedValues()
 		self.assertAlmostEqual( fn.getOp().parameters()["magnitude"].getTypedValue(), 12.25 )
+	
+	def namedScene( self, opType ) :
+		
+		holder = IECoreHoudini.FnOpHolder.create( "holder", opType, 1 )
+		
+		geo = holder.parent()
+		boxA = geo.createNode( "box" )
+		nameA = boxA.createOutputNode( "name" )
+		nameA.parm( "name1" ).set( "boxA" )
+		
+		boxB = geo.createNode( "box" )
+		transformB = boxB.createOutputNode( "xform" )
+		transformB.parm( "tx" ).set( 5 )
+		nameB = transformB.createOutputNode( "name" )
+		nameB.parm( "name1" ).set( "boxB" )
+		
+		boxC = geo.createNode( "box" )
+		transformC = boxC.createOutputNode( "xform" )
+		transformC.parm( "tx" ).set( 10 )
+		nameC = transformC.createOutputNode( "name" )
+		nameC.parm( "name1" ).set( "boxC" )
+		
+		merge = geo.createNode( "merge" )
+		merge.setInput( 0, nameA )
+		merge.setInput( 1, nameB )
+		merge.setInput( 2, nameC )
+		
+		converter = merge.createOutputNode( "ieCortexConverter" )
+		converter.parm( "resultType" ).set( 0 ) # Cortex
+		holder.setInput( 0, converter )
+		
+		return holder
+	
+	def testMultipleOperations( self ) :
+		
+		holder = self.namedScene( "meshNormalsOp" )
+		
+		def verify( passThrough = [] ) :
+			
+			geo = holder.geometry()
+			self.assertEqual( holder.errors(), "" )
+			self.assertEqual( holder.warnings(), "" )
+			self.assertEqual( len(geo.prims()), 3 )
+			names = [ "boxA", "boxB", "boxC" ]
+			for i in range( 0, len(geo.prims()) ) :
+				prim = geo.prims()[i]
+				self.assertEqual( prim.type(), hou.primType.Custom )
+				self.assertEqual( prim.attribValue( "name" ), names[i] )
+			
+			result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
+			self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+			self.assertEqual( len(result.children()), 3 )
+			for j in range( 0, len(result.children()) ) :
+				child = result.children()[j]
+				self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+				self.assertTrue( child.arePrimitiveVariablesValid() )
+				if child.blindData()["name"].value in passThrough :
+					self.assertEqual( child.keys(), [ "P" ] )
+				else :
+					self.assertEqual( child.keys(), [ "N", "P" ] )
+		
+		# normals were added to each mesh individually
+		verify()
+		
+		# non-matching shapes were passed through unmodified
+		holder.parm( "parm_input_nameFilter" ).set( "* ^boxA" )
+		verify( passThrough = [ "boxA" ] )
+		
+		# still operates multiple times for normal houdini geo
+		holder.inputConnections()[0].inputNode().bypass( True )
+		geo = holder.geometry()
+		self.assertEqual( holder.errors(), "" )
+		self.assertEqual( holder.warnings(), "" )
+		self.assertEqual( len(geo.prims()), 8 )
+		names = [ "boxA", "boxB", "boxC" ]
+		for i in range( 0, 6 ) :
+			prim = geo.prims()[i]
+			self.assertEqual( prim.type(), hou.primType.Polygon )
+			self.assertEqual( prim.attribValue( "name" ), "boxA" )
+		prim = geo.prims()[6]
+		self.assertEqual( prim.type(), hou.primType.Custom )
+		self.assertEqual( prim.attribValue( "name" ), "boxB" )
+		prim = geo.prims()[7]
+		self.assertEqual( prim.type(), hou.primType.Custom )
+		self.assertEqual( prim.attribValue( "name" ), "boxC" )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
+		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertEqual( len(result.children()), 3 )
+		for j in range( 0, len(result.children()) ) :
+			child = result.children()[j]
+			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+			self.assertTrue( child.arePrimitiveVariablesValid() )
+			if child.blindData()["name"].value == "boxA" :
+				self.assertEqual( child.keys(), [ "P" ] )
+			else :
+				self.assertEqual( child.keys(), [ "N", "P" ] )
+		
+		# no nameFilter with normal geo compresses to one mesh
+		holder.parm( "parm_input_useNameFilter" ).set( False )
+		geo = holder.geometry()
+		self.assertEqual( holder.errors(), "" )
+		self.assertEqual( holder.warnings(), "" )
+		self.assertEqual( len(geo.prims()), 1 )
+		prim = geo.prims()[0]
+		self.assertEqual( prim.type(), hou.primType.Custom )
+		self.assertEqual( geo.findPrimAttrib( "name" ), None )
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
+		self.assertTrue( result.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result.keys(), [ "N", "P" ] )
+		
+		# no nameFilter with CortexObjects may have unexpected results (because the input parameter wants a single mesh)
+		holder.inputConnections()[0].inputNode().bypass( False )
+		holder.cook()
+		self.assertEqual( holder.errors(), "" )
+		self.assertNotEqual( holder.warnings(), "" )
+	
+	def testNameFilterOnSecondaryInputs( self ) :
+		
+		holder = self.namedScene( "meshMerge" )
+		torus = holder.parent().createNode( "torus" )
+		holder.setInput( 1, torus )
+		
+		def verify( numMergedFaces, passThrough = [] ) :
+			
+			geo = holder.geometry()
+			self.assertEqual( holder.errors(), "" )
+			self.assertEqual( holder.warnings(), "" )
+			self.assertEqual( len(geo.prims()), 3 )
+			names = [ "boxA", "boxB", "boxC" ]
+			for i in range( 0, len(geo.prims()) ) :
+				prim = geo.prims()[i]
+				self.assertEqual( prim.type(), hou.primType.Custom )
+				self.assertEqual( prim.attribValue( "name" ), names[i] )
+			
+			result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
+			self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+			self.assertEqual( len(result.children()), 3 )
+			for j in range( 0, len(result.children()) ) :
+				child = result.children()[j]
+				self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+				self.assertTrue( child.arePrimitiveVariablesValid() )
+				if child.blindData()["name"].value in passThrough :
+					self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+				else :
+					self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 + numMergedFaces )
+		
+		# torus is merged with each box
+		verify( numMergedFaces = 100 )
+		
+		# torus is not merged with the passThrough boxes
+		holder.parm( "parm_input_nameFilter" ).set( "* ^boxA" )
+		verify( numMergedFaces = 100, passThrough = [ "boxA" ] )
+		
+		# multiple meshes in the second parameter may have unexpected results (because it wants a single mesh)
+		holder.setInput( 1, holder.inputConnections()[0].inputNode() )
+		holder.cook()
+		self.assertEqual( holder.errors(), "" )
+		self.assertNotEqual( holder.warnings(), "" )
+		
+		# a single mesh will merge
+		holder.parm( "parm_mesh_nameFilter" ).set( "boxB" )
+		verify( numMergedFaces = 6, passThrough = [ "boxA" ] )
+		
+		# a bulk of normal houdini geo will also merge (it compresses to one mesh)
+		converter = holder.inputConnections()[0].inputNode().createOutputNode( "ieCortexConverter" )
+		holder.setInput( 1, converter )
+		holder.parm( "parm_mesh_nameFilter" ).set( "*" )
+		verify( numMergedFaces = 18, passThrough = [ "boxA" ] )
+		holder.parm( "parm_mesh_nameFilter" ).set( "* ^boxA" )
+		verify( numMergedFaces = 12, passThrough = [ "boxA" ] )
+		holder.parm( "parm_mesh_useNameFilter" ).set( False )
+		verify( numMergedFaces = 18, passThrough = [ "boxA" ] )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
