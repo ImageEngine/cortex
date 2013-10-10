@@ -1407,22 +1407,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( a.readTransformAsMatrix( time ).equalWithAbsError( b.readTransformAsMatrix( time ), 1e-6 ) )
 			ab = a.readBound( time )
 			bb = b.readBound( time )
-			## \todo: re-enable this if Houdini fixes their SubNet bounding box issue
-			if not ( hou.applicationVersion()[0] == 12 and hou.applicationVersion()[1] == 5 ) or not isinstance( b, IECoreHoudini.HoudiniScene ) :
-				self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
-				self.assertTrue( ab.max.equalWithAbsError( bb.max, 1e-6 ) )
+			self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
+			self.assertTrue( ab.max.equalWithAbsError( bb.max, 1e-6 ) )
 		
 		self.assertEqual( a.hasObject(), b.hasObject() )
 		if a.hasObject() :
 			# need to remove the name added by Houdini
-			## \todo: we really shouldn't have the name in the blindData in the first place
 			ma = a.readObject( time )
 			mb = b.readObject( time )
-			self.assertTrue( mb.isInstanceOf( IECore.TypeId.Renderable ) )
-			if ma.blindData().has_key( "name" ) :
-				del ma.blindData()['name']
-			if mb.blindData().has_key( "name" ) :
-				del mb.blindData()['name']
 			# need to adjust P for baked objects
 			if b.name() in bakedObjects :
 				IECore.TransformOp()( input=ma, copyInput=False, matrix=IECore.M44dData( parentTransform ) )
