@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/SceneInterface.h"
+#include "IECore/SharedSceneInterfaces.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
@@ -77,38 +78,47 @@ static std::string pathAsString( const SceneInterface &m )
 	return str;
 }
 
-static void listToPath( list l, SceneInterface::Path &p )
+void listToSceneInterfaceNameList( list l, SceneInterface::NameList &p )
 {
 	int listLen = IECorePython::len( l );
 	for (int i = 0; i < listLen; i++ )
 	{
-		extract< std::string > ex( l[i] );
-		if ( !ex.check() )
+		extract< IECore::InternedString > inStr( l[i] );
+		if ( inStr.check() )
 		{
-			throw InvalidArgumentException( std::string( "Invalid path! Should be a list of strings!" ) );
+			p.push_back( inStr() );
 		}
-		p.push_back( ex() );	
+		else
+		{
+			extract< std::string > ex( l[i] );
+			if ( !ex.check() )
+			{
+				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
+			}
+
+			p.push_back( ex() );
+		}
 	}
 }
 
 static SceneInterfacePtr nonConstScene( SceneInterface &m, list l, SceneInterface::MissingBehaviour b )
 {
 	SceneInterface::Path p;
-	listToPath( l, p );
+	listToSceneInterfaceNameList( l, p );
 	return m.scene( p, b );
 }
 
-static list readAttributeNames( const SceneInterface &m )
+static list attributeNames( const SceneInterface &m )
 {
 	SceneInterface::NameList a;
-	m.readAttributeNames( a );
+	m.attributeNames( a );
 	return arrayToList( a );
 }
 
 static std::string pathToString( list l )
 {
 	SceneInterface::Path p;
-	listToPath( l, p );
+	listToSceneInterfaceNameList( l, p );
 	std::string str;
 	SceneInterface::pathToString( p, str );
 	return str;
@@ -130,6 +140,69 @@ static list supportedExtensions( IndexedIO::OpenMode modes )
 		result.append( e[i] );
 	}
 	return result;
+}
+
+static dict readObjectPrimitiveVariables( const SceneInterface &m, list varNameList, double time )
+{
+	SceneInterface::NameList v;
+	listToSceneInterfaceNameList( varNameList, v );
+
+	PrimitiveVariableMap varMap = m.readObjectPrimitiveVariables( v, time );
+	dict result;
+	for ( PrimitiveVariableMap::const_iterator it = varMap.begin(); it != varMap.end(); it++ )
+	{
+		result[ it->first ] = it->second;
+	}
+	return result;
+}
+
+list readTags( const SceneInterface &m, bool includeChildren )
+{
+	SceneInterface::NameList tags;
+	m.readTags( tags, includeChildren );
+	list result;
+	for ( SceneInterface::NameList::const_iterator it = tags.begin(); it != tags.end(); it++ )
+	{
+		result.append( *it );
+	}
+	return result;
+}
+
+void writeTags( SceneInterface &m, list tagList )
+{
+	SceneInterface::NameList v;
+	listToSceneInterfaceNameList( tagList, v );
+	m.writeTags(v);	
+}
+
+DataPtr readTransform( SceneInterface &m, double time )
+{
+	ConstDataPtr t = m.readTransform(time);
+	if ( t )
+	{
+		return t->copy();
+	}
+	return 0;
+}
+
+ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, double time )
+{
+	ConstObjectPtr o = m.readAttribute(name,time);
+	if ( o )
+	{
+		return o->copy();
+	}
+	return 0;
+}
+
+ObjectPtr readObject( SceneInterface &m, double time )
+{
+	ConstObjectPtr o = m.readObject(time);
+	if ( o )
+	{
+		return o->copy();
+	}
+	return 0;
 }
 
 void bindSceneInterface()
@@ -156,18 +229,23 @@ void bindSceneInterface()
 	// to exist for defining default values).
 	
 	sceneInterfaceClass.def( "path", path )
+		.def( "fileName", &SceneInterface::fileName )
 		.def( "pathAsString", pathAsString )
 		.def( "name", &SceneInterface::name )
 		.def( "readBound", &SceneInterface::readBound )
 		.def( "writeBound", &SceneInterface::writeBound )
-		.def( "readTransform", &SceneInterface::readTransform )
+		.def( "readTransform", &readTransform )
 		.def( "readTransformAsMatrix", &SceneInterface::readTransformAsMatrix )
 		.def( "writeTransform", &SceneInterface::writeTransform )
 		.def( "hasAttribute", &SceneInterface::hasAttribute )
-		.def( "readAttributeNames", readAttributeNames )
-		.def( "readAttribute", &SceneInterface::readAttribute )
+		.def( "attributeNames", attributeNames )
+		.def( "readAttribute", &readAttribute )
 		.def( "writeAttribute", &SceneInterface::writeAttribute )
-		.def( "readObject", &SceneInterface::readObject )
+		.def( "hasTag", &SceneInterface::hasTag, ( arg( "name" ), arg( "includeChildren" ) = true ) )
+		.def( "readTags", readTags, ( arg( "includeChildren" ) = true ) )
+		.def( "writeTags", writeTags )
+		.def( "readObject", &readObject )
+		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )
 		.def( "writeObject", &SceneInterface::writeObject )
 		.def( "hasObject", &SceneInterface::hasObject )
 		.def( "hasChild", &SceneInterface::hasChild )
@@ -179,7 +257,6 @@ void bindSceneInterface()
 		.def( "pathToString", pathToString ).staticmethod("pathToString")
 		.def( "stringToPath", stringToPath ).staticmethod("stringToPath")
 		.def( "create", SceneInterface::create ).staticmethod( "create" )
-		.def( "createShared", SceneInterface::createShared ).staticmethod( "createShared" )
 		.def( "supportedExtensions", supportedExtensions, ( arg("modes") = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append ) ).staticmethod( "supportedExtensions" )
 	;
 }

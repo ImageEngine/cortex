@@ -43,6 +43,8 @@
 
 #include "OpenEXR/ImathRandom.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <algorithm>
 #include <fstream>
 #include <cassert>
@@ -404,3 +406,24 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 	}
 	return result;
 }
+
+std::string NParticleReader::positionPrimVarName()
+{
+	std::vector<std::string> names;
+	attributeNames( names );
+	
+	// The position channel for an nParticle cache should be something like "nParticleShape1_position"
+	for( vector<string>::const_iterator it = names.begin(); it != names.end(); it++ )
+	{
+		if( boost::algorithm::ends_with( *it, "_position") )
+		{
+			return *it ;
+		}
+	}
+	
+	msg( Msg::Warning, "NParticleReader::posPrimVarName()", "Cannot find name for particle position channel, using P" );
+	return "P";
+}
+
+
+

@@ -48,6 +48,7 @@
 #include "IECorePython/KDTreeBinding.h"
 #include "IECorePython/IndexedIOBinding.h"
 #include "IECorePython/DataBinding.h"
+#include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
 #include "IECorePython/VectorTypedDataBinding.h"
 #include "IECorePython/ObjectBinding.h"
@@ -311,11 +312,15 @@
 #include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
-#include "IECorePython/ModelCacheBinding.h"
 #include "IECorePython/SceneInterfaceBinding.h"
+#include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
 #include "IECorePython/SceneCacheBinding.h"
-
+#include "IECorePython/LinkedSceneBinding.h"
+#include "IECorePython/LensModelBinding.h"
+#include "IECorePython/StandardRadialLensModelBinding.h"
+#include "IECorePython/LensDistortOpBinding.h"
+#include "IECorePython/ObjectPoolBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -334,6 +339,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCompoundObject();
 	bindTypeId();
 	bindData();
+	bindGeometricTypedData();
 	bindAllSimpleTypedData();
 	bindAllVectorTypedData();
 	bindCompoundData();
@@ -629,10 +635,15 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimeCodeParameter();
 	bindOptions();
 	bindMPlayDisplayDriver();
-	bindModelCache();
 	bindSceneInterface();
+	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();
 	bindSceneCache();
+	bindLinkedScene();
+	bindLensModel();
+	bindStandardRadialLensModel();
+	bindLensDistortOp();
+	bindObjectPool();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

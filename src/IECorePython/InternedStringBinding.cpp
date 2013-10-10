@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/functional/hash.hpp"
 
 #include "IECore/InternedString.h"
 #include "IECorePython/InternedStringBinding.h"
@@ -78,17 +79,32 @@ struct InternedStringFromPython
 	}
 };
 
+static string repr( const InternedString &str )
+{
+	stringstream s;
+	s << "IECore.InternedString(\"" << str.value() << "\")";
+	return s.str();
+}
+
+static size_t hash( const InternedString &str )
+{
+	return boost::hash<const char *>()( str.c_str() );
+}
+
 void bindInternedString()
 {
 
 	class_<InternedString>( "InternedString" )
 		.def( init<const char *>() )
 		.def( init<InternedString>() )
+		.def( init<int64_t>() )
 		.def( "__str__", &InternedString::value, return_value_policy<copy_const_reference>() )
 		.def( "value", &InternedString::value, return_value_policy<copy_const_reference>() )
 		.def( self == self )
 		.def( self != self )
 		.def( "numUniqueStrings", &InternedString::numUniqueStrings ).staticmethod( "numUniqueStrings" )
+		.def( "__repr__", &repr )
+		.def( "__hash__", &hash )
 	;
 	implicitly_convertible<InternedString, string>();
 

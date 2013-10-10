@@ -39,6 +39,7 @@
 #include "IECore/CompoundObject.h" 
 #include "IECore/TypedData.h" 
 #include "IECore/SimpleTypedData.h" 
+#include "IECore/MemoryIndexedIO.h"
 
 using namespace boost;
 using namespace boost::unit_test;
@@ -136,6 +137,98 @@ struct CompoundObjectTest
 		const StringData *s = c->member<const StringData>( "stringElement" );
 		BOOST_CHECK( s );
 	}
+
+	void testNullData()
+	{
+		CompoundObjectPtr d = new CompoundObject();
+		d->members()["floatElement"] = new FloatData( 42.0f );
+		d->members()["stringElement"] = new StringData( "cake" );
+
+		// sanity check first.
+		try
+		{
+			CompoundObjectPtr dd = d->copy();
+		}
+		catch ( std::exception &e ) 
+		{
+			BOOST_CHECK( !"Exception thrown during CompoundObject copy." );
+		}
+
+		CompoundObjectPtr c = new CompoundObject();
+		c->members()["nullElement"] = 0;
+
+		// copy
+		try
+		{
+			CompoundObjectPtr d = c->copy();
+
+			BOOST_CHECK( !"Exception not thrown during copy with invalid NULL data." );
+		}
+		catch ( std::exception &e )
+		{
+		}
+
+		// save
+		try
+		{
+			IndexedIOPtr io = new MemoryIndexedIO( NULL, IndexedIO::rootPath, IndexedIO::Write);
+			IndexedIO::EntryID entryName( "test" );
+			c->Object::save( io, entryName );
+
+			BOOST_CHECK( !"Exception not thrown during save with invalid NULL data." );
+		}
+		catch ( std::exception &e )
+		{
+		}
+		
+		// memoryUsage
+		try
+		{
+			c->Object::memoryUsage();
+		}
+		catch ( std::exception &e )
+		{
+			BOOST_CHECK( !"Exception thrown during memoryCopy with invalid NULL data." );
+		}
+
+		// isEqual
+		try
+		{
+			CompoundObjectPtr c2 = new CompoundObject();
+			c2->members()["nullElement"] = 0;
+
+			bool i = c->isEqualTo( c );
+			BOOST_CHECK( i );
+
+			i = c->isEqualTo( c2 );
+			BOOST_CHECK( i );
+
+			i = c2->isEqualTo( c );
+			BOOST_CHECK( i );
+
+			i = c->isEqualTo( d );
+			BOOST_CHECK( !i );
+
+			i = d->isEqualTo( c );
+			BOOST_CHECK( !i );
+
+		}
+		catch ( std::exception &e )
+		{
+			BOOST_CHECK( !"Exception thrown during isEqual with invalid NULL data." );
+		}
+
+		// hash
+		try
+		{
+			c->Object::hash();
+
+			BOOST_CHECK( !"Exception not thrown during hash with invalid NULL data." );
+		}
+		catch ( std::exception &e )
+		{
+		}
+	}
 };
 
 
@@ -146,6 +239,7 @@ struct CompoundObjectTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<CompoundObjectTest> instance( new CompoundObjectTest() );
 		add( BOOST_CLASS_TEST_CASE( &CompoundObjectTest::testMemberRetrieval, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundObjectTest::testNullData, instance ) );
 	}
 };
 

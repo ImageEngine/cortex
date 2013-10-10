@@ -59,8 +59,9 @@ FromMayaObjectConverter::FromMayaObjectConverter( const std::string &description
 		"blindDataAttrPrefix",
 		"Any attribute names beginning with this prefix will be added to the blindData dictionary on the converted object. "
 		"Note that this parameter is only valid if the object being converted is a node, and the converted object is capable "
-		"of holding the blind data.",
-		"ie", // image engine prefix by default. maybe change this if cortex gets adopted elsewhere.
+		"of holding the blind data. Empty string matches no attribute.",
+		"", // by default, no attributes are converted to blindData.
+		// \todo Consider creating a registration mechanism to override the default.
 		blindDataAttrPrefixPresets
 	);
 

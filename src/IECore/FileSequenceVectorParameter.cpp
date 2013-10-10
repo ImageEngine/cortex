@@ -195,11 +195,13 @@ void FileSequenceVectorParameter::setFileSequenceValues( const std::vector<FileS
 	setValue( data );
 }
 
-void FileSequenceVectorParameter::getFileSequenceValues( std::vector<FileSequencePtr> &fileSequences ) const
+void FileSequenceVectorParameter::getFileSequenceValues( const StringVectorData *value, std::vector<FileSequencePtr> &fileSequences ) const
 {
+	
 	fileSequences.clear();
-
-	const std::vector< std::string > &sequences = getTypedValue();
+	
+	const std::vector< std::string > &sequences = value->readable();
+	//const std::vector< std::string > &sequences = getTypedValue();
 
 	for ( std::vector< std::string >::const_iterator it =sequences.begin(); it != sequences.end(); ++it )
 	{
@@ -219,6 +221,12 @@ void FileSequenceVectorParameter::getFileSequenceValues( std::vector<FileSequenc
 			fileSequences.push_back( value );
 		}
 	}
+}
+
+void FileSequenceVectorParameter::getFileSequenceValues( std::vector<FileSequencePtr> &fileSequences ) const
+{
+	const StringVectorData *stringVectorDataValue = assertedStaticCast<const StringVectorData>( getValue() );
+	getFileSequenceValues( stringVectorDataValue, fileSequences );
 }
 
 FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::string &fileSequenceStr ) const

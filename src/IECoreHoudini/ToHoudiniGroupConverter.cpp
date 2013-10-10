@@ -46,8 +46,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGroupConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> ToHoudiniGroupConverter::m_description( GroupTypeId );
 
-ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::VisibleRenderable *renderable ) :
-	ToHoudiniGeometryConverter( renderable, "Converts an IECore::Group to a Houdini GU_Detail." )
+ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::Object *object ) :
+	ToHoudiniGeometryConverter( object, "Converts an IECore::Group to a Houdini GU_Detail." )
 {
 	m_transformParameter = new M44fParameter(
 		"transform",
@@ -72,9 +72,9 @@ const M44fParameter *ToHoudiniGroupConverter::transformParameter() const
 	return m_transformParameter;
 }
 
-bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
+bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Detail *geo ) const
 {
-	const Group *group = IECore::runTimeCast<const Group>( renderable );
+	const Group *group = IECore::runTimeCast<const Group>( object );
 	if ( !group )
 	{
 		return false;
@@ -91,10 +91,22 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 	M44fDataPtr transformData = new M44fData( transform );
 	transformOp->matrixParameter()->setValue( transformData );
 	
-	const StringData *groupName = group->blindData()->member<StringData>( "name" );
+	std::string groupName = nameParameter()->getTypedValue();
+	if ( groupName == "" )
+	{
+		// backwards compatibility with older data
+		if ( const StringData *groupNameData = group->blindData()->member<StringData>( "name" ) )
+		{
+			groupName = groupNameData->readable();
+		}
+	}
 	
+	const std::string &attribFilter = attributeFilterParameter()->getTypedValue();
+	bool convertStandardAttributes = convertStandardAttributesParameter()->getTypedValue();
+	
+	size_t i = 0;
 	const Group::ChildContainer &children = group->children();
-	for ( Group::ChildContainer::const_iterator it=children.begin(); it != children.end(); it++ )
+	for ( Group::ChildContainer::const_iterator it=children.begin(); it != children.end(); ++it, ++i )
 	{
 		ConstVisibleRenderablePtr child = *it;
 		
@@ -105,20 +117,30 @@ bool ToHoudiniGroupConverter::doConversion( const VisibleRenderable *renderable,
 			child = staticPointerCast<VisibleRenderable>( transformOp->operate() );
 		}
 		
-		ConstStringDataPtr childName = child->blindData()->member<StringData>( "name" );
-		if ( !childName && groupName )
-		{
-			// We have to duplicate the object in order to modify it and not affect the input object.
-			VisibleRenderablePtr modifiedChild = child->copy();
-			modifiedChild->blindData()->member<StringData>( "name", false, true )->writable() = groupName->readable();
-			child = modifiedChild;
-		}
-		
 		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child );
 		if ( !converter )
 		{
 			continue;
 		}
+		
+		std::string name = groupName;
+		if ( const StringData *childNameData = child->blindData()->member<StringData>( "name" ) )
+		{
+			const std::string &childName = childNameData->readable();
+			if ( childName != "" )
+			{
+				if ( groupName != "" )
+				{
+					name += "/";
+				}
+				
+				name += childName;
+			}
+		}
+		
+		converter->nameParameter()->setTypedValue( name );
+		converter->attributeFilterParameter()->setTypedValue( attribFilter );
+		converter->convertStandardAttributesParameter()->setTypedValue( convertStandardAttributes );
 		
 		ToHoudiniGroupConverter *groupConverter = runTimeCast<ToHoudiniGroupConverter>( converter );
 		if ( groupConverter )

@@ -345,6 +345,11 @@ class CapturingRendererTest( unittest.TestCase ) :
 			else :
 
 				renderer.sphere( 1, -1, 1, 360, {} )
+			
+		def hash( self ):
+		
+			h = IECore.MurmurHash()
+			return h
 	
 	def testTopLevelProceduralThreading( self ) :
 	
@@ -460,7 +465,12 @@ class CapturingRendererTest( unittest.TestCase ) :
 			def render( self, renderer ) :
 			
 				raise RuntimeError
-	
+			
+			def hash( self ):
+			
+				h = IECore.MurmurHash()
+				return h
+			
 		r = IECore.CapturingRenderer()
 	
 		exceptionCaughtOK = False
@@ -529,7 +539,12 @@ class CapturingRendererTest( unittest.TestCase ) :
 				
 			if renderer.getOption( "user:ten" ) != IECore.IntData( 10 ) :
 				CapturingRendererTest.GetOptionProcedural.failure = True
-				
+		
+		def hash( self ):
+		
+			h = IECore.MurmurHash()
+			return h
+	
 	def testGetOptionFromThreadedProcedurals( self ) :
 	
 		# this is necessary so python will allow threads created by the renderer
@@ -592,7 +607,12 @@ class CapturingRendererTest( unittest.TestCase ) :
 			emit( IECore.V3f( 0, 0, 0 ), "three", recurse )
 			emit( IECore.V3f( 1, 0, 0 ), "four", recurse )
 			emit( IECore.V3f( 0, -1, 0 ), "five", recurse )
-			
+
+		def hash( self ):
+		
+			h = IECore.MurmurHash()
+			return h
+		
 	def __getSphereNames( self, g, currentName = None ) :
 		
 		res = set()
@@ -882,7 +902,11 @@ class CapturingRendererTest( unittest.TestCase ) :
 			
 			if self.__withAttributeBlock:
 				renderer.attributeEnd()
-	
+		
+		def hash( self ):
+			
+			h = IECore.MurmurHash()
+			return h
 	
 	def testProceduralAttributesAndShaders( self ):
 		

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@ import IECoreGL
 IECoreGL.init( False )
 import os.path
 import os
+import shutil
 import math
 
 class OrientationTest( unittest.TestCase ) :
@@ -177,11 +178,15 @@ class OrientationTest( unittest.TestCase ) :
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
 
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreGL/output" ) :
+			os.makedirs( "test/IECoreGL/output" )
+	
 	def tearDown( self ) :
-
-		outputFileName = os.path.dirname( __file__ ) + "/output/testOrientation.tif"
-		if os.path.exists( outputFileName ) :
-			os.remove( outputFileName )
+		
+		if os.path.isdir( "test/IECoreGL/output" ) :
+			shutil.rmtree( "test/IECoreGL/output" )
 
 if __name__ == "__main__":
     unittest.main()

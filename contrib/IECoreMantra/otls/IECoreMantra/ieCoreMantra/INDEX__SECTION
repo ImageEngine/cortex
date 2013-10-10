@@ -1,0 +1,26 @@
+Operator:     cortexMantraInject
+Label:        Cortex Mantra Inject
+Path:         oplib:/Shop/cortexMantraInject?Shop/cortexMantraInject
+Icon:         SHOP_subnet
+Table:        Shop
+License:      
+Extra:        
+Inputs:       0 to 0
+Subnet:       true
+Python:       false
+Empty:        false
+Modified:     Thu Aug 16 10:53:22 2012
+
+Operator:     ieprocedural
+Label:        Cortex Mantra Procedural
+Path:         oplib:/Shop/ieprocedural?Shop/ieprocedural
+Icon:         SHOP_geometry
+Table:        Shop
+License:      
+Extra:        geometry
+Inputs:       0 to 0
+Subnet:       false
+Python:       false
+Empty:        false
+Modified:     Thu Aug 16 10:53:39 2012
+

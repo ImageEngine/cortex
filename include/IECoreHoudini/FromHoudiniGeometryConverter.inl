@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 
 #include "GEO/GEO_Vertex.h"
 
+#include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTraits.h"
 
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
@@ -70,8 +71,38 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGeometryConverter::Descr
 	return T::canConvert( geo );
 }
 
+struct SetInterpretation
+{
+	typedef void ReturnType;
+	
+	GA_TypeInfo m_type;
+	
+	template<typename T>
+	void operator() ( T *data )
+	{
+		assert( data );
+		
+		if ( m_type == GA_TYPE_POINT )
+		{
+			data->setInterpretation( IECore::GeometricData::Point );
+		}
+		else if ( m_type == GA_TYPE_NORMAL )
+		{
+			data->setInterpretation( IECore::GeometricData::Normal );
+		}
+		else if ( m_type == GA_TYPE_VECTOR )
+		{
+			data->setInterpretation( IECore::GeometricData::Vector );
+		}
+		else if ( m_type == GA_TYPE_COLOR )
+		{
+			data->setInterpretation( IECore::GeometricData::Color );
+		}
+	}
+};
+
 template <typename T>
-IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const
+typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const
 {
 	typedef typename T::BaseType BaseType;
 	
@@ -87,12 +118,16 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 	{
 		attr->getAIFTuple()->getRange( attr, range, dest, elementIndex, 1 );
 	}
-
+	
+	// set the geometric interpretation if it exists
+	SetInterpretation func = { attr->getTypeInfo() };
+	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data, func );
+	
 	return data;
 }
 
 template <typename T>
-IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr ) const
+typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr ) const
 {
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType ValueType;
@@ -103,6 +138,10 @@ IECore::DataPtr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
 	attr->getAIFTuple()->get( attr, 0, dest, dimensions );
 
+	// set the geometric interpretation if it exists
+	SetInterpretation func = { attr->getTypeInfo() };
+	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data, func );
+	
 	return data;
 }
 

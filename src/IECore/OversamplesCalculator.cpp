@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -102,16 +102,7 @@ int OversamplesCalculator::nearestTick( int tick ) const
 float OversamplesCalculator::tickInterval( float frame, int &tickLow, int &tickHigh ) const
 {
 	float step = ( float )m_ticksPerSecond / ( m_frameRate * m_samplesPerFrame );
-
-	/// Maya seems to suffer from rounding issues so that, for example, tick numbers at 24fps with 3
-	/// samples per frame end up as:
-	/// 250, 333, 416, 499, 583, 555, 749
-	/// Note that the 499 and 749 should ideally be 500 and 750 respectively.
-	/// Here we deliberately discard some of the precision in an attempt to match this behaviour.
-	/// \todo I don't think we should be deliberately be reproducing a maya bug in cortex code.
-	/// The primary purpose of this class is not dealing with maya particle caches (it's used more
-	/// with the InterpolatedCache). Consider removing this hack for Cortex 6. 
-	step = int( step*100000 )/100000.0;
+	
 	float tickF = frame * m_ticksPerSecond /  m_frameRate ;
 	int tick = ( int )( tickF );
 

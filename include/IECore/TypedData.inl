@@ -108,27 +108,29 @@ void TypedData<T>::copyFrom( const Object *other, CopyContext *context )
 template <class T>
 void TypedData<T>::save( SaveContext *context ) const
 {
+	static InternedString valueEntry("value");
 	Data::save( context );
 	IndexedIO *container = context->rawContainer();
-	container->write( "value", readable() );
+	container->write( valueEntry, readable() );
 }
 
 template <class T>
 void TypedData<T>::load( LoadContextPtr context )
 {
+	static InternedString valueEntry("value");
 	Data::load( context );
 	try
 	{
 		// optimised format for new files
 		const IndexedIO *container = context->rawContainer();
-		container->read( "value", writable() );
+		container->read( valueEntry, writable() );
 	}
 	catch( ... )
 	{
 		// backwards compatibility with old files
 		unsigned int v = 0;
 		ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-		container->read( "value", writable() );
+		container->read( valueEntry, writable() );
 	}
 }
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@ import time
 import IECore
 import IECoreRI
 				
-class DspyTest( unittest.TestCase ) :
+class DspyTest( IECoreRI.TestCase ) :
 
 	def testRenderDirectToImagePrimitive( self ) :
 		
@@ -57,7 +57,7 @@ class DspyTest( unittest.TestCase ) :
 		)
 		
 		# write another to disk the usual way
-		r.display( "+test/IECoreRI/output/sphere.tif", "tiff", "rgba",
+		r.display( "test/IECoreRI/output/sphere.tif", "tiff", "rgba",
 			{
 				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
 			}
@@ -120,15 +120,6 @@ class DspyTest( unittest.TestCase ) :
 		i2.blindData().clear()
 		
 		self.failIf( IECore.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
-								
-	def tearDown( self ) :
-	
-		for f in [
-			"test/IECoreRI/output/sphere.tif",
-			"test/IECoreRI/output/display.rib"
-		] :
-			if os.path.exists( f ) :
-				os.remove( f )
 				
 if __name__ == "__main__":
     unittest.main()

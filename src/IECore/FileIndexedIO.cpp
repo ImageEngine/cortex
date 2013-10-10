@@ -144,10 +144,6 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 		}
 
 	}
-
-	assert( m_stream );
-	assert( m_stream->is_complete() );
-	assert( m_index );
 }
 
 void FileIndexedIO::StreamFile::flush( size_t endPosition )
@@ -224,7 +220,7 @@ FileIndexedIO::FileIndexedIO()
 FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
 {
 	const fs::path p = fs::path(path);
-	const std::string filename = p.native_file_string();
+	const std::string filename = p.string();
 
 	if (! fs::exists(filename) && (mode & IndexedIO::Read))
 	{

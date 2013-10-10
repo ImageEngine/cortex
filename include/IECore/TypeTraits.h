@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,11 +66,13 @@ namespace TypeTraits
 /// HasValueType
 template<typename T> struct HasValueType : public boost::false_type {};
 template<typename T> struct HasValueType< TypedData<T> > : public boost::true_type {};
+template<typename T> struct HasValueType< GeometricTypedData<T> > : public boost::true_type {};
 template<typename T> struct HasValueType< const T > : public HasValueType< T > {};
 
 /// HasVectorValueType
 template<typename T> struct HasVectorValueType : public boost::false_type {};
 template<typename T> struct HasVectorValueType< TypedData< std::vector< T > > > : public boost::true_type {};
+template<typename T> struct HasVectorValueType< GeometricTypedData<std::vector<T> > > : public boost::true_type {};
 template<typename T> struct HasVectorValueType< const T > : public HasVectorValueType<T> {};
 
 namespace Detail
@@ -105,17 +107,26 @@ struct VectorValueType
 /// IsTypedData
 template<typename T> struct IsTypedData : public boost::false_type {};
 template<typename T> struct IsTypedData< TypedData<T> > : public boost::true_type {};
+template<typename T> struct IsTypedData< GeometricTypedData<T> > : public boost::true_type {};
 template<typename T> struct IsTypedData< const T > : public IsTypedData<T> {};
+
+/// IsGeometricTypedData
+template<typename T> struct IsGeometricTypedData : public boost::false_type {};
+template<typename T> struct IsGeometricTypedData< GeometricTypedData<T> > : public boost::true_type {};
+template<typename T> struct IsGeometricTypedData< const T > : public IsGeometricTypedData<T> {};
 
 /// IsVectorTypedData
 template<typename T> struct IsVectorTypedData : public boost::false_type {};
 template<typename T> struct IsVectorTypedData< TypedData<std::vector<T> > > : public boost::true_type {};
+template<typename T> struct IsVectorTypedData< GeometricTypedData<std::vector<T> > > : public boost::true_type {};
 template<typename T> struct IsVectorTypedData< const T > : public IsVectorTypedData<T> {};
 
 /// IsSimpleTypedData
 template<typename T> struct IsSimpleTypedData : public boost::false_type {};
 template<typename T> struct IsSimpleTypedData< TypedData<T > > : public boost::true_type {};
+template<typename T> struct IsSimpleTypedData< GeometricTypedData<T > > : public boost::true_type {};
 template<typename T> struct IsSimpleTypedData< TypedData<std::vector<T> > > : public boost::false_type {};
+template<typename T> struct IsSimpleTypedData< GeometricTypedData<std::vector<T> > > : public boost::false_type {};
 template<typename T> struct IsSimpleTypedData< const T > : public IsSimpleTypedData<T> {};
 
 /// IsMatrix33
@@ -245,6 +256,7 @@ template< typename T, template<typename> class Pred > struct IsInterpolableHelpe
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< Imath::Matrix44< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< std::vector< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< TypedData< T >, Pred > : IsInterpolableHelper<T, Pred> {};
+template< typename T, template<typename> class Pred > struct IsInterpolableHelper< GeometricTypedData< T >, Pred > : IsInterpolableHelper<T, Pred> {};
 template< typename T, template<typename> class Pred > struct IsInterpolableHelper< const T, Pred > : IsInterpolableHelper<T, Pred> {};
 }
 

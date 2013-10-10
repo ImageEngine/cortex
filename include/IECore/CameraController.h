@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,13 @@ IE_CORE_FORWARDDECLARE( MatrixTransform )
 
 /// The CameraController class provides methods to aid in the use
 /// of the Camera class within the context of a GUI.
-class CameraController
+class CameraController : public boost::noncopyable
 {
 
 	public:
 
 		CameraController( CameraPtr camera );
+		~CameraController();
 
 		void setCamera( CameraPtr camera );
 		CameraPtr getCamera();
@@ -80,7 +81,7 @@ class CameraController
 		/// Computes the points on the near and far clipping planes that correspond
 		/// with the specified raster position. Points are computed in world space.
 		/// \todo Accept a V2f to provide extra precision and make this method const.
-		void unproject( const Imath::V2i rasterPosition, Imath::V3f &near, Imath::V3f &far );
+		void unproject( const Imath::V2f rasterPosition, Imath::V3f &near, Imath::V3f &far );
 		/// Projects the point in world space into a raster space position.
 		Imath::V2f project( const Imath::V3f &worldPosition ) const;
 		
@@ -98,36 +99,23 @@ class CameraController
 			Dolly
 		};
 		/// Starts a motion of the specified type.
-		void motionStart( MotionType motion, const Imath::V2i &startPosition );
+		void motionStart( MotionType motion, const Imath::V2f &startPosition );
 		/// Updates the camera position based on a changed mouse position. Can only
 		/// be called after motionStart() and before motionEnd().
-		void motionUpdate( const Imath::V2i &newPosition );
+		void motionUpdate( const Imath::V2f &newPosition );
 		/// End the current motion, ready to call motionStart() again if required.
-		void motionEnd( const Imath::V2i &endPosition );
+		void motionEnd( const Imath::V2f &endPosition );
 		//@}
 
 	private:
 
-		void track( const Imath::V2i &p );
-		void tumble( const Imath::V2i &p );
-		void dolly( const Imath::V2i &p );
+		void track( const Imath::V2f &p );
+		void tumble( const Imath::V2f &p );
+		void dolly( const Imath::V2f &p );
 
-		// parts of the camera we manipulate
-		CameraPtr m_camera;
-		V2iDataPtr m_resolution;
-		Box2fDataPtr m_screenWindow;
-		MatrixTransformPtr m_transform;
-		ConstStringDataPtr m_projection;
-		ConstFloatDataPtr m_fov;
-		ConstV2fDataPtr m_clippingPlanes;
-		float m_centreOfInterest;
+		IE_CORE_FORWARDDECLARE( MemberData );
 
-		// motion state
-		MotionType m_motionType;
-		Imath::V2i m_motionStart;
-		Imath::M44f m_motionMatrix;
-		float m_motionCentreOfInterest;
-		Imath::Box2f m_motionScreenWindow;
+		MemberDataPtr m_data;
 
 };
 

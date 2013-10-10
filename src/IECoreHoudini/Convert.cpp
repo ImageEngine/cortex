@@ -91,6 +91,34 @@ Imath::V3d convert( const UT_Vector4 &from )
 }
 
 template<>
+Imath::Color3f convert( const UT_Color &from )
+{
+	float r, g, b;
+	from.getRGB( &r, &g, &b );
+	return Imath::Color3f( r, g, b );
+}
+
+template<>
+UT_Color convert( const Imath::Color3f &from )
+{
+	return UT_Color( UT_RGB, from[0], from[1], from[2] );
+}
+
+template<>
+Imath::Color4f convert( const UT_Color &from )
+{
+	float r, g, b;
+	from.getRGB( &r, &g, &b );
+	return Imath::Color4f( r, g, b, 1 );
+}
+
+template<>
+UT_Color convert( const Imath::Color4f &from )
+{
+	return UT_Color( UT_RGB, from[0], from[1], from[2] );
+}
+
+template<>
 UT_BoundingBox convert( const Imath::Box3f &from )
 {
 	if( from.isEmpty() )
@@ -135,6 +163,12 @@ Imath::M44d convert( const UT_Matrix4T<double> &from )
 }
 
 template<>
+Imath::M44f convert( const UT_Matrix4T<double> &from )
+{
+	return Imath::M44f( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
+}
+
+template<>
 UT_Matrix4T<float> convert( const Imath::M44f &from )
 {
 	return UT_Matrix4T<float>( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
@@ -144,6 +178,12 @@ template<>
 Imath::M44f convert( const UT_Matrix4T<float> &from )
 {
 	return Imath::M44f( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
+}
+
+template<>
+Imath::M44d convert( const UT_Matrix4T<float> &from )
+{
+	return Imath::M44d( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3], from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3] );
 }
 
 } // namespace IECore

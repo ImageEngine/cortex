@@ -139,6 +139,37 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	}
 }
 
+PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInterface, const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &primVarNames )
+{
+	IECore::Object::LoadContextPtr context = new Object::LoadContext( ioInterface->subdirectory( name )->subdirectory( g_dataEntry ) );
+
+	unsigned int v = m_ioVersion;
+	ConstIndexedIOPtr container = context->container( Primitive::staticTypeName(), v );
+	if ( !container )
+	{
+		throw Exception( "Could not find Primitive entry in the file!" );
+	}
+	ConstIndexedIOPtr ioVariables = container->subdirectory( g_variablesEntry );
+
+	PrimitiveVariableMap variables;
+	IndexedIO::EntryIDList::const_iterator it;
+	for( it=primVarNames.begin(); it!=primVarNames.end(); it++ )
+	{
+		ConstIndexedIOPtr ioPrimVar = ioVariables->subdirectory( *it, IndexedIO::NullIfMissing );
+		if ( !ioPrimVar )
+		{
+			continue;
+		}
+		int i; 
+		ioPrimVar->read( g_interpolationEntry, i );
+		variables.insert( 
+			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, g_dataEntry ) ) ) 
+		);
+	}
+
+	return variables;
+}
+
 bool Primitive::isEqualTo( const Object *other ) const
 {
 	if( !VisibleRenderable::isEqualTo( other ) )
@@ -171,6 +202,8 @@ void Primitive::hash( MurmurHash &h ) const
 		h.append( it->second.interpolation );
 		it->second.data->hash( h );
 	}
+	
+	topologyHash( h );
 }
 
 struct ValidateArraySize

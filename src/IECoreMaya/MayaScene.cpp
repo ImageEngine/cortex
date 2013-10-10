@@ -2,6 +2,7 @@
 #include "IECore/MatrixTransform.h"
 #include "IECore/Camera.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/Primitive.h"
 
 #include "IECoreMaya/MayaScene.h"
 #include "IECoreMaya/FromMayaTransformConverter.h"
@@ -36,7 +37,6 @@ IE_CORE_DEFINERUNTIMETYPED( MayaScene );
 
 // this stuff requires a mutex, as all them maya DG functions aint thread safe!
 MayaScene::Mutex MayaScene::s_mutex;
-SceneInterface::FileFormatDescription< MayaScene > MayaScene::s_description( ".ma", IndexedIO::Read );
 
 MayaScene::MayaScene() : m_isRoot( true )
 {
@@ -47,16 +47,6 @@ MayaScene::MayaScene() : m_isRoot( true )
 	it.getPath( m_dagPath );
 }
 
-MayaScene::MayaScene( const std::string&, IndexedIO::OpenMode ) : m_isRoot( true )
-{
-	tbb::mutex::scoped_lock l( s_mutex );
-	
-	// initialize to the root path:
-	MItDag it;
-	it.getPath( m_dagPath );
-}
-
-
 MayaScene::MayaScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 {
 	// this constructor is expected to be called when s_mutex is locked!
@@ -65,6 +55,11 @@ MayaScene::MayaScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 
 MayaScene::~MayaScene()
 {
+}
+
+std::string MayaScene::fileName() const
+{
+	throw Exception( "MayaScene does not support fileName()." );
 }
 
 MayaScenePtr MayaScene::duplicate( const MDagPath& p, bool isRoot ) const
@@ -168,9 +163,10 @@ Imath::Box3d MayaScene::readBound( double time ) const
 
 void MayaScene::writeBound( const Imath::Box3d &bound, double time )
 {
+	throw Exception( "MayaScene::writeBound: write operations not supported!" );
 }
 
-DataPtr MayaScene::readTransform( double time ) const
+ConstDataPtr MayaScene::readTransform( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
@@ -197,29 +193,114 @@ DataPtr MayaScene::readTransform( double time ) const
 
 Imath::M44d MayaScene::readTransformAsMatrix( double time ) const
 {
-	return runTimeCast< TransformationMatrixdData >( readTransform( time ) )->readable().transform();
+	return runTimeCast< const TransformationMatrixdData >( readTransform( time ) )->readable().transform();
 }
 
 void MayaScene::writeTransform( const Data *transform, double time )
 {
+	throw Exception( "MayaScene::writeTransform: write operations not supported!" );
 }
 
 bool MayaScene::hasAttribute( const Name &name ) const
 {
+	if( m_dagPath.length() == 0 && !m_isRoot )
+	{
+		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
+	}
+	std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().find(name);
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_has( m_dagPath );
+	}
 	return false;
 }
 
-void MayaScene::readAttributeNames( NameList &attrs ) const
+void MayaScene::attributeNames( NameList &attrs ) const
 {
+	if( m_dagPath.length() == 0 && !m_isRoot )
+	{
+		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
+	}
+
+	attrs.clear();
+	for ( std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
+	{
+		if ( it->second.m_has( m_dagPath ) )
+		{
+			attrs.push_back( it->first );
+		}
+	}
 }
 
-ObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
+ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 {
+	if( m_dagPath.length() == 0 && !m_isRoot )
+	{
+		throw Exception( "MayaScene::readAttribute: Dag path no longer exists!" );
+	}
+	std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().find(name);
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_read( m_dagPath );
+	}
 	return 0;
 }
 
 void MayaScene::writeAttribute( const Name &name, const Object *attribute, double time )
 {
+	throw Exception( "MayaScene::writeAttribute: write operations not supported!" );
+}
+
+bool MayaScene::hasTag( const Name &name, bool includeChildren ) const
+{
+	if ( m_isRoot )
+	{
+		return false;
+	}
+
+	if( m_dagPath.length() == 0 )
+	{
+		throw Exception( "MayaScene::hasTag: Dag path no longer exists!" );
+	}
+	
+	std::vector<CustomTagReader> &tagReaders = customTagReaders();
+	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
+	{
+		if ( it->m_has( m_dagPath, name ) )
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+void MayaScene::readTags( NameList &tags, bool includeChildren ) const
+{
+	tags.clear();
+
+	if ( m_isRoot )
+	{
+		return;
+	}
+
+	if( m_dagPath.length() == 0 )
+	{
+		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
+	}
+	
+	std::vector<CustomTagReader> &tagReaders = customTagReaders();
+	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
+	{
+		NameList values;
+		it->m_read( m_dagPath, values, includeChildren );
+		tags.insert( tags.end(), values.begin(), values.end() );
+	}
+}
+
+void MayaScene::writeTags( const NameList &tags )
+{
+	throw Exception( "MayaScene::writeTags not supported" );
 }
 
 bool MayaScene::hasObject() const
@@ -230,15 +311,52 @@ bool MayaScene::hasObject() const
 	{
 		return false;
 	}
-	else if( m_dagPath.length() == 0 )
+	else if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "MayaScene::hasObject: Dag path no longer exists!" );
 	}
+
+	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
+	{
+		if ( it->m_has( m_dagPath ) )
+		{
+			return true;
+		}
+	}
+
+	// if no custom object was detected, we try the general cortex converter
+	unsigned int childCount = 0;
+	m_dagPath.numberOfShapesDirectlyBelow(childCount);
+
+	for ( unsigned int c = 0; c < childCount; c++ )
+	{
+		MDagPath childDag = m_dagPath;
+		if( childDag.extendToShapeDirectlyBelow( c ) )
+		{
+			MFnDagNode fnChildDag(childDag);
+			if ( fnChildDag.isIntermediateObject() )
+			{
+				continue;
+			}
+
+			FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
+			if( shapeConverter )
+			{
+				return true;
+			}
+		
+			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
+			if( dagConverter )
+			{
+				return true;
+			}
+		}
+	}
 	
-	return !m_dagPath.hasFn( MFn::kTransform );
+	return false;
 }
 
-ObjectPtr MayaScene::readObject( double time ) const
+ConstObjectPtr MayaScene::readObject( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
@@ -251,32 +369,68 @@ ObjectPtr MayaScene::readObject( double time ) const
 	{
 		throw Exception( "MayaScene::readObject: time must be the same as on the maya timeline!" );
 	}
-	
-	if( m_dagPath.hasFn( MFn::kCamera ) )
+
+	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
 	{
-		FromMayaCameraConverter converter( m_dagPath );
-		CameraPtr cam = runTimeCast< Camera >( converter.convert() );
-		cam->setTransform( new MatrixTransform( Imath::M44f() ) );
-		return cam;
+		if ( it->m_has( m_dagPath ) )
+		{
+			return it->m_read( m_dagPath );
+		}
 	}
-	
-	FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( m_dagPath );
-	if( shapeConverter )
+
+	// if no custom object was detected, we try the general cortex converter
+	unsigned int childCount = 0;
+	m_dagPath.numberOfShapesDirectlyBelow(childCount);
+
+	for ( unsigned int c = 0; c < childCount; c++ )
 	{
-		return shapeConverter->convert();
+		MDagPath childDag = m_dagPath;
+		if( childDag.extendToShapeDirectlyBelow( c ) )
+		{
+			MFnDagNode fnChildDag(childDag);
+			if ( fnChildDag.isIntermediateObject() )
+			{
+				continue;
+			}
+
+			FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
+			if( shapeConverter )
+			{
+				return shapeConverter->convert();
+			}
+		
+			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
+			if( dagConverter )
+			{
+				ObjectPtr result = dagConverter->convert();
+				Camera *cam = runTimeCast< Camera >( result.get() );
+				if( cam )
+				{
+					// Cameras still carry the transform when converted from maya,
+					// so we have to remove them after conversion.
+					cam->setTransform( new MatrixTransform( Imath::M44f() ) );
+				}
+				return result;
+			}
+		}
 	}
-	
-	FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( m_dagPath );
-	if( dagConverter )
-	{
-		return dagConverter->convert();
-	}
-	
 	return 0;
+}
+
+PrimitiveVariableMap MayaScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+{
+	// \todo Optimize this function, adding special cases such as for Meshes.
+	ConstPrimitivePtr prim = runTimeCast< const Primitive >( readObject( time ) );
+	if ( !prim )
+	{
+		throw Exception( "Object does not have primitive variables!" );
+	}
+	return prim->variables;
 }
 
 void MayaScene::writeObject( const Object *object, double time )
 {
+	throw Exception( "MayaScene::writeObject: write operations not supported!" );
 }
 
 void MayaScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const
@@ -321,8 +475,11 @@ void MayaScene::childNames( NameList &childNames ) const
 	
 	for( unsigned i=0; i < paths.length(); ++i )
 	{
-		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
-		childNames.push_back( Name( childName ) );
+		if( paths[i].hasFn( MFn::kTransform ) )
+		{
+			std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
+			childNames.push_back( Name( childName ) );
+		}
 	}
 }
 
@@ -341,10 +498,13 @@ bool MayaScene::hasChild( const Name &name ) const
 	
 	for( unsigned i=0; i < paths.length(); ++i )
 	{
-		std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
-		if( Name( childName ) == name )
+		if( paths[i].hasFn( MFn::kTransform ) )
 		{
-			return true;
+			std::string childName( paths[i].fullPathName().asChar() + currentPathLength + 1 );
+			if( Name( childName ) == name )
+			{
+				return true;
+			}
 		}
 	}
 	return false;
@@ -365,11 +525,11 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 	MDagPath path;
 	MStatus st = sel.getDagPath( 0, path );
 	
-	if( !st )
+	if( !path.hasFn( MFn::kTransform ) )
 	{
 		if( missingBehaviour == SceneInterface::ThrowIfMissing )
 		{
-			throw Exception( "MayaScene::retrieveChild: Couldn't find location at specified path" );
+			throw Exception( "MayaScene::retrieveChild: Couldn't find transform at specified path " + std::string( path.fullPathName().asChar() ) );
 		}
 		return 0;
 	}
@@ -418,7 +578,13 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	{
 		if( missingBehaviour == SceneInterface::ThrowIfMissing )
 		{
-			throw Exception( "MayaScene::retrieveScene: Couldn't find location at specified path" );
+			std::string pathName;
+			for( size_t i = 0; i < path.size(); ++i )
+			{
+				pathName += std::string( path[i] ) + "/";
+			}
+			
+			throw Exception( "MayaScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
 		return 0;
 	}
@@ -426,10 +592,26 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 	MDagPath dagPath;
 	sel.getDagPath( 0, dagPath );
 	
-	return duplicate( dagPath );
+	if( dagPath.hasFn( MFn::kTransform ) )
+	{
+		return duplicate( dagPath );
+	}
+	else
+	{
+		if( missingBehaviour == SceneInterface::ThrowIfMissing )
+		{
+			std::string pathName;
+			for( size_t i = 0; i < path.size(); ++i )
+			{
+				pathName += std::string( path[i] ) + "/";
+			}
+			
+			throw Exception( "MayaScene::retrieveScene: Couldn't find transform at specified path " + pathName );
+		}
+		return 0;
+	}
 	
 }
-
 
 ConstSceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
@@ -439,4 +621,46 @@ ConstSceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour miss
 SceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour missingBehaviour )
 {
 	return retrieveScene( path, missingBehaviour );
+}
+
+void MayaScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
+{
+	CustomReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customObjectReaders().push_back(r);
+}
+
+void MayaScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )
+{
+	CustomReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customAttributeReaders()[attrName] = r;
+}
+
+void MayaScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
+{
+	CustomTagReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customTagReaders().push_back( r );
+}
+
+std::vector< MayaScene::CustomReader > &MayaScene::customObjectReaders()
+{
+	static std::vector< MayaScene::CustomReader > readers;
+	return readers;
+}
+
+std::map< SceneInterface::Name, MayaScene::CustomReader > &MayaScene::customAttributeReaders()
+{
+	static std::map< SceneInterface::Name, MayaScene::CustomReader > readers;
+	return readers;
+}
+
+std::vector<MayaScene::CustomTagReader> &MayaScene::customTagReaders()
+{
+	static std::vector<MayaScene::CustomTagReader> readers;
+	return readers;
 }

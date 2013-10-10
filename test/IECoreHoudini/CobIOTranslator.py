@@ -180,12 +180,21 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		
 		os.remove( "testCobIO.cob" )
 		
-	def testCantReadCobWithNonPrimitiveData( self ) :
+	def testCobWithNonPrimitiveData( self ) :
 		IECore.ObjectWriter( IECore.V3f( 1 ), TestCobIOTranslator.__testFile ).write()
 		reader = self.reader()
-		self.assert_( not reader.geometry() )
-		self.assert_( reader.errors() )
-
+		geo = reader.geometry()
+		prims = geo.prims()
+		self.assertFalse( reader.errors() )
+		self.assertEqual( len(prims), 1 )
+		self.assertEqual( prims[0].type(), hou.primType.Custom )
+		self.assertEqual( prims[0].vertices()[0].point().number(), 0 )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
+		self.assertTrue( isinstance( converter, IECoreHoudini.FromHoudiniCortexObjectConverter ) )
+		result = converter.convert()
+		self.assertEqual( result, IECore.V3fData( IECore.V3f( 1 ) ) )
+	
 	def testReadWritePDC( self ) :
 		points = self.points()
 		writer = self.writer( points )

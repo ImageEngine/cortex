@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -84,6 +84,8 @@ class SpherePrimitive : public Primitive
 		virtual Imath::Box3f bound() const;
 		/// Render the sphere
 		virtual void render( Renderer *renderer ) const;
+		
+		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:
 

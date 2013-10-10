@@ -58,6 +58,11 @@ inline InternedString::InternedString( const char *value )
 {
 }
 
+inline InternedString::InternedString( int64_t number )
+	: m_value( numberString( number ).m_value )
+{
+}
+
 inline InternedString::~InternedString()
 {
 }

@@ -1,43 +1,0 @@
-10
-
-dir
-5253
-http://cortex-vfx.googlecode.com/svn/trunk/contrib
-http://cortex-vfx.googlecode.com/svn
-
-
-
-2013-02-21T01:54:35.148143Z
-5195
-andrewk.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-07b78fde-9e1a-0410-98de-79dcf2039bee
-
-IECoreAlembic
-dir
-
-IECoreHoudini
-dir
-
-IECoreArnold
-dir
-
-for_review
-dir
-
-IECoreMantra
-dir
-

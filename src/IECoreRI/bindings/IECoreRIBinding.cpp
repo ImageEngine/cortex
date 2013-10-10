@@ -34,6 +34,8 @@
 
 #include <boost/python.hpp>
 
+#include "IECoreRI/IECoreRI.h"
+
 #include "IECoreRI/bindings/RendererBinding.h"
 #include "IECoreRI/bindings/SLOReaderBinding.h"
 
@@ -73,5 +75,8 @@ BOOST_PYTHON_MODULE( _IECoreRI )
 	bindSHWDeepImageReader();
 	bindSHWDeepImageWriter();
 #endif // IECORERI_WITH_DEEPSHW
+
+	def( "withRiProceduralV", &IECoreRI::withRiProceduralV );
+
 
 }

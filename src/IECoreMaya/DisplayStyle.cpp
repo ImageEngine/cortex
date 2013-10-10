@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,9 @@
 
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/Primitive.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/TextureLoader.h"
 
 #include "IECoreMaya/DisplayStyle.h"
 
@@ -45,6 +48,7 @@ struct DisplayStyle::Data
 	IECoreGL::StatePtr shadedState;
 	IECoreGL::StatePtr pointsState;
 	IECoreGL::StatePtr boundsState;
+	IECoreGL::StatePtr litState;
 };
 
 DisplayStyle::DisplayStyle()
@@ -54,7 +58,8 @@ DisplayStyle::DisplayStyle()
 	m_data->shadedState = new IECoreGL::State( true );
 	m_data->pointsState = new IECoreGL::State( true );
 	m_data->boundsState = new IECoreGL::State( true );
-
+	m_data->litState = new IECoreGL::State( true );
+	
 	m_data->wireframeState->add( new IECoreGL::Primitive::DrawSolid( false ) );
 	m_data->wireframeState->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 
@@ -64,6 +69,20 @@ DisplayStyle::DisplayStyle()
 
 	m_data->boundsState->add( new IECoreGL::Primitive::DrawSolid( false ) );
 	m_data->boundsState->add( new IECoreGL::Primitive::DrawBound( true ) );
+
+	m_data->litState->add(
+		new IECoreGL::ShaderStateComponent(
+			IECoreGL::ShaderLoader::defaultShaderLoader(),
+			IECoreGL::TextureLoader::defaultTextureLoader(),
+			IECoreGL::Shader::defaultVertexSource(),
+			IECoreGL::Shader::defaultGeometrySource(),
+			IECoreGL::Shader::lambertFragmentSource(),
+			new IECore::CompoundObject()
+		),
+		/// \todo: by setting true here, we are forcing an override of all other
+		/// ShaderStateComponents in the hierarchy. Is this desirable in all cases?
+		true
+	);
 }
 
 DisplayStyle::~DisplayStyle()
@@ -71,7 +90,7 @@ DisplayStyle::~DisplayStyle()
 	delete m_data;
 }
 
-IECoreGL::State *DisplayStyle::baseState( M3dView::DisplayStyle style, bool transferCurrentColor )
+IECoreGL::State *DisplayStyle::baseState( M3dView::DisplayStyle style, M3dView::LightingMode lightingMode, bool transferCurrentColor )
 {
 	switch( style )
 	{
@@ -86,6 +105,10 @@ IECoreGL::State *DisplayStyle::baseState( M3dView::DisplayStyle style, bool tran
 
 		case M3dView::kFlatShaded :
 		case M3dView::kGouraudShaded :
+			if ( lightingMode != M3dView::kLightDefault )
+			{
+				return m_data->litState;
+			}
 			return m_data->shadedState;
 
 		case M3dView::kWireFrame :

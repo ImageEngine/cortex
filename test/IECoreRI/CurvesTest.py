@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,11 +38,11 @@ import os.path
 import IECore
 import IECoreRI
 
-class CurvesTest( unittest.TestCase ) :
+class CurvesTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testCurves.tif"
 
-	def performTest( self, curvesPrimitive, testImage ) :
+	def performTest( self, curvesPrimitive, testImage, withAutomaticInstancing = False ) :
 
 		r = IECoreRI.Renderer( "" )
 
@@ -57,6 +57,9 @@ class CurvesTest( unittest.TestCase ) :
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 		r.setOption( "ri:pixelSamples", IECore.V2iData( IECore.V2i( 10 ) ) )
 		r.worldBegin()
+
+		if withAutomaticInstancing :
+			r.setAttribute( "ri:automaticInstancing", True )
 
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -89,6 +92,7 @@ class CurvesTest( unittest.TestCase ) :
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linearPeriodic.tif" )
+		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linearPeriodic.tif", withAutomaticInstancing = True )
 
 	def testLinear( self ) :
 
@@ -109,6 +113,7 @@ class CurvesTest( unittest.TestCase ) :
 		)
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
+		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linear.tif" )
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linear.tif" )
 
 	def testBSplinePeriodic( self ) :
@@ -131,6 +136,7 @@ class CurvesTest( unittest.TestCase ) :
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSplinePeriodic.tif" )
+		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSplinePeriodic.tif", withAutomaticInstancing = True )
 
 	def testBSpline( self ) :
 
@@ -152,6 +158,7 @@ class CurvesTest( unittest.TestCase ) :
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSpline.tif" )
+		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSpline.tif", withAutomaticInstancing = True )
 
 	def testBezier( self ) :
 
@@ -173,6 +180,7 @@ class CurvesTest( unittest.TestCase ) :
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bezier.tif" )
+		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bezier.tif", withAutomaticInstancing = True )
 
 	def testMotionBlur( self ) :
 
@@ -200,11 +208,7 @@ class CurvesTest( unittest.TestCase ) :
 		m[1] = c2
 
 		self.performTest( m, os.path.dirname( __file__ ) + "/data/curveImages/motionBlur.tif" )
-
-	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
+		self.performTest( m, os.path.dirname( __file__ ) + "/data/curveImages/motionBlur.tif", withAutomaticInstancing = True )
 
 if __name__ == "__main__":
     unittest.main()

@@ -129,7 +129,12 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 			def render( self, renderer ) :
 			
 				IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -10 ), IECore.V2f( 10 ) ) ).render( renderer )
-	
+
+			def hash( self ):
+			
+				h = IECore.MurmurHash()
+				return h
+		
 		def arnoldMessageCallback( logMask, severity, msg, tabs ) :
 	
 			self.__arnoldMessages.append( msg )

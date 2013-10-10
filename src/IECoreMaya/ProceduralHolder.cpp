@@ -49,6 +49,7 @@
 #include "IECoreGL/Primitive.h"
 
 #include "IECoreMaya/ProceduralHolder.h"
+#include "IECoreMaya/ProceduralHolderComponentBoundIterator.h"
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
@@ -72,6 +73,7 @@
 #include "maya/MDagPath.h"
 #include "maya/MFnStringData.h"
 #include "maya/MPlugArray.h"
+#include "maya/MObjectArray.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -424,6 +426,20 @@ MBoundingBox ProceduralHolder::boundingBox() const
 	return m_bound;
 }
 
+/// This method is overridden to supply a geometry iterator, which maya uses to work out
+/// the bounding boxes of the components you've selected in the viewport
+MPxGeometryIterator* ProceduralHolder::geometryIteratorSetup( MObjectArray& componentList, MObject& components, bool forReadOnly )
+{
+	if ( components.isNull() )
+	{
+		return new ProceduralHolderComponentBoundIterator( this, componentList );
+	}
+	else
+	{
+		return new ProceduralHolderComponentBoundIterator( this, components );
+	}
+}
+
 MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
 	if(
@@ -433,6 +449,7 @@ MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plu
 	{
 		// it's an input to the procedural
 		m_boundDirty = m_sceneDirty = true;
+		m_componentToBoundMap.clear();
 		childChanged( kBoundingBoxChanged ); // this is necessary to cause maya to redraw
 		
 		MPlug pComponentTransform( thisMObject(), aComponentTransform );
@@ -463,6 +480,47 @@ MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plu
 	}
 
 	return ParameterisedHolderComponentShape::setDependentsDirty( plug, plugArray );
+}
+
+
+Imath::Box3f ProceduralHolder::componentBound( int idx ) const
+{
+	ComponentToBoundMap::const_iterator boundIt = m_componentToBoundMap.find( idx );
+	if( boundIt != m_componentToBoundMap.end() )
+	{
+		return boundIt->second;
+	}
+	
+	Imath::Box3f componentBound;
+	
+	ComponentToGroupMap::const_iterator it = m_componentToGroupMap.find( idx );
+	
+	if( it == m_componentToGroupMap.end() )
+	{
+		return componentBound;
+	}
+	
+	const std::set< std::pair< std::string, IECoreGL::GroupPtr > >& groups = it->second;
+	std::set< std::pair< std::string, IECoreGL::GroupPtr > >::const_iterator groupIt = groups.begin();
+	for( ; groupIt != groups.end(); ++groupIt )
+	{
+		IECoreGL::ConstGroupPtr group = groupIt->second;
+		Imath::Box3f bound;
+		for( IECoreGL::Group::ChildContainer::const_iterator it=group->children().begin(); it!=group->children().end(); it++ )
+		{
+			bound.extendBy( (*it)->bound() );
+		}
+
+		ComponentTransformsMap::const_iterator tIt = m_componentTransforms.find( groupIt->first );
+
+		bound = Imath::transform( bound, tIt->second );
+
+		componentBound.extendBy( bound );
+	}
+	
+	m_componentToBoundMap[ idx ] = componentBound;
+	
+	return componentBound;
 }
 
 MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
@@ -770,6 +828,12 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 			buildComponents( nameState, group, groupTransform );
 		}
 	}
+}
+
+/// Blank implementation of this method. This is to avoid a crash when you try and use the rotation manipulator maya gives
+/// you when you've selected procedural components in rotation mode (maya 2013)
+void ProceduralHolder::transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache )
+{
 }
 
 void ProceduralHolder::buildComponents()

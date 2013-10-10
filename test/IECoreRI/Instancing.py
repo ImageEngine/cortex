@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@ from IECore import *
 import IECoreRI
 import os
 
-class InstancingTest( unittest.TestCase ) :
+class InstancingTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -121,6 +121,11 @@ class InstancingTest( unittest.TestCase ) :
 				else :
 					renderer.instance( "myLovelySphere" )
 		
+			def hash( self ) :
+			
+				h = MurmurHash()
+				return h
+			
 		# test writing a rib
 		
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
@@ -172,6 +177,11 @@ class InstancingTest( unittest.TestCase ) :
 				renderer.instanceEnd()
 				
 				renderer.instance( self.__instanceName )
+			
+			def hash( self ) :
+				
+				h = MurmurHash()
+				return h
 				
 		initThreads()
 		r = IECoreRI.Renderer( "" )
@@ -182,18 +192,345 @@ class InstancingTest( unittest.TestCase ) :
 		
 			for i in range( 0, 100 ) :
 				r.procedural( InstanceMakingProcedural( "instance%d" % i ) )
+	
+	def testProceduralLevelInstancing( self ) :
+		
+		if IECoreRI.withRiProceduralV():
 
-	def tearDown( self ) :
+			class InstanceTestProcedural( Renderer.Procedural ) :
 
-		files = [
-			"test/IECoreRI/output/instancing.rib",
-			"test/IECoreRI/output/instancing2.rib",
-			"test/IECoreRI/output/instancing3.rib",
-		]
+				renderCount = 0
 
-		for f in files :
-			if os.path.exists( f ):
-				os.remove( f )
+				def __init__( self, instanceHash ) :
+
+					Renderer.Procedural.__init__( self )
+
+					self.__instanceHash = instanceHash
+
+				def bound( self ) :
+
+					return Box3f( V3f( -10 ), V3f( 10 ) )
+
+				def render( self, renderer ) :
+					InstanceTestProcedural.renderCount = InstanceTestProcedural.renderCount + 1
+					pass
+
+				def hash( self ) :
+					return self.__instanceHash
+
+			r = IECoreRI.Renderer("")
+
+			# give it a camera using the ray trace hider, and turn shareinstances on:
+			r.camera( "main", {
+				"resolution" : V2iData( V2i( 1024, 200 ) ),
+				"screenWindow" : Box2fData( Box2f( V2f( -1 ), V2f( 1 ) ) ),
+				"cropWindow" : Box2fData( Box2f( V2f( 0.1, 0.1 ), V2f( 0.9, 0.9 ) ) ),
+				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
+				"projection" : StringData( "perspective" ),
+				"projection:fov" : FloatData( 45 ),
+				"ri:hider" : StringData( "raytrace" ),
+			} )
+			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
+			
+			# chuck a couple of procedurals at it:
+			h1 = MurmurHash()
+			h2 = MurmurHash()
+			
+			h1.append( "instance1" )
+			h2.append( "instance2" )
+			
+			with WorldBlock( r ) :
+				r.procedural( InstanceTestProcedural(h1) )
+				r.procedural( InstanceTestProcedural(h1) )
+				r.procedural( InstanceTestProcedural(h2) )
+				r.procedural( InstanceTestProcedural(h2) )
+
+			# only two unique instances here, as there were 2 unique hashes....
+			self.assertEqual( InstanceTestProcedural.renderCount, 2 )
+			
+			InstanceTestProcedural.renderCount = 0
+			
+			# the system shouldn't perform instancing when the hash method returns empty hashes:
+			with WorldBlock( r ) :
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+			
+			self.assertEqual( InstanceTestProcedural.renderCount, 4 )
+
+		
+	def testParameterisedProceduralInstancing( self ) :
+	
+		if IECoreRI.withRiProceduralV():
+
+			class InstanceTestParamProcedural( ParameterisedProcedural ) :
+				
+				renderCount = 0
+
+				def __init__( self ) :
+					
+					ParameterisedProcedural.__init__( self, "Instancing test" )
+					
+					self.parameters().addParameters(
+			
+						[
+							BoolParameter(
+								name = "p1",
+								description = "whatever.",
+								defaultValue = True,
+							),
+
+							StringParameter(
+								name = "p2",
+								description = "yup.",
+								defaultValue = "blah"
+							),
+						]
+
+					)
+				
+				def doBound( self, args ) :
+
+					return Box3f( V3f( -10 ), V3f( 10 ) )
+
+				def doRender( self, renderer, args ) :
+					InstanceTestParamProcedural.renderCount = InstanceTestParamProcedural.renderCount + 1
+					pass
+			
+			r = IECoreRI.Renderer("")
+			
+			# give it a camera using the ray trace hider, and turn shareinstances on:
+			r.camera( "main", {
+				"resolution" : V2iData( V2i( 1024, 200 ) ),
+				"screenWindow" : Box2fData( Box2f( V2f( -1 ), V2f( 1 ) ) ),
+				"cropWindow" : Box2fData( Box2f( V2f( 0.1, 0.1 ), V2f( 0.9, 0.9 ) ) ),
+				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
+				"projection" : StringData( "perspective" ),
+				"projection:fov" : FloatData( 45 ),
+				"ri:hider" : StringData( "raytrace" ),
+			} )
+			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
+			
+			# chuck a couple of procedurals at it:
+			
+			proc1 = InstanceTestParamProcedural()
+			proc2 = InstanceTestParamProcedural()
+			
+			proc1["p1"].setValue( False )
+			proc1["p2"].setValue( StringData( "humpf" ) )
+			
+			with WorldBlock( r ) :
+				
+				proc1.render( r )
+				proc2.render( r )
+				proc2.render( r )
+				proc2.render( r )
+			
+			# only two unique instances here....
+			self.assertEqual( InstanceTestParamProcedural.renderCount, 2 )
+
+	def testAutomaticInstancing( self ) :
+	
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		
+		with WorldBlock( r ) :
+			m.render( r )
+			m.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 0 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 2 )
+		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		with WorldBlock( r ) :
+			r.setAttribute( "ri:automaticInstancing", True )
+			m.render( r )
+			m.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 2 )
+
+	def testAutomaticInstancingWithMotionBlur( self ) :
+	
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		m2 = MeshPrimitive.createPlane( Box2f( V2f( -2 ), V2f( 2 ) ) )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		
+		with WorldBlock( r ) :
+
+			r.setAttribute( "ri:automaticInstancing", True )
+
+			with MotionBlock( r, [ 0, 1 ] ) :
+				m.render( r )
+				m2.render( r )
+			with MotionBlock( r, [ 0, 1 ] ) :
+				m.render( r )
+				m2.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 2 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 2 )
+	
+	
+	def testAutomaticInstancingWithTransformMotionBlur( self ) :
+	
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+		
+		with WorldBlock( r ) :
+
+			r.setAttribute( "ri:automaticInstancing", True )
+			
+			with TransformBlock( r ):
+			
+				with MotionBlock( r, [ 0, 1 ] ) :
+					r.setTransform( M44f.createTranslated( V3f( 0,0,0 ) ) )
+					r.setTransform( M44f.createTranslated( V3f( 1,0,0 ) ) )
+				m.render( r )
+			
+			with TransformBlock( r ):
+			
+				with MotionBlock( r, [ 0, 1 ] ) :
+					r.setTransform( M44f.createTranslated( V3f( 0,0,0 ) ) )
+					r.setTransform( M44f.createTranslated( V3f( 1,0,0 ) ) )
+				m.render( r )
+			
+		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 2 )
+	
+	def testAutomaticInstancingWithThreadedProcedurals( self ) :
+	
+		class PlaneProcedural( Renderer.Procedural ) :
+		
+			def __init__( self ) :
+			
+				Renderer.Procedural.__init__( self )
+			
+			def bound( self ) :
+			
+				return Box3f( V3f( -10, -10, -0.01 ), V3f( 10, 10, 0.01 ) )
+				
+			def render( self, renderer ) :
+			
+				MeshPrimitive.createPlane( Box2f( V2f( -10 ), V2f( 10 ) ) ).render( renderer )
+				
+			def hash( self ) :
+			
+				h = MurmurHash()
+				return h
+			
+		initThreads()
+		r = IECoreRI.Renderer( "" )
+		
+		with WorldBlock( r ) :
+		
+			r.setAttribute( "ri:automaticInstancing", True )
+			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -20 ) ) )
+		
+			for i in range( 0, 1000 ) :
+				r.procedural( PlaneProcedural() )
+	
+	def testSharedHandles( self ) :
+
+		rib = """
+		Option "searchpath" "string procedural" "./src/rmanProcedurals/python"
+		
+		Display "test/IECoreRI/output/testPythonProcedural.tif" "tiff" "rgba" 
+		
+		Projection "perspective" "float fov" [ 40 ]
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+			
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+		
+		WorldEnd
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+			
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+			Procedural "DynamicLoad" [ "python" "r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0,0,0 ), IECore.V3f( 1,1,1 ) ) ).render( r )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]
+		
+		WorldEnd
+		"""
+		
+		ribFile = open( "test/IECoreRI/output/pythonProcedural.rib", "w" )
+		ribFile.write( rib )
+		ribFile.close()
+		
+		os.system( "renderdl -callprocedurals -catrib test/IECoreRI/output/pythonProcedural.rib > test/IECoreRI/output/pythonProceduralExpanded.rib" )
+		
+		rib = "".join( open( "test/IECoreRI/output/pythonProceduralExpanded.rib" ).readlines() )
+		
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 12 )
+
+	def testSharedHandlesNestedProcedurals( self ) :
+		
+		# this string defines a procedural that renders a box:
+		boxProcString = "exec( 'import IECore\\\\nclass BoxProcedural( IECore.Renderer.Procedural ) :\\\\n\\\\tdef __init__( self ) :\\\\n\\\\t\\\\tIECore.Renderer.Procedural.__init__( self )\\\\n\\\\tdef bound( self ) :\\\\n\\\\t\\\\treturn IECore.Box3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 1, 1 ) )\\\\n\\\\tdef render( self, renderer ) :\\\\n\\\\t\\\\t\\\\tIECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) ).render( renderer )\\\\n\\\\tdef hash( self ) :\\\\n\\\\t\\\\th = IECore.MurmurHash()\\\\n\\\\t\\\\treturn h' )"
+		
+		# this procedural call renders a box, then calls our box procedural:
+		proceduralCallString = 'Procedural "DynamicLoad" [ "python" "' + boxProcString + ';r = IECoreRI.Renderer();IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) ).render( r );r.procedural( BoxProcedural() )" ] [ -3.75 3.75 -3.75 3.75 -3.75 3.75 ]\n'
+		
+		rib = """
+		Option "searchpath" "string procedural" "./src/rmanProcedurals/python"
+		
+		Display "test/IECoreRI/output/testPythonProcedural.tif" "tiff" "rgba" 
+		
+		Projection "perspective" "float fov" [ 40 ]
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+		"""
+		
+		rib += proceduralCallString * 6
+		
+		rib += """
+		WorldEnd
+		
+		WorldBegin
+			
+			Attribute "user" "int cortexAutomaticInstancing" [ 1 ]
+		"""
+		
+		rib += proceduralCallString * 6
+		
+		rib += """
+		WorldEnd
+		"""
+		
+		ribFile = open( "test/IECoreRI/output/pythonProcedural.rib", "w" )
+		ribFile.write( rib )
+		ribFile.close()
+		
+		os.system( "renderdl -callprocedurals -catrib test/IECoreRI/output/pythonProcedural.rib > test/IECoreRI/output/pythonProceduralExpanded.rib" )
+		
+		rib = "".join( open( "test/IECoreRI/output/pythonProceduralExpanded.rib" ).readlines() )
+		
+		# should get 24 instances of the same box!
+		self.assertEqual( rib.count( "ObjectBegin" ), 1 )
+		self.assertEqual( rib.count( "ObjectInstance" ), 24 )
 
 if __name__ == "__main__":
     unittest.main()

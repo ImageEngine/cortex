@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ import IECoreRI
 import os.path
 import os
 
-class MotionTest( unittest.TestCase ) :
+class MotionTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -55,11 +55,6 @@ class MotionTest( unittest.TestCase ) :
 		l = "\n".join( file( "test/IECoreRI/output/motionTest.rib" ).readlines() )
 		self.assert_( "MotionBegin [ 1.75 2.25 ]" in l )
 		self.assert_( "MotionEnd" in l )
-
-	def tearDown( self ) :
-	
-		if os.path.exists( "test/IECoreRI/output/motionTest.rib" ) :
-			os.remove( "test/IECoreRI/output/motionTest.rib" )
 
 if __name__ == "__main__":
     unittest.main()

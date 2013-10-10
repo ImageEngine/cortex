@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ import os
 import IECore
 import IECoreRI
 
-class StringArrayParameterTest( unittest.TestCase ) :
+class StringArrayParameterTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 	
@@ -71,10 +71,11 @@ class StringArrayParameterTest( unittest.TestCase ) :
 		self.failUnless( '"string sa[0]" [ ]' in r )
 
 	def tearDown( self ) :
-	
+		
+		IECoreRI.TestCase.tearDown( self )
+		
 		for f in [
 			"test/IECoreRI/shaders/types.sdl",
-			"test/IECoreRI/output/testStringArrayParameter.rib",
 		] :
 		
 			if os.path.exists( f ) :

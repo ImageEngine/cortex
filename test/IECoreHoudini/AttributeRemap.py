@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		op.parm("parm_quiet").set(True)
 		op.cook()
 		res = cl.resultParameter().getValue()
-		self.assertEqual( res.keys(), ["Cd","P","uv"] )
+		self.assertEqual( res.keys(), ["Cs","P","s","t"] )
 		self.assert_( geo )
 		self.assert_( torus )
 		self.assert_( point )
@@ -82,9 +82,9 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.failUnless( 'P' in object )
 		self.assertEqual( object['P'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['P'].data.typeId(), IECore.TypeId.V3fVectorData )
-		self.failUnless( 'Cd' in object )
-		self.assertEqual( object['Cd'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( object['Cd'].data.typeId(), IECore.TypeId.Color3fVectorData )
+		self.failUnless( 'Cs' in object )
+		self.assertEqual( object['Cs'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( object['Cs'].data.typeId(), IECore.TypeId.Color3fVectorData )
 		
 	def testBasicRemapping(self):
 		(op, attr) = self.testCreateObjects()
@@ -97,6 +97,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.assertEqual( object.keys(), ['Cs', 'P', 'rixlate', 's', 't'] )
 		self.assert_( object )
 		self.failUnless( 'P' in object )
+		self.failUnless( object.arePrimitiveVariablesValid() )
 		self.assertEqual( object['P'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['P'].data.typeId(), IECore.TypeId.V3fVectorData )
 		self.failUnless( 'Cs' in object )
@@ -106,10 +107,10 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.assertEqual( object['rixlate'].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( object['rixlate'].data.typeId(), IECore.TypeId.StringData )
 		self.failUnless( 's' in object )
-		self.assertEqual( object['s'].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( object['s'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['s'].data.typeId(), IECore.TypeId.FloatVectorData )
 		self.failUnless( 't' in object )
-		self.assertEqual( object['t'].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( object['t'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['t'].data.typeId(), IECore.TypeId.FloatVectorData )
 		
 	def testMappingManual(self):
@@ -121,7 +122,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder(op)
 		geo = fn.getParameterised().resultParameter().getValue()
 		self.assertEqual( geo.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( geo.keys(), ["P", "col", "rixlate", "uv"] )
+		self.assertEqual( geo.keys(), ["P", "col", "rixlate", "s", "t"] )
 		self.assertEqual( geo['col'].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( geo['col'].data.typeId(), IECore.TypeId.Color3fVectorData )
 
@@ -147,7 +148,8 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.failUnless( "col_r" in geo.keys() )
 		self.failUnless( "col_g" in geo.keys() )
 		self.failUnless( "col_b" in geo.keys() )
-		self.failUnless( "uv" in geo.keys() )
+		self.failUnless( "s" in geo.keys() )
+		self.failUnless( "t" in geo.keys() )
 		self.assertEqual( geo['col_r'].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( geo['col_r'].data.typeId(), IECore.TypeId.FloatVectorData )
 		self.assertNotEqual( geo['col_r'].data[0], geo['col_r'].data[1] )
@@ -176,7 +178,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		op.cook()
 		fn = IECoreHoudini.FnOpHolder(op)
 		geo = fn.getParameterised().resultParameter().getValue()
-		self.assertEqual( geo.keys(), ['Cd', 'P', 'point_test', 'prim_test', 'rixlate', 'uv', 'varmap'] )
+		self.assertEqual( geo.keys(), ['Cs', 'P', 'point_test', 'prim_test', 'rixlate', 's', 't', 'varmap'] )
 		self.assertEqual( geo['point_test'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( len(geo['point_test'].data), 100 )
 		self.assertEqual( geo['prim_test'].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
@@ -195,7 +197,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		op.cook()
 		fn = IECoreHoudini.FnOpHolder(op)
 		geo = fn.getParameterised().resultParameter().getValue()
-		self.assertEqual( geo.keys(), ['Cd', 'P', 'rixlate', 'test', 'uv', 'varmap'] )
+		self.assertEqual( geo.keys(), ['Cs', 'P', 'rixlate', 's', 't', 'test', 'varmap'] )
 		self.assertEqual( geo['test'].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( len(geo['test'].data), 100 )
 		attr.parm("hname0").set( "test" )
@@ -204,7 +206,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		op.cook()
 		fn = IECoreHoudini.FnOpHolder(op)
 		geo = fn.getParameterised().resultParameter().getValue()
-		self.assertEqual( geo.keys(), ['Cd', 'P', 'rixlate', 'test', 'uv', 'varmap'] )
+		self.assertEqual( geo.keys(), ['Cs', 'P', 'rixlate', 's', 't', 'test', 'varmap'] )
 		self.assertEqual( geo['test'].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( len(geo['test'].data), 100 )
 		

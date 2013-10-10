@@ -1,0 +1,16 @@
+{
+version 0.8
+className	[ 0	locks=0 ]	(	[ className	"" ] 	)
+classVersion	[ 0	locks=0 ]	(	[ classVersion	0 ] 	)
+parameterString	[ 0	locks=0 ]	(	[ parameterString	"" ] 	)
+standardfolder	[ 0	locks=0 ]	(	1	1	)
+folder0	[ 0	locks=0 ]	(	0	0	)
+vmproc_boxstyle	[ 0	locks=0 ]	(	explicit	)
+vmproc_soppath	[ 0	locks=0 ]	(	[ vmproc_soppath	"" ] 	)
+vmproc_minbound	[ 0	locks=0 ]	(	[ vmproc_minboundx	0 ] 	[ vmproc_minboundy	0 ] 	[ vmproc_minboundz	0 ] 	)
+vmproc_maxbound	[ 0	locks=0 ]	(	[ vmproc_maxboundx	0 ] 	[ vmproc_maxboundy	0 ] 	[ vmproc_maxboundz	0 ] 	)
+riproc_boxstyle	[ 0	locks=0 ]	(	explicit	)
+riproc_soppath	[ 0	locks=0 ]	(	""	)
+riproc_minbound	[ 0	locks=0 ]	(	-1	-1	-1	)
+riproc_maxbound	[ 0	locks=0 ]	(	1	1	1	)
+}

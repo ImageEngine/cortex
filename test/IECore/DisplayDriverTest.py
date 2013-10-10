@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -117,6 +117,23 @@ class TestImageDisplayDriver(unittest.TestCase):
 		self.assertEqual( ImageDisplayDriver.removeStoredImage( "myHandle" ), idd.image() )
 		self.assertEqual( ImageDisplayDriver.storedImage( "myHandle" ), None )
 		
+	def testAcceptsRepeatedData( self ) :
+	
+		window = Box2i( V2i( 0 ), V2i( 15 ) )
+	
+		dd = ImageDisplayDriver( window, window, [ "Y" ], CompoundData() )
+		self.assertEqual( dd.acceptsRepeatedData(), True )
+		
+		y = FloatVectorData( [ 1 ] * 16 * 16 )
+		dd.imageData( window, y )
+		
+		y = FloatVectorData( [ 0.5 ] * 16 * 16 )
+		dd.imageData( window, y )
+		
+		dd.imageClose()
+		
+		i = dd.image()
+		self.assertEqual( i["Y"].data, y )
 		
 class TestClientServerDisplayDriver(unittest.TestCase):
 
@@ -209,6 +226,34 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			pass
 			
 		self.failUnless( "Could not connect to remote display driver server : Host not found" in str( e ) )
+
+	def testAcceptsRepeatedData( self ) :
+	
+		window = Box2i( V2i( 0 ), V2i( 15 ) )
+	
+		dd = ClientDisplayDriver(
+			window, window,
+			[ "Y" ],
+			CompoundData( {
+				"displayHost" : "localhost",
+				"displayPort" : "1559",
+				"remoteDisplayType" : "ImageDisplayDriver",
+				"handle" : "myHandle"
+			} )
+		)
+	
+		self.assertEqual( dd.acceptsRepeatedData(), True )
+		
+		y = FloatVectorData( [ 1 ] * 16 * 16 )
+		dd.imageData( window, y )
+		
+		y = FloatVectorData( [ 0.5 ] * 16 * 16 )
+		dd.imageData( window, y )
+		
+		dd.imageClose()
+		
+		i = ImageDisplayDriver.removeStoredImage( "myHandle" )
+		self.assertEqual( i["Y"].data, y )
 
 	def tearDown( self ):
 		

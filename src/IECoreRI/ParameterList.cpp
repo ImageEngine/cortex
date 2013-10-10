@@ -119,6 +119,10 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 			arraySize = static_cast<const FloatVectorData *>( d )->readable().size();
 		case FloatDataTypeId :
 			return "float";
+		case V2iDataTypeId :
+			isArray = true;
+			arraySize = 2;
+			return "integer";
 		case IntVectorDataTypeId :
 			isArray = true;
 			arraySize = static_cast<const IntVectorData *>( d )->readable().size();

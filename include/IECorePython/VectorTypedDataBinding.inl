@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,12 +43,12 @@
 namespace IECorePython
 {
 
-template<typename Container>
+template<typename ThisClass>
 class VectorTypedDataFunctions
 {
 	public:
-		typedef IECore::TypedData< Container > ThisClass;
 		typedef typename ThisClass::Ptr ThisClassPtr;
+		typedef typename ThisClass::ValueType Container;
 		typedef typename Container::value_type data_type;
 		typedef typename Container::size_type index_type;
 		typedef typename Container::size_type size_type;
@@ -81,7 +81,7 @@ class VectorTypedDataFunctions
 				return r;
 			}
 		}
-
+		
 		//
 		static iterator begin( ThisClass &x )
 		{
@@ -661,11 +661,10 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 }																										\
 
 /// \todo Get rid of these macros
-#define BASIC_VECTOR_BINDING(T, Tname)																	\
-		typedef TypedData< std::vector< T > > ThisClass;															\
+#define BASIC_VECTOR_BINDING(ThisClass, Tname)																	\
 		typedef IECore::IntrusivePtr< ThisClass > ThisClassPtr;														\
 		typedef IECore::IntrusivePtr< const ThisClass > ThisConstClassPtr;											\
-		typedef VectorTypedDataFunctions< std::vector<T> > ThisBinder;												\
+		typedef VectorTypedDataFunctions< ThisClass > ThisBinder;												\
 																													\
 		RunTimeTypedClass<ThisClass>(																							\
 			Tname "-type vector class derived from Data class.\n"													\
@@ -703,7 +702,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that does not support Math operators
 #define BIND_VECTOR_TYPEDDATA(T, Tname)													\
 		{																							\
-			BASIC_VECTOR_BINDING(T, Tname)																	\
+			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 			;																						\
 		}
@@ -711,7 +710,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that supports simple Math operators (+=, -= and *=)
 #define BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA(T, Tname)									\
 		{																							\
-			BASIC_VECTOR_BINDING(T, Tname)																	\
+			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\
@@ -727,7 +726,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=)
 #define BIND_OPERATED_VECTOR_TYPEDDATA(T, Tname)											\
 		{																							\
-			BASIC_VECTOR_BINDING(T, Tname)																	\
+			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\
@@ -745,7 +744,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=, <, >)
 #define BIND_FULL_OPERATED_VECTOR_TYPEDDATA(T, Tname)											\
 		{																							\
-			BASIC_VECTOR_BINDING(T, Tname)																	\
+			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\

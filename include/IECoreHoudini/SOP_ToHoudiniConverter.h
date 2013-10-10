@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,8 +51,18 @@ class SOP_ToHoudiniConverter : public SOP_Node
 
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 
+		static const char *typeName;
+		
 		static PRM_Template parameters[];
 		static CH_LocalVariable variables[];
+		
+		static PRM_Name pConvertStandardAttributes;
+		static PRM_Name pAttributeFilter;
+		
+		static PRM_Default convertStandardAttributesDefault;
+		static PRM_Default attributeFilterDefault;
+		
+		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
 
 	protected :
 

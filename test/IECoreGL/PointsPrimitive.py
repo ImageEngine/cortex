@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@ from __future__ import with_statement
 import unittest
 import random
 import os
+import shutil
 
 import IECore
 import IECoreGL
@@ -69,7 +70,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS
 		
 		in vec3 instanceP;
-		in float greyTo255;
+		in float vertexgreyTo255;
 		
 		varying out float fragmentGrey;
 		
@@ -78,7 +79,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			mat4 instanceMatrix = IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX;
 			vec4 pCam = instanceMatrix * vec4( instanceP, 1 );
 			gl_Position = gl_ProjectionMatrix * pCam;
-			fragmentGrey = float( greyTo255 ) / 255.0;
+			fragmentGrey = float( vertexgreyTo255 ) / 255.0;
 		}
 		"""
 
@@ -488,12 +489,94 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
 		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
 		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+	
+	def testWireframeShading( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		
+		r.camera( 
+			"main",
+			{
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+			}
+		)
+		
+		r.display( self.outputFileName, "exr", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.setAttribute( "gl:primitive:wireframe", True )
+			r.setAttribute( "gl:primitive:wireframeColor", IECore.Color4f( 1, 0, 0, 1 ) )			
+			r.setAttribute( "gl:primitive:wireframeWidth", 5.0 )			
+			r.setAttribute( "gl:primitive:solid", False )
+						
+			r.points( 1, {
+				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+			} )
+		
+		e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
+		result = e.createResult()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+
+	def testVertexCs( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		
+		r.camera( 
+			"main",
+			{
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1), IECore.V2f( 1 ) ) )
+			}
+		)
+		
+		r.display( self.outputFileName, "exr", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+						
+			r.points( 2, {
+				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( -.5 ), IECore.V3f( .5 ) ] ) ),
+				"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) ),
+			} )
+		
+		e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
+		result = e.createResult()
+		
+		e.pointAtUV( IECore.V2f( 0.25, 0.75 ), result )
+		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+		
+		e.pointAtUV( IECore.V2f( 0.75, 0.25 ), result )
+		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.R() ), 0 )
+		self.assertEqual( result.floatPrimVar( e.G() ), 1 )
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreGL/output" ) :
+			os.makedirs( "test/IECoreGL/output" )
+	
 	def tearDown( self ) :
 		
-		if os.path.exists( self.outputFileName ) :
-			
-			os.remove( self.outputFileName )
+		if os.path.isdir( "test/IECoreGL/output" ) :
+			shutil.rmtree( "test/IECoreGL/output" )
 
 if __name__ == "__main__":
     unittest.main()

@@ -196,6 +196,10 @@ void DiskPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void DiskPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void DiskPrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_radius );
 	h.append( m_z );
 	h.append( m_thetaMax );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -84,10 +84,16 @@ ParticleReader::ParticleReader( const std::string &description )
 	m_realTypeParameter = new IntParameter(
 		"realType",
 		"The type of data to use to represent real values.",
-		Native,
+		Float,
 		Native,
 		Double,
 		realTypePresets,
+		true
+	);
+	
+	m_convertPrimVarNamesParameter = new BoolParameter(
+		"convertPrimVarNames",
+		"Convert the position primVar name to P.",
 		true
 	);
 
@@ -95,6 +101,7 @@ ParticleReader::ParticleReader( const std::string &description )
 	parameters()->addParameter( m_percentageSeedParameter );
 	parameters()->addParameter( m_attributesParameter );
 	parameters()->addParameter( m_realTypeParameter );
+	parameters()->addParameter( m_convertPrimVarNamesParameter );
 }
 
 FloatParameter * ParticleReader::percentageParameter()
@@ -137,6 +144,16 @@ const IntParameter * ParticleReader::realTypeParameter() const
 	return m_realTypeParameter;
 }
 
+BoolParameter * ParticleReader::convertPrimVarNamesParameter()
+{
+	return m_convertPrimVarNamesParameter;
+}
+
+const BoolParameter * ParticleReader::convertPrimVarNamesParameter() const
+{
+	return m_convertPrimVarNamesParameter;
+}
+
 ObjectPtr ParticleReader::doOperation( const CompoundObject * operands )
 {
 	vector<string> attributes;
@@ -160,7 +177,13 @@ ObjectPtr ParticleReader::doOperation( const CompoundObject * operands )
 			}
 			if( s==result->getNumPoints() )
 			{
-				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
+				string primVarName = *it;
+				if( convertPrimVarNames() && primVarName == positionPrimVarName() )
+				{
+					// Current attribute is the position. Use "P" instead.
+					primVarName = "P";
+				}
+				result->variables.insert( PrimitiveVariableMap::value_type( primVarName, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
 			}
 			else
 			{
@@ -211,3 +234,9 @@ ParticleReader::RealType ParticleReader::realType() const
 {
 	return RealType( m_realTypeParameter->getNumericValue() );
 }
+
+bool ParticleReader::convertPrimVarNames() const
+{
+	return m_convertPrimVarNamesParameter->getTypedValue();
+}
+

@@ -54,7 +54,10 @@ Parameter::Parameter( const std::string &name, const std::string &description, O
 	:	m_name( name ), m_description( description ), m_defaultValue( defaultValue ), m_presetsOnly( presetsOnly ),
 		m_userData( userData ? userData->copy() : 0 )
 {
-	assert( defaultValue );
+	if ( !defaultValue )
+	{
+		throw Exception( "Invalid NULL default value!" );
+	}
 
 	for( PresetsContainer::const_iterator it=presets.begin(); it!=presets.end(); it++ )
 	{
@@ -90,7 +93,17 @@ const Object *Parameter::defaultValue() const
 
 const Parameter::PresetsContainer &Parameter::presets() const
 {
+	return getPresets();
+}
+
+const Parameter::PresetsContainer &Parameter::getPresets() const
+{
 	return m_presets;
+}
+
+void Parameter::setPresets( const PresetsContainer &presets )
+{
+	m_presets = presets;
 }
 
 bool Parameter::presetsOnly() const
@@ -142,7 +155,7 @@ bool Parameter::valueValid( const Object *value, std::string *reason ) const
 	{
 		return true;
 	}
-	const PresetsContainer &pr = presets();
+	const PresetsContainer &pr = getPresets();
 	for( PresetsContainer::const_iterator it = pr.begin(); it!=pr.end(); it++ )
 	{
 		if( it->second->isEqualTo( value ) )
@@ -198,7 +211,7 @@ void Parameter::setValidatedValue( ObjectPtr value )
 
 void Parameter::setValue( const std::string &presetName )
 {
-	const PresetsContainer &pr = presets();
+	const PresetsContainer &pr = getPresets();
 	
 	PresetsContainer::const_iterator it;
 	for( it=pr.begin(); it != pr.end(); it++ )
@@ -248,7 +261,7 @@ std::string Parameter::getCurrentPresetName() const
 	// didn't have to do a copy of the value. but that breaks with CompoundParameter
 	// as it builds the value dynamically in getValue().
 	const Object *currentValue = getValue();
-	const PresetsContainer &pr = presets();
+	const PresetsContainer &pr = getPresets();
 	PresetsContainer::const_iterator it;
 	for( it=pr.begin(); it!=pr.end(); it++ )
 	{

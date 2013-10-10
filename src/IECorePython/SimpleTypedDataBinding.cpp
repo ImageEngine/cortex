@@ -37,6 +37,7 @@
 #include "boost/python.hpp"
 
 #include <limits.h>
+#include <sstream>
 
 #include "boost/python/make_constructor.hpp"
 
@@ -44,10 +45,10 @@
 #include "OpenEXR/halfLimits.h"
 
 #include "IECore/SimpleTypedData.h"
+#include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
-
-#include <sstream>
+#include "IECorePython/SimpleTypedDataBinding.h"
 
 using namespace std;
 using std::string;
@@ -86,6 +87,12 @@ template<class T>
 static typename T::Ptr constructWithValue( const typename T::ValueType &v )
 {
 	return new T( v );
+}
+
+template<class T>
+static typename T::Ptr constructWithValueAndInterpretation( const typename T::ValueType &v, IECore::GeometricData::Interpretation i )
+{
+	return new T( v, i );
 }
 
 template<class T>
@@ -237,12 +244,14 @@ DEFINETYPEDDATASTRSPECIALISATION( uint64_t );
 DEFINETYPEDDATASTRSPECIALISATION( string );
 DEFINETYPEDDATASTRSPECIALISATION( InternedString );
 DEFINETYPEDDATASTRSPECIALISATION( half );
-DEFINETYPEDDATASTRSPECIALISATION( V2i );
-DEFINETYPEDDATASTRSPECIALISATION( V2f );
-DEFINETYPEDDATASTRSPECIALISATION( V2d );
-DEFINETYPEDDATASTRSPECIALISATION( V3i );
-DEFINETYPEDDATASTRSPECIALISATION( V3f );
-DEFINETYPEDDATASTRSPECIALISATION( V3d );
+
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V2i );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V2f );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V2d );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V3i );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V3f );
+IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( V3d );
+
 DEFINETYPEDDATASTRSPECIALISATION( Box2i );
 DEFINETYPEDDATASTRSPECIALISATION( Box2f );
 DEFINETYPEDDATASTRSPECIALISATION( Box2d );
@@ -263,75 +272,6 @@ DEFINETYPEDDATASTRSPECIALISATION( LineSegment3f );
 DEFINETYPEDDATASTRSPECIALISATION( LineSegment3d );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// an rvalue converter to get TypedData<T> from a python object convertible to T
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-struct TypedDataFromType
-{
-	TypedDataFromType()
-	{
-		converter::registry::push_back(
-			&convertible,
-			&construct,
-			type_id<typename T::Ptr>()
-		);
-
-	}
-
-	static void *convertible( PyObject *obj )
-	{
-		extract<typename T::ValueType> e( obj );
-		if( e.check() )
-		{
-			return obj;
-		}
-		return 0;
-	}
-
-	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
-	{
-		void *storage = ((converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
-		new (storage) typename T::Ptr( new T( extract<typename T::ValueType>( obj ) ) );
-		data->convertible = storage;
-	}
-};
-
-// specialise the bool version so it doesn't go gobbling up ints and things and turning them
-// into BoolData
-template<>
-struct TypedDataFromType<BoolData>
-{
-
-	TypedDataFromType()
-	{
-		converter::registry::push_back(
-			&convertible,
-			&construct,
-			type_id<BoolDataPtr>()
-		);
-
-	}
-
-	static void *convertible( PyObject *obj )
-	{
-		if( PyBool_Check( obj ) )
-		{
-			return obj;
-		}
-		return 0;
-	}
-
-	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
-	{
-		void *storage = ((converter::rvalue_from_python_storage<BoolDataPtr>*)data)->storage.bytes;
-		new (storage) BoolDataPtr( new BoolData( extract<bool>( obj ) ) );
-		data->convertible = storage;
-	}
-
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // functions to do the binding
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -350,6 +290,22 @@ static RunTimeTypedClass<T> bindSimpleData()
 									&setValue<T>, "The value contained by the object.");
 
 
+	return result;
+}
+
+template<class T>
+static RunTimeTypedClass<GeometricTypedData<T > > bindSimpleGeometricData()
+{
+	typedef TypedData<T> ParentClass;
+	typedef GeometricTypedData<T> ThisClass;
+	
+	RunTimeTypedClass<ParentClass>();
+	
+	RunTimeTypedClass<ThisClass> result = bindSimpleData<ThisClass>();
+	result.def( "__init__", make_constructor( &constructWithValueAndInterpretation<ThisClass> ), "Construct with the specified value and interpretation." );
+	result.def("getInterpretation", &ThisClass::getInterpretation, "Returns the geometric interpretation of this data.");
+	result.def("setInterpretation", &ThisClass::setInterpretation, "Sets the geometric interpretation of this data.");
+	
 	return result;
 }
 
@@ -417,18 +373,13 @@ void bindAllSimpleTypedData()
 	RunTimeTypedClass<UInt64Data> ui64dc = bindSimpleData<UInt64Data>();
 	bindNumericMethods( ui64dc );
 	ui64dc.def( "__long__", &getValue<UInt64Data> );
-
-	bindSimpleData<V2iData>();
-
-	bindSimpleData<V3iData>();
-
-	bindSimpleData<V2fData>();
-
-	bindSimpleData<V3fData>();
-
-	bindSimpleData<V2dData>();
-
-	bindSimpleData<V3dData>();
+	
+	bindSimpleGeometricData<V2i>();
+	bindSimpleGeometricData<V3i>();
+	bindSimpleGeometricData<V2f>();
+	bindSimpleGeometricData<V3f>();
+	bindSimpleGeometricData<V2d>();
+	bindSimpleGeometricData<V3d>();
 
 	bindSimpleData<Box2iData>();
 

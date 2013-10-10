@@ -47,26 +47,22 @@ using namespace IECoreHoudini;
 
 class SceneCacheNodeHelper
 {
-	public :
-	
-		static void clearCache()
-		{
-			SceneCacheNode<OP_Node>::cache().clear();
-		}
 };
 
 void IECoreHoudini::bindSceneCacheNode()
 {
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" )
-		.def( "clearCache", &SceneCacheNodeHelper::clearCache )
-		.staticmethod( "clearCache" )
-	;
+	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
 	
 	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
 		.value( "World", SceneCacheNode<OP_Node>::World )
 		.value( "Path", SceneCacheNode<OP_Node>::Path )
 		.value( "Local", SceneCacheNode<OP_Node>::Local )
 		.value( "Object", SceneCacheNode<OP_Node>::Object )
+	;
+	
+	enum_<SceneCacheNode<OP_Node>::GeometryType>( "GeometryType" )
+		.value( "Cortex", SceneCacheNode<OP_Node>::Cortex )
+		.value( "Houdini", SceneCacheNode<OP_Node>::Houdini )
 	;
 	
 	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
@@ -79,4 +75,5 @@ void IECoreHoudini::bindSceneCacheNode()
 		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
 		.value( "Children", OBJ_SceneCacheTransform::Children )
 	;
+	
 }

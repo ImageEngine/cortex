@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -63,7 +63,7 @@ class TeapotProcedural( IECore.ParameterisedProcedural ) :
 		renderer.geometry( "teapot", {}, {} )
 
 
-class ParameterisedProceduralTest( unittest.TestCase ) :
+class ParameterisedProceduralTest( IECoreRI.TestCase ) :
 
 	def checkContents( self, fileName, expectedElements, unexpectedElements ) :
 
@@ -161,16 +161,6 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 		self.assertEqual( t.renderStateCalled, False )
 		self.assertEqual( t.boundCalled, False )
 		self.assertEqual( t.renderCalled, True )
-
-	def tearDown( self ) :
-
-		files = [
-			"test/IECoreRI/output/testParameterisedProcedural.rib"
-		]
-		for f in files :
-			if os.path.exists( f ):
-				os.remove( f )
-
 
 if __name__ == "__main__":
     unittest.main()

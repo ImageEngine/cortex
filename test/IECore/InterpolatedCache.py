@@ -51,10 +51,10 @@ class TestInterpolatedCache(unittest.TestCase):
 		self.__createCacheFile( 250, 0 )
 		self.__createCacheFile( 333, 1 )
 		self.__createCacheFile( 416, 2 )
-		self.__createCacheFile( 499, 3 )
+		self.__createCacheFile( 500, 3 )
 		self.__createCacheFile( 583, 4 )
 		self.__createCacheFile( 666, 5 )
-		self.__createCacheFile( 749, 6 )
+		self.__createCacheFile( 750, 6 )
 
 	def __createV3f( self, value ):
 		dataWritten = V3fVectorData()

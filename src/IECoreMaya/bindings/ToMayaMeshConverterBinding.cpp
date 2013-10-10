@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,19 +32,46 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "maya/MObject.h"
+#include "maya/MSelectionList.h"
+
 #include "boost/python.hpp"
 
+#include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
 #include "IECoreMaya/bindings/ToMayaMeshConverterBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
+using namespace IECore;
 using namespace IECoreMaya;
 using namespace boost::python;
+
+// we use the shape name instead of MObject
+static void setMeshInterpolationAttribute( std::string n, std::string interpolation )
+{
+	MSelectionList l;
+	StatusException::throwIfError( l.add( MString( n.c_str() ) ) );
+
+	MStatus s;
+	MObject o;
+
+	s = l.getDependNode( 0, o );
+	if( !s )
+	{
+		throw Exception("Could not get depedency node!");
+	}
+
+	if ( !ToMayaMeshConverter::setMeshInterpolationAttribute( o, interpolation ) )
+	{
+		throw Exception( "Failed to set interpolation attribute in " + n );
+	}
+}
 
 void IECoreMaya::bindToMayaMeshConverter()
 {
 	IECorePython::RunTimeTypedClass<ToMayaMeshConverter>()
 		.def( init<IECore::ConstObjectPtr>() )
+		.def( "setMeshInterpolationAttribute", setMeshInterpolationAttribute,  ( arg_( "nodeName" ), arg_( "interpolation" ) = "linear" )  ).staticmethod( "setMeshInterpolationAttribute" )
 	;
 }

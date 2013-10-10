@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/format.hpp"
+#include "boost/timer.hpp"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Exception.h"
@@ -49,6 +50,8 @@
 #include "IECoreGL/FrameBuffer.h"
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/Primitive.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/TextureLoader.h"
 
 using namespace IECoreGL;
 
@@ -61,20 +64,24 @@ class Selector::Implementation : public IECore::RefCounted
 
 	public :
 	
-		Implementation( Selector *parent )
-			:	m_parent( parent ), m_mode( Invalid ), m_baseState( new State( true /* complete */ ) )
+		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
+			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_currentIDShader( NULL )
 		{
-		}
-	
-		void begin( const Imath::Box2f &region, Mode mode = GLSelect )
-		{
+			// we don't want preexisting errors to trigger exceptions
+			// from error checking code in the begin*() methods, because
+			// we'd then be throwing in a half constructed state, our destructor
+			// wouldn't be run, and we'd be unable to restore the gl state
+			// changes we'd made so far. so we throw immediately if there is a
+			// preexisting error.
+			IECoreGL::Exception::throwIfError();
+			
 			if( g_currentSelector )
 			{
 				throw( IECore::Exception( "Another Selector is already active" ) );
 			}
-
-			g_currentSelector = this->m_parent;
-
+			
+			g_currentSelector = parent;
+	
 			GLdouble projectionMatrix[16];
 			glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix );
 			GLint viewport[4];
@@ -93,7 +100,6 @@ class Selector::Implementation : public IECore::RefCounted
 			glMultMatrixd( projectionMatrix );
 			glMatrixMode( GL_MODELVIEW );
 
-			m_mode = mode;
 			switch( m_mode )
 			{
 				case GLSelect :
@@ -110,9 +116,46 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 
 			glPushAttrib( GL_ALL_ATTRIB_BITS );
-		
 		}
 		
+		~Implementation()
+		{
+			// we don't want preexisting errors to
+			// trigger exceptions from error checking code
+			// in the end*() methods, because it would prevent
+			// us destructing completely. the best we can do
+			// is to log the error and carry on.
+			GLenum error;
+			while( ( error = glGetError()) != GL_NO_ERROR )
+			{
+				IECore::msg( IECore::Msg::Error, "IECoreGL::Selector end", (const char *)gluErrorString( error ) );
+			}
+		
+			g_currentSelector = 0;
+			
+			glPopAttrib();
+			
+			switch( m_mode )
+			{
+				case GLSelect :
+					endGLSelect();
+					break;
+				case IDRender :
+					endIDRender();
+					break;
+				case OcclusionQuery :
+					endOcclusionQuery();
+					break;
+				default :
+					assert( 0 );
+			}
+		}
+
+		Mode mode() const
+		{
+			return m_mode;
+		}
+
 		void loadName( GLuint name )
 		{
 			switch( m_mode )
@@ -129,30 +172,10 @@ class Selector::Implementation : public IECore::RefCounted
 				default :
 					assert( 0 );
 			}
+			
+			m_currentName = name;
 		}
 		
-		size_t end( std::vector<HitRecord> &hits )
-		{
-			glPopAttrib();
-			g_currentSelector = 0;
-			const Mode mode = m_mode;
-			m_mode = Invalid;
-			
-			switch( mode )
-			{
-				case GLSelect :
-					return endGLSelect( hits );
-				case IDRender :
-					return endIDRender( hits );
-				case OcclusionQuery :
-					return endOcclusionQuery( hits );
-				default :
-					assert( 0 );
-			}
-
-			return 0;
-		}
-
 		State *baseState()
 		{
 			return m_baseState;
@@ -160,6 +183,13 @@ class Selector::Implementation : public IECore::RefCounted
 
 		void loadIDShader( const IECoreGL::Shader *shader )
 		{
+			if( shader == m_currentIDShader )
+			{
+				// early out to avoid the relatively expensive operations
+				// below if we've already loaded the shader.
+				return;
+			}
+		
 			const IECoreGL::Shader::Parameter *nameParameter = shader->uniformParameter( "ieCoreGLNameIn" );
 			if( !nameParameter )
 			{
@@ -174,12 +204,15 @@ class Selector::Implementation : public IECore::RefCounted
 			
 			m_nameUniformLocation = nameParameter->location;
 			
-			glUseProgram( shader->program() );
+			m_currentIDShader = shader;
+			glUseProgram( m_currentIDShader->program() );
 					
 			std::vector<GLenum> buffers;
 			buffers.resize( fragDataLocation + 1, GL_NONE );
 			buffers[buffers.size()-1] = GL_COLOR_ATTACHMENT0;
 			glDrawBuffers( buffers.size(), &buffers[0] );
+			
+			loadNameIDRender( m_currentName );
 		}
 
 		static Selector *currentSelector()
@@ -189,10 +222,11 @@ class Selector::Implementation : public IECore::RefCounted
 
 	private :
 
-		Selector *m_parent;
 		Mode m_mode;
+		std::vector<HitRecord> &m_hits;
 		StatePtr m_baseState;
-
+		GLuint m_currentName;
+		
 		static Selector *g_currentSelector;
 
 		//////////////////////////////////////////////////////////////////////////
@@ -216,7 +250,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glLoadName( name );
 		}
 
-		size_t endGLSelect( std::vector<HitRecord> &hits )
+		void endGLSelect()
 		{		
 			int numHits = glRenderMode( GL_RENDER );
 			if( numHits < 0 )
@@ -230,10 +264,9 @@ class Selector::Implementation : public IECore::RefCounted
 			for( int i=0; i<numHits; i++ )
 			{
 				HitRecord h( hitRecord );
-				hits.push_back( h );
+				m_hits.push_back( h );
 				hitRecord += h.offsetToNext();
 			}
-			return hits.size();
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -243,12 +276,13 @@ class Selector::Implementation : public IECore::RefCounted
 		FrameBufferPtr m_frameBuffer;
 		boost::shared_ptr<FrameBuffer::ScopedBinding> m_frameBufferBinding;
 		GLint m_prevProgram;
+		ConstShaderPtr m_currentIDShader;
 		GLint m_prevViewport[4];
 		GLint m_nameUniformLocation;
 		
-		static Shader *idShader()
+		static const std::string &idShaderFragmentSource()
 		{
-			static const char *fragmentSource = 
+			static const std::string fragmentSource = 
 
 				"#version 330\n"
 				""
@@ -261,8 +295,7 @@ class Selector::Implementation : public IECore::RefCounted
 				"	ieCoreGLNameOut = ieCoreGLNameIn;"
 				"}";
 
-			static ShaderPtr s = new Shader( "", fragmentSource );
-			return s.get();
+			return fragmentSource;
 		}
 
 		static std::vector<StateComponentPtr> &idStateComponents()
@@ -270,7 +303,11 @@ class Selector::Implementation : public IECore::RefCounted
 			static std::vector<StateComponentPtr> s;
 			if( !s.size() )
 			{
-				s.push_back( new ShaderStateComponent( new Shader::Setup( idShader() ) ) );
+				s.push_back( new ShaderStateComponent(
+					ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(),
+					"", "", idShaderFragmentSource(),
+					new IECore::CompoundObject()
+				) );
 				s.push_back( new Primitive::DrawBound( false ) );
 				s.push_back( new Primitive::DrawWireframe( false ) );
 				s.push_back( new Primitive::DrawOutline( false ) );
@@ -301,7 +338,7 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 			
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
-			loadIDShader( idShader() );	
+			loadIDShader( m_baseState->get<ShaderStateComponent>()->shaderSetup()->shader() );	
 		}
 
 		void loadNameIDRender( GLuint name )
@@ -310,7 +347,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glUniform1ui( m_nameUniformLocation, name );
 		}
 
-		size_t endIDRender( std::vector<HitRecord> &hits )
+		void endIDRender()
 		{
 			glUseProgram( m_prevProgram );
 			glViewport( m_prevViewport[0], m_prevViewport[1], m_prevViewport[2], m_prevViewport[3] );
@@ -341,20 +378,12 @@ class Selector::Implementation : public IECore::RefCounted
 				it->second.depthMax = std::max( it->second.depthMax, z[i] );		
 			}
 
-			hits.clear();
-			hits.reserve( idRecords.size() );
+			m_hits.clear();
+			m_hits.reserve( idRecords.size() );
 			for( std::map<unsigned int, HitRecord>::const_iterator it = idRecords.begin(), eIt = idRecords.end(); it != eIt; it++ )
 			{
-				hits.push_back( it->second );
+				m_hits.push_back( it->second );
 			}
-
-			const std::vector<StateComponentPtr> &stateComponents = idStateComponents();
-			for( std::vector<StateComponentPtr>::const_iterator it = stateComponents.begin(), eIt = stateComponents.end(); it != eIt; it++ )
-			{
-				m_baseState->add( const_cast<StateComponent *>( State::defaultState()->get( (*it)->typeId() ) ), false /* no override */ );
-			}
-
-			return hits.size();
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -392,7 +421,7 @@ class Selector::Implementation : public IECore::RefCounted
 			m_queryNames.push_back( name );
 		}
 
-		size_t endOcclusionQuery( std::vector<HitRecord> &hits )
+		void endOcclusionQuery()
 		{	
 			if( m_queries.size() )
 			{
@@ -405,13 +434,12 @@ class Selector::Implementation : public IECore::RefCounted
 				glGetQueryObjectuiv( m_queries[i], GL_QUERY_RESULT, &samplesPassed );
 				if( samplesPassed )
 				{
-					hits.push_back( HitRecord( 0, 0, NameStateComponent::nameFromGLName( m_queryNames[i] ) ) );
+					m_hits.push_back( HitRecord( 0, 0, NameStateComponent::nameFromGLName( m_queryNames[i] ) ) );
 				}
 			}
 		
 			glDeleteQueries( m_queries.size(), &(m_queries[0]) );
 			m_baseState->add( const_cast<DepthTestStateComponent *>( State::defaultState()->get<DepthTestStateComponent>() ), false /* no override */ );
-			return hits.size();
 		}
 
 };
@@ -422,8 +450,8 @@ Selector *Selector::Implementation::g_currentSelector = 0;
 // Selector
 //////////////////////////////////////////////////////////////////////////
 
-Selector::Selector()
-	:	m_implementation( new Implementation( this ) )
+Selector::Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
+	:	m_implementation( new Implementation( this, region, mode, hits ) )
 {
 }
 
@@ -431,19 +459,14 @@ Selector::~Selector()
 {
 }
 
-void Selector::begin( const Imath::Box2f &region, Mode mode )
+Selector::Mode Selector::mode() const
 {
-	m_implementation->begin( region, mode );
+	return m_implementation->mode();
 }
 
 void Selector::loadName( GLuint name )
 {
 	m_implementation->loadName( name );
-}
-
-size_t Selector::end( std::vector<HitRecord> &hits )
-{
-	return m_implementation->end( hits );
 }
 
 State *Selector::baseState()

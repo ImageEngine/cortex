@@ -38,20 +38,20 @@
 #ifndef IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
 #define IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
 
-#include "SOP/SOP_Node.h"
+#include "OP/OP_Node.h"
 
 #include "IECoreHoudini/NodeHandle.h"
-#include "IECoreHoudini/SOP_ParameterisedHolder.h"
+#include "IECoreHoudini/ParameterisedHolderInterface.h"
 
 namespace IECoreHoudini
 {
 
-/// \todo: This class is a bit funny. Is it meant to be more like IECoreMaya::ParameterisedInterface?
+/// \todo: This class is a bit funny. Can this all be moved to the bindings like in IECoreMaya?
 class FnParameterisedHolder
 {
 	public :
 
-		FnParameterisedHolder( SOP_Node *sop=0 );
+		FnParameterisedHolder( OP_Node *node=0 );
 		virtual ~FnParameterisedHolder();
 
 		bool hasParameterised();
@@ -69,8 +69,8 @@ class FnParameterisedHolder
 	private :
 
 		bool hasHolder();
-		void setHolder( SOP_Node *sop );
-		SOP_ParameterisedHolder *getHolder( SOP_Node *sop );
+		void setHolder( OP_Node *node );
+		ParameterisedHolderInterface *getHolder( OP_Node *node );
 
 		NodeHandle m_handle;
 

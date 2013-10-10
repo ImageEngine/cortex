@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 
 #include "boost/lexical_cast.hpp"
 #include "boost/format.hpp"
+#include "boost/bind.hpp"
+#include "boost/bind/placeholders.hpp"
 
 #include "IECore/LRUCache.h"
 #include "IECore/MurmurHash.h"
@@ -45,8 +47,8 @@ using namespace IECoreGL;
 
 struct CachedConverter::MemberData
 {
-	MemberData()
-		:	cache( getter )
+	MemberData( size_t maxMemory )
+		:	cache( getter, boost::bind( &MemberData::removalCallback, this, ::_1, ::_2 ), maxMemory )
 	{
 	}
 	
@@ -59,8 +61,16 @@ struct CachedConverter::MemberData
 	// call to convert().
 	struct CacheKey
 	{
+
+		/// default constructor: implies using the default ToGLConverter factory function
 		CacheKey( const IECore::Object *o )
-			: object( o ), hash( o->hash() )
+			: object( o ), converter(0), hash( o->hash() )
+		{
+		}
+
+		/// custom converter constructor: provides a functor that is responsible for converting the object and also should return it's own hash.
+		CacheKey( const IECore::Object *o, ConverterFn conv, const IECore::MurmurHash &converterHash )
+			: object( o ), converter(conv), hash( converterHash )
 		{
 		}
 		
@@ -80,39 +90,58 @@ struct CachedConverter::MemberData
 		}
 		
 		mutable const IECore::Object *object;
+		ConverterFn converter;
 		IECore::MurmurHash hash;
 	};
 	
 	static IECore::RunTimeTypedPtr getter( const CacheKey &key, size_t &cost )
 	{
 		cost = key.object->memoryUsage();
-		ToGLConverterPtr converter = ToGLConverter::create( key.object );
-		if( !converter )
+		IECore::RunTimeTypedPtr ret;
+
+		if ( key.converter )
 		{
-			throw IECore::Exception(
-				boost::str(
-					boost::format(
-						"Unable to create converter for Object of type \"%s\""
-					) % key.object->typeName()
-				)
-			);
+			ret = key.converter(key.object);
 		}
+		else
+		{
+			ToGLConverterPtr converter = ToGLConverter::create( key.object );
+			if( !converter )
+			{
+				throw IECore::Exception(
+					boost::str(
+						boost::format(
+							"Unable to create converter for Object of type \"%s\""
+						) % key.object->typeName()
+					)
+				);
+			}
+			ret = converter->convert();
+		}
+
 		// It would be unsafe to access object from outside of this function,
 		// so we zero it out so that it will be obvious if anyone ever does.
 		// The only way I could see this happening is if the LRUCache implementation
 		// changed.
 		key.object = 0;
-		return converter->convert();
+
+		return ret;
+	}
+	
+	void removalCallback( const CacheKey &key, const IECore::RunTimeTypedPtr &value )
+	{
+		deferredRemovals.push_back( value );
 	}
 	
 	typedef IECore::LRUCache<CacheKey, IECore::RunTimeTypedPtr> Cache;
 	Cache cache;
+	std::vector<IECore::RunTimeTypedPtr> deferredRemovals;
+	
 };
 
 CachedConverter::CachedConverter( size_t maxMemory )
 {
-	m_data = new MemberData();
-	m_data->cache.setMaxCost( maxMemory );
+	m_data = new MemberData( maxMemory );
 }
 
 CachedConverter::~CachedConverter()
@@ -125,6 +154,11 @@ IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *obj
 	return m_data->cache.get( MemberData::CacheKey( object ) );
 }
 
+IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object, ConverterFn converter, const IECore::MurmurHash &converterHash )
+{
+	return m_data->cache.get( MemberData::CacheKey( object, converter, converterHash ) );
+}
+
 size_t CachedConverter::getMaxMemory() const
 {
 	return m_data->cache.getMaxCost();
@@ -133,6 +167,12 @@ size_t CachedConverter::getMaxMemory() const
 void CachedConverter::setMaxMemory( size_t maxMemory )
 {
 	m_data->cache.setMaxCost( maxMemory );
+	clearUnused();
+}
+
+void CachedConverter::clearUnused()
+{
+	m_data->deferredRemovals.clear();
 }
 
 CachedConverterPtr CachedConverter::defaultCachedConverter()

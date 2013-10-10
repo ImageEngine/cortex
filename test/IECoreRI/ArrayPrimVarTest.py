@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import IECoreRI
 import os.path
 import os
 
-class ArrayPrimVarTest( unittest.TestCase ) :
+class ArrayPrimVarTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -63,11 +63,6 @@ class ArrayPrimVarTest( unittest.TestCase ) :
 		self.assert_( '"constant string testTwo[3]" [ "apple" "banana" "beetroot" ]' in rib )
 		self.assert_( '"constant vector testFour[2]" [ 0 0 0 1 1 1 ]' in rib )
 		self.assert_( '"constant float testFive[3]" [ 10 11 12 ]' in rib )
-
-	def tearDown( self ) :
-
-		if os.path.exists( "test/IECoreRI/output/testArrayPrimVar.rib" ) :
-			os.remove( "test/IECoreRI/output/testArrayPrimVar.rib" )
 
 if __name__ == "__main__":
     unittest.main()

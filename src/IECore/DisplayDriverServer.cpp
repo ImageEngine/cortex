@@ -283,6 +283,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 	StringVectorDataPtr channelNames;
 	CompoundDataPtr parameters;
 	bool scanLineOrder = false;
+	bool acceptsRepeatedData = false;
 
 	// handle imageOpen parameters.
 	try
@@ -299,6 +300,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 		m_displayDriver = DisplayDriver::create( displayType->readable(), displayWindow->readable(), dataWindow->readable(), channelNames->readable(), parameters );
 
 		scanLineOrder = m_displayDriver->scanLineOrderOnly();
+		acceptsRepeatedData = m_displayDriver->acceptsRepeatedData();
 	}
 	catch( std::exception &e )
 	{
@@ -313,6 +315,9 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 		// send the result back.
 		sendResult( DisplayDriverServerHeader::imageOpen, sizeof(scanLineOrder) );
 		m_socket.send( boost::asio::buffer( &scanLineOrder, sizeof(scanLineOrder) ) );
+		
+		sendResult( DisplayDriverServerHeader::imageOpen, sizeof(acceptsRepeatedData) );
+		m_socket.send( boost::asio::buffer( &acceptsRepeatedData, sizeof(acceptsRepeatedData) ) );
 
 		// prepare for getting imageData packages
 		boost::asio::async_read( m_socket,

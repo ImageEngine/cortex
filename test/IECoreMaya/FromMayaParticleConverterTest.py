@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -56,8 +56,10 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 		self.assert_( "P" in particle )
 		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertEqual( particle["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assert_( "velocity" in particle )
 		self.assert_( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertEqual( particle["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 		# We don't get this by default, and we didn't request it
 		self.failIf( "mass" in particle )
@@ -87,8 +89,10 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( particle.numPoints < 1100 )
 		self.assert_( "P" in particle )
 		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertEqual( particle["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assert_( "velocity" in particle )
 		self.assert_( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertEqual( particle["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 		self.assert_( "mass" in particle )
 		self.assert_( particle["mass"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
 

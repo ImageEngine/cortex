@@ -57,6 +57,10 @@ class ToMayaMeshConverter : public ToMayaObjectConverter
 
 		ToMayaMeshConverter( IECore::ConstObjectPtr object );
 
+		/// creates the standard attribute ieMeshInterpolation plug in the given Mesh object (it expects to be a MFnMesh bindable object).
+		/// \param defaultInterpolation - only accept values listed in the presets (keys or values) of FromMayaMeshConverter.interpolationParameter().
+		static bool setMeshInterpolationAttribute( MObject &object, std::string interpolation = "linear" );
+
 	protected:
 
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;

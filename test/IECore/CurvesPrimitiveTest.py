@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -77,8 +77,13 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.basis(), CubicBasisf.bSpline() )
 		self.assertEqual( c.periodic(), True )
 		self.assertEqual( c.keys(), [ "P" ] )
-		self.assertEqual( c["P"].data, p )
+		self.assertNotEqual( c["P"].data, p )
+		self.assertEqual( c["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
+		pp = p.copy()
+		pp.setInterpretation( GeometricData.Interpretation.Point )
+		self.assertEqual( c["P"].data, pp )
 		self.failIf( c["P"].data.isSame( p ) )
+		self.failIf( c["P"].data.isSame( pp ) )
 		self.failIf( c.verticesPerCurve().isSame( i ) )
 
 	def testConstructorValidation( self ) :
@@ -176,21 +181,33 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	
 		c = CurvesPrimitive( IntVectorData( [ 4 ] ), CubicBasisf.bSpline(), True )
 		h = c.hash()
+		t = c.topologyHash()
+		
+		c2 = c.copy()
+		self.assertEqual( c2.hash(), h )
+		self.assertEqual( c2.topologyHash(), t )
 		
 		c.setTopology( IntVectorData( [ 5 ] ), CubicBasisf.bSpline(), True )
 		self.assertNotEqual( c.hash(), h )
+		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
-
+		t = c.topologyHash()
+		
 		c.setTopology( IntVectorData( [ 5 ] ), CubicBasisf.catmullRom(), True )
 		self.assertNotEqual( c.hash(), h )
+		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
-
+		t = c.topologyHash()
+		
 		c.setTopology( IntVectorData( [ 5 ] ), CubicBasisf.catmullRom(), False )
 		self.assertNotEqual( c.hash(), h )
+		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
+		t = c.topologyHash()
 		
 		c["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( c.hash(), h )
+		self.assertEqual( c.topologyHash(), t )
 
 	def tearDown( self ) :
 

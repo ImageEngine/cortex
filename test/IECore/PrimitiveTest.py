@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -66,6 +66,9 @@ class PrimitiveTest( unittest.TestCase ) :
 
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ) ) ) )
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3, 4 ] ) ) ) )
+
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f(1), V3f(2), V3f(3), V3f(4) ] ) ) ) )
 
 if __name__ == "__main__":
     unittest.main()

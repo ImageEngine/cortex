@@ -97,7 +97,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		n4 = IECoreHoudini.FnOpHolder.create( "noise", "noiseDeformer", parent=geo, contextArgs=contextArgs )
 		self.assertEqual( n4.path(), "/obj/geo1/noise" )
 		self.assertEqual( len(n4.outputConnectors()[0]), 1 )
-		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieCortexConverter" )
 		
 		# test automatic conversion and output connections
 		mountain = geo.createNode( "mountain" )
@@ -106,7 +106,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( n5.path(), "/obj/geo1/noise1" )
 		self.assertEqual( len(n5.outputConnectors()[0]), 1 )
 		converter = n5.outputConnectors()[0][0].outputNode()
-		self.assertEqual( converter.type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( converter.type().name(), "ieCortexConverter" )
 		self.assertEqual( len(converter.outputConnectors()[0]), 1 )
 		outputNode = converter.outputConnectors()[0][0].outputNode()
 		self.assertEqual( outputNode.type().name(), "mountain" )
@@ -485,7 +485,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.blindData()["name"].value, "torusGroup" )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "torusGroup" } ) )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
 		
 		group1.bypass( True )
@@ -508,7 +508,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		result = fn.getOp().resultParameter().getValue()
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( result.blindData()["name"].value, "boxGroup" )
+		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "boxGroup" } ) )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
 	
 	def testInputConnectionsSaveLoad( self ) :

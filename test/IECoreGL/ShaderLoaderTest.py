@@ -107,6 +107,42 @@ class ShaderLoaderTest( unittest.TestCase ) :
 		self.assertEqual( len( mh.messages ), 1 )
 		# but we do want a nice sensible message the first time.
 		self.failUnless( "thisShaderDoesntExist" in mh.messages[0].message )
+
+	def testClear( self ) :
+
+		sp = IECore.SearchPath( "/tmp", ":" )
+		l = IECoreGL.ShaderLoader( sp )
+
+		f = open('/tmp/testShader.frag','w')
+		f.write(
+			"""void main()
+			{
+				gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+			}"""
+		)
+		f.close()
+
+		s = l.load( "testShader" )
+
+		f = open('/tmp/testShader.frag','w')
+		f.write(
+			"""void main()
+			{
+				gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );
+			}"""
+		)
+		f.close()
+
+		# Source is updated, but we will still reuse the cache
+		s2 = l.load( "testShader" )
+		self.assert_( s.isSame( s2 ) )
+
+		l.clear()
+
+		# After clearing, the shader is now updated.  ( Ideally we would test the modified functionality of the shader here, but that seems hard. )
+		s3 = l.load( "testShader" )
+		self.assert_( not s.isSame( s3 ) )
+
 		
 if __name__ == "__main__":
     unittest.main()

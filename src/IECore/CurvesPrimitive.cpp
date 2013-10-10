@@ -67,7 +67,9 @@ CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const Cub
 
 	if( p )
 	{
-		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p->copy() );
+		V3fVectorDataPtr pData = p->copy();
+		pData->setInterpretation( GeometricData::Point );
+		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
 	}
 }
 
@@ -154,6 +156,10 @@ void CurvesPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void CurvesPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void CurvesPrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_basis.matrix );
 	h.append( m_basis.step );
 	h.append( m_linear );

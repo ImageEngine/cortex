@@ -42,21 +42,10 @@ float ieSpline( uniform float positions[]; uniform float values[]; float t )
 	{
 		return 0;
 	}
-	
-	// workaround for 3delight bugs
-	/// \todo remove or #ifdef appropriately when we have a solution from 3delight
-	uniform float tmpPositions[n];
-	uniform float tmpValues[n];
-	uniform float i;
-	for( i=0; i<n; i+=1 )
-	{
-		tmpPositions[i] = positions[i];
-		tmpValues[i] = values[i];
-	}
-	
+
 	float tt = clamp( t, positions[0], positions[n-1] );
-	tt = spline( "solvecatmull-rom", tt, tmpPositions );
-	return spline( "catmull-rom", tt, tmpValues );
+	tt = spline( "solvecatmull-rom", tt, positions );
+	return spline( "catmull-rom", tt, values );
 }
 
 color ieSpline( uniform float positions[]; uniform color values[]; float t )
@@ -67,20 +56,9 @@ color ieSpline( uniform float positions[]; uniform color values[]; float t )
 		return 0;
 	}
 	
-	// workaround for 3delight bugs
-	/// \todo remove or #ifdef when we have a solution from 3delight
-	uniform float tmpPositions[n];
-	uniform color tmpValues[n];
-	uniform float i;
-	for( i=0; i<n; i+=1 )
-	{
-		tmpPositions[i] = positions[i];
-		tmpValues[i] = values[i];
-	}
-	
 	float tt = clamp( t, positions[0], positions[n-1] );
-	tt = spline( "solvecatmull-rom", tt, tmpPositions );
-	return spline( "catmull-rom", tt, tmpValues );
+	tt = spline( "solvecatmull-rom", tt, positions );
+	return spline( "catmull-rom", tt, values );
 }
 
 #endif // IECORERI_SPLINE_H

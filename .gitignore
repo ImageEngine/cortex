@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *~
 *.so
 *.os
@@ -9,3 +10,34 @@
 .sconf_temp
 .sconsign.dblite
  
+=======
+*.*~
+*.tmp
+*.swp
+*.os
+*.so
+*.o
+*.pyc
+*.dylib
+.sconsign.dblite
+.sconf_temp
+.cproject
+.project
+.pydevproject
+.settings
+.flexlmrc
+doc/html
+doc/python
+plugins
+lib
+build
+config.log
+mayaLog
+test/IECore/IECoreTest
+test/IECore/results.txt
+test/IECore/resultsPython.txt
+test/IECoreRI/resultsPython.txt
+test/IECoreMaya/resultsPython.txt
+test/IECoreNuke/resultsPython.txt
+test/IECoreHoudini/resultsPython.txt
+>>>>>>> 7a3970793430feb96a63af04d98b6b953b1613bb

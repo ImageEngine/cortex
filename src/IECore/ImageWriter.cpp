@@ -183,6 +183,16 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 
 	if ( colorspace != "linear" && !rawChannels )
 	{
+		// Make sure A is not in the list of channels
+		vector<string> channelNames;
+		for( vector<string>::const_iterator it = channels.begin(); it != channels.end(); it++ )
+		{
+			if( *it != "A" )
+			{
+				channelNames.push_back( *it );
+			}
+		}
+		
 		image = image->copy();
 		// color convert the image from linear colorspace creating a temporary copy.
 		ColorSpaceTransformOpPtr transformOp = new ColorSpaceTransformOp();
@@ -190,7 +200,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		transformOp->outputColorSpaceParameter()->setTypedValue( colorspace );
 		transformOp->inputParameter()->setValue( constPointerCast< ImagePrimitive >(image) );
 		transformOp->copyParameter()->setTypedValue( false );
-		transformOp->channelsParameter()->setTypedValue( channels );
+		transformOp->channelsParameter()->setTypedValue( channelNames );
 		transformOp->operate();
  	}
 

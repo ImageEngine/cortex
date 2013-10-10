@@ -52,11 +52,13 @@ class SceneCacheTest( unittest.TestCase ) :
 		# test Write factory function 
 		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		self.assertTrue( isinstance( m, IECore.SceneCache ) )
+		self.assertEqual( m.fileName(), "/tmp/test.scc" )
 		self.assertRaises( RuntimeError, m.readBound, 0.0 )
 		del m
 		# test Read factory function
 		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		self.assertTrue( isinstance( m, IECore.SceneCache ) )
+		self.assertEqual( m.fileName(), "/tmp/test.scc" )
 		m.readBound( 0.0 )
 
 	def testAppendRaises( self ) :
@@ -111,7 +113,11 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.hasChild("a"), False )
 		self.assertEqual( m.hasChild("t"), True )
 		self.assertEqual( m.childNames(), [ "t" ] )
+		self.assertEqual( m.numBoundSamples(), 1 )
+		self.assertEqual( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( 0, -1, -1 ), IECore.V3d( 2, 1, 1 ) ) )
 		self.assertEqual( m.readBound(0.0), IECore.Box3d( IECore.V3d( 0, -1, -1 ), IECore.V3d( 2, 1, 1 ) ) )
+		self.assertEqual( m.numTransformSamples(), 1 )
+		self.assertEqual( m.readTransformAtSample(0), IECore.M44dData(IECore.M44d()) )
 		self.assertEqual( m.readTransform(0.0), IECore.M44dData(IECore.M44d()) )
 		self.assertEqual( m.hasObject(), False )
 		
@@ -143,6 +149,19 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( s.readObject(0.0), IECore.SpherePrimitive( 1 ) )
 	
 		self.assertEqual( s.readAttribute( "glah", 0 ), IECore.BoolData( True ) )
+
+	def testAnimatedAttributes( self ) :
+
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		m.writeAttribute( "w", IECore.BoolData( True ), 1.0 )
+		m.writeAttribute( "w", IECore.BoolData( False ), 2.0 )
+		del m
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( m.numAttributeSamples('w'), 2 )
+		self.assertEqual( m.readAttributeAtSample( "w", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( m.readAttributeAtSample( "w", 1 ), IECore.BoolData( False ) )
+		self.assertEqual( m.readAttribute( "w", 1 ), IECore.BoolData( True ) )
+		self.assertEqual( m.readAttribute( "w", 2 ), IECore.BoolData( False ) )
 
 	@staticmethod
 	def compareBBox( box1, box2 ):
@@ -288,6 +307,14 @@ class SceneCacheTest( unittest.TestCase ) :
 		# looks like an early version crashes here:
 		c.writeObject( IECore.Camera(), 0.0 )
 	
+	def testWriteNullPointers( self ) :
+
+		sc = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		t = sc.createChild( "transform" )
+		self.assertRaises( RuntimeError, t.writeAttribute, "a", None, 0 )
+		self.assertRaises( RuntimeError, t.writeObject, None, 0 )
+		self.assertRaises( RuntimeError, t.writeTransform, None, 0 )				
+
 	def testWritingOnFlushedFiles( self ) :
 
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
@@ -302,6 +329,56 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, b.writeBound, IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
 		self.assertRaises( RuntimeError, b.createChild, "c" )
 		self.assertRaises( RuntimeError, b.child, "c", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+
+	def testStoredScene( self ):
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( m.numBoundSamples(), 4 )
+		self.assertEqual( m.boundSampleTime(0), 0.0 )
+		self.assertEqual( m.boundSampleTime(1), 1.0 )
+		self.assertEqual( m.boundSampleTime(2), 2.0 )
+		self.assertEqual( m.boundSampleTime(3), 3.0 )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
+		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 3,3,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(2), IECore.Box3d( IECore.V3d( -2,-1,-2 ), IECore.V3d( 4,5,2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBound(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) ) )
+		self.assertEqual( m.boundSampleInterval(3), (1.0,2,3) )
+		self.assertEqual( m.boundSampleInterval(4), (0,3,3) )
+
+		A = m.child("A")
+		self.assertEqual( A.numBoundSamples(), 3 )
+		self.assertEqual( A.boundSampleTime(0), 0.0 )
+		self.assertEqual( A.boundSampleTime(1), 1.0 )
+		self.assertEqual( A.boundSampleTime(2), 2.0 )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), IECore.Box3d(IECore.V3d( 0,-1,-1 ), IECore.V3d( 2,1,1 ) ) ) )
+		a = A.child("a")
+		self.assertEqual( a.numBoundSamples(), 1 )
+		self.failUnless( SceneCacheTest.compareBBox( a.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
+		B = m.child("B")
+		self.assertEqual( B.numBoundSamples(), 4 )
+		self.assertEqual( B.boundSampleTime(0), 0.0 )
+		self.assertEqual( B.boundSampleTime(1), 1.0 )
+		self.assertEqual( B.boundSampleTime(2), 2.0 )
+		self.assertEqual( B.boundSampleTime(3), 3.0 )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2,-1,-2 ), IECore.V3d( 2,3,2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3,-2,-3 ), IECore.V3d( 3,4,3 ) ) ) )
+		b = B.child("b")
+		self.assertEqual( b.numBoundSamples(), 4 )
+		self.assertEqual( b.boundSampleTime(0), 0.0 )
+		self.assertEqual( b.boundSampleTime(1), 1.0 )
+		self.assertEqual( b.boundSampleTime(2), 2.0 )
+		self.assertEqual( b.boundSampleTime(3), 3.0 )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2 ), IECore.V3d( 2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3 ), IECore.V3d( 3 ) ) ) )
 
 	def testUnionBoundsForAnimation( self ):
 
@@ -337,10 +414,10 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(1), 1.0 )
 		self.assertEqual( m.boundSampleTime(2), 2.0 )
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
-		self.assertEqual( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) )
-		self.assertEqual( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
-		self.assertEqual( m.readBoundAtSample(1), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 3,3,1 ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 3,3,1 ) ) ) )
 		self.assertEqual( m.readBoundAtSample(2), IECore.Box3d( IECore.V3d( -2,-1,-2 ), IECore.V3d( 4,5,2 ) ) )
 		self.assertEqual( m.readBoundAtSample(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
 		self.assertEqual( m.readBound(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
@@ -413,6 +490,171 @@ class SceneCacheTest( unittest.TestCase ) :
 			tmpBounds = m.readBound( time )
 			tmpBounds.extendBy( IECore.Box3d( tmpBounds.min - errorTolerance, tmpBounds.max + errorTolerance ) )
 			self.failUnless( tmpBounds.contains( transformedBound ) )	# interpolated bounding box must contain bounding box of interpolated rotation.
+	
+	def testAnimatedObjectAttributes( self ) :
+		
+		plane = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		box["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2 = box.copy()
+		box2["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		a = s.createChild( "a" )
+		b = a.createChild( "b" )
+		c = a.createChild( "c" )
+		d = a.createChild( "d" )
+		
+		# animated color
+		b.writeObject( box, 0 )
+		b.writeObject( box2, 1 )
+		
+		# static
+		c.writeObject( box, 0 )
+		c.writeObject( box, 1 )
+		
+		# animated topology
+		d.writeObject( box, 0 )
+		d.writeObject( plane, 1 )
+		
+		del s, a, b, c, d
+		
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		
+		a = s.child( "a" )
+		self.assertFalse( a.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertFalse( a.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+		
+		b = a.child( "b" )
+		self.assertFalse( b.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertTrue( b.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+		self.assertEqual( b.readAttribute( "sceneInterface:animatedObjectPrimVars", 0 ), IECore.InternedStringVectorData( [ "Cs" ] ) )
+		
+		c = a.child( "c" )
+		self.assertFalse( c.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertTrue( c.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+		self.assertEqual( c.readAttribute( "sceneInterface:animatedObjectPrimVars", 0 ), IECore.InternedStringVectorData() )
+		
+		d = a.child( "d" )
+		self.assertTrue( d.hasAttribute( "sceneInterface:animatedObjectTopology" ) )
+		self.assertEqual( d.readAttribute( "sceneInterface:animatedObjectTopology", 0 ), IECore.BoolData( True ) )
+		self.assertFalse( d.hasAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+
+	def testObjectPrimitiveVariablesRead( self ) :
+		
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		box["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2 = box.copy()
+		box2["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
+
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		b = s.createChild( "b" )
+		b.writeObject( box, 0 )
+		b.writeObject( box2, 1 )
+		
+		del s, b
+
+		s = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		b = s.child( "b" )
+
+		self.assertEqual( b.readObject(0)['P'], b.readObjectPrimitiveVariables(['P','Cs'], 0)['P'] )
+		self.assertEqual( b.readObject(0)['Cs'], b.readObjectPrimitiveVariables(['P','Cs'], 0)['Cs'] )
+		self.assertEqual( b.readObject(0.5)['P'], b.readObjectPrimitiveVariables(['P','Cs'], 0.5)['P'] )
+		self.assertEqual( b.readObject(0.5)['Cs'], b.readObjectPrimitiveVariables(['P','Cs'], 0.5)['Cs'] )
+		self.assertEqual( b.readObject(1)['P'], b.readObjectPrimitiveVariables(['P','Cs'], 1)['P'] )
+		self.assertEqual( b.readObject(1)['Cs'], b.readObjectPrimitiveVariables(['P','Cs'], 1)['Cs'] )
+
+	def testTags( self ) :
+
+		sphere = IECore.SpherePrimitive( 1 )
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+
+		def testSet( values ):
+			return set( map( lambda s: IECore.InternedString(s), values ) )
+
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		A = m.createChild( "A" )
+		a = A.createChild( "a" )
+		aa = a.createChild( "aa" )
+		ab = a.createChild( "ab" )
+		ab.writeObject( box, 0 )
+		self.assertEqual( set( ab.readTags(includeChildren=False) ), testSet( [ "ObjectType:MeshPrimitive" ] ) )
+		B = m.createChild( "B" )
+		b = B.createChild( "b" )
+		c = B.createChild( "c" )
+		d = B.createChild( "d" )
+		d.writeObject( sphere, 0 )
+		self.assertEqual( set( d.readTags(includeChildren=False) ), testSet( [ "ObjectType:SpherePrimitive" ] ) )
+
+		aa.writeTags( [ "t1" ] )
+		self.assertEqual( set( aa.readTags(includeChildren=False) ), testSet( [ "t1" ] ) )
+		self.assertRaises( RuntimeError, aa.readTags )
+		aa.writeTags( [ "t1" ] )
+		ab.writeTags( [ IECore.InternedString("t1") ] )
+		ab.writeTags( [ IECore.InternedString("t2") ] )
+
+		c.writeTags( [ "t3" ] )
+
+		B.writeTags( [ "t4" ] )
+
+		a.writeTags( [] )
+		A.writeTags( [ "t1" ] )
+
+		del m, A, a, aa, ab, B, b, c, d
+
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		A = m.child("A")
+		a = A.child("a")
+		aa = a.child("aa")
+		ab = a.child("ab")
+		B = m.child("B")
+		b = B.child("b")
+		c = B.child("c")
+		d = B.child("d")
+
+		self.assertEqual( set( m.readTags() ), testSet( [ "t1", "t2", "t3", "t4", "ObjectType:MeshPrimitive", "ObjectType:SpherePrimitive" ] ) )
+		self.assertEqual( set( m.readTags(includeChildren=False) ), testSet([]) )
+		self.assertEqual( set( A.readTags() ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqual( set( A.readTags(includeChildren=False) ), testSet( [ "t1" ] ) )
+		self.assertEqual( set( a.readTags() ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqual( set( aa.readTags() ), testSet( [ "t1" ] ) )
+		self.assertEqual( set( aa.readTags(includeChildren=False) ), testSet(['t1']) )
+		self.assertEqual( set( ab.readTags() ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqual( set( B.readTags() ), testSet( [ "t3", "t4", "ObjectType:SpherePrimitive" ] ) )
+		self.assertEqual( set( B.readTags(includeChildren=False) ), testSet(['t4']) )
+		self.assertEqual( set( b.readTags() ), testSet( [] ) )
+		self.assertEqual( set( c.readTags() ), testSet( [ "t3" ] ) )
+		self.assertEqual( set( d.readTags() ), testSet( [ "ObjectType:SpherePrimitive" ] ) )
+
+		self.assertTrue( m.hasTag( "t1" ) )
+		self.assertTrue( m.hasTag( "t4" ) )
+		self.assertFalse( m.hasTag( "t1", includeChildren = False ) )
+		self.assertFalse( m.hasTag( "t4", includeChildren = False ) )
+		self.assertFalse( m.hasTag( "t5" ) )
+		self.assertFalse( m.hasTag( "t5", includeChildren = False ) )
+		self.assertTrue( ab.hasTag( "ObjectType:MeshPrimitive" ) )
+		self.assertTrue( B.hasTag( "t4" ) )
+		self.assertTrue( B.hasTag( "t4", includeChildren = False ) )
+		self.assertFalse( B.hasTag( "t1" ) )
+		self.assertTrue( B.hasTag( "t3" ) )
+		self.assertTrue( B.hasTag( "ObjectType:SpherePrimitive" ) )
+		self.assertTrue( d.hasTag( "ObjectType:SpherePrimitive" ) )
+	
+	def testSampleTimeOrder( self ):
+		
+		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+
+		t = m.createChild( "t" )
+		t.writeObject( IECore.SpherePrimitive( 1 ), 1.0 )
+		
+		s = m.createChild( "s" )
+		s.writeObject( IECore.SpherePrimitive( 1 ), 10.0 )
+
+		del m, t, s
+		
+		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertTrue( m.boundSampleTime(0) < m.boundSampleTime(1) )
+
 
 if __name__ == "__main__":
 	unittest.main()

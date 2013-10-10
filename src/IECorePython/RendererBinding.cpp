@@ -117,6 +117,37 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 				msg( Msg::Error, "ProceduralWrap::render", "Caught unknown exception" );
 			}
 		}
+		virtual MurmurHash hash() const
+		{
+			ScopedGILLock gilLock;
+			// ideally we might not do any exception handling here, and always leave it to the host.
+			// but in our case the host is mainly 3delight and that does no exception handling at all.
+			try
+			{
+				override o = this->get_override( "hash" );
+				if( o )
+				{
+					return o();
+				}
+				else
+				{
+					msg( Msg::Error, "ProceduralWrap::hash", "hash() python method not defined" );
+				}
+			}
+			catch( error_already_set )
+			{
+				PyErr_Print();
+			}
+			catch( const std::exception &e )
+			{
+				msg( Msg::Error, "ProceduralWrap::hash", e.what() );
+			}
+			catch( ... )
+			{
+				msg( Msg::Error, "ProceduralWrap::hash", "Caught unknown exception" );
+			}
+			return MurmurHash();
+		}
 
 };
 IE_CORE_DECLAREPTR( ProceduralWrap );
@@ -297,6 +328,13 @@ static void worldEnd( Renderer &r )
 	r.worldEnd();
 }
 
+static void editBegin( Renderer &r, const std::string &name, const dict &parameters )
+{
+	IECore::CompoundDataMap p;
+	fillCompoundDataMap( p, parameters );
+	r.editBegin( name, p );
+}
+
 void bindRenderer()
 {
 	scope rendererScope =  RunTimeTypedClass<Renderer>( "An abstract class to define a renderer" )
@@ -348,13 +386,16 @@ void bindRenderer()
 		.def("instance", &Renderer::instance)
 
 		.def("command", &command)
-
+		
+		.def("editBegin", &editBegin)
+		.def("editEnd", &Renderer::editEnd)
 	;
 
 	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrapPtr>( "Procedural" )
 		.def( init<>() )
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )
+		.def( "hash", &Renderer::Procedural::hash )
 	;
 
 }

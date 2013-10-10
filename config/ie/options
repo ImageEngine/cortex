@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -90,10 +90,11 @@ if targetApp :
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
+	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
 	if not compiler :
-		compiler = IEEnv.registry["platformDefaults"][platform]["compiler"]
+		compiler = platformReg.get( "toolsCompiler", platformReg["compiler"] )
 	if not compilerVersion :
-		compilerVersion = IEEnv.registry["platformDefaults"][platform]["compilerVersion"]
+		compilerVersion = platformReg.get( "toolsCompilerVersion", platformReg["compilerVersion"] )
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
@@ -113,11 +114,16 @@ os.environ["COMPILER_VERSION"] = compilerVersion
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
 
 m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
-if not m:
-	raise RuntimeError( "Cannot determine compiler version" )
-	
-compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
-compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+if m :
+	compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
+	compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+else :
+	m = re.compile( "^([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
+	compilerMajorVersion, compilerMinorVersion = m.group( 1, 2 )
+	compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + 9
+
+if not m :
+	raise RuntimeError( "Cannot determine compiler version (%s)" % compilerVersion )
 
 # figure out the suffix for boost libraries
 boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
@@ -125,7 +131,9 @@ while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ "-pipe", "-Wall", "-Werror" ]
+# adding "-Wno-write-strings" because gcc 4.4 complains about PyDateTime_IMPORT (python2.6) and gcc 4.1.2 doesn't accept pragmas
+## \todo: remove "-Wno-write-strings" if we ever drop support for older gcc versions or python2.6
+CXXFLAGS = [ "-pipe", "-Wall", "-Werror", "-Wno-write-strings" ]
 if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
 	
@@ -210,7 +218,7 @@ pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
 if IEEnv.platformOS().startswith( "osx" ):
 	pythonRoot = os.path.join( pythonRoot, "Python.framework", "Versions", pythonVersion )
 
-PYTHON = "/software/tools/wrappers/python%s" % pythonVersion
+PYTHON = "/software/tools/wrappers/iePython%s" % pythonVersion
 PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 
@@ -289,6 +297,8 @@ if targetApp=="nuke" :
 		# version than we have installed centrally.
 		PNG_INCLUDE_PATH = "/usr/local/include/"
 	
+	# Nuke 6 uses an OpenEXR version that we can't install centrally
+	OPENEXR_LIB_SUFFIX = ""
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -308,7 +318,7 @@ if targetApp=="houdini" :
 	PNG_INCLUDE_PATH = OPENEXR_INCLUDE_PATH
 	
 	HOUDINI_ROOT = houdiniReg['location']
-	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated'
+	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated -Wno-reorder'
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )

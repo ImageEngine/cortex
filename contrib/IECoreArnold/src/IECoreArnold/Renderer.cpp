@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -253,6 +253,16 @@ IECore::DataPtr Renderer::command( const std::string &name, const IECore::Compou
 	return m_implementation->command( name, parameters );
 }
 
+void Renderer::editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters )
+{
+	m_implementation->editBegin( editType, parameters );
+}
+
+void Renderer::editEnd()
+{
+	m_implementation->editEnd();
+}
+	
 size_t Renderer::numProceduralNodes() const
 {
 	return m_implementation->m_nodes.size();

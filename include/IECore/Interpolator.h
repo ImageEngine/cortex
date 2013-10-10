@@ -74,5 +74,6 @@ struct CubicInterpolator
 #include "MatrixInterpolator.inl"
 #include "TransformationMatrixInterpolator.inl"
 #include "TypedDataInterpolator.inl"
+#include "GeometricTypedDataInterpolator.inl"
 
 #endif // IE_CORE_INTERPOLATOR_H

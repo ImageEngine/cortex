@@ -40,7 +40,7 @@ import IECoreRI
 import os.path
 import os
 
-class ArchiveRecordTest( unittest.TestCase ) :
+class ArchiveRecordTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -71,11 +71,6 @@ class ArchiveRecordTest( unittest.TestCase ) :
 		self.assertEqual( len( m.messages ), 1 )
 		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Error )
 		self.assert_( "printf" in m.messages[0].message )
-
-	def tearDown( self ) :
-
-		if os.path.exists( "test/IECoreRI/output/testArchiveRecord.rib" ) :
-			os.remove( "test/IECoreRI/output/testArchiveRecord.rib" )
 
 if __name__ == "__main__":
     unittest.main()

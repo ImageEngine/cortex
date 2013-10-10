@@ -37,6 +37,7 @@
 
 #include "IECoreGL/GL.h" // must come first so glew.h is included before gl.h
 
+#include "maya/MTypes.h"
 #include "maya/MGlobal.h"
 #include "maya/MDrawData.h"
 #include "maya/MDagPath.h"
@@ -53,6 +54,9 @@
 #include "maya/MStringArray.h"
 
 #include "IECore/MessageHandler.h"
+#include "IECore/MeshPrimitive.h"
+#include "IECore/RunTimeTyped.h"
+#include "IECore/MeshPrimitiveEvaluator.h"
 
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/State.h"
@@ -66,6 +70,8 @@
 #include "IECoreMaya/SceneShapeUI.h"
 #include "IECoreMaya/SceneShape.h"
 #include "IECoreMaya/Convert.h"
+
+#include <limits>
 
 using namespace IECoreMaya;
 using namespace std;
@@ -106,17 +112,32 @@ void SceneShapeUI::getDrawRequests( const MDrawInfo &info, bool objectAndActiveO
 
 	// a request for the bound if necessary
 	MPlug pDrawBound( sceneShape->thisMObject(), SceneShape::aDrawRootBound );
-	bool drawBound = true;
+	bool drawBound;
 	pDrawBound.getValue( drawBound );
 	
 	if( drawBound )
 	{
-		MDrawRequest request = info.getPrototype( *this );
-		request.setDrawData( drawData );
-		request.setToken( BoundDrawMode );
-		request.setDisplayStyle( M3dView::kWireFrame );
-		setWireFrameColors( request, info.displayStatus() );
-		requests.add( request );
+		bool doDrawBound = true;
+		
+		// If objectOnly is true, check for an object. If none found, no need to add the bound request.
+		MPlug pObjectOnly( sceneShape->thisMObject(), SceneShape::aObjectOnly );
+		bool objectOnly;
+		pObjectOnly.getValue( objectOnly );
+		if( objectOnly && !sceneShape->getSceneInterface()->hasObject() )
+		{
+			doDrawBound = false;
+		}
+		
+		if( doDrawBound )
+		{
+			MDrawRequest request = info.getPrototype( *this );
+			request.setDrawData( drawData );
+			request.setToken( BoundDrawMode );
+			request.setDisplayStyle( M3dView::kWireFrame );
+			setWireFrameColors( request, info.displayStatus() );
+			requests.add( request );
+		}
+
 	}
 
 	MPlug pDrawAllBounds( sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
@@ -125,16 +146,11 @@ void SceneShapeUI::getDrawRequests( const MDrawInfo &info, bool objectAndActiveO
 	
 	// requests for the scene if necessary
 	MPlug pGLPreview( sceneShape->thisMObject(), SceneShape::aDrawGeometry );
-	bool glPreview = false;
+	bool glPreview;
 	pGLPreview.getValue( glPreview );
 	
 	if( glPreview || drawAllBounds )
 	{
-		//// Trigger compute
-		//MPlug pChildren( sceneShape->thisMObject(), SceneShape::aChildrenNames );
-		//MObject getVal;
-		//pChildren.getValue( getVal );
-		
 		if( info.displayStyle()==M3dView::kGouraudShaded || info.displayStyle()==M3dView::kFlatShaded )
 		{
 			// make a request for solid drawing with a material
@@ -244,7 +260,6 @@ void SceneShapeUI::setWireFrameColors( MDrawRequest &request, M3dView::DisplaySt
 	}
 }
 
-
 void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 {
 	MStatus s;
@@ -253,6 +268,9 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 	assert( sceneShape );
 
 	view.beginGL();
+	
+	M3dView::LightingMode lightingMode;
+	view.getLightingMode( lightingMode );
 	
 	LightingState lightingState;
 	bool restoreLightState = cleanupLights( request, view, &lightingState );
@@ -276,10 +294,10 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 		{
 			resetHilites();
 			
-			IECoreGL::ConstScenePtr scene = sceneShape->scene();
+			IECoreGL::ConstScenePtr scene = sceneShape->glScene();
 			if( scene )
 			{
-				IECoreGL::State *displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
+				IECoreGL::State *displayState = m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle(), lightingMode );
 				
 				if ( request.component() != MObject::kNullObj )
 				{
@@ -293,18 +311,18 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 					
 					int len = fnComp.elementCount( &s );
 					assert( s );
-					std::vector<std::string> groupNames;
+					std::vector<IECore::InternedString> groupNames;
 					for ( int j = 0; j < len; j++ )
 					{
 						int index = fnComp.element(j);
-						groupNames.push_back( sceneShape->getName( index ) );
+						groupNames.push_back( sceneShape->selectionName( index ) );
 					}
 					// Sort by name to make sure we don't unhilite selected items that are further down the hierarchy
 					std::sort( groupNames.begin(), groupNames.end() );
 					
-					for ( std::vector<std::string>::iterator it = groupNames.begin(); it!= groupNames.end(); ++it)
+					for ( std::vector<IECore::InternedString>::iterator it = groupNames.begin(); it!= groupNames.end(); ++it)
 					{
-						IECoreGL::GroupPtr group = sceneShape->getGroup( *it );
+						IECoreGL::GroupPtr group = sceneShape->glGroup( *it );
 
 						hiliteGroups(
 								group,
@@ -332,6 +350,205 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 	view.endGL();
 }
 
+#if MAYA_API_VERSION >= 201300
+
+bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
+{
+	MStatus s;
+
+	if( snapInfo.displayStatus() != M3dView::kHilite )
+	{
+		MSelectionMask meshMask( MSelectionMask::kSelectMeshes );
+		if( !snapInfo.selectable( meshMask ) )
+		{
+			return false;
+		}
+	}
+
+	// early out if we have no scene to draw
+	SceneShape *sceneShape = static_cast<SceneShape *>( surfaceShape() );
+	const IECore::SceneInterface *sceneInterface = sceneShape->getSceneInterface();
+	if( !sceneInterface )
+	{
+		return false;
+	}
+
+	IECoreGL::ConstScenePtr scene = sceneShape->glScene();
+	if( !scene )
+	{
+		return false;
+	}
+
+	// Get the viewport that the snapping operation is taking place in.
+	M3dView view = snapInfo.view();
+
+	// Use an IECoreGL::Selector to find the point in world space that we wish to snap to.
+	// We do this by first getting the origin of the selection ray and transforming it into
+	// NDC space using the OpenGL projection and transformation matrices. Once we have the
+	// point in NDC we can use it to define the viewport that the IECoreGL::Selector will use.
+
+	MPoint localRayOrigin;
+	MVector localRayDirection;
+	snapInfo.getLocalRay( localRayOrigin, localRayDirection );
+	
+	Imath::V3d org( localRayOrigin[0], localRayOrigin[1], localRayOrigin[2] );
+	MDagPath camera;
+	view.getCamera( camera );
+	MMatrix localToCamera = snapInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();
+	
+	view.beginSelect();
+		Imath::M44d projectionMatrix;
+		glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix.getValue() );
+	view.endSelect();
+
+	double v[4][4];
+	localToCamera.get( v ); 
+	Imath::M44d cam( v );
+	Imath::V3d ndcPt3d = ( (org * cam ) * projectionMatrix + Imath::V3d( 1. ) ) * Imath::V3d( .5 );
+	Imath::V2d ndcPt( std::max( std::min( ndcPt3d[0], 1. ), 0. ), 1. - std::max( std::min( ndcPt3d[1], 1. ), 0. ) );
+
+	view.beginGL();
+	
+		glMatrixMode( GL_PROJECTION );
+		glLoadMatrixd( projectionMatrix.getValue() );
+		
+		float radius = .001; // The radius of the selection area in NDC.
+		double aspect = double( view.portWidth() ) / view.portHeight();
+		Imath::V2f selectionWH( radius, radius * aspect );
+		
+		std::vector<IECoreGL::HitRecord> hits;
+		{
+			IECoreGL::Selector selector( Imath::Box2f( ndcPt - selectionWH, ndcPt + selectionWH ), IECoreGL::Selector::IDRender, hits );
+				
+			IECoreGL::State::bindBaseState();
+			selector.baseState()->bind();
+			scene->render( selector.baseState() );			
+		}
+				
+	view.endGL();
+
+	if( hits.empty() )
+	{
+		return false;
+	}
+
+	// Get the closest mesh hit.	
+	float depthMin = std::numeric_limits<float>::max();
+	int depthMinIndex = -1;
+	for( unsigned int i=0, e = hits.size(); i < e; i++ )
+	{		
+		if( hits[i].depthMin < depthMin )
+		{
+			depthMin = hits[i].depthMin;
+			depthMinIndex = i;
+		}
+	}
+
+	// Get the absolute path of the hit object.
+	IECore::SceneInterface::Path objPath;
+	std::string objPathStr;
+	sceneInterface->path( objPath );
+	IECore::SceneInterface::pathToString( objPath, objPathStr );
+	
+	objPathStr += hits[depthMinIndex].name;
+	IECore::SceneInterface::stringToPath( objPathStr, objPath );
+
+	// Validate the hit selection.
+	IECore::ConstSceneInterfacePtr childInterface;
+	try
+	{
+		childInterface = sceneInterface->scene( objPath );
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	if( !childInterface )
+	{
+		return false;
+	}
+	
+	if( !childInterface->hasObject() )
+	{
+		return false;
+	}
+
+	// Get the mesh primitive so that we can query it's vertices.
+	double time = sceneShape->time();
+	IECore::ConstObjectPtr object = childInterface->readObject( time );
+	IECore::ConstMeshPrimitivePtr meshPtr = IECore::runTimeCast<const IECore::MeshPrimitive>( object.get() );
+	
+	if ( !meshPtr )
+	{
+		return false;
+	}
+	
+	// Calculate the snap point in object space.
+	MPoint worldIntersectionPoint;
+	selectionRayToWorldSpacePoint( camera, snapInfo, depthMin, worldIntersectionPoint );
+	Imath::V3f pt( worldIntersectionPoint[0], worldIntersectionPoint[1], worldIntersectionPoint[2] );
+	Imath::M44f objToWorld( worldTransform( childInterface, time ) );
+	pt = pt * objToWorld.inverse();
+
+	// Get the list of vertices in the mesh.
+	IECore::V3fVectorData::ConstPtr pointData( meshPtr->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex ) ); 
+	const std::vector<Imath::V3f> &vertices( pointData->readable() ); 
+	
+	// Find the vertex that is closest to the snap point.
+	Imath::V3d closestVertex;
+	float closestDistance = std::numeric_limits<float>::max(); 
+	
+	for( std::vector<Imath::V3f>::const_iterator it( vertices.begin() ); it != vertices.end(); ++it )
+	{
+		Imath::V3d vert( *it );
+		float d( ( pt - vert ).length() ); // Calculate the distance between the vertex and the snap point.
+		if( d < closestDistance )
+		{
+			closestDistance = d;
+			closestVertex = vert;
+		}
+	}
+
+	// Snap to the vertex.
+	closestVertex *= objToWorld;
+	snapInfo.setSnapPoint( MPoint( closestVertex[0], closestVertex[1], closestVertex[2] ) );
+	return true;
+}
+
+#endif
+
+void SceneShapeUI::selectionRayToWorldSpacePoint( const MDagPath &camera, const MSelectInfo &selectInfo, float depth, MPoint &worldIntersectionPoint ) const
+{
+	MPoint localRayOrigin;
+	MVector localRayDirection;
+	selectInfo.getLocalRay( localRayOrigin, localRayDirection );
+
+	MFnCamera fnCamera( camera.node() );
+	float near = fnCamera.nearClippingPlane();
+	float far = fnCamera.farClippingPlane();
+	float z = -1;
+
+	if( fnCamera.isOrtho() )
+	{
+		z = Imath::lerp( near, far, depth );
+	}
+	else
+	{
+		// perspective camera - depth isn't linear so linearise to get z
+		float a = far / ( far - near );
+		float b = far * near / ( near - far );
+		z = b / ( depth - a );
+	}	
+
+	MMatrix localToCamera = selectInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();	
+	MPoint cameraRayOrigin = localRayOrigin * localToCamera;
+	MVector cameraRayDirection = localRayDirection * localToCamera;
+
+	MPoint cameraIntersectionPoint = cameraRayOrigin + cameraRayDirection * ( -( z - near ) / cameraRayDirection.z );
+	worldIntersectionPoint = cameraIntersectionPoint * camera.inclusiveMatrix();
+}
+
 bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const
 {
 	MStatus s;
@@ -350,7 +567,12 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 
 	// early out if we have no scene to draw
 	SceneShape *sceneShape = static_cast<SceneShape *>( surfaceShape() );
-	IECoreGL::ConstScenePtr scene = sceneShape->scene();
+	if( !sceneShape->getSceneInterface() )
+	{
+		return false;
+	}
+
+	IECoreGL::ConstScenePtr scene = sceneShape->glScene();
 	if( !scene )
 	{
 		return false;
@@ -361,23 +583,27 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	// that means we don't really want to call view.beginSelect(), but we have to
 	// call it just to get the projection matrix for our own selection, because as far
 	// as I can tell, there is no other way of getting it reliably.
-	
+
 	M3dView view = selectInfo.view();
 	view.beginSelect();
-	Imath::M44d projectionMatrix;
-	glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix.getValue() );
+		Imath::M44d projectionMatrix;
+		glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix.getValue() );
 	view.endSelect();
-	
+		
 	view.beginGL();
 	
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixd( projectionMatrix.getValue() );
 		
-		// Need OcclusionQuery Selector mode to be able to select child bounds. Will have to check IDRender would improve performances.
-		IECoreGL::Selector::Mode selectionMode = IECoreGL::Selector::OcclusionQuery;
-		
-		IECoreGL::Selector selector;
-		selector.begin( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode );
+		IECoreGL::Selector::Mode selectionMode = IECoreGL::Selector::IDRender;
+		if( selectInfo.displayStatus() == M3dView::kHilite && !selectInfo.singleSelection() )
+		{
+			selectionMode = IECoreGL::Selector::OcclusionQuery;
+		}
+
+		std::vector<IECoreGL::HitRecord> hits;
+		{
+			IECoreGL::Selector selector( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode, hits );
 				
 			IECoreGL::State::bindBaseState();
 			selector.baseState()->bind();
@@ -385,17 +611,15 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 
 			if( selectInfo.displayStatus() != M3dView::kHilite )
 			{
-				// we're not in component selection mode. we'd like to be able to select the procedural
-				// object using the bounding box so we draw it too.
+				// We're not in component selection mode. We'd like to be able to select the scene shape
+				// using the bounding box so we draw it too.
 				IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( sceneShape->boundingBox() ) );
 			}
-			
-		std::vector<IECoreGL::HitRecord> hits;
-		selector.end( hits );
-				
+		}
+						
 	view.endGL();
 	
-	if( !hits.size() )
+	if( hits.empty() )
 	{
 		return false;
 	}
@@ -413,45 +637,20 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			depthMin = hits[i].depthMin;
 			depthMinIndex = componentIndices.length();
 		}
-		int index = sceneShape->getIndex( hits[i].name.value() );
+		int index = sceneShape->selectionIndex( hits[i].name );
 		componentIndices.append( index );
 	}
 	
 	assert( depthMinIndex >= 0 );
 
-	// figure out the world space location of the closest hit
-	
+	// figure out the world space location of the closest hit	
 	MDagPath camera;
 	view.getCamera( camera );
-	MFnCamera fnCamera( camera.node() );
-	float near = fnCamera.nearClippingPlane();
-	float far = fnCamera.farClippingPlane();
 	
-	float z = -1;
-	if( fnCamera.isOrtho() )
-	{
-		z = Imath::lerp( near, far, depthMin );
-	}
-	else
-	{
-		// perspective camera - depth isn't linear so linearise to get z
-		float a = far / ( far - near );
-		float b = far * near / ( near - far );
-		z = b / ( depthMin - a );
-	}	
-	
-	MPoint localRayOrigin;
-	MVector localRayDirection;
-	selectInfo.getLocalRay( localRayOrigin, localRayDirection );
-	MMatrix localToCamera = selectInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();	
-	MPoint cameraRayOrigin = localRayOrigin * localToCamera;
-	MVector cameraRayDirection = localRayDirection * localToCamera;
-	
-	MPoint cameraIntersectionPoint = cameraRayOrigin + cameraRayDirection * ( -( z - near ) / cameraRayDirection.z );
-	MPoint worldIntersectionPoint = cameraIntersectionPoint * camera.inclusiveMatrix();
-	
+	MPoint worldIntersectionPoint;
+	selectionRayToWorldSpacePoint( camera, selectInfo, depthMin, worldIntersectionPoint );
+
 	// turn the processed hits into appropriate changes to the current selection
-				
 	if( selectInfo.displayStatus() == M3dView::kHilite )
 	{
 		// selecting components
@@ -482,6 +681,15 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	}
 	else
 	{
+		// Check if we should be able to select that object
+		MPlug pObjectOnly( sceneShape->thisMObject(), SceneShape::aObjectOnly );
+		bool objectOnly;
+		pObjectOnly.getValue( objectOnly );
+		if( objectOnly && !sceneShape->getSceneInterface()->hasObject() )
+		{
+			return true;
+		}
+		
 		// selecting objects
 		MSelectionList item;
 		item.add( selectInfo.selectPath() );
@@ -495,6 +703,28 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	}
 	
 	return true;
+}
+
+Imath::M44d SceneShapeUI::worldTransform( const IECore::SceneInterface *scene, double time ) const
+{
+	IECore::SceneInterface::Path p;
+	scene->path( p );
+
+	IECore::ConstSceneInterfacePtr tmpScene = scene->scene( IECore::SceneInterface::rootPath );
+	Imath::M44d result;
+
+	for ( IECore::SceneInterface::Path::const_iterator it = p.begin(); tmpScene && it != p.end(); ++it )
+	{
+		tmpScene = tmpScene->child( *it, IECore::SceneInterface::NullIfMissing );
+		if ( !tmpScene )
+		{
+			break;
+		}
+
+		result = tmpScene->readTransformAsMatrix( time ) * result;
+	}
+	
+	return result;
 }
 
 void SceneShapeUI::unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const

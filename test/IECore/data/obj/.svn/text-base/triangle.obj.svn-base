@@ -1,8 +1,0 @@
-# triangle description:
-# a CCW face with three vertices all lying in the plane z = 0.0
-
-o 1
-v 10.0 10.0 0.0
-v 50.0 10.0 0.0
-v 10.0 50.0 0.0
-f 1 2 3

@@ -34,6 +34,8 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/CompoundObject.h"
+
 #include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
 
 using namespace IECore;
@@ -71,11 +73,12 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 	}
 	
 	// is there a single named shape?
-	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-	if ( attrHandle.isAttributeValid() )
+	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
+	if ( attrRef.isValid() && attrRef.isString() )
 	{
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		if ( geo->getUniqueValueCount( attrRef ) < 2 )
+		const GA_Attribute *nameAttr = attrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		if ( tuple->getTableEntries( nameAttr ) < 2 )
 		{
 			return Ideal;
 		}
@@ -84,7 +87,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 	return Suitable;
 }
 
-PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
+ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	
@@ -115,11 +118,41 @@ PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detai
 		}
 	}
 	
-	result->setTopology( new IntVectorData( vertsPerFace ), new IntVectorData( vertIds ) );
+	// try to get the interpolation type from the geo
+	CompoundObjectPtr modifiedOperands = 0;
+	std::string interpolation = "linear";
+	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "ieMeshInterpolation" );
+	if ( attrHandle.isAttributeValid() )
+	{
+		modifiedOperands = operands->copy();
+		modifiedOperands->member<StringData>( "attributeFilter" )->writable() += " ^ieMeshInterpolation";
+		
+		GA_Range primRange = geo->getPrimitiveRange();
+		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
+		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
+		{
+			const char *value = attrRef.getString( it.getOffset() );
+			if ( value )
+			{
+				if ( !strcmp( value, "subdiv" ) )
+				{
+					interpolation = "catmullClark";
+					break;
+				}
+				else if ( !strcmp( value, "poly" ) )
+				{
+					interpolation = "linear";
+					break;
+				}
+			}
+		}
+	}
+	
+	result->setTopology( new IntVectorData( vertsPerFace ), new IntVectorData( vertIds ), interpolation );
 	
 	if ( geo->getNumVertices() )
 	{
-		transferAttribs( geo, result, operands );
+		transferAttribs( geo, result, modifiedOperands ? modifiedOperands : operands );
 	}
 	
 	return result;

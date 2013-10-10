@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,12 +65,12 @@ void bindImathBox()
 	bindBox<V2d>("Box2d");
 
 	class_< Box3f > cf = bindBox<V3f>("Box3f");
-	cf.def("transform", &transform<float,float>);
-	cf.def("transform", &transform<float,double>);
+	cf.def("transform", ( Box3f (*)(const Box3f &, const Matrix44<float>&) )&transform<float,float>);
+	cf.def("transform", ( Box3f (*)(const Box3f &, const Matrix44<double>&) )&transform<float,double>);
 
 	class_< Box3d > cd = bindBox<V3d>("Box3d");
-	cd.def("transform", &transform<double,float>);
-	cd.def("transform", &transform<double,double>);
+	cd.def("transform", ( Box3d (*)(const Box3d &, const Matrix44<float>&) )&transform<double,float>);
+	cd.def("transform", ( Box3d (*)(const Box3d &, const Matrix44<double>&) )&transform<double,double>);
 
 	bindBox<V2i>("Box2i");
 	bindBox<V3i>("Box3i");

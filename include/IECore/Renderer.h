@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/CompoundData.h"
 #include "IECore/CubicBasis.h"
+#include "IECore/MurmurHash.h"
 
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathBox.h"
@@ -110,6 +111,12 @@ class Renderer : public RunTimeTyped
 		/// A colon separated list of paths to search for fonts on - these are used
 		/// by the text() primitive. The default value should come from the
 		/// IECORE_FONT_PATHS environment variable if set.
+		///
+		/// \par Rerendering Options
+		/// <br>
+		/// \li <b>"editable" BoolData</b><br>
+		/// This option must be set to enable the use of the interactive rerendering
+		/// methods defined below.
 		///////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Set an option. Must not be called after worldBegin().
@@ -339,6 +346,12 @@ class Renderer : public RunTimeTyped
 				/// the geometry generated must be contained within the
 				/// box returned by bound().
 				virtual void render( RendererPtr renderer ) const = 0;
+				/// Implement this to return a hash for procedural level instancing.
+				/// Procedurals with the same hash will be reused by renderers that
+				/// support this feature. If computing a sensible hash is difficult
+				/// or impossible, return IECore::MurmurHash() from this function
+				/// and this feature will be disabled.
+				virtual MurmurHash hash() const = 0;
 
 		};
 		IE_CORE_DECLAREPTR( Procedural );
@@ -365,6 +378,20 @@ class Renderer : public RunTimeTyped
 		/// renderer->command( "ri:makeTexture", ... ).
 		virtual DataPtr command( const std::string &name, const CompoundDataMap &parameters ) = 0;
 
+		//! @name Interactive rerendering
+		/// These methods provide a means of upating the scene following a call to worldEnd(),
+		/// causing the renderer to interactively rerender the scene.
+		///////////////////////////////////////////////////////////////////////////////////////
+		//@{
+		/// Starts a new scene edit of the specified type. The standard functions above for
+		/// declaring the scene can then be used to perform the edit.
+		/// \todo Better define the semantics of this function as we implement it for different
+		/// renderers.
+		virtual void editBegin( const std::string &editType, const CompoundDataMap &parameters ) = 0;
+		/// Ends the current scene edit.
+		virtual void editEnd() = 0;
+		//@}
+		
 };
 
 }

@@ -66,9 +66,12 @@ class LRUCache : private boost::noncopyable
 		/// when given the key. It should throw a descriptive exception if it can't get the data for
 		/// any reason.
 		typedef boost::function<Ptr ( const Key &key, Cost &cost )> GetterFunction;
+		/// The optional RemovalCallback is called whenever an item is discarded from the cache.
+		typedef boost::function<void ( const Key &key, const Ptr &data )> RemovalCallback;
 
 		LRUCache( GetterFunction getter );
 		LRUCache( GetterFunction getter, Cost maxCost );
+		LRUCache( GetterFunction getter, RemovalCallback removalCallback, Cost maxCost );
 		virtual ~LRUCache();
 
 		void clear();
@@ -129,7 +132,10 @@ class LRUCache : private boost::noncopyable
 		/// Clear out any data with a least-recently-used strategy until the current cost does not exceed the specified cost.
 		void limitCost( Cost cost );
 
+		static void nullRemovalCallback( const Key &key, const Ptr &data );
+
 		GetterFunction m_getter;
+		RemovalCallback m_removalCallback;
 
 		mutable Mutex m_mutex;
 

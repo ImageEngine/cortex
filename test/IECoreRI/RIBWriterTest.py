@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import os.path
 import IECore
 import IECoreRI
 
-class RIBWriterTest( unittest.TestCase ) :
+class RIBWriterTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/ribWriter.rib"
 
@@ -69,11 +69,6 @@ class RIBWriterTest( unittest.TestCase ) :
 		self.assert_( "PointsGeneralPolygons" in l )
 		self.assert_( "WorldBegin" in l )
 		self.assert_( "WorldEnd" in l )
-
-	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()

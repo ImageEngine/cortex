@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import os.path
 import IECore
 import IECoreRI
 
-class SubsurfaceTest( unittest.TestCase ) :
+class SubsurfaceTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/subsurface.rib"
 
@@ -74,11 +74,6 @@ class SubsurfaceTest( unittest.TestCase ) :
 		for a in ( '"color meanfreepath" [ 1 1 1 ]', '"color reflectance" [ 0 0 0 ]', '"float refractionindex" [ 1.3 ]', '"float scale" [ 0.1 ]', '"float shadingrate" [ 10 ]' ) :
 			p3 = l.find( a )
 			self.assert_( p3 > p2 )
-
-	def tearDown( self ) :
-
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
 
 if __name__ == "__main__":
     unittest.main()

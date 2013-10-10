@@ -98,6 +98,7 @@ class TestObjectIO( unittest.TestCase ) :
 		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 
 		o = V3fVectorData()
+		o.setInterpretation( GeometricData.Interpretation.Vector )
 		for i in range( 0, 1000 ) :
 			o.append( V3f( i*3, i*3 + 1, i*3 + 2 ) )
 		self.assertEqual( o.size(), 1000 )
@@ -108,8 +109,9 @@ class TestObjectIO( unittest.TestCase ) :
 
 		for i in range( 0, 1000 ) :
 			self.assertEqual( o[i], oo[i] )
-
-		self.assertEqual( o, oo );
+		
+		self.assertEqual( oo.getInterpretation(), GeometricData.Interpretation.Vector )
+		self.assertEqual( o, oo )
 
 	def testOverwrite( self ) :
 
@@ -166,12 +168,12 @@ class TestObjectIO( unittest.TestCase ) :
 		d['c'] = FloatData(3)
 		d['e'] = HalfData(4)
 		d['f'] = V2iData( V2i(1,10) )
-		d['g'] = V2fData( V2f(2,31) )
-		d['h'] = V2dData( V2d(3,551) )
-		d['i'] = V3fData( V3f(1,3,5) )
+		d['g'] = V2fData( V2f(2,31), GeometricData.Interpretation.Vector )
+		d['h'] = V2dData( V2d(3,551), GeometricData.Interpretation.Color )
+		d['i'] = V3fData( V3f(1,3,5), GeometricData.Interpretation.Point )
 		d['k'] = M44fData( M44f(2) )
 		d['l'] = HalfVectorData( [ 1,2,3,100,9,10,11] )
-		d['m'] = V2fVectorData( [ V2f(1,2), V2f(3,4), V2f(5,6) ] )
+		d['m'] = V2fVectorData( [ V2f(1,2), V2f(3,4), V2f(5,6) ], GeometricData.Interpretation.Normal )
 		d['x'] = StringData( "testttt" )
 		d['z'] = StringVectorData( [ "a", 'b', 'adffs' ] )
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,18 +37,20 @@
 
 #include "IECore/Parameter.h"
 #include "IECore/TypedData.h"
+#include "IECore/TypedParameterInternals.h"
 
 namespace IECore
 {
 
-/// A template class for simple typed parameters. TypedData<T> is used to store the value.
+/// A template class for simple typed parameters. TypedParameterTraits<T> is used to
+/// determine the appropriate ObjectType which is used to store the value.
 template<typename T>
 class TypedParameter : public Parameter
 {
 	public :
 
 		typedef T ValueType;
-		typedef TypedData<T> ObjectType;
+		typedef typename TypedParameterTraits<T>::ObjectType ObjectType;
 
 		IE_CORE_DECLAREPTR( ObjectType );
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,6 +60,8 @@ namespace IECorePython
 			.def( init<>() )
 			.def( init<IntVectorDataPtr, IntVectorDataPtr, optional<const std::string &, V3fVectorDataPtr> >() )
 			.def( "numFaces", &MeshPrimitive::numFaces )
+			.def("minVerticesPerFace", &MeshPrimitive::minVerticesPerFace )
+			.def("maxVerticesPerFace", &MeshPrimitive::maxVerticesPerFace )
 			/// \todo I'd rather see these bound as functions rather than properties so they match the C++ interface.
 			/// I think this is particularly important for verticesPerFace and vertexIds as it's pretty unintuitive that a property
 			/// should return a copy. This is something we need to be more consistent about throughout cortex.
@@ -67,8 +69,9 @@ namespace IECorePython
 			.add_property( "vertexIds", &vertexIds, "A copy of the mesh's list of vertex ids." )
 			.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ), &MeshPrimitive::setInterpolation )
 			.def( "setTopology", &MeshPrimitive::setTopology )
-			.def( "createBox", &MeshPrimitive::createBox ).staticmethod( "createBox" )
-			.def( "createPlane", &MeshPrimitive::createPlane ).staticmethod( "createPlane" )
+			.def( "createBox", &MeshPrimitive::createBox, ( arg_( "bounds" ) ) ).staticmethod( "createBox" )
+			.def( "createPlane", &MeshPrimitive::createPlane, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ) ) ).staticmethod( "createPlane" )
+			.def( "createSphere", &MeshPrimitive::createSphere, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ) ) ).staticmethod( "createSphere" )
 		;
 	}
 

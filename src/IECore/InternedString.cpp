@@ -32,9 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <string.h>
+
 #include "tbb/spin_rw_mutex.h"
+#include "tbb/concurrent_hash_map.h"
 
 #include "boost/multi_index_container.hpp"
+#include "boost/format.hpp"
 
 #include "IECore/HashTable.h"
 #include "IECore/InternedString.h"
@@ -114,6 +118,31 @@ static InternedString g_emptyString("");
 const InternedString &InternedString::emptyString()
 {
 	return g_emptyString;
+}
+
+// make sure we create the g_numbers map at load time.
+static InternedString g_zero((int64_t)0);
+
+const InternedString &InternedString::numberString( int64_t number )
+{
+	typedef tbb::concurrent_hash_map< int64_t, InternedString > NumbersMap;
+	static NumbersMap *g_numbers = 0;
+	if ( !g_numbers )
+	{
+		g_numbers = new NumbersMap;
+	}
+	NumbersMap::accessor it;
+	if ( g_numbers->insert( it, number ) )
+	{
+		it->second = InternedString( ( boost::format("%d") % number ).str() );
+	}
+	return it->second;
+}
+
+std::ostream &operator << ( std::ostream &o, const InternedString &str )
+{
+	o << str.c_str();
+	return o;
 }
 
 } // namespace IECore

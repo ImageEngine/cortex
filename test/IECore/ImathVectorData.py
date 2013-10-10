@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -303,6 +303,45 @@ class V3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 	def testByValueItem(self):
 		"""Test V3fVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
+		
+	def testOperatedInterpretation( self ) :
+		
+		v = V3fVectorData( [ V3f(1), V3f(2), V3f(3) ], GeometricData.Interpretation.Vector )
+		self.assertEqual( v.getInterpretation(), GeometricData.Interpretation.Vector )
+		
+		# add and iadd
+		v2 = v + V3fVectorData( [ V3f(4), V3f(5), V3f(6) ] )
+		self.assertEqual( v2.getInterpretation(), GeometricData.Interpretation.Vector )
+		v2 += V3fVectorData( [ V3f(7), V3f(8), V3f(9) ], GeometricData.Interpretation.Normal )
+		self.assertEqual( v2.getInterpretation(), GeometricData.Interpretation.Vector )
+		
+		# sub and isub
+		v3 = v - V3fVectorData( [ V3f(4), V3f(5), V3f(6) ], GeometricData.Interpretation.Normal )
+		self.assertEqual( v3.getInterpretation(), GeometricData.Interpretation.Vector )
+		v3 -= V3fVectorData( [ V3f(7), V3f(8), V3f(9) ] )
+		self.assertEqual( v3.getInterpretation(), GeometricData.Interpretation.Vector )
+
+		# mul and imul
+		v4 = v * V3fVectorData( [ V3f(4), V3f(5), V3f(6) ] )
+		self.assertEqual( v4.getInterpretation(), GeometricData.Interpretation.Vector )
+		v4 *= V3fVectorData( [ V3f(7), V3f(8), V3f(9) ], GeometricData.Interpretation.Point )
+		self.assertEqual( v4.getInterpretation(), GeometricData.Interpretation.Vector )
+
+		# div and idiv
+		v5 = v / V3fVectorData( [ V3f(4), V3f(5), V3f(6) ] )
+		self.assertEqual( v5.getInterpretation(), GeometricData.Interpretation.Vector )
+		v5 /= V3fVectorData( [ V3f(7), V3f(8), V3f(9) ], GeometricData.Interpretation.Color )
+		self.assertEqual( v5.getInterpretation(), GeometricData.Interpretation.Vector )
+		
+		# slices
+		v6 = v[:]
+		self.assertEqual( v6.getInterpretation(), GeometricData.Interpretation.Vector )
+		v6 = v[2:]
+		self.assertEqual( v6.getInterpretation(), GeometricData.Interpretation.Vector )
+		v6 = v[:2]
+		self.assertEqual( v6.getInterpretation(), GeometricData.Interpretation.Vector )
+		v6 = v[:-1]
+		self.assertEqual( v6.getInterpretation(), GeometricData.Interpretation.Vector )
 
 class V3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 

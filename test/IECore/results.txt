@@ -1,3 +1,0 @@
-Running 339 test cases...
-
-*** No errors detected

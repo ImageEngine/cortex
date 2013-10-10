@@ -1,9 +1,0 @@
-K 10
-svn:ignore
-V 51
-*.pyc
-results.txt
-resultsPython.txt
-IECoreMayaTest
-
-END

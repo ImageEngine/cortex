@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_SCENECACHENODE_H
 #define IECOREHOUDINI_SCENECACHENODE_H
 
+#include "boost/logic/tribool.hpp"
+
 #include "tbb/mutex.h"
 
 #include "PRM/PRM_Name.h"
@@ -44,11 +46,6 @@
 
 namespace IECoreHoudini
 {
-
-namespace SceneCacheUtil
-{
-class Cache;
-}
 
 /// Abstract class for using an IECore::SceneCache in Houdini.
 /// Derived nodes will do something useful with the data.
@@ -66,17 +63,27 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pRoot;
 		static PRM_Name pSpace;
 		static PRM_Name pReload;
+		static PRM_Name pGeometryType;
+		static PRM_Name pAttributeFilter;
+		static PRM_Name pTagFilter;
+		static PRM_Name pShapeFilter;
 		
 		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
+		static PRM_Default filterDefault;
+		static PRM_Default geometryTypeDefault;
 		
 		static PRM_ChoiceList rootMenu;
 		static PRM_ChoiceList spaceList;
+		static PRM_ChoiceList geometryTypeList;
+		static PRM_ChoiceList tagFilterMenu;
+		static PRM_ChoiceList shapeFilterMenu;
 		
-		static int fileChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
-		static int pathChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
+		static int sceneParmChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static void buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
+		static void buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
+		static void buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		
 		enum Space
 		{
@@ -86,93 +93,73 @@ class SceneCacheNode : public BaseType
 			Object
 		};
 		
-		/// convienence methods for the common parameters;
-		std::string getFile();
+		enum GeometryType
+		{
+			Cortex,
+			Houdini,
+		};
+		
+		/// convenience methods for the common parameters;
+		std::string getFile() const;
 		void setFile( std::string file );
-		std::string getPath();
+		std::string getPath() const;
 		void setPath( const IECore::SceneInterface *scene );
-		Space getSpace();
+		Space getSpace() const;
 		void setSpace( Space space );
-	
-		/// Access point to the actual SceneCache. All derived classes should only access the cache
-		/// using this method, and must hold onto an EntryPtr retrieved from this utility while
-		/// reading the SceneCache.
-		static SceneCacheUtil::Cache &cache();
+		GeometryType getGeometryType() const;
+		void setGeometryType( GeometryType type );
+		void getAttributeFilter( UT_String &filter ) const;
+		void getAttributeFilter( UT_StringMMPattern &filter ) const;
+		void setAttributeFilter( const UT_String &filter );
+		void getTagFilter( UT_String &filter ) const;
+		void getTagFilter( UT_StringMMPattern &filter ) const;
+		void setTagFilter( const UT_String &filter );
+		void getShapeFilter( UT_String &filter ) const;
+		void getShapeFilter( UT_StringMMPattern &filter ) const;
+		void setShapeFilter( const UT_String &filter );
+		void referenceParent( const char *parmName );
+		
+		/// Access point to the actual SceneCache. All users should only access the cache
+		/// using this method, in order to avoid re-opening existing files.
+		IECore::ConstSceneInterfacePtr scene() const;
+		
+		/// Return the SceneCache time represented by this Houdini Context. This is not a
+		/// simple getTime() call, because Houdini treats time starting at Frame 1, while
+		/// SceneCaches treat time starting at Frame 0. Note that this function should
+		/// really be adjusting time by 1/fps used at cache time, but we don't have access
+		/// to that, so we assume that Houdini's current frame rate is representative.
+		double time( OP_Context context ) const;
+		
+		/// Determine if the given scene has any tag matching the filter
+		static bool tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter );
 	
 	protected :
 		
+		/// Access point to the actual SceneCache. All derived classes should only access the cache
+		/// using this method, in order to avoid re-opening existing files.
+		static IECore::ConstSceneInterfacePtr scene( const std::string &fileName, const std::string &path );
+		
+		/// Computes the worldTransform for the specified path
+		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );
+		
 		/// Called from setFile, setPath, and when either the file or path parameters are changed.
-		/// The default implementation does nothing. Derived nodes may override this if convenient.
+		/// The default implementation sets m_loaded false. Derived nodes may override this if convenient.
 		virtual void sceneChanged();
 		/// get the file and ensure it is a valid SCC
 		bool ensureFile( std::string &file );
+		
 		/// get a breadth first list of all descendant paths
 		void descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants );
 		/// get a depth first list of all object names
 		void objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
+		
+		bool m_loaded;
+		boost::tribool m_static;
+		IECore::MurmurHash m_hash;
 
 };
-
-namespace SceneCacheUtil
-{
-/// \todo: much of this is copied from GafferScene::SceneReader. Can we put it somewhere common instead?
-class Cache
-{
-	
-	private :
-	
-		IE_CORE_FORWARDDECLARE( FileAndMutex )
-	
-	public :
-	
-		Cache();
-		
-		/// This class provides access to a particular location within the SceneCache,
-		/// and ensures that access is threadsafe by holding a mutex on the file.
-		class Entry : public IECore::RefCounted
-		{
-		
-			public :
-			
-				const IECore::SceneInterface *sceneCache();
-			
-			private :
-			
-				Entry( FileAndMutexPtr fileAndMutex );
-				
-				FileAndMutexPtr m_fileAndMutex;
-				IECore::ConstSceneInterfacePtr m_entry;
-				
-				friend class Cache;
-		
-		};
-		
-		IE_CORE_DECLAREPTR( Entry )
-		
-		EntryPtr entry( const std::string &fileName, const std::string &path );
-		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );
-		void erase( const std::string &fileName );
-		void clear();
-	
-	private :
-	
-		class FileAndMutex : public IECore::RefCounted
-		{
-			public :
-				
-				IECore::SceneInterfacePtr file;
-				
-		};
-				
-		static FileAndMutexPtr fileCacheGetter( const std::string &fileName, size_t &cost );
-		
-		typedef IECore::LRUCache<std::string, FileAndMutexPtr> FileCache;
-		FileCache m_fileCache;
-
-};
-}
 
 } // namespace IECoreHoudini
 

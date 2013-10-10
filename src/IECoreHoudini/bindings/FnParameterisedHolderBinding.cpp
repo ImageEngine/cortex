@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "SOP/SOP_Node.h"
+#include "OP/OP_Node.h"
 
 #include "IECoreHoudini/FnParameterisedHolder.h"
 #include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
@@ -45,7 +45,7 @@ using namespace IECoreHoudini;
 void IECoreHoudini::bindFnParameterisedHolder()
 {
 	class_<FnParameterisedHolder>( "_FnParameterisedHolder" )
-		.def( init<SOP_Node*>() )
+		.def( init<OP_Node*>() )
 		.def( "hasParameterised", &FnParameterisedHolder::hasParameterised )
 		.def( "setParameterised", (void (FnParameterisedHolder::*)( IECore::RunTimeTypedPtr ))&FnParameterisedHolder::setParameterised )
 		.def( "setParameterised", (void (FnParameterisedHolder::*)( const std::string &, int, const std::string & ))&FnParameterisedHolder::setParameterised )

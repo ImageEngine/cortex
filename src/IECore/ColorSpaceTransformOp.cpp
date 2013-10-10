@@ -47,6 +47,8 @@
 #include "IECore/MessageHandler.h"
 
 #include "IECore/ColorSpaceTransformOp.h"
+#include "IECore/ImagePremultiplyOp.h"
+#include "IECore/ImageUnpremultiplyOp.h"
 
 using namespace IECore;
 using namespace std;
@@ -408,15 +410,40 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitive * image, const 
 		ImagePrimitivePtr result = 0;
 		if ( currentConversion->isInstanceOf( ChannelOpTypeId )	)
 		{
-			// TODO: The channel Op doesn't handle any unpremultiplication of the colour channels.
-			// Therefore the resulting colour transformation of any ChannelOpType that has been
-			// premultiplied will be wrong.
-			// This could be fixed here by applying an unpremult before and a premult after or on
-			// a more fundemental level inside ChannelOp. Either way it will need some discussion
-			// beforehand...
+			// The channel Op doesn't handle any unpremultiplication of the colour channels.
+			// So we apply an unpremult before and a premult after, if premultiplied is on and alpha exists
+			if( premultipliedParameter()->getTypedValue() )
+			{
+				std::string alphaPrimVar = alphaPrimVarParameter()->getTypedValue();
+				if( image->variables.find( alphaPrimVar ) != image->variables.end() )
+				{
+					ImageUnpremultiplyOpPtr unpremultOp = new ImageUnpremultiplyOp();
+					unpremultOp->alphaChannelNameParameter()->setTypedValue( alphaPrimVar );
+					unpremultOp->channelNamesParameter()->setTypedValue( channelNames );
+					unpremultOp->copyParameter()->setTypedValue( false );
+					unpremultOp->inputParameter()->setValue( image );
+					unpremultOp->operate();
+				}
+			}
+
+			
 			ChannelOpPtr op = assertedStaticCast< ChannelOp >( currentConversion );
 			op->channelNamesParameter()->setTypedValue( channelNames );
 			result = runTimeCast< ImagePrimitive >( op->operate() );
+			
+			if( premultipliedParameter()->getTypedValue() )
+			{
+				std::string alphaPrimVar = alphaPrimVarParameter()->getTypedValue();
+				if( result->variables.find( alphaPrimVar ) != result->variables.end() )
+				{
+					ImagePremultiplyOpPtr premultOp = new ImagePremultiplyOp();
+					premultOp->alphaChannelNameParameter()->setTypedValue( alphaPrimVar );
+					premultOp->channelNamesParameter()->setTypedValue( channelNames );
+					premultOp->copyParameter()->setTypedValue( false );
+					premultOp->inputParameter()->setValue( result );
+					premultOp->operate();
+				}
+			}
 		}
 		else
 		{

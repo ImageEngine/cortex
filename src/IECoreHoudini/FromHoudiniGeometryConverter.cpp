@@ -79,7 +79,14 @@ void FromHoudiniGeometryConverter::constructCommon()
 		"*"
 	);
 	
+	m_convertStandardAttributesParameter = new BoolParameter(
+		"convertStandardAttributes",
+		"Performs automated conversion of Houdini Attributes to standard PrimitiveVariables (i.e. rest->Pref ; Cd->Cs ; uv->s,t)",
+		true
+	);
+	
 	parameters()->addParameter( m_attributeFilterParameter );
+	parameters()->addParameter( m_convertStandardAttributesParameter );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -105,9 +112,7 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 		return 0;
 	}
 	
-	/// \todo: add a shapeFilter parameter, and use UT_String::match to create sub-GU_Details for conversion
-	
-	return doPrimitiveConversion( geo, operands );
+	return doDetailConversion( geo, operands );
 }
 
 /// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
@@ -232,7 +237,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		pData[it.getIndex()] = IECore::convert<Imath::V3f>( geo->getPos3( it.getOffset() ) );
 	}
 
-	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData ) );
+	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData, GeometricData::Point ) );
 	
 	// get RI remapping information from the detail
 	AttributeMap pointAttributeMap;
@@ -301,42 +306,12 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		AttributeMap defaultMap;
 		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
 	}
-	
-	/// \todo: should we convert uv to s and t automatically?
-	
-	// add the name blindData based on the name attribute
-	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-	if ( attrHandle.isAttributeValid() )
-	{			
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
-		{
-			const char *name = attrRef.getString( it.getOffset() );
-			if ( name && strcmp( name, "" ) )
-			{
-				result->blindData()->member<StringData>( "name", false, true )->writable() = name;
-				break;
-			}
-		}
-	}
-	else
-	{
-		// fallback to names from groups
-		const GA_ElementGroupTable &primGroups = geo->primitiveGroups();
-		for ( GA_GroupTable::iterator<GA_ElementGroup> it = primGroups.beginTraverse(); !it.atEnd(); ++it )
-		{
-			GA_ElementGroup *group = it.group();
-			if ( !group->getInternal() && group->containsAny( primRange ) )
-			{
-				result->blindData()->member<StringData>( "name", false, true )->writable() = it.name();
-				break;
-			}
-		}
-	}
 }
 
 void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
+	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
+	
 	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
 		GA_Attribute *attr = it.attrib();
@@ -354,6 +329,23 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		UT_String name( attr->getName() );
 		if ( !name.multiMatch( attribFilter ) )
 		{
+			continue;
+		}
+		
+		// special case for uvs
+		if ( convertStandardAttributes && name.equal( "uv" ) )
+		{
+			FloatVectorDataPtr sData = extractData<FloatVectorData>( attr, range, 0 );
+			FloatVectorDataPtr tData = extractData<FloatVectorData>( attr, range, 1 );
+			std::vector<float> &tValues = tData->writable();
+			for ( size_t i=0; i < tValues.size(); ++i )
+			{
+				tValues[i] = 1 - tValues[i];
+			}
+			
+			result->variables["s"] = PrimitiveVariable( interpolation, sData );
+			result->variables["t"] = PrimitiveVariable( interpolation, tData );
+			
 			continue;
 		}
 		
@@ -520,12 +512,17 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	{
 		std::string varName( attr->getName() );
 		PrimitiveVariable::Interpolation varInterpolation = interpolation;
-
+		
 		// remap our name and interpolation
 		if ( remapInfo )
 		{
 			varName = remapInfo->name;
 			varInterpolation = remapInfo->interpolation;
+		}
+		
+		if ( m_convertStandardAttributesParameter->getTypedValue() )
+		{
+			varName = processPrimitiveVariableName( varName );
 		}
 		
 		// add the primitive variable to our result
@@ -710,6 +707,62 @@ DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, c
 	return data;
 }
 
+const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( const std::string &name ) const
+{
+	/// \todo: This should probably be some formal static map. Make sure to update ToHoudiniGeometryConverter as well.
+	if ( name == "Cd" )
+	{
+		return "Cs";
+	}
+	else if ( name == "Alpha" )
+	{
+		return "Os";
+	}
+	else if ( name == "rest" )
+	{
+		return "Pref";
+	}
+	else if ( name == "pscale" )
+	{
+		return "width";
+	}
+	
+	return name;
+}
+
+GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, const UT_StringMMPattern &nameFilter )
+{
+	GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+	if ( nameAttrRef.isValid() )
+	{
+		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		
+		GA_OffsetList offsets;
+		GA_Range primRange = geo->getPrimitiveRange();
+		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+		{
+			const char *currentName = tuple->getString( nameAttr, it.getOffset(), 0 );
+			if ( UT_String( currentName ).multiMatch( nameFilter ) )
+			{
+				offsets.append( it.getOffset() );
+			}
+		}
+		
+		if ( offsets.entries() )
+		{
+			GU_Detail *newGeo = new GU_Detail();
+			GA_Range matchPrims( geo->getPrimitiveMap(), offsets );
+			newGeo->mergePrimitives( *geo, matchPrims );
+			GU_DetailHandle newHandle;
+			newHandle.allocateAndSet( newGeo );
+			return newHandle;
+		}
+	}
+	
+	return GU_DetailHandle();
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 // Factory
 /////////////////////////////////////////////////////////////////////////////////
@@ -736,17 +789,20 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_D
 		// find the best possible converter
 		for ( TypesToFnsMap::const_iterator it=m->begin(); it != m->end(); it ++ )
 		{
-			if ( *typeIt != IECore::InvalidTypeId && *typeIt != it->first.resultType && find( derivedTypes.begin(), derivedTypes.end(), it->first.resultType ) == derivedTypes.end() )
+			if ( *typeIt == IECore::InvalidTypeId || *typeIt == it->first.resultType || find( derivedTypes.begin(), derivedTypes.end(), it->first.resultType ) != derivedTypes.end() )
 			{
-				// we want something specific, but this converter won't give it to us, nor something that derives from it
-				continue;
-			}
-
-			Convertability current = it->second.second( handle );
-			if ( current && current < best )
-			{
-				best = current;
-				bestIt = it;
+				if ( handle.isNull() )
+				{
+					// it works, therfor its good enough, since we have no handle to judge Convertability
+					return it->second.first( GU_DetailHandle() );
+				}
+				
+				Convertability current = it->second.second( handle );
+				if ( current && current < best )
+				{
+					best = current;
+					bestIt = it;
+				}
 			}
 		}
 	}
@@ -761,40 +817,22 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_D
 	return 0;
 }
 
-FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const std::set<IECore::TypeId> &resultTypes )
+FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_Node *sop, const std::string &nameFilter, IECore::TypeId resultType )
 {
-	const TypesToFnsMap *m = typesToFns();
-	
-	for ( std::set<IECore::TypeId>::iterator typeIt=resultTypes.begin(); typeIt != resultTypes.end(); typeIt++ )
+	// try to reduce the geo to fit the name
+	GU_DetailHandleAutoReadLock readHandle( handle( sop ) );
+	if ( const GU_Detail *geo = readHandle.getGdp() )
 	{
-		const std::set<IECore::TypeId> &derivedTypes = RunTimeTyped::derivedTypeIds( *typeIt );
-		
-		// find any converter that works
-		for ( TypesToFnsMap::const_iterator it=m->begin(); it != m->end(); ++it )
+		UT_StringMMPattern filter;
+		filter.compile( nameFilter.c_str() );
+		GU_DetailHandle newHandle = extract( geo, filter );
+		if ( !newHandle.isNull() )
 		{
-			if ( *typeIt == IECore::InvalidTypeId || *typeIt == it->first.resultType || find( derivedTypes.begin(), derivedTypes.end(), it->first.resultType ) != derivedTypes.end() )
-			{
-				// it works, therfor its good enough, since we have no handle to judge Convertability
-				return it->second.first( GU_DetailHandle() );
-			}
+			return create( newHandle, resultType );
 		}
 	}
 	
-	// there were no suitable converters
-	return 0;
-}
-
-FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const SOP_Node *sop, IECore::TypeId resultType )
-{
 	return create( handle( sop ), resultType );
-}
-
-FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( IECore::TypeId resultType )
-{
-	std::set<IECore::TypeId> types;
-	types.insert( resultType );
-	
-	return create( types );
 }
 
 void FromHoudiniGeometryConverter::registerConverter( IECore::TypeId resultType, CreatorFn creator, ConvertabilityFn canConvert )

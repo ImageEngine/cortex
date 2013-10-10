@@ -53,6 +53,7 @@ class InternedString
 		inline InternedString( const std::string &value );
 		inline InternedString( const InternedString &other );
 		inline InternedString( const char *value );
+		inline InternedString( int64_t number );
 
 		inline ~InternedString();
 
@@ -81,8 +82,11 @@ class InternedString
 		const std::string *m_value;
 
 		static const InternedString &emptyString();
+		static const InternedString &numberString( int64_t number );
 
 };
+
+std::ostream &operator << ( std::ostream &o, const InternedString &str );
 
 } // namespace IECore
 

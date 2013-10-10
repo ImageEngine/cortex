@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,11 @@
 
 #include "OpenEXR/ImathVec.h"
 
+#ifdef IMATH_INTERNAL_NAMESPACE
+namespace IMATH_INTERNAL_NAMESPACE
+#else
 namespace Imath
+#endif
 {
 
 template<typename T>

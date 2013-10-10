@@ -86,12 +86,6 @@ inline MurmurHash &MurmurHash::append( uint64_t data )
 	return *this;
 }
 
-/*inline MurmurHash &MurmurHash::append( size_t data )
-{
-	append( &data, sizeof( size_t ), sizeof( size_t ) );
-	return *this;
-}*/
-
 inline MurmurHash &MurmurHash::append( half data )
 {
 	append( &data, sizeof( half ), sizeof( half ) );
@@ -118,7 +112,7 @@ inline MurmurHash &MurmurHash::append( const char *data )
 
 inline MurmurHash &MurmurHash::append( const std::string &data )
 {
-	append( data.c_str(), data.size(), sizeof( char ) );
+	append( data.c_str(), data.size() + 1, sizeof( char ) );
 	return *this;
 }
 

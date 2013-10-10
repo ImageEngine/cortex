@@ -22,13 +22,13 @@ soptoolutils.genericTool(kwargs, 'ieProceduralHolder')]]></script>
   </tool>
 
   <!-- Cortex To Houdini Converter -->
-  <tool name="cortex_to_houdini_converter" label="Cortex To Houdini" icon="SOP_ieToHoudiniConverter">
+  <tool name="cortex_converter" label="Cortex Convert" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>SOP</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
     <script scriptType="python"><![CDATA[import soptoolutils
-soptoolutils.genericTool(kwargs, 'ieToHoudiniConverter')]]></script>
+soptoolutils.genericTool(kwargs, 'ieCortexConverter')]]></script>
   </tool> 
 
   <!-- SceneCacheSource SOP -->

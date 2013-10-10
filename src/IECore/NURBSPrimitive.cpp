@@ -73,8 +73,9 @@ NURBSPrimitive::NURBSPrimitive( int uOrder, ConstFloatVectorDataPtr uKnot, float
 	setTopology( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax );
 	if( p )
 	{
-		variables.insert( PrimitiveVariableMap::value_type( "P", PrimitiveVariable( PrimitiveVariable::Vertex,
-			p->copy() ) ) );
+		V3fVectorDataPtr pData = p->copy();
+		pData->setInterpretation( GeometricData::Point );
+		variables.insert( PrimitiveVariableMap::value_type( "P", PrimitiveVariable( PrimitiveVariable::Vertex, pData ) ) );
 	}
 }
 
@@ -362,6 +363,10 @@ void NURBSPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void NURBSPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void NURBSPrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_uOrder );
 	m_uKnot->hash( h );
 	h.append( m_uMin );

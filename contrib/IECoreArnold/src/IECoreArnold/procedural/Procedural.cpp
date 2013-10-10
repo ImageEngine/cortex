@@ -34,8 +34,6 @@
 
 #include "boost/python.hpp"
 
-#include "tbb/mutex.h"
-
 #include "ai.h"
 
 #include "IECore/MessageHandler.h"
@@ -54,12 +52,9 @@ using namespace IECorePython;
 
 static object g_mainModule;
 static object g_mainModuleNamespace;
-static tbb::mutex g_pythonInitialisationMutex;
 
 static void initialisePython()
 {
-	tbb::mutex::scoped_lock pythonInitialisationLock( g_pythonInitialisationMutex );
-		
 	if( Py_IsInitialized() )
 	{
 		return;

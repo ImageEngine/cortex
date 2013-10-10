@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@ import IECoreGL
 IECoreGL.init( False )
 import os.path
 import os
+import shutil
 
 class CameraTest( unittest.TestCase ) :
 
@@ -129,15 +130,15 @@ class CameraTest( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( g ), 1 )
 		self.assertEqual( result.floatPrimVar( b ), 0 )
 
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreGL/output" ) :
+			os.makedirs( "test/IECoreGL/output" )
+	
 	def tearDown( self ) :
-
-		files = [
-			os.path.dirname( __file__ ) + "/output/testCamera.tif",
-		]
-
-		for f in files :
-			if os.path.exists( f ) :
-				os.remove( f )
+		
+		if os.path.isdir( "test/IECoreGL/output" ) :
+			shutil.rmtree( "test/IECoreGL/output" )
 
 if __name__ == "__main__":
     unittest.main()

@@ -122,7 +122,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		}																							\
 	}																								\
 
-#define IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )								\
+#define IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N, FALLBACKNAME )								\
 	template<>																						\
 	void TNAME::save( SaveContext *context ) const													\
 	{																								\
@@ -150,7 +150,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		catch( ... )																				\
 		{																							\
 			unsigned int v = 0;																		\
-			ConstIndexedIOPtr container = context->container( staticTypeName(), v );				\
+			ConstIndexedIOPtr container = context->container( FALLBACKNAME::staticTypeName(), v );				\
 			IndexedIO::Entry e = container->entry( g_valueEntry );									\
 			writable().resize( e.arrayLength() / N );												\
 			if ( e.arrayLength() ) 																	\
@@ -166,13 +166,20 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
-	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, 1)				\
+	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, 1, TNAME )				\
 
 #define IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( TNAME, TID, N )		\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
-	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )				\
+	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N, TNAME )				\
+
+#define IE_CORE_DEFINEIMATHGEOMETRICVECTORTYPEDDATASPECIALISATION( TNAME, TID, BTID, N )		\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME ## Base, BTID )					\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )						\
+	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME ## Base )						\
+	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME ## Base )						\
+	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME ## Base, N, TNAME )				\
 
 namespace IECore
 {
@@ -187,12 +194,14 @@ IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UCharVectorData, UCharVectorD
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( Int64VectorData, Int64VectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UInt64VectorData, UInt64VectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( InternedStringVectorData, InternedStringVectorDataTypeId )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2fVectorData, V2fVectorDataTypeId, 2 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2dVectorData, V2dVectorDataTypeId, 2 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2iVectorData, V2iVectorDataTypeId, 2 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3fVectorData, V3fVectorDataTypeId, 3 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3dVectorData, V3dVectorDataTypeId, 3 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3iVectorData, V3iVectorDataTypeId, 3 )
+
+IE_CORE_DEFINEIMATHGEOMETRICVECTORTYPEDDATASPECIALISATION( V2fVectorData, V2fVectorDataTypeId, V2fVectorDataBaseTypeId, 2 )
+IE_CORE_DEFINEIMATHGEOMETRICVECTORTYPEDDATASPECIALISATION( V2dVectorData, V2dVectorDataTypeId, V2dVectorDataBaseTypeId, 2 )
+IE_CORE_DEFINEIMATHGEOMETRICVECTORTYPEDDATASPECIALISATION( V2iVectorData, V2iVectorDataTypeId, V2iVectorDataBaseTypeId, 2 )
+IE_CORE_DEFINEIMATHGEOMETRICVECTORTYPEDDATASPECIALISATION( V3fVectorData, V3fVectorDataTypeId, V3fVectorDataBaseTypeId, 3 )
+IE_CORE_DEFINEIMATHGEOMETRICVECTORTYPEDDATASPECIALISATION( V3dVectorData, V3dVectorDataTypeId, V3dVectorDataBaseTypeId, 3 )
+IE_CORE_DEFINEIMATHGEOMETRICVECTORTYPEDDATASPECIALISATION( V3iVectorData, V3iVectorDataTypeId, V3iVectorDataBaseTypeId, 3 )
+
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2iVectorData, Box2iVectorDataTypeId, 4 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2fVectorData, Box2fVectorDataTypeId, 4 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2dVectorData, Box2dVectorDataTypeId, 4 )
@@ -414,12 +423,21 @@ template class TypedData<vector<short> >;
 template class TypedData<vector<unsigned short> >;
 template class TypedData<vector<int64_t> >;
 template class TypedData<vector<uint64_t> >;
+
 template class TypedData<vector<V2f> >;
 template class TypedData<vector<V2d> >;
 template class TypedData<vector<V2i> >;
 template class TypedData<vector<V3f> >;
 template class TypedData<vector<V3d> >;
 template class TypedData<vector<V3i> >;
+
+template class GeometricTypedData<vector<V2f> >;
+template class GeometricTypedData<vector<V2d> >;
+template class GeometricTypedData<vector<V2i> >;
+template class GeometricTypedData<vector<V3f> >;
+template class GeometricTypedData<vector<V3d> >;
+template class GeometricTypedData<vector<V3i> >;
+
 template class TypedData<vector<Color3f> >;
 template class TypedData<vector<Color4f> >;
 template class TypedData<vector<Color3<double> > >;

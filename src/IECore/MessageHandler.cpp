@@ -92,14 +92,22 @@ ThreadSpecificHandlerStack g_threadHandlers;
 
 MessageHandler::Scope::Scope( MessageHandler *handler )
 {
-	HandlerStack &stack = g_threadHandlers.local();
-	stack.push( handler );
+	if ( handler )
+	{
+		HandlerStack &stack = g_threadHandlers.local();
+		stack.push( handler );
+	}
+	
+	m_handler = handler;
 }
 
 MessageHandler::Scope::~Scope()
 {
-	HandlerStack &stack = g_threadHandlers.local();
-	stack.pop();
+	if ( m_handler )
+	{
+		HandlerStack &stack = g_threadHandlers.local();
+		stack.pop();
+	}
 }
 
 MessageHandler *MessageHandler::currentHandler()

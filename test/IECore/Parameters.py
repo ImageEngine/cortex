@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -55,6 +55,7 @@ class TestParameter( unittest.TestCase ) :
 		v = IntData( 2 )
 		p.setValue( v )
 		self.assertEqual( p.getValue(), v )
+		self.assertRaises( RuntimeError, Parameter, "name", "description", None )		# passing None as default value should raise exception as opposed to segfault!
 
 	def testUserData( self ):
 		compound = CompoundObject()
@@ -97,7 +98,7 @@ class TestParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 4 )
 		self.assertEqual( pr["p1"], FloatData( 40 ) )
 		self.assertEqual( pr["p2"], IntData( 60 ) )
@@ -126,12 +127,31 @@ class TestParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 4 )
 		self.assertEqual( pr["p1"], FloatData( 40 ) )
 		self.assertEqual( pr["p2"], IntData( 60 ) )
 		self.assertEqual( pr["p3"], CompoundData() )
 		self.assertEqual( pr["p4"], FloatData( 20 ) )
+
+		# overriding presets
+
+		p.setPresets( [] )
+		self.assertEqual( p.getPresets(), dict() )
+
+		p.setPresets(
+			[
+				( "p5", FloatData( 40 ) ),
+				( "p1", IntData( 60 ) ),
+			]
+		)
+		pr = p.getPresets()
+		self.assertEqual( len( pr ), 2 )
+		self.assertEqual( pr["p5"], FloatData( 40 ) )
+		self.assertEqual( pr["p1"], IntData( 60 ) )
+		self.assertEqual( p.presetNames(), ("p5", "p1") )
+		p.setValue("p1")
+		self.assertEqual( p.getValue(), IntData(60) )
 
 	def testOrderedPresets( self ) :
 
@@ -295,11 +315,26 @@ class TestNumericParameter( unittest.TestCase ) :
 			)
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
 		self.assertEqual( pr["one"], IntData( 1 ) )
 		self.assertEqual( pr["two"], IntData( 2 ) )
 		self.assertEqual( pr["three"], IntData( 3 ) )
+
+		# overriding presets
+		p.setPresets(
+			[
+				( "four", IntData( 4 ) ),
+				( "one", IntData( 1 ) ),
+			]
+		)
+		pr = p.getPresets()
+		self.assertEqual( len( pr ), 2 )
+		self.assertEqual( pr["four"], IntData( 4 ) )
+		self.assertEqual( pr["one"], IntData( 1 ) )
+		self.assertEqual( p.presetNames(), ("four", "one") )
+		p.setValue("four")
+		self.assertEqual( p.getValue(), IntData(4) )
 
 	def testOrderedPresets( self ) :
 
@@ -386,7 +421,7 @@ class TestTypedParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
 		self.assertEqual( pr["one"], V3fData( V3f( 1 ) ) )
 		self.assertEqual( pr["two"], V3fData( V3f( 2 ) ) )
@@ -394,6 +429,21 @@ class TestTypedParameter( unittest.TestCase ) :
 
 		p.setValue( "one" )
 		self.assertEqual( p.getValue(), V3fData( V3f( 1 ) ) )
+
+		# overriding presets
+		p.setPresets(
+			[
+				( "four", V3fData( V3f(4) ) ),
+				( "one", V3fData( V3f(1) ) ),
+			]
+		)
+		pr = p.getPresets()
+		self.assertEqual( len( pr ), 2 )
+		self.assertEqual( pr["four"], V3fData( V3f(4) ) )
+		self.assertEqual( pr["one"], V3fData( V3f(1) ) )
+		self.assertEqual( p.presetNames(), ("four", "one") )
+		p.setValue("four")
+		self.assertEqual( p.getValue(), V3fData(V3f(4)) )
 
 	def testPresetsOnly( self ) :
 
@@ -439,6 +489,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertEqual( p.getTypedValue(), V3f( 1, 2, 3 ) )
 		p.setTypedValue( V3f( 12, 13, 14 ) )
 		self.assertEqual( p.getTypedValue(), V3f( 12, 13, 14 ) )
+		self.assertEqual( p.getValue(), V3fData( V3f( 12, 13, 14 ) ) )
 
 		self.assertEqual( p.typedDefaultValue, V3f( 1, 2, 3 ) )
 		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", V3f( 4, 5, 6 ) )
@@ -472,7 +523,44 @@ class TestTypedParameter( unittest.TestCase ) :
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
 		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )		
+	
+	def testInterpretation( self ) :
 		
+		p = V3fParameter( name="n", description="d", defaultValue = V3f( 1, 2, 3 ) )
+		self.assertEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Numeric )
+		self.assertEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Numeric )
+		
+		value = V3fData( V3f( 12, 13, 14 ) )
+		value.setInterpretation( GeometricData.Interpretation.Vector )
+		p.setValue( value )
+		self.assertNotEqual( p.getValue(), V3fData( V3f( 12, 13, 14 ) ) )
+		self.assertEqual( p.getValue(), value )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Vector )
+
+		dv = V3fData( V3f( 1, 2, 3 ), GeometricData.Interpretation.Normal )
+		p = V3fParameter( name="n", description="d", defaultValue = dv )
+		self.assertNotEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.defaultValue, dv )
+		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assertNotEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.getValue(), dv )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
+		
+		dv = V3fVectorData( [ V3f( 1, 2, 3 ) ], GeometricData.Interpretation.Normal )
+		p = V3fVectorParameter( name="n", description="d", defaultValue = dv )
+		self.assertNotEqual( p.defaultValue, V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
+		self.assertEqual( p.defaultValue, dv )
+		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assertNotEqual( p.getValue(), V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
+		self.assertEqual( p.getValue(), dv )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
+		
+		p.setValue( V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
+		self.assertEqual( p.getValue(), V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Numeric )
+
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :
@@ -497,7 +585,7 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 		p.setValue( StringData( "100" ) )
 		self.assertEqual( p.getValue(), StringData( "100" ) )
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
 		self.assert_( "100" in pr.keys() )
 		self.assert_( "200" in pr.keys() )
@@ -736,6 +824,20 @@ class TestObjectParameter( unittest.TestCase ) :
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
 		self.assertEqual( p.presetValues(), ( FloatData( 40 ), IntData( 60 ), CompoundData(), FloatData( 20 ) ) )
 
+		# overriding presets
+		p.setPresets(
+			[
+				( "four", V3fData( V3f(4) ) ),
+				( "one", V3fData( V3f(1) ) ),
+			]
+		)
+		pr = p.getPresets()
+		self.assertEqual( len( pr ), 2 )
+		self.assertEqual( pr["four"], V3fData( V3f(4) ) )
+		self.assertEqual( pr["one"], V3fData( V3f(1) ) )
+		self.assertEqual( p.presetNames(), ("four", "one") )
+		p.setValue("four")
+		self.assertEqual( p.getValue(), V3fData(V3f(4)) )
 
 class TestTypedObjectParameter( unittest.TestCase ) :
 
@@ -779,7 +881,7 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 			presetsOnly = True,
 		)
 
-		pr = p.presets()
+		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
 		self.assertEqual( pr["one"], mesh1 )
 		self.assertEqual( pr["two"], mesh2 )

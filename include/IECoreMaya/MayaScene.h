@@ -35,6 +35,7 @@
 #ifndef IECOREMAYA_MAYASCENE_H
 #define IECOREMAYA_MAYASCENE_H
 
+#include "boost/function.hpp"
 #include "tbb/mutex.h"
 
 #include "IECore/SceneInterface.h"
@@ -47,22 +48,16 @@ namespace IECoreMaya
 
 IE_CORE_FORWARDDECLARE( MayaScene );
 
-/// A pure virtual base class for navigating a hierarchical animated 3D scene.
-/// A scene is defined by a hierarchy of 3D transforms.
-/// Each SceneInterface instance maps to a specific transform in a scene, uniquely identified by it's path.
-/// A path is an array of transform names.
-/// Using the method child, you can explore the hierarchy (and create new transforms).
-/// Each transform on the hierarchy has a unique name and contains the 3D transformation, custom attributes, 
-/// a bounding box, and EITHER more child transforms OR a leaf object. All of them can be animated.
-/// Animation is stored by providing the time and the value. When retrieving animation, the interface allows 
-/// for reading the individual stored samples or the interpolated value at any given time. 
-/// The path to the root transform is an empty array. The name of the root transform is "/" though.
-/// The root transform by definition cannot store transformation or an object. Attributes are allowed and they will usually
-/// be used to store global objects in the scene or objects that are not parented to transforms.
-/// \ingroup ioGroup
-/// \todo Implement a TransformStack class that can represent any custom 
-/// transformation that could be interpolated and consider using it here as the
-/// returned type as opposed to DataPtr.
+/// A class for navigating a maya scene.
+/// Each MayaScene instance maps to a specific transform in a scene, uniquely identified by it's dag path.
+/// Shapes are interpreted as objects living on their parent - eg a scene with the objects |pSphere1 and
+/// |pSphere1|pSphereShape1 in it will map to a MayaScene at "/", with a child called "pSphere1", with a
+/// MeshPrimitive as its object, and no children.
+/// This interface currently only supports read operations, which can only be called with the current maya
+/// time in seconds. For example, if you're currently on frame 1 in your maya session, your scene's frame rate
+/// is 24 fps, and you want to read an object from your MayaScene instance, you must call
+/// mayaSceneInstance.readObject( 1.0 / 24 ), or it will throw an exception.
+
 class MayaScene : public IECore::SceneInterface
 {
 	public :
@@ -72,18 +67,13 @@ class MayaScene : public IECore::SceneInterface
 		// default constructor
 		MayaScene();
 		
-		// constructor for the factory mechanism
-		MayaScene( const std::string&, IECore::IndexedIO::OpenMode );
-		
 		virtual ~MayaScene();
 		
-		static FileFormatDescription< MayaScene > s_description;
-		
-		// TODO: sort the name() method out!! Should it be returning a const reference? This means I have to have that mutable m_name variable
-		
+		virtual std::string fileName() const;
+
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
 		virtual Name name() const;
-		/// Returns the path scene this instance is referring to. 
+		/// Returns the tokenized dag path this instance is referring to.
 		virtual void path( Path &p ) const;
 		
 		/*
@@ -91,27 +81,22 @@ class MayaScene : public IECore::SceneInterface
 		 */
 
 		/// Returns the local bounding box of this node at the
-		/// specified point in time.
+		/// specified point in time, which must be equal to the current maya time in seconds.
 		virtual Imath::Box3d readBound( double time ) const;
-		/// Writes the bound for this path, overriding the default bound
-		/// that would be written automatically. Note that it might be useful
-		/// when writing objects which conceptually have a bound but don't
-		/// derive from VisibleRenderable.
+		/// Not currently supported - will throw an exception.
 		virtual void writeBound( const Imath::Box3d &bound, double time );
 
 		/*
 		 * Transform
 		 */
 
-		/// Returns the interpolated transform object of this node at the specified 
-		/// point in time.
-		virtual IECore::DataPtr readTransform( double time ) const;
+		/// Returns the local transform of this node at the specified 
+		/// point in time, which must be equal to the current maya time in seconds.
+		virtual IECore::ConstDataPtr readTransform( double time ) const;
 		/// Returns the transform of this node at the specified 
 		/// point in time as a matrix.
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
-		/// Writes the transform applied to this path within the scene.
-		/// Raises an exception if you try to write transform in the root path
-		/// Currently it only accepts M44dData or TransformationMatrixdData.
+		/// Not currently supported - will throw an exception.
 		virtual void writeTransform( const IECore::Data *transform, double time );
 
 		/*
@@ -120,24 +105,36 @@ class MayaScene : public IECore::SceneInterface
 
 		virtual bool hasAttribute( const Name &name ) const;
 		/// Fills attrs with the names of all attributes available in the current directory
-		virtual void readAttributeNames( NameList &attrs ) const;
-		/// Returns the attribute value at the given time.
-		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
-		/// Writers the attribute to this path within the scene
-		/// Raises an exception if you try to write an attribute in the root path with a time different than 0.
+		virtual void attributeNames( NameList &attrs ) const;
+		/// Returns the attribute value at the given time, which must be equal to the current maya time in seconds.
+		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
+		/// Not currently supported - will throw an exception.
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
+
+		/*
+		 * Tags
+		 */
+
+		/// Uses the custom registered tags to return whether a given tag is present in the scene location or not.
+		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
+		/// Uses the custom registered tags to list all the tags present in the scene location.
+		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
+		/// Not currently supported - will throw an exception.
+		virtual void writeTags( const NameList &tags );
 
 		/*
 		 * Object
 		 */
 
-		/// Convenience method to determine if a piece of geometry exists without reading it
+		/// Checks if there are objects in the scene (convertible from Maya or registered as custom objects)
 		virtual bool hasObject() const;
 		/// Reads the object stored at this path in the scene at the given time - may
-		/// return 0 when no object has been stored.
-		virtual IECore::ObjectPtr readObject( double time ) const;
-		/// Writes a geometry to this path in the scene.
-		/// Raises an exception if you try to write an object in the root path.
+		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
+		virtual IECore::ConstObjectPtr readObject( double time ) const;
+		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
+		/// Raises exception if it turns out not to be a Primitive object.
+		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
+		/// Not currently supported - will throw an exception.
 		virtual void writeObject( const IECore::Object *object, double time );
 
 		/*
@@ -170,14 +167,51 @@ class MayaScene : public IECore::SceneInterface
 		/// Returns an object for querying the scene at the given path (full path). 
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
+		typedef boost::function<bool (const MDagPath &)> HasFn;
+		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &)> ReadFn;
+		typedef boost::function<bool (const MDagPath &, const Name &)> HasTagFn;
+		typedef boost::function<void (const MDagPath &, NameList &, bool)> ReadTagsFn;
+		
+		// Register callbacks for custom objects.		
+		// The has function will be called during hasObject and it stops in the first one that returns true.
+		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
+		static void registerCustomObject( HasFn hasFn, ReadFn readFn );
+
+		// Register callbacks for custom named attributes.
+		// The has function will be called during hasAttribute and it stops in the first one that returns true.
+		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
+		static void registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn );
+		
+		// Register callbacks for nodes to define custom tags
+		// The functions will be called during hasTag and readTags.
+		// readTags will return the union of all custom ReadTagsFns.
+		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
+
 	private :
-				
 		
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveParent() const;
 		
 		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
+
+		/// Struct for registering readers for custom Object and Attributes.
+		struct CustomReader
+		{
+			HasFn m_has;
+			ReadFn m_read;
+		};
+		
+		/// Struct for registering readers for custom Tags.
+		struct CustomTagReader
+		{
+			HasTagFn m_has;
+			ReadTagsFn m_read;
+		};
+		
+		static std::vector< CustomReader > &customObjectReaders();
+		static std::map< Name, CustomReader > &customAttributeReaders();
+		static std::vector<CustomTagReader> &customTagReaders();
 		
 	protected:
 		
@@ -187,7 +221,8 @@ class MayaScene : public IECore::SceneInterface
 		MDagPath m_dagPath;
 		bool m_isRoot;
 		
-		// constructor for a specific dag path:
+		/// calls the constructor for a specific dag path. Derived classes can override this so their child() and scene() methods can 
+		/// return instances of the derived class
 		virtual MayaScenePtr duplicate( const MDagPath& p, bool isRoot = false ) const;
 	
 		typedef tbb::mutex Mutex;

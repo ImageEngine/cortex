@@ -62,11 +62,6 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 		{
 		}
 
-		Implementation( Shader::SetupPtr shaderSetup )
-			:	m_shaderSetup( shaderSetup )
-		{
-		}
-
 		Implementation( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
 			:	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentSource( fragmentSource ), m_geometrySource( geometrySource ),
 				m_vertexSource( vertexSource ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( 0 )
@@ -178,11 +173,6 @@ StateComponent::Description<ShaderStateComponent> ShaderStateComponent::g_descri
 
 ShaderStateComponent::ShaderStateComponent()
 	:	m_implementation( new Implementation() )
-{
-}
-
-ShaderStateComponent::ShaderStateComponent( Shader::SetupPtr shaderSetup )
-	:	m_implementation( new Implementation( shaderSetup ) )
 {
 }
 

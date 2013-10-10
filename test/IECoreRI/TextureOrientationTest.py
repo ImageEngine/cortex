@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import IECoreRI
 import os.path
 import os
 
-class TextureOrientationTest( unittest.TestCase ) :
+class TextureOrientationTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -74,9 +74,9 @@ class TextureOrientationTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
+		IECoreRI.TestCase.tearDown( self )
+		
 		files = [
-			"test/IECoreRI/output/testTextureOrientation1.tif",
-			"test/IECoreRI/output/testTextureOrientation2.tif",
 			"test/IECoreRI/shaders/tex.sdl",
 		]
 		for f in files :

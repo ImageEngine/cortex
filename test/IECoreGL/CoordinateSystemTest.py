@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@ from __future__ import with_statement
 
 import unittest
 import os.path
+import shutil
 
 import IECore
 
@@ -101,10 +102,15 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		self.assertEqual( a[200*127 + 127], 0 )
 		self.assertEqual( a[120*127 + 127], 0 )
 			
+	def setUp( self ) :
+		
+		if not os.path.isdir( "test/IECoreGL/output" ) :
+			os.makedirs( "test/IECoreGL/output" )
+	
 	def tearDown( self ) :
-
-		if os.path.exists( self.__outputFileName ) :
-			os.remove( self.__outputFileName )
+		
+		if os.path.isdir( "test/IECoreGL/output" ) :
+			shutil.rmtree( "test/IECoreGL/output" )
 
 if __name__ == "__main__":
     unittest.main()

@@ -159,6 +159,10 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			return
 			typename Detail::DespatchTypedData< Functor, StringData, ErrorHandler >
 			::template Func<Enabler>()( staticPointerCast<StringData>( data ), functor, errorHandler );
+		case InternedStringDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, InternedStringData, ErrorHandler >
+			::template Func<Enabler>()( staticPointerCast<InternedStringData>( data ), functor, errorHandler );
 		case HalfDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, HalfData, ErrorHandler >
@@ -344,6 +348,10 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			return
 			typename Detail::DespatchTypedData< Functor, StringVectorData, ErrorHandler >
 			::template Func<Enabler>()( staticPointerCast<StringVectorData>( data ), functor, errorHandler );
+		case InternedStringVectorDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, InternedStringVectorData, ErrorHandler >
+			::template Func<Enabler>()( staticPointerCast<InternedStringVectorData>( data ), functor, errorHandler );
 		case V2iVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, V2iVectorData, ErrorHandler >

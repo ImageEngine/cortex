@@ -33,17 +33,22 @@
 ##########################################################################
 
 import maya.cmds
+import maya.OpenMaya as OpenMaya
 
 import IECore
 import IECoreMaya
 
 class MayaSceneTest( IECoreMaya.TestCase ) :
 	
-	def testCreateMethod( self ) :
-		m = IECore.SceneInterface.create( "x.ma", IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( isinstance( m, IECoreMaya.MayaScene ), True )
-		
+	def setUp( self ) :
+
+		maya.cmds.file( new=True, f=True )
 	
+	def testFileName( self ) :
+
+		scene = IECoreMaya.MayaScene()
+		self.assertRaises( RuntimeError, scene.fileName )
+
 	def testChildNames( self ) :
 		
 		sphere = maya.cmds.polySphere( name="pSphere1" )
@@ -57,7 +62,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		child = scene.child( "pSphere1" )
 		
-		self.assertEqual( set( child.childNames() ), set( [ "pSphere2", "pSphere3", "pSphere1Shape" ] ) )
+		self.assertEqual( set( child.childNames() ), set( [ "pSphere2", "pSphere3" ] ) )
+		
+		self.assertEqual( scene.child( "pSphere1" ).child( "pSphere2" ).childNames(), [] )
 
 	def testHasChild( self ) :
 		
@@ -73,8 +80,8 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( scene.hasChild("pSphere1"), True )
-		self.assertEqual( scene.hasChild("pSphere1Shape"), False )
 		
+		self.assertEqual( child.hasChild("pSphere1Shape"), False )
 		self.assertEqual( child.hasChild("pSphere2"), True )
 		self.assertEqual( child.hasChild("pSphere3"), True )
 		self.assertEqual( child.hasChild("pSphere3Shape"), False )
@@ -96,23 +103,17 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		
 		sphere1 = scene.child( "pSphere1" )
-		sphere1Shape = sphere1.child( "pSphere1Shape" )
 		
 		sphere2 = sphere1.child( "pSphere2" )
-		sphere2Shape = sphere2.child( "pSphere2Shape" )
 		
 		sphere3 = sphere1.child( "pSphere3" )
-		sphere3Shape = sphere3.child( "pSphere3Shape" )
 		
 		self.assertEqual( str( scene.name() ), "/" )
 		self.assertEqual( str( sphere1.name() ), "pSphere1" )
-		self.assertEqual( str( sphere1Shape.name() ), "pSphere1Shape" )
 		
 		self.assertEqual( str( sphere2.name() ), "pSphere2" )
-		self.assertEqual( str( sphere2Shape.name() ), "pSphere2Shape" )
 		
 		self.assertEqual( str( sphere3.name() ), "pSphere3" )
-		self.assertEqual( str( sphere3Shape.name() ), "pSphere3Shape" )
 	
 	def testPaths( self ) :
 		
@@ -127,23 +128,17 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		
 		sphere1 = scene.child( "pSphere1" )
-		sphere1Shape = sphere1.child( "pSphere1Shape" )
 		
 		sphere2 = sphere1.child( "pSphere2" )
-		sphere2Shape = sphere2.child( "pSphere2Shape" )
 		
 		sphere3 = sphere1.child( "pSphere3" )
-		sphere3Shape = sphere3.child( "pSphere3Shape" )
 	
 		self.assertEqual( scene.path(), [] )
 		self.assertEqual( sphere1.path(), [ "pSphere1" ] )
-		self.assertEqual( sphere1Shape.path(), [ "pSphere1", "pSphere1Shape" ] )
 		
 		self.assertEqual( sphere2.path(), [ "pSphere1", "pSphere2" ] )
-		self.assertEqual( sphere2Shape.path(), [ "pSphere1", "pSphere2", "pSphere2Shape" ] )
 		
 		self.assertEqual( sphere3.path(), [ "pSphere1", "pSphere3" ] )
-		self.assertEqual( sphere3Shape.path(), [ "pSphere1", "pSphere3", "pSphere3Shape" ] )
 	
 	def testSceneMethod( self ) :
 		
@@ -158,15 +153,12 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		
 		self.assertEqual( str( scene.scene( ["pSphere1"] ).name() ), "pSphere1" )
-		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere1Shape"] ).name() ), "pSphere1Shape" )
 		
 		# does it still return absolute paths if we've gone to another location?
 		scene = scene.scene( ["pSphere1"] )
 		self.assertEqual( str( scene.scene( [] ).name() ), "/" )
 		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere2"] ).name() ), "pSphere2" )
-		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere2", "pSphere2Shape"] ).name() ), "pSphere2Shape" )
 		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere3"] ).name() ), "pSphere3" )
-		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere3", "pSphere3Shape"] ).name() ), "pSphere3Shape" )
 		
 		self.assertEqual( scene.scene( ["idontexist"], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 		self.assertRaises( RuntimeError, IECore.curry( scene.scene, ["idontexist"] ) )
@@ -176,12 +168,10 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		sphere = maya.cmds.polySphere( name="pSphere1" )
 		
 		scene = IECoreMaya.MayaScene()
-		transformChild = scene.child( "pSphere1" )
-		shapeChild = transformChild.child( "pSphere1Shape" )
+		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( scene.hasObject(), False )
-		self.assertEqual( transformChild.hasObject(), False )
-		self.assertEqual( shapeChild.hasObject(), True )
+		self.assertEqual( child.hasObject(), True )
 	
 	def testReadTransformMethods( self ) :
 		
@@ -334,11 +324,11 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "pCube1.rz", 30 )
 		
 		scene = IECoreMaya.MayaScene()
-		shapeChild = scene.child( "pCube1" ).child( "pCube1Shape" )
+		cube = scene.child( "pCube1" )
 		
 		# read mesh at time 0:
 		maya.cmds.currentTime( "0.0sec" )
-		mesh = shapeChild.readObject( 0 )
+		mesh = cube.readObject( 0 )
 		
 		vertList = list( mesh["P"].data )
 		
@@ -355,6 +345,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, -0.5 ) ), 1 )
 		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, -0.5 ) ), 1 )
 
+		# check read primvars
+		self.assertEqual( mesh["P"], cube.readObjectPrimitiveVariables( [ "P" ], 0 )["P"] )
+
 	def testAnimatedMesh( self ) :
 		
 		cube = maya.cmds.polyCube( name = "pCube1" )
@@ -368,21 +361,21 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setKeyframe( cluster, attribute="tx", t="1sec", v=-1 )
 		
 		scene = IECoreMaya.MayaScene()
-		shapeChild = scene.child( "pCube1" ).child( "pCube1Shape" )
+		cube = scene.child( "pCube1" )
 		
 		# read mesh at different times:
 		maya.cmds.currentTime( "0.0sec" )
-		mesh0   = shapeChild.readObject( 0 )
+		mesh0   = cube.readObject( 0 )
 		maya.cmds.currentTime( "0.5sec" )
-		mesh0_5 = shapeChild.readObject( 0.5 )
+		mesh0_5 = cube.readObject( 0.5 )
 		maya.cmds.currentTime( "1.0sec" )
-		mesh1   = shapeChild.readObject( 1 )
+		mesh1   = cube.readObject( 1 )
 		
 		# have we moved vertex 0?
 		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
 		self.assertEqual( mesh0_5["P"].data[0].x, -1 )
 		self.assertEqual( mesh1["P"].data[0].x, -1.5 )
-
+	
 	def testReadBound( self ) :
 		
 		# create some cubes:
@@ -425,16 +418,12 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		# should be in object space!!!
 		self.assertEqual( cube1Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -1.5, -1.5, -1.5 ), IECore.V3d( 1.5, 1.5, 1.5 ) ) )
 		
-		# check the shape:
-		cube1Shape = cube1Transform.child( "pCube1Shape" )
-		self.assertEqual( cube1Shape.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
-		
 		cube2Transform = cube1Transform.child( "pCube2" )
 		self.assertEqual( cube2Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
 		
 		cube3Transform = cube1Transform.child( "pCube3" )
 		self.assertEqual( cube3Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
-
+	
 	def testAnimatedMeshBound( self ) :
 		
 		# Currently fails, because I'm pulling on the boundingBox plugs at arbitrary
@@ -491,7 +480,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		cameraTransform = scene.child( "persp" )
 		maya.cmds.currentTime( "0.0sec" )
-		camera = cameraTransform.child( "perspShape" ).readObject( 0 )
+		camera = cameraTransform.readObject( 0 )
 		
 		# sanity check: camera transform is not identity?
 		self.assertNotEqual( cameraTransform.readTransformAsMatrix( 0 ), IECore.M44f() )
@@ -504,11 +493,10 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		sphere = maya.cmds.polySphere( name="pSphere1" )
 		
 		scene = IECoreMaya.MayaScene()
-		transform = scene.child( "pSphere1" )
-		shape = transform.child( "pSphere1Shape" )
+		sphere = scene.child( "pSphere1" )
 		
 		maya.cmds.currentTime( "0.0sec" )
-		mesh = shape.readObject( 0 )
+		mesh = sphere.readObject( 0 )
 		
 		# should default to 382 verts:
 		self.assertEqual( len( mesh["P"].data ), 382 )
@@ -516,10 +504,141 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "polySphere1.subdivisionsAxis", 3 )
 		maya.cmds.setAttr( "polySphere1.subdivisionsHeight", 3 )
 		
-		mesh = shape.readObject( 0 )
+		mesh = sphere.readObject( 0 )
 		
 		# should be 8 verts now:
 		self.assertEqual( len( mesh["P"].data ), 8 )
 	
+	def testWriteExceptions( self ) :
+		
+		scene = IECoreMaya.MayaScene()
+		
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeBound, IECore.Box3d(), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeTransform, IECore.M44dData( IECore.M44d() ), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeAttribute, "asdfs", IECore.BoolData( False ), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeObject, IECore.SpherePrimitive(), 0.0 ) )
+		
+	def testSceneShapeCustomReaders( self ):
+		
+		# make sure we are at time 0
+		maya.cmds.currentTime( "0sec" )
+		scene = IECoreMaya.MayaScene()
+
+		envShape = str( IECoreMaya.FnSceneShape.create( "ieScene1" ).fullPathName() )
+		envNode = 'ieScene1'
+
+		envScene = scene.child( envNode )
+		self.assertFalse( envScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+
+		maya.cmds.setAttr( envShape+'.file', 'test/IECore/data/sccFiles/environment.lscc',type='string' )
+
+		self.assertTrue( envScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+
+		spheresShape = str( IECoreMaya.FnSceneShape.create( "ieScene2" ).fullPathName() )
+		spheresNode = 'ieScene2'
+		maya.cmds.setAttr( spheresShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
+
+		self.assertEqual( set( scene.childNames() ).intersection([ envNode, spheresNode ]) , set( [ envNode, spheresNode ] ) )
+		self.assertTrue( IECore.LinkedScene.linkAttribute in envScene.attributeNames() )
+		self.assertEqual( envScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/environment.lscc'), "root":IECore.InternedStringVectorData() } ) )
+		self.assertFalse( envScene.hasObject() )
+
+		spheresScene = scene.child( spheresNode )
+		self.assertTrue( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual( spheresScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData() } ) )
+		self.assertFalse( spheresScene.hasObject() )
+
+		# expand the scene
+		fnSpheres = IECoreMaya.FnSceneShape( spheresShape )
+		fnSpheres.expandAll()
+
+		self.assertFalse( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		leafScene = spheresScene.child("A").child("a")
+		self.assertTrue( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		# When expanding, we connect the child time attributes to their scene shape parent time attribute to propagate time remapping. When checking for time remapping, the scene shape
+		# currently only checks the direct connection, so we have here time in the link attributes. Will have to look out for performance issues.
+		self.assertEqual( leafScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData([ 'A', 'a' ]), 'time':IECore.DoubleData( 0 ) } ) )
+		self.assertFalse( leafScene.hasObject() )
+
+		# expand scene to meshes
+		fnSpheres.convertAllToGeometry()
+		self.assertFalse( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertTrue( leafScene.hasObject() )
+		self.assertTrue( isinstance( leafScene.readObject(0), IECore.MeshPrimitive) )
+
+		# test time remapped scene readers...
+		spheresShape = str( maya.cmds.createNode( 'ieSceneShape' ) )
+		maya.cmds.setAttr( spheresShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
+		maya.cmds.setAttr( spheresShape+'.time', 24.0*10 )
+
+		spheresScene = scene.child( 'ieScene3' )
+
+		self.assertTrue( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual( spheresScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData(), "time":IECore.DoubleData(10.0) } ) )		
+	
+	def testReadRootAttribute( self ):
+		
+		maya.cmds.file( new=True, f=True )
+		# make sure we are at time 0
+		maya.cmds.currentTime( "0sec" )
+		scene = IECoreMaya.MayaScene()
+		
+		# tests a bug where calling attributeNames at the root raised an exception
+		scene.attributeNames()
+	
+	def testCustomTags( self ) :
+
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.select( clear = True )
+		sphere = maya.cmds.polySphere( name="pSphere" )
+
+		def hasMyTags( node, tag ) :
+			
+			if tag not in ( "renderable", "archivable" ) :
+				return False
+			
+			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
+			try:
+				dagPath.extendToShapeDirectlyBelow(0)
+			except:
+				return False
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
+				return False
+			
+			return dagPath.fullPathName().endswith("Shape")
+
+		def readMyTags( node, includeChildren ) :
+			
+			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
+			try:
+				dagPath.extendToShapeDirectlyBelow(0)
+			except:
+				return []
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
+				return []
+			
+			if includeChildren :
+				return [ "renderable", "archivable" ]
+			
+			return [ "renderable" ]
+		
+		IECoreMaya.MayaScene.registerCustomTags( hasMyTags, readMyTags )
+
+		scene = IECoreMaya.MayaScene()
+		transformScene = scene.child(str(t))
+		sphereScene = scene.child('pSphere')
+		self.assertFalse( scene.hasTag( 'renderable' ) )
+		self.assertFalse( scene.hasTag( 'archivable' ) )
+		self.assertEqual( scene.readTags(), [] )
+		self.assertFalse( transformScene.hasTag( 'renderable' ) )
+		self.assertFalse( transformScene.hasTag( 'archivable' ) )
+		self.assertEqual( transformScene.readTags(), [] )
+		self.assertEqual( sphereScene.readTags(), [ IECore.InternedString('renderable'), IECore.InternedString('archivable') ] )
+		self.assertEqual( sphereScene.readTags( False ), [ IECore.InternedString('renderable') ] )
+		self.assertTrue( sphereScene.hasTag( 'renderable' ) )
+		self.assertTrue( sphereScene.hasTag( 'archivable' ) )
+		
 if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

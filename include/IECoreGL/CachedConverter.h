@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,10 @@
 #ifndef IECOREGL_CACHEDCONVERTER_H
 #define IECOREGL_CACHEDCONVERTER_H
 
+#include "boost/function.hpp"
+
 #include "IECore/Object.h"
+#include "IECore/MurmurHash.h"
 
 namespace IECoreGL
 {
@@ -56,12 +59,27 @@ class CachedConverter : public IECore::RefCounted
 		/// Returns the object converted to an appropriate IECoreGL type, reusing
 		/// a previous conversion where possible.
 		IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object );
+
+		typedef boost::function<IECore::RunTimeTypedPtr (const IECore::Object *)> ConverterFn;
+
+		/// Uses a custom converter for the given object. The converter is a callable object of the type ConverterFn but it also must implement a hash( object ) method.
+		template< typename T >	IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object, T converter );
 		
 		/// Returns the maximum amount of memory (in bytes) the cache will use.
 		size_t getMaxMemory() const;
 		/// Sets the maximum amount of memory the cache will use. If this
 		/// is less than memoryUsage() then cache removals will result.
 		void setMaxMemory( size_t maxMemory );
+
+		/// The CachedConverter removes items from the cache during convert()
+		/// whenever it needs to free memory to make way for the new conversion.
+		/// However, if the call to convert() is made on a thread for which there's
+		/// no valid gl context, it is unable to free the resources immediately.
+		/// As a workaround it defers the freeing of all resources until clearUnused()
+		/// is called on the main opengl thread. It is the responsibility of the clients
+		/// of the CachedConverter to call this from the main thread periodically.
+		/// \todo Can we improve this situation?
+		void clearUnused();
 
 		/// Returns a static CachedConverter instance to be used by anything
 		/// wishing to share its cache with others. It makes sense to use
@@ -72,11 +90,15 @@ class CachedConverter : public IECore::RefCounted
 
 	private :
 
+		IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object, ConverterFn converter, const IECore::MurmurHash &converterHash );
+
 		struct MemberData;
 		MemberData *m_data;
 
 };
 
 } // namespace IECoreGL
+
+#include "IECoreGL/CachedConverter.inl"
 
 #endif // IECOREGL_CACHEDCONVERTER_H

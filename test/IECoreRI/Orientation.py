@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@ import os.path
 import os
 import math
 
-class OrientationTest( unittest.TestCase ) :
+class OrientationTest( IECoreRI.TestCase ) :
 
 	## Makes a plane on the XY plane which appears with an anticlockwise winding order when
 	# viewing down the negative Z axis.
@@ -117,11 +117,6 @@ class OrientationTest( unittest.TestCase ) :
 		a = e.A()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
-
-	def tearDown( self ) :
-
-		if os.path.exists( "test/IECoreRI/output/testOrientation.tif" ) :
-			os.remove( "test/IECoreRI/output/testOrientation.tif" )
 
 if __name__ == "__main__":
     unittest.main()

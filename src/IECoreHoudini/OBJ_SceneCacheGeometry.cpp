@@ -58,40 +58,70 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( *OBJ_SceneCacheNode<OBJ_Geometry>::buildParameters() );
+		templatePair = new OP_TemplatePair( OBJ_SceneCacheNode<OBJ_Geometry>::buildParameters() );
 	}
 	
 	return templatePair;
 }
 
-void OBJ_SceneCacheGeometry::buildHierarchy( const SceneInterface *scene )
+void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 {
 	if ( !scene )
 	{
 		return;
 	}
 	
-	doBuildGeometry( scene );
+	doExpandGeometry( scene );
+	setInt( pExpanded.getToken(), 0, 0, 1 );
 }
 
-void OBJ_SceneCacheGeometry::doBuildGeometry( const SceneInterface *scene )
+void OBJ_SceneCacheGeometry::pushToHierarchy()
+{
+	UT_String attribFilter, tagFilter, shapeFilter;
+	getAttributeFilter( attribFilter );
+	getTagFilter( tagFilter );
+	getShapeFilter( shapeFilter );
+	GeometryType geomType = getGeometryType();
+	
+	UT_PtrArray<OP_Node*> children;
+	int numSceneSops = getOpsByName( SOP_SceneCacheSource::typeName, children );
+	for ( int i=0; i < numSceneSops; ++i )
+	{
+		SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( children[i] );
+		sop->setAttributeFilter( attribFilter );
+		sop->setTagFilter( tagFilter );
+		sop->setShapeFilter( shapeFilter );
+		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
+	}
+}
+
+void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 {
 	const char *name = ( scene->name() == SceneInterface::rootName ) ? "root" : scene->name().c_str();
 	OP_Node *opNode = createNode( SOP_SceneCacheSource::typeName, name );
 	SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( opNode );
 	
-	sop->setFile( getFile() );
-	sop->setPath( scene );
+	sop->referenceParent( pFile.getToken() );
+	sop->referenceParent( pRoot.getToken() );
 	
+	bool objectOnly = true;
 	Space space = getSpace();
-	UT_String shapes( name );
 	SOP_SceneCacheSource::Space sopSpace = SOP_SceneCacheSource::Object;
 	if ( space == World || space == Path )
 	{
-		shapes = "*";
+		objectOnly = false;
 		sopSpace = SOP_SceneCacheSource::Path;
 	}
 	
+	UT_String attribFilter, tagFilter, shapeFilter;
+	getAttributeFilter( attribFilter );
+	sop->setAttributeFilter( attribFilter );
+	getTagFilter( tagFilter );
+	sop->setTagFilter( tagFilter );
+	getShapeFilter( shapeFilter );
+	sop->setShapeFilter( shapeFilter );
+	
 	sop->setSpace( sopSpace );
-	sop->setString( shapes, CH_STRING_LITERAL, SOP_SceneCacheSource::pShapeFilter.getToken(), 0, 0 );
+	sop->setObjectOnly( objectOnly );
+	sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)getGeometryType() );
 }

@@ -1,18 +1,229 @@
-Additions :
+# 8.0.0-a19
 
-* IECoreMaya: ieSceneShape maya node now uses SceneInterface::createShared(), so it's not super slow when you've got a scene with multiple nodes referencing the same file.
-* createShared static method added to SceneInterface, which uses an LRU cache so you don't end up opening the same file over and over again
+#### IECore
+
+- Removed incorrect assertions from StreamIndexedIO - they were causing crashes in debug builds.
+- ComputationCache is more robust in situations where a call to get() yields a different object than was passed to set().
+
+#### IECoreHoudini
+
+- GEO_CortexPrimitives are now correctly copied and transformed during ObjectMerges.
+- TagFilter now prevents unnecessary expansion of SceneCache nodes. In SubNetwork/AllDescendants mode, the tagFilter is used to prevent expansion into branches of the hierarchy that were not requested. For a heavy asset, filtering by a "Proxy" tag was expanding in 25 seconds and creating 22000 nodes. It is now expanding in 3 seconds and creating 3000 nodes.
+- SceneCache Xform and Geo nodes now have a tagFilter, and pass it through to matching children during expansion and push. Xfrom still uses it to limit expansion and control visibility. Geo just passes it on to the SOP, which uses it to limit objects loaded.
+- Promoted shapeFilter to all SceneCache nodes. SceneCache Xform and Geo just pass it through to the SOP, as with the attributeFilter.
+- Added support for reading and writing tags in SceneCaches.
+- Optimised SceneCache OBJ expansion time. On a heavy asset, this reduces expansion time from 442.3s (7.38m) to 17.12s.
+- Fixed time offset issues caused by Houdini time 0 being at frame 1, whereas it is at frame 0 in Maya, and in SceneInterfaces.
+
+#### IECoreMaya
+
+- Added a flag to the FnSceneShape create so we can directly create a new sceneShape and transform under a given parent. Used when expanding.
+
+#### IECoreNuke
+
+- Fixed a bug in LensDistort that was causing the cache to hold incorrect image data.
+
+#### IECoreGL
+
+- Added ShaderLoader::clear() method, which allows the reloading of GLSL shaders on the fly.
+- Added "gl:primitive:selectable" attribute to Renderer.
+
+#### IECoreRI
+
+- Fixed automatic instancing bug caused by having multiple procedurals in the same RIB file.
+- Added workaround for 3delight 11.0 in IECoreRI::Renderer::worldEnd - this allows rerendering to work again.
+
+####################################################################################################
+
+# 8.0.0-a18 :
+
+#### IECore
+
+- Fixed sample time ordering bug in SceneCache.
+- Fixed transform matrix order in Group.globalTransformMatrix().
+- Added a new setTopologyUnchecked method to MeshPrimitive, plus lazy computation of min/maxVerticesPerFace.
+
+#### IECoreGL
+
+-  Fixed bugs in interpretation of "color" attribute in IECoreGL.
+
+#### IECoreMaya
+
+- Fixed a segfault which occured when selecting multiple components of a sceneShape in Maya.
+- Fixed maya procedural selection highlighting.
+
+#### IECoreHoudini
+
+- Optimised SceneCache caching time significantly.
+- Simplified FromHoudiniGeometryConverter factory functions.
+- Added name parameter to ToHoudiniGeometryConverter.
+- FromHoudiniGeometryConverters no longer add the name blindData.
+- Added nameFilter to FromHoudiniGeometryConverter python factory function.
+- HoudiniGeometryConverters now use Objects rather than VisibleRenderables.
+- Added FromHoudiniCortexObjectConverter for converting single GU_CortexPrimitives.
+- Added ToHoudiniCortexObjectConverter for creating GU_CortexPrimitives.
+- Fixed ToHoudiniGeometryConverter bug where it didn't call incrementMetaCacheCount().
+- Added FromHoudiniCompoundObjectConverter. This converts multiple GU_CortexPrimitives, maintaining the naming by storing each one in a CompoundObject.
+- Added ToHoudiniCompoundObjectConverter.
+- Added non-const access to the object in a Geo_CortexPrimitive.
+- Removed unecessary Object copy in SceneCache SOP.
+- Removed HoudiniScene::readObject hack for CortexObject prims.
+- Updated cob/pdv IO to allow conversion of general Objects and not just VisibleRenderables.
+- Fixed ToHoudiniGeometryConverter factory function search order.
+- Fixed bug when caching hidden OBJs.
+- Added interruptibility to SceneCache ROP.
+- Added DetailSplitter class for efficiently extracting select bits of geometry from a GU_Detail.
+- Reenabled the loading of multiple ieCoreHoudini plugins.
+
+#### IECoreRI
+
+- Added "ri:textureCoordinates" attribute to IECoreRI::Renderer. This maps to a call to RiTextureCoordinates.
+- Fixed specification of multiple displays via IECoreRI::Renderer::display().
+- Added automatic instancing capabilities to IECoreRI::Renderer.
+
+#### IECoreNuke
+
+- Added support for expressions in LensDistort.
+
+#### IECoreAlembic
+
+- Fixed IECoreAlembic to use GeometricTypedData appropriately (#28).
+
+8.0.0-a17 :
+
+IECoreRI
+ - Added support for ri:areaLight parameter to IECoreRI
+
+IECoreHoudini
+ - Fixed bug when loading CoordinateSystems in Houdini
+
+
+8.0.0-a16 :
+
+IECoreMaya
+ - Fixed bug in SceneShape compute which prevented drawing on file open/import
+
+IECoreHoudini
+ - Added ForceObjects parameter to SceneCache ROP (to force what is expanded and what is a link)
+ - Added a ParticleSystem when converting PointsPrimitives to Houdini
+ - Fixed point doulbing bug with SceneCache SOP loading a PointsPrimitive
+ - Fixed bug when writing multiple frames of re-rooted scenes
+ - Fixed HoudiniScene bugs for flattened geometry (SOPs with gaps in the geo hierarchy can now be cached)
+ - SceneCache tagFilter supports SceneInterfaces with no tags
+
+8.0.0-a15 :
+
+IECore
+ - Added Parameter::setPresets and getPresets.
+ - Improved precision of CameraController operations
+ - Default ParticleReader uses floats (#69)
+ - Fixed MurmurHash bug where empty strings had no effect on a hash
+
+IECoreGL
+ - Added Shader::csParameter() for constant time access to "Cs"
+ - Fixed bug with superimposed instances
+ - Fixed potential bug in Selector::loadIDShader()
+ - Fixed state leak for immediate renders
+ - Fixed PointsPrimitive selection and coloring
+ - Implemented per-vertex Cs for PointsPrimitive.
+
+IECoreMaya
+ - Fixed erroneous compute on SceneShape outputObjects
+ - Fixed tests for Maya 2014
+
+IECoreHoudini
+ - Added a Cache Manager for the Cortex ObjectPool (#40)
+ - SceneCache ROP allows caching of un-named top level geo (uses the OBJ node name instead)
+ - Fixed time dependency issues with SceneCache SOP and OBJs
+ - OBJ SceneCache nodes expose their transform via python expressions (see the Output tab)
+ - Expanding and SOP cooking are now interrupt-able using the escape key
+ - Improvements for expanding SceneCaches in Houdini
+  - Expanded nodes are now connected to the subnet indirect inputs
+  - Expanded nodes are placed using Houdini's layout automation
+  - File parms channel reference their parent
+  - Path parms channel reference their parent (when appropriate)
+  - New Push Parms button updates the filters and geometry type throughout the expanded hierarchy (no need to collapse). Note that this does not take hierarchy changes into account, just parameter values.
+ - FromHoudiniGroupConverter ignores internal groups
+ - Fixed compatibility issues with Houdini 12.1 (introduced in a14)
+ - Declared TypeId range
+ 
+IECoreNuke
+ - Added support for TCL expressions on SceneCacheReader
+ - Fixed a few bugs with SceneCacheReader
+
+IECoreArnold
+ - Fixed TypeId range so it doesn't conflict with IECoreHoudini
+ 
+IECoreMantra
+ - Houdini 12.5 compatibility
+
+8.0.0-a14 :
+
+- IECore :
+ - Modified BasicPreset so it works with parameters derived from CompoundParameter
+ - Added ObjectPool and ComputationCache classes for providing a unified cache mechanism for cortex objects (used in SceneCache and CachedReader).
+ - Removed ModelCache class (SceneInterface and SceneCache replaces that entirely).
+ 
+- IECoreMaya :
+ - Using the newly added GL lambert shader in the maya GL preview.
+ - Added geometry snapping to the SceneShape
+ - Optimization on the SceneShape by copying previously rendered GL groups at link locations.
+
+- IECoreHoudini :
+ - Added support for Cortex loaded geometry in the SceneCache reader.
+
+- IECoreGL :
+ - IECoreGL::ToGLTextureConverter option to add missing channels.
+ - Removed IECoreGL dependency on GLUT
+ - Replaced OpenGL 3 function calls with their 2.1 extensions
+ - Added a standard lambert shader to IECoreGL::Shader
+ - Fixes in Selector object and making it revert state when destroyed.
+
+- IECoreRI :
+ - Deprecated 3delight hack
+
+8.0.0-a13 :
+
+- General :
+	- Ubuntu compilation issues.
+
+- IECore :
+	- SceneCache changed to store samples index as a IndexedIO::Directory which is loaded once as opposed to a integer value. Improved performance on large environments.
+	- Improvements and bug fixes in LinkedScene associated to the usage of tags and the link attribute. The link attributes are now separated and can be queried in readers such as SceneShape to obtain the actual file,location and the time.
+	- Adding constructor for InternedString that accepts a signed 64bit integer for quick conversion from numbers to strings. Used in SceneCache.
+
+- IECoreMaya :
+	- Several improvements on the SceneShape node (SceneShapeInterface) and bug fixes.
+
+- IECoreGL :
+	- Reverting some optimizations done in the convertion of Meshes to IECoreGL which were not really effective.
+
+8.0.0 (up to a12) :
+
+Additions :
+* Added IECoreNuke::SceneCacheReader, which allows inspection of scene cache files and the selective display of it's geometry.
+* Renderer::Procedural classes must now implement a hash() method, which provides a hash of their input data. This is so renderers that support procedural caching can make use of the hash, allowing entire procedurals to be instanced.
+* Added Maya converters for IECore.CoordinateSystem to/from Maya Locators.
+* Added the LensModel and StandardRadialLensModel classes to provide a framework for applying or removing lens distortion.
+* Added the LensDistortOp which distorts or undistorts an image using a parametric lens model.
+* Added the ieLensDistort node to IECoreNuke. The node can apply or remove lens distortion using any of the lens models registered to Cortex.
+* Added LinkedScene class, to support scene files that reference (link) to external files with time remapping. The bounding boxes are incorporated in the master scene automatically when writing and when reading the traversal of the whole hierarchy is transparently switching between the files.
+* IECoreMaya: ieSceneShape maya node now uses SharedSceneInterfaces, so it's not super slow when you've got a scene with multiple nodes referencing the same file.
+* Added SharedSceneInterfaces, which uses an LRU cache so you don't end up opening the same file over and over again
 * It's now possible to register FromMayaDagConverters for plugin maya nodes. Added the FromMayaProceduralHolderConverter.
 * IECoreHoudini has new OBJ and SOP nodes for reading IECore::SceneCache files, and a ROP for writing them
 * Added InternedStringData and InternedStringVectorDataTypes.
 * Added IECoreHoudini::HoudiniScene, a SceneInterface for live Houdini scenes.
 * Added virtual duplicate() method to IECore::SceneCache, which is used in methods like child() etc, so derived classes can make these methods return instances of themselves
-* Same change for IECoreMaya::MayaScene
-* Added SceneShape and base class SceneShapeInterface to IECoreMaya for reading IECore::SceneInterface files, SceneShapeUI for drawing. Includes GL preview and output objects, transforms and bounding boxes, basic template and dag menu.
+* Added IECoreMaya::MayaScene, a SceneInterface for live Maya scenes.
+* Added SceneShape and base class SceneShapeInterface to IECoreMaya for reading IECore::SceneInterface files, SceneShapeUI for drawing. Includes GL preview and output objects, transforms and bounding boxes, template and dag menu.
 * Added AlexaLogcToLinearOp and LinearToAlexaLogcOp bindings
+* MeshPrimitive::createSphere will create a sphere-like mesh with the same controls as SpherePrimitive, using the divisions argument to control tessellation.
 
 Improvements :
 
+* IECoreMaya: ieSceneShape now supports snapping of Geometry in maya 2013 and above.
+* IECoreMaya: ieProceduralHolder now supports zooming in on individual components using the "f" key
 * IECoreMaya: ieSceneShape maya node now tells maya its bounding box has changed when you change the file name or scene path
 * IECoreMaya::ClassParameterHandler and ClassVectorParameterHandler will only create attributes using 1-plug mode. 4-plug mode is still readable, but will be removed in the future. The ['maya']['compactClassPlugs'] userData is no longer accepted.
 * IECoreHoudini SOP_InterpolatedCacheReader now exposes samplesPerFrame and interpolation as parameters, instead of the frameMultiplier hack. fps is stil hidden, though may be exposed in the future.
@@ -30,6 +241,55 @@ Improvements :
 * IECoreRI::Renderer now groups options by type, outputting each group via a single RiOption call just before worldBegin(). This is necessary because 3delight requires certain options to be specified together in this way ( statistics "endofframe" and "filename" for example ). 
 * IECoreHoudini uses name attributes by default rather than Houdini groups. Conversion using PrimitiveGroups is still possible using the parameter on the FromHoudiniGroupConverter, but all automated processes will require names.
 * IECoreHoudini FromHoudini converters have an attribute filter that can be used to prevent conversion of unnecessary data.
+* Primitives provide a hash of their topology in addition to the complete hash (including primitive variables).
+* LRUCache class now accepts an optional removalCallback, which is called whenever an item is removed from the cache.
+* IECoreHoudini has new ParameterisedHolderInterface and ParameterisedHolder base classes, so we can hold parameterised objects in non-SOP contexts.
+* IECoreRI::SLOReader now loads shader annotations, providing them as an "ri:annotations" entry in the shader blind data. It also adds a type hint to distinguish between parameters of type string and parameters or type shader.
+* IECore::ParticleReader new parameter to convert primVar names to an appropriate name. Converts original position primVar name returned by derived classes to "P".
+* All V[2,3][i,f,d]Data and VectorData is now GeometricTypedData, which extends TypedData by adding an Interpretation value (Numeric, Point, Normal, Vector, Color).
+* Primitive constructors that accept position data will force the geometric interpretation to Point. Users are responsible to set correct interpretation when assigning prim vars (including P and N) after construction.
+* MatrixMultiplyOp no longer has a mode parameter, and instead uses geometric interpretation to transform the input data appropriately.
+* TransformOp now takes a single list of primitive variables to modify, and uses geometric interpretation to transform them appropriately. For backwards compatibility with old files, if P and N are Numeric, they will be converted to the appropriate interpretation and a warning will be issued.
+* IECoreMaya FromMayaShapeConverters correctly set the geometric interpretation of points, normals, and velocities.
+* IECoreHoudini To/FromHoudini converters correctly set the geometric interpretation of points, normals, and velocities.
+* Shader::parametersData() now returns a raw pointer, and provides a const version.
+* IECore::FileSequenceParameter, FileSequenceVectorParameter, FrameListParameter can now return the FileSequences/FrameList using a StringData/StringVectorData argument instead of the internal value. To be used in ops doOperate in particular. Checks validity of given data.
+* IECoreHoudini ToHoudiniGeometryConverters have an attribFilter parameter to control the which PrimitiveVariables are converted.
+* IECoreHoudini ToHoudiniGeometryConverters have a public transferAttribs method so PrimitiveVariables can be converted without effecting topology.
+* IECoreHoudini To/FromHoudiniGeometryConverters automatically convert standard attributes between Cortex and Houdini (Pref->rest ; Cs->Cd ; s,t->uv, etc and vice versa). This behaviour can be disabled with a parameter, but is on by default (and hence is used by the file sop and other reader nodes).
+* CameraController::dolly() behaviour now produces smoother movement.
+* IECoreMaya::ToMayaMeshConverter now using compressed UV arrays matching uv indices to set uv values in addUVSet.
+* IECoreMaya::ToMayaMeshConverter and IECoreMaya::FromMayaMeshConverter now supports a custom attribute 'ieMeshInterpolation' on meshes that translate to the interpolation type in the IECore::MeshPrimitive. 
+* Added DisplayDriver::acceptsRepeatedData(), enabling the ImageDisplayDriver to support progressive rendering and rerendering when used via IECoreRI.
+* IECoreRI::ParameterList now accepts V2iData, converting it to RenderMan "integer[2]".
+* Added Renderer option "editable", along with editBegin() and editEnd() methods, to allow interactive rerendering functionality to be implemented. These are currently only implemented by IECoreRI::Renderer.
+* Switched to Boost Filesystem version 3
+* MeshPrimitive::createPlane can create multi-face planes using the divisions argument
+* Added MeshPrimitive::max/minVerticesPerFace
+* IECoreHoudini supports the ieMeshInterpolation attribute, using it to set the interpolation of converted MeshPrimitives
+* IECoreGL caches triangulation conversions for MeshPrimitives
+* IECoreHoudini supports reading and writing LinkedScenes (lscc)
+* IECoreHoudini and IECoreMaya are able to pass tags from SceneCache readers to the associated live scenes and writers
+* LinkedScenes now allow tags to be stored at link locations
+* Added Spline->SplineData boost python converter
+
+Bug Fixes :
+* Fixed a maya 2013 crash when attempting to use the rotate manipulator that comes up when selecting an ieProceduralHolder component in rotate mode.
+* IECoreGL ColorTexture now uses GL_RGB16 as the internal colour format to the glTexImage2D call. This fixes colour banding in subtle gradients and edges with an alpha fade off. GL_RGB16 was chosen as 
+  it is supported from OpenGl1.1 and earlier graphics cards that don't support it will reduce their bit precision to GL_RGB8. Please see the following document for more details:
+  http://developer.download.nvidia.com/opengl/texture_formats/nv_ogl_texture_formats.pdf
+* IECore ImageReader and ImageWriter not doing transformation on alpha anymore, A gets filtered out from the channel names given to ColorSpaceTransformOp.
+* IECore ColorSpaceTransformOp applies unpremult before channelOp conversion then premult after, as channelOp doesn't deal with unpremultiplication of the colour channels.
+* Removed rounding hack in OversamplesCalculator.
+* Maya intField created to display IntParameter now has step size set to 1 ( if min or max are set ).  This prevents a warning when creating fields for parameters with max - min less than the default step of 10.
+* Preventing segfaults when CompoundData and CompoundObject have items with NULL pointers.
+* Preventing segfaults when Parameter's default values are initialized with NULL pointers (or the Python None object).
+* ieFilteredAbs corrected to return positive values, ieTurbulence monochrome variant now filtered
+* Fixed a problem where it was impossible to kill the renderer in 3delight IPR mode, and therefore impossible to stop an IPR render. See comments above "struct ProceduralData" in include/IECoreRI/private/RendererImplementation.h
+* Compatibility for OpenEXR 2.0.0
+* Compatibility for Alembic 1.1.2
+* Compatibility for PRMan 17
+* Compatibility for Boost Filesystem v2 and v3
 
 7.10.2 :
 

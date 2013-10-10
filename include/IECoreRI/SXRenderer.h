@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -112,6 +112,9 @@ class SXRenderer : public IECore::Renderer
 
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
+		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
+		virtual void editEnd();
+		
 		//! @group Shader Execution
 		/// These functions allow direct execution of shaders,
 		/// and always evaluate the shaders active in the current

@@ -32,9 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/filesystem/path.hpp"
+
+#include "GEO/GEO_AttributeHandle.h"
+#include "GU/GU_Detail.h"
+#include "OBJ/OBJ_Node.h"
+#include "OP/OP_Bundle.h"
+#include "OP/OP_Director.h" 
 #include "PRM/PRM_Include.h"
+#include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
+#include "UT/UT_StringMMPattern.h"
+
+#include "IECore/LinkedScene.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/HoudiniScene.h"
@@ -46,12 +57,13 @@ using namespace IECoreHoudini;
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
 
 ROP_SceneCacheWriter::ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op )
-	: ROP_Node( net, name, op ), m_liveScene( 0 ), m_outScene( 0 )
+	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 )
 {
 }
 
 ROP_SceneCacheWriter::~ROP_SceneCacheWriter()
 {
+	delete m_forceFilter;
 }
 
 OP_Node *ROP_SceneCacheWriter::create( OP_Network *net, const char *name, OP_Operator *op )
@@ -61,39 +73,44 @@ OP_Node *ROP_SceneCacheWriter::create( OP_Network *net, const char *name, OP_Ope
 
 PRM_Name ROP_SceneCacheWriter::pFile( "file", "File" );
 PRM_Name ROP_SceneCacheWriter::pRootObject( "rootObject", "Root Object" );
+PRM_Name ROP_SceneCacheWriter::pForceObjects( "forceObjects", "Force Objects" );
 
 PRM_Default ROP_SceneCacheWriter::fileDefault( 0, "$HIP/output.scc" );
 PRM_Default ROP_SceneCacheWriter::rootObjectDefault( 0, "/obj" );
+PRM_SpareData ROP_SceneCacheWriter::forceObjectsSpareData;
 
 OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 {
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		PRM_Template *parentTemplate = ROP_Node::getROPbaseTemplate();
-		unsigned numParentParms = PRM_Template::countTemplates( parentTemplate );
-		thisTemplate = new PRM_Template[ numParentParms + 3 ];
+		thisTemplate = new PRM_Template[4];
 		
-		// add the common ROP parms
-		for ( unsigned i = 0; i < numParentParms; ++i )
-		{
-			thisTemplate[i] = parentTemplate[i];
-		}
-		
-		thisTemplate[numParentParms] = PRM_Template(
+		thisTemplate[0] = PRM_Template(
 			PRM_FILE, 1, &pFile, &fileDefault, 0, 0, 0, 0, 0,
 			"An SCC file to write, based on the Houdini hierarchy defined by the Root Object provided."
 		);
-		thisTemplate[numParentParms+1] = PRM_Template(
+		
+		thisTemplate[1] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &pRootObject, &rootObjectDefault, 0, 0, 0,
 			&PRM_SpareData::objPath, 0, "The node to use as the root of the SceneCache"
+		);
+		
+		forceObjectsSpareData.copyFrom( PRM_SpareData::objPath );
+		forceObjectsSpareData.setOpRelative( "/obj" );
+		
+		thisTemplate[2] = PRM_Template(
+			PRM_STRING, PRM_TYPE_DYNAMIC_PATH_LIST, 1, &pForceObjects, 0, 0, 0, 0,
+			&forceObjectsSpareData, 0, "Optional list of nodes to force as expanded objects. "
+			"If this list is used, then links will be stored for any node not listed."
 		);
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		templatePair = new OP_TemplatePair( thisTemplate );
+		OP_TemplatePair *extraTemplatePair = new OP_TemplatePair( thisTemplate );
+		templatePair = new OP_TemplatePair( ROP_Node::getROPbaseTemplate(), extraTemplatePair );
 	}
 	
 	return templatePair;
@@ -101,22 +118,32 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 
 int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 {
+	UT_String nodePath;
+	evalString( nodePath, pRootObject.getToken(), 0, 0 );
+	
 	UT_String value;
-	evalString( value, pRootObject.getToken(), 0, 0 );
+	evalString( value, pFile.getToken(), 0, 0 );
+	std::string file = value.toStdString();
 	
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_liveScene = new IECoreHoudini::HoudiniScene( value, emptyPath, emptyPath );
+		m_houdiniScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
+		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
+		if ( linked( file ) )
+		{
+			m_liveScene = m_houdiniScene;
+		}
+		else
+		{
+			m_liveScene = new LinkedScene( m_houdiniScene );
+		}
 	}
 	catch ( IECore::Exception &e )
 	{		
 		addError( ROP_MESSAGE, e.what() );
 		return false;
 	}
-	
-	evalString( value, pFile.getToken(), 0, 0 );
-	std::string file = value.toStdString();
 	
 	try
 	{
@@ -128,34 +155,172 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		return false;
 	}
 	
+	UT_String forceObjects;
+	evalString( forceObjects, pForceObjects.getToken(), 0, 0 );
+	
+	m_forceFilter =  0;
+	if ( linked( file ) && !forceObjects.equal( "" ) )
+	{
+		// get the list of nodes matching the filter
+		const PRM_SpareData *data = getParm( pForceObjects.getToken() ).getSparePtr();
+		OBJ_Node *baseNode = OPgetDirector()->findNode( data->getOpRelative() )->castToOBJNode();
+		OP_Bundle *bundle = getParmBundle( pForceObjects.getToken(), 0, forceObjects, baseNode, data->getOpFilter() );
+		
+		// add all of the parent nodes
+		UT_PtrArray<OP_Node *> nodes;
+		bundle->getMembers( nodes );
+		size_t numNodes = nodes.entries();
+		for ( size_t i = 0; i < numNodes; ++i )
+		{
+			OP_Node *current = nodes[i]->getParent();
+			while ( current )
+			{
+				bundle->addOp( current );
+				current = current->getParent();
+			}
+		}
+		
+		// build a matchable filter from all these nodes
+		UT_WorkBuffer buffer;
+		bundle->buildString( buffer );
+		buffer.copyIntoString( forceObjects );
+		m_forceFilter = new UT_StringMMPattern();
+		m_forceFilter->compile( forceObjects );
+	}
+	
 	return true;
 }
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *boss )
 {
-	return doWrite( m_liveScene, m_outScene, time );
+	// We need to adjust the time for writing, because Houdini treats time starting
+	// at Frame 1, while SceneInterfaces treat time starting at Frame 0. 
+	double writeTime = time + CHgetManager()->getSecsPerSample();
+	
+	// the interruptor passed in is null for some reason, so just get the global one
+	UT_Interrupt *progress = UTgetInterrupt();
+	if ( !progress->opStart( ( boost::format( "Writing Houdini time %f as SceneCache time %f" ) % time % writeTime ).str().c_str() ) )
+	{
+		addError( 0, "Cache aborted" );
+		return ROP_ABORT_RENDER;
+	}
+	
+	// update the default evaluation time to avoid double cooking
+	m_houdiniScene->setDefaultTime( writeTime );
+	
+	SceneInterfacePtr outScene = m_outScene;
+	
+	// we need to re-root the scene if its trying to cache a top level object
+	UT_String nodePath;
+	evalString( nodePath, pRootObject.getToken(), 0, 0 );
+	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
+	if ( node && node->getObjectType() == OBJ_GEOMETRY )
+	{
+		OP_Context context( time );
+		const GU_Detail *geo = node->getRenderGeometry( context );
+		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+		bool reRoot = !nameAttrRef.isValid();
+		if ( nameAttrRef.isValid() )
+		{
+			const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+			const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+			GA_Size numShapes = tuple->getTableEntries( nameAttr );
+			reRoot = ( numShapes == 0 );
+			if ( numShapes == 1 )
+			{
+				const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
+				if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+				{
+					reRoot = true;
+				}
+			}
+		}
+
+		if ( reRoot )
+		{
+			outScene = m_outScene->child( node->getName().toStdString(), SceneInterface::CreateIfMissing );
+		}
+	}
+	
+	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
+	progress->opEnd();
+	return status;
 }
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 {
+	m_houdiniScene = 0;
 	m_liveScene = 0;
 	m_outScene = 0;
 	
 	return ROP_CONTINUE_RENDER;
 }
 
-ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterface *outScene, double time )
+ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterface *outScene, double time, UT_Interrupt *progress )
 {
+	progress->setLongOpText( ( "Writing " + liveScene->name().string() ).c_str() );
+	if ( progress->opInterrupt() )
+	{
+		addError( 0, ( "Cache aborted during " + liveScene->name().string() ).c_str() );
+		return ROP_ABORT_RENDER;
+	}
+	
 	if ( liveScene != m_liveScene )
 	{
 		outScene->writeTransform( liveScene->readTransform( time ), time );
 	}
 	
+	Mode mode = NaturalExpand;
+	const HoudiniScene *hScene = IECore::runTimeCast<const HoudiniScene>( liveScene );
+	if ( hScene && m_forceFilter )
+	{
+		UT_String nodePath;
+		hScene->node()->getFullPath( nodePath );
+		mode = ( nodePath.multiMatch( *m_forceFilter ) ) ? ForcedExpand : ForcedLink;
+	}
+	
+	SceneInterface::NameList attrs;
+	liveScene->attributeNames( attrs );
+	for ( SceneInterface::NameList::iterator it = attrs.begin(); it != attrs.end(); ++it )
+	{
+		if ( *it == LinkedScene::linkAttribute )
+		{
+			if ( mode == ForcedExpand )
+			{
+				continue;
+			}
+			
+			mode = NaturalLink;
+		}
+		
+		outScene->writeAttribute( *it, liveScene->readAttribute( *it, time ), time );
+	}
+	
+	if ( mode == ForcedLink )
+	{
+		if ( const SceneCacheNode<OP_Node> *sceneNode = static_cast< const SceneCacheNode<OP_Node>* >( hScene->node() ) )
+		{
+			if ( ConstSceneInterfacePtr scene = sceneNode->scene() )
+			{
+				outScene->writeAttribute( LinkedScene::linkAttribute, LinkedScene::linkAttributeData( scene, time ), time );
+				return ROP_CONTINUE_RENDER;
+			}
+		}
+	}
+	
+	if ( mode == NaturalLink )
+	{
+		return ROP_CONTINUE_RENDER;
+	}
+	
+	SceneInterface::NameList tags;
+	liveScene->readTags( tags, false );
+	outScene->writeTags( tags );
+	
 	if ( liveScene->hasObject() )
 	{
 		try
 		{
-			/// \todo: does an invisible node mean there is no object?
 			outScene->writeObject( liveScene->readObject( time ), time );
 		}
 		catch ( IECore::Exception &e )
@@ -169,10 +334,9 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	liveScene->childNames( children );
 	for ( SceneInterface::NameList::iterator it = children.begin(); it != children.end(); ++it )
 	{
-		/// \todo: does an invisible node mean its not a child?
 		ConstSceneInterfacePtr liveChild = liveScene->child( *it );
 		SceneInterfacePtr outChild = outScene->child( *it, SceneInterface::CreateIfMissing );
-		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time );
+		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time, progress );
 		if ( status != ROP_CONTINUE_RENDER )
 		{
 			return status;
@@ -180,4 +344,18 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	}
 	
 	return ROP_CONTINUE_RENDER;
+}
+
+bool ROP_SceneCacheWriter::updateParmsFlags()
+{
+	UT_String value;
+	evalString( value, pFile.getToken(), 0, 0 );
+	std::string file = value.toStdString();
+	enableParm( pForceObjects.getToken(), linked( file ) );
+	return true;
+}
+
+bool ROP_SceneCacheWriter::linked( const std::string &file ) const
+{
+	return ( boost::filesystem::path( file ).extension().string() == ".lscc" );
 }

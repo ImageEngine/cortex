@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,7 +43,7 @@ namespace IECore
 {
 
 /// The MatrixMultiplyOp applies a matrix transformation to an array of vectors.
-/// It can transform the vectors as if they were points, vectors or normals.
+/// It will transform the vectors according to their GeometricData::Interpretation.
 class MatrixMultiplyOp : public ModifyOp
 {
 	public :
@@ -56,19 +56,6 @@ class MatrixMultiplyOp : public ModifyOp
 		ObjectParameter * matrixParameter();
 		const ObjectParameter * matrixParameter() const;
 
-		/// An enumeration for the different ways of interpreting
-		/// the vectors to be transformed. These are the acceptable
-		/// values for modeParameter()->setTypedValue().
-		enum Mode
-		{
-			Point = 0,
-			Vector = 1,
-			Normal = 2
-		};
-
-		IntParameter * modeParameter();
-		const IntParameter * modeParameter() const;
-
 	protected :
 
 		virtual void modify( Object * toModify, const CompoundObject * operands );
@@ -76,7 +63,6 @@ class MatrixMultiplyOp : public ModifyOp
 	private :
 
 		ObjectParameterPtr m_matrixParameter;
-		IntParameterPtr m_modeParameter;
 
 };
 

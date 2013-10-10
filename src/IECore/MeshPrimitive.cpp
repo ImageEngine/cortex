@@ -54,7 +54,7 @@ const unsigned int MeshPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MeshPrimitive);
 
 MeshPrimitive::MeshPrimitive()
-	: m_verticesPerFace( new IntVectorData ), m_vertexIds( new IntVectorData ), m_numVertices( 0 ), m_interpolation( "linear" )
+	: m_verticesPerFace( new IntVectorData ), m_vertexIds( new IntVectorData ), m_numVertices( 0 ), m_interpolation( "linear" ), m_minVerticesPerFace(0), m_maxVerticesPerFace(0)
 {
 }
 
@@ -64,7 +64,9 @@ MeshPrimitive::MeshPrimitive( ConstIntVectorDataPtr verticesPerFace, ConstIntVec
 	setTopology( verticesPerFace, vertexIds, interpolation );
 	if( p )
 	{
-		variables.insert( PrimitiveVariableMap::value_type("P", PrimitiveVariable(PrimitiveVariable::Vertex, p)) );
+		V3fVectorDataPtr pData = p->copy();
+		pData->setInterpretation( GeometricData::Point );
+		variables.insert( PrimitiveVariableMap::value_type("P", PrimitiveVariable(PrimitiveVariable::Vertex, pData)) );
 	}
 }
 
@@ -76,6 +78,50 @@ size_t MeshPrimitive::numFaces() const
 const IntVectorData *MeshPrimitive::verticesPerFace() const
 {
 	return m_verticesPerFace.get();
+}
+
+void MeshPrimitive::computeMinMaxVertsPerFace() const
+{
+	int minVertsPerFace = 0x7fffffff;
+	int maxVertsPerFace = 0;
+	unsigned int numExpectedVertexIds = 0;
+	for ( vector<int>::const_iterator it = m_verticesPerFace->readable().begin(); it != m_verticesPerFace->readable().end(); it++ )
+	{
+		int vertsPerFace = *it;
+		minVertsPerFace = std::min( minVertsPerFace, vertsPerFace );
+		maxVertsPerFace = std::max( maxVertsPerFace, vertsPerFace );
+		numExpectedVertexIds += vertsPerFace;
+	}
+	if( minVertsPerFace<3 )
+	{
+		throw Exception( "Bad topology - number of vertices per face less than 3." );
+	}
+
+	if( numExpectedVertexIds!=m_vertexIds->readable().size() )
+	{
+		throw Exception( "Bad topology - number of vertexIds not equal to sum of verticesPerFace" );
+	}
+
+	m_minVerticesPerFace = ( m_verticesPerFace->readable().size() ? minVertsPerFace : 0 );
+	m_maxVerticesPerFace = maxVertsPerFace;
+}
+		
+int MeshPrimitive::minVerticesPerFace() const
+{
+	if( m_maxVerticesPerFace == 0 )
+	{
+		computeMinMaxVertsPerFace();
+	}
+	return m_minVerticesPerFace;
+}
+
+int MeshPrimitive::maxVerticesPerFace() const
+{
+	if( m_maxVerticesPerFace == 0 )
+	{
+		computeMinMaxVertsPerFace();
+	}
+	return m_maxVerticesPerFace;
 }
 
 const IntVectorData *MeshPrimitive::vertexIds() const
@@ -93,40 +139,41 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 	assert( verticesPerFace );
 	assert( vertexIds );
 
-	vector<int>::const_iterator minIt = min_element( verticesPerFace->readable().begin(), verticesPerFace->readable().end() );
-	if( minIt!=verticesPerFace->readable().end() )
+	int maxVertexId = -1;
+	for ( vector<int>::const_iterator it = vertexIds->readable().begin(); it != vertexIds->readable().end(); it++ )
 	{
-		if( *minIt<3 )
-		{
-			throw Exception( "Bad topology - number of vertices per face less than 3." );
-		}
-	}
-
-	minIt = min_element( vertexIds->readable().begin(), vertexIds->readable().end() );
-	{
-		if( minIt!=vertexIds->readable().end() && *minIt<0 )
+		int id = *it;
+		if( id<0 )
 		{
 			throw Exception( "Bad topology - vertexId less than 0." );
 		}
+		maxVertexId = std::max( maxVertexId, id );
 	}
-
-	unsigned int numExpectedVertexIds = accumulate( verticesPerFace->readable().begin(), verticesPerFace->readable().end(), 0 );
-	if( numExpectedVertexIds!=vertexIds->readable().size() )
-	{
-		throw Exception( "Bad topology - number of vertexIds not equal to sum of verticesPerFace" );
-	}
-
+	
 	m_verticesPerFace = verticesPerFace->copy();
 	m_vertexIds = vertexIds->copy();
+	
+	computeMinMaxVertsPerFace();
+	
 	if( m_vertexIds->readable().size() )
 	{
-		m_numVertices = 1 + *max_element( m_vertexIds->readable().begin(), m_vertexIds->readable().end() );
+		m_numVertices = 1 + maxVertexId;
 	}
 	else
 	{
 		m_numVertices = 0;
 	}
 	m_interpolation = interpolation;
+}
+
+void MeshPrimitive::setTopologyUnchecked( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, size_t numVertices, const std::string &interpolation )
+{
+	m_interpolation = interpolation;
+	m_verticesPerFace = verticesPerFace->copy();
+	m_vertexIds = vertexIds->copy();
+	m_numVertices = numVertices;
+	m_minVerticesPerFace = 0;
+	m_maxVerticesPerFace = 0;
 }
 
 void MeshPrimitive::setInterpolation( const std::string &interpolation )
@@ -253,6 +300,10 @@ void MeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void MeshPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void MeshPrimitive::topologyHash( MurmurHash &h ) const
+{
 	m_verticesPerFace->hash( h );
 	m_vertexIds->hash( h );
 	h.append( m_interpolation );
@@ -294,37 +345,133 @@ MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 	return new MeshPrimitive( new IntVectorData(verticesPerFaceVec), new IntVectorData(vertexIdsVec), interpolation, new V3fVectorData(p) );
 }
 
-MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b )
+MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &divisions )
 {
-	IntVectorDataPtr verticesPerFace = new IntVectorData;
-	verticesPerFace->writable().push_back( 4 );
-
+	V3fVectorDataPtr pData = new V3fVectorData;
+	std::vector<V3f> &p = pData->writable();
+	
+	// add vertices
+	float xStep = b.size().x / (float)divisions.x;
+	float yStep = b.size().y / (float)divisions.y;
+	for ( int i = 0; i <= divisions.y; ++i )
+	{
+		for ( int j = 0; j <= divisions.x; ++j )
+		{
+			p.push_back( V3f( b.min.x + j * xStep, b.min.y + i * yStep, 0 ) );
+		}
+	}
+	
 	IntVectorDataPtr vertexIds = new IntVectorData;
-	vertexIds->writable().push_back( 0 );
-	vertexIds->writable().push_back( 1 );
-	vertexIds->writable().push_back( 2 );
-	vertexIds->writable().push_back( 3 );
+	IntVectorDataPtr verticesPerFace = new IntVectorData;
+	std::vector<int> &vpf = verticesPerFace->writable();
+	std::vector<int> &vIds = vertexIds->writable();
+	
+	FloatVectorDataPtr sData = new FloatVectorData;
+	FloatVectorDataPtr tData = new FloatVectorData;
+	std::vector<float> &s = sData->writable();
+	std::vector<float> &t = tData->writable();
+	
+	float sStep = 1.0f / (float)divisions.x;
+	float tStep = 1.0f / (float)divisions.y;
+	
+	// add faces
+	int v0, v1, v2, v3;
+	for ( int i = 0; i < divisions.y; ++i )
+	{
+		for ( int j = 0; j < divisions.x; ++j )
+		{
+			v0 = j + (divisions.x+1) * i;
+			v1 = j + 1 + (divisions.x+1) * i;;
+			v2 = j + 1 + (divisions.x+1) * (i+1);
+			v3 = j + (divisions.x+1) * (i+1);
+			
+			vpf.push_back( 4 );
+			vIds.push_back( v0 );
+			vIds.push_back( v1 );
+			vIds.push_back( v2 );
+			vIds.push_back( v3 );
+			
+			s.push_back( j * sStep );
+			s.push_back( (j+1) * sStep );
+			s.push_back( (j+1) * sStep );
+			s.push_back( j * sStep );
+			
+			t.push_back( 1 - i * tStep );
+			t.push_back( 1 - i * tStep );
+			t.push_back( 1 - (i+1) * tStep );
+			t.push_back( 1 - (i+1) * tStep );
+		}
+	}
 
-	V3fVectorDataPtr p = new V3fVectorData;
-	p->writable().push_back( V3f( b.min.x, b.min.y, 0 ) );
-	p->writable().push_back( V3f( b.max.x, b.min.y, 0 ) );
-	p->writable().push_back( V3f( b.max.x, b.max.y, 0 ) );
-	p->writable().push_back( V3f( b.min.x, b.max.y, 0 ) );
+	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
+	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
 
-	FloatVectorDataPtr s = new FloatVectorData;
-	FloatVectorDataPtr t = new FloatVectorData;
-	s->writable().push_back( 0 );
-	t->writable().push_back( 1 );
-	s->writable().push_back( 1 );
-	t->writable().push_back( 1 );
-	s->writable().push_back( 1 );
-	t->writable().push_back( 0 );
-	s->writable().push_back( 0 );
-	t->writable().push_back( 0 );
+	return result;
+}
 
-	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", p );
-	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, s );
-	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, t );
+MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zMax, float thetaMax, const Imath::V2i &divisions )
+{
+	IntVectorDataPtr vertexIds = new IntVectorData;
+	IntVectorDataPtr verticesPerFace = new IntVectorData;
+	std::vector<int> &vpf = verticesPerFace->writable();
+	std::vector<int> &vIds = vertexIds->writable();
+	
+	V3fVectorDataPtr pData = new V3fVectorData;
+	V3fVectorDataPtr nData = new V3fVectorData;
+	std::vector<V3f> &pVector = pData->writable();
+	std::vector<V3f> &nVector = nData->writable();
+	
+	FloatVectorDataPtr sData = new FloatVectorData;
+	FloatVectorDataPtr tData = new FloatVectorData;
+	std::vector<float> &sVector = sData->writable();
+	std::vector<float> &tVector = tData->writable();
+	
+	float oMin = Math<float>::asin( zMin );
+	float oMax = Math<float>::asin( zMax );
+	const unsigned int nO = max( 4u, (unsigned int)( ( divisions.x + 1 ) * (oMax - oMin) / M_PI ) );
+
+	float thetaMaxRad = thetaMax / 180.0f * M_PI;
+	const unsigned int nT = max( 7u, (unsigned int)( ( divisions.y + 1 ) * thetaMaxRad / (M_PI*2) ) );
+
+	for ( unsigned int i=0; i<nO; i++ )
+	{
+		float v = (float)i/(float)(nO-1);
+		float o = lerp( oMin, oMax, v );
+		float z = radius * Math<float>::sin( o );
+		float r = radius * Math<float>::cos( o );
+		
+		for ( unsigned int j=0; j<nT; j++ )
+		{
+			float u = (float)j/(float)(nT-1);
+			float theta = thetaMaxRad * u;
+			V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
+			sVector.push_back( u );
+			tVector.push_back( v );
+			pVector.push_back( p );
+			nVector.push_back( p );
+			if( i < nO - 1 && j < nT - 1 )
+			{
+				unsigned int i0 = i * nT + j;
+				unsigned int i1 = i0 + 1;
+				unsigned int i2 = i0 + nT;
+				unsigned int i3 = i2 + 1;
+				vpf.push_back( 3 );
+				vIds.push_back( i0 );
+				vIds.push_back( i1 );
+				vIds.push_back( i2 );
+				vpf.push_back( 3 );
+				vIds.push_back( i1 );
+				vIds.push_back( i3 );
+				vIds.push_back( i2 );
+			}
+		}
+	}
+	
+	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
+	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::Vertex, sData );
+	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::Vertex, tData );
 
 	return result;
 }

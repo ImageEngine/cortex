@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -116,6 +116,17 @@ GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECo
 	}
 	
 	return attrRef;
+}
+
+GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::convertString( std::string name, std::string value, GU_Detail *geo, GA_Range range )
+{
+	StringVectorDataPtr valueData = new StringVectorData();
+	valueData->writable().push_back( value );
+	std::vector<int> indexValues( range.getEntries(), 0 );
+	IntVectorDataPtr indexData = new IntVectorData( indexValues );
+	ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( valueData );
+	converter->indicesParameter()->setValidatedValue( indexData );
+	return converter->convert( name, geo, range );
 }
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniStringDetailAttribConverter );

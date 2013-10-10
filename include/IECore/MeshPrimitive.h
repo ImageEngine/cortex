@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,9 +72,13 @@ class MeshPrimitive : public Primitive
 		//@{
 		size_t numFaces() const;
 		const IntVectorData *verticesPerFace() const;
+		int minVerticesPerFace() const;
+		int maxVerticesPerFace() const;
 		const IntVectorData *vertexIds() const;
 		const std::string &interpolation() const;
+		/// \todo Remove virtual-ness for Cortex 9.
 		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
+		void setTopologyUnchecked( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, size_t numVertices, const std::string &interpolation = "linear" );
 		void setInterpolation( const std::string &interpolation );
 		PolygonIterator faceBegin();
 		PolygonIterator faceEnd();
@@ -89,8 +93,11 @@ class MeshPrimitive : public Primitive
 		/// \todo Add subdivisions and texture coordinates.
 		static MeshPrimitivePtr createBox( const Imath::Box3f &b );
 		/// Creates a plane at z=0, with the geometric normal facing down positive z.
-		/// \todo Add subdivisions.
-		static MeshPrimitivePtr createPlane( const Imath::Box2f &b );
+		static MeshPrimitivePtr createPlane( const Imath::Box2f &b, const Imath::V2i &divisions = Imath::V2i( 1 ) );
+		/// Creates a sphere
+		static MeshPrimitivePtr createSphere( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f, const Imath::V2i &divisions = Imath::V2i( 20, 40 ) );
+		
+		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:
 
@@ -100,6 +107,10 @@ class MeshPrimitive : public Primitive
 		IntVectorDataPtr m_vertexIds;
 		size_t m_numVertices;
 		std::string m_interpolation;
+		
+		void computeMinMaxVertsPerFace() const;
+		mutable int m_minVerticesPerFace;
+		mutable int m_maxVerticesPerFace;
 
 };
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import IECoreRI
 import os.path
 import os
 
-class MultipleContextsTest( unittest.TestCase ) :
+class MultipleContextsTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -58,13 +58,6 @@ class MultipleContextsTest( unittest.TestCase ) :
 		r2.setAttribute( "doubleSided", IECore.BoolData( False ) )
 		self.assertEqual( r1.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
 		self.assertEqual( r2.getAttribute( "doubleSided" ), IECore.BoolData( False ) )
-
-	def tearDown( self ) :
-
-		for f in [ "contextOne.rib", "contextTwo.rib" ] :
-			ff = "test/IECoreRI/output/" + f
-			if os.path.exists( ff ) :
-				os.remove( ff )
 
 if __name__ == "__main__":
     unittest.main()

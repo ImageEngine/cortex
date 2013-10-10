@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,6 +49,11 @@ namespace IECorePython
 		return new Shader( name, type, parameters ? parameters->readable() : CompoundDataMap() );
 	}
 
+	static CompoundDataPtr parametersData( Shader &s )
+	{
+		return s.parametersData();
+	}
+
 	void bindShader()
 	{
 		RunTimeTypedClass<Shader>()
@@ -57,7 +62,7 @@ namespace IECorePython
 			.def( "__init__", make_constructor( &construct, default_call_policies(), ( boost::python::arg_( "name" )="defaultsurface", boost::python::arg_( "type" )="surface", boost::python::arg_( "parameters" )=0 ) ) )
 			.add_property( "name", make_function( &Shader::getName, return_value_policy<copy_const_reference>() ), &Shader::setName )
 			.add_property( "type", make_function( &Shader::getType, return_value_policy<copy_const_reference>() ), &Shader::setType )
-			.add_property( "parameters", &Shader::parametersData )
+			.add_property( "parameters", &parametersData )
 		;
 	}
 

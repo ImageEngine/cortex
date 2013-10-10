@@ -86,7 +86,7 @@ class FnParameterisedHolder():
 		IECoreHoudini.FnParameterisedHolder( holder ).setParameterised( className, version, envVarName )
 		
 		if contextArgs.get( "shiftclick", False ) :
-			converter = holder.parent().createNode( "ieToHoudiniConverter", node_name = holder.name()+"Converter" )
+			converter = holder.parent().createNode( "ieCortexConverter", node_name = holder.name()+"Converter" )
 			outputNode = hou.node( contextArgs.get( "outputnodename", "" ) )
 			toolutils.connectInputsAndOutputs( converter, False, holder, outputNode, 0, 0 )
 			x, y = holder.position()

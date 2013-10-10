@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,14 +50,17 @@ class ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPointsConverter, ToHoudiniPointsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniPointsConverter( const IECore::VisibleRenderable *renderable );
+		ToHoudiniPointsConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniPointsConverter();
+		
+		/// Transfers the primitive variables from the IECore::Primitive to the GU_Detail.
+		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
 	
 	protected :
 		
-		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
-		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
+		/// performs conversion from the IECore::PointsPrimitive into the given GU_Detail
+		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 	private :
 

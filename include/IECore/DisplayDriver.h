@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -80,6 +80,12 @@ class DisplayDriver : public RunTimeTyped
 
 		/// Indicates whether this display driver only accepts data one line each time.
 		virtual bool scanLineOrderOnly() const = 0;
+
+		/// Indicates whether this display driver will accept calls to
+		/// imageData() that respecify data sent by a previous
+		/// call. By accepting repeated data, it is possible to receive images
+		/// from progressive and/or rerendering renders. 
+		virtual bool acceptsRepeatedData() const = 0;
 
 		/// Returns display window size.
 		Imath::Box2i displayWindow() const;

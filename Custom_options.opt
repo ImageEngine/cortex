@@ -17,9 +17,9 @@ GLEW_INCLUDE_PATH='/software/glew/linux.centos6.x86_64/1.6.0/include/GL'
 GLEW_LIB_PATH='/software/glew/linux.centos6.x86_64/1.6.0/lib64'
 TBB_LIB_PATH='/development/software/tbb/linux.centos6.x86_64/3.0.221/lib/'
 TBB_INCLUDE_PATH='/development/software/tbb/linux.centos6.x86_64/3.0.221/include'
-MAYA_ROOT=os.environ['MAYA_LOCATION']
+MAYA_ROOT='/software/maya/linux.centos6.x86_64/%s/' % os.environ['MAYA_VERSION']
 NUKE_ROOT='/software/nuke/linux.centos6.x86_64/%s/' % os.environ['NUKE_VERSION']
-RMAN_ROOT=os.environ['DELIGHT']
+# RMAN_ROOT=os.environ['DELIGHT']
 #HOUDINI_ROOT='/software/houdini/linux.centos6.x86_64/%s/' % (os.environ['HOUDINI_VERSION']) # not working ATM due to Boost issues (different versions .. etc)
 HOUDINI_ROOT='NOTHERE'
 ARNOLD_ROOT='/software/arnold/linux.centos6.x86_64/%s/' % (os.environ['ARNOLD_VERSION'])
@@ -31,8 +31,8 @@ print "MTOA_ROOT",MTOA_ROOT
 OPENEXR_INCLUDE_PATH = '/software/openexr/linux.centos5.x86_64/1.7.0/include/'
 OPENEXR_LIB_PATH = '/software/openexr/linux.centos5.x86_64/1.7.0/lib/'
 
-ALEMBIC_INCLUDE_PATH = '/software/alembic/linux.centos6.x86_64/1.0.5/include/'
-ALEMBIC_LIB_PATH = '/software/alembic/linux.centos6.x86_64/1.0.5/lib/'
+ALEMBIC_INCLUDE_PATH = '/software/alembic/linux.centos6.x86_64/1.5.0/include/'
+ALEMBIC_LIB_PATH = '/software/alembic/linux.centos6.x86_64/1.5.0/lib/'
 HDF5_INCLUDE_PATH = '/software/hdf5/linux.centos6.x86_64/1.8.7/include/'
 HDF5_LIB_PATH = '/software/hdf5/linux.centos6.x86_64/1.8.7/lib/'
 
@@ -41,5 +41,6 @@ INSTALL_PYTHON_DIR = '$INSTALL_PREFIX/python/2.6'
 INSTALL_NUKEPYTHON_DIR = '$INSTALL_PYTHON_DIR' 
 INSTALL_MEL_DIR = '$INSTALL_PREFIX/maya/%s/mel/$IECORE_NAME'  % os.environ['MAYA_VERSION']
 INSTALL_MAYAPLUGIN_NAME = '$INSTALL_PREFIX/maya/%s/plugins/$IECORE_NAME' % os.environ['MAYA_VERSION']
-INSTALL_NUKEPLUGIN_NAME = '$INSTALL_PREFIX/nuke/%s/plugins/$IECORE_NAME' % os.environ['NUKE_MAJOR_VERSION']
+INSTALL_MTOAEXTENSION_NAME = '$INSTALL_PREFIX/mtoaExtensions/%s/%s.%s/$IECORE_NAME' % (os.environ['MAYA_VERSION'],os.environ['MTOA_MAJOR_VERSION'],os.environ['MTOA_MINOR_VERSION'])
+INSTALL_NUKEPLUGIN_NAME = '$INSTALL_PREFIX/nuke/%s/plugins/$IECORE_NAME' % os.environ['NUKE_MAJ_MIN_VERSION']
 

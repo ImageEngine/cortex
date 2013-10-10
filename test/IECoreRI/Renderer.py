@@ -67,9 +67,13 @@ class SimpleProcedural( Renderer.Procedural ) :
 		renderer.concatTransform( m )
 
 		renderer.transformEnd()
+	
+	def hash( self ):
+	
+		h = MurmurHash()
+		return h
 
-
-class RendererTest( unittest.TestCase ) :
+class RendererTest( IECoreRI.TestCase ) :
 
 	def loadShader( self, shader ) :
 
@@ -132,16 +136,17 @@ class RendererTest( unittest.TestCase ) :
 			( "ri:cull:hidden", IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]", False ),
 			( "name", StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True ),
 			( "ri:trace:bias", FloatData( 2 ), "Attribute \"trace\" \"float bias\" [ 2 ]", True ),
+			( "user:myString", StringData( "wellHello" ), "Attribute \"user\" \"string myString\" [ \"wellHello\" ]", True ),
+			( "ri:automaticInstancing", BoolData( True ), "Attribute \"user\" \"int cortexAutomaticInstancing\" [ 1 ]", True ),
 		]
 
 		for t in tests :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
-			r.worldBegin()
-			r.setAttribute( t[0], t[1] )
-			if t[3] :
-				self.assertEqual( r.getAttribute( t[0] ), t[1] )
-			r.worldEnd()
+			with WorldBlock( r ) :
+				r.setAttribute( t[0], t[1] )
+				if t[3] :
+					self.assertEqual( r.getAttribute( t[0] ), t[1] )
 
 			l = "".join( file( "test/IECoreRI/output/testAttributes.rib" ).readlines() )
 			l = " ".join( l.split() )
@@ -533,31 +538,62 @@ class RendererTest( unittest.TestCase ) :
 		self.assertTrue( "hidden" in rib )
 		self.assertTrue( "jitter" in rib )
 		self.assertTrue( "depthfilter" in rib )
-					
+	
+	def testSetBucketSizeViaOptions( self ) :
+	
+		with CapturingMessageHandler() as mh :
+
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+			r.setOption( "ri:limits:bucketsize", V2i( 32, 32 ) )
+
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+
+		self.assertTrue( 'Option "limits" "integer bucketsize[2]" [ 32 32 ]' in rib )
+	
+	def testTextureCoordinates( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		
+		with WorldBlock( r ) :
+		
+			r.setAttribute( "ri:textureCoordinates", FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
+			self.assertEqual( r.getAttribute( "ri:textureCoordinates" ), FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
+	
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+		
+		self.assertTrue( 'TextureCoordinates 0 1 2 3 4 5 6 7' in rib )
+
+	def testMultipleDisplays( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		
+		r.display( "test.exr", "exr", "rgba", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
+		r.display( "z.exr", "exr", "z", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
+		
+		with WorldBlock( r ) :
+			pass
+			
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+				
+		self.assertTrue( "+z.exr" in rib )
+	
 	def tearDown( self ) :
 
+		IECoreRI.TestCase.tearDown( self )
+		
 		files = [
-			"test/IECoreRI/output/test.rib",
-			"test/IECoreRI/output/testAttributes.rib",
-			"test/IECoreRI/output/testProcedural.rib",
-			"test/IECoreRI/output/testGetOption.rib",
-			"test/IECoreRI/output/testDisplay.rib",
-			"test/IECoreRI/output/testCamera.rib",
-			"test/IECoreRI/output/subdiv.rib",
-			"test/IECoreRI/output/commands.rib",
-			"test/IECoreRI/output/motion.rib",
-			"test/IECoreRI/output/stringPrimVars.rib",
-			"test/IECoreRI/output/transform.rib",
-			"test/IECoreRI/output/missingShaders.rib",
-			"test/IECoreRI/output/getUserOption.rib",
-			"test/IECoreRI/output/getUserAttribute.rib",
 			"test/IECoreRI/shaders/types.sdl",
 		]
 
 		for f in files :
 			if os.path.exists( f ):
 				os.remove( f )
-
 
 if __name__ == "__main__":
     unittest.main()

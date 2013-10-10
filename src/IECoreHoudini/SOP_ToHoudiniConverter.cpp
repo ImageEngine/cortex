@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "GA/GA_AIFBlindData.h"
+#include "OP/OP_NodeInfoParms.h"
+#include "PRM/PRM_Default.h"
 #include "UT/UT_Interrupt.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/CapturingRenderer.h"
 #include "IECore/Group.h"
@@ -54,7 +57,24 @@
 
 using namespace IECoreHoudini;
 
+const char *SOP_ToHoudiniConverter::typeName = "ieCortexConverter";
+
+PRM_Name SOP_ToHoudiniConverter::pConvertStandardAttributes( "convertStandardAttributes", "Convert Standard Attributes" );
+PRM_Name SOP_ToHoudiniConverter::pAttributeFilter( "attributeFilter", "Attribute Filter" );
+
+PRM_Default SOP_ToHoudiniConverter::convertStandardAttributesDefault( true );
+PRM_Default SOP_ToHoudiniConverter::attributeFilterDefault( 0, "*" );
+
 PRM_Template SOP_ToHoudiniConverter::parameters[] = {
+	PRM_Template(
+		PRM_TOGGLE, 1, &pConvertStandardAttributes, &convertStandardAttributesDefault, 0, 0, 0, 0, 0,
+		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv)"
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pAttributeFilter, &attributeFilterDefault, 0, 0, 0, 0, 0,
+		"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
+		"P will always be loaded."
+	),
 	PRM_Template()
 };
 
@@ -147,8 +167,19 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 		boss->opEnd();
 		return error();
 	}
-
+	
+	UT_String p( "P" );
+	UT_String attributeFilter;
+	evalString( attributeFilter, pAttributeFilter.getToken(), 0, 0 );
+	if ( !p.match( attributeFilter ) )
+	{
+		attributeFilter += " P";
+	}
+	
 	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	converter->attributeFilterParameter()->setTypedValue( attributeFilter.toStdString() );
+	converter->convertStandardAttributesParameter()->setTypedValue( evalInt( pConvertStandardAttributes.getToken(), 0, 0 ) );
+	
 	if ( !converter->convert( myGdpHandle ) )
 	{
 		addError( SOP_MESSAGE, "Input Cortex data could not be converted to Houdini Geo" );
@@ -159,6 +190,53 @@ OP_ERROR SOP_ToHoudiniConverter::cookMySop( OP_Context &context )
 	boss->opEnd();
 	unlockInputs();
 	return error();
+}
+
+void SOP_ToHoudiniConverter::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
+{
+	SOP_Node::getNodeSpecificInfoText( context, parms );
+	
+	if ( !evalInt( pConvertStandardAttributes.getToken(), 0, 0 ) )
+	{
+		return;
+	}
+	
+	UT_String p( "P" );
+	UT_String filter;
+	evalString( filter, pAttributeFilter.getToken(), 0, 0 );
+	if ( !p.match( filter ) )
+	{
+		filter += " P";
+	}
+	UT_StringMMPattern attributeFilter;
+	attributeFilter.compile( filter );
+	
+	/// \todo: this text could come from a static method on a class that manages these name relations (once that exists)
+	parms.append( "Converting standard Cortex PrimitiveVariables:\n" );
+	if ( UT_String( "s" ).multiMatch( attributeFilter ) && UT_String( "t" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  s,t -> uv\n" );
+	}
+	
+	if ( UT_String( "Cs" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Cs -> Cd\n" );
+	}
+	
+	if ( UT_String( "Pref" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Pref -> rest\n" );
+	}
+	
+	if ( UT_String( "width" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  width -> pscale\n" );
+	}
+	
+	if ( UT_String( "Os" ).multiMatch( attributeFilter ) )
+	{
+		parms.append( "  Os -> Alpha\n" );
+	}
 }
 
 const char *SOP_ToHoudiniConverter::inputLabel( unsigned pos ) const

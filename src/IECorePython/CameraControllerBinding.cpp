@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static tuple unproject( CameraController &c, Imath::V2i &p )
+static tuple unproject( CameraController &c, Imath::V2f &p )
 {
 	Imath::V3f near, far;
 	c.unproject( p, near, far );
@@ -58,7 +58,7 @@ static tuple unproject( CameraController &c, Imath::V2i &p )
 void bindCameraController()
 {
 
-	scope s = class_<CameraController>( "CameraController", init<CameraPtr>() )
+	scope s = class_<CameraController, boost::noncopyable>( "CameraController", init<CameraPtr>() )
 		.def( "setCamera", &CameraController::setCamera )
 		.def( "getCamera", (CameraPtr (CameraController::*)())&CameraController::getCamera )
 		.def( "setCentreOfInterest", &CameraController::setCentreOfInterest )

@@ -248,7 +248,6 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 	{
 	
 		setParameterValues();
-		//setParameterValuesFromInputs();
 	
 		IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 		renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );

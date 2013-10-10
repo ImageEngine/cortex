@@ -58,7 +58,10 @@ void CompoundDataBase::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 	CompoundDataMap::const_iterator iter = data.begin();
 	while (iter != data.end())
 	{
-		accumulator.accumulate( iter->second );		
+		if ( iter->second )
+		{
+			accumulator.accumulate( iter->second );
+		}
 		iter++;
 	}	
 }
@@ -73,6 +76,10 @@ void CompoundDataBase::copyFrom( const Object *other, CopyContext *context )
 	const CompoundDataMap &otherData = tOther->readable();
 	for( CompoundDataMap::const_iterator it = otherData.begin(); it!=otherData.end(); it++ )
 	{
+		if ( !it->second )
+		{
+			throw Exception( "Cannot copy CompoundData will NULL data pointers!" );
+		}
 		data[it->first] = context->copy<Data>( it->second );
 	}
 }
@@ -99,9 +106,17 @@ bool CompoundDataBase::isEqualTo( const Object *other ) const
 		{
 			return false;
 		}
-		if( ! it1->second->isEqualTo( it2->second ) )
+		if ( it1->second != it2->second )
 		{
-			return false;
+			if ( !it1->second || !it2->second )
+			{
+				/// either one of the pointers is NULL
+				return false;
+			}
+			if( ! it1->second->isEqualTo( it2->second ) )
+			{
+				return false;
+			}
 		}
 		it1++;
 		it2++;
@@ -181,6 +196,11 @@ void SimpleDataHolder<CompoundDataMap>::hash( MurmurHash &h ) const
 	std::vector<CompoundDataMap::const_iterator>::const_iterator it;
 	for( it=iterators.begin(); it!=iterators.end(); it++ )
 	{
+		if ( !((*it)->second) )
+		{
+			throw Exception( "Cannot compute hash from a CompoundData will NULL data pointers!" );
+		}
+
 		h.append( (*it)->first.value() );
 		(*it)->second->hash( h );
 	}

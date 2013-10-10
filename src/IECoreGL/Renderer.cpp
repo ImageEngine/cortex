@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -646,6 +646,7 @@ void IECoreGL::Renderer::worldEnd()
 	}
 	m_data->implementation->worldEnd();
 	m_data->inWorld = false;
+	m_data->cachedConverter->clearUnused();
 }
 
 ScenePtr IECoreGL::Renderer::scene()
@@ -1339,6 +1340,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:primitive:boundColor"] = typedAttributeSetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeSetter<OutlineColorStateComponent>;
 		(*a)["gl:primitive:pointColor"] = typedAttributeSetter<PointColorStateComponent>;
+		(*a)["gl:primitive:selectable"] = typedAttributeSetter<IECoreGL::Primitive::Selectable>;
 		(*a)["gl:color"] = typedAttributeSetter<Color>;
 		(*a)["color"] = colorAttributeSetter;
 		(*a)["opacity"] = opacityAttributeSetter;
@@ -1392,6 +1394,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:primitive:boundColor"] = typedAttributeGetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeGetter<OutlineColorStateComponent>;
 		(*a)["gl:primitive:pointColor"] = typedAttributeGetter<PointColorStateComponent>;
+		(*a)["gl:primitive:selectable"] = typedAttributeGetter<IECoreGL::Primitive::Selectable>;
 		(*a)["gl:color"] = typedAttributeGetter<Color>;
 		(*a)["color"] = colorAttributeGetter;
 		(*a)["opacity"] = opacityAttributeGetter;
@@ -1719,7 +1722,20 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 {
 	try
 	{
-		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
+		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive;
+		IECore::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
+		if( it == primVars.end() )
+		{
+			throw IECore::Exception( "Trying to render a mesh without \"P\"" );
+		}
+		
+		IECore::V3fVectorDataPtr pData = runTimeCast< IECore::V3fVectorData >( it->second.data );
+		if( !pData )
+		{
+			throw IECore::Exception( "Mesh \"P\" variable has incorrect type" );
+		}
+		
+		m->setTopologyUnchecked( vertsPerFace, vertIds, pData->readable().size(), interpolation );
 		m->variables = primVars;
 		m_data->addPrimitive( m.get() );
 	}
@@ -2003,6 +2019,16 @@ IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECo
 	}
 
 	return 0;
+}
+
+void IECoreGL::Renderer::editBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	msg( Msg::Warning, "Renderer::editBegin", "Not implemented" );
+}
+
+void IECoreGL::Renderer::editEnd()
+{
+	msg( Msg::Warning, "Renderer::editEnd", "Not implemented" );
 }
 
 IECoreGL::ShaderLoader *IECoreGL::Renderer::shaderLoader()

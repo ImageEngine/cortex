@@ -1,211 +1,0 @@
-10
-
-dir
-5253
-http://cortex-vfx.googlecode.com/svn/trunk/test/IECore/data
-http://cortex-vfx.googlecode.com/svn
-
-
-
-2012-09-13T00:28:11.417201Z
-4835
-luke.imageengine@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-07b78fde-9e1a-0410-98de-79dcf2039bee
-
-jpg
-dir
-
-exrFiles
-dir
-
-null.cin
-file
-
-
-
-
-2011-12-21T09:26:41.000000Z
-1a795b231ab22099ae9984e9521bfe6d
-2007-08-10T02:37:18.481751Z
-5
-john.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3072
-
-expectedResults
-dir
-
-png
-dir
-
-cobFiles
-dir
-
-iffFiles
-dir
-
-tiff
-dir
-
-cachedReaderPath1
-dir
-
-fonts
-dir
-
-pdcFiles
-dir
-
-cachedReaderPath2
-dir
-
-binFiles
-dir
-
-dpx
-dir
-
-cinFiles
-dir
-
-tgaFiles
-dir
-
-empty
-file
-
-
-
-
-2011-12-21T09:26:41.000000Z
-d41d8cd98f00b204e9800998ecf8427e
-2010-04-08T22:54:47.368458Z
-3180
-lucio.imageengine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-0
-
-ribFiles
-dir
-
-bgeoFiles
-dir
-
-fioFiles
-dir
-
-basicPreset
-dir
-
-sgiFiles
-dir
-
-yuvFiles
-dir
-
-idxFiles
-dir
-
-attributeCaches
-dir
-
-nukeScripts
-dir
-
-obj
-dir
-
-null
-file
-
-
-
-
-2011-12-21T09:26:41.000000Z
-1a795b231ab22099ae9984e9521bfe6d
-2007-08-10T02:37:18.481751Z
-5
-john.imageengine
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3072
-
-pointDistributions
-dir
-
-swaFiles
-dir
-

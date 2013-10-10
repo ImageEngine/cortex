@@ -43,9 +43,6 @@ from UIElement import UIElement
 # displayed, so the definition can be edited at any time to change the menu. 
 class Menu( UIElement ) :
 
-	# maya.cmds.about doesn't exist in maya standalone
-	__defaultBoldFont = False if hasattr( maya.cmds, "about" ) and maya.cmds.about( windows=True ) else True
-
 	# Creates a menu defined by the specified definition. parent may be a
 	# window (in which case the menu is added to the menu bar), a menu (in which case a submenu is created)
 	# or a control (in which case a popup menu is created). The optional keyword arguments operate as follows :
@@ -126,14 +123,6 @@ class Menu( UIElement ) :
 			else :
 				label = name
 				
-			boldFont = Menu.__defaultBoldFont
-			if hasattr( item, "bold" ) :
-				boldFont = bool(item.bold)
-			
-			italicized = False
-			if hasattr( item, "italic" ) :
-				italicized = bool(item.italic)
-				
 			if len( pathComponents ) > 1 :
 				# a submenu
 				if not name in done :
@@ -142,14 +131,22 @@ class Menu( UIElement ) :
 					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, subMenuDefinition, useInterToUI ) )
 					done.add( name )
 			else :
-
+			
+				kw = {}
+				
+				if getattr( item, "bold", False ) :
+					kw["boldFont"] = True
+					
+				if getattr( item, "italic", False ) :
+					kw["italicized"] = True
+					
 				if item.divider :
 
 					menuItem = maya.cmds.menuItem( parent=parent, divider=True )
 
 				elif item.subMenu :
 
-					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, boldFont=boldFont, italicized=italicized )
+					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, **kw )
 					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, item.subMenu, useInterToUI ) )
 
 				else :
@@ -157,15 +154,13 @@ class Menu( UIElement ) :
 					active = item.active
 					if callable( active ) :
 						active = active()
-
-					kw = {}
 					
 					checked = item.checkBox
 					if callable( checked ) :
 						checked = checked()
 						kw["checkBox"] = checked
 					
-					menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description, boldFont=boldFont, italicized=italicized, **kw )
+					menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description, **kw )
 					if item.command :
 						maya.cmds.menuItem( menuItem, edit=True, command=self.__wrapCallback( item.command ) )
 					if item.secondaryCommand :

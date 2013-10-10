@@ -70,8 +70,8 @@ struct AssociatedLegendreTestSuite : public boost::unit_test::test_suite
 	{
 		static boost::shared_ptr< AssociatedLegendreTest< T > > instance(new AssociatedLegendreTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &(AssociatedLegendreTest< T >::testEvaluation), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(AssociatedLegendreTest< T >::testDepthEvaluation), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &AssociatedLegendreTest< T >::testEvaluation, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &AssociatedLegendreTest< T >::testDepthEvaluation, instance ) );
 	}
 
 };

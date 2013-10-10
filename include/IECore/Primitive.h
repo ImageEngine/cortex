@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -99,6 +99,16 @@ class Primitive : public VisibleRenderable
 		/// Returns the number of values a piece of data must provide for the given
 		/// interpolation type. Must be implemented in all derived classes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const = 0;
+		
+		/// Hash representing the topology only
+		virtual void topologyHash( MurmurHash &h ) const = 0;
+
+		/// Utility function that can be used in place of Object::load() to load only the primitive variables from a Primitive object stored in a IndexedIO file.
+		/// The function tries to load the requested primitive variables and will ignore the ones that do not exist in the file.
+		/// \param ioInterface File handle where the Primitive is stored.
+		/// \param name Name of the entry where the Primitive is stored under the file location.
+		/// \param primVarNames List of primitive variable names that will be attempted to be loaded.
+		static PrimitiveVariableMap loadPrimitiveVariables( const IndexedIO *ioInterface, const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &primVarNames );
 
 	private:
 

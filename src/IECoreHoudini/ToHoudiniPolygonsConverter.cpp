@@ -35,6 +35,7 @@
 #include "GU/GU_PrimPoly.h"
 
 #include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -43,8 +44,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniPolygonsConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> ToHoudiniPolygonsConverter::m_description( MeshPrimitiveTypeId );
 
-ToHoudiniPolygonsConverter::ToHoudiniPolygonsConverter( const VisibleRenderable *renderable ) :
-	ToHoudiniGeometryConverter( renderable, "Converts an IECore::MeshPrimitive to a Houdini GU_Detail." )
+ToHoudiniPolygonsConverter::ToHoudiniPolygonsConverter( const Object *object ) :
+	ToHoudiniGeometryConverter( object, "Converts an IECore::MeshPrimitive to a Houdini GU_Detail." )
 {
 }
 
@@ -52,15 +53,15 @@ ToHoudiniPolygonsConverter::~ToHoudiniPolygonsConverter()
 {
 }
 
-bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
+bool ToHoudiniPolygonsConverter::doConversion( const Object *object, GU_Detail *geo ) const
 {
-	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( renderable );
+	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( object );
 	if ( !mesh )
 	{
 		return false;
 	}
 	
-	GA_Range newPoints = appendPoints( geo, mesh->variableData<V3fVectorData>( "P" ) );
+	GA_Range newPoints = appendPoints( geo, mesh->variableSize( PrimitiveVariable::Vertex ) );
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
@@ -95,7 +96,14 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 	}
 	
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
-	transferAttribs( mesh, geo, newPoints, newPrims );
+	transferAttribs( geo, newPoints, newPrims );
+	
+	// add the interpolation type
+	if ( newPrims.isValid() )
+	{
+		std::string interpolation = ( mesh->interpolation() == "catmullClark" ) ? "subdiv" : "poly";
+		ToHoudiniStringVectorAttribConverter::convertString( "ieMeshInterpolation", interpolation, geo, newPrims );
+	}
 	
 	return true;
 }

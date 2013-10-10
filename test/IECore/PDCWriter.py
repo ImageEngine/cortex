@@ -58,11 +58,11 @@ class TestPDCWriter( unittest.TestCase ) :
 		p = r.read()
 
 		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
-		w.parameters()["attributes"].setValue( IECore.StringVectorData( ["position"] ) )
+		w.parameters()["attributes"].setValue( IECore.StringVectorData( ["P"] ) )
 		w.write()
 
 		for k in p.keys() :
-			if k!="position" :
+			if k!="P" :
 				del p[k]
 
 		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
@@ -86,6 +86,7 @@ class TestPDCWriter( unittest.TestCase ) :
 		w.write()
 
 		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		r.parameters()["realType"].setValue( "native" )
 		p2 = r.read()
 
 		self.assertEqual( p, p2 )
@@ -102,6 +103,7 @@ class TestPDCWriter( unittest.TestCase ) :
 		w.write()
 
 		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		r.parameters()["realType"].setValue( "native" )
 		p2 = r.read()
 
 		self.assertEqual( p.keys(), p2.keys() )
@@ -122,9 +124,9 @@ class TestPDCWriter( unittest.TestCase ) :
 
 		self.assertEqual( p.keys(), p2.keys() )
 		
-		# we can't expect them to come back as colours, because there's not support for that in pdcs - they should therefore come back as double vectors
-		self.assertEqual( p2["color3f"].data, IECore.V3dData( IECore.V3d( 1 ) ) )
-		self.assertEqual( p2["color3fVector"].data, IECore.V3dVectorData( [ IECore.V3d( 1 ), IECore.V3d( 2 ), IECore.V3d( 3 ) ] ) )
+		# we can't expect them to come back as colours, because there's not support for that in pdcs - they should therefore come back as float vectors
+		self.assertEqual( p2["color3f"].data, IECore.V3fData( IECore.V3f( 1 ) ) )
+		self.assertEqual( p2["color3fVector"].data, IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] ) )
 	
 	def tearDown( self ) :
 

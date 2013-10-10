@@ -159,7 +159,7 @@ class StreamIndexedIO::StringCache
 
 				Imf::Int64 id;
 				readLittleEndian( f,id );
-				assert( id < sz );
+
 				m_prevId = std::max( id, m_prevId );
 
 				m_stringToIdMap[s] = id;
@@ -236,13 +236,10 @@ class StreamIndexedIO::StringCache
 		void add( const IndexedIO::EntryID &s )
 		{
 			(void)find(s, false);
-
-			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
 		}
 
 		Imf::Int64 size() const
 		{
-			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
 			return m_stringToIdMap.size();
 		}
 
@@ -566,10 +563,11 @@ StreamIndexedIO::Node* StreamIndexedIO::Node::child( const IndexedIO::EntryID &n
 	BaseNode *p = child(name);
 	if ( p )
 	{
-		if ( p->entryType() == IndexedIO::Directory && loadChildren )
+		if ( p->entryType() == IndexedIO::Directory )
 		{
 			n = static_cast< Node *>( p );
-			if ( n->m_subindex )
+			
+			if ( loadChildren && n->m_subindex )
 			{
 				m_idx->readNodeFromSubIndex( n );
 			}
@@ -1171,8 +1169,6 @@ void StreamIndexedIO::Index::writeNode( Node *node, F &f )
 			else
 			{
 				Node *child = static_cast< Node * >(p);
-				/// Check tree consistency before writing
-				assert( child->m_parent == this );
 				writeNode( child, f );
 			}
 		}
@@ -1645,7 +1641,6 @@ IndexedIO::OpenMode StreamIndexedIO::StreamFile::openMode() const
 void StreamIndexedIO::StreamFile::setStream( std::iostream *stream, bool emptyFile )
 {
 	m_stream = stream;
-	assert( m_stream->is_complete() );
 	if ( m_openmode & IndexedIO::Append && emptyFile )
 	{
 		m_openmode = (m_openmode ^ IndexedIO::Append) | IndexedIO::Write;
@@ -1681,8 +1676,6 @@ void StreamIndexedIO::StreamFile::flush( size_t endPosition )
 
 bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
 {
-	assert( f.is_complete() );
-
 	f.seekg( 0, std::ios::end );
 	Imf::Int64 end = f.tellg();
 

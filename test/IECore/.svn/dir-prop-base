@@ -1,9 +1,0 @@
-K 10
-svn:ignore
-V 47
-*.pyc
-results.txt
-resultsPython.txt
-IECoreTest
-
-END

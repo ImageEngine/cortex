@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -162,6 +162,13 @@ BOOST_STATIC_ASSERT( (IsInterpolableSimpleTypedData<IntData>::value) );
 BOOST_STATIC_ASSERT( (IsInterpolableSimpleTypedData<V2iData>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<DateTimeData> >::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<IntVectorData> >::value) );
+
+/// IsGeometricTypedData
+BOOST_STATIC_ASSERT( ( IsGeometricTypedData<V2iData>::value) );
+BOOST_STATIC_ASSERT( ( IsGeometricTypedData<V2fVectorData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsGeometricTypedData<IntData> >::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsGeometricTypedData<DateTimeData> >::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsGeometricTypedData<FloatVectorData> >::value) );
 
 /// IsSpline
 BOOST_STATIC_ASSERT( (IsSpline< Spline<float, float> >::value) );

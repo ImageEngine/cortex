@@ -350,7 +350,9 @@ class Font::Implementation : public IECore::RefCounted
 		MeshPrimitivePtr mesh( const std::string &text ) const
 		{
 			MeshPrimitivePtr result = new MeshPrimitive;
-			result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData );
+			V3fVectorDataPtr pData = new V3fVectorData;
+			pData->setInterpretation( GeometricData::Point );
+			result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
 
 			if( !text.size() )
 			{

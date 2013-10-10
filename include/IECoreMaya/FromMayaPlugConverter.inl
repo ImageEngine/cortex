@@ -65,7 +65,7 @@ FromMayaPlugConverter::Description<T>::Description( MFnUnitAttribute::Type fromT
 }
 
 template<class T>
-FromMayaPlugConverterPtr FromMayaPlugConverter::Description<T>::Description::creator( const MPlug &plug )
+FromMayaPlugConverterPtr FromMayaPlugConverter::Description<T>::creator( const MPlug &plug )
 {
 	return new T( plug );
 }

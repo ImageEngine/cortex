@@ -226,10 +226,8 @@ Imath::Box3d AlembicInput::boundAtSample( size_t sampleIndex ) const
 		{
 			throw IECore::Exception( "No stored bounds available" );
 		}
-		
-		XformSample sample;
-		iXFormSchema.get( sample, ISampleSelector( (index_t)sampleIndex ) );
-		return sample.getChildBounds();
+
+		return iXFormSchema.getChildBoundsProperty().getValue( ISampleSelector( (index_t)sampleIndex ) );
 	}
 	else
 	{

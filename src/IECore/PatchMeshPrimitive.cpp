@@ -119,8 +119,10 @@ PatchMeshPrimitive::PatchMeshPrimitive(
 		{
 			throw InvalidArgumentException( "PatchMeshPrimitive: Invalid length of primitive variable P" );
 		}
-
-		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p->copy() );
+		
+		V3fVectorDataPtr pData = p->copy();
+		pData->setInterpretation( GeometricData::Point );
+		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
 	}
 }
 
@@ -226,6 +228,10 @@ void PatchMeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 void PatchMeshPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+}
+
+void PatchMeshPrimitive::topologyHash( MurmurHash &h ) const
+{
 	h.append( m_uPoints );
 	h.append( m_vPoints );
 	h.append( m_uBasis.matrix );

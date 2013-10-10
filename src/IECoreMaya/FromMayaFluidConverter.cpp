@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -182,7 +182,9 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 	}
 
 	V3fVectorDataPtr positionsData = new V3fVectorData;
+	positionsData->setInterpretation( GeometricData::Point );
 	V3fVectorDataPtr velocitiesData = new V3fVectorData;
+	velocitiesData->setInterpretation( GeometricData::Vector );
 	V3fVectorData::ValueType positions = positionsData->writable();
 	V3fVectorData::ValueType velocities = velocitiesData->writable();
 	positions.resize( nPoints );
@@ -246,7 +248,6 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 		if( matrixMultiplier )
 		{
 			matrixMultiplier->inputParameter()->setValue( velocitiesData );
-			matrixMultiplier->modeParameter()->setNumericValue( MatrixMultiplyOp::Vector );
 			matrixMultiplier->operate();
 		}
 		pp->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocitiesData );
@@ -288,6 +289,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 			assert( greenPtr );
 			assert( bluePtr );
 			V3fVectorDataPtr colorData = new V3fVectorData();
+			colorData->setInterpretation( GeometricData::Color );
 			V3fVectorData::ValueType &colorVector = colorData->writable();
 			colorVector.resize( nPoints );
 			for ( unsigned i = 0; i < nPoints; i++ )

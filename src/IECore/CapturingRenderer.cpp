@@ -899,6 +899,16 @@ DataPtr CapturingRenderer::command( const std::string &name, const CompoundDataM
 	return 0;
 }
 
+void CapturingRenderer::editBegin( const std::string &editType, const CompoundDataMap &parameters )
+{
+	msg( Msg::Warning, "CapturingRenderer::editBegin", "Not implemented" );
+}
+
+void CapturingRenderer::editEnd()
+{
+	msg( Msg::Warning, "CapturingRenderer::editEnd", "Not implemented" );
+}
+		
 ConstGroupPtr CapturingRenderer::world()
 {
 	return m_implementation->world();

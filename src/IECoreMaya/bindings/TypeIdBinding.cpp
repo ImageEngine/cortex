@@ -120,6 +120,9 @@ void bindTypeId()
 		.value( "ToMayaParticleConverter", ToMayaParticleConverterTypeId )
 		.value( "ToMayaCameraConverter", ToMayaCameraConverterTypeId )
 		.value( "MayaScene", MayaSceneTypeId )
+		.value( "FromMayaProceduralHolderConverter", FromMayaProceduralHolderConverterTypeId )
+		.value( "FromMayaLocatorConverter", FromMayaLocatorConverterTypeId )
+		.value( "ToMayaLocatorConverter", ToMayaLocatorConverterTypeId )
 	;
 }
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -39,8 +39,9 @@ import os.path
 import os
 import time
 import IECore
+import IECoreRI
 
-class PythonProceduralTest( unittest.TestCase ) :
+class PythonProceduralTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -190,15 +191,6 @@ class PythonProceduralTest( unittest.TestCase ) :
 		nonThreadedTime = time.time() - tStart
 				
 		self.assert_( threadedTime < nonThreadedTime ) # might fail on single core machines or machines under other load
-		
-	def tearDown( self ) :
-	
-		for f in [
-			"test/IECoreRI/output/testPythonProcedural.tif",
-			"test/IECoreRI/output/pythonProcedural.rib",
-		] :
-			if os.path.exists( f ) :
-				os.remove( f )
 
 if __name__ == "__main__":
     unittest.main()

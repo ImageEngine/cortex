@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -72,7 +72,10 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outMesh = builder.mesh()
 
-		self.assertEqual( p, outMesh["P"].data )
+		self.assertNotEqual( p, outMesh["P"].data )
+		pp = p.copy()
+		pp.setInterpretation( GeometricData.Interpretation.Point )
+		self.assertEqual( pp, outMesh["P"].data )
 		self.assertEqual( len( outMesh.verticesPerFace ), len( p ) - 2 )
 		for x in outMesh.verticesPerFace :
 			self.assertEqual( x, 3 )

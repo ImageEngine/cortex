@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -73,6 +73,11 @@ class PythonLRUCache : public LRUCache<object, object>
 		{
 		}
 		
+		PythonLRUCache( object getter, object removalCallback, LRUCache<object, object>::Cost maxCost )
+			:	LRUCache<object, object>( LRUCacheGetter( getter ), removalCallback, maxCost )
+		{
+		}
+		
 		object get( const object &key )
 		{
 			// we must hold the GIL when entering LRUCache<object, object>::get()
@@ -119,6 +124,7 @@ void bindLRUCache()
 	
 	class_<PythonLRUCache, boost::noncopyable>( "LRUCache", no_init )
 		.def( init<object, PythonLRUCache::Cost>( ( boost::python::arg_( "getter" ), boost::python::arg_( "maxCost" )=500  ) ) )
+		.def( init<object, object, PythonLRUCache::Cost>( ( boost::python::arg_( "getter" ), boost::python::arg_( "removalCallback" ), boost::python::arg_( "maxCost" )  ) ) )
 		.def( "clear", &PythonLRUCache::clear )
 		.def( "erase", &PythonLRUCache::erase )
 		.def( "setMaxCost", &PythonLRUCache::setMaxCost )

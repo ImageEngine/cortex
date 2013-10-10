@@ -86,7 +86,7 @@ class ToGLTextureConverter : public ToGLConverter
 		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLTextureConverter, ToGLTextureConverterTypeId, ToGLConverter );
 
-		ToGLTextureConverter( IECore::ConstObjectPtr toConvert = 0 );
+		ToGLTextureConverter( IECore::ConstObjectPtr toConvert = 0, bool createMissingRGBChannels = false );
 		virtual ~ToGLTextureConverter();
 
 	protected :
@@ -95,7 +95,9 @@ class ToGLTextureConverter : public ToGLConverter
 	
 	private :
 
+		IECore::ImagePrimitivePtr createMissingChannels( const IECore::ImagePrimitive *image ) const;
 		IECore::ImagePrimitivePtr imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const;
+		bool m_createMissingRGBChannels;
 
 		static ConverterDescription<ToGLTextureConverter> g_description;
 		static ConverterDescription<ToGLTextureConverter> g_compoundDataDescription;

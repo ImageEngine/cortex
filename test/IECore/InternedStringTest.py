@@ -65,6 +65,31 @@ class InternedStringTest( unittest.TestCase ) :
 	
 		self.assertEqual( InternedString(), InternedString( "" ) )
 
+	def testNumberConstructor( self ) :
+
+		self.assertEqual( InternedString(0), InternedString("0") )
+		self.assertEqual( InternedString(-1), InternedString("-1") )
+		self.assertEqual( InternedString(1), InternedString("1") )
+
+	def testHashForSetsAndDicts( self ) :
+
+		def makeStrings( r ) :
+			return map( lambda i: InternedString("unique%d"%i), r )
+
+		# create a list of unique interned strings
+		strings = makeStrings( xrange(0,30000) )
+		
+		# make sure the hash creates unique ids
+		uniqueStringsSet = set(strings)
+		self.assertEqual( len(strings), len(uniqueStringsSet) )
+
+		# make sure set comparison works
+		stringRange = makeStrings( xrange(10,200) )
+		stringRange.reverse()
+		self.assertEqual( set(stringRange), set(strings[10:200]) )
+
+		self.assertEqual( set(stringRange).difference(uniqueStringsSet), set() )
+
 if __name__ == "__main__":
 	unittest.main()
 

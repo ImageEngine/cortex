@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -36,6 +36,8 @@ import unittest
 import glob
 import sys
 import os
+import shutil
+
 from IECore import *
 
 class TestYUVImageWriter(unittest.TestCase):
@@ -224,21 +226,18 @@ class TestYUVImageWriter(unittest.TestCase):
 		w.write()
 
 	def setUp( self ) :
-
+		
+		if not os.path.isdir( "test/IECore/data/yuvFiles" ) :
+			os.makedirs( "test/IECore/data/yuvFiles" )
+		
 		if os.path.exists( "test/IECore/data/yuvFiles/output.yuv" ) :
 
 			os.remove( "test/IECore/data/yuvFiles/output.yuv" )
-
 
 	def tearDown( self ) :
-
-		if os.path.exists( "test/IECore/data/yuvFiles/output.yuv" ) :
-
-			os.remove( "test/IECore/data/yuvFiles/output.yuv" )
-
-
-
-
+		
+		if os.path.isdir( "test/IECore/data/yuvFiles" ) :
+			shutil.rmtree( "test/IECore/data/yuvFiles" )
 
 if __name__ == "__main__":
 	unittest.main()

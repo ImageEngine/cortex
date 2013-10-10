@@ -76,7 +76,6 @@ class MurmurHash
 		inline MurmurHash &append( unsigned int data );
 		inline MurmurHash &append( int64_t data );
 		inline MurmurHash &append( uint64_t data );
-		//inline MurmurHash &append( size_t data );
 		inline MurmurHash &append( half data );
 		inline MurmurHash &append( float data );
 		inline MurmurHash &append( double data );

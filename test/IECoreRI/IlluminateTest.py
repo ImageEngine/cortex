@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import os.path
 import IECore
 import IECoreRI
 
-class IlluminateTest( unittest.TestCase ) :
+class IlluminateTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/illuminate.rib"
 
@@ -76,10 +76,20 @@ class IlluminateTest( unittest.TestCase ) :
 		self.assert_( '"int intensity" [ 2 ]' in l ) 
 		self.assert_( "Illuminate \"myLightHandle\" 0" in l )
 
-	def tearDown( self ) :
+	def testAreaLight( self ) :
+		r = IECoreRI.Renderer( self.outputFileName )
+		
+		r.worldBegin()
+		
+		r.light( "spotlight", "myLightHandle", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "ri:areaLight" : True } )
+		r.light( "spotlight", "myLightHandle2", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "ri:areaLight" : False } )
+		
+		r.worldEnd()
 
-		if os.path.exists( self.outputFileName ) :
-			os.remove( self.outputFileName )
+		l = "".join( file( self.outputFileName ).readlines() )
+
+		self.assert_( "AreaLightSource \"spotlight\" \"myLightHandle\"" in l )
+		self.assert_( "LightSource \"spotlight\" \"myLightHandle2\"" in l )
 
 if __name__ == "__main__":
     unittest.main()

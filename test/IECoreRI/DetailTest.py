@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import IECoreRI
 import os.path
 import os
 
-class DetailTest( unittest.TestCase ) :
+class DetailTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
@@ -51,11 +51,6 @@ class DetailTest( unittest.TestCase ) :
 		l = "".join( file( "test/IECoreRI/output/testDetail.rib" ).readlines() )
 		self.assert_( "Detail [ 1 4 2 5 3 6 ]" in l )
 		self.assert_( "DetailRange 0 1 2 3" in l )
-
-	def tearDown( self ) :
-
-		if os.path.exists( "test/IECoreRI/output/testDetail.rib" ) :
-			os.remove( "test/IECoreRI/output/testDetail.rib" )
 
 if __name__ == "__main__":
     unittest.main()

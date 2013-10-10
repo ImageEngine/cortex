@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (p) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (p) 2009-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -51,6 +51,7 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( p.uPeriodic(), False )
 		self.assertEqual( p.vPeriodic(), False )
 		self.assertEqual( p.keys(), [ "P" ] )
+		self.assertEqual( p["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
 		self.assertEqual( p.uPoints(), 10 )
 		self.assertEqual( p.vPoints(), 7 )
 		self.assertEqual( p.uPatches(), 3 )

@@ -76,6 +76,14 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 			kw['maxValue'] = parameter.maxValue
 
 
+		# We set the step size on int parameters to 1, because otherwise Maya will throw warnings if the difference between
+		# the min and max is less than the default step of 1.
+		# However Maya also complains when you set the step size on parameters without a min or max, so we need to check that
+		# as well.
+		if ( parameter.hasMinValue() or parameter.hasMaxValue() ) and self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
+			kw['step'] = 1
+
+
 		# \todo Add a way of overriding precision for both float and double parameters, giving
 		# each a sensible (and probably different) default
 		if self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ) :

@@ -63,6 +63,11 @@ class PDCParticleReader : public ParticleReader
 		virtual void attributeNames( std::vector<std::string> &names );
 		virtual DataPtr readAttribute( const std::string &name );
 
+	protected:
+		
+		// Returns the name of the position primVar
+		virtual std::string positionPrimVarName();
+		
 	private :
 
 		static const ReaderDescription<PDCParticleReader> m_readerDescription;

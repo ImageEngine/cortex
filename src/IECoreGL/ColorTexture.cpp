@@ -217,7 +217,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, I
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-	glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_RGBA : GL_RGB, width, height, 0, ra ? GL_RGBA : GL_RGB,
+	glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_RGBA16 : GL_RGB16, width, height, 0, ra ? GL_RGBA : GL_RGB,
 		NumericTraits<ElementType>::glType(), &interleaved[0] );
 
 	Exception::throwIfError();
@@ -255,7 +255,7 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 	// there are potentially loads of different internal formats which denote alpha.
 	// these are the only ones encountered so far, but it's not a great way of testing
 	// and i can't find another way of doing it.
-	if( internalFormat==GL_RGBA || internalFormat==GL_RGBA8_EXT )
+	if( internalFormat==GL_RGBA || internalFormat==GL_RGBA8_EXT || internalFormat==GL_RGBA16 )
 	{
 		ad = new FloatVectorData();
 		a = &ad->writable(); a->resize( width * height );

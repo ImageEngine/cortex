@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -822,3 +822,17 @@ IECore::DataPtr IECoreArnold::RendererImplementation::command( const std::string
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::command", "Not implemented" );
 	return 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// rerendering
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void IECoreArnold::RendererImplementation::editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters )
+{
+	msg( Msg::Warning, "IECoreArnold::RendererImplementation::editBegin", "Not implemented" );
+}
+
+void IECoreArnold::RendererImplementation::editEnd()
+{
+	msg( Msg::Warning, "IECoreArnold::RendererImplementation::editEnd", "Not implemented" );
+}		

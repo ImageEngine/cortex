@@ -94,9 +94,6 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 		std::stringstream *f = new std::stringstream( std::string(buf, size), std::ios::binary | std::ios::in | std::ios::out );
 		setStream( f, false );
 	}
-	assert( m_stream );
-	assert( m_stream->is_complete() );
-	assert( m_index );
 }
 
 void MemoryIndexedIO::StreamFile::flush( size_t endPosition )

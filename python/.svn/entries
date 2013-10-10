@@ -1,49 +1,0 @@
-10
-
-dir
-5253
-http://cortex-vfx.googlecode.com/svn/trunk/python
-http://cortex-vfx.googlecode.com/svn
-
-
-
-2013-03-09T01:13:15.781465Z
-5241
-valerie.imageengine@gmail.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-07b78fde-9e1a-0410-98de-79dcf2039bee
-
-IECoreRI
-dir
-
-IECore
-dir
-
-IECoreHoudini
-dir
-
-IECoreGL
-dir
-
-IECoreNuke
-dir
-
-IECoreMaya
-dir
-
-IECoreTruelight
-dir
-
