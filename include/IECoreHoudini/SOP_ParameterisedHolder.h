@@ -39,8 +39,10 @@
 #define IECOREHOUDINI_SOPPARAMETERISEDHOLDER_H
 
 #include "SOP/SOP_Node.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/CompoundParameter.h"
+#include "IECore/ObjectParameter.h"
 
 #include "IECoreHoudini/ParameterisedHolder.h"
 
@@ -62,6 +64,18 @@ class SOP_ParameterisedHolder : public ParameterisedHolder<SOP_Node>
 		/// it's Cortex output will be passed through. If it is a native Houdini node, it will be converted
 		/// using the appropriate FromHoudiniGeometryConverter.
 		virtual void setInputParameterValues( float now );
+		
+		/// Used by setInputParameterValues to set the value on each individual input parameter. Providing a
+		/// null handle will result in the default behaviour of using the filteredInputValue for this input.
+		virtual void setInputParameterValue( IECore::Parameter *parameter, const GU_DetailHandle &handle, unsigned inputIndex );
+		
+		/// Used to pre-filter the input geometry during setInputParameterValue. It checks for the existance of
+		/// a nameFilter parm cooresponding to the input parameter, and uses FromHoudiniGeometryConverter::extract
+		/// to limit the input geometry based on that filter.
+		GU_DetailHandle filteredInputValue( const IECore::Parameter *parameter, unsigned inputIndex );
+		
+		/// Used to find and evaluate the nameFilter, if it is enabled.
+		bool getNameFilter( const IECore::Parameter *parameter, UT_StringMMPattern &filter );
 		
 		/// Updates the input connections for parameters relevant to FromHoudiniGeometryConverters
 		virtual void refreshInputConnections();
