@@ -146,12 +146,29 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	UT_Matrix4D transform;
 	memcpy( transform.data(), r->getUniform( RE_UNIFORM_OBJECT_MATRIX )->getValue(), sizeof(double) * 16 );
 	
+	GLint currentProgram = 0;
+	glGetIntegerv( GL_CURRENT_PROGRAM, &currentProgram );
+	
+	IECoreGL::State *state = getState( render_mode, flags, opt );
+	
+	if ( render_mode == GR_RENDER_OBJECT_PICK )
+	{
+		const IECoreGL::Shader *shader = state->get<IECoreGL::ShaderStateComponent>()->shaderSetup()->shader();
+		glUseProgram( shader->program() );
+		glUniform1i( shader->uniformParameter( "objectPickId" )->location, r->getObjectPickID() );
+	}
+	
 	r->pushMatrix();
 		
 		r->multiplyMatrix( transform );
-		m_scene->render( getState( render_mode, flags, opt ) );
+		m_scene->render( state );
 	
 	r->popMatrix();
+	
+	if ( render_mode == GR_RENDER_OBJECT_PICK )
+	{
+		glUseProgram( currentProgram );
+	}
 }
 
 IECoreGL::StatePtr GR_CortexPrimitive::g_lit = 0;
@@ -161,10 +178,15 @@ IECoreGL::StatePtr GR_CortexPrimitive::g_wireLit = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_wireShaded = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_wireConstGhost = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_wireConstBG = 0;
+IECoreGL::StatePtr GR_CortexPrimitive::g_pick = 0;
+IECoreGL::StatePtr GR_CortexPrimitive::g_selected = 0;
+IECoreGL::StatePtr GR_CortexPrimitive::g_wireSelected = 0;
+IECoreGL::StatePtr GR_CortexPrimitive::g_wireConstBGSelected = 0;
+IECoreGL::StatePtr GR_CortexPrimitive::g_wireConstGhostSelected = 0;
 
 IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlags flags, const GR_DisplayOption *opt )
 {
-	if ( !g_lit || !g_shaded || !g_wire || !g_wireLit || !g_wireShaded || !g_wireConstGhost || !g_wireConstBG )
+	if ( !g_lit || !g_shaded || !g_wire || !g_wireLit || !g_wireShaded || !g_wireConstGhost || !g_wireConstBG || !g_pick || !g_selected || !g_wireSelected || !g_wireConstBGSelected || !g_wireConstGhostSelected )
 	{
 		g_shaded = new IECoreGL::State( true );
 		g_shaded->add( new IECoreGL::PointsPrimitive::UseGLPoints( IECoreGL::ForAll ) );
@@ -216,6 +238,33 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		
 		g_wireConstGhost = new IECoreGL::State( *g_wireConstBG );
 		g_wireConstGhost->add( new IECoreGL::Color( IECore::convert<Imath::Color4f>( opt->common().getColor( GR_GHOST_FILL_COLOR ) ) ) );
+		
+		g_pick = new IECoreGL::State( *g_shaded );
+		g_pick->add(
+			new IECoreGL::ShaderStateComponent(
+				IECoreGL::ShaderLoader::defaultShaderLoader(),
+				IECoreGL::TextureLoader::defaultTextureLoader(),
+				IECoreGL::Shader::defaultVertexSource(),
+				IECoreGL::Shader::defaultGeometrySource(),
+				pickFragmentSource(),
+				new IECore::CompoundObject()
+			),
+			true
+		);
+		
+		g_selected = new IECoreGL::State( *g_shaded );
+		g_selected->add( new IECoreGL::Primitive::DrawWireframe( true ) );
+		IECoreGL::WireframeColorStateComponentPtr selectionColor = new IECoreGL::WireframeColorStateComponent( IECore::convert<Imath::Color4f>( opt->common().getColor( GR_OBJECT_SELECT_COLOR ) ) );
+		g_selected->add( selectionColor.get() );
+		
+		g_wireSelected = new IECoreGL::State( *g_wire );
+		g_wireSelected->add( selectionColor.get() );
+		
+		g_wireConstBGSelected = new IECoreGL::State( *g_wireConstBG );
+		g_wireConstBGSelected->add( selectionColor.get() );
+		
+		g_wireConstGhostSelected = new IECoreGL::State( *g_wireConstGhost );
+		g_wireConstGhostSelected->add( selectionColor.get() );
 	}
 	
 	switch ( mode )
@@ -224,6 +273,11 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		case GR_RENDER_MATERIAL :
 		case GR_RENDER_MATERIAL_WIREFRAME :
 		{
+			if ( isObjectSelection() )
+			{
+				return g_selected;
+			}
+
 			if ( flags & GR_RENDER_FLAG_WIRE_OVER )
 			{
 				if ( flags & GR_RENDER_FLAG_UNLIT )
@@ -243,15 +297,38 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		}
 		case GR_RENDER_WIREFRAME :
 		{
+			if ( isObjectSelection() )
+			{
+				return g_wireSelected;
+			}
+
 			return g_wire;
 		}
 		case GR_RENDER_HIDDEN_LINE :
 		{
+			if ( isObjectSelection() )
+			{
+				return g_wireConstBGSelected;
+			}
+
 			return g_wireConstBG;
 		}
 		case GR_RENDER_GHOST_LINE :
 		{
+			if ( isObjectSelection() )
+			{
+				return g_wireConstGhostSelected;
+			}
+
 			return g_wireConstGhost;
+		}
+		// hovering on GU_CortexPrimitives during GR_RENDER_OBJECT_PICK mode flips the mode
+		// to GR_RENDER_MATTE. Since we're not supporting that on its own, we'll consider it
+		// a continued pick for now. This avoids strange popping draws on hover.
+		case GR_RENDER_MATTE :
+		case GR_RENDER_OBJECT_PICK :
+		{
+			return g_pick;
 		}
 		default :
 		{
@@ -260,6 +337,24 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 	}
 	
 	return g_shaded;
+}
+
+const std::string &GR_CortexPrimitive::pickFragmentSource()
+{
+	static std::string s = 
+	
+		"#version 150 compatibility\n"
+		"#extension GL_EXT_gpu_shader4 : enable\n"
+		""
+		"uniform int objectPickId;"
+		"out ivec4 id;"
+		""
+		"void main()"
+		"{"
+		"	id = ivec4( objectPickId, 0, 0, 0 );"
+		"}";
+	
+	return s;
 }
 
 #endif // 12.5 or later
