@@ -40,8 +40,14 @@ using namespace IECoreHoudini;
 
 const char *OBJ_SceneCacheGeometry::typeName = "ieSceneCacheGeometry";
 
+int *OBJ_SceneCacheGeometry::g_indirection = 0;
+
 OBJ_SceneCacheGeometry::OBJ_SceneCacheGeometry( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_SceneCacheNode<OBJ_Geometry>( net, name, op )
 {
+	if ( !g_indirection )
+	{
+		g_indirection = OP_Parameters::allocIndirect( this->getParmList()->getEntries() );
+	}
 }
 
 OBJ_SceneCacheGeometry::~OBJ_SceneCacheGeometry()
@@ -124,4 +130,9 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	sop->setSpace( sopSpace );
 	sop->setObjectOnly( objectOnly );
 	sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)getGeometryType() );
+}
+
+int *OBJ_SceneCacheGeometry::getIndirect() const
+{
+	return g_indirection;
 }

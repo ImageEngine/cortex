@@ -68,6 +68,12 @@ class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 		/// determine what settings are used. World and Path will load all descedants,
 		/// while Local and Object will load the immediate child object only.
 		virtual void doExpandGeometry( const IECore::SceneInterface *scene );
+		
+		virtual int *getIndirect() const;
+	
+	private :
+		
+		static int *g_indirection;
 
 };
 
