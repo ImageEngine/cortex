@@ -2973,6 +2973,14 @@ mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$MTOA_ROOT/include", "-isystem", "$MTO
 mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$ARNOLD_ROOT/include" ] )
 mtoaEnv.Append( LIBPATH = [ "$MTOA_ROOT/bin" ] )
 mtoaEnv.Append( CXXFLAGS = [ "-D_LINUX" ] )
+
+mtoaVersionHeader = env.FindFile( "utils/Version.h", mtoaEnv["CXXFLAGS"] )
+if (mtoaVersionHeader !=None):	
+	mtoaEnv.Append( 
+	CXXFLAGS = [
+		"-DMTOA_VERSION_HEADER",
+	])
+
 mtoaEnv["SHLIBPREFIX"] = ""
 
 if doConfigure and haveMaya and haveArnold :
@@ -3023,6 +3031,7 @@ alembicEnvAppends = {
 		"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
+		"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
 		"AlembicUtil$ALEMBIC_LIB_SUFFIX",
 		"hdf5$HDF5_LIB_SUFFIX",
 		"hdf5_hl$HDF5_LIB_SUFFIX",
@@ -3038,7 +3047,7 @@ if doConfigure :
 	c = Configure( alembicEnv )
 
 	if not c.CheckLibWithHeader( alembicEnv.subst( "AlembicAbcGeom" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
-	
+
 		sys.stderr.write( "WARNING : no AlembicAbcGeom library found, not building IECoreAlembic - check ALEMBIC_INCLUDE_PATH, ALEMBIC_LIB_PATH and config.log.\n" )
 		c.Finish()
 		
