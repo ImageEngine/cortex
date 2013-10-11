@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/CompoundObject.h"
+#include "IECore/ParameterisedProcedural.h"
 
 #include "IECoreHoudini/FromHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
@@ -87,7 +88,22 @@ ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail 
 	ConstObjectPtr object = ((GU_CortexPrimitive *)prim)->getObject();
 	ObjectPtr result = filterAttribs( object, operands->member<StringData>( "attributeFilter" )->readable().c_str() );
 	
-	return ( result ) ? result : ( object ) ? object->copy() : 0;
+	if ( result )
+	{
+		return result;
+	}
+	
+	if ( object )
+	{
+		if ( object->isInstanceOf( IECore::ParameterisedProcedural::staticTypeId() ) )
+		{
+			return IECore::constPointerCast<IECore::Object>( object );
+		}
+		
+		return object->copy();
+	}
+	
+	return 0;
 }
 
 ObjectPtr FromHoudiniCortexObjectConverter::filterAttribs( const Object *object, const char *filter ) const
