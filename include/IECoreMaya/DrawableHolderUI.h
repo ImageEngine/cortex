@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,51 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_DRAWABLEHOLDER_H
-#define IECOREMAYA_DRAWABLEHOLDER_H
+#ifndef IECOREMAYA_DRAWABLEHOLDERUI_H
+#define IECOREMAYA_DRAWABLEHOLDERUI_H
 
-#include "maya/MPxSurfaceShape.h"
+#include "maya/MPxSurfaceShapeUI.h"
 
-#include "IECoreGL/IECoreGL.h"
-
-#include "IECoreMaya/ParameterisedHolder.h"
-#include "IECoreMaya/MayaTypeIds.h"
+#include "IECoreMaya/DisplayStyle.h"
 
 namespace IECoreGL
 {
-IE_CORE_FORWARDDECLARE( Scene );
+IE_CORE_FORWARDDECLARE( State );
+IE_CORE_FORWARDDECLARE( Group );
+IE_CORE_FORWARDDECLARE( StateComponent );
 }
 
 namespace IECoreMaya
 {
 
-class DrawableHolder : public ParameterisedHolderSurfaceShape
+class DrawableHolderUI : public MPxSurfaceShapeUI
 {
+
 	public :
 
-		DrawableHolder();
-		virtual ~DrawableHolder();
+		DrawableHolderUI();
+		virtual ~DrawableHolderUI();
+
+		virtual void getDrawRequests( const MDrawInfo &info, bool objectAndActiveOnly, MDrawRequestQueue &requests );
+		virtual void draw( const MDrawRequest &request, M3dView &view ) const;
+		virtual bool select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const;
 
 		static void *creator();
-		static MStatus initialize();
-		static const MTypeId id;
-		static const MString typeName;
 		
-		virtual bool isBounded() const;
-		virtual MBoundingBox boundingBox() const;
-		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-
-		/// Returns an up to date scene created by calling draw() on the held class.
-		IECoreGL::ConstScenePtr scene();
-		
-		static MObject aDraw;
-	
 	private :
-
-		IECoreGL::ScenePtr m_scene;
-
+	
+		mutable DisplayStyle m_displayStyle;
+	
 };
 
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_DRAWABLEHOLDER_H
+#endif // IECOREMAYA_DRAWABLEHOLDERUI_H
