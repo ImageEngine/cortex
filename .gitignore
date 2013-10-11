@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-*~
-*.so
-*.os
-*.o
-*.bak
-.cproject
-.project
-.pydevproject
-.sconf_temp
-.sconsign.dblite
- 
-=======
 *.*~
 *.tmp
 *.swp
@@ -40,4 +27,4 @@ test/IECoreRI/resultsPython.txt
 test/IECoreMaya/resultsPython.txt
 test/IECoreNuke/resultsPython.txt
 test/IECoreHoudini/resultsPython.txt
->>>>>>> 7a3970793430feb96a63af04d98b6b953b1613bb
+
