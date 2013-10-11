@@ -71,7 +71,9 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual UT_Vector3 computeNormal() const;
 		virtual int detachPoints( GA_PointGroup &grp );
 		
-		/// Set the IECore::Object contained by this GEO_Primitive
+		/// Set the IECore::Object contained by this GEO_Primitive. Note that in most situations
+		/// this method takes a copy of the object. However, for ParameterisedProcedurals it does
+		/// not, and it is the users responsibility to treat the contained object as const.
 		void setObject( const IECore::Object *object );
 		/// Get the IECore::Object contained by this GEO_Primitive
 		const IECore::Object *getObject() const;
