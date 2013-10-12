@@ -702,6 +702,30 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		self.assertEqual( scene.child( "box2" ).node(), hou.node( "/obj/box2" ) )
 		self.assertEqual( scene.child( "sub2" ).node(), hou.node( "/obj/sub2" ) )
+	
+	def testEmbedded( self ) :
+		
+		scene = self.buildScene()
+		self.assertEqual( scene.embedded(), False )
+		
+		child = scene.child( "sub1" )
+		self.assertEqual( child.embedded(), False )
+		
+		child2 = child.child( "torus1" )
+		self.assertEqual( child2.embedded(), False )
+		
+		child3 = child2.child( "torus2" )
+		self.assertEqual( child3.embedded(), False )
+		
+		box1 = child.child( "box1" )
+		self.assertEqual( box1.embedded(), False )
+		
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.embedded(), True )
+		self.assertEqual( gap.child( "torus" ).embedded(), True )
+		
+		self.assertEqual( scene.child( "box2" ).embedded(), False )
+		self.assertEqual( scene.child( "sub2" ).embedded(), False )
 
 if __name__ == "__main__":
 	unittest.main()

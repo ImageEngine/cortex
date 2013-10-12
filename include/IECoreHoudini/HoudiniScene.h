@@ -100,6 +100,9 @@ class HoudiniScene : public IECore::SceneInterface
 		/// Convenience method to access the Houdini node this scene refers to
 		const OP_Node *node() const;
 		
+		/// Convenience method to determine if this scene refers to hierarchy embedded inside a SOP
+		bool embedded() const;
+		
 		/// These methods provide a default cooking time for methods that do not accept time
 		/// as an argument (e.g. hasObject or childNames). In a HoudiniScene which points at
 		/// a SOP, it is necessary to use time in these methods. The default time will pass
