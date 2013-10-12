@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "IECoreMaya/FromMayaMatrixVectorDataConverter.h"
 
 #include "IECore/VectorTypedData.h"

@@ -72,6 +72,7 @@ struct NumericTraits
 	}
 };
 
+#if defined(LINUX)
 template<>
 MFnNumericData::Type NumericTraits<bool>::dataType();
 
@@ -120,6 +121,56 @@ template<>
 MFnNumericData::Type NumericTraits<Imath::Color3f>::baseDataType();
 template<>
 bool NumericTraits<Imath::Color3f>::isColor();
+#else
+template<>
+MFnNumericData::Type NumericTraits<bool>::dataType() { return MFnNumericData::kBoolean; };
+
+template<>
+MFnNumericData::Type NumericTraits<int>::dataType() { return MFnNumericData::kInt; };
+
+template<>
+MFnNumericData::Type NumericTraits<float>::dataType() { return MFnNumericData::kFloat; };
+
+template<>
+MFnNumericData::Type NumericTraits<double>::dataType() { return MFnNumericData::kDouble; };
+
+template<>
+MFnNumericData::Type NumericTraits<Imath::V2i>::dataType() { return MFnNumericData::k2Int; };
+template<>
+MFnNumericData::Type NumericTraits<Imath::V2i>::baseDataType() { return MFnNumericData::kInt; };
+
+template<>
+MFnNumericData::Type NumericTraits<Imath::V3i>::dataType() { return MFnNumericData::k3Int; };
+template<>
+MFnNumericData::Type NumericTraits<Imath::V3i>::baseDataType() { return MFnNumericData::kInt; };
+
+template<>
+MFnNumericData::Type NumericTraits<Imath::V2f>::dataType() { return MFnNumericData::k2Float; };
+template<>
+MFnNumericData::Type NumericTraits<Imath::V2f>::baseDataType() { return MFnNumericData::kFloat; };
+
+template<>
+MFnNumericData::Type NumericTraits<Imath::V3f>::dataType() { return MFnNumericData::k3Float; };
+template<>
+MFnNumericData::Type NumericTraits<Imath::V3f>::baseDataType() { return MFnNumericData::kFloat; };
+
+template<>
+MFnNumericData::Type NumericTraits<Imath::V2d>::dataType() { return MFnNumericData::k2Double; };
+template<>
+MFnNumericData::Type NumericTraits<Imath::V2d>::baseDataType() { return MFnNumericData::kDouble; };
+
+template<>
+MFnNumericData::Type NumericTraits<Imath::V3d>::dataType() { return MFnNumericData::k3Double; };
+template<>
+MFnNumericData::Type NumericTraits<Imath::V3d>::baseDataType() { return MFnNumericData::kDouble; };
+
+template<>
+MFnNumericData::Type NumericTraits<Imath::Color3f>::dataType() { return MFnNumericData::k3Float; };
+template<>
+MFnNumericData::Type NumericTraits<Imath::Color3f>::baseDataType() { return MFnNumericData::kFloat; };
+template<>
+bool NumericTraits<Imath::Color3f>::isColor() { return true; };
+#endif
 
 } // namespace IECoreMaya
 

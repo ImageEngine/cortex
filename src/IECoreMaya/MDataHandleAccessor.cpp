@@ -35,7 +35,7 @@
 #include "IECoreMaya/MDataHandleAccessor.h"
 
 using namespace IECoreMaya;
-
+#if defined(LINUX)
 /// Ensure that all specialisations instantiate correctly
 template class MDataHandleAccessor< MObject >;
 template class MDataHandleAccessor< bool >;
@@ -63,3 +63,4 @@ template class MDataHandleAccessor< MMatrix >;
 template class MDataHandleAccessor< MFloatMatrix >;
 template class MDataHandleAccessor< MString >;
 template class MDataHandleAccessor< MPxData * >;
+#endif

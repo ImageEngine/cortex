@@ -92,7 +92,7 @@ class MayaScene : public IECore::SceneInterface
 
 		/// Returns the local transform of this node at the specified 
 		/// point in time, which must be equal to the current maya time in seconds.
-		virtual IECore::DataPtr readTransform( double time ) const;
+		virtual IECore::ConstDataPtr readTransform( double time ) const;
 		/// Returns the transform of this node at the specified 
 		/// point in time as a matrix.
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
@@ -107,7 +107,7 @@ class MayaScene : public IECore::SceneInterface
 		/// Fills attrs with the names of all attributes available in the current directory
 		virtual void attributeNames( NameList &attrs ) const;
 		/// Returns the attribute value at the given time, which must be equal to the current maya time in seconds.
-		virtual IECore::ObjectPtr readAttribute( const Name &name, double time ) const;
+		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		/// Not currently supported - will throw an exception.
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
 
@@ -116,7 +116,7 @@ class MayaScene : public IECore::SceneInterface
 		 */
 
 		/// Uses the custom registered tags to return whether a given tag is present in the scene location or not.
-		virtual bool hasTag( const Name &name ) const;
+		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
 		/// Uses the custom registered tags to list all the tags present in the scene location.
 		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
 		/// Not currently supported - will throw an exception.
@@ -130,7 +130,7 @@ class MayaScene : public IECore::SceneInterface
 		virtual bool hasObject() const;
 		/// Reads the object stored at this path in the scene at the given time - may
 		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
-		virtual IECore::ObjectPtr readObject( double time ) const;
+		virtual IECore::ConstObjectPtr readObject( double time ) const;
 		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
 		/// Raises exception if it turns out not to be a Primitive object.
 		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
@@ -168,8 +168,10 @@ class MayaScene : public IECore::SceneInterface
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
 		typedef boost::function<bool (const MDagPath &)> HasFn;
-		typedef boost::function<IECore::ObjectPtr (const MDagPath &)> ReadFn;
-
+		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &)> ReadFn;
+		typedef boost::function<bool (const MDagPath &, const Name &)> HasTagFn;
+		typedef boost::function<void (const MDagPath &, NameList &, bool)> ReadTagsFn;
+		
 		// Register callbacks for custom objects.		
 		// The has function will be called during hasObject and it stops in the first one that returns true.
 		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
@@ -179,10 +181,11 @@ class MayaScene : public IECore::SceneInterface
 		// The has function will be called during hasAttribute and it stops in the first one that returns true.
 		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
 		static void registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn );
-
-		// Register callbacks for custom named tags.
-		// The has function will be called during hasTag and readTags.
-		static void registerCustomTag( const Name &tagName, HasFn hasFn );
+		
+		// Register callbacks for nodes to define custom tags
+		// The functions will be called during hasTag and readTags.
+		// readTags will return the union of all custom ReadTagsFns.
+		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
 
 	private :
 		
@@ -198,9 +201,17 @@ class MayaScene : public IECore::SceneInterface
 			HasFn m_has;
 			ReadFn m_read;
 		};
+		
+		/// Struct for registering readers for custom Tags.
+		struct CustomTagReader
+		{
+			HasTagFn m_has;
+			ReadTagsFn m_read;
+		};
+		
 		static std::vector< CustomReader > &customObjectReaders();
 		static std::map< Name, CustomReader > &customAttributeReaders();
-		static std::map< Name, HasFn > &customTagReaders();
+		static std::vector<CustomTagReader> &customTagReaders();
 		
 	protected:
 		

@@ -52,7 +52,11 @@ class FrameList : public RunTimeTyped
 {
 	public:
 
+#ifdef WIN32
+		typedef int Frame;
+#else
 		typedef int64_t Frame;
+#endif
 
 		IE_CORE_DECLARERUNTIMETYPED( FrameList, RunTimeTyped );
 

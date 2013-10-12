@@ -39,11 +39,13 @@
 
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
+#include "ieHoudini.h"
+
 namespace IECoreHoudini
 {
 
 /// OBJ for loading a single transform and leaf Objects from an IECore::SceneCache
-class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
+class CortexHOUAPI OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 {
 	public :
 		
@@ -59,6 +61,8 @@ class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 		/// should re-implement doExpandGeometry() if specialized behaviour is necessary.
 		/// \todo: do we need this extra abstraction?
 		virtual void expandHierarchy( const IECore::SceneInterface *scene );
+		/// Implemented to push the GeometryType and attribute filter values to the sop below.
+		virtual void pushToHierarchy();
 	
 	protected :
 		

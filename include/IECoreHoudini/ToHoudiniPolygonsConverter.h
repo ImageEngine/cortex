@@ -44,20 +44,20 @@ namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::MeshPrimitive to a Houdini GU_Detail
-class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class CortexHOUAPI ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPolygonsConverter, ToHoudiniPolygonsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniPolygonsConverter( const IECore::VisibleRenderable *renderable );
+		ToHoudiniPolygonsConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniPolygonsConverter();
 	
 	protected :
 		
-		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
-		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
+		/// performs conversion from the IECore::MeshPrimitive into the given GU_Detail
+		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 	private :
 

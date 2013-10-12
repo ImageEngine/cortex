@@ -67,6 +67,10 @@
 #include "IECoreHoudini/bindings/RATDeepImageWriterBinding.h"
 #include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 #include "IECoreHoudini/bindings/HoudiniSceneBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniCompoundObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCompoundObjectConverterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -89,6 +93,67 @@ static void *extractNodeFromHOM( PyObject *o )
 	HOM_Node *homNode = static_cast<HOM_Node*>(((IECorePython::Detail::PySwigObject*)thisAttr)->ptr);
 	
 	return OPgetDirector()->findNode( homNode->path().c_str() );
+}
+// returns a OP_Node from a hou node instance
+static void *extractNodeFromSOP( PyObject *o )
+{
+	//if (!PyObject_HasAttrString(o,"this"))
+	//{
+	//	return 0;
+	//}
+	//PyObject* thisNode = PyObject_GetAttrString(o,"this");
+	//if (!thisNode)
+	//{
+	//	return 0;
+	//}
+	////int cnt = Py_REFCNT(thisNode);
+	////printf("cnt = %d\n",cnt);
+	//SOP_Node *homNode = static_cast<SOP_Node*>(((IECorePython::Detail::PySwigObject*)thisNode)->ptr);
+	//if (!homNode)
+	//{
+	//	return 0;
+	//}
+	
+	
+	
+	if( !PyObject_HasAttrString( o, "path" ) )
+	{
+		return 0;
+	}
+
+	PyObject *thisAttr = PyObject_GetAttrString( o, "path" );
+	if( !thisAttr || !PyCallable_Check(thisAttr))
+	{
+		return 0;
+	}
+	
+	PyObject* arg = PyTuple_New(0);
+	PyObject* pathres;
+	std::string path;
+	try
+	{
+		pathres = PyObject_CallObject(thisAttr,arg);
+		path = PyString_AS_STRING(pathres);
+	}
+	catch (HOM_ObjectWasDeleted)
+	{
+		return 0;
+	}
+	Py_DECREF(arg);
+	Py_DECREF(pathres);
+	Py_DECREF(thisAttr);
+	
+	
+	//handle<> ph(borrowed(o));
+	//SOP_Node* homNode = extract<SOP_Node*>(object(ph));
+	//return homNode;
+	
+	/// \todo: here we 'assume' we have a HOM_Node object, when it really could be anything...
+	
+	//return homNode;
+	//std::string path = homNode->path();
+	OP_Director* opd = OPgetDirector();
+	return opd->findNode(path.c_str());
 }
 
 BOOST_PYTHON_MODULE(_IECoreHoudini)
@@ -118,12 +183,23 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindToHoudiniGroupConverter();
 	bindRATDeepImageReader();
 	bindRATDeepImageWriter();
+#ifndef _WIN32
 	bindSceneCacheNode();
+#endif
 	bindHoudiniScene();
+	bindFromHoudiniCortexObjectConverter();
+	bindToHoudiniCortexObjectConverter();
+	bindFromHoudiniCompoundObjectConverter();
+	bindToHoudiniCompoundObjectConverter();
 	
 	// register our node converter functions
+#ifndef _WIN32
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<SOP_Node>() );
+#else
+	boost::python::converter::registry::insert( &extractNodeFromSOP, boost::python::type_id<OP_Node>() );
+	boost::python::converter::registry::insert( &extractNodeFromSOP, boost::python::type_id<SOP_Node>() );
+#endif
 	
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
 }

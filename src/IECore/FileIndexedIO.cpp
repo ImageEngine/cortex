@@ -37,6 +37,75 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/FileIndexedIO.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <tchar.h>
+int truncate(const char* filename, long offset)
+{
+	TCHAR tfilename[255];
+	wsprintf(tfilename,_T("%s"),filename);
+	HANDLE filet = CreateFile(tfilename,FILE_WRITE_DATA,FILE_SHARE_READ,NULL,OPEN_ALWAYS,0,NULL);
+	if (filet == INVALID_HANDLE_VALUE)
+	{
+		return -1;
+	}
+	SetFilePointer(filet,offset,NULL,FILE_BEGIN);
+	if (SetEndOfFile(filet))
+	{
+		CloseHandle(filet);
+		return 0;
+	}
+	else
+	{
+		CloseHandle(filet);
+		return -1;
+	}
+
+}
+#endif
+
+#ifdef max
+#undef max
+#endif
+
+#ifdef min
+#undef min
+#endif
+
+
+/// \todo Describe what each item actually means!
+
+/// FileFormat ::= Data Index Version MagicNumber
+/// Data ::= DataEntry*
+/// Index ::= StringCache Nodes FreePages IndexOffset
+
+/// StringCache ::= NumStrings String*
+/// NumStrings ::= int64
+/// String ::= StringLength char*
+/// StringLength ::= int64
+
+/// Nodes ::= NumNodes Node*
+/// NumNodes ::= int64
+/// Node ::= EntryType EntryStringCacheID DataType ArrayLength NodeID ParentNodeID DataOffset DataSize
+/// EntryType ::= char
+/// EntryStringCacheID ::= int64
+/// DataType ::= char
+/// ArrayLength ::= int64
+/// NodeID ::= int64
+/// ParentNodeID ::= ParentNodeID
+/// DataOffset ::= int64
+/// DataSize ::= int64
+
+/// FreePages ::= NumFreePages FreePage*
+/// NumFreePages ::= int64
+/// FreePage ::= FreePageOffset FreePageSize
+/// FreePageOffset ::= int64
+/// FreePageSize ::= int64
+/// IndexOffset ::= int64
+
+/// Version ::= int64
+/// MagicNumber ::= int64
+
 using namespace IECore;
 
 namespace fs = boost::filesystem;

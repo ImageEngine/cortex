@@ -38,12 +38,13 @@
 #include "GEO/GEO_IOTranslator.h"
 #include "GU/GU_Detail.h"
 #include "UT/UT_IStream.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {
 
 /// An IO Translator for saving and loading .cob files using a Houdini File SOP
-class GEO_CobIOTranslator : public GEO_IOTranslator
+class CortexHOUAPI GEO_CobIOTranslator : public GEO_IOTranslator
 {
 
 	public :

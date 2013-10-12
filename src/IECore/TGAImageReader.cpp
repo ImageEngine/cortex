@@ -59,20 +59,23 @@ using namespace std;
 
 struct TGAImageReader::Header
 {
+ 	//typedef ::uint16_t uint16_t;
+ 	//typedef ::uint32_t uint32_t;
+ 	//typedef ::::uint8_t ::uint8_t;
 	unsigned char idLength;
 	char colorMapType;
 	char imageType;
 
 	/// Color Map Specification
-	uint16_t firstEntryIndex;
-	uint16_t colorMapLength;
+	::uint16_t firstEntryIndex;
+	::uint16_t colorMapLength;
 	char colorMapEntrySize;
 
 	/// Image Specification
-	uint16_t xOrigin;
-	uint16_t yOrigin;
-	uint16_t imageWidth;
-	uint16_t imageHeight;
+	::uint16_t xOrigin;
+	::uint16_t yOrigin;
+	::uint16_t imageWidth;
+	::uint16_t imageHeight;
 	char pixelDepth;
 	char imageDescriptor;
 };
@@ -207,7 +210,7 @@ DataPtr TGAImageReader::readTypedChannel( const std::string &name, const Box2i &
 	int dataWidth = 1 + dataWindow.size().x;
 	int bufferDataWidth = 1 + m_dataWindow.size().x;
 
-	ScaledDataConversion<uint8_t, V> converter;
+	ScaledDataConversion<::uint8_t, V> converter;
 
 	const int samplesPerPixel = m_header->pixelDepth == 24 ? 3 : 4 ;
 
@@ -236,7 +239,7 @@ DataPtr TGAImageReader::readTypedChannel( const std::string &name, const Box2i &
 
 		for ( int x = dataWindow.min.x - m_dataWindow.min.x;  x <= dataWindow.max.x - m_dataWindow.min.x ; ++x, dataX += dataXinc )
 		{
-			const uint8_t* buf = reinterpret_cast< uint8_t* >( & m_buffer[0] );
+			const ::uint8_t* buf = reinterpret_cast< ::uint8_t* >( & m_buffer[0] );
 			assert( buf );
 
 			typename TargetVector::ValueType::size_type dataOffset = dataY * dataWidth + dataX;
@@ -277,12 +280,12 @@ void TGAImageReader::readBuffer()
 
 	m_buffer.clear();
 
-	uint32_t pixelCount = m_header->imageWidth * m_header->imageHeight;
-	uint16_t bytesPerPixel = ( int )(( float )m_header->pixelDepth / 8.0 + 0.5 );
-	uint32_t bufferSize = pixelCount * bytesPerPixel;
+	::uint32_t pixelCount = m_header->imageWidth * m_header->imageHeight;
+	::uint16_t bytesPerPixel = ( int )(( float )m_header->pixelDepth / 8.0 + 0.5 );
+	::uint32_t bufferSize = pixelCount * bytesPerPixel;
 	m_buffer.resize( bufferSize, 0 );
 
-	ifstream in( fileName().c_str() );
+	ifstream in( fileName().c_str(), ios::binary);
 	in.seekg( 18 + (unsigned)m_header->idLength, ios_base::beg );
 	if ( in.fail() )
 	{

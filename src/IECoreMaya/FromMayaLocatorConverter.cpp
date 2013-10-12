@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "IECoreMaya/FromMayaLocatorConverter.h"
 #include "IECoreMaya/Convert.h"
 

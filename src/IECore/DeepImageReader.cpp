@@ -76,7 +76,7 @@ ObjectPtr DeepImageReader::doOperation( const CompoundObject *operands )
 	}
 
 	DeepPixelPtr pixel = 0;
-	float channelData[channels.size()];
+	float *channelData = new float [channels.size()];
 	
 	unsigned p = 0;
 	for ( int y=dataWind.min.y; y < dataWind.max.y + 1; ++y )
@@ -98,7 +98,7 @@ ObjectPtr DeepImageReader::doOperation( const CompoundObject *operands )
 			}
 		}
 	}
-	
+	delete [] channelData;
 	return image;
 }
 

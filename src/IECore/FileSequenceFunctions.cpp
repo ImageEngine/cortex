@@ -64,6 +64,20 @@
 
 #endif
 
+#if BOOST_VERSION < 104400
+
+	// Boost 1.44.0 introduced Filesystem v3, which we use by defining BOOST_FILESYSTEM_VERSION=3 via
+	// the build process. Prior versions of boost didn't have this version, so we need this define
+	// to help write code suitable for both.
+
+	#define PATH_TO_STRING filename()
+
+#else
+
+	#define PATH_TO_STRING filename().string()
+
+#endif
+
 using namespace IECore;
 
 void IECore::findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize )
@@ -181,7 +195,7 @@ void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequen
 	 	std::vector< std::string > files;
 		for ( boost::filesystem::directory_iterator it( path ); it != end; ++it )
 		{
-			files.push_back( it->path().filename().string() );
+			files.push_back( it->path().PATH_TO_STRING );
 		}
 
 		findSequences( files, sequences, minSequenceSize );
@@ -203,9 +217,9 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 
  	std::vector< std::string > files;
 
-	boost::filesystem::path dir = boost::filesystem::path( sequencePath ).branch_path();
+	boost::filesystem::path dir = boost::filesystem::path( sequencePath ).parent_path();
 
-	std::string baseSequencePath = boost::filesystem::path( sequencePath ).filename().string();
+	std::string baseSequencePath = boost::filesystem::path( sequencePath ).PATH_TO_STRING;
 
 	const std::string::size_type first = baseSequencePath.find_first_of( '#' );
 	assert( first != std::string::npos );
@@ -225,7 +239,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 
 	for ( boost::filesystem::directory_iterator it( dirToCheck ); it != end; ++it )
 	{
-		const std::string fileName = it->path().filename().string();
+		const std::string fileName = it->path().PATH_TO_STRING;
 
 		if ( fileName.size() >= std::min( prefix.size(), suffix.size() ) && fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
 		{

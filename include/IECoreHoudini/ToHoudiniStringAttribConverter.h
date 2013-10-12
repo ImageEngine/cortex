@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,7 +47,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniStringVectorAttribConverter );
 
 /// A ToHoudiniStringVectorAttribConverter can convert from IECore::StringVectorData
 /// to a Houdini GA_Attribute on the provided GU_Detail.
-class ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
+class CortexHOUAPI ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
 {
 
 	public :
@@ -60,6 +60,9 @@ class ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
 		
 		IECore::IntVectorParameterPtr indicesParameter();
 		IECore::ConstIntVectorParameterPtr indicesParameter() const;
+		
+		/// Utility method to set a single string for all elements in the given range
+		static GA_RWAttributeRef convertString( std::string name, std::string value, GU_Detail *geo, GA_Range range );
 		
 	protected :
 		

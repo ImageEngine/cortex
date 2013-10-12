@@ -39,8 +39,10 @@
 #include "IECoreMaya/MayaScene.h"
 #include "IECoreMaya/bindings/MayaSceneBinding.h"
 
+#include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/SceneInterfaceBinding.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
@@ -48,31 +50,45 @@ using namespace boost::python;
 class CustomTagReader
 {
 	public :
-		CustomTagReader( object fnc ) : m_fnc(fnc)
+		CustomTagReader( object hasFn, object readFn ) : m_has( hasFn ), m_read( readFn )
 		{
 		}
 
-		bool operator() ( const MDagPath &dagPath )
+		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &tag )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
-			return m_fnc( p.asChar() );
+			return m_has( p.asChar(), tag );
+		}
+		
+		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, bool includeChildren )
+		{
+			MString p = dagPath.fullPathName();
+			IECorePython::ScopedGILLock gilLock;
+			object o = m_read( p.asChar(), includeChildren );
+			extract<list> l( o );
+			if ( !l.check() )
+			{
+				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
+			}
+			
+			IECorePython::listToSceneInterfaceNameList( l(), tags );
 		}
 
-	private :
-
-		object m_fnc;
+		object m_has;
+		object m_read;
 };
 
-void registerCustomTag( std::string tagName, object fnc )
+void registerCustomTags( object hasFn, object readFn )
 {
-	MayaScene::registerCustomTag( tagName, CustomTagReader(fnc) );
+	CustomTagReader reader( hasFn, readFn );
+	MayaScene::registerCustomTags( reader, reader );
 }
 
 void IECoreMaya::bindMayaScene()
 {
 	IECorePython::RunTimeTypedClass<MayaScene>()
 		.def( init<>() )
-		.def( "registerCustomTag", registerCustomTag ).staticmethod( "registerCustomTag" )
+		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
 	;
 }

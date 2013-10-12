@@ -36,21 +36,26 @@
 #define IECORE_LINKEDSCENE_H
 
 #include "IECore/SampledSceneInterface.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( LinkedScene );
+//IE_CORE_FORWARDDECLARE( StringData );
+//IE_CORE_FORWARDDECLARE( InternedStringVectorData );
 
 /// Implements a scene that have references (links) to external scenes.
 /// Links can be created at any location in a scene. When a link is created in a given location,
-/// the object, tags, bounds and children will be loaded from the linked scene (with time remapping). The transform, attributes
-/// are still loaded from the main scene.
+/// the object, bounds and children will be loaded from the linked scene (with time remapping). The transform, attributes
+/// are still loaded from the main scene. Tags defined in the link location will be applied (when read) to all the child transforms from the linked scene.
 /// This class wraps another SceneInterface object that is responsible for actually storing the data
 /// (we call it the "main scene"). Links are represented as an attribute in the main scene called "SceneInterface:link".
 /// When created for reading, this class provides seamless access to the hierarchy inside the linked scenes, 
 /// concatenating the two hierarchies in a single path that uniquely identify that location. The time is also 
-/// transparently translated.
+/// transparently translated. Tags that were saved in the linked scene are propagated to the main scene, 
+/// to keep consistent behavior.
 /// When writing, there's no access to the contents of the indexed scene. Instead, it creates the links by either
 /// (1) calls to the function writeLink() or 
 /// (2) calls to the function writeAttribute( LinkedScene::linkSceneAttribute, LinkedScene::linkAttributeData(), ... ). 
@@ -64,6 +69,10 @@ class LinkedScene : public  SampledSceneInterface
 		/// Equals to "SceneInterface:link" and it's the name given to the link attribute that is recognized
 		// by this class when expanding linked scenes.
 		static const Name &linkAttribute;
+		
+		static const Name &fileNameLinkAttribute;
+		static const Name &rootLinkAttribute;
+		static const Name &timeLinkAttribute;
 
 		/// When the open mode is Read it expands the links and only the const methods may be used and the
 		/// when the open mode is Write, only the non-const methods may be used and 
@@ -107,9 +116,9 @@ class LinkedScene : public  SampledSceneInterface
 		virtual size_t numTransformSamples() const;
 		virtual double transformSampleTime( size_t sampleIndex ) const;
 		virtual double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual DataPtr readTransformAtSample( size_t sampleIndex ) const;
+		virtual ConstDataPtr readTransformAtSample( size_t sampleIndex ) const;
 		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const;
-		virtual DataPtr readTransform( double time ) const;
+		virtual ConstDataPtr readTransform( double time ) const;
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
 		virtual void writeTransform( const Data *transform, double time );
 
@@ -118,20 +127,20 @@ class LinkedScene : public  SampledSceneInterface
 		virtual size_t numAttributeSamples( const Name &name ) const;
 		virtual double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
 		virtual double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual ObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
-		virtual ObjectPtr readAttribute( const Name &name, double time ) const;
+		virtual ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
+		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
 
-		virtual bool hasTag( const Name &name ) const;
-		virtual void readTags( NameList &tags, bool includeChildren ) const;
+		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
+		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
 		virtual void writeTags( const NameList &tags );
 
 		virtual bool hasObject() const;
 		virtual size_t numObjectSamples() const;
 		virtual double objectSampleTime( size_t sampleIndex ) const;
 		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual ObjectPtr readObjectAtSample( size_t sampleIndex ) const;
-		virtual ObjectPtr readObject( double time ) const;
+		virtual ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const;
+		virtual ConstObjectPtr readObject( double time ) const;
 		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const;
 		virtual void writeObject( const Object *object, double time );
 
@@ -147,7 +156,7 @@ class LinkedScene : public  SampledSceneInterface
 
 		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped );
 
-		static ConstSceneInterfacePtr expandLink( const CompoundData *linkData, int &linkDepth, bool &timeRemapped );
+		static ConstSceneInterfacePtr expandLink( const StringData *fileName, const InternedStringVectorData *root, int &linkDepth );
 
 		// uses the mainScene to ask what is the time the link is remapped to. Should only be called when the linkAttribute is available.
 		double remappedLinkTime( double time ) const;
@@ -162,9 +171,9 @@ class LinkedScene : public  SampledSceneInterface
 		bool m_timeRemapped;
 		// \todo: std::map< Path, LinkedScenes > for quick scene calls... built by scene... dies with the instance (usually only root uses it).
 
-		static const InternedString g_fileNameLinkAttribute;
-		static const InternedString g_rootLinkAttribute;
-		static const InternedString g_timeAttribute;
+		static const InternedString g_fileName;
+		static const InternedString g_root;
+		static const InternedString g_time;
 };
 
 } // namespace IECore

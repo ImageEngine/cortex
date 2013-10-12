@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,161 +33,217 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "tbb/mutex.h"
+#include "tbb/concurrent_hash_map.h"
 
+#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "IECore/CachedReader.h"
+#include "IECore/ComputationCache.h"
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
 #include "IECore/ModifyOp.h"
+#include "IECore\SearchPath.h"
 
 using namespace IECore;
+using namespace boost;
 using namespace boost::filesystem;
 using namespace std;
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 //////////////////////////////////////////////////////////////////////////
-// Getter
+// MemberData
 //////////////////////////////////////////////////////////////////////////
 
-struct CachedReader::Getter
+#define PARAM(file)	MemberData::ComputeParameters( file, m_data.get() )
+
+struct CachedReader::MemberData
 {
-	Getter( const SearchPath &paths, ConstModifyOpPtr postProcessor=0 )
-	:	m_paths( paths ), m_postProcessor( postProcessor )
-	{
-	}
+	public :
 
-	Getter( const Getter &g )
-	: m_paths( g.m_paths ), m_postProcessor( g.m_postProcessor )
-	{
-	}
-
-	const SearchPath &m_paths; // references CachedReader::m_paths
-	ConstModifyOpPtr m_postProcessor;
-	tbb::mutex m_postProcessorMutex;
-
-	ConstObjectPtr operator()( const std::string &file, size_t &cost )
-	{
-		cost = 0;
-
-		path resolvedPath = m_paths.find( file );
-		if( resolvedPath.empty() )
+		MemberData(const SearchPath &paths, ConstModifyOpPtr postProcessor, ObjectPoolPtr objectPool )
+			:	m_searchPaths( paths ), m_cache( computeFn, hashFn, 10000, objectPool ), m_postProcessor( postProcessor )
 		{
-			string pathList;
-			for( list<path>::const_iterator it = m_paths.paths.begin(); it!=m_paths.paths.end(); it++ )
+		}
+
+		typedef std::pair< std::string, MemberData * > ComputeParameters;
+		typedef IECore::ComputationCache< ComputeParameters > Cache;
+
+		SearchPath m_searchPaths;
+		Cache m_cache;
+		ConstModifyOpPtr m_postProcessor;
+		tbb::mutex m_postProcessorMutex;
+		typedef tbb::concurrent_hash_map< std::string, std::string > FileErrors;
+		FileErrors m_fileErrors;		
+
+	private :
+
+		void registerFileError( const std::string &filePath, const std::string &errorMsg )
+		{
+			FileErrors::accessor it;
+			if ( m_fileErrors.insert( it, filePath ) )
 			{
-				if ( pathList.size() > 0 )
+				it->second = errorMsg;
+			}
+		}
+
+		static MurmurHash hashFn( const ComputeParameters &params )
+		{
+			const std::string &filePath = params.first;
+			MurmurHash h;
+			h.append( filePath );
+			return h;
+		}
+
+		// static function used by the cache mechanism to actually load the object data from file.
+		static ObjectPtr computeFn( const ComputeParameters &params )
+		{
+			const std::string &filePath = params.first;
+			MemberData *data = params.second;
+
+			{
+				/// Check if the file failed before...
+				FileErrors::const_accessor cit;
+				if ( data->m_fileErrors.find( cit, filePath ) )
 				{
-					pathList += ":" + it->string();
-				}
-				else
-				{
-					pathList = it->string();
+					throw Exception( ( format( "Previous attempt to read %s failed: %s" ) % filePath % cit->second ).str() );
 				}
 			}
-			throw Exception( "Could not find file '" + file + "' at the following paths: " + pathList );
+
+			ObjectPtr result(0);
+			try
+			{
+				path resolvedPath = data->m_searchPaths.find( filePath );
+				if( resolvedPath.empty() )
+				{
+					string pathList;
+					for( list<path>::const_iterator it =  data->m_searchPaths.paths.begin(); it!= data->m_searchPaths.paths.end(); it++ )
+					{
+						if ( pathList.size() > 0 )
+						{
+							pathList += ":" + it->string();
+						}
+						else
+						{
+							pathList = it->string();
+						}
+					}
+					throw Exception( "Could not find file '" + filePath + "' at the following paths: " + pathList );
+				}
+	
+				ReaderPtr r = Reader::create( resolvedPath.string() );
+				if( !r )
+				{
+					throw Exception( "Could not create reader for '" + resolvedPath.string() + "'" );
+				}
+		
+				result = r->read();
+				/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
+				/// we were unable to read the file?
+				if( !result )
+				{
+					throw Exception( "Reader for '" + resolvedPath.string() + "' returned no data" );
+				}
+		
+				if( data->m_postProcessor )
+				{
+					/// \todo We need to allow arguments to be passed to Op::operate() directly
+					/// so that the same Op can be used from multiple threads with different arguments.
+					/// This means adding an overloaded operate() method but more importantly making sure
+					/// that all Ops only use their operands to access arguments and not go getting them
+					/// from the Parameters directly.
+					tbb::mutex::scoped_lock l( data->m_postProcessorMutex );
+					ModifyOpPtr postProcessor = constPointerCast<ModifyOp>( data->m_postProcessor );
+					postProcessor->inputParameter()->setValue( result );
+					postProcessor->copyParameter()->setTypedValue( false );
+					postProcessor->operate();
+				}
+			}
+			catch ( std::exception &e )
+			{
+				data->registerFileError( filePath, e.what() );
+				throw;
+			}
+			catch ( ... )
+			{
+				data->registerFileError( filePath, "Unexpected error." );
+				throw;
+			}
+			return result;
 		}
-
-		ReaderPtr r = Reader::create( resolvedPath.string() );
-		if( !r )
-		{
-			throw Exception( "Could not create reader for '" + resolvedPath.string() + "'" );
-		}
-
-		ObjectPtr result = r->read();
-		/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
-		/// we were unable to read the file?
-		if( !result )
-		{
-			throw Exception( "Reader for '" + resolvedPath.string() + "' returned no data" );
-		}
-
-		if( m_postProcessor )
-		{
-			/// \todo We need to allow arguments to be passed to Op::operate() directly
-			/// so that the same Op can be used from multiple threads with different arguments.
-			/// This means adding an overloaded operate() method but more importantly making sure
-			/// that all Ops only use their operands to access arguments and not go getting them
-			/// from the Parameters directly.
-			tbb::mutex::scoped_lock l( m_postProcessorMutex );
-			ModifyOpPtr postProcessor = constPointerCast<ModifyOp>( m_postProcessor );
-			postProcessor->inputParameter()->setValue( result );
-			postProcessor->copyParameter()->setTypedValue( false );
-			postProcessor->operate();
-		}
-
-		cost = result->memoryUsage();
-
-		return result;
-	}
-
 };
 
 //////////////////////////////////////////////////////////////////////////
 // CachedReader
 //////////////////////////////////////////////////////////////////////////
 
-CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory )
-	:	m_paths( paths ), m_cache( Getter( m_paths ), maxMemory )
+CachedReader::CachedReader( const SearchPath &paths, ObjectPoolPtr objectPool  )
+	:	m_data( new MemberData( paths, 0, objectPool ) )
 {
 }
 
-CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory, ConstModifyOpPtr postProcessor )
-	:	m_paths( paths ), m_cache( Getter( m_paths, postProcessor ), maxMemory )
+CachedReader::CachedReader( const SearchPath &paths, ConstModifyOpPtr postProcessor, ObjectPoolPtr objectPool )
+	:	m_data( new MemberData( paths, postProcessor, objectPool ) )
 {
 }
 
 ConstObjectPtr CachedReader::read( const std::string &file )
 {
-	return m_cache.get( file );
+	return m_data->m_cache.get( PARAM(file) );
 }
 
 void CachedReader::insert( const std::string &file, ConstObjectPtr obj )
 {
-	m_cache.set( file, obj, obj->memoryUsage() );
+	m_data->m_fileErrors.erase( file );
+	m_data->m_cache.set( PARAM(file), obj, ObjectPool::StoreReference );
 }
 
 bool CachedReader::cached( const std::string &file ) const
 {
-	return m_cache.cached( file );
-}
+	{
+		/// Check if the file failed before...
+		MemberData::FileErrors::const_accessor cit;
+		if ( m_data->m_fileErrors.find( cit, file ) )
+		{
+			return false;
+		}
+	}
 
-size_t CachedReader::memoryUsage() const
-{
-	return m_cache.currentCost();
+	return m_data->m_cache.get( PARAM(file), MemberData::Cache::NullIfMissing );
 }
 
 void CachedReader::clear()
 {
-	m_cache.clear();
+	m_data->m_fileErrors.clear();
+	m_data->m_cache.clear();
 }
 
 void CachedReader::clear( const std::string &file )
 {
-	m_cache.erase( file );
+	m_data->m_fileErrors.erase(file);
+	m_data->m_cache.erase( PARAM(file) );
 }
 
 const SearchPath &CachedReader::getSearchPath() const
 {
-	return m_paths;
+	return m_data->m_searchPaths;
 }
 
 void CachedReader::setSearchPath( const SearchPath &paths )
 {
-	if( m_paths!=paths )
+	if( m_data->m_searchPaths!=paths )
 	{
-		m_paths = paths;
+		m_data->m_searchPaths = paths;
 		clear();
 	}
 }
 
-size_t CachedReader::getMaxMemory() const
+ObjectPool *CachedReader::objectPool() const
 {
-	return m_cache.getMaxCost();
-}
-
-void CachedReader::setMaxMemory( size_t maxMemory )
-{
-	m_cache.setMaxCost( maxMemory );
+	return m_data->m_cache.objectPool();
 }
 
 CachedReaderPtr CachedReader::defaultCachedReader()
@@ -195,11 +251,8 @@ CachedReaderPtr CachedReader::defaultCachedReader()
 	static CachedReaderPtr c = 0;
 	if( !c )
 	{
-		const char *m = getenv( "IECORE_CACHEDREADER_MEMORY" );
-		int mi = m ? boost::lexical_cast<int>( m ) : 100;
-	
 		const char *sp = getenv( "IECORE_CACHEDREADER_PATHS" );
-		c = new CachedReader( SearchPath( sp ? sp : "", ":" ), 1024 * 1024 * mi );
+		c = new CachedReader( SearchPath( sp ? sp : "", ":" ) );
 	}
 	return c;
 }

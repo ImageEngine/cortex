@@ -46,6 +46,7 @@ if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
 
 	import IECore
 	import IECoreNuke
+	import nuke
 
 	nodesMenu = nuke.menu( "Nodes" )
 	cortexMenu = nodesMenu.addMenu( "Cortex" )
@@ -54,6 +55,9 @@ if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
 		cortexMenu.addCommand( "Display", "nuke.createNode( 'ieDisplay' )" )
 		
 	cortexMenu.addCommand( "LensDistort", "nuke.createNode( 'ieLensDistort' )" )
+	
+	if nuke.env["NukeVersionMajor"] >= 7 :
+		cortexMenu.addCommand( "SceneCacheReader", "nuke.createNode( 'ieSceneCacheReader' )" )
 
 	proceduralMenu = cortexMenu.addMenu( "Procedural" )
 	IECoreNuke.Menus.addProceduralCreationCommands( proceduralMenu )

@@ -1,0 +1,784 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{734097F5-19C8-4F19-BE5F-2BBE15D90B74}</ProjectGuid>
+    <RootNamespace>IECorePython</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v90</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.60315.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECOREPYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECOREPYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;IECOREPYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>D:\sdk\include;D:\sdk\cortex-git\cortex\include;D:\sdk\Deploy\include\OpenEXR;D:\sdk\Deploy\include;D:\sdk\boost_1_51_0;D:\sdk\include\zlib;C:\Python26\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_WINDOWS;_USRDLL;IECOREPYTHON_EXPORTS;NOMINMAX;__PRETTY_FUNCTION__=__FILE__;IE_CORE_MAJORVERSION=8;IE_CORE_MINORVERSION=0;IE_CORE_PATCHVERSION=0;IECORE_WITH_ASIO;IECORE_WITH_TIFF;IECORE_WITH_SIGNALS;IECORE_WITH_BOOSTFACTORIAL;IECORE_WITH_FREETYPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Imath.lib;Half.lib;Iex.lib;IlmThread.lib;IlmImf.lib;irml.lib;tbb.lib;tbbmalloc.lib;tbbmalloc_proxy.lib;freetype249.lib;jpeg.lib;libpng12_static.lib;libtiff.lib;IECore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>D:\sdk\cortex-git\cortex\python\IECore\_IECore.pyd</OutputFile>
+      <AdditionalLibraryDirectories>C:\Python26\libs;D:\sdk\boost_1_51_0\stage\lib;D:\sdk\Deploy\lib\x64\Release;D:\sdk\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\IECorePython\GeometricTypedDataBinding.inl" />
+    <None Include="..\..\..\include\IECorePython\ParameterBinding.inl" />
+    <None Include="..\..\..\include\IECorePython\PointerFromSWIG.inl" />
+    <None Include="..\..\..\include\IECorePython\RefCountedBinding.inl" />
+    <None Include="..\..\..\include\IECorePython\RunTimeTypedBinding.inl" />
+    <None Include="..\..\..\include\IECorePython\SimpleTypedDataBinding.inl" />
+    <None Include="..\..\..\include\IECorePython\TypedObjectParameterBinding.inl" />
+    <None Include="..\..\..\include\IECorePython\TypedParameterBinding.inl" />
+    <None Include="..\..\..\include\IECorePython\VectorTypedDataBinding.inl" />
+    <None Include="..\..\test\IECore\All.py" />
+    <None Include="..\..\test\IECore\All2.py" />
+    <None Include="..\..\test\IECore\IndexedIO.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECorePythonModule\IECore.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\AddSmoothSkinningInfluencesOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\AlexaLogcToLinearOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\AngleConversionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\AttributeCacheBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\AttributeStateBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\BezierAlgoBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\BGEOParticleReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\BinaryFrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\BlindDataHolderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\BlobbyImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\BoundedKDTreeBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CachedImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CachedReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CamelCaseBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CameraBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CameraControllerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CapturingRendererBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ChannelOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CineonToLinearOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CINImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CINImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ClampOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ClientDisplayDriverBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ColorSpaceTransformOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ColorTransformOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CompoundDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CompoundFrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CompoundObjectBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CompoundParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CompressSmoothSkinningDataOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ContrastSmoothSkinningWeightsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CoordinateSystemBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CSGImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CubeColorLookupBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CubeColorLookupDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CubeColorLookupParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CubeColorTransformOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CubicBasisBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CurveExtrudeOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CurveLineariserBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CurvesMergeOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CurvesPrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CurvesPrimitiveEvaluatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CurveTangentsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\CurveTracerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DataCastOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DataConvertOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DataInterleaveOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DataPromoteOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DateTimeDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DateTimeParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DecompressSmoothSkinningDataOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DeepImageConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DeepImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DeepImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DeepPixelBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DirNameParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DiskPrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DisplayBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DisplayDriverBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DPXImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\DPXImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\EmptyFrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\EnvMapSamplerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\EnvMapSHProjectorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ExceptionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ExclusionFrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\EXRImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\EXRImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FaceAreaOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FaceVaryingPromotionOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FileNameParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FileSequenceBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FileSequenceFunctionsBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FileSequenceParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FileSequenceVectorParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FontBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FrameListParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FrameRangeBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\FromCoreConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\GeometricTypedDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\GradeBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\GroupBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\HalfBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\HdrMergeOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\HeaderGeneratorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\HenyeyGreensteinBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\HexConversionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\HitMissTransformBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageCompositeOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageConvolveOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageCropOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageDiffOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageDisplayDriverBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImagePremultiplyOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImagePrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImagePrimitiveEvaluatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageThinnerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageUnpremultiplyOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathBoxBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathBoxVectorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathColorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathColorVectorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathEulerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathMatrixBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathMatrixVectorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathPlaneBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathQuatBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathQuatVectorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathRandomBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathRootsBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathVecBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImathVecVectorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\IndexedIOBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\InternedStringBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\InterpolatedCacheBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\InverseDistanceWeightedInterpolationBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\JPEGImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\JPEGImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\KDTreeBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LevenbergMarquardtBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LightBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LimitSmoothSkinningInfluencesOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LinearToAlexaLogcOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LinearToCineonOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LinearToPanalogOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LinearToRec709OpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LinearToSRGBOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LineSegmentBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LinkedSceneBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LookupBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LRUCacheBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\LuminanceOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MappedRandomPointDistributionOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MarchingCubesBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MarschnerLookupTableOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MarschnerParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MathBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MatrixMotionTransformBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MatrixMultiplyOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MatrixTransformBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MedianCutSamplerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshDistortionsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshFaceFilterOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshMergeOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshNormalsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshPrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshPrimitiveBuilderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshPrimitiveEvaluatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshPrimitiveImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshPrimitiveImplicitSurfaceOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshPrimitiveShrinkWrapOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshTangentsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MeshVertexReorderOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MessageHandlerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MixSmoothSkinningWeightsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ModifyOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MotionPrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\MurmurHashBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\NormalizeSmoothSkinningWeightsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\NullObjectBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\NumericParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\NURBSPrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ObjectBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ObjectInterpolatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ObjectParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ObjectPoolBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ObjectReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ObjectVectorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ObjectWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\OBJReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\OpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\OptionsBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\OversamplesCalculatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PanalogToLinearOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ParameterisedBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ParameterisedProceduralBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ParticleMeshOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ParticleReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ParticleWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PatchMeshPrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PathParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PathVectorParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PDCParticleReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PDCParticleWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PerlinNoiseBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PlaneImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointBoundsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointDensitiesOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointDistributionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointDistributionOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointMeshOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointNormalsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointRepulsionOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointSmoothSkinningOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointsMotionOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointsPrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointsPrimitiveEvaluatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PointVelocityDisplaceOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PolygonAlgoBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PreWorldRenderableBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PrimitiveEvaluatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PrimitiveImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PrimitiveOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\PrimitiveVariableBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\RadixSortBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\RandomRotationOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\Rec709ToLinearOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\RefCountedBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\RemoveSmoothSkinningInfluencesOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\RenderableBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\RendererBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ReorderedFrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ReorderSmoothSkinningInfluencesOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ReversedFrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\RunTimeTypedBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SampledSceneInterfaceBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SceneCacheBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SceneInterfaceBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILLock.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILRelease.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SearchPathBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ShaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SharedSceneInterfacesBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SimpleTypedDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SimpleTypedParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SmoothSkinningDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SmoothSmoothSkinningWeightsOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SphereImplicitSurfaceFunctionBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SpherePrimitiveBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SpherePrimitiveEvaluatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SplineBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SplineDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SplineParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SplineToImageBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SRGBToLinearOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\StandardRadialLensModelBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\StateRenderableBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SummedAreaOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TGAImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TGAImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TIFFImageReaderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TIFFImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimeCodeDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimeCodeParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimeDurationDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimeDurationParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimePeriodBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimePeriodDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimePeriodParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TimerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ToCoreConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TransformationMatrixBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TransformationMatrixDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TransformBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TransformOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TriangleAlgoBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TriangulateOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TriangulatorBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TurbulenceBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TypedObjectParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TypedPrimitiveOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TypedPrimitiveParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\TypeIdBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\UnicodeToStringBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\UniformRandomPointDistributionOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\UVDistortOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ValidatedStringParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\VectorDataFilterOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\VectorTypedDataBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\VectorTypedParameterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\VisibleRenderableBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\WarpOpBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\WrapperGarbageCollector.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\WriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\YUVImageWriterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ZhuBridsonImplicitSurfaceFunctionBinding.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\IECorePython\AddSmoothSkinningInfluencesOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\AlexaLogcToLinearOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\AngleConversionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\AttributeCacheBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\AttributeStateBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BezierAlgoBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BGEOParticleReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BinaryFrameListBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BINMeshReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BINParticleWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BlindDataHolderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BlobbyImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\BoundedKDTreeBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CachedImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CachedReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CamelCaseBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CameraBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CameraControllerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CapturingRendererBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ChannelOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CineonToLinearOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CINImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CINImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ClampOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ClientDisplayDriverBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ColorSpaceTransformOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ColorTransformOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CompoundDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CompoundFrameListBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CompoundObjectBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CompoundParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CompressSmoothSkinningDataOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ContrastSmoothSkinningWeightsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ConverterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CoordinateSystemBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CSGImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CubeColorLookupBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CubeColorLookupDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CubeColorLookupParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CubeColorTransformOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CubicBasisBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CurveExtrudeOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CurveLineariserBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CurvesMergeOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CurvesPrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CurvesPrimitiveEvaluatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CurveTangentsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\CurveTracerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DataCastOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DataConvertOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DataInterleaveOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DataPromoteOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DateTimeDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DateTimeParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DecompressSmoothSkinningDataOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DeepImageConverterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DeepImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DeepImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DeepPixelBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DirNameParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DiskPrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DisplayBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DisplayDriverBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DisplayDriverServerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DPXImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\DPXImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\EmptyFrameListBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\EnvMapSamplerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\EnvMapSHProjectorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ExceptionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ExclusionFrameListBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\EXRImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\EXRImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FaceAreaOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FaceVaryingPromotionOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FileNameParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FileSequenceBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FileSequenceFunctionsBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FileSequenceParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FileSequenceVectorParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FontBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FrameListBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FrameListParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FrameRangeBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\FromCoreConverterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\GeometricTypedDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\GradeBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\GroupBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\HalfBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\HdrMergeOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\HeaderGeneratorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\HenyeyGreensteinBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\HexConversionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\HitMissTransformBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\IECoreBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\IFFHairReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageCompositeOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageConvolveOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageCropOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageDiffOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageDisplayDriverBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImagePremultiplyOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImagePrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImagePrimitiveEvaluatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageThinnerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageUnpremultiplyOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathBoxBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathBoxVectorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathColorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathColorVectorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathEulerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathMatrixBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathMatrixVectorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathPlaneBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathQuatBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathQuatVectorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathRandomBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathRootsBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathVecBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImathVecVectorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImfBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImfTimeCodeBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\IndexedIOBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\InternedStringBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\InterpolatedCacheBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\InverseDistanceWeightedInterpolationBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\JPEGImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\JPEGImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\KDTreeBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LensDistortOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LensModelBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LevenbergMarquardtBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LightBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LimitSmoothSkinningInfluencesOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LinearToAlexaLogcOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LinearToCineonOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LinearToPanalogOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LinearToRec709OpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LinearToSRGBOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LineSegmentBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LinkedSceneBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LookupBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LRUCacheBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\LuminanceOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MappedRandomPointDistributionOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MarchingCubesBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MarschnerLookupTableOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MarschnerParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MathBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MatrixMotionTransformBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MatrixMultiplyOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MatrixTransformBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MedianCutSamplerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshDistortionsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshFaceFilterOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshMergeOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshNormalsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshPrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshPrimitiveBuilderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshPrimitiveEvaluatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshPrimitiveImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshPrimitiveImplicitSurfaceOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshPrimitiveShrinkWrapOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshTangentsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MeshVertexReorderOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MessageHandlerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MixSmoothSkinningWeightsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ModelCacheBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ModifyOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MotionPrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MPlayDisplayDriverBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\MurmurHashBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\NormalizeSmoothSkinningWeightsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\NParticleReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\NullObjectBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\NumericParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\NURBSPrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ObjectBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ObjectInterpolatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ObjectParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ObjectReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ObjectVectorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ObjectWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\OBJReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\OpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\OptionsBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\OversamplesCalculatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PanalogToLinearOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ParameterisedBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ParameterisedProceduralBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ParticleMeshOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ParticleReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ParticleWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PatchMeshPrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PathParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PathVectorParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PDCParticleReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PDCParticleWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PerlinNoiseBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PlaneImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PNGImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointBoundsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointDensitiesOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointDistributionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointDistributionOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointerFromSWIG.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointMeshOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointNormalsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointRepulsionOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointSmoothSkinningOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointsMotionOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointsPrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointsPrimitiveEvaluatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PointVelocityDisplaceOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PolygonAlgoBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PreWorldRenderableBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PrimitiveEvaluatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PrimitiveImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PrimitiveOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\PrimitiveVariableBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\RadixSortBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\RandomRotationOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\Rec709ToLinearOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\RefCountedBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\RemoveSmoothSkinningInfluencesOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\RenderableBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\RendererBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ReorderedFrameListBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ReorderSmoothSkinningInfluencesOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ReversedFrameListBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\RunTimeTypedBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SampledSceneInterfaceBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SceneCacheBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SceneInterfaceBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ScopedGILLock.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ScopedGILRelease.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SearchPathBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SGIImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ShaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SharedSceneInterfacesBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SimpleTypedDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SimpleTypedParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SmoothSkinningDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SmoothSmoothSkinningWeightsOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SphereImplicitSurfaceFunctionBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SpherePrimitiveBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SpherePrimitiveEvaluatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SplineBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SplineDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SplineParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SplineToImageBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SRGBToLinearOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\StandardRadialLensModelBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\StateRenderableBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\SummedAreaOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TGAImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TGAImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TIFFImageReaderBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TIFFImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimeCodeDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimeCodeParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimeDurationDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimeDurationParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimePeriodBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimePeriodDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimePeriodParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TimerBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ToCoreConverterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TransformationMatrixBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TransformationMatrixDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TransformBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TransformOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TriangleAlgoBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TriangulateOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TriangulatorBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TurbulenceBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TypedObjectParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TypedParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TypedPrimitiveOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TypedPrimitiveParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\TypeIdBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\UnicodeToStringBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\UniformRandomPointDistributionOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\UVDistortOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ValidatedStringParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\VectorDataFilterOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\VectorTypedDataBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\VectorTypedParameterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\VisibleRenderableBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\WarpOpBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\Wrapper.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\WrapperGarbageCollector.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\WriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\YUVImageWriterBinding.h" />
+    <ClInclude Include="..\..\..\include\IECorePython\ZhuBridsonImplicitSurfaceFunctionBinding.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

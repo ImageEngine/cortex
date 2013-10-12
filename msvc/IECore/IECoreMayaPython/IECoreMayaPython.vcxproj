@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\CallbackIdBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FnParameterisedHolderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FnProceduralHolderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FnSceneShapeBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaArrayDataConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaCameraConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaCompoundNumericPlugConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaCurveConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaDagNodeConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaGroupConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaImageConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaLocatorConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaMeshConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaNumericPlugConvertBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaObjectConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaParticleConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaPlugConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaProcedualHolderConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaShapeConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaSkinClusterConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaStringPlugConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaTransformationMatrixConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaTransformConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\FromMayaUnitPlugConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\IECoreMaya.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ImageViewportPostProcessBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MayaMeshBuilderBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MayaPythonUtilBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MayaSceneBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MayaTypeIdBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MDagPathFromPython.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MessageHandlerBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MObjectFromPython.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MPlugFromPython.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\MStringFromPython.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\PlaybackFrameListBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\StandaloneBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaCameraConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaGroupConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaImageConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaLocatorConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaMeshConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaObjectConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaParticleConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaPlugConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ToMayaSkinClusterConverterBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\TypeIdBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreMaya\bindings\ViewportPostProcessBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\SceneInterfaceBinding.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILLock.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\WrapperGarbageCollector.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{436687CC-C557-45FF-9B82-F95439E74BCA}</ProjectGuid>
+    <RootNamespace>IECoreMayaPython</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v90</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.60315.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECOREMAYAPYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECOREMAYAPYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2011\include;C:\Python26\include;D:\sdk\include;D:\sdk\include;D:\sdk\include\OpenExr;D:\sdk\boost_1_46_0\boost_1_46_0;D:\sdk\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_WINDOWS;_USRDLL;IECOREMAYAPYTHON_EXPORTS;BOOST_FILESYSTEM_VERSION=2;BOOST_DISABLE_ASSERTS;BOOST_PYTHON_MAX_ARITY=20;IE_CORE_DLL_IMPORT;LIBIECOREGL_IMPORTS;IECOREMAYA_IMPORTS;REQUIRE_IOSTREAM;Bits64_;_BOOL;_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>glew32.lib;Imath.lib;Half.lib;Iex.lib;IlmThread.lib;IlmImf.lib;irml.lib;tbb.lib;tbbmalloc.lib;tbbmalloc_proxy.lib;freetype249.lib;jpeg.lib;libpng12_static.lib;libtiff.lib;IECore.lib;_IECore.lib;Foundation.lib;IECoreGL.lib;OpenMaya.lib;OpenMayaAnim.lib;OpenMayaFX.lib;OpenMayaRender.lib;OpenMayaUI.lib;opengl32.lib;glut32.lib;IECoreMaya.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>D:\sdk\python\IECoreMaya\_IECoreMaya.pyd</OutputFile>
+      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2011\lib;C:\Python26\libs;D:\sdk\boost_1_46_0\boost_1_46_0\stage\lib;D:\sdk\lib64;D:\sdk\IECore\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>D:\sdk\include\gl;C:\Program Files\Autodesk\Maya2012\include;C:\Python26\include;D:\sdk\cortex-git\cortex\include;D:\sdk\include;D:\sdk\Deploy\include\OpenEXR;D:\sdk\Deploy\include;D:\sdk\boost_1_51_0;D:\sdk\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_WINDOWS;_USRDLL;IECOREMAYAPYTHON_EXPORTS;BOOST_FILESYSTEM_VERSION=2;BOOST_DISABLE_ASSERTS;BOOST_PYTHON_MAX_ARITY=20;IE_CORE_DLL_IMPORT;LIBIECOREGL_IMPORTS;IECOREMAYA_IMPORTS;REQUIRE_IOSTREAM;Bits64_;_BOOL;_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>glew32.lib;Imath.lib;Half.lib;Iex.lib;IlmThread.lib;IlmImf.lib;irml.lib;tbb.lib;tbbmalloc.lib;tbbmalloc_proxy.lib;freetype249.lib;jpeg.lib;libpng12_static.lib;libtiff.lib;IECore.lib;Foundation.lib;IECoreGL.lib;OpenMaya.lib;OpenMayaAnim.lib;OpenMayaFX.lib;OpenMayaRender.lib;OpenMayaUI.lib;opengl32.lib;glut32.lib;IECoreMaya.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>D:\sdk\cortex-git\cortex\python\IECoreMaya\_IECoreMaya.pyd</OutputFile>
+      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2012\lib;C:\Python26\libs;D:\sdk\boost_1_51_0\stage\lib;D:\sdk\lib64;D:\sdk\Deploy\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -89,9 +89,9 @@ struct TGAImageWriter::ChannelConverter
 	Box2i m_dataWindow;
 	int m_numChannels;
 	int m_channelOffset;
-	std::vector<uint8_t> &m_imageBuffer;
+	std::vector<boost::uint8_t> &m_imageBuffer;
 
-	ChannelConverter( const std::string &channelName, const ImagePrimitive * image, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<uint8_t> &imageBuffer )
+	ChannelConverter( const std::string &channelName, const ImagePrimitive * image, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<boost::uint8_t> &imageBuffer )
 			: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_numChannels( numChannels ), m_channelOffset( channelOffset ), m_imageBuffer( imageBuffer )
 	{
 	}
@@ -102,10 +102,10 @@ struct TGAImageWriter::ChannelConverter
 		assert( dataContainer );
 
 		const typename T::ValueType &data = dataContainer->readable();
-		ScaledDataConversion<typename T::ValueType::value_type, uint8_t> converter;
+		ScaledDataConversion<typename T::ValueType::value_type, boost::uint8_t> converter;
 
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
-		typedef boost::multi_array_ref< uint8_t, 3 > TargetArray3D;
+		typedef boost::multi_array_ref< boost::uint8_t, 3 > TargetArray3D;
 
 		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
 		TargetArray3D targetData( &m_imageBuffer[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ][ m_numChannels ] );
@@ -202,29 +202,29 @@ void TGAImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 	// Write the header
 
 	/// ID Length
-	writeLittleEndian<uint8_t>( out, 0 );
+	writeLittleEndian<boost::uint8_t>( out, 0 );
 
 	/// Color Map Type
-	writeLittleEndian<uint8_t>( out, 0 );
+	writeLittleEndian<boost::uint8_t>( out, 0 );
 
 	/// Image Type
-	writeLittleEndian<uint8_t>( out, 2 );
+	writeLittleEndian<boost::uint8_t>( out, 2 );
 
 	/// Color Map Specification
-	writeLittleEndian<uint16_t>( out, 0 );
-	writeLittleEndian<uint16_t>( out, 0 );
-	writeLittleEndian<uint8_t>( out, 0 );
+	writeLittleEndian<::uint16_t>( out, 0 );
+	writeLittleEndian<::uint16_t>( out, 0 );
+	writeLittleEndian<boost::uint8_t>( out, 0 );
 
 	/// Image Specification
-	writeLittleEndian<uint16_t>( out, 0 );
-	writeLittleEndian<uint16_t>( out, 0 );
-	writeLittleEndian<uint16_t>( out, displayWidth );
-	writeLittleEndian<uint16_t>( out, displayHeight );
-	writeLittleEndian<uint8_t>( out, numChannels * 8 );
-	writeLittleEndian<uint8_t>( out, ( numChannels == 4 ? 8 : 0 ) + 32 );
+	writeLittleEndian<::uint16_t>( out, 0 );
+	writeLittleEndian<::uint16_t>( out, 0 );
+	writeLittleEndian<::uint16_t>( out, displayWidth );
+	writeLittleEndian<::uint16_t>( out, displayHeight );
+	writeLittleEndian<boost::uint8_t>( out, numChannels * 8 );
+	writeLittleEndian<boost::uint8_t>( out, ( numChannels == 4 ? 8 : 0 ) + 32 );
 
 	// Encode the image buffer
-	std::vector<uint8_t> imageBuffer( displayWidth*displayHeight*numChannels, 0 );
+	std::vector<boost::uint8_t> imageBuffer( displayWidth*displayHeight*numChannels, 0 );
 
 	int offset = 0;
 	for ( vector<string>::const_iterator it = filteredNames.begin(); it != filteredNames.end(); ++it )

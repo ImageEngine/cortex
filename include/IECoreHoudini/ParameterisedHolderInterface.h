@@ -37,6 +37,7 @@
 
 #include "IECore/Parameterised.h"
 #include "IECore/Parameter.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {

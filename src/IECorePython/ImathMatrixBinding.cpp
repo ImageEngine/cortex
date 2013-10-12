@@ -553,7 +553,9 @@ void bindMatrix44()
 
 		.def(init<>())
 		.def(init<T>())
+#ifndef _WIN32
 		.def(init<T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T>())
+#endif
 		.def(init<Matrix33<T>, Vec3<T> >())
 		.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<float> > ) )
 		.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<double> > ) )

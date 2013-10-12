@@ -208,7 +208,7 @@ void SmoothSkinningData::validateIds() const
 		 it!=m_pointIndexOffsets->readable().end(); ++it )
 	{
 		int o = (*it);
-		if ( ( o < 0 ) or ( o > (cpii-1) ) )
+		if ( ( o < 0 ) || ( o > (cpii-1) ) )
 		{
 			int id = it - m_pointIndexOffsets->readable().begin();
 			string error = str( format( "SmoothSkinningData: pointIndexOffset[%e] with value '%e' is not pointing to valid index in pointInfluenceWeights vector range [ 0, %e ]!" ) % id % o % (cpii-1) );
@@ -221,7 +221,7 @@ void SmoothSkinningData::validateIds() const
 		 it!=m_pointInfluenceIndices->readable().end(); ++it )
 	{
 		int o = (*it);
-		if ( ( o < 0 ) or ( o > (cin-1) ) )
+		if ( ( o < 0 ) || ( o > (cin-1) ) )
 		{
 			int id = it - m_pointInfluenceIndices->readable().begin();
 			string error = str( format( "SmoothSkinningData: pointInfluenceIndices[%e] with value '%e' is not pointing to valid index in influenceNames vector range [ 0, %e ]!" ) % id % o % (cin-1) );

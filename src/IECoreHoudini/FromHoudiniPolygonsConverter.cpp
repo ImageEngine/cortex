@@ -73,11 +73,12 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 	}
 	
 	// is there a single named shape?
-	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-	if ( attrHandle.isAttributeValid() )
+	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
+	if ( attrRef.isValid() && attrRef.isString() )
 	{
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		if ( geo->getUniqueValueCount( attrRef ) < 2 )
+		const GA_Attribute *nameAttr = attrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		if ( tuple->getTableEntries( nameAttr ) < 2 )
 		{
 			return Ideal;
 		}
@@ -86,7 +87,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 	return Suitable;
 }
 
-PrimitivePtr FromHoudiniPolygonsConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
+ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	

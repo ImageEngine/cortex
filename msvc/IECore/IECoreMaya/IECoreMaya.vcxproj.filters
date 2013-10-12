@@ -1,0 +1,603 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\bindings">
+      <UniqueIdentifier>{124d6bb9-1d4c-4d5a-a72c-ed73ae160b56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{d0a59a76-f217-4af6-bfc7-fff72b0ed2cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\bindings">
+      <UniqueIdentifier>{5784e46a-149e-4db6-8219-17496ab82a9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="python">
+      <UniqueIdentifier>{47d8be78-82c7-4523-84d9-ab4f02721dc1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieAttr.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieAttributeEditorControl.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieConverterHolderUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\IECoreMaya.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieCurveCombinerUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieDLUserGeoTypes.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieDrawableHolderUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieGeometryCombinerUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieImagePlaneHolderUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieNode.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieOpHolderUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\iePanel.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieParameterisedHolder.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieParameterisedHolderSetUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieParameterisedHolderUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieParameterPanel.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieProceduralHolder.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieProceduralHolderUI.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\MAYA_SCRIPT_PATH\IECoreMaya\ieRFMUserGeoTypes.mel">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\__init__.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\AttributeEditorControl.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\BakeTransform.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\BoolParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\BoxParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ClassParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ClassVectorParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\Collapsible.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ColorParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\CompoundParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\DAGPathParameter.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\DAGPathVectorParameter.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\DirNameParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FileBrowser.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FileDialog.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FileNameParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FileSequenceParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FnConverterHolder.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FnDagNode.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FnOpHolder.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FnParameterisedHolder.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FnParameterisedHolderSet.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FnProceduralHolder.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\FnTransientParameterisedHolderNode.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\GenericParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\GeometryCombinerUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\LineSegmentParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ManipulatorUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\mayaDo.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\MayaTypeId.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\Menu.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\Menus.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\MeshOpHolderUtil.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ModalDialogue.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\NodeParameter.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\NoteParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\NumericParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\NumericVectorParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\OpWindow.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\Panel.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ParameterClipboardUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ParameterPanel.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\PathParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\PresetsOnlyParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\PresetsUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ProceduralHolderUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\ScopedSelection.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\SplineParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\StringParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\StringUtil.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\StringVectorParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\TemporaryAttributeValues.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\TestCase.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\TestProgram.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\TransformationMatrixParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\TransientParameterisedHolderNode.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\UIElement.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\UITemplate.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\UndoDisabled.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\VectorParameterUI.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\..\..\..\PYTHONPATH\maya2012\IECoreMaya\WaitCursor.py">
+      <Filter>python</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaNumericDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaObjectConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaParticleConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaPlugConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaSkinClusterConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\TransformationMatrixManipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\TransformationMatrixParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\TransientParameterisedHolderNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\V3Manipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ViewportPostProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ViewportPostProcessCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ViewportPostProcessCallbackBinding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\BoolParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\Box3Manipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\BoxParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\CacheSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\CallbackId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ClassParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ClassVectorParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ColorSplineParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\CompoundNumericParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\CompoundParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\Convert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ConverterHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\CurveCombiner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\DateTimeParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\DisplayStyle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\DrawableHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FloatSplineParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaArrayDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaCameraConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaCompoundNumericPlugConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaCurveConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaDagNodeConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaFluidConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaGroupConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaImageConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaLocatorConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaMatrixDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaMatrixVectorDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaMeshConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaNumericDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaNumericPlugConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaObjectConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaObjectDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaParticleConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaPlugConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaPluginDataPlugConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaProceduralHolderConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaShapeConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaSkinClusterConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaStringPlugConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaTransformationMatrixConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaTransformConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\FromMayaUnitPlugConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\GeometryCombiner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\IECoreMaya.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ImageFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ImagePlaneHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ImageViewportPostProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\LineSegmentParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\MayaHeaderGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\MayaPythonUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\MayaScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\MayaTime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\MDataHandleAccessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\MeshParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\MessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\NumericParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\NumericTraits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ObjectData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ObjectMFnDataParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ObjectParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ObjectVectorParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\OpHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterisedHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterisedHolderInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterisedHolderManipContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterisedHolderManipContextCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterisedHolderModificationCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterisedHolderSetValueCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ParameterManipContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\PlaybackFrameList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\PostLoadCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ProceduralHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ProceduralHolderComponentBoundIterator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ProceduralHolderUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\PythonCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\SceneShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\SceneShapeInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\SceneShapeUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\StatusException.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\StringParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\StringVectorParameterHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\SystemExitCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaArrayDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaCameraConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaGroupConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaImageConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaLocatorConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaMatrixDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaMatrixVectorDataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\ToMayaMeshConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILLock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\WrapperGarbageCollector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreMaya\SceneShapeInterfaceComponentBoundIterator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

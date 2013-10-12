@@ -223,7 +223,7 @@ __dataTypesConversionDict = {
 
 	IECore.SmoothSkinningData: None,
 	
-	IECore.TimeCodeData: ( IECore.TimeCode, True ),
+	#IECore.TimeCodeData: ( IECore.TimeCode, True ),
 }
 
 ## Function that returns a list of Data derived classes.

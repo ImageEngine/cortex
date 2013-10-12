@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "maya/MVectorArray.h"
 #include "maya/MPointArray.h"
 #include "maya/MStringArray.h"

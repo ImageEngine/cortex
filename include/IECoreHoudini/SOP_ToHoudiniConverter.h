@@ -40,12 +40,13 @@
 
 #include "SOP/SOP_Node.h"
 #include "PRM/PRM_Name.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {
 
 /// SOP class for converting from an IECore::VisibleRenderable into native Houdini geometry.
-class SOP_ToHoudiniConverter : public SOP_Node
+class CortexHOUAPI SOP_ToHoudiniConverter : public SOP_Node
 {
 	public :
 
@@ -53,8 +54,8 @@ class SOP_ToHoudiniConverter : public SOP_Node
 
 		static const char *typeName;
 		
-		static PRM_Template parameters[];
-		static CH_LocalVariable variables[];
+		static PRM_Template _stdcall parameters[];
+		static CH_LocalVariable _stdcall variables[];
 		
 		static PRM_Name pConvertStandardAttributes;
 		static PRM_Name pAttributeFilter;

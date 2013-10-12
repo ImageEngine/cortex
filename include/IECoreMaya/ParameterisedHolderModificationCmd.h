@@ -48,6 +48,15 @@
 
 namespace IECoreMaya
 {
+	//class ParameterisedHolderModificationCmd;
+#ifdef _WIN32
+	//#include <IECore/CompoundData.h>
+// #include "IECore/Object.h"
+// #include "IECore/CompoundParameter.h"
+// #include "IECore/SimpleTypedData.h"
+// #include "IECore/VectorTypedData.h"
+	void parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses );	
+#endif
 
 // This class has two purposes :
 //

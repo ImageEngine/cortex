@@ -47,7 +47,7 @@ namespace IECoreHoudini
 {
 
 /// \todo: This class is a bit funny. Can this all be moved to the bindings like in IECoreMaya?
-class FnParameterisedHolder
+class CortexHOUAPI FnParameterisedHolder
 {
 	public :
 

@@ -65,7 +65,11 @@ FromMayaPlugConverter::Description<T>::Description( MFnUnitAttribute::Type fromT
 }
 
 template<class T>
+#ifndef _WIN32
 FromMayaPlugConverterPtr FromMayaPlugConverter::Description<T>::Description::creator( const MPlug &plug )
+#else
+FromMayaPlugConverterPtr FromMayaPlugConverter::Description<T>::creator( const MPlug &plug )
+#endif
 {
 	return new T( plug );
 }

@@ -37,6 +37,7 @@
 #include "IECore/LensModel.h"
 #include <iostream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 using namespace IECore;

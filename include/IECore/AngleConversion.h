@@ -41,6 +41,10 @@
 
 #include <math.h>
 
+#ifdef _WIN32
+#define M_PI 3.141592657
+#endif
+
 namespace IECore
 {
 

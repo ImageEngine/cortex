@@ -40,7 +40,7 @@
 #include "maya/MPointArray.h"
 
 #include "IECore/PointsPrimitive.h"
-
+#include "IECore\CompoundObject.h"
 #include "IECoreMaya/ToMayaParticleConverter.h"
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"

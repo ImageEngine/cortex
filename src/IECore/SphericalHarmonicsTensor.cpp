@@ -34,6 +34,9 @@
 
 #include "IECore/SphericalHarmonicsTensor.h"
 #include "boost/math/special_functions/factorials.hpp"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 using namespace IECore;
 
@@ -184,7 +187,7 @@ double SphericalHarmonicsTensor::gaunt( int Ji, int Mi, int Jj, int Mj, int Jk, 
 
 std::complex<double> SphericalHarmonicsTensor::U( int l, int m, int u )
 {
-	const static double invSqrt2 = 1/sqrt(2);
+	const static double invSqrt2 = 1/sqrt(2.0);
 	double mS = (m&1?-invSqrt2:invSqrt2);
 	if ( u == 0 )
 	{

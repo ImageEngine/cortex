@@ -42,13 +42,14 @@
 
 #include "IECore/CompoundParameter.h"
 
+#include "ieHoudini.h"
 #include "IECoreHoudini/ParameterisedHolder.h"
 
 namespace IECoreHoudini
 {
 
 /// Class representing a SOP node acting as a holder for the abstract Parameterised class.
-class SOP_ParameterisedHolder : public ParameterisedHolder<SOP_Node>
+class CortexHOUAPI SOP_ParameterisedHolder : public ParameterisedHolder<SOP_Node>
 {
 	public :
 

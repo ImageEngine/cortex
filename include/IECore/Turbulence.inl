@@ -150,7 +150,7 @@ typename Turbulence<N>::Value Turbulence<N>::turbulence( const Point &p ) const
 
 
 template<typename N>
-typename Turbulence<N>::Value Turbulence<N>::turbulence( const Point &p, PointBaseType filterWidth ) const
+typename Turbulence<N>::Value Turbulence<N>::turbulence( const typename Point &p, typename PointBaseType filterWidth ) const
 {
 	Value result; vecSetAll( result, 0 );
 	Point frequency; vecSetAll( frequency, 1 );

@@ -44,7 +44,7 @@ namespace IECoreHoudini
 {
 
 /// Converter which converts from a Houdini GU_Detail to an IECore::PointsPrimitive
-class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
+class CortexHOUAPI FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
 	public :
 
@@ -61,7 +61,7 @@ class FromHoudiniPointsConverter : public IECoreHoudini::FromHoudiniGeometryConv
 	protected :
 		
 		/// performs conversion to a IECore::PointsPrimitive
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
+		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 
 	private :
 

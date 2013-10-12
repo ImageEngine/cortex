@@ -49,12 +49,17 @@
 #include "boost/multi_array.hpp"
 #include "boost/format.hpp"
 
+
 #include <fstream>
 
 using namespace IECore;
 using namespace std;
 using namespace boost;
 using namespace Imath;
+
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
 
 IE_CORE_DEFINERUNTIMETYPED( DPXImageWriter )
 

@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "IECoreMaya/FromMayaStringPlugConverter.h"
 
 #include "IECore/SimpleTypedData.h"

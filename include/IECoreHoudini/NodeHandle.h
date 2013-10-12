@@ -37,6 +37,7 @@
 
 #include "OP/OP_Node.h"
 #include "HOM/HOM_Node.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {
@@ -44,7 +45,7 @@ namespace IECoreHoudini
 /// The NodeHandle is a class that may be used to verify the existence of an OP_Node.
 /// Use a NodeHandle if you want a raw pointer to an OP_Node, but are concerned about
 /// the lifespan of that OP_Node.
-class NodeHandle
+class CortexHOUAPI NodeHandle
 {
 
 	public :

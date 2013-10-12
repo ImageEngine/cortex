@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "maya/MDagPath.h"
 #include "maya/MDagModifier.h"
 #include "maya/MFnDagNode.h"

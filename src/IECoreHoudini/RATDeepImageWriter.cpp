@@ -83,7 +83,7 @@ void RATDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	const float *channelData = 0;
 	
 	float alpha = 1.0;
-	float adjustedData[m_dataSize];
+	float *adjustedData = new float[m_dataSize];
 	for ( unsigned c=0; c < 3; ++c )
 	{
 		adjustedData[c] = alpha;
@@ -123,6 +123,7 @@ void RATDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	}
 	
 	m_outputFile->pixelClose();
+	delete [] adjustedData;
 }
 
 void RATDeepImageWriter::open()

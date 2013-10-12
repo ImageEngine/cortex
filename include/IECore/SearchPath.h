@@ -39,6 +39,10 @@
 
 #include "boost/filesystem/path.hpp"
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 namespace IECore
 {
 

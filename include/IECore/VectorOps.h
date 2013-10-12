@@ -96,6 +96,9 @@ inline T vecMul( const T &v1, const T &v2 );
 /// to be the same as either v1 or v2 to perform multiplication in place.
 template<typename T>
 inline void vecMul( const T &v1, const T &v2, T &result);
+#ifdef _WIN32
+inline void vecMul( float v1, float v2, float& result);
+#endif
 
 /// Division by a scalar returning a new vector.
 template<typename T>
@@ -114,6 +117,10 @@ inline T vecDiv( const T &v1, const T &v2 );
 /// for result to be the same as either v1 or v2 to perform division in place.
 template<typename T>
 inline void vecDiv( const T &v1, const T &v2, T &result );
+
+#ifdef _WIN32
+inline void vecDiv( float v1, float v2, float& result);
+#endif
 
 /// Returns the dot product of v1 and v2.
 template<typename T>

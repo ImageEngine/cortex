@@ -44,8 +44,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniPolygonsConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> ToHoudiniPolygonsConverter::m_description( MeshPrimitiveTypeId );
 
-ToHoudiniPolygonsConverter::ToHoudiniPolygonsConverter( const VisibleRenderable *renderable ) :
-	ToHoudiniGeometryConverter( renderable, "Converts an IECore::MeshPrimitive to a Houdini GU_Detail." )
+ToHoudiniPolygonsConverter::ToHoudiniPolygonsConverter( const Object *object ) :
+	ToHoudiniGeometryConverter( object, "Converts an IECore::MeshPrimitive to a Houdini GU_Detail." )
 {
 }
 
@@ -53,9 +53,9 @@ ToHoudiniPolygonsConverter::~ToHoudiniPolygonsConverter()
 {
 }
 
-bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderable, GU_Detail *geo ) const
+bool ToHoudiniPolygonsConverter::doConversion( const Object *object, GU_Detail *geo ) const
 {
-	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( renderable );
+	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( object );
 	if ( !mesh )
 	{
 		return false;
@@ -102,13 +102,7 @@ bool ToHoudiniPolygonsConverter::doConversion( const VisibleRenderable *renderab
 	if ( newPrims.isValid() )
 	{
 		std::string interpolation = ( mesh->interpolation() == "catmullClark" ) ? "subdiv" : "poly";
-		StringVectorDataPtr interpolationVectorData = new StringVectorData();
-		interpolationVectorData->writable().push_back( interpolation );
-		std::vector<int> indexValues( newPrims.getEntries(), 0 );
-		IntVectorDataPtr indexData = new IntVectorData( indexValues );
-		ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( interpolationVectorData );
-		converter->indicesParameter()->setValidatedValue( indexData );
-		converter->convert( "ieMeshInterpolation", geo, newPrims );
+		ToHoudiniStringVectorAttribConverter::convertString( "ieMeshInterpolation", interpolation, geo, newPrims );
 	}
 	
 	return true;

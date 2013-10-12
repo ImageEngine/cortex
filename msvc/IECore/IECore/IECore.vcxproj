@@ -1,0 +1,908 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C623F2E9-8B20-4CCF-AC62-FF6B7E9EEA3A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>IECore</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v90</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NOMINMAX;NDEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;IE_CORE_DLL_EXPORT;IE_CORE_MAJORVERSION=8;IE_CORE_MINORVERSION=0;IE_CORE_PATCHVERSION=0;IECORE_WITH_ASIO;IECORE_WITH_TIFF;IECORE_WITH_SIGNALS;IECORE_WITH_BOOSTFACTORIAL;IECORE_WITH_FREETYPE;__PRETTY_FUNCTION__=__FILE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\sdk\cortex-git\cortex\include;D:\sdk\include;D:\sdk\Deploy\include\OpenEXR;D:\sdk\Deploy\include;D:\sdk\boost_1_51_0;D:\sdk\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>D:\sdk\lib64;D:\sdk\Deploy\lib\x64\Release;D:\sdk\boost_1_51_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Imath.lib;Half.lib;Iex.lib;IexMath.lib;IlmThread.lib;IlmImf.lib;irml.lib;tbb.lib;tbbmalloc.lib;tbbmalloc_proxy.lib;freetype249.lib;jpeg.lib;libpng12_static.lib;libtiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>D:\sdk\cortex-git\cortex\msvc\IECore\IECore\x64\Release\IECore.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetPath) D:\sdk\bin64\$(TargetFileName)
+copy $(TargetDir)\$(TargetName).pdb D:\sdk\bin64\
+copy $(TargetDir)\$(TargetName).lib D:\sdk\lib64\$(TargetName).lib</Command>
+    </PostBuildEvent>
+    <PreLinkEvent>
+      <Command>
+      </Command>
+    </PreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECore\AddSmoothSkinningInfluencesOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\AlexaLogcToLinearOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\AssociatedLegendre.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\AttributeBlock.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\AttributeCache.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\AttributeState.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\BGEOParticleReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\BinaryFrameList.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\BlindDataHolder.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CachedReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Camera.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CameraController.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CapturingRenderer.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ChannelOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CineonToLinearOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CINImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CINImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ClampOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ClientDisplayDriver.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ColorSpaceTransformOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ColorTransformOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CompoundData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CompoundDataBase.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CompoundFrameList.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CompoundMessageHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CompoundObject.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CompoundParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CompressSmoothSkinningDataOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ContrastSmoothSkinningWeightsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Converter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CoordinateSystem.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CubeColorLookupData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CubeColorLookupParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CubeColorTransformOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CurveExtrudeOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CurveLineariser.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CurvesMergeOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CurvesPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CurvesPrimitiveEvaluator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CurveTangentsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\CurveTracer.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Data.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DataCastOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DataConvertOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DataInterleaveOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DataPromoteOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DateTimeData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DateTimeParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DecompressSmoothSkinningDataOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DeepImageConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DeepImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DeepImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DeepPixel.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DirNameParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DiskPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Display.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DisplayDriver.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DisplayDriverServerHeader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DPXImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\DPXImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\EmptyFrameList.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\EnvMapSampler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\EnvMapSHProjector.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Exception.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ExclusionFrameList.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\EXRImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\EXRImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FaceAreaOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FaceVaryingPromotionOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FileIndexedIO.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FileNameParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FileSequence.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FileSequenceFunctions.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FileSequenceParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FileSequenceVectorParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FilteredMessageHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Font.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FrameList.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FrameListParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FrameRange.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\FromCoreConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Grade.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Group.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\HdrMergeOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\HeaderGenerator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\HitMissTransform.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\IECore.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageCompositeOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageConvolveOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageCropOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageDiffOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageDisplayDriver.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImagePremultiplyOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImagePrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImagePrimitiveEvaluator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageThinner.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageUnpremultiplyOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\IndexedIO.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\InternedString.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\InterpolatedCache.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\JPEGImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\JPEGImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LevelFilteredMessageHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Light.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LimitSmoothSkinningInfluencesOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LinearToAlexaLogcOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LinearToCineonOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LinearToPanalogOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LinearToRec709Op.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LinearToSRGBOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LinkedScene.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\LuminanceOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MappedRandomPointDistributionOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MarschnerLookupTableOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MarschnerParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MatrixAlgo.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MatrixMotionTransform.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MatrixMultiplyOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MatrixTransform.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MedianCutSampler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MemoryIndexedIO.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MemoryStream.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshDistortionsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshFaceFilterOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshMergeOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshNormalsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshPrimitiveBuilder.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshPrimitiveEvaluator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshPrimitiveImplicitSurfaceFunction.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshPrimitiveImplicitSurfaceOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshPrimitiveShrinkWrapOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshTangentsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MeshVertexReorderOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MessageHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MixSmoothSkinningWeightsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ModifyOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MotionBlock.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MotionPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\MurmurHash.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\NormalizeSmoothSkinningWeightsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\NullMessageHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\NullObject.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\NumericParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\NURBSPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Object.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ObjectInterpolator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ObjectParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ObjectPool.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ObjectReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ObjectVector.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ObjectWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\OBJReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Op.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Options.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\OStreamMessageHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\OversamplesCalculator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PanalogToLinearOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Parameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Parameterised.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ParameterisedInterface.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ParameterisedProcedural.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ParticleMeshOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ParticleReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ParticleWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PatchMeshPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PathParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PathVectorParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PDCParticleReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PDCParticleWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointBoundsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointDensitiesOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointDistribution.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointDistributionOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointMeshOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointNormalsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointRepulsionOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointSmoothSkinningOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointsMotionOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointsPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointsPrimitiveEvaluator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PointVelocityDisplaceOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PreWorldRenderable.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Primitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PrimitiveEvaluator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PrimitiveImplicitSurfaceFunction.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PrimitiveOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\PrimitiveVariable.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\RadixSort.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\RandomRotationOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Reader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Rec709ToLinearOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\RefCounted.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\RemoveSmoothSkinningInfluencesOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Renderable.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Renderer.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ReorderedFrameList.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ReorderSmoothSkinningInfluencesOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ReversedFrameList.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\RunTimeTyped.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SampledSceneInterface.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SceneCache.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SceneInterface.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ScopedTIFFErrorHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SearchPath.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Shader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SharedSceneInterfaces.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SimpleSubsurface.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SimpleTypedData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SimpleTypedParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SmoothSkinningData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SmoothSmoothSkinningWeightsOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SpherePrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SpherePrimitiveEvaluator.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SphericalHarmonics.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SphericalHarmonicsProjector.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SphericalHarmonicsRotationMatrix.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SphericalHarmonicsTensor.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SphericalHarmonicsTransferMatrix.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SplineData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SplineParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SplineToImage.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SRGBToLinearOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\StateRenderable.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\StreamIndexedIO.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\SummedAreaOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TGAImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TGAImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TIFFImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TIFFImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TimeCodeData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TimeCodeParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TimeDurationData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TimeDurationParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TimePeriod.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TimePeriodData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TimePeriodParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Timer.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ToCoreConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Transform.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TransformationMatrix.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TransformationMatrixData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TransformBlock.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TransformOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TriangulateOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TypedObjectParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TypedPrimitiveOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\TypedPrimitiveParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\UniformRandomPointDistributionOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\UVDistortOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\ValidatedStringParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\VectorDataFilterOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\VectorTypedData.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\VectorTypedParameter.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\VisibleRenderable.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\WarpOp.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\WorldBlock.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\Writer.cpp" />
+    <ClCompile Include="..\..\..\src\IECore\YUVImageWriter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\IECore\AddSmoothSkinningInfluencesOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\AlexaLogcToLinearDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\AlexaLogcToLinearOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\AngleConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\AssociatedLegendre.h" />
+    <ClInclude Include="..\..\..\include\IECore\AttributeBlock.h" />
+    <ClInclude Include="..\..\..\include\IECore\AttributeCache.h" />
+    <ClInclude Include="..\..\..\include\IECore\AttributeState.h" />
+    <ClInclude Include="..\..\..\include\IECore\BezierAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\BGEOParticleReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\BinaryFrameList.h" />
+    <ClInclude Include="..\..\..\include\IECore\BINMeshReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\BINParticleWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\BlindDataHolder.h" />
+    <ClInclude Include="..\..\..\include\IECore\BlobbyImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\BoundedKDTree.h" />
+    <ClInclude Include="..\..\..\include\IECore\BoxAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\BoxOps.h" />
+    <ClInclude Include="..\..\..\include\IECore\BoxTraits.h" />
+    <ClInclude Include="..\..\..\include\IECore\ByteOrder.h" />
+    <ClInclude Include="..\..\..\include\IECore\CachedImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\CachedReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\CamelCase.h" />
+    <ClInclude Include="..\..\..\include\IECore\Camera.h" />
+    <ClInclude Include="..\..\..\include\IECore\CameraController.h" />
+    <ClInclude Include="..\..\..\include\IECore\CapturingRenderer.h" />
+    <ClInclude Include="..\..\..\include\IECore\ChannelOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\CineonToLinearDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\CineonToLinearOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\CINImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\CINImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\CircularIterator.h" />
+    <ClInclude Include="..\..\..\include\IECore\ClampOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ClassData.h" />
+    <ClInclude Include="..\..\..\include\IECore\ClientDisplayDriver.h" />
+    <ClInclude Include="..\..\..\include\IECore\ColorAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\ColorSpaceTransformOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ColorTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\ColorTransformOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompositeAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompoundData.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompoundDataBase.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompoundDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompoundFrameList.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompoundMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompoundObject.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompoundParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\CompressSmoothSkinningDataOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ContrastSmoothSkinningWeightsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\Convert.h" />
+    <ClInclude Include="..\..\..\include\IECore\Converter.h" />
+    <ClInclude Include="..\..\..\include\IECore\CoordinateSystem.h" />
+    <ClInclude Include="..\..\..\include\IECore\CSGImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\CubeColorLookup.h" />
+    <ClInclude Include="..\..\..\include\IECore\CubeColorLookupData.h" />
+    <ClInclude Include="..\..\..\include\IECore\CubeColorLookupParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\CubeColorTransformOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\CubicBasis.h" />
+    <ClInclude Include="..\..\..\include\IECore\CurveExtrudeOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\CurveLineariser.h" />
+    <ClInclude Include="..\..\..\include\IECore\CurvesMergeOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\CurvesPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\CurvesPrimitiveEvaluator.h" />
+    <ClInclude Include="..\..\..\include\IECore\CurveTangentsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\CurveTracer.h" />
+    <ClInclude Include="..\..\..\include\IECore\Data.h" />
+    <ClInclude Include="..\..\..\include\IECore\DataCastOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\DataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\DataConvert.h" />
+    <ClInclude Include="..\..\..\include\IECore\DataConvertOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\DataInterleaveOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\DataPromoteOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\DateTimeData.h" />
+    <ClInclude Include="..\..\..\include\IECore\DateTimeParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\DecompressSmoothSkinningDataOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\DeepImageConverter.h" />
+    <ClInclude Include="..\..\..\include\IECore\DeepImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\DeepImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\DeepPixel.h" />
+    <ClInclude Include="..\..\..\include\IECore\Deleter.h" />
+    <ClInclude Include="..\..\..\include\IECore\DespatchTypedData.h" />
+    <ClInclude Include="..\..\..\include\IECore\DimensionTraits.h" />
+    <ClInclude Include="..\..\..\include\IECore\DirNameParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\DiskPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\Display.h" />
+    <ClInclude Include="..\..\..\include\IECore\DisplayDriver.h" />
+    <ClInclude Include="..\..\..\include\IECore\DisplayDriverServer.h" />
+    <ClInclude Include="..\..\..\include\IECore\DPXImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\DPXImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\EmptyFrameList.h" />
+    <ClInclude Include="..\..\..\include\IECore\EnvMapSampler.h" />
+    <ClInclude Include="..\..\..\include\IECore\EnvMapSHProjector.h" />
+    <ClInclude Include="..\..\..\include\IECore\EuclideanToSphericalTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\Exception.h" />
+    <ClInclude Include="..\..\..\include\IECore\ExclusionFrameList.h" />
+    <ClInclude Include="..\..\..\include\IECore\EXRImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\EXRImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\FaceAreaOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\FaceVaryingPromotionOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\FastFloat.h" />
+    <ClInclude Include="..\..\..\include\IECore\FileIndexedIO.h" />
+    <ClInclude Include="..\..\..\include\IECore\FileNameParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\FileSequence.h" />
+    <ClInclude Include="..\..\..\include\IECore\FileSequenceFunctions.h" />
+    <ClInclude Include="..\..\..\include\IECore\FileSequenceParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\FileSequenceVectorParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\FilteredMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\IECore\Font.h" />
+    <ClInclude Include="..\..\..\include\IECore\FrameList.h" />
+    <ClInclude Include="..\..\..\include\IECore\FrameListParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\FrameRange.h" />
+    <ClInclude Include="..\..\..\include\IECore\FromCoreConverter.h" />
+    <ClInclude Include="..\..\..\include\IECore\GeometricTypedData.h" />
+    <ClInclude Include="..\..\..\include\IECore\Grade.h" />
+    <ClInclude Include="..\..\..\include\IECore\Group.h" />
+    <ClInclude Include="..\..\..\include\IECore\HalfTypeTraits.h" />
+    <ClInclude Include="..\..\..\include\IECore\HashTable.h" />
+    <ClInclude Include="..\..\..\include\IECore\HdrMergeOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\HeaderGenerator.h" />
+    <ClInclude Include="..\..\..\include\IECore\HenyeyGreenstein.h" />
+    <ClInclude Include="..\..\..\include\IECore\HexConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\HitMissTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\IECore.h" />
+    <ClInclude Include="..\..\..\include\IECore\IFFFile.h" />
+    <ClInclude Include="..\..\..\include\IECore\IFFHairReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageCompositeOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageConvolveOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageCropOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageDiffOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageDisplayDriver.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImagePremultiplyOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImagePrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImagePrimitiveEvaluator.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageThinner.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageUnpremultiplyOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImathRandAdapter.h" />
+    <ClInclude Include="..\..\..\include\IECore\ImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\IndexedIO.h" />
+    <ClInclude Include="..\..\..\include\IECore\InternedString.h" />
+    <ClInclude Include="..\..\..\include\IECore\InterpolatedCache.h" />
+    <ClInclude Include="..\..\..\include\IECore\Interpolator.h" />
+    <ClInclude Include="..\..\..\include\IECore\IntrusivePtr.h" />
+    <ClInclude Include="..\..\..\include\IECore\InverseDistanceWeightedInterpolation.h" />
+    <ClInclude Include="..\..\..\include\IECore\JPEGImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\JPEGImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\KDTree.h" />
+    <ClInclude Include="..\..\..\include\IECore\LensDistortOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\LensModel.h" />
+    <ClInclude Include="..\..\..\include\IECore\LevelFilteredMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\IECore\LevenbergMarquardt.h" />
+    <ClInclude Include="..\..\..\include\IECore\Light.h" />
+    <ClInclude Include="..\..\..\include\IECore\LimitSmoothSkinningInfluencesOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToAlexaLogcDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToAlexaLogcOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToCineonDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToCineonOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToPanalogDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToPanalogOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToRec709DataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToRec709Op.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToSRGBDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinearToSRGBOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\LineSegment.h" />
+    <ClInclude Include="..\..\..\include\IECore\LinkedScene.h" />
+    <ClInclude Include="..\..\..\include\IECore\Lookup.h" />
+    <ClInclude Include="..\..\..\include\IECore\LRUCache.h" />
+    <ClInclude Include="..\..\..\include\IECore\LuminanceOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MappedRandomPointDistributionOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MarchingCubes.h" />
+    <ClInclude Include="..\..\..\include\IECore\Marschner.h" />
+    <ClInclude Include="..\..\..\include\IECore\MarschnerLookupTableOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MarschnerParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\Math.h" />
+    <ClInclude Include="..\..\..\include\IECore\MatrixAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\MatrixMotionTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\MatrixMultiplyOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MatrixOps.h" />
+    <ClInclude Include="..\..\..\include\IECore\MatrixTraits.h" />
+    <ClInclude Include="..\..\..\include\IECore\MatrixTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeanSquaredError.h" />
+    <ClInclude Include="..\..\..\include\IECore\MedianCutSampler.h" />
+    <ClInclude Include="..\..\..\include\IECore\MemoryIndexedIO.h" />
+    <ClInclude Include="..\..\..\include\IECore\MemoryStream.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshDistortionsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshFaceFilterOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshMergeOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshNormalsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshPrimitiveBuilder.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshPrimitiveEvaluator.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshPrimitiveImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshPrimitiveImplicitSurfaceOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshPrimitiveShrinkWrapOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshTangentsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MeshVertexReorderOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MessageHandler.h" />
+    <ClInclude Include="..\..\..\include\IECore\MixSmoothSkinningWeightsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ModelCache.h" />
+    <ClInclude Include="..\..\..\include\IECore\ModifyOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\MotionBlock.h" />
+    <ClInclude Include="..\..\..\include\IECore\MotionPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\MPlayDisplayDriver.h" />
+    <ClInclude Include="..\..\..\include\IECore\MurmurHash.h" />
+    <ClInclude Include="..\..\..\include\IECore\NormalizeSmoothSkinningWeightsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\NParticleReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\NullMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\IECore\NullObject.h" />
+    <ClInclude Include="..\..\..\include\IECore\NumericParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\NURBSPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\Object.h" />
+    <ClInclude Include="..\..\..\include\IECore\ObjectInterpolator.h" />
+    <ClInclude Include="..\..\..\include\IECore\ObjectParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\ObjectReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\ObjectVector.h" />
+    <ClInclude Include="..\..\..\include\IECore\ObjectWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\OBJReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\Op.h" />
+    <ClInclude Include="..\..\..\include\IECore\Options.h" />
+    <ClInclude Include="..\..\..\include\IECore\OStreamMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\IECore\OversamplesCalculator.h" />
+    <ClInclude Include="..\..\..\include\IECore\PanalogToLinearDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\PanalogToLinearOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\Parameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\Parameterised.h" />
+    <ClInclude Include="..\..\..\include\IECore\ParameterisedInterface.h" />
+    <ClInclude Include="..\..\..\include\IECore\ParameterisedProcedural.h" />
+    <ClInclude Include="..\..\..\include\IECore\ParticleMeshOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ParticleReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\ParticleWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\PatchMeshPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\PathParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\PathVectorParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\PDCParticleReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\PDCParticleWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\PerlinNoise.h" />
+    <ClInclude Include="..\..\..\include\IECore\PlaneImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\PNGImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointBoundsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointDensitiesOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointDistribution.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointDistributionOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointMeshOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointNormalsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointRepulsionOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointSmoothSkinningOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointsMotionOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointsPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointsPrimitiveEvaluator.h" />
+    <ClInclude Include="..\..\..\include\IECore\PointVelocityDisplaceOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PolygonAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\PolygonIterator.h" />
+    <ClInclude Include="..\..\..\include\IECore\PolygonVertexIterator.h" />
+    <ClInclude Include="..\..\..\include\IECore\PreWorldRenderable.h" />
+    <ClInclude Include="..\..\..\include\IECore\Primitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\PrimitiveEvaluator.h" />
+    <ClInclude Include="..\..\..\include\IECore\PrimitiveImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\PrimitiveOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\PrimitiveVariable.h" />
+    <ClInclude Include="..\..\..\include\IECore\private\cineon.h" />
+    <ClInclude Include="..\..\..\include\IECore\private\DisplayDriverServerHeader.h" />
+    <ClInclude Include="..\..\..\include\IECore\private\dpx.h" />
+    <ClInclude Include="..\..\..\include\IECore\private\ScopedTIFFErrorHandler.h" />
+    <ClInclude Include="..\..\..\include\IECore\QuatAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\RadixSort.h" />
+    <ClInclude Include="..\..\..\include\IECore\Random.h" />
+    <ClInclude Include="..\..\..\include\IECore\RandomRotationOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\Reader.h" />
+    <ClInclude Include="..\..\..\include\IECore\RealSphericalHarmonicFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\Rec709ToLinearDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\Rec709ToLinearOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\RefCounted.h" />
+    <ClInclude Include="..\..\..\include\IECore\RemoveSmoothSkinningInfluencesOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\Renderable.h" />
+    <ClInclude Include="..\..\..\include\IECore\Renderer.h" />
+    <ClInclude Include="..\..\..\include\IECore\ReorderedFrameList.h" />
+    <ClInclude Include="..\..\..\include\IECore\ReorderSmoothSkinningInfluencesOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ReversedFrameList.h" />
+    <ClInclude Include="..\..\..\include\IECore\RGBToXYZColorTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\RunTimeTyped.h" />
+    <ClInclude Include="..\..\..\include\IECore\SampledSceneInterface.h" />
+    <ClInclude Include="..\..\..\include\IECore\ScaledDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\SceneCache.h" />
+    <ClInclude Include="..\..\..\include\IECore\SceneInterface.h" />
+    <ClInclude Include="..\..\..\include\IECore\SearchPath.h" />
+    <ClInclude Include="..\..\..\include\IECore\SGIImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\Shader.h" />
+    <ClInclude Include="..\..\..\include\IECore\SharedSceneInterfaces.h" />
+    <ClInclude Include="..\..\..\include\IECore\SimpleSubsurface.h" />
+    <ClInclude Include="..\..\..\include\IECore\SimpleTypedData.h" />
+    <ClInclude Include="..\..\..\include\IECore\SimpleTypedParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\SmoothSkinningData.h" />
+    <ClInclude Include="..\..\..\include\IECore\SmoothSmoothSkinningWeightsOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\SpaceTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphereImplicitSurfaceFunction.h" />
+    <ClInclude Include="..\..\..\include\IECore\SpherePrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECore\SpherePrimitiveEvaluator.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphericalHarmonics.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphericalHarmonicsAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphericalHarmonicsProjector.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphericalHarmonicsRotationMatrix.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphericalHarmonicsTensor.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphericalHarmonicsTransferMatrix.h" />
+    <ClInclude Include="..\..\..\include\IECore\SphericalToEuclideanTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\Spline.h" />
+    <ClInclude Include="..\..\..\include\IECore\SplineData.h" />
+    <ClInclude Include="..\..\..\include\IECore\SplineParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\SplineToImage.h" />
+    <ClInclude Include="..\..\..\include\IECore\SRGBToLinearDataConversion.h" />
+    <ClInclude Include="..\..\..\include\IECore\SRGBToLinearOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\StandardRadialLensModel.h" />
+    <ClInclude Include="..\..\..\include\IECore\StateRenderable.h" />
+    <ClInclude Include="..\..\..\include\IECore\StreamIndexedIO.h" />
+    <ClInclude Include="..\..\..\include\IECore\StringAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\SummedAreaOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\SweepAndPrune.h" />
+    <ClInclude Include="..\..\..\include\IECore\TestTypedData.h" />
+    <ClInclude Include="..\..\..\include\IECore\TetrahedronAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\TGAImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\TGAImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\TIFFImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECore\TIFFImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\TimeCodeData.h" />
+    <ClInclude Include="..\..\..\include\IECore\TimeCodeParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\TimeDurationData.h" />
+    <ClInclude Include="..\..\..\include\IECore\TimeDurationParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\TimePeriod.h" />
+    <ClInclude Include="..\..\..\include\IECore\TimePeriodData.h" />
+    <ClInclude Include="..\..\..\include\IECore\TimePeriodParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\Timer.h" />
+    <ClInclude Include="..\..\..\include\IECore\ToCoreConverter.h" />
+    <ClInclude Include="..\..\..\include\IECore\Transform.h" />
+    <ClInclude Include="..\..\..\include\IECore\TransformationMatrix.h" />
+    <ClInclude Include="..\..\..\include\IECore\TransformationMatrixData.h" />
+    <ClInclude Include="..\..\..\include\IECore\TransformBlock.h" />
+    <ClInclude Include="..\..\..\include\IECore\TransformOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\TriangleAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\TriangulateOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\Triangulator.h" />
+    <ClInclude Include="..\..\..\include\IECore\Turbulence.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypedData.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypedDataInternals.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypedObjectParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypedParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypedParameterInternals.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypedPrimitiveOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypedPrimitiveParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypeIds.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypeInfoCmp.h" />
+    <ClInclude Include="..\..\..\include\IECore\TypeTraits.h" />
+    <ClInclude Include="..\..\..\include\IECore\UniformRandomPointDistributionOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\UVDistortOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\ValidatedStringParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\VecAlgo.h" />
+    <ClInclude Include="..\..\..\include\IECore\VectorDataFilterOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\VectorOps.h" />
+    <ClInclude Include="..\..\..\include\IECore\VectorTraits.h" />
+    <ClInclude Include="..\..\..\include\IECore\VectorTypedData.h" />
+    <ClInclude Include="..\..\..\include\IECore\VectorTypedParameter.h" />
+    <ClInclude Include="..\..\..\include\IECore\VisibleRenderable.h" />
+    <ClInclude Include="..\..\..\include\IECore\WarpOp.h" />
+    <ClInclude Include="..\..\..\include\IECore\WorldBlock.h" />
+    <ClInclude Include="..\..\..\include\IECore\Writer.h" />
+    <ClInclude Include="..\..\..\include\IECore\XYYToXYZColorTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\XYZToRGBColorTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\XYZToXYYColorTransform.h" />
+    <ClInclude Include="..\..\..\include\IECore\YUVImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECore\ZhuBridsonImplicitSurfaceFunction.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\IECore\AlexaLogcToLinearDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\AssociatedLegendre.inl" />
+    <None Include="..\..\..\include\IECore\BezierAlgo.inl" />
+    <None Include="..\..\..\include\IECore\BlobbyImplicitSurfaceFunction.inl" />
+    <None Include="..\..\..\include\IECore\BoundedKDTree.inl" />
+    <None Include="..\..\..\include\IECore\BoxAlgo.inl" />
+    <None Include="..\..\..\include\IECore\BoxInterpolator.inl" />
+    <None Include="..\..\..\include\IECore\BoxOps.inl" />
+    <None Include="..\..\..\include\IECore\CachedImplicitSurfaceFunction.inl" />
+    <None Include="..\..\..\include\IECore\CamelCase.inl" />
+    <None Include="..\..\..\include\IECore\CineonToLinearDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\CircularIterator.inl" />
+    <None Include="..\..\..\include\IECore\ClassData.inl" />
+    <None Include="..\..\..\include\IECore\ColorAlgo.inl" />
+    <None Include="..\..\..\include\IECore\ColorSpaceTransformOp.inl" />
+    <None Include="..\..\..\include\IECore\CompositeAlgo.inl" />
+    <None Include="..\..\..\include\IECore\CompoundData.inl" />
+    <None Include="..\..\..\include\IECore\CompoundDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\CompoundObject.inl" />
+    <None Include="..\..\..\include\IECore\CompoundParameter.inl" />
+    <None Include="..\..\..\include\IECore\CSGImplicitSurfaceFunction.inl" />
+    <None Include="..\..\..\include\IECore\CubeColorLookup.inl" />
+    <None Include="..\..\..\include\IECore\CubicBasis.inl" />
+    <None Include="..\..\..\include\IECore\DataConvert.inl" />
+    <None Include="..\..\..\include\IECore\DeepImageWriter.inl" />
+    <None Include="..\..\..\include\IECore\DespatchTypedData.inl" />
+    <None Include="..\..\..\include\IECore\DimensionTraits.inl" />
+    <None Include="..\..\..\include\IECore\DisplayDriver.inl" />
+    <None Include="..\..\..\include\IECore\EuclideanToSphericalTransform.inl" />
+    <None Include="..\..\..\include\IECore\FastFloat.inl" />
+    <None Include="..\..\..\include\IECore\FrameList.inl" />
+    <None Include="..\..\..\include\IECore\GeometricTypedData.inl" />
+    <None Include="..\..\..\include\IECore\GeometricTypedDataInterpolator.inl" />
+    <None Include="..\..\..\include\IECore\HenyeyGreenstein.inl" />
+    <None Include="..\..\..\include\IECore\IFFFile.inl" />
+    <None Include="..\..\..\include\IECore\ImagePrimitive.inl" />
+    <None Include="..\..\..\include\IECore\IndexedIO.inl" />
+    <None Include="..\..\..\include\IECore\InternedString.inl" />
+    <None Include="..\..\..\include\IECore\Interpolator.inl" />
+    <None Include="..\..\..\include\IECore\IntrusivePtr.inl" />
+    <None Include="..\..\..\include\IECore\InverseDistanceWeightedInterpolation.inl" />
+    <None Include="..\..\..\include\IECore\KDTree.inl" />
+    <None Include="..\..\..\include\IECore\LensModel.inl" />
+    <None Include="..\..\..\include\IECore\LevenbergMarquardt.inl" />
+    <None Include="..\..\..\include\IECore\LinearToAlexaLogcDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\LinearToCineonDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\LinearToPanalogDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\LinearToRec709DataConversion.inl" />
+    <None Include="..\..\..\include\IECore\LinearToSRGBDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\LineSegment.inl" />
+    <None Include="..\..\..\include\IECore\Lookup.inl" />
+    <None Include="..\..\..\include\IECore\LRUCache.inl" />
+    <None Include="..\..\..\include\IECore\MarchingCubes.inl" />
+    <None Include="..\..\..\include\IECore\Marschner.inl" />
+    <None Include="..\..\..\include\IECore\Math.inl" />
+    <None Include="..\..\..\include\IECore\MatrixAlgo.inl" />
+    <None Include="..\..\..\include\IECore\MatrixInterpolator.inl" />
+    <None Include="..\..\..\include\IECore\MatrixOps.inl" />
+    <None Include="..\..\..\include\IECore\MeanSquaredError.inl" />
+    <None Include="..\..\..\include\IECore\MurmurHash.inl" />
+    <None Include="..\..\..\include\IECore\Object.inl" />
+    <None Include="..\..\..\include\IECore\OversamplesCalculator.inl" />
+    <None Include="..\..\..\include\IECore\PanalogToLinearDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\Parameter.inl" />
+    <None Include="..\..\..\include\IECore\ParticleReader.inl" />
+    <None Include="..\..\..\include\IECore\PerlinNoise.inl" />
+    <None Include="..\..\..\include\IECore\PointDistribution.inl" />
+    <None Include="..\..\..\include\IECore\PolygonAlgo.inl" />
+    <None Include="..\..\..\include\IECore\PolygonIterator.inl" />
+    <None Include="..\..\..\include\IECore\PolygonVertexIterator.inl" />
+    <None Include="..\..\..\include\IECore\Primitive.inl" />
+    <None Include="..\..\..\include\IECore\QuatInterpolator.inl" />
+    <None Include="..\..\..\include\IECore\Random.inl" />
+    <None Include="..\..\..\include\IECore\RandomRotationOp.inl" />
+    <None Include="..\..\..\include\IECore\Reader.inl" />
+    <None Include="..\..\..\include\IECore\RealSphericalHarmonicFunction.inl" />
+    <None Include="..\..\..\include\IECore\Rec709ToLinearDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\ReorderedFrameList.inl" />
+    <None Include="..\..\..\include\IECore\RGBToXYZColorTransform.inl" />
+    <None Include="..\..\..\include\IECore\RunTimeTyped.inl" />
+    <None Include="..\..\..\include\IECore\ScaledDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\SceneInterface.inl" />
+    <None Include="..\..\..\include\IECore\SphericalHarmonics.inl" />
+    <None Include="..\..\..\include\IECore\SphericalHarmonicsAlgo.inl" />
+    <None Include="..\..\..\include\IECore\SphericalHarmonicsProjector.inl" />
+    <None Include="..\..\..\include\IECore\SphericalHarmonicsRotationMatrix.inl" />
+    <None Include="..\..\..\include\IECore\SphericalHarmonicsTransferMatrix.inl" />
+    <None Include="..\..\..\include\IECore\SphericalToEuclideanTransform.inl" />
+    <None Include="..\..\..\include\IECore\Spline.inl" />
+    <None Include="..\..\..\include\IECore\SRGBToLinearDataConversion.inl" />
+    <None Include="..\..\..\include\IECore\StringAlgo.inl" />
+    <None Include="..\..\..\include\IECore\SweepAndPrune.inl" />
+    <None Include="..\..\..\include\IECore\TestTypedData.inl" />
+    <None Include="..\..\..\include\IECore\TetrahedronAlgo.inl" />
+    <None Include="..\..\..\include\IECore\TransformationMatrix.inl" />
+    <None Include="..\..\..\include\IECore\TransformationMatrixInterpolator.inl" />
+    <None Include="..\..\..\include\IECore\TriangleAlgo.inl" />
+    <None Include="..\..\..\include\IECore\Triangulator.inl" />
+    <None Include="..\..\..\include\IECore\Turbulence.inl" />
+    <None Include="..\..\..\include\IECore\TypedData.inl" />
+    <None Include="..\..\..\include\IECore\TypedDataInterpolator.inl" />
+    <None Include="..\..\..\include\IECore\TypedObjectParameter.inl" />
+    <None Include="..\..\..\include\IECore\TypedParameter.inl" />
+    <None Include="..\..\..\include\IECore\VecAlgo.inl" />
+    <None Include="..\..\..\include\IECore\VectorOps.inl" />
+    <None Include="..\..\..\include\IECore\Writer.inl" />
+    <None Include="..\..\..\include\IECore\XYYToXYZColorTransform.inl" />
+    <None Include="..\..\..\include\IECore\XYZToRGBColorTransform.inl" />
+    <None Include="..\..\..\include\IECore\XYZToXYYColorTransform.inl" />
+    <None Include="..\..\..\include\IECore\ZhuBridsonImplicitSurfaceFunction.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

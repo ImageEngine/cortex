@@ -61,7 +61,11 @@ MarchingCubes<ImplicitFn, MeshBuilder>::~MarchingCubes()
 }
 
 template< typename ImplicitFn, typename MeshBuilder >
+#ifdef _WIN32
+void MarchingCubes<ImplicitFn, MeshBuilder>::march( const typename MarchingCubes<ImplicitFn, MeshBuilder>::BoxType &bound, const Imath::V3i &res, typename MarchingCubes<ImplicitFn, MeshBuilder>::ValueBaseType iso )
+#else
 void MarchingCubes<ImplicitFn, MeshBuilder>::march( const MarchingCubes<ImplicitFn, MeshBuilder>::BoxType &bound, const Imath::V3i &res, typename MarchingCubes<ImplicitFn, MeshBuilder>::ValueBaseType iso )
+#endif
 {
 	m_resolution = res;
 	m_bound = bound;

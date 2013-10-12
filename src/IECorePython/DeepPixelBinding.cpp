@@ -167,13 +167,14 @@ struct DeepPixelHelper
 		
 		unsigned numChannels = pixel->numChannels();
 
-		float data[numChannels];
+		float *data = new float[numChannels];
 		pixel->interpolatedChannelData( depth, data );
 		for ( unsigned c=0; c < numChannels; ++c )
 		{
 			result.append( data[c] );
 		}
 
+		delete [] data;
 		return tuple( result );
 	}
 	
@@ -194,7 +195,7 @@ struct DeepPixelHelper
 	{
 		unsigned numChannels = pixel->numChannels();
 		
-		float data[numChannels];
+		float *data = new float [numChannels];
 		
 		pixel->composite( data );
 		
@@ -203,7 +204,7 @@ struct DeepPixelHelper
 		{
 			result.append( data[c] );
 		}
-		
+		delete [] data;
 		return result;
 	}
 	

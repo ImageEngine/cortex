@@ -46,7 +46,7 @@ namespace IECoreHoudini
 {
 
 /// SOP class for representing a IECore::ParameterisedProcedural in Houdini
-class SOP_ProceduralHolder : public SOP_ParameterisedHolder
+class CortexHOUAPI SOP_ProceduralHolder : public SOP_ParameterisedHolder
 {
 	public :
 

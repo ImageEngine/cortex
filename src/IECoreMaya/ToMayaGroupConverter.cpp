@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
 

@@ -44,13 +44,13 @@ namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::PointsPrimitive to a Houdini GU_Detail
-class ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class CortexHOUAPI ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniPointsConverter, ToHoudiniPointsConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniPointsConverter( const IECore::VisibleRenderable *renderable );
+		ToHoudiniPointsConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniPointsConverter();
 		
@@ -59,8 +59,8 @@ class ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 	
 	protected :
 		
-		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
-		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
+		/// performs conversion from the IECore::PointsPrimitive into the given GU_Detail
+		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 	private :
 

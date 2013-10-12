@@ -112,6 +112,7 @@ inline void vecMul( const T& v1, typename VectorTraits<T>::BaseType v2, T& resul
 	}
 }
 
+
 template<typename T>
 inline T vecMul( const T &v1, const T &v2 )
 {
@@ -119,15 +120,26 @@ inline T vecMul( const T &v1, const T &v2 )
 	vecMul( v1, v2, result );
 	return result;
 }
-
-template<typename T>
-inline void vecMul( const T &v1, const T &v2, T &result)
+template <>
+inline float vecMul(const float &v1, const float &v2)
 {
-	for( unsigned char i=0; i<VectorTraits<T>::dimensions(); i++ )
-	{
-		vecSet( result, i, vecGet( v1, i ) * vecGet( v2, i ) );
-	}
+	return v1*v2;
 }
+
+ template<typename T>
+ inline void vecMul( const T &v1, const T &v2, T &result)
+ {
+ 	for( unsigned char i=0; i<VectorTraits<T>::dimensions(); i++ )
+ 	{
+ 		vecSet( result, i, vecGet( v1, i ) * vecGet( v2, i ) );
+ 	}
+ }
+#ifdef _WIN32
+inline void vecMul( float v1, float v2, float& result)
+{
+	vecSet(result,0,v1*v2);
+}
+#endif
 
 template<typename T>
 inline T vecDiv( const T &v1, typename VectorTraits<T>::BaseType v2 )
@@ -145,6 +157,13 @@ inline void vecDiv( const T &v1, typename VectorTraits<T>::BaseType v2, T &resul
 		vecSet( result, i, vecGet( v1, i ) / v2 );
 	}
 }
+
+#ifdef _WIN32
+inline void vecDiv(float v1, float v2, float& result)
+{
+	result = v1/v2;
+}
+#endif
 
 template<typename T>
 inline T vecDiv( const T &v1, const T &v2 )

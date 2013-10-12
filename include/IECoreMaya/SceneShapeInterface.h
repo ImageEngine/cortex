@@ -68,6 +68,8 @@ namespace IECoreMaya
 ///
 class SceneShapeInterface: public MPxComponentShape
 {
+	friend class SceneShapeInterfaceComponentBoundIterator;
+	
 	public:
 		
 		SceneShapeInterface();
@@ -86,6 +88,14 @@ class SceneShapeInterface: public MPxComponentShape
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
+		
+		/// This method is overridden to supply a geometry iterator, which maya uses to work out
+		/// the bounding boxes of the components you've selected in the viewport
+		virtual MPxGeometryIterator* geometryIteratorSetup( MObjectArray&, MObject&, bool );
+		
+		/// This is a blank override, to stop maya offering you a rotation manipulator for the
+		/// procedural components, then crashing when you try and use it (maya 2013)
+		virtual void transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache );
 		
 		static MTypeId id;
 		
@@ -114,12 +124,16 @@ class SceneShapeInterface: public MPxComponentShape
 		IECore::InternedString selectionName( int index );
 		/// Returns all component names currently existing in the shape
 		const std::vector< IECore::InternedString > & componentNames() const;
+		/// Return the value of the time plug for the SceneShape.
+		double time() const;
 
 	protected :
 		
 		// protected variables, used by derived classes to set attribute dependencies
 		static MObject aTime;
+		static MObject aOutTime;
 		static MObject aOutputObjects;
+		static MObject aObjectDependency;
 		static MObject aAttributes;
 		static MObject aTransform;
 		static MObject aBound;
@@ -179,18 +193,36 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Recursively parses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
 		void recurseBuildScene( IECoreGL::Renderer * renderer, const IECore::SceneInterface *subSceneInterface, double time, bool drawBounds, bool drawGeometry, bool objectOnly, const IECore::SceneInterface::NameList &drawTags );
 
+		void createInstances();
+
 		/// Recursively parses glScene to store GL Groups matching path names
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
+
+		void registerGroup( const std::string &name, IECoreGL::GroupPtr &group );
 		
 		std::string relativePathName( IECore::SceneInterface::Path path );
+		IECore::SceneInterface::Path fullPathName( std::string relativeName );
 		/// Returns concatenated matrix from current sceneInterface path to given scene
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, double time );
+		/// Returns bound for the component matching the given index
+		Imath::Box3d componentBound( int idx );
+
+		void recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix );
 
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
+		typedef std::map< IECore::MurmurHash, IECore::InternedString > HashToName;
+		typedef std::pair< IECore::InternedString, IECore::InternedString > InstanceInfo;
+		typedef std::vector< InstanceInfo > InstanceArray;
 
 		IndexToNameMap m_indexToNameMap;
 		NameToGroupMap m_nameToGroupMap;
+		HashToName m_hashToName;
+		InstanceArray m_instances;
+		
+		IE_CORE_FORWARDDECLARE( PostLoadCallback );
+		PostLoadCallbackPtr m_postLoadCallback;
+
 };
 
 }

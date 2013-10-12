@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include <cassert>
 
 #include "boost/format.hpp"
@@ -495,7 +496,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 	int interpolationValue = 0;
 
 	FromMayaMeshConverter fromMaya(object);
-	const IECore::Parameter::PresetsContainer &presets = fromMaya.interpolationParameter()->presets();
+	const IECore::Parameter::PresetsContainer &presets = fromMaya.interpolationParameter()->getPresets();
 	IECore::Parameter::PresetsContainer::const_iterator it;
 
 	if ( interpolation != "default" )

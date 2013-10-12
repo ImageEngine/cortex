@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Src">
+      <UniqueIdentifier>{fc84da8c-5bf4-4d31-99d4-288c40476ca4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{c4e678a8-1c5c-4dc3-a0db-9cd7b91064a9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FnParameterisedHolderBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniCompoundObjectConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniCortexObjectConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniCurvesConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniGeometryConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniGroupConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniPointsConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\FromHoudiniPolygonsConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\HoudiniSceneBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\IECoreHoudiniModule.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\RATDeepImageReaderBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\RATDeepImageWriterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudinGeometryConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudiniCompoundObjectConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudiniConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudiniCortexObjectConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudiniCurvesConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudiniGroupConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudiniPointsConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\ToHoudiniPolygonsConverterBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\bindings\TypeIdBinding.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\WrapperGarbageCollector.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FnParameterisedHolderBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniCompoundObjectConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniCortexObjectConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniCurvesConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniGeometryConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniGroupConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniPointsConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\FromHoudiniPolygonsConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\HoudiniSceneBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\RATDeepImageReaderBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\RATDeepImageWriterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\SceneCacheNodeBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniCompoundObjectConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniCortexObjectConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniCurvesConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniGeometryConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniGroupConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniPointsConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\ToHoudiniPolygonsConverterBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\bindings\TypeIdBinding.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

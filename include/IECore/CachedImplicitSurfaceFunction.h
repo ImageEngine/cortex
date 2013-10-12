@@ -83,7 +83,17 @@ class CachedImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 	public:
 
 
+		#ifndef _WIN32
 		CachedImplicitSurfaceFunction( typename Fn::Ptr fn, PointBaseType tolerance = Imath::limits<PointBaseType>::epsilon() );
+		#else
+		CachedImplicitSurfaceFunction( typename Fn::Ptr fn, PointBaseType tolerance = Imath::limits<PointBaseType>::epsilon() )		
+		{
+			assert( fn );
+			assert( tolerance >= 0.0 );
+			m_fn = fn;
+			m_tolerance = tolerance;
+		}
+		#endif
 
 		/// Returns the value of the underlying function
 		inline Value operator()( const Point &p );

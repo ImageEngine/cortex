@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,11 +35,12 @@
 #include "boost/python.hpp"
 #include "boost/python/make_constructor.hpp"
 
+#include <sstream>
+
 #include "IECore/SplineData.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
-
-#include <sstream>
+#include "IECorePython/SimpleTypedDataBinding.h"
 
 using namespace std;
 using std::string;
@@ -84,6 +85,8 @@ static typename T::ValueType &getValue( T &that )
 template< typename T >
 void bindSplineData()
 {
+	TypedDataFromType<T>();
+
 	RunTimeTypedClass<T>()
 		.def( init<>() )
 		.def( init<const typename T::ValueType &>() )

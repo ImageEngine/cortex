@@ -41,6 +41,7 @@
 #include "IECore/DeepImageReader.h"
 
 #include "IECoreHoudini/TypeIds.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {
@@ -53,7 +54,7 @@ namespace IECoreHoudini
 /// \todo: add support for arbitrary channels
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class RATDeepImageReader : public IECore::DeepImageReader
+class CortexHOUAPI RATDeepImageReader : public IECore::DeepImageReader
 {
 	public :
 

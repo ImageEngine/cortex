@@ -40,6 +40,7 @@
 
 #include "IECore/InterpolatedCache.h"
 #include "IECore/TransformationMatrix.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {
@@ -51,7 +52,7 @@ namespace IECoreHoudini
 /// be transfered for the GA_Range definied by the GA_PointGroup. The GA_Attribute name will be the
 /// difference between the AttributeHandle and the Attribute Prefix/Suffix parameters. If transformAttribute
 /// is specified, and the associated data is a TransformationMatrix, it will be used to transform the GA_Range.
-class SOP_InterpolatedCacheReader : public SOP_Node
+class CortexHOUAPI SOP_InterpolatedCacheReader : public SOP_Node
 {
 	public :
 
@@ -59,17 +60,8 @@ class SOP_InterpolatedCacheReader : public SOP_Node
 		virtual ~SOP_InterpolatedCacheReader();
 
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
-		static PRM_Template parameters[];
-		
-		enum GroupingMode
-		{
-			PrimitiveGroup,
-			PointGroup,
-		};
-		
-		static PRM_ChoiceList interpolationList;
-		static PRM_ChoiceList groupingModeList;
-	
+		static PRM_Template _stdcall parameters[];
+
 	protected :
 	
 		virtual OP_ERROR cookMySop( OP_Context &context );

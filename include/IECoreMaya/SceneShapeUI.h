@@ -36,6 +36,7 @@
 #define IECOREMAYA_SCENESHAPEUI_H
 
 #include "maya/MPxSurfaceShapeUI.h"
+#include "maya/MTypes.h"
 
 #include "IECore/Object.h"
 
@@ -65,6 +66,11 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		virtual void draw( const MDrawRequest &request, M3dView &view ) const;
 		virtual bool select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const;
 
+		/// If the maya version is greater or equal to 2013 then add support for snapping geometry to the SceneShape.
+		#if MAYA_API_VERSION >= 201300
+		virtual bool snap( MSelectInfo &snapInfo ) const;
+		#endif
+
 		static void *creator();
 	
 	private :
@@ -74,6 +80,12 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		void hiliteGroups( IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr hilite, IECoreGL::StateComponentPtr base ) const;
 		void unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const;
 		void resetHilites() const;
+
+		/// A useful method that calculates the world space position of the selection ray when given a camera and depth. The result is returned in worldIntersectionPoint.
+		void selectionRayToWorldSpacePoint( const MDagPath &camera, const MSelectInfo &selectInfo, float depth, MPoint &worldIntersectionPoint ) const;
+
+		/// Returns the concatenated object transforms of the SceneInterface.
+		Imath::M44d worldTransform( const IECore::SceneInterface *scene, double time ) const;
 
 		mutable StateMap m_stateMap;
 		mutable DisplayStyle m_displayStyle;

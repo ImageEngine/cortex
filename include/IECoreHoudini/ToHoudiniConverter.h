@@ -38,13 +38,14 @@
 #include "IECore/FromCoreConverter.h"
 
 #include "IECoreHoudini/TypeIds.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {
 
 /// A base class for all classes which convert from an IECore datatype
 /// to a Houdini datatype.
-class ToHoudiniConverter : public IECore::FromCoreConverter
+class CortexHOUAPI ToHoudiniConverter : public IECore::FromCoreConverter
 {
 
 	public :

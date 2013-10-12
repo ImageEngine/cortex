@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,7 +49,8 @@ void PresetsOnlyParameterHandler::knobs( const IECore::Parameter *parameter, con
 	if( f.makeKnobs() )
 	{
 		m_names.clear();
-		for( Parameter::PresetsContainer::const_iterator it = parameter->presets().begin(); it!=parameter->presets().end(); it++ )
+		const Parameter::PresetsContainer &presets = parameter->getPresets();
+		for( Parameter::PresetsContainer::const_iterator it = presets.begin(); it!=presets.end(); it++ )
 		{
 			if( it->second->isEqualTo( parameter->defaultValue() ) )
 			{
@@ -79,12 +80,12 @@ void PresetsOnlyParameterHandler::setParameterValue( IECore::Parameter *paramete
 	{
 		presetIndex = (int)m_knob->get_value();
 	}
-	parameter->setValue( parameter->presets()[m_storage].second );
+	parameter->setValue( parameter->getPresets()[m_storage].second );
 }
 
 void PresetsOnlyParameterHandler::setKnobValue( const IECore::Parameter *parameter )
 {
-	const Parameter::PresetsContainer &presets = parameter->presets();
+	const Parameter::PresetsContainer &presets = parameter->getPresets();
 	std::string currentPresetName = parameter->getCurrentPresetName();
 	size_t presetIndex = 0;
 	for( Parameter::PresetsContainer::const_iterator it = presets.begin(); it!=presets.end(); it++, presetIndex++ )

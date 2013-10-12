@@ -42,7 +42,7 @@
 # us to deal with object identity issues when pushing wrapped objects back into python. Boost python issues a warning
 # about this as it has already registered a converter, so we ignore the warnings here.
 import warnings
-warnings.filterwarnings( "ignore", "to-Python converter for IECore::IntrusivePtr.*already registered.", RuntimeWarning )
+warnings.filterwarnings( "ignore", "to-Python converter for class IECore::IntrusivePtr*", RuntimeWarning )
 
 from _IECore import *
 

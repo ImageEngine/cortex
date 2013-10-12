@@ -312,7 +312,6 @@
 #include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
-#include "IECorePython/ModelCacheBinding.h"
 #include "IECorePython/SceneInterfaceBinding.h"
 #include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
@@ -321,6 +320,7 @@
 #include "IECorePython/LensModelBinding.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/LensDistortOpBinding.h"
+#include "IECorePython/ObjectPoolBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -513,7 +513,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDisplayDriver();
 	bindImageDisplayDriver();
 	bindClientDisplayDriver();
-	bindDisplayDriverServer();
+	//bindDisplayDriverServer();
 	// see note in Sconstruct re IECORE_WITH_ASIO and OBJReader
 	bindOBJReader();
 
@@ -542,7 +542,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageUnpremultiplyOp();
 	bindImageCompositeOp();
 	bindDateTimeData();
-	bindSGIImageReader();
+	//bindSGIImageReader();
 	bindTimeDurationData();
 	bindTimePeriod();
 	bindTimePeriodData();
@@ -564,11 +564,11 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
 	bindColorSpaceTransformOp();
-	bindBINParticleWriter();
-	bindBINMeshReader();
+	//bindBINParticleWriter();
+	//bindBINMeshReader();
 	bindBGEOParticleReader();
-	bindNParticleReader();
-	bindIFFHairReader();
+	//bindNParticleReader();
+	//bindIFFHairReader();
 	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
@@ -630,20 +630,21 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDiskPrimitive();
 	bindClampOp();
 	bindMeshFaceFilterOp();
-	bindImf();
+	//bindImf();
 	bindTimeCodeData();
 	bindTimeCodeParameter();
 	bindOptions();
-	bindMPlayDisplayDriver();
-	bindModelCache();
+	//bindMPlayDisplayDriver();
+//	bindModelCache();
 	bindSceneInterface();
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();
 	bindSceneCache();
 	bindLinkedScene();
-	bindLensModel();
-	bindStandardRadialLensModel();
-	bindLensDistortOp();
+	//bindLensModel();
+	//bindStandardRadialLensModel();
+	//bindLensDistortOp();
+	bindObjectPool();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

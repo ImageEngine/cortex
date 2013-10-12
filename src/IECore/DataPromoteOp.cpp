@@ -168,27 +168,47 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 		case V2fVectorDataTypeId :
 		{
 			Promote2Fn<V2fVectorData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V2dVectorDataTypeId :
 		{
 			Promote2Fn<V2dVectorData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V3fVectorDataTypeId :
 		{
 			Promote2Fn<V3fVectorData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V3dVectorDataTypeId :
 		{
 			Promote2Fn<V3dVectorData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case Color3fVectorDataTypeId :
 		{
 			Promote2Fn<Color3fVectorData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		default :
 			throw Exception( "DataPromoteOp: Unsupported target data type \"" + std::string( Object::typeNameFromTypeId( targetType ) ) + "\"." );
@@ -207,27 +227,47 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 		case V2fDataTypeId :
 		{
 			Promote2Fn<V2fData> fn;
+#ifdef WIN32
+			return fn.operator()<F>(d);
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V2dDataTypeId :
 		{
 			Promote2Fn<V2dData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V3fDataTypeId :
 		{
 			Promote2Fn<V3fData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V3dDataTypeId :
 		{
 			Promote2Fn<V3dData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case Color3fDataTypeId :
 		{
 			Promote2Fn<Color3fData> fn;
+#ifdef WIN32
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif		
 		}
 		default :
 			throw Exception( "DataPromoteOp: Unsupported target data type \"" + std::string( Object::typeNameFromTypeId( targetType ) ) + "\"." );

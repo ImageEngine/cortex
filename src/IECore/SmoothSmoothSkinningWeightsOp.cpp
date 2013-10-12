@@ -156,7 +156,7 @@ void SmoothSmoothSkinningWeightsOp::modify( Object * object, const CompoundObjec
 		locks.resize( skinningData->influenceNames()->readable().size(), false );
 	}
 	
-	std::vector<int64_t> vertexIds;
+	std::vector<int> vertexIds;
 	m_vertexIdsParameter->getFrameListValue()->asList( vertexIds );
 	
 	// make sure all vertex ids are valid

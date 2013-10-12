@@ -66,7 +66,15 @@ struct SpaceTransform : public std::unary_function<F, T>
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}
 
+	#ifndef _WIN32
 	virtual T transform( const F &f ) = 0;
+	#else
+	virtual T transform( const F &f )
+	{
+		T a;
+		return a;
+	}
+	#endif
 
 };
 

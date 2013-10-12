@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\Convert.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\CoreHoudini.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\DetailSplitter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FnParameterisedHolder.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniCompoundObjectConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniCortexObjectConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniCurvesConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniGeometryConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniGroupConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniPointsConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniPolygonsConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GEO_CobIOTranslator.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GEO_CortexPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GR_Cortex.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GR_CortexPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GUI_CortexPrimitiveHook.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GU_CortexPrimitive.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\HoudiniScene.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\MessageHandler.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\NodeHandle.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\NodePassData.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheGeometry.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheNode.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheTransform.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ParameterisedHolder.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ParameterisedHolderInterface.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\RATDeepImageReader.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\RATDeepImageWriter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ROP_SceneCacheWriter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SceneCacheNode.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_InterpolatedCacheReader.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_OpHolder.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_ParameterisedHolder.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_ProceduralHolder.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_SceneCacheSource.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_ToHoudiniConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniAttribConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniCompoundObjectConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniCortexObjectConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniCurvesConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniGeometryConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniGroupConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniNumericAttribConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniPointsConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniPolygonsConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniStringAttribConverter.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\TypeIds.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\TypeTraits.h" />
+    <ClInclude Include="..\..\..\include\IECoreHoudini\UT_ObjectPoolCache.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\IECoreHoudini\FromHoudiniGeometryConverter.inl" />
+    <None Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheNode.inl" />
+    <None Include="..\..\..\include\IECoreHoudini\ToHoudiniAttribConverter.inl" />
+    <None Include="..\..\..\include\IECoreHoudini\ToHoudiniGeometryConverter.inl" />
+    <None Include="..\..\..\include\IECoreHoudini\ToHoudiniNumericAttribConverter.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\Convert.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\CoreHoudini.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\DetailSplitter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FnParameterisedHolder.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniCompoundObjectConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniCortexObjectConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniCurvesConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniGeometryConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniGroupConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniPointsConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniPolygonsConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GEO_CobIOTranslator.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GEO_CortexPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GR_Cortex.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GR_CortexPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GUI_CortexPrimitiveHook.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GU_CortexPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\HoudiniHeaderGenerator.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\HoudiniScene.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\MessageHandler.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\NodeHandle.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\NodePassData.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\OBJ_SceneCacheGeometry.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\OBJ_SceneCacheNode.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\OBJ_SceneCacheTransform.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ParameterisedHolder.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ParameterisedHolderInterface.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\RATDeepImageReader.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\RATDeepImageWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ROP_SceneCacheWriter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SceneCacheNode.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_OpHolder.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_ParameterisedHolder.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_ProceduralHolder.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_SceneCacheSource.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_ToHoudiniConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniAttribConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniCompoundObjectConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniCortexObjectConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniCurvesConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniGeometryConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniGroupConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniNumericAttribConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniPointsConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniPolygonsConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniStringAttribConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreHoudini\UT_ObjectPoolCache.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILLock.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILRelease.cpp" />
+    <ClCompile Include="..\..\..\src\IECorePython\WrapperGarbageCollector.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>IECoreHoudini</ProjectName>
+    <ProjectGuid>{64D57E4C-091F-41E6-9BC4-91C34E6A29BE}</ProjectGuid>
+    <RootNamespace>libIECoreHoudini</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v90</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.60315.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBIECOREHOUDINI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBIECOREHOUDINI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBIECOREHOUDINI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>D:\sdk\include\gl;D:\Program Files\Side Effects Software\Houdini 12.5.533\python26\include;D:\Program Files\Side Effects Software\Houdini 12.5.533\toolkit\include;D:\Program Files\Side Effects Software\Houdini 12.5.533\toolkit\include\OpenEXR;..\..\..\include;D:\sdk\include;D:\sdk\Deploy\include\;D:\sdk\Deploy\include\OpenEXR;D:\sdk\boost_1_51_0;D:\sdk\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_WINDOWS;_USRDLL;LIBIECOREHOUDINI_EXPORTS;BOOST_FILESYSTEM_VERSION=3;BOOST_DISABLE_ASSERTS;BOOST_PYTHON_MAX_ARITY=20;IE_CORE_DLL_IMPORT;LIBIECOREGL_IMPORTS;AMD64;SIZEOF_VOID_P=8;VERSION=12.5.376;M_PI=3.14159265358979323846;I386;SWAP_BITFIELDS;_WIN32_WINNT=0x0501;WINVER=0x0501;NOMINMAX;SESI_LITTLE_ENDIAN;NEED_SPECIALIZATION_STORAGE;IECoreHoudini_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>glew32.lib;IECore.lib;IECoreGL.lib;Imath.lib;Half.lib;Iex.lib;IlmThread.lib;IlmImf.lib;D:\Program Files\Side Effects Software\Houdini 12.5.376\custom\houdini\dsolib\*.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)IECoreHoudini.dll</OutputFile>
+      <AdditionalLibraryDirectories>D:\sdk\lib64;D:\Program Files\Side Effects Software\Houdini 12.5.533\python26\libs;D:\Program Files\Side Effects Software\Houdini 12.5.533\custom\houdini\dsolib;D:\sdk\boost_1_51_0\stage\lib;D:\sdk\Deploy\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetPath) D:\sdk\bin64\
+copy $(TargetDir)IECoreHoudini.lib D:\sdk\lib64
+copy $(TargetDir)IECoreHoudini.pdb D:\sdk\bin64
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

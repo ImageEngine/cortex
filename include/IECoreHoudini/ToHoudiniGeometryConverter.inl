@@ -47,9 +47,9 @@ ToHoudiniGeometryConverter::Description<T>::Description( IECore::TypeId fromType
 }
 
 template<class T>
-ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::Description<T>::creator( const IECore::VisibleRenderable *renderable )
+ToHoudiniGeometryConverterPtr ToHoudiniGeometryConverter::Description<T>::creator( const IECore::Object *object )
 {
-	return new T( renderable );
+	return new T( object );
 }
 
 } // namespace IECoreHoudini

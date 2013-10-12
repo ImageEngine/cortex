@@ -41,46 +41,61 @@
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
+#include "ieHoudini.h"
+
 namespace IECoreHoudini
 {
 
 /// Abstract base class for all OBJ SceneCacheNodes.
 /// See OBJ_SceneCacheGeometry or OBJ_SceneCacheTransform for specific implementations.
 template<typename BaseType>
-class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
+class CortexHOUAPI OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 {
 	public :
 		
 		OBJ_SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~OBJ_SceneCacheNode();
 		
-		static OP_TemplatePair *buildParameters();
+		static PRM_Template *buildParameters( OP_TemplatePair *extraParameters = 0 );
 		
+		static PRM_Name pMainSwitcher;
 		static PRM_Name pExpand;
+		static PRM_Name pPush;
 		static PRM_Name pCollapse;
 		static PRM_Name pExpanded;
+		static PRM_Name pOutTranslate;
+		static PRM_Name pOutRotate;
+		static PRM_Name pOutScale;
 		
 		static int expandButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
+		static int pushButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int collapseButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 	
 		/// Derived classes should define this function to expand the hierarchy contained in the SceneCache.
 		virtual void expandHierarchy( const IECore::SceneInterface *scene ) = 0;
+		// Derived classes should define this function to update the hierarchy based on relevant parameter values.
+		virtual void pushToHierarchy() = 0;
 		/// Implemented to destroy all child nodes
 		virtual void collapseHierarchy();
 	
 	protected :
 		
 		virtual void sceneChanged();
+		
+		virtual OP_ERROR cookMyObj( OP_Context &context );
 		virtual bool getParmTransform( OP_Context &context, UT_DMatrix4 &xform );
+		virtual bool updateParmsFlags();
+		void updateState();
 		
-		static OP_TemplatePair *buildBaseParameters();
-		static OP_TemplatePair *buildExpansionParameters();
-		
-		bool m_static;
 		UT_Matrix4D m_xform;
+	
+	private :
+		
+		static OP_TemplatePair *buildExpansionParameters();
+		static OP_TemplatePair *buildOutputParameters();
 
 };
 
 } // namespace IECoreHoudini
-
+//#include "IECoreHoudini/OBJ_SceneCacheNode.inl"
 #endif // IECOREHOUDINI_OBJSCENECACHENODE_H

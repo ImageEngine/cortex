@@ -51,7 +51,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniAttribConverter );
 /// The ToHoudiniAttribConverter class forms an abstract base class for all classes
 /// able to perform some kind of conversion from IECore::Data to a Houdini GB_Attribute.
 /// The resulting GB_Attribute will be transferred onto the provided GU_Detail.
-class ToHoudiniAttribConverter : public ToHoudiniConverter
+class CortexHOUAPI ToHoudiniAttribConverter : public ToHoudiniConverter
 {
 
 	public :

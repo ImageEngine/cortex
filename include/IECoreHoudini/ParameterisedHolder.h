@@ -45,12 +45,17 @@
 #include "IECoreHoudini/MessageHandler.h"
 #include "IECoreHoudini/ParameterisedHolderInterface.h"
 
+//#include <PRM/PRM_Tempalte.h>
+#include <PRM\PRM_Template.h>
+#include <CH\CH_LocalVariable.h>
+#include "ieHoudini.h"
+
 namespace IECoreHoudini
 {
 
 /// Class representing an OP node acting as a holder for the abstract Parameterised class.
 template<typename BaseType>
-class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
+class CortexHOUAPI ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 {
 	public :
 		
@@ -59,6 +64,9 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		
 		static PRM_Template parameters[];
 		static CH_LocalVariable variables[];
+
+		static PRM_Template *getParameters();
+		static CH_LocalVariable *getVariables();
 		
 		static PRM_Name pParameterisedClassCategory;
 		static PRM_Name pParameterisedClassName;

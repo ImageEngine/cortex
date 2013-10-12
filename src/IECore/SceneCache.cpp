@@ -32,8 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include"boost/tuple/tuple.hpp"
 #include "tbb/concurrent_hash_map.h"
+
 #include "OpenEXR/ImathBoxAlgo.h"
+
 #include "IECore/SceneCache.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/HeaderGenerator.h"
@@ -44,9 +47,11 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/SharedSceneInterfaces.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/ComputationCache.h"
 
 using namespace IECore;
 using namespace Imath;
+using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( SceneCache )
 
@@ -119,14 +124,24 @@ class SceneCache::Implementation : public RefCounted
 			attributes->entryIds( attrsNames, IndexedIO::Directory );
 		}
 
-		bool hasTag( const Name &name ) const
+		bool hasTag( const Name &name, bool includeChildren ) const
 		{
 			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
 			if ( !tagsIO )
 			{
 				return false;
 			}
-			return tagsIO->hasEntry( name );
+
+			if ( tagsIO->hasEntry( name ) )
+			{
+				if ( includeChildren )
+				{
+					return true;
+				}
+				return ( tagsIO->entry( name ).entryType() == IndexedIO::File );
+			}
+
+			return false;
 		}
 
 		void readTags( NameList &tags, bool includeChildren ) const
@@ -182,7 +197,7 @@ class SceneCache::Implementation : public RefCounted
 		// \todo Remove this when InternedString nativelly supports a constructor with integers.
 		static IndexedIO::EntryID sampleEntry( size_t sample )
 		{
-			return InternedString( ( boost::format("%d") % sample ).str() );
+			return InternedString( sample );
 		}
 
 		static inline Imath::M44d dataToMatrix( const Data *data )
@@ -198,6 +213,9 @@ class SceneCache::Implementation : public RefCounted
 			}
 		}
 
+#if defined(_WIN32)	
+	public:
+#endif
 		IndexedIOPtr m_indexedIO;
 };
 
@@ -209,25 +227,25 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		IE_CORE_DECLAREPTR( ReaderImplementation )
 
-		ReaderImplementation( IndexedIOPtr io, SceneCache::Implementation *parent = 0) : SceneCache::Implementation( io ), m_parent(static_cast< ReaderImplementation* >( parent )), m_sampleTimesMap(0), m_boundSampleTimes(0), m_transformSampleTimes(0), m_objectSampleTimes(0)
+		ReaderImplementation( IndexedIOPtr io, SceneCache::Implementation *parent = 0) : SceneCache::Implementation( io ), m_parent(static_cast< ReaderImplementation* >( parent )), m_sharedData(0), m_boundSampleTimes(0), m_transformSampleTimes(0), m_objectSampleTimes(0)
 		{
 			if ( m_parent )
 			{
 				// use same map from the root
-				m_sampleTimesMap = m_parent->m_sampleTimesMap;
+				m_sharedData = m_parent->m_sharedData;
 			}
 			else
 			{
 				// only the root instance allocate the map.
-				m_sampleTimesMap = new SampleTimesMap;
+				m_sharedData = new SharedData;
 			}
 		}
 	
 		virtual ~ReaderImplementation()
 		{
-			if ( m_sampleTimesMap && !m_parent )
+			if ( m_sharedData && !m_parent )
 			{
-				delete m_sampleTimesMap;
+				delete m_sharedData;
 			}
 		}
 
@@ -396,21 +414,9 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		DataPtr readTransformAtSample( size_t sampleIndex ) const
+		ConstDataPtr readTransformAtSample( size_t sampleIndex ) const
 		{
-			IndexedIOPtr io = m_indexedIO->subdirectory( transformEntry, IndexedIO::NullIfMissing );
-			if ( !io )
-			{
-				if ( sampleIndex==0 )
-				{
-					return g_defaults.defaultTransform;
-				}
-				else
-				{
-					throw Exception( "Sample index out of bounds!" );
-				}
-			}
-			return runTimeCast<Data>( Object::load( io, sampleEntry(sampleIndex) ) );
+			return m_sharedData->readTransformAtSample( this, sampleIndex );
 		}
 
 		Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const
@@ -418,7 +424,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return dataToMatrix( readTransformAtSample( sampleIndex ) );
 		}
 
-		DataPtr readTransform( double time ) const
+		ConstDataPtr readTransform( double time ) const
 		{
 			size_t sample1, sample2;
 			double x = transformSampleInterval( time, sample1, sample2 );
@@ -430,8 +436,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			{
 				return readTransformAtSample( sample2 );
 			}
-			DataPtr transformData1 = readTransformAtSample( sample1 );
-			DataPtr transformData2 = readTransformAtSample( sample2 );
+			ConstDataPtr transformData1 = readTransformAtSample( sample1 );
+			ConstDataPtr transformData2 = readTransformAtSample( sample2 );
 			DataPtr transformData = runTimeCast< Data >( linearObjectInterpolation( transformData1, transformData2, x ) );
 			if ( !transformData )
 			{
@@ -483,12 +489,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		ObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex ) const
+		ConstObjectPtr readAttributeAtSample( const SceneCache::Name &name, size_t sampleIndex ) const
 		{
-			return Object::load( m_indexedIO->subdirectory(attributesEntry)->subdirectory(name), sampleEntry(sampleIndex) );
+			return m_sharedData->readAttributeAtSample( this, name, sampleIndex );
 		}
 
-		ObjectPtr readAttribute( const SceneCache::Name &name, double time ) const
+		ConstObjectPtr readAttribute( const SceneCache::Name &name, double time ) const
 		{
 			size_t sample1, sample2;
 			double x = attributeSampleInterval( name, time, sample1, sample2 );
@@ -501,8 +507,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				return readAttributeAtSample( name, sample2 );
 			}
 
-			ObjectPtr attributeObj1 = readAttributeAtSample( name, sample1 );
-			ObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
+			ConstObjectPtr attributeObj1 = readAttributeAtSample( name, sample1 );
+			ConstObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
 			ObjectPtr attributeObj = linearObjectInterpolation( attributeObj1, attributeObj2, x );
 			if ( !attributeObj )
 			{
@@ -543,12 +549,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		ObjectPtr readObjectAtSample( size_t sampleIndex ) const
+		ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const
 		{
-			return Object::load( m_indexedIO->subdirectory( objectEntry ), sampleEntry(sampleIndex) );
+			return m_sharedData->readObjectAtSample( this, sampleIndex );
 		}
 
-		ObjectPtr readObject( double time ) const
+		ConstObjectPtr readObject( double time ) const
 		{
 			size_t sample1, sample2;
 			double x = objectSampleInterval( time, sample1, sample2 );
@@ -561,8 +567,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				return readObjectAtSample( sample2 );
 			}
 
-			ObjectPtr object1 = readObjectAtSample( sample1 );
-			ObjectPtr object2 = readObjectAtSample( sample2 );
+			ConstObjectPtr object1 = readObjectAtSample( sample1 );
+			ConstObjectPtr object2 = readObjectAtSample( sample2 );
 			ObjectPtr object = linearObjectInterpolation( object1, object2, x );
 			if ( !object )
 			{
@@ -572,20 +578,26 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return object;
 		}
 
+		static PrimitiveVariableMap readObjectPrimitiveVariablesAtSample( const IndexedIOPtr &io, const std::vector<InternedString> &primVarNames, size_t sample )
+		{
+			return Primitive::loadPrimitiveVariables( io->subdirectory( objectEntry ), sampleEntry(sample), primVarNames );
+		}
+
 		PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 		{
 			size_t sample1, sample2;
 			double x = objectSampleInterval( time, sample1, sample2 );
-			IndexedIOPtr objectIO = m_indexedIO->subdirectory( objectEntry );
+
 			if ( x == 0 )
 			{
-				return Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample1), primVarNames );
+				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample1);
 			}
 			if ( x == 1 )
 			{
-				return Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample2), primVarNames );
+				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample2);
 			}
 
+			IndexedIOPtr objectIO = m_indexedIO->subdirectory( objectEntry );
 			PrimitiveVariableMap map1 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample1), primVarNames );
 			PrimitiveVariableMap map2 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample2), primVarNames );
 
@@ -646,13 +658,123 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 	private :
 	
 		// \todo Consider using concurrent_vector for constant access time.
-		typedef tbb::concurrent_hash_map< uint64_t, SampleTimes > SampleTimesMap;
+		typedef tbb::concurrent_hash_map< ::uint64_t, SampleTimes > SampleTimesMap;
 		typedef std::map< IndexedIO::EntryID, const SampleTimes* > AttributeSamplesMap;
 
-		ReaderImplementationPtr m_parent;
-		mutable SampleTimesMap *m_sampleTimesMap;
+		typedef std::pair< const ReaderImplementation *, size_t > SimpleCacheKey;
+		typedef tuple< const ReaderImplementation *, const SceneCache::Name &, size_t > AttributeCacheKey;
 
-		/// pointers to values in m_sampleTimesMap.
+		typedef IECore::ComputationCache< SimpleCacheKey > SimpleCache;
+		typedef IECore::ComputationCache< AttributeCacheKey > AttributeCache;
+
+		/// Hold pointers to values allocated/deallocated by the root scene object (the last one to die)
+		class SharedData : public RefCounted
+		{
+			public :
+
+				SharedData() : 
+					objectCache( new SimpleCache( doReadObjectAtSample, simpleHash,  10000 )  ), 
+					attributeCache( new AttributeCache( doReadAttributeAtSample, attributeHash, 1000) ), 
+					transformCache( new SimpleCache(  doReadTransformAtSample, simpleHash, 1000) )
+				{
+				}
+
+				/// utility function used by the ReaderImplementation to use the LRUCache for transform reading
+				IECore::ConstDataPtr readTransformAtSample( const ReaderImplementation *reader, size_t sample )
+				{
+					return runTimeCast< const Data >( transformCache->get( SimpleCacheKey(reader, sample) ) );
+				}
+
+				/// utility function used by the ReaderImplementation to use the LRUCache for object reading
+				IECore::ConstObjectPtr readObjectAtSample( const ReaderImplementation *reader, size_t sample )
+				{
+					const size_t defaultSample = -1;
+					SimpleCacheKey currentKey( reader, sample );
+
+					// if constant topology and the object is not in the cache, we try to build it from another frame
+					if ( reader->hasAttribute(animatedObjectPrimVarsAttribute) )
+					{
+						/// Could not create the object from another time sample... so we load the entire object
+						SimpleCacheKey defaultKey( reader, defaultSample );
+
+						ConstObjectPtr obj = objectCache->get( currentKey, SimpleCache::NullIfMissing );
+						if ( !obj )
+						{
+							/// ok, try to build the object from another frame...
+							ConstObjectPtr defaultObj = objectCache->get( defaultKey, SimpleCache::NullIfMissing );
+							if ( defaultObj )
+							{
+								IECore::ConstInternedStringVectorDataPtr varNames = runTimeCast<const InternedStringVectorData>( reader->readAttributeAtSample(animatedObjectPrimVarsAttribute, 0) );
+								if ( varNames )
+								{
+									PrimitivePtr prim= runTimeCast< Primitive >( defaultObj->copy() );
+									if ( prim )
+									{
+										// we managed to load the object from a different time sample from the cache, just have to load the changing prim vars...
+										mergeMaps( prim->variables, readObjectPrimitiveVariablesAtSample( reader->m_indexedIO, varNames->readable(), sample ) );
+										objectCache->set( currentKey, prim, ObjectPool::StoreReference );
+										return prim;
+									}
+								}
+							}
+							/// ok, we don't have the object even from other times in the cache... load it from the file then.
+							obj = objectCache->get( currentKey );
+						}
+						/// register the object as the default, so next frames could reuse them
+						objectCache->set( defaultKey, obj, ObjectPool::StoreReference );
+						return obj;
+					}
+					/// The object has animated topology... so we load the entire object
+					ConstObjectPtr obj = objectCache->get(currentKey);
+					return obj;
+				}
+
+				/// utility function used by the ReaderImplementation to use the LRUCache for attribute reading
+				IECore::ConstObjectPtr readAttributeAtSample( const ReaderImplementation *reader, const SceneCache::Name &name, size_t sample )
+				{
+					return attributeCache->get( AttributeCacheKey(reader,name,sample) );
+				}
+
+				// \todo Consider adding "ReaderImplementation *rootScene" to optimize the scene() calls.
+				SampleTimesMap sampleTimesMap;
+				SimpleCache::Ptr objectCache;
+				AttributeCache::Ptr attributeCache;
+				SimpleCache::Ptr transformCache;
+
+			private :
+
+			// utility function that copies all the values from the rhs dictionary to the lhs.
+			template< typename T >
+			static void mergeMaps ( T& lhs, const T& rhs) 
+			{
+	    		typename T::iterator lhsItr = lhs.begin();
+				typename T::const_iterator rhsItr = rhs.begin();
+	
+				while (lhsItr != lhs.end() && rhsItr != rhs.end()) 
+				{
+					if (rhsItr->first < lhsItr->first) 
+					{
+						lhs.insert(lhsItr, *rhsItr);
+						++rhsItr;
+					}
+					else if (rhsItr->first == lhsItr->first) 
+					{
+						lhsItr->second = rhsItr->second;
+						++lhsItr;
+						++rhsItr;
+					}
+					else
+						++lhsItr;
+				}
+				lhs.insert(rhsItr, rhs.end());
+			}
+
+		};
+
+		ReaderImplementationPtr m_parent;
+		mutable SharedData *m_sharedData;
+
+		/// pointers to values in m_sharedData->sampleTimesMap for the current scene location.
 		mutable const SampleTimes *m_boundSampleTimes;
 		mutable const SampleTimes *m_transformSampleTimes;
 		mutable AttributeSamplesMap m_attributeSampleTimes;
@@ -683,18 +805,34 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				return 0;
 			}
 
-			uint64_t sampleTimesIndex = 0;
-			location->read( sampleTimesEntry, sampleTimesIndex );
+			::uint64_t sampleTimesIndex = 0;
+			SceneInterface::Name sampleEntryId;
+			if ( location->entry( sampleTimesEntry ).entryType() == IndexedIO::File )
+			{
+				/// Provided for backward compatibility.
+				location->read( sampleTimesEntry, sampleTimesIndex );
+				sampleEntryId = sampleEntry(sampleTimesIndex);
+			}
+			else
+			{
+				SceneInterface::NameList sampleList;
+				location->subdirectory( sampleTimesEntry )->entryIds(sampleList);
+				if ( sampleList.size() != 1 )
+				{
+					throw Exception( "Corrupted file! Could not find sample times key!!!" );
+				}
+				sampleEntryId = sampleList[0];
+				sampleTimesIndex = atoi( sampleEntryId.value().c_str() );
+			}
 
 			{
 				SampleTimesMap::const_accessor cit;
-				if ( m_sampleTimesMap->find( cit, sampleTimesIndex ) )
+				if ( m_sharedData->sampleTimesMap.find( cit, sampleTimesIndex ) )
 				{
 					return &(cit->second);
 				}
 			}
 
-			const SceneInterface::Name &sampleEntryId = sampleEntry(sampleTimesIndex);
 			// never loaded before...
 			// change our reading location to the global location.
 			location = globalSampleTimes();
@@ -706,11 +844,79 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			// and loads the sample times on to the map before returning
 			location->read( sampleEntryId, ptrTimes, times.size() );
 			SampleTimesMap::accessor it;
-			if ( m_sampleTimesMap->insert( it, sampleTimesIndex ) )
+			if ( m_sharedData->sampleTimesMap.insert( it, sampleTimesIndex ) )
 			{
 				it->second = times;
 			}
 			return &(it->second);
+		}
+
+		static MurmurHash simpleHash( const SimpleCacheKey &key )
+		{
+			const ReaderImplementation *reader = key.first;
+			size_t sample = key.second;
+
+			SceneInterface::Path p;
+			reader->path(p);
+
+			MurmurHash h;
+			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
+			{
+				h.append( it->value() );
+				h.append( '/' );
+			}
+			h.append(sample);
+			return h;
+		}
+
+		// static function used by the cache mechanism to actually load the object data from file.
+		static ObjectPtr doReadTransformAtSample( const SimpleCacheKey &key )
+		{
+			IndexedIOPtr io = key.first->m_indexedIO->subdirectory( transformEntry, IndexedIO::NullIfMissing );
+			if ( !io )
+			{
+				if ( key.second==0 )
+				{
+					return g_defaults.defaultTransform;
+				}
+				else
+				{
+					throw Exception( "Sample index out of bounds!" );
+				}
+			}
+			return Object::load( io, sampleEntry(key.second) );
+		}
+
+		// static function used by the cache mechanism to actually load the object data from file.
+		static ObjectPtr doReadObjectAtSample( const SimpleCacheKey &key )
+		{
+			return Object::load( key.first->m_indexedIO->subdirectory( objectEntry ), sampleEntry(key.second) );
+		}
+
+		static MurmurHash attributeHash( const AttributeCacheKey &key )
+		{
+			const ReaderImplementation *reader = get<0>( key );
+			const SceneInterface::Name &name = get<1>( key );
+			size_t sample = get<2>( key );
+
+			SceneInterface::Path p;
+			reader->path(p);
+
+			MurmurHash h;
+			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
+			{
+				h.append( it->value() );
+				h.append( '/' );
+			}
+			h.append(name.value());
+			h.append(sample);
+			return h;
+		}
+
+		// static function used by the cache mechanism to actually load the attribute data from file.
+		static ObjectPtr doReadAttributeAtSample( const AttributeCacheKey &key )
+		{
+			return Object::load( get<0>(key)->m_indexedIO->subdirectory(attributesEntry)->subdirectory(get<1>(key)), sampleEntry(get<2>(key)) );
 		}
 
 		/// Determine defaults when transform and bounds are not stored in the file.
@@ -730,6 +936,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				defaultBox.makeEmpty();
 			}
 		} g_defaults;
+
 };
 
 SceneCache::ReaderImplementation::Defaults SceneCache::ReaderImplementation::g_defaults;
@@ -899,6 +1106,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				// we represent inherited tags as empty directories and local tags as a IndexedIO::File of bool type, so
 				// we can easily filter them when reading by entry type.
+				// Inherited tags do not override local tags.
 				if ( fromChildren )
 				{
 					if ( !io->hasEntry( *tIt ) )
@@ -1087,8 +1295,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		void storeSampleTimes( const SampleTimes &sampleTimes, IndexedIOPtr location )
 		{
 			assert( m_sampleTimesMap );
-			uint64_t sampleTimesIndex = 0;
-			std::pair< SampleTimesMap::iterator, bool > it = m_sampleTimesMap->insert( std::pair< SampleTimes, uint64_t >( sampleTimes, 0 ) );
+			::uint64_t sampleTimesIndex = 	0;
+			IndexedIO::EntryID samplesEntry;
+			std::pair< SampleTimesMap::iterator, bool > it = m_sampleTimesMap->insert( std::pair< SampleTimes, ::uint64_t >( sampleTimes, 0 ) );
 			if ( it.second )
 			{
 				// Unique Id for the sampleTimes (incremental integer)
@@ -1097,15 +1306,17 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				it.first->second = sampleTimesIndex;
 				// find the global location for the sample times from the root Scene.
 				IndexedIOPtr sampleTimesIO = globalSampleTimes();
+				samplesEntry = sampleEntry(sampleTimesIndex);
 				// write the sampleTimes in the file
-				sampleTimesIO->write( sampleEntry(sampleTimesIndex), &sampleTimes[0], sampleTimes.size() );
+				sampleTimesIO->write( samplesEntry, &sampleTimes[0], sampleTimes.size() );
 			}
 			else
 			{
 				// already saved in the global sample times section...
 				sampleTimesIndex = it.first->second;
+				samplesEntry = sampleEntry(sampleTimesIndex);
 			}
-			location->write( sampleTimesEntry, sampleTimesIndex );
+			location->createSubdirectory( sampleTimesEntry )->createSubdirectory( samplesEntry );
 		}
 
 		// function called when bounding boxes were not explicitly defined in this scene location.
@@ -1235,9 +1446,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			if ( newTimeIt != sampleTimes.end() )
 			{
 				size_t appendCount = (sampleTimes.end() - newTimeIt);
-				size_t index = currTimeIt - m_boundSampleTimes.begin();
-				m_boundSampleTimes.insert( currTimeIt, newTimeIt, sampleTimes.end() );
-				m_boundSamples.insert( currBoxIt, appendCount, newestKnownBox );
+				size_t index = m_boundSampleTimes.size();
+				m_boundSampleTimes.insert( m_boundSampleTimes.end(), newTimeIt, sampleTimes.end() );
+				m_boundSamples.insert( m_boundSamples.end(), appendCount, newestKnownBox );
 				// refresh iterators after insertion
 				currTimeIt = m_boundSampleTimes.begin() + index;
 				currBoxIt = m_boundSamples.begin() + index;
@@ -1491,7 +1702,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				if ( computedBounds )
 				{
 					// store computed bounds in file
-					uint64_t sampleIndex = 0;
+					::uint64_t sampleIndex = 0;
 					for ( BoxSamples::const_iterator bit = m_boundSamples.begin(); bit != m_boundSamples.end(); bit++, sampleIndex++ )
 					{
 						io->write( sampleEntry(sampleIndex), bit->min.getValue(), 6 );
@@ -1549,27 +1760,19 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				throw Exception( "Mismatch number of box samples!" );
 			}
-
-			if ( *ttIt != *btIt )
-			{
-				/// by construction in flush() they should match...
-				throw Exception( "Initial transform and bound sample time don't match!" );
-			}
+			
 			LinearInterpolator<Box3d> boxInterpolator;
 			Imath::Box3d previousBox = *bsIt;
 			TransformSample previousTransform = *tsIt;
 			double previousTransformTime = *ttIt;
 			Imath::M44d previousTransformMatrix = dataToMatrix( previousTransform );
-			Imath::Box3d previousTransformedBox = transform(previousBox, previousTransformMatrix);
-			*bsIt = previousTransformedBox;
+			Imath::Box3d previousTransformedBox;
 			TransformSample nextTransform = 0;
-			bsIt++;
-			btIt++;
 			ttIt++;
 			tsIt++;
 
 			/// transform all box samples that come prior to the first transform as static boxes transformed by the first transform.
-			while( btIt != boxTimes.end() && *btIt < previousTransformTime )
+			while( btIt != boxTimes.end() && *btIt <= previousTransformTime )
 			{
 				previousBox = *bsIt;
 				previousTransformedBox = transform(previousBox, previousTransformMatrix);
@@ -1666,7 +1869,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		WriterImplementation* m_parent;
 		std::map< SceneCache::Name, WriterImplementationPtr > m_children;
 
-		typedef std::map< SampleTimes, uint64_t > SampleTimesMap;
+		typedef std::map< SampleTimes, ::uint64_t > SampleTimesMap;
 		typedef std::map< SceneCache::Name, SampleTimes > AttributeSamplesMap;
 
 		SampleTimesMap *m_sampleTimesMap;
@@ -1841,7 +2044,7 @@ double SceneCache::transformSampleInterval( double time, size_t &floorIndex, siz
 	return reader->transformSampleInterval( time, floorIndex, ceilIndex );
 }
 
-DataPtr SceneCache::readTransformAtSample( size_t sampleIndex ) const
+ConstDataPtr SceneCache::readTransformAtSample( size_t sampleIndex ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readTransformAtSample( sampleIndex );
@@ -1853,7 +2056,7 @@ Imath::M44d SceneCache::readTransformAsMatrixAtSample( size_t sampleIndex ) cons
 	return reader->readTransformAsMatrixAtSample( sampleIndex );
 }
 
-DataPtr SceneCache::readTransform( double time ) const
+ConstDataPtr SceneCache::readTransform( double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readTransform( time );
@@ -1899,13 +2102,13 @@ double SceneCache::attributeSampleInterval( const Name &name, double time, size_
 	return reader->attributeSampleInterval( name, time, floorIndex, ceilIndex );
 }
 
-ObjectPtr SceneCache::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
+ConstObjectPtr SceneCache::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readAttributeAtSample( name, sampleIndex );
 }
 
-ObjectPtr SceneCache::readAttribute( const Name &name, double time ) const
+ConstObjectPtr SceneCache::readAttribute( const Name &name, double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readAttribute( name, time );
@@ -1924,9 +2127,9 @@ void SceneCache::writeAttribute( const Name &name, const Object *attribute, doub
 	writer->writeAttribute( name, attribute, time );
 }
 
-bool SceneCache::hasTag( const Name &name ) const
+bool SceneCache::hasTag( const Name &name, bool includeChildren ) const
 {
-	return m_implementation->hasTag(name);
+	return m_implementation->hasTag(name, includeChildren);
 }
 
 void SceneCache::readTags( NameList &tags, bool includeChildren ) const
@@ -1943,6 +2146,12 @@ void SceneCache::writeTags( const NameList &tags )
 {
 	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
 	writer->writeTags( tags );
+}
+
+void SceneCache::writeTags( const NameList &tags, bool fromChildren )
+{
+	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
+	writer->writeTags( tags, fromChildren );
 }
 
 bool SceneCache::hasObject() const
@@ -1968,13 +2177,13 @@ double SceneCache::objectSampleInterval( double time, size_t &floorIndex, size_t
 	return reader->objectSampleInterval( time, floorIndex, ceilIndex );
 }
 
-ObjectPtr SceneCache::readObjectAtSample( size_t sampleIndex ) const
+ConstObjectPtr SceneCache::readObjectAtSample( size_t sampleIndex ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readObjectAtSample( sampleIndex );
 }
 
-ObjectPtr SceneCache::readObject( double time ) const
+ConstObjectPtr SceneCache::readObject( double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	return reader->readObject( time );

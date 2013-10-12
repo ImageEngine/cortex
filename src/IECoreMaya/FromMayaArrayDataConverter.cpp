@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "IECoreMaya/FromMayaArrayDataConverter.h"
 #include "IECoreMaya/MArrayTraits.h"
 #include "IECoreMaya/Convert.h"

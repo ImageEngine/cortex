@@ -44,7 +44,7 @@ namespace IECoreHoudini
 {
 
 /// SOP class for representing a IECore::Op in Houdini
-class SOP_OpHolder : public SOP_ParameterisedHolder
+class CortexHOUAPI SOP_OpHolder : public SOP_ParameterisedHolder
 {
 	public :
 

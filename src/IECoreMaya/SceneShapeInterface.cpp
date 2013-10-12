@@ -32,7 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECoreMaya/SceneShapeInterface.h"
+#include "IECoreMaya/SceneShapeInterfaceComponentBoundIterator.h"
 
 #include "boost/python.hpp"
 #include "boost/tokenizer.hpp"
@@ -52,6 +55,7 @@
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
 #include "IECoreMaya/MayaTypeIds.h"
+#include "IECoreMaya/PostLoadCallback.h"
 
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
@@ -69,6 +73,8 @@
 #include "IECore/TransformOp.h"
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Transform.h"
+#include "IECore/MatrixAlgo.h"
+#include "IECore/LinkedScene.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnEnumAttribute.h"
@@ -87,7 +93,7 @@
 #include "maya/MFnNurbsCurveData.h"
 #include "maya/MFnGeometryData.h"
 #include "maya/MPlugArray.h"
-
+#include "maya/MFileIO.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -101,9 +107,11 @@ MObject SceneShapeInterface::aDrawChildBounds;
 MObject SceneShapeInterface::aDrawTagsFilter;
 MObject SceneShapeInterface::aQuerySpace;
 MObject SceneShapeInterface::aTime;
+MObject SceneShapeInterface::aOutTime;
 MObject SceneShapeInterface::aSceneQueries;
 MObject SceneShapeInterface::aAttributeQueries;
 MObject SceneShapeInterface::aOutputObjects;
+MObject SceneShapeInterface::aObjectDependency;
 MObject SceneShapeInterface::aAttributes;
 MObject SceneShapeInterface::aAttributeValues;
 MObject SceneShapeInterface::aTransform;
@@ -133,10 +141,38 @@ MObject SceneShapeInterface::aBoundCenterX;
 MObject SceneShapeInterface::aBoundCenterY;
 MObject SceneShapeInterface::aBoundCenterZ;
 
+// This post load callback is used to dirty the aOutputObjects elements
+// following loading - see further  comments in initialize.
+class SceneShapeInterface::PostLoadCallback : public IECoreMaya::PostLoadCallback
+{
+
+	public :
+	
+		PostLoadCallback( SceneShapeInterface *node ) : m_node( node )
+		{
+		}
+	
+	protected :
+		
+		SceneShapeInterface *m_node;
+		
+		virtual void postLoad()
+		{
+			MFnDependencyNode fnDN( m_node->thisMObject() );
+			MPlug plug = fnDN.findPlug( aObjectDependency );
+			plug.setValue( 1 );
+			
+			m_node->m_postLoadCallback = 0; // remove this callback
+		}
+		
+};
 
 SceneShapeInterface::SceneShapeInterface()
 	: m_previewSceneDirty( true )
 {
+	// We only create the post load callback when Maya is reading a scene,
+	// so that it does not effect nodes as they are created by users.
+	m_postLoadCallback = ( MFileIO::isReadingFile() ) ? new PostLoadCallback( this ) : NULL;
 }
 
 SceneShapeInterface::~SceneShapeInterface()
@@ -225,6 +261,13 @@ MStatus SceneShapeInterface::initialize()
 	
 	s = addAttribute( aTime );
 
+	aOutTime = uAttr.create( "outTime", "otm", MFnUnitAttribute::kTime, 0.0, &s );
+	uAttr.setReadable( true );
+	uAttr.setWritable( false );
+	uAttr.setStorable( false );
+	
+	s = addAttribute( aOutTime );
+	
 	// Queries
 	
 	aSceneQueries = tAttr.create( "queryPaths", "qpa", MFnData::kString, &s );
@@ -250,7 +293,6 @@ MStatus SceneShapeInterface::initialize()
 	s = addAttribute( aAttributeQueries );
 
 	// Output objects
-
 	aOutputObjects = gAttr.create( "outObjects", "oob", &s );
 	gAttr.addDataAccept( MFnMeshData::kMesh );
 	gAttr.addDataAccept( MFnNurbsCurveData::kNurbsCurve );
@@ -261,9 +303,23 @@ MStatus SceneShapeInterface::initialize()
 	gAttr.setIndexMatters( true );
 	gAttr.setUsesArrayDataBuilder( true );
 	gAttr.setStorable( false );
-
 	s = addAttribute( aOutputObjects );
-
+	
+	// A Maya bug causes mesh attributes to compute on scene open, even when nothing should be
+	// pulling on them. While dynamic attributes can work around this issue for single meshes,
+	// arrays of meshes suffer from the erroneous compute as either static or dynamic attributes.
+	//
+	// We work around the problem by adding a PostLoadCallback if the node was created while the
+	// scene is being read from disk. This callback is used to short circuit the compute which
+	// was triggered on scene open. Since the compute may have actually been necessary, we use
+	// this dummy dependency attribute to dirty the output object attributes immediately following
+	// load. At this point the callback deletes itself, and the newly dirtied output objects will
+	// re-compute if something was actually pulling on them.
+	aObjectDependency = nAttr.create( "objectDependency", "objDep", MFnNumericData::kInt, 0 );
+	nAttr.setStorable( false );
+	nAttr.setHidden( true );
+	s = addAttribute( aObjectDependency );
+	
 	// Transform
 
 	aTranslateX = nAttr.create( "outTranslateX", "otx", MFnNumericData::kFloat, 0, &s );
@@ -425,12 +481,14 @@ MStatus SceneShapeInterface::initialize()
 	attributeAffects( aSceneQueries, aBound );
 	attributeAffects( aSceneQueries, aOutputObjects );
 	attributeAffects( aSceneQueries, aAttributes );
-
+	
 	attributeAffects( aAttributeQueries, aAttributes );
 	
 	attributeAffects( aQuerySpace, aTransform );
 	attributeAffects( aQuerySpace, aBound );
 	attributeAffects( aQuerySpace, aOutputObjects );
+	
+	attributeAffects( aTime, aOutTime );
 
 	return s;
 }
@@ -443,6 +501,14 @@ ConstSceneInterfacePtr SceneShapeInterface::getSceneInterface( )
 bool SceneShapeInterface::isBounded() const
 {
 	return true;
+}
+
+double SceneShapeInterface::time() const
+{
+	MPlug pTime( thisMObject(), aTime );
+	MTime time;
+	pTime.getValue( time );
+	return time.as( MTime::kSeconds );
 }
 
 MBoundingBox SceneShapeInterface::boundingBox() const
@@ -472,8 +538,8 @@ MBoundingBox SceneShapeInterface::boundingBox() const
 				// Check for an object
 				if( scn->hasObject() )
 				{
-					ObjectPtr object = scn->readObject( time.as( MTime::kSeconds ) );
-					VisibleRenderablePtr obj = runTimeCast< VisibleRenderable >( object );
+					ConstObjectPtr object = scn->readObject( time.as( MTime::kSeconds ) );
+					const VisibleRenderable *obj = runTimeCast< const VisibleRenderable >( object.get() );
 					if( obj )
 					{
 						Box3f objBox = obj->bound();
@@ -576,6 +642,15 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 		// Preview plug values have changed, GL Scene is dirty
 		m_previewSceneDirty = true;
 	}
+	else if ( plug == aObjectDependency )
+	{
+		MPlug pObjects( thisMObject(), aOutputObjects );
+		for( unsigned i=0; i<pObjects.numElements(); i++ )
+		{
+			MPlug p = pObjects[i];
+			plugArray.append( p );
+		}
+	}
 	
 	return MS::kSuccess;
 }
@@ -584,7 +659,6 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 {
 	MStatus s;
-
 	MPlug topLevelPlug = plug;
 	int index = -1;
 	// Look for parent plug index
@@ -600,7 +674,12 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			topLevelPlug = topLevelPlug.array();
 		}
 	}
-
+	
+	if ( topLevelPlug == aOutputObjects && m_postLoadCallback )
+	{
+		return MS::kFailure;
+	}
+	
 	if( topLevelPlug == aOutputObjects || topLevelPlug == aTransform || topLevelPlug == aBound || topLevelPlug == aAttributes )
 	{
 		if( index == -1 )
@@ -631,17 +710,9 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			msg( Msg::Error, dag.fullPathName().asChar(),  "Input values are invalid." );
 			return MS::kFailure;
 		}
-		
-		// get root path
-		SceneInterface::Path root;
-		getSceneInterface()->path( root );
-		std::string rootName;
-		SceneInterface::pathToString( root, rootName );
-		// get full path for query
-		std::string pathName = rootName+name.asChar();
-		
+
 		SceneInterface::Path path;
-		SceneInterface::stringToPath( pathName, path );
+		path = fullPathName( name.asChar() );
 		// Get sceneInterface for query path
 		ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
 		
@@ -670,9 +741,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			}
 			
 			V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
-			M44f transform;
-			transform.setValue( transformd );
-			extractSHRT( convert<M44f>( transform ), scale, shear, rotate, translate );
+			extractSHRT( convert<M44f>( transformd ), scale, shear, rotate, translate );
 
 			MDataHandle transformElementHandle = transformBuilder.addElement( index );
 			transformElementHandle.child( aTranslate ).set3Float( translate[0], translate[1], translate[2] );
@@ -686,7 +755,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MArrayDataHandle outputDataHandle = dataBlock.outputArrayValue( aOutputObjects, &s );
 			MArrayDataBuilder outputBuilder = outputDataHandle.builder();
 
-			ObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
+			ConstObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
 
 			if( querySpace == World )
 			{
@@ -695,8 +764,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 				transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
 				
 				TransformOpPtr transformer = new TransformOp();
-				transformer->inputParameter()->setValue( object );
-				transformer->copyParameter()->setTypedValue( false );
+				transformer->inputParameter()->setValue( const_cast< Object *>(object.get()) );		/// safe const_cast because the op will duplicate the Object.
+				transformer->copyParameter()->setTypedValue( true );
 				transformer->matrixParameter()->setValue( new M44dData( transformd ) );
 				object = transformer->operate();
 			}
@@ -815,33 +884,37 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			arrayHandle.jumpToElement( attrIndex );
 			MDataHandle currentElement = arrayHandle.outputValue();
 			
-			ObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
+			ConstObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
 			IECore::TypeId type = attrValue->typeId();
 			if( type == BoolDataTypeId )
 			{
-				ConstBoolDataPtr val = runTimeCast< BoolData >(attrValue);
-				bool value = val->readable();
+				bool value = static_cast< const BoolData * >(attrValue.get())->readable();
 				currentElement.setGenericBool( value, true);
 			}
 			else if( type == FloatDataTypeId )
 			{
-				ConstFloatDataPtr val = runTimeCast< FloatData >(attrValue);
-				float value = val->readable();
+				float value = static_cast< const FloatData * >(attrValue.get())->readable();
 				currentElement.setGenericFloat( value, true);
 			}
 			else if( type == IntDataTypeId )
 			{
-				ConstIntDataPtr val = runTimeCast< IntData >(attrValue);
-				int value = val->readable();
+				int value = static_cast< const IntData * >(attrValue.get())->readable();
 				currentElement.setGenericInt( value, true);
 			}
 			else if( type == StringDataTypeId )
 			{
-				ConstStringDataPtr val = runTimeCast< StringData >(attrValue);
-				MString value( val->readable().c_str() );
+				MString value( static_cast< const StringData * >(attrValue.get())->readable().c_str() );
 				currentElement.setString( value );
 			}
 		}
+	}
+	else if( topLevelPlug == aOutTime )
+	{
+		MDataHandle timeHandle = dataBlock.inputValue( aTime );
+		MTime time = timeHandle.asTime();
+		
+		MDataHandle outTimeHandle = dataBlock.outputValue( aOutTime );
+		outTimeHandle.setMTime( time );
 	}
 
 	return MS::kSuccess;
@@ -928,6 +1001,48 @@ MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelecti
 	return MPxSurfaceShape::matchComponent( item, spec, list );
 }
 
+/// Blank implementation of this method. This is to avoid a crash when you try and use the rotation manipulator maya gives
+/// you when you've selected procedural components in rotation mode (maya 2013)
+void SceneShapeInterface::transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache )
+{
+}
+
+/// This method is overridden to supply a geometry iterator, which maya uses to work out
+/// the bounding boxes of the components you've selected in the viewport
+MPxGeometryIterator* SceneShapeInterface::geometryIteratorSetup( MObjectArray& componentList, MObject& components, bool forReadOnly )
+{
+	if ( components.isNull() )
+	{
+		return new SceneShapeInterfaceComponentBoundIterator( this, componentList );
+	}
+	else
+	{
+		return new SceneShapeInterfaceComponentBoundIterator( this, components );
+	}
+}
+
+Imath::Box3d SceneShapeInterface::componentBound( int idx )
+{
+	// get relative path name from index
+	IECore::InternedString name = selectionName( idx );
+	
+	SceneInterface::Path path;
+	path = fullPathName( name.value() );
+	ConstSceneInterfacePtr scene = getSceneInterface()->scene( path,  SceneInterface::NullIfMissing );
+	
+	MPlug pTime( thisMObject(), aTime );
+	MTime time;
+	pTime.getValue( time );
+	
+	// read bound from scene interface and return it in world space
+	Imath::Box3d componentBound = scene->readBound( time.as( MTime::kSeconds ) );
+	M44d transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
+
+	componentBound = transform( componentBound, transformd );
+
+	return componentBound;
+}
+
 void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstSceneInterfacePtr subSceneInterface )
 {
 	// Grab plug values to know what we need to render
@@ -946,6 +1061,11 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 	MPlug pObjectOnly( thisMObject(), aObjectOnly );
 	bool objectOnly;
 	pObjectOnly.getValue( objectOnly );
+	
+	if( !drawGeometry && !drawBounds )
+	{
+		return;
+	}
 
 	MPlug pDrawTagsFilter( thisMObject(), aDrawTagsFilter );
 	MString drawTagsFilter;
@@ -971,6 +1091,8 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 			}
 		}
 	}
+
+	renderer->concatTransform( convert<M44f>( worldTransform( subSceneInterface, time.as( MTime::kSeconds ) ) ) );
 
 	recurseBuildScene( renderer.get(), subSceneInterface.get(), time.as( MTime::kSeconds ), drawBounds, drawGeometry, objectOnly, drawTags );
 }
@@ -999,24 +1121,39 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	subSceneInterface->path( pathName );
 	std::string pathStr = relativePathName( pathName );
 	renderer->setAttribute( "name", new StringData( pathStr ) );
-	// Need to add this attribute block to get a parent group with that name that includes the object and/or bound
-	AttributeBlock aNew(renderer);
 
-	M44d transformd;
 	if(pathStr != "/")
 	{
 		// Path space
-		transformd = worldTransform( subSceneInterface, time );
+		renderer->concatTransform( convert<M44f>( subSceneInterface->readTransformAsMatrix( time ) ) );
+	}
+	
+	// Need to add this attribute block to get a parent group with that name that includes the object and/or bound
+	AttributeBlock aNew(renderer);
+
+	if ( subSceneInterface->hasAttribute( LinkedScene::fileNameLinkAttribute ) )
+	{
+		// we are at a link location... create a hash to uniquely identify it.
+		MurmurHash hash;
+		subSceneInterface->readAttribute( LinkedScene::fileNameLinkAttribute, time )->hash( hash );
+		subSceneInterface->readAttribute( LinkedScene::rootLinkAttribute, time )->hash( hash );
+		subSceneInterface->readAttribute( LinkedScene::timeLinkAttribute, time )->hash( hash );
+		/// register the hash mapped to the name of the group
+		InternedString pathInternedStr(pathStr);
+		std::pair< HashToName::iterator, bool > ret = m_hashToName.insert( HashToName::value_type( hash, pathInternedStr ) );
+		if ( !ret.second )
+		{
+			/// the same location was already rendered, so we store the current location for instanting later...
+			m_instances.push_back( InstanceInfo(pathInternedStr, ret.first->second) );
+			return;
+		}
 	}
 
-	M44f transform;
-	transform.setValue( transformd );
-	renderer->setTransform( transform );
 
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
-		ObjectPtr object = subSceneInterface->readObject( time );
-		Renderable *o = runTimeCast< Renderable >(object.get());
+		ConstObjectPtr object = subSceneInterface->readObject( time );
+		const Renderable *o = runTimeCast< const Renderable >(object.get());
 		if( o )
 		{
 			o->render(renderer);
@@ -1047,6 +1184,74 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 			recurseBuildScene( renderer, childScene.get(), time, drawBounds, drawGeometry, objectOnly, drawTags );
 		}
 	}
+}
+
+void SceneShapeInterface::createInstances()
+{
+	for ( InstanceArray::iterator it = m_instances.begin(); it != m_instances.end(); it++ )
+	{
+		const InternedString &instanceName = it->first;
+		const InternedString &instanceSourceName = it->second;
+
+		NameToGroupMap::const_iterator srcIt = m_nameToGroupMap.find( instanceSourceName );
+
+		assert ( srcIt != m_nameToGroupMap.end() );
+
+		const IECoreGL::Group *srcGroup = srcIt->second.second.get();
+		
+		NameToGroupMap::iterator trgIt = m_nameToGroupMap.find( instanceName );
+		IECoreGL::Group *trgGroup = trgIt->second.second.get();
+
+		// copy the src group to the trg group (empty instance group)
+		recurseCopyGroup( srcGroup, trgGroup, instanceName.value() );
+	}
+
+	/// clear the maps we don't need them.
+	m_hashToName.clear();
+	m_instances.clear();
+}
+
+void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix )
+{
+	const IECoreGL::Group::ChildContainer &children = srcGroup->children();
+
+	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+	{
+		IECoreGL::Group *group = runTimeCast< IECoreGL::Group >( *it );
+
+		if ( group )
+		{
+			IECoreGL::GroupPtr newGroup = new IECoreGL::Group();
+			 // copy state, including the name state component
+			IECoreGL::StatePtr newState = new IECoreGL::State( *group->getState() );
+			newGroup->setState( newState );
+			std::string newName;
+			const IECoreGL::NameStateComponent *nameState = newState->get< IECoreGL::NameStateComponent >();
+			/// now override the name state component
+			if ( nameState )
+			{
+				const std::string &srcName = nameState->name();
+				size_t found = srcName.rfind('/');
+				if (found!=std::string::npos)
+				{
+					// we take the current "directory" and prepend it with the namePrefix
+					newName = namePrefix;
+					newName.append( srcName, found, std::string::npos );
+					newState->add( new IECoreGL::NameStateComponent( newName ) );
+					// we also need to register the group in the selection maps...
+					registerGroup( newName, newGroup );
+				}
+			}
+			newGroup->setTransform( group->getTransform() );
+			recurseCopyGroup( group, newGroup, newName.size() ? newName.c_str() : namePrefix );
+			trgGroup->addChild( newGroup );
+		}
+		else
+		{
+			trgGroup->addChild( *it );
+		}
+	}
+
 }
 
 IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
@@ -1083,10 +1288,22 @@ IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
+	createInstances();
 
 	m_previewSceneDirty = false;
 
 	return m_scene;
+}
+
+void SceneShapeInterface::registerGroup( const std::string &name, IECoreGL::GroupPtr &group )
+{
+		int index = m_nameToGroupMap.size();
+		std::pair< NameToGroupMap::iterator, bool> ret;
+		ret = m_nameToGroupMap.insert( std::pair< InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
+		if( ret.second )
+		{
+			m_indexToNameMap.push_back( name );
+		}
 }
 
 void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group )
@@ -1103,14 +1320,7 @@ void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr name
 	const std::string &name = nameState->name();
 	if( name != "unnamed" )
 	{
-		int index = m_nameToGroupMap.size();
-		std::pair< NameToGroupMap::iterator, bool> ret;
-		ret = m_nameToGroupMap.insert( std::pair< InternedString, NameToGroupMap::mapped_type > (name,  NameToGroupMap::mapped_type( index, group )) );
-		if( ret.second )
-		{
-			IndexToNameMap::iterator idIt = m_indexToNameMap.begin() + index;
-			m_indexToNameMap.insert( idIt, name ); 	
-		}
+		registerGroup( name, group );
 	}
 
 	const IECoreGL::Group::ChildContainer &children = group->children();
@@ -1192,4 +1402,18 @@ std::string SceneShapeInterface::relativePathName( SceneInterface::Path path )
 	return pathName;
 }
 
+SceneInterface::Path SceneShapeInterface::fullPathName( std::string relativeName )
+{
+	SceneInterface::Path root;
+	getSceneInterface()->path( root );
+	assert( root );
+
+	SceneInterface::Path relativePath;
+	SceneInterface::stringToPath( relativeName, relativePath );
+
+	SceneInterface::Path fullPath( root );
+	fullPath.insert( fullPath.end(), relativePath.begin(), relativePath.end() );
+
+	return fullPath;
+}
 

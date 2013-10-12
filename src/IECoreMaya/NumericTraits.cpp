@@ -36,6 +36,8 @@
 
 using namespace IECoreMaya;
 
+#if defined(LINUX)
+
 template<>
 MFnNumericData::Type NumericTraits<bool>::dataType() { return MFnNumericData::kBoolean; };
 
@@ -84,3 +86,4 @@ template<>
 MFnNumericData::Type NumericTraits<Imath::Color3f>::baseDataType() { return MFnNumericData::kFloat; };
 template<>
 bool NumericTraits<Imath::Color3f>::isColor() { return true; };
+#endif

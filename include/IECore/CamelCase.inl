@@ -41,6 +41,10 @@
 
 #include "IECore/StringAlgo.h"
 
+#ifdef _WIN32
+#include <locale>
+#endif
+
 namespace IECore
 {
 
@@ -131,15 +135,21 @@ std::string CamelCase::join( Iterator begin, Iterator end, Caps caps, const std:
 		}
 		if( caps!=Unchanged )
 		{
-			if( (caps==First && it==begin) || caps==All || (caps==AllExceptFirst and it!=begin) )
+			if( (caps==First && it==begin) || caps==All || (caps==AllExceptFirst && it!=begin) )
 			{
 				if( !isUpperCase( word ) )
 				{
 					boost::algorithm::to_lower( word );
 				}
+#ifndef _WIN32
 				word[0] = std::toupper( word[0] );
+#else
+				std::locale loc("");
+				word[0] = std::toupper(word[0],loc);
+#endif
+				//std::toupper(word[0],);
 			}
-			else if( (caps==AllExceptFirst && it==begin) || (caps==First and it!=begin ) )
+			else if( (caps==AllExceptFirst && it==begin) || (caps==First && it!=begin ) )
 			{
 				boost::algorithm::to_lower( word );
 			}

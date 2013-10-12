@@ -37,6 +37,7 @@
 #include "boost/python.hpp"
 
 #include <limits.h>
+#include <sstream>
 
 #include "boost/python/make_constructor.hpp"
 
@@ -47,8 +48,7 @@
 #include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
-
-#include <sstream>
+#include "IECorePython/SimpleTypedDataBinding.h"
 
 using namespace std;
 using std::string;
@@ -59,6 +59,9 @@ using namespace IECore;
 
 namespace IECorePython
 {
+
+	typedef boost::int64_t int64_t;
+	typedef boost::uint64_t uint64_t;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // functions used by the bindings
@@ -184,6 +187,20 @@ string repr( InternedString &x )
 {
 	return "\"" + x.value() + "\"";
 }
+template <>
+string repr(LineSegment3f &x)
+{
+	stringstream s;																						\
+	s << x.p0 << " " << x.p1;																								\
+	return s.str();	
+}
+template <>
+string repr(LineSegment3d &x)
+{
+	stringstream s;																						\
+	s << x.p0 << " " << x.p1;																								\
+	return s.str();	
+}
 
 #define DEFINENUMERICSTRSPECIALISATION( TYPE )															\
 template<>																								\
@@ -210,8 +227,8 @@ DEFINENUMERICSTRSPECIALISATION( double );
 DEFINENUMERICSTRSPECIALISATION( half );
 DEFINENUMERICSTRSPECIALISATION( short );
 DEFINENUMERICSTRSPECIALISATION( unsigned short );
-DEFINENUMERICSTRSPECIALISATION( int64_t );
-DEFINENUMERICSTRSPECIALISATION( uint64_t );
+DEFINENUMERICSTRSPECIALISATION( ::int64_t );
+DEFINENUMERICSTRSPECIALISATION( ::uint64_t );
 
 #define DEFINETYPEDDATASTRSPECIALISATION( TYPE )														\
 template<>																								\
@@ -272,75 +289,6 @@ DEFINETYPEDDATASTRSPECIALISATION( LineSegment3f );
 DEFINETYPEDDATASTRSPECIALISATION( LineSegment3d );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// an rvalue converter to get TypedData<T> from a python object convertible to T
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-struct TypedDataFromType
-{
-	TypedDataFromType()
-	{
-		converter::registry::push_back(
-			&convertible,
-			&construct,
-			type_id<typename T::Ptr>()
-		);
-
-	}
-
-	static void *convertible( PyObject *obj )
-	{
-		extract<typename T::ValueType> e( obj );
-		if( e.check() )
-		{
-			return obj;
-		}
-		return 0;
-	}
-
-	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
-	{
-		void *storage = ((converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
-		new (storage) typename T::Ptr( new T( extract<typename T::ValueType>( obj ) ) );
-		data->convertible = storage;
-	}
-};
-
-// specialise the bool version so it doesn't go gobbling up ints and things and turning them
-// into BoolData
-template<>
-struct TypedDataFromType<BoolData>
-{
-
-	TypedDataFromType()
-	{
-		converter::registry::push_back(
-			&convertible,
-			&construct,
-			type_id<BoolDataPtr>()
-		);
-
-	}
-
-	static void *convertible( PyObject *obj )
-	{
-		if( PyBool_Check( obj ) )
-		{
-			return obj;
-		}
-		return 0;
-	}
-
-	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
-	{
-		void *storage = ((converter::rvalue_from_python_storage<BoolDataPtr>*)data)->storage.bytes;
-		new (storage) BoolDataPtr( new BoolData( extract<bool>( obj ) ) );
-		data->convertible = storage;
-	}
-
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // functions to do the binding
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -381,8 +329,10 @@ static RunTimeTypedClass<GeometricTypedData<T > > bindSimpleGeometricData()
 template<class T>
 static void bindNumericMethods( class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > &c )
 {
-	c.add_static_property( "minValue", &std::numeric_limits<typename T::ValueType>::min, "Minimum representable value." );
-	c.add_static_property( "maxValue", &std::numeric_limits<typename T::ValueType>::max, "Maximum representable value." );
+	//c.add_static_property( "minValue", &std::numeric_limits<typename T::ValueType>::min, "Minimum representable value." );
+	//c.add_static_property( "maxValue", &std::numeric_limits<typename T::ValueType>::max, "Maximum representable value." );
+	c.add_property("minValue",&std::numeric_limits<typename T::ValueType>::min,"Minimum representable value.");
+	c.add_property("maxValue",&std::numeric_limits<typename T::ValueType>::max,"Maximum representable value.");
 	c.def( "__cmp__", &cmp<T>, "Comparison operators ( <, >, >=, <= )" );
 }
 

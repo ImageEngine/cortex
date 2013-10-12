@@ -159,7 +159,7 @@ class StreamIndexedIO::StringCache
 
 				Imf::Int64 id;
 				readLittleEndian( f,id );
-				assert( id < sz );
+
 				m_prevId = std::max( id, m_prevId );
 
 				m_stringToIdMap[s] = id;
@@ -236,13 +236,10 @@ class StreamIndexedIO::StringCache
 		void add( const IndexedIO::EntryID &s )
 		{
 			(void)find(s, false);
-
-			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
 		}
 
 		Imf::Int64 size() const
 		{
-			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
 			return m_stringToIdMap.size();
 		}
 
@@ -931,7 +928,11 @@ BaseNode *StreamIndexedIO::Index::readNodeV4( F &f )
 		result = n;
 	}
 
+#ifdef _WIN32
+	if ( nodeId && parentId != Imath::limits<unsigned long>::max())
+#else
 	if ( nodeId && parentId != Imath::limits<Imf::Int64>::max() )
+#endif
 	{
 		Node* parent = 0;
 		if ( parentId < m_indexToNodeMap.size() )

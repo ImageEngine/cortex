@@ -47,11 +47,13 @@
 
 #include "IECore/Object.h"
 
+#include "ieHoudini.h"
+
 /// The IECoreHoudini namespace holds all the functionality of libIECoreHoudini.
 namespace IECoreHoudini
 {
 
-class CoreHoudini
+class CortexHOUAPI CoreHoudini
 {
 	public:
 
@@ -62,17 +64,19 @@ class CoreHoudini
 		static void import( const std::string &module );
 
 		/// Utility method for getting the global python context
-		static boost::python::object &globalContext()
-		{
-			return g_globalContext;
-		}
+		static boost::python::object &globalContext();
+		//{
+		//	return g_globalContext;
+		//}
 		
 		/// Run misc python command
 		static boost::python::object evalPython( const std::string &cmd );
+		/// our global context
+		static boost::python::object _stdcall g_globalContext;
+
 
 	private:
-		/// our global context
-		static boost::python::object g_globalContext;
+		
 
 		/// initialized
 		static bool g_initialized;

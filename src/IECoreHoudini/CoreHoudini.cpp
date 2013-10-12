@@ -101,3 +101,7 @@ object CoreHoudini::evalPython( const std::string &cmd )
 	}
 	return result;
 }
+boost::python::object & CoreHoudini::globalContext()
+{
+	return g_globalContext;
+}

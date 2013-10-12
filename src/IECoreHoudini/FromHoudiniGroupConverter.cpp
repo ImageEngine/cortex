@@ -39,6 +39,7 @@
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 
+#include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGroupConverter.h"
 
 using namespace IECore;
@@ -106,11 +107,12 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	}
 	
 	// are there multiple named shapes?
-	const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-	if ( attrHandle.isAttributeValid() )
+	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
+	if ( attrRef.isValid() && attrRef.isString() )
 	{
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		if ( geo->getUniqueValueCount( attrRef ) > 1 )
+		const GA_Attribute *nameAttr = attrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		if ( tuple->getTableEntries( nameAttr ) > 1 )
 		{
 			return Ideal;
 		}
@@ -119,71 +121,92 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	// are the primitives split into groups?
 	UT_PtrArray<const GA_ElementGroup*> primGroups;
 	geo->getElementGroupList( GA_ATTRIB_PRIMITIVE, primGroups );
-	if ( primGroups.isEmpty() || primGroups[0]->entries() == numPrims )
+	if ( primGroups.isEmpty() )
 	{
 		return Admissible;
 	}
 	
-	return Ideal;
+	bool externalGroups = false;
+	for ( unsigned i=0; i < primGroups.entries(); ++i )
+	{
+		const GA_ElementGroup *group = primGroups[i];
+		if ( group->getInternal() )
+		{
+			continue;
+		}
+		
+		if ( group->entries() == numPrims )
+		{
+			return Admissible;
+		}
+		
+		externalGroups = true;
+	}
+	
+	if ( externalGroups )
+	{
+		return Ideal;
+	}
+	
+	return Admissible;
 }
 
 ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operands ) const
 {
-	GU_DetailHandleAutoReadLock readHandle( handle() );
-	const GU_Detail *geo = readHandle.getGdp();
-	if ( !geo )
-	{
-		return 0;
-	}
-	
-	size_t numResultPrims = 0;
-	size_t numOrigPrims = geo->getNumPrimitives();
-	
 	GroupPtr result = new Group();
 	
 	if ( operands->member<const IntData>( "groupingMode" )->readable() == NameAttribute )
 	{
-		GA_ROAttributeRef attributeRef = geo->findPrimitiveAttribute( "name" );
-		if ( attributeRef.isInvalid() || !attributeRef.isString() )
+		DetailSplitterPtr splitter = new DetailSplitter( handle() );
+		std::vector<std::string> children;
+		splitter->values( children );
+		
+		if ( children.empty() )
 		{
-			GU_Detail ungroupedGeo( (GU_Detail*)geo );
-			GA_PrimitiveGroup *ungrouped = static_cast<GA_PrimitiveGroup*>( ungroupedGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__ungroupedPrimitives" ) );
-			ungrouped->toggleRange( ungroupedGeo.getPrimitiveRange() );
-			
-			VisibleRenderablePtr renderable = 0;
-			doGroupConversion( &ungroupedGeo, ungrouped, renderable, operands );
-			if ( renderable )
-			{
-				Group *group = runTimeCast<Group>( renderable );
-				if ( group )
-				{
-					const Group::ChildContainer &children = group->children();
-					for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
-					{
-						result->addChild( *it );
-					}
-				}
-				else
-				{
-					result->addChild( renderable );
-				}
-			}
-			
+			doUnnamedConversion( GU_DetailHandleAutoReadLock( handle() ).getGdp(), result, operands );
 			return result;
 		}
 		
-		GU_Detail groupGeo( (GU_Detail*)geo );
-		
-		AttributePrimIdGroupMap groupMap;
-		regroup( &groupGeo, groupMap, attributeRef );
-		
-		for ( AttributePrimIdGroupMapIterator it=groupMap.begin(); it != groupMap.end(); ++it )
+		for ( std::vector<std::string>::iterator it = children.begin(); it != children.end(); ++it )
 		{
-			convertAndAddPrimitive( &groupGeo, it->second, result, operands );
+			const std::string &name = *it;
+			GU_DetailHandle childHandle = splitter->split( name );
+			if ( childHandle.isNull() )
+			{
+				continue;
+			}
+			
+			GU_DetailHandleAutoReadLock readHandle( childHandle );
+			const GU_Detail *childGeo = readHandle.getGdp();
+			ObjectPtr child = doDetailConversion( childGeo, operands );
+			if ( !child )
+			{
+				// this happens when mismatched primitives share the same name
+				doUnnamedConversion( childGeo, result, operands, name );
+			}
+			else if ( VisibleRenderablePtr renderable = IECore::runTimeCast<VisibleRenderable>( child ) )
+			{
+				if ( name != "" )
+				{
+					renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
+				}
+				
+				result->addChild( renderable );
+			}
 		}
 	}
 	else
 	{
+		GU_DetailHandleAutoReadLock readHandle( handle() );
+		const GU_Detail *geo = readHandle.getGdp();
+		if ( !geo )
+		{
+			return 0;
+		}
+
+		size_t numResultPrims = 0;
+		size_t numOrigPrims = geo->getNumPrimitives();
+
 		for ( GA_GroupTable::iterator<GA_ElementGroup> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 		{
 			GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup*>( it.group() );
@@ -198,7 +221,8 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			{
 				continue;
 			}
-
+			
+			renderable->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
 			result->addChild( renderable );
 		}
 
@@ -242,7 +266,7 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	size_t numPrims = groupGeo.getNumPrimitives();
 	if ( numPrims < 2 )
 	{
-		result = doPrimitiveConversion( &groupGeo, operands );
+		result = IECore::runTimeCast<VisibleRenderable>( doDetailConversion( &groupGeo, operands ) );
 		return numPrims;
 	}
 	
@@ -252,16 +276,11 @@ size_t FromHoudiniGroupConverter::doGroupConversion( const GU_Detail *geo, GA_Pr
 	
 	if ( numNewGroups < 2 )
 	{
-		result = doPrimitiveConversion( &groupGeo, operands );
+		result = IECore::runTimeCast<VisibleRenderable>( doDetailConversion( &groupGeo, operands ) );
 		return numPrims;
 	}
 
 	GroupPtr groupResult = new Group();
-	if ( !group->getInternal() )
-	{
-		groupResult->blindData()->member<StringData>( "name", false, true )->writable() = group->getName().toStdString();
-	}
-	
 	for ( PrimIdGroupMapIterator it = groupMap.begin(); it != groupMap.end(); it++ )
 	{
 		convertAndAddPrimitive( &groupGeo, it->second, groupResult, operands );
@@ -292,40 +311,42 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, PrimIdGroupMap &group
 	return groupMap.size();
 }
 
-size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, AttributePrimIdGroupMap &groupMap, GA_ROAttributeRef attrRef ) const
+void FromHoudiniGroupConverter::doUnnamedConversion( const GU_Detail *geo, Group *result, const CompoundObject *operands, const std::string &name ) const
 {
-	const GA_Attribute *attr = attrRef.getAttribute();
-	const GA_AIFStringTuple *attrAIF = attrRef.getAIFStringTuple();
+	GU_Detail newGeo( (GU_Detail*)geo );
+	GA_PrimitiveGroup *newGroup = static_cast<GA_PrimitiveGroup*>( newGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__doUnnamedConversion" ) );
+	newGroup->toggleRange( newGeo.getPrimitiveRange() );
 	
-	AttributePrimIdGroupMapIterator it;
-	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	for ( GA_Iterator pIt=geo->getPrimitiveRange().begin(); !pIt.atEnd(); ++pIt )
+	VisibleRenderablePtr renderable = 0;
+	doGroupConversion( &newGeo, newGroup, renderable, operands );
+	if ( renderable )
 	{
-		GA_Primitive *prim = primitives.get( pIt.getOffset() );
-		unsigned primType = prim->getTypeId().get();
-		
-		std::string value = "";
-		const char *tmp = attrAIF->getString( attr, pIt.getOffset() );
-		if ( tmp )
+		if ( Group *group = IECore::runTimeCast<Group>( renderable ) )
 		{
-			value = tmp;
+			const Group::ChildContainer &children = group->children();
+			for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+			{
+				if ( name != "" )
+				{
+					(*it)->blindData()->member<StringData>( "name", false, true )->writable() = name;
+				}
+				
+				result->addChild( *it );
+			}
 		}
-		
-		AttributePrimIdPair key( value, primType );
-		it = groupMap.find( key );
-		if ( it == groupMap.end() )
+		else
 		{
-			AttributePrimIdGroupPair pair( key, static_cast<GA_PrimitiveGroup*>( geo->createInternalElementGroup( GA_ATTRIB_PRIMITIVE, ( boost::format( "FromHoudiniGroupConverter__typedPrimitives%d%s" ) % primType % value ).str().c_str() ) ) );
-			it = groupMap.insert( pair ).first;
+			if ( name != "" )
+			{
+				renderable->blindData()->member<StringData>( "name", false, true )->writable() = name;
+			}
+			
+			result->addChild( renderable );
 		}
-		
-		it->second->add( prim );
 	}
-	
-	return groupMap.size();
 }
 
-PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *geo, const CompoundObject *operands ) const
+ObjectPtr FromHoudiniGroupConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	GU_DetailHandle handle;
 	handle.allocateAndSet( (GU_Detail*)geo, false );
@@ -350,10 +371,10 @@ PrimitivePtr FromHoudiniGroupConverter::doPrimitiveConversion( const GU_Detail *
 		}
 	}
 	
-	return IECore::runTimeCast<Primitive>( converter->convert() );
+	return converter->convert();
 }
 
-void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands ) const
+void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands, const std::string &name ) const
 {
 	GU_Detail childGeo( geo, group );
 	for ( GA_GroupTable::iterator<GA_ElementGroup> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
@@ -362,9 +383,14 @@ void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_Primi
 	}
 	childGeo.destroyAllEmptyGroups();
 	
-	PrimitivePtr child = doPrimitiveConversion( &childGeo, operands );
+	PrimitivePtr child = IECore::runTimeCast<Primitive>( doDetailConversion( &childGeo, operands ) );
 	if ( child )
 	{
+		if ( name != "" )
+		{
+			child->blindData()->member<StringData>( "name", false, true )->writable() = name;
+		}
+		
 		result->addChild( child );
 	}
 }

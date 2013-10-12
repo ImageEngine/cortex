@@ -360,8 +360,9 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 			selectionMode = IECoreGL::Selector::OcclusionQuery;
 		}
 		
-		IECoreGL::Selector selector;
-		selector.begin( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode );
+		std::vector<IECoreGL::HitRecord> hits;
+		{
+			IECoreGL::Selector selector( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode, hits );
 				
 			IECoreGL::State::bindBaseState();
 			selector.baseState()->bind();
@@ -379,10 +380,8 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 					IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
 				}
 			}
-			
-		std::vector<IECoreGL::HitRecord> hits;
-		selector.end( hits );
-				
+		}
+						
 	view.endGL();
 	
 	if( !hits.size() )
@@ -415,19 +414,19 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 	MDagPath camera;
 	view.getCamera( camera );
 	MFnCamera fnCamera( camera.node() );
-	float near = fnCamera.nearClippingPlane();
-	float far = fnCamera.farClippingPlane();
+	float nearf = fnCamera.nearClippingPlane();
+	float farf = fnCamera.farClippingPlane();
 	
 	float z = -1;
 	if( fnCamera.isOrtho() )
 	{
-		z = Imath::lerp( near, far, depthMin );
+		z = Imath::lerp( nearf, farf, depthMin );
 	}
 	else
 	{
 		// perspective camera - depth isn't linear so linearise to get z
-		float a = far / ( far - near );
-		float b = far * near / ( near - far );
+		float a = farf / ( farf - nearf );
+		float b = farf * nearf / ( nearf - farf );
 		z = b / ( depthMin - a );
 	}	
 	
@@ -438,7 +437,7 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 	MPoint cameraRayOrigin = localRayOrigin * localToCamera;
 	MVector cameraRayDirection = localRayDirection * localToCamera;
 	
-	MPoint cameraIntersectionPoint = cameraRayOrigin + cameraRayDirection * ( -( z - near ) / cameraRayDirection.z );
+	MPoint cameraIntersectionPoint = cameraRayOrigin + cameraRayDirection * ( -( z - nearf ) / cameraRayDirection.z );
 	MPoint worldIntersectionPoint = cameraIntersectionPoint * camera.inclusiveMatrix();
 	
 	// turn the processed hits into appropriate changes to the current selection
@@ -513,7 +512,7 @@ void ProceduralHolderUI::unhiliteGroupChildren( const std::string &name, IECoreG
 {
 	assert( base );
 	assert( group );
-
+	
 	/// Add state so that the group hilite state doesn't propogate down the hierarchy past the given name
 	IECoreGL::ConstNameStateComponentPtr n = group->getState()->get< IECoreGL::NameStateComponent >();
 	if ( n && n->name() != name )
@@ -524,8 +523,12 @@ void ProceduralHolderUI::unhiliteGroupChildren( const std::string &name, IECoreG
 			assert( oldState );
 			m_stateMap[ group.get() ] = oldState;
 		}
-
-		group->getState()->add( base );
+		
+		// don't bother if the group's already been explicitly highlighted
+		if( !group->getState()->get( IECoreGL::WireframeColorStateComponent::staticTypeId() ) )
+		{
+			group->getState()->add( base );
+		}
 		return;
 	}
 

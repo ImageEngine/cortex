@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "IECore/SimpleTypedData.h"
 
 #include "IECoreMaya/Convert.h"

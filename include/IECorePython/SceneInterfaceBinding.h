@@ -35,10 +35,15 @@
 #ifndef IECOREPYTHON_SCENEINTERFACEBINDING_H
 #define IECOREPYTHON_SCENEINTERFACEBINDING_H
 
+#include "boost/python.hpp"
+#include "IECore/SceneInterface.h"
+
 namespace IECorePython
 {
 
 void bindSceneInterface();
+
+void listToSceneInterfaceNameList( boost::python::list l, IECore::SceneInterface::NameList &p );
 
 }
 

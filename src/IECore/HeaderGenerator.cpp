@@ -32,9 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef _WIN32
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <pwd.h>
+#else
+#include <Windows.h>
+#endif
+
+
 #include <time.h>
 
 #include "boost/format.hpp"
@@ -44,6 +50,14 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/CompoundData.h"
 #include "IECore/IECore.h"
+
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+
 
 using namespace std;
 using namespace IECore;
@@ -82,6 +96,8 @@ static void ieCoreHeaderGenerator( CompoundObjectPtr header )
 
 static void unameHeaderGenerator( CompoundObjectPtr header )
 {
+#ifndef _WIN32
+
 	struct utsname name;
 
 	if ( !uname( &name ) )
@@ -94,10 +110,13 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 		compound->writable()["machineName"] = new StringData( name.machine );
 		header->members()["host"] = compound;
 	}
+#endif
 }
 
 static void userHeaderGenerator( CompoundObjectPtr header )
 {
+#ifndef _WIN32
+
 	uid_t uid = getuid();
 	struct passwd *st = getpwuid( uid );
 	if ( st )
@@ -108,6 +127,7 @@ static void userHeaderGenerator( CompoundObjectPtr header )
 	{
 		header->members()["userID"] = new IntData( uid );
 	}
+#endif
 }
 
 static void timeStampHeaderGenerator( CompoundObjectPtr header )
@@ -117,7 +137,7 @@ static void timeStampHeaderGenerator( CompoundObjectPtr header )
 
 	/// ctime_r manpage suggest that 26 characters should be enough in all cases
 	char buf[27];
-	std::string strTime ( ctime_r( &tm, &buf[0] ) );
+	std::string strTime ( ctime( &tm ) );
 
 	assert( strTime.length() <= 26 );
 

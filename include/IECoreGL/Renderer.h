@@ -217,6 +217,9 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"gl:primitive:pointColor" Color4fData</b><br>
 		/// The color of the points drawn.
 		///
+		/// \li <b>"gl:primitive:selectable" BoolData true</b><br>
+		/// Allow the primitive to be selected. ( ie. it will be drawn when we render for selection purposes )
+		///
 		/// \li <b>"gl:primitive:sortForTransparency" BoolData true</b><br>
 		/// Causes the individual components of a
 		/// primitive to be sorted in depth when the "gl:shade:transparent"

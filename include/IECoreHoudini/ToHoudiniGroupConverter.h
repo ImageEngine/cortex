@@ -45,13 +45,13 @@ namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::Group to a Houdini GU_Detail
-class ToHoudiniGroupConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class CortexHOUAPI ToHoudiniGroupConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniGroupConverter, ToHoudiniGroupConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
 
-		ToHoudiniGroupConverter( const IECore::VisibleRenderable *renderable );
+		ToHoudiniGroupConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniGroupConverter();
 		
@@ -60,8 +60,8 @@ class ToHoudiniGroupConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 	
 	protected :
 		
-		/// performs conversion from the IECore::VisibleRenderable into the given GU_Detail
-		virtual bool doConversion( const IECore::VisibleRenderable *renderable, GU_Detail *geo ) const;
+		/// performs conversion from the IECore::Group into the given GU_Detail
+		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 	private :
 

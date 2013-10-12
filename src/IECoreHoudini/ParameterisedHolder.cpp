@@ -110,6 +110,15 @@ CH_LocalVariable ParameterisedHolder<BaseType>::variables[] = {
 };
 
 template<typename BaseType>
+PRM_Template* ParameterisedHolder<BaseType>::getParameters(){
+	return parameters;
+};
+template<typename BaseType>
+CH_LocalVariable* ParameterisedHolder<BaseType>::getVariables(){
+	return variables;
+};
+
+template<typename BaseType>
 ParameterisedHolder<BaseType>::ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op ) : BaseType( net, name, op )
 {
 	CoreHoudini::initPython();

@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "IECoreMaya/FromMayaCompoundNumericPlugConverter.h"
 #include "IECoreMaya/NumericTraits.h"
 

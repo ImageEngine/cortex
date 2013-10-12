@@ -50,6 +50,20 @@
 #include "IECore/Group.h"
 #include "IECore/MatrixTransform.h"
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+
+#include <algorithm>
+
+#include <math.h>
+#ifdef _WIN32
+float roundf(float _x)
+{
+	return floor(_x + 0.5f);
+}
+#endif
+
 using namespace IECore;
 using namespace Imath;
 using namespace std;

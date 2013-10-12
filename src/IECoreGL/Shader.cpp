@@ -50,6 +50,7 @@
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/TextureUnits.h"
+#include "IECoreGL/Selector.h"
 
 using namespace std;
 using namespace boost;
@@ -67,7 +68,8 @@ class Shader::Implementation : public IECore::RefCounted
 
 		Implementation( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource )
 			:	m_vertexSource( vertexSource ), m_geometrySource( geometrySource ), m_fragmentSource( fragmentSource ),
-				m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
+				m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 ),
+				m_csParameter( NULL )
 		{		
 			string actualVertexSource = vertexSource;
 			string actualFragmentSource = fragmentSource;
@@ -162,6 +164,11 @@ class Shader::Implementation : public IECore::RefCounted
 					}
 
 					m_uniformParameters[name] = p;
+					
+					if( name == "Cs" )
+					{
+						m_csParameter = &(m_uniformParameters[name]);
+					}
 				}
 			}
 
@@ -265,6 +272,11 @@ class Shader::Implementation : public IECore::RefCounted
 			return 0;
 		}
 	
+		const Shader::Parameter *csParameter() const
+		{
+			return m_csParameter;
+		}
+	
 	private :
 	
 		friend class Shader::Setup;
@@ -282,6 +294,8 @@ class Shader::Implementation : public IECore::RefCounted
 		typedef std::map<std::string, Shader::Parameter> ParameterMap;
 		ParameterMap m_uniformParameters;
 		ParameterMap m_vertexAttributes;
+		
+		const Shader::Parameter *m_csParameter;
 		
 		void compile( const std::string &source, GLenum type, GLuint &shader )
 		{
@@ -319,8 +333,7 @@ class Shader::Implementation : public IECore::RefCounted
 				glGetShaderInfoLog( shader, logLength, &l, &log[0] );
 				message = &log[0];
 				IECore::msg( IECore::Msg::Warning, "IECoreGL::Shader", message );
-			}				
-
+			}
 		}
 
 		void release()
@@ -393,6 +406,20 @@ const Shader::Parameter *Shader::vertexAttribute( const std::string &name ) cons
 	return m_implementation->vertexAttribute( name );
 }
 
+const Shader::Parameter *Shader::csParameter() const
+{
+	return m_implementation->csParameter();
+}
+
+bool Shader::Parameter::operator == ( const Shader::Parameter &other ) const
+{
+	return 
+		type == other.type &&
+		size == other.size &&
+		location == other.location &&
+		textureUnit == other.textureUnit;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Setup implementation
 ///////////////////////////////////////////////////////////////////////////////
@@ -400,7 +427,10 @@ const Shader::Parameter *Shader::vertexAttribute( const std::string &name ) cons
 struct Shader::Setup::MemberData : public IECore::RefCounted
 {
 	
-	ConstShaderPtr shader;
+	MemberData( ConstShaderPtr &s )
+		:	shader( s ), hasCsValue( false )
+	{
+	}
 	
 	// base class for objects which can bind a value of some sort
 	// to a shader, and later unbind it.
@@ -423,15 +453,15 @@ struct Shader::Setup::MemberData : public IECore::RefCounted
 		virtual void bind()
 		{
 			Buffer::ScopedBinding binding( *m_buffer );
-			glEnableVertexAttribArray( m_attributeIndex );
-			glVertexAttribPointer( m_attributeIndex, m_size, m_type, false, 0, 0 );
-			glVertexAttribDivisor( m_attributeIndex, m_divisor );
+			glEnableVertexAttribArrayARB( m_attributeIndex );
+			glVertexAttribPointerARB( m_attributeIndex, m_size, m_type, false, 0, 0 );
+			glVertexAttribDivisorARB( m_attributeIndex, m_divisor );
 		}
 		
 		virtual void unbind()
 		{
-			glVertexAttribDivisor( m_attributeIndex, 0 );
-			glDisableVertexAttribArray( m_attributeIndex );
+			glVertexAttribDivisorARB( m_attributeIndex, 0 );
+			glDisableVertexAttribArrayARB( m_attributeIndex );
 		}
 		
 		private :
@@ -575,14 +605,15 @@ struct Shader::Setup::MemberData : public IECore::RefCounted
 				
 	};
 	
+	ConstShaderPtr shader;
 	vector<ValuePtr> values;
+	bool hasCsValue;
 	
 };
 
 Shader::Setup::Setup( ConstShaderPtr shader )
-	:	m_memberData( new MemberData )
+	:	m_memberData( new MemberData( shader ) )
 {
-	m_memberData->shader = shader;
 }
 
 const Shader *Shader::Setup::shader() const
@@ -711,6 +742,11 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 			}
 			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, floats ) );
 		}
+		
+		if( name == "Cs" )
+		{
+			m_memberData->hasCsValue = true;
+		}
 	}
 	else if( p->type == GL_FLOAT_MAT3 || p->type == GL_FLOAT_MAT4 )
 	{
@@ -792,6 +828,11 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	m_memberData->values.push_back( new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor ) );
 }
 
+bool Shader::Setup::hasCsValue() const
+{
+	return m_memberData->hasCsValue;
+}
+
 Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	:	m_previousProgram( 0 ), m_setup( setup )
 {
@@ -802,6 +843,15 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
 	{
 		(*it)->bind();
+	}
+	
+	
+	if( Selector *currentSelector = Selector::currentSelector() )
+	{
+		if( currentSelector->mode() == Selector::IDRender )
+		{
+			currentSelector->loadIDShader( m_setup.shader() );
+		}	
 	}
 }
 
@@ -817,7 +867,7 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// default shader source
+// common shader sources
 ///////////////////////////////////////////////////////////////////////////////
 
 const std::string &Shader::defaultVertexSource()
@@ -835,11 +885,13 @@ const std::string &Shader::defaultVertexSource()
 		"in vec3 vertexCs;"
 		""
 		"out vec3 geometryI;"
+		"out vec3 geometryP;"
 		"out vec3 geometryN;"
 		"out vec2 geometryst;"
 		"out vec3 geometryCs;"
 		""
 		"out vec3 fragmentI;"
+		"out vec3 fragmentP;"
 		"out vec3 fragmentN;"
 		"out vec2 fragmentst;"
 		"out vec3 fragmentCs;"
@@ -848,6 +900,7 @@ const std::string &Shader::defaultVertexSource()
 		"{"
 		"	vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );"
 		"	gl_Position = gl_ProjectionMatrix * pCam;"
+		"	geometryP = pCam.xyz;"
 		"	geometryN = normalize( gl_NormalMatrix * vertexN );"
 		"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
 		"	{"
@@ -859,21 +912,21 @@ const std::string &Shader::defaultVertexSource()
 		"	}"
 		""
 		"	geometryst = vertexst;"
-		"	if( vertexCsActive )"
-		"	{"
-		"		geometryCs = Cs * vertexCs;"
-		"	}"
-		"	else"
-		"	{"
-		"		geometryCs = Cs;"
-		"	}"
+		"	geometryCs = mix( Cs, vertexCs, float( vertexCsActive ) );"
 		""
 		"	fragmentI = geometryI;"
+		"	fragmentP = geometryP;"
 		"	fragmentN = geometryN;"
 		"	fragmentst = geometryst;"
 		"	fragmentCs = geometryCs;"
 		"}";
 		
+	return s;
+}
+
+const std::string &Shader::defaultGeometrySource()
+{
+	static string s = "";
 	return s;
 }
 
@@ -897,22 +950,60 @@ const std::string &Shader::defaultFragmentSource()
 	return s;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// definitions for useful simple shaders
-///////////////////////////////////////////////////////////////////////////////
-
-ShaderPtr Shader::constant()
+const std::string &Shader::constantFragmentSource()
 {
-	static const char *fragmentSource =
+	static string s = 
 	
+		"#version 150 compatibility\n"
+		""
 		"in vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
 		"	gl_FragColor = vec4( fragmentCs, 1 );"
 		"}";
+	
+	return s;
+}
 
-	static ShaderPtr s = new Shader( "", fragmentSource );
+const std::string &Shader::lambertFragmentSource()
+{
+	static string s = 
+	
+		"#version 150 compatibility\n"
+		""
+		"#include \"IECoreGL/Lights.h\"\n"
+		"#include \"IECoreGL/ColorAlgo.h\"\n"
+		"#include \"IECoreGL/Diffuse.h\"\n"
+
+		"in vec3 fragmentP;"
+		"in vec3 fragmentN;"
+		"in vec3 fragmentCs;"
+		""
+		"void main()"
+		"{"
+		"	vec3 n = normalize( fragmentN );"
+		""
+		"	vec3 L[ gl_MaxLights ];"
+		"	vec3 Cl[ gl_MaxLights ];"
+		""
+		"	lights( fragmentP, Cl, L, gl_MaxLights );"
+		""
+		"	vec3 Cdiffuse = ieDiffuse( fragmentP, n, Cl, L, gl_MaxLights );"
+		""
+		"	gl_FragColor = vec4( Cdiffuse, 1.0 );"
+		"}";
+	
+	return s;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// definitions for useful simple shaders
+///////////////////////////////////////////////////////////////////////////////
+
+ShaderPtr Shader::constant()
+{
+	static ShaderPtr s = new Shader( "", constantFragmentSource() );
 	return s;
 }
 

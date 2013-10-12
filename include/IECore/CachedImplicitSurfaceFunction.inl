@@ -35,6 +35,7 @@
 namespace IECore
 {
 
+#ifndef _WIN32
 template<typename P, typename V>
 CachedImplicitSurfaceFunction<P,V>::CachedImplicitSurfaceFunction( typename CachedImplicitSurfaceFunction<P,V>::Fn::Ptr fn, PointBaseType tolerance )
 {
@@ -44,9 +45,9 @@ CachedImplicitSurfaceFunction<P,V>::CachedImplicitSurfaceFunction( typename Cach
 	m_fn = fn;
 	m_tolerance = tolerance;
 }
-
+#endif
 template<typename P, typename V>
-typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::operator()( const CachedImplicitSurfaceFunction<P,V>::Point &p )
+typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::operator()( const typename CachedImplicitSurfaceFunction<P,V>::Point &p )
 {
 	/// Offset such that a cell centre is aligned with the origin
 	Key cacheKey(
@@ -81,7 +82,7 @@ typename CachedImplicitSurfaceFunction<P,V>::Cache::size_type CachedImplicitSurf
 }
 
 template<typename P, typename V>
-typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::getValue( const CachedImplicitSurfaceFunction<P,V>::Point &p )
+typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::getValue( const typename CachedImplicitSurfaceFunction<P,V>::Point &p )
 {
 	return this->operator()(p);
 }

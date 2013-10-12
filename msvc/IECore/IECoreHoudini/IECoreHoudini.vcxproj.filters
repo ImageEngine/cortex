@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\RATDeepImageReader.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\RATDeepImageWriter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ROP_SceneCacheWriter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SceneCacheNode.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_InterpolatedCacheReader.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_OpHolder.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_ParameterisedHolder.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_ProceduralHolder.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_SceneCacheSource.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\SOP_ToHoudiniConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniAttribConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniCompoundObjectConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniCortexObjectConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniCurvesConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniGeometryConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniGroupConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniNumericAttribConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniPointsConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniPolygonsConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ToHoudiniStringAttribConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\TypeIds.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\TypeTraits.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\UT_ObjectPoolCache.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\Convert.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\CoreHoudini.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\DetailSplitter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FnParameterisedHolder.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniCompoundObjectConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniCortexObjectConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniCurvesConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniGeometryConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniGroupConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniPointsConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\FromHoudiniPolygonsConverter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GEO_CobIOTranslator.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GEO_CortexPrimitive.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GR_Cortex.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GR_CortexPrimitive.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GU_CortexPrimitive.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\GUI_CortexPrimitiveHook.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\HoudiniScene.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\MessageHandler.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\NodeHandle.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\NodePassData.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheGeometry.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheNode.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheTransform.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ParameterisedHolder.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IECoreHoudini\ParameterisedHolderInterface.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\IECoreHoudini\ToHoudiniAttribConverter.inl">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="..\..\..\include\IECoreHoudini\ToHoudiniGeometryConverter.inl">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="..\..\..\include\IECoreHoudini\ToHoudiniNumericAttribConverter.inl">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="..\..\..\include\IECoreHoudini\FromHoudiniGeometryConverter.inl">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="..\..\..\include\IECoreHoudini\OBJ_SceneCacheNode.inl">
+      <Filter>Inc</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ParameterisedHolder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ParameterisedHolderInterface.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\RATDeepImageReader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\RATDeepImageWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ROP_SceneCacheWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SceneCacheNode.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_OpHolder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_ParameterisedHolder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_ProceduralHolder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_SceneCacheSource.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\SOP_ToHoudiniConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniAttribConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniCompoundObjectConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniCortexObjectConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniCurvesConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniGeometryConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniGroupConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniNumericAttribConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniPointsConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniPolygonsConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\ToHoudiniStringAttribConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\UT_ObjectPoolCache.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\Convert.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\CoreHoudini.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\DetailSplitter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FnParameterisedHolder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniCompoundObjectConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniCortexObjectConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniCurvesConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniGeometryConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniGroupConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniPointsConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\FromHoudiniPolygonsConverter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GEO_CobIOTranslator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GEO_CortexPrimitive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GR_Cortex.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GR_CortexPrimitive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GU_CortexPrimitive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\GUI_CortexPrimitiveHook.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\HoudiniHeaderGenerator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\HoudiniScene.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\MessageHandler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\NodeHandle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\NodePassData.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILLock.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILRelease.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\WrapperGarbageCollector.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\OBJ_SceneCacheGeometry.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\OBJ_SceneCacheNode.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreHoudini\OBJ_SceneCacheTransform.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

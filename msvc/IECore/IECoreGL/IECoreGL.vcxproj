@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECoreGL\AlphaTexture.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Bindable.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\BoxPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Buffer.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\CachedConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Camera.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ColorTexture.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\CurvesPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Debug.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\DeferredRendererImplementation.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\DepthTexture.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\DiskPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Display.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Exception.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Font.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\FontLoader.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\FrameBuffer.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Group.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\HitRecord.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\IECoreGL.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ImmediateRendererImplementation.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Lights.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\LuminanceTexture.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\MeshPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\NameStateComponent.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\NumericTraits.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\OrthographicCamera.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\PerspectiveCamera.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\PointsPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Primitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\QuadPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Renderable.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Renderer.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\RendererImplementation.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Scene.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Selector.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Shader.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ShaderLoader.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ShaderStateComponent.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\SpherePrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\SplineToGLTextureConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\State.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\StateComponent.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\TextPrimitive.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\Texture.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\TextureLoader.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\TextureUnits.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ToGLBufferConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ToGLCameraConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ToGLConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ToGLCurvesConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ToGLMeshConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ToGLPointsConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\ToGLTextureConverter.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\TypedStateComponent.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\UIntTexture.cpp" />
+    <ClCompile Include="..\..\..\src\IECoreGL\UniformFunctions.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D348DD83-BEC1-44FE-9D9F-99F1A4F96100}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>IECoreGL</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v90</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NOMINMAX;NDEBUG;_WINDOWS;_USRDLL;IECORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\sdk\cortex-git\cortex\include;D:\sdk\include;D:\sdk\Deploy\include\OpenEXR;D:\sdk\Deploy\include;D:\sdk\boost_1_51_0;D:\sdk\include\gl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>D:\sdk\lib64;D:\sdk\Deploy\lib\x64\Release;D:\sdk\boost_1_51_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;Imath.lib;Half.lib;Iex.lib;IlmThread.lib;IlmImf.lib;irml.lib;tbb.lib;tbbmalloc.lib;tbbmalloc_proxy.lib;freetype249.lib;jpeg.lib;libpng12_static.lib;libtiff.lib;IECore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>D:\sdk\cortex-git\cortex\msvc\IECore\IECoreGL\x64\Release\IECoreGL.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetPath) D:\sdk\bin64\$(TargetFileName)
+copy $(TargetDir)\$(TargetName).pdb D:\sdk\bin64\
+copy $(TargetDir)\$(TargetName).lib D:\sdk\lib64\$(TargetName).lib</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

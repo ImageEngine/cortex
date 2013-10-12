@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore\CompoundObject.h"
 #include "IECoreMaya/FromMayaProceduralHolderConverter.h"
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/MayaTypeIds.h"

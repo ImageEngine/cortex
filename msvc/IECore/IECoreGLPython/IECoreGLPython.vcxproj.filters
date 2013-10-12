@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{bd2b32c6-b80e-497c-a7b3-bb4667fbea58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IECorePython">
+      <UniqueIdentifier>{0971efca-77f7-4b64-83ab-565c2c93effe}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\AlphaTextureBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\BindableBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\BufferBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\CachedConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\CameraBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ColorTextureBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\DepthTextureBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\FontBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\FontLoaderBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\FrameBufferBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\GroupBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\HitRecordBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\IECoreGLBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\LuminanceTextureBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\NameStateComponentBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\OrthographicCameraBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\PerspectiveCameraBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\PointsPrimitiveBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\PrimitiveBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\RenderableBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\RendererBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\SceneBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\SelectorBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ShaderBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ShaderLoaderBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ShaderStateComponentBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\SplineToGLTextureConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\StateBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\StateComponentBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\TextureBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\TextureLoaderBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ToGLCameraConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ToGLConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ToGLCurvesConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ToGLMeshConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ToGLPointsConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\ToGLTextureConverterBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECoreGL\bindings\TypedStateComponentBinding.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\WrapperGarbageCollector.cpp">
+      <Filter>IECorePython</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IECorePython\ScopedGILRelease.cpp">
+      <Filter>IECorePython</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

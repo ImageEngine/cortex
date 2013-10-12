@@ -31,9 +31,10 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
+#ifdef USESCENECACHE
+#include "OP/OP_Layout.h"
 #include "PRM/PRM_ChoiceList.h"
-#include "UT/UT_StringMMPattern.h"
+#include "UT/UT_Interrupt.h"
 
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
@@ -58,11 +59,9 @@ OP_Node *OBJ_SceneCacheTransform::create( OP_Network *net, const char *name, OP_
 
 PRM_Name OBJ_SceneCacheTransform::pHierarchy( "hierarchy", "Hierarchy" );
 PRM_Name OBJ_SceneCacheTransform::pDepth( "depth", "Depth" );
-PRM_Name OBJ_SceneCacheTransform::pTagFilter( "tagFilter", "Tag Filter" );
 
 PRM_Default OBJ_SceneCacheTransform::hierarchyDefault( SubNetworks );
 PRM_Default OBJ_SceneCacheTransform::depthDefault( AllDescendants );
-PRM_Default OBJ_SceneCacheTransform::filterDefault( 0, "*" );
 
 static PRM_Name hierarchyNames[] = {
 	PRM_Name( "0", "SubNetworks" ),
@@ -79,15 +78,13 @@ static PRM_Name depthNames[] = {
 
 PRM_ChoiceList OBJ_SceneCacheTransform::hierarchyList( PRM_CHOICELIST_SINGLE, &hierarchyNames[0] );
 PRM_ChoiceList OBJ_SceneCacheTransform::depthList( PRM_CHOICELIST_SINGLE, &depthNames[0] );
-PRM_ChoiceList OBJ_SceneCacheTransform::tagFilterMenu( PRM_CHOICELIST_TOGGLE, &OBJ_SceneCacheTransform::buildTagFilterMenu );
 
 OP_TemplatePair *OBJ_SceneCacheTransform::buildParameters()
 {
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		OP_TemplatePair *firstTemplatePair = new OP_TemplatePair( buildExtraParameters()->myTemplate, buildExpansionParameters() );
-		templatePair = new OP_TemplatePair( buildBaseParameters()->myTemplate, firstTemplatePair );
+		templatePair = new OP_TemplatePair( OBJ_SceneCacheNode<OBJ_SubNet>::buildParameters( buildExtraParameters() ) );
 	}
 	
 	return templatePair;
@@ -98,7 +95,7 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildExtraParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[4];
+		thisTemplate = new PRM_Template[3];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_INT, 1, &pHierarchy, &hierarchyDefault, &hierarchyList, 0, 0, 0, 0,
@@ -112,12 +109,6 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildExtraParameters()
 			"path and Children will only expand the immediate children of the root path, which may "
 			"or may not contain geometry."
 		);
-		thisTemplate[2] = PRM_Template(
-			PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
-			"A list of filters to decide which tags to display when expanding. All children will be created, "
-			"the tag filters just control initial visibility. Uses Houdini matching syntax, but nodes will be "
-			"visible if the filter matches *any* of their tags."
-		);
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
@@ -129,44 +120,6 @@ OP_TemplatePair *OBJ_SceneCacheTransform::buildExtraParameters()
 	return templatePair;
 }
 
-void OBJ_SceneCacheTransform::buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
-{
-	OBJ_SceneCacheTransform *node = reinterpret_cast<OBJ_SceneCacheTransform*>( data );
-	if ( !node )
-	{
-		return;
-	}
-	
-	menu[0].setToken( "*" );
-	menu[0].setLabel( "*" );
-	
-	std::string file;
-	if ( !node->ensureFile( file ) )
-	{
-		// mark the end of our menu
-		menu[1].setToken( 0 );
-		return;
-	}
-	
-	ConstSceneInterfacePtr scene = node->scene( file, node->getPath() );
-	if ( !scene )
-	{
-		// mark the end of our menu
-		menu[1].setToken( 0 );
-		return;
-	}
-	
-	SceneInterface::NameList tags;
-	scene->readTags( tags );
-	std::vector<std::string> tagStrings;
-	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
-	{
-		tagStrings.push_back( *it );
-	}
-	
-	node->createMenu( menu, tagStrings );
-}
-
 void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 {
 	if ( !scene )
@@ -174,107 +127,148 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 		return;
 	}
 	
-	Depth depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
-	Hierarchy hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
+	Parameters params;
+	params.geometryType = getGeometryType();
+	params.depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
+	params.hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
+	getAttributeFilter( params.attributeFilter );
+	getShapeFilter( params.shapeFilter );
+	getTagFilter( params.tagFilterStr );
+	getTagFilter( params.tagFilter );
 	
-	UT_String tagFilterStr;
-	evalString( tagFilterStr, pTagFilter.getToken(), 0, 0 );
-	UT_StringMMPattern tagFilter;
-	tagFilter.compile( tagFilterStr );
-	
-	if ( hierarchy == FlatGeometry )
+	if ( params.hierarchy == FlatGeometry )
 	{
 		// Collapse first, in case the immediate object was already created on during parent expansion
 		collapseHierarchy();
-		doExpandObject( scene, this, hierarchy, depth, tagFilter );
+		doExpandObject( scene, this, params );
 		setInt( pExpanded.getToken(), 0, 0, 1 );
-		enableParm( pExpanded.getToken(), false );
 		return;
 	}
 	
 	OBJ_Node *rootNode = this;
 	if ( scene->hasObject() )
 	{
-		OBJ_Node *objNode = doExpandObject( scene, this, SubNetworks, Children, tagFilter );
-		if ( hierarchy == Parenting )
+		Parameters rootParams( params );
+		rootParams.hierarchy = SubNetworks;
+		rootParams.depth = Children;
+		OBJ_Node *objNode = doExpandObject( scene, this, rootParams );
+		if ( params.hierarchy == Parenting )
 		{
 			rootNode = objNode;
 		}
 	}
-	else if ( hierarchy == Parenting )
+	else if ( params.hierarchy == Parenting )
 	{
 		/// \todo: this is terrible. can we use the subnet input instead?
 		rootNode = reinterpret_cast<OBJ_Node*>( createNode( "geo", "TMP" ) );
 	}
 	
-	doExpandChildren( scene, rootNode, hierarchy, depth, tagFilter );
-	setInt( pExpanded.getToken(), 0, 0, 1 );
-	enableParm( pExpanded.getToken(), false );
+	if ( params.hierarchy == Parenting )
+	{
+		rootNode->setIndirectInput( 0, this->getParentInput( 0 ) );
+	}
 	
-	if ( hierarchy == Parenting && !scene->hasObject() )
+	UT_Interrupt *progress = UTgetInterrupt();
+	if ( !progress->opStart( ( "Expand Hierarchy for " + getPath() ).c_str() ) )
+	{
+		return;
+	}
+	
+	doExpandChildren( scene, rootNode, params );
+	setInt( pExpanded.getToken(), 0, 0, 1 );
+	
+	if ( params.hierarchy == Parenting && !scene->hasObject() )
 	{
 		destroyNode( rootNode );
 	}
+	
+	progress->opEnd();
 }
 
-OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth, const UT_StringMMPattern &tagFilter )
+OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, OP_Network *parent, const Parameters &params )
 {
-	const char *name = ( hierarchy == Parenting ) ? scene->name().c_str() : "geo";
+	const char *name = ( params.hierarchy == Parenting ) ? scene->name().c_str() : "geo";
 	OP_Node *opNode = parent->createNode( OBJ_SceneCacheGeometry::typeName, name );
 	OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( opNode );
 	
-	geo->setFile( getFile() );
-	geo->setPath( scene );
+	geo->referenceParent( pFile.getToken() );
+	if ( params.hierarchy == Parenting )
+	{
+		geo->setPath( scene );
+	}
+	else
+	{
+		geo->referenceParent( pRoot.getToken() );
+		geo->setIndirectInput( 0, parent->getParentInput( 0 ) );
+	}
 	
-	Space space = ( depth == AllDescendants ) ? Path : ( hierarchy == Parenting ) ? Local : Object;
+	Space space = ( params.depth == AllDescendants ) ? Path : ( params.hierarchy == Parenting ) ? Local : Object;
 	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
+	geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)params.geometryType );
+	geo->setAttributeFilter( params.attributeFilter );
+	geo->setShapeFilter( params.shapeFilter );
 	
+	bool visible = tagged( scene, params.tagFilter );
+	if ( visible )
+	{
+		geo->setTagFilter( params.tagFilterStr );
+	}
+	
+	geo->setDisplay( visible );
 	geo->expandHierarchy( scene );
-	
-	geo->setVisible( tagged( scene, tagFilter ) );
 	
 	return geo;
 }
 
-OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth, const UT_StringMMPattern &tagFilter )
+OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, OP_Network *parent, const Parameters &params )
 {
 	OP_Node *opNode = parent->createNode( OBJ_SceneCacheTransform::typeName, scene->name().c_str() );
 	OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( opNode );
 	
-	xform->setFile( getFile() );
+	xform->referenceParent( pFile.getToken() );
 	xform->setPath( scene );
 	xform->setSpace( Local );
-	xform->setInt( pHierarchy.getToken(), 0, 0, hierarchy );
-	xform->setInt( pDepth.getToken(), 0, 0, depth );
+	xform->setGeometryType( (OBJ_SceneCacheTransform::GeometryType)params.geometryType );
+	xform->setAttributeFilter( params.attributeFilter );
+	xform->setShapeFilter( params.shapeFilter );
+	xform->setInt( pHierarchy.getToken(), 0, 0, params.hierarchy );
+	xform->setInt( pDepth.getToken(), 0, 0, params.depth );
 	
 	SceneInterface::NameList children;
 	scene->childNames( children );
 	if ( children.empty() && !scene->hasObject() )
 	{
 		xform->setInt( pExpanded.getToken(), 0, 0, 1 );
-		xform->enableParm( pExpanded.getToken(), false );
 	}
 	
-	if ( tagged( scene, tagFilter ) )
+	if ( tagged( scene, params.tagFilter ) )
 	{
-		// we can't get the string directly from the UT_StringMMPattern, and we don't want to re-compile the UT_StringMMPattern
-		// from a string during a recursive expansion, so we get the filter string from the parameter again.
-		UT_String tagFilterStr;
-		evalString( tagFilterStr, pTagFilter.getToken(), 0, 0 );
-		xform->setString( tagFilterStr, CH_STRING_LITERAL, pTagFilter.getToken(), 0, 0 );
+		xform->setTagFilter( params.tagFilterStr );
 	}
 	else
 	{
-		xform->setVisible( false );
+		xform->setDisplay( false );
+	}
+	
+	if ( params.hierarchy == SubNetworks )
+	{
+		xform->setIndirectInput( 0, parent->getParentInput( 0 ) );
 	}
 	
 	return xform;
 }
 
-void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_Network *parent, Hierarchy hierarchy, Depth depth, const UT_StringMMPattern &tagFilter )
+void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_Network *parent, const Parameters &params )
 {
+	UT_Interrupt *progress = UTgetInterrupt();
+	progress->setLongOpText( ( "Expanding " + scene->name().string() ).c_str() );
+	if ( progress->opInterrupt() )
+	{
+		return;
+	}
+	
 	OP_Network *inputNode = parent;
-	if ( hierarchy == Parenting )
+	if ( params.hierarchy == Parenting )
 	{
 		parent = parent->getParent();
 	}
@@ -286,50 +280,132 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		ConstSceneInterfacePtr child = scene->child( *it );
 		
 		OBJ_Node *childNode = 0;
-		if ( hierarchy == SubNetworks )
+		if ( params.hierarchy == SubNetworks )
 		{
-			childNode = doExpandChild( child, parent, hierarchy, depth, tagFilter );
-			if ( depth == AllDescendants && child->hasObject() )
+			childNode = doExpandChild( child, parent, params );
+			if ( params.depth == AllDescendants && child->hasObject() && tagged( child, params.tagFilter ) )
 			{
-				doExpandObject( child, childNode, hierarchy, Children, tagFilter );
+				Parameters childParams( params );
+				childParams.depth = Children;
+				doExpandObject( child, childNode, childParams );
 			}
 		}
-		else if ( hierarchy == Parenting )
+		else if ( params.hierarchy == Parenting )
 		{
 			if ( child->hasObject() )
 			{
-				childNode = doExpandObject( child, parent, hierarchy, Children, tagFilter );
+				Parameters childParams( params );
+				childParams.depth = Children;
+				childNode = doExpandObject( child, parent, childParams );
 			}
 			else
 			{
-				childNode = doExpandChild( child, parent, hierarchy, depth, tagFilter );
+				childNode = doExpandChild( child, parent, params );
 			}
 			
 			childNode->setInput( 0, inputNode );
 		}
 		
-		if ( depth == AllDescendants )
+		if ( params.depth == AllDescendants )
 		{
-			doExpandChildren( child, childNode, hierarchy, depth, tagFilter );
+			if ( params.hierarchy == SubNetworks && !tagged( child, params.tagFilter ) )
+			{
+				// we don't expand non-tagged children for SubNetwork mode, but we
+				// do for Parenting mode, because otherwise the hierarchy would be
+				// stuck in an un-expandable state.
+				continue;
+			}
+			
+			doExpandChildren( child, childNode, params );
 			childNode->setInt( pExpanded.getToken(), 0, 0, 1 );
-			childNode->enableParm( pExpanded.getToken(), false );
-		}
-	}
-}
-
-bool OBJ_SceneCacheTransform::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )
-{
-	SceneInterface::NameList tags;
-	scene->readTags( tags );
-	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
-	{
-		if ( UT_String( *it ).multiMatch( filter ) )
-		{
-			return true;
 		}
 	}
 	
-	return false;
+	OP_Layout layout( parent );
+	layout.addLayoutOp( parent->getParentInput( 0 ) );
+	for ( int i=0; i < parent->getNchildren(); ++i )
+	{
+		layout.addLayoutOp( parent->getChild( i ) );
+	}
+	layout.layoutOps( OP_LAYOUT_TOP_TO_BOT, parent, parent->getParentInput( 0 ) );
+}
+
+void OBJ_SceneCacheTransform::pushToHierarchy()
+{
+	UT_String attribFilter, shapeFilter;
+	getAttributeFilter( attribFilter );
+	getShapeFilter( shapeFilter );
+	GeometryType geometryType = getGeometryType();
+	
+	UT_String tagFilterStr;
+	UT_StringMMPattern tagFilter;
+	getTagFilter( tagFilterStr );
+	tagFilter.compile( tagFilterStr );
+	
+	UT_PtrArray<OP_Node*> children;
+	int numSceneNodes = getOpsByName( OBJ_SceneCacheTransform::typeName, children );
+	for ( int i=0; i < numSceneNodes; ++i )
+	{
+		OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( children[i] );
+		xform->setAttributeFilter( attribFilter );
+		xform->setShapeFilter( shapeFilter );
+		xform->setGeometryType( geometryType );
+		
+		std::string file;
+		bool visible = false;
+		if ( IECore::ConstSceneInterfacePtr scene = xform->scene() )
+		{
+			if ( tagged( scene, tagFilter ) )
+			{
+				visible = true;
+				xform->setTagFilter( tagFilterStr );
+			}
+		}
+		
+		xform->setRender( visible );
+		xform->setDisplay( visible );
+		xform->pushToHierarchy();
+	}
+	
+	children.clear();
+	numSceneNodes = getOpsByName( OBJ_SceneCacheGeometry::typeName, children );
+	for ( int i=0; i < numSceneNodes; ++i )
+	{
+		OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( children[i] );
+		geo->setAttributeFilter( attribFilter );
+		geo->setShapeFilter( shapeFilter );
+		geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)geometryType );
+		
+		std::string file;
+		bool visible = false;
+		if ( IECore::ConstSceneInterfacePtr scene = geo->scene() )
+		{
+			visible = tagged( scene, tagFilter );
+			if ( visible )
+			{
+				geo->setTagFilter( tagFilterStr );
+			}
+		}
+		
+		geo->setRender( visible );
+		geo->setDisplay( visible );
+		geo->pushToHierarchy();
+	}
+}
+
+OBJ_SceneCacheTransform::Parameters::Parameters()
+{
+}
+
+OBJ_SceneCacheTransform::Parameters::Parameters( const Parameters &other )
+{
+	geometryType = other.geometryType;
+	hierarchy = other.hierarchy;
+	depth = other.depth;
+	attributeFilter = other.attributeFilter;
+	shapeFilter = other.shapeFilter;
+	tagFilterStr = other.tagFilterStr;
+	tagFilter.compile( tagFilterStr );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -346,6 +422,12 @@ OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
 
 bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 {
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
+	{
+		return false;
+	}
+	
 	const char *expanded = pExpanded.getToken();
 	if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
 	{
@@ -355,14 +437,15 @@ bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
 	return false;
 }
 
-IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
+IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node, double time )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	if ( !sceneNode )
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
 		return 0;
 	}
 	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
 	/// \todo: do we need to ensure the file exists first?
 	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
 	if ( !scene )
@@ -370,17 +453,18 @@ IECore::ObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node )
 		return 0;
 	}
 	
-	return LinkedScene::linkAttributeData( scene );
+	return LinkedScene::linkAttributeData( scene, time );
 }
 
 bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	if ( !sceneNode )
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
 		return false;
 	}
 	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
 	/// \todo: do we need to ensure the file exists first?
 	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
 	if ( !scene )
@@ -393,12 +477,13 @@ bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface:
 
 void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, bool includeChildren )
 {
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	if ( !sceneNode )
+	// make sure its a SceneCacheNode
+	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
 		return;
 	}
 	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
 	/// \todo: do we need to ensure the file exists first?
 	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
 	if ( !scene )
@@ -408,3 +493,4 @@ void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::Nam
 	
 	scene->readTags( tags, includeChildren );
 }
+#endif

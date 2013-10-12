@@ -40,6 +40,7 @@
 #include "IECore/DeepImageWriter.h"
 
 #include "IECoreHoudini/TypeIds.h"
+#include "ieHoudini.h"
 
 namespace IECoreHoudini
 {
@@ -52,7 +53,7 @@ namespace IECoreHoudini
 /// supports reading them.
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class RATDeepImageWriter : public IECore::DeepImageWriter
+class CortexHOUAPI RATDeepImageWriter : public IECore::DeepImageWriter
 {
 	public :
 

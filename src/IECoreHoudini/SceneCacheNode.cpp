@@ -35,10 +35,13 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
+#include "CH/CH_Manager.h"
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
 #include "PRM/PRM_ChoiceList.h"
+#include "PRM/PRM_Parm.h"
 #include "SOP/SOP_Node.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/SharedSceneInterfaces.h"
 
@@ -52,7 +55,8 @@ using namespace IECoreHoudini;
 //////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename BaseType>
-SceneCacheNode<BaseType>::SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) : BaseType( net, name, op )
+SceneCacheNode<BaseType>::SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op ) :
+	BaseType( net, name, op ), m_loaded( false ), m_static( boost::indeterminate )
 {
 	BaseType::flags().setTimeDep( true );
 }
@@ -75,16 +79,40 @@ template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pSpace( "space", "Space" );
 
 template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pAttributeFilter( "attributeFilter", "Attribute Filter" );
+
+template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pTagFilter( "tagFilter", "Tag Filter" );
+
+template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pShapeFilter( "shapeFilter", "Shape Filter" );
+
+template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pGeometryType( "geometryType", "Geometry Type" );
+
+template<typename BaseType>
 PRM_Default SceneCacheNode<BaseType>::rootDefault( 0, "/" );
 
 template<typename BaseType>
 PRM_Default SceneCacheNode<BaseType>::spaceDefault( World );
+
+template<typename BaseType>
+PRM_Default SceneCacheNode<BaseType>::filterDefault( 0, "*" );
+
+template<typename BaseType>
+PRM_Default SceneCacheNode<BaseType>::geometryTypeDefault( Cortex );
 
 static PRM_Name spaceNames[] = {
 	PRM_Name( "0", "World" ),
 	PRM_Name( "1", "Path" ),
 	PRM_Name( "2", "Local" ),
 	PRM_Name( "3", "Object" ),
+	PRM_Name( 0 ) // sentinal
+};
+
+static PRM_Name geometryTypes[] = {
+	PRM_Name( "0", "Cortex Primitives" ),
+	PRM_Name( "1", "Houdini Geometry" ),
 	PRM_Name( 0 ) // sentinal
 };
 
@@ -95,9 +123,18 @@ template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::spaceList( PRM_CHOICELIST_SINGLE, &spaceNames[0] );
 
 template<typename BaseType>
+PRM_ChoiceList SceneCacheNode<BaseType>::geometryTypeList( PRM_CHOICELIST_SINGLE, &geometryTypes[0] );
+
+template<typename BaseType>
+PRM_ChoiceList SceneCacheNode<BaseType>::tagFilterMenu( PRM_CHOICELIST_TOGGLE, &SceneCacheNode<BaseType>::buildTagFilterMenu );
+
+template<typename BaseType>
+PRM_ChoiceList SceneCacheNode<BaseType>::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SceneCacheNode<BaseType>::buildShapeFilterMenu );
+
+template<typename BaseType>
 PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 	PRM_Template(
-		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::fileChangedCallback, 0, 0,
+		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
 		"A static or animated SCC or LSCC file to load, starting at the Root path provided."
 	),
 	PRM_Template(
@@ -106,7 +143,7 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 		"cause all other nodes using this file to require a recook as well."
 	),
 	PRM_Template(
-		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::pathChangedCallback, 0, 0,
+		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
 		"Root path inside the SCC or LSCC of the hierarchy to load"
 	),
 	PRM_Template(
@@ -114,6 +151,30 @@ PRM_Template SceneCacheNode<BaseType>::parameters[] = {
 		"Re-orient the objects by choosing a space. World transforms from \"/\" on down the hierarchy, "
 		"Path re-roots the transformation starting at the specified root path, Local uses the current level "
 		"transformations only, and Object is an identity transform"
+	),
+	PRM_Template(
+		PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
+		"The type of geometry to load. Cortex Primitives are faster, but only allow manipulation through "
+		"OpHolders or specificly designed nodes. Houdini Geometry will use the converters to create standard "
+		"geo that can be manipulated anywhere."
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pAttributeFilter, &filterDefault, 0, 0, 0, 0, 0,
+		"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
+		"The filter expects Cortex names as exist in the cache, and performs automated conversion to "
+		"standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). P will always be loaded."
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
+		"A list of filters to decide which shapes to load. Only the shape basename is relevant, the path "
+		"is ignored. Uses Houdini matching syntax"
+	),
+	PRM_Template(
+		PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
+		"A list of filters to decide which tags to expand. In SubNetwork mode, branches that do not "
+		"match the filter will remain collapsed. In Parenting mode, the tag filters just control initial "
+		"visibility. In FlatGeometry mode they essentially delete the non-tagged geometry. Uses Houdini "
+		"matching syntax, but matches *any* of the tags."
 	),
 	PRM_Template()
 };
@@ -144,21 +205,79 @@ void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 }
 
 template<typename BaseType>
-int SceneCacheNode<BaseType>::fileChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
+void SceneCacheNode<BaseType>::buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
 {
 	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
 	if ( !node )
 	{
-		return 0;
+		return;
 	}
 	
-	node->sceneChanged();
+	menu[0].setToken( "*" );
+	menu[0].setLabel( "*" );
 	
-	return 1;
+	std::string file;
+	if ( !node->ensureFile( file ) )
+	{
+		// mark the end of our menu
+		menu[1].setToken( 0 );
+		return;
+	}
+	
+	ConstSceneInterfacePtr scene = node->scene( file, node->getPath() );
+	if ( !scene )
+	{
+		// mark the end of our menu
+		menu[1].setToken( 0 );
+		return;
+	}
+	
+	SceneInterface::NameList tags;
+	scene->readTags( tags );
+	std::vector<std::string> tagStrings;
+	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
+	{
+		tagStrings.push_back( *it );
+	}
+	
+	node->createMenu( menu, tagStrings );
 }
 
 template<typename BaseType>
-int SceneCacheNode<BaseType>::pathChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
+void SceneCacheNode<BaseType>::buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
+{
+	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
+	if ( !node )
+	{
+		return;
+	}
+	
+	menu[0].setToken( "*" );
+	menu[0].setLabel( "*" );
+	
+	std::string file;
+	if ( !node->ensureFile( file ) )
+	{
+		// mark the end of our menu
+		menu[1].setToken( 0 );
+		return;
+	}
+	
+	ConstSceneInterfacePtr scene = node->scene( file, node->getPath() );
+	if ( !scene )
+	{
+		// mark the end of our menu
+		menu[1].setToken( 0 );
+		return;
+	}
+	
+	std::vector<std::string> objects;
+	node->objectNames( scene, objects );
+	node->createMenu( menu, objects );
+}
+
+template<typename BaseType>
+int SceneCacheNode<BaseType>::sceneParmChangedCallback( void *data, int index, float time, const PRM_Template *tplate )
 {
 	SceneCacheNode<BaseType> *node = reinterpret_cast<SceneCacheNode<BaseType>*>( data );
 	if ( !node )
@@ -251,9 +370,88 @@ typename SceneCacheNode<BaseType>::Space SceneCacheNode<BaseType>::getSpace() co
 }
 
 template<typename BaseType>
-void SceneCacheNode<BaseType>::setSpace( SceneCacheNode<BaseType>::Space space )
+void SceneCacheNode<BaseType>::setSpace(typename SceneCacheNode<BaseType>::Space space )
 {
 	this->setInt( pSpace.getToken(), 0, 0, space );
+}
+
+template<typename BaseType>
+typename SceneCacheNode<BaseType>::GeometryType SceneCacheNode<BaseType>::getGeometryType() const
+{
+	return (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setGeometryType(typename SceneCacheNode<BaseType>::GeometryType type )
+{
+	this->setInt( pGeometryType.getToken(), 0, 0, type );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getAttributeFilter( UT_String &filter ) const
+{
+	this->evalString( filter, pAttributeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getAttributeFilter( UT_StringMMPattern &filter ) const
+{
+	UT_String value;
+	getAttributeFilter( value );
+	filter.compile( value );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setAttributeFilter( const UT_String &filter )
+{
+	this->setString( filter, CH_STRING_LITERAL, pAttributeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getTagFilter( UT_String &filter ) const
+{
+	this->evalString( filter, pTagFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getTagFilter( UT_StringMMPattern &filter ) const
+{
+	UT_String value;
+	getTagFilter( value );
+	filter.compile( value );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setTagFilter( const UT_String &filter )
+{
+	this->setString( filter, CH_STRING_LITERAL, pTagFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getShapeFilter( UT_String &filter ) const
+{
+	this->evalString( filter, pShapeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getShapeFilter( UT_StringMMPattern &filter ) const
+{
+	UT_String value;
+	getShapeFilter( value );
+	filter.compile( value );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setShapeFilter( const UT_String &filter )
+{
+	this->setString( filter, CH_STRING_LITERAL, pShapeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::referenceParent( const char *parmName )
+{
+	this->getParm( parmName ).setChannelReference( 0, 0, ( std::string( "../" ) + parmName ).c_str() );
+	sceneChanged();
 }
 
 template<typename BaseType>
@@ -313,6 +511,48 @@ void SceneCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std
 }
 
 template<typename BaseType>
+bool SceneCacheNode<BaseType>::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )
+{
+	SceneInterface::NameList tags;
+	scene->readTags( tags );
+	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
+	{
+		if ( UT_String( *it ).multiMatch( filter ) )
+		{
+			return true;
+		}
+	}
+	
+	// an empty list should be equivalent to matching an empty string
+	if ( tags.empty() && UT_String( "" ).multiMatch( filter ) )
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+template<typename BaseType>
+ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene() const
+{
+	if ( !this->hasParm( pFile.getToken() ) || !this->hasParm( pRoot.getToken() ) )
+	{
+		return 0;
+	}
+	
+	try
+	{
+		return this->scene( getFile(), getPath() );
+	}
+	catch( ... )
+	{
+		return 0;
+	}
+	
+	return 0;
+}
+
+template<typename BaseType>
 ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileName, const std::string &path )
 {
 	ConstSceneInterfacePtr result = SharedSceneInterfaces::get( fileName );
@@ -324,6 +564,12 @@ ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileN
 	}
 	
 	return result;
+}
+
+template<typename BaseType>
+double SceneCacheNode<BaseType>::time( OP_Context context ) const
+{
+	return context.getTime() + CHgetManager()->getSecsPerSample();
 }
 
 template<typename BaseType>
