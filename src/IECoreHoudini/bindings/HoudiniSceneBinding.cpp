@@ -67,6 +67,21 @@ static HoudiniScenePtr constructor( const std::string n, const list &c, const li
 	return new HoudiniScene( nodePath, contentPath, rootPath, defaultTime );
 }
 
+/// \todo: return a PyObject* directly if SideFx provides a swig-free method for creating one from a HOM_Node*
+static std::string getNodePath( HoudiniScene *scene )
+{
+	const OP_Node *node = scene->node();
+	if ( !node )
+	{
+		return 0;
+	}
+	
+	UT_String path;
+	node->getFullPath( path );
+	
+	return path.toStdString();
+}
+
 void IECoreHoudini::bindHoudiniScene()
 {
 	IECorePython::RunTimeTypedClass<HoudiniScene>()
@@ -74,5 +89,6 @@ void IECoreHoudini::bindHoudiniScene()
 		.def( "__init__", make_constructor( &constructor, default_call_policies(), ( arg( "nodePath" ), arg( "contentPath" ) = list(), arg( "rootPath" ) = list(), arg( "defaultTime" ) = std::numeric_limits<double>::infinity() ) ) )
 		.def( "getDefaultTime", &HoudiniScene::getDefaultTime )
 		.def( "setDefaultTime", &HoudiniScene::setDefaultTime )
+		.def( "_getNodePath", &getNodePath )
 	;
 }
