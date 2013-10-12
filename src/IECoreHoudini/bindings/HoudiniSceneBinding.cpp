@@ -89,6 +89,7 @@ void IECoreHoudini::bindHoudiniScene()
 		.def( "__init__", make_constructor( &constructor, default_call_policies(), ( arg( "nodePath" ), arg( "contentPath" ) = list(), arg( "rootPath" ) = list(), arg( "defaultTime" ) = std::numeric_limits<double>::infinity() ) ) )
 		.def( "getDefaultTime", &HoudiniScene::getDefaultTime )
 		.def( "setDefaultTime", &HoudiniScene::setDefaultTime )
+		.def( "embedded", &HoudiniScene::embedded )
 		.def( "_getNodePath", &getNodePath )
 	;
 }
