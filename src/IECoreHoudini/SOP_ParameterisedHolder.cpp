@@ -50,6 +50,7 @@
 #include "IECorePython/ScopedGILRelease.h"
 
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
 using namespace boost;
@@ -250,4 +251,12 @@ bool SOP_ParameterisedHolder::getNameFilter( const IECore::Parameter *parameter,
 	}
 	
 	return false;
+}
+
+void SOP_ParameterisedHolder::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
+{
+	SOP_Node::getNodeSpecificInfoText( context, parms );
+	
+	// add type descriptions for the Cortex Objects
+	GU_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 }

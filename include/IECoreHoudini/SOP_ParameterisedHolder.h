@@ -56,6 +56,8 @@ class SOP_ParameterisedHolder : public ParameterisedHolder<SOP_Node>
 
 		SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SOP_ParameterisedHolder();
+		
+		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
 	
 	protected :
 		
