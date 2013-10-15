@@ -786,13 +786,12 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_D
 	for ( std::set<IECore::TypeId>::iterator typeIt=resultTypes.begin(); typeIt != resultTypes.end(); typeIt++ )
 	{
 		const std::set<IECore::TypeId> &derivedTypes = RunTimeTyped::derivedTypeIds( *typeIt );
-
 		// find the best possible converter
 		for ( TypesToFnsMap::const_iterator it=m->begin(); it != m->end(); it ++ )
 		{
-			if ( *typeIt == IECore::InvalidTypeId || *typeIt == it->first.resultType || find( derivedTypes.begin(), derivedTypes.end(), it->first.resultType ) != derivedTypes.end() )
+			if ( *typeIt == IECore::InvalidTypeId || it->first.resultType == InvalidTypeId || *typeIt == it->first.resultType || find( derivedTypes.begin(), derivedTypes.end(), it->first.resultType ) != derivedTypes.end() )
 			{
-				if ( handle.isNull() )
+				if ( handle.isNull() && it->first.resultType != InvalidTypeId )
 				{
 					// it works, therfor its good enough, since we have no handle to judge Convertability
 					return it->second.first( GU_DetailHandle() );
