@@ -43,7 +43,7 @@
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
 #include "IECore/ModifyOp.h"
-#include "IECore\SearchPath.h"
+#include "IECore/SearchPath.h"
 
 using namespace IECore;
 using namespace boost;

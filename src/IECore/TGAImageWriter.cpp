@@ -211,15 +211,15 @@ void TGAImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 	writeLittleEndian<boost::uint8_t>( out, 2 );
 
 	/// Color Map Specification
-	writeLittleEndian<::uint16_t>( out, 0 );
-	writeLittleEndian<::uint16_t>( out, 0 );
+	writeLittleEndian< ::uint16_t>( out, 0 );
+	writeLittleEndian< ::uint16_t>( out, 0 );
 	writeLittleEndian<boost::uint8_t>( out, 0 );
 
 	/// Image Specification
-	writeLittleEndian<::uint16_t>( out, 0 );
-	writeLittleEndian<::uint16_t>( out, 0 );
-	writeLittleEndian<::uint16_t>( out, displayWidth );
-	writeLittleEndian<::uint16_t>( out, displayHeight );
+	writeLittleEndian< ::uint16_t>( out, 0 );
+	writeLittleEndian< ::uint16_t>( out, 0 );
+	writeLittleEndian< ::uint16_t>( out, displayWidth );
+	writeLittleEndian< ::uint16_t>( out, displayHeight );
 	writeLittleEndian<boost::uint8_t>( out, numChannels * 8 );
 	writeLittleEndian<boost::uint8_t>( out, ( numChannels == 4 ? 8 : 0 ) + 32 );
 

@@ -39,7 +39,7 @@
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/Camera.h"
-#include "IECoreGL\private\Display.h"
+#include "IECoreGL/private/Display.h"
 
 #include "IECore/MessageHandler.h"
 #include "boost/noncopyable.hpp"

@@ -52,7 +52,7 @@
 #endif
 
 #include "IECore/MessageHandler.h"
-#include "boost\filesystem.hpp"
+#include "boost/filesystem.hpp"
 #include <boost/version.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -62,14 +62,18 @@
 
 #include "IECore/MessageHandler.h"
 
+#if defined(_WIN32)
 static void nullDisplayFunc()
 {
 }
+#endif
 
 void IECoreGL::init( bool glAlreadyInitialised )
 {
 	static bool init = false;
+#if defined(_WIN32)
 	int window= 0;
+#endif
 	if( !init )
 	{
 		if( !glAlreadyInitialised )

@@ -210,7 +210,7 @@ DataPtr TGAImageReader::readTypedChannel( const std::string &name, const Box2i &
 	int dataWidth = 1 + dataWindow.size().x;
 	int bufferDataWidth = 1 + m_dataWindow.size().x;
 
-	ScaledDataConversion<::uint8_t, V> converter;
+	ScaledDataConversion< ::uint8_t, V> converter;
 
 	const int samplesPerPixel = m_header->pixelDepth == 24 ? 3 : 4 ;
 

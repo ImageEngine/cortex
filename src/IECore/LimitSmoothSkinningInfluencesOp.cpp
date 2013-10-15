@@ -223,7 +223,11 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 	// Zero specific influences for all points
 	else if ( mode == LimitSmoothSkinningInfluencesOp::Indexed )
 	{
+#if defined(_WIN32)		
 		std::vector<int> indicesToLimit;
+#else
+		std::vector<int64_t> indicesToLimit;
+#endif
 		m_influenceIndicesParameter->getFrameListValue()->asList( indicesToLimit );
 		std::vector<bool> limitIndex( skinningData->influenceNames()->readable().size(), false );
 		for ( unsigned i=0; i < indicesToLimit.size(); i++ )

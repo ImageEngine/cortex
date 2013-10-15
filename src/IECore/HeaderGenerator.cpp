@@ -136,7 +136,7 @@ static void timeStampHeaderGenerator( CompoundObjectPtr header )
 	time( &tm );
 
 	/// ctime_r manpage suggest that 26 characters should be enough in all cases
-	char buf[27];
+	//char buf[27];
 	std::string strTime ( ctime( &tm ) );
 
 	assert( strTime.length() <= 26 );
