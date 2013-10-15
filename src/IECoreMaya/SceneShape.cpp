@@ -58,7 +58,7 @@ SceneShape::MayaSceneAddOn SceneShape::g_mayaSceneAddon;
 SceneShape::MayaSceneAddOn::MayaSceneAddOn()
 {
 	MayaScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
-	MayaScene::registerCustomAttribute( LinkedScene::linkAttribute, SceneShape::hasSceneShapeLink, SceneShape::readSceneShapeLink );
+	MayaScene::registerCustomAttributes( SceneShape::sceneShapeAttributeNames, SceneShape::readSceneShapeAttribute );
 	MayaScene::registerCustomTags( SceneShape::hasTag, SceneShape::readTags );
 }
 
@@ -268,6 +268,59 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 	MTime time;
 	timePlug.getValue( time );
 	return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
+}
+
+void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::NameList &attributeNames )
+{
+	MDagPath dagPath;
+	SceneShape *sceneShape = findScene( p, false, &dagPath );
+	if ( !sceneShape )
+	{
+		return;
+	}
+	
+	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	if ( !scene )
+	{
+		return;
+	}
+	scene->attributeNames( attributeNames );
+	
+	MFnDagNode fnChildDag( dagPath );
+	if( !fnChildDag.isIntermediateObject() && hasSceneShapeLink( p ) )
+	{
+		attributeNames.push_back( LinkedScene::linkAttribute );
+	}
+}
+
+ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInterface::Name attributeName )
+{
+	MDagPath dagPath;
+	SceneShape *sceneShape = findScene( p, false, &dagPath );
+	if ( !sceneShape )
+	{
+		return 0;
+	}
+	
+	MFnDagNode fnChildDag( dagPath );
+	if( attributeName == LinkedScene::linkAttribute )
+	{
+		if( !fnChildDag.isIntermediateObject() )
+		{
+			return readSceneShapeLink(p);
+		}
+	}
+	
+	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	if ( !scene )
+	{
+		return 0;
+	}
+	
+	MPlug timePlug = fnChildDag.findPlug( aTime );
+	MTime time;
+	timePlug.getValue( time );
+	return scene->readAttribute( attributeName, time.as( MTime::kSeconds ) );
 }
 
 bool SceneShape::hasSceneShapeObject( const MDagPath &p )
