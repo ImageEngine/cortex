@@ -45,6 +45,7 @@ using namespace IECoreHoudini;
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniCortexObjectConverter );
 
 FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> FromHoudiniCortexObjectConverter::m_description( ObjectTypeId );
+FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> FromHoudiniCortexObjectConverter::m_universalDescription( InvalidTypeId );
 
 FromHoudiniCortexObjectConverter::FromHoudiniCortexObjectConverter( const GU_DetailHandle &handle ) :
 	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECore::Object." )
