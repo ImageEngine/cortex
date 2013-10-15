@@ -169,18 +169,20 @@ class MayaScene : public IECore::SceneInterface
 
 		typedef boost::function<bool (const MDagPath &)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &)> ReadFn;
+		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &, const Name &)> ReadAttrFn;
 		typedef boost::function<bool (const MDagPath &, const Name &)> HasTagFn;
 		typedef boost::function<void (const MDagPath &, NameList &, bool)> ReadTagsFn;
+		typedef boost::function<void (const MDagPath &, NameList &)> NamesFn;
 		
 		// Register callbacks for custom objects.		
 		// The has function will be called during hasObject and it stops in the first one that returns true.
 		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
 		static void registerCustomObject( HasFn hasFn, ReadFn readFn );
 
-		// Register callbacks for custom named attributes.
-		// The has function will be called during hasAttribute and it stops in the first one that returns true.
-		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
-		static void registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn );
+		// Register callbacks for custom attributes.
+		// The names function will be called during attributeNames and hasAttribute.
+		// The readAttr method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
+		static void registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn );
 		
 		// Register callbacks for nodes to define custom tags
 		// The functions will be called during hasTag and readTags.
@@ -195,7 +197,7 @@ class MayaScene : public IECore::SceneInterface
 		
 		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
 
-		/// Struct for registering readers for custom Object and Attributes.
+		/// Struct for registering readers for custom Object.
 		struct CustomReader
 		{
 			HasFn m_has;
@@ -209,9 +211,16 @@ class MayaScene : public IECore::SceneInterface
 			ReadTagsFn m_read;
 		};
 		
+		/// Struct for registering readers for custom Attributes.
+		struct CustomAttributeReader
+		{
+			NamesFn m_names;
+			ReadAttrFn m_read;
+		};
+		
 		static std::vector< CustomReader > &customObjectReaders();
-		static std::map< Name, CustomReader > &customAttributeReaders();
-		static std::vector<CustomTagReader> &customTagReaders();
+		static std::vector< CustomAttributeReader > &customAttributeReaders();
+		static std::vector< CustomTagReader > &customTagReaders();
 		
 	protected:
 		
