@@ -106,6 +106,11 @@ const OP_Node *HoudiniScene::node() const
 	return retrieveNode( false, NullIfMissing );
 }
 
+bool HoudiniScene::embedded() const
+{
+	return m_contentIndex;
+}
+
 double HoudiniScene::adjustedDefaultTime() const
 {
 	if ( m_defaultTime == std::numeric_limits<double>::infinity() )
