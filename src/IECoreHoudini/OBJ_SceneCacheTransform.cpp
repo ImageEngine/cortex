@@ -44,8 +44,14 @@ using namespace IECoreHoudini;
 
 const char *OBJ_SceneCacheTransform::typeName = "ieSceneCacheTransform";
 
+int *OBJ_SceneCacheTransform::g_indirection = 0;
+
 OBJ_SceneCacheTransform::OBJ_SceneCacheTransform( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_SceneCacheNode<OBJ_SubNet>( net, name, op )
 {
+	if ( !g_indirection )
+	{
+		g_indirection = OP_Parameters::allocIndirect( this->getParmList()->getEntries() );
+	}
 }
 
 OBJ_SceneCacheTransform::~OBJ_SceneCacheTransform()
@@ -492,4 +498,9 @@ void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::Nam
 	}
 	
 	scene->readTags( tags, includeChildren );
+}
+
+int *OBJ_SceneCacheTransform::getIndirect() const
+{
+	return g_indirection;
 }

@@ -120,6 +120,8 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		virtual void doExpandChildren( const IECore::SceneInterface *scene, OP_Network *parent, const Parameters &params );
 		
 		static OP_TemplatePair *buildExtraParameters();
+		
+		virtual int *getIndirect() const;
 	
 	private :
 		
@@ -134,6 +136,8 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		static IECore::ConstObjectPtr readLink( const OP_Node *node, double time );
 		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag );
 		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren );
+		
+		static int *g_indirection;
 
 };
 
