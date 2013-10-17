@@ -212,12 +212,9 @@ bool MayaScene::hasAttribute( const Name &name ) const
 	{
 		NameList names;
 		it->m_names( m_dagPath, names );
-		for ( NameList::iterator nameIt = names.begin(); nameIt != names.end(); ++nameIt )
+		if ( std::find(names.begin(), names.end(), name) != names.end() )
 		{
-			if( *nameIt == name )
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
