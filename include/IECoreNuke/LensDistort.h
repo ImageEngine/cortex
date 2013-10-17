@@ -144,6 +144,10 @@ class LensDistort : public DD::Image::Iop
 
 		/// Iterates over all of the lens model's attributes and if they are associated with a knob, retrieves the information from the knob.
 		void updatePluginAttributesFromKnobs();
+
+		/// Updates the dynamic knobs. This method should be called whenever a knob is changed or an event happens that requires
+		/// the dynamic knobs to be recreated or their enabled state changed.
+		void updateUI();
 		
 		/// The maximum number of threads that we are going to use in parallel.
 		const int m_nThreads;

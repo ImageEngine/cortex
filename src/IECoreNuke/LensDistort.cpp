@@ -486,32 +486,38 @@ void LensDistort::updatePluginAttributesFromKnobs()
 
 int LensDistort::knob_changed(Knob* k)
 {
-	bool updateUI = false;
-
 	// If the lensFileSequence knob just changed then we need to check if it is valid and load it.
-	// Once loaded then we set the updateUI flag to trigger a UI update.
 	if ( k->is( "lensFileSequence" ) )
 	{
+		bool updateRequired = false;
+
 		std::string path;
 		bool oldValue = m_useFileSequence;
 		m_useFileSequence = getFileSequencePath( path );
-		updateUI |= oldValue != m_useFileSequence;
+		updateRequired |= oldValue != m_useFileSequence;
 
 		if ( m_useFileSequence )
 		{
 			bool oldValue = m_hasValidFileSequence;
 			std::string path;
 			m_hasValidFileSequence = setLensFromFile( path );
-			updateUI |= m_hasValidFileSequence != oldValue;
+			updateRequired |= m_hasValidFileSequence != oldValue;
 		}
 		
+		if( updateRequired )
+		{
+			updateUI();
+		}
+		
+		return true;
 	}
 
 	// If the lens model was just changed then we need to set it internally and then update the UI.
 	if ( k->is( "model" ) )
 	{
 		setLensModel( modelNames()[getLensModel()] );
-		updateUI = true;
+		updateUI();
+		return true;
 	}
 
 	// Update our internal reference of the knob value that just changed...
@@ -531,25 +537,26 @@ int LensDistort::knob_changed(Knob* k)
 		}
 	}
 
-	if ( k->is( "lensFileSequence" ) ) return true;
-	
 	// Do we need to update the UI?
-	if ( k == &Knob::showPanel || updateUI )
+	if ( k == &Knob::showPanel )
 	{
-		m_numNewKnobs = replace_knobs( m_lastStaticKnob, m_numNewKnobs, addDynamicKnobs, this->firstOp() );
-
-		// Handle the knobs state.
-		if ( knob("model" ) != NULL) knob("model")->enable( !m_useFileSequence );
-		for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
-		{
-			if ( it->m_knob != NULL) it->m_knob->enable( !m_useFileSequence );
-		}
-
+		updateUI();
 		return true;
 	}
 
-
 	return Iop::knob_changed(k);
+}
+
+void LensDistort::updateUI()
+{
+	m_numNewKnobs = replace_knobs( m_lastStaticKnob, m_numNewKnobs, addDynamicKnobs, this->firstOp() );
+
+	// Handle the knobs state.
+	if ( knob("model" ) != NULL) knob("model")->enable( !m_useFileSequence );
+	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+	{
+		if ( it->m_knob != NULL) it->m_knob->enable( !m_useFileSequence );
+	}
 }
 
 void LensDistort::buildDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
