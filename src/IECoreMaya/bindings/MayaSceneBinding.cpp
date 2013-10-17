@@ -85,10 +85,50 @@ void registerCustomTags( object hasFn, object readFn )
 	MayaScene::registerCustomTags( reader, reader );
 }
 
+class CustomAttributeReader
+{
+	public :
+		CustomAttributeReader( object namesFn, object readFn ) : m_names( namesFn ), m_read( readFn )
+		{
+		}
+
+		IECore::ConstObjectPtr operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &attr )
+		{
+			MString p = dagPath.fullPathName();
+			IECorePython::ScopedGILLock gilLock;
+			IECore::ConstObjectPtr result = extract<IECore::ConstObjectPtr>(m_read( p.asChar(), attr ));
+			return result;
+		}
+		
+		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &attributes )
+		{
+			MString p = dagPath.fullPathName();
+			IECorePython::ScopedGILLock gilLock;
+			object o = m_names( p.asChar() );
+			extract<list> l( o );
+			if ( !l.check() )
+			{
+				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
+			}
+			
+			IECorePython::listToSceneInterfaceNameList( l(), attributes );
+		}
+
+		object m_names;
+		object m_read;
+};
+
+void registerCustomAttributes( object namesFn, object readFn )
+{
+	CustomAttributeReader reader( namesFn, readFn );
+	MayaScene::registerCustomAttributes( reader, reader );
+}
+
 void IECoreMaya::bindMayaScene()
 {
 	IECorePython::RunTimeTypedClass<MayaScene>()
 		.def( init<>() )
 		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
+		.def( "registerCustomAttributes", registerCustomAttributes ).staticmethod( "registerCustomAttributes" )
 	;
 }
