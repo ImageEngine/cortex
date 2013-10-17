@@ -207,10 +207,15 @@ bool MayaScene::hasAttribute( const Name &name ) const
 	{
 		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
 	}
-	std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().find(name);
-	if ( it != customAttributeReaders().end() )
+	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
+	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
-		return it->second.m_has( m_dagPath );
+		NameList names;
+		it->m_names( m_dagPath, names );
+		if ( std::find(names.begin(), names.end(), name) != names.end() )
+		{
+			return true;
+		}
 	}
 	return false;
 }
@@ -223,12 +228,9 @@ void MayaScene::attributeNames( NameList &attrs ) const
 	}
 
 	attrs.clear();
-	for ( std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
+	for ( std::vector< CustomAttributeReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
 	{
-		if ( it->second.m_has( m_dagPath ) )
-		{
-			attrs.push_back( it->first );
-		}
+		it->m_names( m_dagPath, attrs );
 	}
 }
 
@@ -238,10 +240,15 @@ ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 	{
 		throw Exception( "MayaScene::readAttribute: Dag path no longer exists!" );
 	}
-	std::map< Name, CustomReader >::const_iterator it = customAttributeReaders().find(name);
-	if ( it != customAttributeReaders().end() )
+	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
+	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
-		return it->second.m_read( m_dagPath );
+		ConstObjectPtr attr = it->m_read( m_dagPath, name );
+		if( !attr )
+		{
+			continue;
+		}
+		return attr;
 	}
 	return 0;
 }
@@ -631,12 +638,12 @@ void MayaScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
 	customObjectReaders().push_back(r);
 }
 
-void MayaScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )
+void MayaScene::registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn )
 {
-	CustomReader r;
-	r.m_has = hasFn;
+	CustomAttributeReader r;
+	r.m_names = namesFn;
 	r.m_read = readFn;
-	customAttributeReaders()[attrName] = r;
+	customAttributeReaders().push_back(r);
 }
 
 void MayaScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
@@ -653,9 +660,9 @@ std::vector< MayaScene::CustomReader > &MayaScene::customObjectReaders()
 	return readers;
 }
 
-std::map< SceneInterface::Name, MayaScene::CustomReader > &MayaScene::customAttributeReaders()
+std::vector<MayaScene::CustomAttributeReader> &MayaScene::customAttributeReaders()
 {
-	static std::map< SceneInterface::Name, MayaScene::CustomReader > readers;
+	static std::vector< MayaScene::CustomAttributeReader > readers;
 	return readers;
 }
 
