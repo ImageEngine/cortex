@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,14 +52,12 @@ Lookup<X, Y>::Lookup()
 }
 
 template<typename X, typename Y>
-template<class Function>
 Lookup<X, Y>::Lookup( const Function &function, XType xMin, XType xMax, unsigned numSamples )
 {
 	init( function, xMin, xMax, numSamples );
 }
 
 template<typename X, typename Y>
-template<class Function>
 void Lookup<X, Y>::init( const Function &function, XType xMin, XType xMax, unsigned numSamples )
 {
 	m_values.resize( numSamples );
