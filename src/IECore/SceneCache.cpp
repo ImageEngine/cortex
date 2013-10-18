@@ -862,7 +862,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				h.append( it->value() );
 				h.append( '/' );
 			}
-			h.append(sample);
+			h.append( (uint64_t)sample );
 			return h;
 		}
 
@@ -906,7 +906,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				h.append( '/' );
 			}
 			h.append(name.value());
-			h.append(sample);
+			h.append( (uint64_t)sample );
 			return h;
 		}
 
