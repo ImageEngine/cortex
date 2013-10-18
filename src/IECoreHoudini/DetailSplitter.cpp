@@ -88,7 +88,8 @@ bool DetailSplitter::validate()
 	GA_ROAttributeRef attrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, m_key.c_str() );
 	if ( !attrRef.isValid() )
 	{
-		return false;
+		m_cache[""] = m_handle;
+		return true;
 	}
 	
 	const GA_Attribute *attr = attrRef.getAttribute();
