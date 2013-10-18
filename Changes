@@ -1,3 +1,33 @@
+# 8.0.0-a20
+
+#### IECore
+
+- Fixed IECore::Lookup for OS X.
+- Fixed SceneCache build problem on OS X.
+- Fixed unit test in LinkedSceneTest.py ( testLinkBoundTransformMismatch )
+
+#### IECoreGL
+
+- Fixed IECoreGL::PointsPrimitive crash on OS X.
+- Removed IECoreGL/Lights.h.
+- Removed IECoreGL/GLUT.h
+
+#### IECoreHoudini
+
+- SceneCache OBJ Parameter Reorganization (will cause warnings in existing scenes. these can be ignored)
+- Added functions to HoudiniScene: node() and embedded()
+- Added click Selection of GR_CortexPrimitives
+
+#### IECoreMaya
+
+- Added FnSceneShape createChild, extracted from expandOnce.
+- Changed interface for MayaScene custom attribute callbacks and added bindings for Python.
+
+#### IECoreNuke
+
+- Fixed bug #4837: "Knobs not found" warning messages.
+- Fixed artefacts in LensDistort
+
 # 8.0.0-a19
 
 #### IECore
