@@ -203,7 +203,12 @@ void MayaScene::writeTransform( const Data *transform, double time )
 
 bool MayaScene::hasAttribute( const Name &name ) const
 {
-	if( m_dagPath.length() == 0 && !m_isRoot )
+	if ( m_isRoot )
+	{
+		return false;
+	}
+	
+	if( m_dagPath.length() == 0 )
 	{
 		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
 	}
@@ -222,7 +227,12 @@ bool MayaScene::hasAttribute( const Name &name ) const
 
 void MayaScene::attributeNames( NameList &attrs ) const
 {
-	if( m_dagPath.length() == 0 && !m_isRoot )
+	if ( m_isRoot )
+	{
+		return;
+	}
+	
+	if( m_dagPath.length() == 0 )
 	{
 		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
 	}
@@ -236,7 +246,12 @@ void MayaScene::attributeNames( NameList &attrs ) const
 
 ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 {
-	if( m_dagPath.length() == 0 && !m_isRoot )
+	if ( m_isRoot )
+	{
+		return 0;
+	}
+
+	if( m_dagPath.length() == 0 )
 	{
 		throw Exception( "MayaScene::readAttribute: Dag path no longer exists!" );
 	}
