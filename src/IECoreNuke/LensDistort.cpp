@@ -43,6 +43,7 @@
 #include "DDImage/Pixel.h"
 #include "DDImage/Tile.h"
 #include "IECore/CachedReader.h"
+#include "IECore/FastFloat.h"
 #include "IECore/Reader.h"
 #include "IECore/NumericParameter.h"
 #include "boost/algorithm/string.hpp"
@@ -223,9 +224,10 @@ void LensDistort::_validate(bool for_real)
 	}
 	
 	// Set the output bounding box according to the lens model.
+	bool black = input0().black_outside();
 	Imath::Box2i input( Imath::V2i( input0().info().x(), input0().info().y() ), Imath::V2i( input0().info().r()-1, input0().info().t()-1 ) );
 	Imath::Box2i box( m_model[0]->bounds( m_mode, input, format().width(), format().height() ) );
-	info_.set( box.min.x, box.min.y, box.max.x, box.max.y );
+	info_.set( box.min.x-black, box.min.y-black, box.max.x+black, box.max.y+black );
 	
 	set_out_channels( Mask_All );
 }
@@ -243,6 +245,14 @@ void LensDistort::_request( int x, int y, int r, int t, ChannelMask channels, in
 
 void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outrow )
 {
+	// Provide an early-out for any black rows.
+	bool blackOutside = info().black_outside();
+	if( blackOutside && ( y == info().t()-1 || y == info().y() ) )
+	{
+		outrow.erase( channels );
+		return;
+	}
+
 	const Info &info = input0().info();
 	const double h( format().height() );
 	const double w( format().width() );
@@ -305,10 +315,20 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 	DD::Image::Pixel out(channels);
 	
 	// Lock the tile into the cache
-	DD::Image::Tile t( input0(), int(floor(x_min)), int(floor(y_min)), int(ceil(x_max)), int(ceil(y_max)), channels );
-	
-	// Loop over our array of precomputed points, and ask nuke to perform a filtered lookup for us
-	for( int i = x; i < r; i++ )
+	DD::Image::Tile t( input0(), IECore::fastFloatFloor( x_min ), IECore::fastFloatFloor( y_min ), IECore::fastFloatCeil( x_max ), IECore::fastFloatCeil( y_max ), channels );
+
+	// Write the black outside pixels.
+	if( blackOutside )
+	{
+		foreach ( z, channels )
+		{
+			outrow.writable(z)[x] = 0.f;
+			outrow.writable(z)[r-1] = 0.f;
+		}
+	}
+
+	// Loop over our array of precomputed points, and ask nuke to perform a filtered lookup for us.
+	for( int i = x+blackOutside; i < r-blackOutside; i++ )
 	{
 		if(aborted()) break;
 		input0().sample( distort[i-x].x+0.5, distort[i-x].y+0.5, 1.0, 1.0, &m_filter, out );
@@ -317,7 +337,6 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 			outrow.writable(z)[i] = out[z];
 		}
 	}
-	
 }
 
 void LensDistort::append( DD::Image::Hash &hash )
@@ -486,32 +505,38 @@ void LensDistort::updatePluginAttributesFromKnobs()
 
 int LensDistort::knob_changed(Knob* k)
 {
-	bool updateUI = false;
-
 	// If the lensFileSequence knob just changed then we need to check if it is valid and load it.
-	// Once loaded then we set the updateUI flag to trigger a UI update.
 	if ( k->is( "lensFileSequence" ) )
 	{
+		bool updateRequired = false;
+
 		std::string path;
 		bool oldValue = m_useFileSequence;
 		m_useFileSequence = getFileSequencePath( path );
-		updateUI |= oldValue != m_useFileSequence;
+		updateRequired |= oldValue != m_useFileSequence;
 
 		if ( m_useFileSequence )
 		{
 			bool oldValue = m_hasValidFileSequence;
 			std::string path;
 			m_hasValidFileSequence = setLensFromFile( path );
-			updateUI |= m_hasValidFileSequence != oldValue;
+			updateRequired |= m_hasValidFileSequence != oldValue;
 		}
 		
+		if( updateRequired )
+		{
+			updateUI();
+		}
+		
+		return true;
 	}
 
 	// If the lens model was just changed then we need to set it internally and then update the UI.
 	if ( k->is( "model" ) )
 	{
 		setLensModel( modelNames()[getLensModel()] );
-		updateUI = true;
+		updateUI();
+		return true;
 	}
 
 	// Update our internal reference of the knob value that just changed...
@@ -531,25 +556,26 @@ int LensDistort::knob_changed(Knob* k)
 		}
 	}
 
-	if ( k->is( "lensFileSequence" ) ) return true;
-	
 	// Do we need to update the UI?
-	if ( k == &Knob::showPanel || updateUI )
+	if ( k == &Knob::showPanel )
 	{
-		m_numNewKnobs = replace_knobs( m_lastStaticKnob, m_numNewKnobs, addDynamicKnobs, this->firstOp() );
-
-		// Handle the knobs state.
-		if ( knob("model" ) != NULL) knob("model")->enable( !m_useFileSequence );
-		for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
-		{
-			if ( it->m_knob != NULL) it->m_knob->enable( !m_useFileSequence );
-		}
-
+		updateUI();
 		return true;
 	}
 
-
 	return Iop::knob_changed(k);
+}
+
+void LensDistort::updateUI()
+{
+	m_numNewKnobs = replace_knobs( m_lastStaticKnob, m_numNewKnobs, addDynamicKnobs, this->firstOp() );
+
+	// Handle the knobs state.
+	if ( knob("model" ) != NULL) knob("model")->enable( !m_useFileSequence );
+	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+	{
+		if ( it->m_knob != NULL) it->m_knob->enable( !m_useFileSequence );
+	}
 }
 
 void LensDistort::buildDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
