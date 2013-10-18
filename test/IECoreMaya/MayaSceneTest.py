@@ -669,12 +669,12 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 			try:
 				dagPath.extendToShapeDirectlyBelow(0)
 			except:
-				return ["noShapeAttr"]
+				return ["transformAttribute"]
 			
 			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
 				return []
 	
-			return ["testAttribute"]
+			return ["shapeAttribute"]
 	
 		def readMyAttribute( node, attr ) :
 			
@@ -685,23 +685,31 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 			try:
 				dagPath.extendToShapeDirectlyBelow(0)
 			except:
-				return False
+				if attr == "shapeAttribute":
+					return None
+				return IECore.FloatData( 5 )
+			
+			if attr == "transformAttribute":
+				return None
 			
 			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
-				return False
+				return None
 	
-			return True
+			return IECore.StringData("mesh")
 		
 		IECoreMaya.MayaScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
 	
 		scene = IECoreMaya.MayaScene()
 		transformScene = scene.child(str(t))
 		sphereScene = scene.child('pSphere')
-		self.assertEqual( transformScene.attributeNames(), [IECore.InternedString("noShapeAttr")] )
-		self.assertEqual( transformScene.hasAttribute("testAttribute"), False )
-		self.assertEqual( transformScene.readAttribute( "noShapeAttr", 0.0), IECore.BoolData(False) )
-		self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString('testAttribute') ] )
-		self.assertEqual( sphereScene.readAttribute( "testAttribute", 0.0), IECore.BoolData(True) )
+		self.assertEqual( scene.attributeNames(), [] )
+		self.assertEqual( scene.readAttribute("anyAttr", 0.0), None )
+		self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("transformAttribute") ] )
+		self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
+		self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), None )
+		self.assertEqual( transformScene.readAttribute( "transformAttribute", 0.0), IECore.FloatData(5) )
+		self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString('shapeAttribute') ] )
+		self.assertEqual( sphereScene.readAttribute( "shapeAttribute", 0.0), IECore.StringData("mesh") )
 		
 		# Disable custom attribute functions so they don't mess with other tests
 		doTest = False
