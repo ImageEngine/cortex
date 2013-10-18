@@ -275,6 +275,12 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 
 void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) const
 {
+	if( !m_memberData->points->readable().size() )
+	{
+		// early out if no points - some drivers crash otherwise
+		return;
+	}
+	
 	/*if( depthSortRequested( state ) )
 	{
 		depthSort();
