@@ -66,29 +66,37 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		# however, handy macros exist to make the instancing and aiming easy.
 		vertexSource = """
 		#include \"IECoreGL/PointsPrimitive.h\"
+		#include \"IECoreGL/VertexShader.h\"
 		
 		IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS
 		
-		in vec3 instanceP;
-		in float vertexgreyTo255;
+		IECOREGL_VERTEXSHADER_IN vec3 instanceP;
+		// although we don't need to pass st to the fragment shader, everything
+		// ceases to work on os x if we don't.
+		IECOREGL_VERTEXSHADER_IN vec2 instancest;
+		IECOREGL_VERTEXSHADER_IN float vertexgreyTo255;
 		
-		varying out float fragmentGrey;
+		IECOREGL_VERTEXSHADER_OUT float fragmentGrey;
+		IECOREGL_VERTEXSHADER_OUT vec2 fragmentst;
 		
 		void main()
 		{
 			mat4 instanceMatrix = IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX;
 			vec4 pCam = instanceMatrix * vec4( instanceP, 1 );
 			gl_Position = gl_ProjectionMatrix * pCam;
+			fragmentst = instancest;
 			fragmentGrey = float( vertexgreyTo255 ) / 255.0;
 		}
 		"""
 
 		fragmentSource = """
-		varying float fragmentGrey;
+		#include \"IECoreGL/FragmentShader.h\"
+
+		IECOREGL_FRAGMENTSHADER_IN float fragmentGrey;
 
 		void main()
 		{
-			gl_FragColor = vec4( fragmentGrey, fragmentGrey, fragmentGrey, 1 );
+			gl_FragColor = vec4( fragmentGrey, fragmentGrey, fragmentGrey, 1.0 );
 		}
 		"""
 

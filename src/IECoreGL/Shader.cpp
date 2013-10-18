@@ -874,7 +874,12 @@ const std::string &Shader::defaultVertexSource()
 {
 	static string s =
 		
-		"#version 150 compatibility\n"
+		"#version 120\n"
+		""
+		"#if __VERSION__ <= 120\n"
+		"#define in attribute\n"
+		"#define out varying\n"
+		"#endif\n"
 		""
 		"uniform vec3 Cs = vec3( 1, 1, 1 );"
 		"uniform bool vertexCsActive = false;"
@@ -934,7 +939,9 @@ const std::string &Shader::defaultFragmentSource()
 {
 	static string s = 
 	
-		"#version 150 compatibility\n"
+		"#if __VERSION__ <= 120\n"
+		"#define in varying\n"
+		"#endif\n"
 		""
 		"in vec3 fragmentI;"
 		"in vec3 fragmentN;"
@@ -954,7 +961,9 @@ const std::string &Shader::constantFragmentSource()
 {
 	static string s = 
 	
-		"#version 150 compatibility\n"
+		"#if __VERSION__ <= 120\n"
+		"#define in varying\n"
+		"#endif\n"
 		""
 		"in vec3 fragmentCs;"
 		""
@@ -970,7 +979,9 @@ const std::string &Shader::lambertFragmentSource()
 {
 	static string s = 
 	
-		"#version 150 compatibility\n"
+		"#if __VERSION__ <= 120\n"
+		"#define in varying\n"
+		"#endif\n"
 		""
 		"#include \"IECoreGL/Lights.h\"\n"
 		"#include \"IECoreGL/ColorAlgo.h\"\n"

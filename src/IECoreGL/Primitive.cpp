@@ -107,6 +107,11 @@ static ShaderPtr constant2()
 
 	static const char *vertexSource =
 		
+		"#if __VERSION__ <= 120\n"
+		"#define in attribute\n"
+		"#define out varying\n"
+		"#endif\n"
+		""
 		"in vec3 vertexP;"
 		""
 		"void main()"
