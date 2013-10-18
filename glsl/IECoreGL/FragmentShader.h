@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_POINTSPRIMITIVE_H
-#define IECOREGL_POINTSPRIMITIVE_H
+#ifndef IECOREGL_FRAGMENTSHADER_H
+#define IECOREGL_FRAGMENTSHADER_H
 
-#include "IECoreGL/MatrixAlgo.h"
-#include "IECoreGL/VertexShader.h"
+#if __VERSION__ <= 120
+#define IECOREGL_FRAGMENTSHADER_IN varying
+#else
+#define IECOREGL_FRAGMENTSHADER_IN in
+#endif
 
-#define IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS \
-	\
-	IECOREGL_VERTEXSHADER_IN vec3 vertexP;\
-	IECOREGL_VERTEXSHADER_IN float vertexwidth;\
-	IECOREGL_VERTEXSHADER_IN float vertexpatchaspectratio;\
-	IECOREGL_VERTEXSHADER_IN float vertexpatchrotation;\
-	uniform bool useWidth;\
-	uniform bool useAspectRatio;\
-	uniform bool useRotation;\
-	uniform float constantwidth;
-
-#define IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX \
-	iePointsPrimitiveInstanceMatrix(\
-		vertexP,\
-		useWidth ? vertexwidth * constantwidth : constantwidth,\
-		useAspectRatio ? vertexpatchaspectratio : 1.0,\
-		useRotation ? vertexpatchrotation : 0.0\
-	)
-	
-mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float width, in float aspectRatio, in float rotation )
-{
-	vec3 pCam = (gl_ModelViewMatrix * vec4( P, 1.0 )).xyz;
-
-	vec3 Az;
-	if( gl_ProjectionMatrix[2][3] != 0.0 )
-	{
-		// perspective
-		Az = normalize( -pCam.xyz );
-	}
-	else
-	{
-		// orthographic
-		Az = vec3( 0, 0, 1 );
-		
-	}
-
-	vec3 up = vec3( sin( radians( rotation ) ), cos( radians( rotation ) ), 0 );
-	
-	vec3 Ax = normalize( cross( up, Az ) );
-	vec3 Ay = normalize( cross( Az, Ax ) );
-
-	mat4 placementMatrix = ieMatrixFromBasis( Ax * width, Ay * width / aspectRatio, Az * width, pCam );
-	
-	return placementMatrix;
-}
-
-#endif // IECOREGL_POINTSPRIMITIVE_H
+#endif // IECOREGL_FRAGMENTSHADER_H
