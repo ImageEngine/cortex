@@ -65,12 +65,12 @@ FromHoudiniCortexObjectConverter::~FromHoudiniCortexObjectConverter()
 FromHoudiniGeometryConverter::Convertability FromHoudiniCortexObjectConverter::canConvert( const GU_Detail *geo )
 {
 	size_t numPrims = geo->getNumPrimitives();
-	if ( numPrims )
+	if ( numPrims == 1 )
 	{
 		const GA_Primitive *prim = geo->getPrimitiveList().get( geo->getPrimitiveRange().begin().getOffset() );
 		if ( prim->getTypeId() == GU_CortexPrimitive::typeId() )
 		{
-			return ( numPrims == 1 ) ? Ideal : Admissible;
+			return Ideal;
 		}
 	}
 	
