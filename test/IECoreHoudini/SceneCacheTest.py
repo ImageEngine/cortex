@@ -1586,7 +1586,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( root.name(), "ieSceneCacheGeometry1" )
 		self.assertEqual( root.readTransformAsMatrix( 0 ), IECore.M44d() )
 		self.assertTrue( root.hasObject() )
-		self.assertTrue( root.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		obj = root.readObject( 0 )
+		self.assertTrue( obj.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertEqual( len(obj.children()), 3 )
+		for child in obj.children() :
+			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( root.childNames(), [] )
 	
 	def testRopLinked( self ) :
