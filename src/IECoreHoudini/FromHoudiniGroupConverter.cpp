@@ -160,13 +160,6 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		DetailSplitterPtr splitter = new DetailSplitter( handle() );
 		std::vector<std::string> children;
 		splitter->values( children );
-		
-		if ( children.empty() )
-		{
-			doUnnamedConversion( GU_DetailHandleAutoReadLock( handle() ).getGdp(), result, operands );
-			return result;
-		}
-		
 		for ( std::vector<std::string>::iterator it = children.begin(); it != children.end(); ++it )
 		{
 			const std::string &name = *it;
