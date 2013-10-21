@@ -1,3 +1,11 @@
+# 8.0.0-a21
+
+#### IECoreMaya
+
+- Changing base class for DrawableHolder (from MPxLocatorNode to MPxSurfaceShape ) to solve a selection bug.
+  Warning: This breaks binary compatibility with any DrawableHolder derived class.
+
+
 # 8.0.0-a20
 
 #### IECore
