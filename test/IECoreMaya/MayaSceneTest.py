@@ -592,7 +592,12 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.select( clear = True )
 		sphere = maya.cmds.polySphere( name="pSphere" )
 
+		doTest = True
+		
 		def hasMyTags( node, tag ) :
+			
+			if not doTest:
+				return False
 			
 			if tag not in ( "renderable", "archivable" ) :
 				return False
@@ -609,6 +614,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 			return dagPath.fullPathName().endswith("Shape")
 
 		def readMyTags( node, includeChildren ) :
+			
+			if not doTest:
+				return []
 			
 			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
 			try:
@@ -639,6 +647,74 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( sphereScene.readTags( False ), [ IECore.InternedString('renderable') ] )
 		self.assertTrue( sphereScene.hasTag( 'renderable' ) )
 		self.assertTrue( sphereScene.hasTag( 'archivable' ) )
+		
+		# Disable custom tag functions so they don't mess with other tests
+		doTest = False
+	
+	def testCustomAttributes( self ) :
+	
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.select( clear = True )
+		sphere = maya.cmds.polySphere( name="pSphere" )
+		maya.cmds.currentTime( "0sec" )
+		
+		doTest = True
+	
+		def myAttributeNames( node ) :
+
+			if not doTest:
+				return []
+			
+			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
+			try:
+				dagPath.extendToShapeDirectlyBelow(0)
+			except:
+				return ["transformAttribute"]
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
+				return []
+	
+			return ["shapeAttribute"]
+	
+		def readMyAttribute( node, attr ) :
+			
+			if not doTest:
+				return None
+			
+			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
+			try:
+				dagPath.extendToShapeDirectlyBelow(0)
+			except:
+				if attr == "shapeAttribute":
+					return None
+				return IECore.FloatData( 5 )
+			
+			if attr == "transformAttribute":
+				return None
+			
+			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
+				return None
+	
+			return IECore.StringData("mesh")
+		
+		IECoreMaya.MayaScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
+	
+		scene = IECoreMaya.MayaScene()
+		transformScene = scene.child(str(t))
+		sphereScene = scene.child('pSphere')
+		self.assertEqual( scene.attributeNames(), [] )
+		self.assertEqual( scene.readAttribute("anyAttr", 0.0), None )
+		self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("transformAttribute") ] )
+		self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
+		self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), None )
+		self.assertEqual( transformScene.readAttribute( "transformAttribute", 0.0), IECore.FloatData(5) )
+		self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString('shapeAttribute') ] )
+		self.assertEqual( sphereScene.readAttribute( "shapeAttribute", 0.0), IECore.StringData("mesh") )
+		
+		# Disable custom attribute functions so they don't mess with other tests
+		doTest = False
+		
+		
 		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

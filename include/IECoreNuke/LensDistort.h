@@ -82,6 +82,7 @@ class LensDistort : public DD::Image::Iop
 			
 			std::string m_name;
 			DD::Image::Knob *m_knob;
+			std::string m_script;
 			double m_value;
 			double m_low;
 			double m_high;
@@ -111,6 +112,7 @@ class LensDistort : public DD::Image::Iop
 		virtual void _validate( bool for_real );
 		virtual void engine( int y, int x, int r, DD::Image::ChannelMask channels, DD::Image::Row & outrow );
 		
+		static void buildDynamicKnobs( void*, DD::Image::Knob_Callback f );
 		static void addDynamicKnobs( void*, DD::Image::Knob_Callback f );
 		static const Iop::Description m_description;
 		static DD::Image::Op *build( Node *node );
@@ -139,6 +141,13 @@ class LensDistort : public DD::Image::Iop
 		/// @param returnPath The path of the file that has been loaded.
 		/// @return Whether or not the file path was successful.
 		bool setLensFromFile( std::string &returnPath );
+
+		/// Iterates over all of the lens model's attributes and if they are associated with a knob, retrieves the information from the knob.
+		void updatePluginAttributesFromKnobs();
+
+		/// Updates the dynamic knobs. This method should be called whenever a knob is changed or an event happens that requires
+		/// the dynamic knobs to be recreated or their enabled state changed.
+		void updateUI();
 		
 		/// The maximum number of threads that we are going to use in parallel.
 		const int m_nThreads;

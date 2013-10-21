@@ -214,6 +214,9 @@ class Renderer : public IECore::Renderer
 		///
 		/// \li <b>"ri:textureCoordinates" FloatVectorData( [ s1, t1, s2, t2, s3, t3, s4, t4 ] )</b><br>
 		/// Passed to RiTextureCoordinates.
+		/// \li <b>"ri:automaticInstancing" BoolData</b><br>
+		/// When this is true, all primitives are rendered as instances, and if a previously rendered
+		/// primitive is encountered, the instance will simply be reused.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		/// \par Currently supported attributes :
 		///

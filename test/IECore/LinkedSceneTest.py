@@ -621,6 +621,54 @@ class LinkedSceneTest( unittest.TestCase ) :
 		i2 = l.child( "instance2" )
 		self.assertEqual( i2.childNames(), [] )
 
+	def testLinkBoundTransformMismatch( self ) :
+		
+		scene = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		child = scene.createChild( "child" )
+		mesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		child.writeObject( mesh, 0 )
+		
+		del scene, child
+		
+		child = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read ).child( "child" )
+		
+		linked = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		parent = linked.createChild( "parent" )
+		transform = IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) )
+		parent.writeTransform( transform, 1.0 )
+		parent.writeObject( mesh, 1.0 )
+		childLink = parent.createChild( "childLink" )
+		childLink.writeTransform( transform, 1.0 )
+		childLink.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( child ), 1.0 )
+		
+		del linked, parent, child, childLink
+		
+		linked = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		parent = linked.child( "parent" )
+		childLink = parent.child( "childLink" )
+		
+		# there are 2 bound samples, because the link has bounds at time 0, but a transform at time 1
+		self.assertEqual( linked.numBoundSamples(), 2 )
+		self.assertEqual( parent.numBoundSamples(), 2 )
+		self.assertEqual( childLink.numBoundSamples(), 1 )
+		
+		self.assertEqual( linked.numTransformSamples(), 1 )
+		self.assertEqual( parent.numTransformSamples(), 1 )
+		self.assertEqual( childLink.numTransformSamples(), 1 )
+		
+		# object at the origin
+		self.failUnless( LinkedSceneTest.compareBBox( childLink.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 1 ) ) ) )
+		
+		# transformed the childLink by ( 1, 0, 0 ) and added an object at the origin
+		self.assertEqual( childLink.readTransformAtSample( 0 ), transform )
+		self.failUnless( LinkedSceneTest.compareBBox( parent.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 2, 1, 1 ) ) ) )
+		self.failUnless( LinkedSceneTest.compareBBox( parent.readBoundAtSample( 0 ), parent.readBoundAtSample( 1 ) ) )
+		
+		# transformed the parent by ( 1, 0, 0 )
+		self.assertEqual( parent.readTransformAtSample( 0 ), transform )
+		self.failUnless( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( 1, 0, 0 ), IECore.V3d( 3, 1, 1 ) ) ) )
+		self.failUnless( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), linked.readBoundAtSample( 1 ) ) )
+
 if __name__ == "__main__":
 	unittest.main()
 

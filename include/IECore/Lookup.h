@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,9 +36,11 @@
 #ifndef IECORE_LOOKUP_H
 #define IECORE_LOOKUP_H
 
-#include "OpenEXR/ImathColor.h"
-
 #include <vector>
+
+#include "boost/function.hpp"
+
+#include "OpenEXR/ImathColor.h"
 
 namespace IECore
 {
@@ -54,13 +57,11 @@ class Lookup
 	
 		typedef X XType;
 		typedef Y YType;
+		typedef boost::function<Y ( X )> Function;
 	
 		Lookup();
-	
-		template<class Function>
 		Lookup( const Function &function, XType xMin, XType xMax, unsigned numSamples );
 
-		template<class Function>
 		void init( const Function &function, XType xMin, XType xMax, unsigned numSamples );
 		
 		inline Y operator() ( X x ) const;

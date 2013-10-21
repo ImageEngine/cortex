@@ -58,3 +58,6 @@ import Utils
 from ActiveTake import ActiveTake
 from TemporaryParameterValues import TemporaryParameterValues
 from UpdateMode import UpdateMode
+
+## \todo: remove this hack if SideFx provides a swig-free method for sending a HOM_Node* to python
+HoudiniScene.node = lambda x : hou.node( x._getNodePath() )

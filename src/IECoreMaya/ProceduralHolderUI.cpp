@@ -512,7 +512,7 @@ void ProceduralHolderUI::unhiliteGroupChildren( const std::string &name, IECoreG
 {
 	assert( base );
 	assert( group );
-
+	
 	/// Add state so that the group hilite state doesn't propogate down the hierarchy past the given name
 	IECoreGL::ConstNameStateComponentPtr n = group->getState()->get< IECoreGL::NameStateComponent >();
 	if ( n && n->name() != name )
@@ -523,8 +523,12 @@ void ProceduralHolderUI::unhiliteGroupChildren( const std::string &name, IECoreG
 			assert( oldState );
 			m_stateMap[ group.get() ] = oldState;
 		}
-
-		group->getState()->add( base );
+		
+		// don't bother if the group's already been explicitly highlighted
+		if( !group->getState()->get( IECoreGL::WireframeColorStateComponent::staticTypeId() ) )
+		{
+			group->getState()->add( base );
+		}
 		return;
 	}
 

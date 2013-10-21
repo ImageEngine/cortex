@@ -140,6 +140,7 @@ GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoi
 	GA_OffsetList offsets;
 	offsets.reserve( numPoints );
 	
+	/// \todo: try GA_Detail::appendPointBlock instead. SideFx says it is much faster
 	for ( size_t i=0; i < numPoints; ++i )
 	{
 		offsets.append( geo->appendPoint() );

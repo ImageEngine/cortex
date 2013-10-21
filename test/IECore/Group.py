@@ -285,6 +285,30 @@ class TestGroup( unittest.TestCase ) :
 		
 		g.setTransform( MatrixTransform( M44f() ) )
 		self.assertNotEqual( g.hash(), h )
+	
+	def testGlobalTransform( self ) :
+	
+		g = Group()
+		childGroup = Group()
+		
+		g.addChild( childGroup )
+		
+		parentTransform = TransformationMatrixf()
+		parentTransform.rotate = Eulerf( 0,3.1415926/2,0 )
+		
+		childTransform = TransformationMatrixf()
+		childTransform.translate = V3f( 1, 0, 2 )
+		
+		childGroup.setTransform( MatrixTransform( childTransform.transform ) )
+		g.setTransform( MatrixTransform( parentTransform.transform ) )
+		
+		# child group's translation should have been rotated 90 degrees about the y axis:
+		childGroupGlobalTranslation = childGroup.globalTransformMatrix().extractSHRT()[3]
+		self.assertAlmostEqual( childGroupGlobalTranslation.x, 2, 4 )
+		self.assertAlmostEqual( childGroupGlobalTranslation.y, 0, 4 )
+		self.assertAlmostEqual( childGroupGlobalTranslation.z, -1, 4 )
+		
+		
 		
 	def tearDown( self ) :
 

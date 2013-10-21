@@ -231,7 +231,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 	
 	def testTags( self ) :
 		
-		# at this point, only SceneCacheNodes can define tags
+		# no tags by default
 		scene = self.buildScene()
 		self.assertEqual( scene.readTags(), [] )
 		self.assertFalse( scene.hasTag( "any" ) )
@@ -241,6 +241,68 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		torus1 = sub1.child( "torus1" )
 		self.assertEqual( torus1.readTags(), [] )
 		self.assertFalse( torus1.hasTag( "any" ) )
+		
+		def addTags( node, tags ) :
+			
+			parm = node.addSpareParmTuple( hou.StringParmTemplate( "ieTags", "ieTags", 1, "" ) )
+			parm.set( [ tags ] )
+		
+		# we can add tags to OBJ nodes, but they do not trickle up automatically
+		addTags( hou.node( "/obj/sub1/torus1" ), "yellow" )
+		addTags( hou.node( "/obj/box1" ), "sop top" )
+		self.assertEqual( scene.readTags(), [] )
+		self.assertFalse( scene.hasTag( "yellow" ) )
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.readTags(), [] )
+		self.assertFalse( sub1.hasTag( "yellow" ) )
+		torus1 = sub1.child( "torus1" )
+		self.assertEqual( torus1.readTags(), [ "yellow" ] )
+		self.assertTrue( torus1.hasTag( "yellow" ) )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.readTags(), [ "sop", "top" ] )
+		self.assertTrue( box1.hasTag( "sop" ) )
+		self.assertTrue( box1.hasTag( "top" ) )
+		self.assertFalse( box1.hasTag( "yellow" ) )
+		
+		def addSopTags( node, tag, primRange ) :
+			
+			group = node.createOutputNode( "group" )
+			group.parm( "crname" ).set( tag )
+			group.parm( "groupop" ).set( 1 ) # by range
+			group.parm( "rangestart" ).set( primRange[0] )
+			group.parm( "rangeend" ).deleteAllKeyframes()
+			group.parm( "rangeend" ).set( primRange[1] )
+			group.parm( "select2" ).set( 1 )
+			group.setRenderFlag( True )
+		
+		# we can add tags to SOPs using groups, but they do not trickle up automatically
+		boxObj = hou.node( "/obj/box1" )
+		addSopTags( boxObj.renderNode(), "ieTag_itsABox", ( 0, 5 ) ) # box only
+		addSopTags( boxObj.renderNode(), "notATag", ( 0, 5 ) ) # box only
+		addSopTags( boxObj.renderNode(), "ieTag_itsATorus", ( 6, 105 ) ) # torus only
+		addSopTags( boxObj.renderNode(), "ieTag_both:and", ( 3, 50 ) ) # parts of each
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.readTags(), [] )
+		self.assertFalse( sub1.hasTag( "yellow" ) )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.readTags(), [ "sop", "top", "itsABox", "both:and" ] )
+		self.assertTrue( box1.hasTag( "sop" ) )
+		self.assertTrue( box1.hasTag( "top" ) )
+		self.assertTrue( box1.hasTag( "itsABox" ) )
+		self.assertTrue( box1.hasTag( "both:and" ) )
+		self.assertFalse( box1.hasTag( "itsATorus" ) )
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.readTags(), [] )
+		self.assertFalse( gap.hasTag( "sop" ) )
+		self.assertFalse( gap.hasTag( "top" ) )
+		self.assertFalse( gap.hasTag( "itsATorus" ) )
+		torus = gap.child( "torus" )
+		self.assertEqual( torus.readTags(), [ "itsATorus", "both:and" ] )
+		self.assertTrue( torus.hasTag( "itsATorus" ) )
+		self.assertTrue( torus.hasTag( "both:and" ) )
+		self.assertFalse( torus.hasTag( "sop" ) )
+		self.assertFalse( torus.hasTag( "top" ) )
+		self.assertFalse( torus.hasTag( "itsABox" ) )
 	
 	def testLinks( self ) :
 		
@@ -306,7 +368,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		shape = hou.node( "/obj/box1/actualBox" )
 		deformer = shape.createOutputNode( "twist" )
 		deformer.parm( "paxis" ).set( 1 )
-		deformer.parm( "strength" ).setExpression( "10*$T" )
+		deformer.parm( "strength" ).setExpression( "10*($T+(1.0/$FPS))" )
 		
 		box1 = scene.child( "sub1" ).child( "box1" )
 		mesh0   = box1.readObject( 0 )
@@ -361,13 +423,13 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		scene = self.buildScene()
 		hou.node( "/obj/sub1" ).parmTuple( "t" ).set( [ 1, 1, 1 ] )
-		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T" )
-		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T" )
-		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T+(1.0/$FPS)" )
+		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T+(1.0/$FPS)" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T+(1.0/$FPS)" )
 		hou.node( "/obj/sub1/torus2" ).parmTuple( "t" ).set( [ -1, 0, 2 ] )
-		hou.node( "/obj/box1" ).parm( "tx" ).setExpression( "-$T" )
-		hou.node( "/obj/box1" ).parm( "ty" ).setExpression( "-$T" )
-		hou.node( "/obj/box1" ).parm( "tz" ).setExpression( "-$T" )
+		hou.node( "/obj/box1" ).parm( "tx" ).setExpression( "-($T+(1.0/$FPS))" )
+		hou.node( "/obj/box1" ).parm( "ty" ).setExpression( "-($T+(1.0/$FPS))" )
+		hou.node( "/obj/box1" ).parm( "tz" ).setExpression( "-($T+(1.0/$FPS))" )
 		# to make the bounds nice round numbers
 		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "rows" ).set( 100 )
 		hou.node( "/obj/sub1/torus1/actualTorus" ).parm( "cols" ).set( 100 )
@@ -425,9 +487,9 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 	def testAnimatedTransform( self ) :
 		
 		scene = self.buildScene()
-		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T" )
-		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T+1" )
-		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T+2" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tx" ).setExpression( "$T+(1.0/$FPS)" )
+		hou.node( "/obj/sub1/torus1" ).parm( "ty" ).setExpression( "$T+(1.0/$FPS)+1" )
+		hou.node( "/obj/sub1/torus1" ).parm( "tz" ).setExpression( "$T+(1.0/$FPS)+2" )
 		
 		torus1 = scene.child( "sub1" ).child( "torus1" )
 		transform0 = torus1.readTransform( 0 ).value
@@ -564,6 +626,106 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		# can't use scene() to go outside of the re-rooting
 		self.assertRaises( RuntimeError, scene.scene, [ "sub2" ] )
 		self.assertEqual( scene.scene( [ "sub2" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+	
+	def testHiddenObjects( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1" ).setDisplayFlag( False )
+		self.assertFalse(  hou.node( "/obj/sub1" ).isObjectDisplayed() )
+		self.assertFalse(  hou.node( "/obj/sub1/torus1" ).isObjectDisplayed() )
+		
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.childNames(), [ "torus1", "box1" ] )
+		self.assertFalse( sub1.hasObject() )
+		
+		torus = sub1.child( "torus1" )
+		self.assertEqual( torus.childNames(), [ "torus2" ] )
+		self.assertTrue( torus.hasObject() )
+		self.assertTrue( isinstance( torus.readObject( 0 ), IECore.MeshPrimitive ) )
+
+	def testDefaultTime( self ) :
+		
+		self.buildScene()
+		box = hou.node( "/obj/box1" )
+		deformer = box.renderNode().createOutputNode( "twist" )
+		deformer.parm( "paxis" ).set( 1 )
+		deformer.parm( "strength" ).setExpression( "10*($T+1.0/$FPS)" )
+		deformer.setRenderFlag( True )
+		
+		self.assertNotEqual( hou.time(), 0.5 )
+		self.assertEqual( deformer.cookCount(), 0 )
+		scene = IECoreHoudini.HoudiniScene( box.path(), defaultTime = 0.5 )
+		self.assertEqual( scene.getDefaultTime(), 0.5 )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertEqual( scene.childNames(), [ "gap" ] )
+		self.assertEqual( deformer.cookCount(), 1 )
+		mesh0_5 = scene.readObject( 0.5 )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertEqual( len(mesh0_5["P"].data), 8 )
+		self.assertAlmostEqual( mesh0_5["P"].data[0].x, -0.521334, 6 )
+		
+		scene.setDefaultTime( 0 )
+		self.assertEqual( scene.getDefaultTime(), 0 )
+		self.assertEqual( deformer.cookCount(), 1 )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( deformer.cookCount(), 2 )
+		self.assertEqual( scene.childNames(), [ "gap" ] )
+		self.assertEqual( deformer.cookCount(), 2 )
+		mesh0 = scene.readObject( 0 )
+		self.assertEqual( deformer.cookCount(), 2 )
+		self.assertEqual( len(mesh0["P"].data), 8 )
+		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
+	
+	def testNode( self ) :
+		
+		scene = self.buildScene()
+		self.assertEqual( scene.node(), hou.node( "/obj" ) )
+		
+		child = scene.child( "sub1" )
+		self.assertEqual( child.node(), hou.node( "/obj/sub1" ) )
+		
+		child2 = child.child( "torus1" )
+		self.assertEqual( child2.node(), hou.node( "/obj/sub1/torus1" ) )
+		
+		child3 = child2.child( "torus2" )
+		self.assertEqual( child3.node(), hou.node( "/obj/sub1/torus2" ) )
+		
+		box1 = child.child( "box1" )
+		self.assertEqual( box1.node(), hou.node( "/obj/box1" ) )
+		
+		# flattened geo still points to the parent OBJ
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.node(), hou.node( "/obj/box1" ) )
+		self.assertEqual( gap.child( "torus" ).node(), hou.node( "/obj/box1" ) )
+		
+		self.assertEqual( scene.child( "box2" ).node(), hou.node( "/obj/box2" ) )
+		self.assertEqual( scene.child( "sub2" ).node(), hou.node( "/obj/sub2" ) )
+	
+	def testEmbedded( self ) :
+		
+		scene = self.buildScene()
+		self.assertEqual( scene.embedded(), False )
+		
+		child = scene.child( "sub1" )
+		self.assertEqual( child.embedded(), False )
+		
+		child2 = child.child( "torus1" )
+		self.assertEqual( child2.embedded(), False )
+		
+		child3 = child2.child( "torus2" )
+		self.assertEqual( child3.embedded(), False )
+		
+		box1 = child.child( "box1" )
+		self.assertEqual( box1.embedded(), False )
+		
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.embedded(), True )
+		self.assertEqual( gap.child( "torus" ).embedded(), True )
+		
+		self.assertEqual( scene.child( "box2" ).embedded(), False )
+		self.assertEqual( scene.child( "sub2" ).embedded(), False )
 
 if __name__ == "__main__":
 	unittest.main()

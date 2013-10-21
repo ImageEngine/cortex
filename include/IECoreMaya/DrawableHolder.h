@@ -35,12 +35,11 @@
 #ifndef IECOREMAYA_DRAWABLEHOLDER_H
 #define IECOREMAYA_DRAWABLEHOLDER_H
 
-#include "maya/MPxLocatorNode.h"
+#include "maya/MPxSurfaceShape.h"
 
 #include "IECoreGL/IECoreGL.h"
 
 #include "IECoreMaya/ParameterisedHolder.h"
-#include "IECoreMaya/DisplayStyle.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 namespace IECoreGL
@@ -51,9 +50,8 @@ IE_CORE_FORWARDDECLARE( Scene );
 namespace IECoreMaya
 {
 
-class DrawableHolder : public ParameterisedHolder<MPxLocatorNode>
+class DrawableHolder : public ParameterisedHolderSurfaceShape
 {
-
 	public :
 
 		DrawableHolder();
@@ -66,7 +64,6 @@ class DrawableHolder : public ParameterisedHolder<MPxLocatorNode>
 		
 		virtual bool isBounded() const;
 		virtual MBoundingBox boundingBox() const;
-		virtual void draw( M3dView &view, const MDagPath &path, M3dView::DisplayStyle style, M3dView::DisplayStatus displayStatus );
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 
 		/// Returns an up to date scene created by calling draw() on the held class.
@@ -77,7 +74,6 @@ class DrawableHolder : public ParameterisedHolder<MPxLocatorNode>
 	private :
 
 		IECoreGL::ScenePtr m_scene;
-		DisplayStyle m_displayStyle;
 
 };
 

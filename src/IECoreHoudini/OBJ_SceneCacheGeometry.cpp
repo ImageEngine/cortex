@@ -40,8 +40,14 @@ using namespace IECoreHoudini;
 
 const char *OBJ_SceneCacheGeometry::typeName = "ieSceneCacheGeometry";
 
+int *OBJ_SceneCacheGeometry::g_indirection = 0;
+
 OBJ_SceneCacheGeometry::OBJ_SceneCacheGeometry( OP_Network *net, const char *name, OP_Operator *op ) : OBJ_SceneCacheNode<OBJ_Geometry>( net, name, op )
 {
+	if ( !g_indirection )
+	{
+		g_indirection = OP_Parameters::allocIndirect( this->getParmList()->getEntries() );
+	}
 }
 
 OBJ_SceneCacheGeometry::~OBJ_SceneCacheGeometry()
@@ -64,6 +70,18 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 	return templatePair;
 }
 
+bool OBJ_SceneCacheGeometry::runCreateScript()
+{
+	UT_String path;
+	getFullPath( path );
+	
+	// add the standard mantra geometry parms
+	UT_String script( "opproperty -f -F Render " + path.toStdString() + " mantra default_geometry" );
+	executeHscriptScript( script, 0 );
+	
+	return OBJ_Geometry::runCreateScript();
+}
+
 void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 {
 	if ( !scene )
@@ -77,8 +95,10 @@ void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 
 void OBJ_SceneCacheGeometry::pushToHierarchy()
 {
-	UT_String attribFilter;
+	UT_String attribFilter, tagFilter, shapeFilter;
 	getAttributeFilter( attribFilter );
+	getTagFilter( tagFilter );
+	getShapeFilter( shapeFilter );
 	GeometryType geomType = getGeometryType();
 	
 	UT_PtrArray<OP_Node*> children;
@@ -87,6 +107,8 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 	{
 		SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( children[i] );
 		sop->setAttributeFilter( attribFilter );
+		sop->setTagFilter( tagFilter );
+		sop->setShapeFilter( shapeFilter );
 		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
 	}
 }
@@ -109,11 +131,20 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 		sopSpace = SOP_SceneCacheSource::Path;
 	}
 	
-	UT_String attribFilter;
+	UT_String attribFilter, tagFilter, shapeFilter;
 	getAttributeFilter( attribFilter );
 	sop->setAttributeFilter( attribFilter );
+	getTagFilter( tagFilter );
+	sop->setTagFilter( tagFilter );
+	getShapeFilter( shapeFilter );
+	sop->setShapeFilter( shapeFilter );
 	
 	sop->setSpace( sopSpace );
 	sop->setObjectOnly( objectOnly );
 	sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)getGeometryType() );
+}
+
+int *OBJ_SceneCacheGeometry::getIndirect() const
+{
+	return g_indirection;
 }

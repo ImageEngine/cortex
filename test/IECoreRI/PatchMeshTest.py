@@ -42,7 +42,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 	outputFileName = "./test/IECoreRI/output/testPatchMesh.tif"
 
-	def __performTest( self, curvesPrimitive, testImage ) :
+	def __performTest( self, primitive, testImage, withAutomaticInstancing = False ) :
 
 		r = IECoreRI.Renderer( "" )
 
@@ -58,9 +58,12 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 		r.setOption( "ri:pixelSamples", IECore.V2iData( IECore.V2i( 10 ) ) )
 		r.worldBegin()
 
+		if withAutomaticInstancing :
+			r.setAttribute( "ri:automaticInstancing", True )
+
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-		curvesPrimitive.render( r )
+		primitive.render( r )
 
 		r.worldEnd()
 
@@ -92,6 +95,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 		)
 
 		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/linearPeriodic.tif" )
+		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/linearPeriodic.tif", withAutomaticInstancing = True )
 
 	def testLinear( self ) :
 
@@ -114,6 +118,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 		)
 
 		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/linear.tif" )
+		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/linear.tif", withAutomaticInstancing = True )
 
 	def testBSplinePeriodic( self ) :
 
@@ -151,6 +156,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 		)
 
 		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/bSplinePeriodic.tif" )
+		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/bSplinePeriodic.tif", withAutomaticInstancing = True )
 
 	def testBSpline( self ) :
 
@@ -188,6 +194,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 		)
 
 		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/bSpline.tif" )
+		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/bSpline.tif", withAutomaticInstancing = True )
 
 	def testBezier( self ) :
 
@@ -225,6 +232,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 		)
 
 		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/bezier.tif" )
+		self.__performTest( p, "./test/IECoreRI/data/patchMeshImages/bezier.tif", withAutomaticInstancing = True )
 
 	def testMotionBlur( self ) :
 
@@ -268,6 +276,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 		m[1] = p2
 
 		self.__performTest( m, "./test/IECoreRI/data/patchMeshImages/motionBlur.tif" )
+		self.__performTest( m, "./test/IECoreRI/data/patchMeshImages/motionBlur.tif", withAutomaticInstancing = True )
 
 if __name__ == "__main__":
     unittest.main()

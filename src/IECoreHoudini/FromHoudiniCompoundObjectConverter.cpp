@@ -68,7 +68,9 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
 	if ( attrRef.isValid() && attrRef.isString() )
 	{
-		if ( geo->getUniqueValueCount( attrRef ) < 2 )
+		const GA_Attribute *nameAttr = attrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		if ( tuple->getTableEntries( nameAttr ) < 2 )
 		{
 			return Inapplicable;
 		}

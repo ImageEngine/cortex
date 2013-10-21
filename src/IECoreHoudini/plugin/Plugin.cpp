@@ -184,6 +184,12 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 		GA_FAMILY_NONE, ( std::string( GU_CortexPrimitive::typeName ) + "s" ).c_str()
 	);
 	
+	if ( !primDef )
+	{
+		std::cerr << "Warning: Duplicate definition for GU_CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
+		return;
+	}
+	
 	/// \todo: This method is silly. Should we just give up and do the whole registration in GU_CortexPrimitive?
 	GU_CortexPrimitive::setTypeDef( primDef );
 	

@@ -59,13 +59,13 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@staticmethod
-	def create( parentName ) :
+	def create( parentName, transformParent = None ) :
 		
 		try:
-			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True )
+			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True, parent = transformParent )
 		except:
 			# The parent name is supposed to be the children names in a sceneInterface, they could be numbers, maya doesn't like that. Use a prefix.
-			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True )
+			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True, parent = transformParent )
 				
 		return FnSceneShape.createShape( parentNode )
 	
@@ -202,6 +202,57 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 				
 		maya.cmds.setAttr( node+".queryPaths["+str(index)+"]", path, type="string" )
 		return index
+	
+	## create the given child for the scene shape
+	# Returns a the function set for the child scene shape.
+	def createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "" ) :
+		
+		node = self.fullPathName()
+		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
+		
+		if maya.cmds.objExists( transform+"|"+childName ):
+			shape = maya.cmds.listRelatives( transform+"|"+childName, f=True, type="ieSceneShape" )
+			if shape:
+				fnChild = IECoreMaya.FnSceneShape( shape[0] )
+			else:
+				fnChild = IECoreMaya.FnSceneShape.createShape( transform+"|"+childName )
+		else:
+			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent = transform )
+
+		childNode = fnChild.fullPathName()
+		childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
+		maya.cmds.setAttr( childNode+".file", sceneFile, type="string" )
+		sceneRootName = "/"+childName if sceneRoot == "/" else sceneRoot+"/"+childName
+		maya.cmds.setAttr( childNode+".root", sceneRootName, type="string" )
+		
+		index = self.__queryIndexForPath( "/"+childName )
+		outTransform = node+".outTransform["+str(index)+"]"
+		if not maya.cmds.isConnected( outTransform+".outTranslate", childTransform+".translate" ):
+			maya.cmds.connectAttr( outTransform+".outTranslate", childTransform+".translate", f=True )
+		if not maya.cmds.isConnected( outTransform+".outRotate", childTransform+".rotate" ):
+			maya.cmds.connectAttr( outTransform+".outRotate", childTransform+".rotate", f=True )
+		if not maya.cmds.isConnected( outTransform+".outScale", childTransform+".scale" ):
+			maya.cmds.connectAttr( outTransform+".outScale", childTransform+".scale", f=True )
+
+		maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
+		maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
+		maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
+
+		if drawTagsFilter:
+			parentTags = drawTagsFilter.split()
+			childTags = fnChild.sceneInterface().readTags()
+			commonTags = filter( lambda x: str(x) in childTags, parentTags )
+			if not commonTags:
+				# Hide that child since it doesn't match any filter
+				maya.cmds.setAttr( childTransform+".visibility", 0 )
+			else:
+				maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )
+		
+		# Connect child time to its parent so they're in sync
+		if not maya.cmds.isConnected( node+".outTime", childNode+".time" ):
+			maya.cmds.connectAttr( node+".outTime", childNode+".time", f=True )
+		
+		return fnChild
 
 	## Expands the scene shape one level down if possible.
 	# Returns a list of function sets for the child scene shapes.
@@ -233,57 +284,11 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		drawRootBound = maya.cmds.getAttr( node+".drawRootBound" )
 		drawTagsFilter = maya.cmds.getAttr( node+".drawTagsFilter" )
 		
-		timeConnection = maya.cmds.listConnections( node+".time", source = True, destination = False, plugs=True )
-		
 		newSceneShapeFns = []
 
 		for i, child in enumerate( sceneChildren ):
 			
-			if maya.cmds.objExists( transform+"|"+child ):
-				shape = maya.cmds.listRelatives( transform+"|"+child, f=True, type="ieSceneShape" )
-				if shape:
-					fnChild = IECoreMaya.FnSceneShape( shape[0] )
-				else:
-					fnChild = IECoreMaya.FnSceneShape.createShape( transform+"|"+child )
-			else:
-				fnChild = IECoreMaya.FnSceneShape.create( child )
-
-			childNode = fnChild.fullPathName()
-			childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
-			maya.cmds.setAttr( childNode+".file", sceneFile, type="string" )
-			sceneRootName = "/"+child if sceneRoot == "/" else sceneRoot+"/"+child
-			maya.cmds.setAttr( childNode+".root", sceneRootName, type="string" )
-			
-			index = self.__queryIndexForPath( "/"+child )
-			outTransform = node+".outTransform["+str(index)+"]"
-			if not maya.cmds.isConnected( outTransform+".outTranslate", childTransform+".translate" ):
-				maya.cmds.connectAttr( outTransform+".outTranslate", childTransform+".translate", f=True )
-			if not maya.cmds.isConnected( outTransform+".outRotate", childTransform+".rotate" ):
-				maya.cmds.connectAttr( outTransform+".outRotate", childTransform+".rotate", f=True )
-			if not maya.cmds.isConnected( outTransform+".outScale", childTransform+".scale" ):
-				maya.cmds.connectAttr( outTransform+".outScale", childTransform+".scale", f=True )
-
-			maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
-			maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
-			maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
-
-			if drawTagsFilter:
-				parentTags = drawTagsFilter.split()
-				childTags = fnChild.sceneInterface().readTags()
-				commonTags = filter( lambda x: str(x) in childTags, parentTags )
-				if not commonTags:
-					# Hide that child since it doesn't match any filter
-					maya.cmds.setAttr( childTransform+".visibility", 0 )
-				else:
-					maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )
-			
-			# Connect child time to its parent so they're in sync
-			if not maya.cmds.isConnected( node+".outTime", childNode+".time" ):
-				maya.cmds.connectAttr( node+".outTime", childNode+".time", f=True )
-
-			if maya.cmds.listRelatives( childTransform, parent = True, f=True ) != [ transform ]:
-				maya.cmds.parent( childTransform, transform, relative=True )
-			
+			fnChild = self.createChild( child, sceneFile, sceneRoot, drawGeo, drawChildBounds, drawRootBound, drawTagsFilter )
 			newSceneShapeFns.append( fnChild )
 			
 		return newSceneShapeFns

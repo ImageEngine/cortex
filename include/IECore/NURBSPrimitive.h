@@ -72,6 +72,7 @@ class NURBSPrimitive : public Primitive
 		float vMax() const;
 		int vVertices() const;
 		int vSegments() const;
+		/// \todo Remove virtual-ness for Cortex 9.
 		virtual void setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax,
 			int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax );
 		//@}

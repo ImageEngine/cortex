@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,21 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// \file GL.h
-/// Include this file to include the system GLUT headers. It's better this way as the
-/// right way of including GLUT varies from system to system.
+#ifndef IECOREMAYA_DRAWABLEHOLDERUI_H
+#define IECOREMAYA_DRAWABLEHOLDERUI_H
 
-#ifndef IECOREGL_GLUT_H
-#define IECOREGL_GLUT_H
+#include "maya/MPxSurfaceShapeUI.h"
 
-#ifdef __APPLE__
+#include "IECoreMaya/DisplayStyle.h"
 
-#include "GLUT/glut.h"
+namespace IECoreGL
+{
+IE_CORE_FORWARDDECLARE( State );
+IE_CORE_FORWARDDECLARE( Group );
+IE_CORE_FORWARDDECLARE( StateComponent );
+}
 
-#else
+namespace IECoreMaya
+{
 
-#include "GL/glut.h"
+class DrawableHolderUI : public MPxSurfaceShapeUI
+{
 
-#endif // __APPLE__
+	public :
 
-#endif // IECOREGL_GLUT_H
+		DrawableHolderUI();
+		virtual ~DrawableHolderUI();
+
+		virtual void getDrawRequests( const MDrawInfo &info, bool objectAndActiveOnly, MDrawRequestQueue &requests );
+		virtual void draw( const MDrawRequest &request, M3dView &view ) const;
+		virtual bool select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const;
+
+		static void *creator();
+		
+	private :
+	
+		mutable DisplayStyle m_displayStyle;
+	
+};
+
+} // namespace IECoreMaya
+
+#endif // IECOREMAYA_DRAWABLEHOLDERUI_H

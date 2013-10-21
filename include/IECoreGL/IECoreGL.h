@@ -42,8 +42,8 @@ namespace IECoreGL
 /// This function must be called at least once before using any
 /// functionality in the IECoreGL library. Set glAlreadyInitialised
 /// to true if you have setup an OpenGL context already, and false if
-/// you wish one to be created for you (using GLUT). There is no harm
-/// in calling it multiple times.
+/// you wish one to be created for you. There is no harm in calling
+/// it multiple times.
 void init( bool glAlreadyInitialised = false );
 
 } // namespace IECoreGL

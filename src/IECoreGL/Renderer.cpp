@@ -1340,6 +1340,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:primitive:boundColor"] = typedAttributeSetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeSetter<OutlineColorStateComponent>;
 		(*a)["gl:primitive:pointColor"] = typedAttributeSetter<PointColorStateComponent>;
+		(*a)["gl:primitive:selectable"] = typedAttributeSetter<IECoreGL::Primitive::Selectable>;
 		(*a)["gl:color"] = typedAttributeSetter<Color>;
 		(*a)["color"] = colorAttributeSetter;
 		(*a)["opacity"] = opacityAttributeSetter;
@@ -1393,6 +1394,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:primitive:boundColor"] = typedAttributeGetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeGetter<OutlineColorStateComponent>;
 		(*a)["gl:primitive:pointColor"] = typedAttributeGetter<PointColorStateComponent>;
+		(*a)["gl:primitive:selectable"] = typedAttributeGetter<IECoreGL::Primitive::Selectable>;
 		(*a)["gl:color"] = typedAttributeGetter<Color>;
 		(*a)["color"] = colorAttributeGetter;
 		(*a)["opacity"] = opacityAttributeGetter;
@@ -1720,7 +1722,20 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 {
 	try
 	{
-		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
+		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive;
+		IECore::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
+		if( it == primVars.end() )
+		{
+			throw IECore::Exception( "Trying to render a mesh without \"P\"" );
+		}
+		
+		IECore::V3fVectorDataPtr pData = runTimeCast< IECore::V3fVectorData >( it->second.data );
+		if( !pData )
+		{
+			throw IECore::Exception( "Mesh \"P\" variable has incorrect type" );
+		}
+		
+		m->setTopologyUnchecked( vertsPerFace, vertIds, pData->readable().size(), interpolation );
 		m->variables = primVars;
 		m_data->addPrimitive( m.get() );
 	}

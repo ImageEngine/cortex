@@ -57,7 +57,7 @@ class DspyTest( IECoreRI.TestCase ) :
 		)
 		
 		# write another to disk the usual way
-		r.display( "+test/IECoreRI/output/sphere.tif", "tiff", "rgba",
+		r.display( "test/IECoreRI/output/sphere.tif", "tiff", "rgba",
 			{
 				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
 			}

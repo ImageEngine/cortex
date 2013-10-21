@@ -56,24 +56,16 @@ static InternedString pName( "P" );
 
 const char *SOP_SceneCacheSource::typeName = "ieSceneCacheSource";
 
-PRM_Name SOP_SceneCacheSource::pShapeFilter( "shapeFilter", "Shape Filter" );
 PRM_Name SOP_SceneCacheSource::pObjectOnly( "objectOnly", "Object Only" );
-
-PRM_ChoiceList SOP_SceneCacheSource::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SOP_SceneCacheSource::buildShapeFilterMenu );
 
 OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 {
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[3];
+		thisTemplate = new PRM_Template[2];
 		
 		thisTemplate[0] = PRM_Template(
-			PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
-			"A list of filters to decide which shapes to load. Uses Houdini matching syntax"
-		);
-		
-		thisTemplate[1] = PRM_Template(
 			PRM_TOGGLE, 1, &pObjectOnly, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
 			"Determines whether this SOP cooks the current object only, or traverses down through the hierarchy."
 		);
@@ -100,38 +92,6 @@ SOP_SceneCacheSource::~SOP_SceneCacheSource()
 OP_Node *SOP_SceneCacheSource::create( OP_Network *net, const char *name, OP_Operator *op )
 {
 	return new SOP_SceneCacheSource( net, name, op );
-}
-
-void SOP_SceneCacheSource::buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
-{
-	SOP_SceneCacheSource *node = reinterpret_cast<SOP_SceneCacheSource*>( data );
-	if ( !node )
-	{
-		return;
-	}
-	
-	menu[0].setToken( "*" );
-	menu[0].setLabel( "*" );
-	
-	std::string file;
-	if ( !node->ensureFile( file ) )
-	{
-		// mark the end of our menu
-		menu[1].setToken( 0 );
-		return;
-	}
-	
-	ConstSceneInterfacePtr scene = node->scene( file, node->getPath() );
-	if ( !scene )
-	{
-		// mark the end of our menu
-		menu[1].setToken( 0 );
-		return;
-	}
-	
-	std::vector<std::string> objects;
-	node->objectNames( scene, objects );
-	node->createMenu( menu, objects );
 }
 
 bool SOP_SceneCacheSource::getObjectOnly() const
@@ -191,14 +151,19 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	Space space = getSpace();
 	GeometryType geometryType = (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
 	
+	UT_String tagFilterStr;
+	getTagFilter( tagFilterStr );
+	UT_StringMMPattern tagFilter;
+	tagFilter.compile( tagFilterStr );
+	
 	UT_String shapeFilterStr;
-	evalString( shapeFilterStr, pShapeFilter.getToken(), 0, 0 );
+	getShapeFilter( shapeFilterStr );
 	UT_StringMMPattern shapeFilter;
 	shapeFilter.compile( shapeFilterStr );
 	
 	UT_String p( "P" );
 	UT_String attributeFilter;
-	evalString( attributeFilter, pAttributeFilter.getToken(), 0, 0 );
+	getAttributeFilter( attributeFilter );
 	if ( !p.match( attributeFilter ) )
 	{
 		attributeFilter += " P";
@@ -216,6 +181,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( file );
 	hash.append( path );
 	hash.append( space );
+	hash.append( tagFilterStr );
 	hash.append( shapeFilterStr );
 	hash.append( attributeFilter );
 	hash.append( geometryType );
@@ -226,7 +192,8 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 		gdp->clearAndDestroy();
 	}
 	
-	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, context.getTime() ) : Imath::M44d();
+	double readTime = time( context );
+	Imath::M44d transform = ( space == World ) ? worldTransform( file, path, readTime ) : Imath::M44d();
 	
 	SceneInterface::Path rootPath;
 	scene->path( rootPath );
@@ -239,7 +206,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 		return error();
 	}
 	
-	loadObjects( scene, transform, context.getTime(), space, shapeFilter, attributeFilter.toStdString(), geometryType, rootPath.size() );
+	loadObjects( scene, transform, readTime, space, tagFilter, shapeFilter, attributeFilter.toStdString(), geometryType, rootPath.size() );
 	
 	if ( progress->opInterrupt( 100 ) )
 	{
@@ -259,7 +226,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, GeometryType geometryType, size_t rootSize )
+void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &tagFilter, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, GeometryType geometryType, size_t rootSize )
 {
 	UT_Interrupt *progress = UTgetInterrupt();
 	progress->setLongOpText( ( "Loading " + scene->name().string() ).c_str() );
@@ -268,7 +235,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		return;
 	}
 	
-	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) )
+	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( shapeFilter ) && tagged( scene, tagFilter ) )
 	{
 		ConstObjectPtr object = scene->readObject( time );
 		std::string name = relativePath( scene, rootSize );
@@ -325,7 +292,10 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr child = scene->child( *it );
-		loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, shapeFilter, attributeFilter, geometryType, rootSize );
+		if ( tagged( child, tagFilter ) )
+		{
+			loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, tagFilter, shapeFilter, attributeFilter, geometryType, rootSize );
+		}
 	}
 }
 

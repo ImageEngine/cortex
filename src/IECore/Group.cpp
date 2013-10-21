@@ -94,7 +94,7 @@ Imath::M44f Group::globalTransformMatrix( float time ) const
 {
 	if( m_parent )
 	{
-		return m_parent->globalTransformMatrix( time ) * transformMatrix( time );
+		return transformMatrix( time ) * m_parent->globalTransformMatrix( time );
 	}
 	return transformMatrix( time );
 }

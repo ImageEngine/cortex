@@ -1,3 +1,132 @@
+# 8.0.0-a21
+
+#### IECoreMaya
+
+- Changing base class for DrawableHolder (from MPxLocatorNode to MPxSurfaceShape ) to solve a selection bug.
+  Warning: This breaks binary compatibility with any DrawableHolder derived class.
+
+
+# 8.0.0-a20
+
+#### IECore
+
+- Fixed IECore::Lookup for OS X.
+- Fixed SceneCache build problem on OS X.
+- Fixed unit test in LinkedSceneTest.py ( testLinkBoundTransformMismatch )
+
+#### IECoreGL
+
+- Fixed IECoreGL::PointsPrimitive crash on OS X.
+- Removed IECoreGL/Lights.h.
+- Removed IECoreGL/GLUT.h
+
+#### IECoreHoudini
+
+- SceneCache OBJ Parameter Reorganization (will cause warnings in existing scenes. these can be ignored)
+- Added functions to HoudiniScene: node() and embedded()
+- Added click Selection of GR_CortexPrimitives
+
+#### IECoreMaya
+
+- Added FnSceneShape createChild, extracted from expandOnce.
+- Changed interface for MayaScene custom attribute callbacks and added bindings for Python.
+
+#### IECoreNuke
+
+- Fixed bug #4837: "Knobs not found" warning messages.
+- Fixed artefacts in LensDistort
+
+# 8.0.0-a19
+
+#### IECore
+
+- Removed incorrect assertions from StreamIndexedIO - they were causing crashes in debug builds.
+- ComputationCache is more robust in situations where a call to get() yields a different object than was passed to set().
+
+#### IECoreHoudini
+
+- GEO_CortexPrimitives are now correctly copied and transformed during ObjectMerges.
+- TagFilter now prevents unnecessary expansion of SceneCache nodes. In SubNetwork/AllDescendants mode, the tagFilter is used to prevent expansion into branches of the hierarchy that were not requested. For a heavy asset, filtering by a "Proxy" tag was expanding in 25 seconds and creating 22000 nodes. It is now expanding in 3 seconds and creating 3000 nodes.
+- SceneCache Xform and Geo nodes now have a tagFilter, and pass it through to matching children during expansion and push. Xfrom still uses it to limit expansion and control visibility. Geo just passes it on to the SOP, which uses it to limit objects loaded.
+- Promoted shapeFilter to all SceneCache nodes. SceneCache Xform and Geo just pass it through to the SOP, as with the attributeFilter.
+- Added support for reading and writing tags in SceneCaches.
+- Optimised SceneCache OBJ expansion time. On a heavy asset, this reduces expansion time from 442.3s (7.38m) to 17.12s.
+- Fixed time offset issues caused by Houdini time 0 being at frame 1, whereas it is at frame 0 in Maya, and in SceneInterfaces.
+
+#### IECoreMaya
+
+- Added a flag to the FnSceneShape create so we can directly create a new sceneShape and transform under a given parent. Used when expanding.
+
+#### IECoreNuke
+
+- Fixed a bug in LensDistort that was causing the cache to hold incorrect image data.
+
+#### IECoreGL
+
+- Added ShaderLoader::clear() method, which allows the reloading of GLSL shaders on the fly.
+- Added "gl:primitive:selectable" attribute to Renderer.
+
+#### IECoreRI
+
+- Fixed automatic instancing bug caused by having multiple procedurals in the same RIB file.
+- Added workaround for 3delight 11.0 in IECoreRI::Renderer::worldEnd - this allows rerendering to work again.
+
+####################################################################################################
+
+# 8.0.0-a18 :
+
+#### IECore
+
+- Fixed sample time ordering bug in SceneCache.
+- Fixed transform matrix order in Group.globalTransformMatrix().
+- Added a new setTopologyUnchecked method to MeshPrimitive, plus lazy computation of min/maxVerticesPerFace.
+
+#### IECoreGL
+
+-  Fixed bugs in interpretation of "color" attribute in IECoreGL.
+
+#### IECoreMaya
+
+- Fixed a segfault which occured when selecting multiple components of a sceneShape in Maya.
+- Fixed maya procedural selection highlighting.
+
+#### IECoreHoudini
+
+- Optimised SceneCache caching time significantly.
+- Simplified FromHoudiniGeometryConverter factory functions.
+- Added name parameter to ToHoudiniGeometryConverter.
+- FromHoudiniGeometryConverters no longer add the name blindData.
+- Added nameFilter to FromHoudiniGeometryConverter python factory function.
+- HoudiniGeometryConverters now use Objects rather than VisibleRenderables.
+- Added FromHoudiniCortexObjectConverter for converting single GU_CortexPrimitives.
+- Added ToHoudiniCortexObjectConverter for creating GU_CortexPrimitives.
+- Fixed ToHoudiniGeometryConverter bug where it didn't call incrementMetaCacheCount().
+- Added FromHoudiniCompoundObjectConverter. This converts multiple GU_CortexPrimitives, maintaining the naming by storing each one in a CompoundObject.
+- Added ToHoudiniCompoundObjectConverter.
+- Added non-const access to the object in a Geo_CortexPrimitive.
+- Removed unecessary Object copy in SceneCache SOP.
+- Removed HoudiniScene::readObject hack for CortexObject prims.
+- Updated cob/pdv IO to allow conversion of general Objects and not just VisibleRenderables.
+- Fixed ToHoudiniGeometryConverter factory function search order.
+- Fixed bug when caching hidden OBJs.
+- Added interruptibility to SceneCache ROP.
+- Added DetailSplitter class for efficiently extracting select bits of geometry from a GU_Detail.
+- Reenabled the loading of multiple ieCoreHoudini plugins.
+
+#### IECoreRI
+
+- Added "ri:textureCoordinates" attribute to IECoreRI::Renderer. This maps to a call to RiTextureCoordinates.
+- Fixed specification of multiple displays via IECoreRI::Renderer::display().
+- Added automatic instancing capabilities to IECoreRI::Renderer.
+
+#### IECoreNuke
+
+- Added support for expressions in LensDistort.
+
+#### IECoreAlembic
+
+- Fixed IECoreAlembic to use GeometricTypedData appropriately (#28).
+
 8.0.0-a17 :
 
 IECoreRI

@@ -55,7 +55,10 @@ using namespace IECoreHoudini;
 
 static InternedString contentName( "geo" );
 
-HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
+PRM_Name HoudiniScene::pTags( "ieTags", "ieTags" );
+static const UT_String tagGroupPrefix( "ieTag_" );
+
+HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
 	motDirector->getObjectManager()->getFullPath( m_nodePath );
@@ -64,26 +67,34 @@ HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 )
 	calculatePath( contentPath, rootPath );
 }
 
-HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath ) : m_rootIndex( 0 ), m_contentIndex( 0 )
+HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime )
+	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( defaultTime )
+{
+	constructCommon( nodePath, contentPath, rootPath, 0 );
+}
+
+HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter )
+	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( splitter ), m_defaultTime( defaultTime )
+{
+	constructCommon( nodePath, contentPath, rootPath, splitter );
+}
+
+void HoudiniScene::constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
 {
 	m_nodePath = nodePath;
 	m_nodePath.hardenIfNeeded();
 	
-	OP_Node *contentNode = locateContent( retrieveNode() );
-	if ( contentNode )
+	if ( OP_Node *contentNode = locateContent( retrieveNode() ) )
 	{
-		contentNode->getFullPath( m_contentPath );
-		m_contentPath.hardenIfNeeded();
+		if ( !m_splitter )
+		{
+			OP_Context context( adjustedDefaultTime() );
+			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
+			m_splitter = new DetailSplitter( handle );
+		}
 	}
 	
 	calculatePath( contentPath, rootPath );
-	
-	// make sure the node is valid
-	OP_Node *node = retrieveNode();
-	if ( !node->isManager() && !node->castToOBJNode() )
-	{
-		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" is not a valid OBJ." );
-	}
 }
 
 HoudiniScene::~HoudiniScene()
@@ -93,6 +104,31 @@ HoudiniScene::~HoudiniScene()
 const OP_Node *HoudiniScene::node() const
 {
 	return retrieveNode( false, NullIfMissing );
+}
+
+bool HoudiniScene::embedded() const
+{
+	return m_contentIndex;
+}
+
+double HoudiniScene::adjustedDefaultTime() const
+{
+	if ( m_defaultTime == std::numeric_limits<double>::infinity() )
+	{
+		return adjustTime( CHgetEvalTime() );
+	}
+	
+	return adjustTime( m_defaultTime );
+}
+
+double HoudiniScene::getDefaultTime() const
+{
+	return m_defaultTime;
+}
+
+void HoudiniScene::setDefaultTime( double time )
+{
+	m_defaultTime = time;
 }
 
 std::string HoudiniScene::fileName() const
@@ -118,12 +154,7 @@ void HoudiniScene::path( Path &p ) const
 
 void HoudiniScene::calculatePath( const Path &contentPath, const Path &rootPath )
 {
-	OP_Node *node = OPgetDirector()->findNode( m_nodePath );
-	if ( !node )
-	{
-		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
-	}
-	
+	OP_Node *node = retrieveNode();
 	if ( node->isManager() )
 	{
 		return;
@@ -195,7 +226,7 @@ Imath::Box3d HoudiniScene::readBound( double time ) const
 	
 	Imath::Box3d bounds;
 	UT_BoundingBox box;
-	OP_Context context( time );
+	OP_Context context( adjustTime( time ) );
 	/// \todo: this doesn't account for SOPs containing multiple shapes
 	/// if we fix it, we need to fix the condition below as well
 	if ( node->getBoundingBox( box, context ) )
@@ -259,7 +290,7 @@ Imath::M44d HoudiniScene::readTransformAsMatrix( double time ) const
 	}
 	
 	UT_DMatrix4 matrix;
-	OP_Context context( time );
+	OP_Context context( adjustTime( time ) );
 	if ( !objNode->getLocalTransform( context, matrix ) )
 	{
 		return Imath::M44d();
@@ -301,7 +332,7 @@ ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) cons
 	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
 	if ( it != customAttributeReaders().end() )
 	{
-		return it->second.m_read( retrieveNode() );
+		return it->second.m_read( retrieveNode(), time );
 	}
 	
 	return 0;
@@ -320,12 +351,59 @@ bool HoudiniScene::hasTag( const Name &name, bool includeChildren ) const
 		return false;
 	}
 	
+	// check for user supplied tags if we're not inside a SOP
+	if ( !m_contentIndex && node->hasParm( pTags.getToken() ) )
+	{
+		UT_String parmTags;
+		node->evalString( parmTags, pTags.getToken(), 0, 0 );
+		if ( UT_String( name.c_str() ).multiMatch( parmTags ) )
+		{
+			return true;
+		}
+	}
+	
+	// check with the registered tag readers
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
 		if ( it->m_has( node, name ) )
 		{
 			return true;
+		}
+	}
+	
+	// check tags based on primitive groups
+	OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
+	if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
+	{
+		GU_DetailHandle newHandle = m_splitter->split( contentPathValue() );
+		if ( !newHandle.isNull() )
+		{
+			GU_DetailHandleAutoReadLock readHandle( newHandle );
+			if ( const GU_Detail *geo = readHandle.getGdp() )
+			{
+				GA_Range prims = geo->getPrimitiveRange();
+				for ( GA_GroupTable::iterator<GA_ElementGroup> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+				{
+					GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup*>( it.group() );
+					if ( group->getInternal() || group->isEmpty() )
+					{
+						continue;
+					}
+					
+					const UT_String &groupName = group->getName();
+					if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
+					{
+						UT_String tag;
+						groupName.substr( tag, tagGroupPrefix.length() );
+						tag.substitute( "_", ":" );
+						if ( tag.equal( name.c_str() ) )
+						{
+							return true;
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -342,6 +420,23 @@ void HoudiniScene::readTags( NameList &tags, bool includeChildren ) const
 		return;
 	}
 	
+	// add user supplied tags if we're not inside a SOP
+	if ( !m_contentIndex && node->hasParm( pTags.getToken() ) )
+	{
+		UT_String parmTagStr;
+		node->evalString( parmTagStr, pTags.getToken(), 0, 0 );
+		if ( !parmTagStr.equal( UT_String::getEmptyString() ) )
+		{
+			UT_WorkArgs tokens;
+			parmTagStr.tokenize( tokens, " " );
+			for ( int i = 0; i < tokens.getArgc(); ++i )
+			{
+				tags.push_back( tokens[i] );
+			}
+		}
+	}
+	
+	// add tags from the registered tag readers
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
@@ -349,12 +444,46 @@ void HoudiniScene::readTags( NameList &tags, bool includeChildren ) const
 		it->m_read( node, values, includeChildren );
 		tags.insert( tags.end(), values.begin(), values.end() );
 	}
+	
+	// add tags based on primitive groups
+	OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
+	if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
+	{
+		GU_DetailHandle newHandle = m_splitter->split( contentPathValue() );
+		if ( !newHandle.isNull() )
+		{
+			GU_DetailHandleAutoReadLock readHandle( newHandle );
+			if ( const GU_Detail *geo = readHandle.getGdp() )
+			{
+				GA_Range prims = geo->getPrimitiveRange();
+				for ( GA_GroupTable::iterator<GA_ElementGroup> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+				{
+					GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup*>( it.group() );
+					if ( group->getInternal() || group->isEmpty() )
+					{
+						continue;
+					}
+					
+					const UT_String &groupName = group->getName();
+					if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
+					{
+						UT_String tag;
+						groupName.substr( tag, tagGroupPrefix.length() );
+						tag.substitute( "_", ":" );
+						tags.push_back( tag.buffer() );
+					}
+				}
+			}
+		}
+	}
 }
 
 void HoudiniScene::writeTags( const NameList &tags )
 {
 	throw Exception( "HoudiniScene::writeTags not supported" );
 }
+
+static const char *emptyString = "";
 
 bool HoudiniScene::hasObject() const
 {
@@ -373,29 +502,31 @@ bool HoudiniScene::hasObject() const
 	OBJ_OBJECT_TYPE type = objNode->getObjectType();
 	if ( type == OBJ_GEOMETRY  )
 	{
-		OP_Context context( CHgetEvalTime() );
-		const GU_Detail *geo = objNode->getRenderGeometry( context );
+		OP_Context context( adjustedDefaultTime() );
+		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
-		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-		if ( !attrHandle.isAttributeValid() )
+		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+		if ( !nameAttrRef.isValid() )
 		{
 			return true;
 		}
 		
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		int numShapes = geo->getUniqueValueCount( attrRef );
+		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		GA_Size numShapes = tuple->getTableEntries( nameAttr );
 		if ( !numShapes )
 		{
 			return true;
 		}
 		
-		for ( int i=0; i < numShapes; ++i )
+		for ( GA_Size i=0; i < numShapes; ++i )
 		{
-			Path childPath;
-			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-			if ( valid && childPath.empty() )
+			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+			const char *match = matchPath( currentName );
+			if ( match && *match == *emptyString )
 			{
+				// exact match
 				return true;
 			}
 		}
@@ -418,18 +549,15 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 	
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( time );
-		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context );
-		GU_DetailHandleAutoReadLock readHandle( handle );
-		const GU_Detail *geo = readHandle.getGdp();
-		if ( !geo )
+		OP_Context context( adjustTime( time ) );
+		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
+		
+		if ( !m_splitter || ( handle != m_splitter->handle() ) )
 		{
-			return 0;
+			m_splitter = new DetailSplitter( handle );
 		}
 		
-		UT_StringMMPattern nameFilter;
-		nameFilter.compile( contentPathValue() );
-		GU_DetailHandle newHandle = FromHoudiniGeometryConverter::extract( geo, nameFilter );
+		GU_DetailHandle newHandle = m_splitter->split( contentPathValue() );
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
@@ -496,23 +624,29 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	// add child shapes within the geometry
 	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( CHgetEvalTime() );
-		const GU_Detail *geo = contentNode->getRenderGeometry( context );
-		const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-		if ( !attrHandle.isAttributeValid() )
+		OP_Context context( adjustedDefaultTime() );
+		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
+		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+		if ( !nameAttrRef.isValid() )
 		{
 			return;
 		}
 		
-		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-		int numShapes = geo->getUniqueValueCount( attrRef );
-		for ( int i=0; i < numShapes; ++i )
+		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		GA_Size numShapes = tuple->getTableEntries( nameAttr );
+		for ( GA_Size i=0; i < numShapes; ++i )
 		{
-			Path childPath;
-			bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-			if ( valid && !childPath.empty() && std::find( childNames.begin(), childNames.end(), *childPath.begin() ) == childNames.end() )
+			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+			const char *match = matchPath( currentName );
+			if ( match && *match != *emptyString )
 			{
-				childNames.push_back( *childPath.begin() );
+				std::pair<const char *, size_t> childMarker = nextWord( match );
+				std::string child( childMarker.first, childMarker.second );
+				if ( std::find( childNames.begin(), childNames.end(), child ) == childNames.end() )
+				{
+					childNames.push_back( child );
+				}
 			}
 		}
 	}
@@ -541,7 +675,7 @@ SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missin
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	return new HoudiniScene( nodePath, contentPath, rootPath );
+	return new HoudiniScene( nodePath, contentPath, rootPath, m_defaultTime, m_splitter );
 }
 
 ConstSceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -567,63 +701,24 @@ SceneInterfacePtr HoudiniScene::scene( const Path &path, MissingBehaviour missin
 OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehaviour ) const
 {
 	OP_Node *node = OPgetDirector()->findNode( m_nodePath );
-	if ( !node && missingBehaviour == ThrowIfMissing )
+	if ( node && content )
 	{
-		throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
-	}
-	
-	OP_Node *contentNode = 0;
-	UT_String contentPath = m_contentPath;
-	if ( m_contentPath.length() )
-	{
-		contentNode = OPgetDirector()->findNode( m_contentPath );
-	}
-	else
-	{
-		contentNode = node;
-		contentPath = m_nodePath;
-	}
-	
-	if ( content )
-	{
-		if ( !contentNode && missingBehaviour == ThrowIfMissing )
+		if ( OP_Node *contentNode = locateContent( node ) )
 		{
-			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + contentPath.toStdString() + "\" no longer exists." );
+			node = contentNode;
 		}
-		
-		node = contentNode;
 	}
 	
-	if ( m_contentIndex )
+	if ( missingBehaviour == ThrowIfMissing )
 	{
-		OBJ_Node *objNode = contentNode->castToOBJNode();
-		if ( objNode && objNode->getObjectType() == OBJ_GEOMETRY )
+		if ( !node )
 		{
-			OP_Context context( CHgetEvalTime() );
-			const GU_Detail *geo = objNode->getRenderGeometry( context );
-			const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-			if ( attrHandle.isAttributeValid() )
-			{
-				const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-				int numShapes = geo->getUniqueValueCount( attrRef );
-				size_t contentSize = m_path.size() - m_contentIndex;
-				for ( int i=0; i < numShapes; ++i )
-				{
-					Path childPath;
-					stringToPath( geo->getUniqueStringValue( attrRef, i ), childPath );
-					if ( childPath.empty() || name() == *( childPath.begin() + contentSize - 1 ) )
-					{
-						return node;
-					}
-				}
-				
-				if ( missingBehaviour == ThrowIfMissing )
-				{
-					throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + contentPath.toStdString() + "\" does not contain the expected geometry for \"" + name().string() + "\"." );
-				}
-				
-				return 0;
-			}
+			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
+		}
+
+		if ( !node->isManager() && !node->castToOBJNode() )
+		{
+			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" is not a valid OBJ." );
 		}
 	}
 	
@@ -643,6 +738,10 @@ OP_Node *HoudiniScene::locateContent( OP_Node *node ) const
 				return child;
 			}
 		}
+	}
+	else if ( objNode && objNode->getObjectType() == OBJ_GEOMETRY )
+	{
+		return objNode;
 	}
 	
 	return 0;
@@ -694,29 +793,35 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		// check child shapes within the geo
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
-			OP_Context context( CHgetEvalTime() );
-			const GU_Detail *geo = contentNode->getRenderGeometry( context );
-			const GEO_AttributeHandle attrHandle = geo->getPrimAttribute( "name" );
-			if ( attrHandle.isAttributeValid() )
+			OP_Context context( adjustedDefaultTime() );
+			const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
+			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+			if ( nameAttrRef.isValid() )
 			{
-				const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
-				int numShapes = geo->getUniqueValueCount( attrRef );
-				for ( int i=0; i < numShapes; ++i )
+				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+				GA_Size numShapes = tuple->getTableEntries( nameAttr );
+				for ( GA_Size i=0; i < numShapes; ++i )
 				{
-					SceneInterface::Path childPath;
-					bool valid = relativePath( geo->getUniqueStringValue( attrRef, i ), childPath );
-					if ( valid && !childPath.empty() && name == *childPath.begin() )
+					const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+					const char *match = matchPath( currentName );
+					if ( match && *match != *emptyString )
 					{
-						size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-						if ( contentSize )
+						std::pair<const char *, size_t> childMarker = nextWord( match );
+						std::string child( childMarker.first, childMarker.second );
+						if ( name == child )
 						{
-							contentPath.resize( contentSize );
-							std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
+							size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
+							if ( contentSize )
+							{
+								contentPath.resize( contentSize );
+								std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
+							}
+							
+							contentPath.push_back( name );
+							
+							return contentNode;
 						}
-						
-						contentPath.push_back( name );
-						
-						return contentNode;
 					}
 				}
 			}
@@ -760,7 +865,7 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	node->getFullPath( rootNodePath );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath );
+	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath, m_defaultTime, m_splitter );
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
 	{
 		scene = scene->child( *it, missingBehaviour );
@@ -788,36 +893,94 @@ bool HoudiniScene::hasInput( const OP_Node *node ) const
 	return false;
 }
 
-bool HoudiniScene::relativePath( const char *value, Path &result ) const
+double HoudiniScene::adjustTime( double time ) const
 {
-	Path path;
-	std::string pStr = value;
-	stringToPath( pStr, path );
+	return time - CHgetManager()->getSecsPerSample();
+}
+
+bool HoudiniScene::matchPattern( const char *value, const char *pattern ) const
+{
+	size_t size = strlen( pattern ) - 1;
 	
-	size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-	if ( contentSize > path.size() )
+	// can't be a match unless its exactly the right length
+	if ( strlen( value ) < size || value[size] == '\0' || value[size] == '/' )
 	{
 		return false;
 	}
 	
-	Path::iterator start = path.begin() + contentSize;
-	if ( path.end() - start > 0 )
+	for ( size_t i = 0; i < size; ++i )
 	{
-		result.resize( path.end() - start );
-		std::copy( start, path.end(), result.begin() );
-	}
-	
-	// verify the pre-path matches
-	Path::const_iterator mIt = m_path.begin() + m_contentIndex;
-	for ( Path::iterator it = path.begin(); it != start && mIt != m_path.end(); ++it, ++mIt )
-	{
-		if ( *it != *mIt )
+		if ( value[i] != pattern[i] )
 		{
 			return false;
 		}
 	}
 	
 	return true;
+}
+
+const char *HoudiniScene::matchPath( const char *value ) const
+{
+	// looking for empty path
+	if ( !m_contentIndex )
+	{
+		// houdini returns 0 for empty strings in some cases
+		if ( value == 0 || !value[0] || !strcmp( value, "/" ) )
+		{
+			return emptyString;
+		}
+		
+		return &value[0];
+	}
+	
+	// looking for some value, so empty is a failed match
+	if ( value == 0 )
+	{
+		return NULL;
+	}
+	
+	size_t i = 0;
+	for ( Path::const_iterator it = m_path.begin() + m_contentIndex; it != m_path.end(); ++it )
+	{
+		const char *current = it->c_str();
+		
+		if ( value[i] == '/' )
+		{
+			i++;
+		}
+		
+		if ( !matchPattern( &value[i], current ) )
+		{
+			return NULL;
+		}
+		
+		i += strlen( current );
+	}
+	
+	return &value[i];
+}
+
+std::pair<const char *, size_t> HoudiniScene::nextWord( const char *value ) const
+{
+	std::pair<const char *, size_t> result( value, 0 );
+	
+	if ( value[0] == '/' )
+	{
+		result.first = &value[1];
+		result.second = 1;
+	}
+	
+	size_t size = strlen( value );
+	for ( ; result.second < size; ++result.second )
+	{
+		if ( value[result.second] == '/' || value[result.second] == '\0' )
+		{
+			result.second--;
+			break;
+		}
+	}
+	
+	return result;
 }
 
 const char *HoudiniScene::contentPathValue() const

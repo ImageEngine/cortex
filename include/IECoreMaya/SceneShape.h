@@ -83,7 +83,7 @@ class SceneShape : public SceneShapeInterface
 		IECore::ConstSceneInterfacePtr m_scene;
 
 
-		static SceneShape *findScene( const MDagPath &p, MDagPath *dagPath = 0 );
+		static SceneShape *findScene( const MDagPath &p, bool noIntermediate, MDagPath *dagPath = 0 );
 
 		/// functions registered in MayaScene as custom object and custom attributes
 		struct MayaSceneAddOn
@@ -96,6 +96,8 @@ class SceneShape : public SceneShapeInterface
 		static IECore::ConstObjectPtr readSceneShapeLink( const MDagPath &p );
 		static bool hasSceneShapeObject( const MDagPath &p );
 		static IECore::ConstObjectPtr readSceneShapeObject( const MDagPath &p );
+		static void sceneShapeAttributeNames( const MDagPath &p, IECore::SceneInterface::NameList &attributeNames );
+		static IECore::ConstObjectPtr readSceneShapeAttribute( const MDagPath &p, IECore::SceneInterface::Name attributeName );
 		static bool hasTag( const MDagPath &p, const IECore::SceneInterface::Name &tag );
 		static void readTags( const MDagPath &p, IECore::SceneInterface::NameList &tags, bool includeChildren );
 

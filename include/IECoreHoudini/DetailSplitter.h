@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,24 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/Lights.h"
+#ifndef IECOREHOUDINI_DETAILSPLITTER_H
+#define IECOREHOUDINI_DETAILSPLITTER_H
 
-const std::vector<GLenum> &IECoreGL::lights()
+#include <map>
+#include <string>
+
+#include "GU/GU_DetailHandle.h"
+
+#include "IECore/RefCounted.h"
+
+namespace IECoreHoudini
 {
-	static std::vector<GLenum> t;
-	if( !t.size() )
-	{
-		t.push_back( GL_LIGHT0 );
-		t.push_back( GL_LIGHT1 );
-		t.push_back( GL_LIGHT2 );
-		t.push_back( GL_LIGHT3 );
-		t.push_back( GL_LIGHT4 );
-		t.push_back( GL_LIGHT5 );
-		t.push_back( GL_LIGHT6 );
-		t.push_back( GL_LIGHT7 );
-		GLint max = 0;
-		glGetIntegerv( GL_MAX_LIGHTS, &max );
-		t.resize( max );
-	}
-	return t;
-}
+
+/// DetailSplitter is a convenience class for extracting select bits of geometry
+/// from a GU_Detail. It is intended to improve performance when making multiple
+/// calls to split the same detail. The default use is splitting based on the name
+/// attribute, but any primitive string attribute could be used.
+class DetailSplitter : public IECore::RefCounted
+{
+	
+	public :
+		
+		IE_CORE_DECLAREMEMBERPTR( DetailSplitter );
+		
+		/// Create a DetailSplitter which will split the handle by the given key.
+		/// @param key The name of a primitive string attribute on the GU_Detail.
+		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name" );
+		
+		virtual ~DetailSplitter();
+		
+		/// Creates and returns a handle to a new GU_Detail which contains only
+		/// the primitives that match the value requested.
+		const GU_DetailHandle split( const std::string &value );
+		
+		/// Fills the result vector with all valid values in the GU_Detail
+		void values( std::vector<std::string> &result );
+		
+		/// Returns the handle held by the splitter
+		const GU_DetailHandle &handle() const;
+	
+	private :
+		
+		bool validate();
+		
+		typedef std::map<std::string, GU_DetailHandle> Cache;
+		
+		int m_lastMetaCount;
+		const std::string m_key;
+		const GU_DetailHandle m_handle;
+		Cache m_cache;
+
+};
+
+IE_CORE_DECLAREPTR( DetailSplitter );
+
+} // namespace IECoreHoudini
+
+#endif // IECOREHOUDINI_DETAILSPLITTER_H
