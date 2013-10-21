@@ -76,6 +76,7 @@
 #include "IECoreMaya/ParameterisedHolderManipContextCommand.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/DrawableHolder.h"
+#include "IECoreMaya/DrawableHolderUI.h"
 #include "IECoreMaya/GeometryCombiner.h"
 #include "IECoreMaya/TransformationMatrixManipulator.h"
 #include "IECoreMaya/SceneShape.h"
@@ -120,10 +121,6 @@ MStatus initialize(MFnPlugin &plugin)
 			ParameterisedHolderLocator::creator, ParameterisedHolderLocator::initialize, MPxNode::kLocatorNode );
 		assert( s );
 		
-		s = plugin.registerNode( DrawableHolder::typeName, DrawableHolder::id,
-			DrawableHolder::creator, DrawableHolder::initialize, MPxNode::kLocatorNode );
-		assert( s );
-
 		s = plugin.registerNode( ParameterisedHolderDeformer::typeName, ParameterisedHolderDeformer::id,
 			ParameterisedHolderDeformer::creator, ParameterisedHolderDeformer::initialize, MPxNode::kDeformerNode );
 		assert( s );
@@ -144,6 +141,10 @@ MStatus initialize(MFnPlugin &plugin)
 			ParameterisedHolderComponentShape::creator, ParameterisedHolderComponentShape::initialize, ProceduralHolderUI::creator );
 		assert( s );
 
+		s = plugin.registerShape( DrawableHolder::typeName, DrawableHolder::id,
+			DrawableHolder::creator, DrawableHolder::initialize, DrawableHolderUI::creator );
+		assert( s );
+		
 		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id,
 			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );
 		assert( s );

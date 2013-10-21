@@ -74,7 +74,7 @@ void *DrawableHolder::creator()
 
 MStatus DrawableHolder::initialize()
 {
-	MStatus s = inheritAttributesFrom( ParameterisedHolderLocator::typeName );
+	MStatus s = inheritAttributesFrom( ParameterisedHolderSurfaceShape::typeName );
 	assert( s );
 	
 	MFnNumericAttribute nAttr;
@@ -109,70 +109,13 @@ MBoundingBox DrawableHolder::boundingBox() const
 	return MBoundingBox();
 }
 
-void DrawableHolder::draw( M3dView &view, const MDagPath &path, M3dView::DisplayStyle style, M3dView::DisplayStatus displayStatus )
-{
-	IECoreGL::init( true );
-
-	IECoreGL::ConstScenePtr s = scene();
-	if( !s )
-	{
-		return;
-	}
-	
-	MPlug pDraw( this->thisMObject(), DrawableHolder::aDraw );
-	bool draw = true;
-	pDraw.getValue( draw );
-	if( !draw )
-	{
-		return;
-	}
-	
-	view.beginGL();
-			
-		// maya can sometimes leave an error from it's own code,
-		// and we don't want that to confuse us in our drawing code.
-		while( glGetError()!=GL_NO_ERROR )
-		{
-		}
-
-		// if we're being drawn as part of a selection operation we need
-		// to make sure there's a name on the name stack, as the IECoreGL::NameStateComponent
-		// expects to be able to load a name into it (it fails with an invalid operation if
-		// there's no name slot to load into).
-		if( view.selectMode() )
-		{
-			view.pushName( 0 );
-		}
-
-		try
-		{
-			// do the main render
-			s->render( m_displayStyle.baseState( style ) );
-		
-			// do a wireframe render over the top if we're selected and we just did a solid
-			// draw.
-			bool selected = displayStatus==M3dView::kActive || displayStatus==M3dView::kLead;
-			bool solid = style==M3dView::kFlatShaded || style==M3dView::kGouraudShaded;
-			if( selected && solid )
-			{
-				s->render( m_displayStyle.baseState( M3dView::kWireFrame ) );
-			}
-		}
-		catch( std::exception &e )
-		{
-			IECore::msg( IECore::Msg::Error, "DrawableHolder::draw", e.what() );
-		}
-			
-	view.endGL();
-}
-
 MStatus DrawableHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
-	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == ParameterisedHolderLocator::g_attributeNamePrefix )
+	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == ParameterisedHolderSurfaceShape::g_attributeNamePrefix )
 	{
 		m_scene = 0;
 	}
-	return ParameterisedHolderLocator::setDependentsDirty( plug, plugArray );
+	return ParameterisedHolderSurfaceShape::setDependentsDirty( plug, plugArray );
 }
 
 IECoreGL::ConstScenePtr DrawableHolder::scene()
