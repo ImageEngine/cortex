@@ -457,6 +457,11 @@ void SceneCacheNode<BaseType>::referenceParent( const char *parmName )
 template<typename BaseType>
 void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants )
 {
+	if ( !scene )
+	{
+		return;
+	}
+	
 	SceneInterface::NameList children;
 	scene->childNames( children );
 	
@@ -482,6 +487,11 @@ void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneInterface *sc
 template<typename BaseType>
 void SceneCacheNode<BaseType>::objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects )
 {
+	if ( !scene )
+	{
+		return;
+	}
+	
 	if ( scene->hasObject() )
 	{
 		objects.push_back( scene->name() );
@@ -555,12 +565,21 @@ ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene() const
 template<typename BaseType>
 ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileName, const std::string &path )
 {
-	ConstSceneInterfacePtr result = SharedSceneInterfaces::get( fileName );
-	if ( path != SceneInterface::rootName.string() )
+	ConstSceneInterfacePtr result = 0;
+	
+	try
 	{
-		SceneInterface::Path p;
-		SceneInterface::stringToPath( path, p );
-		result = result->scene( p, SceneInterface::NullIfMissing );
+		result = SharedSceneInterfaces::get( fileName );
+		if ( path != SceneInterface::rootName.string() )
+		{
+			SceneInterface::Path p;
+			SceneInterface::stringToPath( path, p );
+			result = result->scene( p, SceneInterface::NullIfMissing );
+		}
+	}
+	catch ( std::exception &e )
+	{
+		std::cerr << "Error loading \"" << fileName << "\" at location \"" << path << "\": " << e.what() << std::endl;
 	}
 	
 	return result;

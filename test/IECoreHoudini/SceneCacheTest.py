@@ -2139,20 +2139,27 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		coord = IECore.CoordinateSystem()
 		coord.setName( "testing" )
 		coordChild.writeObject( coord, 0 )
+		coordChild2 = coordChild.createChild( "other")
+		coordChild2.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) ), 0 )
+		coordChild2.writeObject( coord, 0 )
 		
-		del scene, coordChild
+		del scene, coordChild, coordChild2
 		
 		sop = self.sop()
 		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		prims = sop.geometry().prims()
-		self.assertEqual( len(prims), 1 )
+		self.assertEqual( len(prims), 2 )
 		
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
-		self.assertEqual( sorted(nameAttr.strings()), [ "/coord" ] )
+		self.assertEqual( sorted(nameAttr.strings()), [ "/coord", "/coord/other" ] )
 		self.assertEqual( prims[0].attribValue( "name" ), "/coord" )
 		self.assertEqual( prims[0].type(), hou.primType.Custom )
 		self.assertEqual( prims[0].vertices()[0].point().number(), 0 )
 		self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 0, 0, 0 ) )
+		self.assertEqual( prims[1].attribValue( "name" ), "/coord/other" )
+		self.assertEqual( prims[1].type(), hou.primType.Custom )
+		self.assertEqual( prims[1].vertices()[0].point().number(), 1 )
+		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 1, 2, 3 ) )
 	
 	def testObjectMerge( self ) :
 		
