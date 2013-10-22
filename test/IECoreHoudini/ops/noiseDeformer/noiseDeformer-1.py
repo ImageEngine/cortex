@@ -40,7 +40,7 @@ class noiseDeformer( Op ) :
 			raise Exception("Must have primvar 'P' in primitive!")
 		if not "N" in prim:
 			error( "Must have primvar 'N' in primitive!" )
-			return
+			return PointsPrimitive( 1 )
 		
 		# get our magnitude & frequency parameters
 		mag = args['magnitude'].value

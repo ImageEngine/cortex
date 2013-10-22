@@ -231,3 +231,38 @@ GU_RayIntersect *GU_CortexPrimitive::createRayCache( int &persistent )
 	
 	return intersect;
 }
+
+void GU_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, OP_NodeInfoParms &parms )
+{
+	if ( !geo )
+	{
+		return;
+	}
+	
+	std::map<std::string, int> typeMap;
+	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+	for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	{
+		const GA_Primitive *prim = primitives.get( it.getOffset() );
+		if ( prim->getTypeId() == GU_CortexPrimitive::typeId() )
+		{
+			const IECore::Object *object = ((GU_CortexPrimitive *)prim)->getObject();
+			if ( object )
+			{
+				typeMap[object->typeName()] += 1;
+			}
+		}
+	}
+	
+	if ( typeMap.empty() )
+	{
+		return;
+	}
+	
+	parms.append( "Cortex Object Details:\n" );
+	for ( std::map<std::string, int>::iterator it = typeMap.begin(); it != typeMap.end(); ++it )
+	{
+		parms.append( ( boost::format( "  %d " + it->first + "s\n" ) % it->second ).str().c_str() );
+	}
+	parms.append( "\n" );
+}

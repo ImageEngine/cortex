@@ -35,8 +35,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_SOPTOHOUDINICONVERTER_H
-#define IECOREHOUDINI_SOPTOHOUDINICONVERTER_H
+#ifndef IECOREHOUDINI_SOPCORTEXCONVERTER_H
+#define IECOREHOUDINI_SOPCORTEXCONVERTER_H
 
 #include "SOP/SOP_Node.h"
 #include "PRM/PRM_Name.h"
@@ -44,8 +44,8 @@
 namespace IECoreHoudini
 {
 
-/// SOP class for converting from an IECore::VisibleRenderable into native Houdini geometry.
-class SOP_ToHoudiniConverter : public SOP_Node
+/// SOP class for converting between GU_CortexPrimitives and native Houdini geometry.
+class SOP_CortexConverter : public SOP_Node
 {
 	public :
 
@@ -56,24 +56,39 @@ class SOP_ToHoudiniConverter : public SOP_Node
 		static PRM_Template parameters[];
 		static CH_LocalVariable variables[];
 		
-		static PRM_Name pConvertStandardAttributes;
+		enum ResultType
+		{
+			Cortex = 0,
+			Houdini
+		};
+		
+		static PRM_Name pNameFilter;
 		static PRM_Name pAttributeFilter;
+		static PRM_Name pResultType;
+		static PRM_Name pConvertStandardAttributes;
 		
 		static PRM_Default convertStandardAttributesDefault;
-		static PRM_Default attributeFilterDefault;
+		static PRM_Default filterDefault;
+		static PRM_Default resultTypeDefault;
+		
+		static PRM_ChoiceList resultTypeList;
 		
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
 
 	protected :
 
-		SOP_ToHoudiniConverter( OP_Network *net, const char *name, OP_Operator *op );
-		virtual ~SOP_ToHoudiniConverter();
+		SOP_CortexConverter( OP_Network *net, const char *name, OP_Operator *op );
+		virtual ~SOP_CortexConverter();
 
 		virtual OP_ERROR cookMySop( OP_Context &context );
-		virtual const char *inputLabel( unsigned pos ) const;
+	
+	private :
+		
+		void doConvert( const GU_DetailHandle &handle, const std::string &name, ResultType type, const std::string &attributeFilter, bool convertStandardAttributes );
+		void doPassThrough( const GU_DetailHandle &handle, const std::string &name );
 
 };
 
 } // namespace IECoreHoudini
 
-#endif // IECOREHOUDINI_SOPTOHOUDINICONVERTER_H
+#endif // IECOREHOUDINI_SOPCORTEXCONVERTER_H

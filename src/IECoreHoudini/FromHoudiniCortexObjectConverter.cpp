@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/CompoundObject.h"
+#include "IECore/ParameterisedProcedural.h"
 
 #include "IECoreHoudini/FromHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
@@ -45,6 +46,7 @@ using namespace IECoreHoudini;
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniCortexObjectConverter );
 
 FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> FromHoudiniCortexObjectConverter::m_description( ObjectTypeId );
+FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> FromHoudiniCortexObjectConverter::m_universalDescription( InvalidTypeId );
 
 FromHoudiniCortexObjectConverter::FromHoudiniCortexObjectConverter( const GU_DetailHandle &handle ) :
 	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECore::Object." )
@@ -63,12 +65,12 @@ FromHoudiniCortexObjectConverter::~FromHoudiniCortexObjectConverter()
 FromHoudiniGeometryConverter::Convertability FromHoudiniCortexObjectConverter::canConvert( const GU_Detail *geo )
 {
 	size_t numPrims = geo->getNumPrimitives();
-	if ( numPrims )
+	if ( numPrims == 1 )
 	{
 		const GA_Primitive *prim = geo->getPrimitiveList().get( geo->getPrimitiveRange().begin().getOffset() );
 		if ( prim->getTypeId() == GU_CortexPrimitive::typeId() )
 		{
-			return ( numPrims == 1 ) ? Ideal : Admissible;
+			return Ideal;
 		}
 	}
 	
@@ -86,7 +88,22 @@ ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail 
 	ConstObjectPtr object = ((GU_CortexPrimitive *)prim)->getObject();
 	ObjectPtr result = filterAttribs( object, operands->member<StringData>( "attributeFilter" )->readable().c_str() );
 	
-	return ( result ) ? result : ( object ) ? object->copy() : 0;
+	if ( result )
+	{
+		return result;
+	}
+	
+	if ( object )
+	{
+		if ( object->isInstanceOf( IECore::ParameterisedProcedural::staticTypeId() ) )
+		{
+			return IECore::constPointerCast<IECore::Object>( object );
+		}
+		
+		return object->copy();
+	}
+	
+	return 0;
 }
 
 ObjectPtr FromHoudiniCortexObjectConverter::filterAttribs( const Object *object, const char *filter ) const

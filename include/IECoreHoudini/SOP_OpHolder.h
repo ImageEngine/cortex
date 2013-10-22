@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,12 +38,18 @@
 #ifndef IECOREHOUDINI_SOPOPHOLDER_H
 #define IECOREHOUDINI_SOPOPHOLDER_H
 
+#include "IECore/Op.h"
+
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
 namespace IECoreHoudini
 {
 
-/// SOP class for representing a IECore::Op in Houdini
+/// SOP class for representing an IECore::Op in Houdini. The held op will operate multiple times
+/// over its primary input, splitting by name. Each operation adds a single GU_CortexPrimitive
+/// to the output geometry. The held op will operate on any named shaped in the primary input
+/// which matches the nameFilter. Non-matching shapes will be passed through without modification.
+/// The other inputs will be treated as they normally would by SOP_ParameterisedHolder.
 class SOP_OpHolder : public SOP_ParameterisedHolder
 {
 	public :
@@ -56,6 +62,16 @@ class SOP_OpHolder : public SOP_ParameterisedHolder
 		virtual ~SOP_OpHolder();
 
 		virtual OP_ERROR cookMySop( OP_Context &context );
+		
+		/// Overridden for the primary input since that value is used during cook to control
+		/// the number of operations. Falls back to default implementation for all other inputs.
+		virtual void setInputParameterValue( IECore::Parameter *parameter, const GU_DetailHandle &handle, unsigned inputIndex );
+		
+		/// Run the op once all parameters have been set. This may be called several times
+		/// when using a nameFilter on the primary input.
+		virtual void doOperation( IECore::Op *op, const GU_DetailHandle &handle, const std::string &name );
+		/// Pass-through the primary input shapes that do not match the nameFilter.
+		virtual void doPassThrough( const GU_DetailHandle &handle, const std::string &name );
 
 };
 

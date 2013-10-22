@@ -35,17 +35,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GA/GA_AIFBlindData.h"
 #include "PRM/PRM_Parm.h"
 #include "UT/UT_Interrupt.h"
 
-#include "IECore/Op.h"
-#include "IECore/VisibleRenderable.h"
-
 #include "IECorePython/ScopedGILLock.h" 
 
+#include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
-#include "IECoreHoudini/NodePassData.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
@@ -97,28 +94,52 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	boss->opStart("Building OpHolder Geometry...");
 	gdp->clearAndDestroy();
 	
+	// update the op parameters
 	setParameterisedValues( now );
+	
+	// main input is reserved for splitting by name when the filter is enabled
+	UT_StringMMPattern nameFilter;
+	if ( !m_inputParameters.empty() && getNameFilter( m_inputParameters[0], nameFilter ) ) 
+	{
+		DetailSplitterPtr splitter = new DetailSplitter( inputGeoHandle( 0 ) );
+		std::vector<std::string> names;
+		splitter->values( names );
+		for ( std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it )
+		{
+			const std::string &name = *it;
+			// we want match all to also match no-name
+			if ( UT_String( name ).multiMatch( nameFilter ) || ( name == "" && UT_String( "*" ).multiMatch( nameFilter ) ) )
+			{
+				doOperation( op, splitter->split( name ), name );
+			}
+			else
+			{
+				doPassThrough( splitter->split( name ), name );
+			}
+		}
+	}
+	else
+	{
+		doOperation( op, GU_DetailHandle(), "" );
+	}
+	
+	boss->opEnd();
+	unlockInputs();
+	return error();
+}
+
+void SOP_OpHolder::doOperation( IECore::Op *op, const GU_DetailHandle &handle, const std::string &name )
+{
+	if ( !m_inputParameters.empty() )
+	{
+		SOP_ParameterisedHolder::setInputParameterValue( m_inputParameters[0], handle, 0 );
+	}
+	
+	const IECore::Object *result = 0;
 	
 	try
 	{
-		// make our Cortex op do it's thing...
-		op->operate();
-
-		// pass ourselves onto the GR_Cortex render hook
-		IECoreHoudini::NodePassData data( this, IECoreHoudini::NodePassData::CORTEX_OPHOLDER );
-		GA_RWAttributeRef attrRef = gdp->createAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData", NULL, NULL, "blinddata" );
-		GA_Attribute *attr = attrRef.getAttribute();
-		const GA_AIFBlindData *blindData = attr->getAIFBlindData();
-		blindData->setDataSize( attr, sizeof(IECoreHoudini::NodePassData), &data );
-
-		// if our result is a visible renderable then set our bounds on our output gdp
-		const IECore::Object *result = op->resultParameter()->getValue();
-		IECore::ConstVisibleRenderablePtr renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( result );
-		if ( renderable )
-		{
-			Imath::Box3f bbox = renderable->bound();
-			gdp->cube( bbox.min.x, bbox.max.x, bbox.min.y, bbox.max.y, bbox.min.z, bbox.max.z, 0, 0, 0, 1, 1 );
-		}
+		result = op->operate();
 	}
 	catch( boost::python::error_already_set )
 	{
@@ -138,9 +159,43 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	{
 		addError( SOP_MESSAGE, "Caught unknown exception!" );
 	}
+	
+	if ( result )
+	{
+		ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( result );
+		converter->nameParameter()->setTypedValue( name );
+		if ( !converter->convert( myGdpHandle ) )
+		{
+			addError( SOP_MESSAGE, "Unable to store op result on gdp" );
+		}
+	}
+}
 
-	// tidy up & go home!
-	boss->opEnd();
-	unlockInputs();
-	return error();
+void SOP_OpHolder::doPassThrough( const GU_DetailHandle &handle, const std::string &name )
+{
+	if ( handle.isNull() )
+	{
+		addError( SOP_MESSAGE, ( "Could not pass through the geometry named " + name ).c_str() );
+		return;
+	}
+	
+	GU_DetailHandleAutoReadLock readHandle( handle );
+	const GU_Detail *inputGeo = readHandle.getGdp();
+	if ( !inputGeo )
+	{
+		addError( SOP_MESSAGE, ( "Could not pass through the geometry named " + name ).c_str() );
+		return;
+	}
+	
+	gdp->merge( *inputGeo );
+}
+
+void SOP_OpHolder::setInputParameterValue( IECore::Parameter *parameter, const GU_DetailHandle &handle, unsigned inputIndex )
+{
+	if ( inputIndex == 0 )
+	{
+		return;
+	}
+	
+	SOP_ParameterisedHolder::setInputParameterValue( parameter, handle, inputIndex );
 }

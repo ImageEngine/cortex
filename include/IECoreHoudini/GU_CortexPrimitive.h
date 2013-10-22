@@ -37,6 +37,8 @@
 
 #include "GU/GU_Prim.h"
 #include "GU/GU_Detail.h"
+#include "OP/OP_Context.h"
+#include "OP/OP_NodeInfoParms.h"
 
 #include "IECore/Object.h"
 
@@ -73,6 +75,10 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 		virtual void normal( NormalComp &output ) const;
 		virtual int intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, float tmax=1E17F, float tol=1E-12F, float *distance=0, UT_Vector3 *pos=0, UT_Vector3 *nml=0, int accurate=0, float *u=0, float *v=0, int ignoretrim=1 ) const;
 		virtual GU_RayIntersect *createRayCache( int &persistent );
+		
+		/// Convenience method to inspect a GU_Detail and return some information about
+		/// the GU_CortexPrimitives within, if there are any.
+		static void infoText( const GU_Detail *geo, OP_Context &context, OP_NodeInfoParms &parms );
 	
 	private :
 		

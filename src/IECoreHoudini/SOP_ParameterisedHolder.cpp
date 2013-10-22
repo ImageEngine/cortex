@@ -43,7 +43,6 @@
 #include "IECore/CapturingRenderer.h"
 #include "IECore/Group.h"
 #include "IECore/Op.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/ParameterisedProcedural.h"
 #include "IECore/WorldBlock.h"
 
@@ -51,7 +50,7 @@
 #include "IECorePython/ScopedGILRelease.h"
 
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-#include "IECoreHoudini/NodePassData.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
 using namespace boost;
@@ -150,101 +149,114 @@ void SOP_ParameterisedHolder::setInputParameterValues( float now )
 	{
 		useInputSource( i, m_dirty, false );
 		
-		IECore::ParameterPtr inputParameter = m_inputParameters[i];
-		
-		GU_DetailHandle inputHandle = inputGeoHandle( i );
-		GU_DetailHandleAutoReadLock readHandle( inputHandle );
-		const GU_Detail *inputGdp = readHandle.getGdp();
-		if ( !inputGdp )
+		setInputParameterValue( m_inputParameters[i], GU_DetailHandle(), i );
+	}
+}
+
+void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *parameter, const GU_DetailHandle &handle, unsigned inputIndex )
+{
+	IECore::ObjectParameter *objectParameter = IECore::runTimeCast<IECore::ObjectParameter>( parameter );
+	if ( !objectParameter )
+	{
+		return;
+	}
+	
+	GU_DetailHandle inputHandle = ( handle.isNull() ) ? filteredInputValue( parameter, inputIndex ) : handle;
+	FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( inputHandle, objectParameter->validTypes() );
+	if ( !converter )
+	{
+		addWarning( SOP_MESSAGE, ( boost::format( "Could not find an appropriate converter for parameter \"%s\" (input %d)" ) % parameter->name() % inputIndex ).str().c_str() );
+		return;
+	}
+	
+	// set converter parameters from the node values
+	const CompoundParameter::ParameterVector &converterParameters = converter->parameters()->orderedParameters();
+	for ( CompoundParameter::ParameterVector::const_iterator it=converterParameters.begin(); it != converterParameters.end(); ++it )
+	{
+		updateParameter( *it, 0, "parm_" + parameter->name() + "_" );
+	}
+	
+	try
+	{
+		IECore::ObjectPtr result = converter->convert();
+		if ( !result )
 		{
-			continue;
+			return;
 		}
 		
-		const GA_ROAttributeRef attrRef = inputGdp->findAttribute( GA_ATTRIB_DETAIL, GA_SCOPE_PRIVATE, "IECoreHoudiniNodePassData" );
-		if ( attrRef.isValid() )
+		if ( IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( result ) )
 		{
-			// looks like data passed from another ParameterisedHolder
-			const GA_Attribute *attr = attrRef.getAttribute();
-			const GA_AIFBlindData *blindData = attr->getAIFBlindData();
-			const NodePassData passData = blindData->getValue<NodePassData>( attr, 0 );
-			SOP_ParameterisedHolder *sop = dynamic_cast<SOP_ParameterisedHolder*>( const_cast<OP_Node*>( passData.nodePtr() ) );
-			
-			IECore::ConstObjectPtr result = 0;
-			if ( passData.type() == IECoreHoudini::NodePassData::CORTEX_OPHOLDER )
+			IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
+			// We are acquiring and releasing the GIL here to ensure that it is released when we render. This has
+			// to be done because a procedural might jump between c++ and python a few times (i.e. if it spawns
+			// subprocedurals that are implemented in python). In a normal call to cookMySop, this wouldn't be an
+			// issue, but if cookMySop was called from HOM, hou.Node.cook appears to be holding onto the GIL.
+			IECorePython::ScopedGILLock gilLock;
 			{
-				IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( sop->getParameterised() );
-				result = op->resultParameter()->getValue();
-			}
-			else if ( passData.type() == IECoreHoudini::NodePassData::CORTEX_PROCEDURALHOLDER )
-			{
-				IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( sop->getParameterised() );
-				IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
-				// We are acquiring and releasing the GIL here to ensure that it is released when we render. This has
-				// to be done because a procedural might jump between c++ and python a few times (i.e. if it spawns
-				// subprocedurals that are implemented in python). In a normal call to cookMySop, this wouldn't be an
-				// issue, but if cookMySop was called from HOM, hou.Node.cook appears to be holding onto the GIL.
-				IECorePython::ScopedGILLock gilLock;
+				IECorePython::ScopedGILRelease gilRelease;
 				{
-					IECorePython::ScopedGILRelease gilRelease;
-					{
-						IECore::WorldBlock worldBlock( renderer );
-						procedural->render( renderer );
-					}
+					IECore::WorldBlock worldBlock( renderer );
+					procedural->render( renderer );
 				}
-				result = IECore::runTimeCast<const IECore::Object>( renderer->world() );
-			}
-			else
-			{
-				continue;
 			}
 			
-			try
-			{
-				inputParameter->setValidatedValue( IECore::constPointerCast<IECore::Object>( result ) );
-			}
-			catch ( const IECore::Exception &e )
-			{
-				addError( SOP_MESSAGE, e.what() );
-			}
+			result = IECore::constPointerCast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
 		}
-		else
+		
+		parameter->setValidatedValue( result );
+	}
+	catch ( const IECore::Exception &e )
+	{
+		addError( SOP_MESSAGE, e.what() );
+	}
+	catch ( std::runtime_error &e )
+	{
+		addError( SOP_MESSAGE, e.what() );
+	}
+}
+
+GU_DetailHandle SOP_ParameterisedHolder::filteredInputValue( const IECore::Parameter *parameter, unsigned inputIndex )
+{
+	GU_DetailHandle inputHandle = inputGeoHandle( inputIndex );
+	GU_DetailHandleAutoReadLock readHandle( inputHandle );
+	const GU_Detail *inputGdp = readHandle.getGdp();
+	if ( !inputGdp )
+	{
+		return inputHandle;
+	}
+	
+	UT_StringMMPattern nameFilter;
+	if ( getNameFilter( parameter, nameFilter ) )
+	{
+		GU_DetailHandle filteredGeo = FromHoudiniGeometryConverter::extract( inputGdp, nameFilter );
+		if ( !filteredGeo.isNull() )
 		{
-			// looks like a regular Houdini detail
-			IECore::ObjectParameterPtr objectParameter = IECore::runTimeCast<IECore::ObjectParameter>( inputParameter );
-			if ( !objectParameter )
-			{
-				continue;
-			}
-			
-			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( inputHandle, objectParameter->validTypes() );
-			if ( !converter )
-			{
-				continue;
-			}
-			
-			// set converter parameters from the node values
-			const CompoundParameter::ParameterVector &converterParameters = converter->parameters()->orderedParameters();
-			for ( CompoundParameter::ParameterVector::const_iterator it=converterParameters.begin(); it != converterParameters.end(); ++it )
-			{
-				updateParameter( *it, now, "parm_" + inputParameter->name() + "_" );
-			}
-			
-			try
-			{
-				IECore::ObjectPtr converted = converter->convert();
-				if ( converted )
-				{
-					inputParameter->setValidatedValue( converted );
-				}
-			}
-			catch ( const IECore::Exception &e )
-			{
-				addError( SOP_MESSAGE, e.what() );
-			}
-			catch ( std::runtime_error &e )
-			{
-				addError( SOP_MESSAGE, e.what() );
-			}
+			return filteredGeo;
 		}
 	}
+	
+	return inputHandle;
+}
+
+bool SOP_ParameterisedHolder::getNameFilter( const IECore::Parameter *parameter, UT_StringMMPattern &filter )
+{
+	const std::string useNameFilterParm = "parm_" + parameter->name() + "_useNameFilter";
+	const std::string nameFitlerParm = "parm_" + parameter->name() + "_nameFilter";
+	if ( hasParm( useNameFilterParm.c_str() ) && hasParm( nameFitlerParm.c_str() ) && evalInt( useNameFilterParm.c_str(), 0, 0 ) )
+	{
+		UT_String filterStr;
+		evalString( filterStr, nameFitlerParm.c_str(), 0, 0 );
+		filter.compile( filterStr );
+		return true;
+	}
+	
+	return false;
+}
+
+void SOP_ParameterisedHolder::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
+{
+	SOP_Node::getNodeSpecificInfoText( context, parms );
+	
+	// add type descriptions for the Cortex Objects
+	GU_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 }

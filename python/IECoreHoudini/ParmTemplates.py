@@ -154,15 +154,25 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 			converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( p.validTypes() )
 			sub_folder = folders + [ parmLabel( p ) ]
 			name = parmName( p.name, prefix=parent )
+			## \todo: set joinWithNext with userData if hou.ParmTemplate.setJoinWithNext() starts working
+			useNameFilterParm = IECore.BoolParameter( "useNameFilter", "Enables the nameFilter", True )
+			results += createParm( useNameFilterParm, sub_folder, parent=name )
+			useNameTuple = results[-1]["tuple"]
+			nameFilterParm = IECore.StringParameter(
+				"nameFilter", "A list of named shapes to convert. Uses Houdini matching syntax.", "*",
+				userData = { "houdini" : { "disableWhen" : IECore.StringData( "{ %s == 0 }" % useNameTuple.name() ) } }
+			)
+			results += createParm( nameFilterParm, sub_folder, parent=name )
 			for child in converter.parameters().values() :
 				results += createParm( child, sub_folder, parent=name )
 	
 	if parm:
-		# is this parameter hidden?
-		do_hide = False
-		if 'UI' in p.userData() and 'visible' in p.userData()['UI']:
-			do_hide = not bool(p.userData()['UI']['visible'].value)
-		parm['tuple'].hide( do_hide )
+		
+		with IECore.IgnoredExceptions( KeyError ) :
+			parm['tuple'].hide( not bool(p.userData()["UI"]['visible'].value) )
+		
+		with IECore.IgnoredExceptions( KeyError ) :
+			parm['tuple'].setDisableWhen( p.userData()["houdini"]['disableWhen'].value )
 		
 		# add our list of parent folders
 		parm['folder'] = folders

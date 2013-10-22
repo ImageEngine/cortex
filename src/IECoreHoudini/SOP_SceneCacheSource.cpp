@@ -408,38 +408,7 @@ void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_Node
 	GeometryType geometryType = (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
 	if ( geometryType == Cortex )
 	{
-		std::map<std::string, int> typeMap;
-		const GU_Detail *geo = getCookedGeo( context );
-		if ( !geo )
-		{
-			return;
-		}
-		
-		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-		for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
-		{
-			const GA_Primitive *prim = primitives.get( it.getOffset() );
-			if ( prim->getTypeId() == GU_CortexPrimitive::typeId() )
-			{
-				const IECore::Object *object = ((GU_CortexPrimitive *)prim)->getObject();
-				if ( object )
-				{
-					typeMap[object->typeName()] += 1;
-				}
-			}
-		}
-		
-		if ( typeMap.empty() )
-		{
-			return;
-		}
-		
-		parms.append( "Cortex Object Details:\n" );
-		for ( std::map<std::string, int>::iterator it = typeMap.begin(); it != typeMap.end(); ++it )
-		{
-			parms.append( ( boost::format( "  %d " + it->first + "s\n" ) % it->second ).str().c_str() );
-		}
-		
+		GU_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 		return;
 	}
 	
