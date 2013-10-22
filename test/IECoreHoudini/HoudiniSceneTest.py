@@ -727,5 +727,30 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( scene.child( "box2" ).embedded(), False )
 		self.assertEqual( scene.child( "sub2" ).embedded(), False )
 
+	def testSimilarNamesInFlatGeo( self ) :
+		
+		scene = self.buildScene()
+		name = hou.node( "/obj/box1" ).renderNode().createInputNode( 2, "name" )
+		name.parm( "name1" ).set( "/gap/torus2" )
+		name.createInputNode( 0, "torus" )
+		
+		box1 = scene.scene( [ "sub1", "box1" ] )
+		self.assertEqual( box1.childNames(), [ "gap" ] )
+		
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.childNames(), [ "torus", "torus2" ] )
+		
+		torus = gap.child( "torus" )
+		self.assertEqual( torus.childNames(), [] )
+		self.assertTrue( torus.hasObject() )
+		self.assertTrue( torus.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertEqual( torus.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		
+		torus2 = gap.child( "torus2" )
+		self.assertEqual( torus2.childNames(), [] )
+		self.assertTrue( torus2.hasObject() )
+		self.assertTrue( torus2.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertEqual( torus2.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+
 if __name__ == "__main__":
 	unittest.main()
