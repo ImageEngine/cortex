@@ -306,10 +306,17 @@ void HoudiniScene::writeTransform( const Data *transform, double time )
 
 bool HoudiniScene::hasAttribute( const Name &name ) const
 {
-	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
-	if ( it != customAttributeReaders().end() )
+	OP_Node *node = retrieveNode();
+	
+	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
+	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
-		return it->second.m_has( retrieveNode() );
+		NameList names;
+		it->m_names( node, names );
+		if ( std::find( names.begin(), names.end(), name ) != names.end() )
+		{
+			return true;
+		}
 	}
 	
 	return false;
@@ -318,21 +325,29 @@ bool HoudiniScene::hasAttribute( const Name &name ) const
 void HoudiniScene::attributeNames( NameList &attrs ) const
 {
 	attrs.clear();
-	for ( std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); ++it )
+	
+	OP_Node *node = retrieveNode();
+	
+	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
+	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
-		if ( it->second.m_has( retrieveNode() ) )
-		{
-			attrs.push_back( it->first );
-		}
+		NameList names;
+		it->m_names( node, names );
+		attrs.insert( attrs.end(), names.begin(), names.end() );
 	}
 }
 
 ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
 {
-	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
-	if ( it != customAttributeReaders().end() )
+	OP_Node *node = retrieveNode();
+	
+	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
+	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
-		return it->second.m_read( retrieveNode(), time );
+		if ( IECore::ConstObjectPtr object = it->m_read( node, name, time ) )
+		{
+			return object;
+		}
 	}
 	
 	return 0;
@@ -999,17 +1014,17 @@ const char *HoudiniScene::contentPathValue() const
 	return name.c_str();
 }
 
-void HoudiniScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )
+void HoudiniScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn )
 {
-	CustomReader r;
-	r.m_has = hasFn;
+	CustomAttributeReader r;
+	r.m_names = namesFn;
 	r.m_read = readFn;
-	customAttributeReaders()[attrName] = r;
+	customAttributeReaders().push_back( r );
 }
 
-std::map<SceneInterface::Name, HoudiniScene::CustomReader> &HoudiniScene::customAttributeReaders()
+std::vector<HoudiniScene::CustomAttributeReader> &HoudiniScene::customAttributeReaders()
 {
-	static std::map<SceneInterface::Name, HoudiniScene::CustomReader> readers;
+	static std::vector<HoudiniScene::CustomAttributeReader> readers;
 	return readers;
 }
 
