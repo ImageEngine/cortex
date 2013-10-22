@@ -325,7 +325,10 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 	{
 		GroupPtr result = group->copy();
 		MatrixTransformPtr matTransform = matrixTransform( transform );
-		matTransform->matrix *= group->getTransform()->transform();
+		if ( const Transform *transform = group->getTransform() )
+		{
+			matTransform->matrix *= transform->transform();
+		}
 		result->setTransform( matTransform );
 		return result;
 	}
@@ -333,7 +336,10 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 	{
 		CoordinateSystemPtr result = coord->copy();
 		MatrixTransformPtr matTransform = matrixTransform( transform );
-		matTransform->matrix *= coord->getTransform()->transform();
+		if ( const Transform *transform = coord->getTransform() )
+		{
+			matTransform->matrix *= transform->transform();
+		}
 		result->setTransform( matTransform );
 		return result;
 	}
