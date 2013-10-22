@@ -900,14 +900,15 @@ double HoudiniScene::adjustTime( double time ) const
 
 bool HoudiniScene::matchPattern( const char *value, const char *pattern ) const
 {
-	size_t size = strlen( pattern ) - 1;
+	size_t size = strlen( pattern );
 	
 	// can't be a match unless its exactly the right length
-	if ( strlen( value ) < size || value[size] == '\0' || value[size] == '/' )
+	if ( ( strlen( value ) < size  ) || ( strlen( value ) > size && value[size] != '\0' && value[size] != '/' ) )
 	{
 		return false;
 	}
 	
+	// all characters must match
 	for ( size_t i = 0; i < size; ++i )
 	{
 		if ( value[i] != pattern[i] )
