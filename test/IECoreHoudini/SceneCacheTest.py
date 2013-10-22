@@ -1225,6 +1225,78 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( scene.hasTag( tag ) )
 		self.assertFalse( scene.hasTag( "notATag" ) )
 	
+	def writeAttributeSCC( self ) :
+		
+		scene = self.writeSCC()
+		sc1 = scene.child( str( 1 ) )
+		sc2 = sc1.child( str( 2 ) )
+		sc3 = sc2.child( str( 3 ) )
+		sc1.writeAttribute( "label", IECore.StringData( "a" ), 0 )
+		sc1.writeAttribute( "color", IECore.Color3dData( IECore.Color3d( 0.5 ) ), 0 )
+		sc2.writeAttribute( "label", IECore.StringData( "b" ), 0 )
+		sc2.writeAttribute( "material", IECore.StringData( "rubber" ), 0 )
+		sc3.writeAttribute( "label", IECore.StringData( "c" ), 0 )
+		sc3.writeAttribute( "animColor", IECore.Color3dData( IECore.Color3d( 0 ) ), 0 )
+		sc3.writeAttribute( "animColor", IECore.Color3dData( IECore.Color3d( 0.5 ) ), 0.5 )
+		sc3.writeAttribute( "animColor", IECore.Color3dData( IECore.Color3d( 1 ) ), 1 )
+		
+		return scene
+	
+	def testLiveAttributes( self ) :
+		
+		self.writeAttributeSCC()
+		
+		xform = self.xform()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		
+		# its a link before it is expanded
+		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		self.assertEqual( scene.attributeNames(), [ IECore.LinkedScene.linkAttribute ] )
+		self.assertTrue( scene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual(
+			scene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ),
+			IECore.CompoundData( {
+				"time" : IECore.DoubleData( 0 ),
+				"fileName" : IECore.StringData( "test/test.scc" ),
+				"root" : IECore.InternedStringVectorData( [] )
+			} )
+		)
+		
+		# the link disapears once expanded
+		xform.parm( "expand" ).pressButton()
+		self.assertEqual( scene.attributeNames(), [] )
+		self.assertFalse( scene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertEqual( scene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), None )
+		
+		# nodes expose their attributes
+		a = scene.child( "1" )
+		self.assertEqual( sorted(a.attributeNames()), [ "color", "label", "sceneInterface:animatedObjectPrimVars" ] )
+		for attr in a.attributeNames() :
+			self.assertTrue( a.hasAttribute( attr ) )
+		self.assertFalse( a.hasAttribute( "material" ) )
+		self.assertEqual( a.readAttribute( "label", 0 ), IECore.StringData( "a" ) )
+		self.assertEqual( a.readAttribute( "color", 0 ), IECore.Color3dData( IECore.Color3d( 0.5 ) ) )
+		
+		b = a.child( "2" )
+		self.assertEqual( sorted(b.attributeNames()), [ "label", "material", "sceneInterface:animatedObjectPrimVars" ] )
+		for attr in b.attributeNames() :
+			self.assertTrue( b.hasAttribute( attr ) )
+		self.assertFalse( b.hasAttribute( "color" ) )
+		self.assertEqual( b.readAttribute( "label", 0 ), IECore.StringData( "b" ) )
+		self.assertEqual( b.readAttribute( "material", 0 ), IECore.StringData( "rubber" ) )
+		
+		c = b.child( "3" )
+		self.assertEqual( sorted(c.attributeNames()), [ "animColor", "label", "sceneInterface:animatedObjectPrimVars" ] )
+		for attr in c.attributeNames() :
+			self.assertTrue( c.hasAttribute( attr ) )
+		self.assertFalse( c.hasAttribute( "color" ) )
+		self.assertFalse( c.hasAttribute( "material" ) )
+		self.assertEqual( c.readAttribute( "label", 0 ), IECore.StringData( "c" ) )
+		self.assertEqual( c.readAttribute( "animColor", 0 ), IECore.Color3dData( IECore.Color3d( 0 ) ) )
+		self.assertEqual( c.readAttribute( "animColor", 0.5 ), IECore.Color3dData( IECore.Color3d( 0.5 ) ) )
+		self.assertEqual( c.readAttribute( "animColor", 1 ), IECore.Color3dData( IECore.Color3d( 1 ) ) )
+	
 	def testReloadButton( self ) :
 		
 		def testNode( node ) :
@@ -1409,6 +1481,19 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			bb = b.readBound( time )
 			self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
 			self.assertTrue( ab.max.equalWithAbsError( bb.max, 1e-6 ) )
+		
+		aAttrs = a.attributeNames()
+		bAttrs = b.attributeNames()
+		# need to remove the animatedObjectPrimVars attribute since it doesn't exist in some circumstances
+		if "sceneInterface:animatedObjectPrimVars" in aAttrs :
+			aAttrs.remove( "sceneInterface:animatedObjectPrimVars" )
+		if "sceneInterface:animatedObjectPrimVars" in bAttrs :
+			bAttrs.remove( "sceneInterface:animatedObjectPrimVars" )
+		self.assertEqual( aAttrs, bAttrs )
+		for attr in aAttrs :
+			self.assertTrue( a.hasAttribute( attr ) )
+			self.assertTrue( b.hasAttribute( attr ) )
+			self.assertEqual( a.readAttribute( attr, time ), b.readAttribute( attr, time ) )
 		
 		self.assertEqual( a.hasObject(), b.hasObject() )
 		if a.hasObject() :
@@ -1654,7 +1739,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testRopForceObjects( self ) :
 		
-		s = self.writeSCC()
+		s = self.writeAttributeSCC()
 		d = s.child( "1" ).createChild( "4" )
 		e = d.createChild( "5" )
 		box = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
@@ -1693,7 +1778,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( b.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
 			self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( TestSceneCache.__testFile ) )
 			self.assertEqual( b.readAttribute( IECore.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [ "1", "2" ] ) )
-			self.assertEqual( b.readAttribute( IECore.LinkedScene.timeLinkAttribute, 0 ), IECore.DoubleData( 1.0 / hou.fps() ) )
+			self.assertEqual( b.readAttribute( IECore.LinkedScene.timeLinkAttribute, 0 ), IECore.DoubleData( 0 ) )
 			d = a.child( "4" )
 			self.assertFalse( d.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 			self.assertFalse( d.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
@@ -1701,6 +1786,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertFalse( d.hasAttribute( IECore.LinkedScene.timeLinkAttribute ) )
 		
 		# force b and below as links even though they are expanded
+		hou.setTime( -1.0 / hou.fps() )
 		xform = self.xform()
 		xform.parm( "expand" ).pressButton()
 		rop = self.rop( xform )

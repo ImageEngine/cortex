@@ -132,8 +132,8 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		};
 		static HoudiniSceneAddOn g_houdiniSceneAddOn;
 		
-		static bool hasLink( const OP_Node *node );
-		static IECore::ConstObjectPtr readLink( const OP_Node *node, double time );
+		static void attributeNames( const OP_Node *node, IECore::SceneInterface::NameList &attrs );
+		static IECore::ConstObjectPtr readAttribute( const OP_Node *node, const IECore::SceneInterface::Name &name, double time );
 		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag );
 		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren );
 		
