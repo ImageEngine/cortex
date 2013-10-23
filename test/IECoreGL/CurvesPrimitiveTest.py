@@ -41,6 +41,25 @@ import IECore
 import IECoreGL
 IECoreGL.init( False )
 
+# workaround lack of skipIf decorator for
+# python < 2.7.
+## \todo If we had an IECoreTest module we could
+# put this there, along with the expectedFailure
+# workaround from GafferTest.
+try :
+	skipIf = unittest.skipIf
+except AttributeError :
+	def skipIf( condition, reason ) :
+		if condition :
+			def ignoreFunction( f ) :
+				def noOp( *args ) :
+					pass
+			return ignoreFunction
+		else :
+			def callFunction( f ) :
+				return f
+			return callFunction
+		
 class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testCurves.tif"
@@ -246,6 +265,50 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			]
 		)
 
+	@skipIf( IECoreGL.glslVersion() >= 150, "Modern GLSL version, no need to test fallback" )
+	def testFallbackLinearPeriodicAsLines( self ) :
+
+		# when the GLSL version is < 150, we should fall back
+		# to rendering everything as linear lines.
+
+		self.performTest(
+
+			IECore.CurvesPrimitive(
+
+				IECore.IntVectorData( [ 4 ] ),
+				IECore.CubicBasisf.bSpline(),
+				True,
+				IECore.V3fVectorData(
+					[
+						IECore.V3f( 1, 0, 0 ),
+						IECore.V3f( 0, 0, 0 ),
+						IECore.V3f( 0, 1, 0 ),
+						IECore.V3f( 1, 1, 0 ),
+					]
+				)
+
+			),
+			[
+				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
+			],
+			[
+				( IECore.V2f( 0, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 0.5, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 1, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 1, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 1, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 0.5, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 0, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 0, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.1, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.9, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.9, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.1, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+
+			]
+		)
+
 	def testLinearPeriodicAsLines( self ) :
 
 		self.performTest(
@@ -287,6 +350,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			]
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testBSplinePeriodicAsLines( self ) :
 
 		self.performTest(
@@ -315,6 +379,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/periodicBSpline.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testBSplinePeriodicAsRibbons( self ) :
 
 		c = IECore.CurvesPrimitive(
@@ -345,6 +410,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/bSplineCircle.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testBezierAsRibbons( self ) :
 
 		c = IECore.CurvesPrimitive(
@@ -374,6 +440,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/bezierHorseShoe.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testLinearRibbons( self ) :
 
 		c = IECore.CurvesPrimitive(
@@ -403,6 +470,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/linearHorseShoeRibbon.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testLinearPeriodicRibbons( self ) :
 
 		c = IECore.CurvesPrimitive(
@@ -432,6 +500,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/linearPeriodicRibbon.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testSeveralBSplineRibbons( self ) :
 
 		c = IECore.CurvesPrimitive(
@@ -466,6 +535,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/twoBSplineCircles.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testSeveralBSplineLines( self ) :
 
 		self.performTest(
@@ -498,6 +568,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/twoBSplineCirclesAsLines.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testRibbonWindingOrder( self ) :
 
 		c = IECore.CurvesPrimitive(
@@ -528,6 +599,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/bSplineCircle.tif"
 		)
 
+	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testLinearRibbonWindingOrder( self ) :
 
 		c = IECore.CurvesPrimitive(
