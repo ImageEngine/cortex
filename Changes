@@ -1,3 +1,27 @@
+# 8.0.0-a22
+
+#### IECoreHoudini
+
+- ParameterisedHolder SOPs have a nameFilter parm (w/ disable toggle)
+ - These are used to pre-filter each input geometry (or not if toggled off)
+- ProceduralHolder outputs a single CortexObject holding its procedural
+- OpHolder operates several times per cook, once for each named input shape
+ - Shapes matching the filter are operated on, and returned as CortexObjects, maintaining their name
+ - Shapes not matching are passed through unchanged, whether they were normal geo or CortexObjects
+ - It can be forced to operate only once by disabling the nameFilter or by passing a single named shape
+- CortexConverter SOP now operates in both directions (converting between CortexObjects and native geo)
+ - It also has a nameFilter, with similar pass-through behaviour as the OpHolder
+- Changed interface for HoudiniScene custom attribute callbacks
+ - SceneCache OBJs pass attributes through to HoudiniScene (and therefor SceneCache ROP)
+- Added IECoreHoudini.makeMainGLContextCurrent() which is needed for sharing the GL Context with other applications (like Gaffer)
+- Fixed bug in HoudiniScene which was creating phony children when FlatGeometry names were similar, but not exact
+- Fixed bug in SceneCache SOP when loading Groups or CoordinateSystems without a transform
+- Preventing segmentation faults when reading a corrupt SceneCache file
+
+#### IECoreGL
+
+- Fixed GLSL shaders to work with GLSL version 120 (OpenGL 2.1)
+
 # 8.0.0-a21
 
 #### IECoreMaya
