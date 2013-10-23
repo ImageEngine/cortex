@@ -46,6 +46,9 @@ namespace IECoreGL
 /// it multiple times.
 void init( bool glAlreadyInitialised = false );
 
+/// Returns the current GLSL version.
+int glslVersion();
+
 } // namespace IECoreGL
 
 #endif // IECOREGL_COREGL_H
