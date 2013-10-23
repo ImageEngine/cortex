@@ -1412,7 +1412,6 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		self.assertEqual( a.hasObject(), b.hasObject() )
 		if a.hasObject() :
-			# need to remove the name added by Houdini
 			ma = a.readObject( time )
 			mb = b.readObject( time )
 			# need to adjust P for baked objects
