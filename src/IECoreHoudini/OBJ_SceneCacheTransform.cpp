@@ -422,28 +422,36 @@ OBJ_SceneCacheTransform::HoudiniSceneAddOn OBJ_SceneCacheTransform::g_houdiniSce
 
 OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
 {
-	HoudiniScene::registerCustomAttribute( LinkedScene::linkAttribute, OBJ_SceneCacheTransform::hasLink, OBJ_SceneCacheTransform::readLink );
+	HoudiniScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
 	HoudiniScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
 }
 
-bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
+void OBJ_SceneCacheTransform::attributeNames( const OP_Node *node, SceneInterface::NameList &attrs )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
-		return false;
+		return;
 	}
+	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	/// \todo: do we need to ensure the file exists first?
+	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
+	if ( !scene )
+	{
+		return;
+	}
+	
+	scene->attributeNames( attrs );
 	
 	const char *expanded = pExpanded.getToken();
 	if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
 	{
-		return true;
+		attrs.push_back( LinkedScene::linkAttribute );
 	}
-	
-	return false;
 }
 
-IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node, double time )
+IECore::ConstObjectPtr OBJ_SceneCacheTransform::readAttribute( const OP_Node *node, const SceneInterface::Name &name, double time )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
@@ -459,7 +467,18 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node, d
 		return 0;
 	}
 	
-	return LinkedScene::linkAttributeData( scene, time );
+	if ( name == LinkedScene::linkAttribute )
+	{
+		const char *expanded = pExpanded.getToken();
+		if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
+		{
+			return LinkedScene::linkAttributeData( scene, time );
+		}
+		
+		return 0;
+	}
+	
+	return scene->readAttribute( name, time );
 }
 
 bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
