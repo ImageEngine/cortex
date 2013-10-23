@@ -53,6 +53,8 @@
 
 #include "IECore/MessageHandler.h"
 
+static int g_glslVersion = 0;
+
 void IECoreGL::init( bool glAlreadyInitialised )
 {
 	static bool init = false;
@@ -121,6 +123,11 @@ void IECoreGL::init( bool glAlreadyInitialised )
 		}
 		init = true;
 		
+		const char *s = (const char *)glGetString( GL_SHADING_LANGUAGE_VERSION );
+		int major = 0; int minor = 0;
+		sscanf( s, "%d.%d", &major, &minor );
+		g_glslVersion = major * 100 + minor;
+	
 #if defined( __APPLE__ )
 
 		if( !glAlreadyInitialised )
@@ -136,4 +143,9 @@ void IECoreGL::init( bool glAlreadyInitialised )
 #endif
 		
 	}
+}
+
+int IECoreGL::glslVersion()
+{
+	return g_glslVersion;
 }
