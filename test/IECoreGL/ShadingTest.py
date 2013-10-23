@@ -576,6 +576,10 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testGeometryShaderViaParameters( self ) :
 	
+		if IECoreGL.glslVersion() < 150 :
+			# no point testing unavailable functionality
+			return
+	
 		g = IECore.Group()
 		
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
@@ -602,6 +606,10 @@ class ShadingTest( unittest.TestCase ) :
 		
 	def testGeometryShaderViaFile( self ) :
 	
+		if IECoreGL.glslVersion() < 150 :
+			# no point testing unavailable functionality
+			return
+
 		g = IECore.Group()
 		
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
