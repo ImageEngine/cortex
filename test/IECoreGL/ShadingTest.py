@@ -56,8 +56,9 @@ class ShadingTest( unittest.TestCase ) :
 		s = IECore.Shader( "test", "gl:surface" )
 		
 		s.parameters["gl:fragmentSource"] = """
+			#include "IECoreGL/FragmentShader.h"
 			
-			in vec3 fragmentCs;
+			IECOREGL_FRAGMENTSHADER_IN vec3 fragmentCs;
 						
 			void main()
 			{

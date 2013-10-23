@@ -48,7 +48,9 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	def showColorShader( self ) :
 	
 		fs = """
-		in vec3 fragmentCs;
+		#include "IECoreGL/FragmentShader.h"
+		
+		IECOREGL_FRAGMENTSHADER_IN vec3 fragmentCs;
 		void main()
 		{
 			gl_FragColor = vec4( fragmentCs, 1 );
