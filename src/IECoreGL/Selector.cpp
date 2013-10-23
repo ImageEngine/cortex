@@ -52,6 +52,7 @@
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/TextureLoader.h"
+#include "IECoreGL/IECoreGL.h"
 
 using namespace IECoreGL;
 
@@ -99,6 +100,13 @@ class Selector::Implementation : public IECore::RefCounted
 			gluPickMatrix( regionCenter.x, regionCenter.y, regionSize.x, regionSize.y, viewport );
 			glMultMatrixd( projectionMatrix );
 			glMatrixMode( GL_MODELVIEW );
+
+			// fall back to GLSelect mode if we can't
+			// support IDRender mode.
+			if( m_mode == IDRender && glslVersion() < 330 )
+			{
+				m_mode = GLSelect;
+			}
 
 			switch( m_mode )
 			{

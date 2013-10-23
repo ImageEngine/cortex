@@ -73,7 +73,10 @@ class Selector : boost::noncopyable
 			OcclusionQuery,
 			/// Renders each object to an offscreen framebuffer using a
 			/// unique colour per object. Can therefore only select the
-			/// frontmost objects, but does provide accurate depth information. 
+			/// frontmost objects, but does provide accurate depth information.
+			/// Note that this mode is currently only supported for GLSL
+			/// versions 330 and up - lesser versions will fall back to using
+			/// the GLSelect mode.
 			IDRender
 		};
 
