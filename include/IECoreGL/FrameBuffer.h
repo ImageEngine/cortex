@@ -63,6 +63,12 @@ class FrameBuffer : public IECore::RunTimeTyped
 		FrameBuffer();
 		virtual ~FrameBuffer();
 
+		/// Returns the GL handle for the framebuffer. Note that this is
+		/// owned by the FrameBuffer class and will be destroyed in the
+		/// destructor - you must therefore not call glDeleteFramebuffers()
+		/// yourself.
+		GLuint frameBuffer() const;
+
 		/// Returns the maximum number of color attachments available
 		/// in the calls below (the maximum allowable value for index).
 		static unsigned int maxColors();

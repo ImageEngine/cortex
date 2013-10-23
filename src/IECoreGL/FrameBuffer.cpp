@@ -97,6 +97,11 @@ FrameBuffer::~FrameBuffer()
 	glDeleteFramebuffers( 1, &m_frameBuffer );
 }
 
+GLuint FrameBuffer::frameBuffer() const
+{
+	return m_frameBuffer;
+}
+
 unsigned int FrameBuffer::maxColors()
 {
 	GLint m;
