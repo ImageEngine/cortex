@@ -50,9 +50,11 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 	def testVertexAttributes( self ) :
 
 		vertexSource = """
-		in vec3 vertexP;
-		attribute vec2 vertexst;
-		varying out vec4 stColor;
+		#include "IECoreGL/VertexShader.h"
+		
+		IECOREGL_VERTEXSHADER_IN vec3 vertexP;
+		IECOREGL_VERTEXSHADER_IN vec2 vertexst;
+		IECOREGL_VERTEXSHADER_OUT vec4 stColor;
 
 		void main()
 		{

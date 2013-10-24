@@ -124,4 +124,5 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 #endif
 
 	def( "init", &IECoreGL::init );
+	def( "glslVersion", &IECoreGL::glslVersion );
 }

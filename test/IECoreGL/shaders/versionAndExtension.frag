@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#version 150
+#version 120
 #extension GL_EXT_geometry_shader4 : disable
-
-out vec4 Ci;
 
 void main()
 {
-	Ci = vec4( 1, 0, 1, 1 );
+	gl_FragColor = vec4( 1, 0, 1, 1 );
 }

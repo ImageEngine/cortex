@@ -36,6 +36,8 @@
 #include <iostream>
 
 #include "boost/format.hpp"
+#include "boost/tokenizer.hpp"
+#include "boost/algorithm/string/predicate.hpp"
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
@@ -117,7 +119,35 @@ class Shader::Implementation : public IECore::RefCounted
 				vector<char> log( logLength, ' ' );
 				glGetProgramInfoLog( m_program, logLength, 0, &log[0] );
 				message = &log[0];
-				IECore::msg( IECore::Msg::Warning, "IECoreGL::Shader", message );
+				
+				// os x spews warnings rather overzealously, so we split them
+				// into warnings and debug messages. the debug messages will generally
+				// be filtered out by the message level, but they're still there
+				// if someone really wants them.
+				std::string warning;
+				std::string debug;
+				typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+				Tokenizer lines( message, boost::char_separator<char>( "\n" ) );
+				for( Tokenizer::iterator it = lines.begin(); it != lines.end(); ++it )
+				{
+					if( starts_with( *it, "WARNING: Output of vertex shader" ) && ends_with( *it, "not read by fragment shader" ) )
+					{
+						debug += *it + "\n";
+					}
+					else
+					{
+						warning += *it + "\n";
+					}
+				}
+				
+				if( debug.size() )
+				{
+					IECore::msg( IECore::Msg::Debug, "IECoreGL::Shader", debug );
+				}
+				if( warning.size() )
+				{
+					IECore::msg( IECore::Msg::Warning, "IECoreGL::Shader", warning );
+				}
 			}
 			{
 				// build the uniform parameter description map
