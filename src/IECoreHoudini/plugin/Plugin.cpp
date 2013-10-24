@@ -87,21 +87,21 @@ void newSopOperator(OP_OperatorTable *table)
 		SOP_OpHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
 		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	opHolder->setIconName( "SOP_ieOpHolder" );
+	opHolder->setIconName( "CortexLogoMini" );
 	
 	OP_Operator *proceduralHolder = new OP_Operator(
 		"ieProceduralHolder", "Cortex Procedural",
 		SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
     		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	proceduralHolder->setIconName( "SOP_ieProceduralHolder" );
+	proceduralHolder->setIconName( "CortexLogoMini" );
 	
 	OP_Operator *converter = new OP_Operator(
 		SOP_CortexConverter::typeName, "Cortex Convert",
 		SOP_CortexConverter::create, SOP_CortexConverter::parameters, 1,	1,
 		SOP_CortexConverter::variables, OP_FLAG_GENERATOR
 	);
-	converter->setIconName( "SOP_ieCortexConverter" );
+	converter->setIconName( "CortexLogoMini" );
 	
 	OP_Operator *cacheReader = new OP_Operator(
 		"ieInterpolatedCacheReader", "Interpolated Cache Reader",
@@ -160,8 +160,7 @@ void newDriverOperator( OP_OperatorTable *table )
 		ROP_SceneCacheWriter::create, ROP_SceneCacheWriter::buildParameters(), 0, 999, 0,
 		OP_FLAG_GENERATOR
 	);
-	/// \todo: get a new icon
-	sceneCacheWriter->setIconName( "SOP_ieCortexConverter" );
+	sceneCacheWriter->setIconName( "CortexLogoMini" );
 	
 	table->addOperator( sceneCacheWriter );
 	

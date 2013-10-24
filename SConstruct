@@ -2670,7 +2670,7 @@ if doConfigure :
 		#=====
 		# install icons
 		#=====
-		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" )
+		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" ) + glob.glob( "graphics/CortexLogo*.svg" )
 		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
 		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )
