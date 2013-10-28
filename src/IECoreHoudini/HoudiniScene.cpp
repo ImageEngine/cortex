@@ -381,7 +381,7 @@ bool HoudiniScene::hasTag( const Name &name, bool includeChildren ) const
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
-		if ( it->m_has( node, name ) )
+		if ( it->m_has( node, name, includeChildren ) )
 		{
 			return true;
 		}
