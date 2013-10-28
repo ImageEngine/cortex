@@ -481,7 +481,7 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readAttribute( const OP_Node *no
 	return scene->readAttribute( name, time );
 }
 
-bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
+bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag, bool includeChildren )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
@@ -497,7 +497,7 @@ bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface:
 		return false;
 	}
 	
-	return scene->hasTag( tag );
+	return scene->hasTag( tag, includeChildren );
 }
 
 void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, bool includeChildren )

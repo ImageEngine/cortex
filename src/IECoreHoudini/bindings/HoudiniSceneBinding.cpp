@@ -34,11 +34,13 @@
 
 #include "boost/python.hpp"
 
+#include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/HoudiniScene.h"
 #include "IECoreHoudini/bindings/HoudiniSceneBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/SceneInterfaceBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -82,6 +84,86 @@ static std::string getNodePath( HoudiniScene *scene )
 	return path.toStdString();
 }
 
+class CustomTagReader
+{
+	public :
+		CustomTagReader( object hasFn, object readFn ) : m_has( hasFn ), m_read( readFn )
+		{
+		}
+
+		bool operator() ( const OP_Node *node, const IECore::SceneInterface::Name &tag, bool includeChildren )
+		{
+			UT_String path;
+			node->getFullPath( path );
+			IECorePython::ScopedGILLock gilLock;
+			return m_has( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), tag, includeChildren );
+		}
+		
+		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren )
+		{
+			UT_String path;
+			node->getFullPath( path );
+			IECorePython::ScopedGILLock gilLock;
+			object o = m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), includeChildren );
+			extract<list> l( o );
+			if ( !l.check() )
+			{
+				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
+			}
+			
+			IECorePython::listToSceneInterfaceNameList( l(), tags );
+		}
+		
+		object m_has;
+		object m_read;
+};
+
+void registerCustomTags( object hasFn, object readFn )
+{
+	CustomTagReader reader( hasFn, readFn );
+	HoudiniScene::registerCustomTags( reader, reader );
+}
+
+class CustomAttributeReader
+{
+	public :
+		CustomAttributeReader( object namesFn, object readFn ) : m_names( namesFn ), m_read( readFn )
+		{
+		}
+
+		IECore::ConstObjectPtr operator() ( const OP_Node *node, const IECore::SceneInterface::Name &attr, double time )
+		{
+			UT_String path;
+			node->getFullPath( path );
+			IECorePython::ScopedGILLock gilLock;
+			return extract<IECore::ConstObjectPtr>( m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), attr, time ) );
+		}
+		
+		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &attributes )
+		{
+			UT_String path;
+			node->getFullPath( path );
+			IECorePython::ScopedGILLock gilLock;
+			object o = m_names( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ) );
+			extract<list> l( o );
+			if ( !l.check() )
+			{
+				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
+			}
+			
+			IECorePython::listToSceneInterfaceNameList( l(), attributes );
+		}
+
+		object m_names;
+		object m_read;
+};
+
+void registerCustomAttributes( object namesFn, object readFn )
+{
+	CustomAttributeReader reader( namesFn, readFn );
+	HoudiniScene::registerCustomAttributes( reader, reader );
+}
+
 void IECoreHoudini::bindHoudiniScene()
 {
 	IECorePython::RunTimeTypedClass<HoudiniScene>()
@@ -91,5 +173,7 @@ void IECoreHoudini::bindHoudiniScene()
 		.def( "setDefaultTime", &HoudiniScene::setDefaultTime )
 		.def( "embedded", &HoudiniScene::embedded )
 		.def( "_getNodePath", &getNodePath )
+		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
+		.def( "registerCustomAttributes", registerCustomAttributes ).staticmethod( "registerCustomAttributes" )
 	;
 }
