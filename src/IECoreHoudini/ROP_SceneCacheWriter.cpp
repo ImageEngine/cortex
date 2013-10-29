@@ -293,7 +293,10 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			mode = NaturalLink;
 		}
 		
-		outScene->writeAttribute( *it, liveScene->readAttribute( *it, time ), time );
+		if ( ConstObjectPtr data = liveScene->readAttribute( *it, time ) )
+		{
+			outScene->writeAttribute( *it, data, time );
+		}
 	}
 	
 	if ( mode == ForcedLink )
