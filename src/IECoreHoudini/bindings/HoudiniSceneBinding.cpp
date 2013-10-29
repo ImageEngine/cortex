@@ -84,6 +84,16 @@ static std::string getNodePath( HoudiniScene *scene )
 	return path.toStdString();
 }
 
+IECore::DataPtr readWorldTransform( HoudiniScene &scene, double time )
+{
+	if ( IECore::ConstDataPtr t = scene.readWorldTransform( time ) )
+	{
+		return t->copy();
+	}
+	
+	return 0;
+}
+
 class CustomTagReader
 {
 	public :
@@ -173,6 +183,8 @@ void IECoreHoudini::bindHoudiniScene()
 		.def( "setDefaultTime", &HoudiniScene::setDefaultTime )
 		.def( "embedded", &HoudiniScene::embedded )
 		.def( "_getNodePath", &getNodePath )
+		.def( "readWorldTransform", &readWorldTransform )
+		.def( "readWorldTransformAsMatrix", &HoudiniScene::readWorldTransformAsMatrix )
 		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
 		.def( "registerCustomAttributes", registerCustomAttributes ).staticmethod( "registerCustomAttributes" )
 	;
