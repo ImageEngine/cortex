@@ -48,20 +48,19 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( SceneInterface );
 
 /// A pure virtual base class for navigating a hierarchical animated 3D scene.
-/// A scene is defined by a hierarchy of 3D transforms.
+/// A scene is defined by a hierarchy of named 3D transforms.
 /// Each SceneInterface instance maps to a specific transform in a scene, uniquely identified by it's path.
 /// A path is an array of transform names.
 /// Using the method child, you can explore the hierarchy (and create new transforms).
 /// Each transform on the hierarchy has a unique name and contains the 3D transformation, custom attributes, tags,
 /// a bounding box, a main object and more child transforms. All of them can be animated.
-/// Animation is stored by providing the time and the value. When retrieving animation, the interface allows 
-/// for reading the individual stored samples or the interpolated value at any given time. 
+/// Animation is stored by providing the time and the value. And it's retrieved by querying it's value at any time, and if the 
+/// animation is inherently sampled, interpolation will be applied for queries on attributes, objects, transforms and bounds. 
 /// The path to the root transform is an empty array. The name of the root transform is "/" though.
 /// The root transform by definition cannot store transformation or an object. Attributes and Tags are allowed.
-/// Tags is simply a set of labels assigned to any location in a scene and they are propagated up in the hierarchy
-/// when the scene is saved, so they can be used to filter the scene when reading. For example, some geo could be 
-/// tagged as "proxy", then readers could easily only display the proxy geometry for quick previsualization.
-/// Care must be taken when a tag is set in the middle of the hierarchy as child locations will not inherit the tag.
+/// Tags are string labels assigned to any location in a scene and they are propagated up and down in the hierarchy
+/// when the scene is saved to files, so they can be used for efficiently filtering the hierarchy. 
+/// Check on the Maya and Houdini scene reader nodes for examples on how to filter by tag.
 /// \ingroup ioGroup
 /// \todo Implement a TransformStack class that can represent any custom 
 /// transformation that could be interpolated and consider using it here as the
@@ -81,6 +80,13 @@ class SceneInterface : public RunTimeTyped
 			NullIfMissing = IndexedIO::NullIfMissing,
 			CreateIfMissing = IndexedIO::CreateIfMissing
 		} MissingBehaviour;
+
+		enum TagFilter {
+			DescendentTag = 1,
+			LocalTag = 2,
+			AncestorTag = 4,
+			EveryTag = DescendentTag | LocalTag | AncestorTag
+		};
 
 		/// Constant name assigned to the root location "/".
 		static const Name &rootName;
@@ -170,15 +176,14 @@ class SceneInterface : public RunTimeTyped
 		 * Tags
 		 */
 
-		/// Utility function that quickly checks for the existence of one tag in the scene
-		/// \param includeChildren If false, then it will return true only if the given tag was written in the current scene location.
-		/// Otherwise, will return true if the tag was set on any child location.
-		virtual bool hasTag( const Name &name, bool includeChildren = true ) const = 0;
-		/// Reads all the tags on the current scene location.
-		/// \param includeChildren If false, then it will return tags that were written only in the current scene location.
-		/// Otherwise, will include the union of all tags from the children as well which is usually the expected behavior. 
-		/// Some implementations may not support recursing to the children due to performance reasons and will ignore this flag.
-		virtual void readTags( NameList &tags, bool includeChildren = true ) const = 0;
+		/// Utility function that quickly checks for the existence of one tag relative to the current scene location and the given filter.
+		/// \param filter Will filter the results based on a combination of flags DescendentTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendentTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
+		/// Some implementations may not support all combinations of these flags and will ignore them.
+		virtual bool hasTag( const Name &name, int filter = LocalTag ) const = 0;
+		/// Reads all the tags relative to the current scene location and the filter. Does not guarantee unique set of tags to be returned.
+		/// \param filter Will filter the results based on a combination of flags DescendentTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendentTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
+		/// Some implementations may not support all combinations of these flags and will ignore them.
+		virtual void readTags( NameList &tags, int filter = LocalTag ) const = 0;
 		/// Adds tags to the current scene location.
 		virtual void writeTags( const NameList &tags ) = 0;
 

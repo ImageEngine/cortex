@@ -110,8 +110,8 @@ class SceneCache : public SampledSceneInterface
 		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
 
-		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
-		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
+		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
+		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
 		virtual void writeTags( const NameList &tags );
 
 		virtual bool hasObject() const;
@@ -144,7 +144,7 @@ class SceneCache : public SampledSceneInterface
 
 		/// LinkedScene need to specify whether the tag is supposed to be saved
 		/// as a local tag or a tag that was artificially inherited from the child transforms.
-		void writeTags( const NameList &tags,  bool fromChildren );
+		void writeTags( const NameList &tags,  bool descendentTags );
 
 		friend class LinkedScene;
 		

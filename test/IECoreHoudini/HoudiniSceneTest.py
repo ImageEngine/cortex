@@ -233,14 +233,14 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		# no tags by default
 		scene = self.buildScene()
-		self.assertEqual( scene.readTags(), [] )
-		self.assertFalse( scene.hasTag( "any" ) )
+		self.assertEqual( scene.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( scene.hasTag( "any", IECore.SceneInterface.EveryTag ) )
 		sub1 = scene.child( "sub1" )
-		self.assertEqual( sub1.readTags(), [] )
-		self.assertFalse( sub1.hasTag( "any" ) )
+		self.assertEqual( sub1.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( sub1.hasTag( "any",IECore.SceneInterface.EveryTag ) )
 		torus1 = sub1.child( "torus1" )
-		self.assertEqual( torus1.readTags(), [] )
-		self.assertFalse( torus1.hasTag( "any" ) )
+		self.assertEqual( torus1.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( torus1.hasTag( "any",IECore.SceneInterface.EveryTag ) )
 		
 		def addTags( node, tags ) :
 			
@@ -250,19 +250,19 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		# we can add tags to OBJ nodes, but they do not trickle up automatically
 		addTags( hou.node( "/obj/sub1/torus1" ), "yellow" )
 		addTags( hou.node( "/obj/box1" ), "sop top" )
-		self.assertEqual( scene.readTags(), [] )
-		self.assertFalse( scene.hasTag( "yellow" ) )
+		self.assertEqual( scene.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( scene.hasTag( "yellow", IECore.SceneInterface.EveryTag ) )
 		sub1 = scene.child( "sub1" )
-		self.assertEqual( sub1.readTags(), [] )
-		self.assertFalse( sub1.hasTag( "yellow" ) )
+		self.assertEqual( sub1.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( sub1.hasTag( "yellow", IECore.SceneInterface.EveryTag ) )
 		torus1 = sub1.child( "torus1" )
-		self.assertEqual( torus1.readTags(), [ "yellow" ] )
-		self.assertTrue( torus1.hasTag( "yellow" ) )
+		self.assertEqual( torus1.readTags(IECore.SceneInterface.LocalTag), [ "yellow" ] )
+		self.assertTrue( torus1.hasTag( "yellow",IECore.SceneInterface.LocalTag ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readTags(), [ "sop", "top" ] )
-		self.assertTrue( box1.hasTag( "sop" ) )
-		self.assertTrue( box1.hasTag( "top" ) )
-		self.assertFalse( box1.hasTag( "yellow" ) )
+		self.assertEqual( box1.readTags(IECore.SceneInterface.LocalTag), [ "sop", "top" ] )
+		self.assertTrue( box1.hasTag( "sop",IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( box1.hasTag( "top",IECore.SceneInterface.LocalTag ) )
+		self.assertFalse( box1.hasTag( "yellow",IECore.SceneInterface.EveryTag ) )
 		
 		def addSopTags( node, tag, primRange ) :
 			
@@ -285,7 +285,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sub1.readTags(), [] )
 		self.assertFalse( sub1.hasTag( "yellow" ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readTags(), [ "sop", "top", "itsABox", "both:and" ] )
+		self.assertEqual( set(box1.readTags()), set( map( lambda s: IECore.InternedString(s), [ "sop", "top", "itsABox", "both:and" ] )) )
 		self.assertTrue( box1.hasTag( "sop" ) )
 		self.assertTrue( box1.hasTag( "top" ) )
 		self.assertTrue( box1.hasTag( "itsABox" ) )
@@ -297,7 +297,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertFalse( gap.hasTag( "top" ) )
 		self.assertFalse( gap.hasTag( "itsATorus" ) )
 		torus = gap.child( "torus" )
-		self.assertEqual( torus.readTags(), [ "itsATorus", "both:and" ] )
+		self.assertEqual( set(torus.readTags()), set( map( lambda s: IECore.InternedString(s),[ "itsATorus", "both:and" ])) )
 		self.assertTrue( torus.hasTag( "itsATorus" ) )
 		self.assertTrue( torus.hasTag( "both:and" ) )
 		self.assertFalse( torus.hasTag( "sop" ) )
@@ -824,24 +824,24 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 	def testCustomTags( self ) : 
 		
 		scene = self.buildScene()
-		self.assertEqual( scene.readTags(), [] )
-		self.assertFalse( scene.hasTag( "custom" ) )
+		self.assertEqual( scene.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( scene.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		sub1 = scene.child( "sub1" )
-		self.assertEqual( sub1.readTags(), [] )
-		self.assertFalse( sub1.hasTag( "custom" ) )
+		self.assertEqual( sub1.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( sub1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		torus1 = sub1.child( "torus1" )
-		self.assertEqual( torus1.readTags(), [] )
-		self.assertFalse( torus1.hasTag( "custom" ) )
+		self.assertEqual( torus1.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( torus1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readTags(), [] )
-		self.assertFalse( box1.hasTag( "custom" ) )
+		self.assertEqual( box1.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( box1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		gap = box1.child( "gap" )
-		self.assertEqual( gap.readTags(), [] )
-		self.assertFalse( gap.hasTag( "custom" ) )
+		self.assertEqual( gap.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( gap.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		
 		doTest = True
 		
-		def readTags( node, includeChildren ) :
+		def readTags( node, tagFilter ) :
 			
 			if not doTest :
 				return []
@@ -849,7 +849,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 			if node.type().name() == "geo" :
 				return [ "custom" ]
 			
-			if includeChildren :
+			if tagFilter & IECore.SceneInterface.DescendentTag :
 				
 				def recurse( node ) :
 					if node.type().name() == "geo" :
@@ -864,7 +864,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 			
 			return []
 		
-		def hasTag( node, name, includeChildren ) :
+		def hasTag( node, name, tagFilter ) :
 			
 			if not doTest :
 				return False
@@ -875,7 +875,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 			if node.type().name() == "geo" :
 				return True
 			
-			if includeChildren :
+			if tagFilter & IECore.SceneInterface.DescendentTag :
 				
 				def recurse( node ) :
 					if node.type().name() == "geo" :
@@ -892,29 +892,29 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		IECoreHoudini.HoudiniScene.registerCustomTags( hasTag, readTags )
 		
 		# subnets do not have the new tag directly
-		self.assertEqual( scene.readTags( False ), [] )
-		self.assertFalse( scene.hasTag( "custom", False ) )
-		self.assertEqual( sub1.readTags( False ), [] )
-		self.assertFalse( sub1.hasTag( "custom", False ) )
+		self.assertEqual( scene.readTags( IECore.SceneInterface.LocalTag ), [] )
+		self.assertFalse( scene.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertEqual( sub1.readTags( IECore.SceneInterface.LocalTag ), [] )
+		self.assertFalse( sub1.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
 		# but they do have them on children
-		self.assertEqual( scene.readTags(), [ "custom" ] )
-		self.assertTrue( scene.hasTag( "custom" ) )
-		self.assertEqual( sub1.readTags(), [ "custom" ] )
-		self.assertTrue( sub1.hasTag( "custom" ) )
+		self.assertEqual( scene.readTags(IECore.SceneInterface.EveryTag), [ "custom" ] )
+		self.assertTrue( scene.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		self.assertEqual( sub1.readTags(IECore.SceneInterface.EveryTag), [ "custom" ] )
+		self.assertTrue( sub1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		# geo nodes have the new tag directly and on children
-		self.assertEqual( torus1.readTags( False ), [ "custom" ] )
-		self.assertEqual( torus1.readTags(), [ "custom" ] )
-		self.assertTrue( torus1.hasTag( "custom", False ) )
-		self.assertTrue( torus1.hasTag( "custom" ) )
-		self.assertEqual( box1.readTags( False ), [ "custom" ] )
-		self.assertEqual( box1.readTags(), [ "custom" ] )
-		self.assertTrue( box1.hasTag( "custom", False ) )
-		self.assertTrue( box1.hasTag( "custom" ) )
+		self.assertEqual( torus1.readTags( IECore.SceneInterface.LocalTag ), [ "custom" ] )
+		self.assertEqual( torus1.readTags( IECore.SceneInterface.EveryTag ), [ "custom" ] )
+		self.assertTrue( torus1.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( torus1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		self.assertEqual( box1.readTags( IECore.SceneInterface.LocalTag ), [ "custom" ] )
+		self.assertEqual( box1.readTags( IECore.SceneInterface.EveryTag ), [ "custom" ] )
+		self.assertTrue( box1.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( box1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		# embedded shapes do as well
-		self.assertEqual( gap.readTags( False ), [ "custom" ] )
-		self.assertEqual( gap.readTags(), [ "custom" ] )
-		self.assertTrue( gap.hasTag( "custom", False ) )
-		self.assertTrue( gap.hasTag( "custom" ) )
+		self.assertEqual( gap.readTags( IECore.SceneInterface.LocalTag ), [ "custom" ] )
+		self.assertEqual( gap.readTags( IECore.SceneInterface.EveryTag ), [ "custom" ] )
+		self.assertTrue( gap.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( gap.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
 		
 		# Disable custom tag functions so they don't mess with other tests
 		doTest = False

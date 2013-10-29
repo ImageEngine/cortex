@@ -314,7 +314,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	}
 	
 	SceneInterface::NameList tags;
-	liveScene->readTags( tags, false );
+	liveScene->readTags( tags );
 	outScene->writeTags( tags );
 	
 	if ( liveScene->hasObject() )

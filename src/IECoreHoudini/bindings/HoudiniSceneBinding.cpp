@@ -91,20 +91,20 @@ class CustomTagReader
 		{
 		}
 
-		bool operator() ( const OP_Node *node, const IECore::SceneInterface::Name &tag, bool includeChildren )
+		bool operator() ( const OP_Node *node, const IECore::SceneInterface::Name &tag, int filter )
 		{
 			UT_String path;
 			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			return m_has( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), tag, includeChildren );
+			return m_has( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), tag, filter );
 		}
 		
-		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren )
+		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &tags, int filter )
 		{
 			UT_String path;
 			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			object o = m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), includeChildren );
+			object o = m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), filter );
 			extract<list> l( o );
 			if ( !l.check() )
 			{
