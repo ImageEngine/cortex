@@ -156,10 +156,10 @@ static dict readObjectPrimitiveVariables( const SceneInterface &m, list varNameL
 	return result;
 }
 
-list readTags( const SceneInterface &m, bool includeChildren )
+list readTags( const SceneInterface &m, int filter )
 {
 	SceneInterface::NameList tags;
-	m.readTags( tags, includeChildren );
+	m.readTags( tags, filter );
 	list result;
 	for ( SceneInterface::NameList::const_iterator it = tags.begin(); it != tags.end(); it++ )
 	{
@@ -222,6 +222,15 @@ void bindSceneInterface()
 			.value("CreateIfMissing", SceneInterface::CreateIfMissing)
 			.export_values()
 		;
+
+		enum_< SceneInterface::TagFilter > ("TagFilter")
+			.value("DescendentTag", SceneInterface::DescendentTag)
+			.value("LocalTag", SceneInterface::LocalTag)
+			.value("AncestorTag", SceneInterface::AncestorTag)
+			.value("EveryTag", SceneInterface::EveryTag)
+			.export_values()
+		;
+
 	}
 
 	// now we've defined the nested types, we're able to define the methods for
@@ -241,8 +250,8 @@ void bindSceneInterface()
 		.def( "attributeNames", attributeNames )
 		.def( "readAttribute", &readAttribute )
 		.def( "writeAttribute", &SceneInterface::writeAttribute )
-		.def( "hasTag", &SceneInterface::hasTag, ( arg( "name" ), arg( "includeChildren" ) = true ) )
-		.def( "readTags", readTags, ( arg( "includeChildren" ) = true ) )
+		.def( "hasTag", &SceneInterface::hasTag, ( arg( "name" ), arg( "filter" ) = SceneInterface::LocalTag ) )
+		.def( "readTags", readTags, ( arg( "filter" ) = SceneInterface::LocalTag ) )
 		.def( "writeTags", writeTags )
 		.def( "readObject", &readObject )
 		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )

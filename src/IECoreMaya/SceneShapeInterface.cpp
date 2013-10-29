@@ -1080,8 +1080,8 @@ void SceneShapeInterface::buildScene( IECoreGL::RendererPtr renderer, ConstScene
 	{
 		if ( t->size() )
 		{
-			/// test if the scene has the tag to start with..
-			if ( subSceneInterface->hasTag( *t ) )
+			/// test if the scene location has the tag to start with..
+			if ( subSceneInterface->hasTag( *t, SceneInterface::EveryTag ) )
 			{
 				drawTags.push_back( *t );
 			}
@@ -1104,7 +1104,7 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 		SceneInterface::NameList::const_iterator it;
 		for ( it = drawTags.begin(); it != drawTags.end(); it++ )
 		{
-			if ( subSceneInterface->hasTag( *it ) )
+			if ( subSceneInterface->hasTag( *it, SceneInterface::EveryTag ) )
 			{
 				break;
 			}

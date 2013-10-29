@@ -728,7 +728,7 @@ void SceneCacheReader::buildSceneView( std::vector< std::string > &list, const I
 		if( sceneInterface->hasObject() )
 		{
 			IECore::SceneInterface::NameList tagNames;
-			sceneInterface->readTags( tagNames, false );
+			sceneInterface->readTags( tagNames, IECore::SceneInterface::LocalTag );
 			for ( IECore::SceneInterface::NameList::const_iterator it = tagNames.begin(); it != tagNames.end(); ++it )
 			{
 				m_tagMap[*it].push_back( list.size() );

@@ -134,8 +134,8 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		
 		static void attributeNames( const OP_Node *node, IECore::SceneInterface::NameList &attrs );
 		static IECore::ConstObjectPtr readAttribute( const OP_Node *node, const IECore::SceneInterface::Name &name, double time );
-		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag, bool includeChildren );
-		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren );
+		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag, int filter );
+		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, int filter );
 		
 		static int *g_indirection;
 

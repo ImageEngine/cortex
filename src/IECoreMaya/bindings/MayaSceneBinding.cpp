@@ -54,18 +54,18 @@ class CustomTagReader
 		{
 		}
 
-		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &tag )
+		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &tag, int filter )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
-			return m_has( p.asChar(), tag );
+			return m_has( p.asChar(), tag, filter );
 		}
 		
-		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, bool includeChildren )
+		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, int filter )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
-			object o = m_read( p.asChar(), includeChildren );
+			object o = m_read( p.asChar(), filter );
 			extract<list> l( o );
 			if ( !l.check() )
 			{

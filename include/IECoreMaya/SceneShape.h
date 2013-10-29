@@ -98,8 +98,8 @@ class SceneShape : public SceneShapeInterface
 		static IECore::ConstObjectPtr readSceneShapeObject( const MDagPath &p );
 		static void sceneShapeAttributeNames( const MDagPath &p, IECore::SceneInterface::NameList &attributeNames );
 		static IECore::ConstObjectPtr readSceneShapeAttribute( const MDagPath &p, IECore::SceneInterface::Name attributeName );
-		static bool hasTag( const MDagPath &p, const IECore::SceneInterface::Name &tag );
-		static void readTags( const MDagPath &p, IECore::SceneInterface::NameList &tags, bool includeChildren );
+		static bool hasTag( const MDagPath &p, const IECore::SceneInterface::Name &tag, int filter );
+		static void readTags( const MDagPath &p, IECore::SceneInterface::NameList &tags, int filter );
 
 };
 

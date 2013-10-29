@@ -594,18 +594,25 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 
 		doTest = True
 		
-		def hasMyTags( node, tag ) :
-			
+		def hasMyTags( node, tag, tagFilter ) :
+			"""'archivable' should be on all transforms and 'renderable' only at shape transforms."""			
+
 			if not doTest:
 				return False
 			
 			if tag not in ( "renderable", "archivable" ) :
 				return False
 			
+			if tag == "archivable"  :
+				return True
+
 			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
 			try:
 				dagPath.extendToShapeDirectlyBelow(0)
 			except:
+				return False
+
+			if not ( tagFilter & IECore.SceneInterface.TagFilter.LocalTag ) :
 				return False
 			
 			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
@@ -613,24 +620,24 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 			
 			return dagPath.fullPathName().endswith("Shape")
 
-		def readMyTags( node, includeChildren ) :
+		def readMyTags( node, tagFilter ) :
+			"""'archivable' should be on all transforms and 'renderable' only at shape transforms."""			
 			
 			if not doTest:
 				return []
+
+			result = [ "archivable" ]
 			
 			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
 			try:
 				dagPath.extendToShapeDirectlyBelow(0)
 			except:
-				return []
-			
-			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
-				return []
-			
-			if includeChildren :
-				return [ "renderable", "archivable" ]
-			
-			return [ "renderable" ]
+				return result
+
+			if tagFilter & IECore.SceneInterface.TagFilter.LocalTag and dagPath.apiType() == maya.OpenMaya.MFn.kMesh :
+				result.append( "renderable" )
+
+			return result
 		
 		IECoreMaya.MayaScene.registerCustomTags( hasMyTags, readMyTags )
 
@@ -641,12 +648,13 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertFalse( scene.hasTag( 'archivable' ) )
 		self.assertEqual( scene.readTags(), [] )
 		self.assertFalse( transformScene.hasTag( 'renderable' ) )
-		self.assertFalse( transformScene.hasTag( 'archivable' ) )
-		self.assertEqual( transformScene.readTags(), [] )
-		self.assertEqual( sphereScene.readTags(), [ IECore.InternedString('renderable'), IECore.InternedString('archivable') ] )
-		self.assertEqual( sphereScene.readTags( False ), [ IECore.InternedString('renderable') ] )
-		self.assertTrue( sphereScene.hasTag( 'renderable' ) )
-		self.assertTrue( sphereScene.hasTag( 'archivable' ) )
+		self.assertTrue( transformScene.hasTag( 'archivable' ) )
+		self.assertEqual( transformScene.readTags(), [ IECore.InternedString('archivable') ] )
+		self.assertEqual( set(sphereScene.readTags()), set([ IECore.InternedString('renderable'), IECore.InternedString('archivable') ]) )
+		self.assertEqual( set(sphereScene.readTags( IECore.SceneInterface.TagFilter.EveryTag )), set([ IECore.InternedString('renderable'), IECore.InternedString('archivable') ]) )
+		self.assertEqual( sphereScene.readTags( IECore.SceneInterface.TagFilter.AncestorTag ), [ IECore.InternedString('archivable') ] )
+		self.assertTrue( sphereScene.hasTag( 'renderable') )
+		self.assertTrue( sphereScene.hasTag( 'archivable') )
 		
 		# Disable custom tag functions so they don't mess with other tests
 		doTest = False

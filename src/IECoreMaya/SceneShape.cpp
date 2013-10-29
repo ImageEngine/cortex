@@ -364,7 +364,7 @@ ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
 	return sceneShape->getSceneInterface()->readObject( t );
 }
 
-bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag )
+bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int filter )
 {
 	SceneShape *sceneShape = findScene( p, false );
 	if ( !sceneShape )
@@ -378,10 +378,10 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag )
 		return false;
 	}
 	
-	return scene->hasTag( tag );
+	return scene->hasTag( tag, filter );
 }
 
-void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, bool includeChildren )
+void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, int filter )
 {
 	SceneShape *sceneShape = findScene( p, false );
 	if ( !sceneShape )
@@ -395,5 +395,5 @@ void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, bo
 		return;
 	}
 	
-	scene->readTags( tags, includeChildren );
+	scene->readTags( tags, filter );
 }
