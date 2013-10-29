@@ -299,6 +299,39 @@ Imath::M44d HoudiniScene::readTransformAsMatrix( double time ) const
 	return IECore::convert<Imath::M44d>( matrix );
 }
 
+ConstDataPtr HoudiniScene::readWorldTransform( double time ) const
+{
+	Imath::V3d s, h, r, t;
+	Imath::M44d matrix = readWorldTransformAsMatrix( time );
+	Imath::extractSHRT( matrix, s, h, r, t, true );
+	
+	return new TransformationMatrixdData( TransformationMatrixd( s, r, t ) );
+}
+
+Imath::M44d HoudiniScene::readWorldTransformAsMatrix( double time ) const
+{
+	OP_Node *node = retrieveNode();	
+	if ( node->isManager() )
+	{
+		return Imath::M44d();
+	}
+	
+	OBJ_Node *objNode = node->castToOBJNode();
+	if ( !objNode )
+	{
+		return Imath::M44d();
+	}
+	
+	UT_DMatrix4 matrix;
+	OP_Context context( adjustTime( time ) );
+	if ( !objNode->getWorldTransform( matrix, context ) )
+	{
+		return Imath::M44d();
+	}
+	
+	return IECore::convert<Imath::M44d>( matrix );
+}
+
 void HoudiniScene::writeTransform( const Data *transform, double time )
 {
 	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );

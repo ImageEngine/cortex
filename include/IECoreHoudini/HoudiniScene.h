@@ -72,6 +72,8 @@ class HoudiniScene : public IECore::SceneInterface
 
 		virtual IECore::ConstDataPtr readTransform( double time ) const;
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
+		IECore::ConstDataPtr readWorldTransform( double time ) const;
+		Imath::M44d readWorldTransformAsMatrix( double time ) const;
 		virtual void writeTransform( const IECore::Data *transform, double time );
 
 		virtual bool hasAttribute( const Name &name ) const;
