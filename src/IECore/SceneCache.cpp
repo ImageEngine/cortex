@@ -129,6 +129,11 @@ class SceneCache::Implementation : public RefCounted
 
 		bool hasTag( const Name &name, int filter ) const
 		{
+			if ( !filter )
+			{
+				return false;
+			}
+
 			if ( filter & SceneInterface::LocalTag )
 			{
 				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::NullIfMissing );
