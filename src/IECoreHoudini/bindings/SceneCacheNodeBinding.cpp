@@ -36,6 +36,8 @@
 
 #include "OP/OP_Node.h"
 
+#include "IECore/MessageHandler.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECoreHoudini/SceneCacheNode.h"
@@ -66,7 +68,7 @@ class SceneCacheNodeHelper
 			{
 				UT_String path;
 				node->getFullPath( path );
-				std::cerr << path << " was not a valid SceneCacheNode!" << std::endl;
+				IECore::msg( IECore::MessageHandler::Error, "SceneCacheNode", path.toStdString() + " was not a valid SceneCacheNode" );
 			}
 		}
 		
