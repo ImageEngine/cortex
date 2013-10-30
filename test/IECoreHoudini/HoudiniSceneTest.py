@@ -940,6 +940,27 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		# Disable custom tag functions so they don't mess with other tests
 		doTest = False
+	
+	def testBrokenSop( self ) :
+		
+		scene = self.buildScene()
+		boxNode = hou.node( "/obj/box1" )
+		box1 = scene.scene( [ "sub1", "box1" ] )
+		self.assertEqual( box1.hasObject(), True )
+		mesh = box1.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 8 )
+		self.assertEqual( box1.childNames(), [ "gap" ] )
+		self.assertTrue( isinstance( box1.child( "gap" ), IECoreHoudini.HoudiniScene ) )
+		
+		# forcing a cook error
+		hou.parm('/obj/box1/actualBox/sizex').setExpression( "fake" )
+		self.assertEqual( box1.hasObject(), False )
+		self.assertEqual( box1.readObject( 0 ), None )
+		self.assertEqual( box1.childNames(), [] )
+		self.assertRaises( RuntimeError, box1.child, "gap" )
+		self.assertEqual( box1.child( "gap", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertRaises( hou.OperationFailed, box1.node().renderNode().cook )
 
 if __name__ == "__main__":
 	unittest.main()
