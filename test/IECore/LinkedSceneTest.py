@@ -416,7 +416,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 			if atLink :	
 	
-				self.assertEqual( set(virtualScene.readTags(IECore.SceneInterface.TagFilter.DescendentTag)), set(realScene.readTags(IECore.SceneInterface.TagFilter.DescendentTag)) )
+				self.assertEqual( set(virtualScene.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), set(realScene.readTags(IECore.SceneInterface.TagFilter.DescendantTag)) )
 
 			else: # attributes and tranforms at link location are not loaded.
 
@@ -432,7 +432,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 					self.assertEqual( virtualScene.readTransformAtSample(s), realScene.readTransformAtSample(s) )
 
 				self.assertEqual( set(virtualScene.readTags()), set(realScene.readTags()) )
-				self.assertEqual( set(virtualScene.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendentTag)), set(realScene.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendentTag)) )
+				self.assertEqual( set(virtualScene.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendantTag)), set(realScene.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendantTag)) )
 
 			self.assertEqual( virtualScene.numBoundSamples(), realScene.numBoundSamples() )
 			for s in xrange(0,virtualScene.numBoundSamples()) :
@@ -525,7 +525,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( set(l.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["testA", "testB", "tags"]) )
 		self.assertEqual( set(l.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["tags"]) )
 		self.assertEqual( set(a.readTags(IECore.SceneInterface.TagFilter.AncestorTag)), testSet(["tags"]) )
-		self.assertEqual( set(a.readTags(IECore.SceneInterface.TagFilter.DescendentTag)), set() )
+		self.assertEqual( set(a.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), set() )
 		self.assertEqual( set(a.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testA"]) )
 		self.assertEqual( set(b.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testB"]) )
 		self.assertEqual( set(b.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testB"]) )
@@ -583,8 +583,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertFalse( l2.hasTag("t", IECore.SceneInterface.TagFilter.EveryTag) )
 
 		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet([]) )
-		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.DescendentTag)), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
-		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendentTag)), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
+		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
+		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendantTag)), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
 		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.AncestorTag)), testSet([]) )
 		self.assertEqual( set(A.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["testA","testB", "tags","linkedA"]) )
 		self.assertTrue( A.hasTag( "linkedA", IECore.SceneInterface.TagFilter.EveryTag ) )
@@ -603,7 +603,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( set(C.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["C"]) )
 		self.assertEqual( set(c.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["C", "testA", "testB","tags"]) )
 		self.assertEqual( set(c.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["tags"]) )
-		self.assertEqual( set(c.readTags(IECore.SceneInterface.TagFilter.DescendentTag)), testSet([ "testA", "testB" ]) )
+		self.assertEqual( set(c.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), testSet([ "testA", "testB" ]) )
 		self.assertEqual( set(ca.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testA"]) )
 		self.assertEqual( set(ca.readTags(IECore.SceneInterface.TagFilter.AncestorTag)), testSet(["C", "tags"]) )
 		self.assertTrue( ca.hasTag("testA", IECore.SceneInterface.TagFilter.EveryTag) )

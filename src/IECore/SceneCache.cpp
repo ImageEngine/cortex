@@ -143,7 +143,7 @@ class SceneCache::Implementation : public RefCounted
 				}
 			}
 
-			if ( filter & SceneInterface::DescendentTag )
+			if ( filter & SceneInterface::DescendantTag )
 			{
 				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::NullIfMissing );
 				if ( tagsIO && tagsIO->hasEntry( name ) )
@@ -205,7 +205,7 @@ class SceneCache::Implementation : public RefCounted
 				}
 			}
 
-			if ( (filter & SceneInterface::DescendentTag) )
+			if ( (filter & SceneInterface::DescendantTag) )
 			{
 				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::NullIfMissing );
 				if ( tagsIO )
@@ -1174,7 +1174,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				io = m_indexedIO->subdirectory( ancestorTagsEntry, IndexedIO::CreateIfMissing );
 			}
-			else if ( tagLocation == SceneInterface::DescendentTag )
+			else if ( tagLocation == SceneInterface::DescendantTag )
 			{
 				io = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::CreateIfMissing );
 			}
@@ -1810,8 +1810,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				NameList tags;
 				// propagate tags to parent
-				readTags( tags, SceneInterface::LocalTag | SceneInterface::DescendentTag );
-				m_parent->writeTags( tags, SceneInterface::DescendentTag );
+				readTags( tags, SceneInterface::LocalTag | SceneInterface::DescendantTag );
+				m_parent->writeTags( tags, SceneInterface::DescendantTag );
 			}
 
 			// deallocate children since we now computed everything from them anyways...
@@ -2242,7 +2242,7 @@ void SceneCache::writeTags( const NameList &tags )
 void SceneCache::writeTags( const NameList &tags, bool descendentTags )
 {
 	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
-	writer->writeTags( tags, descendentTags ? SceneInterface::DescendentTag : SceneInterface::LocalTag );
+	writer->writeTags( tags, descendentTags ? SceneInterface::DescendantTag : SceneInterface::LocalTag );
 }
 
 bool SceneCache::hasObject() const

@@ -871,7 +871,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 			if node.type().name() == "geo" :
 				return [ "custom" ]
 			
-			if tagFilter & IECore.SceneInterface.DescendentTag :
+			if tagFilter & IECore.SceneInterface.DescendantTag :
 				
 				def recurse( node ) :
 					if node.type().name() == "geo" :
@@ -897,7 +897,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 			if node.type().name() == "geo" :
 				return True
 			
-			if tagFilter & IECore.SceneInterface.DescendentTag :
+			if tagFilter & IECore.SceneInterface.DescendantTag :
 				
 				def recurse( node ) :
 					if node.type().name() == "geo" :

@@ -82,10 +82,10 @@ class SceneInterface : public RunTimeTyped
 		} MissingBehaviour;
 
 		enum TagFilter {
-			DescendentTag = 1,
+			DescendantTag = 1,
 			LocalTag = 2,
 			AncestorTag = 4,
-			EveryTag = DescendentTag | LocalTag | AncestorTag
+			EveryTag = DescendantTag | LocalTag | AncestorTag
 		};
 
 		/// Constant name assigned to the root location "/".
@@ -177,11 +177,11 @@ class SceneInterface : public RunTimeTyped
 		 */
 
 		/// Utility function that quickly checks for the existence of one tag relative to the current scene location and the given filter.
-		/// \param filter Will filter the results based on a combination of flags DescendentTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendentTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
+		/// \param filter Will filter the results based on a combination of flags DescendantTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendantTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
 		/// Some implementations may not support all combinations of these flags and will ignore them.
 		virtual bool hasTag( const Name &name, int filter = LocalTag ) const = 0;
 		/// Reads all the tags relative to the current scene location and the filter. Does not guarantee unique set of tags to be returned.
-		/// \param filter Will filter the results based on a combination of flags DescendentTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendentTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
+		/// \param filter Will filter the results based on a combination of flags DescendantTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendantTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
 		/// Some implementations may not support all combinations of these flags and will ignore them.
 		virtual void readTags( NameList &tags, int filter = LocalTag ) const = 0;
 		/// Adds tags to the current scene location.
